@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.0.47</version>
+	<version>1.0.48</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>
@@ -56,7 +56,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
@@ -112,12 +111,10 @@ public final class BuildInformation {
 						</goals>
 					</execution>
 				</executions>
-			</plugin>	
-		-->		
+			</plugin>			
 		</plugins>
 		<!--This plugin's configuration is used to store Eclipse m2e settings only. 
 		It has no influence on the Maven build itself. -->
-		<!--
 		<pluginManagement>
 			<plugins>
 
@@ -153,7 +150,6 @@ public final class BuildInformation {
 				</plugin>
 			</plugins>
 		</pluginManagement>
-	-->
 	</build>
 	<repositories>
 		<repository>

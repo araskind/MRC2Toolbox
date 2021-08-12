@@ -238,18 +238,18 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213799033" orientation="VERTICAL" divider="0.4238134887593672">
 											<node nodeId="1600214046293" orientation="HORIZONTAL" divider="0.24170616113744076">
-												<leaf id="0" nodeId="1600214046291">
+												<leaf id="2" nodeId="1600214046291">
 													<placeholders>
 														<placeholder>dock.single.DockableCompoundDatabaseSearchPanel</placeholder>
 													</placeholders>
 												</leaf>
 												<node nodeId="1628554024680" orientation="HORIZONTAL" divider="0.7076773235443492">
-													<leaf id="1" nodeId="1600213799037">
+													<leaf id="5" nodeId="1600213799037">
 														<placeholders>
 															<placeholder>dock.single.DockableDatabaseCompoundTable</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="2" nodeId="1628554024679">
+													<leaf id="0" nodeId="1628554024679">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanelDockableMolStructurePanel</placeholder>
 														</placeholders>
@@ -304,12 +304,12 @@
 															</placeholder-map>
 														</leaf>
 														<node nodeId="1600214321534" orientation="HORIZONTAL" divider="0.5479616771755215">
-															<leaf id="5" nodeId="1600214310291">
+															<leaf id="3" nodeId="1600214310291">
 																<placeholders>
 																	<placeholder>dock.single.DockableDatabaseLinksTable</placeholder>
 																</placeholders>
 															</leaf>
-															<leaf id="3" nodeId="1600214321533">
+															<leaf id="1" nodeId="1600214321533">
 																<placeholders>
 																	<placeholder>dock.single.DockableSynonymsTable</placeholder>
 																</placeholders>
@@ -325,7 +325,7 @@
 															</leaf>
 														</node>
 													</node>
-													<leaf id="4" nodeId="1600214095261">
+													<leaf id="7" nodeId="1600214095261">
 														<placeholders>
 															<placeholder>dock.single.DockableSpectraTable</placeholder>
 														</placeholders>
@@ -356,7 +356,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="7" nodeId="1600214080589">
+													<leaf id="4" nodeId="1600214080589">
 														<placeholders>
 															<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
 														</placeholders>
@@ -373,26 +373,6 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableCompoundDatabaseSearchPanel">
-										<replacement id="dockablesingle DockableCompoundDatabaseSearchPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableCompoundDatabaseSearchPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDatabaseCompoundTable">
-										<replacement id="dockablesingle DockableDatabaseCompoundTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDatabaseCompoundTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -463,10 +443,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableSpectraTable">
-										<replacement id="dockablesingle DockableSpectraTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableCompoundDatabaseSearchPanel">
+										<replacement id="dockablesingle DockableCompoundDatabaseSearchPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableSpectraTable</id>
+											<id>DockableCompoundDatabaseSearchPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -477,6 +457,26 @@
 										<replacement id="dockablesingle DockableDatabaseLinksTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>DockableDatabaseLinksTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMSMSLibraryEntryPropertiesTable">
+										<replacement id="dockablesingle DockableMSMSLibraryEntryPropertiesTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMSMSLibraryEntryPropertiesTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableDatabaseCompoundTable">
+										<replacement id="dockablesingle DockableDatabaseCompoundTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableDatabaseCompoundTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -542,10 +542,10 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMSMSLibraryEntryPropertiesTable">
-										<replacement id="dockablesingle DockableMSMSLibraryEntryPropertiesTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableSpectraTable">
+										<replacement id="dockablesingle DockableSpectraTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMSMSLibraryEntryPropertiesTable</id>
+											<id>DockableSpectraTable</id>
 											<area/>
 										</delegate>
 									</layout>
