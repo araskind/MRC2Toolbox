@@ -1,0 +1,30 @@
+# DEFAULT CACHE REGION
+
+jcs.default=DC
+jcs.default.cacheattributes= org.apache.commons.jcs3.engine.CompositeCacheAttributes
+jcs.default.cacheattributes.MaxObjects=30000
+jcs.default.cacheattributes.MemoryCacheName= org.apache.commons.jcs3.engine.memory.lru.LRUMemoryCache
+jcs.default.cacheattributes.UseMemoryShrinker=true
+jcs.default.cacheattributes.MaxMemoryIdleTimeSeconds=3600
+jcs.default.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.default.cacheattributes.MaxSpoolPerRun=500
+jcs.default.elementattributes=org.apache.commons.jcs3.engine.ElementAttributes
+jcs.default.elementattributes.IsEternal=false
+
+# MSMS FEATURE CACHE REGION
+
+jcs.msmsFeatureCache=DC
+jcs.msmsFeatureCache.cacheattributes= org.apache.commons.jcs3.engine.CompositeCacheAttributes
+jcs.msmsFeatureCache.cacheattributes.MaxObjects=30000
+jcs.msmsFeatureCache.cacheattributes.MemoryCacheName= org.apache.commons.jcs3.engine.memory.lru.LRUMemoryCache
+jcs.msmsFeatureCache.cacheattributes.UseMemoryShrinker=true
+jcs.msmsFeatureCache.cacheattributes.MaxMemoryIdleTimeSeconds=3600
+jcs.msmsFeatureCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.msmsFeatureCache.cacheattributes.MaxSpoolPerRun=500
+jcs.msmsFeatureCache.elementattributes=org.apache.commons.jcs3.engine.ElementAttributes
+jcs.msmsFeatureCache.elementattributes.IsEternal=false
+
+# AVAILABLE AUXILIARY CACHES
+jcs.auxiliary.DC= org.apache.commons.jcs3.auxiliary.disk.indexed.IndexedDiskCacheFactory
+jcs.auxiliary.DC.attributes=org.apache.commons.jcs3.auxiliary.disk.indexed.IndexedDiskCacheAttributes
+jcs.auxiliary.DC.attributes.maxKeySize=100000

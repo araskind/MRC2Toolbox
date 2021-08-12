@@ -1,0 +1,303 @@
+<?xml version='1.0'?>
+<root>
+	<resource name="dock.ui.ThemeMap">
+		<key>eclipse</key>
+	</resource>
+	<resource name="ccontrol.frontend">
+		<frontend>
+			<current>
+				<base>
+					<roots>
+						<root name="external">
+							<layout factory="predefined">
+								<replacement id="rootexternal"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="screen dock">
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CExternalizeArea</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol north">
+							<layout factory="predefined">
+								<replacement id="rootccontrol north"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="SOUTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol south">
+							<layout factory="predefined">
+								<replacement id="rootccontrol south"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="NORTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol east">
+							<layout factory="predefined">
+								<replacement id="rootccontrol east"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="WEST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol center">
+							<layout factory="predefined" placeholder="dock.single.ccontrol\ center">
+								<replacement id="rootccontrol center"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<id>ccontrol center</id>
+									<root>true</root>
+									<content delegate="SplitDockStationFactory">
+										<fullscreen-action>false</fullscreen-action>
+										<node nodeId="1600213801963" orientation="HORIZONTAL" divider="0.2">
+											<leaf id="2" nodeId="1600213801965">
+												<placeholders>
+													<placeholder>dock.single.MgfPanelDockableMsMsTree</placeholder>
+												</placeholders>
+											</leaf>
+											<node nodeId="1600213801967" orientation="VERTICAL" divider="0.5">
+												<leaf id="0" nodeId="1600213801969">
+													<placeholders>
+														<placeholder>dock.single.DockableMsMsClusterTable</placeholder>
+													</placeholders>
+												</leaf>
+												<node nodeId="1600213801971" orientation="HORIZONTAL" divider="0.5">
+													<leaf id="1" nodeId="1600213801973">
+														<placeholders>
+															<placeholder>dock.single.MgfPanelDockableSpectumPlot</placeholder>
+														</placeholders>
+													</leaf>
+													<leaf id="3" nodeId="1600213801975">
+														<placeholders>
+															<placeholder>dock.single.DockableMsMsTable</placeholder>
+														</placeholders>
+													</leaf>
+												</node>
+											</node>
+										</node>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.center</type>
+								</layout>
+							</adjacent>
+							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMsMsClusterTable">
+										<replacement id="dockablesingle DockableMsMsClusterTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMsMsClusterTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.MgfPanelDockableSpectumPlot">
+										<replacement id="dockablesingle MgfPanelDockableSpectumPlot"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>MgfPanelDockableSpectumPlot</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.MgfPanelDockableMsMsTree">
+										<replacement id="dockablesingle MgfPanelDockableMsMsTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>MgfPanelDockableMsMsTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMsMsTable">
+										<replacement id="dockablesingle DockableMsMsTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMsMsTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+							</children>
+						</root>
+						<root name="ccontrol west">
+							<layout factory="predefined">
+								<replacement id="rootccontrol west"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="EAST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+					</roots>
+					<children/>
+				</base>
+				<modes>
+					<dockables>
+						<entry id="single DockableMsMsClusterTable" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableMsMsClusterTable</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.8" id="1600213801963"/>
+												<node location="TOP" size="0.5" id="1600213801967"/>
+												<leaf id="1600213801969"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single MgfPanelDockableSpectumPlot" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.MgfPanelDockableSpectumPlot</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.8" id="1600213801963"/>
+												<node location="BOTTOM" size="0.5" id="1600213801967"/>
+												<node location="LEFT" size="0.5" id="1600213801971"/>
+												<leaf id="1600213801973"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableMsMsTable" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableMsMsTable</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.8" id="1600213801963"/>
+												<node location="BOTTOM" size="0.5" id="1600213801967"/>
+												<node location="RIGHT" size="0.5" id="1600213801971"/>
+												<leaf id="1600213801975"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single MgfPanelDockableMsMsTree" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.MgfPanelDockableMsMsTree</placeholder>
+											<backup-path>
+												<node location="LEFT" size="0.2" id="1600213801963"/>
+												<leaf id="1600213801965"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+					</dockables>
+					<modes>
+						<entry id="dock.mode.maximized"/>
+					</modes>
+				</modes>
+			</current>
+		</frontend>
+	</resource>
+	<resource name="ccontrol.preferences"/>
+</root>

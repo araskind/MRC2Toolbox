@@ -1,0 +1,211 @@
+<?xml version='1.0'?>
+<root>
+	<resource name="dock.ui.ThemeMap">
+		<key>eclipse</key>
+	</resource>
+	<resource name="ccontrol.frontend">
+		<frontend>
+			<current>
+				<base>
+					<roots>
+						<root name="external">
+							<layout factory="predefined">
+								<replacement id="rootexternal"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="screen dock">
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CExternalizeArea</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol north">
+							<layout factory="predefined">
+								<replacement id="rootccontrol north"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="SOUTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMzRtMSMSPlotPanel</placeholder>
+												</key>
+											</entry>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol south">
+							<layout factory="predefined">
+								<replacement id="rootccontrol south"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="NORTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol east">
+							<layout factory="predefined">
+								<replacement id="rootccontrol east"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="WEST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol center">
+							<layout factory="predefined" placeholder="dock.single.ccontrol\ center">
+								<replacement id="rootccontrol center"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<id>ccontrol center</id>
+									<root>true</root>
+									<content delegate="SplitDockStationFactory">
+										<fullscreen-action>false</fullscreen-action>
+										<leaf id="0" nodeId="1613427943233">
+											<placeholders>
+												<placeholder>dock.single.DockableMzRtMSMSPlotPanel</placeholder>
+											</placeholders>
+										</leaf>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.center</type>
+								</layout>
+							</adjacent>
+							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMzRtMSMSPlotPanel">
+										<replacement id="dockablesingle DockableMzRtMSMSPlotPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMzRtMSMSPlotPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+							</children>
+						</root>
+						<root name="ccontrol west">
+							<layout factory="predefined">
+								<replacement id="rootccontrol west"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="EAST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+					</roots>
+					<children/>
+				</base>
+				<modes>
+					<dockables>
+						<entry id="single DockableMzRtMSMSPlotPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.minimized</mode>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.maximized">
+									<mode>dock.mode.maximized</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockFullScreenPropertyFactory"/>
+									</location>
+								</property>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableMzRtMSMSPlotPanel</placeholder>
+										</property>
+									</location>
+								</property>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableMzRtMSMSPlotPanel</placeholder>
+											<backup-path>
+												<leaf id="1613427943233"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+					</dockables>
+					<modes>
+						<entry id="dock.mode.maximized"/>
+					</modes>
+				</modes>
+			</current>
+		</frontend>
+	</resource>
+	<resource name="ccontrol.preferences"/>
+</root>

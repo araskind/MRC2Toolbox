@@ -1,0 +1,373 @@
+/*******************************************************************************
+ * 
+ * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * Contributors:
+ * Alexander Raskind (araskind@med.umich.edu)
+ *  
+ ******************************************************************************/
+
+package edu.umich.med.mrc2.datoolbox.data;
+
+import java.io.Serializable;
+
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+
+public class ReferenceMsMsLibraryMatch implements Serializable {
+
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1980840150518719361L;
+	private MsMsLibraryFeature matchedLibraryFeature;
+	private double score;
+	private double forwardScore;
+	private double reverseScore;
+	private double probability;
+	private double dotProduct;
+	private double reverseDotProduct;
+	private double hybridDotProduct;
+	private double hybridScore;
+	private MSMSMatchType matchType;
+	private double hybridDeltaMz;
+	private String searchParameterSetId;
+	private boolean decoyMatch;	
+	private double percolatorScore; 
+	private double qValue;	
+	private double posteriorErrorProbability;
+
+	public ReferenceMsMsLibraryMatch(
+			MsMsLibraryFeature matchedLibraryFeature,
+			double score,
+			double forwardScore,
+			double reverseScore,
+			double probability,
+			double dotProduct) {
+		super();
+		this.matchedLibraryFeature = matchedLibraryFeature;
+		this.score = score;
+		this.forwardScore = forwardScore;
+		this.reverseScore = reverseScore;
+		this.probability = probability;
+		this.dotProduct = dotProduct;
+		matchType = MSMSMatchType.Regular;
+		decoyMatch = false;
+	}
+	
+	public ReferenceMsMsLibraryMatch(
+			MsMsLibraryFeature matchedLibraryFeature,
+			double score, 
+			double forwardScore,
+			double reverseScore, 
+			double probability, 
+			double dotProduct, 
+			double reverseDotProduct,
+			double hybridDotProduct, 
+			double hybridScore, 
+			double hybridDeltaMz, 
+			MSMSMatchType matchType,
+			boolean decoyMatch,
+			String searchParameterSetId) {
+		super();
+		this.matchedLibraryFeature = matchedLibraryFeature;
+		this.score = score;
+		this.forwardScore = forwardScore;
+		this.reverseScore = reverseScore;
+		this.probability = probability;
+		this.dotProduct = dotProduct;
+		this.reverseDotProduct = reverseDotProduct;
+		this.hybridDotProduct = hybridDotProduct;
+		this.hybridScore = hybridScore;
+		this.hybridDeltaMz = hybridDeltaMz;
+		this.matchType = matchType;
+		this.decoyMatch = decoyMatch;
+		this.searchParameterSetId = searchParameterSetId;
+	}
+
+	public ReferenceMsMsLibraryMatch(String mrc2InternalDbId, double score) {
+		super();
+		this.matchedLibraryFeature = new MsMsLibraryFeature(mrc2InternalDbId);
+		this.score = score;
+	}
+	
+	public ReferenceMsMsLibraryMatch(
+			MsMsLibraryFeature matchedLibraryFeature,
+			PepSearchOutputObject poo,
+			String searchParameterSetId) {
+		super();
+		this.matchedLibraryFeature = matchedLibraryFeature;
+		this.searchParameterSetId = searchParameterSetId;		
+		this.score = poo.getScore();
+		this.probability = poo.getProbablility();
+		this.dotProduct = poo.getDotProduct();
+		this.reverseDotProduct = poo.getReverseDotProduct();
+		this.hybridDotProduct = poo.getHybridDotProduct();
+		this.hybridScore = poo.getHybridScore();
+		this.hybridDeltaMz = poo.getHybridDeltaMz();
+		this.matchType = poo.getMatchType();
+		this.decoyMatch = poo.isDecoy();		
+	}
+
+	/**
+	 * @return the score
+	 */
+	public double getScore() {
+		return score;
+	}
+
+	/**
+	 * @return the forwardScore
+	 */
+	public double getForwardScore() {
+		return forwardScore;
+	}
+
+	/**
+	 * @return the reverseScore
+	 */
+	public double getReverseScore() {
+		return reverseScore;
+	}
+
+	/**
+	 * @return the probability
+	 */
+	public double getProbability() {
+		return probability;
+	}
+
+	/**
+	 * @return the dotProduct
+	 */
+	public double getDotProduct() {
+		return dotProduct;
+	}
+
+	/**
+	 * @param score the score to set
+	 */
+	public void setScore(double score) {
+		this.score = score;
+	}
+
+	/**
+	 * @param forwardScore the forwardScore to set
+	 */
+	public void setForwardScore(double forwardScore) {
+		this.forwardScore = forwardScore;
+	}
+
+	/**
+	 * @param reverseScore the reverseScore to set
+	 */
+	public void setReverseScore(double reverseScore) {
+		this.reverseScore = reverseScore;
+	}
+
+	/**
+	 * @param probability the probability to set
+	 */
+	public void setProbability(double probability) {
+		this.probability = probability;
+	}
+
+	/**
+	 * @param dotProduct the dotProduct to set
+	 */
+	public void setDotProduct(double dotProduct) {
+		this.dotProduct = dotProduct;
+	}
+
+	@Override
+	public boolean equals(Object msmsMatch) {
+
+        if (msmsMatch == this)
+            return true;
+
+		if(msmsMatch == null)
+			return false;
+
+        if (!ReferenceMsMsLibraryMatch.class.isAssignableFrom(msmsMatch.getClass()))
+            return false;
+
+        ReferenceMsMsLibraryMatch cid = (ReferenceMsMsLibraryMatch)msmsMatch;
+
+        if ((this.matchedLibraryFeature == null) ? (cid.getMatchedLibraryFeature() != null) :
+        	!this.matchedLibraryFeature.equals(cid.getMatchedLibraryFeature()))
+        	return false;
+
+        if(this.score != cid.getScore())
+        	return false;
+
+        return true;
+	}
+
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash +
+    		+ (this.matchedLibraryFeature != null ? this.matchedLibraryFeature.hashCode() : 0)
+    		+ Double.toString(this.score).hashCode();
+        return hash;
+    }
+
+	/**
+	 * @return the matchedLibraryFeature
+	 */
+	public MsMsLibraryFeature getMatchedLibraryFeature() {
+		return matchedLibraryFeature;
+	}
+
+	/**
+	 * @param matchedLibraryFeature the matchedLibraryFeature to set
+	 */
+	public void setMatchedLibraryFeature(MsMsLibraryFeature matchedLibraryFeature) {
+		this.matchedLibraryFeature = matchedLibraryFeature;
+	}
+
+	/**
+	 * @return the searchParameterSetId
+	 */
+	public String getSearchParameterSetId() {
+		return searchParameterSetId;
+	}
+
+	/**
+	 * @param searchParameterSetId the searchParameterSetId to set
+	 */
+	public void setSearchParameterSetId(String searchParameterSetId) {
+		this.searchParameterSetId = searchParameterSetId;
+	}
+
+	public double getReverseDotProduct() {
+		return reverseDotProduct;
+	}
+
+	public void setReverseDotProduct(double reverseDotProduct) {
+		this.reverseDotProduct = reverseDotProduct;
+	}
+
+	public double getHybridDotProduct() {
+		return hybridDotProduct;
+	}
+
+	public void setHybridDotProduct(double hybridDotProduct) {
+		this.hybridDotProduct = hybridDotProduct;
+	}
+
+	public double getHybridScore() {
+		return hybridScore;
+	}
+
+	public void setHybridScore(double hybridScore) {
+		this.hybridScore = hybridScore;
+	}
+
+	public double getHybridDeltaMz() {
+		return hybridDeltaMz;
+	}
+
+	public void setHybridDeltaMz(double hybridDeltaMz) {
+		this.hybridDeltaMz = hybridDeltaMz;
+	}
+
+	public boolean isHybridMatch() {
+		return matchType.equals(MSMSMatchType.Hybrid);
+	}
+
+	public boolean isInSourceMatch() {
+		return matchType.equals(MSMSMatchType.InSource);
+	}
+
+	public boolean isIdentical(ReferenceMsMsLibraryMatch other) {
+		
+		if(!matchedLibraryFeature.equals(other.getMatchedLibraryFeature()))
+			return false;
+		
+		if(!matchType.equals(other.getMatchType()))
+			return false;
+		
+		if(score != other.getScore())
+			return false;
+				
+		if(forwardScore != other.getForwardScore())
+			return false;
+		
+		if(reverseScore != other.getReverseScore())
+			return false;
+				
+		if(probability != other.getProbability())
+			return false;
+		
+		if(dotProduct != other.getDotProduct())
+			return false;
+				
+		if(reverseDotProduct != other.getReverseDotProduct())
+			return false;
+		
+		if(hybridDotProduct != other.getHybridDotProduct())
+			return false;
+				
+		if(hybridScore != other.getHybridScore())
+			return false;
+		
+		if(hybridDeltaMz != other.getHybridDeltaMz())
+			return false;		
+		
+		return true;
+	}
+
+	public MSMSMatchType getMatchType() {
+		return matchType;
+	}
+
+	public void setMatchType(MSMSMatchType matchType) {
+		this.matchType = matchType;
+	}
+
+	public boolean isDecoyMatch() {
+		return decoyMatch;
+	}
+
+	public void setDecoyMatch(boolean decoyMatch) {
+		this.decoyMatch = decoyMatch;
+	}
+
+	public double getPercolatorScore() {
+		return percolatorScore;
+	}
+
+	public void setPercolatorScore(double percolatorScore) {
+		this.percolatorScore = percolatorScore;
+	}
+
+	public double getqValue() {
+		return qValue;
+	}
+
+	public void setqValue(double qValue) {
+		this.qValue = qValue;
+	}
+
+	public double getPosteriorErrorProbability() {
+		return posteriorErrorProbability;
+	}
+
+	public void setPosteriorErrorProbability(double posteriorErrorProbability) {
+		this.posteriorErrorProbability = posteriorErrorProbability;
+	}
+}

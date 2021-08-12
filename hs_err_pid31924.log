@@ -1,0 +1,195 @@
+#
+# There is insufficient memory for the Java Runtime Environment to continue.
+# Native memory allocation (mmap) failed to map 17179869184 bytes for Failed to commit area from 0x00000003c0000000 to 0x00000007c0000000 of length 17179869184.
+# Possible reasons:
+#   The system is out of physical RAM or swap space
+#   The process is running with CompressedOops enabled, and the Java Heap may be blocking the growth of the native heap
+# Possible solutions:
+#   Reduce memory load on the system
+#   Increase physical memory or swap space
+#   Check if swap backing store is full
+#   Decrease Java heap size (-Xmx/-Xms)
+#   Decrease number of Java threads
+#   Decrease Java thread stack sizes (-Xss)
+#   Set larger code cache with -XX:ReservedCodeCacheSize=
+# This output file may be truncated or incomplete.
+#
+#  Out of Memory Error (t:/workspace/open/src/hotspot/os/windows/os_windows.cpp:3221), pid=31924, tid=28020
+#
+# JRE version:  (10.0+46) (build )
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (10+46, mixed mode, aot, tiered, compressed oops, g1 gc, windows-amd64)
+# No core dump will be written. Minidumps are not enabled by default on client versions of Windows
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:59886 -Xms16g -Xmx16g -Dcom.github.fommil.netlib.NativeSystemBLAS.natives=mkl_rt.dll -Dfile.encoding=Cp1252 edu.umich.med.mrc2.cefanalyzer.main.CefAnalyzerCore
+
+Host: Intel(R) Xeon(R) Silver 4108 CPU @ 1.80GHz, 16 cores, 31G,  Windows 10 , 64 bit Build 17134 (10.0.17134.1)
+Time: Mon Jun 25 16:56:22 2018 Eastern Daylight Time elapsed time: 0 seconds (0d 0h 0m 0s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00000186ba0cf800):  JavaThread "Unknown thread" [_thread_in_vm, id=28020, stack(0x0000007786600000,0x0000007786700000)]
+
+Stack: [0x0000007786600000,0x0000007786700000]
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+V  [jvm.dll+0x59fbf9]
+V  [jvm.dll+0x6bca11]
+V  [jvm.dll+0x6bdc06]
+V  [jvm.dll+0x6be293]
+V  [jvm.dll+0x234ba8]
+V  [jvm.dll+0x59d4f4]
+V  [jvm.dll+0x592345]
+V  [jvm.dll+0x2f633b]
+V  [jvm.dll+0x2f62a5]
+V  [jvm.dll+0x2f6182]
+V  [jvm.dll+0x2f8376]
+V  [jvm.dll+0x3441f3]
+V  [jvm.dll+0x344906]
+V  [jvm.dll+0x3442f3]
+V  [jvm.dll+0x2c4758]
+V  [jvm.dll+0x2c58a1]
+V  [jvm.dll+0x69ce1b]
+V  [jvm.dll+0x69e63c]
+V  [jvm.dll+0x351909]
+V  [jvm.dll+0x685282]
+V  [jvm.dll+0x3ba143]
+V  [jvm.dll+0x3bc321]
+C  [javaw.exe+0x3541]
+C  [javaw.exe+0xe1cf]
+C  [javaw.exe+0xe376]
+C  [KERNEL32.DLL+0x13034]
+C  [ntdll.dll+0x71431]
+
+
+---------------  P R O C E S S  ---------------
+
+Threads class SMR info:
+_java_thread_list=0x00000186b8790f20, length=0, elements={
+}
+
+Java Threads: ( => current thread )
+
+Other Threads:
+  0x00000186b884b000 GCTaskThread "GC Thread#0" [stack: 0x0000007786700000,0x0000007786800000] [id=25036]
+  0x00000186b884c000 GCTaskThread "GC Thread#1" [stack: 0x0000007786800000,0x0000007786900000] [id=32744]
+  0x00000186ba0e9000 GCTaskThread "GC Thread#2" [stack: 0x0000007786900000,0x0000007786a00000] [id=10424]
+  0x00000186ba0f1000 GCTaskThread "GC Thread#3" [stack: 0x0000007786a00000,0x0000007786b00000] [id=1752]
+  0x00000186ba0f9000 GCTaskThread "GC Thread#4" [stack: 0x0000007786b00000,0x0000007786c00000] [id=12308]
+  0x00000186ba0f6800 GCTaskThread "GC Thread#5" [stack: 0x0000007786c00000,0x0000007786d00000] [id=9524]
+  0x00000186ba0f3800 GCTaskThread "GC Thread#6" [stack: 0x0000007786d00000,0x0000007786e00000] [id=26944]
+  0x00000186ba0f4000 GCTaskThread "GC Thread#7" [stack: 0x0000007786e00000,0x0000007786f00000] [id=26096]
+  0x00000186ba0f7800 GCTaskThread "GC Thread#8" [stack: 0x0000007786f00000,0x0000007787000000] [id=32680]
+  0x00000186ba0f8800 GCTaskThread "GC Thread#9" [stack: 0x0000007787000000,0x0000007787100000] [id=7280]
+  0x00000186ba0fa000 GCTaskThread "GC Thread#10" [stack: 0x0000007787100000,0x0000007787200000] [id=29660]
+  0x00000186ba0f4800 GCTaskThread "GC Thread#11" [stack: 0x0000007787200000,0x0000007787300000] [id=29296]
+  0x00000186ba0fa800 GCTaskThread "GC Thread#12" [stack: 0x0000007787300000,0x0000007787400000] [id=13616]
+  0x00000186d4792000 ConcurrentGCThread "G1 Main Marker" [stack: 0x0000007787400000,0x0000007787500000] [id=24808]
+  0x00000186ba0f8000 ConcurrentGCThread "G1 Conc#0" [stack: 0x0000007787500000,0x0000007787600000] [id=23376]
+  0x00000186ba0f5800 ConcurrentGCThread "G1 Conc#1" [stack: 0x0000007787600000,0x0000007787700000] [id=12440]
+  0x00000186ba0f6000 ConcurrentGCThread "G1 Conc#2" [stack: 0x0000007787700000,0x0000007787800000] [id=31644]
+
+[error occurred during error reporting (printing all threads), id 0xe0000002]
+
+VM state:not at safepoint (not fully initialized)
+
+VM Mutex/Monitor currently owned by a thread:  ([mutex/lock_event])
+[0x00000186ba0cc360] Heap_lock - owner thread: 0x00000186ba0cf800
+
+Heap address: 0x00000003c0000000, size: 16384 MB, Compressed Oops mode: Non-zero based: 0x00000003c0000000
+Narrow klass base: 0x0000000000000000, Narrow klass shift: 0
+
+GC Heap History (0 events):
+No events
+
+Deoptimization events (0 events):
+No events
+
+Classes redefined (0 events):
+No events
+
+Internal exceptions (0 events):
+No events
+
+Events (0 events):
+No events
+
+
+Dynamic libraries:
+0x00007ff78aca0000 - 0x00007ff78acde000 	C:\Program Files\Java\jdk-10\bin\javaw.exe
+0x00007ffd72d60000 - 0x00007ffd72f41000 	C:\WINDOWS\SYSTEM32\ntdll.dll
+0x00007ffd71960000 - 0x00007ffd71a12000 	C:\WINDOWS\System32\KERNEL32.DLL
+0x00007ffd6f790000 - 0x00007ffd6fa03000 	C:\WINDOWS\System32\KERNELBASE.dll
+0x00007ffd72c80000 - 0x00007ffd72d21000 	C:\WINDOWS\System32\ADVAPI32.dll
+0x00007ffd728d0000 - 0x00007ffd7296e000 	C:\WINDOWS\System32\msvcrt.dll
+0x00007ffd71900000 - 0x00007ffd7195b000 	C:\WINDOWS\System32\sechost.dll
+0x00007ffd727a0000 - 0x00007ffd728c4000 	C:\WINDOWS\System32\RPCRT4.dll
+0x00007ffd71d00000 - 0x00007ffd71e90000 	C:\WINDOWS\System32\USER32.dll
+0x00007ffd6f530000 - 0x00007ffd6f550000 	C:\WINDOWS\System32\win32u.dll
+0x00007ffd71840000 - 0x00007ffd71868000 	C:\WINDOWS\System32\GDI32.dll
+0x00007ffd6f5f0000 - 0x00007ffd6f782000 	C:\WINDOWS\System32\gdi32full.dll
+0x00007ffd6f550000 - 0x00007ffd6f5ef000 	C:\WINDOWS\System32\msvcp_win.dll
+0x00007ffd6f430000 - 0x00007ffd6f52a000 	C:\WINDOWS\System32\ucrtbase.dll
+0x00007ffd677e0000 - 0x00007ffd677ea000 	C:\WINDOWS\SYSTEM32\VERSION.dll
+0x00007ffd5f320000 - 0x00007ffd5f589000 	C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.17134.112_none_fb3f961b30681c12\COMCTL32.dll
+0x00007ffd71e90000 - 0x00007ffd721b3000 	C:\WINDOWS\System32\combase.dll
+0x00007ffd70170000 - 0x00007ffd701ea000 	C:\WINDOWS\System32\bcryptPrimitives.dll
+0x00007ffd72ad0000 - 0x00007ffd72afd000 	C:\WINDOWS\System32\IMM32.DLL
+0x00007ffd442f0000 - 0x00007ffd443df000 	C:\Program Files\Java\jdk-10\bin\msvcr120.dll
+0x00007ffd44240000 - 0x00007ffd442e6000 	C:\Program Files\Java\jdk-10\bin\msvcp120.dll
+0x0000000074090000 - 0x0000000074aff000 	C:\Program Files\Java\jdk-10\bin\server\jvm.dll
+0x00007ffd71830000 - 0x00007ffd71838000 	C:\WINDOWS\System32\PSAPI.DLL
+0x00007ffd68060000 - 0x00007ffd68083000 	C:\WINDOWS\SYSTEM32\WINMM.dll
+0x00007ffd5e580000 - 0x00007ffd5e589000 	C:\WINDOWS\SYSTEM32\WSOCK32.dll
+0x00007ffd71870000 - 0x00007ffd718dc000 	C:\WINDOWS\System32\WS2_32.dll
+0x00007ffd68030000 - 0x00007ffd6805a000 	C:\WINDOWS\SYSTEM32\winmmbase.dll
+0x00007ffd70120000 - 0x00007ffd70169000 	C:\WINDOWS\System32\cfgmgr32.dll
+0x00007ffd5a570000 - 0x00007ffd5a5a9000 	C:\Program Files\Java\jdk-10\bin\splashscreen.dll
+0x00007ffd5a540000 - 0x00007ffd5a567000 	C:\Program Files\Java\jdk-10\bin\java.dll
+0x00007ffd6b2a0000 - 0x00007ffd6b867000 	C:\WINDOWS\SYSTEM32\d2d1.dll
+0x00007ffd68540000 - 0x00007ffd6854f000 	C:\Program Files\Java\jdk-10\bin\verify.dll
+0x00007ffd72bd0000 - 0x00007ffd72c79000 	C:\WINDOWS\System32\shcore.dll
+0x00007ffd6d4c0000 - 0x00007ffd6d558000 	C:\WINDOWS\system32\uxtheme.dll
+0x00007ffd638c0000 - 0x00007ffd63a89000 	C:\WINDOWS\SYSTEM32\DBGHELP.DLL
+0x00007ffd721c0000 - 0x00007ffd72335000 	C:\WINDOWS\System32\MSCTF.dll
+0x00007ffd72b00000 - 0x00007ffd72bc2000 	C:\WINDOWS\System32\OLEAUT32.dll
+0x00007ffd63890000 - 0x00007ffd638b9000 	C:\WINDOWS\SYSTEM32\dbgcore.DLL
+0x00007ffd56110000 - 0x00007ffd56146000 	C:\Program Files\Java\jdk-10\bin\jdwp.dll
+0x00007ffd57a40000 - 0x00007ffd57a56000 	C:\Program Files\Java\jdk-10\bin\zip.dll
+0x00007ffd68510000 - 0x00007ffd6851a000 	C:\Program Files\Java\jdk-10\bin\jimage.dll
+
+dbghelp: loaded successfully - version: 4.0.5 - missing functions: none
+symbol engine: initialized successfully - sym options: 0x614 - pdb path: .;C:\Program Files\Java\jdk-10\bin;C:\WINDOWS\SYSTEM32;C:\WINDOWS\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.17134.112_none_fb3f961b30681c12;C:\Program Files\Java\jdk-10\bin\server
+
+VM Arguments:
+jvm_args: -agentlib:jdwp=transport=dt_socket,suspend=y,address=localhost:59886 -Xms16g -Xmx16g -Dcom.github.fommil.netlib.NativeSystemBLAS.natives=mkl_rt.dll -Dfile.encoding=Cp1252 
+java_command: edu.umich.med.mrc2.cefanalyzer.main.CefAnalyzerCore
+java_class_path (initial): E:\Eclipse\git2\CefAnalyzerMVN\target\classes;C:\Users\Sasha\.m2\repository\org\apache\derby\derby\10.14.2.0\derby-10.14.2.0.jar;C:\Users\Sasha\.m2\repository\CustomSwingComponents\accordion\1.2.0\accordion-1.2.0.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-bundle\2.1.1\cdk-bundle-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-interfaces\2.1.1\cdk-interfaces-2.1.1.jar;C:\Users\Sasha\.m2\repository\javax\vecmath\vecmath\1.5.2\vecmath-1.5.2.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-core\2.1.1\cdk-core-2.1.1.jar;C:\Users\Sasha\.m2\repository\com\google\guava\guava\17.0\guava-17.0.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-standard\2.1.1\cdk-standard-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-atomtype\2.1.1\cdk-atomtype-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-valencycheck\2.1.1\cdk-valencycheck-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-diff\2.1.1\cdk-diff-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-data\2.1.1\cdk-data-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-ioformats\2.1.1\cdk-ioformats-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-silent\2.1.1\cdk-silent-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-isomorphism\2.1.1\cdk-isomorphism-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-datadebug\2.1.1\cdk-datadebug-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-io\2.1.1\cdk-io-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-formula\2.1.1\cdk-formula-2.1.1.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-dict\2.1.1\cdk-dict-2.1.1.jar;C:\Users\Sasha\.m2\repository\xom\xom\1.2.5\xom-1.2.5.jar;C:\Users\Sasha\.m2\repository\xerces\xercesImpl\2.8.0\xercesImpl-2.8.0.jar;C:\Users\Sasha\.m2\repository\xalan\xalan\2.7.0\xalan-2.7.0.jar;C:\Users\Sasha\.m2\repository\org\openscience\cdk\cdk-pdb\2.
+Launcher Type: SUN_STANDARD
+
+Logging:
+Log output configuration:
+#0: stdout all=warning uptime,level,tags
+#1: stderr all=off uptime,level,tags
+
+Environment Variables:
+JAVA_HOME=C:\Program Files\Java\jdk1.8.0_162
+PATH=C:/Program Files/Java/jre1.8.0_162/bin/server;C:/Program Files/Java/jre1.8.0_162/bin;C:/Program Files/Java/jre1.8.0_162/lib/amd64;C:\Program Files (x86)\Agilent\MassHunter\Workstation\IDBrowser\bin;C:\ProgramData\Oracle\Java\javapath;c:\Rtools\bin;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;c:\Program Files (x86)\HP\HP Performance Advisor;C:\Program Files (x86)\Calibre2\;C:\Program Files\Liquid Technologies\Liquid Studio 2018\XmlDataBinder16\Redist16\cpp\win32\bin;C:\Program Files\Liquid Technologies\Liquid Studio 2018\XmlDataBinder16\Redist16\cpp\win64\bin;C:\ProgramData\Miniconda3;C:\ProgramData\Miniconda3\Scripts;C:\ProgramData\Miniconda3\Library\bin;C:\Users\Sasha\Apps\instantclient_12_2_X64;C:\Program Files\Java\jdk1.8.0_162\bin;C:\Program Files\Java\jdk-10\bin;C:\WINDOWS\System32\OpenSSH\;E:\Program Files\Apache\apache-maven-3.2.2\bin;C:\Program Files\dotnet\;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\HDF_Group\HDF5\1.10.2\bin\;C:\msys64\mingw64\bin;C:\msys64\mingw64\x86_64-w64-mingw32\bin;C:\Strawberry\c\bin;C:\Strawberry\perl\site\bin;C:\Strawberry\perl\bin;C:\Users\Sasha\AppData\Local\Microsoft\WindowsApps;C:\Users\Sasha\AppData\Local\GitHubDesktop\bin;C:\Users\Sasha\Apps\eclipse2;
+USERNAME=Sasha
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 85 Stepping 4, GenuineIntel
+
+
+
+---------------  S Y S T E M  ---------------
+
+OS: Windows 10 , 64 bit Build 17134 (10.0.17134.1)
+
+CPU:total 16 (initial active 16) (8 cores per cpu, 2 threads per core) family 6 model 85 stepping 4, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, avx, avx2, aes, clmul, erms, rtm, 3dnowpref, lzcnt, ht, tsc, tscinvbit, bmi1, bmi2, adx, evex, fma
+
+Memory: 4k page, physical 33246668k(4898776k free), swap 57760816k(5718984k free)
+
+vm_info: Java HotSpot(TM) 64-Bit Server VM (10+46) for windows-amd64 JRE (10+46), built on Mar  8 2018 02:11:18 by "mach5one" with MS VC++ 12.0 (VS2013)
+
+END.

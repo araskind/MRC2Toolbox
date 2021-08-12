@@ -1,0 +1,195 @@
+/*******************************************************************************
+ *
+ * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Contributors:
+ * Alexander Raskind (araskind@med.umich.edu)
+ *
+ ******************************************************************************/
+
+package edu.umich.med.mrc2.datoolbox.data;
+
+import java.io.Serializable;
+import java.util.Date;
+import java.util.UUID;
+
+import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
+
+public class LibraryMsFeature extends MsFeature implements Serializable {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 4462209780734866111L;
+	private String libraryId;
+	private Date dateCreated;
+	private Date lastModified;
+
+	// Copy constructor to create new entry
+	public LibraryMsFeature(LibraryMsFeature source) {
+
+		super(source);
+		dateCreated = new Date();
+		lastModified = new Date();
+		id = DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString();
+
+			//	TODO handle "copy annotations" to save them to the database as new and linked to the current feature
+//		for(ObjectAnnotation annotation : annotations)
+//			annotation.setUniqueId(DataPrefix.ANNOTATION.getName() + UUID.randomUUID().toString());
+	}
+
+	public LibraryMsFeature(MsFeature source) {
+
+		super(source);
+		dateCreated = new Date();
+		lastModified = new Date();
+		id = DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString();
+		if(spectrum == null && source.getSpectrum() != null)
+			spectrum = source.getSpectrum();
+
+		if(source.getStatsSummary() != null) {
+			double observedRt = source.getStatsSummary().getMeanObservedRetention();
+			if(observedRt > 0)
+				retentionTime = observedRt;
+		}
+	}
+
+	public LibraryMsFeature(
+			String name,
+			double rt,
+			String enabled,
+			String dbTargetId,
+			long created,
+			long modified) {
+
+		super(name, 0.0d, rt);
+
+		active = false;
+		if(enabled != null)
+			active = true;
+
+		id = dbTargetId;
+		dateCreated = new Date(created);
+		lastModified = new Date(modified);
+	}
+
+	public LibraryMsFeature(String name, MassSpectrum spectrum, double retentionTime) {
+
+		super(name, retentionTime);
+		this.spectrum = spectrum;
+		dateCreated = new Date();
+		lastModified = new Date();
+		id = DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString();
+	}
+
+	public LibraryMsFeature(String name, double retentionTime) {
+
+		super(name, retentionTime);
+		dateCreated = new Date();
+		lastModified = new Date();
+		id = DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString();
+	}
+
+	public LibraryMsFeature(String name, double mass, double rt) {
+
+		super(name, mass, rt);
+		dateCreated = new Date();
+		lastModified = new Date();
+		id = DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString();
+	}
+
+	public Date getDateCreated() {
+		return dateCreated;
+	}
+
+	public Date getLastModified() {
+		return lastModified;
+	}
+
+	public String getLibraryId() {
+		return libraryId;
+	}
+
+	public void setDateCreated(Date dateCreated) {
+		this.dateCreated = dateCreated;
+	}
+
+	public void setLastModified(Date lastModified) {
+		this.lastModified = lastModified;
+	}
+
+	public void setLibraryId(String libraryId) {
+		this.libraryId = libraryId;
+	}
+
+	public Range getLibraryMatchRtRange(double rtWindow, boolean useCustomRange) {
+
+		Range libmatchRange = new Range(0.0d);
+		//if(this.retentionTime > 0.0d);
+			libmatchRange = new Range(retentionTime - rtWindow, retentionTime  + rtWindow);
+
+		if(useCustomRange && this.getRtRange().getSize() > 0.0d)
+			libmatchRange = new Range(rtRange);
+
+		return libmatchRange;
+	}
+	
+	@Override
+	public String getName() {
+		
+		if(name != null && !name.isEmpty())
+			return name;
+		else if(getPrimaryIdentity() != null)
+			return getPrimaryIdentity().getName();
+		else
+			return id;			
+	}
+	
+	@Override
+	public AnnotatedObjectType getAnnotatedObjectType() {
+		return AnnotatedObjectType.MS_LIB_FEATURE;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,384 @@
+<?xml version='1.0'?>
+<root>
+	<resource name="dock.ui.ThemeMap">
+		<key>eclipse</key>
+	</resource>
+	<resource name="ccontrol.frontend">
+		<frontend>
+			<current>
+				<base>
+					<roots>
+						<root name="external">
+							<layout factory="predefined">
+								<replacement id="rootexternal"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="screen dock">
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CExternalizeArea</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol north">
+							<layout factory="predefined">
+								<replacement id="rootccontrol north"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="SOUTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol south">
+							<layout factory="predefined">
+								<replacement id="rootccontrol south"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="NORTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol east">
+							<layout factory="predefined">
+								<replacement id="rootccontrol east"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="WEST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol center">
+							<layout factory="predefined" placeholder="dock.single.ccontrol\ center">
+								<replacement id="rootccontrol center"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<id>ccontrol center</id>
+									<root>true</root>
+									<content delegate="SplitDockStationFactory">
+										<fullscreen-action>false</fullscreen-action>
+										<node nodeId="1625777761343" orientation="HORIZONTAL" divider="0.1594871794871795">
+											<leaf id="-1" nodeId="1625777761341">
+												<placeholders>
+													<placeholder>dock.single.DockableMotrpacProjectTree</placeholder>
+												</placeholders>
+											</leaf>
+											<node nodeId="1625777775420" orientation="VERTICAL" divider="0.25">
+												<node nodeId="1625777789474" orientation="HORIZONTAL" divider="0.6322541233964569">
+													<leaf id="0" nodeId="1625776299521">
+														<placeholders>
+															<placeholder>dock.single.DockableMoTrPACStudyManagerPanel</placeholder>
+														</placeholders>
+														<placeholder-map>
+															<version>0</version>
+															<format>dock.PlaceholderList</format>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.DockableMoTrPACStudyManagerPanel</placeholder>
+																</key>
+															</entry>
+														</placeholder-map>
+													</leaf>
+													<leaf id="2" nodeId="1625777789472">
+														<placeholders>
+															<placeholder>dock.single.DockableMotrpacStudyAssayListingPanel</placeholder>
+														</placeholders>
+													</leaf>
+												</node>
+												<node nodeId="1625777784726" orientation="VERTICAL" divider="0.31153184165232356">
+													<node nodeId="1625777793657" orientation="HORIZONTAL" divider="0.7690897984117288">
+														<leaf id="4" nodeId="1625777775418">
+															<placeholders>
+																<placeholder>dock.single.DockableExperimentListingTable</placeholder>
+															</placeholders>
+															<placeholder-map>
+																<version>0</version>
+																<format>dock.PlaceholderList</format>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.DockableExperimentListingTable</placeholder>
+																	</key>
+																</entry>
+															</placeholder-map>
+														</leaf>
+														<leaf id="1" nodeId="1625777793655">
+															<placeholders>
+																<placeholder>dock.single.DockableMoTrPACTissueCodeListingPanel</placeholder>
+															</placeholders>
+														</leaf>
+													</node>
+													<leaf id="3" nodeId="1625777784724">
+														<placeholders>
+															<placeholder>dock.single.DockableMoTrPACReportListingPanel</placeholder>
+														</placeholders>
+													</leaf>
+												</node>
+											</node>
+										</node>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.center</type>
+								</layout>
+							</adjacent>
+							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACStudyManagerPanel">
+										<replacement id="dockablesingle DockableMoTrPACStudyManagerPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMoTrPACStudyManagerPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACTissueCodeListingPanel">
+										<replacement id="dockablesingle DockableMoTrPACTissueCodeListingPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMoTrPACTissueCodeListingPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMotrpacStudyAssayListingPanel">
+										<replacement id="dockablesingle DockableMotrpacStudyAssayListingPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMotrpacStudyAssayListingPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACReportListingPanel">
+										<replacement id="dockablesingle DockableMoTrPACReportListingPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMoTrPACReportListingPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
+										<replacement id="dockablesingle DockableExperimentListingTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableExperimentListingTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+							</children>
+						</root>
+						<root name="ccontrol west">
+							<layout factory="predefined">
+								<replacement id="rootccontrol west"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="EAST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+					</roots>
+					<children/>
+				</base>
+				<modes>
+					<dockables>
+						<entry id="single DockableMoTrPACTissueCodeListingPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableMoTrPACTissueCodeListingPanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.8405128205128205" id="1625777761343"/>
+												<node location="TOP" size="0.25" id="1625777775420"/>
+												<node location="LEFT" size="0.8711056811240073" id="1625777789474"/>
+												<leaf id="1625776299521"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableMoTrPACTissueCodeListingPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableMoTrPACReportListingPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableMoTrPACReportListingPanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.8405128205128205" id="1625777761343"/>
+												<node location="BOTTOM" size="0.75" id="1625777775420"/>
+												<leaf id="1625777775418"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableMoTrPACReportListingPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableMoTrPACStudyManagerPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableMoTrPACStudyManagerPanel</placeholder>
+											<backup-path>
+												<leaf id="1625776299521"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableMoTrPACStudyManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableExperimentListingTable" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableExperimentListingTable</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.8405128205128205" id="1625777761343"/>
+												<leaf id="1625776299521"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableExperimentListingTable</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableMotrpacStudyAssayListingPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableMotrpacStudyAssayListingPanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.8405128205128205" id="1625777761343"/>
+												<node location="TOP" size="0.25" id="1625777775420"/>
+												<leaf id="1625776299521"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>2</index>
+											<placeholder>dock.single.DockableMotrpacStudyAssayListingPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+					</dockables>
+					<modes>
+						<entry id="dock.mode.maximized"/>
+					</modes>
+				</modes>
+			</current>
+		</frontend>
+	</resource>
+	<resource name="ccontrol.preferences"/>
+</root>

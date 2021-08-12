@@ -1,0 +1,3 @@
+#FilePreferences
+#Tue Aug 10 11:05:05 EDT 2021
+edu.umich.med.mrc2.datoolbox.gui.test.AgilentDfileRenamer.BASE_DIRECTORY=C\:\\Users\\Sasha\\Downloads\\_2_rename\\17_2_16

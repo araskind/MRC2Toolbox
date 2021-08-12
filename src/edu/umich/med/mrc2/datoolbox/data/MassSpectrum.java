@@ -1,0 +1,473 @@
+/*******************************************************************************
+ *
+ * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Contributors:
+ * Alexander Raskind (araskind@med.umich.edu)
+ *
+ ******************************************************************************/
+
+package edu.umich.med.mrc2.datoolbox.data;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import edu.umich.med.mrc2.datoolbox.data.compare.AdductComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import edu.umich.med.mrc2.datoolbox.msmsscore.SpectrumMatcher;
+
+public class MassSpectrum implements Serializable {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 8329755008254129461L;
+
+	private TreeMap<Adduct, List<MsPoint>> adductMap;
+	private TreeMap<String, List<MsPoint>> patternMap;
+	private Set<MsPoint> msPoints;
+	private Adduct primaryAdduct;
+	private Set<TandemMassSpectrum>tandemSpectra;
+	private String detectionAlgorithm;
+	private double mcMillanCutoff;
+	private double mcMillanCutoffPercentDelta;
+
+	public MassSpectrum() {
+
+		super();
+		msPoints = new HashSet<MsPoint>();
+		adductMap = new TreeMap<Adduct, List<MsPoint>>(new AdductComparator(SortProperty.Name));
+		primaryAdduct = null;
+		tandemSpectra = new HashSet<TandemMassSpectrum>();
+		patternMap = new TreeMap<String, List<MsPoint>>();
+	}
+
+	public void addDataPoint(double mz, double intensity, String adductType, double rt) {
+
+		MsPoint dp = new MsPoint(mz, intensity, adductType, rt);
+		msPoints.add(dp);
+	}
+
+	public void addDataPoints(Collection<MsPoint>points) {
+		msPoints.addAll(points);
+	}
+
+	public void addDataPoint(double mz, double intensity, String adductType, int charge) {
+
+		MsPoint dp = new MsPoint(mz, intensity, adductType, charge);
+		msPoints.add(dp);
+	}
+
+	public void addSpectrumForAdduct(Adduct adduct, Collection<MsPoint>dataPoints){
+
+		List<MsPoint>sorted = dataPoints.stream().
+				distinct().
+				sorted(new MsDataPointComparator(SortProperty.MZ)).
+				collect(Collectors.toList());
+
+		adductMap.put(adduct, sorted);
+		msPoints.addAll(dataPoints);
+
+		double maxIntensity = 0.0d;
+
+		for (Entry<Adduct, List<MsPoint>> entry : adductMap.entrySet()) {
+
+			if(entry.getValue() == null)
+				continue;
+
+			if(entry.getValue().isEmpty())
+				continue;
+
+			MsPoint basePeak =
+				Collections.max(entry.getValue(), Comparator.comparing(MsPoint::getIntensity));
+
+			if(basePeak.getIntensity() > maxIntensity) {
+
+				maxIntensity = basePeak.getIntensity();
+				primaryAdduct = entry.getKey();
+			}
+		}
+	}
+
+	public void addSpectrumForPattern(Collection<MsPoint>dataPoints){
+
+		List<MsPoint>sorted = dataPoints.stream().
+				distinct().
+				sorted(new MsDataPointComparator(SortProperty.MZ)).
+				collect(Collectors.toList());
+
+		String key = DataPrefix.MS_PATTERN.getName() + UUID.randomUUID().toString().substring(0, 10);
+		patternMap.put(key, sorted);
+		msPoints.addAll(dataPoints);
+	}
+
+	public Set<String> finalizeCefImportSpectrum() {
+
+		adductMap.clear();
+		String adduct;
+		double maxIntensity = 0.0d;
+		double minMz = 100000000.0d;
+		Set<String> unmatchedAdducts = new HashSet<String>();
+
+		for (MsPoint dp : msPoints) {
+
+			adduct = dp.getAdductType().replaceAll("\\+[0-9]+$", "");
+			Adduct mod = AdductManager.getAdductByCefNotation(adduct);
+			if (mod != null) {
+
+				if (!adductMap.containsKey(mod))
+					adductMap.put(mod, new ArrayList<MsPoint>());
+
+				adductMap.get(mod).add(dp);
+				if (dp.getIntensity() > maxIntensity) {
+
+					maxIntensity = dp.getIntensity();
+					primaryAdduct = mod;
+				}
+				if (dp.getMz() < minMz)
+					minMz = dp.getMz();
+			}
+			else {
+				unmatchedAdducts.add(adduct);
+			}
+		}
+		// Sort points for each adduct
+		for (Entry<Adduct, List<MsPoint>> entry : adductMap.entrySet()) {
+
+			List<MsPoint>sorted = entry.getValue().stream().
+				sorted(new MsDataPointComparator(SortProperty.MZ, SortDirection.ASC)).
+				collect(Collectors.toList());
+			entry.getValue().clear();
+			entry.getValue().addAll(sorted);
+		}
+		return unmatchedAdducts;
+	}
+
+	public void clearAdductMap() {
+
+		adductMap.clear();
+		primaryAdduct = null;
+	}
+
+	public Collection<BasicIsotopicPattern>getIsotopicGroups(){
+
+		ArrayList<BasicIsotopicPattern>isoPatterns = new ArrayList<BasicIsotopicPattern>();
+
+		if(!adductMap.isEmpty()){
+
+			for (Entry<Adduct, List<MsPoint>> entry : adductMap.entrySet()) {
+
+				BasicIsotopicPattern bip = new BasicIsotopicPattern(entry.getValue().get(0));
+				entry.getValue().stream().skip(1).map(dp -> bip.addDataPoint(dp, Math.abs(entry.getKey().getCharge())));
+				isoPatterns.add(bip);
+			}
+		}
+		else{
+			MsPoint[] pattern = getCompletePattern();
+			isoPatterns.add(new BasicIsotopicPattern(pattern[0]));
+			boolean added;
+
+			for(int j=1; j<pattern.length; j++) {
+
+				added = false;
+
+				for(int i = 3; i>0; i--) {
+
+					for(BasicIsotopicPattern bip : isoPatterns) {
+
+						if(bip.addDataPoint(pattern[j], i)) {
+
+							added = true;
+							break;
+						}
+					}
+				}
+				if(!added)
+					isoPatterns.add(new BasicIsotopicPattern(pattern[j]));
+			}
+		}
+		return isoPatterns;
+	}
+
+	public Set<Adduct>getAdducts() {
+		return adductMap.keySet();
+	}
+
+	public MsPoint getBasePeak() {
+
+		MsPoint basePeak = null;
+
+		if(!msPoints.isEmpty()) {
+
+			return msPoints.stream().
+					sorted(new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC)).
+					toArray(size -> new MsPoint[size])[0];
+		}
+		return basePeak;
+	}
+
+	public double getBasePeakMz() {
+
+		double bpMz = 0.0d;
+		MsPoint basePeak = getBasePeak();
+
+		if(basePeak != null)
+			bpMz = basePeak.getMz();
+
+		return bpMz;
+	}
+
+	public MsPoint[] getCompletePattern(boolean scale) {
+
+		if(scale)
+			return getCompleteNormalizedPattern();
+		else
+			return getCompletePattern();
+	}
+
+	public MsPoint[] getCompletePattern() {
+
+		return msPoints.stream().
+				sorted(new MsDataPointComparator(SortProperty.MZ)).
+				toArray(size -> new MsPoint[size]);
+	}
+
+	public MsPoint[] getCompleteNormalizedPattern() {
+
+		MsPoint[] pattern = msPoints.stream().toArray(size -> new MsPoint[size]);
+		return SpectrumMatcher.normalizeAndSortMsPattern(pattern);
+	}
+
+	public MsPoint getMonoisotopicPeak() {
+
+		MsPoint miPeak = null;
+
+		if(!msPoints.isEmpty()) {
+
+			return msPoints.stream().
+					sorted(new MsDataPointComparator(SortProperty.MZ)).
+					toArray(size -> new MsPoint[size])[0];
+		}
+		return miPeak;
+	}
+
+	public double getMonoisotopicMz() {
+
+		double miMz = 0.0d;
+		MsPoint miPeak = getMonoisotopicPeak();
+
+		if(miPeak != null)
+			miMz = miPeak.getMz();
+
+		return miMz;
+	}
+
+	public MsPoint[] getMsForAdduct(Adduct adduct) {
+
+		if(adductMap.get(adduct) == null)
+			return null;
+
+		if(adductMap.get(adduct).isEmpty())
+			return null;
+
+		return adductMap.get(adduct).stream().
+			sorted(new MsDataPointComparator(SortProperty.MZ)).
+			toArray(size -> new MsPoint[size]);
+	}
+
+	public MsPoint[] getMsForAdduct(Adduct adduct, boolean scale) {
+
+		if(!scale)
+			return getMsForAdduct(adduct);
+
+		if(adductMap.get(adduct) == null)
+			return null;
+
+		if(adductMap.get(adduct).isEmpty())
+			return null;
+
+		MsPoint[] ms = adductMap.get(adduct).stream().toArray(size -> new MsPoint[size]);
+		return SpectrumMatcher.normalizeAndSortMsPattern(ms);
+	}
+	
+	public double getPrimaryAdductBasePeakMz() {
+		
+		if(primaryAdduct == null)
+			return -1.0d;
+		
+		MsPoint[] ms = getMsForAdduct(primaryAdduct);
+		if(ms == null)
+			return -1.0d;
+		else
+			return ms[0].getMz();
+	}
+
+	public Adduct getPrimaryAdduct() {
+		return primaryAdduct;
+	}
+
+	public int getAbsoluteCharge() {
+
+		int absCharge = 0;
+		MsPoint[] pattern = getCompletePattern();
+
+		if(pattern.length > 1)
+			absCharge = (int) Math.round(1.0d / (pattern[1].getMz() - pattern[0].getMz()));
+
+		return absCharge;
+	}
+
+	public int getPrimaryAdductAbsoluteCharge() {
+
+		return Math.abs(primaryAdduct.getCharge());
+	}
+
+	public boolean isEmpty(){
+
+		return msPoints.isEmpty();
+	}
+
+	public void addTandemMs(TandemMassSpectrum tandemMs) {
+
+		if(tandemMs.getPolarity() == null) {
+
+			if(getPrimaryAdduct() != null) {
+
+				if(getPrimaryAdduct().getCharge() < 0)
+					tandemMs.setPolarity(Polarity.Negative);
+
+				if(getPrimaryAdduct().getCharge() > 0)
+					tandemMs.setPolarity(Polarity.Positive);
+			}
+		}
+		tandemSpectra.add(tandemMs);
+	}
+
+	public boolean hasTandemMs(int depth) {
+
+		boolean hasMs = false;
+
+		for(TandemMassSpectrum tms : tandemSpectra) {
+
+			if(tms.getDepth() == depth)
+				return true;
+		}
+		return hasMs;
+	}
+
+	public Set<TandemMassSpectrum> getTandemSpectra() {
+		return tandemSpectra;
+	}
+
+	public TandemMassSpectrum getTandemSpectrum(SpectrumSource source) {
+		return tandemSpectra.stream().
+				filter(t -> t.getSpectrumSource().equals(source)).
+				findFirst().orElse(null);
+	}
+	
+	public TandemMassSpectrum getReferenceTandemSpectrum() {
+		return tandemSpectra.stream().
+				filter(t -> !t.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
+				findFirst().orElse(null);
+	}
+	
+	public TandemMassSpectrum getExperimentalTandemSpectrum() {
+		return tandemSpectra.stream().
+				filter(t -> t.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
+				findFirst().orElse(null);
+	}
+
+	public TreeMap<String, List<MsPoint>> getPatternMap() {
+		return patternMap;
+	}
+
+	public List<MsPoint>getPattern(String patternKey){
+
+		if(patternMap.containsKey(patternKey))
+			return patternMap.get(patternKey);
+		else
+			return null;
+	}
+
+	public List<MsPoint> removePattern(String patternKey){
+
+		if(patternMap.containsKey(patternKey))
+			return patternMap.remove(patternKey);
+		else
+			return null;
+	}
+
+	/**
+	 * @return the detectionAlgorithm
+	 */
+	public String getDetectionAlgorithm() {
+		return detectionAlgorithm;
+	}
+
+	/**
+	 * @param detectionAlgorithm the detectionAlgorithm to set
+	 */
+	public void setDetectionAlgorithm(String detectionAlgorithm) {
+		this.detectionAlgorithm = detectionAlgorithm;
+	}
+
+	public double getMcMillanCutoff() {
+		return mcMillanCutoff;
+	}
+
+	public void setMcMillanCutoff(double mcMillanCutoff) {
+		this.mcMillanCutoff = mcMillanCutoff;
+	}
+
+	public double getMcMillanCutoffPercentDelta() {
+		return mcMillanCutoffPercentDelta;
+	}
+
+	public void setMcMillanCutoffPercentDelta(double mcMillanCutoffPercentDelta) {
+		this.mcMillanCutoffPercentDelta = mcMillanCutoffPercentDelta;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

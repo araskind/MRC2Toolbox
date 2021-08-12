@@ -1,0 +1,193 @@
+/*******************************************************************************
+ *
+ * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Contributors:
+ * Alexander Raskind (araskind@med.umich.edu)
+ *
+ ******************************************************************************/
+
+package edu.umich.med.mrc2.datoolbox.utils;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.apache.commons.io.FilenameUtils;
+
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.RawMsPoint;
+import edu.umich.med.mrc2.datoolbox.data.enums.SupportedRawDataTypes;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import umich.ms.datatypes.LCMSData;
+import umich.ms.datatypes.LCMSDataSubset;
+import umich.ms.datatypes.scan.IScan;
+import umich.ms.datatypes.scancollection.IScanCollection;
+import umich.ms.datatypes.scancollection.ScanIndex;
+import umich.ms.datatypes.spectrum.ISpectrum;
+import umich.ms.fileio.exceptions.FileParsingException;
+import umich.ms.fileio.filetypes.mzml.MZMLFile;
+import umich.ms.fileio.filetypes.mzxml.MZXMLFile;
+import umich.ms.fileio.filetypes.xmlbased.AbstractXMLBasedDataSource;
+
+public class RawDataUtils {
+
+	public static Map<Integer, IScan>getCompleteScanMap(IScanCollection scans){
+		
+		 TreeMap<Integer, IScan> scanMap = new TreeMap<Integer, IScan>();
+		 TreeMap<Integer, ScanIndex> msLevel2index = scans.getMapMsLevel2index();
+		 msLevel2index.forEach((msLevel, index) -> {
+			 index.getNum2scan().forEach((scanNum, scan) -> scanMap.put(scanNum, scan));
+		 }); 
+		 return  scanMap;
+	}
+		
+	public static Collection<MsPoint> getScanPoints(IScan scan, double minIntensityCutoff) { 
+		
+		Collection<MsPoint> pattern = new ArrayList<MsPoint>();
+		ISpectrum spectrum = scan.getSpectrum();
+		if(spectrum == null) {
+			try {
+				spectrum = scan.fetchSpectrum();
+			} catch (FileParsingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		int scanNum = scan.getNum();
+		if(spectrum != null) {
+			
+			double[] mzs = spectrum.getMZs();
+			double[] intens = spectrum.getIntensities();
+			for(int i=0; i<mzs.length; i++) {
+				
+				if(intens[i] > minIntensityCutoff)
+					pattern.add(new MsPoint(mzs[i], intens[i], scanNum));
+			}
+		}
+		return pattern;
+	}
+	
+	public static Collection<MsPoint> getScanPoints(IScan scan) { 		
+		return getScanPoints(scan, 0.0d);
+	}
+	
+	public static Collection<RawMsPoint> getRawScanPoints(IScan scan, double minIntensityCutoff) { 
+		
+		Collection<RawMsPoint> pattern = new ArrayList<RawMsPoint>();
+		ISpectrum spectrum = scan.getSpectrum();
+		if(spectrum == null) {
+			try {
+				spectrum = scan.fetchSpectrum();
+			} catch (FileParsingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		int scanNum = scan.getNum();
+		if(spectrum != null) {
+			
+			double[] mzs = spectrum.getMZs();
+			double[] intens = spectrum.getIntensities();
+			for(int i=0; i<mzs.length; i++) {
+				
+				if(intens[i] > minIntensityCutoff)
+					pattern.add(new RawMsPoint(mzs[i], intens[i], scanNum));
+			}
+		}
+		return pattern;
+	}
+	
+	public static Collection<RawMsPoint> getRawScanPoints(IScan scan) { 		
+		return getRawScanPoints(scan, 0.0d);
+	}
+	
+	public static Map<DataFile, LCMSData>createDataSources(Collection<DataFile> files, int msLevel, Object parent) throws FileParsingException{
+
+		Map<DataFile, LCMSData>dataSourcesmap = new HashMap<DataFile,LCMSData>();
+		
+		for(DataFile df : files) {
+			
+			Path path = Paths.get(df.getFullPath());
+			LCMSData fileData;
+			@SuppressWarnings("rawtypes")
+			AbstractXMLBasedDataSource source = null;
+			
+			if(FilenameUtils.getExtension(path.toString()).equalsIgnoreCase(SupportedRawDataTypes.MZML.name())) 				
+				source = new MZMLFile(path.toString());		
+			
+			if(FilenameUtils.getExtension(path.toString()).equalsIgnoreCase(SupportedRawDataTypes.MZXML.name()))		
+				source = new MZXMLFile(path.toString());
+
+			fileData = new LCMSData(source);
+			if(msLevel == 1)
+				fileData.load(LCMSDataSubset.MS1_WITH_SPECTRA, parent);
+			
+			if(msLevel == 2)
+				fileData.load(LCMSDataSubset.MS2_WITH_SPECTRA, parent);
+			
+			dataSourcesmap.put(df,fileData);
+		}		
+		return dataSourcesmap;
+	}
+	
+	public static String getScanLabel(IScan s) {
+		
+		String labelText = "Scan #" + s.getNum() + 
+				" (RT " + MRC2ToolBoxConfiguration.getRtFormat().format(s.getRt()) + ")";
+		if (s.getMsLevel() > 1) {
+
+			if (s.getPrecursor().getMzRangeStart() != null && s.getPrecursor().getMzRangeEnd() != null) {
+				labelText += "; isol. "
+						+ MRC2ToolBoxConfiguration.getMzFormat().format(s.getPrecursor().getMzRangeStart()) + "~"
+						+ MRC2ToolBoxConfiguration.getMzFormat().format(s.getPrecursor().getMzRangeEnd());
+			} else if (s.getPrecursor().getMzTarget() != null) {
+				labelText += "; Prec. "
+						+ MRC2ToolBoxConfiguration.getMzFormat().format(s.getPrecursor().getMzTarget());
+			} else {
+				if (s.getPrecursor().getMzTargetMono() != null) {
+					labelText += "; Prec. "
+							+ MRC2ToolBoxConfiguration.getMzFormat().format(s.getPrecursor().getMzTargetMono());
+				}
+			}
+		}
+		return labelText;
+	}
+	
+	public static double getScanPrecursorMz(IScan s) {
+		
+		if (s.getMsLevel() > 1) {
+
+			if (s.getPrecursor().getMzRangeStart() != null && s.getPrecursor().getMzRangeEnd() != null) {
+				
+				return (s.getPrecursor().getMzRangeStart() + s.getPrecursor().getMzRangeEnd()) / 2.0d;
+				
+			} else if (s.getPrecursor().getMzTarget() != null) {
+				return s.getPrecursor().getMzTarget();
+			} else {
+				if (s.getPrecursor().getMzTargetMono() != null) {
+					return s.getPrecursor().getMzTargetMono();
+				}
+			}
+		}
+		return 0.0d;
+	}
+	
+}

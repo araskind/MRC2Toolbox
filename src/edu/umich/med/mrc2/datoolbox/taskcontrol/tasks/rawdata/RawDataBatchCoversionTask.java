@@ -1,0 +1,88 @@
+/*******************************************************************************
+ *
+ * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Contributors:
+ * Alexander Raskind (araskind@med.umich.edu)
+ *
+ ******************************************************************************/
+
+package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata;
+
+import java.io.File;
+import java.util.Collection;
+
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+
+public class RawDataBatchCoversionTask extends AbstractTask implements TaskListener {
+	
+	private File outputDir ;
+	private Collection<File>filesToConvert;
+
+	public RawDataBatchCoversionTask(File outputDir, Collection<File> filesToConvert) {
+		super();
+		this.outputDir = outputDir;
+		this.filesToConvert = filesToConvert;
+	}
+
+	@Override
+	public void run() {
+		setStatus(TaskStatus.PROCESSING);
+		taskDescription = "Converting selected raw data files ...";
+		total = filesToConvert.size();
+		processed = 0;		
+		try {
+			for(File rawFile : filesToConvert) {
+
+				RawDataCoversionTask task = new RawDataCoversionTask(outputDir, rawFile);
+				task.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(task);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);		
+		}
+	}
+	
+	@Override
+	public Task cloneTask() {
+		return new RawDataBatchCoversionTask(outputDir, filesToConvert);
+	}
+
+	@Override
+	public void statusChanged(TaskEvent e) {
+
+		if (e.getStatus() == TaskStatus.FINISHED) {
+			
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+			
+			if (e.getSource().getClass().equals(RawDataCoversionTask.class)) {
+								
+				processed++;
+				if(processed == total) {
+					taskDescription = "Re-indexing raw data repository ...";
+					RawDataManager.indexRepository();
+					setStatus(TaskStatus.FINISHED);
+				}
+			}
+		}
+	}
+}

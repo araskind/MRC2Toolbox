@@ -1,0 +1,262 @@
+<?xml version='1.0'?>
+<root>
+	<resource name="dock.ui.ThemeMap">
+		<key>eclipse</key>
+	</resource>
+	<resource name="ccontrol.frontend">
+		<frontend>
+			<current>
+				<base>
+					<roots>
+						<root name="external">
+							<layout factory="predefined">
+								<replacement id="rootexternal"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="screen dock">
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CExternalizeArea</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol north">
+							<layout factory="predefined">
+								<replacement id="rootccontrol north"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="SOUTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol south">
+							<layout factory="predefined">
+								<replacement id="rootccontrol south"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="NORTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol east">
+							<layout factory="predefined">
+								<replacement id="rootccontrol east"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="WEST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol center">
+							<layout factory="predefined" placeholder="dock.single.ccontrol\ center">
+								<replacement id="rootccontrol center"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<id>ccontrol center</id>
+									<root>true</root>
+									<content delegate="SplitDockStationFactory">
+										<fullscreen-action>false</fullscreen-action>
+										<node nodeId="1600213802276" orientation="HORIZONTAL" divider="0.7592223330009971">
+											<node nodeId="1600213802278" orientation="VERTICAL" divider="0.4891416752843847">
+												<leaf id="1" nodeId="1600213802280">
+													<placeholders>
+														<placeholder>dock.single.DockableExperimentListingTable</placeholder>
+													</placeholders>
+												</leaf>
+												<leaf id="0" nodeId="1600213802282">
+													<placeholders>
+														<placeholder>dock.single.DockableLIMSDesignEditorPanel</placeholder>
+													</placeholders>
+												</leaf>
+											</node>
+											<leaf id="2" nodeId="1600213802284">
+												<placeholders>
+													<placeholder>dock.single.DockableExperimentSummaryPanel</placeholder>
+												</placeholders>
+											</leaf>
+										</node>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.center</type>
+								</layout>
+							</adjacent>
+							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableLIMSDesignEditorPanel">
+										<replacement id="dockablesingle DockableLIMSDesignEditorPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableLIMSDesignEditorPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
+										<replacement id="dockablesingle DockableExperimentListingTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableExperimentListingTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentSummaryPanel">
+										<replacement id="dockablesingle DockableExperimentSummaryPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableExperimentSummaryPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+							</children>
+						</root>
+						<root name="ccontrol west">
+							<layout factory="predefined">
+								<replacement id="rootccontrol west"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="EAST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+					</roots>
+					<children/>
+				</base>
+				<modes>
+					<dockables>
+						<entry id="single DockableLIMSDesignEditorPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableLIMSDesignEditorPanel</placeholder>
+											<backup-path>
+												<node location="LEFT" size="0.7592223330009971" id="1600213802276"/>
+												<node location="BOTTOM" size="0.5" id="1600213802278"/>
+												<leaf id="1600213802282"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableExperimentListingTable" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableExperimentListingTable</placeholder>
+											<backup-path>
+												<node location="LEFT" size="0.7592223330009971" id="1600213802276"/>
+												<node location="TOP" size="0.5" id="1600213802278"/>
+												<leaf id="1600213802280"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableExperimentSummaryPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableExperimentSummaryPanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.24077766699900294" id="1600213802276"/>
+												<leaf id="1600213802284"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+					</dockables>
+					<modes>
+						<entry id="dock.mode.maximized"/>
+					</modes>
+				</modes>
+			</current>
+		</frontend>
+	</resource>
+	<resource name="ccontrol.preferences"/>
+</root>

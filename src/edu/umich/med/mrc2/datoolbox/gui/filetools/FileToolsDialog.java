@@ -1,0 +1,476 @@
+/*******************************************************************************
+ *
+ * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Contributors:
+ * Alexander Raskind (araskind@med.umich.edu)
+ *
+ ******************************************************************************/
+
+package edu.umich.med.mrc2.datoolbox.gui.filetools;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
+
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
+
+import edu.umich.med.mrc2.datoolbox.data.Worklist;
+import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
+import edu.umich.med.mrc2.datoolbox.gui.automator.TextAreaOutputStream;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.TableClipboardKeyAdapter;
+import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.worklist.WorklistTable;
+import edu.umich.med.mrc2.datoolbox.gui.worklist.WorklistTableModel;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.WorklistExtractionTask;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+
+public class FileToolsDialog extends JDialog 
+	implements ActionListener, BackedByPreferences, TaskListener {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8176806884989838988L;
+	
+	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 32);
+	public static final String CURRENT_DIRECTORY = "CURRENT_DIRECTORY";
+	private Preferences preferences;
+	
+	private JFileChooser chooser;
+	private File baseDirectory;
+	private JTextField rawDataFolderForCleanupTextField;
+	private JTextArea consoleTextArea;
+	private TextAreaOutputStream taos;
+	private PrintStream ps;
+	private JCheckBox removeProfileMsCheckBox;
+	private IOFileFilter dotDfilter;
+	private FileFilter txtFilter;
+	private Worklist worklist;
+
+	private WorklistTable worklistTable;
+
+	public FileToolsDialog() {
+
+		super(MRC2ToolBoxCore.getMainWindow(), "Raw data file tools");
+		setIconImage(((ImageIcon) dataFileToolsIcon).getImage());
+
+		setModalityType(ModalityType.APPLICATION_MODAL);
+		setSize(new Dimension(800, 480));
+		setResizable(true);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		getContentPane().add(tabbedPane, BorderLayout.CENTER);
+		
+		JPanel worklistPanel = createWorklistPanel();
+		tabbedPane.addTab("Extract worklist", worklistPanel);
+		 
+		JPanel cleanupPanel = createUntargetedResultsCleanupPanel();
+		tabbedPane.addTab("Cleanup raw data", cleanupPanel);
+		
+		dotDfilter = FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
+		txtFilter = new FileNameExtensionFilter("Text files", "txt", "TXT");
+		loadPreferences();
+		initChooser();		
+		pack();
+	}
+	
+	private void initChooser() {
+
+		chooser = new ImprovedFileChooser();
+		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
+		chooser.setAcceptAllFileFilterUsed(false);
+		chooser.setMultiSelectionEnabled(false);
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setCurrentDirectory(baseDirectory);
+	}
+	
+	private JPanel createUntargetedResultsCleanupPanel() {
+		
+		JPanel panel = new JPanel();
+		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[]{71, 46, 46, 0, 0, 0};
+		gbl_panel.rowHeights = new int[]{14, 0, 0};
+		gbl_panel.columnWeights = new double[]{0.0, 1.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		panel.setLayout(gbl_panel);
+
+		JLabel lblNewLabel = new JLabel("Raw data folder");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 0;
+		panel.add(lblNewLabel, gbc_lblNewLabel);
+
+		rawDataFolderForCleanupTextField = new JTextField();
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.gridwidth = 3;
+		gbc_textField.insets = new Insets(0, 0, 5, 5);
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField.gridx = 1;
+		gbc_textField.gridy = 0;
+		panel.add(rawDataFolderForCleanupTextField, gbc_textField);
+		rawDataFolderForCleanupTextField.setColumns(10);
+
+		JButton fileBrowseButton = new JButton("Browse ...");
+		fileBrowseButton.setActionCommand(MainActionCommands.SELECT_RAW_DATA_FOLDER_FOR_CLEANUP.getName());
+		fileBrowseButton.addActionListener(this);
+		GridBagConstraints gbc_fileBrowseButton = new GridBagConstraints();
+		gbc_fileBrowseButton.insets = new Insets(0, 0, 5, 5);
+		gbc_fileBrowseButton.gridx = 4;
+		gbc_fileBrowseButton.gridy = 0;
+		panel.add(fileBrowseButton, gbc_fileBrowseButton);
+
+		JButton runButton = new JButton(MainActionCommands.CLEANUP_RAW_DATA.getName());
+		runButton.setActionCommand(MainActionCommands.CLEANUP_RAW_DATA.getName());
+		runButton.addActionListener(this);
+		
+		removeProfileMsCheckBox = new JCheckBox("Remove MS profile data");
+		GridBagConstraints gbc_removeProfileMsCheckBox = new GridBagConstraints();
+		gbc_removeProfileMsCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_removeProfileMsCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_removeProfileMsCheckBox.gridx = 1;
+		gbc_removeProfileMsCheckBox.gridy = 1;
+		panel.add(removeProfileMsCheckBox, gbc_removeProfileMsCheckBox);
+		GridBagConstraints gbc_runButton = new GridBagConstraints();
+		gbc_runButton.gridwidth = 2;
+		gbc_runButton.insets = new Insets(0, 0, 5, 5);
+		gbc_runButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_runButton.gridx = 3;
+		gbc_runButton.gridy = 1;
+		panel.add(runButton, gbc_runButton);
+
+		consoleTextArea = new JTextArea();
+		JScrollPane areaScrollPane = new JScrollPane(consoleTextArea);
+		areaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		areaScrollPane.setPreferredSize(new Dimension(600, 250));
+		GridBagConstraints gbc_console = new GridBagConstraints();
+		gbc_console.insets = new Insets(0, 0, 0, 5);
+		gbc_console.gridwidth = 5;
+		gbc_console.fill = GridBagConstraints.BOTH;
+		gbc_console.gridx = 0;
+		gbc_console.gridy = 2;
+		panel.add(areaScrollPane, gbc_console);	
+		try {
+			taos = new TextAreaOutputStream(consoleTextArea);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (taos != null) {
+			ps = new PrintStream(taos);
+			System.setOut(ps);
+			//	System.setErr(ps);
+		}
+		return panel;
+	}
+	
+	private JPanel createWorklistPanel() {
+		
+		JPanel panel = new JPanel(new BorderLayout(0,0));
+		WorklistToolsToolbar toolbar = new WorklistToolsToolbar(this);
+		panel.add(toolbar, BorderLayout.NORTH);
+		
+		worklistTable = new WorklistTable();
+		panel.add(new JScrollPane(worklistTable), BorderLayout.CENTER);
+		worklistTable.addKeyListener(new TableClipboardKeyAdapter(worklistTable));
+		
+		return panel;
+	}
+	
+	@Override
+	public void dispose() {
+		savePreferences();
+		super.dispose();
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		
+		//	Worklist
+		if (command.equals(MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName())) {
+			try {
+				scanDirectoryForSampleInfo(false);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		if (command.equals(MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName())) {
+			try {
+				scanDirectoryForSampleInfo(true);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		if (command.equals(MainActionCommands.SAVE_WORKLIST_COMMAND.getName()))
+			saveWorklistToFile();
+
+		if (command.equals(MainActionCommands.COPY_WORKLIST_COMMAND.getName()))
+			copyWorklistToClipboard();
+
+		if (command.equals(MainActionCommands.CLEAR_WORKLIST_COMMAND.getName()))
+			clearWorklist();
+
+		//	Data cleanup
+		if (command.equals(MainActionCommands.SELECT_RAW_DATA_FOLDER_FOR_CLEANUP.getName()))
+			selectRawDataFolderForCleanup();
+		
+		if (command.equals(MainActionCommands.CLEANUP_RAW_DATA.getName())) 
+			removeResultsFolders();
+	}
+
+	private void scanDirectoryForSampleInfo(boolean appendWorklist) throws Exception {
+
+		File dirToScan = selectRawFilesDirectory();
+		if (dirToScan != null && dirToScan.exists()) {
+
+			Collection<File> dataDiles = FileUtils.listFilesAndDirs(
+					dirToScan,
+					DirectoryFileFilter.DIRECTORY,
+					dotDfilter);
+
+			if (!dataDiles.isEmpty()) {
+
+				WorklistExtractionTask wlit = new WorklistExtractionTask(
+						dirToScan,
+						WorklistImportType.RAW_DATA_DIRECTORY_SCAN,
+						false,
+						appendWorklist);
+				wlit.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(wlit);
+			}
+		}
+	}
+	
+	private void saveWorklistToFile() {
+
+		String worklistString = worklistTable.getWorklistsAsString();
+		if(worklistString == null || worklistString.isEmpty())
+			return;
+
+		JFileChooser chooser = new ImprovedFileChooser();
+		chooser.setAcceptAllFileFilterUsed(false);
+		chooser.setMultiSelectionEnabled(false);
+		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		chooser.setDialogTitle("Save assay worklist to file:");
+		chooser.setApproveButtonText("Save worklist");
+		chooser.setCurrentDirectory(baseDirectory);
+		chooser.setFileFilter(txtFilter);
+
+		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
+		String fileName = "EXTRACTED_WORKLIST_" + timestamp + ".txt";
+		File outputFile = Paths.get(fileName).toFile();
+		chooser.setSelectedFile(outputFile);
+		if (chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+
+			outputFile = FIOUtils.changeExtension(chooser.getSelectedFile(), "txt") ;
+			try {
+				FileUtils.writeStringToFile(outputFile, worklistString, Charset.defaultCharset());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private File selectRawFilesDirectory() {
+
+		File inputFile = null;
+		chooser.setDialogTitle("Select folder containing data files:");
+		chooser.setCurrentDirectory(baseDirectory);
+		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+			inputFile = chooser.getSelectedFile();
+			if (inputFile.exists())
+				baseDirectory = inputFile.getParentFile();
+		}
+		return inputFile;
+	}
+	
+	private void copyWorklistToClipboard() {
+
+		String worklistString = worklistTable.getWorklistsAsString();
+		if(worklistString == null || worklistString.isEmpty())
+			return;
+
+		StringSelection stringSelection = new StringSelection(worklistString);
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
+	}
+	
+	private void clearWorklist() {
+
+		int selectedValue = MessageDialog.showChoiceWithWarningMsg(
+				"Do you want to clear the current worklist?", this);
+
+		if (selectedValue == JOptionPane.YES_OPTION)
+			((WorklistTableModel) worklistTable.getModel()).clearModel();
+	}
+	
+	private void selectRawDataFolderForCleanup() {
+	
+		chooser.setDialogTitle("Select folder containing data files:");
+		chooser.setCurrentDirectory(baseDirectory);
+		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+			rawDataFolderForCleanupTextField.setText(chooser.getSelectedFile().getAbsolutePath());	
+			baseDirectory = chooser.getSelectedFile().getParentFile();
+			savePreferences();
+		}
+	}
+
+	private void removeResultsFolders() {
+		consoleTextArea.setText("");
+		List<Path> dDirs = null;
+		try {
+			dDirs = Files.find(Paths.get(rawDataFolderForCleanupTextField.getText().trim()), Integer.MAX_VALUE,
+					(filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".d")) && 
+					fileAttr.isDirectory()).collect(Collectors.toList());
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(dDirs != null) {
+			for(Path dir : dDirs) {
+
+				File resultsDir = Paths.get(dir.toString(), "Results").toFile();
+				if(resultsDir.exists()) {
+					try {
+						FileUtils.deleteDirectory(resultsDir);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					System.out.println("Cleaning " + dir.getFileName());
+				}
+				if(removeProfileMsCheckBox.isSelected()) {
+					
+					File profileMs = Paths.get(dir.toString(), "AcqData", "MSProfile.bin").toFile();
+					if(profileMs.exists()) 
+						FileUtils.deleteQuietly(profileMs);
+				}
+			}
+		}
+		MessageDialog.showInfoMsg("Data cleanup finished", this);
+	}
+	
+	@Override
+	public void loadPreferences() {
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
+	}
+	
+	@Override
+	public void loadPreferences(Preferences prefs) {
+
+		preferences = prefs;
+		baseDirectory = Paths.get(
+				preferences.get(CURRENT_DIRECTORY,
+				MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).toFile();
+	}
+
+	@Override
+	public void savePreferences() {
+
+		preferences = Preferences.userNodeForPackage(this.getClass());
+		preferences.put(CURRENT_DIRECTORY, baseDirectory.getAbsolutePath());
+	}
+
+	@Override
+	public void statusChanged(TaskEvent e) {
+
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+
+			if (e.getSource().getClass().equals(WorklistExtractionTask.class))
+				finalizeWorklistExtractionTask((WorklistExtractionTask) e.getSource());					
+		}
+		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED)
+			MainWindow.hideProgressDialog();		
+	}
+	
+	private void finalizeWorklistExtractionTask(WorklistExtractionTask eTask) {
+		
+		Worklist newWorklist = eTask.getWorklist();
+		if(worklist == null) {
+			worklist = newWorklist;
+		}
+		else {
+			if(eTask.isAppendWorklist())
+				worklist.appendWorklist(newWorklist);			
+			else
+				worklist = newWorklist;
+		}
+		worklistTable.setTableModelFromWorklist(worklist);
+	}
+}

@@ -1,0 +1,311 @@
+<?xml version='1.0'?>
+<root>
+	<resource name="dock.ui.ThemeMap">
+		<key>smooth</key>
+	</resource>
+	<resource name="ccontrol.frontend">
+		<frontend>
+			<current>
+				<base>
+					<roots>
+						<root name="external">
+							<layout factory="predefined">
+								<replacement id="rootexternal"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="screen dock">
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CExternalizeArea</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol north">
+							<layout factory="predefined">
+								<replacement id="rootccontrol north"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="SOUTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol south">
+							<layout factory="predefined">
+								<replacement id="rootccontrol south"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="NORTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol east">
+							<layout factory="predefined">
+								<replacement id="rootccontrol east"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="WEST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol center">
+							<layout factory="predefined" placeholder="dock.single.ccontrol\ center">
+								<replacement id="rootccontrol center"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<id>ccontrol center</id>
+									<root>true</root>
+									<content delegate="SplitDockStationFactory">
+										<fullscreen-action>false</fullscreen-action>
+										<node nodeId="1603755091641" orientation="HORIZONTAL" divider="0.35656836461126007">
+											<leaf id="2" nodeId="1603755091639">
+												<placeholders>
+													<placeholder>dock.single.DockableExtendedCompoundDatabaseSearchPanel</placeholder>
+												</placeholders>
+											</leaf>
+											<node nodeId="1603755099188" orientation="VERTICAL" divider="0.47035573122529645">
+												<leaf id="1" nodeId="1603755084874">
+													<placeholders>
+														<placeholder>dock.single.DockableDatabaseCompoundTable</placeholder>
+													</placeholders>
+													<placeholder-map>
+														<version>0</version>
+														<format>dock.PlaceholderList</format>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableDatabaseCompoundTable</placeholder>
+															</key>
+														</entry>
+													</placeholder-map>
+												</leaf>
+												<node nodeId="1603755115448" orientation="HORIZONTAL" divider="0.604384133611691">
+													<leaf id="0" nodeId="1603755115446">
+														<placeholders>
+															<placeholder>dock.single.ManualIdentificationDialogDockableMolStructurePanel</placeholder>
+														</placeholders>
+													</leaf>
+													<leaf id="3" nodeId="1603755099187">
+														<placeholders>
+															<placeholder>dock.single.Synonyms</placeholder>
+														</placeholders>
+													</leaf>
+												</node>
+											</node>
+										</node>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.center</type>
+								</layout>
+							</adjacent>
+							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.ManualIdentificationDialogDockableMolStructurePanel">
+										<replacement id="dockablesingle ManualIdentificationDialogDockableMolStructurePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ManualIdentificationDialogDockableMolStructurePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableDatabaseCompoundTable">
+										<replacement id="dockablesingle DockableDatabaseCompoundTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableDatabaseCompoundTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableExtendedCompoundDatabaseSearchPanel">
+										<replacement id="dockablesingle DockableExtendedCompoundDatabaseSearchPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableExtendedCompoundDatabaseSearchPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.Synonyms">
+										<replacement id="dockablesingle Synonyms"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>Synonyms</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+							</children>
+						</root>
+						<root name="ccontrol west">
+							<layout factory="predefined">
+								<replacement id="rootccontrol west"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="EAST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+					</roots>
+					<children/>
+				</base>
+				<modes>
+					<dockables>
+						<entry id="single ManualIdentificationDialogDockableMolStructurePanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.ManualIdentificationDialogDockableMolStructurePanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.6434316353887399" id="1603755091641"/>
+												<node location="BOTTOM" size="0.75" id="1603755099188"/>
+												<node location="LEFT" size="0.1649269311064718" id="1603755115448"/>
+												<leaf id="1603755115446"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableDatabaseCompoundTable" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableDatabaseCompoundTable</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.6434316353887399" id="1603755091641"/>
+												<node location="TOP" size="0.25" id="1603755099188"/>
+												<leaf id="1603755084874"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single Synonyms" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.Synonyms</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.5113941018766757" id="1603755091641"/>
+												<node location="BOTTOM" size="0.75" id="1603755099188"/>
+												<leaf id="1603755099187"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableExtendedCompoundDatabaseSearchPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableExtendedCompoundDatabaseSearchPanel</placeholder>
+											<backup-path>
+												<node location="LEFT" size="0.4886058981233244" id="1603755091641"/>
+												<leaf id="1603755091639"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+					</dockables>
+					<modes>
+						<entry id="dock.mode.maximized"/>
+					</modes>
+				</modes>
+			</current>
+		</frontend>
+	</resource>
+	<resource name="ccontrol.preferences"/>
+</root>

@@ -1,0 +1,295 @@
+/*******************************************************************************
+ *
+ * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Contributors:
+ * Alexander Raskind (araskind@med.umich.edu)
+ *
+ ******************************************************************************/
+
+package edu.umich.med.mrc2.datoolbox.gui.mgf;
+
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.util.Arrays;
+
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.Icon;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import bibliothek.gui.dock.common.CControl;
+import bibliothek.gui.dock.common.CGrid;
+import bibliothek.gui.dock.common.theme.ThemeMap;
+import edu.umich.med.mrc2.datoolbox.data.MsMsCluster;
+import edu.umich.med.mrc2.datoolbox.data.SimpleMsMs;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
+import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
+import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
+import edu.umich.med.mrc2.datoolbox.gui.mgf.mgftree.DockableMsMsTree;
+import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
+import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MgfImportTask;
+
+public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionListener {
+
+	private MgfPanelToolbar toolbar;
+	private DockableMsMsTree msMsTree;
+	private DockableSpectumPlot msPlot;
+	private DockableMsMsTable msMsTable;
+	private DockableMsMsClusterTable msMsClusterTable;
+	private File baseDirectory;
+
+	private static final Icon componentIcon = GuiUtils.getIcon("filterMsMs", 16);
+	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "MgfPanel.layout");
+
+	public MgfPanel() {
+
+		super("MgfPanel", PanelList.MGF.getName(), componentIcon);
+
+		toolbar = new MgfPanelToolbar(this);
+		add(toolbar, BorderLayout.NORTH);
+
+		control = new CControl(MRC2ToolBoxCore.getMainWindow());
+		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
+		grid = new CGrid(control);
+
+		msMsTree = new DockableMsMsTree("MgfPanelDockableMsMsTree", "MGF spectra");
+		msMsTree.getTree().addTreeSelectionListener(this);
+
+		msMsClusterTable = new DockableMsMsClusterTable(this);
+		msMsTable = new DockableMsMsTable();
+		msPlot = new DockableSpectumPlot("MgfPanelDockableSpectumPlot", "MGF MS/MS plot");
+
+		grid.add(0, 0, 100, 50, msMsClusterTable);
+		grid.add(50, 50, 50, 50, msMsTable);
+		grid.add(0, 50, 50, 50, msPlot);
+
+		grid.add(-25, 0, 25, 100, msMsTree);
+		grid.select(-25, 0, 25, 100, msMsTree);
+
+		control.getContentArea().deploy(grid);
+		add(control.getContentArea(), BorderLayout.CENTER);
+
+		loadLayout(layoutConfigFile);
+
+		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent event) {
+
+		String command = event.getActionCommand();
+
+		if (command.equals(MainActionCommands.IMPORT_MGF_COMMAND.getName()))
+			importMgf();
+
+		if (command.equals(MainActionCommands.EXPORT_MSMS_COMMAND.getName()))
+			exportMsMs();
+	}
+
+	public void clearPanel() {
+
+		msMsTree.resetTree();
+		msPlot.removeAllDataSets();
+		msMsClusterTable.clearTable();;
+		msMsTable.clearTable();;
+	}
+
+	private void exportMsMs() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void importMgf() {
+
+		String yesNoQuestion = "You are going to discard existing results, do you want to proceed?";
+		if (MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
+
+			File mgfFile = selectMgfFile();
+
+			if (mgfFile != null) {
+
+				if (mgfFile.exists()) {
+
+					MgfImportTask mip = new MgfImportTask(mgfFile);
+					mip.addTaskListener(this);
+					MRC2ToolBoxCore.getTaskController().addTask(mip);
+				}
+			}
+		}
+		else
+			return;
+	}
+
+	private File selectMgfFile() {
+
+		JFileChooser chooser = new ImprovedFileChooser();
+		File inputFile = null;
+		chooser.setCurrentDirectory(baseDirectory);
+
+		chooser.setDialogTitle("Select MGF file");
+		chooser.setAcceptAllFileFilterUsed(false);
+		chooser.setMultiSelectionEnabled(false);
+		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		FileNameExtensionFilter mgfFileFilter = new FileNameExtensionFilter("MGF files", "MGF", "mgf");
+		chooser.setFileFilter(mgfFileFilter);
+
+		if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
+			inputFile = chooser.getSelectedFile();
+
+		return inputFile;
+	}
+
+	@Override
+	public void statusChanged(TaskEvent e) {
+
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+
+			// MgfImportTask
+			if (e.getSource().getClass().equals(MgfImportTask.class)) {
+
+				clearPanel();
+
+				MgfImportTask eTask = (MgfImportTask) e.getSource();
+
+				for (MsMsCluster cluster : eTask.getFeatureClusterss())
+					msMsTree.addFeatureClusterToTree(cluster);
+
+				msMsTree.expandClusterBranch();
+			}
+		}
+		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED)
+			MainWindow.hideProgressDialog();
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent e) {
+
+		if(!e.getValueIsAdjusting()) {
+
+			if (e.getSource() instanceof DefaultListSelectionModel) {
+
+				ListSelectionListener[] source = ((DefaultListSelectionModel) e.getSource()).getListSelectionListeners();
+
+				if (Arrays.asList(source).contains(msMsClusterTable)) {
+
+					SimpleMsMs selectedMsMs = msMsClusterTable.getSelectedMsMs();
+					if(selectedMsMs != null) {
+						msPlot.showSimpleMsMs(Arrays.asList(selectedMsMs));
+						msMsTable.setTableModelFromSimpleMsMs(selectedMsMs);
+					}
+					else {
+						msPlot.removeAllDataSets();
+						msMsTable.clearTable();
+					}
+				}
+			}
+		}
+	}
+
+	@Override
+	public void valueChanged(TreeSelectionEvent event) {
+
+		if (event.getSource().equals(msMsTree)) {
+
+			if (msMsTree.getClickedObject() instanceof MsMsCluster) {
+
+				MsMsCluster fc = (MsMsCluster) msMsTree.getClickedObject();
+				msMsTable.setTableModelFromMsMsCluster(fc);
+				msMsClusterTable.setTableModelFromMsMsCluster(fc);
+				msPlot.showMsForCluster(fc);
+			}
+			if (msMsTree.getClickedObject() instanceof SimpleMsMs) {
+
+				SimpleMsMs fc = (SimpleMsMs) msMsTree.getClickedObject();
+				msMsTable.setTableModelFromSimpleMsMs(fc);
+				msPlot.showSimpleMsMs(Arrays.asList(fc));
+			}
+		}
+	}
+
+	@Override
+	public void reloadDesign() {
+		switchDataPipeline(currentProject, activeDataPipeline);
+	}
+
+	@Override
+	public void switchDataPipeline(DataAnalysisProject project, DataPipeline newPipeline) {
+
+		clearPanel();
+		super.switchDataPipeline(project, newPipeline);
+		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+	}
+
+	@Override
+	public void closeProject() {
+		// TODO Auto-generated method stub
+		super.closeProject();
+		clearPanel();
+		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
+	}
+
+	@Override
+	public void designStatusChanged(ExperimentDesignEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void designSetStatusChanged(ExperimentDesignSubsetEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void msFeatureStatusChanged(MsFeatureEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void featureSetStatusChanged(FeatureSetEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public File getLayoutFile() {
+		return layoutConfigFile;
+	}
+}

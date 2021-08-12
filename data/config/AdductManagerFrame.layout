@@ -1,0 +1,381 @@
+<?xml version='1.0'?>
+<root>
+	<resource name="dock.ui.ThemeMap">
+		<key>smooth</key>
+	</resource>
+	<resource name="ccontrol.frontend">
+		<frontend>
+			<current>
+				<base>
+					<roots>
+						<root name="external">
+							<layout factory="predefined">
+								<replacement id="rootexternal"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="screen dock">
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CExternalizeArea</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol north">
+							<layout factory="predefined">
+								<replacement id="rootccontrol north"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="SOUTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol south">
+							<layout factory="predefined">
+								<replacement id="rootccontrol south"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="NORTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol east">
+							<layout factory="predefined">
+								<replacement id="rootccontrol east"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="WEST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol center">
+							<layout factory="predefined" placeholder="dock.single.ccontrol\ center">
+								<replacement id="rootccontrol center"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<id>ccontrol center</id>
+									<root>true</root>
+									<content delegate="SplitDockStationFactory">
+										<fullscreen-action>false</fullscreen-action>
+										<node nodeId="1605720012294" orientation="VERTICAL" divider="0.7713248638838476">
+											<leaf id="0" nodeId="1605720007186">
+												<placeholders>
+													<placeholder>dock.single.DockableAdductExchangeManager</placeholder>
+													<placeholder>dock.single.DockableBinnerAnnotationsEditor</placeholder>
+													<placeholder>dock.single.DockableAdductEditor</placeholder>
+												</placeholders>
+												<placeholder-map>
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableAdductEditor</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableAdductExchangeManager</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableBinnerAnnotationsEditor</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+												</placeholder-map>
+											</leaf>
+											<leaf id="1" nodeId="1605720012292">
+												<placeholders>
+													<placeholder>dock.single.AdductManagerFrameDockableMolStructurePanel</placeholder>
+												</placeholders>
+											</leaf>
+										</node>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.center</type>
+								</layout>
+							</adjacent>
+							<children ignore="false">
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>2</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableAdductEditor</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableAdductEditor</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableAdductExchangeManager</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableAdductExchangeManager</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableBinnerAnnotationsEditor</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableBinnerAnnotationsEditor</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.AdductManagerFrameDockableMolStructurePanel</placeholder>
+												</key>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableAdductEditor">
+												<replacement id="dockablesingle DockableAdductEditor"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableAdductEditor</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableAdductExchangeManager">
+												<replacement id="dockablesingle DockableAdductExchangeManager"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableAdductExchangeManager</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableBinnerAnnotationsEditor">
+												<replacement id="dockablesingle DockableBinnerAnnotationsEditor"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableBinnerAnnotationsEditor</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.AdductManagerFrameDockableMolStructurePanel">
+										<replacement id="dockablesingle AdductManagerFrameDockableMolStructurePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>AdductManagerFrameDockableMolStructurePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+							</children>
+						</root>
+						<root name="ccontrol west">
+							<layout factory="predefined">
+								<replacement id="rootccontrol west"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="EAST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+					</roots>
+					<children/>
+				</base>
+				<modes>
+					<dockables>
+						<entry id="single DockableAdductExchangeManager" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableAdductExchangeManager</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.7713248638838476" id="1605720012294"/>
+												<leaf id="1605720007186"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableAdductExchangeManager</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableBinnerAnnotationsEditor" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableBinnerAnnotationsEditor</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.7713248638838476" id="1605720012294"/>
+												<leaf id="1605720007186"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>2</index>
+											<placeholder>dock.single.DockableBinnerAnnotationsEditor</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single AdductManagerFrameDockableMolStructurePanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.AdductManagerFrameDockableMolStructurePanel</placeholder>
+											<backup-path>
+												<node location="BOTTOM" size="0.75" id="1605720012294"/>
+												<leaf id="1605720012292"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableAdductEditor" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableAdductEditor</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.7713248638838476" id="1605720012294"/>
+												<leaf id="1605720007186"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableAdductEditor</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+					</dockables>
+					<modes>
+						<entry id="dock.mode.maximized"/>
+					</modes>
+				</modes>
+			</current>
+		</frontend>
+	</resource>
+	<resource name="ccontrol.preferences"/>
+</root>

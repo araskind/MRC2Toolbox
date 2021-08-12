@@ -1,0 +1,68 @@
+/*******************************************************************************
+ *
+ * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Contributors:
+ * Alexander Raskind (araskind@med.umich.edu)
+ *
+ ******************************************************************************/
+
+package edu.umich.med.mrc2.datoolbox.gui.mptrack.study.edit;
+
+import java.util.Collection;
+
+import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
+import edu.umich.med.mrc2.datoolbox.data.motrpac.MotrpacSampleType;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
+import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
+
+public class StudyTableModel extends BasicTableModel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3491446203090259355L;
+	public static final String STUDY_COLUMN = "Study code";
+	public static final String STUDY_DESCRIPTION_COLUMN = "Description";
+	public static final String STUDY_SUBJECT_COLUMN = "Subject type";
+
+	public StudyTableModel() {
+
+		super();
+		columnArray = new ColumnContext[] {
+			new ColumnContext(STUDY_COLUMN, MotrpacSampleType.class, false),
+			new ColumnContext(STUDY_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(STUDY_SUBJECT_COLUMN, String.class, false),
+		};
+	}
+
+	public void setTableModelFromStudies(Collection<MoTrPACStudy> studies) {
+
+		setRowCount(0);
+		if(studies.isEmpty())
+			return;
+
+		for (MoTrPACStudy study : studies) {
+
+			Object[] obj = {
+
+					study,
+					study.getDescription(),
+					study.getSubjectType().getSubjectType()
+			};
+			super.addRow(obj);
+		}
+	}
+}
