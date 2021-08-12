@@ -1,1 +1,1 @@
-# MRC2Toolbox is a software package for metabolomics data analysis workflow management
+# MRC2Toolbox - software package for metabolomics data analysis workflow management
