@@ -32,6 +32,7 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.owl.graph.OWLGraphWrapper;
 import edu.umich.med.mrc2.datoolbox.gui.owl.graph.io.ParserWrapper;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.DatabaseConnectionSetupDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -126,10 +128,32 @@ public final class MRC2ToolBoxCore {
 		logger = LogManager.getLogger(MRC2ToolBoxCore.class);
 		logger.info("Statring the program");	
 				
-		MRC2ToolBoxConfiguration.initConfiguration();		
-		if(!ConnectionManager.connectionDefined())
+		MRC2ToolBoxConfiguration.initConfiguration();
+		boolean conectionSetupTried = false;
+		if(!ConnectionManager.connectionDefined()) {
+			conectionSetupTried = true;
+			showDatabaseSetup();
+		}		
+		Connection conn = null;
+		try {
+			conn = ConnectionManager.getConnection();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			//	e1.printStackTrace();
+		}
+		if(conn == null && !conectionSetupTried)
 			showDatabaseSetup();
 		
+		try {
+			conn = ConnectionManager.getConnection();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			//	e1.printStackTrace();
+		}
+		if(conn == null) {
+			MessageDialog.showErrorMsg("Database connection can not be established, exiting the program");
+			System.exit(1);
+		}		
         final SplashScreen splash = SplashScreen.getSplashScreen();
         Graphics2D g = null;
         if (splash != null)

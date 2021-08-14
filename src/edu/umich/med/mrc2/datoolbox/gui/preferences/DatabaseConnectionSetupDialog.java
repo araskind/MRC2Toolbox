@@ -65,7 +65,7 @@ public class DatabaseConnectionSetupDialog extends JDialog implements ActionList
 		} catch (IllegalAccessException e) {
 			// handle exception
 		}
-		setTitle("Database connectionSetup");
+		setTitle("Database Connection Setup");
 		setIconImage(((ImageIcon) preferencesIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setSize(new Dimension(640, 480));
@@ -99,7 +99,7 @@ public class DatabaseConnectionSetupDialog extends JDialog implements ActionList
 
 		if(e.getActionCommand().equals(MainActionCommands.CONTINUE_PROGRAM_STARTUP_COMMAND.getName())) {
 			
-			if(databasePreferencesPanel.testConnection()) {				
+			if(databasePreferencesPanel.testConnection(true)) {				
 				databasePreferencesPanel.savePreferences();
 				dispose();	
 			}

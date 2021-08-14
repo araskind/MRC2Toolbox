@@ -110,7 +110,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600214436454" orientation="HORIZONTAL" divider="0.2562358276643991">
-											<leaf id="1" nodeId="1600213801751">
+											<leaf id="2" nodeId="1600213801751">
 												<placeholders>
 													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</placeholders>
@@ -156,7 +156,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="2" nodeId="1600214464136">
+												<leaf id="1" nodeId="1600214464136">
 													<placeholders>
 														<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
 														<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
@@ -374,16 +374,6 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
-										<replacement id="dockablesingle DockableIdProjectTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableIdProjectTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>5</selected>
 										<placeholders>
@@ -561,6 +551,16 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
+										<replacement id="dockablesingle DockableIdProjectTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableIdProjectTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

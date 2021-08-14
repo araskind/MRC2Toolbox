@@ -245,7 +245,7 @@ public class DatabasePreferencesPanel extends JPanel
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(MainActionCommands.TEST_DATABASE_CONNECTION.getName()))
-				testConnection();
+				testConnection(false);
 		
 		if(e.getActionCommand().equals(MainActionCommands.SAVE_DATABASE_CONNECTION.getName()))
 				saveConnection();
@@ -253,7 +253,7 @@ public class DatabasePreferencesPanel extends JPanel
 	
 	public void saveConnection() {
 		
-		if(testConnection()) {
+		if(testConnection(true)) {
 			
 			savePreferences();
 			MessageDialog.showWarningMsg(
@@ -261,7 +261,7 @@ public class DatabasePreferencesPanel extends JPanel
 		}
  	}
 
-	public boolean testConnection() {
+	public boolean testConnection(boolean silentOnSuccess) {
 
 		Collection<String>errors = verifyConnectionParameters();
 		if(!errors.isEmpty()) {
@@ -272,7 +272,9 @@ public class DatabasePreferencesPanel extends JPanel
         String url = createJdbcConnectionString();
         try {
             conn = DriverManager.getConnection(url, getUserName(), getPassword());
-            MessageDialog.showInfoMsg("Connection successful", this);  
+            if(!silentOnSuccess)
+            	MessageDialog.showInfoMsg("Connection successful", this);  
+            
             return true;
         } catch (SQLException e) {
         	System.out.println(e.getMessage());
