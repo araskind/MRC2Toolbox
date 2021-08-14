@@ -4,7 +4,7 @@ Large-scale mass-spectrometry based metabolomics experiments became a common pla
 
 ##	Downloads
 ###	Software & database
-- [MetIDTracker software](https://umich.box.com/s/xsceug1xqx1iggio3u6nu9w43isecv7w)
+- [MetIDTracker software](https://umich.box.com/s/xsceug1xqx1iggio3u6nu9w43isecv7w){:target="_blank" rel="noopener"}
 - [PostgreSQL database dump](https://umich.box.com/s/52sjf3yu8rwmg2ieaqnmk23d4em2ohji)
 
 ###	Documentation
