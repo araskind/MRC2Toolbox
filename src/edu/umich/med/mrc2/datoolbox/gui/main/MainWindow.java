@@ -70,6 +70,7 @@ import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.dbparse.DbParserFrame;
 import edu.umich.med.mrc2.datoolbox.gui.filetools.FileToolsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.organization.OrganizationManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
@@ -265,6 +266,9 @@ public class MainWindow extends JFrame
 		if(command.equals(MainActionCommands.SHOW_USER_MANAGER_COMMAND.getName()))
 			showUserManager();
 		
+		if(command.equals(MainActionCommands.SHOW_ORGANIZATION_MANAGER_COMMAND.getName()))
+			showOrganizationManager();
+			
 		if(command.equals(MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName()))
 			showFileToolsDialog();
 	}
@@ -281,6 +285,13 @@ public class MainWindow extends JFrame
 		UserManagerDialog umd = new UserManagerDialog();
 		umd.setLocationRelativeTo(this);
 		umd.setVisible(true);
+	}
+	
+	private void showOrganizationManager() {
+		
+		OrganizationManagerDialog omd = new OrganizationManagerDialog();
+		omd.setLocationRelativeTo(this);
+		omd.setVisible(true);
 	}
 
 	private void showRawDataUploadPrepDialog() {

@@ -40,13 +40,40 @@
 											<format>dock.PlaceholderList</format>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
+													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</key>
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableIdProjectTree</placeholder>
+													<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
+													<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
+													<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
+													<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
 												</key>
+												<item key="map" type="p">
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
+														</key>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
+														</key>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
+														</key>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
+														</key>
+													</entry>
+												</item>
 											</entry>
 										</placeholders>
 									</content>
@@ -115,7 +142,7 @@
 													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1600214464138" orientation="VERTICAL" divider="0.5559736594543744">
+											<node nodeId="1600214464138" orientation="VERTICAL" divider="0.32929782082324455">
 												<leaf id="0" nodeId="1600213801754">
 													<placeholders>
 														<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
@@ -253,41 +280,6 @@
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableSOPProtocolsManagerPanel</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
 													<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
@@ -375,7 +367,7 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>5</selected>
+										<selected>0</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -671,9 +663,27 @@
 						</entry>
 						<entry id="single DockableSamplePrepManagerPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -682,9 +692,8 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.25" id="1600213801749"/>
-												<node location="RIGHT" size="0.7932739861523245" id="1600214436454"/>
-												<node location="TOP" size="0.48959200666111574" id="1600214464138"/>
+												<node location="RIGHT" size="0.7437641723356009" id="1600214436454"/>
+												<node location="TOP" size="0.5" id="1600214464138"/>
 												<leaf id="1600213801754"/>
 											</backup-path>
 										</property>
@@ -698,9 +707,27 @@
 						</entry>
 						<entry id="single DockableIDTrackerResultsOverviewPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>3</index>
+											<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -709,9 +736,8 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.25" id="1600213801749"/>
-												<node location="RIGHT" size="0.7932739861523245" id="1600214436454"/>
-												<node location="TOP" size="0.48959200666111574" id="1600214464138"/>
+												<node location="RIGHT" size="0.7437641723356009" id="1600214436454"/>
+												<node location="TOP" size="0.5" id="1600214464138"/>
 												<leaf id="1600213801754"/>
 											</backup-path>
 										</property>
@@ -788,9 +814,27 @@
 						</entry>
 						<entry id="single DockableInstrumentSequenceManagerPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>2</index>
+											<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -799,9 +843,8 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.25" id="1600213801749"/>
-												<node location="RIGHT" size="0.7932739861523245" id="1600214436454"/>
-												<node location="TOP" size="0.48959200666111574" id="1600214464138"/>
+												<node location="RIGHT" size="0.7437641723356009" id="1600214436454"/>
+												<node location="TOP" size="0.5" id="1600214464138"/>
 												<leaf id="1600213801754"/>
 											</backup-path>
 										</property>
@@ -857,6 +900,10 @@
 											<size>400</size>
 											<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
 										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
+										</property>
 									</location>
 								</property>
 								<property id="dock.mode.normal">
@@ -867,8 +914,8 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.25" id="1600213801749"/>
-												<node location="RIGHT" size="0.75" id="1600214436454"/>
+												<node location="RIGHT" size="0.7437641723356009" id="1600214436454"/>
+												<node location="TOP" size="0.5" id="1600214464138"/>
 												<leaf id="1600213801754"/>
 											</backup-path>
 										</property>

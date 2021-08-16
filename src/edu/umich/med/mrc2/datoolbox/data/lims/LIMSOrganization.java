@@ -97,6 +97,18 @@ public class LIMSOrganization implements Serializable, Comparable<LIMSOrganizati
 	public String getOrganizationInfo() {
 		return "<HTML><B>" + name + "</B><BR>" + address;
 	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
 }
 
 

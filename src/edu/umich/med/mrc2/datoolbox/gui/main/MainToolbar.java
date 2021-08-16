@@ -60,6 +60,7 @@ public class MainToolbar extends CommonToolbar {
 	private static final Icon superUserIcon = GuiUtils.getIcon("superUser", 32);
 	private static final Icon loggedOutUserIcon = GuiUtils.getIcon("loggedOutUser", 32);
 	private static final Icon manageUsersIcon = GuiUtils.getIcon("manageUsers", 32);
+	private static final Icon organizationIcon = GuiUtils.getIcon("organization", 32);
 	private static final Icon msToolboxIcon = GuiUtils.getIcon("toolbox", 32);
 	private static final Icon chemModIcon = GuiUtils.getIcon("chemModList", 32);
 	private static final Icon refSampleIcon = GuiUtils.getIcon("standardSample", 32);
@@ -97,7 +98,8 @@ public class MainToolbar extends CommonToolbar {
 		showAssayManagerButton,
 		showRefSampleEditorButton,
 		dbParserButton,
-		manageUsersButton;
+		manageUsersButton,
+		manageOrganizationsButton;
 
 	private JComboBox dataPipelineComboBox;
 	private ItemListener iListener;
@@ -214,6 +216,10 @@ public class MainToolbar extends CommonToolbar {
 		Component horizontalGlue = Box.createHorizontalGlue();
 		add(horizontalGlue);
 		
+		manageOrganizationsButton = GuiUtils.addButton(this, null, organizationIcon, commandListener,
+				MainActionCommands.SHOW_ORGANIZATION_MANAGER_COMMAND.getName(),
+				MainActionCommands.SHOW_ORGANIZATION_MANAGER_COMMAND.getName(), buttonDimension);
+		
 		manageUsersButton = GuiUtils.addButton(this, null, manageUsersIcon, commandListener,
 				MainActionCommands.SHOW_USER_MANAGER_COMMAND.getName(),
 				MainActionCommands.SHOW_USER_MANAGER_COMMAND.getName(), buttonDimension);
@@ -236,6 +242,7 @@ public class MainToolbar extends CommonToolbar {
 			idTrackerUserButton.setActionCommand(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
 			idTrackerUserButton.setToolTipText(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
 			loggedUserLabel.setText("");
+			manageOrganizationsButton.setEnabled(false);
 			manageUsersButton.setEnabled(false);
 		}
 		else {
@@ -245,6 +252,7 @@ public class MainToolbar extends CommonToolbar {
 			loggedUserLabel.setText(user.getFullName());
 			if(user.isSuperUser()) {
 				manageUsersButton.setEnabled(true);
+				manageOrganizationsButton.setEnabled(true);
 				idTrackerUserButton.setIcon(superUserIcon);
 			}
 		}		

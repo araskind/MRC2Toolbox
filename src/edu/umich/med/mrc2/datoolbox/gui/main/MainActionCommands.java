@@ -57,6 +57,16 @@ public enum MainActionCommands {
 	EDIT_USER_COMMAND("Edit User"),
 	DELETE_USER_COMMAND("Delete User"),
 	
+	//	Organization manager
+	SHOW_ORGANIZATION_MANAGER_COMMAND("Show Organization Manager"),
+	ADD_ORGANIZATION_DIALOG_COMMAND("Add Organization dialog"),
+	ADD_ORGANIZATION_COMMAND("Add Organization"),
+	EDIT_ORGANIZATION_DIALOG_COMMAND("Edit Organization dialog"),
+	EDIT_ORGANIZATION_COMMAND("Edit Organization"),
+	DELETE_ORGANIZATION_COMMAND("Delete Organization"),
+	SELECT_PI_COMMAND("Select principal investigator"),
+	SELECT_CONTACT_PERSON_COMMAND("Select contact person"),
+		
 	//	Raw file tools
 	SHOW_RAW_DATA_FILE_TOOLS_COMMAND("Show raw data file tools"),
 	SELECT_RAW_DATA_FOLDER_FOR_CLEANUP("Select raw data folder for cleanup"),

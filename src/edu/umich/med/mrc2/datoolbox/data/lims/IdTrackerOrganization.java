@@ -51,6 +51,21 @@ public class IdTrackerOrganization extends LIMSOrganization implements Serializa
 		this.mailingAddress = mailingAddress;
 	}
 
+	public IdTrackerOrganization(
+			String name, 
+			String mailingAddress, 
+			String department, 
+			String laboratory,
+			LIMSUser principalInvestigator, 
+			LIMSUser contactPerson) {
+		super(null, name, mailingAddress);
+		this.department = department;
+		this.laboratory = laboratory;
+		this.principalInvestigator = principalInvestigator;
+		this.contactPerson = contactPerson;
+		this.mailingAddress = mailingAddress;
+	}
+
 	/**
 	 * @return the department
 	 */
@@ -115,6 +130,18 @@ public class IdTrackerOrganization extends LIMSOrganization implements Serializa
 
 	public void setMetlimsClientId(String metlimsClientId) {
 		this.metlimsClientId = metlimsClientId;
+	}
+
+	public void setDepartment(String department) {
+		this.department = department;
+	}
+
+	public void setLaboratory(String laboratory) {
+		this.laboratory = laboratory;
+	}
+
+	public void setMailingAddress(String mailingAddress) {
+		this.mailingAddress = mailingAddress;
 	}
 }
 

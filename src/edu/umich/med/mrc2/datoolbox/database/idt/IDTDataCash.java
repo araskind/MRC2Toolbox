@@ -100,13 +100,7 @@ public class IDTDataCash {
 	public static Collection<LIMSSamplePreparation>samplePreps = 
 			new TreeSet<LIMSSamplePreparation>();
 	public static Map<LIMSExperiment, Collection<LIMSSamplePreparation>> experimentSamplePrepMap =
-			new TreeMap<LIMSExperiment, Collection<LIMSSamplePreparation>>();
-	
-//	public static Map<LIMSSamplePreparation, Collection<DataAcquisitionMethod>> samplePrepAcquisitionMethodMap =
-//			new TreeMap<LIMSSamplePreparation, Collection<DataAcquisitionMethod>>();
-//	public static Map<DataAcquisitionMethod, Collection<DataExtractionMethod>> acquisitionDataExtractionMethodMap =
-//			new TreeMap<DataAcquisitionMethod, Collection<DataExtractionMethod>>();	
-	
+			new TreeMap<LIMSExperiment, Collection<LIMSSamplePreparation>>();	
 	public static Map<LIMSSamplePreparation, Collection<DataPipeline>> samplePrepDataPipelineMap = 
 			new TreeMap<LIMSSamplePreparation, Collection<DataPipeline>>();	
 	public static Collection<String>sampleQuantityUnits = 

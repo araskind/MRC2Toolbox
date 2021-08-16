@@ -52,7 +52,7 @@ public enum PanelList {
 	MS_LIBRARY("MS library", MsLibraryPanel.class, Boolean.FALSE),
 	DATABASE("Databases", CompoundDatabasePanel.class, Boolean.FALSE),
 	ID_WORKBENCH("IDTracker workbench", IDWorkbenchPanel.class, Boolean.FALSE),
-	ID_TRACKER_LIMS("ID tracker LIMS", IDTrackerLimsManagerPanel.class, Boolean.FALSE),
+	ID_TRACKER_LIMS("IDTracker LIMS", IDTrackerLimsManagerPanel.class, Boolean.FALSE),
 	//	LIPIDS("Lipid identification", LipidIdPanel.class, Boolean.FALSE),
 	MGF("MGF explorer", MgfPanel.class, Boolean.FALSE),
 	AUTOMATOR("Batch data extraction", AutomatorPanel.class, Boolean.FALSE),

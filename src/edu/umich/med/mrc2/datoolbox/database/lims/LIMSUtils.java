@@ -742,6 +742,46 @@ public class LIMSUtils {
 //		return nextId;
 //	}
 	
+	public static void editOrganization(IdTrackerOrganization organization) throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		editOrganization(organization, conn);
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void editOrganization(IdTrackerOrganization organization, Connection conn) throws Exception{
+
+		String sql = 
+				"UPDATE ORGANIZATION SET NAME = ?, ADDRESS = ?, "
+				+ "DEPARTMENT_OR_DIVISION = ?, LABORATORY = ?, PRINCIPAL_INVESTIGATOR_ID = ?, "
+				+ "CONTACT_PERSON_ID = ?, MAILING_ADDRESS = ?, CLIENT_ID_TMP = ? "
+				+ "WHERE ORGANIZATION_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+		
+		ps.setString(1, organization.getName());
+		ps.setString(2, organization.getAddress());
+		ps.setString(3, organization.getDepartment());
+		ps.setString(4, organization.getLaboratory());		
+		ps.setString(5, organization.getPrincipalInvestigator().getId());
+		ps.setString(6, organization.getContactPerson().getId());
+		ps.setString(7, organization.getMailingAddress());	
+		ps.setString(8, organization.getMetlimsClientId());
+		ps.setString(9, organization.getId());
+		ps.executeUpdate();
+		ps.close();	
+	}
+	
+	public static void deleteOrganization(IdTrackerOrganization organization) throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String sql = "DELETE FROM ORGANIZATION WHERE ORGANIZATION_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(sql);	
+		ps.setString(1, organization.getId());
+		ps.executeUpdate();
+		ps.close();	
+		ConnectionManager.releaseConnection(conn);
+	}
+	
 	public static Collection<InstrumentPlatform> getInstrumentPlatformList() throws Exception{
 			
 			Connection conn = ConnectionManager.getConnection();

@@ -1,10 +1,22 @@
 #FilePreferences
-#Fri Aug 13 11:56:37 EDT 2021
-edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databaseHost=localhost
-edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databaseType=PostgreSQL
-edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databaseConnectionString=+3wpkD36VsgxFCCVABHcsb9a3fO6XCZmTlO3R0Euir2FdZpaqs6W+5Y89UfykMJTCLxpjd+hSdkWNYAnKUDm89SWjROpg9GFu2c1I59cFIsI2dxhB40H+Cy56OzAveHO9wJmF2Vf1rN08kILgcf8rmgqA67H//QTMWdWGKTomil+ySGeccIJYsy9rdTgRZbrmVRrpjAoZhuYj38wkLwixg\=\=
-edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databasePort=5432
+#Sun Aug 15 17:46:35 EDT 2021
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databaseHost=UHMETBRESPR1.umhs.med.umich.edu
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databaseConnectionString=+3wpkD36VsgxFCCVABHcseLB78QNGPOpuBUb26dmXBY0/Jtawp00RBOv+lqVeERUAjZkY+LqaqXqSv0xVIerk64I+kth47Omg0LUwsNlky+FzcLaImlzlmA+B7N4SsdDbsuwXhg0dWAl5ijIgu10XsUHpuH2gMGmqJws0RIaVgWloY7Fws58v8Q8JM6o4JwvCjmu9DCMyL19RYjMXbUcA844wxIv8BPf1ZjZV/YbYLEwK/ijBnwEdCwWGwPwZwBg
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.maxThreadNumber=6
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.rtWindow=0.05
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.sampleIdMask=S\\d{8}|R\\d{9}|CS\\d{7}|R\\d{8}
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.retentionUnits=Minutes
 edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databasePassword=riXfcxIKPdMM25FjQSFBDQ\=\=
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.mzFormat=\#.\#\#\#\#
 edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databaseSchema=idtracker
 edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databaseUser=yrAGMb0lrFpNtoFwG0po9g\=\=
 edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databaseNameSid=idtracker
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.rtFormat=\#.\#\#\#
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databaseType=PostgreSQL
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.intensityFormat=\#,\#\#\#
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.sampleNameMask=
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.fileTimeStampFormat=yyyyMMdd_HHmmss
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.databasePort=5432
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.massAccuracy=20.0
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.intensityDecimals=4
+edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration.intensityNotation=Decimal

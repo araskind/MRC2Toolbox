@@ -235,6 +235,10 @@ public class UserManagerDialog extends JDialog implements ActionListener {
 		if(user == null)
 			return;
 		
+		if(user.equals(MRC2ToolBoxCore.getIdTrackerUser())){
+			MessageDialog.showErrorMsg("You can not delete your own user record!", this);
+			return;
+		}		
 		String yesNoQuestion = "<HTML>Do you want to delete user <B>" + user.getFullName() + "</B>?\n"
 				+ "All the data associated with this user will be deleted from database!";
 		int res = MessageDialog.showChoiceWithWarningMsg(yesNoQuestion , this);
