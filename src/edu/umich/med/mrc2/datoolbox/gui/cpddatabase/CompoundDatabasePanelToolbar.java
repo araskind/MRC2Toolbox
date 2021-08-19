@@ -135,6 +135,7 @@ public class CompoundDatabasePanelToolbar extends CommonToolbar {
 				MainActionCommands.SHOW_COMPOUND_DATABASE_CURATOR.getName(),
 				MainActionCommands.SHOW_COMPOUND_DATABASE_CURATOR.getName(),
 				buttonDimension);
+		curateCompoundButton.setEnabled(false);
 	}
 
 	@Override

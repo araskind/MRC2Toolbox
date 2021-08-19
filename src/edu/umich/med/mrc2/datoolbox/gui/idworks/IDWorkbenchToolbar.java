@@ -219,7 +219,7 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 		importDecoyRefMSMSLibraryButton = GuiUtils.addButton(this, null, libraryImportIcon, commandListener,
 				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(),
 				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(), buttonDimension);
-//		importDecoyRefMSMSLibraryButton.setEnabled(false);
+		importDecoyRefMSMSLibraryButton.setEnabled(false);
 		
 		addSeparator(buttonDimension);
 		

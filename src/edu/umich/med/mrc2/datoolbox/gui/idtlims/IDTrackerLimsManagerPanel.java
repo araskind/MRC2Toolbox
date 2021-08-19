@@ -418,8 +418,8 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 
 	public void showExperimentEditDialog(LIMSExperiment experiment) {
 
-		if (experiment == null)
-			return;
+//		if (experiment == null)
+//			return;
 		
 		experimentDialog = new IDTrackerExperimentDialog(experiment, this);
 		experimentDialog.setLocationRelativeTo(this.getContentPane());

@@ -57,10 +57,12 @@ public class IDTrackerExperimentDialog  extends JDialog {
 	private JButton saveButton;
 	private IDTrackerLimsManagerPanel parentPanel;
 	private IDTExperimentDefinitionPanel experimentDefinitionPanel;
+	private LIMSExperiment experiment;
 
 	public IDTrackerExperimentDialog(LIMSExperiment experiment, ActionListener actionListener) {
 
 		super();
+		this.experiment = experiment;
 		setIconImage(((ImageIcon) newCdpIdExperimentIcon).getImage());
 		setPreferredSize(new Dimension(400, 500));
 		setSize(new Dimension(400, 500));

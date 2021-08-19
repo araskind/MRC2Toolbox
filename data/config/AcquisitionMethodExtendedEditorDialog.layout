@@ -38,6 +38,41 @@
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableChromatographicGradientTable</placeholder>
+													<placeholder>dock.single.DockableGradientChartPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">size</item>
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">hold</item>
+												</item>
+												<item key="dock.size" type="i">400</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.hold" type="b">false</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMobilePhaseAndParametersPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">size</item>
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+													<item type="s">hold</item>
+												</item>
+												<item key="dock.size" type="i">400</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMobilePhaseAndParametersPanel</item>
+												<item key="dock.hold" type="b">false</item>
+											</entry>
 										</placeholders>
 									</content>
 								</delegate>
@@ -45,99 +80,6 @@
 							<adjacent>
 								<layout factory="dock.RootStationAdjacentFactory">
 									<type>dock.CContentArea.minimize</type>
-								</layout>
-							</adjacent>
-							<children ignore="false"/>
-						</root>
-						<root name="ccontrol south">
-							<layout factory="predefined">
-								<replacement id="rootccontrol south"/>
-								<delegate id="delegate_CommonDockStationFactory">
-									<root>true</root>
-									<content delegate="flap dock">
-										<window auto="false" direction="NORTH"/>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-										</placeholders>
-									</content>
-								</delegate>
-							</layout>
-							<adjacent>
-								<layout factory="dock.RootStationAdjacentFactory">
-									<type>dock.CContentArea.minimize</type>
-								</layout>
-							</adjacent>
-							<children ignore="false"/>
-						</root>
-						<root name="ccontrol east">
-							<layout factory="predefined">
-								<replacement id="rootccontrol east"/>
-								<delegate id="delegate_CommonDockStationFactory">
-									<root>true</root>
-									<content delegate="flap dock">
-										<window auto="false" direction="WEST"/>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-										</placeholders>
-									</content>
-								</delegate>
-							</layout>
-							<adjacent>
-								<layout factory="dock.RootStationAdjacentFactory">
-									<type>dock.CContentArea.minimize</type>
-								</layout>
-							</adjacent>
-							<children ignore="false"/>
-						</root>
-						<root name="ccontrol center">
-							<layout factory="predefined" placeholder="dock.single.ccontrol\ center">
-								<replacement id="rootccontrol center"/>
-								<delegate id="delegate_CommonDockStationFactory">
-									<id>ccontrol center</id>
-									<root>true</root>
-									<content delegate="SplitDockStationFactory">
-										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600794717898" orientation="VERTICAL" divider="0.4025069637883008">
-											<leaf id="2" nodeId="1600794711413">
-												<placeholders>
-													<placeholder>dock.single.DockableAcquisitionMethodDataPanel</placeholder>
-												</placeholders>
-												<placeholder-map>
-													<version>0</version>
-													<format>dock.PlaceholderList</format>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableAcquisitionMethodDataPanel</placeholder>
-														</key>
-													</entry>
-												</placeholder-map>
-											</leaf>
-											<node nodeId="1600794782551" orientation="HORIZONTAL" divider="0.5657084188911704">
-												<leaf id="0" nodeId="1600794722848">
-													<placeholders>
-														<placeholder>dock.single.DockableChromatographicGradientTable</placeholder>
-														<placeholder>dock.single.DockableGradientChartPanel</placeholder>
-													</placeholders>
-													<placeholder-map>
-														<version>0</version>
-														<format>dock.PlaceholderList</format>
-													</placeholder-map>
-												</leaf>
-												<leaf id="1" nodeId="1600794717896">
-													<placeholders>
-														<placeholder>dock.single.DockableMobilePhaseAndParametersPanel</placeholder>
-													</placeholders>
-												</leaf>
-											</node>
-										</node>
-									</content>
-								</delegate>
-							</layout>
-							<adjacent>
-								<layout factory="dock.RootStationAdjacentFactory">
-									<type>dock.CContentArea.center</type>
 								</layout>
 							</adjacent>
 							<children ignore="false">
@@ -210,6 +152,110 @@
 									</layout>
 									<children ignore="false"/>
 								</child>
+							</children>
+						</root>
+						<root name="ccontrol south">
+							<layout factory="predefined">
+								<replacement id="rootccontrol south"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="NORTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol east">
+							<layout factory="predefined">
+								<replacement id="rootccontrol east"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="WEST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol center">
+							<layout factory="predefined" placeholder="dock.single.ccontrol\ center">
+								<replacement id="rootccontrol center"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<id>ccontrol center</id>
+									<root>true</root>
+									<content delegate="SplitDockStationFactory">
+										<fullscreen-action>false</fullscreen-action>
+										<node nodeId="1600794717898" orientation="VERTICAL" divider="0.4025069637883008">
+											<leaf id="0" nodeId="1600794711413">
+												<placeholders>
+													<placeholder>dock.single.DockableAcquisitionMethodDataPanel</placeholder>
+												</placeholders>
+												<placeholder-map>
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableAcquisitionMethodDataPanel</placeholder>
+														</key>
+													</entry>
+												</placeholder-map>
+											</leaf>
+											<node nodeId="1600794782551" orientation="HORIZONTAL" divider="0.5657084188911704">
+												<leaf id="-1" nodeId="1600794722848">
+													<placeholders>
+														<placeholder>dock.single.DockableChromatographicGradientTable</placeholder>
+														<placeholder>dock.single.DockableGradientChartPanel</placeholder>
+													</placeholders>
+													<placeholder-map>
+														<version>0</version>
+														<format>dock.PlaceholderList</format>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableGradientChartPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableChromatographicGradientTable</placeholder>
+															</key>
+														</entry>
+													</placeholder-map>
+												</leaf>
+												<leaf id="-1" nodeId="1600794717896">
+													<placeholders>
+														<placeholder>dock.single.DockableMobilePhaseAndParametersPanel</placeholder>
+													</placeholders>
+												</leaf>
+											</node>
+										</node>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.center</type>
+								</layout>
+							</adjacent>
+							<children ignore="false">
 								<child>
 									<layout factory="predefined" placeholder="dock.single.DockableAcquisitionMethodDataPanel">
 										<replacement id="dockablesingle DockableAcquisitionMethodDataPanel"/>
@@ -269,11 +315,25 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableMobilePhaseAndParametersPanel" current="dock.mode.normal">
+						<entry id="single DockableMobilePhaseAndParametersPanel" current="dock.mode.minimized">
 							<history>
 								<mode>dock.mode.normal</mode>
+								<mode>dock.mode.minimized</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>1</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableMobilePhaseAndParametersPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -283,7 +343,7 @@
 											<placeholder>dock.single.DockableMobilePhaseAndParametersPanel</placeholder>
 											<backup-path>
 												<node location="BOTTOM" size="0.5974930362116992" id="1600794717898"/>
-												<node location="RIGHT" size="0.2854209445585215" id="1600794722849"/>
+												<node location="RIGHT" size="0.4342915811088296" id="1600794782551"/>
 												<leaf id="1600794717896"/>
 											</backup-path>
 										</property>
@@ -291,10 +351,11 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableGradientChartPanel" current="dock.mode.normal">
+						<entry id="single DockableGradientChartPanel" current="dock.mode.minimized">
 							<history>
 								<mode>dock.mode.maximized</mode>
 								<mode>dock.mode.normal</mode>
+								<mode>dock.mode.minimized</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -303,6 +364,23 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableGradientChartPanel</placeholder>
+										</property>
+									</location>
+								</property>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableGradientChartPanel</placeholder>
+										</property>
 										<property factory="StackDockPropertyFactory">
 											<index>0</index>
 											<placeholder>dock.single.DockableGradientChartPanel</placeholder>
@@ -330,10 +408,11 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableChromatographicGradientTable" current="dock.mode.normal">
+						<entry id="single DockableChromatographicGradientTable" current="dock.mode.minimized">
 							<history>
 								<mode>dock.mode.maximized</mode>
 								<mode>dock.mode.normal</mode>
+								<mode>dock.mode.minimized</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -342,6 +421,23 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableChromatographicGradientTable</placeholder>
+										</property>
+									</location>
+								</property>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableChromatographicGradientTable</placeholder>
+										</property>
 										<property factory="StackDockPropertyFactory">
 											<index>1</index>
 											<placeholder>dock.single.DockableChromatographicGradientTable</placeholder>
@@ -362,7 +458,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>0</index>
 											<placeholder>dock.single.DockableChromatographicGradientTable</placeholder>
 										</property>
 									</location>

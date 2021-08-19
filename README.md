@@ -4,21 +4,21 @@ Large-scale mass-spectrometry based metabolomics experiments became a common pla
 
 ##	Downloads
 ###	Software & database
-- [MetIDTracker software](https://umich.box.com/s/xsceug1xqx1iggio3u6nu9w43isecv7w)
-- [PostgreSQL database dump](https://umich.box.com/s/52sjf3yu8rwmg2ieaqnmk23d4em2ohji)
+- [MetIDTracker software](https://drive.google.com/file/d/1Nm0D2ZFocODAMzZuJ2lleXeHMy5ZULuO/view?usp=sharing)
+- [PostgreSQL database dump](https://drive.google.com/file/d/15smKw8Xo5D8xQDA8TkKg8icQ_EWqZFzr/view?usp=sharing)
 
 ###	Documentation
 
-- [Database installation and configuration manual](https://umich.box.com/s/h46kuhiw373lo9s3xrao095wee091u57)
-- [MetIDTracker user manual, preliminary draft](https://umich.box.com/s/3kp6j2dzt6vfyyelr5a95awvnz7egf1v)
+- [Database installation and configuration manual](https://drive.google.com/file/d/1HauD5QU5auukfpbdkedcc5uDHpupyiMQ/view?usp=sharing)
+- [MetIDTracker user manual, preliminary draft](https://drive.google.com/file/d/1kJqHpMGVKiTGqMifyjwKie-7ExMFzRD6/view?usp=sharing)
 
 ###	MSMS libraries
 Several open access MSMS libraries from [MS-DIAL](http://prime.psc.riken.jp/compms/msdial/main.html) were reformatted to include internal MetIDTracker spectrum identifiers and converted to NIST format. They may be used to search experimental data from MetIDTracker. 
 
-- [MS-DIAL metabolomics MSP spectral kit, VS15, positive mode](https://umich.box.com/s/4p6usq555ab5f46l4bgheigamlbxvj95)
-- [MS-DIAL metabolomics MSP spectral kit, VS15, negative mode](https://umich.box.com/s/2drqabukveaog1ers89qcu3qx9uocfie)
-- [MS-DIAL LipidBlast, V68, positive mode](https://umich.box.com/s/dat5kj9xafg6z4qw4vnju9v1z01drsg9)
-- [MS-DIAL LipidBlast, V68, negative mode](https://umich.box.com/s/gm4yf920uad53wpqv1gvsk82epxd2t4w)
+- [MS-DIAL metabolomics MSP spectral kit, VS15, positive mode](https://drive.google.com/file/d/1Pq3VEI5BLUg-Fn_G6sDiYV1bSuOSx1am/view?usp=sharing)
+- [MS-DIAL metabolomics MSP spectral kit, VS15, negative mode](https://drive.google.com/file/d/1n4-hIXVa4RBExrvXHEk1GgYL60K71uKA/view?usp=sharing)
+- [MS-DIAL LipidBlast, V68, positive mode](https://drive.google.com/file/d/1zfLNRdJrNwsiUzj11ZgN6g2ONSA-yRM9/view?usp=sharing)
+- [MS-DIAL LipidBlast, V68, negative mode](https://drive.google.com/file/d/1fTPmTwhJ7G0z3P2PxsZ0teYdmuoIsPZn/view?usp=sharing)
 
 ###	Third party software
 For a number of operations MetIDTracker relies on third party software. This software needs to be installed on the same computer and the location of each external program has to specified in the preferences.

@@ -65,7 +65,7 @@ public class OrganizationEditorDialog extends JDialog implements ActionListener{
 	private static final long serialVersionUID = 7684989595475342241L;
 
 	private static final Icon editOrganizationIcon = GuiUtils.getIcon("editOrganization", 32);
-	private static final Icon addOrganizationIcon = GuiUtils.getIcon("addOrganizationIcon", 32);
+	private static final Icon addOrganizationIcon = GuiUtils.getIcon("newOrganization", 32);
 
 	private IdTrackerOrganization organization;
 	private LIMSUser principalInvestigator;

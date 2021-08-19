@@ -71,6 +71,7 @@ public class ObjectAnnotationToolbar extends CommonToolbar {
 		structuralAnnotationButton = GuiUtils.addButton(this, null, structuralAnnotationIcon, commandListener,
 				MainActionCommands.ADD_STRUCTURAL_ANNOTATION_COMMAND.getName(),
 				MainActionCommands.ADD_STRUCTURAL_ANNOTATION_COMMAND.getName(), buttonDimension);
+		structuralAnnotationButton.setEnabled(false);
 
 		addSeparator(buttonDimension);
 

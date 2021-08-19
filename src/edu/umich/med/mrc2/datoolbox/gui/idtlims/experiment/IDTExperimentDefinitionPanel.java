@@ -241,7 +241,7 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		loadExperimentData();
 	}
 	
-	private void loadExperimentData() {
+	public void loadExperimentData() {
 
 		if(experiment == null) 
 			return;

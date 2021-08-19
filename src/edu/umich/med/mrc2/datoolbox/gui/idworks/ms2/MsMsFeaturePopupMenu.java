@@ -140,11 +140,13 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 				MainActionCommands.COPY_SELECTED_MS2_ROWS_COMMAND.getName(), listener,
 				MainActionCommands.COPY_SELECTED_MS2_ROWS_COMMAND.getName());
 		copySelectedMenuItem.setIcon(copySelectedIcon);
+		copySelectedMenuItem.setEnabled(false);
 
 		copySelectedWithHeaderMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND.getName(), listener,
 				MainActionCommands.COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND.getName());
 		copySelectedWithHeaderMenuItem.setIcon(copySelectedWithHeaderIcon);
+		copySelectedWithHeaderMenuItem.setEnabled(false);
 		
 		addSeparator();
 		
