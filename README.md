@@ -9,8 +9,8 @@ Large-scale mass-spectrometry based metabolomics experiments became a common pla
 
 ###	Documentation
 
-- [Database installation and configuration manual](https://drive.google.com/file/d/1HauD5QU5auukfpbdkedcc5uDHpupyiMQ/view?usp=sharing)
-- [MetIDTracker user manual, preliminary draft](https://drive.google.com/file/d/1kJqHpMGVKiTGqMifyjwKie-7ExMFzRD6/view?usp=sharing)
+- [Database installation and configuration manual](https://drive.google.com/file/d/1Nqt6OUTFlo60Xu26Mw2nERc_8DFgmm0s/view?usp=sharing)
+- [MetIDTracker user manual, preliminary draft](https://drive.google.com/file/d/1xwdk9Cr4FPrGiCDWwtGu1boXAJ3q66hp/view?usp=sharing)
 
 ###	MSMS libraries
 Several open access MSMS libraries from [MS-DIAL](http://prime.psc.riken.jp/compms/msdial/main.html) were reformatted to include internal MetIDTracker spectrum identifiers and converted to NIST format. They may be used to search experimental data from MetIDTracker. 
