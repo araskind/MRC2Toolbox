@@ -75,6 +75,36 @@ public class NISTPepSearchUtils {
 	}
 	
 	public static Collection<PepSearchOutputObject> parsePepSearchOutputToObjects(
+			File searchResults,
+			NISTPepSearchParameterObject pepSearchParameterObject){
+			
+		String[][] searchData = null;
+		try {
+			searchData =
+				DelimitedTextParser.parseTextFileWithEncodingSkippingComments(
+						searchResults, MRC2ToolBoxConfiguration.getTabDelimiter(), ">");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		if(searchData == null)
+			return null;
+		
+		if(pepSearchParameterObject == null) {
+			
+			String commandLine = "";
+			try (Stream<String> lines = Files.lines(Paths.get(searchResults.getAbsolutePath()))) {
+				commandLine = lines.skip(1).findFirst().get();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			pepSearchParameterObject = parsePepSearchCommandLine(commandLine);
+		}	
+		Collection<PepSearchOutputObject>pooList = 
+				parsePepSearchOutputToObjects(searchData, pepSearchParameterObject);
+		return pooList;
+	}
+	
+	public static Collection<PepSearchOutputObject> parsePepSearchOutputToObjects(
 			String[][] searchData,
 			NISTPepSearchParameterObject pepSearchParameterObject){
 		

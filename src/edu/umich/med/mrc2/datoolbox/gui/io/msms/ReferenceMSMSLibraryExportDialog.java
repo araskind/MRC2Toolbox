@@ -41,6 +41,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -105,12 +106,14 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 	public static final String POLARITY = "POLARITY";
 	public static final String ENTRIES_PER_FILE = "ENTRIES_PER_FILE";
 	public static final String MAX_TIME_PER_COMPOUND = "MAX_TIME_PER_COMPOUND";
+	public static final String HIGH_RES_ONLY = "HIGH_RES_ONLY";
 	public static final long MAX_TIME_PER_COMPOUND_DEFAULT = 10L;
 	
 	private JTextField oldLogFileTextField;
 	private JTextField lastProcessedIdTextField;
 	private JTextField mspTextField;
 	private JFormattedTextField maxTimeTextField;
+	private JCheckBox highResOnlyCheckBox;
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ReferenceMSMSLibraryExportDialog(TaskListener taskListener) {
@@ -129,9 +132,9 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		getContentPane().add(panel_1, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel_1.columnWeights = new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
 		libraryListingTable = new MSMSLibraryListingTable();
@@ -163,7 +166,8 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 						new MsLibraryFormat[] {
 								MsLibraryFormat.MSP, 
 								MsLibraryFormat.SIRIUS_MS, 
-								MsLibraryFormat.MGF}));
+								MsLibraryFormat.MGF,
+								MsLibraryFormat.XY_META_MGF}));
 		GridBagConstraints gbc_outputFormatComboBox = new GridBagConstraints();
 		gbc_outputFormatComboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_outputFormatComboBox.fill = GridBagConstraints.HORIZONTAL;
@@ -192,10 +196,9 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		
 		JLabel lblNewLabel_2 = new JLabel("Entries per file (0 => all in one file)");
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_lblNewLabel_2.gridwidth = 2;
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_2.gridx = 4;
+		gbc_lblNewLabel_2.gridx = 5;
 		gbc_lblNewLabel_2.gridy = 1;
 		panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
@@ -207,6 +210,15 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		gbc_entriesPerFileTextField.gridy = 1;
 		panel_1.add(entriesPerFileTextField, gbc_entriesPerFileTextField);
 		
+		highResOnlyCheckBox = new JCheckBox("High resolution entries only");
+		GridBagConstraints gbc_highResOnlyCheckBox = new GridBagConstraints();
+		gbc_highResOnlyCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_highResOnlyCheckBox.gridwidth = 3;
+		gbc_highResOnlyCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_highResOnlyCheckBox.gridx = 0;
+		gbc_highResOnlyCheckBox.gridy = 2;
+		panel_1.add(highResOnlyCheckBox, gbc_highResOnlyCheckBox);
+		
 		outputFolderTextField = new JTextField();
 		outputFolderTextField.setEditable(false);
 		GridBagConstraints gbc_outputFolderTextField = new GridBagConstraints();
@@ -214,7 +226,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		gbc_outputFolderTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_outputFolderTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_outputFolderTextField.gridx = 0;
-		gbc_outputFolderTextField.gridy = 2;
+		gbc_outputFolderTextField.gridy = 3;
 		panel_1.add(outputFolderTextField, gbc_outputFolderTextField);
 		outputFolderTextField.setColumns(10);
 		
@@ -225,7 +237,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		gbc_outputDirBrowseButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_outputDirBrowseButton.insets = new Insets(0, 0, 5, 0);
 		gbc_outputDirBrowseButton.gridx = 6;
-		gbc_outputDirBrowseButton.gridy = 2;
+		gbc_outputDirBrowseButton.gridy = 3;
 		panel_1.add(outputDirBrowseButton, gbc_outputDirBrowseButton);
 		
 		oldLogFileTextField = new JTextField();
@@ -235,7 +247,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		gbc_oldLogFileTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_oldLogFileTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_oldLogFileTextField.gridx = 0;
-		gbc_oldLogFileTextField.gridy = 3;
+		gbc_oldLogFileTextField.gridy = 4;
 		panel_1.add(oldLogFileTextField, gbc_oldLogFileTextField);
 		oldLogFileTextField.setColumns(10);
 		
@@ -246,7 +258,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		gbc_oldLogBrowseButton.insets = new Insets(0, 0, 5, 0);
 		gbc_oldLogBrowseButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_oldLogBrowseButton.gridx = 6;
-		gbc_oldLogBrowseButton.gridy = 3;
+		gbc_oldLogBrowseButton.gridy = 4;
 		panel_1.add(oldLogBrowseButton, gbc_oldLogBrowseButton);
 		
 		mspTextField = new JTextField();
@@ -256,7 +268,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		gbc_mspTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_mspTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_mspTextField.gridx = 0;
-		gbc_mspTextField.gridy = 4;
+		gbc_mspTextField.gridy = 5;
 		panel_1.add(mspTextField, gbc_mspTextField);
 		mspTextField.setColumns(10);
 		
@@ -267,7 +279,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		gbc_selectMspButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_selectMspButton.insets = new Insets(0, 0, 5, 0);
 		gbc_selectMspButton.gridx = 6;
-		gbc_selectMspButton.gridy = 4;
+		gbc_selectMspButton.gridy = 5;
 		panel_1.add(selectMspButton, gbc_selectMspButton);
 		
 		JLabel lblNewLabel_3 = new JLabel("Last processed ID");
@@ -275,7 +287,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_3.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNewLabel_3.gridx = 0;
-		gbc_lblNewLabel_3.gridy = 5;
+		gbc_lblNewLabel_3.gridy = 6;
 		panel_1.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		lastProcessedIdTextField = new JTextField();
@@ -283,7 +295,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		gbc_lastProcessedIdTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_lastProcessedIdTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lastProcessedIdTextField.gridx = 1;
-		gbc_lastProcessedIdTextField.gridy = 5;
+		gbc_lastProcessedIdTextField.gridy = 6;
 		panel_1.add(lastProcessedIdTextField, gbc_lastProcessedIdTextField);
 		lastProcessedIdTextField.setColumns(10);
 		
@@ -291,16 +303,16 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
 		gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_4.insets = new Insets(0, 0, 0, 5);
-		gbc_lblNewLabel_4.gridx = 3;
-		gbc_lblNewLabel_4.gridy = 5;
+		gbc_lblNewLabel_4.gridx = 2;
+		gbc_lblNewLabel_4.gridy = 6;
 		panel_1.add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
 		maxTimeTextField = new JFormattedTextField(new DecimalFormat("###"));
 		GridBagConstraints gbc_maxTimeTextField = new GridBagConstraints();
 		gbc_maxTimeTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_maxTimeTextField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_maxTimeTextField.gridx = 4;
-		gbc_maxTimeTextField.gridy = 5;
+		gbc_maxTimeTextField.gridx = 3;
+		gbc_maxTimeTextField.gridy = 6;
 		panel_1.add(maxTimeTextField, gbc_maxTimeTextField);
 		
 		JPanel panel = new JPanel();
@@ -460,8 +472,12 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		
 		ReferenceMSMSLibraryExportTask task = 
 				new ReferenceMSMSLibraryExportTask(
-						library, exportFormat, polarity, 
-						outputDirectory, getEntriesPerFile());
+						library, 
+						exportFormat, 
+						polarity, 
+						outputDirectory, 
+						getEntriesPerFile(),
+						highResOnlyCheckBox.isSelected());
 		task.addTaskListener(taskListener);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 		
@@ -537,11 +553,10 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		outputFormatComboBox.setSelectedItem(depth);
 		
 		Polarity pol = Polarity.getPolarityByCode(preferences.get(POLARITY, Polarity.Positive.getCode()));
-		polarityComboBox.setSelectedItem(pol);	
-		
-		entriesPerFileTextField.setText(Integer.toString(preferences.getInt(ENTRIES_PER_FILE, 0)));
-			
-		maxTimeTextField.setText(Long.toString(preferences.getLong(MAX_TIME_PER_COMPOUND, MAX_TIME_PER_COMPOUND_DEFAULT)));
+		polarityComboBox.setSelectedItem(pol);			
+		entriesPerFileTextField.setText(Integer.toString(preferences.getInt(ENTRIES_PER_FILE, 0)));		
+		maxTimeTextField.setText(Long.toString(preferences.getLong(MAX_TIME_PER_COMPOUND, MAX_TIME_PER_COMPOUND_DEFAULT)));		
+		highResOnlyCheckBox.setSelected(preferences.getBoolean(HIGH_RES_ONLY, true));
 	}
 
 	@Override
@@ -554,11 +569,10 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		preferences.put(OUTPUT_FORMAT, format.name());
 		
 		Polarity pol = (Polarity) polarityComboBox.getSelectedItem();
-		preferences.put(POLARITY, pol.getCode());
-		
-		preferences.putInt(ENTRIES_PER_FILE, getEntriesPerFile());
-		
+		preferences.put(POLARITY, pol.getCode());		
+		preferences.putInt(ENTRIES_PER_FILE, getEntriesPerFile());		
 		preferences.putLong(MAX_TIME_PER_COMPOUND, Long.parseLong(maxTimeTextField.getText().trim()));
+		preferences.putBoolean(HIGH_RES_ONLY, highResOnlyCheckBox.isSelected());
 	}
 
 }

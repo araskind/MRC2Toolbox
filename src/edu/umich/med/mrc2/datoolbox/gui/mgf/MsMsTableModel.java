@@ -58,7 +58,7 @@ public class MsMsTableModel extends BasicTableModel {
 		//	double accuracyPpm = CaConfiguration.getMassAccuracy();
 		double accuracyPpm = 100.0d;
 
-		Range parentRange = MsUtils.createMassRange(featureCluster.getParentMass(), accuracyPpm);
+		Range parentRange = MsUtils.createPpmMassRange(featureCluster.getParentMass(), accuracyPpm);
 
 		for (MsPoint dp : featureCluster.getAverageMsMs()) {
 

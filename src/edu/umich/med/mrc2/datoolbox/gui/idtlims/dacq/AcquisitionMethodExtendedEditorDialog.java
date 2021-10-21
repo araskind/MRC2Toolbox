@@ -67,7 +67,6 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 	private static final Icon editMethodIcon = GuiUtils.getIcon("editDataAcquisitionMethod", 32);
 	private static final Icon addMethodIcon = GuiUtils.getIcon("addDataAcquisitionMethod", 32);
 
-
 	private DataAcquisitionMethod method;
 	private JButton btnSave;
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "AcquisitionMethodExtendedEditorDialog.layout");

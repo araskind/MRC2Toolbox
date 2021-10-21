@@ -308,6 +308,19 @@ public class MsFeatureCluster implements Serializable {
 				findFirst().isPresent();
 	}
 	
+	public boolean nameMatches(
+			MsFeature cf, 
+			DataPipeline pipeline) {
+		
+		if(clusterFeatures.get(pipeline) == null)
+			return false;
+
+		String newName = cf.getName();
+		return clusterFeatures.get(pipeline).stream().
+				filter(f -> f.getName().equals(newName)).
+				findFirst().isPresent();
+	}
+	
 	public boolean matches(
 			MsFeature cf, 
 			double massAccuracy, 

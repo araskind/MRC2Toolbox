@@ -25,6 +25,7 @@ import java.awt.BorderLayout;
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -34,8 +35,10 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+import java.util.prefs.Preferences;
 
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
@@ -81,6 +84,7 @@ import edu.umich.med.mrc2.datoolbox.gui.labnote.LabNoteBookPanel;
 import edu.umich.med.mrc2.datoolbox.gui.lims.METLIMSPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.MoTrPACDataTrackingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mstools.MSToolsFrame;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.PreferencesDialog;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLlayoutManager;
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.ProjectSetupDraw;
@@ -113,12 +117,17 @@ import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
  */
 public class MainWindow extends JFrame
 		implements ProjectView, ActionListener, WindowListener,
-		ItemListener, TaskListener, TaskControlListener, PersistentLayout {
+		ItemListener, TaskListener, TaskControlListener, PersistentLayout, BackedByPreferences {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -1562468261440779387L;
+	private Preferences preferences;
+	public static final String WINDOW_WIDTH = "WINDOW_WIDTH";
+	public static final String WINDOW_HEIGTH = "WINDOW_HEIGTH";
+	public static final String WINDOW_X = "WINDOW_X";
+	public static final String WINDOW_Y = "WINDOW_Y";
 
 //	public static final String PROG_NAME = "MRC2 Data Analysis Toolbox";
 
@@ -470,10 +479,7 @@ public class MainWindow extends JFrame
 				runSaveProjectTask();
 				return;
 			}
-			MRC2ToolBoxCore.setCurrentProject(null);
-			switchDataPipeline(null,  null);
-			setTitle(BuildInformation.getProgramName());
-			System.gc();
+			clearGuiAfterProjectClosed();
 		}
 	}
 	
@@ -607,16 +613,12 @@ public class MainWindow extends JFrame
 	private void initProjectLoadTask() {
 
 		File savedProjectFile = selectProjectFile();
+		if (savedProjectFile != null && savedProjectFile.exists()) {
 
-		if (savedProjectFile != null) {
-
-			if (savedProjectFile.exists()) {
-
-				LoadProjectTask ltp = new LoadProjectTask(savedProjectFile);
-				ltp.addTaskListener(this);
-				MRC2ToolBoxCore.getTaskController().addTask(ltp);
-			}
-		}
+			LoadProjectTask ltp = new LoadProjectTask(savedProjectFile);
+			ltp.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(ltp);
+		}		
 	}
 
 	private synchronized void initWindow() {
@@ -753,7 +755,7 @@ public class MainWindow extends JFrame
 
 			int selectedValue = JOptionPane.showInternalConfirmDialog(this.getContentPane(),
 					"You are going to close current project, do you want to save the results (Yes - save, No - discard)?",
-					"Run analysis", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+					"Save active project", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 
 			if (selectedValue == JOptionPane.YES_OPTION) {
 
@@ -943,8 +945,10 @@ public class MainWindow extends JFrame
 	}
 
 	public void createNewProjectFromLimsExperiment(
-			File projectFile, String projectDescription,
-			ProjectType projectType, LIMSExperiment activeExperiment) {
+			File projectFile, 
+			String projectDescription,
+			ProjectType projectType, 
+			LIMSExperiment activeExperiment) {
 
 		String name = "";
 		if(projectFile != null)
@@ -975,9 +979,13 @@ public class MainWindow extends JFrame
 		setGuiFromActiveProject();
 
 		//	Add design listeners
-//		currentProject.getExperimentDesign().addListener(projectDashBooard);
-//		for (Entry<PanelList, CAPanel> entry : panels.entrySet())
-//			currentProject.getExperimentDesign().addListener(entry.getValue());
+		currentProject.getExperimentDesign().addListener(projectDashBooard);
+		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
+			currentProject.getExperimentDesign().addListener(entry.getValue());
+		
+		SaveProjectTask spt = new SaveProjectTask(currentProject);
+		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
+		MRC2ToolBoxCore.getTaskController().addTask(spt);
 	}
 
 	public void createNewProjectFromIDTrackerExperiment(
@@ -1018,6 +1026,10 @@ public class MainWindow extends JFrame
 		currentProject.getExperimentDesign().addListener(projectDashBooard);
 		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
 			currentProject.getExperimentDesign().addListener(entry.getValue());
+		
+		SaveProjectTask spt = new SaveProjectTask(currentProject);
+		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
+		MRC2ToolBoxCore.getTaskController().addTask(spt);
 	}
 
 	public void createNewProject(
@@ -1056,6 +1068,10 @@ public class MainWindow extends JFrame
 		currentProject.getExperimentDesign().addListener(projectDashBooard);
 		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
 			currentProject.getExperimentDesign().addListener(entry.getValue());
+		
+		SaveProjectTask spt = new SaveProjectTask(currentProject);
+		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
+		MRC2ToolBoxCore.getTaskController().addTask(spt);
 	}
 
 	public void showPanel(PanelList panelType) {
@@ -1093,7 +1109,7 @@ public class MainWindow extends JFrame
 		}
 	}
 
-	private void shutDown() {
+	public void shutDown() {
 
 		RawDataManager.releaseAllDataSources();
 		try {
@@ -1102,6 +1118,7 @@ public class MainWindow extends JFrame
 			e.printStackTrace();
 		}
 		saveApplicationLayout();
+		savePreferences();
 		this.dispose();
 		System.gc();
 		System.exit(0);
@@ -1137,9 +1154,7 @@ public class MainWindow extends JFrame
 		if(showNewProjectDialog) {
 
 			showNewProjectDialog = false;
-			MRC2ToolBoxCore.setCurrentProject(null);
-			switchDataPipeline(null,  null);
-			System.gc();
+			clearGuiAfterProjectClosed();
 
 			if(newProjectFrame == null)
 				newProjectFrame = new NewProjectDialog(this);
@@ -1150,9 +1165,7 @@ public class MainWindow extends JFrame
 		if(saveOnCloseRequested) {
 
 			saveOnCloseRequested = false;
-			MRC2ToolBoxCore.setCurrentProject(null);
-			switchDataPipeline(null,  null);
-			System.gc();
+			clearGuiAfterProjectClosed();
 		}
 		if(saveOnExitRequested) {
 
@@ -1166,8 +1179,7 @@ public class MainWindow extends JFrame
 		}
 		if(showOpenProjectDialog) {
 
-			MRC2ToolBoxCore.setCurrentProject(null);
-			switchDataPipeline(null,  null);
+			clearGuiAfterProjectClosed();
 			showOpenProjectDialog = false;
 			initProjectLoadTask();
 		}
@@ -1177,9 +1189,19 @@ public class MainWindow extends JFrame
 			File projectCopy = selectProjectCopyDirectory();
 
 			if(projectCopy != null) {
-
+				
+				//	TODO update project name and project file name
 				try {
 					FileUtils.copyDirectory(currentProject.getProjectDirectory(), projectCopy);
+					currentProject.getProjectFile();				
+					File oldProjectFile = 
+							Paths.get(projectCopy.getAbsolutePath(), currentProject.getProjectFile().getName()).toFile();				
+					File newProjectFile = 
+							Paths.get(projectCopy.getAbsolutePath(), projectCopy.getName() + "."
+							+ MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION).toFile();
+					
+					oldProjectFile.renameTo(newProjectFile);
+					
 					MessageDialog.showInfoMsg("Project " + currentProject.getName() + 
 							" copied to\n" + projectCopy.getAbsolutePath());
 				} catch (IOException e1) {
@@ -1188,6 +1210,14 @@ public class MainWindow extends JFrame
 				}
 			}
 		}
+	}
+	
+	private void clearGuiAfterProjectClosed() {
+		
+		MRC2ToolBoxCore.setCurrentProject(null);
+		switchDataPipeline(null,  null);
+		setTitle(BuildInformation.getProgramName());
+		System.gc();
 	}
 
 	@Override
@@ -1421,6 +1451,34 @@ public class MainWindow extends JFrame
 		return projectDashBooard;
 	}
 
+	@Override
+	public void loadPreferences(Preferences prefs) {
+		preferences = prefs;
+
+		int width = preferences.getInt(WINDOW_WIDTH, 1000);
+		int heigh = preferences.getInt(WINDOW_HEIGTH, 800);
+		setSize(new Dimension(width, heigh));
+		setPreferredSize(new Dimension(width, heigh));		
+		int x = preferences.getInt(WINDOW_X, 100);
+		int y = preferences.getInt(WINDOW_Y, 100);		
+		setLocation(x,y);
+	}
+
+	@Override
+	public void loadPreferences() {
+		loadPreferences(Preferences.userRoot().node(MainWindow.class.getName()));
+	}
+
+	@Override
+	public void savePreferences() {
+		
+		preferences = Preferences.userRoot().node(MainWindow.class.getName());
+		preferences.putInt(WINDOW_WIDTH, getWidth());
+		preferences.putInt(WINDOW_HEIGTH, getHeight());	
+		Point location = getLocation();
+		preferences.putInt(WINDOW_X, location.x);
+		preferences.putInt(WINDOW_Y, location.y);
+	}
 }
 
 

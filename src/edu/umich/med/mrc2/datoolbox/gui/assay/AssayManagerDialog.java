@@ -74,14 +74,13 @@ public class AssayManagerDialog extends JDialog implements ActionListener {
 		toolbar  = new AssayManagerToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
-		JScrollPane scrollPane = new JScrollPane();
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
 		assayMethodsTable = new AssayTable();
 		LIMSDataCash.refreshAssayList();		
 		assayMethodsTable.setTableModelFromAssayCollection(
 					LIMSDataCash.getAssays());
+		JScrollPane scrollPane = new JScrollPane(assayMethodsTable);
+		getContentPane().add(scrollPane, BorderLayout.CENTER);
 
-		scrollPane.setViewportView(assayMethodsTable);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
@@ -117,9 +116,7 @@ public class AssayManagerDialog extends JDialog implements ActionListener {
 	private void updateAssayMethod() {
 
 		Assay method = assayEditorDialog.getActiveMethod();
-
 		String name = assayEditorDialog.getMethodName();
-
 		if(name.isEmpty()) {
 			MessageDialog.showErrorMsg("Assay name can not be empty!", this);
 			return;
@@ -159,22 +156,21 @@ public class AssayManagerDialog extends JDialog implements ActionListener {
 	}
 
 	private void showEditAssayMethodDialog() {
+		
+		Assay method = assayMethodsTable.getSelectedAssay();
+		if(method == null)
+			return;
 
-		if(assayMethodsTable.getSelectedRow() > -1) {
-
-			Assay method = (Assay) assayMethodsTable.getValueAt(assayMethodsTable.getSelectedRow(),
-					assayMethodsTable.getColumnIndex(AssayTableModel.ASSAY_COLUMN));
-
-			assayEditorDialog = new AssayEditorDialog(this);
-			assayEditorDialog.loadMethodData(method, false);
-			assayEditorDialog.setLocationRelativeTo(this);
-			assayEditorDialog.setVisible(true);
-		}
+		assayEditorDialog = new AssayEditorDialog(this);
+		assayEditorDialog.loadMethodData(method, false);
+		assayEditorDialog.setLocationRelativeTo(this);
+		assayEditorDialog.setVisible(true);
 	}
 
 	private void showAddAssayMethodDialog() {
 
-		String methodId = DataPrefix.ASSAY_METHOD.getName() + UUID.randomUUID().toString().substring(0, 10);
+		String methodId = DataPrefix.ASSAY_METHOD.getName() + 
+				UUID.randomUUID().toString().substring(0, 10);
 		Assay method = new Assay(methodId, "New method");
 		assayEditorDialog = new AssayEditorDialog(this);
 		assayEditorDialog.loadMethodData(method, true);
@@ -184,28 +180,26 @@ public class AssayManagerDialog extends JDialog implements ActionListener {
 
 	private void deleteSelectedMethod() {
 
-		if(assayMethodsTable.getSelectedRow() > -1) {
+		Assay method = assayMethodsTable.getSelectedAssay();
+		if(method == null)
+			return;
 
-			int approve = MessageDialog.showChoiceWithWarningMsg(
-					"Delete selected assay from database?\n"
-					+ "(NO UNDO!)", this);
+		int approve = MessageDialog.showChoiceWithWarningMsg(
+				"Delete selected assay from database?\n"
+				+ "(NO UNDO!)", this);
 
-			if (approve == JOptionPane.YES_OPTION) {
+		if (approve == JOptionPane.YES_OPTION) {
 
-				Assay method = (Assay) assayMethodsTable.getValueAt(assayMethodsTable.getSelectedRow(),
-						assayMethodsTable.getColumnIndex(AssayTableModel.ASSAY_COLUMN));
-
-				try {
-					AssayDatabaseUtils.deleteAssay(method);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				LIMSDataCash.refreshAssayList();		
-				assayMethodsTable.setTableModelFromAssayCollection(
-							LIMSDataCash.getAssays());
+			try {
+				AssayDatabaseUtils.deleteAssay(method);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		}
+			LIMSDataCash.refreshAssayList();		
+			assayMethodsTable.setTableModelFromAssayCollection(
+						LIMSDataCash.getAssays());
+		}	
 	}
 }
 

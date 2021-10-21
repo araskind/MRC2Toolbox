@@ -53,8 +53,10 @@ import umich.ms.fileio.filetypes.xmlbased.AbstractXMLBasedDataSource;
 
 public class RawDataManager {
 
-	private static Map<DataFile, LCMSData> rawDataMap = new HashMap<DataFile, LCMSData>();
-	private static Map<String,Collection<Path>>fileLocationMap = new TreeMap<String,Collection<Path>>();
+	private static Map<DataFile, LCMSData> rawDataMap 
+		= new HashMap<DataFile, LCMSData>();
+	private static Map<String,Collection<Path>>fileLocationMap 
+		= new TreeMap<String,Collection<Path>>();
 
 	public static Map<String, Collection<Path>> getFileLocationMap() {
 		return fileLocationMap;

@@ -53,7 +53,7 @@ public class DataPipelineDefinitionDialog extends JDialog {
 	private JButton btnSave;
 	private DataPipelineDefinitionPanel dataPipelineDefinitionPanel;
 
-	public DataPipelineDefinitionDialog(ActionListener listener) {
+	public DataPipelineDefinitionDialog(ActionListener listener, DataPipeline dpl) {
 		super();
 		setTitle("Data pipeline definition");
 		setIconImage(((ImageIcon) dataAnalysisPipelineIcon).getImage());
@@ -64,6 +64,9 @@ public class DataPipelineDefinitionDialog extends JDialog {
 		getContentPane().setLayout(new BorderLayout(0,0));
 		
 		dataPipelineDefinitionPanel = new DataPipelineDefinitionPanel();
+		if(dpl != null)
+			dataPipelineDefinitionPanel.setDataPipeline(dpl);
+		
 		getContentPane().add(dataPipelineDefinitionPanel, BorderLayout.CENTER);
 
 		JPanel buttonPanel = new JPanel();
@@ -79,8 +82,8 @@ public class DataPipelineDefinitionDialog extends JDialog {
 		JButton btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
 		btnCancel.addActionListener(al);
-		btnSave = new JButton(MainActionCommands.DEFINE_DATA_PIPELINE_COMMAND.getName());
-		btnSave.setActionCommand(MainActionCommands.DEFINE_DATA_PIPELINE_COMMAND.getName());
+		btnSave = new JButton(MainActionCommands.SAVE_DATA_PIPELINE_COMMAND.getName());
+		btnSave.setActionCommand(MainActionCommands.SAVE_DATA_PIPELINE_COMMAND.getName());
 		btnSave.addActionListener(listener);
 		buttonPanel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);

@@ -63,8 +63,7 @@ public class RawDataFileOpenTask extends AbstractTask implements TaskListener{
 		try {
 			for(File rawFile : filesToOpen) {
 
-				DataFile newDataFile = new DataFile(rawFile.getName());
-				newDataFile.setFullPath(rawFile.getAbsolutePath());
+				DataFile newDataFile = new DataFile(rawFile);
 				LCMSData rawData = RawDataManager.getRawData(newDataFile);
 				if(rawData != null) {
 					newRawFiles.add(newDataFile);

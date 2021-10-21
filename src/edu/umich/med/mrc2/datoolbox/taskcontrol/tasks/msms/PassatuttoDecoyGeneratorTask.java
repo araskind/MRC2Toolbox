@@ -196,7 +196,7 @@ public class PassatuttoDecoyGeneratorTask extends AbstractTask {
 			
 			 //timeout - kill the process. 
 			if(!p.waitFor(maxTime, TimeUnit.MINUTES))
-			    p.destroyForcibly(); // consider using destroyForcibly instead
+			    p.destroyForcibly();
 			else {				
 				//int exitCode = p.waitFor();
 				if(p.exitValue() == 0) {

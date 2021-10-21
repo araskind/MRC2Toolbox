@@ -49,22 +49,27 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import org.openscience.cdk.silent.AtomContainer;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
+import org.openscience.cdk.tools.CDKHydrogenAdder;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTReferenceLibraries;
 import edu.umich.med.mrc2.datoolbox.utils.MsImportUtils;
+import net.sf.jniinchi.INCHI_RET;
 
 public class NISTDataUploader {
 	
@@ -272,7 +277,7 @@ public class NISTDataUploader {
 		System.out.println("MSMS upload completed");
 	}
 	
-	private Map<List<String>,IAtomContainer> createMsmsMolMap(File mspFile, File sdfFile) throws Exception {
+	public static Map<List<String>,IAtomContainer> createMsmsMolMap(File mspFile, File sdfFile) throws Exception {
 		
 		List<List<String>> mspChunks = NISTMSPParser.parseInputMspFile(mspFile);
 		List<IAtomContainer>molChunks = new ArrayList<IAtomContainer>();
@@ -306,16 +311,143 @@ public class NISTDataUploader {
 	        sdfWriter.close();
 	        molecule.setProperty(CompoundIdentityField.MOL_TEXT.name(), writer.toString());
 			molChunks.add(molecule);
-		}		
+		}			
 		Map<List<String>,IAtomContainer>msmsMolMap = new HashMap<List<String>,IAtomContainer>();	
 		if(mspChunks.size() != molChunks.size()) {			
 			System.out.println(FilenameUtils.getBaseName(mspFile.getName()));
 			System.out.println("# of MSMS = " + Integer.toString(mspChunks.size()) + " | " + "# of MOL = " + Integer.toString(molChunks.size()));			
 		}
 		for(int i=0; i<mspChunks.size(); i++)
-			msmsMolMap.put(mspChunks.get(i), molChunks.get(i));
+				msmsMolMap.put(mspChunks.get(i), molChunks.get(i));
 				
 		return msmsMolMap;
+	}
+	
+	public static Map<String,IAtomContainer> createInChiKeyMolMap(
+			File mspFile, 
+			File sdfFile, 
+			List<String>mismatchLog,
+			List<String>molErrorLog ) throws Exception {
+		
+		List<List<String>> mspChunks = NISTMSPParser.parseInputMspFile(mspFile);
+		List<IAtomContainer>molChunks = new ArrayList<IAtomContainer>();
+		IteratingSDFReader reader = 
+				new IteratingSDFReader(new FileInputStream(sdfFile), DefaultChemObjectBuilder.getInstance());
+	
+		while (reader.hasNext()) {
+
+			IAtomContainer molecule = null;
+			try {
+				molecule = (IAtomContainer)reader.next();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(molecule != null){
+				
+				String smiles = null;
+				try {
+					smiles = smilesGenerator.create(molecule);
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(smiles != null)
+					molecule.setProperty(CompoundIdentityField.SMILES.name(), smiles);
+				
+				inChIGenerator = igfactory.getInChIGenerator(molecule);
+				INCHI_RET ret = inChIGenerator.getReturnStatus();
+				if (ret == INCHI_RET.OKAY || ret == INCHI_RET.WARNING)
+					molecule.setProperty(CompoundIdentityField.INCHIKEY.name(), inChIGenerator.getInchiKey());
+				else
+					molErrorLog.add("Unable to generate InChi for " + molecule.getProperty(CDKConstants.TITLE));
+				
+				StringWriter writer = new StringWriter();
+				SDFWriter sdfWriter = new SDFWriter(writer);
+		        sdfWriter.write(molecule);
+		        sdfWriter.close();
+		        molecule.setProperty(CompoundIdentityField.MOL_TEXT.name(), writer.toString());
+				molChunks.add(molecule);
+			}
+			else {
+				molChunks.add(null);
+			}
+		}		
+		Map<String,IAtomContainer>inchiKeyMolMap = new HashMap<String,IAtomContainer>();	
+		for(int i=0; i<mspChunks.size(); i++) {
+			
+			NISTTandemMassSpectrum msms = NISTMSPParser.parseNistMspDataSource(mspChunks.get(i));
+			IAtomContainer molecule = molChunks.get(i);
+			molecule.setProperty(NISTmspField.NAME.getName(), msms.getProperties().get(NISTmspField.NAME));			
+			if(molChunks.get(i) != null) {
+				
+				String mspInChiKey = msms.getProperties().get(NISTmspField.INCHI_KEY);
+				String molInChiKey = molecule.getProperty(CompoundIdentityField.INCHIKEY.name());
+				if(molInChiKey != null && molInChiKey.equals(mspInChiKey))				
+					inchiKeyMolMap.put(mspInChiKey, molecule);
+				else {
+					mismatchLog.add("InChiKey mismatch for NIST# " +
+							msms.getNistNum() + " MSP: " + mspInChiKey + " | MOL: " + molInChiKey);
+				}
+			}
+		}		
+		return inchiKeyMolMap;
+	}
+	
+	public static Map<String,IAtomContainer> createInChiKeyMolMapFromSdfOnly( 
+			File sdfFile, 
+			List<String>molErrorLog ) throws Exception {
+		
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Map<String,IAtomContainer>inchiKeyMolMap = new HashMap<String,IAtomContainer>();
+		IChemObjectBuilder builder = DefaultChemObjectBuilder.getInstance();
+		IteratingSDFReader reader = 
+				new IteratingSDFReader(new FileInputStream(sdfFile), builder);
+	
+		while (reader.hasNext()) {
+
+			IAtomContainer molecule = null;
+			try {
+				molecule = (IAtomContainer)reader.next();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(molecule != null){
+				
+		        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
+		        CDKHydrogenAdder.getInstance(builder).addImplicitHydrogens(molecule);				
+				String smiles = null;
+				try {
+					smiles = smilesGenerator.create(molecule);
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(smiles != null)
+					molecule.setProperty(CompoundIdentityField.SMILES.name(), smiles);
+				
+				inChIGenerator = igfactory.getInChIGenerator(molecule);
+				INCHI_RET ret = inChIGenerator.getReturnStatus();
+				if (ret == INCHI_RET.OKAY || ret == INCHI_RET.WARNING) {
+					molecule.setProperty(CompoundIdentityField.INCHIKEY.name(), inChIGenerator.getInchiKey());
+					StringWriter writer = new StringWriter();
+					SDFWriter sdfWriter = new SDFWriter(writer);
+			        sdfWriter.write(molecule);
+			        sdfWriter.close();
+			        molecule.setProperty(CompoundIdentityField.MOL_TEXT.name(), writer.toString());
+			        inchiKeyMolMap.put(inChIGenerator.getInchiKey(), molecule);
+				}
+				else
+					molErrorLog.add("Unable to generate InChi for " + molecule.getProperty(CDKConstants.TITLE));
+			}
+		}		
+		return inchiKeyMolMap;
 	}
 
 	public void enumerateNistDataFields() {
@@ -351,6 +483,10 @@ public class NISTDataUploader {
 			e.printStackTrace();
 		}
 		System.out.println(StringUtils.join(fields, "\n"));
+	}
+
+	public Map<File, File> getMsp2sdfMap() {
+		return msp2sdfMap;
 	}
 	
 }

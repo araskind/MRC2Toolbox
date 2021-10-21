@@ -31,7 +31,6 @@ import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.DefaultComboBoxModel;
@@ -51,14 +50,13 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.gui.assay.AssaySelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 
 public class DataPipelineDefinitionPanel extends JPanel 
 		implements ActionListener, ItemListener {
@@ -75,8 +73,8 @@ public class DataPipelineDefinitionPanel extends JPanel
 	private JTextField acqMethodTextField;
 	private JTextField daMethodTextField;
 	private JTextField nameTextField;
-	private JComboBox assayComboBox;
 	private JTextArea descriptionTextArea;
+	private Assay assay;
 	private DataAcquisitionMethod acquisitionMethod;
 	private DataExtractionMethod dataExtractionMethod;	
 	private AcquisitionMethodSelectorDialog acquisitionMethodSelectorDialog;
@@ -85,6 +83,9 @@ public class DataPipelineDefinitionPanel extends JPanel
 	private JButton showDataAcqSelectorButton;
 	private JButton showDataExtrSelectorButton;
 	private Set<DataPipelineEventListener> eventListeners;
+	private JTextField assayTextField;
+	private JButton selectAssayButton;
+	private AssaySelectorDialog assaySelectorDialog;
 
 	@SuppressWarnings("rawtypes")
 	public DataPipelineDefinitionPanel() {
@@ -93,7 +94,7 @@ public class DataPipelineDefinitionPanel extends JPanel
 		GridBagLayout gbl_this = new GridBagLayout();
 		gbl_this.columnWidths = new int[]{0, 49, 0, 0, 0};
 		gbl_this.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_this.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_this.columnWeights = new double[]{0.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
 		gbl_this.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		this.setLayout(gbl_this);
 		
@@ -119,24 +120,37 @@ public class DataPipelineDefinitionPanel extends JPanel
 		lblNewLabel.setIcon(assayIcon);		
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.anchor = GridBagConstraints.ABOVE_BASELINE_LEADING;
+		gbc_lblNewLabel.anchor = GridBagConstraints.ABOVE_BASELINE_TRAILING;
 		gbc_lblNewLabel.gridx = 0;
 		gbc_lblNewLabel.gridy = 1;
 		this.add(lblNewLabel, gbc_lblNewLabel);
 		
-		assayComboBox = new JComboBox();
-		GridBagConstraints gbc_assayComboBox = new GridBagConstraints();
-		gbc_assayComboBox.gridwidth = 3;
-		gbc_assayComboBox.insets = new Insets(0, 0, 5, 0);
-		gbc_assayComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_assayComboBox.gridx = 1;
-		gbc_assayComboBox.gridy = 1;
-		this.add(assayComboBox, gbc_assayComboBox);
+		assayTextField = new JTextField();
+		assayTextField.setEditable(false);
+		GridBagConstraints gbc_AssayTextField = new GridBagConstraints();
+		gbc_AssayTextField.gridwidth = 2;
+		gbc_AssayTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_AssayTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_AssayTextField.gridx = 1;
+		gbc_AssayTextField.gridy = 1;
+		add(assayTextField, gbc_AssayTextField);
+		assayTextField.setColumns(10);
+		
+		selectAssayButton = new JButton("Select assay ...");
+		selectAssayButton.setActionCommand(
+				MainActionCommands.SHOW_ASSAY_METHOD_MANAGER_COMMAND.getName());
+		selectAssayButton.addActionListener(this);
+		GridBagConstraints gbc_selectAssayButton = new GridBagConstraints();
+		gbc_selectAssayButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_selectAssayButton.insets = new Insets(0, 0, 5, 0);
+		gbc_selectAssayButton.gridx = 3;
+		gbc_selectAssayButton.gridy = 1;
+		add(selectAssayButton, gbc_selectAssayButton);
 		
 		JLabel lblNewLabel_1 = new JLabel("Acquisition");
 		lblNewLabel_1.setIcon(acquisitionMethodIcon);
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_1.fill = GridBagConstraints.VERTICAL;
 		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_1.gridx = 0;
@@ -189,16 +203,15 @@ public class DataPipelineDefinitionPanel extends JPanel
 		showDataExtrSelectorButton.setActionCommand(
 				MainActionCommands.SHOW_DATA_EXTRACTION_SELECTOR_COMMAND.getName());
 		showDataExtrSelectorButton.addActionListener(this);
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
-		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnNewButton.gridx = 3;
-		gbc_btnNewButton.gridy = 3;
-		this.add(showDataExtrSelectorButton, gbc_btnNewButton);
+		GridBagConstraints gbc_DataExtrSelectorButton = new GridBagConstraints();
+		gbc_DataExtrSelectorButton.insets = new Insets(0, 0, 5, 0);
+		gbc_DataExtrSelectorButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_DataExtrSelectorButton.gridy = 3;
+		this.add(showDataExtrSelectorButton, gbc_DataExtrSelectorButton);
 		
 		JLabel lblNewLabel_4 = new JLabel("Description");
 		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
-		gbc_lblNewLabel_4.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_4.gridx = 0;
 		gbc_lblNewLabel_4.gridy = 4;
@@ -228,15 +241,12 @@ public class DataPipelineDefinitionPanel extends JPanel
 		motrpacAssayCodeComboBox = new JComboBox();
 		GridBagConstraints gbc_motrpacAssayCodeComboBox = new GridBagConstraints();
 		gbc_motrpacAssayCodeComboBox.gridwidth = 2;
-		gbc_motrpacAssayCodeComboBox.insets = new Insets(0, 0, 0, 5);
 		gbc_motrpacAssayCodeComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_motrpacAssayCodeComboBox.gridx = 2;
 		gbc_motrpacAssayCodeComboBox.gridy = 6;
 		add(motrpacAssayCodeComboBox, gbc_motrpacAssayCodeComboBox);
 		
 		eventListeners = ConcurrentHashMap.newKeySet();
-		populateAssaySelector();
-		assayComboBox.addItemListener(this);
 		populateMotrpacAssayComboBox();
 		motrpacAssayCodeComboBox.addItemListener(this);
 	}
@@ -258,19 +268,6 @@ public class DataPipelineDefinitionPanel extends JPanel
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void populateAssaySelector() {
-		Collection<Assay> assays = new TreeSet<Assay>();		
-		try {
-			assays = LIMSUtils.getLIMSAssayList();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-		assayComboBox.setModel(new SortedComboBoxModel<Assay>(assays));
-		assayComboBox.setSelectedIndex(-1);
-	}
-	
-	@SuppressWarnings("unchecked")
 	private void populateMotrpacAssayComboBox() {
 		
 		Collection<MoTrPACAssay> mpAssays = MoTrPACDatabaseCash.getMotrpacAssayList();
@@ -284,35 +281,74 @@ public class DataPipelineDefinitionPanel extends JPanel
 	public void actionPerformed(ActionEvent e) {
 		
 		String command = e.getActionCommand();
-		if(command.equals(MainActionCommands.SHOW_DATA_ACQUISITION_SELECTOR_COMMAND.getName())) {
-			acquisitionMethodSelectorDialog = new AcquisitionMethodSelectorDialog(this);
-			acquisitionMethodSelectorDialog.setLocationRelativeTo(this);
-			acquisitionMethodSelectorDialog.setVisible(true);
-		}
-		if(command.equals(MainActionCommands.SELECT_DATA_ACQUISITION_METHOD_COMMAND.getName())) {
+		if(command.equals(MainActionCommands.SHOW_DATA_ACQUISITION_SELECTOR_COMMAND.getName()))
+			showAcquisitionMethodSelector();
 			
-			acquisitionMethod = acquisitionMethodSelectorDialog.getSelectedMethod();
-			if(acquisitionMethod == null)
-				return;
-			
-			acqMethodTextField.setText(acquisitionMethod.getName());
-			acquisitionMethodSelectorDialog.dispose();
-			fireDataPipelineEvent();
-		}
-		if(command.equals(MainActionCommands.SHOW_DATA_EXTRACTION_SELECTOR_COMMAND.getName())) {
-			dataExtractionMethodSelectorDialog = new DataExtractionMethodSelectorDialog(this);
-			dataExtractionMethodSelectorDialog.setLocationRelativeTo(this);
-			dataExtractionMethodSelectorDialog.setVisible(true);
-		}
-		if(command.equals(MainActionCommands.SELECT_DATA_EXTRACTION_METHOD_COMMAND.getName())) {
-			
-			dataExtractionMethod = dataExtractionMethodSelectorDialog.getSelectedMethod();
-			if(dataExtractionMethod == null)
-				return;
-			
-			daMethodTextField.setText(dataExtractionMethod.getName());
-			dataExtractionMethodSelectorDialog.dispose();
-			fireDataPipelineEvent();
+		if(command.equals(MainActionCommands.SELECT_DATA_ACQUISITION_METHOD_COMMAND.getName()))
+			selectAcquisitionMethod();
+
+		if(command.equals(MainActionCommands.SHOW_DATA_EXTRACTION_SELECTOR_COMMAND.getName()))
+			showDataExtractionMethodSelector();
+		
+		if(command.equals(MainActionCommands.SELECT_DATA_EXTRACTION_METHOD_COMMAND.getName()))
+			selectDataExtractionMethodMethod();
+		
+		if(command.equals(MainActionCommands.SHOW_ASSAY_METHOD_MANAGER_COMMAND.getName()))
+			showAssaySelector();
+		
+		if(command.equals(MainActionCommands.SELECT_ASSAY_COMMAND.getName()))
+			selectAssay();
+	}
+	
+	private void showAcquisitionMethodSelector() {
+		
+		acquisitionMethodSelectorDialog = new AcquisitionMethodSelectorDialog(this);
+		acquisitionMethodSelectorDialog.setLocationRelativeTo(this);
+		acquisitionMethodSelectorDialog.setVisible(true);
+	}
+	
+	private void selectAcquisitionMethod() {
+		
+		acquisitionMethod = acquisitionMethodSelectorDialog.getSelectedMethod();
+		if(acquisitionMethod == null)
+			return;
+		
+		acqMethodTextField.setText(acquisitionMethod.getName());
+		acquisitionMethodSelectorDialog.dispose();
+		fireDataPipelineEvent();
+	}
+	
+	private void showDataExtractionMethodSelector() {
+		
+		dataExtractionMethodSelectorDialog = new DataExtractionMethodSelectorDialog(this);
+		dataExtractionMethodSelectorDialog.setLocationRelativeTo(this);
+		dataExtractionMethodSelectorDialog.setVisible(true);
+	}
+	
+	private void selectDataExtractionMethodMethod() {
+		
+		dataExtractionMethod = dataExtractionMethodSelectorDialog.getSelectedMethod();
+		if(dataExtractionMethod == null)
+			return;
+		
+		daMethodTextField.setText(dataExtractionMethod.getName());
+		dataExtractionMethodSelectorDialog.dispose();
+		fireDataPipelineEvent();
+	}
+	
+	private void showAssaySelector() {
+		
+		assaySelectorDialog = new AssaySelectorDialog(this);
+		assaySelectorDialog.setLocationRelativeTo(this);
+		assaySelectorDialog.setVisible(true);
+	}
+	
+	private void selectAssay() {
+		
+		assay = assaySelectorDialog.getSelectedAssay();
+		if(assay != null) {
+			assayTextField.setText(assay.toString());
+			assaySelectorDialog.dispose();
 		}
 	}
 	
@@ -333,10 +369,9 @@ public class DataPipelineDefinitionPanel extends JPanel
 	public String getDescription() {
 		return descriptionTextArea.getText().trim();
 	}
-	
-	
+		
 	public Assay getAssay() {
-		return (Assay)assayComboBox.getSelectedItem();
+		return assay;
 	}
 
 	public DataAcquisitionMethod getAcquisitionMethod() {
@@ -367,7 +402,7 @@ public class DataPipelineDefinitionPanel extends JPanel
 			return null;
 		}
 		DataPipeline dpl = new DataPipeline(
-				getName(), getAssay(), acquisitionMethod, dataExtractionMethod);
+				getName(), assay, acquisitionMethod, dataExtractionMethod);
 		dpl.setDescription(getDescription());
 		dpl.setMotrpacAssay(getMotrpacAssay());
 		return dpl;
@@ -386,20 +421,23 @@ public class DataPipelineDefinitionPanel extends JPanel
 		
 		nameTextField.setText(pipeline.getName());
 		descriptionTextArea.setText(pipeline.getDescription());
-		assayComboBox.setSelectedItem(pipeline.getAssay());
+		assay = pipeline.getAssay();
+		assayTextField.setText(assay.toString());
 		acquisitionMethod = pipeline.getAcquisitionMethod();
 		acqMethodTextField.setText(acquisitionMethod.getName());
 		dataExtractionMethod = pipeline.getDataExtractionMethod();
 		daMethodTextField.setText(dataExtractionMethod.getName());
+		motrpacAssayCodeComboBox.setSelectedItem(pipeline.getMotrpacAssay());
 	}
 	
 	public void lockPanel() {
 		
 		nameTextField.setEditable(false);
 		descriptionTextArea.setEditable(false);
-		assayComboBox.setEnabled(false);		
+		selectAssayButton.setEnabled(false);		
 		showDataAcqSelectorButton.setEnabled(false);		
 		showDataExtrSelectorButton.setEnabled(false);
+		motrpacAssayCodeComboBox.setEnabled(false);
 	}
 	
 	public Collection<String>validatePipelineDefinition(){

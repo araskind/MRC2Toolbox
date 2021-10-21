@@ -63,5 +63,16 @@ public class AssayTable extends BasicTable {
 		thf.setTable(this);
 		tca.adjustColumns();
 	}
+		
+	public Assay getSelectedAssay() {
 
+		int row = getSelectedRow();
+		if (row == -1)
+			return null;
+
+		Assay method = (Assay) model.getValueAt(convertRowIndexToModel(row),
+				model.getColumnIndex(AssayTableModel.ASSAY_COLUMN));
+
+		return method;
+	}
 }

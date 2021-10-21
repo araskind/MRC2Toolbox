@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.0.48</version>
+	<version>1.0.51</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>
@@ -89,7 +89,7 @@ public final class BuildInformation {
 	public static final String revisionNumber = "${build.number}";
 	public static final String timeStamp = "${TODAY}";
 	public static final StartupConfiguration programConfiguration = 
-			StartupConfiguration.IDTRACKER;
+			StartupConfiguration.COMPLETE_TOOLBOX;
 	
 	public static String getProgramName() {
 		return programConfiguration.getName() + " Version " + revisionNumber + " (" + timeStamp + ")";

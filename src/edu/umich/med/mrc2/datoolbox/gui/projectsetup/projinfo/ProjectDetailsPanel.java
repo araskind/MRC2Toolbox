@@ -28,6 +28,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -213,8 +215,8 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		gbc_scrollPane.gridy = 6;
 		contents.add(scrollPane, gbc_scrollPane);
 
-		changeAssayButton = new JButton(MainActionCommands.CHANGE_ASSAY_COMMAND.getName());
-		changeAssayButton.setActionCommand(MainActionCommands.CHANGE_ASSAY_COMMAND.getName());
+		changeAssayButton = new JButton(MainActionCommands.EDIT_DATA_PIPELINE_COMMAND.getName());
+		changeAssayButton.setActionCommand(MainActionCommands.EDIT_DATA_PIPELINE_COMMAND.getName());
 		changeAssayButton.addActionListener(this);
 		GridBagConstraints gbc_changeAssayButton = new GridBagConstraints();
 		gbc_changeAssayButton.gridwidth = 3;
@@ -223,8 +225,8 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		gbc_changeAssayButton.gridy = 7;
 		contents.add(changeAssayButton, gbc_changeAssayButton);
 
-		deleteAssayButtonButton = new JButton(MainActionCommands.DELETE_ASSAY_COMMAND.getName());
-		deleteAssayButtonButton.setActionCommand(MainActionCommands.DELETE_ASSAY_COMMAND.getName());
+		deleteAssayButtonButton = new JButton(MainActionCommands.DELETE_DATA_PIPELINE_COMMAND.getName());
+		deleteAssayButtonButton.setActionCommand(MainActionCommands.DELETE_DATA_PIPELINE_COMMAND.getName());
 		deleteAssayButtonButton.addActionListener(this);
 		GridBagConstraints gbc_deleteAssayButtonButton = new GridBagConstraints();
 		gbc_deleteAssayButtonButton.insets = new Insets(0, 0, 5, 0);
@@ -287,13 +289,13 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 
 		if (currentProject != null) {
 
-			if (e.getActionCommand().equals(MainActionCommands.DELETE_ASSAY_COMMAND.getName()))
+			if (e.getActionCommand().equals(MainActionCommands.DELETE_DATA_PIPELINE_COMMAND.getName()))
 				deleteDataPipeline();
 
-			if (e.getActionCommand().equals(MainActionCommands.CHANGE_ASSAY_COMMAND.getName()))
+			if (e.getActionCommand().equals(MainActionCommands.EDIT_DATA_PIPELINE_COMMAND.getName()))
 				showAsayTypeDialog();
 
-			if (e.getActionCommand().equals(MainActionCommands.CONFIRM_ASSAY_CHANGE_COMMAND.getName()))
+			if (e.getActionCommand().equals(MainActionCommands.SAVE_DATA_PIPELINE_COMMAND.getName()))
 				changeDataPipelineType();
 
 			if (e.getActionCommand().equals(MainActionCommands.EDIT_PROJECT_NAME_COMMAND.getName()))
@@ -341,33 +343,38 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		descEditButton.setActionCommand(MainActionCommands.EDIT_PROJECT_DESCRIPTION_COMMAND.getName());
 	}
 
-	//	TODO delete when "Edit data pipeline" is implemented
 	private void changeDataPipelineType() {
-
-//		Assay oldMethod = assayMethodDialog.getOldMethod();
-//		Assay newMethod = assayMethodDialog.getNewMethod();
-//		if(newMethod == null)
-//			return;
-//
-//		if (!newMethod.equals(oldMethod)) {
-//
-//			// Check if method already used in the project
-//			if (MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newMethod)) {
-//
-//				MessageDialog.showErrorMsg("Current project already contains data for " + 
-//						newMethod.getName(), this.getContentPane());
-//				return;
-//			}
-//			String yesNoQuestion = "Do you want to change current assay method from " + 
-//					oldMethod.getName() + " to " + newMethod.getName() + "?";
-//			if (MessageDialog.showChoiceWithWarningMsg(yesNoQuestion,
-//					this.getContentPane()) == JOptionPane.YES_OPTION) {
-//
-//				MRC2ToolBoxCore.getCurrentProject().replaceAssayMethod(oldMethod, newMethod);
-//				MRC2ToolBoxCore.getMainWindow().switchPanelForDataPipeline(newMethod, null);
-//			}
-//		}
-//		assayMethodDialog.dispose();
+		
+		DataPipeline selectedPipeline = dataPipelinesTable.getSelectedDataPipeline();
+		DataPipeline modifiedPipeline = dataPipelineDefinitionDialog.getDataPipeline();
+		
+		Set<DataPipeline> otherPipelines = currentProject.getDataPipelines().stream().
+				filter(p -> !p.equals(selectedPipeline)).
+				collect(Collectors.toSet());
+		
+		if(!otherPipelines.isEmpty()) {
+			
+			DataPipeline conflictingPipeline = otherPipelines.stream().
+				filter(p -> p.getAcquisitionMethod().equals(modifiedPipeline.getAcquisitionMethod())).
+				filter(p -> p.getDataExtractionMethod().equals(modifiedPipeline.getDataExtractionMethod())).
+				findFirst().orElse(null);
+			if(conflictingPipeline != null) {
+				MessageDialog.showErrorMsg(
+						"Current project contains a different data pipeline \"" + conflictingPipeline.getName() + "\"\n" + 
+						"with acquisition method \"" + conflictingPipeline.getAcquisitionMethod().getName() + "\"\n" + 
+						"and data extraction method \"" + conflictingPipeline.getDataExtractionMethod().getName() + "\"", 
+				this.getContentPane());
+				return;
+			}
+		}
+		selectedPipeline.setName(modifiedPipeline.getName());
+		selectedPipeline.setDescription(modifiedPipeline.getDescription());
+		selectedPipeline.setAcquisitionMethod(modifiedPipeline.getAcquisitionMethod());
+		selectedPipeline.setDataExtractionMethod(modifiedPipeline.getDataExtractionMethod());
+		selectedPipeline.setMotrpacAssay(modifiedPipeline.getMotrpacAssay());
+		selectedPipeline.setAssay(modifiedPipeline.getAssay());
+		dataPipelinesTable.setTableModelFromProject(currentProject);
+		dataPipelineDefinitionDialog.dispose();
 	}
 
 	private void showAsayTypeDialog() {
@@ -376,10 +383,9 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		if(selectedPipeline == null)
 			return;
 		
-		dataPipelineDefinitionDialog = new DataPipelineDefinitionDialog(this);
-		
-		//	TODO load selected pipeline
-		
+		dataPipelineDefinitionDialog = new DataPipelineDefinitionDialog(this, selectedPipeline);
+		dataPipelineDefinitionDialog.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
+		dataPipelineDefinitionDialog.setVisible(true);	
 	}
 
 	private void deleteDataPipeline() {

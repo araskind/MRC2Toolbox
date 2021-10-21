@@ -61,43 +61,8 @@ public class DockableWorklistTable extends DefaultSingleCDockable {
 		worklistTable.setTableModelFromWorklist(worklist);
 	}
 
-	public String getWorklistsAsString() {
-		
+	public String getWorklistsAsString() {		
 		return worklistTable.getWorklistsAsString();
-
-//		StringBuffer worklistData = new StringBuffer();
-//		int numCols = worklistTable.getColumnCount();
-//
-//		worklistData.append(worklistTable.getColumnName(0));
-//
-//		for(int i=1; i<numCols; i++)
-//			worklistData.append("\t" + worklistTable.getColumnName(i));
-//
-//		worklistData.append("\n");
-//
-//		for(int i=0;  i<worklistTable.getRowCount(); i++){
-//
-//			for(int j=0; j<numCols; j++){
-//
-//                final TableCellRenderer renderer = worklistTable.getCellRenderer(i, j);
-//                final Component comp = worklistTable.prepareRenderer(renderer, i, j);
-//                String txt = null;
-//
-//                if (comp instanceof JLabel)
-//                	txt = ((JLabel) comp).getText();
-//
-//                if (comp instanceof JTextPane)
-//                	txt = ((JTextPane) comp).getText();
-//
-//            	worklistData.append(txt.trim());
-//
-//                if(j<numCols-1)
-//                	worklistData.append("\t");
-//                else
-//                	worklistData.append("\n");
-//			}
-//		}
-//		return worklistData.toString();
 	}
 
 	public void copyWorklistToClipboard() {

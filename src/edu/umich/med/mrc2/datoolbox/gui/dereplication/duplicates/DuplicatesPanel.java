@@ -27,6 +27,7 @@ import java.awt.event.ItemEvent;
 import java.io.File;
 import java.util.Collection;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
@@ -34,6 +35,8 @@ import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
+
+import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
@@ -48,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -55,7 +59,9 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateFeaturesTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateNamesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeaturesTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.CalculateStatisticsTask;
 
 public class DuplicatesPanel extends ClusterDisplayPanel {
 
@@ -132,8 +138,22 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 		if (command.equals(MainActionCommands.REMOVE_SELECTED_FROM_CLUSTER_COMMAND.getName()))
 			removSelectedFeaturesFromCluster();
+		
+		if (command.equals(MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName()))
+			checkForDuplicateNames();		
 	}
 	
+	private void checkForDuplicateNames() {
+		
+		if(currentProject == null || activeDataPipeline == null)
+			return;
+			
+		FindDuplicateNamesTask task = 
+			new FindDuplicateNamesTask(currentProject, activeDataPipeline);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);;
+	}
+
 	private void filterClusters() {
 		
 		Set<MsFeatureCluster> clusters = currentProject
@@ -202,26 +222,26 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 	private void mergeDuplicateFeatures() {
 
+		if(currentProject == null || activeDataPipeline == null)
+			return;
 
+		if (currentProject.dataPipelineHasData(activeDataPipeline)
+				&& currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline) != null) {
 
-			if (currentProject.dataPipelineHasData(activeDataPipeline)
-					&& currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline) != null) {
+			if (!currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline).isEmpty()) {
 
-				if (!currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline).isEmpty()) {
-
-					clearPanel();
-					clearPanel();
-					duplicateMergeDialog.setVisible(false);
-					MergeDuplicateFeaturesTask ddt = 
-							new MergeDuplicateFeaturesTask(
-									currentProject,
-									activeDataPipeline, 
-									duplicateMergeDialog.getMergeOption());
-					ddt.addTaskListener(this);
-					MRC2ToolBoxCore.getTaskController().addTask(ddt);
-				}
+				clearPanel();
+				clearPanel();
+				duplicateMergeDialog.setVisible(false);
+				MergeDuplicateFeaturesTask ddt = 
+						new MergeDuplicateFeaturesTask(
+								currentProject,
+								activeDataPipeline, 
+								duplicateMergeDialog.getMergeOption());
+				ddt.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(ddt);
 			}
-		
+		}		
 	}
 
 	@Override
@@ -237,8 +257,30 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 				showDuplicateFeatureClusters((FindDuplicateFeaturesTask) e.getSource());
 
 			if (e.getSource().getClass().equals(MergeDuplicateFeaturesTask.class))
-				mergeDuplicates();
+				finalizeDuplicatesMerge();
+			
+			if (e.getSource().getClass().equals(FindDuplicateNamesTask.class))
+				finalizeDuplicateNameSearch((FindDuplicateNamesTask) e.getSource());
 		}
+	}
+
+	private void finalizeDuplicateNameSearch(FindDuplicateNamesTask task) {
+
+		if(task.getDuplicateNameList().isEmpty()) {
+			MessageDialog.showInfoMsg(
+					"No duplicate feature names found.", 
+					this.getContentPane());
+			return;
+		}
+		Collection<String>dupNames = new TreeSet<String>();
+		for(MsFeatureCluster cluster : task.getDuplicateNameList())		
+			dupNames.add(cluster.getPrimaryFeature().getName());
+
+		InformationDialog info = new InformationDialog(
+				"Duplicate feature names", 
+				"Found the following duplicate feature names",
+				StringUtils.join(dupNames, "\n"),
+				this.getContentPane());
 	}
 
 	private void showDuplicateFeatureClusters(FindDuplicateFeaturesTask fdt) {
@@ -257,14 +299,19 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		}
 	}
 
-	private void mergeDuplicates() {
+	private void finalizeDuplicatesMerge() {
 
-		((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
-				.setTableModelFromFeatureSet(currentProject.getActiveFeatureSetForDataPipeline(activeDataPipeline));
+//		((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
+//				.setTableModelFromFeatureSet(currentProject.getActiveFeatureSetForDataPipeline(activeDataPipeline));
 
 		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
 		MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().
 			switchDataPipeline(currentProject, activeDataPipeline);
+		
+		CalculateStatisticsTask cst = 
+				new CalculateStatisticsTask(currentProject, activeDataPipeline);
+		cst.addTaskListener(((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA)));
+		MRC2ToolBoxCore.getTaskController().addTask(cst);
 	}
 
 	@Override

@@ -26,15 +26,22 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.ProcessBuilder.Redirect;
+import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +52,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
@@ -82,7 +91,10 @@ public class NISTPepSearchResultManipulator {
 	private static final DecimalFormat pvalFdrFormat = new DecimalFormat("##.#####");
 	
 	public static void mergeTargetDecoySearchResultsForPercolator(
-			File libraryMatchFile, File decoyMatchFile, File outputFile) {
+			File libraryMatchFile, 
+			File decoyMatchFile,
+			MergeType mergeType,
+			File outputFile) {
 		
 		System.out.println("Creating file " + outputFile.getAbsolutePath());		
 		Collection<PepSearchOutputObject>libraryHits = null;
@@ -104,7 +116,7 @@ public class NISTPepSearchResultManipulator {
 			return;
 				
 		Collection<PepSearchOutputObject>mergedData = mergeLibraryAndDecoyHits(
-				libraryHits, decoyHits, MergeType.BEST_OVERALL);		
+				libraryHits, decoyHits, mergeType);		
 		try {
 			writeMergedDataToFile(mergedData, outputFile);
 		} catch (Exception e) {
@@ -117,7 +129,8 @@ public class NISTPepSearchResultManipulator {
 		return parsePepSearchResults(resultFile, true);
 	}
 	
-	public static Collection<PepSearchOutputObject> parsePepSearchResults(File resultFile, boolean requireMsMsFeatureId) throws Exception {
+	public static Collection<PepSearchOutputObject> parsePepSearchResults(
+			File resultFile, boolean requireMsMsFeatureId) throws Exception {
 		
 		NISTPepSearchParameterObject parObject = getNISTPepSearchParameterObject(resultFile);
 		if(parObject == null) {			
@@ -162,6 +175,9 @@ public class NISTPepSearchResultManipulator {
 		
 		if(mergeType.equals(MergeType.BEST_IN_TYPE))
 			return mergeLibraryAndDecoyHitsByBestInType(libraryHits, decoyHits);
+		
+		if(mergeType.equals(MergeType.MERGE_ALL))
+			return mergeAllLibraryAndDecoyHits(libraryHits, decoyHits);
 				
 		return null;
 	}
@@ -203,6 +219,22 @@ public class NISTPepSearchResultManipulator {
 		return merged;
 	}
 	
+	
+	public static Collection<PepSearchOutputObject>mergeAllLibraryAndDecoyHits(
+			Collection<PepSearchOutputObject>libraryHits, 
+			Collection<PepSearchOutputObject>decoyHits) {
+		Collection<PepSearchOutputObject>allHits = new ArrayList<PepSearchOutputObject>();
+		allHits.addAll(libraryHits);
+		allHits.addAll(decoyHits);		
+		try {
+			assignMrc2LibIds(allHits);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return allHits;
+	}
+	
 	public static Collection<PepSearchOutputObject>mergeLibraryAndDecoyHitsOnUnknownInChiKeyByBestOverall(
 			Collection<PepSearchOutputObject>libraryHits, 
 			Collection<PepSearchOutputObject>decoyHits) {
@@ -240,6 +272,7 @@ public class NISTPepSearchResultManipulator {
 		return merged;
 	}
 	
+	//	TODO
 	private static Collection<PepSearchOutputObject>mergeLibraryAndDecoyHitsByBestInType(
 			Collection<PepSearchOutputObject>libraryHits, 
 			Collection<PepSearchOutputObject>decoyHits) {
@@ -1178,6 +1211,242 @@ public class NISTPepSearchResultManipulator {
 //			commandParts.add("x");
 		
 		return pepSearchParameterObject;
+	}
+	
+	public static void createPassatuttoEBAinputFile(
+			File libraryPepSearchOutputFile, 
+			File passatuttoInputFile,
+			boolean bestHitsOnly) {
+		
+		Collection<PepSearchOutputObject>libraryObjects = null;
+		try {
+			libraryObjects = 
+					NISTPepSearchResultManipulator.parsePepSearchResults(libraryPepSearchOutputFile, false);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Collection<PepSearchOutputObject>filtered = new ArrayList<PepSearchOutputObject>();
+		if(bestHitsOnly) {
+			Map<String, List<PepSearchOutputObject>> hitMap = 
+					libraryObjects.stream().collect(Collectors.groupingBy(PepSearchOutputObject::getMsmsFeatureId));
+			
+			for(Entry<String, List<PepSearchOutputObject>> pooListEntry : hitMap.entrySet()) {
+				
+				List<PepSearchOutputObject> featureHits = pooListEntry.getValue().stream().
+						sorted(pooSorter).collect(Collectors.toList());
+				filtered.add(featureHits.get(0));
+			}
+		}
+		else
+			filtered = libraryObjects;
+	
+		try {
+			assignMrc2LibIds(filtered);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		List<PepSearchOutputObject> sortedHits = 
+				filtered.stream().
+				sorted(pooSorter).collect(Collectors.toList());
+		
+		ArrayList<String>lines = new ArrayList<String>();
+		lines.add("query\ttarget\tscore");
+		
+		NumberFormat nf= NumberFormat.getInstance();
+		nf.setMaximumFractionDigits(2);
+		nf.setMinimumFractionDigits(2);
+		nf.setRoundingMode(RoundingMode.HALF_UP);
+		
+		for(PepSearchOutputObject o : sortedHits) {
+			
+			String line = o.getMsmsFeatureId() 
+					+ "\t" + o.getMrc2libid() + "\t" 
+					+ nf.format(o.getScore());
+			lines.add(line);
+		}
+		Path outputPath = Paths.get(passatuttoInputFile.getAbsolutePath());
+	    try {
+			Files.write(outputPath, 
+					lines, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void evaluateDecoyLibrary(
+			File libraryPepSearchOutputFile, 
+			File decoyPepSearchOutputFile,
+			File percolatorOutputDirectory) {
+	
+		Collection<PepSearchOutputObject>libraryObjects = null;
+		try {
+			libraryObjects = 
+					NISTPepSearchResultManipulator.parsePepSearchResults(libraryPepSearchOutputFile, false);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		Collection<PepSearchOutputObject>decoyObjects = null;
+		try {
+			decoyObjects = 
+					NISTPepSearchResultManipulator.parsePepSearchResults(decoyPepSearchOutputFile, false);
+			decoyObjects.stream().forEach(p -> p.setDecoy(true));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(libraryObjects == null || decoyObjects == null) {
+			System.out.println("Couldn't parse input files.");
+			return;
+		}
+		Collection<PepSearchOutputObject>mergedData = 
+				NISTPepSearchResultManipulator.mergeLibraryAndDecoyHitsByBestOverall(libraryObjects, decoyObjects);	
+		int totalHits = mergedData.size();
+		
+		DoubleSummaryStatistics sumStats = 
+				mergedData.stream().mapToDouble(o -> o.getScore()).summaryStatistics();
+		Collection<PepSearchOutputObject>libHits = 
+				mergedData.stream().filter(h -> !h.isDecoy()).collect(Collectors.toList());
+		Collection<PepSearchOutputObject>decoyHits = 
+				mergedData.stream().filter(h -> h.isDecoy()).collect(Collectors.toList());
+
+		for(PepSearchOutputObject poo : libHits) {
+			
+			if(poo.getLibInchiKey() != null && poo.getUnknownInchiKey() != null) {
+				boolean sameStructure = 
+						poo.getLibInchiKey().substring(0, 14).equals(poo.getUnknownInchiKey().substring(0, 14));
+				poo.setTrueHit(sameStructure);
+			}
+		}
+		long wrongLibHitCount = libHits.stream().filter(p -> !p.isTrueHit()).count();
+		double percentIncorrectHits = (double)wrongLibHitCount/libHits.size();
+		System.out.println("% incorrect top hits = " + MRC2ToolBoxConfiguration.getPpmFormat().format(percentIncorrectHits));
+		
+		TreeMap<Double,Double>scoreFdrMap = new TreeMap<Double,Double>();
+		TreeMap<Double,Double>scorePvalueMap = new TreeMap<Double,Double>();
+		TreeMap<Double,Double>scorePvalueBaseAllMap = new TreeMap<Double,Double>();
+		for(double score = sumStats.getMin(); score < sumStats.getMax(); score = score + 1.0d) {
+			
+			final double cutoff = score;
+			long numDecoyHitsAboveCutoff = decoyHits.stream().filter(d -> d.getScore() > cutoff).count();
+			long numLibHitsAboveCutoff = libHits.stream().filter(d -> d.getScore() > cutoff).count();
+			double pValue = (double)numDecoyHitsAboveCutoff/(numDecoyHitsAboveCutoff + numLibHitsAboveCutoff);
+			scorePvalueMap.put(cutoff, pValue);
+			double pValueBaseAll = (double)numDecoyHitsAboveCutoff/totalHits;
+			scorePvalueBaseAllMap.put(cutoff, pValueBaseAll);			
+			double fdr = percentIncorrectHits * numDecoyHitsAboveCutoff / numLibHitsAboveCutoff;
+			scoreFdrMap.put(cutoff, fdr);
+		}
+		for(PepSearchOutputObject poo : mergedData) {
+
+			Double fdr = scoreFdrMap.get(poo.getScore());
+			if(fdr != null)
+				poo.setFdr(fdr);
+			
+			Double pVal = scorePvalueMap.get(poo.getScore());
+			if(pVal != null)
+				poo.setpValue(pVal);
+			
+			Double pValBaseAll = scorePvalueBaseAllMap.get(poo.getScore());
+			if(pValBaseAll != null)
+				poo.setpValueBaseAll(pValBaseAll);
+		}
+//		//	Calculate q-values based on pValues
+//		double[] pValueList = mergedData.stream().mapToDouble(p -> p.getpValue()).sorted().toArray();
+		
+//		Calculate q-values based on pValues BaseAll
+		double[] pValueList = mergedData.stream().mapToDouble(p -> p.getpValueBaseAll()).sorted().toArray();
+		TreeMap<Double,Double>pValueQvalueMap = new TreeMap<Double,Double>();
+		DescriptiveStatistics ds = new DescriptiveStatistics();
+		
+		//	Wrong, map will screw up, have to use Integer/ Double?
+		for(int i=pValueList.length-1; i>=0; i--) {
+			
+			double qVal = (pValueList[i]) * totalHits / (i+1);
+			pValueQvalueMap.put(pValueList[i], qVal);
+			if(qVal > 0.0d) {
+				
+				ds.addValue(qVal);
+				if(qVal > ds.getMin())
+					pValueQvalueMap.put(pValueList[i], ds.getMin());
+			}
+		}
+		for(PepSearchOutputObject poo : mergedData) {
+			
+//			Double qVal = pValueQvalueMap.get(poo.getpValue());
+			Double qVal = pValueQvalueMap.get(poo.getpValueBaseAll());
+			if(qVal != null)
+				poo.setqValue(qVal);
+		}		
+		File mergedFile = Paths.get(percolatorOutputDirectory.getAbsolutePath(), 
+				FilenameUtils.getBaseName(decoyPepSearchOutputFile.getName()) + "_merged.txt").toFile();
+		try {
+			NISTPepSearchResultManipulator.writeMergedDataToFile(mergedData, mergedFile);
+		} catch (Exception e) {			
+			e.printStackTrace();
+		}
+		File percolatorInputFile = Paths.get(percolatorOutputDirectory.getAbsolutePath(), 
+				FilenameUtils.getBaseName(decoyPepSearchOutputFile.getName()) + ".pin").toFile();
+		try {
+			NISTPepSearchResultManipulator.convertMergedResultFileToPinFormat(mergedFile, percolatorInputFile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			runPercolator(percolatorInputFile);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public static void runPercolator(File percolatorInputFile) throws Exception {
+				
+		File percolatorResultFile = Paths.get(percolatorInputFile.getParentFile().getAbsolutePath(), 
+				FilenameUtils.getBaseName(percolatorInputFile.getName()) + "_percolator_psms.tsv").toFile();
+		File percolatorDecoyResultFile = Paths.get(percolatorInputFile.getParentFile().getAbsolutePath(), 
+				FilenameUtils.getBaseName(percolatorInputFile.getName()) + "_percolator_decoy_psms.tsv").toFile();
+		File percolatorLogFile = Paths.get(percolatorInputFile.getParentFile().getAbsolutePath(), 
+				FilenameUtils.getBaseName(percolatorInputFile.getName()) + "_percolator_log.txt").toFile();			
+
+		if(percolatorInputFile != null && percolatorInputFile.exists()) {
+			
+			 ProcessBuilder pb =
+					   new ProcessBuilder(MRC2ToolBoxConfiguration.getPercolatorBinaryPath(), 
+							   "--results-psms", percolatorResultFile.getAbsolutePath(),
+							   "--decoy-results-psms", percolatorDecoyResultFile.getAbsolutePath(),
+							   "--only-psms",
+							   "--post-processing-tdc",
+							   "--num-threads", "6",
+							   percolatorInputFile.getAbsolutePath());
+			try {
+				pb.redirectErrorStream(true);
+				pb.redirectOutput(Redirect.appendTo(percolatorLogFile));
+				Process p = pb.start();
+				assert pb.redirectInput() == Redirect.PIPE;
+				assert pb.redirectOutput().file() == percolatorLogFile;
+				assert p.getInputStream().read() == -1;
+				int exitCode = p.waitFor();
+				if (exitCode == 0) {
+
+					p.destroy();
+					if (!percolatorResultFile.exists() || !percolatorDecoyResultFile.exists()) {
+						System.out.println("Percolator failed to create result files.");
+					}
+				} else {
+					System.out.println("Percolator run failed.");
+				}
+			} catch (IOException e) {
+				System.out.println("Percolator run failed.");
+				e.printStackTrace();
+			}		 
+		}
 	}
 }
 

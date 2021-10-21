@@ -48,6 +48,14 @@ public enum MainActionCommands {
 	SHOW_OPEN_CPD_ID_PROJECT_DIALOG_COMMAND("Show \"Open IDTracker project\" dialog"),
 	OPEN_CPD_ID_PROJECT_COMMAND("Open IDTracker project"),
 	CLOSE_PROJECT_COMMAND("Close project"),
+	SELECT_PROJECT_LOCATION_COMMAND("Select project location"),
+	
+	// Raw data project
+	NEW_RAW_DATA_PROJECT_SETUP_COMMAND("New raw data analysis project"),
+	NEW_RAW_DATA_PROJECT_COMMAND("Create new raw data analysis project"),
+	OPEN_RAW_DATA_PROJECT_COMMAND("Open raw data analysis pproject"),
+	CLOSE_RAW_DATA_PROJECT_COMMAND("Close raw data analysis pproject"),
+	SAVE_RAW_DATA_PROJECT_COMMAND("Save raw data analysis pproject"),
 	
 	//	User manager
 	SHOW_USER_MANAGER_COMMAND("Show User Manager"),
@@ -77,8 +85,8 @@ public enum MainActionCommands {
 	EXTRACT_WORKLIST_FROM_RAW_DATA_FOLDER("Extract worklist"),
 	SAVE_EXTRACTED_WORKLIST_TO_FILE("Save worklist to file"),
 
-	DELETE_ASSAY_COMMAND("Delete selected assay"),
-	CHANGE_ASSAY_COMMAND("Change type for selected assay"),
+	DELETE_DATA_PIPELINE_COMMAND("Delete data pipeline"),
+	EDIT_DATA_PIPELINE_COMMAND("Edit data pipeline"),
 	CONFIRM_ASSAY_CHANGE_COMMAND("Confirm assay change"),
 
 	EDIT_PROJECT_NAME_COMMAND("Edit project name"),
@@ -137,10 +145,12 @@ public enum MainActionCommands {
 	LOAD_MGF_COMMAND("Load MGF data file"),
 	SEND_WORKLIST_TO_DATABASE("Send worklist to database"),
 	REFRESH_WORKLIST("Refresh worklist"),
+	CHECK_WORKLIST_FOR_MISSING_DATA("Check worklist for missing data"),
 
 	//	Multi-file import
 	SHOW_DATA_PIPELINE_DEFINITION_DIALOG_COMMAND("Show data pipeline definition dialog"),
 	DEFINE_DATA_PIPELINE_COMMAND("Define data pipeline"),
+	SAVE_DATA_PIPELINE_COMMAND("Save data pipeline definition"),
 	SELECT_INPUT_LIBRARY_COMMAND("Select input library"),
 	ADD_DATA_FILES_COMMAND("Add data files"),
 	REMOVE_DATA_FILES_COMMAND("Remove data files"),
@@ -322,7 +332,7 @@ public enum MainActionCommands {
 	EXPORT_DUPLICATES_COMMAND("Export duplicate entries"),
 	EXPORT_RESULTS_TO_EXCEL_COMMAND("Export project report to Excel"),
 	EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND("Export results for metabolomics workbench"),
-
+	CHECK_FOR_DUPLICATE_NAMES_COMMAND("Check for duplicate names"),
 
 	// Data integration
 	DATA_INTEGRATION_DIALOG_COMMAND("Show data integration setup dialog"),
@@ -635,6 +645,7 @@ public enum MainActionCommands {
 	EDIT_ASSAY_METHOD_DIALOG_COMMAND("Edit assay method dialog"),
 	EDIT_ASSAY_METHOD_COMMAND("Edit assay method"),
 	DELETE_ASSAY_METHOD_COMMAND("Delete assay method"),
+	SELECT_ASSAY_COMMAND("Select assay"),
 
 	//	Reference sample editor
 	SHOW_REFERENCE_SAMPLE_MANAGER_COMMAND("Show reference sample manager"),

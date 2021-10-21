@@ -32,12 +32,12 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class RawDataCoversionTask extends AbstractTask {
+public class RawDataConversionTask extends AbstractTask {
 	
 	private File outputDir ;
 	private File fileToConvert;
 
-	public RawDataCoversionTask(File outputDir, File fileToConvert) {
+	public RawDataConversionTask(File outputDir, File fileToConvert) {
 		super();
 		this.outputDir = outputDir;
 		this.fileToConvert = fileToConvert;

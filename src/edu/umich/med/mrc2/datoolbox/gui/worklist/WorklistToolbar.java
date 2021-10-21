@@ -49,8 +49,8 @@ public class WorklistToolbar extends CommonToolbar {
 	private static final Icon manifestIcon = GuiUtils.getIcon("manifest", 32);
 	private static final Icon refreshIcon = GuiUtils.getIcon("rerun", 32);	
 	private static final Icon extractWorklistIcon = GuiUtils.getIcon("extractList", 32);
-
-
+	private static final Icon sampleWarningIcon = GuiUtils.getIcon("sampleWarning", 32);
+	
 	private JButton
 		loadWorklistButton,
 		addWorklistButton,
@@ -61,7 +61,8 @@ public class WorklistToolbar extends CommonToolbar {
 		saveWorklistButton,
 		copyWorklistToClipboardButton,
 		manifestButton,
-		extractWorklistFromFolderButton;
+		extractWorklistFromFolderButton,
+		sampleWarningButton;
 
 	public WorklistToolbar(ActionListener commandListener) {
 
@@ -92,9 +93,14 @@ public class WorklistToolbar extends CommonToolbar {
 
 		addSeparator(buttonDimension);
 
-		refreshButton = GuiUtils.addButton(this, null, refreshIcon, commandListener,
-				MainActionCommands.REFRESH_WORKLIST.getName(),
-				MainActionCommands.REFRESH_WORKLIST.getName(),
+//		refreshButton = GuiUtils.addButton(this, null, refreshIcon, commandListener,
+//				MainActionCommands.REFRESH_WORKLIST.getName(),
+//				MainActionCommands.REFRESH_WORKLIST.getName(),
+//				buttonDimension);
+		
+		sampleWarningButton = GuiUtils.addButton(this, null, sampleWarningIcon, commandListener,
+				MainActionCommands.CHECK_WORKLIST_FOR_MISSING_DATA.getName(),
+				MainActionCommands.CHECK_WORKLIST_FOR_MISSING_DATA.getName(),
 				buttonDimension);
 
 		addSeparator(buttonDimension);

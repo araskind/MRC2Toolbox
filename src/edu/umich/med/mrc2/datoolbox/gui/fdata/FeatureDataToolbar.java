@@ -59,7 +59,8 @@ public class FeatureDataToolbar extends CommonToolbar {
 	private static final Icon clearIdentificationsIcon = GuiUtils.getIcon("clearIdentifications", 32);
 	private static final Icon imputeDataIcon = GuiUtils.getIcon("impute", 32);
 	private static final Icon bubblePlotIcon = GuiUtils.getIcon("bubble", 32);
-
+	private static final Icon checkDuplicateNamesIcon = GuiUtils.getIcon("checkDuplicateNames", 32);
+	
 	@SuppressWarnings("unused")
 	private JButton
 		loadPlainDataFileButton,
@@ -81,7 +82,8 @@ public class FeatureDataToolbar extends CommonToolbar {
 		showMissingIdentificationsButton,
 		clearIdentificationsButon,
 		imputeMissingDataButton,
-		bubblePlotButton;
+		bubblePlotButton,
+		checkDuplicateNamesButton;
 
 	public FeatureDataToolbar(ActionListener commandListener) {
 
@@ -123,6 +125,10 @@ public class FeatureDataToolbar extends CommonToolbar {
 		cleanEmptyFeaturesButton = GuiUtils.addButton(this, null, cleanEmptyFeaturesIcon, commandListener,
 				MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName(),
 				MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName(), buttonDimension);
+		
+		checkDuplicateNamesButton = GuiUtils.addButton(this, null, checkDuplicateNamesIcon, commandListener,
+				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(),
+				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(), buttonDimension);
 
 		addSeparator(buttonDimension);
 

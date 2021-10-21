@@ -28,6 +28,7 @@ public enum MsLibraryFormat {
 	TSV("Tab-separated text", "txt"),
 	SIRIUS_MS("Sirius MS file", "ms"),
 	MGF("MGF file", "mgf"),
+	XY_META_MGF("XY-meta MGF file", "mgf"),
 	;
 
 	private final String name;

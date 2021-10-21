@@ -3,15 +3,14 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -45,7 +44,6 @@ public class ReferenceMSMSLibraryExportTask extends AbstractTask {
 	
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###.##");
 	private static final NumberFormat mzFormat =  MRC2ToolBoxConfiguration.getMzFormat();
-	private static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 	
 	private ReferenceMsMsLibrary library;
 	private MsLibraryFormat exportFormat;
@@ -53,19 +51,22 @@ public class ReferenceMSMSLibraryExportTask extends AbstractTask {
 	private File outputDirectory;
 	private ArrayList<MsMsLibraryFeature> featuresToExport;
 	private int maxEntriesPerFile;
+	private boolean highResOnly;
 
 	public ReferenceMSMSLibraryExportTask(
 			ReferenceMsMsLibrary library, 
 			MsLibraryFormat exportFormat, 
 			Polarity polarity,
 			File outputFile,
-			int maxEntriesPerFile) {
+			int maxEntriesPerFile,
+			boolean highResOnly) {
 		super();
 		this.library = library;
 		this.exportFormat = exportFormat;
 		this.polarity = polarity;
 		this.outputDirectory = outputFile;
 		this.maxEntriesPerFile = maxEntriesPerFile;
+		this.highResOnly = highResOnly;
 	}
 
 	@Override
@@ -101,9 +102,11 @@ public class ReferenceMSMSLibraryExportTask extends AbstractTask {
 				+ "RESOLUTION, SPECTRUM_SOURCE, IONIZATION_TYPE, LIBRARY_NAME, "
 				+ "ORIGINAL_LIBRARY_ID, ACCESSION, SPECTRUM_HASH, ENTROPY "
 				+ "FROM REF_MSMS_LIBRARY_COMPONENT "
-				+ "WHERE LIBRARY_NAME = ? AND POLARITY = ? "
-				//	+ "AND MAX_DIGITS > 1 "
-				+ "ORDER BY 1 ";
+				+ "WHERE LIBRARY_NAME = ? AND POLARITY = ? ";
+		if(highResOnly)
+			query += "AND MAX_DIGITS > 2 ";
+
+		query +=  "ORDER BY 1 ";
 		
 		PreparedStatement ps = conn.prepareStatement(query,
 		         ResultSet.TYPE_SCROLL_INSENSITIVE ,
@@ -206,17 +209,30 @@ public class ReferenceMSMSLibraryExportTask extends AbstractTask {
 				e.printStackTrace();
 			}
 		
-		if(exportFormat.equals(MsLibraryFormat.SIRIUS_MS))
+		if(exportFormat.equals(MsLibraryFormat.SIRIUS_MS)) {
+			if(maxEntriesPerFile == 1) {
+				writeSiriusOutputOneEntryPerFile();
+			}
+			else {
+				try {
+					writeSiriusOutput();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		if(exportFormat.equals(MsLibraryFormat.MGF))
 			try {
-				writeSiriusOutput();
+				writeMGFOutput();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		
-		if(exportFormat.equals(MsLibraryFormat.MGF))
+		if(exportFormat.equals(MsLibraryFormat.XY_META_MGF))
 			try {
-				writeMGFOutput();
+				writeXYMetaMGFOutput();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -240,15 +256,9 @@ public class ReferenceMSMSLibraryExportTask extends AbstractTask {
 		individual.add(MSPField.NOTES);	//	TODO Skip notes for now, not required for most tasks
 		
 		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-//		String fileName = library.getName().replaceAll("\\s+", "_") + "_" + polarity.getCode() + "_" 
-//				+ timestamp + "." + exportFormat.getFileExtension();
 		String fileName = library.getSearchOutputCode() + "." + exportFormat.getFileExtension();
 		int fileCount = 1;
-		if(maxEntriesPerFile > 0) {
-//			fileName = library.getName().replaceAll("\\s+", "_") + "_" + polarity.getCode() + "_" 
-//					+ timestamp + "_" +  StringUtils.leftPad(Integer.toString(fileCount), 8, '0') + 
-//					"." + exportFormat.getFileExtension();
-			
+		if(maxEntriesPerFile > 0) {			
 			fileName = library.getSearchOutputCode() + "_" 
 					+ StringUtils.leftPad(Integer.toString(fileCount), 8, '0') + 
 					"." + exportFormat.getFileExtension();
@@ -344,6 +354,71 @@ public class ReferenceMSMSLibraryExportTask extends AbstractTask {
 		}
 		writer.flush();
 		writer.close();
+	}
+	
+	private void writeSiriusOutputOneEntryPerFile() {
+		
+		taskDescription = "Wtiting Sirius MS output one entry per file ...";
+		total = featuresToExport.size();
+		processed = 0;
+		Adduct adduct = AdductManager.getDefaultAdductForPolarity(polarity);
+		
+		for(MsMsLibraryFeature feature : featuresToExport) {						
+			
+			String formula = null;
+			String compoundName = "";
+			CompoundIdentity cid = feature.getCompoundIdentity();
+			if(cid != null) {
+				compoundName = cid.getName();
+				formula = cid.getFormula();
+			}
+			if(formula == null || formula.isEmpty())
+				continue;
+			
+			if(feature.getSpectrum() == null || feature.getSpectrum().isEmpty())
+				continue;
+			
+			Collection<MsPoint> msPoints = MsUtils.calculateIsotopeDistribution(formula, adduct);
+			if(msPoints == null || msPoints.isEmpty())
+				continue;
+							
+			Collection<String>msBlock = new ArrayList<String>();			
+			msBlock.add(">compound " + feature.getUniqueId());
+			msBlock.add(">parentmass " + mzFormat.format(feature.getParent().getMz()));
+			msBlock.add(">ionization " + adduct.getName());
+			//	msBlock.add(">comments " + compoundName);
+			if(formula != null)
+				msBlock.add(">formula " + formula);		
+						
+			//	msBlock.add(">collision " + feature.getCollisionEnergyValue());
+			msBlock.add("");
+			msBlock.add(">ms2");
+			for(MsPoint p : feature.getSpectrum()) {
+				
+				if(Math.round(p.getIntensity()) > 0)
+					msBlock.add(mzFormat.format(p.getMz()) + " " + 
+								intensityFormat.format(p.getIntensity()));
+			}
+			msBlock.add("");
+			msBlock.add(">ms1");
+			for(MsPoint p : msPoints) {
+				
+				msBlock.add(
+						mzFormat.format(p.getMz()) + " " + 
+								intensityFormat.format(p.getIntensity()));
+			}		
+			try {		
+				File exportFile = Paths.get(outputDirectory.getAbsolutePath(), feature.getUniqueId() + ".ms").toFile();	
+				Writer writer = new BufferedWriter(new FileWriter(exportFile));						
+				writer.append(StringUtils.join(msBlock, "\n") + "\n");	
+				writer.flush();
+				writer.close();
+			} catch (IOException e) {
+				System.out.println("Failed to write file for " + feature.getUniqueId());
+				e.printStackTrace();
+			}
+			processed++;
+		}
 	}
 	
 	private void writeSiriusOutput() throws Exception {
@@ -487,6 +562,65 @@ public class ReferenceMSMSLibraryExportTask extends AbstractTask {
 		writer.flush();
 		writer.close();
 	}
+	
+	private void writeXYMetaMGFOutput()throws Exception {
+		
+		taskDescription = "Wtiting XY-meta MGF output";
+		total = featuresToExport.size();
+		processed = 0;
+		
+		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
+		String fileName = library.getName().replaceAll("\\s+", "_") + "_" + polarity.getCode() + "_" 
+				+ timestamp + "." + exportFormat.getFileExtension();
+		int fileCount = 1;
+		if(maxEntriesPerFile > 0) {
+			fileName = library.getName().replaceAll("\\s+", "_") + "_" + polarity.getCode() + "_" 
+					+ timestamp + "_" +  StringUtils.leftPad(Integer.toString(fileCount), 8, '0') + 
+					"." + exportFormat.getFileExtension();
+		}
+		File exportFile = Paths.get(outputDirectory.getAbsolutePath(), fileName).toFile();	
+		Writer writer = new BufferedWriter(new FileWriter(exportFile));
+//		Adduct defaultAdduct = AdductManager.getDefaultAdductForPolarity(polarity);
+		
+		for(MsMsLibraryFeature feature : featuresToExport) {
+			
+			writer.append(MGFFields.BEGIN_BLOCK.getName() + "\n");
+			double pepMass = 0.0d;
+//			if(feature.getCompoundIdentity() != null)				
+//				pepMass = feature.getCompoundIdentity().getExactMass();
+//			else 
+//				pepMass = MsUtils.getNeutralMass(feature.getParent(), defaultAdduct);
+			
+			writer.append(MGFFields.PEPMASS + "=" + mzFormat.format(feature.getParent().getMz()) + "\n");						
+			writer.append(MGFFields.CHARGE + "=" + Integer.toString(polarity.getSign()) + "\n");
+			writer.append(MGFFields.MSLEVEL + "=2\n");			
+			writer.append(MGFFields.TITLE.getName() + "=" + feature.getUniqueId() + "\n");
+			writer.append(MGFFields.NAME.getName() + "=" + feature.getUniqueId() + "\n");
+			for(MsPoint point : feature.getSpectrum()) {
+
+				writer.append(
+					mzFormat.format(point.getMz())
+					+ " " + intensityFormat.format(point.getIntensity())) ;
+				
+				writer.append("\n");
+			}
+			writer.append(MGFFields.END_IONS.getName() + "\n\n");	
+			processed++;
+			if (maxEntriesPerFile > 0 && processed % maxEntriesPerFile == 0) {
+				fileCount++;
+				writer.flush();
+				writer.close();
+				fileName = library.getName().replaceAll("\\s+", "_") + "_" + polarity.getCode() + "_" + timestamp
+						 + "_" +  StringUtils.leftPad(Integer.toString(fileCount), 8, '0') + "."
+						+ exportFormat.getFileExtension();
+
+				exportFile = Paths.get(outputDirectory.getAbsolutePath(), fileName).toFile();
+				writer = new BufferedWriter(new FileWriter(exportFile));
+			}
+		}
+		writer.flush();
+		writer.close();
+	}
 
 	@Override
 	public Task cloneTask() {
@@ -496,7 +630,8 @@ public class ReferenceMSMSLibraryExportTask extends AbstractTask {
 				 exportFormat, 
 				 polarity,
 				 outputDirectory,
-				 maxEntriesPerFile);
+				 maxEntriesPerFile,
+				 highResOnly);
 	}
 
 	public File getOutputFile() {

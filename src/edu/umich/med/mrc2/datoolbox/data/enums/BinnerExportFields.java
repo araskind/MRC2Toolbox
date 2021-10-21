@@ -29,6 +29,7 @@ public enum BinnerExportFields {
 	BINNER_NAME("Binner name"),
 	NEUTRAL_MASS("Neutral mass"),
 	BINNER_MASS("Binner mass"),
+	BINNER_MZ("Binner M/Z"),
 	RT_EXPECTED("RT expected"),
 	RT_OBSERVED("RT observed"),
 	MZ("Monoisotopic M/Z"),

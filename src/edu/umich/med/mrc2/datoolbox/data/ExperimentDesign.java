@@ -179,8 +179,10 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		for(ExperimentalSample rs : samples2add) {
 
 			ExperimentDesignLevel sampleTypeLevel = rs.getDesignCell().get(sampleTypeFactor);
-			if(sampleTypeLevel != null)
+			if(sampleTypeLevel != null) {
 				sampleTypeFactor.addLevel(sampleTypeLevel);
+				getCompleteDesignSubset().addLevel(sampleTypeLevel);
+			}
 		}
 		addSamples(samples2add);
 		updateCompleteDesignSubsets();
@@ -366,8 +368,10 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 					sampleSet.stream().filter(s -> s.getDesignCell().get(sampleTypeFactor).equals(sampleTypeLevel)).
 					filter(s -> !s.equals(rs)).findFirst().orElse(null);
 
-			if(otherSample == null && sampleTypeLevel != null)
+			if(otherSample == null && sampleTypeLevel != null) {
 				sampleTypeFactor.removeLevel(sampleTypeLevel);
+				getCompleteDesignSubset().removeLevel(sampleTypeLevel);
+			}
 		}
 		removeSamples(samples2remove);
 		updateCompleteDesignSubsets();

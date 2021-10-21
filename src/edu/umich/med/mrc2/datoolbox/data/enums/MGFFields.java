@@ -41,6 +41,7 @@ public enum MGFFields {
 	INCHI("INCHI"),
 	INCHI_KEY("INCHIAUX"),
 	SEQ("SEQ"),
+	MSLEVEL("MSLEVEL"),
 	;
 
 	private final String field;

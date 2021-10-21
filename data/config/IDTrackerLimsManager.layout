@@ -137,13 +137,13 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600214436454" orientation="HORIZONTAL" divider="0.2562358276643991">
-											<leaf id="1" nodeId="1600213801751">
+											<leaf id="0" nodeId="1600213801751">
 												<placeholders>
 													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1600214464138" orientation="VERTICAL" divider="0.32929782082324455">
-												<leaf id="0" nodeId="1600213801754">
+											<node nodeId="1600214464138" orientation="VERTICAL" divider="0.527542372881356">
+												<leaf id="1" nodeId="1600213801754">
 													<placeholders>
 														<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
 														<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
@@ -259,8 +259,18 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
+										<replacement id="dockablesingle DockableIdProjectTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableIdProjectTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>3</selected>
+										<selected>2</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -366,18 +376,8 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
-										<replacement id="dockablesingle DockableIdProjectTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableIdProjectTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>5</selected>
+										<selected>3</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>

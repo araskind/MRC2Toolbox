@@ -106,8 +106,7 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>{
         
         if ((this.assay == null) ? (other.getAssay() != null) : !this.assay.equals(other.getAssay()))
             return false;
-        
-        
+              
         if ((this.acquisitionMethod == null) ? (other.getAcquisitionMethod() != null) : 
         		!this.acquisitionMethod.equals(other.getAcquisitionMethod()))
             return false;
@@ -115,11 +114,6 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>{
         if ((this.dataExtractionMethod == null) ? (other.getDataExtractionMethod() != null) : 
         		!this.dataExtractionMethod.equals(other.getDataExtractionMethod()))
         	return false;
-//        
-//        if(!this.assay.equals(other.getAssay()) || 
-//        		!this.acquisitionMethod.equals(other.getAcquisitionMethod()) || 
-//        		!this.dataExtractionMethod.equals(other.getDataExtractionMethod()))
-//        	return false;
 
         return true;
     }
@@ -185,5 +179,9 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>{
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public void setAssay(Assay assay) {
+		this.assay = assay;
 	}
 }

@@ -386,7 +386,7 @@ public class DataExportTask extends AbstractTask {
 		header[++columnCount] = BinnerExportFields.METABOLITE_NAME.getName();
 		header[++columnCount] = BinnerExportFields.BINNER_NAME.getName();
 		header[++columnCount] = BinnerExportFields.NEUTRAL_MASS.getName();
-		header[++columnCount] = BinnerExportFields.BINNER_MASS.getName();
+		header[++columnCount] = BinnerExportFields.BINNER_MZ.getName();
 		header[++columnCount] = BinnerExportFields.RT_EXPECTED.getName();
 		header[++columnCount] = BinnerExportFields.RT_OBSERVED.getName();
 		header[++columnCount] = BinnerExportFields.MZ.getName();
@@ -428,6 +428,11 @@ public class DataExportTask extends AbstractTask {
 			double binnerMass =
 				MsUtils.calculateModifiedMz(msf.getNeutralMass(),
 						AdductManager.getDefaultAdductForPolarity(msf.getPolarity()));
+			if(msf.getSpectrum().getPrimaryAdduct() != null 
+					&& Math.abs(msf.getSpectrum().getPrimaryAdduct().getCharge()) == 1
+					&& msf.getSpectrum().getPrimaryAdduct().getOligomericState() > 1)
+				binnerMass =msf.getMonoisotopicMz();
+				
 			line[columnCount] = msf.getName();
 			line[++columnCount] = compoundName;
 			line[++columnCount] = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 

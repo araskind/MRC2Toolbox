@@ -230,7 +230,7 @@ public class MsUtils {
 		return avgPoints.toArray(new MsPoint[avgPoints.size()]);
 	}
 
-	public static Range createMassRange(double mz, double accuracyPpm) {
+	public static Range createPpmMassRange(double mz, double accuracyPpm) {
 
 		double b1 = mz * (1 - accuracyPpm / 1000000);
 		double b2 = mz * (1 + accuracyPpm / 1000000);
@@ -321,7 +321,7 @@ public class MsUtils {
 		for (Adduct cm : adducts) {
 
 			double mz = MsUtils.getAdductMz(neutralMass, cm);
-			Range newRange = MsUtils.createMassRange(mz, massAccuracy);
+			Range newRange = MsUtils.createPpmMassRange(mz, massAccuracy);
 			modifiedMassRanges.put(cm, newRange);
 		}
 		return modifiedMassRanges;
@@ -338,7 +338,7 @@ public class MsUtils {
 			if (cm.getModificationType().equals(ModificationType.REPEAT) && cm.getMassCorrection() < 0) {
 
 				double mz = neutralMass + cm.getMassCorrection();
-				Range newRange = MsUtils.createMassRange(mz, massAccuracy);
+				Range newRange = MsUtils.createPpmMassRange(mz, massAccuracy);
 				modifiedMassRanges.put(cm, newRange);
 			}
 		}
@@ -371,7 +371,7 @@ public class MsUtils {
 			return false;
 
 		Arrays.sort(pattern, new MsDataPointComparator(SortProperty.MZ));
-		Range refRange = MsUtils.createMassRange(pattern[0].getMz(), massAccuracy);
+		Range refRange = MsUtils.createPpmMassRange(pattern[0].getMz(), massAccuracy);
 		Range clRange = new Range(refRange.getMin() + BR_ISOTOPE_DISTANCE, refRange.getMax() + BR_ISOTOPE_DISTANCE);
 		if (clRange.contains(pattern[2].getMz())
 				&& pattern[2].getIntensity() / pattern[0].getIntensity() > 0.7d
@@ -388,7 +388,7 @@ public class MsUtils {
 			return false;
 
 		Arrays.sort(pattern, new MsDataPointComparator(SortProperty.MZ));
-		Range refRange = MsUtils.createMassRange(pattern[0].getMz(), massAccuracy);
+		Range refRange = MsUtils.createPpmMassRange(pattern[0].getMz(), massAccuracy);
 		Range clRange = new Range(refRange.getMin() + CL_ISOTOPE_DISTANCE, refRange.getMax() + CL_ISOTOPE_DISTANCE);
 
 		if (clRange.contains(pattern[2].getMz())

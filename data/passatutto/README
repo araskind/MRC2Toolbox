@@ -1,0 +1,43 @@
+Description of passatutto:
+Passatutto is designed to calculate q-values for spectral library matches produced in high-throughput experiments.
+
+
+
+Description of the folders:
+Passatutto/Data/Gnps: contains the raw GNPS files (/Gnps) as well as decoy databases with ConditionalPeaks RandomPeaks (GnpsDecoyRandomPeaks) and (GnpsDecoyConditionalPeaks) based on the raw data
+Passatutto/Data/GnpsNoiseFiltered: contains the noise-filtered GNPS files  and trees(/Gnps, /GnpsTrees) as well as decoy databases with RandomPeaks (GnpsDecoyRandomPeaks), ConditionalPeaks (GnpsDecoyConditionalPeaks) and Reroot (GnpsDecoyReroot) based on the raw data
+Passatutto/Data/MassbankOrbi: contains the raw Massbank files
+Passatutto/Data/searchNoiseFiltered: contains an example of a search for Massbank spectra vs. noise filtered GNPS (MassbankOrbi-Gnps.txt), a search for Massbank spectra vs. a noise filtered decoy database (MassbankOrbi-GnpsDecoyConditionalPeaks.txt) as well as the q-values for the respective TDA (MassbankOrbi-Gnps_qValues_TDA_RandomPeaks.txt) and EBA (MassbankOrbi-GnpsDecoyConditionalPeaks.txt)
+
+
+
+To calculate q-values, you have to follow these instructions:
+
+1. If you want to use the Target-Decoy-Approach (TDA):
+
+i) Construct decoy database:
+java -cp lib\* DecoyDatabaseConstruction -target [full path of target database folder] -out [full path of output folder for decoy database folder] -method [RandomPeaks|ConditionalPeaks|Reroot] -ppm [relative error] -ae [absolute error]
+EXAMPLE: java -cp lib\* DecoyDatabaseConstruction -target /home/Passatutto/Data/Gnps/Gnps -out /home/Passatutto/Data/Gnps/GnpsDecoyConditionalPeaks -method ConditionalPeaks -ppm 10 -ae 2
+method "Reroot" needs fragmentation trees: java -cp lib\* DecoyDatabaseConstruction -target /home/Passatutto/Data/GnpsNoiseFiltered/GnpsTrees -out /home/Passatutto/Data/GnpsNoiseFiltered/GnpsDecoyReroot -method Reroot -ppm 10 -ae 2
+for huge decoy databases, you might have to use java option -Xmx1G
+
+ii) Search in target/decoy database (you need both for the target-decoy-approach):
+java -cp lib\* SpectralComparison -query [full path of folder with query spectra folder] -target [full path of target/decoy database folder] -out [full path of output file] -method [MassBank|CosineDistance] -ppm [relative error] -ae [absolute error]
+EXAMPLE (search in target database): java -cp lib\* SpectralComparison -query /home/Passatutto/Data/MassbankOrbi -target /home/Passatutto/Data/Gnps/Gnps -out /home/Passatutto/Data/search/MassbankOrbi-Gnps.txt -method MassBank -ppm 10 -ae 2
+EXAMPLE (search in decoy database): java -cp lib\* SpectralComparison -query /home/Passatutto/Data/MassbankOrbi -target /home/Passatutto/Data/Gnps/GnpsDecoyConditionalPeaks -out /home/Passatutto/Data/search/MassbankOrbi-GnpsDecoyConditionalPeaks.txt -method MassBank -ppm 10 -ae 2
+
+iii) Calculate q-values:
+java -cp lib\* QValueEstimator -target [full path of target search file] -out [full path of output file] -method TDA [full path of decoy search file] 
+EXAMPLE: java -cp lib\* QValueEstimator -target /home/Passatutto/Data/search/MassbankOrbi-Gnps.txt -out /home/Passatutto/Data/search/MassbankOrbi-Gnps_qValues_TDA_ConditionalPeaks.txt -method TDA /home/Passatutto/Data/search/MassbankOrbi-GnpsDecoyConditionalPeaks.txt
+
+
+2. If you want to use the Empirical-Bayes-Approach (EBA):
+
+i) Search in target database (see 1.ii)
+
+ii) Calculate q-values:
+java -cp lib\* QValueEstimator -target [full path of target search file] -out [full path of output file] -method EBA
+EXAMPLE: java -cp lib\* QValueEstimator -target /home/Passatutto/Data/search/MassbankOrbi-Gnps.txt -out /home/Passatutto/Data/search/MassbankOrbi-Gnps_qValues_EBA.txt -method EBA
+
+
+EXAMPLES are based on the assumption that Passatutto is unpacked into the folder /home/

@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 public class LIMSReportingUtils {
 
 	public static final String UNTARGETED_ASSAY_ID = "A003";
+	public static final String CENTRAL_CARBON_METABOLISM_ASSAY_ID = "A049";
 
 	public static Path createExperimentDataDirectoryStructure(String experimentId, File parentDirectory) throws Exception {
 
@@ -70,8 +71,8 @@ public class LIMSReportingUtils {
 				if(assay.getId().equals(UNTARGETED_ASSAY_ID)) {
 
 					//	TIC
-					Files.createDirectories(Paths.get(assayDirPath.toString(), "TIC", "POS"));
-					Files.createDirectories(Paths.get(assayDirPath.toString(), "TIC", "NEG"));
+//					Files.createDirectories(Paths.get(assayDirPath.toString(), "TIC", "POS"));
+//					Files.createDirectories(Paths.get(assayDirPath.toString(), "TIC", "NEG"));
 
 					//	Raw data
 					Files.createDirectory(Paths.get(rawDataPath.toString(), "POS"));
@@ -89,6 +90,19 @@ public class LIMSReportingUtils {
 					Files.createDirectories(Paths.get(assayDirPath.toString(), "Recursion libraries", "POS"));
 					Files.createDirectories(Paths.get(assayDirPath.toString(), "Recursion libraries", "NEG"));
 				}
+				if(assay.getId().equals(CENTRAL_CARBON_METABOLISM_ASSAY_ID)) {
+					//	Raw data
+					Files.createDirectory(Paths.get(rawDataPath.toString(), "NEG"));
+
+					//	MFE
+					Files.createDirectories(Paths.get(assayDirPath.toString(), "MFE", "NEG"));
+
+					//	FBF
+					Files.createDirectories(Paths.get(assayDirPath.toString(), "FBF-recursive", "NEG"));
+
+					//	Recursion libraries
+					Files.createDirectories(Paths.get(assayDirPath.toString(), "Recursion libraries", "NEG"));
+				}			
 			}
 		}
 		return expDirPath;

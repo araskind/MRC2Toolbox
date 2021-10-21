@@ -69,7 +69,7 @@ public class SiriusMsMsCluster implements Serializable {
 		rtRange = new Range(
 				firstBundle.getMsFeature().getRetentionTime() - rtError, 
 				firstBundle.getMsFeature().getRetentionTime() + rtError);		
-		mzRange = MsUtils.createMassRange(parentIon.getMz(), mzError);
+		mzRange = MsUtils.createPpmMassRange(parentIon.getMz(), mzError);
 		
 		meanRt = new DescriptiveStatistics();
 		meanRt.addValue(firstBundle.getMsFeature().getRetentionTime());
@@ -105,7 +105,7 @@ public class SiriusMsMsCluster implements Serializable {
 		rtRange = new Range(
 				medianRt - rtError, 
 				medianRt + rtError);		
-		mzRange = MsUtils.createMassRange(medianMz, mzError);
+		mzRange = MsUtils.createPpmMassRange(medianMz, mzError);
 		return true;
 	}
 	
@@ -113,7 +113,7 @@ public class SiriusMsMsCluster implements Serializable {
 		
 		return msmsComponents.stream().
 				map(b -> b.getMsFeature()).
-				map(f -> f.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL)).
+				map(f -> f.getSpectrum().getExperimentalTandemSpectrum()).
 				collect(Collectors.toList());	
 	}
 	
@@ -124,7 +124,7 @@ public class SiriusMsMsCluster implements Serializable {
 	public String getName() {
 		
 		String name = 
-				DataPrefix.MS_LIBRARY_UNKNOWN_TARGET + 
+				DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
 				MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()) + "_" +
 				MRC2ToolBoxConfiguration.getRtFormat().format(rtRange.getAverage()) ;		
 		return name;
@@ -143,15 +143,16 @@ public class SiriusMsMsCluster implements Serializable {
 	public String getSiriusMsBlock() {
 		
 		Collection<String>msBlock = new ArrayList<String>();
-		msBlock.add(">compound " + getName());
-		msBlock.add(">parentmass " + MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()));
-		msBlock.add(">ionization " + adduct.getName());
-		msBlock.add(">comments " + getComment());
-		msBlock.add("");
-		
-		Collection<TandemMassSpectrum>msmsList = getMsMsSpectra();
-		for(TandemMassSpectrum msms : msmsList) {
+		if(msmsComponents.size() == 1) {
 			
+			MsFeatureInfoBundle bundle = msmsComponents.iterator().next();
+			msBlock.add(">compound " + bundle.getMSMSFeatureId());
+			msBlock.add(">parentmass " + MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()));
+			msBlock.add(">ionization " + adduct.getName());
+			msBlock.add(">comments " + getName());
+			msBlock.add("");
+			
+			TandemMassSpectrum msms =  bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();			
 			msBlock.add(">collision " + ceFormat.format(msms.getCidLevel()));
 			for(MsPoint p : msms.getMassSortedSpectrum()) {
 				
@@ -159,12 +160,38 @@ public class SiriusMsMsCluster implements Serializable {
 						MRC2ToolBoxConfiguration.getMzFormat().format(p.getMz()) + " " + 
 								intensityFormat.format(p.getIntensity()));
 			}
-			msBlock.add("");
+			msBlock.add("");			
+			msBlock.add(">ms1");
+			
+			msBlock.add(
+					MRC2ToolBoxConfiguration.getMzFormat().format(msms.getParent().getMz()) + " " + 
+							intensityFormat.format(msms.getParent().getIntensity()));
 		}
-		msBlock.add(">ms1");
-		msBlock.add(
-				MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()) + " " + 
-						intensityFormat.format(parentIon.getIntensity()));
+		else {
+			msBlock.add(">compound " + getName());
+			msBlock.add(">parentmass " + MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()));
+			msBlock.add(">ionization " + adduct.getName());
+			msBlock.add(">comments " + getComment());
+			msBlock.add("");
+			
+			Collection<TandemMassSpectrum>msmsList = getMsMsSpectra();
+			for(TandemMassSpectrum msms : msmsList) {
+				
+				msBlock.add(">collision " + ceFormat.format(msms.getCidLevel()));
+				for(MsPoint p : msms.getMassSortedSpectrum()) {
+					
+					msBlock.add(
+							MRC2ToolBoxConfiguration.getMzFormat().format(p.getMz()) + " " + 
+									intensityFormat.format(p.getIntensity()));
+				}
+				msBlock.add("");
+			}
+			msBlock.add(">ms1");
+			msBlock.add(
+					MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()) + " " + 
+							intensityFormat.format(parentIon.getIntensity()));
+		}
+
 		msBlock.add("");
 		return StringUtils.join(msBlock, "\n");
 	}

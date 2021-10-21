@@ -61,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.impl.TaskControllerImpl;
 import edu.umich.med.mrc2.datoolbox.utils.SysStreamsLogger;
 import umich.ms.datatypes.LCMSData;
@@ -83,6 +84,7 @@ public final class MRC2ToolBoxCore {
 	private static MainWindow mainWindow;
 	private static TaskControllerImpl taskController;
 	private static DataAnalysisProject currentProject;
+	private static RawDataAnalysisProject activeRawDataAnalysisProject;
 	private static Collection<CompoundLibrary>activeMsLibraries;
 	private static RenjinScriptEngine rScriptEngine;
 
@@ -199,6 +201,7 @@ public final class MRC2ToolBoxCore {
 		//initClassyFireOntology();
 		
 		mainWindow = new MainWindow();
+		mainWindow.loadPreferences();
 		mainWindow.setVisible(true);
         if (splash != null){
         	try {
@@ -346,5 +349,13 @@ public final class MRC2ToolBoxCore {
 		compositeCacheManager.configure(cacheProps);
 		
 		msmsFeatureCache = JCS.getInstance("msmsFeatureCache");
+	}
+
+	public static RawDataAnalysisProject getActiveRawDataAnalysisProject() {
+		return activeRawDataAnalysisProject;
+	}
+
+	public static void setActiveRawDataAnalysisProject(RawDataAnalysisProject activeRawDataAnalysisProject) {
+		MRC2ToolBoxCore.activeRawDataAnalysisProject = activeRawDataAnalysisProject;
 	}
 }

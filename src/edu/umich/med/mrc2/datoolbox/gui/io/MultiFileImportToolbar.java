@@ -46,7 +46,8 @@ public class MultiFileImportToolbar extends CommonToolbar {
 	private static final Icon clearDataIcon = GuiUtils.getIcon("clearWorklist", 32);
 	private static final Icon editReferenceSamplesIcon = GuiUtils.getIcon("standardSample", 32);
 	private static final Icon loadDesignIcon = GuiUtils.getIcon("loadDesign", 32);
-
+	private static final Icon addAcqMethodIcon = GuiUtils.getIcon("addDataAcquisitionMethod", 32);
+	private static final Icon addDextrMethodIcon = GuiUtils.getIcon("addDataProcessingMethod", 32);
 	private JButton
 		dataAnalysisPipelineButton,
 		selectLibraryButton,
@@ -55,7 +56,9 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		removeDataFilesButton,
 		clearDataButton,
 		editReferenceSamplesButton,
-		loadDesignButton;
+		loadDesignButton,
+		addAcqMethodButton,
+		addDextrMethodButton;
 
 	public MultiFileImportToolbar(ActionListener commandListener) {
 		
@@ -91,6 +94,16 @@ public class MultiFileImportToolbar extends CommonToolbar {
 				MainActionCommands.SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND.getName(),
 				buttonDimension);
 		
+		addAcqMethodButton = GuiUtils.addButton(this, null, addAcqMethodIcon, commandListener,
+				MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName(),
+				buttonDimension);
+		
+		addDextrMethodButton = GuiUtils.addButton(this, null, addDextrMethodIcon, commandListener,
+				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
+				buttonDimension);
+		
 		addSeparator(buttonDimension);
 		
 		loadDesignButton = GuiUtils.addButton(this, null, loadDesignIcon, commandListener,
@@ -114,6 +127,8 @@ public class MultiFileImportToolbar extends CommonToolbar {
 		clearDataButton.setEnabled(active);
 		editReferenceSamplesButton.setEnabled(active);
 		loadDesignButton.setEnabled(active);
+		addAcqMethodButton.setEnabled(active);
+		addDextrMethodButton.setEnabled(active);
 	}
 }
 

@@ -25,6 +25,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeSelectionEvent;
@@ -53,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
+import edu.umich.med.mrc2.datoolbox.gui.io.NewProjectDialog;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableMsMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -62,6 +65,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.DockableChromatogramPl
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.RawDataConversionSetupDialog;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisProjectSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTree;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.TreeGrouping;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
@@ -70,17 +74,23 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveProjectTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MassSpectraAveragingTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ProjectRawDataFileOpenTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataBatchCoversionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataFileOpenTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryIndexingTask;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.scan.IScan;
@@ -102,6 +112,13 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel implements Tr
 	private IndeterminateProgressDialog idp;
 	private CloseRawDataFilesDialog closeRawDataFilesDialog;
 	private RawDataConversionSetupDialog rawDataConversionSetupDialog;
+	
+	private boolean showOpenProjectDialog;
+	private RawDataAnalysisProject activeRawDataAnalysisProject;
+	private RawDataAnalysisProjectSetupDialog rawDataAnalysisProjectSetupDialog;
+	private boolean saveOnCloseRequested;
+	private boolean saveOnExitRequested;
+	private boolean showNewProjectDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("chromatogram", 16);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "RawDataPanel.layout");
@@ -165,11 +182,29 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel implements Tr
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		
-//		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
-//			MessageDialog.showErrorMsg("You are not logged in ID tracker!", this.getContentPane());
-//			return;
-//		}
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
+			return;
+		}
 		String command = event.getActionCommand();
+		
+		if (command.equals(MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName())) 
+			showNewRawDataAnalysisProjectDialog();
+		
+		if (command.equals(MainActionCommands.NEW_RAW_DATA_PROJECT_COMMAND.getName())) 
+			createNewRawDataAnalysisProject();
+			
+		if (command.equals(MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND.getName())) 
+			openRawDataAnalysisProject();
+		
+		if (command.equals(MainActionCommands.CLOSE_RAW_DATA_PROJECT_COMMAND.getName())) 
+			closeRawDataAnalysisProject();
+		
+		if (command.equals(MainActionCommands.SAVE_RAW_DATA_PROJECT_COMMAND.getName())) 
+			saveRawDataAnalysisProject();
+		
 		if (command.equals(MainActionCommands.GROUP_TREE_BY_FILE.getName())){
 						
 			dataFileTreePanel.groupTree(TreeGrouping.BY_DATA_FILE);
@@ -210,6 +245,155 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel implements Tr
 		
 		if (command.equals(MainActionCommands.EXTRACT_CHROMATOGRAM.getName()))	
 			extractChromatogramms();		
+	}
+	
+	public void showNewRawDataAnalysisProjectDialog() {
+		
+		// TODO check if there is active opened project
+		
+		rawDataAnalysisProjectSetupDialog = new RawDataAnalysisProjectSetupDialog(this);
+		rawDataAnalysisProjectSetupDialog.setLocationRelativeTo(this.getContentPane());
+		rawDataAnalysisProjectSetupDialog.setVisible(true);
+	}
+
+	private void createNewRawDataAnalysisProject() {
+		
+		Collection<String>errors = validateRawDataAnalysisProjectSetup();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), 
+					rawDataAnalysisProjectSetupDialog);
+			return;
+		}				
+		File parentDirectory = 
+				new File(rawDataAnalysisProjectSetupDialog.getProjectLocationPath());		
+		RawDataAnalysisProject newProject = new RawDataAnalysisProject(
+				rawDataAnalysisProjectSetupDialog.getProjectName(), 
+				rawDataAnalysisProjectSetupDialog.getProjectDescription(), 
+				parentDirectory);
+		List<DataFile> dataFiles = 
+				rawDataAnalysisProjectSetupDialog.getDataFiles().stream().
+				map(f -> new DataFile(f)).collect(Collectors.toList());
+		
+		newProject.addDataFiles(dataFiles);
+		boolean copyDataToProject = 
+				rawDataAnalysisProjectSetupDialog.copyRawDataToProject();
+		rawDataAnalysisProjectSetupDialog.dispose();
+		
+		//	Save project file
+		ProjectUtils.saveProjectFile(newProject);
+		
+		//	Set project as active
+		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(newProject);
+		
+		//	 Load raw data
+		ProjectRawDataFileOpenTask task = 
+				new ProjectRawDataFileOpenTask(newProject, copyDataToProject);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);	
+	}
+	
+	private Collection<String>validateRawDataAnalysisProjectSetup(){
+		
+		Collection<String>errors = new ArrayList<String>();
+		String name = rawDataAnalysisProjectSetupDialog.getProjectName();
+		String location = rawDataAnalysisProjectSetupDialog.getProjectLocationPath();
+		
+		if(name.isEmpty())
+			errors.add("Project name can not be empty");
+		
+		if(location.isEmpty())		
+			errors.add("Project name can not be empty");
+		
+		if(!location.isEmpty() && !name.isEmpty()) {	
+
+			File projectDir = Paths.get(location, name).toFile();
+			if(projectDir.exists())
+				errors.add("Project \"" + name + "\" alredy exists at " + location);
+		}		
+		if(rawDataAnalysisProjectSetupDialog.getDataFiles().isEmpty())
+			errors.add("No raw data files added to the project");
+		
+		return errors;
+	}
+	
+	private void openRawDataAnalysisProject() {
+
+		if (activeRawDataAnalysisProject != null) {
+
+			int selectedValue = JOptionPane.showInternalConfirmDialog(this.getContentPane(),
+					"You are going to close current project, do you want to save the results (Yes - save, No - discard)?",
+					"Save active project", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+
+			if (selectedValue == JOptionPane.YES_OPTION) {
+
+				runSaveProjectTask();
+				this.clearPanel();
+				//	TODO clear tracker workbench if used
+				MRC2ToolBoxCore.getMainWindow().setTitle(BuildInformation.getProgramName());
+				activeRawDataAnalysisProject = null;
+				showOpenProjectDialog = true;
+			}
+			if (selectedValue == JOptionPane.NO_OPTION) {
+
+				this.clearPanel();
+				//	TODO clear tracker workbench if used
+				MRC2ToolBoxCore.getMainWindow().setTitle(BuildInformation.getProgramName());
+				activeRawDataAnalysisProject = null;
+				initRawDataAnalysisProjectLoadTask();
+			}
+			if (selectedValue == JOptionPane.CANCEL_OPTION)
+				return;
+		}
+		else
+			initRawDataAnalysisProjectLoadTask();
+	}	
+	
+	private void saveRawDataAnalysisProject() {
+
+		if (activeRawDataAnalysisProject != null)
+			runSaveProjectTask();
+	}
+	
+	private void runSaveProjectTask() {
+
+		if(activeRawDataAnalysisProject == null)
+			return;
+		
+		SaveRawDataAnalysisProjectTask task = 
+				new SaveRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+	}
+
+	private void initRawDataAnalysisProjectLoadTask() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void closeRawDataAnalysisProject() {
+
+		if (activeRawDataAnalysisProject == null)
+			return;
+
+		String yesNoQuestion = "You are going to close current project,"
+				+ " do you want to save the results (Yes - save, No - discard)?";
+		int selectedValue = MessageDialog.showChooseOrCancelMsg(
+				yesNoQuestion, this.getContentPane());
+		if (selectedValue == JOptionPane.CANCEL_OPTION)
+			return;
+
+		if (selectedValue == JOptionPane.YES_OPTION) {
+			saveOnCloseRequested = true;
+			runSaveProjectTask();
+			return;
+		}
+		clearGuiAfterProjectClosed();
+	}
+	
+	private void clearGuiAfterProjectClosed() {		
+		activeRawDataAnalysisProject = null;
+		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(null);
+		clearPanel();
 	}
 
 	private void extractChromatogramms() {
@@ -392,9 +576,61 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel implements Tr
 			}
 			if(e.getSource().getClass().equals(RawDataRepositoryIndexingTask.class)) 
 				MessageDialog.showInfoMsg("Raw data indexing completed", this.getContentPane());
+			
+			if(e.getSource().getClass().equals(ProjectRawDataFileOpenTask.class)) {
+				ProjectRawDataFileOpenTask task = (ProjectRawDataFileOpenTask)e.getSource();
+				finalizeProjectRawDataLoad(task);
+			}
+			//	Save project
+			if (e.getSource().getClass().equals(SaveRawDataAnalysisProjectTask.class))
+				finalizeRawDataAnalysisProjectSave();
 		}
 	}
 	
+	private void finalizeRawDataAnalysisProjectSave() {
+		
+		if(showNewProjectDialog) {
+
+			showNewProjectDialog = false;
+			clearGuiAfterProjectClosed();
+			rawDataAnalysisProjectSetupDialog = new RawDataAnalysisProjectSetupDialog(this);
+			rawDataAnalysisProjectSetupDialog.setLocationRelativeTo(this.getContentPane());
+			rawDataAnalysisProjectSetupDialog.setVisible(true);
+		}
+		if(saveOnCloseRequested) {
+
+			saveOnCloseRequested = false;
+			clearGuiAfterProjectClosed();
+		}
+		if(saveOnExitRequested) {
+
+			saveOnExitRequested = false;
+			int selectedValue = JOptionPane.showInternalConfirmDialog(this.getContentPane(),
+					"Are you sure you want to exit?", "Exiting...", JOptionPane.YES_NO_OPTION,
+					JOptionPane.WARNING_MESSAGE);
+
+			if (selectedValue == JOptionPane.YES_OPTION)
+				MRC2ToolBoxCore.getMainWindow().shutDown();
+		}
+		if(showOpenProjectDialog) {
+
+			clearGuiAfterProjectClosed();
+			showOpenProjectDialog = false;
+			initRawDataAnalysisProjectLoadTask();
+		}
+	}
+	
+	private void finalizeProjectRawDataLoad(ProjectRawDataFileOpenTask task) {
+
+		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
+				task.getProject().getRawDataFiles());
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+
 	public void finalizeMassSpectraAveraging(MassSpectraAveragingTask task) {
 		
 		Collection<AverageMassSpectrum> spectra = task.getExtractedSpectra();
@@ -537,6 +773,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel implements Tr
 		if(s.getMsLevel() == 1) {
 			msPlotPanel.showScan(s);
 			msTable.setTableModelFromScan(s);
+			msmsPlotPane.clearPanel();
+			msmsTable.clearTable();
 		}
 		else {
 			msmsPlotPane.showScan(s);

@@ -163,6 +163,26 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		eventListeners = ConcurrentHashMap.newKeySet();
 	}
 
+	public MsFeature(double retentionTime, Polarity polarity) {
+		super();
+		this.id = DataPrefix.MS_FEATURE.getName() + UUID.randomUUID().toString();
+		this.retentionTime = retentionTime;
+		this.polarity = polarity;
+		
+		rtRange = new Range(retentionTime);
+		spectrum = null;
+		neutralMass = 0.0d;
+		active = true;
+		qualityScore = 0;
+		identifications = new HashSet<MsFeatureIdentity>();
+		primaryIdentity = null;
+		annotations = new TreeSet<ObjectAnnotation>();
+		defaultModification = null;
+		suggestedModification = null;
+		binnerAnnotation = null;
+		eventListeners = ConcurrentHashMap.newKeySet();
+	}
+
 	/*
 	 * Annotation
 	 * */

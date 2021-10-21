@@ -33,7 +33,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
@@ -47,10 +50,12 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.commons.lang3.StringUtils;
 
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.theme.ThemeMap;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -141,6 +146,9 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 		if (command.equals(MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName()))
 			loadWorklistFromDirectoryScan(true);
+		
+		if (command.equals(MainActionCommands.CHECK_WORKLIST_FOR_MISSING_DATA.getName()))
+			checkWorklistForMissingData();
 
 		if (command.equals(MainActionCommands.SAVE_WORKLIST_COMMAND.getName()))
 			saveWorklistToFile();
@@ -153,6 +161,40 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 		if (command.equals(MainActionCommands.CLEAR_WORKLIST_COMMAND.getName()))
 			clearWorklist();
+	}
+
+	private void checkWorklistForMissingData() {
+		
+		if(currentProject == null || activeDataPipeline == null)
+			return;
+		
+		Worklist worklist = currentProject.getWorklistForDataAcquisitionMethod(
+				activeDataPipeline.getAcquisitionMethod());
+		
+		if(worklist == null)
+			return;
+				
+		Set<DataFile> allDataFiles = currentProject.getDataFilesForPipeline(activeDataPipeline, false);
+		Set<DataFile> worklistDataFiles = worklist.getWorklistItems().stream().
+				map(i -> i.getDataFile()).collect(Collectors.toSet());
+		
+		List<DataFile> missingFiles = allDataFiles.stream().filter(f -> !worklistDataFiles.contains(f)).
+			sorted().collect(Collectors.toList());
+		
+		if(!missingFiles.isEmpty()) {
+			
+			List<String> fileNames = missingFiles.stream().
+					map(f -> f.getName()).sorted().collect(Collectors.toList());
+			
+			MessageDialog.showWarningMsg(
+					"Worklist data missing for:\n" + StringUtils.join(fileNames, "\n"), 
+					this.getContentPane());
+		}
+		else {
+			MessageDialog.showInfoMsg(
+					"No missing data.", 
+					this.getContentPane());
+		}
 	}
 
 	private void extractWorlkistFromRawDataFolderToFile() {

@@ -24,5 +24,6 @@ package edu.umich.med.mrc2.datoolbox.msmsfdr;
 public enum MergeType {
 	BEST_IN_TYPE,
 	BEST_OVERALL,
+	MERGE_ALL
 	;
 }

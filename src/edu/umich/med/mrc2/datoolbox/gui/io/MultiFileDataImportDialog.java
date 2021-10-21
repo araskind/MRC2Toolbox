@@ -88,9 +88,15 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FeatureAlignmentType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.expdesign.editor.ReferenceSampleDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodExtendedEditorDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.DockableAcquisitionMethodDataPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.DataExtractionMethodEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.matcher.DataFileSampleMatchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -151,8 +157,9 @@ public class MultiFileDataImportDialog extends JDialog
 	private DataAcquisitionMethod activeDataAcquisitionMethod;
 	private Set<DataFile>dataFilesForMethod;
 	private boolean pfaLoaded = false;
-
 	private DataAnalysisProject currentProject;
+	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
+	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
 	
 	private static final Icon importMultifileIcon = GuiUtils.getIcon("importMultifile", 32);
 
@@ -377,6 +384,89 @@ public class MultiFileDataImportDialog extends JDialog
 		
 		if (command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
 			chooseDesignFile();
+		
+		if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName()))
+			showAcquisitionMethodEditor();
+		
+		if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_COMMAND.getName()))
+			addAcquisitionMethod();
+		
+		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName()))
+			showDataExtractionMethodEditor();
+		
+		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
+			addDataExtractionMethod();
+	}
+	
+	private void showDataExtractionMethodEditor() {
+		
+		dataExtractionMethodEditorDialog = new DataExtractionMethodEditorDialog(null, this);
+		dataExtractionMethodEditorDialog.setLocationRelativeTo(this.getContentPane());
+		dataExtractionMethodEditorDialog.setVisible(true);
+	}
+	
+	private void addDataExtractionMethod() {
+
+		Collection<String>errors = dataExtractionMethodEditorDialog.validateMethodData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), dataExtractionMethodEditorDialog);
+			return;
+		}
+		DataExtractionMethod selectedMethod = new DataExtractionMethod(
+					null,
+					dataExtractionMethodEditorDialog.getMethodName(),
+					dataExtractionMethodEditorDialog.getMethodDescription(),
+					MRC2ToolBoxCore.getIdTrackerUser(),
+					new Date());
+		String methodId = null;
+		try {
+			methodId = IDTUtils.addNewDataExtractionMethod(
+					selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
+			selectedMethod.setId(methodId);
+			IDTDataCash.getDataExtractionMethods().add(selectedMethod);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		dataExtractionMethodEditorDialog.dispose();
+	}
+	
+	private void showAcquisitionMethodEditor() {
+
+		acquisitionMethodEditorDialog = new AcquisitionMethodExtendedEditorDialog(null, this);
+		acquisitionMethodEditorDialog.setLocationRelativeTo(this.getContentPane());
+		acquisitionMethodEditorDialog.setVisible(true);
+	}
+	
+	private void addAcquisitionMethod() {
+
+		Collection<String>errors = acquisitionMethodEditorDialog.validateMethodData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), acquisitionMethodEditorDialog);
+			return;
+		}
+		DockableAcquisitionMethodDataPanel methodData = acquisitionMethodEditorDialog.getDataPanel();
+		DataAcquisitionMethod newMethod = new DataAcquisitionMethod(
+					null,
+					methodData.getMethodName(),
+					methodData.getMethodDescription(),
+					MRC2ToolBoxCore.getIdTrackerUser(),
+					new Date());
+
+		newMethod.setPolarity(methodData.getMethodPolarity());
+		newMethod.setMsType(methodData.getMethodMsType());
+		newMethod.setColumn(methodData.getColumn());
+		newMethod.setIonizationType(methodData.getIonizationType());
+		newMethod.setMassAnalyzerType(methodData.getMassAnalyzerType());
+		newMethod.setSeparationType(methodData.getChromatographicSeparationType());
+		try {
+			AcquisitionMethodUtils.addNewAcquisitionMethod(newMethod, methodData.getMethodFile());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		IDTDataCash.getAcquisitionMethods().add(newMethod);		
+		acquisitionMethodEditorDialog.dispose();
 	}
 	
 	private void editReferenceSamples() {
@@ -684,6 +774,7 @@ public class MultiFileDataImportDialog extends JDialog
 				o.getSample().addDataFile(o.getDataFile());
 		}	
 		if(existingDataPipeline != null) {
+
 			MultiCefDataAddTask task = new MultiCefDataAddTask(
 					dataToImport, 
 					importPipeline, 

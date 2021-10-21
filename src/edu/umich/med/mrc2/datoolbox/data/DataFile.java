@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.awt.Color;
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,6 +60,21 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 	public DataFile(String fileName) {
 
 		this.name = fileName;
+		enabled = true;
+		injectionTime = null;
+		acquisitionMethod = null;
+		scalingFactor = 1.0d;
+		batchNumber = 1;
+		chromatograms = new ArrayList<ExtractedChromatogram>();
+		userSpectra = new ArrayList<AverageMassSpectrum>();
+		color = Color.BLACK;
+		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();
+	}
+	
+	public DataFile(File dataFile) {
+
+		this.name = dataFile.getName();
+		fullPath = dataFile.getAbsolutePath();
 		enabled = true;
 		injectionTime = null;
 		acquisitionMethod = null;

@@ -51,6 +51,7 @@ import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -93,6 +94,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.FindDuplicateNamesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
@@ -302,6 +304,20 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		if (command.equals(MainActionCommands.CLEAR_SELECTED_FEATURE_IDENTIFICATION_COMMAND.getName()))
 			clearSelectedFeatureIdentifications();
+		
+		if (command.equals(MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName()))
+			checkForDuplicateNames();		
+	}
+
+	private void checkForDuplicateNames() {
+		
+		if(currentProject == null || activeDataPipeline == null)
+			return;
+			
+		FindDuplicateNamesTask task = 
+			new FindDuplicateNamesTask(currentProject, activeDataPipeline);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);;
 	}
 
 	private void showFeatureFilter() {
@@ -1056,11 +1072,32 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (e.getSource().getClass().equals(RemoveEmptyFeaturesTask.class))
 				finalizeEmptyFeatureCleanup((RemoveEmptyFeaturesTask) e.getSource());
 			
+			if (e.getSource().getClass().equals(FindDuplicateNamesTask.class))
+				finalizeDuplicateNameSearch((FindDuplicateNamesTask) e.getSource());			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR)
 			MainWindow.hideProgressDialog();
 	}
 
+	private void finalizeDuplicateNameSearch(FindDuplicateNamesTask task) {
+
+		if(task.getDuplicateNameList().isEmpty()) {
+			MessageDialog.showInfoMsg(
+					"No duplicate feature names found.", 
+					this.getContentPane());
+			return;
+		}
+		Collection<String>dupNames = new TreeSet<String>();
+		for(MsFeatureCluster cluster : task.getDuplicateNameList())		
+			dupNames.add(cluster.getPrimaryFeature().getName());
+
+		InformationDialog info = new InformationDialog(
+				"Duplicate feature names", 
+				"Found the following duplicate feature names",
+				StringUtils.join(dupNames, "\n"),
+				this.getContentPane());
+	}
+	
 	private void finalizeQuantDataLoad(QuantMatrixImportTask quantMatrixImportTask) {
 
 		DataPipeline dataPipeline = quantMatrixImportTask.getDataPipeline();
@@ -1221,7 +1258,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		Collection<MsFeature> filtered = new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.RT));
 		for (double mz : monoisotopicAdductMasses) {
 
-			Range mzRange = MsUtils.createMassRange(mz, massAccuracyPpm);
+			Range mzRange = MsUtils.createPpmMassRange(mz, massAccuracyPpm);
 			Set<MsFeature> adductFiltered = 
 					currentProject.getMsFeaturesForDataPipeline(activeDataPipeline).stream().
 					filter(f -> rtRange.contains(f.getRetentionTime())).

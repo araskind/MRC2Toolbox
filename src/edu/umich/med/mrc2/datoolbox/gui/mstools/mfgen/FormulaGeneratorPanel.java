@@ -201,7 +201,7 @@ public class FormulaGeneratorPanel extends JPanel implements ActionListener, Tas
 		double mz = Double.parseDouble(mzTextField.getText());
 		Adduct ad = chModPanel.getSelectedModification();
 		double neutraltMass = MsUtils.calculateNeutralMass(mz, ad);
-		Range massRange = MsUtils.createMassRange(neutraltMass, ppm);
+		Range massRange = MsUtils.createPpmMassRange(neutraltMass, ppm);
 		double error = massRange.getMax() - neutraltMass;
 		ToleranceRangeRule toleranceRule = new ToleranceRangeRule();
 		toleranceRule.setParameters(new Object[]{neutraltMass, error});

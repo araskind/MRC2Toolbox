@@ -21,14 +21,17 @@ System.out.println(smiles); * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.ed
 
 package edu.umich.med.mrc2.datoolbox.misctest;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.URLEncoder;
@@ -75,6 +78,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -86,6 +91,7 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
@@ -96,6 +102,8 @@ import org.openscience.cdk.interfaces.IBioPolymer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.io.MDLV2000Reader;
+import org.openscience.cdk.io.MDLV3000Writer;
+import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.io.inchi.INChIContentProcessorTool;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
@@ -125,6 +133,9 @@ import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescription;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.compare.PepSearchOutputObjectComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -137,6 +148,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDStudy;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDWorkflow;
@@ -149,8 +161,9 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTMsDataUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
+import edu.umich.med.mrc2.datoolbox.database.load.massbank.MassBankFileParser;
+import edu.umich.med.mrc2.datoolbox.database.load.massbank.MassBankTandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.database.load.mine.MINEMSPParser;
 import edu.umich.med.mrc2.datoolbox.database.load.msdial.LipidBlastRikenParser;
 import edu.umich.med.mrc2.datoolbox.database.load.msdial.MSDialMSMSRecord;
@@ -158,6 +171,7 @@ import edu.umich.med.mrc2.datoolbox.database.load.msdial.MSDialMetabolomicsLibra
 import edu.umich.med.mrc2.datoolbox.database.load.nist.NISTDataUploader;
 import edu.umich.med.mrc2.datoolbox.database.load.nist.NISTMSPParser;
 import edu.umich.med.mrc2.datoolbox.database.load.nist.NISTTandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.database.load.nist.NISTmspField;
 import edu.umich.med.mrc2.datoolbox.database.load.pubchem.PubChemFields;
 import edu.umich.med.mrc2.datoolbox.database.load.pubchem.PubChemParser;
 import edu.umich.med.mrc2.datoolbox.database.thermo.CompoundDiscovererUtils;
@@ -168,16 +182,20 @@ import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.msmsfdr.MergeType;
 import edu.umich.med.mrc2.datoolbox.msmsfdr.NISTPepSearchResultManipulator;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.LIMSReportingUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MGFUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PeptideUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 import edu.umich.med.mrc2.datoolbox.utils.WebUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
+import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodReportParser;
 import net.sf.jniinchi.INCHI_RET;
 
 public class RegexTest {
@@ -203,10 +221,1005 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			String pwd = UserUtils.encryptString("admin");
-			System.out.println(pwd);
+			extractMSMSisolationWindows();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public static void extractMSMSisolationWindows() throws Exception {
+		
+		List<File> methodFiles = Files.find(Paths.get("C:\\Users\\Sasha\\Downloads\\MSMSMethods\\AcqReports"), 1,
+				(filePath, fileAttr) -> filePath.toString().toLowerCase().endsWith(".xls") && fileAttr.isRegularFile()).
+				map(p -> p.toFile()).collect(Collectors.toList());
+		
+		String mn = "Method Name";
+		String iw = "Isolation Width MS/MS";
+		
+		Map<String,String>isolWindowMap = new TreeMap<String,String>();
+		for(File methodFile : methodFiles) {
+			
+			Map<String,String>paramMap = 
+					AgilentAcquisitionMethodReportParser.parseAgilentAcquisitionMethodReportFile(methodFile);
+			if(paramMap.get(mn) != null && paramMap.get(iw) != null)
+				isolWindowMap.put(paramMap.get(mn), paramMap.get(iw));
+			
+			System.out.println(methodFile.getName());
+		}
+		List<String>paramLines = new ArrayList<String>();
+		for(Entry<String,String> e : isolWindowMap.entrySet())
+			paramLines.add(e.getKey() + "\t" + e.getValue());
+					
+		Path scriptPath = Paths.get("C:\\Users\\Sasha\\Downloads\\MSMSMethods\\IsolationWindowMap.txt");
+	    try {
+			Files.write(scriptPath, 
+					paramLines, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void getMSMSAcquisitionMethodFiles() throws Exception {
+
+		File destinationFolder = new File("C:\\Users\\Sasha\\Downloads\\MSMSMethods");
+		//	Get zip from database
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT METHOD_NAME, METHOD_CONTAINER "
+				+ "FROM DATA_ACQUISITION_METHOD "
+				+ "WHERE MS_TYPE = 'HRMSMS'";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+
+			File zipFile = 
+					Paths.get(destinationFolder.getAbsolutePath(), rs.getString("METHOD_NAME") + ".zip").toFile();
+			BufferedInputStream is = new BufferedInputStream(rs.getBinaryStream("METHOD_CONTAINER"));
+			FileOutputStream fos = new FileOutputStream(zipFile);
+			byte[] buffer = new byte[2048];
+			int r = 0;
+			while ((r = is.read(buffer)) != -1)
+				fos.write(buffer, 0, r);
+
+			fos.flush();
+			fos.close();
+			is.close();
+			
+			//	Extract archive and delete zip;
+			if(zipFile.exists()) {
+
+	            ZipArchiveInputStream zipStream = new ZipArchiveInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
+	            ZipArchiveEntry entry;
+	            while ((entry = zipStream.getNextZipEntry()) != null) {
+
+	                if (entry.isDirectory())
+	                	continue;
+
+	                File curfile = new File(destinationFolder, entry.getName());
+	                File parent = curfile.getParentFile();
+	                if (!parent.exists())
+	                    parent.mkdirs();
+
+	                fos = new FileOutputStream(curfile);
+	                IOUtils.copy(zipStream, fos);
+	                fos.close();
+	            }
+	            zipStream.close();
+	    		Path path = Paths.get(zipFile.getAbsolutePath());
+	    	    Files.delete(path);
+			}
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void generateCorrelationsRScript() throws IOException {
+		
+		String dirPath = "Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\RSD-stats-calculation";
+		String[]namingList = new String[] {"Unnamed", "Named"};
+		ArrayList<String>scriptLines = new ArrayList<String>();
+		scriptLines.add("library(tidyverse)");
+		scriptLines.add("library(matrixStats)");
+		scriptLines.add("library(gridExtra)");
+		scriptLines.add("library(ggpubr)");
+		scriptLines.add("lm_eqn <- function(df){ m <- lm(Mean ~ RSD, df); ");
+		scriptLines.add("r2 = format(summary(m)$r.squared, digits = 3)");
+		scriptLines.add(" paste(\"R^2 = \", r2); }");
+		scriptLines.add("");	
+		scriptLines.add("plotList <- list()");
+		scriptLines.add("");
+		
+		for(String naming : namingList) {
+			
+			List<File> dataFiles = Files.find(Paths.get(dirPath, naming, "DataRenamed"), 1,
+					(filePath, fileAttr) -> filePath.toString().toLowerCase().endsWith(".txt") && fileAttr.isRegularFile()).
+					map(p -> p.toFile()).collect(Collectors.toList());
+			
+			scriptLines.add("#################################################");
+			scriptLines.add("# " + naming + "##########");
+			scriptLines.add("#################################################");
+			int plotCount = 1;
+			for(File dataFile : dataFiles) {
+				
+				String baseName = FilenameUtils.getBaseName(dataFile.getName()).replace("_", " ");
+				String plotId = "p"+ Integer.toString(plotCount);
+				String tableName = "stats.pools.table"+ Integer.toString(plotCount);
+				
+				scriptLines.add("# " + baseName + "##########");
+				scriptLines.add("metab.data <- read.delim(\"" + 
+						dataFile.getAbsolutePath().replace("\\", "/") + "\", check.names=FALSE)");
+				scriptLines.add("metab.data.pools <- select(metab.data, contains(\"CS00000MP\"))");
+				scriptLines.add(tableName + " <- metab.data.pools %>% "
+						+ "mutate(Mean = rowMeans(metab.data.pools, na.rm = TRUE), "
+						+ "Median = rowMedians(as.matrix(metab.data.pools), na.rm = TRUE), "
+						+ "stdev=rowSds(as.matrix(metab.data.pools), na.rm = TRUE), "
+						+ "repr = rowSums(!is.na(metab.data.pools)) / (rowSums(is.na(metab.data.pools)) + rowSums(!is.na(metab.data.pools)))) %>% "
+						+ "mutate(RSD = stdev / Mean * 100) %>% "
+						+ "select(c(\"Mean\", \"Median\", \"stdev\", \"RSD\", \"repr\")) %>% filter(Median < 7000)");
+				
+//				scriptLines.add(tableName + " <- cbind(metab.data$metabolite_name, stats.pools)");
+//				scriptLines.add("colnames(" + tableName + ")[1] <- \"metabolite_name\"");
+				
+				scriptLines.add(plotId + " <- ggplot(data = " + tableName + ", aes(x=Median,y=RSD)) + ");
+				scriptLines.add("geom_point(alpha=0.5) + labs(x= \"Median area\", y=\"RSD%\") + ");
+				scriptLines.add("geom_smooth() + ylim(0,60) + ");
+				scriptLines.add("geom_text(x = 50000, y = 50, label = lm_eqn(" + tableName + "), parse = F) + ");
+				scriptLines.add("ggtitle(\"" + baseName + "\")");
+				scriptLines.add("plotList[[" + Integer.toString(plotCount) + "]] <- " + plotId);							
+				scriptLines.add("");
+				plotCount++;
+			}
+			//	Plots to PDF
+			String pdfPath = Paths.get(dirPath, naming, "DataRenamed", 
+					"EX00979 RSD to peak area correlation plots for areas below 100K (" + naming + " data).pdf").toString().replace("\\", "/");
+			scriptLines.add("multi.page <- ggarrange(plotlist = plotList, nrow=3, ncol=1)");
+			scriptLines.add("ggexport(multi.page, filename=\"" + pdfPath + "\", height=11, width=8.5)");
+			scriptLines.add("");
+		}
+		Path scriptPath = Paths.get(
+				dirPath, "PASS1B_CorrelationSummariesForAreasBelow7K.R");
+	    try {
+			Files.write(scriptPath, 
+					scriptLines, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void generateRsdScript() throws IOException {
+		
+		String dirPath = "Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\RSD-stats-calculation";
+		String[]namingList = new String[] {"Unnamed", "Named"};
+		ArrayList<String>scriptLines = new ArrayList<String>();
+		scriptLines.add("library(tidyverse)");
+		scriptLines.add("library(matrixStats)");
+		scriptLines.add("library(gridExtra)");
+		scriptLines.add("");
+	
+		for(String naming : namingList) {
+			
+			List<File> dataFiles = Files.find(Paths.get(dirPath, naming), 1,
+					(filePath, fileAttr) -> filePath.toString().toLowerCase().endsWith(".txt") && fileAttr.isRegularFile()).
+					map(p -> p.toFile()).collect(Collectors.toList());
+			
+			scriptLines.add("#################################################");
+			scriptLines.add("# " + naming + "##########");
+			scriptLines.add("#################################################");
+			for(File dataFile : dataFiles) {
+				
+				String baseName = FilenameUtils.getBaseName(dataFile.getName());
+				scriptLines.add("# " + baseName + "##########");
+				scriptLines.add("metab.data <- read.delim(\"" + 
+						dataFile.getAbsolutePath().replace("\\", "/") + "\", check.names=FALSE)");
+				scriptLines.add("metab.data.pools <- select(metab.data, contains(\"CS00000MP\"))");
+				scriptLines.add("stats.pools <- metab.data.pools %>% "
+								+ "mutate(Mean = rowMeans(metab.data.pools, na.rm = TRUE), "
+								+ "stdev=rowSds(as.matrix(metab.data.pools), na.rm = TRUE)) %>% "
+								+ "mutate(RSD = stdev / Mean * 100) %>% "
+								+ "select(c(\"Mean\", \"stdev\", \"RSD\"))");
+				scriptLines.add("stats.pools.table <- cbind(metab.data$metabolite_name, stats.pools)");
+				scriptLines.add("colnames(stats.pools.table)[1] <- \"metabolite_name\"");
+				
+//				String tableFilePath = Paths.get(
+//						dataFile.getParent(), "Stats", 
+//						FilenameUtils.getBaseName(dataFile.getName()) + 
+//						"_STATS.txt").toString().replace("\\", "/");
+//				scriptLines.add("write.table(stats.pools.table, file = \"" + 
+//						tableFilePath + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
+				
+				scriptLines.add("stats.pools$cut <- cut(stats.pools$RSD, seq(0,max(stats.pools$RSD, na.rm = T), by=5))");
+//				scriptLines.add("rsdPlot <- ggplot(stats.pools, aes(cut)) + "
+//						+ "geom_histogram(stat = \"count\", aes(y = stat(count) / sum(count), fill = ..count..)) + "
+//						+ "labs(x = \"RSD%\", y = \"Frequency\") + "
+//						+ "theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + "
+//						+ "ggtitle(\"RSD% distribution for " + FilenameUtils.getBaseName(dataFile.getName()) + "\")");
+				scriptLines.add("sumStats <- stats.pools %>% "
+						+ "group_by(Range=cut) %>% "
+						+ "summarise(Counts= n()) %>% "
+						+ "mutate(Frequency = Counts/sum(Counts)*100) %>% "
+						+ "arrange(as.numeric(Range))");
+				
+//				String pdfFilePath = Paths.get(
+//						dataFile.getParent(), "Graphics", 
+//						FilenameUtils.getBaseName(dataFile.getName()) + 
+//						"_STATS.pdf").toString().replace("\\", "/");
+//				scriptLines.add("pdf(\"" + pdfFilePath + "\", height=11, width=8.5)");						
+//				scriptLines.add("grid.table(sumStats, rows = NULL)");
+//				scriptLines.add("rsdPlot");	
+//				scriptLines.add("dev.off()");
+				String summaryTableFilePath = Paths.get(
+						dataFile.getParent(), "Summaries", 
+						FilenameUtils.getBaseName(dataFile.getName()) + 
+						"_SUMMARY.txt").toString().replace("\\", "/");
+				scriptLines.add("write.table(sumStats, file = \"" + 
+						summaryTableFilePath + "\", quote = F, sep = \"\\t\", na = \"\", row.names = F)");
+				scriptLines.add("");
+			}
+		}
+		Path scriptPath = Paths.get(
+				dirPath, "PASS1B_RSDSummaries.R");
+	    try {
+			Files.write(scriptPath, 
+					scriptLines, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void batchRunPassatuttoBPA() {
+		
+		String passatuttoPath = "E:\\Eclipse\\git2\\MRC2Toolbox\\data\\passatutto\\*";
+		String searchResultsPath = "E:\\DataAnalysis\\MSMS\\DecoyDB\\Evaluation";
+		String libResults = "Results\\Library";
+		String ebaDir = "PassatuttoEBA";
+		String[] modes = new String[] {
+				"NEG",
+				"POS",
+			};
+		String[] experiments = new String[] {
+				"EX00663-",
+				"EX00884-",
+				"EX00930-MOTRPAC-Plasma-",
+				"EX00930-MOTRPAC-liver-",
+				"EX00930-MOTRPAC-muscle-",
+				"EX00930-MOTRPAC-white-adipose-",
+				"EX00953-MOTRPAC-Hippocampus-",
+				"EX00953-MOTRPAC-Kidney-",
+				"EX00953-MOTRPAC-Lung-",
+				"EX00953-MOTRPAC-brown-adipose-",
+				"EX00953-MOTRPAC-heart-",
+				"EX00979-MOTRPAC-Hippocampus-",
+				"EX00979-MOTRPAC-Kidney-",
+				"EX00979-MOTRPAC-Liver-",
+				"EX00979-MOTRPAC-Lung-",
+				"EX00979-MOTRPAC-Muscle-",
+				"EX00979-MOTRPAC-brown-adipose-",
+				"EX00979-MOTRPAC-heart-",
+				"EX00979-MOTRPAC-white-adipose-",
+		};
+		Map<String,String> searchModes = new HashMap<String,String>();
+		searchModes.put("1_Normal", "");
+//		searchModes.put("2_InSource", "_IN_SOURCE");
+		for(String mode : modes) {
+			
+			for(String experiment : experiments) {
+				
+				for(Entry<String, String> searchMode : searchModes.entrySet()) {
+					
+					String libResFileName = 
+							experiment + mode + searchMode.getValue() + "_PEPSEARCH_RESULTS.TXT";
+					File librarySearchResult = Paths.get(
+							searchResultsPath, 
+							mode, 
+							libResults, 
+							searchMode.getKey(),
+							libResFileName).toFile();
+					
+					System.out.println("Processing " + librarySearchResult.getName());
+					
+					//	Write Passatutto input file sorted by score descending
+					String passatuttoInputFileName = 
+							experiment + mode + searchMode.getValue() + "_PASSATUTTO_INPUT.TXT";
+					File passatuttoInputFile = Paths.get(
+							searchResultsPath, 
+							mode, 
+							libResults, 
+							searchMode.getKey(),
+							ebaDir,
+							passatuttoInputFileName).toFile();
+					
+					NISTPepSearchResultManipulator.createPassatuttoEBAinputFile(
+							librarySearchResult, passatuttoInputFile, true);
+
+					String passatuttoOutputFileName = 
+							experiment + mode + searchMode.getValue() + "_PASSATUTTO_OUTPUT.TXT";		
+					File passatuttoOutputFile = Paths.get(
+							searchResultsPath, 
+							mode, 
+							libResults, 
+							searchMode.getKey(),
+							ebaDir,
+							passatuttoOutputFileName).toFile();
+					
+					 ProcessBuilder pb =
+							   new ProcessBuilder(
+									   "java", 
+									   "-cp", 
+									   passatuttoPath,
+									   "QValueEstimator",
+									   "-target",
+									   passatuttoInputFile.getAbsolutePath(),
+									   "-out",
+									   passatuttoOutputFile.getAbsolutePath(),
+									   "-method",
+									   "EBA");
+//					 System.out.println(StringUtils.join(pb.command(), " "));
+					 
+					try {
+						Process p = pb.start();
+						int exitCode = p.waitFor();
+						if (exitCode == 0) {
+							p.destroy();
+						} else {
+							System.out.println("Passatutto run failed for " + passatuttoInputFile.getName());
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					System.out.println("Created " + passatuttoOutputFile.getName());
+				}
+			}
+		}
+	}
+	
+	private static void batchRunPercollator() {
+		
+		String searchResultsPath = "Y:\\Sasha\\MSMS-decoys\\Evaluation";
+		String libResults = "Results\\Library";
+		String decoyResults = "ResultsNew";
+		String percollatorResults = "ResultsNew\\Percollator";
+		String[] modes = new String[] {
+				"NEG",
+				"POS",
+			};
+		String[] experiments = new String[] {
+				"EX00663-",
+				"EX00884-",
+				"EX00930-MOTRPAC-Plasma-",
+				"EX00930-MOTRPAC-liver-",
+				"EX00930-MOTRPAC-muscle-",
+				"EX00930-MOTRPAC-white-adipose-",
+				"EX00953-MOTRPAC-Hippocampus-",
+				"EX00953-MOTRPAC-Kidney-",
+				"EX00953-MOTRPAC-Lung-",
+				"EX00953-MOTRPAC-brown-adipose-",
+				"EX00953-MOTRPAC-heart-",
+				"EX00979-MOTRPAC-Hippocampus-",
+				"EX00979-MOTRPAC-Kidney-",
+				"EX00979-MOTRPAC-Liver-",
+				"EX00979-MOTRPAC-Lung-",
+				"EX00979-MOTRPAC-Muscle-",
+				"EX00979-MOTRPAC-brown-adipose-",
+				"EX00979-MOTRPAC-heart-",
+				"EX00979-MOTRPAC-white-adipose-",
+		};
+		Map<String,String> searchModes = new HashMap<String,String>();
+		searchModes.put("1_Normal", "");
+		searchModes.put("2_InSource", "_IN_SOURCE");
+
+		String libType = "0_Library";
+		Map<String,String> decoyTypes = new HashMap<String,String>();
+		decoyTypes.put(libType, "_PEPSEARCH_RESULTS.TXT");
+		decoyTypes.put("1_Decoy_PassatuttoTreeReroot", "-PASSATUTTO_TREE_REROOT_DECOY");
+		decoyTypes.put("2_Decoy_PassatuttoConditional", "-PASSATUTTO_CONDITIONAL_DECOY");
+		decoyTypes.put("3_Decoy_PassatuttoRandom", "-PASSATUTTO_RANDOM_DECOY");
+		decoyTypes.put("4_Decoy_XYMeta", "-XYMeta_DECOY");
+
+		for(String mode : modes) {
+			
+			for(String experiment : experiments) {
+				
+				for(Entry<String, String> searchMode : searchModes.entrySet()) {				
+					
+					for(Entry<String, String> decoyType : decoyTypes.entrySet()) {
+						
+						if(decoyType.getKey().equals(libType))
+							continue;
+
+						String pinFileName = 
+								experiment + mode + decoyType.getValue() + searchMode.getValue() + 
+								decoyTypes.get(libType).replace(".TXT", "_MERGED.pin");
+						File percolatorInputFile = Paths.get(
+								searchResultsPath, 
+								mode, 
+								percollatorResults, 
+								decoyType.getKey(),
+								searchMode.getKey(),
+								pinFileName).toFile();
+
+						if(percolatorInputFile != null && percolatorInputFile.exists()) {
+							
+							System.out.println("Processing " + percolatorInputFile.getName());
+							
+							File percolatorResultFile = Paths.get(percolatorInputFile.getParentFile().getAbsolutePath(), 
+									FilenameUtils.getBaseName(percolatorInputFile.getName()) + "_percolator_psms.tsv").toFile();
+							File percolatorDecoyResultFile = Paths.get(percolatorInputFile.getParentFile().getAbsolutePath(), 
+									FilenameUtils.getBaseName(percolatorInputFile.getName()) + "_percolator_decoy_psms.tsv").toFile();
+							File percolatorLogFile = Paths.get(percolatorInputFile.getParentFile().getAbsolutePath(), 
+									FilenameUtils.getBaseName(percolatorInputFile.getName()) + "_percolator_log.txt").toFile();
+							
+							 ProcessBuilder pb =
+									   new ProcessBuilder(MRC2ToolBoxConfiguration.getPercolatorBinaryPath(), 
+											   "--results-psms", percolatorResultFile.getAbsolutePath(),
+											   "--decoy-results-psms", percolatorDecoyResultFile.getAbsolutePath(),
+											   "--only-psms",
+											   "--post-processing-tdc",
+											   "--num-threads", "6",
+											   percolatorInputFile.getAbsolutePath());
+							try {
+								pb.redirectErrorStream(true);
+								pb.redirectOutput(Redirect.appendTo(percolatorLogFile));
+								Process p = pb.start();
+								assert pb.redirectInput() == Redirect.PIPE;
+								assert pb.redirectOutput().file() == percolatorLogFile;
+								assert p.getInputStream().read() == -1;
+								int exitCode = p.waitFor();
+								if (exitCode == 0) {
+									p.destroy();
+								} else {
+									System.out.println("Percolator run failed for " + percolatorInputFile.getName());
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}		 
+						}
+						else {
+							System.out.println("!!! File " + percolatorInputFile.getName() + " was not found.");
+						}
+						System.out.println("***");
+					}
+				}
+			}
+		}
+	}
+	
+	private static void parsePepSearchResultsForPercollator() {
+		
+		String searchResultsPath = "E:\\DataAnalysis\\MSMS\\DecoyDB\\Evaluation";
+		String libResults = "Results\\Library";
+		String decoyResults = "ResultsNew";
+		String percollatorResults = "ResultsNew\\Percollator2";
+		String[] modes = new String[] {
+				"NEG",
+				"POS",
+			};
+		String[] experiments = new String[] {
+				"EX00663-",
+				"EX00884-",
+				"EX00930-MOTRPAC-Plasma-",
+				"EX00930-MOTRPAC-liver-",
+				"EX00930-MOTRPAC-muscle-",
+				"EX00930-MOTRPAC-white-adipose-",
+				"EX00953-MOTRPAC-Hippocampus-",
+				"EX00953-MOTRPAC-Kidney-",
+				"EX00953-MOTRPAC-Lung-",
+				"EX00953-MOTRPAC-brown-adipose-",
+				"EX00953-MOTRPAC-heart-",
+				"EX00979-MOTRPAC-Hippocampus-",
+				"EX00979-MOTRPAC-Kidney-",
+				"EX00979-MOTRPAC-Liver-",
+				"EX00979-MOTRPAC-Lung-",
+				"EX00979-MOTRPAC-Muscle-",
+				"EX00979-MOTRPAC-brown-adipose-",
+				"EX00979-MOTRPAC-heart-",
+				"EX00979-MOTRPAC-white-adipose-",
+		};
+		Map<String,String> searchModes = new HashMap<String,String>();
+		searchModes.put("1_Normal", "");
+		//searchModes.put("2_InSource", "_IN_SOURCE");
+
+		String libType = "0_Library";
+		Map<String,String> decoyTypes = new HashMap<String,String>();
+		decoyTypes.put(libType, "_PEPSEARCH_RESULTS.TXT");
+		decoyTypes.put("1_Decoy_PassatuttoTreeReroot", "-PASSATUTTO_TREE_REROOT_DECOY");
+		decoyTypes.put("2_Decoy_PassatuttoConditional", "-PASSATUTTO_CONDITIONAL_DECOY");
+		decoyTypes.put("3_Decoy_PassatuttoRandom", "-PASSATUTTO_RANDOM_DECOY");
+		decoyTypes.put("4_Decoy_XYMeta", "-XYMeta_DECOY");
+
+		for(String mode : modes) {
+			
+			for(String experiment : experiments) {
+				
+				for(Entry<String, String> searchMode : searchModes.entrySet()) {
+					
+					String libResFileName = 
+							experiment + mode + searchMode.getValue() + decoyTypes.get(libType);
+					File librarySearchResult = Paths.get(
+							searchResultsPath, 
+							mode, 
+							libResults, 
+							searchMode.getKey(),
+							libResFileName).toFile();
+					
+					if(!librarySearchResult.exists())
+						System.out.println("Wrong name!!! " + librarySearchResult.getAbsolutePath());
+					
+					for(Entry<String, String> decoyType : decoyTypes.entrySet()) {
+						
+						if(decoyType.getKey().equals(libType))
+							continue;
+
+						String decoyResFileName = 
+								experiment + mode + decoyType.getValue() + searchMode.getValue() + decoyTypes.get(libType);
+						File decoySearchResult = Paths.get(
+								searchResultsPath, 
+								mode, 
+								decoyResults, 
+								decoyType.getKey(),
+								searchMode.getKey(),
+								decoyResFileName).toFile();
+						
+						if(!decoySearchResult.exists())
+							System.out.println("Wrong name!!! " + decoySearchResult.getAbsolutePath());
+						
+						File percolatorOutputDirectory = Paths.get(
+							searchResultsPath, 
+							mode, 
+							percollatorResults, 
+							decoyType.getKey(),
+							searchMode.getKey()).toFile();
+						
+						NISTPepSearchResultManipulator.evaluateDecoyLibrary(
+								librarySearchResult, decoySearchResult, percolatorOutputDirectory);
+						
+//						String mergedFileName = 
+//								decoySearchResult.getName().replace(".TXT", "_MERGED.TXT");
+//						File mergeResult = Paths.get(
+//								searchResultsPath, 
+//								mode, 
+//								percollatorResults, 
+//								decoyType.getKey(),
+//								searchMode.getKey(),
+//								mergedFileName).toFile();
+//						
+//						NISTPepSearchResultManipulator.mergeTargetDecoySearchResultsForPercolator(
+//								librarySearchResult, 
+//								decoySearchResult,
+//								MergeType.BEST_OVERALL,
+//								mergeResult);
+//						
+//						String pinFileName = 
+//								decoySearchResult.getName().replace(".TXT", "_MERGED.pin");
+//						File pinFile = Paths.get(
+//								searchResultsPath, 
+//								mode, 
+//								percollatorResults, 
+//								decoyType.getKey(),
+//								searchMode.getKey(),
+//								pinFileName).toFile();
+//						try {
+//							NISTPepSearchResultManipulator.convertMergedResultFileToPinFormat(mergeResult, pinFile);
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+						//	mergeResult.delete();
+						System.gc();
+						System.out.println("***");
+					}
+				}
+			}
+		}
+	}
+	
+	private static void parseNistCompoundDataForDereplicator() throws Exception {
+		
+		ArrayList<String>libInfoLines = new ArrayList<String>();
+		ArrayList<String>smiles = new ArrayList<String>();
+		String query = 
+				"SELECT DISTINCT C.ACCESSION, C.PRIMARY_NAME, C.MOL_FORMULA, C.EXACT_MASS, C.SMILES  " +
+				"FROM COMPOUND_DATA C, " +
+				"REF_MSMS_LIBRARY_COMPONENT L " +
+				"WHERE L.LIBRARY_NAME = 'hr_msms_nist' " +
+				"AND L.ACCESSION = C.ACCESSION "
+				+ "AND C.SMILES IS NOT NULL";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs  = ps.executeQuery();
+		while(rs.next()){
+			
+			String accession = rs.getString("ACCESSION");
+			String cleanAccession = accession.replaceAll("\\W+", "_");
+			smiles.add(rs.getString("SMILES") + "\t" + cleanAccession);
+			
+			ArrayList<String>libInfoLineParts = new ArrayList<String>();
+			libInfoLineParts.add("mols/" + cleanAccession + ".mol");			
+			String molName = rs.getString("PRIMARY_NAME");
+			libInfoLineParts.add(molName.replaceAll("\\s+", "_").replaceAll("\\W+", "_"));
+			libInfoLineParts.add(MRC2ToolBoxConfiguration.getMzFormat().format(rs.getDouble("EXACT_MASS")));
+			libInfoLineParts.add("1");
+			libInfoLineParts.add("NIST");
+			libInfoLines.add(StringUtils.join(libInfoLineParts, " "));			
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		Path libInfoPath = Paths.get("E:\\DataAnalysis\\MSMS\\_TOOLS\\DEREPLICATOR-PLUS\\NIST_LIB_BABEL\\library.info");
+	    try {
+			Files.write(libInfoPath, 
+					libInfoLines, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Path smilesPath = Paths.get("E:\\DataAnalysis\\MSMS\\_TOOLS\\DEREPLICATOR-PLUS\\NIST_LIB_BABEL\\library.smiles");
+	    try {
+			Files.write(smilesPath, 
+					smiles, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void splitMolFileForDereplicator() throws IOException {
+		
+		Path molDirPath = Paths.get("E:\\DataAnalysis\\MSMS\\_TOOLS\\DEREPLICATOR-PLUS\\NIST_LIB_BABEL\\mols");
+		Path inputPath = Paths.get("E:\\DataAnalysis\\MSMS\\_TOOLS\\DEREPLICATOR-PLUS\\NIST_LIB_BABEL\\library_all_mols3.mol");
+		
+		List<String> molText = Files.readAllLines(inputPath);
+		List<String> chunk = new ArrayList<String>();
+		for(int i=0; i<molText.size(); i++) {
+			
+			if(molText.get(i).trim().equals("$$$$")) {
+				
+				Path molPath = Paths.get(molDirPath.toString(), chunk.get(0) + ".mol");
+			    try {
+					Files.write(molPath, 
+							chunk, 
+							StandardCharsets.UTF_8,
+							StandardOpenOption.CREATE, 
+							StandardOpenOption.APPEND);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				chunk = new ArrayList<String>();
+			}
+			else {
+				chunk.add(molText.get(i));
+			}
+		}	
+		if(!chunk.isEmpty()) {
+			Path molPath = Paths.get(molDirPath.toString(), chunk.get(0) + ".mol");
+		    try {
+				Files.write(molPath, 
+						chunk, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.APPEND);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private static void parseNistForDereplicator() throws IOException {
+		
+		File nist17SdfDir = new File("E:\\DataAnalysis\\Databases\\NIST\\NIST17-export\\Export\\MSMS\\SDF_NORM");
+		File nist20SdfDir = new File("E:\\DataAnalysis\\Databases\\NIST\\NIST20-export\\EXPORT\\SDF_NORM");
+		Path molDirPath = Paths.get("E:\\DataAnalysis\\MSMS\\_TOOLS\\DEREPLICATOR-PLUS\\NIST_LIB2\\mols"); 
+		Path libInfoPath = Paths.get("E:\\DataAnalysis\\MSMS\\_TOOLS\\DEREPLICATOR-PLUS\\NIST_LIB2\\library.info");
+		
+		List<File> sdfFiles = Files.find(Paths.get(nist17SdfDir.getAbsolutePath()), 1,
+				(filePath, fileAttr) -> filePath.toString().toLowerCase().endsWith(".sdf") && fileAttr.isRegularFile()).
+				map(p -> p.toFile()).collect(Collectors.toList());
+		List<File> sdfFiles2 = Files.find(Paths.get(nist20SdfDir.getAbsolutePath()), 1,
+				(filePath, fileAttr) -> filePath.toString().toLowerCase().endsWith(".sdf") && fileAttr.isRegularFile()).
+				map(p -> p.toFile()).collect(Collectors.toList());
+		sdfFiles.addAll(sdfFiles2);
+		ArrayList<String>libInfoLines = new ArrayList<String>();
+		ArrayList<String>molErrorLog = new ArrayList<String>();
+		Map<String,IAtomContainer>keyMolMap = new HashMap<String,IAtomContainer>();		
+		for(File sdfFile : sdfFiles) {
+			
+			Map<String,IAtomContainer>submapMap = new HashMap<String,IAtomContainer>();
+			try {
+				submapMap = NISTDataUploader.createInChiKeyMolMapFromSdfOnly(sdfFile, molErrorLog);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			keyMolMap.putAll(submapMap);
+			System.out.println("Processed " + sdfFile.getName());
+		}
+		System.out.println("Mapped " + keyMolMap.size() + " unique InChiKeys");
+		for(Entry<String, IAtomContainer> keyMol : keyMolMap.entrySet()) {
+			
+			IAtomContainer molecule = keyMol.getValue();
+			
+			//	MOL file
+			File exportFile = Paths.get(molDirPath.toString(), keyMol.getKey() + ".mol").toFile();	
+			Writer writer = new BufferedWriter(new FileWriter(exportFile));
+			//	SDFWriter sdfWriter = new SDFWriter(writer);		
+			MDLV3000Writer molWriter = new MDLV3000Writer(writer);
+	        try {
+	        	molWriter.write(molecule);
+			} catch (CDKException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			writer.flush();
+			writer.close();
+			molWriter.close();
+			
+			//	LibInfo line			
+			IMolecularFormula mf = MolecularFormulaManipulator.getMolecularFormula(molecule);
+			double exactMass = MolecularFormulaManipulator.getMajorIsotopeMass(mf);
+			ArrayList<String>libInfoLineParts = new ArrayList<String>();
+			libInfoLineParts.add("mols/" + keyMol.getKey() + ".mol");			
+			String molName = molecule.getProperty(CDKConstants.TITLE);
+			libInfoLineParts.add(molName.replaceAll("\\s+", "_").replaceAll("\\W+", "_"));
+			libInfoLineParts.add(MRC2ToolBoxConfiguration.getMzFormat().format(exactMass));
+			libInfoLineParts.add("1");
+			libInfoLineParts.add("NIST");
+			libInfoLines.add(StringUtils.join(libInfoLineParts, " "));
+		}		
+		//	Write LibInfo file
+	    try {
+			Files.createFile(libInfoPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	    try {
+			Files.write(libInfoPath, 
+					libInfoLines, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.WRITE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	    //	Write logs
+	    Path molErrorPath = Paths.get("Y:\\Sasha\\MSMS-decoys\\4Dereplicator\\NIST_LIB\\molErrors.txt");
+	    try {
+			Files.createFile(molErrorPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	    try {
+			Files.write(molErrorPath, 
+					molErrorLog, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.WRITE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void createRoboCopyScript() {
+		
+		List<File>expDirs = new ArrayList<File>();
+		try {
+			expDirs = Files.list(Paths.get("Y:\\DataAnalysis\\_Reports"))
+			        .map(Path::toFile).filter(f -> f.getName().startsWith("EX"))
+			        .collect(Collectors.toList());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		List<String>commands = new ArrayList<String>();
+		for(File expDir : expDirs) {
+			
+			String command = "robocopy \"" + expDir.getAbsolutePath() + "\\ \"" + 
+			"\"R:\\Metabolomics-BRCF\\Shared\\_Reports\\" + expDir.getName() + " \" /mir /mt:16 /tbd /r:1 /w:3 /fft /np";
+			commands.add(command);
+		}
+		Path mspOutputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\robocopy.bat");
+	    try {
+			Files.createFile(mspOutputPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	    try {
+			Files.write(mspOutputPath, 
+					commands, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.WRITE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	private static void parseOldPassatuttoDecoys() {
+
+		File inputFile = new File("E:\\DataAnalysis\\MSMS\\DecoyDB\\Passatutto\\_OLD\\NIST_POS_DECOY_PASSATUTTO_CONDITIONAL.MS");
+		List<List<String>> chunks = MassBankFileParser.parseLargeInputMassBankFile(inputFile);
+		System.out.println("Parsed " + chunks.size() + " spectra");
+		Polarity polarity = Polarity.Positive;
+		Path mspOutputPath = Paths.get("E:\\DataAnalysis\\MSMS\\DecoyDB\\Passatutto\\_OLD\\NIST_POS_DECOY_PASSATUTTO_CONDITIONAL.MSP");
+	    try {
+			Files.createFile(mspOutputPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		for(List<String>chunk : chunks) {
+			
+			List<String> mspEntry = passatuttoDecoyToMSP(chunk, polarity);
+		    try {
+				Files.write(mspOutputPath, 
+						mspEntry, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.WRITE, 
+						StandardOpenOption.APPEND);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}  
+		}		
+	}
+	
+	private static List<String> passatuttoDecoyToMSP(List<String>chunk, Polarity polarity) {
+		
+		MassBankTandemMassSpectrum tandemMs = MassBankFileParser.parseMassBankDataSource(chunk);
+		List<String>msp = new ArrayList<String>();
+		
+		msp.add(MSPField.NAME.getName() + ": " + tandemMs.getId());		
+		msp.add(MSPField.ION_MODE.getName() + ": " + polarity.getCode());
+		msp.add(MSPField.PRECURSORMZ.getName() + ": " +
+			MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()));
+		msp.add(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()));
+		int pointCount = 0;
+		String msms = "";
+		for(MsPoint point : tandemMs.getSpectrum()) {
+
+			msms+= MRC2ToolBoxConfiguration.getMzFormat().format(point.getMz())
+				+ " " + intensityFormat.format(point.getIntensity()) + "; ";
+			pointCount++;
+			if(pointCount % 5 == 0) {
+				msp.add(msms);
+				msms = "";
+			}
+		}
+		msp.add("");
+		return msp;
+	}
+	
+	private static void parseOldPassatuttoDecoysOld() {
+		
+		
+		Collection<File> decoys = new ArrayList<File>();
+		try {
+			//	"E:\\DataAnalysis\\MSMS\\DecoyDB\\Passatutto\\_OLD\\NIST_NEG"
+			//	"Y:\\Sasha\\MSMS-decoys\\Passatutto-old\\NIST_NEG_DECOY_CONDITIONAL"
+			decoys = Files.list(Paths.get("Y:\\Sasha\\MSMS-decoys\\Passatutto-old\\NIST_NEG_DECOY_CONDITIONAL"))
+                        .map(Path::toFile).filter(f -> f.getName().endsWith(".txt"))
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            // Error while reading the directory
+        }	
+		Collection<MassBankTandemMassSpectrum>spectra = 
+				new ArrayList<MassBankTandemMassSpectrum>();
+		for(File decoy : decoys ) {			
+			List<List<String>> parts = MassBankFileParser.parseInputMassBankFile(decoy);
+			for(List<String>part : parts) {
+				MassBankTandemMassSpectrum msms = MassBankFileParser.parseMassBankDataSource(part);
+				msms.setId(FileNameUtils.getBaseName(decoy.getName()));
+				spectra.add(msms);
+			}
+		}
+		System.out.println("Parsed " + spectra.size() + " spectra");
+		String polarity = "N";
+		File exportFile = new File("E:\\DataAnalysis\\MSMS\\DecoyDB\\Passatutto\\_OLD\\NIST_NEG_DECOY_CONDITIONAL.MSP");
+		try {
+			final Writer writer = new BufferedWriter(new FileWriter(exportFile));
+			for(TandemMassSpectrum tandemMs : spectra) {
+
+				writer.append(MSPField.NAME.getName() + ": " + tandemMs.getId() + "\n");		
+				writer.append(MSPField.ION_MODE.getName() + ": " + polarity + "\n");
+				writer.append(MSPField.PRECURSORMZ.getName() + ": " +
+					MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()) + "\n");
+				writer.append(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()) + "\n");
+				int pointCount = 0;
+				for(MsPoint point : tandemMs.getSpectrum()) {
+
+					writer.append(
+						MRC2ToolBoxConfiguration.getMzFormat().format(point.getMz())
+						+ " " + intensityFormat.format(point.getIntensity()) + "; ") ;
+					pointCount++;
+					if(pointCount % 5 == 0)
+						writer.append("\n");
+				}
+				writer.append("\n\n");
+			}
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void parseXYMetaMGF() {
+		
+		File inputFile = new File("E:\\DataAnalysis\\MSMS\\_TOOLS\\XY-meta\\XY-Meta-master\\"
+				+ "XY-Meta-Win\\database\\Libraries\\NIST17_20_HighRes_MSMS_N_20210916_Decoy.mgf");
+		Polarity pol = Polarity.Negative;
+		Collection<String[]>mgfBlocks = MGFUtils.getMGFTextBlocksFromFile(inputFile);		
+		Collection<TandemMassSpectrum>spectra = new ArrayList<TandemMassSpectrum>();
+		for(String[]block : mgfBlocks) {
+			
+			TandemMassSpectrum spectrum = MGFUtils.parseXYMetaMGFBlock(block, pol);
+			spectra.add(spectrum);
+		}
+		System.out.println("Parsed " + spectra.size() + " spectra");
+		try {
+			File exportFile = Paths.get(inputFile.getParentFile().getAbsolutePath(), 
+					FilenameUtils.getBaseName(inputFile.getName()) + 
+					"." + MsLibraryFormat.MSP.getFileExtension()).toFile();
+			
+			final Writer writer = new BufferedWriter(new FileWriter(exportFile));
+			for(TandemMassSpectrum tandemMs : spectra) {
+
+				writer.append(MSPField.NAME.getName() + ": " + tandemMs.getId() + "\n");		
+				writer.append(MSPField.ION_MODE.getName() + ": " + pol.getCode() + "\n");
+				writer.append(MSPField.PRECURSORMZ.getName() + ": " +
+					MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()) + "\n");
+				writer.append(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()) + "\n");
+				int pointCount = 0;
+				for(MsPoint point : tandemMs.getSpectrum()) {
+
+					writer.append(
+						MRC2ToolBoxConfiguration.getMzFormat().format(point.getMz())
+						+ " " + intensityFormat.format(point.getIntensity()) + "; ") ;
+					pointCount++;
+					if(pointCount % 5 == 0)
+						writer.append("\n");
+				}
+				writer.append("\n\n");
+			}
+			writer.flush();
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void extractPassatuttoDecoys() throws Exception {
+		
+		File decoyFolder = new File("E:\\DataAnalysis\\MSMS\\_TOOLS\\Passatutto\\container-passatutto-master\\passatutto\\Passatutto\\Data\\_TEST");
+		IOFileFilter decoyFileFilter = FileFilterUtils.makeFileOnly(
+				new RegexFileFilter(DataPrefix.MSMS_LIBRARY_ENTRY.getName() + "\\d{9}.txt$"));
+		Collection<File> decoys = FileUtils.listFilesAndDirs(
+				decoyFolder,
+				decoyFileFilter,
+				null);
+		for(File decoy : decoys) {
+			
+			if(decoy.isDirectory())
+				continue;
+			
+			List<List<String>> records = MassBankFileParser.parseInputMassBankFile(decoy);
+			for(List<String>record : records) {
+				MassBankTandemMassSpectrum msms = MassBankFileParser.parseMassBankDataSource(record);
+				System.out.println(msms.getId());
+			}
 		}
 	}
 	
@@ -2290,7 +3303,20 @@ public class RegexTest {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	
+	private static void normalizeNist17Sdf() {
+		
+		String mspDir = "E:\\DataAnalysis\\Databases\\NIST\\NIST17-export\\Export\\MSMS\\MSP";
+		String sdfDir = "E:\\DataAnalysis\\Databases\\NIST\\NIST17-export\\Export\\MSMS\\SDF";		
+		NISTDataUploader nistUpl = new NISTDataUploader(mspDir, sdfDir, NISTReferenceLibraries.nist_msms);
+		
+		try {
+			nistUpl.normalizeSdfData(Paths.get("E:\\DataAnalysis\\Databases\\NIST\\NIST17-export\\Export\\MSMS\\SDF_NORM").toFile());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+		
 	private static void nist20upload() {
 		
 		String mspDir = "E:\\DataAnalysis\\Databases\\NIST20\\EXPORT\\MSP_TODO";
@@ -5329,7 +6355,7 @@ public class RegexTest {
 			if(rtFiltered.isEmpty())
 				continue;
 
-			Range parentMzLookupRange = MsUtils.createMassRange(f.getSpectrum().getBasePeakMz(), 50.0d);
+			Range parentMzLookupRange = MsUtils.createPpmMassRange(f.getSpectrum().getBasePeakMz(), 50.0d);
 			Collection<MsFeature>mzFiltered =
 					rtFiltered.stream().
 					filter(tdf -> parentMzLookupRange.contains(
@@ -5848,6 +6874,80 @@ public class RegexTest {
 		catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void addSmilesToLib() {
+
+		File nameFile = new File("C:\\Users\\Sasha\\Downloads\\Positive_Garrett_MetaboliteStd_Library_RP_CB_2.txt");
+		String[][]libData = DelimitedTextParser.parseTextFile(nameFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		String pubchemCidUrl = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
+		InputStream pubchemDataStream = null;
+		ArrayList<String>lines = new ArrayList<String>();
+		ArrayList<String>line = new ArrayList<String>();
+		line.addAll(Arrays.asList(libData[0]));
+		line.add("SMILES");
+		lines.add(StringUtils.join(line, "\t"));
+		for(int i=1; i<libData.length; i++) {
+			
+			line.clear();
+			line.addAll(Arrays.asList(libData[i]));
+			String pubChemId = libData[i][9];
+			String smiles = "";
+			try {
+				pubchemDataStream = WebUtils.getInputStreamFromURL(pubchemCidUrl + pubChemId + "/property/IsomericSMILES/TXT");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if(pubchemDataStream != null) {				
+				try {
+					smiles = IOUtils.toString(pubchemDataStream, StandardCharsets.UTF_8);
+				}
+				catch (Exception e) {
+					//	e.printStackTrace();
+				}
+				try {
+					pubchemDataStream.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(smiles == null || smiles.isEmpty()) {			
+				try {
+					pubchemDataStream = WebUtils.getInputStreamFromURL(pubchemCidUrl + pubChemId + "/property/CanonicalSMILES/TXT");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if(pubchemDataStream != null) {
+					
+					try {
+						smiles = IOUtils.toString(pubchemDataStream, StandardCharsets.UTF_8);
+					}
+					catch (Exception e) {
+						//	e.printStackTrace();
+					}
+					try {
+						pubchemDataStream.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			line.add(smiles);
+			System.out.println(pubChemId + " " + smiles);
+			lines.add(StringUtils.join(line, "\t"));
+		}
+		Path libOutPath = Paths.get("C:\\Users\\Sasha\\Downloads\\Positive_Garrett_MetaboliteStd_Library_RP_CB_SMILES_2.txt");
+	    try {
+			Files.write(libOutPath, 
+					lines, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 	}
 }
 

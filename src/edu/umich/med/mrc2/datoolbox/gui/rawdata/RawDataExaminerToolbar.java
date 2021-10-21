@@ -39,8 +39,12 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	 * 
 	 */
 	private static final long serialVersionUID = -5123511136162707646L;
-
-
+	
+	private static final Icon newProjectIcon = GuiUtils.getIcon("newProject", 32);
+	private static final Icon openProjectIcon = GuiUtils.getIcon("open", 32);
+	private static final Icon closeProjectIcon = GuiUtils.getIcon("close", 32);
+	private static final Icon saveProjectIcon = GuiUtils.getIcon("save", 32);
+	
 	private static final Icon expandTreeIcon = GuiUtils.getIcon("expand", 32);
 	private static final Icon collapseTreeIcon = GuiUtils.getIcon("collapse", 32);
 	private static final Icon byFileTreeIcon = GuiUtils.getIcon("groupByFile", 32);
@@ -52,6 +56,10 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	
 
 	private JButton 
+		newProjectButton,	
+		openProjectButton,
+		closeProjectButton,
+		saveProjectButton,
 		expandCollapseTreeButton, 
 		toggleTreeGroupingButton,
 		openDataFileButton,
@@ -62,7 +70,36 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	public RawDataExaminerToolbar(ActionListener commandListener2) {
 
 		super(commandListener2);
+		
+//		NEW_RAW_DATA_PROJECT_COMMAND("New raw data analysis project"),
+//		OPEN_RAW_DATA_PROJECT_COMMAND("Open raw data analysis pproject"),
+//		CLOSE_RAW_DATA_PROJECT_COMMAND("Close raw data analysis pproject"),
+//		SAVE_RAW_DATA_PROJECT_COMMAND("Save raw data analysis pproject"),
 
+		newProjectButton = GuiUtils.addButton(this, null, newProjectIcon, commandListener,
+				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
+				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
+				buttonDimension);
+
+		addSeparator(buttonDimension);
+
+		openProjectButton = GuiUtils.addButton(this, null, openProjectIcon, commandListener,
+				MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND.getName(),
+				MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND.getName(),
+				buttonDimension);
+
+		closeProjectButton = GuiUtils.addButton(this, null, closeProjectIcon, commandListener,
+				MainActionCommands.CLOSE_RAW_DATA_PROJECT_COMMAND.getName(),
+				MainActionCommands.CLOSE_RAW_DATA_PROJECT_COMMAND.getName(),
+				buttonDimension);
+
+		saveProjectButton = GuiUtils.addButton(this, null, saveProjectIcon, commandListener,
+				MainActionCommands.SAVE_RAW_DATA_PROJECT_COMMAND.getName(),
+				MainActionCommands.SAVE_RAW_DATA_PROJECT_COMMAND.getName(),
+				buttonDimension);
+		
+		addSeparator(buttonDimension);
+		
 		expandCollapseTreeButton = GuiUtils.addButton(this, null, expandTreeIcon, commandListener,
 				MainActionCommands.EXPAND_TREE.getName(), 
 				MainActionCommands.EXPAND_TREE.getName(), buttonDimension);

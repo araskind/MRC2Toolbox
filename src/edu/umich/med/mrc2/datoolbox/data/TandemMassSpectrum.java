@@ -197,7 +197,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 
 	public MsPoint getActualParentIon() {
 
-		Range parentRange = MsUtils.createMassRange(parent.getMz(), MRC2ToolBoxConfiguration.getMassAccuracy());
+		Range parentRange = MsUtils.createPpmMassRange(parent.getMz(), MRC2ToolBoxConfiguration.getMassAccuracy());
 
 		Optional<MsPoint>actualParent = spectrum.stream().filter(dp -> parentRange.contains(dp.getMz())).
 				sorted(new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC)).findFirst();

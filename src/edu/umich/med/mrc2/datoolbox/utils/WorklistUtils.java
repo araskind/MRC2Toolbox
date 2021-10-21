@@ -45,7 +45,6 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.database.idt.AssayDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -94,12 +93,15 @@ public class WorklistUtils {
 		
 		//Get MoTrPAC MS mode
 		String msMode = "";	
-		try {
-			msMode = AssayDatabaseUtils.getMotrPacMsModeForDataPipeline(activeDataPipeline);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
+		if(activeDataPipeline.getMotrpacAssay() != null)
+			msMode = activeDataPipeline.getMotrpacAssay().getBucketCode();
+			
+//		try {
+//			msMode = AssayDatabaseUtils.getMotrPacMsModeForDataPipeline(activeDataPipeline);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}		
 		int injectionOrder = 1;
 
 		//	Append data

@@ -43,12 +43,15 @@ public class DuplicatePanelToolbar extends ClusterDisplayToolbar {
 	private static final Icon clearDuplicatesIcon = GuiUtils.getIcon("clearDuplicates", 32);
 	private static final Icon exportDuplicatesIcon = GuiUtils.getIcon("saveDuplicates", 32);
 	private static final Icon showDuplicatesIcon = GuiUtils.getIcon("findDuplicates", 32);
+	private static final Icon checkDuplicateNamesIcon = GuiUtils.getIcon("checkDuplicateNames", 32);
+	
 
 	@SuppressWarnings("unused")
 	private JButton
 		showDuplicatesButton,
 		clearDuplicatesButton,
-		exportDuplicatesButton;
+		exportDuplicatesButton,
+		checkDuplicateNamesButton;
 
 	public DuplicatePanelToolbar(ActionListener commandListener) {
 
@@ -65,6 +68,12 @@ public class DuplicatePanelToolbar extends ClusterDisplayToolbar {
 		exportDuplicatesButton = GuiUtils.addButton(this, null, exportDuplicatesIcon, commandListener,
 				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(),
 				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(), buttonDimension);
+		
+		addSeparator(buttonDimension);
+		
+		checkDuplicateNamesButton = GuiUtils.addButton(this, null, checkDuplicateNamesIcon, commandListener,
+				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(),
+				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(), buttonDimension);
 	}
 
 	@Override

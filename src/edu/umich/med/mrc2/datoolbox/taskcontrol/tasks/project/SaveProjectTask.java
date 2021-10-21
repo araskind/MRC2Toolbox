@@ -103,8 +103,8 @@ public class SaveProjectTask extends AbstractTask {
 			fout.close();
 			raf.close();
 			
-			String xmlString = projectXstream.toXML(projectToSave);
-			byte[] contentInBytes = xmlString.getBytes();
+//			String xmlString = projectXstream.toXML(projectToSave);
+//			byte[] contentInBytes = xmlString.getBytes();
 			processed = 50;		
 			if(xmlFile.exists()) {
 				

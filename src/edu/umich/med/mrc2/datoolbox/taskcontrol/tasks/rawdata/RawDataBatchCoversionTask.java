@@ -52,7 +52,7 @@ public class RawDataBatchCoversionTask extends AbstractTask implements TaskListe
 		try {
 			for(File rawFile : filesToConvert) {
 
-				RawDataCoversionTask task = new RawDataCoversionTask(outputDir, rawFile);
+				RawDataConversionTask task = new RawDataConversionTask(outputDir, rawFile);
 				task.addTaskListener(this);
 				MRC2ToolBoxCore.getTaskController().addTask(task);
 			}
@@ -74,7 +74,7 @@ public class RawDataBatchCoversionTask extends AbstractTask implements TaskListe
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(RawDataCoversionTask.class)) {
+			if (e.getSource().getClass().equals(RawDataConversionTask.class)) {
 								
 				processed++;
 				if(processed == total) {

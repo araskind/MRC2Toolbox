@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import edu.umich.med.mrc2.datoolbox.data.MsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsMs;
+import edu.umich.med.mrc2.datoolbox.data.enums.MGFFields;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -37,13 +38,6 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MgfImportTask extends AbstractTask {
-
-	private final static String BEGIN_BLOCK = "BEGIN IONS";
-	private final static String PEPMASS = "PEPMASS";
-	private final static String CHARGE = "CHARGE";
-	private final static String TITLE = "TITLE";
-	private final static String RTINSECONDS = "RTINSECONDS";
-	private final static String END_BLOCK = "END IONS";
 
 	private File mgfFile;
 	private ArrayList<SimpleMsMs> mgfFeatures;
@@ -72,7 +66,7 @@ public class MgfImportTask extends AbstractTask {
 		boolean belongs = false;
 
 		rtRange = new Range(cluster.getRt() - rtWindow, cluster.getRt() + rtWindow);
-		massRange = MsUtils.createMassRange(cluster.getParentMass(), massErrorPpm);
+		massRange = MsUtils.createPpmMassRange(cluster.getParentMass(), massErrorPpm);
 
 		if (rtRange.contains(msms.getRetention()) && massRange.contains(msms.getParentMass().getMz()))
 			belongs = true;
@@ -149,7 +143,7 @@ public class MgfImportTask extends AbstractTask {
 
 		for (int i = 1; i < mgfData.length; i++) {
 
-			if (mgfData[i][0].trim().equals(END_BLOCK)) {
+			if (mgfData[i][0].trim().equals(MGFFields.END_BLOCK.getName())) {
 
 				blockEnded = true;
 
@@ -162,31 +156,32 @@ public class MgfImportTask extends AbstractTask {
 				}
 				msms = new ArrayList<MsPoint>();
 			}
-			if (mgfData[i][0].trim().equals(BEGIN_BLOCK))
+			if (mgfData[i][0].trim().equals(MGFFields.BEGIN_BLOCK.getName()))
 				blockEnded = false;
 
-			if (!blockEnded && !mgfData[i][0].trim().equals(BEGIN_BLOCK)) {
+			if (!blockEnded && !mgfData[i][0].trim().equals(MGFFields.BEGIN_BLOCK.getName())) {
 
-				if (mgfData[i][0].trim().startsWith(PEPMASS)) {
+				if (mgfData[i][0].trim().startsWith(MGFFields.PEPMASS.getName())) {
 
-					pepMass = mgfData[i][0].trim().replace(PEPMASS + "=", "");
+					pepMass = mgfData[i][0].trim().replace(MGFFields.PEPMASS.getName() + "=", "");
 					parentMass = new MsPoint(Double.valueOf(pepMass), 100.0d);
-				} else if (mgfData[i][0].trim().startsWith(CHARGE)) {
+				} else if (mgfData[i][0].trim().startsWith(MGFFields.CHARGE.getName())) {
 
-					chargeString = mgfData[i][0].trim().replace(CHARGE + "=", "");
+					chargeString = mgfData[i][0].trim().replace(MGFFields.CHARGE.getName() + "=", "");
 
 					if (chargeString.charAt(1) == '+')
 						charge = Integer.valueOf(chargeString.charAt(0));
 
 					if (chargeString.charAt(1) == '-')
 						charge = Integer.valueOf("-" + chargeString.charAt(0));
-				} else if (mgfData[i][0].trim().startsWith(RTINSECONDS)) {
+				} 
+				else if (mgfData[i][0].trim().startsWith(MGFFields.RTINSECONDS.getName())) {
 
-					rtString = mgfData[i][0].trim().replace(RTINSECONDS + "=", "");
+					rtString = mgfData[i][0].trim().replace(MGFFields.RTINSECONDS.getName() + "=", "");
 					rt = Double.valueOf(rtString) / 60;
-				} else if (mgfData[i][0].trim().startsWith(TITLE)) {
+				} else if (mgfData[i][0].trim().startsWith(MGFFields.TITLE.getName())) {
 
-					title = mgfData[i][0].trim().replace(TITLE + "=", "");
+					title = mgfData[i][0].trim().replace(MGFFields.TITLE.getName() + "=", "");
 				} else {
 					if (Character.isDigit(mgfData[i][0].charAt(0))) {
 
