@@ -21,24 +21,22 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.project;
 
-import javax.swing.JPanel;
-import java.awt.GridBagLayout;
-import javax.swing.border.EmptyBorder;
-
-import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-
-import javax.swing.JLabel;
+import java.awt.Color;
 import java.awt.GridBagConstraints;
-import javax.swing.JTextField;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.JTextArea;
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import java.awt.Color;
+
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 
 public class ProjectDetailsPanel extends JPanel  {
 	

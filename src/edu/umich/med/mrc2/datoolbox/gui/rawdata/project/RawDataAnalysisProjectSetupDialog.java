@@ -65,7 +65,8 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 	 */
 	private static final long serialVersionUID = 6638353683063626416L;
 
-	private static final Icon rdaProjectIcon = GuiUtils.getIcon("dataAnalysisPipeline", 32);
+	private static final Icon rdaProjectIcon = GuiUtils.getIcon("newRawDataAnalysisProject", 32);
+	private static final Icon editRdaProjectIcon = GuiUtils.getIcon("editRawDataAnalysisProject", 32);
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "RawDataAnalysisProjectSetupDialog.layout");
 	private Preferences preferences;

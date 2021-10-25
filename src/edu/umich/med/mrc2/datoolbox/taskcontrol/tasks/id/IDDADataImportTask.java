@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id;
 
 import java.io.File;
 
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -35,7 +36,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class IDDADataImportTask extends AbstractTask implements TaskListener{
 
-	private File[] sourceRawFiles;
+	private DataFile[] sourceRawFiles;
 	private Range dataExtractionRtRange;
 	private double precursorAlignmentRtWindow;
 	private double precursorAlignmentMzWindow;
@@ -45,7 +46,7 @@ public class IDDADataImportTask extends AbstractTask implements TaskListener{
 	private int maxFragmentsCutoff;
 
 	public IDDADataImportTask(
-			File[] sourceRawFiles,
+			DataFile[] sourceRawFiles,
 			Range dataExtractionRtRange,
 			double precursorAlignmentRtWindow,
 			double precursorAlignmentMzWindow,
@@ -72,8 +73,8 @@ public class IDDADataImportTask extends AbstractTask implements TaskListener{
 		total = sourceRawFiles.length;
 		processed = 0;
 		try {
-			for(File f : sourceRawFiles) {
-
+			for(DataFile f : sourceRawFiles) {
+				
 				MsMsfeatureExtractionTask fet = new MsMsfeatureExtractionTask(
 						f,
 						dataExtractionRtRange,

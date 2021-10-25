@@ -40,11 +40,12 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	 */
 	private static final long serialVersionUID = -5123511136162707646L;
 	
-	private static final Icon newProjectIcon = GuiUtils.getIcon("newProject", 32);
-	private static final Icon openProjectIcon = GuiUtils.getIcon("open", 32);
-	private static final Icon closeProjectIcon = GuiUtils.getIcon("close", 32);
-	private static final Icon saveProjectIcon = GuiUtils.getIcon("save", 32);
-	
+	private static final Icon newRdaProjectIcon = GuiUtils.getIcon("newRawDataAnalysisProject", 32);
+	private static final Icon editRdaProjectIcon = GuiUtils.getIcon("editRawDataAnalysisProject", 32);
+	private static final Icon openProjectIcon = GuiUtils.getIcon("openRawDataAnalysisProject", 32);
+	private static final Icon closeProjectIcon = GuiUtils.getIcon("closeRawDataAnalysisProject", 32);
+	private static final Icon saveProjectIcon = GuiUtils.getIcon("saveRawDataAnalysisProject", 32);	
+	private static final Icon extractMSMSFeaturesIcon = GuiUtils.getIcon("findMSMSFeatures", 32);	
 	private static final Icon expandTreeIcon = GuiUtils.getIcon("expand", 32);
 	private static final Icon collapseTreeIcon = GuiUtils.getIcon("collapse", 32);
 	private static final Icon byFileTreeIcon = GuiUtils.getIcon("groupByFile", 32);
@@ -60,12 +61,14 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 		openProjectButton,
 		closeProjectButton,
 		saveProjectButton,
+		editProjectButton,
 		expandCollapseTreeButton, 
 		toggleTreeGroupingButton,
 		openDataFileButton,
 		closeDataFileButton,
 		msConvertButton,
-		indexRawFilesButton;
+		indexRawFilesButton,
+		extractMSMSFeaturesButton;
 
 	public RawDataExaminerToolbar(ActionListener commandListener2) {
 
@@ -76,7 +79,7 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 //		CLOSE_RAW_DATA_PROJECT_COMMAND("Close raw data analysis pproject"),
 //		SAVE_RAW_DATA_PROJECT_COMMAND("Save raw data analysis pproject"),
 
-		newProjectButton = GuiUtils.addButton(this, null, newProjectIcon, commandListener,
+		newProjectButton = GuiUtils.addButton(this, null, newRdaProjectIcon, commandListener,
 				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
 				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
 				buttonDimension);
@@ -98,6 +101,18 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 				MainActionCommands.SAVE_RAW_DATA_PROJECT_COMMAND.getName(),
 				buttonDimension);
 		
+		editProjectButton = GuiUtils.addButton(this, null, editRdaProjectIcon, commandListener,
+				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
+				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
+				buttonDimension);
+		
+		addSeparator(buttonDimension);
+		
+		extractMSMSFeaturesButton = GuiUtils.addButton(this, null, extractMSMSFeaturesIcon, commandListener,
+				MainActionCommands.MSMS_FEATURE_EXTRACTION_SETUP_COMMAND.getName(),
+				MainActionCommands.MSMS_FEATURE_EXTRACTION_SETUP_COMMAND.getName(),
+				buttonDimension);
+
 		addSeparator(buttonDimension);
 		
 		expandCollapseTreeButton = GuiUtils.addButton(this, null, expandTreeIcon, commandListener,

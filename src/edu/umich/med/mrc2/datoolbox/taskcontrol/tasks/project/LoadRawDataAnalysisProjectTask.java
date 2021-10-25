@@ -26,15 +26,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.Collections;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FilenameUtils;
-import org.ujmp.core.Matrix;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -42,27 +41,31 @@ import com.thoughtworks.xstream.security.NoTypePermission;
 import com.thoughtworks.xstream.security.NullPermission;
 import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
-import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
-import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
+import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
 
-public class LoadProjectTask extends AbstractTask {
+public class LoadRawDataAnalysisProjectTask extends AbstractTask implements TaskListener{
 
-	private DataAnalysisProject newProject;
-	private File projectDirectory, projectFile;
+	private RawDataAnalysisProject newProject;
+	private File projectFile;
+	private ArrayList<String>errors;
+	private int ticCount;
 
-	public LoadProjectTask(File projectFile) {
+	public LoadRawDataAnalysisProjectTask(File projectFile) {
 
 		this.projectFile = projectFile;
-		projectDirectory = projectFile.getParentFile();
+		errors = new ArrayList<String>();
+		ticCount = 0;
 	}
 	
 	@Override
@@ -85,37 +88,67 @@ public class LoadProjectTask extends AbstractTask {
 		if (newProject != null) {
 
 			newProject.updateProjectLocation(projectFile);
-			verifyExperimentDesign();
-			newProject.recreateMatrixMaps();
-
-			for (DataPipeline dataPipeline : newProject.getDataPipelines()) {
-
-				File dataMatrixFile = 
-						Paths.get(projectDirectory.getAbsolutePath(), 
-							newProject.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
-
-				Matrix dataMatrix = null;
-				if (dataMatrixFile.exists()) {
-					try {
-						dataMatrix = Matrix.Factory.load(dataMatrixFile);
-					} catch (ClassNotFoundException | IOException e) {
-						setStatus(TaskStatus.ERROR);
-						e.printStackTrace();
-					}
-					if (dataMatrix != null) {
-
-						dataMatrix.setMetaDataDimensionMatrix(0, 
-								newProject.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
-						dataMatrix.setMetaDataDimensionMatrix(1, 
-								newProject.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
-						newProject.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
-					}
-				}
+			loadRawData();			
+			if(getStatus().equals(TaskStatus.PROCESSING)) {
+				
+				//	Already have TICs extracted?
+				//	initTicExtraction();
+				
+				//	TODO any additional data load?
 			}
-			newProject.restoreData();
+			setStatus(TaskStatus.FINISHED);
 		}
 		processed = 100;
-		this.setStatus(TaskStatus.FINISHED);
+		setStatus(TaskStatus.FINISHED);
+	}
+	
+	private void loadRawData() {
+		
+		taskDescription = "Loading raw data files for project ...";
+		total = newProject.getRawDataFiles().size();
+		processed = 0;	
+		
+		for(DataFile df : newProject.getRawDataFiles()) {
+			
+			File rdf = new File(df.getFullPath());
+			if(!rdf.exists())
+				errors.add("Data file " + df.getFullPath() + "not found");
+		}
+		if(!errors.isEmpty()) {
+			this.setStatus(TaskStatus.ERROR);
+			return;
+		}
+		for(DataFile df : newProject.getRawDataFiles()) {
+			
+			RawDataManager.getRawData(df);
+			processed++;
+		}
+	}
+		
+	private void initTicExtraction() {
+		
+		taskDescription = "Extracting TICs ...";
+		total = newProject.getRawDataFiles().size();
+		processed = 1;	
+		Collection<Double> mzList = new ArrayList<Double>();
+		
+		for(DataFile df : newProject.getRawDataFiles()) {
+			
+			ChromatogramExtractionTask xicTask = new ChromatogramExtractionTask(
+					Collections.singleton(df), 
+					ChromatogramPlotMode.TIC, 
+					null, 
+					1, 
+					mzList,
+					false, 
+					Double.NaN, 
+					null, 
+					null,
+					true,
+					SavitzkyGolayWidth.FIVE);
+			xicTask.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(xicTask);
+		}
 	}
 
 	private void loadProjectFile() throws ZipException, IOException {
@@ -148,7 +181,7 @@ public class LoadProjectTask extends AbstractTask {
 			input = zipFile.getInputStream(zippedProject);
 			br = new BufferedReader(new InputStreamReader(input, "UTF-8"));
 
-			newProject = (DataAnalysisProject) projectImport.fromXML(br);
+			newProject = (RawDataAnalysisProject) projectImport.fromXML(br);
 
 			br.close();
 			input.close();
@@ -157,45 +190,33 @@ public class LoadProjectTask extends AbstractTask {
 		processed = 50;
 	}
 
-	//	This is a workaround to handle reference samples
-	private void verifyExperimentDesign() {
-
-		ExperimentDesign design = newProject.getExperimentDesign();
-		ExperimentDesignFactor	sampleTypeFactor = 
-				new ExperimentDesignFactor(StandardFactors.SAMPLE_CONTROL_TYPE.getName());
-		Collection<ExperimentDesignLevel>refLevels =
-				design.getSamples().stream().map(s -> s.getDesignCell().get(sampleTypeFactor)).
-				distinct().collect(Collectors.toList());
-
-		refLevels.stream().forEach(l -> sampleTypeFactor.addLevel(l));
-		design.replaceSampleTypeFactor(sampleTypeFactor);
-		
-		//	Check samples and replace IDs/Names for reference samples where necessary
-		Collection<ExperimentalSample> dbRefSamples = ReferenceSamplesManager.getReferenceSamples();
-		for(ExperimentalSample sample : design.getReferenceSamples()) {
-			
-			ExperimentalSample match = dbRefSamples.stream().
-					filter(s -> s.getSampleIdDeprecated() != null).
-					filter(s -> s.getSampleIdDeprecated().equals(sample.getId())).
-					findFirst().orElse(null);
-			
-			if(match != null) {
-				
-				if(!sample.getId().equals(match.getId())) {
-					sample.setId(match.getId());
-					sample.setName(match.getName());
-				}
-			}
-		}
-	}	
-
 	@Override
 	public Task cloneTask() {
-		return new LoadProjectTask(projectFile);
+		return new LoadRawDataAnalysisProjectTask(projectFile);
 	}
 	
-	public DataAnalysisProject getNewProject() {
+	public RawDataAnalysisProject getNewProject() {
 		return newProject;
+	}
+	
+	@Override
+	public void statusChanged(TaskEvent e) {
+
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+
+			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class)) {
+				
+				ticCount++;
+				if(ticCount == newProject.getRawDataFiles().size())
+					setStatus(TaskStatus.FINISHED);
+			}
+		}		
+	}
+
+	public ArrayList<String> getErrors() {
+		return errors;
 	}
 }
 

@@ -204,7 +204,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	private FileNameExtensionFilter xmlFilter;
 	private FileNameExtensionFilter mgfFilter;
 
-	private IDDAImportSetupDialog iddaImportSetupDialog;
+//	private IDDAImportSetupDialog iddaImportSetupDialog;
 	private IDTrackerLimsManagerPanel idTrackerManager;
 	private OpenIDTrackerProjectDialog openIDTrackerProjectDialog;
 	private LIMSExperiment idTrackerExperiment;
@@ -394,11 +394,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		if (command.equals(MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_COMMAND.getName()))
 			showNistMsPepSearchResultValidadtionDialog();
 
-		if (command.equals(MainActionCommands.IDDA_SETUP_DIALOG_COMMAND.getName()))
-			showIddaImportSetupDialog();
-		
-		if (command.equals(MainActionCommands.IDDA_IMPORT_COMMAND.getName()))
-			importIDDAExperiment();
+//		if (command.equals(MainActionCommands.IDDA_SETUP_DIALOG_COMMAND.getName()))
+//			showIddaImportSetupDialog();
+//		
+//		if (command.equals(MainActionCommands.IDDA_IMPORT_COMMAND.getName()))
+//			importIDDAExperiment();
 
 		if (command.equals(MainActionCommands.EXPORT_FEATURES_TO_MSP_COMMAND.getName()))
 			exportMsMsfeaturesToMspFile();
@@ -738,11 +738,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 
 	private void showIddaImportSetupDialog() {
 
-		if(iddaImportSetupDialog == null)
-			iddaImportSetupDialog = new IDDAImportSetupDialog(this);
-
-		iddaImportSetupDialog.setLocationRelativeTo(this.getContentPane());
-		iddaImportSetupDialog.setVisible(true);
+//		if(iddaImportSetupDialog == null)
+//			iddaImportSetupDialog = new IDDAImportSetupDialog(this);
+//
+//		iddaImportSetupDialog.setLocationRelativeTo(this.getContentPane());
+//		iddaImportSetupDialog.setVisible(true);
 	}
 
 	private void showNistSearchSetup() {

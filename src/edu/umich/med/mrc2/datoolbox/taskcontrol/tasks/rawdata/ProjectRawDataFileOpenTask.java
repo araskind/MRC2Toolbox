@@ -42,7 +42,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
-import umich.ms.datatypes.LCMSData;
 
 public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskListener{
 

@@ -21,23 +21,17 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map.Entry;
-
-import org.apache.commons.io.FilenameUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.data.enums.SupportedRawDataTypes;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -46,36 +40,35 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.LCMSDataSubset;
 import umich.ms.datatypes.scan.IScan;
-import umich.ms.datatypes.scancollection.IScanCollection;
 import umich.ms.datatypes.scancollection.ScanIndex;
 import umich.ms.fileio.exceptions.FileParsingException;
-import umich.ms.fileio.filetypes.mzml.MZMLFile;
-import umich.ms.fileio.filetypes.mzxml.MZXMLFile;
-import umich.ms.fileio.filetypes.xmlbased.AbstractXMLBasedDataSource;
 
 public class MsMsfeatureExtractionTask extends AbstractTask {
 
-	private File sourceRawFile;
+	private DataFile rawDataFile;
 	private Range dataExtractionRtRange;
 	private boolean removeAllMassesAboveParent;
 	private double msMsCountsCutoff;
 	private int maxFragmentsCutoff;
+	private IntensityMeasure filterIntensityMeasure;
 
 	private LCMSData data;
 	private Collection<MsFeature>features;
 
 	public MsMsfeatureExtractionTask(
-			File sourceRawFile,
+			DataFile rawDataFile,
 			Range dataExtractionRtRange,
 			boolean removeAllMassesAboveParent,
 			double msMsCountsCutoff,
-			int maxFragmentsCutoff) {
+			int maxFragmentsCutoff,
+			IntensityMeasure filterIntensityMeasure) {
 		super();
-		this.sourceRawFile = sourceRawFile;
+		this.rawDataFile = rawDataFile;
 		this.dataExtractionRtRange = dataExtractionRtRange;
 		this.removeAllMassesAboveParent = removeAllMassesAboveParent;
 		this.msMsCountsCutoff = msMsCountsCutoff;
 		this.maxFragmentsCutoff = maxFragmentsCutoff;
+		this.filterIntensityMeasure = filterIntensityMeasure;
 		features = new ArrayList<MsFeature>();
 	}
 
@@ -83,7 +76,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	public void run() {
 		// TODO Auto-generated method stub
 		setStatus(TaskStatus.PROCESSING);
-		taskDescription = "Importing data from file " + sourceRawFile.getName();
+		taskDescription = "Importing data from file " + rawDataFile.getName();
 		total = 100;
 		processed = 0;
 		try {
@@ -111,14 +104,14 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 
 	private void filterAndDenoise() {
 		// TODO Auto-generated method stub
-		taskDescription = "Filtering and de-noising " + sourceRawFile.getName();
+		taskDescription = "Filtering and de-noising " + rawDataFile.getName();
 		total = 100;
 		processed = 0;
 	}
 
 	private void extractMSMSFeatures() {
 
-		taskDescription = "Extracting MSMS features from " + sourceRawFile.getName();
+		taskDescription = "Extracting MSMS features from " + rawDataFile.getName();
 		ScanIndex msmsScansIndex = data.getScans().getMapMsLevel2index().get(2);
 		total =  msmsScansIndex.getNum2scan().size();
 		processed = 0;		
@@ -178,10 +171,10 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		if (isCanceled())
 			return;
 		
-		data = RawDataManager.getRawData(sourceRawFile);
+		data = RawDataManager.getRawData(rawDataFile);
 		
 		if(!data.getScans().getMapMsLevel2index().containsKey(2)) {
-			System.out.println("No MSMS data in file " + sourceRawFile.getName());
+			System.out.println("No MSMS data in file " + rawDataFile.getName());
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
@@ -191,14 +184,19 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	@Override
 	public Task cloneTask() {
 		return new MsMsfeatureExtractionTask(
-				sourceRawFile,
+				rawDataFile,
 				dataExtractionRtRange,
 				removeAllMassesAboveParent,
 				msMsCountsCutoff,
-				maxFragmentsCutoff);
+				maxFragmentsCutoff,
+				filterIntensityMeasure);
 	}
 
 	public Collection<MsFeature> getMSMSFeatures() {
 		return features;
+	}
+
+	public DataFile getRawDataFile() {
+		return rawDataFile;
 	}
 }

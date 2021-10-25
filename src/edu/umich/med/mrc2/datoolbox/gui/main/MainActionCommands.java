@@ -56,6 +56,12 @@ public enum MainActionCommands {
 	OPEN_RAW_DATA_PROJECT_COMMAND("Open raw data analysis pproject"),
 	CLOSE_RAW_DATA_PROJECT_COMMAND("Close raw data analysis pproject"),
 	SAVE_RAW_DATA_PROJECT_COMMAND("Save raw data analysis pproject"),
+	EDIT_RAW_DATA_PROJECT_SETUP_COMMAND("Show raw data analysis project editor"),
+	EDIT_RAW_DATA_PROJECT_COMMAND("Edit raw data analysis project"),
+	
+	//	Raw data analysis
+	MSMS_FEATURE_EXTRACTION_SETUP_COMMAND("Set up MSMS feature extraction"),
+	MSMS_FEATURE_EXTRACTION_COMMAND("Extract MSMS features"),
 	
 	//	User manager
 	SHOW_USER_MANAGER_COMMAND("Show User Manager"),

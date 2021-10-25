@@ -22,12 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.project;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Date;
 
-import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 

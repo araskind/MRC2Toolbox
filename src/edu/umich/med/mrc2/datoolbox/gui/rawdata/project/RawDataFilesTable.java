@@ -25,8 +25,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;

@@ -1,38 +1,51 @@
 /*******************************************************************************
- *
+ * 
  * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ * 
  * Contributors:
  * Alexander Raskind (araskind@med.umich.edu)
- *
+ *  
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.misctest;
+package edu.umich.med.mrc2.datoolbox.data.enums;
 
-import java.awt.FlowLayout;
+public enum IntensityMeasure {
 
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
+	ABSOLUTE("Absolute"), 
+	RELATIVE("Relative to base peak");
 
-public class MockJPanel extends JPanel {
-	public MockJPanel() {
-		FlowLayout flowLayout = (FlowLayout) getLayout();
-		flowLayout.setAlignment(FlowLayout.LEFT);
-		
-		JCheckBox copyFilesCheckBox = new JCheckBox("Copy raw data to project");
-		add(copyFilesCheckBox);
+	private final String name;
+
+	IntensityMeasure(String type) {
+		this.name = type;
 	}
 
+	public String getName() {
+		return name;
+	}
+	
+	public String toString() {
+		return name;
+	}
+	
+	public static IntensityMeasure geIntensityMeasureByName(String type) {
+		
+		for(IntensityMeasure m : IntensityMeasure.values()) {
+			if(m.name().equals(type))
+				return m;
+		}		
+		return null;
+	}
 }
