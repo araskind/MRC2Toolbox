@@ -79,6 +79,14 @@ public class MassSpectrum implements Serializable {
 	public void addDataPoints(Collection<MsPoint>points) {
 		msPoints.addAll(points);
 	}
+	
+	public void replaceDataPoints(Collection<MsPoint>points) {
+		
+		clearAdductMap();
+		clearPatternMap();
+		msPoints.clear();
+		msPoints.addAll(points);
+	}
 
 	public void addDataPoint(double mz, double intensity, String adductType, int charge) {
 
@@ -175,6 +183,10 @@ public class MassSpectrum implements Serializable {
 
 		adductMap.clear();
 		primaryAdduct = null;
+	}
+	
+	public void clearPatternMap() {
+		patternMap.clear();
 	}
 
 	public Collection<BasicIsotopicPattern>getIsotopicGroups(){
@@ -453,6 +465,10 @@ public class MassSpectrum implements Serializable {
 
 	public void setMcMillanCutoffPercentDelta(double mcMillanCutoffPercentDelta) {
 		this.mcMillanCutoffPercentDelta = mcMillanCutoffPercentDelta;
+	}
+
+	public Set<MsPoint> getMsPoints() {
+		return msPoints;
 	}
 }
 

@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.msms;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -31,9 +32,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.prefs.Preferences;
 
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -47,12 +51,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JSpinner;
-import javax.swing.JSplitPane;
 import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
@@ -60,8 +65,6 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -77,8 +80,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	private JCheckBox limitExtractionRtCheckBox;
 	private JFormattedTextField rtFromTextField;
 	private JFormattedTextField rtToTextField;
-	private JFormattedTextField precursorRtAlignTextField;
-	private JFormattedTextField precursorMzAlignTextField;
+	private JFormattedTextField isolationWindowLowerTextField;
+	private JFormattedTextField isolationWindowUpperTextField;
 	private JComboBox intensityMeasureComboBox;
 	private JButton importButton;
 	private JButton cancelButton;
@@ -88,26 +91,35 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	private JCheckBox chckbxLeaveOnly;
 	private JSpinner maxFragmentsSpinner;
 
+	private static final NumberFormat twoDecFormat = new DecimalFormat("###.##");
+	
 	public static final String USE_RT_RANGE = "USE_RT_RANGE";
 	public static final String RT_BORDER_LEFT_MIN = "RT_BORDER_LEFT_MIN";
 	public static final String RT_BORDER_RIGHT_MIN = "RT_BORDER_RIGHT_MIN";
-	public static final String PRECURSOR_MASS_WINDOW = "PRECURSOR_MASS_WINDOW";
+	public static final String ISOLATION_BORDER_MAX = "PRECURSOR_MASS_WINDOW";
 	public static final String PRECURSOR_MASS_WINDOW_UNITS = "PRECURSOR_MASS_WINDOW_UNITS";
-	public static final String PRECURSOR_RT_WINDOW_MIN = "PRECURSOR_RT_WINDOW_MIN";
+	public static final String ISOLATION_BORDER_MIN = "PRECURSOR_RT_WINDOW_MIN";	
+	public static final String PRECURSOR_GROUPING_RT_WINDOW = "PRECURSOR_GROUPING_RT_WINDOW";
+	public static final String PRECURSOR_GROUPING_MASS_ERROR = "PRECURSOR_GROUPING_MASS_ERROR";
+	public static final String PRECURSOR_GROUPING_MASS_ERROR_TYPE = "PRECURSOR_GROUPING_MASS_ERROR_TYPE";	
 	public static final String REMOVE_MASSES_ABOVE_PARENT = "REMOVE_MASSES_ABOVE_PARENT";
 	public static final String REMOVE_MASSES_BELOW_COUNT = "REMOVE_MASSES_BELOW_COUNT";
 	public static final String MINIMAL_COUNTS = "MINIMAL_COUNTS";
 	public static final String LEAVE_MAX_FRAGMENTS = "LEAVE_MAX_FRAGMENTS";
 	public static final String MAX_FRAGMENTS_COUNT = "MAX_FRAGMENTS_COUNT";
 	public static final String INTENSITY_MEASURE = "INTENSITY_MEASURE";
+
+	private JFormattedTextField msmsGroupRtWindowTextField;
+	private JFormattedTextField precursorGroupingMassErrorTextField;
+	private JComboBox precursorGroupingMassErrorTypeComboBox;
 	
 	public MSMSFeatureExtractionSetupDialog(ActionListener listener) {
 		super();
 		setTitle("MSMS feature extraction settings");
 		setIconImage(((ImageIcon) extractMSMSFeaturesIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setPreferredSize(new Dimension(640, 300));
-		setSize(new Dimension(640, 300));
+		setPreferredSize(new Dimension(640, 450));
+		setSize(new Dimension(640, 450));
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		preferences = Preferences.userNodeForPackage(this.getClass());
@@ -116,14 +128,15 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		panel_1.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(panel_1, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0};
-		gbl_panel_1.columnWeights = new double[]{1.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.columnWidths = new int[]{277, 0, 0, 0, 0, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 
 		limitExtractionRtCheckBox = new JCheckBox("Extract data only for retention time from ");
 		GridBagConstraints gbc_limitExtractionRtCheckBox = new GridBagConstraints();
+		gbc_limitExtractionRtCheckBox.anchor = GridBagConstraints.EAST;
 		gbc_limitExtractionRtCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_limitExtractionRtCheckBox.gridx = 0;
 		gbc_limitExtractionRtCheckBox.gridy = 0;
@@ -163,66 +176,173 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblMin.gridy = 0;
 		panel_1.add(lblMin, gbc_lblMin);
 
-		JLabel lblRtAlignmentWindow = new JLabel("Precursor isolation window (if not in data), from ");
+		JLabel lblRtAlignmentWindow = new JLabel("Precursor isolation window (if not in data)");
 		GridBagConstraints gbc_lblRtAlignmentWindow = new GridBagConstraints();
 		gbc_lblRtAlignmentWindow.anchor = GridBagConstraints.EAST;
 		gbc_lblRtAlignmentWindow.insets = new Insets(0, 0, 5, 5);
 		gbc_lblRtAlignmentWindow.gridx = 0;
 		gbc_lblRtAlignmentWindow.gridy = 1;
 		panel_1.add(lblRtAlignmentWindow, gbc_lblRtAlignmentWindow);
-
-		precursorRtAlignTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getRtFormat());
-		precursorRtAlignTextField.setColumns(10);
+		
+		JLabel lblNewLabel_4 = new JLabel("Below precursor M/Z");
+		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
+		gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_4.gridx = 0;
+		gbc_lblNewLabel_4.gridy = 2;
+		panel_1.add(lblNewLabel_4, gbc_lblNewLabel_4);
+		
+		isolationWindowLowerTextField = 
+				new JFormattedTextField(twoDecFormat);
+		isolationWindowLowerTextField.setColumns(10);
 		GridBagConstraints gbc_precursorRtAlignTextField = new GridBagConstraints();
 		gbc_precursorRtAlignTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_precursorRtAlignTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_precursorRtAlignTextField.gridx = 1;
-		gbc_precursorRtAlignTextField.gridy = 1;
-		panel_1.add(precursorRtAlignTextField, gbc_precursorRtAlignTextField);
-
-		JLabel lblMin_1 = new JLabel("to ");
-		GridBagConstraints gbc_lblMin_1 = new GridBagConstraints();
-		gbc_lblMin_1.insets = new Insets(0, 0, 5, 5);
-		gbc_lblMin_1.gridx = 2;
-		gbc_lblMin_1.gridy = 1;
-		panel_1.add(lblMin_1, gbc_lblMin_1);
+		gbc_precursorRtAlignTextField.gridy = 2;
+		panel_1.add(isolationWindowLowerTextField, gbc_precursorRtAlignTextField);
 		
-				precursorMzAlignTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getPpmFormat());
-				precursorMzAlignTextField.setColumns(10);
-				GridBagConstraints gbc_precursorMzAlignTextField = new GridBagConstraints();
-				gbc_precursorMzAlignTextField.insets = new Insets(0, 0, 5, 5);
-				gbc_precursorMzAlignTextField.fill = GridBagConstraints.HORIZONTAL;
-				gbc_precursorMzAlignTextField.gridx = 3;
-				gbc_precursorMzAlignTextField.gridy = 1;
-				panel_1.add(precursorMzAlignTextField, gbc_precursorMzAlignTextField);
+		JLabel lblNewLabel_3 = new JLabel("Da");
+		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
+		gbc_lblNewLabel_3.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_3.gridx = 2;
+		gbc_lblNewLabel_3.gridy = 2;
+		panel_1.add(lblNewLabel_3, gbc_lblNewLabel_3);
+		
+		JLabel lblNewLabel_5 = new JLabel("Above precursor M/Z");
+		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
+		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_5.gridx = 0;
+		gbc_lblNewLabel_5.gridy = 3;
+		panel_1.add(lblNewLabel_5, gbc_lblNewLabel_5);
+		
+		isolationWindowUpperTextField = 
+				new JFormattedTextField(twoDecFormat);
+		isolationWindowUpperTextField.setColumns(10);
+		GridBagConstraints gbc_precursorMzAlignTextField = new GridBagConstraints();
+		gbc_precursorMzAlignTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_precursorMzAlignTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_precursorMzAlignTextField.gridx = 1;
+		gbc_precursorMzAlignTextField.gridy = 3;
+		panel_1.add(isolationWindowUpperTextField, gbc_precursorMzAlignTextField);
+		
+		JLabel lblNewLabel_6 = new JLabel("Da");
+		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
+		gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_6.gridx = 2;
+		gbc_lblNewLabel_6.gridy = 3;
+		panel_1.add(lblNewLabel_6, gbc_lblNewLabel_6);
+		
+		JPanel panel_3 = new JPanel();
+		panel_3.setBorder(new CompoundBorder(new TitledBorder(
+				new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
+						new Color(160, 160, 160)), "MSMS grouping", 
+				TitledBorder.LEADING, TitledBorder.TOP, null, 
+				new Color(0, 0, 0)), new EmptyBorder(10, 10, 10, 10)));
+		GridBagConstraints gbc_panel_3 = new GridBagConstraints();
+		gbc_panel_3.gridwidth = 5;
+		gbc_panel_3.insets = new Insets(0, 0, 5, 0);
+		gbc_panel_3.fill = GridBagConstraints.BOTH;
+		gbc_panel_3.gridx = 0;
+		gbc_panel_3.gridy = 4;
+		panel_1.add(panel_3, gbc_panel_3);
+		GridBagLayout gbl_panel_3 = new GridBagLayout();
+		gbl_panel_3.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_panel_3.rowHeights = new int[]{0, 0, 0};
+		gbl_panel_3.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_3.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		panel_3.setLayout(gbl_panel_3);
+		
+		JLabel lblNewLabel = new JLabel("Group MSMS if within RT window of ");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 0;
+		panel_3.add(lblNewLabel, gbc_lblNewLabel);
+		
+		msmsGroupRtWindowTextField = new JFormattedTextField((Format) null);
+		msmsGroupRtWindowTextField.setText("0.0");
+		msmsGroupRtWindowTextField.setColumns(10);
+		GridBagConstraints gbc_msmsGroupRtWindowTextField = new GridBagConstraints();
+		gbc_msmsGroupRtWindowTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_msmsGroupRtWindowTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_msmsGroupRtWindowTextField.gridx = 1;
+		gbc_msmsGroupRtWindowTextField.gridy = 0;
+		panel_3.add(msmsGroupRtWindowTextField, gbc_msmsGroupRtWindowTextField);
+		
+		JLabel lblNewLabel_1 = new JLabel("min.");
+		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel_1.gridx = 2;
+		gbc_lblNewLabel_1.gridy = 0;
+		panel_3.add(lblNewLabel_1, gbc_lblNewLabel_1);
+		
+		JLabel lblNewLabel_2 = new JLabel("Precursor mass tolerance");
+		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_2.gridx = 0;
+		gbc_lblNewLabel_2.gridy = 1;
+		panel_3.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		
+		precursorGroupingMassErrorTextField = new JFormattedTextField((Format) null);
+		precursorGroupingMassErrorTextField.setText("0.65");
+		precursorGroupingMassErrorTextField.setColumns(10);
+		GridBagConstraints gbc_precursorMassToleranceTextField = new GridBagConstraints();
+		gbc_precursorMassToleranceTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_precursorMassToleranceTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_precursorMassToleranceTextField.gridx = 1;
+		gbc_precursorMassToleranceTextField.gridy = 1;
+		panel_3.add(precursorGroupingMassErrorTextField, gbc_precursorMassToleranceTextField);
+		
+		precursorGroupingMassErrorTypeComboBox = new JComboBox<MassErrorType>(
+				new DefaultComboBoxModel<MassErrorType>(MassErrorType.values()));
+		precursorGroupingMassErrorTypeComboBox.setSize(new Dimension(80, 22));
+		precursorGroupingMassErrorTypeComboBox.setPreferredSize(new Dimension(80, 22));
+		GridBagConstraints gbc_precursorMassErrorTypeComboBox = new GridBagConstraints();
+		gbc_precursorMassErrorTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_precursorMassErrorTypeComboBox.gridx = 2;
+		gbc_precursorMassErrorTypeComboBox.gridy = 1;
+		panel_3.add(precursorGroupingMassErrorTypeComboBox, gbc_precursorMassErrorTypeComboBox);
 
 		//		MSMS filtering
 		JPanel panel = new JPanel();
-		panel.setBorder(new TitledBorder(null, "MSMS filtering", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		GridBagConstraints gbc_panel_3 = new GridBagConstraints();
-		gbc_panel_3.gridwidth = 5;
-		gbc_panel_3.fill = GridBagConstraints.BOTH;
-		gbc_panel_3.gridx = 0;
-		gbc_panel_3.gridy = 2;
-		panel_1.add(panel, gbc_panel_3);
+		panel.setBorder(
+				new CompoundBorder(new TitledBorder(
+						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
+								new Color(160, 160, 160)), "MSMS filtering", 
+						TitledBorder.LEADING, TitledBorder.TOP, null, 
+						new Color(0, 0, 0)), new EmptyBorder(10, 10, 10, 10)));
+		GridBagConstraints gbc_panel = new GridBagConstraints();
+		gbc_panel.gridwidth = 5;
+		gbc_panel.fill = GridBagConstraints.BOTH;
+		gbc_panel.gridx = 0;
+		gbc_panel.gridy = 5;
+		panel_1.add(panel, gbc_panel);
 
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[]{0, 87, 0, 0, 0};
+		gbl_panel.columnWidths = new int[]{0, 87, 87, 0, 0, 0};
 		gbl_panel.rowHeights = new int[]{0, 0, 0, 0};
-		gbl_panel.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 
-		chckbxRemoveAllMassesAboveParent = new JCheckBox("Remove all masses above parent ion");
+		chckbxRemoveAllMassesAboveParent = 
+				new JCheckBox("Remove all masses above parent ion");
 		GridBagConstraints gbc_chckbxRemoveAllMassesAboveParent = new GridBagConstraints();
 		gbc_chckbxRemoveAllMassesAboveParent.anchor = GridBagConstraints.WEST;
-		gbc_chckbxRemoveAllMassesAboveParent.gridwidth = 2;
+		gbc_chckbxRemoveAllMassesAboveParent.gridwidth = 3;
 		gbc_chckbxRemoveAllMassesAboveParent.insets = new Insets(0, 0, 5, 5);
 		gbc_chckbxRemoveAllMassesAboveParent.gridx = 0;
 		gbc_chckbxRemoveAllMassesAboveParent.gridy = 0;
 		panel.add(chckbxRemoveAllMassesAboveParent, gbc_chckbxRemoveAllMassesAboveParent);
 
-		chckbxRemoveAllMassesBelowCounts = new JCheckBox("Remove all masses below ");
+		chckbxRemoveAllMassesBelowCounts = 
+				new JCheckBox("Remove all masses below ");
 		GridBagConstraints gbc_chckbxRemoveAllMasses = new GridBagConstraints();
 		gbc_chckbxRemoveAllMasses.insets = new Insets(0, 0, 5, 5);
 		gbc_chckbxRemoveAllMasses.anchor = GridBagConstraints.WEST;
@@ -232,21 +352,22 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 				
 		intensityMeasureComboBox = new JComboBox<IntensityMeasure>(
 				new DefaultComboBoxModel<IntensityMeasure>(IntensityMeasure.values()));
-		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBox.gridx = 1;
-		gbc_comboBox.gridy = 1;
-		panel.add(intensityMeasureComboBox, gbc_comboBox);
+		GridBagConstraints gbc_intensityMeasureComboBox = new GridBagConstraints();
+		gbc_intensityMeasureComboBox.gridwidth = 2;
+		gbc_intensityMeasureComboBox.insets = new Insets(0, 0, 5, 5);
+		gbc_intensityMeasureComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_intensityMeasureComboBox.gridx = 1;
+		gbc_intensityMeasureComboBox.gridy = 1;
+		panel.add(intensityMeasureComboBox, gbc_intensityMeasureComboBox);
 
-		minimalCountsTextField = new JFormattedTextField(new DecimalFormat("###.##"));
+		minimalCountsTextField = new JFormattedTextField(twoDecFormat);
 		minimalCountsTextField.setSize(new Dimension(80, 20));
 		minimalCountsTextField.setPreferredSize(new Dimension(80, 20));
 		minimalCountsTextField.setColumns(9);
 		GridBagConstraints gbc_formattedTextField = new GridBagConstraints();
 		gbc_formattedTextField.anchor = GridBagConstraints.WEST;
 		gbc_formattedTextField.insets = new Insets(0, 0, 5, 5);
-		gbc_formattedTextField.gridx = 2;
+		gbc_formattedTextField.gridx = 3;
 		gbc_formattedTextField.gridy = 1;
 		panel.add(minimalCountsTextField, gbc_formattedTextField);
 
@@ -286,13 +407,13 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				dispose();
 			}
 		};
 		cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(al);
 		panel_2.add(cancelButton);
-		importButton = new JButton("Import iDDA data");
+		importButton = new JButton(MainActionCommands.MSMS_FEATURE_EXTRACTION_COMMAND.getName());
 		importButton.setActionCommand(MainActionCommands.MSMS_FEATURE_EXTRACTION_COMMAND.getName());
 		importButton.addActionListener(listener);
 		panel_2.add(importButton);	
@@ -311,16 +432,38 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 //		}
 	}
 
-	public double getPrecursorAlignmentRtWindow() {
-		return Double.valueOf(precursorRtAlignTextField.getText());
+	public Range getDataExtractionRtRange() {
+		
+		double fromRt = Double.valueOf(rtFromTextField.getText());
+		double toRt = Double.valueOf(rtToTextField.getText());
+		if(limitExtractionRtCheckBox.isSelected() && toRt > 0 && toRt > fromRt)
+			return new Range(fromRt, toRt);
+		else
+			return null;
+	}
+	
+	public double getIsolationWindowLowerBorder() {
+		return Double.valueOf(isolationWindowLowerTextField.getText());
 	}
 
-	public double getPrecursorAlignmentMzWindow() {
-		return Double.valueOf(precursorMzAlignTextField.getText());
+	public double getIsolationWindowUpperBorder() {
+		return Double.valueOf(isolationWindowUpperTextField.getText());
+	}
+	
+	public double getMsmsGroupingRtWindow() {
+		return Double.valueOf(msmsGroupRtWindowTextField.getText());
+	}
+	
+	public double getPrecursorGroupingMassError() {
+		return Double.valueOf(precursorGroupingMassErrorTextField.getText());
+	}
+	
+	public MassErrorType getPrecursorGroupingMassErrorType() {
+		return (MassErrorType) precursorGroupingMassErrorTypeComboBox.getSelectedItem();
 	}
 
-	public MassErrorType getPrecursorAlignmentMzErrorType() {
-		return (MassErrorType) mzAlignUnitsComboBox.getSelectedItem();
+	public IntensityMeasure getFilterIntensityMeasure() {
+		return (IntensityMeasure) intensityMeasureComboBox.getSelectedItem();
 	}
 
 	public boolean removeAllMassesAboveParent() {
@@ -342,16 +485,6 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 			return (int) maxFragmentsSpinner.getValue();
 	}
 	
-	public Range getDataExtractionRtRange() {
-		
-		double fromRt = Double.valueOf(rtFromTextField.getText());
-		double toRt = Double.valueOf(rtToTextField.getText());
-		if(limitExtractionRtCheckBox.isSelected() && toRt > 0 && toRt > fromRt)
-			return new Range(fromRt, toRt);
-		else
-			return null;
-	}
-	
 	public IntensityMeasure getIntensityMeasure() {
 		return (IntensityMeasure)intensityMeasureComboBox.getSelectedItem();
 	}
@@ -363,9 +496,13 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		limitExtractionRtCheckBox.setSelected(preferences.getBoolean(USE_RT_RANGE, false));
 		rtFromTextField.setText(Double.toString(preferences.getDouble(RT_BORDER_LEFT_MIN, 0.0d)));
 		rtToTextField.setText(Double.toString(preferences.getDouble(RT_BORDER_RIGHT_MIN, 0.0d)));
-		precursorRtAlignTextField.setText(Double.toString(preferences.getDouble(PRECURSOR_RT_WINDOW_MIN, 0.1d)));
-		precursorMzAlignTextField.setText(Double.toString(preferences.getDouble(PRECURSOR_MASS_WINDOW, 20.0d)));
-
+		isolationWindowLowerTextField.setText(Double.toString(preferences.getDouble(ISOLATION_BORDER_MIN, 0.65d)));
+		isolationWindowUpperTextField.setText(Double.toString(preferences.getDouble(ISOLATION_BORDER_MAX, 0.65d)));		
+		msmsGroupRtWindowTextField.setText(Double.toString(preferences.getDouble(PRECURSOR_GROUPING_RT_WINDOW, 0.1d)));
+		precursorGroupingMassErrorTextField.setText(Double.toString(preferences.getDouble(PRECURSOR_GROUPING_MASS_ERROR, 15.0d)));
+		precursorGroupingMassErrorTypeComboBox.setSelectedItem(
+				MassErrorType.getTypeByName(
+						preferences.get(PRECURSOR_GROUPING_MASS_ERROR_TYPE, MassErrorType.ppm.name())));			
 		chckbxRemoveAllMassesAboveParent.setSelected(preferences.getBoolean(REMOVE_MASSES_ABOVE_PARENT, true));
 		chckbxRemoveAllMassesBelowCounts.setSelected(preferences.getBoolean(REMOVE_MASSES_BELOW_COUNT, false));
 		minimalCountsTextField.setText(Double.toString(preferences.getDouble(MINIMAL_COUNTS, 0.0d)));
@@ -383,10 +520,13 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		preferences.putBoolean(USE_RT_RANGE, limitExtractionRtCheckBox.isSelected());
 		preferences.putDouble(RT_BORDER_LEFT_MIN, Double.valueOf(rtFromTextField.getText()));
 		preferences.putDouble(RT_BORDER_RIGHT_MIN, Double.valueOf(rtToTextField.getText()));
-		preferences.putDouble(PRECURSOR_RT_WINDOW_MIN, Double.valueOf(precursorRtAlignTextField.getText()));
-		preferences.putDouble(PRECURSOR_MASS_WINDOW, Double.valueOf(precursorMzAlignTextField.getText()));
-		preferences.put(PRECURSOR_MASS_WINDOW_UNITS, getPrecursorAlignmentMzErrorType().name());
-		preferences.putBoolean(REMOVE_MASSES_ABOVE_PARENT, chckbxRemoveAllMassesAboveParent.isSelected());
+		preferences.putDouble(ISOLATION_BORDER_MIN, getIsolationWindowLowerBorder());
+		preferences.putDouble(ISOLATION_BORDER_MAX, getIsolationWindowUpperBorder());		
+		preferences.putDouble(PRECURSOR_GROUPING_RT_WINDOW, getMsmsGroupingRtWindow());
+		preferences.putDouble(PRECURSOR_GROUPING_MASS_ERROR, getPrecursorGroupingMassError());
+		preferences.put(PRECURSOR_GROUPING_MASS_ERROR_TYPE, getPrecursorGroupingMassErrorType().name());		
+		preferences.put(PRECURSOR_MASS_WINDOW_UNITS, getFilterIntensityMeasure().name());
+		preferences.putBoolean(REMOVE_MASSES_ABOVE_PARENT, removeAllMassesAboveParent());
 		preferences.putBoolean(REMOVE_MASSES_BELOW_COUNT, chckbxRemoveAllMassesBelowCounts.isSelected());
 		preferences.putDouble(MINIMAL_COUNTS, Double.parseDouble(minimalCountsTextField.getText()));
 		preferences.putBoolean(LEAVE_MAX_FRAGMENTS, chckbxLeaveOnly.isSelected());
@@ -404,7 +544,30 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		savePreferences();
 		super.dispose();	
 	}
+	
+	public Collection<String>validateParameters(){
+		
+		Collection<String>errors = new ArrayList<String>();
+		if(limitExtractionRtCheckBox.isSelected()) {
+			double lb = Double.valueOf(rtFromTextField.getText());
+			double rb = Double.valueOf(rtToTextField.getText());
+			if(lb >= rb)
+				errors.add("Specified retention time range not valid");		
+		}
+		if(getFilterIntensityMeasure().equals(IntensityMeasure.RELATIVE)) {
+			
+			double minCounts = getMsMsCountsCutoff();
+			if(minCounts > 100.0d || minCounts < 0.0d)
+				errors.add("Relative intensity cutoff should be between 0 and 100");
+		}
+		return errors;
+	}
 }
+
+
+
+
+
 
 
 

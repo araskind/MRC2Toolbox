@@ -159,12 +159,22 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	public MsPoint[] getNormalizedMassSortedSpectrum() {
 
 		double maxIntensity = spectrum.stream().
-			sorted(new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC)).
+			sorted(MsUtils.reverseIntensitySorter).
 			findFirst().get().getIntensity();
 
 		return spectrum.stream().sorted(new MsDataPointComparator(SortProperty.MZ)).
 				map(p -> new MsPoint(p.getMz(), p.getIntensity()/maxIntensity * 1000.0d)).
 				toArray(size -> new MsPoint[size]);
+	}
+	
+	public MsPoint getBasePeak() {
+		
+		if(spectrum.isEmpty())
+			return null;
+		
+		return spectrum.stream().
+			sorted(MsUtils.reverseIntensitySorter).
+			findFirst().get();
 	}
 
 	/**
@@ -399,16 +409,16 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
     @Override
     public int hashCode() {
 
-        int hash =  MsUtils.calculateSpectrumHash(spectrum).hashCode();
-        hash = 53 * hash +
-        		spectrumSource.name().hashCode() +
-        		polarity.name().hashCode() +	//	TODO make sure polarity is always present
-        		Double.toString(cidLevel).hashCode() +
-        		Double.toString(parent.getMz()).hashCode();
-        if(ionisationType != null)
-        	hash += ionisationType.hashCode();
+//        int hash =  MsUtils.calculateSpectrumHash(spectrum).hashCode();
+//        hash = 53 * hash +
+//        		spectrumSource.name().hashCode() +
+//        		polarity.name().hashCode() +	//	TODO make sure polarity is always present
+//        		Double.toString(cidLevel).hashCode() +
+//        		Double.toString(parent.getMz()).hashCode();
+//        if(ionisationType != null)
+//        	hash += ionisationType.hashCode();
 
-        return hash;
+        return MsUtils.calculateSpectrumHash(spectrum).hashCode();
     }
 
 	/**
@@ -436,11 +446,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	}
 
 	public double getTotalIntensity() {
-		return totalIntensity;
-	}
-
-	public void setTotalIntensity(double totalIntensity) {
-		this.totalIntensity = totalIntensity;
+		return spectrum.stream().mapToDouble(p -> p.getIntensity()).sum();
 	}
 
 	public double getEntropy() {
@@ -449,6 +455,11 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 
 	public void setEntropy(double entropy) {
 		this.entropy = entropy;
+	}
+	
+	public void setSpecrum(Collection<MsPoint>newSpectrum) {
+		spectrum.clear();
+		spectrum.addAll(newSpectrum);
 	}
 }
 

@@ -44,5 +44,7 @@ public enum SortProperty {
 	probability,
 	sample,
 	dataFile,
-	resultFile;
+	resultFile,
+	spectrumEntropy,
+	msmsIntensity;
 }

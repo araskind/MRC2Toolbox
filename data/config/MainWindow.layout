@@ -186,13 +186,6 @@
 													<format>dock.PlaceholderList</format>
 													<entry>
 														<key shared="false">
-															<placeholder>dock.single.MsLibraryPanel</placeholder>
-														</key>
-														<item key="convert" type="b">true</item>
-														<item key="convert-keys" type="a"/>
-													</entry>
-													<entry>
-														<key shared="false">
 															<placeholder>dock.single.ExperimentDesignPanel</placeholder>
 														</key>
 													</entry>

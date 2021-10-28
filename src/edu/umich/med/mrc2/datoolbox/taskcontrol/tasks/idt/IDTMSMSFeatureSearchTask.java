@@ -635,7 +635,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 							polarity);
 					msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
 					msms.setParent(new MsPoint(rs.getDouble("PARENT_MZ"), 999.0d));	
-					msms.setTotalIntensity(rs.getDouble("TOTAL_INTENSITY"));
+//					msms.setTotalIntensity(rs.getDouble("TOTAL_INTENSITY"));
 					msms.setEntropy(rs.getDouble("ENTROPY"));		
 					msmsList.add(msms);
 					
@@ -653,8 +653,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 
 					msrs.close();
 					
-					if(msms.getTotalIntensity() == 0.0d)				
-						msms.setTotalIntensity(spectrum.stream().mapToDouble(p -> p.getIntensity()).sum());
+//					if(msms.getTotalIntensity() == 0.0d)				
+//						msms.setTotalIntensity(spectrum.stream().mapToDouble(p -> p.getIntensity()).sum());
 					
 					if(msms.getEntropy() == 0.0d)
 						msms.setEntropy(MsUtils.calculateSpectrumEntropy(spectrum));

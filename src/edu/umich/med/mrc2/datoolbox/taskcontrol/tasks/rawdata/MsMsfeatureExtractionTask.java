@@ -23,24 +23,44 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.ClusterUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.LCMSDataSubset;
 import umich.ms.datatypes.scan.IScan;
-import umich.ms.datatypes.scancollection.ScanIndex;
+import umich.ms.datatypes.scan.props.PrecursorInfo;
+import umich.ms.datatypes.spectrum.ISpectrum;
 import umich.ms.fileio.exceptions.FileParsingException;
 
 public class MsMsfeatureExtractionTask extends AbstractTask {
@@ -51,6 +71,11 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private double msMsCountsCutoff;
 	private int maxFragmentsCutoff;
 	private IntensityMeasure filterIntensityMeasure;
+	private double msmsIsolationWindowLowerBorder;
+	private double msmsIsolationWindowUpperBorder;
+	private double msmsGroupingRtWindow;
+	private double precursorGroupingMassError;
+	private MassErrorType precursorGroupingMassErrorType;
 
 	private LCMSData data;
 	private Collection<MsFeature>features;
@@ -61,7 +86,12 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			boolean removeAllMassesAboveParent,
 			double msMsCountsCutoff,
 			int maxFragmentsCutoff,
-			IntensityMeasure filterIntensityMeasure) {
+			IntensityMeasure filterIntensityMeasure,
+			double msmsIsolationWindowLowerBorder,
+			double msmsIsolationWindowUpperBorder,
+			double msmsGroupingRtWindow,
+			double precursorGroupingMassError,
+			MassErrorType precursorGroupingMassErrorType) {
 		super();
 		this.rawDataFile = rawDataFile;
 		this.dataExtractionRtRange = dataExtractionRtRange;
@@ -69,6 +99,11 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		this.msMsCountsCutoff = msMsCountsCutoff;
 		this.maxFragmentsCutoff = maxFragmentsCutoff;
 		this.filterIntensityMeasure = filterIntensityMeasure;
+		this.msmsIsolationWindowLowerBorder = msmsIsolationWindowLowerBorder;
+		this.msmsIsolationWindowUpperBorder = msmsIsolationWindowUpperBorder;
+		this.msmsGroupingRtWindow = msmsGroupingRtWindow;
+		this.precursorGroupingMassError = precursorGroupingMassError;
+		this.precursorGroupingMassErrorType = precursorGroupingMassErrorType;
 		features = new ArrayList<MsFeature>();
 	}
 
@@ -87,6 +122,13 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);
 		}
 		try {
+			extractMSMSFeatures();
+		}
+		catch (Exception e1) {
+			e1.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+		}
+		try {
 			filterAndDenoise();
 		}
 		catch (Exception e1) {
@@ -94,29 +136,180 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);
 		}
 		try {
-			extractMSMSFeatures();
+			groupRelatedMsmsSpectra();
 		}
 		catch (Exception e1) {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
+		setStatus(TaskStatus.FINISHED);
 	}
 
 	private void filterAndDenoise() {
 		// TODO Auto-generated method stub
-		taskDescription = "Filtering and de-noising " + rawDataFile.getName();
-		total = 100;
+		taskDescription = "Filtering and de-noising MSMS features in " + rawDataFile.getName();
+		total = features.size();
+		processed = 0;		
+		for(MsFeature feature : features) {
+			
+			//	MS1
+//			List<MsPoint> msOneRaw = 
+//					feature.getSpectrum().getMsPoints().stream().
+//					sorted(MsUtils.reverseIntensitySorter).
+//					collect(Collectors.toList());
+//			Collection<MsPoint> msOneFiltered = msOneRaw;
+//			if(msMsCountsCutoff > 0) {
+//				
+//				if(filterIntensityMeasure.equals(IntensityMeasure.ABSOLUTE)) {
+//					msOneFiltered = msOneRaw.stream().
+//						filter(p -> p.getIntensity() > msMsCountsCutoff).
+//						collect(Collectors.toList());
+//				}
+//				if(filterIntensityMeasure.equals(IntensityMeasure.RELATIVE)) {
+//					
+//					double topIntensity = feature.getSpectrum().getBasePeak().getIntensity() / 100;
+//					msOneFiltered = msOneRaw.stream().
+//							filter(p -> p.getIntensity()/topIntensity > msMsCountsCutoff).
+//							collect(Collectors.toList());
+//				}
+//			}
+//			msOneFiltered  = msOneFiltered.stream().
+//					sorted(MsUtils.mzSorter).collect(Collectors.toList());
+//			feature.getSpectrum().replaceDataPoints(msOneFiltered);
+			
+			//	MS2
+			TandemMassSpectrum msms = feature.getSpectrum().getExperimentalTandemSpectrum();
+			if(msms != null) {
+							
+				List<MsPoint> msmsRaw = 
+						msms.getSpectrum().stream().
+						sorted(MsUtils.reverseIntensitySorter).
+						collect(Collectors.toList());
+				Collection<MsPoint> msmsFiltered = msmsRaw;
+				if(msMsCountsCutoff > 0) {
+					
+					if(filterIntensityMeasure.equals(IntensityMeasure.ABSOLUTE)) {
+						msmsFiltered = msmsRaw.stream().
+							filter(p -> p.getIntensity() > msMsCountsCutoff).
+							collect(Collectors.toList());
+					}
+					if(filterIntensityMeasure.equals(IntensityMeasure.RELATIVE)) {
+						
+						double topIntensity = msms.getBasePeak().getIntensity() / 100;
+						msmsFiltered = msmsRaw.stream().
+								filter(p -> p.getIntensity()/topIntensity > msMsCountsCutoff).
+								collect(Collectors.toList());
+					}
+				}
+				if(maxFragmentsCutoff > 0) {
+					msmsFiltered  = msmsFiltered.stream().
+							sorted(MsUtils.reverseIntensitySorter).
+							limit(maxFragmentsCutoff).collect(Collectors.toList());
+				}
+				msmsFiltered  = msmsFiltered.stream().
+						sorted(MsUtils.mzSorter).collect(Collectors.toList());
+				
+				if(removeAllMassesAboveParent) {
+					double precursorMz = msms.getParent().getMz() + 0.5d;
+					msmsFiltered  = msmsFiltered.stream().filter(p -> p.getMz() <= precursorMz).
+							sorted(MsUtils.mzSorter).collect(Collectors.toList());
+				}			
+				msms.setSpecrum(msmsFiltered);
+				msms.setEntropy(MsUtils.calculateSpectrumEntropy(msmsFiltered));
+			}
+			processed++;
+		}
+	}
+	
+	private void groupRelatedMsmsSpectra() {
+		// TODO Auto-generated method stub
+		taskDescription = "Grouping related MSMS features in " + rawDataFile.getName();
+		total = features.size();
 		processed = 0;
+		HashSet<MsFeature>assigned = new HashSet<MsFeature>();
+		ArrayList<MsFeatureCluster> clusters = new ArrayList<MsFeatureCluster>();
+		DataPipeline dataPipeline = createDummyDataPipeline();
+		features = features.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).
+				collect(Collectors.toList());
+		
+		for (MsFeature cf : features) {
+
+			for (MsFeatureCluster fClust : clusters) {
+
+				if (fClust.matchesOnMSMSParentIon(cf,
+						precursorGroupingMassError, 
+						precursorGroupingMassErrorType, 
+						msmsGroupingRtWindow)) {
+
+					fClust.addFeature(cf, dataPipeline);
+					assigned.add(cf);
+					break;
+				}
+			}
+			if (!assigned.contains(cf)) {
+
+				MsFeatureCluster newCluster = new MsFeatureCluster();
+				newCluster.addFeature(cf, dataPipeline);
+				assigned.add(cf);
+				clusters.add(newCluster);
+			}
+			processed++;
+		}
+		clusters.stream().forEach(c -> c.setPrimaryFeature(ClusterUtils.getMostIntensiveMsmsFeature(c)));
+		List<MsFeature> uniqueFeatures = clusters.stream().
+			filter(c -> c.getFeatures().size() == 1).
+			map(c -> c.getPrimaryFeature()).
+			collect(Collectors.toList());
+		
+		Collection<MsFeatureCluster>duplicateList = clusters.stream().
+				filter(c -> c.getFeatures().size() > 1).
+				collect(Collectors.toList());
+		taskDescription = "Averaging redundant MSMS features in " + rawDataFile.getName();
+		total = duplicateList.size();
+		processed = 0;
+		for (MsFeatureCluster clust : duplicateList){
+			
+//			MsFeature avg = clust.getAveragedSpectrumFeature();
+//			if(avg != null)
+//				uniqueFeatures.add(avg);
+			
+			processed++;
+		}
+		features = uniqueFeatures.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).
+				collect(Collectors.toList());
+	}
+	
+	private DataPipeline createDummyDataPipeline() {
+		DataAcquisitionMethod acqMethod = new DataAcquisitionMethod(
+				"QQQ",
+				"Dummy DataAcquisitionMethod",
+				"",
+				MRC2ToolBoxCore.getIdTrackerUser(),
+				new Date());
+		DataExtractionMethod dacq = new DataExtractionMethod(
+				"ZZZ",
+				"Dummy DataAcquisitionMethod",
+				"",
+				MRC2ToolBoxCore.getIdTrackerUser(),
+				new Date());
+		return new DataPipeline(acqMethod, dacq);
 	}
 
 	private void extractMSMSFeatures() {
 
 		taskDescription = "Extracting MSMS features from " + rawDataFile.getName();
-		ScanIndex msmsScansIndex = data.getScans().getMapMsLevel2index().get(2);
-		total =  msmsScansIndex.getNum2scan().size();
+		Map<Integer, IScan>num2scan = data.getScans().getMapMsLevel2index().get(2).getNum2scan();
+		total =  num2scan.size();
 		processed = 0;		
 		
-		for(Entry<Integer, IScan> entry: msmsScansIndex.getNum2scan().entrySet()) {
+		if(dataExtractionRtRange != null) {
+			num2scan = num2scan.entrySet().stream().
+					filter(x -> dataExtractionRtRange.contains(x.getValue().getRt())).
+					collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+		}
+		for(Entry<Integer, IScan> entry: num2scan.entrySet()) {
 			
 			IScan s = entry.getValue();		
 			IScan parentScan = getParentScan(s);
@@ -130,15 +323,39 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			
 			MsFeature f = new MsFeature(s.getRt(), polarity);
 			MassSpectrum spectrum = new MassSpectrum();
-			spectrum.addDataPoints(getDataPointsForScan(parentScan));			
-			MsPoint parent = new MsPoint(
-					s.getPrecursor().getMzTarget(), 
-					s.getPrecursor().getIntensity());			
+			spectrum.addDataPoints(RawDataUtils.getScanPoints(parentScan));		
+			PrecursorInfo precursor = s.getPrecursor();
+			Double targetMz = precursor.getMzTarget();
+			if(targetMz == null)
+				targetMz = precursor.getMzTargetMono();
+			Range isolationWindow = new Range(
+					targetMz - msmsIsolationWindowLowerBorder, 
+					targetMz + msmsIsolationWindowUpperBorder);			
+			if(precursor.getMzRange() != null)
+				isolationWindow = new Range(isolationWindow.getMin(), isolationWindow.getMax());
+			
+			MsPoint parent = getActualPrecursor(parentScan, isolationWindow);
+			if(parent == null)
+				parent = new MsPoint(targetMz, s.getPrecursor().getIntensity());				
+			
+			String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+					MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
+					MRC2ToolBoxConfiguration.defaultRtFormat.format(parentScan.getRt());
+			f.setName(name);
 			TandemMassSpectrum msms = new TandemMassSpectrum(
 					2, 
 					parent,
-					getDataPointsForScan(s),
+					RawDataUtils.getScanPoints(s),
 					polarity);
+			msms.setIsolationWindow(isolationWindow);
+			if(precursor.getActivationInfo() != null) {
+				Double ach = precursor.getActivationInfo().getActivationEnergyHi();
+				Double acl = precursor.getActivationInfo().getActivationEnergyLo();
+				if(ach != null && acl != null)
+					msms.setCidLevel((acl + ach)/2.0d);
+			}
+			msms.setScanNumber(s.getNum());
+			msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
 			spectrum.addTandemMs(msms);		
 			f.setSpectrum(spectrum);
 			features.add(f);
@@ -146,15 +363,26 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		}
 	}
 	
-	private Collection<MsPoint>getDataPointsForScan(IScan s){
+	private MsPoint getActualPrecursor(IScan ms1can, Range isolationWindow) {
+	
+		ISpectrum spectrum = ms1can.getSpectrum();
+		int[] precursorIdx = spectrum.findMzIdxs(isolationWindow.getMin(), isolationWindow.getMax());
+		if(precursorIdx == null)
+			return null;
 		
-		Collection<MsPoint>points = new ArrayList<MsPoint>();
-		double[]mzs = s.getSpectrum().getMZs();
-		double[]intensities = s.getSpectrum().getIntensities();
-		for(int i=0; i<mzs.length; i++)
-			points.add(new MsPoint(mzs[i], intensities[i]));		
-		
-		return points;
+		int maxIdx = -1;
+		double maxIntensity = 0.0d;
+		for(int i=precursorIdx[0]; i<=precursorIdx[1]; i++) {
+
+			if(spectrum.getIntensities()[i] > maxIntensity) {
+				maxIntensity = spectrum.getIntensities()[i];
+				maxIdx = i;
+			}
+		}
+		if(maxIdx > -1)
+			return new MsPoint(spectrum.getMZs()[maxIdx], spectrum.getIntensities()[maxIdx]);
+		else
+			return null;
 	}
 	
 	private IScan getParentScan(IScan s) {
@@ -189,7 +417,12 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				removeAllMassesAboveParent,
 				msMsCountsCutoff,
 				maxFragmentsCutoff,
-				filterIntensityMeasure);
+				filterIntensityMeasure,
+				msmsIsolationWindowLowerBorder,
+				msmsIsolationWindowUpperBorder,
+				msmsGroupingRtWindow,
+				precursorGroupingMassError,
+				precursorGroupingMassErrorType);
 	}
 
 	public Collection<MsFeature> getMSMSFeatures() {

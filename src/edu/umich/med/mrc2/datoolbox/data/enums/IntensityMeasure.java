@@ -23,8 +23,8 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 
 public enum IntensityMeasure {
 
-	ABSOLUTE("Absolute"), 
-	RELATIVE("Relative to base peak");
+	ABSOLUTE("Absolute, counts"), 
+	RELATIVE("Relative to base peak, %");
 
 	private final String name;
 

@@ -40,11 +40,21 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 public class ClusterUtils {
 
 	public static MsFeature getMostIntensiveFeature(Collection<MsFeature> features) {
-		return features.stream().sorted(new MsFeatureComparator(SortProperty.Area, SortDirection.DESC)).findFirst().get();
+		return features.stream().
+				sorted(new MsFeatureComparator(SortProperty.Area, SortDirection.DESC)).
+				findFirst().orElse(null);
 	}
 
 	public static MsFeature getMostIntensiveFeature(MsFeatureCluster fcluster) {
 		return ClusterUtils.getMostIntensiveFeature(fcluster.getFeatures());
+	}
+	
+	public static MsFeature getMostIntensiveMsmsFeature(MsFeatureCluster fcluster) {
+		return fcluster.getFeatures().stream().
+				filter(f -> f.getSpectrum() != null).
+				filter(f -> f.getSpectrum().getExperimentalTandemSpectrum() != null).
+				sorted(new MsFeatureComparator(SortProperty.msmsIntensity, SortDirection.DESC)).
+				findFirst().orElse(null);
 	}
 
 	public static Matrix createClusterCorrelationMatrix(MsFeatureCluster fcluster, boolean activeOnly) {

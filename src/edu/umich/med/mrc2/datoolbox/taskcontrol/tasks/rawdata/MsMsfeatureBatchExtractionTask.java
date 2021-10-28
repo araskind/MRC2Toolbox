@@ -28,6 +28,7 @@ import java.util.TreeMap;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -45,6 +46,11 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 	private double msMsCountsCutoff;
 	private int maxFragmentsCutoff;
 	private IntensityMeasure filterIntensityMeasure;
+	private double msmsIsolationWindowLowerBorder;
+	private double msmsIsolationWindowUpperBorder;	
+	private double msmsGroupingRtWindow;
+	private double precursorGroupingMassError;
+	private MassErrorType precursorGroupingMassErrorType;
 	
 	public MsMsfeatureBatchExtractionTask(
 			Collection<DataFile> rawDataFiles, 
@@ -52,7 +58,12 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 			boolean removeAllMassesAboveParent, 
 			double msMsCountsCutoff, 
 			int maxFragmentsCutoff,
-			IntensityMeasure filterIntensityMeasure) {
+			IntensityMeasure filterIntensityMeasure,
+			double msmsIsolationWindowLowerBorder,
+			double msmsIsolationWindowUpperBorder,
+			double msmsGroupingRtWindow,
+			double precursorGroupingMassError,
+			MassErrorType precursorGroupingMassErrorType) {
 		super();
 		this.rawDataFiles = rawDataFiles;
 		this.dataExtractionRtRange = dataExtractionRtRange;
@@ -60,6 +71,11 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 		this.msMsCountsCutoff = msMsCountsCutoff;
 		this.maxFragmentsCutoff = maxFragmentsCutoff;
 		this.filterIntensityMeasure = filterIntensityMeasure;
+		this.msmsIsolationWindowLowerBorder = msmsIsolationWindowLowerBorder;
+		this.msmsIsolationWindowUpperBorder = msmsIsolationWindowUpperBorder;
+		this.msmsGroupingRtWindow = msmsGroupingRtWindow;
+		this.precursorGroupingMassError = precursorGroupingMassError;
+		this.precursorGroupingMassErrorType = precursorGroupingMassErrorType;
 		msFeatureMap = new TreeMap<DataFile, Collection<MsFeature>>();		
 	}
 
@@ -78,7 +94,12 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 					removeAllMassesAboveParent,
 					msMsCountsCutoff,
 					maxFragmentsCutoff,
-					filterIntensityMeasure);
+					filterIntensityMeasure,
+					msmsIsolationWindowLowerBorder,
+					msmsIsolationWindowUpperBorder,
+					msmsGroupingRtWindow,
+					precursorGroupingMassError,
+					precursorGroupingMassErrorType);
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
@@ -92,7 +113,12 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 				removeAllMassesAboveParent, 
 				msMsCountsCutoff, 
 				maxFragmentsCutoff,
-				filterIntensityMeasure);
+				filterIntensityMeasure,
+				msmsIsolationWindowLowerBorder,
+				msmsIsolationWindowUpperBorder,
+				msmsGroupingRtWindow,
+				precursorGroupingMassError,
+				precursorGroupingMassErrorType);
 	}
 
 	@Override

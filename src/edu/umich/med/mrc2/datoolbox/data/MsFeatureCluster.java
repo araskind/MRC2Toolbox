@@ -43,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -439,6 +440,98 @@ public class MsFeatureCluster implements Serializable {
 				return entry.getKey();
 		}
 		return null;
+	}
+	
+	public MsFeature getAveragedMSMSFeature(
+			Double mzBinWidth, MassErrorType errorType) {
+		
+		if(primaryFeature == null || primaryFeature.getSpectrum() == null)
+			return null;		
+		Polarity polarity = primaryFeature.getPolarity();		
+		MassSpectrum spectrum = new MassSpectrum();
+		
+		//	MS1
+		Collection<MsPoint>inputPoints = getFeatures().stream().
+				filter(f -> f.getSpectrum() != null).
+				flatMap(f -> f.getSpectrum().getMsPoints().stream()).
+				collect(Collectors.toList());
+		Collection<MsPoint>averageMS1Spectrum = 
+				MsUtils.averageSpectrum(inputPoints, mzBinWidth, errorType);
+		spectrum.replaceDataPoints(averageMS1Spectrum);
+		
+		//	MS2
+		List<TandemMassSpectrum> msmsList = getFeatures().stream().
+			filter(f -> f.getSpectrum() != null).
+			filter(f -> f.getSpectrum().getExperimentalTandemSpectrum() != null).
+			map(f -> f.getSpectrum().getExperimentalTandemSpectrum()).
+			collect(Collectors.toList());
+		Range isolationWindow = msmsList.get(0).getIsolationWindow();
+		for(int i=1; i<msmsList.size(); i++)
+			isolationWindow.extendRange(msmsList.get(i).getIsolationWindow());
+		
+		Collection<MsPoint>inputParentPoints = msmsList.stream().
+				map(s -> s.getParent()).collect(Collectors.toList());			
+		MsPoint parent = MsUtils.getAveragePoint(inputParentPoints);
+		Collection<MsPoint>inputMS2Points = msmsList.stream().
+				flatMap(s -> s.getSpectrum().stream()).
+				collect(Collectors.toList());
+		Collection<MsPoint>averageMS2Spectrum = 
+				MsUtils.averageSpectrum(inputMS2Points, mzBinWidth, errorType);
+		TandemMassSpectrum msms = new TandemMassSpectrum(
+				2, 
+				parent,
+				averageMS2Spectrum,
+				polarity);
+		msms.setIsolationWindow(isolationWindow);
+		
+		//	Weighted RT
+		
+//		String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+//			MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
+//			MRC2ToolBoxConfiguration.defaultRtFormat.format(parentScan.getRt());
+		
+		MsFeature averaged = new MsFeature(primaryFeature.getRetentionTime(), polarity);
+		TandemMassSpectrum primaryTandemMs = 
+				primaryFeature.getSpectrum().getExperimentalTandemSpectrum();
+		
+//		spectrum.addDataPoints(RawDataUtils.getScanPoints(parentScan));		
+//		PrecursorInfo precursor = s.getPrecursor();
+//		Double targetMz = precursor.getMzTarget();
+//		if(targetMz == null)
+//			targetMz = precursor.getMzTargetMono();
+//		Range isolationWindow = new Range(
+//				targetMz - msmsIsolationWindowLowerBorder, 
+//				targetMz + msmsIsolationWindowUpperBorder);			
+//		if(precursor.getMzRange() != null)
+//			isolationWindow = new Range(isolationWindow.getMin(), isolationWindow.getMax());
+//		
+//		MsPoint parent = getActualPrecursor(parentScan, isolationWindow);
+//		if(parent == null)
+//			parent = new MsPoint(targetMz, s.getPrecursor().getIntensity());				
+//		
+//		String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+//				MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
+//				MRC2ToolBoxConfiguration.defaultRtFormat.format(parentScan.getRt());
+//		f.setName(name);
+//		TandemMassSpectrum msms = new TandemMassSpectrum(
+//				2, 
+//				parent,
+//				RawDataUtils.getScanPoints(s),
+//				polarity);
+//		msms.setIsolationWindow(isolationWindow);
+//		if(precursor.getActivationInfo() != null) {
+//			Double ach = precursor.getActivationInfo().getActivationEnergyHi();
+//			Double acl = precursor.getActivationInfo().getActivationEnergyLo();
+//			if(ach != null && acl != null)
+//				msms.setCidLevel((acl + ach)/2.0d);
+//		}
+//		msms.setScanNumber(s.getNum());
+//		msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
+//		spectrum.addTandemMs(msms);		
+//		f.setSpectrum(spectrum);
+
+		
+		return averaged;
 	}
 }
 

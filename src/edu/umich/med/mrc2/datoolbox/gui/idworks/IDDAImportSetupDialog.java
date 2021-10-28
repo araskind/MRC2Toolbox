@@ -67,7 +67,6 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.IDDADataImportTask;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class IDDAImportSetupDialog extends JDialog implements ActionListener, BackedByPreferences{

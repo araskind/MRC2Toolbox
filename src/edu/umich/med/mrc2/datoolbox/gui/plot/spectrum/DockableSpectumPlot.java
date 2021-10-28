@@ -31,10 +31,12 @@ import java.util.List;
 
 import javax.swing.Icon;
 
+import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.ui.Layer;
 import org.jfree.data.Range;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -157,6 +159,23 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		spectrumPlot.removeAllDataSets();
 		activeMsDataSet = new MsDataSet(cf, scaleMs);
 		showMsDataSet(activeMsDataSet);
+		
+		if(cf.getSpectrum() != null) {
+			
+			if(cf.getSpectrum().getExperimentalTandemSpectrum() != null) {
+				
+				TandemMassSpectrum msms = cf.getSpectrum().getExperimentalTandemSpectrum();
+				if(msms.getIsolationWindow() != null && msms.getIsolationWindow().getSize() > 0.0d) {
+					
+					IntervalMarker marker = new IntervalMarker(
+							msms.getIsolationWindow().getMin(), 
+							msms.getIsolationWindow().getMax());
+					marker.setPaint(LCMSPlotPanel.markerColor);
+					marker.setAlpha(0.5f);
+					((XYPlot) spectrumPlot.getPlot()).addDomainMarker(marker, Layer.FOREGROUND);
+				}
+			}
+		}
 	}
 
 	public void showMsForFeatureList(Collection<MsFeature> featureList, boolean scaleMs) {
@@ -198,8 +217,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		((XYPlot) spectrumPlot.getPlot()).setDataset(1, parentSet);
 
 		setPlotMargins(activeMsDataSet);
-	}
-	
+	}	
 
 	public void showTandemMs(TandemMassSpectrum msms) {
 

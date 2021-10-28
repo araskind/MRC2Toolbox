@@ -54,6 +54,7 @@ import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
@@ -276,14 +277,25 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void extractMSMSFeatures() {
-
+		
+		Collection<String>errors = msmsFeatureExtractionSetupDialog.validateParameters();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msmsFeatureExtractionSetupDialog);
+			return;
+		}
 		MsMsfeatureBatchExtractionTask task = new MsMsfeatureBatchExtractionTask(
 				activeRawDataAnalysisProject.getRawDataFiles(), 
 				msmsFeatureExtractionSetupDialog.getDataExtractionRtRange(),
 				msmsFeatureExtractionSetupDialog.removeAllMassesAboveParent(), 
 				msmsFeatureExtractionSetupDialog.getMsMsCountsCutoff(), 
 				msmsFeatureExtractionSetupDialog.getMaxFragmentsCutoff(),
-				msmsFeatureExtractionSetupDialog.getIntensityMeasure());
+				msmsFeatureExtractionSetupDialog.getIntensityMeasure(),
+				msmsFeatureExtractionSetupDialog.getIsolationWindowLowerBorder(),
+				msmsFeatureExtractionSetupDialog.getIsolationWindowUpperBorder(),
+				msmsFeatureExtractionSetupDialog.getMsmsGroupingRtWindow(),
+				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassError(),
+				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassErrorType());
+		
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 		msmsFeatureExtractionSetupDialog.dispose();
@@ -553,9 +565,17 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		 * Main task. Executed in background thread.
 		 */
 		private Collection<DataFile>newRawFiles;
+		private boolean append;
+
+		public OpenRawDataFilesTask(Collection<DataFile> newRawFiles, boolean append) {
+			super();
+			this.newRawFiles = newRawFiles;
+			this.append = append;
+		}
 
 		public OpenRawDataFilesTask(Collection<DataFile>newRawFiles) {
 			this.newRawFiles = newRawFiles;
+			this.append = true;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -567,8 +587,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				existingFiles.addAll(newRawFiles);
 				dataFileTreePanel.loadData(existingFiles, true);	
 				dataFileTreePanel.toggleTreeExpanded(dataFileTreePanel.isTreeExpanded());				
-				xicSetupPanel.loadData(newRawFiles, true);
-				msExtractorPanel.loadData(newRawFiles, true);				
+				xicSetupPanel.loadData(newRawFiles, append);
+				msExtractorPanel.loadData(newRawFiles, append);				
 			} 
 			catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -664,14 +684,18 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	private void finalizeRawMSMSBatchExtractionTask(MsMsfeatureBatchExtractionTask task) {
-		// TODO Auto-generated method stub
+
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
 		Map<DataFile, Collection<MsFeature>> featureMap = task.getMsFeatureMap();		
 		for(Entry<DataFile, Collection<MsFeature>>e : featureMap.entrySet())
 			activeRawDataAnalysisProject.setMsFeaturesForDataFile(e.getKey(), e.getValue());
 		
-		System.out.println("***");
+		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
+				activeRawDataAnalysisProject.getRawDataFiles(), false);
+		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
 	}
 
 	private void finalizeRawDataAnalysisProjectSave(LoadRawDataAnalysisProjectTask task) {
@@ -840,6 +864,10 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(selected.stream().findFirst().get() instanceof AverageMassSpectrum)
 			showAverageMassSpectrum((AverageMassSpectrum)selected.stream().findFirst().get());
 		
+		//	Show first selected MSMS feature
+		if(selected.stream().findFirst().get() instanceof MsFeature)
+			showMsFeature((MsFeature)selected.stream().findFirst().get());
+		
 		//	Show selected chromatograms
 		List<ExtractedChromatogram> chroms = 
 				selected.stream().filter(o -> (o instanceof ExtractedChromatogram)).
@@ -854,6 +882,26 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		
 		if(!files.isEmpty())
 			showFiles(files);
+	}
+
+	private void showMsFeature(MsFeature msFeature) {
+
+		msPlotPanel.showMsForFeature(msFeature, false);
+		msTable.setTableModelFromSpectrum(msFeature);
+		msmsPlotPane.clearPanel();
+		msmsTable.clearTable();
+	
+		TandemMassSpectrum msms = 
+				msFeature.getSpectrum().getExperimentalTandemSpectrum();
+		if(msms != null) {
+			msmsPlotPane.showTandemMs(msms);;
+			msmsTable.setTableModelFromTandemMs(msms);
+		}
+		DataFile df = dataFileTreePanel.getDataFileForMsFeature(msFeature);
+		if(df != null) {
+			xicSetupPanel.selectFiles(Collections.singleton(df));
+			msExtractorPanel.selectFiles(Collections.singleton(df));
+		}
 	}
 
 	private void showFiles(List<DataFile> files) {

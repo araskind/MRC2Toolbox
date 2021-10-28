@@ -61,15 +61,32 @@ public class MsOneTableModel extends BasicTableModel {
 		if(spectrum == null)
 			return;
 
-		for(Adduct adduct : spectrum.getAdducts()) {
+		if(spectrum.getAdducts() != null && !spectrum.getAdducts().isEmpty()) {
+			
+			for(Adduct adduct : spectrum.getAdducts()) {
 
+				int count = 1;
+				for(MsPoint dp : spectrum.getMsForAdduct(adduct)) {
+
+					Object[] obj = {
+							dp.getMz(),
+							dp.getIntensity(),
+							adduct,
+							count
+					};
+					super.addRow(obj);
+					count++;
+				}
+			}
+		}
+		else {
 			int count = 1;
-			for(MsPoint dp : spectrum.getMsForAdduct(adduct)) {
+			for(MsPoint dp : spectrum.getCompletePattern()) {
 
 				Object[] obj = {
 						dp.getMz(),
 						dp.getIntensity(),
-						adduct,
+						"",
 						count
 				};
 				super.addRow(obj);

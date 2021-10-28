@@ -21,11 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id;
 
-import java.io.File;
-
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -74,16 +71,16 @@ public class IDDADataImportTask extends AbstractTask implements TaskListener{
 		processed = 0;
 		try {
 			for(DataFile f : sourceRawFiles) {
-				
-				MsMsfeatureExtractionTask fet = new MsMsfeatureExtractionTask(
-						f,
-						dataExtractionRtRange,
-						removeAllMassesAboveParent,
-						msMsCountsCutoff,
-						maxFragmentsCutoff);
-
-				fet.addTaskListener(this);
-				MRC2ToolBoxCore.getTaskController().addTask(fet);
+//				
+//				MsMsfeatureExtractionTask fet = new MsMsfeatureExtractionTask(
+//						f,
+//						dataExtractionRtRange,
+//						removeAllMassesAboveParent,
+//						msMsCountsCutoff,
+//						maxFragmentsCutoff);
+//
+//				fet.addTaskListener(this);
+//				MRC2ToolBoxCore.getTaskController().addTask(fet);
 			}
 		}
 		catch (Exception e1) {

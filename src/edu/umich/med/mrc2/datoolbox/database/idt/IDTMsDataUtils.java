@@ -275,11 +275,11 @@ public class IDTMsDataUtils {
 			TandemMassSpectrum msms = new TandemMassSpectrum(2, parent, msmsPoints, polarity);
 			msms.setFragmenterVoltage(rs.getDouble("FRAGMENTATION_ENERGY"));
 			msms.setCidLevel(rs.getDouble("COLLISION_ENERGY"));
-			double totalIntensity = rs.getDouble("TOTAL_INTENSITY");
-			if(totalIntensity == 0.0d)
-				totalIntensity = msmsPoints.stream().mapToDouble(p -> p.getIntensity()).sum();
-				
-			msms.setTotalIntensity(totalIntensity);
+//			double totalIntensity = rs.getDouble("TOTAL_INTENSITY");
+//			if(totalIntensity == 0.0d)
+//				totalIntensity = msmsPoints.stream().mapToDouble(p -> p.getIntensity()).sum();
+//				
+//			msms.setTotalIntensity(totalIntensity);
 			double entropy = rs.getDouble("ENTROPY");
 			if(entropy == 0.0d)
 				entropy = MsUtils.calculateSpectrumEntropy(msmsPoints);
@@ -616,7 +616,7 @@ public class IDTMsDataUtils {
 					polarity);
 			msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
 			msms.setParent(new MsPoint(rs.getDouble("PARENT_MZ"), 999.0d));	
-			msms.setTotalIntensity(rs.getDouble("TOTAL_INTENSITY"));
+//			msms.setTotalIntensity(rs.getDouble("TOTAL_INTENSITY"));
 			msms.setEntropy(rs.getDouble("ENTROPY"));		
 			msmsList.add(msms);
 		}
@@ -637,8 +637,8 @@ public class IDTMsDataUtils {
 
 			msrs.close();
 			
-			if(msms.getTotalIntensity() == 0.0d)				
-				msms.setTotalIntensity(spectrum.stream().mapToDouble(p -> p.getIntensity()).sum());
+//			if(msms.getTotalIntensity() == 0.0d)				
+//				msms.setTotalIntensity(spectrum.stream().mapToDouble(p -> p.getIntensity()).sum());
 			
 			if(msms.getEntropy() == 0.0d)
 				msms.setEntropy(MsUtils.calculateSpectrumEntropy(spectrum));

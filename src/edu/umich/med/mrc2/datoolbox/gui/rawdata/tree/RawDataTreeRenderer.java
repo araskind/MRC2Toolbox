@@ -36,6 +36,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.scan.IScan;
@@ -56,6 +57,8 @@ public class RawDataTreeRenderer extends DefaultTreeCellRenderer {
 	private static final Icon averageSpectrumIcon = GuiUtils.getIcon("avgSpectrum", 24);	
 	private static final Icon scanCollectionIcon = GuiUtils.getIcon("scanCollection", 24);
 	private static final Icon spectrumIcon = GuiUtils.getIcon("spectrumicon", 16);
+	private static final Icon msTwoFeatureCollectionIcon = GuiUtils.getIcon("msTwoFeatureCollection", 24);
+	private static final Icon msTwoFeatureIcon = GuiUtils.getIcon("msTwo", 16);
 	
 	static final Font bigFont = new Font("SansSerif", Font.BOLD, 14);
 	static final Font smallerFont = new Font("SansSerif", Font.BOLD, 12);
@@ -104,6 +107,10 @@ public class RawDataTreeRenderer extends DefaultTreeCellRenderer {
 			label.setFont(smallerFont);
 			label.setIcon(averageSpectrumCollectionIcon);
 		}
+		if (embeddedObject == RawDataTreeModel.ms2featuresNodeName) {
+			label.setFont(bigFont);
+			label.setIcon(msTwoFeatureCollectionIcon);
+		}
 		if (embeddedObject instanceof DataFile) {
 			
 			label.setIcon(rawFileIcon);
@@ -136,6 +143,19 @@ public class RawDataTreeRenderer extends DefaultTreeCellRenderer {
 			label.setText(RawDataUtils.getScanLabel(s));
 			if (!selected) {
 				if (s.getMsLevel() > 1)
+					label.setForeground(Color.red);
+				else
+					label.setForeground(Color.blue);
+			}
+		}
+		if (embeddedObject instanceof MsFeature) {
+			
+			MsFeature f = (MsFeature) embeddedObject;
+			label.setIcon(msTwoFeatureIcon);
+			label.setFont(smallerPlainFont);
+			label.setText(f.getName());
+			if (!selected) {
+				if (f.hasInstrumentMsMs())
 					label.setForeground(Color.red);
 				else
 					label.setForeground(Color.blue);

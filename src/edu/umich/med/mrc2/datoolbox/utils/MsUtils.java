@@ -1210,6 +1210,15 @@ public class MsUtils {
 		return -entropy;
 	}
 	
+	public static Collection<MsPoint>averageSpectrum(
+			Collection<MsPoint>inputPoints, Double mzBinWidth, MassErrorType errorType){
+		
+		List<RawMsPoint> rawInputPoints = inputPoints.stream().
+				map(p -> new RawMsPoint(p.getMz(), p.getIntensity(), p.getScanNum())).
+				collect(Collectors.toList());
+		return averageMassSpectrum(rawInputPoints, mzBinWidth, errorType);
+	}
+	
 	public static Collection<MsPoint>averageMassSpectrum(
 			Collection<RawMsPoint>inputPoints, Double mzBinWidth, MassErrorType errorType) {
 		
@@ -1232,6 +1241,20 @@ public class MsUtils {
 				map(b -> b.getAveragePoint()).
 				map(p -> new MsPoint(p.getMz(), p.getIntensity())).
 				collect(Collectors.toList());
+	}
+	
+	public static MsPoint getAveragePoint(Collection<MsPoint>inputPoints) {
+		
+		if(inputPoints.isEmpty())
+			return null;
+		
+		if(inputPoints.size() == 1)
+			return inputPoints.iterator().next();
+		
+		double totalIntensity =  inputPoints.stream().mapToDouble(p -> p.getIntensity()).sum();
+		double massIntensityProductSum = inputPoints.stream().mapToDouble(p -> p.getMz() * p.getIntensity()).sum();
+		double avgMz = massIntensityProductSum / totalIntensity;
+		return new MsPoint(avgMz, totalIntensity);
 	}
 	
 	public static void calculateMcMillanMassDefectForSpectrum(MassSpectrum spectrum) {

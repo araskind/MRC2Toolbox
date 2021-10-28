@@ -33,6 +33,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import umich.ms.datatypes.scan.IScan;
 
@@ -191,6 +192,15 @@ public class RawDataTree extends JTree {
 	public DataFile getDataFileForScan(IScan s) {
 		
 		DefaultMutableTreeNode scanNode = treeModel.getNodeForObject(s);
+		if(scanNode == null)
+			return null;
+		
+		return (DataFile)((DefaultMutableTreeNode)scanNode.getParent().getParent()).getUserObject();
+	}
+	
+	public DataFile getDataFileForMsFeature(MsFeature f) {
+		
+		DefaultMutableTreeNode scanNode = treeModel.getNodeForObject(f);
 		if(scanNode == null)
 			return null;
 		

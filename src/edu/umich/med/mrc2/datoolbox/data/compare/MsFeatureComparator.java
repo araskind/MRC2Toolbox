@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.data.compare;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 
 public class MsFeatureComparator extends ObjectCompatrator<MsFeature> {
 
@@ -87,6 +88,21 @@ public class MsFeatureComparator extends ObjectCompatrator<MsFeature> {
 				return result;
 			else
 				return -result;
+			
+		case msmsIntensity:
+			if(o1.getSpectrum() != null && o2.getSpectrum() != null 
+					&& o1.getSpectrum().getExperimentalTandemSpectrum() != null
+					&& o2.getSpectrum().getExperimentalTandemSpectrum() != null) {
+				TandemMassSpectrum msmsOne = o1.getSpectrum().getExperimentalTandemSpectrum();
+				TandemMassSpectrum msmsTwo = o2.getSpectrum().getExperimentalTandemSpectrum();
+				result = Double.compare(msmsOne.getTotalIntensity(), msmsTwo.getTotalIntensity());
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+			}
+			else
+				return 0;
 
 		case pimaryId:
 			result = 0;

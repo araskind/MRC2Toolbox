@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.OptionalDouble;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.RawMsPointComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
@@ -61,12 +60,16 @@ public class RawMsPointBucket implements Serializable {
 	
 	public RawMsPoint getAveragePoint() {
 		
-		OptionalDouble avgMz = points.stream().mapToDouble(p -> p.getMz()).average();
-		OptionalDouble avgIntensity = points.stream().mapToDouble(p -> p.getIntensity()).average();
-		if(avgMz.isPresent() && avgIntensity.isPresent())
-			return new RawMsPoint(avgMz.getAsDouble(), avgIntensity.getAsDouble() / points.size());	
-		else
+		if(points.isEmpty())
 			return null;
+		
+		if(points.size() == 1)
+			return points.iterator().next();
+		
+		double totalIntensity =  points.stream().mapToDouble(p -> p.getIntensity()).sum();
+		double massIntensityProductSum = points.stream().mapToDouble(p -> p.getMz() * p.getIntensity()).sum();
+		double avgMz = massIntensityProductSum / totalIntensity;
+		return new RawMsPoint(avgMz, totalIntensity);
 	}
 	
 	public RawMsPoint getMostIntensivePoint() {

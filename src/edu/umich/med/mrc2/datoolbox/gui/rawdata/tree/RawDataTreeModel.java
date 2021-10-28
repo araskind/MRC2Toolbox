@@ -35,6 +35,10 @@ import javax.swing.tree.TreeNode;
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.LCMSData;
@@ -55,15 +59,20 @@ public class RawDataTreeModel extends DefaultTreeModel {
 	public static final String chromatogramNodeName = "Chromatograms";
 	public static final String scansNodeName = "Scans";
 	public static final String spectraNodeName = "Spectra";
+	public static final String ms2featuresNodeName = "MSMS features";
 
 	private DefaultMutableTreeNode rootNode;
-	private final DefaultMutableTreeNode dataFilesNode = new DefaultMutableTreeNode(dataFilesNodeName);
-	private final DefaultMutableTreeNode chromatogramNode = new DefaultMutableTreeNode(chromatogramNodeName);
-	private final DefaultMutableTreeNode spectraNode = new DefaultMutableTreeNode(spectraNodeName);
+	private final DefaultMutableTreeNode dataFilesNode = 
+			new DefaultMutableTreeNode(dataFilesNodeName);
+	private final DefaultMutableTreeNode chromatogramNode = 
+			new DefaultMutableTreeNode(chromatogramNodeName);
+	private final DefaultMutableTreeNode spectraNode = 
+			new DefaultMutableTreeNode(spectraNodeName);
 
-	private TreeGrouping treeGrouping;
-	
+	private TreeGrouping treeGrouping;	
 	protected ConcurrentHashMap<Object, DefaultMutableTreeNode> treeObjects;
+	private static final MsFeatureComparator rtSorter = 
+			new MsFeatureComparator(SortProperty.RT);
 
 	public RawDataTreeModel(TreeNode root) {
 		super(root);
@@ -195,36 +204,36 @@ public class RawDataTreeModel extends DefaultTreeModel {
 			if(!dataFile.getChromatograms().isEmpty()) {
 				dataFile.getChromatograms().stream().sorted().
 					forEach(c -> insertNodeInto(new DefaultMutableTreeNode(c), fileChromatogramNode, getChildCount(fileChromatogramNode)));
-			}
-//			for (ExtractedChromatogram chrom : dataFile.getChromatograms())
-//				insertNodeInto(new DefaultMutableTreeNode(chrom), fileChromatogramNode, getChildCount(fileChromatogramNode));								
-				
+			}												
 			DefaultMutableTreeNode userSpectraNode = new DefaultMutableTreeNode(spectraNodeName);
 			insertNodeInto(userSpectraNode, newNode, getChildCount(newNode));
 			if(!dataFile.getAverageSpectra().isEmpty()) {
 				dataFile.getAverageSpectra().stream().sorted().
 					forEach(s -> insertNodeInto(new DefaultMutableTreeNode(s), userSpectraNode, getChildCount(userSpectraNode)));
 			}
-//			for (AverageMassSpectrum uSpec : dataFile.getAverageSpectra())
-//				insertNodeInto(new DefaultMutableTreeNode(uSpec), userSpectraNode, getChildCount(userSpectraNode));											
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+				DefaultMutableTreeNode ms2featuresNode = new DefaultMutableTreeNode(ms2featuresNodeName);
+				insertNodeInto(ms2featuresNode, newNode, getChildCount(newNode));
+				Collection<MsFeature> msmsFeatures = 
+						MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMsFeaturesForDataFile(dataFile);
+				if(msmsFeatures != null && !msmsFeatures.isEmpty()) {
+					
+					msmsFeatures.stream().sorted(rtSorter).
+						forEach(c -> insertNodeInto(new DefaultMutableTreeNode(c), ms2featuresNode, getChildCount(ms2featuresNode)));
+				}
+			}
 		}
 		if(treeGrouping.equals(TreeGrouping.BY_OBJECT_TYPE)) {
 			
 			if (!dataFile.getChromatograms().isEmpty()) {
 				
 				dataFile.getChromatograms().stream().sorted().
-					forEach(c -> insertNodeInto(new DefaultMutableTreeNode(c), chromatogramNode, getChildCount(chromatogramNode)));
-				
-//				for (ExtractedChromatogram chrom : dataFile.getChromatograms())
-//					insertNodeInto(new DefaultMutableTreeNode(chrom), chromatogramNode, getChildCount(chromatogramNode));								
+					forEach(c -> insertNodeInto(new DefaultMutableTreeNode(c), chromatogramNode, getChildCount(chromatogramNode)));								
 			}
 			if (!dataFile.getAverageSpectra().isEmpty()) {
 				
 				dataFile.getAverageSpectra().stream().sorted().
-					forEach(s -> insertNodeInto(new DefaultMutableTreeNode(s), spectraNode, getChildCount(spectraNode)));
-				
-//				for (AverageMassSpectrum uSpec : dataFile.getAverageSpectra())
-//					insertNodeInto(new DefaultMutableTreeNode(uSpec), spectraNode, getChildCount(spectraNode));								
+					forEach(s -> insertNodeInto(new DefaultMutableTreeNode(s), spectraNode, getChildCount(spectraNode)));								
 			}
 		}
 		//	Add scans

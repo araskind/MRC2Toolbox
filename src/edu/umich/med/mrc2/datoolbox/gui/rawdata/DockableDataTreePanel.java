@@ -39,6 +39,7 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTree;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTreeModel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.TreeGrouping;
@@ -202,6 +203,10 @@ public class DockableDataTreePanel extends DefaultSingleCDockable {
 	
 	public DataFile getDataFileForScan(IScan s) {
 		return rawDataTree.getDataFileForScan(s);
+	}
+	
+	public DataFile getDataFileForMsFeature(MsFeature f) {
+		return rawDataTree.getDataFileForMsFeature(f);
 	}
 }
 

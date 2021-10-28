@@ -22,7 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.gui.rawdata;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
@@ -54,7 +56,10 @@ public class RawDataFileTableModel extends BasicTableModel {
 		if(files == null || files.isEmpty())
 			return;
 		
-		TreeSet<DataFile>sortedFiles = new TreeSet<DataFile>(files);
+		//TreeSet<DataFile>sortedFiles = new TreeSet<DataFile>(files);
+		List<DataFile> sortedFiles = 
+				files.stream().distinct().
+				sorted().collect(Collectors.toList());
 		for (DataFile file : sortedFiles) {
 
 			Object[] obj = new Object[] { 

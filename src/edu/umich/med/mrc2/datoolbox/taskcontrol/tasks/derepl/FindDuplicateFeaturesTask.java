@@ -95,7 +95,6 @@ public class FindDuplicateFeaturesTask extends AbstractTask {
 		taskDescription = "Finding duplicates";
 		duplicateList = new HashSet<MsFeatureCluster>();
 		HashSet<MsFeature>assigned = new HashSet<MsFeature>();
-
 		ArrayList<MsFeatureCluster> clusters = new ArrayList<MsFeatureCluster>();
 		for (MsFeature cf : featureList) {
 

@@ -100,7 +100,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	protected transient Rectangle2D markerRectangle = null;
 	protected Point2D markerStartPoint = null;
-	protected Paint markerColor;
+	public static final Paint markerColor = new Color(150, 150, 150);;
 
 	protected NumberAxis xAxis, yAxis;
 	protected MassSpectrumRenderer defaultMsRenderer;
@@ -133,7 +133,6 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 		dataPointsVisible = false;
 		annotationsVisible = true;
-		markerColor = new Color(150, 150, 150);
 	}
 
 	public void actionPerformed(ActionEvent event) {
@@ -569,6 +568,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 		if(plot != null) {
 
+			plot.clearDomainMarkers();
+			
 			for (int i = 0; i < plot.getDatasetCount(); i++)
 				plot.setDataset(i, null);
 
@@ -591,8 +592,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		
 		((XYPlot) this.getPlot()).setRenderer(1, msRenderer);
 		((XYPlot) this.getPlot()).setDataset(1, targetMs);
-		
-		
+				
 		//	Mark precursor ranges or individual precursors
 		//	Highest MS level
 		if(s.getChildScans() == null || s.getChildScans().isEmpty())
