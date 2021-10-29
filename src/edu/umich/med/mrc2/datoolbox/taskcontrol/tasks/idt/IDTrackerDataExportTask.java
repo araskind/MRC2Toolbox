@@ -550,21 +550,37 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		if(property.equals(IDTrackerMsFeatureProperties.RETENTION_TIME))
 			return rtFormat.format(feature.getRetentionTime());
 		
-		if(property.equals(IDTrackerMsFeatureProperties.EXPERIMENT_ID))
-			return bundle.getExperiment().getId();
+		if(property.equals(IDTrackerMsFeatureProperties.EXPERIMENT_ID)) {
+			if(bundle.getExperiment() != null)
+				return bundle.getExperiment().getId();
+			else
+				return "";
+		}
 		
-		if(property.equals(IDTrackerMsFeatureProperties.SAMPLE_ID))
-			return bundle.getSample().getId();
-		
-		if(property.equals(IDTrackerMsFeatureProperties.SAMPLE_TYPE))
-			return bundle.getStockSample().getLimsSampleType().getName();
-		
-		if(property.equals(IDTrackerMsFeatureProperties.ACQ_METHOD))		
-			return bundle.getAcquisitionMethod().getName();
-		
-		if(property.equals(IDTrackerMsFeatureProperties.DATA_ANALYSIS_METHOD))
-			return bundle.getDataExtractionMethod().getName();
-		
+		if(property.equals(IDTrackerMsFeatureProperties.SAMPLE_ID)) {
+			if(bundle.getSample() != null)
+				return bundle.getSample().getId();
+			else
+				return "";
+		}
+		if(property.equals(IDTrackerMsFeatureProperties.SAMPLE_TYPE)) {
+			if(bundle.getStockSample() != null)
+				return bundle.getStockSample().getLimsSampleType().getName();
+			else
+				return "";
+		}
+		if(property.equals(IDTrackerMsFeatureProperties.ACQ_METHOD)) {	
+			if(bundle.getAcquisitionMethod() != null)
+				return bundle.getAcquisitionMethod().getName();
+			else
+				return "";
+		}
+		if(property.equals(IDTrackerMsFeatureProperties.DATA_ANALYSIS_METHOD)) {
+			if(bundle.getDataExtractionMethod() != null)
+				return bundle.getDataExtractionMethod().getName();
+			else
+				return "";
+		}
 		if(property.equals(IDTrackerMsFeatureProperties.RAW_DATA_FILE)) {
 			
 			Injection inj = injections.stream().filter(i -> i.getId().equals(bundle.getInjectionId())).findFirst().orElse(null);

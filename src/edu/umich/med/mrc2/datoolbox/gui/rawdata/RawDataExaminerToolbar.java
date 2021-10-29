@@ -46,6 +46,7 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	private static final Icon closeProjectIcon = GuiUtils.getIcon("closeRawDataAnalysisProject", 32);
 	private static final Icon saveProjectIcon = GuiUtils.getIcon("saveRawDataAnalysisProject", 32);	
 	private static final Icon extractMSMSFeaturesIcon = GuiUtils.getIcon("findMSMSFeatures", 32);	
+	private static final Icon sendToIDTrackerIcon = GuiUtils.getIcon("sendToIDTracker", 32);	
 	private static final Icon expandTreeIcon = GuiUtils.getIcon("expand", 32);
 	private static final Icon collapseTreeIcon = GuiUtils.getIcon("collapse", 32);
 	private static final Icon byFileTreeIcon = GuiUtils.getIcon("groupByFile", 32);
@@ -55,7 +56,6 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	private static final Icon msConvertIcon = GuiUtils.getIcon("msConvert", 32);
 	private static final Icon indexRawFilesIcon = GuiUtils.getIcon("indexRawFiles", 32);
 	
-
 	private JButton 
 		newProjectButton,	
 		openProjectButton,
@@ -68,7 +68,8 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 		closeDataFileButton,
 		msConvertButton,
 		indexRawFilesButton,
-		extractMSMSFeaturesButton;
+		extractMSMSFeaturesButton,
+		sendToIDTrackerButton;
 
 	public RawDataExaminerToolbar(ActionListener commandListener2) {
 
@@ -113,6 +114,11 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 				MainActionCommands.MSMS_FEATURE_EXTRACTION_SETUP_COMMAND.getName(),
 				buttonDimension);
 
+		sendToIDTrackerButton = GuiUtils.addButton(this, null, sendToIDTrackerIcon, commandListener,
+				MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH.getName(),
+				MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH.getName(),
+				buttonDimension);
+		
 		addSeparator(buttonDimension);
 		
 		expandCollapseTreeButton = GuiUtils.addButton(this, null, expandTreeIcon, commandListener,

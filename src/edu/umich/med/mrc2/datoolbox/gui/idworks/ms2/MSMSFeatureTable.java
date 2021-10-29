@@ -255,6 +255,10 @@ public class MSMSFeatureTable extends BasicTable {
 				continue;
 
 			String compoundName = "";
+			LIMSSampleType limsSampleType = null;
+			if(bundle.getStockSample() != null) 
+				limsSampleType = bundle.getStockSample().getLimsSampleType();
+				
 			FeatureIdentificationState idState = cf.getIdentificationState();
 			boolean hasAnnotations = (!cf.getAnnotations().isEmpty() 
 					|| !bundle.getStandadAnnotations().isEmpty());
@@ -308,7 +312,7 @@ public class MSMSFeatureTable extends BasicTable {
 				instrumentMsMs.getCidLevel(),	//	COLLISION_ENERGY_COLUMN	Double
 //				score,	//	LIB_SCORE_COLUMN	Double
 //				lib,	//	MSMS_LIB_COLUMN	CompoundLibrary
-				bundle.getStockSample().getLimsSampleType(),	//	SAMPLE_TYPE_COLUMN	LIMSSampleType
+				limsSampleType,	//	SAMPLE_TYPE_COLUMN	LIMSSampleType
 				bundle.getSample(),		//	SAMPLE_COLUMN	IDTExperimentalSample
 				bundle.getExperiment(),	//	EXPERIMENT_COLUMN	LIMSExperiment
 				bundle.getAcquisitionMethod(),	//	ACQ_METHOD_ID_COLUMN	LIMSAcquisitionMethod

@@ -24,7 +24,9 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 
@@ -65,6 +67,8 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	private AnnotatedObjectType annotatedObjectType;
 	private double totalIntensity;
 	private double entropy;
+	protected Collection<MsPoint>minorParentIons;
+	protected Map<Integer,Integer>averagedScanNumbers;
 
 	public TandemMassSpectrum(
 			int depth,
@@ -77,8 +81,11 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		this.spectrum = spectrum;
 		this.polarity = polarity;
 
-		uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + UUID.randomUUID().toString();
+		uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);
 		annotations = new TreeSet<ObjectAnnotation>();
+		minorParentIons = new HashSet<MsPoint>();
+		averagedScanNumbers = new TreeMap<Integer,Integer>();
 	}
 
 	public TandemMassSpectrum(int depth, MsPoint parent, Polarity polarity) {
@@ -87,8 +94,11 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		this.parent = parent;
 		this.polarity = polarity;
 		spectrum = new HashSet<MsPoint>();
-		uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + UUID.randomUUID().toString();
+		uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);
 		annotations = new TreeSet<ObjectAnnotation>();
+		minorParentIons = new HashSet<MsPoint>();
+		averagedScanNumbers = new TreeMap<Integer,Integer>();
 	}
 
 	public TandemMassSpectrum(TandemMassSpectrum source) {
@@ -103,7 +113,14 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		uniqueId = source.getId();
 		annotations = new TreeSet<ObjectAnnotation>();
 		annotations.addAll(source.getAnnotations());
-		this.description = source.getDescription();
+		description = source.getDescription();
+		scanNumber = source.getScanNumber();
+		parentScanNumber = source.getParentScanNumber();
+		
+		minorParentIons = new HashSet<MsPoint>();
+		minorParentIons.addAll(source.getMinorParentIons());
+		averagedScanNumbers = new TreeMap<Integer,Integer>();
+		averagedScanNumbers.putAll(source.getAveragedScanNumbers());
 	}
 
 	public TandemMassSpectrum(
@@ -120,15 +137,20 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		this.polarity = polarity;
 		spectrum = new HashSet<MsPoint>();
 		annotations = new TreeSet<ObjectAnnotation>();
+		minorParentIons = new HashSet<MsPoint>();
+		averagedScanNumbers = new TreeMap<Integer,Integer>();
 	}
 
 	public TandemMassSpectrum(Polarity polarity) {
 		super();
-		this.uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + UUID.randomUUID().toString();
+		this.uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);;
 		this.depth = 2;
 		this.polarity = polarity;
 		spectrum = new HashSet<MsPoint>();
 		annotations = new TreeSet<ObjectAnnotation>();
+		minorParentIons = new HashSet<MsPoint>();
+		averagedScanNumbers = new TreeMap<Integer,Integer>();
 	}
 
 	public int getDepth() {
@@ -460,6 +482,18 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	public void setSpecrum(Collection<MsPoint>newSpectrum) {
 		spectrum.clear();
 		spectrum.addAll(newSpectrum);
+	}
+
+	public Collection<MsPoint> getMinorParentIons() {
+		return minorParentIons;
+	}
+
+	public Map<Integer,Integer>getAveragedScanNumbers() {
+		return averagedScanNumbers;
+	}
+	
+	public void addAveragedScanNumbers(int msmsScan, int parentScan) {
+		averagedScanNumbers.put(msmsScan, parentScan);
 	}
 }
 

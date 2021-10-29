@@ -106,7 +106,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 
 	public MsFeature(String name, double neutralMass, double retentionTime) {
 
-		this.id = DataPrefix.MS_FEATURE.getName() + UUID.randomUUID().toString();
+		this.id = DataPrefix.MS_FEATURE.getName() +
+				UUID.randomUUID().toString().substring(0, 12);
 		this.name = name;
 		this.neutralMass = neutralMass;
 		this.retentionTime = retentionTime;
@@ -126,7 +127,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 
 	public MsFeature(String name, double retentionTime) {
 
-		this.id = DataPrefix.MS_FEATURE.getName() + UUID.randomUUID().toString();
+		this.id = DataPrefix.MS_FEATURE.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);
 		this.name = name;
 		this.retentionTime = retentionTime;
 		rtRange = new Range(retentionTime);
@@ -165,7 +167,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 
 	public MsFeature(double retentionTime, Polarity polarity) {
 		super();
-		this.id = DataPrefix.MS_FEATURE.getName() + UUID.randomUUID().toString();
+		this.id = DataPrefix.MS_FEATURE.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);
 		this.retentionTime = retentionTime;
 		this.polarity = polarity;
 		

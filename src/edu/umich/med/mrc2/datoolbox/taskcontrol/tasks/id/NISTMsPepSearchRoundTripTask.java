@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
@@ -52,8 +53,10 @@ import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityMSMSScoreComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -75,6 +78,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 	private String output;	
 	private String error;
 	private Process p;
+	private boolean skipResultsUpload;
 	
 	public NISTMsPepSearchRoundTripTask(
 			String searchCommand,
@@ -86,6 +90,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		this.featuresToSearch = featuresToSearch;
 		this.inputFile = inputFile;
 		this.resultFile = resultFile;
+		skipResultsUpload = false;
 		total = 100;
 		processed = 20;
 		taskDescription = "Running NIST MS/MS search";
@@ -101,6 +106,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		this.featuresToSearch = featuresToSearch;
 		this.inputFile = inputFile;
 		this.resultFile = resultFile;
+		skipResultsUpload = false;
 		total = 100;
 		processed = 20;
 		taskDescription = "Running NIST MS/MS search";
@@ -131,29 +137,107 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 			setStatus(TaskStatus.ERROR);
 		}
 		try {
-			parseAndFilterSearchResults();
+			parseAndFilterSearchResults(skipResultsUpload);
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-		}
+		}		
 		if(pooList.size() > 0) {
 			
-			try {
-				uploadSearchResults();
-			} catch (Exception e) {
-				e.printStackTrace();
-				setStatus(TaskStatus.ERROR);
+			if(!skipResultsUpload) {
+				try {
+					uploadSearchResults();
+				} catch (Exception e) {
+					e.printStackTrace();
+					setStatus(TaskStatus.ERROR);
+				}
+				try {
+					updateFeatureIdentifications();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-			try {
-				updateFeatureIdentifications();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			else {
+				try {
+					updateOfflineFeatureIdentifications();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				assignTopHits();
 			}
 		}
 		// Cleanup working directory
 		cleanupWorkingDirectory();
 		setStatus(TaskStatus.FINISHED);
+	}
+
+	private void assignTopHits() {
+
+		taskDescription = "Assigning default ids ...";
+		total = pooList.size();
+		processed = 0;	
+		MsFeatureIdentityMSMSScoreComparator sorter = 
+				new MsFeatureIdentityMSMSScoreComparator();
+		for(PepSearchOutputObject poo : pooList) {
+			
+			MsFeature msf = msmsIdMap.get(poo.getMsmsFeatureId());
+			if(msf.getIdentifications().size() == 1 && msf.getPrimaryIdentity() == null)
+				msf.setPrimaryIdentity(msf.getIdentifications().iterator().next());
+			
+			if(msf.getIdentifications().size() > 1) {
+				MsFeatureIdentity primaryId = msf.getIdentifications().stream().
+						sorted(sorter).findFirst().orElse(null);
+				if(primaryId != null)
+					msf.setPrimaryIdentity(primaryId);
+			}					
+			processed++;
+		}
+	}
+
+	private void updateOfflineFeatureIdentifications() throws Exception {
+
+		taskDescription = "Updating identification data ...";
+		total = pooList.size();
+		processed = 0;
+		Connection conn = ConnectionManager.getConnection();	
+		for(PepSearchOutputObject poo : pooList) {
+			
+			MsFeature msf = msmsIdMap.get(poo.getMsmsFeatureId());
+			MsMsLibraryFeature msmsId =
+					MSMSLibraryUtils.getMsMsLibraryFeatureById(
+							poo.getMrc2libid(), conn);
+			if(msmsId == null)
+				continue;
+
+			String msmsMatchId = DataPrefix.MSMS_LIBRARY_MATCH.getName() + 
+					UUID.randomUUID().toString().substring(0, 15);
+			MsFeatureIdentity id = new MsFeatureIdentity(msmsId.getCompoundIdentity(),
+					CompoundIdentificationConfidence.ACCURATE_MASS_MSMS);
+			id.setIdSource(CompoundIdSource.LIBRARY_MS2);
+			id.setUniqueId(msmsMatchId);		
+			MSMSMatchType matchType = 
+					MSMSMatchType.getMSMSMatchTypeByName(poo.getMatchType().name());		
+			ReferenceMsMsLibraryMatch match = new ReferenceMsMsLibraryMatch(
+					msmsId,
+					poo.getScore(), 
+					0.0d,
+					0.0d, 
+					poo.getProbablility(), 
+					poo.getDotProduct(), 
+					poo.getReverseDotProduct(),
+					poo.getHybridDotProduct(),
+					poo.getHybridScore(),
+					poo.getHybridDeltaMz(),
+					matchType,
+					poo.isDecoy(),
+					null);			
+			id.setReferenceMsMsLibraryMatch(match);		
+			msf.addIdentity(id);						
+			processed++;
+		}
+		ConnectionManager.releaseConnection(conn);
 	}
 
 	protected void createInputMspFile() throws IOException {
@@ -206,10 +290,15 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 
 			//	Comments
 			String comment = MSPField.COMMENT.getName() + ": ";
-			comment += "Acq. method: " + bundle.getAcquisitionMethod().getName() + "; ";
-			comment += "DA method: " + bundle.getDataExtractionMethod().getName() + "\n";
+			if(bundle.getAcquisitionMethod() != null)
+				comment += "Acq. method: " + bundle.getAcquisitionMethod().getName() + "; ";
+			
+			if(bundle.getDataExtractionMethod() != null)
+				comment += "DA method: " + bundle.getDataExtractionMethod().getName();
+			
+			comment += "\n";
 			writer.append(comment);
-
+			
 			writer.append(MSPField.PRECURSORMZ.getName() + ": " +
 				MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()) + "\n");
 			writer.append(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()) + "\n");
@@ -471,5 +560,9 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 					commandParts, featuresToSearch, inputFile, resultFile);
 		else
 			return null;
+	}
+
+	public void setSkipResultsUpload(boolean skipResultsUpload) {
+		this.skipResultsUpload = skipResultsUpload;
 	}
 }

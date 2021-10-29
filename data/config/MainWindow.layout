@@ -216,13 +216,6 @@
 													</entry>
 													<entry>
 														<key shared="false">
-															<placeholder>dock.single.CompoundDatabasePanel</placeholder>
-														</key>
-														<item key="convert" type="b">true</item>
-														<item key="convert-keys" type="a"/>
-													</entry>
-													<entry>
-														<key shared="false">
 															<placeholder>dock.single.MgfPanel</placeholder>
 														</key>
 													</entry>
@@ -269,7 +262,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>6</selected>
+										<selected>3</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>

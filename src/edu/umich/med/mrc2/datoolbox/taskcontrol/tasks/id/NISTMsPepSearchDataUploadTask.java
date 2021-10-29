@@ -71,7 +71,7 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 		setStatus(TaskStatus.PROCESSING);
 		initLogFile();
 		try {
-			parseAndFilterSearchResults();
+			parseAndFilterSearchResults(false);
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);

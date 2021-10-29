@@ -44,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -483,54 +484,22 @@ public class MsFeatureCluster implements Serializable {
 				averageMS2Spectrum,
 				polarity);
 		msms.setIsolationWindow(isolationWindow);
-		
-		//	Weighted RT
-		
-//		String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-//			MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
-//			MRC2ToolBoxConfiguration.defaultRtFormat.format(parentScan.getRt());
-		
-		MsFeature averaged = new MsFeature(primaryFeature.getRetentionTime(), polarity);
 		TandemMassSpectrum primaryTandemMs = 
 				primaryFeature.getSpectrum().getExperimentalTandemSpectrum();
-		
-//		spectrum.addDataPoints(RawDataUtils.getScanPoints(parentScan));		
-//		PrecursorInfo precursor = s.getPrecursor();
-//		Double targetMz = precursor.getMzTarget();
-//		if(targetMz == null)
-//			targetMz = precursor.getMzTargetMono();
-//		Range isolationWindow = new Range(
-//				targetMz - msmsIsolationWindowLowerBorder, 
-//				targetMz + msmsIsolationWindowUpperBorder);			
-//		if(precursor.getMzRange() != null)
-//			isolationWindow = new Range(isolationWindow.getMin(), isolationWindow.getMax());
-//		
-//		MsPoint parent = getActualPrecursor(parentScan, isolationWindow);
-//		if(parent == null)
-//			parent = new MsPoint(targetMz, s.getPrecursor().getIntensity());				
-//		
-//		String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-//				MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
-//				MRC2ToolBoxConfiguration.defaultRtFormat.format(parentScan.getRt());
-//		f.setName(name);
-//		TandemMassSpectrum msms = new TandemMassSpectrum(
-//				2, 
-//				parent,
-//				RawDataUtils.getScanPoints(s),
-//				polarity);
-//		msms.setIsolationWindow(isolationWindow);
-//		if(precursor.getActivationInfo() != null) {
-//			Double ach = precursor.getActivationInfo().getActivationEnergyHi();
-//			Double acl = precursor.getActivationInfo().getActivationEnergyLo();
-//			if(ach != null && acl != null)
-//				msms.setCidLevel((acl + ach)/2.0d);
-//		}
-//		msms.setScanNumber(s.getNum());
-//		msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
-//		spectrum.addTandemMs(msms);		
-//		f.setSpectrum(spectrum);
-
-		
+		msms.setCidLevel(primaryTandemMs.getCidLevel());
+		msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
+		msms.setScanNumber(primaryTandemMs.getScanNumber());
+		msms.setParentScanNumber(primaryTandemMs.getParentScanNumber());
+		msmsList.stream().forEach(s -> msms.addAveragedScanNumbers(s.getScanNumber(), s.getParentScanNumber()));
+		spectrum.addTandemMs(msms);
+			
+		MsFeature averaged = new MsFeature(primaryFeature.getRetentionTime(), polarity);
+		averaged.setRtRange(getRtRange());
+		String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+			MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
+			MRC2ToolBoxConfiguration.defaultRtFormat.format(averaged.getRetentionTime());
+		averaged.setName(name);
+		averaged.setSpectrum(spectrum);
 		return averaged;
 	}
 }

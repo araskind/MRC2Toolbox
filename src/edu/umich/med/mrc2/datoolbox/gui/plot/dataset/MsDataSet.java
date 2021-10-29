@@ -262,7 +262,14 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 
 			MsPoint[] libPattern = cf.getSpectrum().getCompletePattern(scaleMs);
 			msSeries.put(featureCount, libPattern);
-			labels.put(featureCount, cf.getName() + " - library");
+			String fName = cf.getName();
+			if(cf instanceof LibraryMsFeature)
+				fName += " - library";
+
+			//	TODO show scan #
+//			if(cf.getSpectrum() != null && cf.getSpectrum().getS)
+			
+			labels.put(featureCount, fName);
 			for (MsPoint p : libPattern) {
 
 				allPoints.add(p);

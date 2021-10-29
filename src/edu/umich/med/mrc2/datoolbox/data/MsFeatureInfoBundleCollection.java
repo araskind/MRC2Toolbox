@@ -34,6 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class MsFeatureInfoBundleCollection implements Serializable {
 
@@ -49,6 +50,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	private LIMSUser owner;
 	private Collection<MsFeatureInfoBundle>features;
 	private TreeSet<ObjectAnnotation> annotations;
+	private boolean offLine;
 	
 	public MsFeatureInfoBundleCollection(String name) {
 		super();
@@ -59,6 +61,8 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		features = new TreeSet<MsFeatureInfoBundle>(
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
 		annotations = new TreeSet<ObjectAnnotation>();
+		owner = MRC2ToolBoxCore.getIdTrackerUser();
+		offLine = false;
 	}
 
 	public MsFeatureInfoBundleCollection(
@@ -78,6 +82,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		features = new TreeSet<MsFeatureInfoBundle>(
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
 		annotations = new TreeSet<ObjectAnnotation>();
+		offLine = false;
 	}
 	
 	public void clearCollection(){
@@ -226,5 +231,13 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 				filter(f -> f.getMSMSFeatureId() != null).
 				map(f -> f.getMSMSFeatureId()).
 				collect(Collectors.toSet());
+	}
+
+	public boolean isOffLine() {
+		return offLine;
+	}
+
+	public void setOffLine(boolean offLine) {
+		this.offLine = offLine;
 	}
 }

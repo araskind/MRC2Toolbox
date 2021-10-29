@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -45,6 +46,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.prefs.Preferences;
 
+import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
@@ -133,6 +135,9 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 	public static final String MATCH_CHARGE = "MATCH_CHARGE";
 	public static final String SET_HIGH_EXECUTION_PRIORITY = "SET_HIGH_EXECUTION_PRIORITY";
 	public static final String LOAD_LIBRARIES_IN_MEMORY = "LOAD_LIBRARIES_IN_MEMORY";
+	
+	public static final String SEARCH_LIBS_SEPARATELY = "SEARCH_LIBS_SEPARATELY";
+	
 	//	Output options
 	public static final String MIN_MATCH_FACTOR = "MIN_MATCH_FACTOR";
 	public static final String MAX_NUM_HITS = "MAX_NUM_HITS";
@@ -221,6 +226,8 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 					inputAndLibraryPanel,
 					outputOptionsPanel,
 					commandPreviewPanel;
+	private JCheckBox searchLibrariesSeparatelyCheckBox;
+	private Component horizontalStrut;
 	
 	public PepSearchSetupDialog() {
 		//	Empty constructor to allow access to individual panel creation.
@@ -445,6 +452,15 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		btnRemoveLibrary = new JButton("Remove library");
 		btnRemoveLibrary.setActionCommand(MainActionCommands.REMOVE_PEPSEARCH_LIBRARY_COMMAND.getName());
 		btnRemoveLibrary.addActionListener(this);
+		
+		searchLibrariesSeparatelyCheckBox = 
+				new JCheckBox("Search each library separately");
+		panel_2.add(searchLibrariesSeparatelyCheckBox);
+		
+		horizontalStrut = Box.createHorizontalStrut(20);
+		horizontalStrut.setPreferredSize(new Dimension(80, 0));
+		horizontalStrut.setMinimumSize(new Dimension(80, 0));
+		panel_2.add(horizontalStrut);
 		panel_2.add(btnRemoveLibrary);
 
 		addLibraryButton = new JButton("Add library");
@@ -822,7 +838,7 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		GridBagLayout gbl_outputOptionsPanel = new GridBagLayout();
 		gbl_outputOptionsPanel.columnWidths = new int[]{131, 0, 0, 0};
 		gbl_outputOptionsPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
-		gbl_outputOptionsPanel.columnWeights = new double[]{1.0, 1.0, 1.0, Double.MIN_VALUE};
+		gbl_outputOptionsPanel.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		gbl_outputOptionsPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		outputOptionsPanel.setLayout(gbl_outputOptionsPanel);
 
@@ -902,6 +918,7 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 
 		noHitProbabsCheckBox = new JCheckBox("Do not output hit probabilities");
 		GridBagConstraints gbc_noHitProbabsCheckBox = new GridBagConstraints();
+		gbc_noHitProbabsCheckBox.anchor = GridBagConstraints.WEST;
 		gbc_noHitProbabsCheckBox.insets = new Insets(0, 0, 5, 0);
 		gbc_noHitProbabsCheckBox.gridx = 1;
 		gbc_noHitProbabsCheckBox.gridy = 3;
@@ -1389,6 +1406,9 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 			fileSource.setSelected(true);
 		else
 			internalSource.setSelected(true);
+		
+		searchLibrariesSeparatelyCheckBox.setSelected(
+				preferences.getBoolean(SEARCH_LIBS_SEPARATELY, true));
 	}
 
 	protected void loadSearchOptionsPreferences() {
@@ -1601,13 +1621,17 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		Map<File,Boolean>libMap = libraryTable.getLibraryFilesMap();
 		ArrayList<String>libData = new ArrayList<String>();
 		libMap.entrySet().stream().
-			forEach(e -> libData.add(e.getKey().getAbsolutePath() + "@" + Boolean.toString(e.getValue())));
+			forEach(e -> libData.add(e.getKey().getAbsolutePath() + 
+					"@" + Boolean.toString(e.getValue())));
 		preferences.put(LIB_LIST, StringUtils.join(libData, "|"));		
 		
 		preferences.putBoolean(USE_INPUT_FILE, fileSource.isSelected());
 		TableRowSubset subset = (TableRowSubset)featureSubsetComboBox.getSelectedItem();
 		preferences.put(TABLE_ROW_SUBSET, subset.name());
 		
+		preferences.putBoolean(SEARCH_LIBS_SEPARATELY, 
+				searchLibrariesSeparatelyCheckBox.isSelected());
+	
 		//	Search settings
 		preferences.put(PRESEARCH_MODE, ((PreSearchType)preSearchModeComboBox.getSelectedItem()).name());
 		preferences.put(SEARCH_TYPE, ((HiResSearchType)searchTypeComboBox.getSelectedItem()).name());

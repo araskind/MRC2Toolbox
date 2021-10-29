@@ -270,9 +270,11 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		processed = 0;
 		for (MsFeatureCluster clust : duplicateList){
 			
-//			MsFeature avg = clust.getAveragedSpectrumFeature();
-//			if(avg != null)
-//				uniqueFeatures.add(avg);
+			MsFeature avg = clust.getAveragedMSMSFeature(
+					precursorGroupingMassError, 
+					precursorGroupingMassErrorType);
+			if(avg != null)
+				uniqueFeatures.add(avg);
 			
 			processed++;
 		}
@@ -355,6 +357,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 					msms.setCidLevel((acl + ach)/2.0d);
 			}
 			msms.setScanNumber(s.getNum());
+			msms.setParentScanNumber(parentScan.getNum());
 			msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
 			spectrum.addTandemMs(msms);		
 			f.setSpectrum(spectrum);

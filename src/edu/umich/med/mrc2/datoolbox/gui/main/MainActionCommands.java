@@ -62,6 +62,7 @@ public enum MainActionCommands {
 	//	Raw data analysis
 	MSMS_FEATURE_EXTRACTION_SETUP_COMMAND("Set up MSMS feature extraction"),
 	MSMS_FEATURE_EXTRACTION_COMMAND("Extract MSMS features"),
+	SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH("Send MSMS features to IDTracker workbench"),
 	
 	//	User manager
 	SHOW_USER_MANAGER_COMMAND("Show User Manager"),

@@ -59,6 +59,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableMsMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -224,6 +225,9 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.MSMS_FEATURE_EXTRACTION_COMMAND.getName()))
 			extractMSMSFeatures();
 		
+		if (command.equals(MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH.getName()))
+			sendMSMSFeaturesToIDTrackerWorkbench();
+		
 		if (command.equals(MainActionCommands.GROUP_TREE_BY_FILE.getName())){
 						
 			dataFileTreePanel.groupTree(TreeGrouping.BY_DATA_FILE);
@@ -264,6 +268,30 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		
 		if (command.equals(MainActionCommands.EXTRACT_CHROMATOGRAM.getName()))	
 			extractChromatogramms();		
+	}
+	
+	private void sendMSMSFeaturesToIDTrackerWorkbench() {
+		
+		if(activeRawDataAnalysisProject == null)
+			return;
+		
+		Collection<DataFile> files = 
+				activeRawDataAnalysisProject.getRawDataFiles();
+		
+		int fCount = 0;
+		for(DataFile df : files) {
+			 Collection<MsFeature> fileFeatures = 
+					 activeRawDataAnalysisProject.getMsFeaturesForDataFile(df);
+			 if(fileFeatures != null && !fileFeatures.isEmpty())
+				 fCount += fileFeatures.size();
+		}
+		if(fCount == 0)
+			return;
+		
+		IDWorkbenchPanel workbench  = 
+				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
+		workbench.loadFeaturesFromRawDataProject(activeRawDataAnalysisProject);
+		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.ID_WORKBENCH);
 	}
 	
 	private void setupMSMSFeatureExtraction() {
@@ -687,10 +715,13 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
-		Map<DataFile, Collection<MsFeature>> featureMap = task.getMsFeatureMap();		
-		for(Entry<DataFile, Collection<MsFeature>>e : featureMap.entrySet())
+		Map<DataFile, Collection<MsFeature>> featureMap = task.getMsFeatureMap();	
+		Collection<String>log = new ArrayList<String>();
+		for(Entry<DataFile, Collection<MsFeature>>e : featureMap.entrySet()) {
 			activeRawDataAnalysisProject.setMsFeaturesForDataFile(e.getKey(), e.getValue());
-		
+			log.add(e.getKey().getName() + " -> " + Integer.toString(e.getValue().size()) + " features");
+		}
+		MessageDialog.showInfoMsg(StringUtils.join(log, "\n"), this.getContentPane());
 		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
 				activeRawDataAnalysisProject.getRawDataFiles(), false);
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);

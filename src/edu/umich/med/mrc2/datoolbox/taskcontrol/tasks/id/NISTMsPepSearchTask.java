@@ -123,7 +123,7 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 		}
 	}
 	
-	protected void parseAndFilterSearchResults() throws Exception {
+	protected void parseAndFilterSearchResults(boolean skipResultsUpload) throws Exception {
 
 		//	Parse output file
 		if(!resultFile.exists())
@@ -156,17 +156,20 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 			ConnectionManager.releaseConnection(conn);
 			return;
 		}
-		checkHitPolarity(conn);
-		if(pooList.size() == 0) {
-			addLogLine("No hits of correct polarity found");
-			ConnectionManager.releaseConnection(conn);
-			return;
+		if(!skipResultsUpload) {
+			checkHitPolarity(conn);
+			if(pooList.size() == 0) {
+				addLogLine("No hits of correct polarity found");
+				ConnectionManager.releaseConnection(conn);
+				return;
+			}
 		}
-		filterOutDuplicateHits();
-		filterOutExistingHits(conn);		
-		if(pooList.size() == 0)
-			addLogLine("No new hits found");
-		
+		filterOutDuplicateHits();		
+		if(!skipResultsUpload) {
+			filterOutExistingHits(conn);	
+			if(pooList.size() == 0)
+				addLogLine("No new hits found");
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 
@@ -432,11 +435,6 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 		int batchSize = 200; //	1 for debug only, normal is 200;
 		for(PepSearchOutputObject poo : pooList) {
 			
-//			midRs = midPs.executeQuery();
-//			while(midRs.next())
-//				msmsMatchId = midRs.getString("MATCH_ID");
-//
-//			midRs.close();
 			msmsMatchId = SQLUtils.getNextIdFromSequence(conn, 
 					"MSMS_LIB_MATCH_SEQ",
 					DataPrefix.MSMS_LIBRARY_MATCH,

@@ -146,6 +146,7 @@ import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -1696,7 +1697,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), pepSearchSetupDialog);
 			return;
 		}
-		String searchCommand = pepSearchSetupDialog.buildSearchCommand();
 		List<String>commandParts = pepSearchSetupDialog.getSearchCommandParts();
 		if(pepSearchSetupDialog.getFeaturesFromDatabase()) {
 
@@ -1708,36 +1708,27 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 						"\" feature subset", pepSearchSetupDialog);
 				return;
 			}	
-			//	Run the search from MSMS features in the table
-//			NISTMsPepSearchRoundTripTask task = new NISTMsPepSearchRoundTripTask(
-//					searchCommand,
-//					fToSearch,
-//					pepSearchSetupDialog.getTmpInputFile(),
-//					pepSearchSetupDialog.getResultFile());
-
 			NISTMsPepSearchRoundTripTask task = new NISTMsPepSearchRoundTripTask(
 					commandParts,
 					fToSearch,
 					pepSearchSetupDialog.getTmpInputFile(),
 					pepSearchSetupDialog.getResultFile());			
 			task.setPepSearchParameterObject(pepSearchSetupDialog.getPepSearchParameterObject());
-			try {
-				IdentificationUtils.addNewPepSearchParameterSet(task.getPepSearchParameterObject());
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if(!activeFeatureCollection.isOffLine()) {
+				try {
+					IdentificationUtils.addNewPepSearchParameterSet(task.getPepSearchParameterObject());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else {
+				task.setSkipResultsUpload(true);
 			}
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
-		else {
-			//	Run the search from external file
-//			NISTMspepSearchOfflineTask task = new NISTMspepSearchOfflineTask(
-//					searchCommand,
-//					null,
-//					pepSearchSetupDialog.getInputFile(),
-//					pepSearchSetupDialog.getResultFile());
-			
+		else {			
 			NISTMspepSearchOfflineTask task = new NISTMspepSearchOfflineTask(
 					pepSearchSetupDialog.getSearchCommandParts(),
 					null,
@@ -2575,6 +2566,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	public MsFeatureInfoBundleCollection getActiveFeatureCollection() {
 		return activeFeatureCollection;
 	}
-	
-	
+
+	public void loadFeaturesFromRawDataProject(RawDataAnalysisProject activeRawDataAnalysisProject) {
+		
+		clearPanel();		
+		activeFeatureCollection = 
+				new MsFeatureInfoBundleCollection(activeRawDataAnalysisProject.getName());
+		activeFeatureCollection.setOffLine(true);		
+		Collection<MsFeatureInfoBundle>projectMsmsFeatures = 
+				activeRawDataAnalysisProject.getMsMsFeatureBundles();
+		activeFeatureCollection.addFeatures(projectMsmsFeatures);
+		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());			
+		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+	}	
 }
