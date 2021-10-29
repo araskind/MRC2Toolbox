@@ -144,7 +144,16 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		}		
 		if(pooList.size() > 0) {
 			
-			if(!skipResultsUpload) {
+			if(skipResultsUpload) {
+				try {
+					updateOfflineFeatureIdentifications();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				assignTopHits();
+			}
+			else {
 				try {
 					uploadSearchResults();
 				} catch (Exception e) {
@@ -157,15 +166,6 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
-			else {
-				try {
-					updateOfflineFeatureIdentifications();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				assignTopHits();
 			}
 		}
 		// Cleanup working directory
@@ -232,7 +232,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 					poo.getHybridDeltaMz(),
 					matchType,
 					poo.isDecoy(),
-					null);			
+					pepSearchParameterObject.getId());			
 			id.setReferenceMsMsLibraryMatch(match);		
 			msf.addIdentity(id);						
 			processed++;

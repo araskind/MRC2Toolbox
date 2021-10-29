@@ -108,10 +108,13 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	public static final String LEAVE_MAX_FRAGMENTS = "LEAVE_MAX_FRAGMENTS";
 	public static final String MAX_FRAGMENTS_COUNT = "MAX_FRAGMENTS_COUNT";
 	public static final String INTENSITY_MEASURE = "INTENSITY_MEASURE";
+	public static final String FLAG_MINOR_ISOTOPES_PRECURSORS = "FLAG_MINOR_ISOTOPES_PRECURSORS";
+	
 
 	private JFormattedTextField msmsGroupRtWindowTextField;
 	private JFormattedTextField precursorGroupingMassErrorTextField;
 	private JComboBox precursorGroupingMassErrorTypeComboBox;
+	private JCheckBox flagMinorIsotopesPrecursorsCheckBox;
 	
 	public MSMSFeatureExtractionSetupDialog(ActionListener listener) {
 		super();
@@ -129,9 +132,9 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		getContentPane().add(panel_1, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[]{277, 0, 0, 0, 0, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 
 		limitExtractionRtCheckBox = new JCheckBox("Extract data only for retention time from ");
@@ -318,6 +321,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 						TitledBorder.LEADING, TitledBorder.TOP, null, 
 						new Color(0, 0, 0)), new EmptyBorder(10, 10, 10, 10)));
 		GridBagConstraints gbc_panel = new GridBagConstraints();
+		gbc_panel.insets = new Insets(0, 0, 5, 0);
 		gbc_panel.gridwidth = 5;
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 0;
@@ -397,6 +401,16 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblMajorFragments.gridx = 2;
 		gbc_lblMajorFragments.gridy = 2;
 		panel.add(lblMajorFragments, gbc_lblMajorFragments);
+		
+		flagMinorIsotopesPrecursorsCheckBox = 
+				new JCheckBox("Flag MSMS features where precursor is not monoisotopic peak");
+		GridBagConstraints gbc_flagMinorIsotopesPrecursorsCheckBox = new GridBagConstraints();
+		gbc_flagMinorIsotopesPrecursorsCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_flagMinorIsotopesPrecursorsCheckBox.gridwidth = 5;
+		gbc_flagMinorIsotopesPrecursorsCheckBox.insets = new Insets(0, 0, 0, 5);
+		gbc_flagMinorIsotopesPrecursorsCheckBox.gridx = 0;
+		gbc_flagMinorIsotopesPrecursorsCheckBox.gridy = 6;
+		panel_1.add(flagMinorIsotopesPrecursorsCheckBox, gbc_flagMinorIsotopesPrecursorsCheckBox);
 
 		//	Buttons
 		JPanel panel_2 = new JPanel();
@@ -488,6 +502,10 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	public IntensityMeasure getIntensityMeasure() {
 		return (IntensityMeasure)intensityMeasureComboBox.getSelectedItem();
 	}
+	
+	public boolean flagMinorIsotopesPrecursors() {
+		return flagMinorIsotopesPrecursorsCheckBox.isSelected();
+	}
 
 	@Override
 	public void loadPreferences(Preferences prefs) {
@@ -510,7 +528,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		maxFragmentsSpinner.setValue(preferences.getInt(MAX_FRAGMENTS_COUNT, 30));
 		intensityMeasureComboBox.setSelectedItem(
 				IntensityMeasure.geIntensityMeasureByName(
-						preferences.get(INTENSITY_MEASURE, IntensityMeasure.ABSOLUTE.name())));		
+						preferences.get(INTENSITY_MEASURE, IntensityMeasure.ABSOLUTE.name())));	
+		flagMinorIsotopesPrecursorsCheckBox.setSelected(preferences.getBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, true));		
 	}
 
 	@Override
@@ -531,7 +550,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		preferences.putDouble(MINIMAL_COUNTS, Double.parseDouble(minimalCountsTextField.getText()));
 		preferences.putBoolean(LEAVE_MAX_FRAGMENTS, chckbxLeaveOnly.isSelected());
 		preferences.putInt(MAX_FRAGMENTS_COUNT, (int) maxFragmentsSpinner.getValue());		
-		preferences.put(INTENSITY_MEASURE, getIntensityMeasure().name());
+		preferences.put(INTENSITY_MEASURE, getIntensityMeasure().name());		
+		preferences.putBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, flagMinorIsotopesPrecursorsCheckBox.isSelected());
 	}
 
 	@Override

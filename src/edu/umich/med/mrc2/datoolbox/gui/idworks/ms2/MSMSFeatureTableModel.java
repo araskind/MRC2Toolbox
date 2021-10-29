@@ -66,9 +66,9 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 	public static final String DEX_METHOD_ID_COLUMN = "DA method";
 	public static final String ANNOTATIONS_COLUMN = "Annotations";
 	public static final String FOLLOWUP_COLUMN = "Follow-up";
+	public static final String PARENT_ION_PURITY_COLUMN = "PIpurity";
 	public static final String SPECTRUM_ENTROPY_COLUMN = "PRE";
-	public static final String SPECTRUM_TOTAL_INTENSITY_COLUMN = "Area Sum";
-	
+	public static final String SPECTRUM_TOTAL_INTENSITY_COLUMN = "Area Sum";	
 	public static final String LIBRARY_PRECURSOR_DELTA_MZ_COLUMN = "Lib " + '\u0394' + " M/Z";
 	public static final String NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN = "MW " + '\u0394' + " M/Z";
 
@@ -95,7 +95,8 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			new ColumnContext(SAMPLE_COLUMN, IDTExperimentalSample.class, false),
 			new ColumnContext(EXPERIMENT_COLUMN, LIMSExperiment.class, false),
 			new ColumnContext(ACQ_METHOD_ID_COLUMN, DataAcquisitionMethod.class, false),
-			new ColumnContext(DEX_METHOD_ID_COLUMN, DataExtractionMethod.class, false),
+			new ColumnContext(DEX_METHOD_ID_COLUMN, DataExtractionMethod.class, false),			
+			new ColumnContext(PARENT_ION_PURITY_COLUMN, Double.class, false),
 			new ColumnContext(SPECTRUM_ENTROPY_COLUMN, Double.class, false),
 			new ColumnContext(SPECTRUM_TOTAL_INTENSITY_COLUMN, Double.class, false),
 		};
@@ -172,6 +173,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 				bundle.getExperiment(),	//	EXPERIMENT_COLUMN	LIMSExperiment
 				bundle.getAcquisitionMethod(),	//	ACQ_METHOD_ID_COLUMN	LIMSAcquisitionMethod
 				bundle.getDataExtractionMethod(),	//	DEX_METHOD_ID_COLUMN	LIMSDataExtractionMethod
+				instrumentMsMs.getParentIonPurity(),	//	PARENT_ION_PURITY_COLUMN
 				instrumentMsMs.getEntropy(), //	SPECTRUM_ENTROPY_COLUMN		Double
 				instrumentMsMs.getTotalIntensity(),	//	SPECTRUM_TOTAL_INTENSITY_COLUMN	Double
 			};
@@ -233,6 +235,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		setValueAt(bundle.getExperiment(), row, getColumnIndex(EXPERIMENT_COLUMN));
 		setValueAt(bundle.getAcquisitionMethod(), row, getColumnIndex(ACQ_METHOD_ID_COLUMN));
 		setValueAt(bundle.getDataExtractionMethod(), row, getColumnIndex(DEX_METHOD_ID_COLUMN));		
+		setValueAt(instrumentMsMs.getParentIonPurity(), row, getColumnIndex(PARENT_ION_PURITY_COLUMN));
 		setValueAt(instrumentMsMs.getEntropy(), row, getColumnIndex(SPECTRUM_ENTROPY_COLUMN));
 		setValueAt(instrumentMsMs.getTotalIntensity(), row, getColumnIndex(SPECTRUM_TOTAL_INTENSITY_COLUMN));
 	}

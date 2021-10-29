@@ -522,7 +522,8 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 		}
 		Connection conn = ConnectionManager.getConnection();		
 		Collection<String> searchParametersIds = 
-				IdentificationUtils.getPepSearchParameterSetWithSameSearchSettings(pepSearchParameterObject,conn);
+				IdentificationUtils.getPepSearchParameterSetWithSameSearchSettings(
+						pepSearchParameterObject,conn);
 		
 		if(searchParametersIds.isEmpty()) {
 			System.out.println("No PepSearch matching PepSearch parameter set in database!");

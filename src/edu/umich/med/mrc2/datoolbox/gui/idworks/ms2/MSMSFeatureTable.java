@@ -78,6 +78,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.IdentificationFollowupS
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSExperimentRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MSFeatureIdentificationLevelColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MsFeatureInfoBundleRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.PercentValueRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.SampleTypeRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
@@ -150,6 +151,8 @@ public class MSMSFeatureTable extends BasicTable {
 			.setCellRenderer(new IdentificationFollowupStateRenderer()); 
 		columnModel.getColumnById(MSMSFeatureTableModel.ID_LEVEL_COLUMN)
 			.setCellRenderer(new MSFeatureIdentificationLevelColorRenderer());
+		columnModel.getColumnById(MSMSFeatureTableModel.PARENT_ION_PURITY_COLUMN)
+			.setCellRenderer(new PercentValueRenderer());
 		columnModel.getColumnById(MSMSFeatureTableModel.SPECTRUM_ENTROPY_COLUMN)
 			.setCellRenderer(new FormattedDecimalRenderer(new DecimalFormat("##.###")));
 		columnModel.getColumnById(MSMSFeatureTableModel.SPECTRUM_TOTAL_INTENSITY_COLUMN)
@@ -317,6 +320,7 @@ public class MSMSFeatureTable extends BasicTable {
 				bundle.getExperiment(),	//	EXPERIMENT_COLUMN	LIMSExperiment
 				bundle.getAcquisitionMethod(),	//	ACQ_METHOD_ID_COLUMN	LIMSAcquisitionMethod
 				bundle.getDataExtractionMethod(),	//	DEX_METHOD_ID_COLUMN	LIMSDataExtractionMethod
+				instrumentMsMs.getParentIonPurity(),	//	PARENT_ION_PURITY_COLUMN
 				instrumentMsMs.getEntropy(), //	SPECTRUM_ENTROPY_COLUMN		Double
 				instrumentMsMs.getTotalIntensity(),	//	SPECTRUM_TOTAL_INTENSITY_COLUMN	Double
 			};
@@ -330,8 +334,7 @@ public class MSMSFeatureTable extends BasicTable {
 	    private final BasicTableModel tableModel;
 	    private final List<Object[]> modelData;
 
-
-		public TableUpdateTask(BasicTableModel tableModel, List<Object[]> modelData) {
+	    public TableUpdateTask(BasicTableModel tableModel, List<Object[]> modelData) {
 	        this.tableModel = tableModel;
 	        this.modelData = modelData;
 	    }
@@ -356,7 +359,12 @@ public class MSMSFeatureTable extends BasicTable {
 	    
 	    @Override
 	    public void done() {    	
-			thf.setTable(MSMSFeatureTable.this);
+			try {
+				thf.setTable(MSMSFeatureTable.this);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			adjustVariableColumns();
 			idp.dispose();
 	    }

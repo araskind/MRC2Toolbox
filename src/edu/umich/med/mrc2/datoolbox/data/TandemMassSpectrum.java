@@ -495,6 +495,20 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	public void addAveragedScanNumbers(int msmsScan, int parentScan) {
 		averagedScanNumbers.put(msmsScan, parentScan);
 	}
+
+	public void setMinorParentIons(Collection<MsPoint> newMinorParentIons) {
+		minorParentIons.clear();
+		minorParentIons.addAll(newMinorParentIons);
+	}
+	
+	public double getParentIonPurity() {
+		
+		if(minorParentIons.isEmpty() || parent == null)
+			return 1.0;
+		
+		return parent.getIntensity() / (minorParentIons.stream().
+				mapToDouble(p -> p.getIntensity()).sum() + parent.getIntensity());
+	}
 }
 
 

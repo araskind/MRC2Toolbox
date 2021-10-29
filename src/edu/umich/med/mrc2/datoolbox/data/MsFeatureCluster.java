@@ -491,8 +491,16 @@ public class MsFeatureCluster implements Serializable {
 		msms.setScanNumber(primaryTandemMs.getScanNumber());
 		msms.setParentScanNumber(primaryTandemMs.getParentScanNumber());
 		msmsList.stream().forEach(s -> msms.addAveragedScanNumbers(s.getScanNumber(), s.getParentScanNumber()));
-		spectrum.addTandemMs(msms);
-			
+		
+		Collection<MsPoint>minorParentIons = msmsList.stream().
+				flatMap(f -> f.getMinorParentIons().stream()).
+				collect(Collectors.toList());
+		if(!minorParentIons.isEmpty()) {
+			Collection<MsPoint>averageMinorParentIons = 
+					MsUtils.averageSpectrum(minorParentIons, mzBinWidth, errorType);
+			msms.setMinorParentIons(averageMinorParentIons);
+		}	
+		spectrum.addTandemMs(msms);			
 		MsFeature averaged = new MsFeature(primaryFeature.getRetentionTime(), polarity);
 		averaged.setRtRange(getRtRange());
 		String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +

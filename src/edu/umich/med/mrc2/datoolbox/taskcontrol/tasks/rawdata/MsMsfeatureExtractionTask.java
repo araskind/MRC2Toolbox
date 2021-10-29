@@ -136,7 +136,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);
 		}
 		try {
-			groupRelatedMsmsSpectra();
+			mergeRelatedMsmsSpectra();
 		}
 		catch (Exception e1) {
 			e1.printStackTrace();
@@ -150,6 +150,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		taskDescription = "Filtering and de-noising MSMS features in " + rawDataFile.getName();
 		total = features.size();
 		processed = 0;		
+		Collection<MsFeature>discarded = new ArrayList<MsFeature>();
 		for(MsFeature feature : features) {
 			
 			//	MS1
@@ -193,8 +194,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 							filter(p -> p.getIntensity() > msMsCountsCutoff).
 							collect(Collectors.toList());
 					}
-					if(filterIntensityMeasure.equals(IntensityMeasure.RELATIVE)) {
-						
+					if(filterIntensityMeasure.equals(IntensityMeasure.RELATIVE)) {				
 						double topIntensity = msms.getBasePeak().getIntensity() / 100;
 						msmsFiltered = msmsRaw.stream().
 								filter(p -> p.getIntensity()/topIntensity > msMsCountsCutoff).
@@ -213,15 +213,22 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 					double precursorMz = msms.getParent().getMz() + 0.5d;
 					msmsFiltered  = msmsFiltered.stream().filter(p -> p.getMz() <= precursorMz).
 							sorted(MsUtils.mzSorter).collect(Collectors.toList());
-				}			
-				msms.setSpecrum(msmsFiltered);
-				msms.setEntropy(MsUtils.calculateSpectrumEntropy(msmsFiltered));
+				}	
+				if(msmsFiltered.isEmpty()) {
+					discarded.add(feature);
+				}
+				else {
+					msms.setSpecrum(msmsFiltered);
+					msms.setEntropy(MsUtils.calculateSpectrumEntropy(msmsFiltered));
+				}
 			}
 			processed++;
 		}
+		if(!discarded.isEmpty())
+			features.removeAll(discarded);
 	}
 	
-	private void groupRelatedMsmsSpectra() {
+	private void mergeRelatedMsmsSpectra() {
 		// TODO Auto-generated method stub
 		taskDescription = "Grouping related MSMS features in " + rawDataFile.getName();
 		total = features.size();
@@ -344,26 +351,52 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 					MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
 					MRC2ToolBoxConfiguration.defaultRtFormat.format(parentScan.getRt());
 			f.setName(name);
-			TandemMassSpectrum msms = new TandemMassSpectrum(
-					2, 
-					parent,
-					RawDataUtils.getScanPoints(s),
-					polarity);
-			msms.setIsolationWindow(isolationWindow);
-			if(precursor.getActivationInfo() != null) {
-				Double ach = precursor.getActivationInfo().getActivationEnergyHi();
-				Double acl = precursor.getActivationInfo().getActivationEnergyLo();
-				if(ach != null && acl != null)
-					msms.setCidLevel((acl + ach)/2.0d);
+			Collection<MsPoint> msmsPoints = RawDataUtils.getScanPoints(s);
+			if(!msmsPoints.isEmpty()) {
+				
+				TandemMassSpectrum msms = new TandemMassSpectrum(
+						2, 
+						parent,
+						RawDataUtils.getScanPoints(s),
+						polarity);				
+				msms.setIsolationWindow(isolationWindow);
+				if(precursor.getActivationInfo() != null) {
+					Double ach = precursor.getActivationInfo().getActivationEnergyHi();
+					Double acl = precursor.getActivationInfo().getActivationEnergyLo();
+					if(ach != null && acl != null)
+						msms.setCidLevel((acl + ach)/2.0d);
+				}
+				msms.setScanNumber(s.getNum());
+				msms.setParentScanNumber(parentScan.getNum());
+				msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);				
+				Collection<MsPoint>minorParentIons = getMinorParentIons(
+						parentScan, isolationWindow, parent.getMz());
+				if(minorParentIons != null && !minorParentIons.isEmpty())
+					msms.setMinorParentIons(minorParentIons);
+				
+				spectrum.addTandemMs(msms);		
+				f.setSpectrum(spectrum);
+				features.add(f);
 			}
-			msms.setScanNumber(s.getNum());
-			msms.setParentScanNumber(parentScan.getNum());
-			msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
-			spectrum.addTandemMs(msms);		
-			f.setSpectrum(spectrum);
-			features.add(f);
 			processed++;
 		}
+	}
+	
+	private Collection<MsPoint>getMinorParentIons(
+			IScan ms1can, Range isolationWindow, double parentMz){
+				
+		ISpectrum spectrum = ms1can.getSpectrum();
+		int[] precursorIdx = spectrum.findMzIdxs(isolationWindow.getMin(), isolationWindow.getMax());
+		if(precursorIdx == null)
+			return null;
+
+		Collection<MsPoint>minorParentIons = new ArrayList<MsPoint>();
+		for(int i=precursorIdx[0]; i<=precursorIdx[1]; i++) {
+			if(spectrum.getMZs()[i] != parentMz)
+				minorParentIons.add(new MsPoint(
+						spectrum.getMZs()[i], spectrum.getIntensities()[i]));
+		}
+		return minorParentIons;
 	}
 	
 	private MsPoint getActualPrecursor(IScan ms1can, Range isolationWindow) {

@@ -1714,17 +1714,15 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 					pepSearchSetupDialog.getTmpInputFile(),
 					pepSearchSetupDialog.getResultFile());			
 			task.setPepSearchParameterObject(pepSearchSetupDialog.getPepSearchParameterObject());
-			if(!activeFeatureCollection.isOffLine()) {
-				try {
-					IdentificationUtils.addNewPepSearchParameterSet(task.getPepSearchParameterObject());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			else {
+			try {
+				IdentificationUtils.addNewPepSearchParameterSet(task.getPepSearchParameterObject());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}		
+			if(activeFeatureCollection.isOffLine())
 				task.setSkipResultsUpload(true);
-			}
+			
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
@@ -2501,8 +2499,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		}
 		List<MsPoint> msOne = Arrays.asList(feature.getSpectrum().getCompletePattern());
 		if(!msOne.isEmpty()) {
-			msOnePlot.showMsForPointCollection(
-					Arrays.asList(feature.getSpectrum().getCompletePattern()), true, "MS1 scan");
+//			msOnePlot.showMsForPointCollection(
+//					Arrays.asList(feature.getSpectrum().getCompletePattern()), true, "MS1 scan");
+			msOnePlot.showMsForFeature(feature, false);
 			msOneTable.setTableModelFromSpectrum(feature);
 		}
 		//	Add MSMS
@@ -2534,9 +2533,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		if(featureId.getReferenceMsMsLibraryMatch() == null)
 			return;
 			
-			String parId = featureId.getReferenceMsMsLibraryMatch().getSearchParameterSetId();
-			if(parId == null)
-				return;
+		String parId = featureId.getReferenceMsMsLibraryMatch().getSearchParameterSetId();
+		if(parId == null)
+			return;
 			
 		NISTPepSearchParameterObject pepSearchParams = IDTDataCash.getNISTPepSearchParameterObjectById(parId);
 		pepSearchParameterListingPanel.loadNISTPepSearchParameterObject(pepSearchParams);
