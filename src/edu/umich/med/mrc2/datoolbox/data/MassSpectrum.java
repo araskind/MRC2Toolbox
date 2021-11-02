@@ -43,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.msmsscore.SpectrumMatcher;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class MassSpectrum implements Serializable {
 
@@ -98,31 +99,39 @@ public class MassSpectrum implements Serializable {
 
 		List<MsPoint>sorted = dataPoints.stream().
 				distinct().
-				sorted(new MsDataPointComparator(SortProperty.MZ)).
+				sorted(MsUtils.mzSorter).
 				collect(Collectors.toList());
-
 		adductMap.put(adduct, sorted);
 		msPoints.addAll(dataPoints);
-
+		findPrimaryAdduct();
+	}
+	
+	private void findPrimaryAdduct() {
+		
 		double maxIntensity = 0.0d;
-
 		for (Entry<Adduct, List<MsPoint>> entry : adductMap.entrySet()) {
 
-			if(entry.getValue() == null)
-				continue;
-
-			if(entry.getValue().isEmpty())
+			if(entry.getValue() == null || entry.getValue().isEmpty())
 				continue;
 
 			MsPoint basePeak =
 				Collections.max(entry.getValue(), Comparator.comparing(MsPoint::getIntensity));
 
 			if(basePeak.getIntensity() > maxIntensity) {
-
 				maxIntensity = basePeak.getIntensity();
 				primaryAdduct = entry.getKey();
 			}
 		}
+	}	
+	
+	public void silentlyAddSpectrumForAdduct(Adduct adduct, Collection<MsPoint>dataPoints){
+		
+		List<MsPoint>sorted = dataPoints.stream().
+				distinct().
+				sorted(MsUtils.mzSorter).
+				collect(Collectors.toList());
+		adductMap.put(adduct, sorted);
+		findPrimaryAdduct();
 	}
 
 	public void addSpectrumForPattern(Collection<MsPoint>dataPoints){

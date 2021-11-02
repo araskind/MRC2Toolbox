@@ -51,6 +51,8 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 	private double msmsGroupingRtWindow;
 	private double precursorGroupingMassError;
 	private MassErrorType precursorGroupingMassErrorType;
+	private boolean flagMinorIsotopesPrecursors;
+	private int maxPrecursorCharge;
 	
 	public MsMsfeatureBatchExtractionTask(
 			Collection<DataFile> rawDataFiles, 
@@ -63,7 +65,9 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 			double msmsIsolationWindowUpperBorder,
 			double msmsGroupingRtWindow,
 			double precursorGroupingMassError,
-			MassErrorType precursorGroupingMassErrorType) {
+			MassErrorType precursorGroupingMassErrorType,
+			boolean flagMinorIsotopesPrecursors,
+			int maxPrecursorCharge) {
 		super();
 		this.rawDataFiles = rawDataFiles;
 		this.dataExtractionRtRange = dataExtractionRtRange;
@@ -76,6 +80,8 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 		this.msmsGroupingRtWindow = msmsGroupingRtWindow;
 		this.precursorGroupingMassError = precursorGroupingMassError;
 		this.precursorGroupingMassErrorType = precursorGroupingMassErrorType;
+		this.flagMinorIsotopesPrecursors = flagMinorIsotopesPrecursors;
+		this.maxPrecursorCharge = maxPrecursorCharge;
 		msFeatureMap = new TreeMap<DataFile, Collection<MsFeature>>();		
 	}
 
@@ -99,7 +105,9 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 					msmsIsolationWindowUpperBorder,
 					msmsGroupingRtWindow,
 					precursorGroupingMassError,
-					precursorGroupingMassErrorType);
+					precursorGroupingMassErrorType,
+					flagMinorIsotopesPrecursors,
+					maxPrecursorCharge);
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
@@ -118,7 +126,9 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 				msmsIsolationWindowUpperBorder,
 				msmsGroupingRtWindow,
 				precursorGroupingMassError,
-				precursorGroupingMassErrorType);
+				precursorGroupingMassErrorType,
+				flagMinorIsotopesPrecursors,
+				maxPrecursorCharge);
 	}
 
 	@Override

@@ -42,26 +42,34 @@ public class MsDataPointComparator extends ObjectCompatrator<MsPoint> {
 	public int compare(MsPoint p1, MsPoint p2) {
 
 		int result = 0;
-
 		switch (property) {
 
-		case MZ:
-			result = Double.compare(p1.getMz(), p2.getMz());
-
-			if (direction == SortDirection.ASC)
-				return result;
-			else
-				return -result;
-
-		case Intensity:
-			result = Double.compare(p1.getIntensity(), p2.getIntensity());
-
-			if (direction == SortDirection.ASC)
-				return result;
-			else
-				return -result;
-		default:
-			break;
+			case MZ:
+				result = Double.compare(p1.getMz(), p2.getMz());
+	
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+	
+			case Intensity:
+				result = Double.compare(p1.getIntensity(), p2.getIntensity());
+	
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+			
+			case scanNumber:
+				result = Integer.compare(p1.getScanNum(), p2.getScanNum());
+	
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+				
+			default:
+				break;
 		}
 		throw (new IllegalStateException());
 	}

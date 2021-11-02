@@ -123,7 +123,7 @@ public class ManualIdentificationDialog extends JDialog
 		setIconImage(((ImageIcon) dialogIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		//setPreferredSize(new Dimension(1000, 800));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.listener = listener;
 //		searchType = null;
 		
@@ -159,7 +159,7 @@ public class ManualIdentificationDialog extends JDialog
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				dispose();
 			}
 		};
 		btnCancel.addActionListener(al);
@@ -175,7 +175,6 @@ public class ManualIdentificationDialog extends JDialog
 		loadLayout(layoutConfigFile);
 		loadPreferences();
 		pack();
-		loadPreferences();
 	}
 	
 	@Override

@@ -63,12 +63,13 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	protected Range isolationWindow;
 	protected TreeSet<ObjectAnnotation> annotations;
 	protected Polarity polarity;
-	private String description;
-	private AnnotatedObjectType annotatedObjectType;
-	private double totalIntensity;
-	private double entropy;
+	protected String description;
+	protected AnnotatedObjectType annotatedObjectType;
+	protected double totalIntensity;
+	protected double entropy;
 	protected Collection<MsPoint>minorParentIons;
 	protected Map<Integer,Integer>averagedScanNumbers;
+	protected boolean parentIonIsMinorIsotope;
 
 	public TandemMassSpectrum(
 			int depth,
@@ -508,6 +509,14 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		
 		return parent.getIntensity() / (minorParentIons.stream().
 				mapToDouble(p -> p.getIntensity()).sum() + parent.getIntensity());
+	}
+
+	public boolean isParentIonMinorIsotope() {
+		return parentIonIsMinorIsotope;
+	}
+
+	public void setParentIonIsMinorIsotope(boolean parentIonIsMinorIsotope) {
+		this.parentIonIsMinorIsotope = parentIonIsMinorIsotope;
 	}
 }
 

@@ -46,6 +46,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.LCMSDataSubset;
+import umich.ms.datatypes.scan.StorageStrategy;
 import umich.ms.fileio.exceptions.FileParsingException;
 import umich.ms.fileio.filetypes.mzml.MZMLFile;
 import umich.ms.fileio.filetypes.mzxml.MZXMLFile;
@@ -120,15 +121,18 @@ public class RawDataManager {
 
 		Path path = Paths.get(sourceRawFile.getAbsolutePath());
 		AbstractXMLBasedDataSource source = null;
-
-		if (FilenameUtils.getExtension(path.toString()).equalsIgnoreCase(SupportedRawDataTypes.MZML.name()))
+		if (FilenameUtils.getExtension(path.toString()).
+				equalsIgnoreCase(SupportedRawDataTypes.MZML.name()))
 			source = new MZMLFile(path.toString());
 
-		if (FilenameUtils.getExtension(path.toString()).equalsIgnoreCase(SupportedRawDataTypes.MZXML.name()))
+		if (FilenameUtils.getExtension(path.toString()).
+				equalsIgnoreCase(SupportedRawDataTypes.MZXML.name()))
 			source = new MZXMLFile(path.toString());
 
 		LCMSData data = new LCMSData(source);
-		data.load(LCMSDataSubset.STRUCTURE_ONLY, MRC2ToolBoxCore.getMainWindow());
+		data.load(LCMSDataSubset.STRUCTURE_ONLY, MRC2ToolBoxCore.getMainWindow());		
+		data.getScans().isAutoloadSpectra(true);
+		data.getScans().setDefaultStorageStrategy(StorageStrategy.SOFT);
 		return data;
 	}
 	

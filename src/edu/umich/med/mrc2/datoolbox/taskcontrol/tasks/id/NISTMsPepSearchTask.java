@@ -156,6 +156,7 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 			ConnectionManager.releaseConnection(conn);
 			return;
 		}
+		filterOutDuplicateHits();
 		if(!skipResultsUpload) {
 			checkHitPolarity(conn);
 			if(pooList.size() == 0) {
@@ -163,14 +164,39 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 				ConnectionManager.releaseConnection(conn);
 				return;
 			}
-		}
-		filterOutDuplicateHits();		
-		if(!skipResultsUpload) {
 			filterOutExistingHits(conn);	
 			if(pooList.size() == 0)
 				addLogLine("No new hits found");
 		}
+		else {
+			filterOutExistingHitsOffline();	
+			if(pooList.size() == 0)
+				addLogLine("No new hits found");
+		}
 		ConnectionManager.releaseConnection(conn);
+	}
+		
+	protected void filterOutExistingHitsOffline(){
+		
+		taskDescription = "Filtering out existing library matches ...";
+		total = pooList.size();
+		processed = 0;	
+		Collection<PepSearchOutputObject>filtered = new ArrayList<PepSearchOutputObject>();
+		for(PepSearchOutputObject poo : pooList) {
+			
+			MsFeature feature = msmsIdMap.get(poo.getMsmsFeatureId());		
+			String libId = poo.getMrc2libid();
+			MsFeatureIdentity existingHit = feature.getIdentifications().stream().
+				filter(i -> i.getReferenceMsMsLibraryMatch() != null).
+				filter(i -> i.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().
+						getUniqueId().equals(libId)).findFirst().orElse(null);
+			if(existingHit == null)
+				filtered.add(poo);
+			
+			processed++;
+		}
+		pooList.clear();
+		pooList.addAll(filtered);
 	}
 
 	protected void createResultsSummary() {
@@ -178,36 +204,6 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 		taskDescription = "Creating summary ...";
 		total = 100;
 		processed = 20;
-		
-//		long totalDistinctFeatures = pooList.stream().map(o -> o.getMsmsFeatureId()).distinct().count();
-//		addLogLine("Found total " + Integer.toString(pooList.size()) + " output lines for " + 
-//				Long.toString(totalDistinctFeatures) + " distinct MSMS features");
-//				
-//		List<PepSearchOutputObject> libHits = pooList.stream().
-//				filter(poo -> (poo.getLibraryName() != null  && (poo.getNistRegId() != null || poo.getPeptide() != null))).
-//				collect(Collectors.toList());
-//		
-//		long identifiedDistinctFeatures = libHits.stream().map(o -> o.getMsmsFeatureId()).distinct().count();
-//		addLogLine("Found total " + Integer.toString(libHits.size()) + " identifications for " + 
-//				Long.toString(identifiedDistinctFeatures) + " distinct MSMS features\n");
-//		
-//		Map<String, Long> countsByLibrary = libHits.stream().map(o -> o.getLibraryName()).
-//				collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-//		
-//		addLogLine("Hits count by library:");
-//		countsByLibrary.entrySet().stream().forEach(e -> addLogLine(e.getKey() + "\t" + Long.toString(e.getValue())));
-//		addLogLine("\n");
-//		
-//		//	Check for unknown libraries
-//		refLibMap = new TreeMap<String, ReferenceMsMsLibrary>();
-//		for(Entry<String, Long> e : countsByLibrary.entrySet()) {
-//			
-//			ReferenceMsMsLibrary refLib = IDTDataCash.getReferenceMsMsLibraryByCode(e.getKey());
-//			if(refLib == null) 
-//				addLogLine("Unknown library " + e.getKey());
-//			else
-//				refLibMap.put(e.getKey(), refLib);
-//		}
 		Collection<String>summary = NISTPepSearchUtils.createResultsSummary(pooList);
 		for(String line : summary)
 			addLogLine(line);
@@ -388,7 +384,7 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 				+ "the corresponding MSMS features) present");
 	}
 	
-	private void filterOutDuplicateHits() {
+	protected void filterOutDuplicateHits() {
 		
 		Set<PepSearchOutputObject>uniqueHits = 
 				pooList.stream().distinct().collect(Collectors.toSet());

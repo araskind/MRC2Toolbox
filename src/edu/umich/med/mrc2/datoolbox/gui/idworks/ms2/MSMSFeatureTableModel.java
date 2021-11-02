@@ -67,6 +67,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 	public static final String ANNOTATIONS_COLUMN = "Annotations";
 	public static final String FOLLOWUP_COLUMN = "Follow-up";
 	public static final String PARENT_ION_PURITY_COLUMN = "PIpurity";
+	public static final String PARENT_ION_IS_MINOR_ISOTOPE_COLUMN = "MinorP";
 	public static final String SPECTRUM_ENTROPY_COLUMN = "PRE";
 	public static final String SPECTRUM_TOTAL_INTENSITY_COLUMN = "Area Sum";	
 	public static final String LIBRARY_PRECURSOR_DELTA_MZ_COLUMN = "Lib " + '\u0394' + " M/Z";
@@ -97,6 +98,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			new ColumnContext(ACQ_METHOD_ID_COLUMN, DataAcquisitionMethod.class, false),
 			new ColumnContext(DEX_METHOD_ID_COLUMN, DataExtractionMethod.class, false),			
 			new ColumnContext(PARENT_ION_PURITY_COLUMN, Double.class, false),
+			new ColumnContext(PARENT_ION_IS_MINOR_ISOTOPE_COLUMN, Boolean.class, false),			
 			new ColumnContext(SPECTRUM_ENTROPY_COLUMN, Double.class, false),
 			new ColumnContext(SPECTRUM_TOTAL_INTENSITY_COLUMN, Double.class, false),
 		};
@@ -173,7 +175,8 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 				bundle.getExperiment(),	//	EXPERIMENT_COLUMN	LIMSExperiment
 				bundle.getAcquisitionMethod(),	//	ACQ_METHOD_ID_COLUMN	LIMSAcquisitionMethod
 				bundle.getDataExtractionMethod(),	//	DEX_METHOD_ID_COLUMN	LIMSDataExtractionMethod
-				instrumentMsMs.getParentIonPurity(),	//	PARENT_ION_PURITY_COLUMN
+				instrumentMsMs.getParentIonPurity(),	//	PARENT_ION_PURITY_COLUMN	Double
+				instrumentMsMs.isParentIonMinorIsotope(),	//	PARENT_ION_IS_MINOR_ISOTOPE_COLUMN	Boolean
 				instrumentMsMs.getEntropy(), //	SPECTRUM_ENTROPY_COLUMN		Double
 				instrumentMsMs.getTotalIntensity(),	//	SPECTRUM_TOTAL_INTENSITY_COLUMN	Double
 			};
@@ -220,6 +223,10 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			else
 				adduct = AdductManager.getDefaultAdductForCharge(cf.getCharge());
 		}
+		LIMSSampleType sType = null;
+		if(bundle.getStockSample() != null)
+			sType = bundle.getStockSample().getLimsSampleType();
+		
 		setValueAt(compoundName, row, getColumnIndex(COMPOUND_NAME_COLUMN));
 		setValueAt(cf.getPrimaryIdentity(), row, getColumnIndex(DATABASE_LINK_COLUMN));
 		setValueAt(cf.getIdentificationState(), row, getColumnIndex(AMBIGUITY_COLUMN));
@@ -230,12 +237,13 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		setValueAt(cf.getRetentionTime(), row, getColumnIndex(RETENTION_COLUMN));
 		setValueAt(instrumentMsMs.getParent().getMz(), row, getColumnIndex(PARENT_MZ_COLUMN));
 		setValueAt(instrumentMsMs.getCidLevel(), row, getColumnIndex(COLLISION_ENERGY_COLUMN));
-		setValueAt(bundle.getStockSample().getLimsSampleType(), row, getColumnIndex(SAMPLE_TYPE_COLUMN));
+		setValueAt(sType, row, getColumnIndex(SAMPLE_TYPE_COLUMN));
 		setValueAt(bundle.getSample(), row, getColumnIndex(SAMPLE_COLUMN));
 		setValueAt(bundle.getExperiment(), row, getColumnIndex(EXPERIMENT_COLUMN));
 		setValueAt(bundle.getAcquisitionMethod(), row, getColumnIndex(ACQ_METHOD_ID_COLUMN));
 		setValueAt(bundle.getDataExtractionMethod(), row, getColumnIndex(DEX_METHOD_ID_COLUMN));		
-		setValueAt(instrumentMsMs.getParentIonPurity(), row, getColumnIndex(PARENT_ION_PURITY_COLUMN));
+		setValueAt(instrumentMsMs.getParentIonPurity(), row, getColumnIndex(PARENT_ION_PURITY_COLUMN));		
+		setValueAt(instrumentMsMs.isParentIonMinorIsotope(), row, getColumnIndex(PARENT_ION_IS_MINOR_ISOTOPE_COLUMN));
 		setValueAt(instrumentMsMs.getEntropy(), row, getColumnIndex(SPECTRUM_ENTROPY_COLUMN));
 		setValueAt(instrumentMsMs.getTotalIntensity(), row, getColumnIndex(SPECTRUM_TOTAL_INTENSITY_COLUMN));
 	}

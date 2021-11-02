@@ -322,7 +322,9 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				msmsFeatureExtractionSetupDialog.getIsolationWindowUpperBorder(),
 				msmsFeatureExtractionSetupDialog.getMsmsGroupingRtWindow(),
 				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassError(),
-				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassErrorType());
+				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassErrorType(),
+				msmsFeatureExtractionSetupDialog.flagMinorIsotopesPrecursors(),
+				msmsFeatureExtractionSetupDialog.getMaxPrecursorCharge());
 		
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);

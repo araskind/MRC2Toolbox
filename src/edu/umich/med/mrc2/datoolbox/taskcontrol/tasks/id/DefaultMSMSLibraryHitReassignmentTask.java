@@ -25,20 +25,13 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
@@ -47,14 +40,13 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.tophit.TopHitReassignmentOption;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 
 public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 	
 	private Collection<MsFeatureInfoBundle>featuresToUpdate;
 	private TopHitReassignmentOption topHitReassignmentOption;
 	private boolean commitChangesToDatabase;
-	private static final MsFeatureIdentityComparator idScoreComparator = 
-			new MsFeatureIdentityComparator(SortProperty.msmsScore, SortDirection.DESC);
 	
 	public DefaultMSMSLibraryHitReassignmentTask(
 			Collection<MsFeatureInfoBundle> featuresToExport,
@@ -72,7 +64,8 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		setStatus(TaskStatus.PROCESSING);
 		IDTDataCash.refreshNISTPepSearchParameters();
 		try {
-			removeLockedFeatures();
+			featuresToUpdate = 
+				NISTPepSearchUtils.removeLockedFeatures(featuresToUpdate);
 		}
 		catch (Exception e1) {
 			setStatus(TaskStatus.ERROR);
@@ -99,9 +92,12 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		processed = 0;	
 		Connection conn = ConnectionManager.getConnection();
 
-		Map<String,HiResSearchOption>searchTypeMap = getSearchTypeMap();	
-		String metlinLibId = IDTDataCash.getReferenceMsMsLibraryByName("Metlin_AMRT_PCDL").getUniqueId();		
-		MSFeatureIdentificationLevel tentativeLevel = IDTDataCash.getMSFeatureIdentificationLevelById("IDS002");
+		Map<String,HiResSearchOption>searchTypeMap = 
+				NISTPepSearchUtils.getSearchTypeMap(featuresToUpdate);	
+		String metlinLibId = 
+				IDTDataCash.getReferenceMsMsLibraryByName("Metlin_AMRT_PCDL").getUniqueId();		
+		MSFeatureIdentificationLevel tentativeLevel = 
+				IDTDataCash.getMSFeatureIdentificationLevelById("IDS002");
 				
 		for(MsFeatureInfoBundle bundle : featuresToUpdate) {
 			
@@ -109,7 +105,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 						bundle.getMsFeature().getIdentifications().stream().
 						filter(id -> id.getReferenceMsMsLibraryMatch() != null).
 						filter(id -> id.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(metlinLibId)).
-						sorted(idScoreComparator).
+						sorted(NISTPepSearchUtils.idScoreComparator).
 						collect(Collectors.toList());
 			 
 			if(topHitReassignmentOption.equals(TopHitReassignmentOption.PREFER_METLIN)  
@@ -118,7 +114,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 			}
 			else {
 				Map<HiResSearchOption,Collection<MsFeatureIdentity>>hitTypeMap = 
-						getSearchTypeIdentityMap(bundle.getMsFeature(), searchTypeMap);
+						NISTPepSearchUtils.getSearchTypeIdentityMap(bundle.getMsFeature(), searchTypeMap);
 				
 				MsFeatureIdentity topNormalHit = null;
 				MsFeatureIdentity topInSourceHit = null;
@@ -169,7 +165,8 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 				}
 				if(topHitReassignmentOption.equals(TopHitReassignmentOption.ALLOW_HYBRID_HITS)) {
 					
-					TreeSet<MsFeatureIdentity>topHits = new TreeSet<MsFeatureIdentity>(idScoreComparator);
+					TreeSet<MsFeatureIdentity>topHits = 
+							new TreeSet<MsFeatureIdentity>(NISTPepSearchUtils.idScoreComparator);
 					if(topNormalHit != null)
 						topHits.add(topNormalHit);
 					
@@ -199,63 +196,6 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 			processed++;
 		}	
 		ConnectionManager.releaseConnection(conn);
-	}
-	
-	private Map<HiResSearchOption,Collection<MsFeatureIdentity>>getSearchTypeIdentityMap(
-			MsFeature feature, 
-			Map<String,HiResSearchOption>searchTypeMap) {
-		
-		Map<HiResSearchOption,Collection<MsFeatureIdentity>>typeMap = 
-				new TreeMap<HiResSearchOption,Collection<MsFeatureIdentity>>();
-		for(HiResSearchOption o : HiResSearchOption.values())
-			typeMap.put(o, new TreeSet<MsFeatureIdentity>(idScoreComparator));
-		
-		List<MsFeatureIdentity> nistSearchHits = feature.getIdentifications().stream().
-			filter(i -> i.getReferenceMsMsLibraryMatch() != null).
-			filter(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId() != null).
-			collect(Collectors.toList());
-		
-		for(MsFeatureIdentity hit : nistSearchHits) {
-			
-			String parSetId = hit.getReferenceMsMsLibraryMatch().getSearchParameterSetId();
-			typeMap.get(searchTypeMap.get(parSetId)).add(hit);	
-		}		
-		return typeMap;
-	}
-	
-	private Map<String,HiResSearchOption>getSearchTypeMap(){
-		
-		Set<String> searchParamSet = featuresToUpdate.stream().
-				flatMap(f -> f.getMsFeature().getIdentifications().stream()).
-				filter(i -> i.getReferenceMsMsLibraryMatch() != null).
-				filter(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId() != null).
-				map(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId()).collect(Collectors.toSet());
-			
-		Map<String,HiResSearchOption>searchTypeMap = 
-					new TreeMap<String,HiResSearchOption>();
-		for(String spId : searchParamSet) {
-			NISTPepSearchParameterObject pepSearchParams = 
-					IDTDataCash.getNISTPepSearchParameterObjectById(spId);
-			searchTypeMap.put(spId, pepSearchParams.getHiResSearchOption());
-		}
-		return searchTypeMap;
-	}
-	
-	private void removeLockedFeatures() {
-		
-		List<MsFeatureInfoBundle> filteredFeatures = featuresToUpdate.stream().
-			filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-			filter(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null).			
-			filter(f -> f.getMsFeature().getMSMSLibraryMatchCount() > 1).
-			filter(f -> f.getIdFollowupSteps().isEmpty()).
-			filter(f -> f.getStandadAnnotations().isEmpty()).
-			filter(f -> f.getMsFeature().getAnnotations().isEmpty()).
-			filter(f -> f.getMsFeature().getPrimaryIdentity().getAssignedBy() == null).
-			filter(f -> (f.getMsFeature().getPrimaryIdentity().getIdentificationLevel() == null 
-				|| f.getMsFeature().getPrimaryIdentity().getIdentificationLevel().getId().equals("IDS002"))).
-			collect(Collectors.toList());
-		
-		featuresToUpdate = filteredFeatures;
 	}
 	
 	@Override

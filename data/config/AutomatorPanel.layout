@@ -101,7 +101,7 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213802082" orientation="HORIZONTAL" divider="0.39612015018773467">
 											<node nodeId="1600213802084" orientation="VERTICAL" divider="0.5">
-												<leaf id="2" nodeId="1600213802086">
+												<leaf id="1" nodeId="1600213802086">
 													<placeholders>
 														<placeholder>dock.single.DockableProcessingMethodsPanel</placeholder>
 													</placeholders>
@@ -118,7 +118,7 @@
 														<placeholder>dock.single.DockableAutomatorTaskTable</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="1" nodeId="1600213802094">
+												<leaf id="2" nodeId="1600213802094">
 													<placeholders>
 														<placeholder>dock.single.DockableAutomatorConsole</placeholder>
 														<placeholder>dock.single.DockableFailedTasksTable</placeholder>
@@ -158,6 +158,16 @@
 										<replacement id="dockablesingle DockableInputFilesPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>DockableInputFilesPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableProcessingMethodsPanel">
+										<replacement id="dockablesingle DockableProcessingMethodsPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableProcessingMethodsPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -221,16 +231,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableProcessingMethodsPanel">
-										<replacement id="dockablesingle DockableProcessingMethodsPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableProcessingMethodsPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="predefined" placeholder="dock.single.DockableAutomatorTaskTable">

@@ -32,7 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,9 +43,15 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
@@ -61,6 +69,9 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PreSearchType;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class NISTPepSearchUtils {
+	
+	public static final MsFeatureIdentityComparator idScoreComparator = 
+			new MsFeatureIdentityComparator(SortProperty.msmsScore, SortDirection.DESC);
 
 	public static Map<NISTPepSearchOutputFields,Integer>createPepSearchOutputColumnMap(String[]pepsearchResultsHeader){
 		
@@ -738,6 +749,65 @@ public class NISTPepSearchUtils {
 		}
 		return parsePepSearchOutputToObjects(searchData, pepSearchParameterObject);
 	}
+	
+	public static Map<String,HiResSearchOption>getSearchTypeMap(Collection<MsFeatureInfoBundle>bundles){
+		
+		Set<String> searchParamSet = bundles.stream().
+				flatMap(f -> f.getMsFeature().getIdentifications().stream()).
+				filter(i -> i.getReferenceMsMsLibraryMatch() != null).
+				filter(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId() != null).
+				map(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId()).collect(Collectors.toSet());
+			
+		Map<String,HiResSearchOption>searchTypeMap = 
+					new TreeMap<String,HiResSearchOption>();
+		for(String spId : searchParamSet) {
+			NISTPepSearchParameterObject pepSearchParams = 
+					IDTDataCash.getNISTPepSearchParameterObjectById(spId);
+			searchTypeMap.put(spId, pepSearchParams.getHiResSearchOption());
+		}
+		return searchTypeMap;
+	}
+	
+	public static Map<HiResSearchOption,Collection<MsFeatureIdentity>>getSearchTypeIdentityMap(
+			MsFeature feature, 
+			Map<String,HiResSearchOption>searchTypeMap) {
+		
+		Map<HiResSearchOption,Collection<MsFeatureIdentity>>typeMap = 
+				new TreeMap<HiResSearchOption,Collection<MsFeatureIdentity>>();
+		for(HiResSearchOption o : HiResSearchOption.values())
+			typeMap.put(o, new TreeSet<MsFeatureIdentity>(idScoreComparator));
+		
+		List<MsFeatureIdentity> nistSearchHits = feature.getIdentifications().stream().
+			filter(i -> i.getReferenceMsMsLibraryMatch() != null).
+			filter(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId() != null).
+			collect(Collectors.toList());
+		
+		for(MsFeatureIdentity hit : nistSearchHits) {
+			
+			String parSetId = hit.getReferenceMsMsLibraryMatch().getSearchParameterSetId();
+			typeMap.get(searchTypeMap.get(parSetId)).add(hit);	
+		}		
+		return typeMap;
+	}
+	
+	public static Collection<MsFeatureInfoBundle> removeLockedFeatures(
+			Collection<MsFeatureInfoBundle>featuresToFilter) {
+		
+		Collection<MsFeatureInfoBundle> filteredFeatures = featuresToFilter.stream().
+			filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
+			filter(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null).			
+			filter(f -> f.getMsFeature().getMSMSLibraryMatchCount() > 1).
+			filter(f -> f.getIdFollowupSteps().isEmpty()).
+			filter(f -> f.getStandadAnnotations().isEmpty()).
+			filter(f -> f.getMsFeature().getAnnotations().isEmpty()).
+			filter(f -> f.getMsFeature().getPrimaryIdentity().getAssignedBy() == null).
+			filter(f -> (f.getMsFeature().getPrimaryIdentity().getIdentificationLevel() == null 
+				|| f.getMsFeature().getPrimaryIdentity().getIdentificationLevel().getId().equals("IDS002"))).
+			collect(Collectors.toList());
+		
+		return filteredFeatures;
+	}
+
 }
 
 

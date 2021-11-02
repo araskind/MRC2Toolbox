@@ -153,6 +153,8 @@ public class MSMSFeatureTable extends BasicTable {
 			.setCellRenderer(new MSFeatureIdentificationLevelColorRenderer());
 		columnModel.getColumnById(MSMSFeatureTableModel.PARENT_ION_PURITY_COLUMN)
 			.setCellRenderer(new PercentValueRenderer());
+		columnModel.getColumnById(MSMSFeatureTableModel.PARENT_ION_IS_MINOR_ISOTOPE_COLUMN)
+			.setCellRenderer(new RadioButtonRenderer());
 		columnModel.getColumnById(MSMSFeatureTableModel.SPECTRUM_ENTROPY_COLUMN)
 			.setCellRenderer(new FormattedDecimalRenderer(new DecimalFormat("##.###")));
 		columnModel.getColumnById(MSMSFeatureTableModel.SPECTRUM_TOTAL_INTENSITY_COLUMN)
@@ -300,7 +302,7 @@ public class MSMSFeatureTable extends BasicTable {
 					adduct = AdductManager.getDefaultAdductForCharge(cf.getCharge());
 			}
 			Object[] obj = {
-				bundle,				//	MS_FEATURE_COLUMN	MsFeature
+				bundle,			//	MS_FEATURE_COLUMN	MsFeature
 				compoundName,	//	COMPOUND_NAME_COLUMN	String
 				cf.getPrimaryIdentity(),	//	DATABSE_LINK_COLUMN	MsFeatureIdentity
 				idState, //	AMBIGUITY_COLUMN, Boolean
@@ -320,7 +322,8 @@ public class MSMSFeatureTable extends BasicTable {
 				bundle.getExperiment(),	//	EXPERIMENT_COLUMN	LIMSExperiment
 				bundle.getAcquisitionMethod(),	//	ACQ_METHOD_ID_COLUMN	LIMSAcquisitionMethod
 				bundle.getDataExtractionMethod(),	//	DEX_METHOD_ID_COLUMN	LIMSDataExtractionMethod
-				instrumentMsMs.getParentIonPurity(),	//	PARENT_ION_PURITY_COLUMN
+				instrumentMsMs.getParentIonPurity(),	//	PARENT_ION_PURITY_COLUMN	Double				
+				instrumentMsMs.isParentIonMinorIsotope(),	//	PARENT_ION_IS_MINOR_ISOTOPE_COLUMN	Boolean
 				instrumentMsMs.getEntropy(), //	SPECTRUM_ENTROPY_COLUMN		Double
 				instrumentMsMs.getTotalIntensity(),	//	SPECTRUM_TOTAL_INTENSITY_COLUMN	Double
 			};

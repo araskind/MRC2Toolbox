@@ -109,12 +109,13 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	public static final String MAX_FRAGMENTS_COUNT = "MAX_FRAGMENTS_COUNT";
 	public static final String INTENSITY_MEASURE = "INTENSITY_MEASURE";
 	public static final String FLAG_MINOR_ISOTOPES_PRECURSORS = "FLAG_MINOR_ISOTOPES_PRECURSORS";
-	
+	public static final String MAX_PRECURSOR_CHARGE = "MAX_PRECURSOR_CHARGE";
 
 	private JFormattedTextField msmsGroupRtWindowTextField;
 	private JFormattedTextField precursorGroupingMassErrorTextField;
 	private JComboBox precursorGroupingMassErrorTypeComboBox;
 	private JCheckBox flagMinorIsotopesPrecursorsCheckBox;
+	private JSpinner maxChargeSpinner;
 	
 	public MSMSFeatureExtractionSetupDialog(ActionListener listener) {
 		super();
@@ -387,12 +388,12 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		maxFragmentsSpinner.setModel(new SpinnerNumberModel(20, 1, null, 1));
 		maxFragmentsSpinner.setPreferredSize(new Dimension(80, 20));
 		maxFragmentsSpinner.setSize(new Dimension(80, 20));
-		GridBagConstraints gbc_spinner = new GridBagConstraints();
-		gbc_spinner.anchor = GridBagConstraints.WEST;
-		gbc_spinner.insets = new Insets(0, 0, 0, 5);
-		gbc_spinner.gridx = 1;
-		gbc_spinner.gridy = 2;
-		panel.add(maxFragmentsSpinner, gbc_spinner);
+		GridBagConstraints gbc_maxFragmentsSpinner = new GridBagConstraints();
+		gbc_maxFragmentsSpinner.anchor = GridBagConstraints.WEST;
+		gbc_maxFragmentsSpinner.insets = new Insets(0, 0, 0, 5);
+		gbc_maxFragmentsSpinner.gridx = 1;
+		gbc_maxFragmentsSpinner.gridy = 2;
+		panel.add(maxFragmentsSpinner, gbc_maxFragmentsSpinner);
 
 		JLabel lblMajorFragments = new JLabel("major fragments");
 		GridBagConstraints gbc_lblMajorFragments = new GridBagConstraints();
@@ -406,11 +407,27 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 				new JCheckBox("Flag MSMS features where precursor is not monoisotopic peak");
 		GridBagConstraints gbc_flagMinorIsotopesPrecursorsCheckBox = new GridBagConstraints();
 		gbc_flagMinorIsotopesPrecursorsCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_flagMinorIsotopesPrecursorsCheckBox.gridwidth = 5;
+		gbc_flagMinorIsotopesPrecursorsCheckBox.gridwidth = 2;
 		gbc_flagMinorIsotopesPrecursorsCheckBox.insets = new Insets(0, 0, 0, 5);
 		gbc_flagMinorIsotopesPrecursorsCheckBox.gridx = 0;
 		gbc_flagMinorIsotopesPrecursorsCheckBox.gridy = 6;
 		panel_1.add(flagMinorIsotopesPrecursorsCheckBox, gbc_flagMinorIsotopesPrecursorsCheckBox);
+		
+		JLabel lblNewLabel_7 = new JLabel("Max. charge");
+		GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();
+		gbc_lblNewLabel_7.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_7.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_7.gridx = 3;
+		gbc_lblNewLabel_7.gridy = 6;
+		panel_1.add(lblNewLabel_7, gbc_lblNewLabel_7);
+		
+		maxChargeSpinner = new JSpinner();
+		maxChargeSpinner.setModel(new SpinnerNumberModel(2, 1, 3, 1));
+		GridBagConstraints gbc_maxChargeSpinner = new GridBagConstraints();
+		gbc_maxChargeSpinner.anchor = GridBagConstraints.WEST;
+		gbc_maxChargeSpinner.gridx = 4;
+		gbc_maxChargeSpinner.gridy = 6;
+		panel_1.add(maxChargeSpinner, gbc_maxChargeSpinner);
 
 		//	Buttons
 		JPanel panel_2 = new JPanel();
@@ -506,6 +523,10 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	public boolean flagMinorIsotopesPrecursors() {
 		return flagMinorIsotopesPrecursorsCheckBox.isSelected();
 	}
+	
+	public int getMaxPrecursorCharge() {
+		return (int)maxChargeSpinner.getValue();
+	}
 
 	@Override
 	public void loadPreferences(Preferences prefs) {
@@ -529,7 +550,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		intensityMeasureComboBox.setSelectedItem(
 				IntensityMeasure.geIntensityMeasureByName(
 						preferences.get(INTENSITY_MEASURE, IntensityMeasure.ABSOLUTE.name())));	
-		flagMinorIsotopesPrecursorsCheckBox.setSelected(preferences.getBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, true));		
+		flagMinorIsotopesPrecursorsCheckBox.setSelected(preferences.getBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, true));	
+		maxChargeSpinner.setValue(preferences.getInt(MAX_PRECURSOR_CHARGE, 2));
 	}
 
 	@Override
@@ -551,7 +573,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		preferences.putBoolean(LEAVE_MAX_FRAGMENTS, chckbxLeaveOnly.isSelected());
 		preferences.putInt(MAX_FRAGMENTS_COUNT, (int) maxFragmentsSpinner.getValue());		
 		preferences.put(INTENSITY_MEASURE, getIntensityMeasure().name());		
-		preferences.putBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, flagMinorIsotopesPrecursorsCheckBox.isSelected());
+		preferences.putBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, flagMinorIsotopesPrecursorsCheckBox.isSelected());		
+		preferences.putInt(MAX_PRECURSOR_CHARGE, (int) maxChargeSpinner.getValue());
 	}
 
 	@Override

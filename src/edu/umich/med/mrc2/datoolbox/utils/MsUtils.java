@@ -128,6 +128,8 @@ public class MsUtils {
 			new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC);
 	public static final MsDataPointComparator mzSorter = 
 			new MsDataPointComparator(SortProperty.MZ);
+	public static final MsDataPointComparator scanSorter = 
+			new MsDataPointComparator(SortProperty.scanNumber);
 	
 	public static double calculateModifiedMz(double neutralMass, Adduct mod) {
 

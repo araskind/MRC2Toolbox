@@ -353,6 +353,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		dataAcquisitionMethods.clear();
 	}
 
+//	DISABLE_PRIMARY_IDENTIFICATION_COMMAND
+//	DELETE_IDENTIFICATION_COMMAND
+//	DELETE_ALL_IDENTIFICATIONS_COMMAND
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
@@ -561,6 +565,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			return;
 
 		reassignDefaultMSMSLibraryHitDialog = new ReassignDefaultMSMSLibraryHitDialog(this);
+		
+		if(activeFeatureCollection.isOffLine())
+			reassignDefaultMSMSLibraryHitDialog.blockCommitToDatabase();
+		
 		reassignDefaultMSMSLibraryHitDialog.setLocationRelativeTo(this.getContentPane());
 		reassignDefaultMSMSLibraryHitDialog.setVisible(true);
 	}
@@ -1109,13 +1117,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
-				try {
-					IdFollowupUtils.setIdFollowupStepsForMS1Feature(fib);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if(!activeFeatureCollection.isOffLine()) {
+					try {
+						IdFollowupUtils.setIdFollowupStepsForMS1Feature(fib);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-				//	updateMSFeatures(fib);
 			}
 			updateSelectedMSFeatures();
 			followupStepAssignmentDialog.dispose();
@@ -1127,13 +1136,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
-				try {
-					IdFollowupUtils.setIdFollowupStepsForMSMSFeature(fib);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if(!activeFeatureCollection.isOffLine()) {
+					try {
+						IdFollowupUtils.setIdFollowupStepsForMSMSFeature(fib);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-				//updateMSMSFeature(fib);
 			}
 			updateSelectedMSMSFeatures();
 			followupStepAssignmentDialog.dispose();
@@ -1168,11 +1178,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
-				try {
-					StandardAnnotationUtils.setStandardFeatureAnnotationsForMS1Feature(fib);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if(!activeFeatureCollection.isOffLine()) {
+					try {
+						StandardAnnotationUtils.setStandardFeatureAnnotationsForMS1Feature(fib);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 			updateSelectedMSFeatures();
@@ -1185,11 +1197,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
-				try {
-					StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(fib);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if(!activeFeatureCollection.isOffLine()) {
+					try {
+						StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(fib);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 			updateSelectedMSMSFeatures();
@@ -1201,7 +1215,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	public void createNewMsmsFeatureCollectionFromSelectedFeatures(
 			Collection<MsFeatureInfoBundle> featuresToAdd) {
 		
-		if(featuresToAdd.isEmpty())
+		if(featuresToAdd.isEmpty() || activeFeatureCollection.isOffLine())
 			return;
 		
 		featureCollectionManagerDialog = new FeatureCollectionManagerDialog();
@@ -1214,7 +1228,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	public void addSelectedFeaturesToExistingMsMsFeatureCollection(
 			Collection<MsFeatureInfoBundle> featuresToAdd) {
 		
-		if(featuresToAdd.isEmpty())
+		if(featuresToAdd.isEmpty() || activeFeatureCollection.isOffLine())
 			return;
 		
 		if(FeatureCollectionManager.getEditableMsFeatureInformationBundleCollectionList().isEmpty()) {
@@ -1230,15 +1244,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	public void removeSelectedFeaturesFromActiveMsMsFeatureCollection(
 			Collection<MsFeatureInfoBundle> featuresToRemove) {
 		
+		if(activeFeatureCollection == null 
+				|| activeFeatureCollection.getFeatures().isEmpty()
+				|| activeFeatureCollection.isOffLine())
+			return;
+		
 		if(activeFeatureCollection.equals(FeatureCollectionManager.msmsSearchResults) 
 				|| activeFeatureCollection.equals(FeatureCollectionManager.msOneSearchResults)) {
 			MessageDialog.showWarningMsg("Collection \"" + activeFeatureCollection.getName() + 
 					"\" represents database search results and can not be edited.", this.getContentPane());
 			return;
 		}
-		if(activeFeatureCollection == null || activeFeatureCollection.getFeatures().isEmpty())
-			return;
-		
 		String message = 
 				"Do you really want to remove " + Integer.toString(featuresToRemove.size()) + 
 				" selected features from collection \"" + 
@@ -1298,17 +1314,19 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			String yesNoQuestion = "Do you want to remove all identifications for " + feature.getName() + "?";
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				
-				try {
-					IdentificationUtils.clearReferenceMS1FeatureLibraryMatches(feature.getId());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				try {
-					IdentificationUtils.clearReferenceMS1FeatureManualIds(feature.getId());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if(!activeFeatureCollection.isOffLine()) {
+					try {
+						IdentificationUtils.clearReferenceMS1FeatureLibraryMatches(feature.getId());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					try {
+						IdentificationUtils.clearReferenceMS1FeatureManualIds(feature.getId());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				feature.clearIdentification();
 				updateSelectedMSFeatures();
@@ -1320,17 +1338,19 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 				if(msms != null) {
-					try {					
-						IdentificationUtils.clearMSMSFeatureLibraryMatches(msms.getId());
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					try {
-						IdentificationUtils.clearMSMSFeatureManualIdentifications(msms.getId());
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					if(!activeFeatureCollection.isOffLine()) {
+						try {					
+							IdentificationUtils.clearMSMSFeatureLibraryMatches(msms.getId());
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						try {
+							IdentificationUtils.clearMSMSFeatureManualIdentifications(msms.getId());
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					feature.clearIdentification();
 					updateSelectedMSMSFeatures();
@@ -1355,11 +1375,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 					
 				MsFeature msOneFeature = bundle.getMsFeature();
 				msOneFeature.disablePrimaryIdentity();
-				try {
-					IdentificationUtils.disableReferenceMS1FeaturePrimaryIdentity(msOneFeature.getId());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if(!activeFeatureCollection.isOffLine()) {
+					try {
+						IdentificationUtils.disableReferenceMS1FeaturePrimaryIdentity(msOneFeature.getId());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -1369,12 +1391,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 				
 				MsFeature msTwoFeature = bundle.getMsFeature();
 				msTwoFeature.disablePrimaryIdentity();
-				try {
-					String msmsId = msTwoFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL).getId();
-					IdentificationUtils.disableMSMSFeaturePrimaryIdentity(msmsId);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if(!activeFeatureCollection.isOffLine()) {
+					try {
+						String msmsId = msTwoFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL).getId();
+						IdentificationUtils.disableMSMSFeaturePrimaryIdentity(msmsId);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}	
@@ -1454,19 +1478,23 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				
 				if(id.getMsRtLibraryMatch() != null) {
-					try {
-						IdentificationUtils.removeReferenceMS1FeatureLibraryMatch(id);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					if(!activeFeatureCollection.isOffLine()) {
+						try {
+							IdentificationUtils.removeReferenceMS1FeatureLibraryMatch(id);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 				else {
-					try {
-						IdentificationUtils.removeReferenceMS1FeatureManualId(id);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					if(!activeFeatureCollection.isOffLine()) {
+						try {
+							IdentificationUtils.removeReferenceMS1FeatureManualId(id);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 				feature.removeIdentity(id);
@@ -1490,20 +1518,23 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 				if(msms != null) {
 					
 					if(id.getReferenceMsMsLibraryMatch() != null) {
-						
-						try {					
-							IdentificationUtils.removeMSMSFeatureLibraryMatch(id);
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						if(!activeFeatureCollection.isOffLine()) {
+							try {					
+								IdentificationUtils.removeMSMSFeatureLibraryMatch(id);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						}
 					}
 					else {
-						try {
-							IdentificationUtils.removeMSMSFeatureManualIdentification(id);
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						if(!activeFeatureCollection.isOffLine()) {
+							try {
+								IdentificationUtils.removeMSMSFeatureManualIdentification(id);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						}
 					}
 					feature.removeIdentity(id);
@@ -1531,11 +1562,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		if(msTwoFeatureTable.getSelectedBundle() == null)
 			return;
 
-		if(manualIdentificationDialog == null) {
-			manualIdentificationDialog = new ManualIdentificationDialog(this);
-			//manualIdentificationDialog.setLocationRelativeTo(this.getContentPane());
-		}	
-		manualIdentificationDialog.setActiveFeature(msTwoFeatureTable.getSelectedBundle().getMsFeature());
+		manualIdentificationDialog = new ManualIdentificationDialog(this);
+		manualIdentificationDialog.setActiveFeature(
+				msTwoFeatureTable.getSelectedBundle().getMsFeature());
 		manualIdentificationDialog.setVisible(true);
 	}
 	
@@ -1556,15 +1585,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 //			MsFeatureIdentity manualId = 
 //					new MsFeatureIdentity(compoundIdentity, CompoundIdentificationConfidence.ACCURATE_MASS);
 //			manualId.setIdSource(CompoundIdSource.MANUAL);
-			try {
-				IdentificationUtils.addReferenceMS1FeatureManualId(feature.getId(), manualId);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if(!activeFeatureCollection.isOffLine()) {
+				try {
+					IdentificationUtils.addReferenceMS1FeatureManualId(feature.getId(), manualId);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			feature.setPrimaryIdentity(manualId);
 			updateSelectedMSFeatures();
-			manualIdentificationDialog.setVisible(false);
+			manualIdentificationDialog.dispose();
 			return;
 		}
 		if(msTwoFeatureTable.getSelectedBundle() != null) {
@@ -1574,15 +1605,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 //			new MsFeatureIdentity(compoundIdentity, CompoundIdentificationConfidence.ACCURATE_MASS);
 //			manualId.setIdSource(CompoundIdSource.MANUAL);			
 			TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
-			try {
-				IdentificationUtils.addMSMSFeatureManualId(msms.getId(), manualId);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if(!activeFeatureCollection.isOffLine()) {
+				try {
+					IdentificationUtils.addMSMSFeatureManualId(msms.getId(), manualId);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			feature.setPrimaryIdentity(manualId);
 			updateSelectedMSMSFeatures();
-			manualIdentificationDialog.setVisible(false);
+			manualIdentificationDialog.dispose();
 			return;
 		}
 	}
@@ -2387,7 +2420,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		for(MsFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
-			if(primaryId != null) {
+			if(primaryId != null && !activeFeatureCollection.isOffLine()) {
 				try {
 					IdentificationUtils.setReferenceMS1FeaturePrimaryIdentity(
 							bundle.getMsFeature().getId(),
@@ -2413,8 +2446,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		msTwoFeatureTable.getTable().scrollToSelected();
 	}
 	
-	
-	
 	private void updateMSMSFeature(Collection<MsFeatureInfoBundle> selectedBundles) {
 		
 		for(MsFeatureInfoBundle bundle : selectedBundles) {
@@ -2422,7 +2453,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
 			TandemMassSpectrum msmsFeature = 
 					bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
-			if(primaryId != null) {
+			if(primaryId != null && !activeFeatureCollection.isOffLine()) {
 				try {
 					IdentificationUtils.setMSMSFeaturePrimaryIdentity(
 							msmsFeature.getId(),

@@ -28,14 +28,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.XicDataBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -46,6 +50,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import edu.umich.med.mrc2.datoolbox.main.ChemicalModificationsManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -56,6 +62,8 @@ import edu.umich.med.mrc2.datoolbox.utils.ClusterUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
+import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
+import edu.umich.med.mrc2.datoolbox.utils.filter.WeightedMovingAverageFilter;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.LCMSDataSubset;
 import umich.ms.datatypes.scan.IScan;
@@ -76,9 +84,13 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private double msmsGroupingRtWindow;
 	private double precursorGroupingMassError;
 	private MassErrorType precursorGroupingMassErrorType;
-
+	private boolean flagMinorIsotopesPrecursors;
+	private int maxPrecursorCharge;
 	private LCMSData data;
 	private Collection<MsFeature>features;
+	private double xicWindowHalfWidth;
+	
+	private Filter smoothingFilter;
 
 	public MsMsfeatureExtractionTask(
 			DataFile rawDataFile,
@@ -91,7 +103,9 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			double msmsIsolationWindowUpperBorder,
 			double msmsGroupingRtWindow,
 			double precursorGroupingMassError,
-			MassErrorType precursorGroupingMassErrorType) {
+			MassErrorType precursorGroupingMassErrorType,
+			boolean flagMinorIsotopesPrecursors,
+			int maxPrecursorCharge) {
 		super();
 		this.rawDataFile = rawDataFile;
 		this.dataExtractionRtRange = dataExtractionRtRange;
@@ -104,12 +118,17 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		this.msmsGroupingRtWindow = msmsGroupingRtWindow;
 		this.precursorGroupingMassError = precursorGroupingMassError;
 		this.precursorGroupingMassErrorType = precursorGroupingMassErrorType;
+		this.flagMinorIsotopesPrecursors = flagMinorIsotopesPrecursors;
+		this.maxPrecursorCharge = maxPrecursorCharge;
+		
+		xicWindowHalfWidth = 0.2d;	//	TODO pass as parameter
+		smoothingFilter = new WeightedMovingAverageFilter(9);	//	TODO pass as parameter
 		features = new ArrayList<MsFeature>();
 	}
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
+
 		setStatus(TaskStatus.PROCESSING);
 		taskDescription = "Importing data from file " + rawDataFile.getName();
 		total = 100;
@@ -142,7 +161,277 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
+		if(flagMinorIsotopesPrecursors) {
+			try {
+				flagFeaturesWithMinorIsotopesPrecursors();
+			}
+			catch (Exception e1) {
+				e1.printStackTrace();
+				setStatus(TaskStatus.ERROR);
+			}
+		}
 		setStatus(TaskStatus.FINISHED);
+	}
+
+	private void flagFeaturesWithMinorIsotopesPrecursors() {
+		
+		taskDescription = "Flagging MSMS with minor isotope parent ions "
+				+ "and assigning adducts in " + rawDataFile.getName();
+		total = features.size();
+		processed = 0;	
+
+		for(MsFeature feature : features) {
+			
+			//	Extract XIC for parent ion
+			double mz = feature.getSpectrum().getExperimentalTandemSpectrum().getParent().getMz();
+			int scanNum = feature.getSpectrum().getExperimentalTandemSpectrum().getParentScanNumber();
+			Range mzRange = MsUtils.createMassRange(
+					mz, precursorGroupingMassError, precursorGroupingMassErrorType);
+			Range rtRange = new Range(
+					feature.getRetentionTime() - xicWindowHalfWidth, 
+					feature.getRetentionTime() + xicWindowHalfWidth);			
+			XicDataBundle parentBundle = getXicDataBundleForMzAroundRt(mzRange, rtRange);
+			findPeakBordersForScan(parentBundle, scanNum);
+			
+			Collection<MsPoint>ms1pattern = new TreeSet<MsPoint>(MsUtils.mzSorter);
+			ms1pattern.add(parentBundle.getRawPointForScan(scanNum));
+			
+			//	Create lookup ranges for lower and higher? isotopes		
+			for (int i = maxPrecursorCharge; i >= 1; i--) {
+
+				mzRange = MsUtils.createMassRange(mz - MsUtils.NEUTRON_MASS / (double) i, precursorGroupingMassError,
+						precursorGroupingMassErrorType);
+				XicDataBundle isotopeBundle = 
+						getXicDataBundleForMzAroundRt(mzRange, parentBundle.getPeakRtRange());
+				
+				// TODO check for correlation?
+				if (isotopeBundle.getmaxSmoothIntensity() > parentBundle.getmaxSmoothIntensity()) {
+
+					feature.getSpectrum().getExperimentalTandemSpectrum().setParentIonIsMinorIsotope(true);
+					ms1pattern.add(isotopeBundle.getRawPointForScan(scanNum));
+					
+					// Check if there is one more isotope present
+					mzRange = MsUtils.createMassRange(mz - (MsUtils.NEUTRON_MASS * 2) / (double) i,
+							precursorGroupingMassError, precursorGroupingMassErrorType);
+					XicDataBundle nextIsotopeBundle = getXicDataBundleForMzAroundRt(mzRange,
+							parentBundle.getPeakRtRange());
+					if (nextIsotopeBundle.getmaxSmoothIntensity() > isotopeBundle.getmaxSmoothIntensity())
+						ms1pattern.add(nextIsotopeBundle.getRawPointForScan(scanNum));
+					
+					if(ms1pattern.size() > 1) {
+						int charge = feature.getPolarity().getSign() * i;
+						Adduct adduct = ChemicalModificationsManager.getDefaultAdductForCharge(charge);
+						feature.getSpectrum().silentlyAddSpectrumForAdduct(adduct, ms1pattern);
+					}
+					break;
+				}
+			}
+			//	Look up minor isotopes
+			if(ms1pattern.size() == 1) {
+				
+				for (int i = maxPrecursorCharge; i >= 1; i--) {
+
+					mzRange = MsUtils.createMassRange(mz + MsUtils.NEUTRON_MASS / (double) i, precursorGroupingMassError,
+							precursorGroupingMassErrorType);
+					XicDataBundle isotopeBundle = 
+							getXicDataBundleForMzAroundRt(mzRange, parentBundle.getPeakRtRange());
+					if (isotopeBundle.getmaxSmoothIntensity() < parentBundle.getmaxSmoothIntensity()) {
+
+						ms1pattern.add(isotopeBundle.getRawPointForScan(scanNum));
+						
+						// Check if there is one more isotope present
+						mzRange = MsUtils.createMassRange(mz + (MsUtils.NEUTRON_MASS * 2) / (double) i,
+								precursorGroupingMassError, precursorGroupingMassErrorType);
+						XicDataBundle nextIsotopeBundle = getXicDataBundleForMzAroundRt(mzRange,
+								parentBundle.getPeakRtRange());
+						if (nextIsotopeBundle.getmaxSmoothIntensity() < isotopeBundle.getmaxSmoothIntensity())
+							ms1pattern.add(nextIsotopeBundle.getRawPointForScan(scanNum));
+						
+						if(ms1pattern.size() > 1) {
+							int charge = feature.getPolarity().getSign() * i;
+							Adduct adduct = AdductManager.getDefaultAdductForCharge(charge);
+							feature.getSpectrum().silentlyAddSpectrumForAdduct(adduct, ms1pattern);
+						}
+						break;
+					}
+				}
+			}
+			processed++;
+		}
+	}
+	
+	private XicDataBundle getXicDataBundleForMzAroundRt(Range mzRange, Range rtRange) {
+
+		double mz = mzRange.getAverage();		
+		Map<Integer, IScan>scansInRange = 
+				data.getScans().getScansByRtSpanAtMsLevel(rtRange.getMin(), rtRange.getMax(), 1);
+		if(scansInRange == null || scansInRange.isEmpty())
+			return null;
+
+		TreeSet<MsPoint>rawXic = new TreeSet<MsPoint>(MsUtils.scanSorter);		
+		TreeMap<Integer, Double>scanRtMap = new TreeMap<Integer, Double>();
+		TreeMap<Double, Double>rtIntensityMap = new TreeMap<Double, Double>();
+		Collection<MsPoint>p2average = new ArrayList<MsPoint>();
+		for(Entry<Integer, IScan> sce : scansInRange.entrySet()) {
+			
+			IScan scan = sce.getValue();
+			if(scan.getSpectrum() == null)
+				try {
+					scan.fetchSpectrum();
+				} catch (FileParsingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
+			int scanNum = sce.getKey();
+			int[]mzIdx = scan.getSpectrum().findMzIdxs(mzRange.getMin(), mzRange.getMax());
+			MsPoint newPoint = null;
+			if(mzIdx == null) {
+				newPoint = new MsPoint(mz, 0.0d, scanNum);
+			}
+			else if(mzIdx[0] == mzIdx[1]){
+				newPoint = new MsPoint(
+						scan.getSpectrum().getMZs()[mzIdx[0]], 
+						scan.getSpectrum().getIntensities()[mzIdx[0]], 
+						scanNum);
+			}
+			else {
+				p2average.clear();
+				for(int i=mzIdx[0]; i<=mzIdx[1]; i++) {
+					p2average.add(new MsPoint(
+							scan.getSpectrum().getMZs()[i], 
+							scan.getSpectrum().getIntensities()[i], 
+							scanNum));
+					newPoint = MsUtils.getAveragePoint(p2average);
+					newPoint.setScanNum(scanNum);				
+				}
+			}
+			rawXic.add(newPoint);
+			scanRtMap.put(scanNum, scan.getRt());
+			rtIntensityMap.put(scan.getRt(), newPoint.getIntensity());
+		}
+		double[] intensityArray = rtIntensityMap.values().stream().mapToDouble(Double::doubleValue).toArray();
+		double[] timeArray = rtIntensityMap.keySet().stream().mapToDouble(Double::doubleValue).toArray();
+		double[] filtered = smoothingFilter.filter(timeArray, intensityArray);
+		TreeSet<MsPoint>smoothXicPoints = new TreeSet<MsPoint>(MsUtils.scanSorter);
+		MsPoint[] rawPoints = rawXic.toArray(new MsPoint[rawXic.size()]);
+		for(int i=0; i < filtered.length; i++) 			
+			smoothXicPoints.add(new MsPoint(rawPoints[i].getMz(), filtered[i], rawPoints[i].getScanNum()));
+		
+		XicDataBundle bundle = new XicDataBundle(rawXic, smoothXicPoints, rtRange, rtRange);
+		bundle.setScanRtMap(scanRtMap);
+		return bundle;
+	}
+	
+	private void findPeakBordersForScan(XicDataBundle xicBundle, int scanNum){
+		
+		Map<Integer, Double> smoothInt = xicBundle.getSmoothedIntensityByScan();		
+		double prev = 0.0d;
+		double current = 0.0d;
+		double next = 0.0d;
+		for(int i : smoothInt.keySet()) {
+			if(i<scanNum)
+				prev = smoothInt.get(i);
+			else if(i==scanNum)
+				current = smoothInt.get(i);
+			if(i>scanNum) {
+				next = smoothInt.get(i);
+				break;
+			}
+		}
+		int[]scanNums = smoothInt.keySet().stream().mapToInt(Integer::intValue).toArray();
+		int refIdx = 0;
+		for(int i=0; i<scanNums.length; i++) {
+			if(scanNums[i] == scanNum) {
+				refIdx = i;
+				break;
+			}
+		}	
+		double smoothMax = xicBundle.getmaxSmoothIntensity();
+		int leftMinIdx = 0;
+		int leftMaxIdx = 0;
+		int rightMinIdx = scanNums.length-1;
+		int rightMaxIdx = 0;
+		
+		//	If on the left slope
+		if(current > prev && current < next) {			
+			
+			//	Left min
+			double leftMin = smoothMax;
+			for(int i=refIdx-1; i>=0; i--) {
+				if(smoothInt.get(scanNums[i]) < leftMin) {
+					leftMin = smoothInt.get(scanNums[i]);
+					leftMinIdx = i;
+				}
+			}
+			//	Right max
+			double rightMax = 0.0d;
+			for(int i=refIdx+1; i<scanNums.length; i++) {
+				if(smoothInt.get(scanNums[i]) > rightMax) {
+					rightMax = smoothInt.get(scanNums[i]);
+					rightMaxIdx = i;
+				}
+			}			
+			//	Right min
+			double rightMin = rightMax;
+			for(int i=rightMaxIdx+1; i<scanNums.length; i++) {
+				if(smoothInt.get(scanNums[i]) < rightMin) {
+					rightMin = smoothInt.get(scanNums[i]);
+					rightMinIdx = i;
+				}
+			}
+		}
+		//	If on the right slope
+		if(current < prev && current > next) {			
+			
+			//	Right min
+			double rightMin = smoothMax;
+			for(int i=refIdx+1; i<scanNums.length; i++) {
+				if(smoothInt.get(scanNums[i]) < rightMin) {
+					rightMin = smoothInt.get(scanNums[i]);
+					rightMinIdx = i;
+				}
+			}
+			//	Left max
+			double leftMax = 0.0d;
+			for(int i=refIdx-1; i>=0; i--) {
+				if(smoothInt.get(scanNums[i]) > leftMax) {
+					leftMax = smoothInt.get(scanNums[i]);
+					leftMaxIdx = i;
+				}
+			}
+			//	Left min
+			double leftMin = leftMax;
+			for(int i=leftMaxIdx-1; i>=0; i--) {
+				if(smoothInt.get(scanNums[i]) < leftMin) {
+					leftMin = smoothInt.get(scanNums[i]);
+					leftMinIdx = i;
+				}
+			}			
+		}
+		if(current == smoothMax) {
+			
+			//	Right min
+			double rightMin = smoothMax;
+			for(int i=refIdx+1; i<scanNums.length; i++) {
+				if(smoothInt.get(scanNums[i]) < rightMin) {
+					rightMin = smoothInt.get(scanNums[i]);
+					rightMinIdx = i;
+				}
+			}
+			//	Left min
+			double leftMin = smoothMax;
+			for(int i=refIdx-1; i>=0; i--) {
+				if(smoothInt.get(scanNums[i]) < leftMin) {
+					leftMin = smoothInt.get(scanNums[i]);
+					leftMinIdx = i;
+				}
+			}
+		}
+		Range peakRange = new Range(
+				xicBundle.getScanRtMap().get(scanNums[leftMinIdx]),
+				xicBundle.getScanRtMap().get(scanNums[rightMinIdx]));
+		xicBundle.setPeakRtRange(peakRange);
 	}
 
 	private void filterAndDenoise() {
@@ -229,7 +518,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	}
 	
 	private void mergeRelatedMsmsSpectra() {
-		// TODO Auto-generated method stub
+
 		taskDescription = "Grouping related MSMS features in " + rawDataFile.getName();
 		total = features.size();
 		processed = 0;
@@ -311,16 +600,15 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		taskDescription = "Extracting MSMS features from " + rawDataFile.getName();
 		Map<Integer, IScan>num2scan = data.getScans().getMapMsLevel2index().get(2).getNum2scan();
 		total =  num2scan.size();
-		processed = 0;		
+		processed = 0;			
+		if(dataExtractionRtRange != null) 			
+			num2scan = data.getScans().getScansByRtSpanAtMsLevel(
+					dataExtractionRtRange.getMin(), dataExtractionRtRange.getMax(), 2);
 		
-		if(dataExtractionRtRange != null) {
-			num2scan = num2scan.entrySet().stream().
-					filter(x -> dataExtractionRtRange.contains(x.getValue().getRt())).
-					collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
-		}
 		for(Entry<Integer, IScan> entry: num2scan.entrySet()) {
 			
-			IScan s = entry.getValue();		
+			IScan s = entry.getValue();	
+			int scanNum = entry.getKey();
 			IScan parentScan = getParentScan(s);
 			if(parentScan == null) {
 				processed++;
@@ -366,7 +654,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 					if(ach != null && acl != null)
 						msms.setCidLevel((acl + ach)/2.0d);
 				}
-				msms.setScanNumber(s.getNum());
+				msms.setScanNumber(scanNum);
 				msms.setParentScanNumber(parentScan.getNum());
 				msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);				
 				Collection<MsPoint>minorParentIons = getMinorParentIons(
@@ -458,7 +746,9 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				msmsIsolationWindowUpperBorder,
 				msmsGroupingRtWindow,
 				precursorGroupingMassError,
-				precursorGroupingMassErrorType);
+				precursorGroupingMassErrorType,
+				flagMinorIsotopesPrecursors,
+				maxPrecursorCharge);
 	}
 
 	public Collection<MsFeature> getMSMSFeatures() {

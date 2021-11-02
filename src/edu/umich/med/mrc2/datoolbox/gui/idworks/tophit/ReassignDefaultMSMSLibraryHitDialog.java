@@ -178,6 +178,11 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 		preferences.putBoolean(COMMIT_CHANGES, commitChangesCheckBox.isSelected());
 		preferences.put(TOP_HIT_REASSIGNMENT_OPTION, getTopHitReassignmentOption().name());
 	}
+
+	public void blockCommitToDatabase() {
+		commitChangesCheckBox.setSelected(false);
+		commitChangesCheckBox.setEnabled(false);
+	}
 }
 
 

@@ -520,11 +520,29 @@ public class ChemicalModificationsManager {
 			throw new IllegalArgumentException("Polarity can not be null!");
 		
 		if(pol.equals(Polarity.Positive))
-			return getAdductNameMap().get("M+H");
+			return getAdductNameMap().get("[M+H]+");
 		else if(pol.equals(Polarity.Negative))
-			return getAdductNameMap().get("M-H");
+			return getAdductNameMap().get("[M-H]-");
 		else
-			return getAdductNameMap().get("M");
+			return getAdductNameMap().get("[M]");
+	}
+	
+	public static Adduct getDefaultAdductForCharge(int charge) {
+		
+		if(charge == 1)
+			return getAdductNameMap().get("[M+H]+");
+		else if(charge == 2)
+			return getAdductNameMap().get("[M+2H]2+");
+		else if(charge == 2)
+			return getAdductNameMap().get("[M+3H]3+");
+		else if(charge == -1)
+			return getAdductNameMap().get("[M-H]-");
+		else if(charge == -2)
+			return getAdductNameMap().get("[M-2H]2-");
+		else if(charge == -3)
+			return getAdductNameMap().get("[M-3H]3-");
+		else
+			return getAdductNameMap().get("[M]");
 	}
 }
 

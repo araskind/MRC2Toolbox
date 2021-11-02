@@ -50,12 +50,10 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 public class SaveRawDataAnalysisProjectTask extends AbstractTask {
 
 	private RawDataAnalysisProject projectToSave;
-	private File projectFile;
-
+	
 	public SaveRawDataAnalysisProjectTask(RawDataAnalysisProject rawDataAnalyzerProject) {
 
 		this.projectToSave = rawDataAnalyzerProject;
-		projectFile = projectToSave.getProjectFile();
 		total = 100;
 		processed = 0;
 	}
@@ -68,35 +66,36 @@ public class SaveRawDataAnalysisProjectTask extends AbstractTask {
 		projectToSave.setLastModified(new Date());
 
 		backUpListeners();
+		
+		//	Create copy without features
+		RawDataAnalysisProject copyToSave = new RawDataAnalysisProject(projectToSave);
 
 		// Save project file
 		try {
 			processed = 10;
 			taskDescription = "Parsing project code ... ";
 			XStream projectXstream = initXstream();
-			File xmlFile = Paths.get(projectFile.getParentFile().getAbsolutePath(), 
-					projectToSave.getName() + ".xml").toFile();
+			File xmlFile = Paths.get(copyToSave.getProjectDirectory().getAbsolutePath(), 
+					copyToSave.getName() + ".xml").toFile();
 	        RandomAccessFile raf = new RandomAccessFile(xmlFile.getAbsolutePath(), "rw");
 	        FileOutputStream fout = new FileOutputStream(raf.getFD());	        
 			BufferedOutputStream bout = new BufferedOutputStream(fout);
-			projectXstream.toXML(projectToSave, bout);
+			projectXstream.toXML(copyToSave, bout);
 			bout.close();
 			fout.close();
 			raf.close();
-			
-//			String xmlString = projectXstream.toXML(projectToSave);
-//			byte[] contentInBytes = xmlString.getBytes();
+
 			processed = 50;		
 			if(xmlFile.exists()) {
 				
 				taskDescription = "Compressing XML file";
 				processed = 60;
-		        OutputStream archiveStream = new FileOutputStream(projectFile);
+		        OutputStream archiveStream = new FileOutputStream(copyToSave.getProjectFile());
 		        ZipArchiveOutputStream archive =
 		        	(ZipArchiveOutputStream) new ArchiveStreamFactory().
 		        	createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
 		        archive.setUseZip64(Zip64Mode.Always);
-		        ZipArchiveEntry entry = new ZipArchiveEntry(projectToSave.getName());
+		        ZipArchiveEntry entry = new ZipArchiveEntry(copyToSave.getName());
 		        archive.putArchiveEntry(entry);
 
 		        BufferedInputStream input = new BufferedInputStream(new FileInputStream(xmlFile));

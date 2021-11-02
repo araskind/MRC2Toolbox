@@ -36,6 +36,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
@@ -53,7 +55,6 @@ import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityMSMSScoreComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -64,14 +65,16 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 
 public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 
-	protected Collection<MsFeatureInfoBundle> featuresToSearch;	
+	protected Collection<MsFeatureInfoBundle>featuresToSearch;	
 	protected File inputFile;	
 	private Semaphore outputSem;
 	private Semaphore errorSem;
@@ -144,12 +147,13 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		}		
 		if(pooList.size() > 0) {
 			
+			IDTDataCash.refreshNISTPepSearchParameters();
 			if(skipResultsUpload) {
 				try {
 					updateOfflineFeatureIdentifications();
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					e.printStackTrace();	
 				}
 				assignTopHits();
 			}
@@ -176,24 +180,70 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 	private void assignTopHits() {
 
 		taskDescription = "Assigning default ids ...";
-		total = pooList.size();
+		total = featuresToSearch.size();
 		processed = 0;	
-		MsFeatureIdentityMSMSScoreComparator sorter = 
-				new MsFeatureIdentityMSMSScoreComparator();
-		for(PepSearchOutputObject poo : pooList) {
+		
+		Map<String,HiResSearchOption>searchTypeMap = 
+				NISTPepSearchUtils.getSearchTypeMap(featuresToSearch);			
+		MSFeatureIdentificationLevel tentativeLevel = 
+				IDTDataCash.getMSFeatureIdentificationLevelById("IDS002");
+				
+		for(MsFeatureInfoBundle bundle : featuresToSearch) {
 			
-			MsFeature msf = msmsIdMap.get(poo.getMsmsFeatureId());
-			if(msf.getIdentifications().size() == 1 && msf.getPrimaryIdentity() == null)
-				msf.setPrimaryIdentity(msf.getIdentifications().iterator().next());
+			if(bundle.getMsFeature().getIdentifications().isEmpty()) {
+				processed++;
+				continue;
+			}		
+			Map<HiResSearchOption,Collection<MsFeatureIdentity>>hitTypeMap = 
+					NISTPepSearchUtils.getSearchTypeIdentityMap(bundle.getMsFeature(), searchTypeMap);
 			
-			if(msf.getIdentifications().size() > 1) {
-				MsFeatureIdentity primaryId = msf.getIdentifications().stream().
-						sorted(sorter).findFirst().orElse(null);
-				if(primaryId != null)
-					msf.setPrimaryIdentity(primaryId);
-			}					
+			MsFeatureIdentity topNormalHit = null;
+			MsFeatureIdentity topInSourceHit = null;
+			MsFeatureIdentity topHybridHit = null;
+			
+			if(!hitTypeMap.get(HiResSearchOption.z).isEmpty())
+				topNormalHit = hitTypeMap.get(HiResSearchOption.z).iterator().next();
+			
+			if(!hitTypeMap.get(HiResSearchOption.u).isEmpty()) 
+				topInSourceHit = hitTypeMap.get(HiResSearchOption.u).iterator().next();
+			
+			if(!hitTypeMap.get(HiResSearchOption.y).isEmpty())
+				topHybridHit = hitTypeMap.get(HiResSearchOption.y).iterator().next();
+			
+			if(topNormalHit != null) {
+				bundle.getMsFeature().setPrimaryIdentity(topNormalHit);
+			}
+			else {
+				if(topInSourceHit != null) {
+					bundle.getMsFeature().setPrimaryIdentity(topInSourceHit);
+				}
+				else {
+					if(topHybridHit != null)
+						bundle.getMsFeature().setPrimaryIdentity(topHybridHit);
+				}
+			}
+			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
+			if(primaryId.getIdentificationLevel() == null)
+				primaryId.setIdentificationLevel(tentativeLevel);
+			
 			processed++;
 		}
+//		MsFeatureIdentityMSMSScoreComparator sorter = 
+//				new MsFeatureIdentityMSMSScoreComparator();
+//		for(PepSearchOutputObject poo : pooList) {
+//			
+//			MsFeature msf = msmsIdMap.get(poo.getMsmsFeatureId());
+//			if(msf.getIdentifications().size() == 1 && msf.getPrimaryIdentity() == null)
+//				msf.setPrimaryIdentity(msf.getIdentifications().iterator().next());
+//			
+//			if(msf.getIdentifications().size() > 1) {
+//				MsFeatureIdentity primaryId = msf.getIdentifications().stream().
+//						sorted(sorter).findFirst().orElse(null);
+//				if(primaryId != null)
+//					msf.setPrimaryIdentity(primaryId);
+//			}					
+//			processed++;
+//		}
 	}
 
 	private void updateOfflineFeatureIdentifications() throws Exception {
