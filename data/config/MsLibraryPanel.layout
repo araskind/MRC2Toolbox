@@ -101,12 +101,12 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213797663" orientation="VERTICAL" divider="0.5453788509575354">
 											<node nodeId="1615231600226" orientation="VERTICAL" divider="0.7592083040044367">
-												<leaf id="1" nodeId="1600213797667">
+												<leaf id="0" nodeId="1600213797667">
 													<placeholders>
 														<placeholder>dock.single.MsLibraryPanelDockableLibraryFeatureTable</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="0" nodeId="1600213797669">
+												<leaf id="1" nodeId="1600213797669">
 													<placeholders>
 														<placeholder>dock.single.MsLibraryPanelDockableMolStructurePanel</placeholder>
 													</placeholders>
@@ -128,20 +128,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.MsLibraryPanelDockableMolStructurePanel">
-										<replacement id="dockablesingle MsLibraryPanelDockableMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.MsLibraryPanelDockableLibraryFeatureTable">
+										<replacement id="dockablesingle MsLibraryPanelDockableLibraryFeatureTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>MsLibraryPanelDockableMolStructurePanel</id>
+											<id>MsLibraryPanelDockableLibraryFeatureTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.MsLibraryPanelDockableLibraryFeatureTable">
-										<replacement id="dockablesingle MsLibraryPanelDockableLibraryFeatureTable"/>
+									<layout factory="predefined" placeholder="dock.single.MsLibraryPanelDockableMolStructurePanel">
+										<replacement id="dockablesingle MsLibraryPanelDockableMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>MsLibraryPanelDockableLibraryFeatureTable</id>
+											<id>MsLibraryPanelDockableMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>

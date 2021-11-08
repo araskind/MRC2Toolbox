@@ -58,6 +58,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.ChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.utils.ClusterUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -196,7 +197,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			Collection<MsPoint>ms1pattern = new TreeSet<MsPoint>(MsUtils.mzSorter);
 			ms1pattern.add(parentBundle.getRawPointForScan(scanNum));
 			
-			//	Create lookup ranges for lower and higher? isotopes		
+			//	Create lookup ranges for lower M/Z isotopes		
 			for (int i = maxPrecursorCharge; i >= 1; i--) {
 
 				mzRange = MsUtils.createMassRange(mz - MsUtils.NEUTRON_MASS / (double) i, precursorGroupingMassError,
@@ -206,6 +207,13 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				
 				// TODO check for correlation?
 				if (isotopeBundle.getmaxSmoothIntensity() > parentBundle.getmaxSmoothIntensity()) {
+					
+					double corr = ChromatogramUtils.calculateXicCorrelationInPeak(
+							parentBundle,
+							isotopeBundle, 
+							parentBundle.getPeakRtRange());
+//					if(corr < 0.3)
+//						continue;
 
 					feature.getSpectrum().getExperimentalTandemSpectrum().setParentIonIsMinorIsotope(true);
 					ms1pattern.add(isotopeBundle.getRawPointForScan(scanNum));
@@ -220,8 +228,13 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 					
 					if(ms1pattern.size() > 1) {
 						int charge = feature.getPolarity().getSign() * i;
-						Adduct adduct = ChemicalModificationsManager.getDefaultAdductForCharge(charge);
-						feature.getSpectrum().silentlyAddSpectrumForAdduct(adduct, ms1pattern);
+						Adduct adduct = AdductManager.getDefaultAdductForCharge(charge);
+						try {
+							feature.getSpectrum().silentlyAddSpectrumForAdduct(adduct, ms1pattern);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					break;
 				}
@@ -236,9 +249,20 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 					XicDataBundle isotopeBundle = 
 							getXicDataBundleForMzAroundRt(mzRange, parentBundle.getPeakRtRange());
 					if (isotopeBundle.getmaxSmoothIntensity() < parentBundle.getmaxSmoothIntensity()) {
-
-						ms1pattern.add(isotopeBundle.getRawPointForScan(scanNum));
 						
+						double corr = ChromatogramUtils.calculateXicCorrelationInPeak(
+								parentBundle,
+								isotopeBundle, 
+								parentBundle.getPeakRtRange());
+//						if(corr < 0.3)
+//							continue;
+
+						try {
+							ms1pattern.add(isotopeBundle.getRawPointForScan(scanNum));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}						
 						// Check if there is one more isotope present
 						mzRange = MsUtils.createMassRange(mz + (MsUtils.NEUTRON_MASS * 2) / (double) i,
 								precursorGroupingMassError, precursorGroupingMassErrorType);
