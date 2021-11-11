@@ -115,7 +115,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="5" nodeId="1600213831496">
+												<leaf id="2" nodeId="1600213831496">
 													<placeholders>
 														<placeholder>dock.single.DockableRawDataFilePropertiesTable</placeholder>
 													</placeholders>
@@ -123,12 +123,12 @@
 											</node>
 											<node nodeId="1600213804256" orientation="VERTICAL" divider="0.5">
 												<node nodeId="1600213847903" orientation="HORIZONTAL" divider="0.6706270627062707">
-													<leaf id="1" nodeId="1600213804258">
+													<leaf id="3" nodeId="1600213804258">
 														<placeholders>
 															<placeholder>dock.single.RawDataExaminerPanelDockableChromatogramPlot</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="3" nodeId="1600213847902">
+													<leaf id="5" nodeId="1600213847902">
 														<placeholders>
 															<placeholder>dock.single.DockableXICSetupPanel</placeholder>
 														</placeholders>
@@ -136,7 +136,7 @@
 												</node>
 												<node nodeId="1600213804260" orientation="HORIZONTAL" divider="0.6559855438069168">
 													<node nodeId="1634664089405" orientation="HORIZONTAL" divider="0.49137931034482757">
-														<leaf id="4" nodeId="1600213804262">
+														<leaf id="1" nodeId="1600213804262">
 															<placeholders>
 																<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</placeholder>
 																<placeholder>dock.single.RawDataExaminerPanelDockableMsMsTable</placeholder>
@@ -168,7 +168,7 @@
 																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="6" nodeId="1634664089403">
+														<leaf id="4" nodeId="1634664089403">
 															<placeholders>
 																<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS2</placeholder>
 															</placeholders>
@@ -192,7 +192,7 @@
 															</placeholder-map>
 														</leaf>
 													</node>
-													<leaf id="2" nodeId="1600213804275">
+													<leaf id="6" nodeId="1600213804275">
 														<placeholders>
 															<placeholder>dock.single.DockableMsExtractorPanel</placeholder>
 														</placeholders>
@@ -223,36 +223,6 @@
 										<replacement id="dockablesingle DockableDataTreePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>DockableDataTreePanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableChromatogramPlot">
-										<replacement id="dockablesingle RawDataExaminerPanelDockableChromatogramPlot"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>RawDataExaminerPanelDockableChromatogramPlot</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMsExtractorPanel">
-										<replacement id="dockablesingle DockableMsExtractorPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMsExtractorPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableXICSetupPanel">
-										<replacement id="dockablesingle DockableXICSetupPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableXICSetupPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -338,6 +308,16 @@
 									<children ignore="false"/>
 								</child>
 								<child>
+									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableChromatogramPlot">
+										<replacement id="dockablesingle RawDataExaminerPanelDockableChromatogramPlot"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>RawDataExaminerPanelDockableChromatogramPlot</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
 										<placeholders>
@@ -395,6 +375,26 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableXICSetupPanel">
+										<replacement id="dockablesingle DockableXICSetupPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableXICSetupPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMsExtractorPanel">
+										<replacement id="dockablesingle DockableMsExtractorPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMsExtractorPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

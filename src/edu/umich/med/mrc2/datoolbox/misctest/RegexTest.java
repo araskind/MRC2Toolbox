@@ -88,6 +88,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.CDKConstants;
@@ -176,6 +177,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsfdr.NISTPepSearchResultManipulator;
+import edu.umich.med.mrc2.datoolbox.rawdata.PeakFinder;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.LIMSReportingUtils;
@@ -187,6 +189,8 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 import edu.umich.med.mrc2.datoolbox.utils.WebUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodReportParser;
+import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayFilter;
+import edu.umich.med.mrc2.datoolbox.utils.filter.sgfilter.SGFilter;
 import net.sf.jniinchi.INCHI_RET;
 
 public class RegexTest {
@@ -212,9 +216,148 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			extractMSMSisolationWindows();
+			testSgFilterImpl();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	private static void testSgFilterImpl() {
+		
+		double[]x = new double[]{0.0, 0.126933037, 0.253866073, 0.38079911, 0.507732146, 0.634665183, 
+				0.761598219, 0.888531256, 1.015464292, 1.142397329, 1.269330365, 
+				1.396263402, 1.523196438, 1.650129475, 1.777062511, 1.903995548, 2.030928584, 2.157861621,
+				2.284794657, 2.411727694, 2.53866073, 
+				2.665593767, 2.792526803, 2.91945984, 3.046392876, 3.173325913, 3.300258949, 3.427191986, 
+				3.554125022, 3.681058059, 3.807991095, 
+				3.934924132, 4.061857168, 4.188790205, 4.315723241, 4.442656278, 4.569589314, 4.696522351, 
+				4.823455387, 4.950388424, 5.07732146, 
+				5.204254497, 5.331187533, 5.45812057, 5.585053606, 5.711986643, 5.838919679, 5.965852716, 
+				6.092785752, 6.219718789, 6.346651825, 
+				6.473584862, 6.600517898, 6.727450935, 6.854383971, 6.981317008, 7.108250044, 7.235183081, 
+				7.362116118, 7.489049154, 7.615982191, 
+				7.742915227, 7.869848264, 7.9967813, 8.123714337, 8.250647373, 8.37758041, 8.504513446, 
+				8.631446483, 8.758379519, 8.885312556, 
+				9.012245592, 9.139178629, 9.266111665, 9.393044702, 9.519977738, 9.646910775, 9.773843811, 
+				9.900776848, 10.02770988, 10.15464292, 
+				10.28157596, 10.40850899, 10.53544203, 10.66237507, 10.7893081, 10.91624114, 11.04317418, 
+				11.17010721, 11.29704025, 11.42397329, 
+				11.55090632, 11.67783936, 11.8047724, 11.93170543, 12.05863847, 12.1855715, 12.31250454, 
+				12.43943758, 12.56637061};
+		
+		double[]y = new double[] {
+				-0.490570301, 2.536284821, 2.109922579, 3.432542001, 1.923443578, 
+				1.699784562, 2.729253684, 4.367166214, 1.499211857, 3.179151687, 
+				2.829241617, 0.895607733, -1.528976649, 3.768937599, -1.894263879, 
+				-2.690879241, 0.3113558, -2.848725674, -5.32307835, -3.522089608, 
+				-4.087501291, -1.4882235, -4.243784082, -2.153299909, -0.9728344, 
+				2.985463288, 0.287496245, 0.861370078, 1.402215194, 2.482739626, 
+				4.822819791, 1.246663481, 2.030382054, 2.421853505, 2.978549285, 
+				2.392880104, 4.848569418, 0.788226172, -1.557310038, 1.601292092, 
+				-2.027981737, -7.621533276, -3.234544741, -4.418584766, -4.751026328, 
+				-2.429422344, -0.1264004, -1.937823052, -2.069273531, 2.339161412, 
+				1.087334155, -4.793833386, 0.523563469, -1.463262425, 4.276701902, 
+				4.187878739, -1.390483, 6.169949305, 1.081581438, -0.219102748, 
+				5.077521347, 1.274737421, -0.640368931, -2.125510927, -0.164740118, 
+				-1.351941121, -1.651215585, -4.102619229, -3.614013049, -4.705534892, 
+				-0.847089928, -2.922535638, 0.313855396, -3.641052116, 4.65616623, 
+				-1.25709448, 3.519158682, 1.207421768, 3.381560119, 6.650095743, 
+				1.37732372, 3.534901892, 5.03269543, 6.470289807, 0.808708184, 
+				-1.357149532, -1.289611861, 2.867187554, 0.900398107, -3.919795796, 
+				-2.295655831, -2.231584552, -4.040356519, -3.784012738, 0.671670268, 
+				-0.782393421, -2.326181592, 0.691850912, -1.786074992, 0.48115285};		
+
+		SGFilter sgFilter = new SGFilter(9, 9); 
+		double[] coeffs =SGFilter.computeSGCoefficients(9, 9, 4); 
+		double[] smooth = sgFilter.smooth(y, coeffs); 
+		
+		for(int i=0; i<y.length; i++)
+			System.err.println(x[i] + "\t" + y[i] + "\t" + smooth[i]);
+		
+		PeakFinder pf = new PeakFinder(x,smooth);
+		pf.findMinAndMax();
+		
+		System.err.println("Maxima");
+		double[][] maxCoord = pf.getMaximaCoordinates();
+		for(int i=0; i<maxCoord[0].length; i++) {
+			System.err.println(maxCoord[0][i] + "\t" + maxCoord[1][i]);
+		}
+	}
+	
+	private static void testSgFilter() {
+		
+		SavitzkyGolayFilter f = new SavitzkyGolayFilter(13);		
+		double[]y = new double[] {
+				-0.490570301, 2.536284821, 2.109922579, 3.432542001, 1.923443578, 
+				1.699784562, 2.729253684, 4.367166214, 1.499211857, 3.179151687, 
+				2.829241617, 0.895607733, -1.528976649, 3.768937599, -1.894263879, 
+				-2.690879241, 0.3113558, -2.848725674, -5.32307835, -3.522089608, 
+				-4.087501291, -1.4882235, -4.243784082, -2.153299909, -0.9728344, 
+				2.985463288, 0.287496245, 0.861370078, 1.402215194, 2.482739626, 
+				4.822819791, 1.246663481, 2.030382054, 2.421853505, 2.978549285, 
+				2.392880104, 4.848569418, 0.788226172, -1.557310038, 1.601292092, 
+				-2.027981737, -7.621533276, -3.234544741, -4.418584766, -4.751026328, 
+				-2.429422344, -0.1264004, -1.937823052, -2.069273531, 2.339161412, 
+				1.087334155, -4.793833386, 0.523563469, -1.463262425, 4.276701902, 
+				4.187878739, -1.390483, 6.169949305, 1.081581438, -0.219102748, 
+				5.077521347, 1.274737421, -0.640368931, -2.125510927, -0.164740118, 
+				-1.351941121, -1.651215585, -4.102619229, -3.614013049, -4.705534892, 
+				-0.847089928, -2.922535638, 0.313855396, -3.641052116, 4.65616623, 
+				-1.25709448, 3.519158682, 1.207421768, 3.381560119, 6.650095743, 
+				1.37732372, 3.534901892, 5.03269543, 6.470289807, 0.808708184, 
+				-1.357149532, -1.289611861, 2.867187554, 0.900398107, -3.919795796, 
+				-2.295655831, -2.231584552, -4.040356519, -3.784012738, 0.671670268, 
+				-0.782393421, -2.326181592, 0.691850912, -1.786074992, 0.48115285};
+		double[]x = new double[]{0.0, 0.126933037, 0.253866073, 0.38079911, 0.507732146, 0.634665183, 
+				0.761598219, 0.888531256, 1.015464292, 1.142397329, 1.269330365, 
+				1.396263402, 1.523196438, 1.650129475, 1.777062511, 1.903995548, 2.030928584, 2.157861621,
+				2.284794657, 2.411727694, 2.53866073, 
+				2.665593767, 2.792526803, 2.91945984, 3.046392876, 3.173325913, 3.300258949, 3.427191986, 
+				3.554125022, 3.681058059, 3.807991095, 
+				3.934924132, 4.061857168, 4.188790205, 4.315723241, 4.442656278, 4.569589314, 4.696522351, 
+				4.823455387, 4.950388424, 5.07732146, 
+				5.204254497, 5.331187533, 5.45812057, 5.585053606, 5.711986643, 5.838919679, 5.965852716, 
+				6.092785752, 6.219718789, 6.346651825, 
+				6.473584862, 6.600517898, 6.727450935, 6.854383971, 6.981317008, 7.108250044, 7.235183081, 
+				7.362116118, 7.489049154, 7.615982191, 
+				7.742915227, 7.869848264, 7.9967813, 8.123714337, 8.250647373, 8.37758041, 8.504513446, 
+				8.631446483, 8.758379519, 8.885312556, 
+				9.012245592, 9.139178629, 9.266111665, 9.393044702, 9.519977738, 9.646910775, 9.773843811, 
+				9.900776848, 10.02770988, 10.15464292, 
+				10.28157596, 10.40850899, 10.53544203, 10.66237507, 10.7893081, 10.91624114, 11.04317418, 
+				11.17010721, 11.29704025, 11.42397329, 
+				11.55090632, 11.67783936, 11.8047724, 11.93170543, 12.05863847, 12.1855715, 12.31250454, 
+				12.43943758, 12.56637061};
+		
+		double[]yFiltered = f.filter(x, y);
+		System.err.println("Length " + y.length + "\t" + yFiltered.length);		
+		for(int i=0; i<x.length; i++)
+			System.err.println(x[i] + "\t" + y[i] + "\t" + yFiltered[i]);
+	}
+	
+	private static void testGaussianWindow() {
+
+		double[] mz = new double[] {99.5, 99.9, 100, 100.1, 100.5};
+		DescriptiveStatistics ds = new DescriptiveStatistics(mz);
+		double medMz = ds.getMax() - (ds.getMax() - ds.getMin())/2.0d;		
+		double[] mzCentered = new double[mz.length];
+		for(int i=0; i<mz.length; i++)
+			mzCentered[i] = mz[i] - medMz;
+		
+		double[] intensity = new double[] {1000.0, 1000.0, 1000.0, 1000.0, 1000.0};	
+		double maxIntensity = Arrays.stream(intensity).max().getAsDouble();
+		
+		double sd = 0.5/4.0d;
+		NormalDistribution nd = new NormalDistribution(0.0, sd);
+		
+		double[] adjIntensity = new double[intensity.length];
+		for(int i=0; i<mz.length; i++)
+			adjIntensity[i] = nd.density(mzCentered[i]) * intensity[i];
+			
+		double maxAdjIntensity = Arrays.stream(adjIntensity).max().getAsDouble();
+		for(int i=0; i<mz.length; i++) {
+			double normInt  = adjIntensity[i] / maxAdjIntensity * maxIntensity;
+			System.err.println(mz[i] + "\t" + mzCentered[i] + "\t" + intensity[i] + "\t" +  + adjIntensity[i] + "\t" + normInt);
 		}
 	}
 	
