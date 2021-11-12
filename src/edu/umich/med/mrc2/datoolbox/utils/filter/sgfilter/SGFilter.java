@@ -30,6 +30,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
+import edu.umich.med.mrc2.datoolbox.utils.filter.FilterClass;
 
 /**
  * Savitzky-Golay filter implementation. For more information see
@@ -655,5 +656,10 @@ public class SGFilter implements Filter {
 
 	public void setPrecalculatedCoefficients(double[] precalculatedCoefficients) {
 		this.precalculatedCoefficients = precalculatedCoefficients;
+	}
+
+	@Override
+	public String getCode() {
+		return FilterClass.SAVITZKY_GOLAY.getCode();
 	}
 }

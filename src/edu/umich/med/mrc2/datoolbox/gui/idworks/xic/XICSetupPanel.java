@@ -515,10 +515,26 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 			double toRt = Double.parseDouble(rtToTextField.getText().trim());
 			rtRange = new Range(fromRt, toRt);
 		}
+		Filter smoothingFilter = filterGuiPanel.getFilter();
+		ChromatogramExtractionType chexType = 
+				(ChromatogramExtractionType)smoothingComboBox.getSelectedItem();
+		if(chexType.equals(ChromatogramExtractionType.RAW))
+				smoothingFilter = null;
+		
 		savePreferences();
-		ChromatogramExtractionTask xicTask = new ChromatogramExtractionTask(files, mode, polarity, msLevel, mzList,
-				sumAllMassChromatograms, mzWindowValue, massErrorType, rtRange);
-
+		ChromatogramExtractionTask xicTask = 
+				new ChromatogramExtractionTask(
+						files, 
+						mode, 
+						polarity, 
+						msLevel, 
+						mzList,
+						sumAllMassChromatograms, 
+						mzWindowValue, 
+						massErrorType, 
+						rtRange,
+						smoothingFilter,
+						chexType);
 		return xicTask;
 	}
 

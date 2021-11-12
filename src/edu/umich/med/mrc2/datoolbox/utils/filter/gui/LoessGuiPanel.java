@@ -75,7 +75,7 @@ public class LoessGuiPanel extends FilterGuiPanel {
 		add(lblNewLabel, gbc_lblNewLabel);
 		
 		windowSizeSpinner = new JSpinner();
-		windowSizeSpinner.setModel(new SpinnerNumberModel(5, 3, 100, 1));
+		windowSizeSpinner.setModel(new SpinnerNumberModel(5, 1, 100, 1));
 		GridBagConstraints gbc_pointsBeforeSpinner = new GridBagConstraints();
 		gbc_pointsBeforeSpinner.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pointsBeforeSpinner.insets = new Insets(0, 0, 0, 5);

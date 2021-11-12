@@ -171,4 +171,9 @@ public class SavitzkyGolayFilter implements Filter {
 	private static final int hvalues[] = new int[] {
 		35, 21, 231, 429, 143, 1105, 323, 2261, 3059, 805, 5175
 	};
+	
+	@Override
+	public String getCode() {
+		return FilterClass.SAVITZKY_GOLAY.getCode();
+	}
 }

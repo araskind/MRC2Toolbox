@@ -189,4 +189,13 @@ public class LoessFilter implements Filter
 		
 		return smooth;
 	}
+	
+	@Override
+	public String getCode() {
+		return FilterClass.LOESS.getCode();
+	}
 }
+
+
+
+

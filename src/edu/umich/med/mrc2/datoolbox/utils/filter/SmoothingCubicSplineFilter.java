@@ -52,4 +52,9 @@ public class SmoothingCubicSplineFilter implements Filter {
 		}		
 		return smooth;
 	}
+
+	@Override
+	public String getCode() {
+		return FilterClass.SMOOTHING_CUBIC_SPLINE.getCode();
+	}
 }

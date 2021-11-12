@@ -28,6 +28,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
 
 public class ChromatogramDefinition  implements Serializable, Cloneable{
@@ -36,6 +37,7 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 	 * 
 	 */
 	private static final long serialVersionUID = -8498214730121164940L;
+	
 	private ChromatogramPlotMode mode;
 	private Polarity polarity;
 	private int msLevel;
@@ -46,7 +48,32 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 	private Range rtRange;
 	private boolean doSmooth; 
 	private SavitzkyGolayWidth filterWidth;
+	private Filter smoothingFilter;
 	
+	public ChromatogramDefinition(
+			ChromatogramPlotMode mode, 
+			Polarity polarity, 
+			int msLevel, 
+			Collection<Double> mzList,
+			boolean sumAllMassChromatograms, 
+			Double mzWindowValue, 
+			MassErrorType massErrorType, 
+			Range rtRange,
+			Filter smoothingFilter) {
+		super();
+		this.mode = mode;
+		this.polarity = polarity;
+		this.msLevel = msLevel;
+		this.mzList = mzList;
+		this.sumAllMassChromatograms = sumAllMassChromatograms;
+		this.mzWindowValue = mzWindowValue;
+		this.massErrorType = massErrorType;
+		this.rtRange = rtRange;
+		this.smoothingFilter = smoothingFilter;
+		if(smoothingFilter != null)
+			doSmooth = true;
+	}
+
 	public ChromatogramDefinition(
 			ChromatogramPlotMode mode, 
 			Polarity polarity, 
@@ -121,8 +148,16 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 	@Override
 	public ChromatogramDefinition clone() {
 		
-		return new ChromatogramDefinition(mode, polarity, msLevel, mzList,
-			 sumAllMassChromatograms, mzWindowValue, massErrorType, rtRange);
+		return new ChromatogramDefinition(
+				 mode, 
+				 polarity, 
+				 msLevel, 
+				 mzList,
+				 sumAllMassChromatograms, 
+				 mzWindowValue, 
+				 massErrorType, 
+				 rtRange,
+				 smoothingFilter);
 	}
 
 	public boolean isDoSmooth() {
@@ -131,5 +166,9 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 
 	public SavitzkyGolayWidth getFilterWidth() {
 		return filterWidth;
+	}
+
+	public Filter getSmoothingFilter() {
+		return smoothingFilter;
 	}
 }

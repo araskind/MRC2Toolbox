@@ -105,7 +105,11 @@ public class MovingAverageFilter implements Filter{
 		}
 		return newValues;
 	}
-	
+
+	@Override
+	public String getCode() {
+		return FilterClass.MOVING_AVERAGE.getCode();
+	}
 
 }
 

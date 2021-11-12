@@ -39,4 +39,6 @@ public interface Filter
 	 * @return			The resulting smoothed version of the y-values.
 	 */
 	public double[] filter(double xvals[], double yvals[]) throws IllegalArgumentException;
+	
+	public String getCode();
 }

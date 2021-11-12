@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.xic.ChromatogramExtractionType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -44,7 +45,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
-import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayFilter;
+import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.scan.IScan;
@@ -64,12 +65,45 @@ public class ChromatogramExtractionTask extends AbstractTask {
 	private Double mzWindowValue;
 	private MassErrorType massErrorType;
 	private Range rtRange;
-	private ChromatogramDefinition chromatogramDefinition;
-	private Collection<ExtractedChromatogram>extractedChromatograms;
+	private Filter smoothingFilter;
+	private ChromatogramExtractionType chexType;
+	
 	private boolean doSmooth; 
 	private SavitzkyGolayWidth filterWidth;
+	private ChromatogramDefinition chromatogramDefinition;
+	private Collection<ExtractedChromatogram>extractedChromatograms;
 	private boolean releaseMemory;
 	
+	public ChromatogramExtractionTask(
+			Collection<DataFile> files, 
+			ChromatogramPlotMode mode, 
+			Polarity polarity,
+			int msLevel, 
+			Collection<Double> mzList, 
+			boolean sumAllMassChromatograms, 
+			Double mzWindowValue,
+			MassErrorType massErrorType, 
+			Range rtRange, 
+			Filter smoothingFilter, 
+			ChromatogramExtractionType chexType) {
+		super();
+		this.files = files;
+		this.mode = mode;
+		this.polarity = polarity;
+		this.msLevel = msLevel;
+		this.mzList = mzList;
+		this.sumAllMassChromatograms = sumAllMassChromatograms;
+		this.mzWindowValue = mzWindowValue;
+		this.massErrorType = massErrorType;
+		this.rtRange = rtRange;
+		this.smoothingFilter = smoothingFilter;
+		this.chexType = chexType;
+		if(smoothingFilter != null)
+			doSmooth = true;
+		
+		extractedChromatograms = new ArrayList<ExtractedChromatogram>();
+	}
+
 	public ChromatogramExtractionTask(
 			Collection<DataFile> files, 
 			ChromatogramPlotMode mode, 
@@ -96,7 +130,6 @@ public class ChromatogramExtractionTask extends AbstractTask {
 		releaseMemory = false;
 		
 		extractedChromatograms = new ArrayList<ExtractedChromatogram>();
-		taskDescription = "Extracting chromatograms ";
 	}
 
 	public ChromatogramExtractionTask(
@@ -126,13 +159,13 @@ public class ChromatogramExtractionTask extends AbstractTask {
 		this.filterWidth = filterWidth;
 		releaseMemory = false;
 		
-		extractedChromatograms = new ArrayList<ExtractedChromatogram>();
-		taskDescription = "Extracting chromatograms ";
+		extractedChromatograms = new ArrayList<ExtractedChromatogram>();		
 	}
 
 	@Override
 	public void run() {
 
+		taskDescription = "Extracting chromatograms ";
 		setStatus(TaskStatus.PROCESSING);
 		try {
 			//	Map<DataFile, LCMSData> dataSources = RawDataUtils.createDataSources(files, msLevel, this);
@@ -172,21 +205,144 @@ public class ChromatogramExtractionTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);		
 		}
 	}
+	
+	private void extractTics(Map<DataFile, LCMSData> dataSourcesmap) {
+		
+//		chromatogramDefinition = 
+//				new ChromatogramDefinition(
+//						mode, 
+//						polarity, 
+//						msLevel, 
+//						mzList, 
+//						sumAllMassChromatograms, 
+//						mzWindowValue, 
+//						massErrorType, 
+//						rtRange,
+//						doSmooth, 
+//						filterWidth);
+
+		for (Entry<DataFile, LCMSData> entry : dataSourcesmap.entrySet()) {
+			
+			taskDescription = "Extracting TIC for " + entry.getKey().getName();
+			
+//			ExtractedChromatogram tic = new ExtractedChromatogram(entry.getKey(), chromatogramDefinition);
+			ArrayList<Double>time = new ArrayList<Double>();
+			ArrayList<Double>intensity = new ArrayList<Double>();
+			
+			IScanCollection scans = entry.getValue().getScans();
+			scans.isAutoloadSpectra(true);
+			scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
+			TreeMap<Integer, ScanIndex> msLevel2index = scans.getMapMsLevel2index();
+			ScanIndex ms2idx = msLevel2index.get(msLevel);
+			
+			if(ms2idx != null) {
+				
+				TreeMap<Integer, IScan> num2scan = ms2idx.getNum2scan();
+				Set<Map.Entry<Integer, IScan>> scanEntries = num2scan.entrySet();
+				
+				total = scanEntries.size();
+				processed = 0;
+				
+				for (Map.Entry<Integer, IScan> scanEntry : scanEntries) {
+
+					IScan scan = scanEntry.getValue();
+					if(polarity != null && scan.getPolarity().getSign() != polarity.getSign())
+						continue;
+					
+					if(scan.getSpectrum() == null) {
+						try {
+							scan.fetchSpectrum();
+						} catch (FileParsingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					time.add(scan.getRt());
+					intensity.add(scan.getTic());
+					processed++;
+				}
+//				tic.setTimeValues(time.stream().mapToDouble(Double::doubleValue).toArray());
+//				tic.setIntensityValues(intensity.stream().mapToDouble(Double::doubleValue).toArray());
+//				extractedChromatograms.add(tic);
+//				entry.getKey().getChromatograms().add(tic);
+				
+				finaliseChromatogramExtraction(
+						entry.getKey(), null, time, intensity);
+			}			
+			if(releaseMemory)
+				entry.getValue().releaseMemory();
+		}
+	}
+
+	private void extractBpcs(Map<DataFile, LCMSData> dataSourcesmap) {
+		
+//		chromatogramDefinition = 
+//				new ChromatogramDefinition(
+//						mode, 
+//						polarity, 
+//						msLevel, 
+//						mzList, 
+//						sumAllMassChromatograms, 
+//						mzWindowValue, 
+//						massErrorType, 
+//						rtRange,
+//						doSmooth, 
+//						filterWidth);
+
+		for (Entry<DataFile, LCMSData> entry : dataSourcesmap.entrySet()) {
+			
+			taskDescription = "Extracting BPC for " + entry.getKey().getName();
+			
+//			ExtractedChromatogram tic = new ExtractedChromatogram(entry.getKey(), chromatogramDefinition);
+			ArrayList<Double>time = new ArrayList<Double>();
+			ArrayList<Double>intensity = new ArrayList<Double>();
+			
+			IScanCollection scans = entry.getValue().getScans();
+			scans.isAutoloadSpectra(true);
+			scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
+			TreeMap<Integer, ScanIndex> msLevel2index = scans.getMapMsLevel2index();
+			ScanIndex ms2idx = msLevel2index.get(msLevel);
+			
+			if(ms2idx != null) {
+				
+				TreeMap<Integer, IScan> num2scan = ms2idx.getNum2scan();
+				Set<Map.Entry<Integer, IScan>> scanEntries = num2scan.entrySet();
+				
+				total = scanEntries.size();
+				processed = 0;
+				
+				for (Map.Entry<Integer, IScan> scanEntry : scanEntries) {
+
+					IScan scan = scanEntry.getValue();
+					if(polarity != null && scan.getPolarity().getSign() != polarity.getSign())
+						continue;
+					
+					if(scan.getSpectrum() == null) {
+						try {
+							scan.fetchSpectrum();
+						} catch (FileParsingException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					time.add(scan.getRt());
+					intensity.add(scan.getBasePeakIntensity());
+					processed++;
+				}
+//				tic.setTimeValues(time.stream().mapToDouble(Double::doubleValue).toArray());
+//				tic.setIntensityValues(intensity.stream().mapToDouble(Double::doubleValue).toArray());
+//				extractedChromatograms.add(tic);
+//				entry.getKey().getChromatograms().add(tic);
+				
+				finaliseChromatogramExtraction(
+						entry.getKey(), null, time, intensity);
+			}			
+			if(releaseMemory)
+				entry.getValue().releaseMemory();
+		}
+	}
 
 	private void extractCombinedXic(Map<DataFile, LCMSData> dataSourcesmap, Collection<Double> mzList2) {
-		
-		chromatogramDefinition = 
-				new ChromatogramDefinition(
-						mode, 
-						polarity, 
-						msLevel, 
-						mzList2, 
-						sumAllMassChromatograms, 
-						mzWindowValue, 
-						massErrorType, 
-						rtRange,
-						doSmooth, 
-						filterWidth);
 		
 		Collection<Double>xicMasses = new ArrayList<Double>();
 		Collection<Range>mzRanges = new ArrayList<Range>();
@@ -198,7 +354,7 @@ public class ChromatogramExtractionTask extends AbstractTask {
 		for (Entry<DataFile, LCMSData> entry : dataSourcesmap.entrySet()) {
 			
 			taskDescription = "Creating extracted ion chromatogram for " + entry.getKey().getName();
-			ExtractedChromatogram xic = new ExtractedChromatogram(entry.getKey(), chromatogramDefinition);
+			
 			ArrayList<Double>time = new ArrayList<Double>();
 			ArrayList<Double>intensity = new ArrayList<Double>();			
 			IScanCollection scans = entry.getValue().getScans();
@@ -244,16 +400,51 @@ public class ChromatogramExtractionTask extends AbstractTask {
 					}
 					processed++;
 				}
-				double[] timeArray = time.stream().mapToDouble(Double::doubleValue).toArray();
-				double[] intensityArray = intensity.stream().mapToDouble(Double::doubleValue).toArray();
-				if(doSmooth) {
-					SavitzkyGolayFilter sgFilter = new SavitzkyGolayFilter(filterWidth.getWidth());
-					intensityArray = sgFilter.filter(timeArray, intensityArray);
-				}
-				xic.setTimeValues(timeArray);
-				xic.setIntensityValues(intensityArray);
-				extractedChromatograms.add(xic);
-				entry.getKey().getChromatograms().add(xic);
+				finaliseChromatogramExtraction(entry.getKey(), mzList2, time, intensity);
+				
+//				double[] timeArray = time.stream().mapToDouble(Double::doubleValue).toArray();
+//				double[] intensityArray = intensity.stream().mapToDouble(Double::doubleValue).toArray();
+//				if(chexType.equals(ChromatogramExtractionType.RAW) 
+//						|| chexType.equals(ChromatogramExtractionType.BOTH)) {
+//					ChromatogramDefinition rawChromatogramDefinition = 
+//							new ChromatogramDefinition(
+//									mode, 
+//									polarity, 
+//									msLevel, 
+//									mzList2, 
+//									sumAllMassChromatograms, 
+//									mzWindowValue, 
+//									massErrorType, 
+//									rtRange,
+//									null);
+//					ExtractedChromatogram rawXic = 
+//							new ExtractedChromatogram(entry.getKey(), rawChromatogramDefinition);
+//					rawXic.setTimeValues(timeArray);
+//					rawXic.setIntensityValues(intensityArray);
+//					extractedChromatograms.add(rawXic);
+//					entry.getKey().getChromatograms().add(rawXic);
+//				}
+//				if(doSmooth) {
+//					double[] smoothIntensityArray = 
+//							smoothingFilter.filter(timeArray, intensityArray);
+//					ChromatogramDefinition smoothChromatogramDefinition = 
+//							new ChromatogramDefinition(
+//									mode, 
+//									polarity, 
+//									msLevel, 
+//									mzList2, 
+//									sumAllMassChromatograms, 
+//									mzWindowValue, 
+//									massErrorType, 
+//									rtRange,
+//									smoothingFilter);
+//					ExtractedChromatogram smoothXic = 
+//							new ExtractedChromatogram(entry.getKey(), smoothChromatogramDefinition);
+//					smoothXic.setTimeValues(timeArray);
+//					smoothXic.setIntensityValues(smoothIntensityArray);
+//					extractedChromatograms.add(smoothXic);
+//					entry.getKey().getChromatograms().add(smoothXic);
+//				}
 			}
 		}
 		if(releaseMemory) {
@@ -264,18 +455,17 @@ public class ChromatogramExtractionTask extends AbstractTask {
 
 	private void extractXic(Map<DataFile, LCMSData> dataSourcesmap, Double mz) {
 		
-		chromatogramDefinition = 
-				new ChromatogramDefinition(
-						mode, 
-						polarity, 
-						msLevel, 
-						Collections.singleton(mz), 
-						sumAllMassChromatograms, 
-						mzWindowValue, 
-						massErrorType, 
-						rtRange,
-						doSmooth, 
-						filterWidth);
+//		chromatogramDefinition = 
+//				new ChromatogramDefinition(
+//						mode, 
+//						polarity, 
+//						msLevel, 
+//						Collections.singleton(mz), 
+//						sumAllMassChromatograms, 
+//						mzWindowValue, 
+//						massErrorType, 
+//						rtRange,
+//						smoothingFilter);
 		
 		for (Entry<DataFile, LCMSData> entry : dataSourcesmap.entrySet()) {
 			
@@ -285,7 +475,7 @@ public class ChromatogramExtractionTask extends AbstractTask {
 			Collection<Double>xicMasses = new ArrayList<Double>();
 			xicMasses.add(mz);
 			
-			ExtractedChromatogram xic = new ExtractedChromatogram(entry.getKey(), chromatogramDefinition);
+//			ExtractedChromatogram xic = new ExtractedChromatogram(entry.getKey(), chromatogramDefinition);
 			ArrayList<Double>time = new ArrayList<Double>();
 			ArrayList<Double>intensity = new ArrayList<Double>();
 			
@@ -332,17 +522,70 @@ public class ChromatogramExtractionTask extends AbstractTask {
 					intensity.add(sum);
 					processed++;
 				}
-				double[] timeArray = time.stream().mapToDouble(Double::doubleValue).toArray();
-				double[] intensityArray = intensity.stream().mapToDouble(Double::doubleValue).toArray();
-				if(doSmooth) {
-					SavitzkyGolayFilter sgFilter = new SavitzkyGolayFilter(filterWidth.getWidth());
-					intensityArray = sgFilter.filter(timeArray, intensityArray);
-				}
-				xic.setTimeValues(timeArray);
-				xic.setIntensityValues(intensityArray);
-				extractedChromatograms.add(xic);
-				entry.getKey().getChromatograms().add(xic);
+				finaliseChromatogramExtraction(
+						entry.getKey(), Collections.singleton(mz), time, intensity);
+				
+//				double[] timeArray = time.stream().mapToDouble(Double::doubleValue).toArray();
+//				double[] intensityArray = intensity.stream().mapToDouble(Double::doubleValue).toArray();
+//				if(doSmooth) {
+//					SavitzkyGolayFilter sgFilter = new SavitzkyGolayFilter(filterWidth.getWidth());
+//					intensityArray = sgFilter.filter(timeArray, intensityArray);
+//				}
+//				xic.setTimeValues(timeArray);
+//				xic.setIntensityValues(intensityArray);
+//				extractedChromatograms.add(xic);
+//				entry.getKey().getChromatograms().add(xic);
 			}
+		}
+	}
+	
+	private void finaliseChromatogramExtraction(
+			DataFile dataFile, 
+			Collection<Double> mzList2, 
+			ArrayList<Double>time,
+			ArrayList<Double>intensity) {
+		double[] timeArray = time.stream().mapToDouble(Double::doubleValue).toArray();
+		double[] intensityArray = intensity.stream().mapToDouble(Double::doubleValue).toArray();
+		if(chexType.equals(ChromatogramExtractionType.RAW) 
+				|| chexType.equals(ChromatogramExtractionType.BOTH)) {
+			ChromatogramDefinition rawChromatogramDefinition = 
+					new ChromatogramDefinition(
+							mode, 
+							polarity, 
+							msLevel, 
+							mzList2, 
+							sumAllMassChromatograms, 
+							mzWindowValue, 
+							massErrorType, 
+							rtRange,
+							null);
+			ExtractedChromatogram rawXic = 
+					new ExtractedChromatogram(dataFile, rawChromatogramDefinition);
+			rawXic.setTimeValues(timeArray);
+			rawXic.setIntensityValues(intensityArray);
+			extractedChromatograms.add(rawXic);
+			dataFile.getChromatograms().add(rawXic);
+		}
+		if(doSmooth) {
+			double[] smoothIntensityArray = 
+					smoothingFilter.filter(timeArray, intensityArray);
+			ChromatogramDefinition smoothChromatogramDefinition = 
+					new ChromatogramDefinition(
+							mode, 
+							polarity, 
+							msLevel, 
+							mzList2, 
+							sumAllMassChromatograms, 
+							mzWindowValue, 
+							massErrorType, 
+							rtRange,
+							smoothingFilter);
+			ExtractedChromatogram smoothXic = 
+					new ExtractedChromatogram(dataFile, smoothChromatogramDefinition);
+			smoothXic.setTimeValues(timeArray);
+			smoothXic.setIntensityValues(smoothIntensityArray);
+			extractedChromatograms.add(smoothXic);
+			dataFile.getChromatograms().add(smoothXic);
 		}
 	}
 	
@@ -360,136 +603,6 @@ public class ChromatogramExtractionTask extends AbstractTask {
 			}
 		}
 		return inflectionPoint;
-	}
-
-	private void extractTics(Map<DataFile, LCMSData> dataSourcesmap) {
-		
-		chromatogramDefinition = 
-				new ChromatogramDefinition(
-						mode, 
-						polarity, 
-						msLevel, 
-						mzList, 
-						sumAllMassChromatograms, 
-						mzWindowValue, 
-						massErrorType, 
-						rtRange,
-						doSmooth, 
-						filterWidth);
-
-		for (Entry<DataFile, LCMSData> entry : dataSourcesmap.entrySet()) {
-			
-			taskDescription = "Extracting TIC for " + entry.getKey().getName();
-			
-			ExtractedChromatogram tic = new ExtractedChromatogram(entry.getKey(), chromatogramDefinition);
-			ArrayList<Double>time = new ArrayList<Double>();
-			ArrayList<Double>intensity = new ArrayList<Double>();
-			
-			IScanCollection scans = entry.getValue().getScans();
-			scans.isAutoloadSpectra(true);
-			scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
-			TreeMap<Integer, ScanIndex> msLevel2index = scans.getMapMsLevel2index();
-			ScanIndex ms2idx = msLevel2index.get(msLevel);
-			
-			if(ms2idx != null) {
-				
-				TreeMap<Integer, IScan> num2scan = ms2idx.getNum2scan();
-				Set<Map.Entry<Integer, IScan>> scanEntries = num2scan.entrySet();
-				
-				total = scanEntries.size();
-				processed = 0;
-				
-				for (Map.Entry<Integer, IScan> scanEntry : scanEntries) {
-
-					IScan scan = scanEntry.getValue();
-					if(polarity != null && scan.getPolarity().getSign() != polarity.getSign())
-						continue;
-					
-					if(scan.getSpectrum() == null) {
-						try {
-							scan.fetchSpectrum();
-						} catch (FileParsingException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					time.add(scan.getRt());
-					intensity.add(scan.getTic());
-					processed++;
-				}
-				tic.setTimeValues(time.stream().mapToDouble(Double::doubleValue).toArray());
-				tic.setIntensityValues(intensity.stream().mapToDouble(Double::doubleValue).toArray());
-				extractedChromatograms.add(tic);
-			}
-			entry.getKey().getChromatograms().add(tic);
-			if(releaseMemory)
-				entry.getValue().releaseMemory();
-		}
-	}
-
-	private void extractBpcs(Map<DataFile, LCMSData> dataSourcesmap) {
-		
-		chromatogramDefinition = 
-				new ChromatogramDefinition(
-						mode, 
-						polarity, 
-						msLevel, 
-						mzList, 
-						sumAllMassChromatograms, 
-						mzWindowValue, 
-						massErrorType, 
-						rtRange,
-						doSmooth, 
-						filterWidth);
-
-		for (Entry<DataFile, LCMSData> entry : dataSourcesmap.entrySet()) {
-			
-			taskDescription = "Extracting BPC for " + entry.getKey().getName();
-			
-			ExtractedChromatogram tic = new ExtractedChromatogram(entry.getKey(), chromatogramDefinition);
-			ArrayList<Double>time = new ArrayList<Double>();
-			ArrayList<Double>intensity = new ArrayList<Double>();
-			
-			IScanCollection scans = entry.getValue().getScans();
-			scans.isAutoloadSpectra(true);
-			scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
-			TreeMap<Integer, ScanIndex> msLevel2index = scans.getMapMsLevel2index();
-			ScanIndex ms2idx = msLevel2index.get(msLevel);
-			
-			if(ms2idx != null) {
-				
-				TreeMap<Integer, IScan> num2scan = ms2idx.getNum2scan();
-				Set<Map.Entry<Integer, IScan>> scanEntries = num2scan.entrySet();
-				
-				total = scanEntries.size();
-				processed = 0;
-				
-				for (Map.Entry<Integer, IScan> scanEntry : scanEntries) {
-
-					IScan scan = scanEntry.getValue();
-					if(polarity != null && scan.getPolarity().getSign() != polarity.getSign())
-						continue;
-					
-					if(scan.getSpectrum() == null) {
-						try {
-							scan.fetchSpectrum();
-						} catch (FileParsingException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					time.add(scan.getRt());
-					intensity.add(scan.getBasePeakIntensity());
-					processed++;
-				}
-				tic.setTimeValues(time.stream().mapToDouble(Double::doubleValue).toArray());
-				tic.setIntensityValues(intensity.stream().mapToDouble(Double::doubleValue).toArray());
-				extractedChromatograms.add(tic);
-			}
-			entry.getKey().getChromatograms().add(tic);
-			if(releaseMemory)
-				entry.getValue().releaseMemory();
-		}
 	}
 
 	@Override

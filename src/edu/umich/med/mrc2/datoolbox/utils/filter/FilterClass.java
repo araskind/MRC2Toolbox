@@ -23,25 +23,31 @@ package edu.umich.med.mrc2.datoolbox.utils.filter;
 
 public enum FilterClass {
 
-	SAVITZKY_GOLAY("Savitzky-Golay"),
-	MOVING_AVERAGE("Moving Average"),
-	WEIGHTED_MOVING_AVERAGE("Weighted Moving Average"),
-	LOESS("Loess"),
-	SMOOTHING_CUBIC_SPLINE("Cubic Spline"),
+	SAVITZKY_GOLAY("Savitzky-Golay", "SG"),
+	MOVING_AVERAGE("Moving Average", "MA"),
+	WEIGHTED_MOVING_AVERAGE("Weighted Moving Average", "WMA"),
+	LOESS("Loess", "L"),
+	SMOOTHING_CUBIC_SPLINE("Cubic Spline", "CS"),
 	;
 
 	private final String name;
+	private final String code;
 
-	FilterClass(String type) {
+	FilterClass(String type, String code) {
 		this.name = type;
+		this.code = code;
 	}
 
 	public String getName() {
 		return name;
 	}
 
+	public String getCode() {
+		return code;
+	}
+	
 	public String toString() {
-		return name;
+		return name + " (" + code + ")";
 	}
 	
 	public static FilterClass getFilterClassByName(String name) {
