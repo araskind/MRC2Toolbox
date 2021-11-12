@@ -19,30 +19,37 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram;
+package edu.umich.med.mrc2.datoolbox.utils.filter;
 
-public enum ChromatogramPlotMode {
+public class SmoothingCubicSplineFilter implements Filter {
 
-	TIC("Total ion chromatogram"),
-	BASEPEAK("Base peak chromatogram"),
-	XIC("Extracted ion chromatogram");
-
-	private String type;
-
-	ChromatogramPlotMode(String type) {
-		this.type = type;
-	}
-
-	public String toString() {
-		return type;
-	}
-	
-	public static ChromatogramPlotMode getChromatogramPlotModeByName(String name) {
+	private SmoothingCubicSpline spline;
+	private double rho;
 		
-		for(ChromatogramPlotMode v : ChromatogramPlotMode.values()) {
-			if(v.name().equals(name))
-				return v;
-		}	
-		return null;
+	/**
+	 * Creates smoothing cubic spline filter with the smoothing parameter rho
+	 * 
+	 * @param rho
+	 *          the smoothing parameter
+	 * 
+	 * @throws IllegalArgumentException  
+	 * 			if rho has wrong value.
+	 */
+	public SmoothingCubicSplineFilter(double rho) {
+		super();
+		this.rho = rho;
+		if (rho < 0 || rho > 1)
+			throw new IllegalArgumentException("rho not in [0, 1]");
+	}
+
+	@Override
+	public double[] filter(double[] xvals, double[] yvals) throws IllegalArgumentException {
+
+		spline  = new SmoothingCubicSpline(xvals, yvals, rho);
+		double[]smooth = new double[xvals.length];
+		for(int i=0; i<xvals.length; i++) {
+			smooth[i] = spline.evaluate(xvals[i]);
+		}		
+		return smooth;
 	}
 }

@@ -19,30 +19,37 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram;
+package edu.umich.med.mrc2.datoolbox.utils.filter.gui;
 
-public enum ChromatogramPlotMode {
+import java.util.Collection;
 
-	TIC("Total ion chromatogram"),
-	BASEPEAK("Base peak chromatogram"),
-	XIC("Extracted ion chromatogram");
+import javax.swing.JPanel;
 
-	private String type;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
+import edu.umich.med.mrc2.datoolbox.utils.filter.FilterClass;
 
-	ChromatogramPlotMode(String type) {
-		this.type = type;
-	}
-
-	public String toString() {
-		return type;
-	}
+public abstract class FilterGuiPanel extends JPanel implements BackedByPreferences {
 	
-	public static ChromatogramPlotMode getChromatogramPlotModeByName(String name) {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7753167930059241676L;
+	protected FilterClass filterClass;
 		
-		for(ChromatogramPlotMode v : ChromatogramPlotMode.values()) {
-			if(v.name().equals(name))
-				return v;
-		}	
-		return null;
+	public FilterGuiPanel(FilterClass filterClass) {
+		super();
+		this.filterClass = filterClass;
+		createGui();
+	}
+		
+	protected abstract void createGui();
+
+	public abstract Filter getFilter();
+	
+	protected abstract Collection<String>validateParameters();
+
+	public FilterClass getFilterClass() {
+		return filterClass;
 	}
 }

@@ -29,6 +29,8 @@ import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
+import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
+
 /**
  * Savitzky-Golay filter implementation. For more information see
  * http://www.nrbook.com/a/bookcpdf/c14-8.pdf. This implementation,
@@ -49,7 +51,9 @@ import org.apache.commons.math3.linear.RealVector;
  *	smooth = sgFilter.smooth(data, leftPad, new float[0], coeffs);
  *
  */
-public class SGFilter {
+public class SGFilter implements Filter {
+	
+	private double[] precalculatedCoefficients = null;
 
 	/**
 	 * Computes Savitzky-Golay coefficients for given parameters
@@ -270,6 +274,27 @@ public class SGFilter {
 		if (nr < 0)
 			throw new IllegalArgumentException("nr < 0");
 		this.nr = nr;
+	}
+	
+	/**
+	 * Smooths data by using Savitzky-Golay filter. This method will use 0 for
+	 * any element beyond {@code data} which will be needed for computation (you
+	 * may want to use some {@link Preprocessor})
+	 * 
+	 * @param data
+	 *            data for filter
+	 * @return filtered data
+	 * @throws NullPointerException
+	 *             when any array passed as parameter is null
+	 * @throws IllegalArgumentException
+	 *             if coefficients were not precalculated
+	 */
+	public double[] filter(double xvals[], double yvals[]) {
+		
+		if(precalculatedCoefficients == null)
+			throw new IllegalArgumentException("Filter coefficients were not precalculated");
+		
+		return smooth(xvals, 0, xvals.length, precalculatedCoefficients);
 	}
 
 	/**
@@ -626,5 +651,9 @@ public class SGFilter {
 		float[] rightPad = Arrays.copyOfRange(data, to, data.length);
 		float[] dataCopy = Arrays.copyOfRange(data, from, to);
 		return smooth(dataCopy, leftPad, rightPad, bias, coeffs);
+	}
+
+	public void setPrecalculatedCoefficients(double[] precalculatedCoefficients) {
+		this.precalculatedCoefficients = precalculatedCoefficients;
 	}
 }

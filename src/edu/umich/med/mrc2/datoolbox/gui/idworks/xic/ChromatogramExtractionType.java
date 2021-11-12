@@ -19,17 +19,17 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.xic;
 
-public enum ChromatogramPlotMode {
+public enum ChromatogramExtractionType {
 
-	TIC("Total ion chromatogram"),
-	BASEPEAK("Base peak chromatogram"),
-	XIC("Extracted ion chromatogram");
+	RAW("Extract raw chromatogram only"),
+	SMOOTH("Extract smoothed chromatogram only"),
+	BOTH("Extract bot raw and smoothed chromatograms");
 
 	private String type;
 
-	ChromatogramPlotMode(String type) {
+	ChromatogramExtractionType(String type) {
 		this.type = type;
 	}
 
@@ -37,9 +37,9 @@ public enum ChromatogramPlotMode {
 		return type;
 	}
 	
-	public static ChromatogramPlotMode getChromatogramPlotModeByName(String name) {
+	public static ChromatogramExtractionType getChromatogramExtractionTypeByName(String name) {
 		
-		for(ChromatogramPlotMode v : ChromatogramPlotMode.values()) {
+		for(ChromatogramExtractionType v : ChromatogramExtractionType.values()) {
 			if(v.name().equals(name))
 				return v;
 		}	

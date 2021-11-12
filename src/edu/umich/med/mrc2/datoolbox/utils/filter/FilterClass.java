@@ -19,27 +19,34 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram;
+package edu.umich.med.mrc2.datoolbox.utils.filter;
 
-public enum ChromatogramPlotMode {
+public enum FilterClass {
 
-	TIC("Total ion chromatogram"),
-	BASEPEAK("Base peak chromatogram"),
-	XIC("Extracted ion chromatogram");
+	SAVITZKY_GOLAY("Savitzky-Golay"),
+	MOVING_AVERAGE("Moving Average"),
+	WEIGHTED_MOVING_AVERAGE("Weighted Moving Average"),
+	LOESS("Loess"),
+	SMOOTHING_CUBIC_SPLINE("Cubic Spline"),
+	;
 
-	private String type;
+	private final String name;
 
-	ChromatogramPlotMode(String type) {
-		this.type = type;
+	FilterClass(String type) {
+		this.name = type;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public String toString() {
-		return type;
+		return name;
 	}
 	
-	public static ChromatogramPlotMode getChromatogramPlotModeByName(String name) {
+	public static FilterClass getFilterClassByName(String name) {
 		
-		for(ChromatogramPlotMode v : ChromatogramPlotMode.values()) {
+		for(FilterClass v : FilterClass.values()) {
 			if(v.name().equals(name))
 				return v;
 		}	

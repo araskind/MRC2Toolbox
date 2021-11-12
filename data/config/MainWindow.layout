@@ -167,13 +167,17 @@
 													<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
 													<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 													<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
+													<placeholder>dock.single.WorklistPanel</placeholder>
 													<placeholder>dock.single.IDWorkbenchPanel</placeholder>
+													<placeholder>dock.single.ExperimentDesignPanel</placeholder>
+													<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 													<placeholder>dock.single.LabNoteBookPanel</placeholder>
 													<placeholder>dock.single.AutomatorPanel</placeholder>
 													<placeholder>dock.single.QCPanel</placeholder>
 													<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 													<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
 													<placeholder>dock.single.MsLibraryPanel</placeholder>
+													<placeholder>dock.single.FeatureDataPanel</placeholder>
 													<placeholder>dock.single.METLIMSPanel</placeholder>
 												</placeholders>
 												<placeholder-map>
@@ -238,7 +242,7 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
+										<selected>9</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -778,7 +782,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>2</index>
+											<index>6</index>
 											<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 										</property>
 									</location>
@@ -815,7 +819,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>2</index>
+											<index>6</index>
 											<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 										</property>
 									</location>
@@ -843,7 +847,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>3</index>
 											<placeholder>dock.single.WorklistPanel</placeholder>
 										</property>
 									</location>
@@ -861,7 +865,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>3</index>
 											<placeholder>dock.single.WorklistPanel</placeholder>
 										</property>
 									</location>
@@ -882,7 +886,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>5</index>
+											<index>9</index>
 											<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 										</property>
 									</location>
@@ -919,7 +923,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>5</index>
+											<index>9</index>
 											<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 										</property>
 									</location>
@@ -940,7 +944,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>5</index>
 											<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 										</property>
 									</location>
@@ -977,7 +981,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>5</index>
 											<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 										</property>
 									</location>
@@ -1001,7 +1005,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>0</index>
+											<index>1</index>
 											<placeholder>dock.single.FeatureDataPanel</placeholder>
 										</property>
 									</location>
@@ -1019,7 +1023,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>0</index>
+											<index>1</index>
 											<placeholder>dock.single.FeatureDataPanel</placeholder>
 										</property>
 									</location>
@@ -1061,7 +1065,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>4</index>
+											<index>8</index>
 											<placeholder>dock.single.METLIMSPanel</placeholder>
 										</property>
 									</location>
@@ -1098,7 +1102,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>4</index>
+											<index>8</index>
 											<placeholder>dock.single.METLIMSPanel</placeholder>
 										</property>
 									</location>
@@ -1156,7 +1160,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>4</index>
 											<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 										</property>
 									</location>
@@ -1174,7 +1178,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>4</index>
 											<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 										</property>
 									</location>
@@ -1233,7 +1237,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>0</index>
+											<index>2</index>
 											<placeholder>dock.single.MsLibraryPanel</placeholder>
 										</property>
 									</location>
@@ -1270,7 +1274,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>0</index>
+											<index>2</index>
 											<placeholder>dock.single.MsLibraryPanel</placeholder>
 										</property>
 									</location>
@@ -1299,7 +1303,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>3</index>
+											<index>7</index>
 											<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 										</property>
 									</location>
@@ -1336,7 +1340,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>3</index>
+											<index>7</index>
 											<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 										</property>
 									</location>

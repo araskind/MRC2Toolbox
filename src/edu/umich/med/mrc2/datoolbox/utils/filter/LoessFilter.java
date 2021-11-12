@@ -37,6 +37,9 @@ package edu.umich.med.mrc2.datoolbox.utils.filter;
  * fairly computational intensive.
  * 
  * {@link http://en.wikipedia.org/wiki/Local_regression}
+ * 
+ * Code from mzmatch
+ * http://mzmatch.sourceforge.net/peakml/peakml/math/filter/LoessFilter.html
  */
 public class LoessFilter implements Filter
 {
