@@ -71,6 +71,7 @@ import edu.umich.med.mrc2.datoolbox.utils.filter.gui.FilterGuiPanel;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.LoessGuiPanel;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.MovingAverageGuiPanel;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.SavitzkyGolayGuiPanel;
+import edu.umich.med.mrc2.datoolbox.utils.filter.gui.SavitzkyGolayMZMineGuiPanel;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.SmoothingCubicSplineGuiPanel;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.WeightedMovingAverageGuiPanel;
 
@@ -362,7 +363,11 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		smoothingSettingsPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		filterTypeComboBox = new JComboBox<FilterClass>(
-				new DefaultComboBoxModel<FilterClass>(FilterClass.values()));
+				new DefaultComboBoxModel<FilterClass>(new FilterClass[] {
+						FilterClass.SAVITZKY_GOLAY_MZMINE, 
+						FilterClass.MOVING_AVERAGE, 
+						FilterClass.WEIGHTED_MOVING_AVERAGE 
+					}));				
 		filterTypeComboBox.setSelectedIndex(-1);	//	TODO read from preferences		
 		filterTypeComboBox.addItemListener(this);
 		GridBagConstraints gbc_filterTypeComboBox = new GridBagConstraints();
@@ -644,7 +649,10 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		filterParameters.removeAll();
 		
 		if(filterClass.equals(FilterClass.SAVITZKY_GOLAY))
-			filterGuiPanel = new SavitzkyGolayGuiPanel();			
+			filterGuiPanel = new SavitzkyGolayGuiPanel();	
+		
+		if(filterClass.equals(FilterClass.SAVITZKY_GOLAY_MZMINE))
+			filterGuiPanel = new SavitzkyGolayMZMineGuiPanel();	
 		
 		if(filterClass.equals(FilterClass.MOVING_AVERAGE))
 			filterGuiPanel = new MovingAverageGuiPanel();

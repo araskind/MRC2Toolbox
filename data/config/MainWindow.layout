@@ -153,15 +153,15 @@
 									<id>ccontrol center</id>
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
-										<fullscreen id="0"/>
+										<fullscreen id="1"/>
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1631029354244" orientation="HORIZONTAL" divider="0.246900269541779">
-											<leaf id="1" nodeId="1631029354246">
+											<leaf id="0" nodeId="1631029354246">
 												<placeholders>
 													<placeholder>dock.single.ProjectSetupDraw</placeholder>
 												</placeholders>
 											</leaf>
-											<leaf id="0" nodeId="1631029354257">
+											<leaf id="1" nodeId="1631029354257">
 												<placeholders>
 													<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 													<placeholder>dock.single.MgfPanel</placeholder>
@@ -170,8 +170,8 @@
 													<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 													<placeholder>dock.single.WorklistPanel</placeholder>
 													<placeholder>dock.single.IDWorkbenchPanel</placeholder>
-													<placeholder>dock.single.ExperimentDesignPanel</placeholder>
 													<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
+													<placeholder>dock.single.ExperimentDesignPanel</placeholder>
 													<placeholder>dock.single.LabNoteBookPanel</placeholder>
 													<placeholder>dock.single.AutomatorPanel</placeholder>
 													<placeholder>dock.single.QCPanel</placeholder>
@@ -231,6 +231,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
+										<replacement id="dockablesingle ProjectSetupDraw"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ProjectSetupDraw</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>9</selected>
@@ -516,16 +526,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
-										<replacement id="dockablesingle ProjectSetupDraw"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ProjectSetupDraw</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

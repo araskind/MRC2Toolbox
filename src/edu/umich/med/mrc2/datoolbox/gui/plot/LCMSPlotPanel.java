@@ -34,7 +34,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import org.jfree.chart.ChartFactory;
@@ -62,7 +61,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
-import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.ChromatogramToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.ContinuousCromatogramRenderer;
@@ -71,7 +69,6 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.FilledChromatogramRenderer
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MassSpectrumRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MsLabelGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -398,7 +395,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 						
 		((XYPlot) this.getPlot()).setRenderer(1, renderer);
 		XYSeriesCollection dataSet = new XYSeriesCollection();
-		Collection<Color>usedColors = new HashSet<Color>();
+		//	Collection<Color>usedColors = new HashSet<Color>();
 		
 		int seriesCount = 0;
 		for(ExtractedChromatogram chrom : chromatograms) {
@@ -410,12 +407,12 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				series.add(times[i], intensities[i]);
 			
 			dataSet.addSeries(series);
-			Color seriesColor = chrom.getDataFile().getColor();		
-			if(chrom.getChromatogramDefinition().getMode().equals(ChromatogramPlotMode.XIC)) {
-				if(usedColors.contains(seriesColor))
-					seriesColor = ColorUtils.getNextFreeBrewerColor(usedColors);
-			}
-			usedColors.add(seriesColor);
+			Color seriesColor = chrom.getColor();		
+//			if(chrom.getChromatogramDefinition().getMode().equals(ChromatogramPlotMode.XIC)) {
+//				if(usedColors.contains(seriesColor))
+//					seriesColor = ColorUtils.getNextFreeBrewerColor(usedColors);
+//			}
+//			usedColors.add(seriesColor);
 			if(rType.equals(ChromatogramRenderingType.Lines)) {
 				renderer.setSeriesFillPaint(seriesCount, seriesColor);
 				renderer.setSeriesPaint(seriesCount, seriesColor);

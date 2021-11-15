@@ -174,6 +174,6 @@ public class SavitzkyGolayFilter implements Filter {
 	
 	@Override
 	public String getCode() {
-		return FilterClass.SAVITZKY_GOLAY.getCode();
+		return FilterClass.SAVITZKY_GOLAY_MZMINE.getCode();
 	}
 }

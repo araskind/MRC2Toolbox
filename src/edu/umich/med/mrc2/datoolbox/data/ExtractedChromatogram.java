@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.Collection;
 
@@ -39,6 +40,7 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 	private double[] intensityValues;
 	private String note;
 	private Collection<Integer>inflectionPoints;
+	private Color color;
 	
 	public ExtractedChromatogram(DataFile dataFile, ChromatogramDefinition definition) {
 		super();
@@ -91,6 +93,9 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 		if(definition.getRtRange() != null)
 			name += " | RT " + definition.getRtRange().getFormattedString(MRC2ToolBoxConfiguration.getRtFormat());
 		
+		if(definition.getSmoothingFilter() != null)
+			name += " " + definition.getSmoothingFilter().getCode();
+			
 		if(note != null)
 			name += " |  " + note;
 		
@@ -116,5 +121,13 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 	@Override
 	public int compareTo(ExtractedChromatogram o) {
 		return this.toString().compareTo(o.toString());
+	}
+
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
 	}
 }

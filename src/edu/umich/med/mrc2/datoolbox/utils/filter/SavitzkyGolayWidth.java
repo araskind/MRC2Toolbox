@@ -53,4 +53,13 @@ public enum SavitzkyGolayWidth {
 	public String toString() {
 		return Integer.toString(width);
 	}
+	
+	public static SavitzkyGolayWidth getSavitzkyGolayWidthByName(String name) {
+		
+		for(SavitzkyGolayWidth sgw : SavitzkyGolayWidth.values()) {
+			if(sgw.name().equals(name))
+				return sgw;
+		}		
+		return null;
+	}
 }

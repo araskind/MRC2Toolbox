@@ -38,6 +38,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.xic.ChromatogramExtractionType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -544,6 +545,11 @@ public class ChromatogramExtractionTask extends AbstractTask {
 			Collection<Double> mzList2, 
 			ArrayList<Double>time,
 			ArrayList<Double>intensity) {
+		
+		int chromCount = files.size() + 
+				(int)files.stream().
+				flatMap(f -> f.getChromatograms().stream()).count() + 1;
+		
 		double[] timeArray = time.stream().mapToDouble(Double::doubleValue).toArray();
 		double[] intensityArray = intensity.stream().mapToDouble(Double::doubleValue).toArray();
 		if(chexType.equals(ChromatogramExtractionType.RAW) 
@@ -561,6 +567,11 @@ public class ChromatogramExtractionTask extends AbstractTask {
 							null);
 			ExtractedChromatogram rawXic = 
 					new ExtractedChromatogram(dataFile, rawChromatogramDefinition);
+			if(mode.equals(ChromatogramPlotMode.TIC) || mode.equals(ChromatogramPlotMode.BASEPEAK))
+				rawXic.setColor(dataFile.getColor());
+			else
+				rawXic.setColor(ColorUtils.getBrewerColor(chromCount));
+								
 			rawXic.setTimeValues(timeArray);
 			rawXic.setIntensityValues(intensityArray);
 			extractedChromatograms.add(rawXic);
@@ -582,6 +593,11 @@ public class ChromatogramExtractionTask extends AbstractTask {
 							smoothingFilter);
 			ExtractedChromatogram smoothXic = 
 					new ExtractedChromatogram(dataFile, smoothChromatogramDefinition);
+			if(mode.equals(ChromatogramPlotMode.TIC) || mode.equals(ChromatogramPlotMode.BASEPEAK))
+				smoothXic.setColor(dataFile.getColor());
+			else
+				smoothXic.setColor(ColorUtils.getBrewerColor(chromCount));
+			
 			smoothXic.setTimeValues(timeArray);
 			smoothXic.setIntensityValues(smoothIntensityArray);
 			extractedChromatograms.add(smoothXic);

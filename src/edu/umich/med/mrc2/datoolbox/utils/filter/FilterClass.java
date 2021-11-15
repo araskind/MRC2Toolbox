@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.utils.filter;
 public enum FilterClass {
 
 	SAVITZKY_GOLAY("Savitzky-Golay", "SG"),
+	SAVITZKY_GOLAY_MZMINE("Savitzky-Golay | MZMine", "SGMZ"),
 	MOVING_AVERAGE("Moving Average", "MA"),
 	WEIGHTED_MOVING_AVERAGE("Weighted Moving Average", "WMA"),
 	LOESS("Loess", "L"),
