@@ -58,7 +58,7 @@ public class MsFeatureInfoBundleComparator extends ObjectCompatrator<MsFeatureIn
 				return result;
 			else
 				return -result;
-
+			
 		case MZ:
 			result = Double.compare(o1.getMsFeature().getMonoisotopicMz(), o2.getMsFeature().getMonoisotopicMz());
 			if (result == 0)

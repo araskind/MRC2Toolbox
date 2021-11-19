@@ -22,39 +22,32 @@
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.project;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
 
 import javax.swing.Icon;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 
 public class DockableRawDataFileSelector extends DefaultSingleCDockable 
 		implements ActionListener {
 
-	private static final Icon chromIcon = GuiUtils.getIcon("chromatogram", 16);
-
 	private ImprovedFileChooser chooser;
 	private File baseDirectory;
 	private RawDataFilesTable rawDataFilesTable;
 	private RawDataFileSelectorToolbar toolbar;
-	private JCheckBox copyFilesCheckBox;
 
-	public DockableRawDataFileSelector() {
+	public DockableRawDataFileSelector(String title, Icon chromIcon) {
 
-		super("DockableRawDataFileSelector", chromIcon, "Select raw data files", null, Permissions.MIN_MAX_STACK);
+		super(title.replace(" ", ""), chromIcon, title, null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 		toolbar = new RawDataFileSelectorToolbar(this);
@@ -63,13 +56,6 @@ public class DockableRawDataFileSelector extends DefaultSingleCDockable
 		rawDataFilesTable = new RawDataFilesTable();
 		JScrollPane scroll = new JScrollPane(rawDataFilesTable);
 		add(scroll, BorderLayout.CENTER);
-		
-		JPanel cbPanel = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) cbPanel.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEFT);			
-		copyFilesCheckBox = new JCheckBox("Copy raw data to project");
-		cbPanel.add(copyFilesCheckBox);
-		add(cbPanel, BorderLayout.SOUTH);
 		
 		initChooser();
 	}
@@ -140,9 +126,6 @@ public class DockableRawDataFileSelector extends DefaultSingleCDockable
 	public File getBaseDirectory() {
 		return baseDirectory;
 	}
-	
-	public boolean copyRawDataToProject() {
-		return copyFilesCheckBox.isSelected();
-	}
-
 }
+
+

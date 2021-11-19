@@ -99,8 +99,8 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600213797663" orientation="VERTICAL" divider="0.5453788509575354">
-											<node nodeId="1615231600226" orientation="VERTICAL" divider="0.7592083040044367">
+										<node nodeId="1600213797663" orientation="VERTICAL" divider="0.4684959349593496">
+											<node nodeId="1637181838881" orientation="HORIZONTAL" divider="0.8733885819521179">
 												<leaf id="1" nodeId="1600213797667">
 													<placeholders>
 														<placeholder>dock.single.MsLibraryPanelDockableLibraryFeatureTable</placeholder>
@@ -242,7 +242,7 @@
 											<placeholder>dock.single.MsLibraryPanelDockableMolStructurePanel</placeholder>
 											<backup-path>
 												<node location="TOP" size="0.5453788509575354" id="1600213797663"/>
-												<node location="RIGHT" size="0.25" id="1600213797665"/>
+												<node location="BOTTOM" size="0.24079169599556327" id="1615231600226"/>
 												<leaf id="1600213797669"/>
 											</backup-path>
 										</property>

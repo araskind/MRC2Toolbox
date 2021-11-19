@@ -36,7 +36,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.scan.IScan;
@@ -148,14 +148,14 @@ public class RawDataTreeRenderer extends DefaultTreeCellRenderer {
 					label.setForeground(Color.blue);
 			}
 		}
-		if (embeddedObject instanceof MsFeature) {
+		if (embeddedObject instanceof MsFeatureInfoBundle) {
 			
-			MsFeature f = (MsFeature) embeddedObject;
+			MsFeatureInfoBundle f = (MsFeatureInfoBundle) embeddedObject;
 			label.setIcon(msTwoFeatureIcon);
 			label.setFont(smallerPlainFont);
-			label.setText(f.getName());
+			label.setText(f.getMsFeature().getName());
 			if (!selected) {
-				if (f.hasInstrumentMsMs())
+				if (f.getMsFeature().hasInstrumentMsMs())
 					label.setForeground(Color.red);
 				else
 					label.setForeground(Color.blue);

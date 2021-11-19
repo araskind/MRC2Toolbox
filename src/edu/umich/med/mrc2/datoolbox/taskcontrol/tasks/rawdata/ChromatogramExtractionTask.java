@@ -47,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
+import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayFilter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.scan.IScan;
@@ -127,6 +128,7 @@ public class ChromatogramExtractionTask extends AbstractTask {
 		this.massErrorType = massErrorType;
 		this.rtRange = rtRange;
 		this.doSmooth = false;
+		this.chexType = ChromatogramExtractionType.RAW;
 		this.filterWidth = SavitzkyGolayWidth.NINE;
 		releaseMemory = false;
 		
@@ -157,9 +159,14 @@ public class ChromatogramExtractionTask extends AbstractTask {
 		this.massErrorType = massErrorType;
 		this.rtRange = rtRange;
 		this.doSmooth = doSmooth;
+		if(!doSmooth)
+			this.chexType = ChromatogramExtractionType.RAW;
+		else {
+			this.chexType = ChromatogramExtractionType.SMOOTH;
+			smoothingFilter = new SavitzkyGolayFilter(filterWidth.getWidth());
+		}	
 		this.filterWidth = filterWidth;
-		releaseMemory = false;
-		
+		releaseMemory = false;		
 		extractedChromatograms = new ArrayList<ExtractedChromatogram>();		
 	}
 

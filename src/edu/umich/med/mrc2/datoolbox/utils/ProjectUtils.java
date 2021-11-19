@@ -29,6 +29,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -54,6 +56,9 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 
 public class ProjectUtils {
+	
+	public static final DateFormat dateTimeFormat = 
+			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	public static boolean designValidForStats(
 			DataAnalysisProject currentProject,

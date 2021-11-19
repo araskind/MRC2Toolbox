@@ -105,10 +105,10 @@ public class LoadRawDataAnalysisProjectTask extends AbstractTask implements Task
 	private void loadRawData() {
 		
 		taskDescription = "Loading raw data files for project ...";
-		total = newProject.getRawDataFiles().size();
+		total = newProject.getMSMSDataFiles().size();
 		processed = 0;	
 		
-		for(DataFile df : newProject.getRawDataFiles()) {
+		for(DataFile df : newProject.getMSMSDataFiles()) {
 			
 			File rdf = new File(df.getFullPath());
 			if(!rdf.exists())
@@ -118,7 +118,7 @@ public class LoadRawDataAnalysisProjectTask extends AbstractTask implements Task
 			this.setStatus(TaskStatus.ERROR);
 			return;
 		}
-		for(DataFile df : newProject.getRawDataFiles()) {
+		for(DataFile df : newProject.getMSMSDataFiles()) {
 			
 			RawDataManager.getRawData(df);
 			processed++;
@@ -128,11 +128,11 @@ public class LoadRawDataAnalysisProjectTask extends AbstractTask implements Task
 	private void initTicExtraction() {
 		
 		taskDescription = "Extracting TICs ...";
-		total = newProject.getRawDataFiles().size();
+		total = newProject.getMSMSDataFiles().size();
 		processed = 1;	
 		Collection<Double> mzList = new ArrayList<Double>();
 		
-		for(DataFile df : newProject.getRawDataFiles()) {
+		for(DataFile df : newProject.getMSMSDataFiles()) {
 			
 			ChromatogramExtractionTask xicTask = new ChromatogramExtractionTask(
 					Collections.singleton(df), 
@@ -209,7 +209,7 @@ public class LoadRawDataAnalysisProjectTask extends AbstractTask implements Task
 			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class)) {
 				
 				ticCount++;
-				if(ticCount == newProject.getRawDataFiles().size())
+				if(ticCount == newProject.getMSMSDataFiles().size())
 					setStatus(TaskStatus.FINISHED);
 			}
 		}		

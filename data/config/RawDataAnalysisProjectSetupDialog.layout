@@ -99,10 +99,29 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<leaf id="0" nodeId="1634769494367">
+										<leaf id="0" nodeId="1637108691785">
 											<placeholders>
-												<placeholder>dock.single.DockableRawDataFileSelector</placeholder>
+												<placeholder>dock.single.SelectMS1datafiles</placeholder>
+												<placeholder>dock.single.SelectMSMSdatafiles</placeholder>
 											</placeholders>
+											<placeholder-map>
+												<version>0</version>
+												<format>dock.PlaceholderList</format>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.SelectMSMSdatafiles</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.SelectMS1datafiles</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+											</placeholder-map>
 										</leaf>
 									</content>
 								</delegate>
@@ -114,14 +133,63 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableRawDataFileSelector">
-										<replacement id="dockablesingle DockableRawDataFileSelector"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableRawDataFileSelector</id>
-											<area/>
-										</delegate>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.SelectMSMSdatafiles</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.SelectMSMSdatafiles</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.SelectMS1datafiles</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.SelectMS1datafiles</item>
+											</entry>
+										</placeholders>
 									</layout>
-									<children ignore="false"/>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.SelectMSMSdatafiles">
+												<replacement id="dockablesingle SelectMSMSdatafiles"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>SelectMSMSdatafiles</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.SelectMS1datafiles">
+												<replacement id="dockablesingle SelectMS1datafiles"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>SelectMS1datafiles</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
 								</child>
 							</children>
 						</root>
@@ -151,7 +219,7 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DockableRawDataFileSelector" current="dock.mode.normal">
+						<entry id="single SelectMSMSdatafiles" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -162,10 +230,38 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableRawDataFileSelector</placeholder>
+											<placeholder>dock.single.SelectMSMSdatafiles</placeholder>
 											<backup-path>
-												<leaf id="1634769494367"/>
+												<leaf id="1637108691785"/>
 											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.SelectMSMSdatafiles</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single SelectMS1datafiles" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.SelectMS1datafiles</placeholder>
+											<backup-path>
+												<leaf id="1637108691785"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.SelectMS1datafiles</placeholder>
 										</property>
 									</location>
 								</property>

@@ -35,8 +35,8 @@ import javax.swing.tree.TreeNode;
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
@@ -71,8 +71,8 @@ public class RawDataTreeModel extends DefaultTreeModel {
 
 	private TreeGrouping treeGrouping;	
 	protected ConcurrentHashMap<Object, DefaultMutableTreeNode> treeObjects;
-	private static final MsFeatureComparator rtSorter = 
-			new MsFeatureComparator(SortProperty.RT);
+	private static final MsFeatureInfoBundleComparator rtSorter = 
+			new MsFeatureInfoBundleComparator(SortProperty.RT);
 
 	public RawDataTreeModel(TreeNode root) {
 		super(root);
@@ -214,7 +214,7 @@ public class RawDataTreeModel extends DefaultTreeModel {
 			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 				DefaultMutableTreeNode ms2featuresNode = new DefaultMutableTreeNode(ms2featuresNodeName);
 				insertNodeInto(ms2featuresNode, newNode, getChildCount(newNode));
-				Collection<MsFeature> msmsFeatures = 
+				Collection<MsFeatureInfoBundle> msmsFeatures = 
 						MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMsFeaturesForDataFile(dataFile);
 				if(msmsFeatures != null && !msmsFeatures.isEmpty()) {
 					

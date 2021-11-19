@@ -275,4 +275,8 @@ public class Range implements Serializable, Comparable<Range> {
 		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	public String getStorableString() {
+		return Double.toString(min) + " " + Double.toString(max);
+	}
 }

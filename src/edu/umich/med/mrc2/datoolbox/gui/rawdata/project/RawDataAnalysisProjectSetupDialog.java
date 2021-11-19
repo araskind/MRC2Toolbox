@@ -35,6 +35,7 @@ import java.util.prefs.Preferences;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -67,19 +68,27 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 
 	private static final Icon rdaProjectIcon = GuiUtils.getIcon("newRawDataAnalysisProject", 32);
 	private static final Icon editRdaProjectIcon = GuiUtils.getIcon("editRawDataAnalysisProject", 32);
+	
+	private static final Icon msOneIcon = GuiUtils.getIcon("chromGradient", 16);
+	private static final Icon msmsIcon = GuiUtils.getIcon("chromGradient", 16);
+	
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "RawDataAnalysisProjectSetupDialog.layout");
 	private Preferences preferences;
 	public static final String PREFS_NODE = 
 			"edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataAnalysisProjectSetupDialog";
-	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
+	public static final String MSMS_BASE_DIRECTORY = "MSMS_BASE_DIRECTORY";
+	public static final String MS1_BASE_DIRECTORY = "MS1_BASE_DIRECTORY";
 	public static final String PROJECT_BASE_DIRECTORY = "PROJECT_BASE_DIRECTORY";
+	public static final String COPY_RAW_DATA_TO_PROJECT = "COPY_RAW_DATA_TO_PROJECT";
 	private File projectBaseDir;
 
 	private CControl control;
 	private CGrid grid;
-	private DockableRawDataFileSelector rawDataFileSelector;
+	private DockableRawDataFileSelector rawMSMSDataFileSelector;
+	private DockableRawDataFileSelector rawMSOneDataFileSelector;
 	private ProjectDetailsPanel projectDetailsPanel;
+	private JCheckBox copyFilesCheckBox;
 	
 	public RawDataAnalysisProjectSetupDialog(ActionListener actionListener) {
 		
@@ -97,8 +106,9 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
 		
-		rawDataFileSelector = new DockableRawDataFileSelector();	
-		grid.add(0, 0, 75, 100, rawDataFileSelector);
+		rawMSMSDataFileSelector = new DockableRawDataFileSelector("Select MSMS data files", msmsIcon);	
+		rawMSOneDataFileSelector =  new DockableRawDataFileSelector("Select MS1 data files", msOneIcon);
+		grid.add(0, 0, 75, 100, rawMSMSDataFileSelector, rawMSOneDataFileSelector);
 		control.getContentArea().deploy(grid);
 		getContentPane().add(control.getContentArea(), BorderLayout.CENTER);
 		
@@ -109,6 +119,9 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		getContentPane().add(panel, BorderLayout.SOUTH);
+		
+		copyFilesCheckBox = new JCheckBox("Copy raw data to project");
+		panel.add(copyFilesCheckBox);
 
 		JButton btnCancel = new JButton("Cancel");
 		panel.add(btnCancel);
@@ -163,10 +176,6 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 		}
 	}
 	
-	public Collection<File> getDataFiles() {
-		return rawDataFileSelector.getDataFiles();
-	}
-	
 	public String getProjectName() {
 		return projectDetailsPanel.getProjectName();
 	}
@@ -179,8 +188,16 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 		return projectDetailsPanel.getProjectLocationPath();
 	}
 	
+	public Collection<File> getMSMSDataFiles() {
+		return rawMSMSDataFileSelector.getDataFiles();
+	}
+	
+	public Collection<File> getMSOneDataFiles() {
+		return rawMSOneDataFileSelector.getDataFiles();
+	}
+	
 	public boolean copyRawDataToProject() {
-		return rawDataFileSelector.copyRawDataToProject();
+		return copyFilesCheckBox.isSelected();
 	}
 	
 	public void dispose() {
@@ -239,14 +256,22 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;
-		File baseDirectory =
-			new File(preferences.get(BASE_DIRECTORY,
+		File msmsBaseDirectory =
+			new File(preferences.get(MSMS_BASE_DIRECTORY,
 					MRC2ToolBoxConfiguration.getRawDataRepository()));
-		rawDataFileSelector.setBaseDirectory(baseDirectory);		
+		rawMSMSDataFileSelector.setBaseDirectory(msmsBaseDirectory);	
+		
+		File msOneBaseDirectory =
+				new File(preferences.get(MS1_BASE_DIRECTORY,
+						MRC2ToolBoxConfiguration.getRawDataRepository()));
+		rawMSOneDataFileSelector.setBaseDirectory(msOneBaseDirectory);
+		
 		projectBaseDir =
 				new File(preferences.get(PROJECT_BASE_DIRECTORY,
 						MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()));
 		projectDetailsPanel.setProjectLocation(projectBaseDir);
+		
+		copyFilesCheckBox.setSelected(preferences.getBoolean(COPY_RAW_DATA_TO_PROJECT, Boolean.TRUE));
 	}
 
 	@Override
@@ -256,10 +281,18 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 
 	@Override
 	public void savePreferences() {
+		
 		preferences = Preferences.userRoot().node(PREFS_NODE);
-		if(rawDataFileSelector.getBaseDirectory() != null)
-			preferences.put(BASE_DIRECTORY, rawDataFileSelector.getBaseDirectory().getAbsolutePath());
+		
+		if(rawMSMSDataFileSelector.getBaseDirectory() != null)
+			preferences.put(MSMS_BASE_DIRECTORY, rawMSMSDataFileSelector.getBaseDirectory().getAbsolutePath());
+		
+		if(rawMSOneDataFileSelector.getBaseDirectory() != null)
+			preferences.put(MS1_BASE_DIRECTORY, rawMSOneDataFileSelector.getBaseDirectory().getAbsolutePath());
+		
 		if(projectBaseDir != null)
 			preferences.put(PROJECT_BASE_DIRECTORY, projectBaseDir.getAbsolutePath());
+		
+		preferences.putBoolean(COPY_RAW_DATA_TO_PROJECT, copyFilesCheckBox.isSelected());		
 	}
 }

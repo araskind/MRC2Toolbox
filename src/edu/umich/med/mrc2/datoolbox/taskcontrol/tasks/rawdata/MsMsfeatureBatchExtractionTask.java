@@ -26,63 +26,43 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
-import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayFilter;
 
 public class MsMsfeatureBatchExtractionTask extends AbstractTask implements TaskListener {
 
-	private Collection<DataFile> rawDataFiles;
-	private Map<DataFile, Collection<MsFeature>>msFeatureMap;
-	private Range dataExtractionRtRange;
-	private boolean removeAllMassesAboveParent;
-	private double msMsCountsCutoff;
-	private int maxFragmentsCutoff;
-	private IntensityMeasure filterIntensityMeasure;
-	private double msmsIsolationWindowLowerBorder;
-	private double msmsIsolationWindowUpperBorder;	
-	private double msmsGroupingRtWindow;
-	private double precursorGroupingMassError;
-	private MassErrorType precursorGroupingMassErrorType;
-	private boolean flagMinorIsotopesPrecursors;
-	private int maxPrecursorCharge;
+	private MSMSExtractionParameterSet ps;
 	
+	private Collection<DataFile> msmsDataFiles;	
+	private Collection<DataFile> msOneDataFiles;	
+	private boolean flagMinorIsotopesPrecursors;
+	private int maxPrecursorCharge;	
+	private double chromatogramExtractionWindow;
+	private int smoothingFilterWidth;
+	
+	private SavitzkyGolayFilter smoothingFilter; 
+	
+	private Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;
+
 	public MsMsfeatureBatchExtractionTask(
-			Collection<DataFile> rawDataFiles, 
-			Range dataExtractionRtRange,
-			boolean removeAllMassesAboveParent, 
-			double msMsCountsCutoff, 
-			int maxFragmentsCutoff,
-			IntensityMeasure filterIntensityMeasure,
-			double msmsIsolationWindowLowerBorder,
-			double msmsIsolationWindowUpperBorder,
-			double msmsGroupingRtWindow,
-			double precursorGroupingMassError,
-			MassErrorType precursorGroupingMassErrorType,
-			boolean flagMinorIsotopesPrecursors,
-			int maxPrecursorCharge) {
+			MSMSExtractionParameterSet ps, 	
+			Collection<DataFile> msmsDataFiles,
+			Collection<DataFile> msOneDataFiles) {
 		super();
-		this.rawDataFiles = rawDataFiles;
-		this.dataExtractionRtRange = dataExtractionRtRange;
-		this.removeAllMassesAboveParent = removeAllMassesAboveParent;
-		this.msMsCountsCutoff = msMsCountsCutoff;
-		this.maxFragmentsCutoff = maxFragmentsCutoff;
-		this.filterIntensityMeasure = filterIntensityMeasure;
-		this.msmsIsolationWindowLowerBorder = msmsIsolationWindowLowerBorder;
-		this.msmsIsolationWindowUpperBorder = msmsIsolationWindowUpperBorder;
-		this.msmsGroupingRtWindow = msmsGroupingRtWindow;
-		this.precursorGroupingMassError = precursorGroupingMassError;
-		this.precursorGroupingMassErrorType = precursorGroupingMassErrorType;
-		this.flagMinorIsotopesPrecursors = flagMinorIsotopesPrecursors;
-		this.maxPrecursorCharge = maxPrecursorCharge;
-		msFeatureMap = new TreeMap<DataFile, Collection<MsFeature>>();		
+		this.ps = ps;
+		this.msmsDataFiles = msmsDataFiles;
+		this.msOneDataFiles = msOneDataFiles;
+		this.flagMinorIsotopesPrecursors = ps.isFlagMinorIsotopesPrecursors();
+		this.maxPrecursorCharge = ps.getMaxPrecursorCharge();
+		this.smoothingFilterWidth = ps.getSmoothingFilterWidth();
+		
+		msFeatureMap = new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
 	}
 
 	@Override
@@ -92,22 +72,8 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 		taskDescription = "Extracting MSMS features from raw data ... ";
 		total = 100;
 		processed = 0;
-		for(DataFile df : rawDataFiles) {
-			
-			MsMsfeatureExtractionTask task = new MsMsfeatureExtractionTask(
-					df,
-					dataExtractionRtRange,
-					removeAllMassesAboveParent,
-					msMsCountsCutoff,
-					maxFragmentsCutoff,
-					filterIntensityMeasure,
-					msmsIsolationWindowLowerBorder,
-					msmsIsolationWindowUpperBorder,
-					msmsGroupingRtWindow,
-					precursorGroupingMassError,
-					precursorGroupingMassErrorType,
-					flagMinorIsotopesPrecursors,
-					maxPrecursorCharge);
+		for(DataFile df : msmsDataFiles) {			
+			MsMsfeatureExtractionTask task = new MsMsfeatureExtractionTask(df, ps);
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
@@ -116,19 +82,9 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 	@Override
 	public Task cloneTask() {
 		return new  MsMsfeatureBatchExtractionTask(
-				rawDataFiles, 
-				dataExtractionRtRange,
-				removeAllMassesAboveParent, 
-				msMsCountsCutoff, 
-				maxFragmentsCutoff,
-				filterIntensityMeasure,
-				msmsIsolationWindowLowerBorder,
-				msmsIsolationWindowUpperBorder,
-				msmsGroupingRtWindow,
-				precursorGroupingMassError,
-				precursorGroupingMassErrorType,
-				flagMinorIsotopesPrecursors,
-				maxPrecursorCharge);
+				ps,
+				msmsDataFiles, 
+				msOneDataFiles);
 	}
 
 	@Override
@@ -140,15 +96,15 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 			
 			if (e.getSource().getClass().equals(MsMsfeatureExtractionTask.class)) {
 				MsMsfeatureExtractionTask task = (MsMsfeatureExtractionTask)e.getSource();
-				msFeatureMap.put(task.getRawDataFile(), task.getMSMSFeatures());
+				msFeatureMap.put(task.getRawDataFile(), task.getMsFeatureInfoBundles());
 				processed++;
-				if(processed == rawDataFiles.size())
+				if(processed == msmsDataFiles.size())
 					setStatus(TaskStatus.FINISHED);
 			}
 		}
 	}
 
-	public Map<DataFile, Collection<MsFeature>> getMsFeatureMap() {
+	public Map<DataFile, Collection<MsFeatureInfoBundle>> getMsFeatureMap() {
 		return msFeatureMap;
 	}
 }

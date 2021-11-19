@@ -80,7 +80,10 @@ public class SaveRawDataAnalysisProjectTask extends AbstractTask {
 	        RandomAccessFile raf = new RandomAccessFile(xmlFile.getAbsolutePath(), "rw");
 	        FileOutputStream fout = new FileOutputStream(raf.getFD());	        
 			BufferedOutputStream bout = new BufferedOutputStream(fout);
-			projectXstream.toXML(copyToSave, bout);
+			
+//			projectXstream.toXML(copyToSave, bout);			
+			projectXstream.toXML(projectToSave, bout);
+			
 			bout.close();
 			fout.close();
 			raf.close();

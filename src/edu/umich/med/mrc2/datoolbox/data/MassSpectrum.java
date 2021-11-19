@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,6 +35,10 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.compare.AdductComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
@@ -43,7 +48,9 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.msmsscore.SpectrumMatcher;
+import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
 public class MassSpectrum implements Serializable {
 
@@ -478,6 +485,64 @@ public class MassSpectrum implements Serializable {
 
 	public Set<MsPoint> getMsPoints() {
 		return msPoints;
+	}
+	
+	public Element getXmlElement(Document parentDocument) {
+		
+		Element spectrumElement = parentDocument.createElement(
+				MassSpectrumFields.Spectrum.name());
+		
+		if(msPoints != null && !msPoints.isEmpty()) {
+			double[]mzValues = msPoints.stream().mapToDouble(p -> p.getMz()).toArray();
+			String mz = "";
+			try {
+				mz = NumberArrayUtils.encodeNumberArray(mzValues);
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			spectrumElement.setAttribute(MassSpectrumFields.MZ.name(), mz);			
+			double[]intensityValues = msPoints.stream().mapToDouble(p -> p.getIntensity()).toArray();
+			String intensity = "";
+			try {
+				intensity = NumberArrayUtils.encodeNumberArray(intensityValues);
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			spectrumElement.setAttribute(MassSpectrumFields.Intensity.name(), intensity);
+		}
+		if(detectionAlgorithm != null)
+			spectrumElement.setAttribute(MassSpectrumFields.Algo.name(), detectionAlgorithm);
+		
+		if(adductMap != null && !adductMap.isEmpty()) {
+			
+			Element adductMapElement = parentDocument.createElement(
+					MassSpectrumFields.AdductMap.name());
+			spectrumElement.appendChild(adductMapElement);
+			
+			for(Entry<Adduct, List<MsPoint>>am : adductMap.entrySet()) {
+				Element amEntryElement = parentDocument.createElement(
+						MassSpectrumFields.Adduct.name());
+				amEntryElement.setAttribute(MassSpectrumFields.AName.name(), am.getKey().getId());
+				List<String>mpList = am.getValue().stream().
+						map(p -> p.toString()).collect(Collectors.toList());
+				amEntryElement.setAttribute(MassSpectrumFields.ASpec.name(), StringUtils.join(mpList, ";"));
+				adductMapElement.appendChild(amEntryElement);
+			}		
+		}
+		if(primaryAdduct != null)
+			spectrumElement.setAttribute(MassSpectrumFields.PAdduct.name(), primaryAdduct.getId());
+		
+		if(tandemSpectra != null && !tandemSpectra.isEmpty()) {
+			
+			Element msmsListElement = parentDocument.createElement(
+					MassSpectrumFields.MsmsList.name());
+			spectrumElement.appendChild(msmsListElement);
+			for(TandemMassSpectrum msms : tandemSpectra) 
+				msmsListElement.appendChild(msms.getXmlElement(parentDocument));
+		}
+		return spectrumElement;
 	}
 }
 

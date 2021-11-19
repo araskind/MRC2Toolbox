@@ -23,12 +23,20 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
+import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
+import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayFilter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
 
 public class ChromatogramDefinition  implements Serializable, Cloneable{
@@ -118,6 +126,8 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		this.rtRange = rtRange;
 		this.doSmooth = doSmooth;
 		this.filterWidth = filterWidth;
+		if(doSmooth)
+			smoothingFilter = new SavitzkyGolayFilter(filterWidth.getWidth());
 	}
 	
 	public ChromatogramPlotMode getMode() {
@@ -171,4 +181,76 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 	public Filter getSmoothingFilter() {
 		return smoothingFilter;
 	}
+	
+	
+	public Element getXmlElement(Document parentDocument) {
+		
+		Element chromatogramDefinitionElement = parentDocument.createElement(
+				XICDefinitionFields.XICDefinition.name());
+		chromatogramDefinitionElement.setAttribute(
+				XICDefinitionFields.Mode.name(), mode.name());
+		if(polarity != null)
+			chromatogramDefinitionElement.setAttribute(
+				XICDefinitionFields.Pol.name(), polarity.getCode());
+		
+		chromatogramDefinitionElement.setAttribute(
+				XICDefinitionFields.MsLevel.name(), Integer.toString(msLevel));
+		if(mzList != null && !mzList.isEmpty()) {
+			if(mzList.size() == 1) {
+				chromatogramDefinitionElement.setAttribute(
+						XICDefinitionFields.MZList.name(), 
+						Double.toString(mzList.iterator().next()));
+			}
+			else {
+				List<String> stringList = mzList.stream().
+						map(mz -> Double.toString(mz)).
+						collect(Collectors.toList());
+				chromatogramDefinitionElement.setAttribute(
+						XICDefinitionFields.MZList.name(), 
+						StringUtils.join(stringList, " "));
+			}
+		}
+		chromatogramDefinitionElement.setAttribute(
+				XICDefinitionFields.SumAll.name(), 
+				Boolean.toString(sumAllMassChromatograms));
+		chromatogramDefinitionElement.setAttribute(
+				XICDefinitionFields.MzWindow.name(), 
+				Double.toString(mzWindowValue));
+		
+		if(massErrorType != null)
+			chromatogramDefinitionElement.setAttribute(
+				XICDefinitionFields.METype.name(), massErrorType.name());	
+		
+		if(rtRange != null)
+			chromatogramDefinitionElement.setAttribute(
+					XICDefinitionFields.RTRange.name(), rtRange.getStorableString());	
+		
+		if(smoothingFilter != null)
+				chromatogramDefinitionElement.setAttribute(
+						XICDefinitionFields.Filter.name(), smoothingFilter.getCode());
+		
+		chromatogramDefinitionElement.setAttribute(
+				XICDefinitionFields.Smooth.name(), 
+				Boolean.toString(doSmooth));
+		return chromatogramDefinitionElement;		
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

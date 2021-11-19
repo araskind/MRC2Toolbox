@@ -25,10 +25,14 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.TreeSet;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
 
 public class MsFeatureInfoBundle implements Serializable {
 
@@ -133,7 +137,8 @@ public class MsFeatureInfoBundle implements Serializable {
 	 */
 	public void setSample(IDTExperimentalSample sample) {
 		this.sample = sample;
-		this.stockSample = sample.getParentStockSample();
+		if(sample != null)
+			this.stockSample = sample.getParentStockSample();
 	}
 
 	/**
@@ -257,5 +262,41 @@ public class MsFeatureInfoBundle implements Serializable {
 			return msms.getId();
 		else
 			return null;
+	}
+	
+	public Element getXmlElement(Document parentDocument) {
+		
+		Element msFeatureInfoBundleElement = parentDocument.createElement(
+				MsFeatureInfoBundleFields.MFIB.name());
+		
+		if(acquisitionMethod != null)
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.AcqMethod.name(), 
+					acquisitionMethod.getId());
+		
+		if(dataExtractionMethod != null)
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.DaMethod.name(), 
+					dataExtractionMethod.getId());
+		
+		if(experiment != null)
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.Exp.name(), 
+					experiment.getId());
+		
+		if(sample != null)
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.Sample.name(), 
+					sample.getId());
+		
+		if(injectionId != null)
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.Inj.name(), 
+					injectionId);
+		
+		Element featureElement =  msFeature.getXmlElement(parentDocument);
+		msFeatureInfoBundleElement.appendChild(featureElement);
+					
+		return msFeatureInfoBundleElement;		
 	}
 }

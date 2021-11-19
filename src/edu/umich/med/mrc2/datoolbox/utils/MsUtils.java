@@ -1212,6 +1212,24 @@ public class MsUtils {
 		return -entropy;
 	}
 	
+	public static Collection<MsPoint>averageTwoSpectraWithInterpolation(
+			Collection<MsPoint>spectrumOne, 
+			Collection<MsPoint>spectrumTwo, 
+			double splitRatio, 
+			Double mzBinWidth, 
+			MassErrorType errorType){
+		
+		double multiplier = 1.0 - splitRatio;	
+		List<RawMsPoint> rawInputPoints = spectrumTwo.stream().
+				map(p -> new RawMsPoint(p.getMz(), p.getIntensity() * splitRatio, p.getScanNum())).
+				collect(Collectors.toList());
+		List<RawMsPoint> rawInputPointsTwo = spectrumOne.stream().
+				map(p -> new RawMsPoint(p.getMz(), p.getIntensity() * multiplier, p.getScanNum())).
+				collect(Collectors.toList());
+		rawInputPoints.addAll(rawInputPointsTwo);
+		return averageMassSpectrum(rawInputPoints, mzBinWidth, errorType);
+	}
+	
 	public static Collection<MsPoint>averageSpectrum(
 			Collection<MsPoint>inputPoints, Double mzBinWidth, MassErrorType errorType){
 		
@@ -1242,6 +1260,7 @@ public class MsUtils {
 		return msBins.stream().
 				map(b -> b.getAveragePoint()).
 				map(p -> new MsPoint(p.getMz(), p.getIntensity())).
+				sorted(mzSorter).
 				collect(Collectors.toList());
 	}
 	

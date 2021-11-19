@@ -23,10 +23,17 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.awt.Color;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.XICFields;
+import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
 public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>, Serializable {
 
@@ -130,4 +137,51 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 	public void setColor(Color color) {
 		this.color = color;
 	}
+	
+	public Element getXmlElement(Document parentDocument) {
+		
+		Element extractedChromatogramElement = 
+				parentDocument.createElement(XICFields.XIC.name());
+		
+		String time = "";
+		try {
+			time = NumberArrayUtils.encodeNumberArray(timeValues);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		extractedChromatogramElement.setAttribute(XICFields.Time.name(), time);	
+		
+		String intensity = "";
+		try {
+			intensity = NumberArrayUtils.encodeNumberArray(intensityValues);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		extractedChromatogramElement.setAttribute(XICFields.Intensity.name(), intensity);	
+		
+		if(color != null)
+			extractedChromatogramElement.setAttribute(XICFields.Color.name(), 
+					ColorUtils.rgb2hex(color));	
+		
+		if(note != null)
+			extractedChromatogramElement.setAttribute(XICFields.Note.name(), note);	
+		
+		extractedChromatogramElement.appendChild(
+				definition.getXmlElement(parentDocument));
+				
+		return extractedChromatogramElement;		
+	}
 }
+
+
+
+
+
+
+
+
+
+
+

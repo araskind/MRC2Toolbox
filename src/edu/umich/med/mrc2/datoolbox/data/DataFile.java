@@ -30,10 +30,16 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
+import edu.umich.med.mrc2.datoolbox.project.store.StoredDataFileFields;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class DataFile implements Comparable<DataFile>, Serializable {
 
@@ -308,7 +314,66 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 	public Map<DataExtractionMethod, ResultsFile> getResultFiles() {
 		return resultFiles;
 	}
+	
+	public Element getXmlElement(Document parentDocument) {
+		
+		Element dataFileElement = parentDocument.createElement(
+				StoredDataFileFields.DataFile.name());
+		dataFileElement.setAttribute(StoredDataFileFields.Name.name(), name);	
+		dataFileElement.setAttribute(StoredDataFileFields.Path.name(), fullPath);	
+		
+		if(parentSample != null)
+			dataFileElement.setAttribute(StoredDataFileFields.Sample.name(), parentSample.getId());	
+		
+		if(acquisitionMethod != null)
+			dataFileElement.setAttribute(StoredDataFileFields.AcqMethod.name(), acquisitionMethod.getId());	
+		
+		if(injectionId != null)
+			dataFileElement.setAttribute(StoredDataFileFields.Injection.name(), injectionId);	
+		
+		if(samplePosition != null)
+			dataFileElement.setAttribute(StoredDataFileFields.SamplePosition.name(), samplePosition);	
+		
+		if(injectionTime != null)
+			dataFileElement.setAttribute(StoredDataFileFields.InjTimestamp.name(), 
+					ProjectUtils.dateTimeFormat.format(injectionTime));
+		
+		if(injectionVolume > 0)
+			dataFileElement.setAttribute(StoredDataFileFields.InjVol.name(), 
+					Double.toString(injectionVolume));
+		
+		if(color != null)
+			dataFileElement.setAttribute(StoredDataFileFields.Color.name(), 
+					ColorUtils.rgb2hex(color));
+			
+		if(chromatograms != null && !chromatograms.isEmpty()) {
+			
+			Element xicListElement = parentDocument.createElement(
+					StoredDataFileFields.XicList.name());
+			dataFileElement.appendChild(xicListElement);
+			for(ExtractedChromatogram xic : chromatograms)	
+				xicListElement.appendChild(xic.getXmlElement(parentDocument));		
+		}
+		if(userSpectra != null && !userSpectra.isEmpty()) {
+			
+			Element userSpectraElement = parentDocument.createElement(
+					StoredDataFileFields.AvgMsList.name());
+			dataFileElement.appendChild(userSpectraElement);
+			for(AverageMassSpectrum avgMs : userSpectra) {
+				//	TODO
+			}
+		}		
+		return dataFileElement;
+	}
 }
+
+
+
+
+
+
+
+
 
 
 

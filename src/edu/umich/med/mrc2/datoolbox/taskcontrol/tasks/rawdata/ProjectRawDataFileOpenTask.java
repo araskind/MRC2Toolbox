@@ -33,6 +33,7 @@ import com.google.common.io.Files;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
@@ -42,13 +43,16 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
+import umich.ms.datatypes.LCMSData;
 
 public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskListener{
 
-	private Collection<DataFile> filesToOpen;
+
 	private int ticCount;
 	private RawDataAnalysisProject project;
 	private boolean copyFilesToProject;
+	private Collection<String>errors;
+	
 	
 	public ProjectRawDataFileOpenTask(
 			RawDataAnalysisProject project,
@@ -56,8 +60,8 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 		super();
 		this.project = project;
 		this.copyFilesToProject = copyFilesToProject;
-		filesToOpen = new TreeSet<DataFile>();
 		ticCount = 0;
+		errors = new ArrayList<String>();
 	}
 	
 	@Override
@@ -74,12 +78,30 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 	private void loadRawData() {
 		
 		taskDescription = "Loading raw data files for project ...";
-		total = project.getRawDataFiles().size();
+		total = project.getMSMSDataFiles().size() + project.getMSOneDataFiles().size();
 		processed = 0;	
 		
-		for(DataFile df : project.getRawDataFiles()) {
+		for(DataFile df : project.getMSMSDataFiles()) {
 			
-			RawDataManager.getRawData(df);
+			LCMSData dataSource = RawDataManager.getRawData(df);
+			if(!dataSource.getScans().getMapMsLevel2index().containsKey(2)) {
+				errors.add("Data file \"" + df.getName() + 
+						"\" does not contatin MSMS data; not included in the project.");
+				project.removeMSMSDataFile(df);
+				RawDataManager.removeDataSource(df);
+			}
+			processed++;
+		}
+		for(DataFile df : project.getMSOneDataFiles()) {
+			
+			LCMSData dataSource = RawDataManager.getRawData(df);
+			if(dataSource.getScans().getMapMsLevel2index().containsKey(2)) {
+				errors.add("Data file \"" + df.getName() + 
+						"\" contatin MSMS data and can not be used as MS1 "
+						+ "reference file; not included in the project.");
+				project.removeMSOneDataFile(df);
+				RawDataManager.removeDataSource(df);
+			}
 			processed++;
 		}
 	}
@@ -87,12 +109,13 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 	private void initTicExtraction() {
 		
 		taskDescription = "Extracting TICs ...";
-		total = project.getRawDataFiles().size();
+		total = project.getMSMSDataFiles().size();
 		processed = 1;	
 		Collection<Double> mzList = new ArrayList<Double>();
-		
-		for(DataFile df : project.getRawDataFiles()) {
+		int fileCount = 0;
+		for(DataFile df : project.getMSMSDataFiles()) {
 			
+			df.setColor(ColorUtils.getBrewerColor(fileCount));			
 			ChromatogramExtractionTask xicTask = new ChromatogramExtractionTask(
 					Collections.singleton(df), 
 					ChromatogramPlotMode.TIC, 
@@ -103,10 +126,30 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 					Double.NaN, 
 					null, 
 					null,
-					true,
+					false,
 					SavitzkyGolayWidth.FIVE);
 			xicTask.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(xicTask);
+			fileCount++;
+		}
+		for(DataFile df : project.getMSOneDataFiles()) {
+			
+			df.setColor(ColorUtils.getBrewerColor(fileCount));			
+			ChromatogramExtractionTask xicTask = new ChromatogramExtractionTask(
+					Collections.singleton(df), 
+					ChromatogramPlotMode.TIC, 
+					null, 
+					1, 
+					mzList,
+					false, 
+					Double.NaN, 
+					null, 
+					null,
+					false,
+					SavitzkyGolayWidth.FIVE);
+			xicTask.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(xicTask);
+			fileCount++;
 		}
 	}
 	
@@ -114,7 +157,7 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 		
 		taskDescription = "Copying raw data files to project directory ...";
 		TreeSet<DataFile>filesToCopy = new TreeSet<DataFile>();
-		for(DataFile df : project.getRawDataFiles()) {
+		for(DataFile df : project.getMSMSDataFiles()) {
 			
 			File existingFile = Paths.get(project.getRawDataDirectory().getAbsolutePath(), 
 					df.getName()).toFile();
@@ -162,9 +205,13 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class)) {
 				
 				ticCount++;
-				if(ticCount == project.getRawDataFiles().size())
+				if(ticCount == project.getMSMSDataFiles().size())
 					setStatus(TaskStatus.FINISHED);
 			}
 		}		
+	}
+
+	public Collection<String> getErrors() {
+		return errors;
 	}
 }

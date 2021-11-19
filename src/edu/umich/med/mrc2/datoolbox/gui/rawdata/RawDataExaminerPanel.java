@@ -54,6 +54,7 @@ import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -89,7 +90,9 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveRawDataAnalysisProjectTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MassSpectraAveragingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MsMsfeatureBatchExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ProjectRawDataFileOpenTask;
@@ -276,11 +279,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			return;
 		
 		Collection<DataFile> files = 
-				activeRawDataAnalysisProject.getRawDataFiles();
+				activeRawDataAnalysisProject.getMSMSDataFiles();
 		
 		int fCount = 0;
 		for(DataFile df : files) {
-			 Collection<MsFeature> fileFeatures = 
+			 Collection<MsFeatureInfoBundle> fileFeatures = 
 					 activeRawDataAnalysisProject.getMsFeaturesForDataFile(df);
 			 if(fileFeatures != null && !fileFeatures.isEmpty())
 				 fCount += fileFeatures.size();
@@ -306,25 +309,34 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	private void extractMSMSFeatures() {
 		
-		Collection<String>errors = msmsFeatureExtractionSetupDialog.validateParameters();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msmsFeatureExtractionSetupDialog);
+		MSMSExtractionParameterSet ps = 
+				msmsFeatureExtractionSetupDialog.getMSMSExtractionParameterSet();
+		if(ps == null)
 			return;
-		}
+		
 		MsMsfeatureBatchExtractionTask task = new MsMsfeatureBatchExtractionTask(
-				activeRawDataAnalysisProject.getRawDataFiles(), 
-				msmsFeatureExtractionSetupDialog.getDataExtractionRtRange(),
-				msmsFeatureExtractionSetupDialog.removeAllMassesAboveParent(), 
-				msmsFeatureExtractionSetupDialog.getMsMsCountsCutoff(), 
-				msmsFeatureExtractionSetupDialog.getMaxFragmentsCutoff(),
-				msmsFeatureExtractionSetupDialog.getIntensityMeasure(),
-				msmsFeatureExtractionSetupDialog.getIsolationWindowLowerBorder(),
-				msmsFeatureExtractionSetupDialog.getIsolationWindowUpperBorder(),
-				msmsFeatureExtractionSetupDialog.getMsmsGroupingRtWindow(),
-				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassError(),
-				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassErrorType(),
-				msmsFeatureExtractionSetupDialog.flagMinorIsotopesPrecursors(),
-				msmsFeatureExtractionSetupDialog.getMaxPrecursorCharge());
+				ps, activeRawDataAnalysisProject.getMSMSDataFiles(), null);
+		
+//		Collection<String>errors = msmsFeatureExtractionSetupDialog.validateParameters();
+//		if(!errors.isEmpty()) {
+//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msmsFeatureExtractionSetupDialog);
+//			return;
+//		}
+//		MsMsfeatureBatchExtractionTask task = new MsMsfeatureBatchExtractionTask(
+//				activeRawDataAnalysisProject.getRawDataFiles(), 
+//				msmsFeatureExtractionSetupDialog.getDataExtractionRtRange(),
+//				msmsFeatureExtractionSetupDialog.removeAllMassesAboveParent(), 
+//				msmsFeatureExtractionSetupDialog.getMsMsCountsCutoff(), 
+//				msmsFeatureExtractionSetupDialog.getMaxFragmentsCutoff(),
+//				msmsFeatureExtractionSetupDialog.getIntensityMeasure(),
+//				msmsFeatureExtractionSetupDialog.getIsolationWindowLowerBorder(),
+//				msmsFeatureExtractionSetupDialog.getIsolationWindowUpperBorder(),
+//				msmsFeatureExtractionSetupDialog.getMsmsGroupingRtWindow(),
+//				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassError(),
+//				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassErrorType(),
+//				msmsFeatureExtractionSetupDialog.flagMinorIsotopesPrecursors(),
+//				msmsFeatureExtractionSetupDialog.getMaxPrecursorCharge(),
+//				msmsFeatureExtractionSetupDialog.getSmoothingFilterWidth());
 		
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
@@ -354,11 +366,16 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				rawDataAnalysisProjectSetupDialog.getProjectName(), 
 				rawDataAnalysisProjectSetupDialog.getProjectDescription(), 
 				parentDirectory);
-		List<DataFile> dataFiles = 
-				rawDataAnalysisProjectSetupDialog.getDataFiles().stream().
-				map(f -> new DataFile(f)).collect(Collectors.toList());
+		List<DataFile> msmsDataFiles = 
+				rawDataAnalysisProjectSetupDialog.getMSMSDataFiles().stream().
+				map(f -> new DataFile(f)).collect(Collectors.toList());		
+		newProject.addMSMSDataFiles(msmsDataFiles);
 		
-		newProject.addDataFiles(dataFiles);
+		List<DataFile> msOneDataFiles = 
+				rawDataAnalysisProjectSetupDialog.getMSOneDataFiles().stream().
+				map(f -> new DataFile(f)).collect(Collectors.toList());		
+		newProject.addMSOneDataFiles(msOneDataFiles);
+		
 		boolean copyDataToProject = 
 				rawDataAnalysisProjectSetupDialog.copyRawDataToProject();
 		rawDataAnalysisProjectSetupDialog.dispose();
@@ -395,7 +412,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			if(projectDir.exists())
 				errors.add("Project \"" + name + "\" alredy exists at " + location);
 		}		
-		if(rawDataAnalysisProjectSetupDialog.getDataFiles().isEmpty())
+		if(rawDataAnalysisProjectSetupDialog.getMSMSDataFiles().isEmpty())
 			errors.add("No raw data files added to the project");
 		
 		return errors;
@@ -454,8 +471,12 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(activeRawDataAnalysisProject == null)
 			return;
 		
-		SaveRawDataAnalysisProjectTask task = 
-				new SaveRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
+//		SaveRawDataAnalysisProjectTask task = 
+//				new SaveRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
+//		task.addTaskListener(this);
+		
+		SaveStoredRawDataAnalysisProjectTask task = 
+				new SaveStoredRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
@@ -717,15 +738,15 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
-		Map<DataFile, Collection<MsFeature>> featureMap = task.getMsFeatureMap();	
+		Map<DataFile, Collection<MsFeatureInfoBundle>> featureMap = task.getMsFeatureMap();	
 		Collection<String>log = new ArrayList<String>();
-		for(Entry<DataFile, Collection<MsFeature>>e : featureMap.entrySet()) {
+		for(Entry<DataFile, Collection<MsFeatureInfoBundle>>e : featureMap.entrySet()) {
 			activeRawDataAnalysisProject.setMsFeaturesForDataFile(e.getKey(), e.getValue());
 			log.add(e.getKey().getName() + " -> " + Integer.toString(e.getValue().size()) + " features");
 		}
 		MessageDialog.showInfoMsg(StringUtils.join(log, "\n"), this.getContentPane());
 		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
-				activeRawDataAnalysisProject.getRawDataFiles(), false);
+				activeRawDataAnalysisProject.getMSMSDataFiles(), false);
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
@@ -742,7 +763,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(task.getNewProject());
 		activeRawDataAnalysisProject = task.getNewProject();
 		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
-				activeRawDataAnalysisProject.getRawDataFiles());
+				activeRawDataAnalysisProject.getMSMSDataFiles());
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
@@ -784,9 +805,17 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	private void finalizeProjectRawDataLoad(ProjectRawDataFileOpenTask task) {
-
-		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
-				task.getProject().getRawDataFiles());
+		
+		Collection<String> errors = task.getErrors();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this.getContentPane());
+			ProjectUtils.saveProjectFile(activeRawDataAnalysisProject);
+		}
+		Collection<DataFile> filesToLoad = new ArrayList<DataFile>();
+		filesToLoad.addAll(task.getProject().getMSMSDataFiles());
+		filesToLoad.addAll(task.getProject().getMSOneDataFiles());
+		
+		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(filesToLoad);
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
@@ -898,8 +927,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			showAverageMassSpectrum((AverageMassSpectrum)selected.stream().findFirst().get());
 		
 		//	Show first selected MSMS feature
-		if(selected.stream().findFirst().get() instanceof MsFeature)
-			showMsFeature((MsFeature)selected.stream().findFirst().get());
+		if(selected.stream().findFirst().get() instanceof MsFeatureInfoBundle)
+			showMsFeature(((MsFeatureInfoBundle)selected.stream().findFirst().get()).getMsFeature());
 		
 		//	Show selected chromatograms
 		List<ExtractedChromatogram> chroms = 

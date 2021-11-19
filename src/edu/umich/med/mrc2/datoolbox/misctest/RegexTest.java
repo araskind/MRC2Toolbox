@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.URLEncoder;
@@ -183,6 +184,7 @@ import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.LIMSReportingUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MGFUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PeptideUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
@@ -203,7 +205,7 @@ public class RegexTest {
 	public static final String pubchemCidUrl = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
 	private static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
 	private static final SmilesParser smipar = new SmilesParser(builder);
-	private static final MDLV2000Reader mdlReader = new MDLV2000Reader();
+	private static final MDLV2000Reader molReader  = new MDLV2000Reader();
 	private static InChIGeneratorFactory igfactory;
 	private static InChIGenerator inChIGenerator;
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
@@ -216,10 +218,52 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			testSgFilterImpl();
+			testEncodeDecode();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void testEncodeDecode() {
+
+		double[]x = new double[]{0.0, 0.126933037, 0.253866073, 0.38079911, 0.507732146, 0.634665183, 
+				0.761598219, 0.888531256, 1.015464292, 1.142397329, 1.269330365, 
+				1.396263402, 1.523196438, 1.650129475, 1.777062511, 1.903995548, 2.030928584, 2.157861621,
+				2.284794657, 2.411727694, 2.53866073, 
+				2.665593767, 2.792526803, 2.91945984, 3.046392876, 3.173325913, 3.300258949, 3.427191986, 
+				3.554125022, 3.681058059, 3.807991095, 
+				3.934924132, 4.061857168, 4.188790205, 4.315723241, 4.442656278, 4.569589314, 4.696522351, 
+				4.823455387, 4.950388424, 5.07732146, 
+				5.204254497, 5.331187533, 5.45812057, 5.585053606, 5.711986643, 5.838919679, 5.965852716, 
+				6.092785752, 6.219718789, 6.346651825, 
+				6.473584862, 6.600517898, 6.727450935, 6.854383971, 6.981317008, 7.108250044, 7.235183081, 
+				7.362116118, 7.489049154, 7.615982191, 
+				7.742915227, 7.869848264, 7.9967813, 8.123714337, 8.250647373, 8.37758041, 8.504513446, 
+				8.631446483, 8.758379519, 8.885312556, 
+				9.012245592, 9.139178629, 9.266111665, 9.393044702, 9.519977738, 9.646910775, 9.773843811, 
+				9.900776848, 10.02770988, 10.15464292, 
+				10.28157596, 10.40850899, 10.53544203, 10.66237507, 10.7893081, 10.91624114, 11.04317418, 
+				11.17010721, 11.29704025, 11.42397329, 
+				11.55090632, 11.67783936, 11.8047724, 11.93170543, 12.05863847, 12.1855715, 12.31250454, 
+				12.43943758, 12.56637061};
+		
+		String enc = "";
+		try {
+			enc = NumberArrayUtils.encodeNumberArray(x);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.err.println(enc);
+		double[] decoded = null;		
+		try {
+			decoded = NumberArrayUtils.decodeNumberArray(enc);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.err.println(x.length);
+		System.err.println(decoded.length);
 	}
 	
 	private static void testSgFilterImpl() {

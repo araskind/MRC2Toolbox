@@ -60,13 +60,18 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import org.apache.commons.lang.StringUtils;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
 
 public class MSMSFeatureExtractionSetupDialog extends JDialog  implements ActionListener, BackedByPreferences{
 
@@ -110,20 +115,26 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	public static final String INTENSITY_MEASURE = "INTENSITY_MEASURE";
 	public static final String FLAG_MINOR_ISOTOPES_PRECURSORS = "FLAG_MINOR_ISOTOPES_PRECURSORS";
 	public static final String MAX_PRECURSOR_CHARGE = "MAX_PRECURSOR_CHARGE";
+	public static final String FILTER_WIDTH = "FILTER_WIDTH";
+	public static final String CHROMATOGRAM_WIDTH = "CHROMATOGRAM_WIDTH";
 
 	private JFormattedTextField msmsGroupRtWindowTextField;
 	private JFormattedTextField precursorGroupingMassErrorTextField;
 	private JComboBox precursorGroupingMassErrorTypeComboBox;
 	private JCheckBox flagMinorIsotopesPrecursorsCheckBox;
 	private JSpinner maxChargeSpinner;
+	private JLabel lblNewLabel_8;
+	private JComboBox filterWidthComboBox;
+	private JLabel lblNewLabel_9;
+	private JFormattedTextField xicWindowTextField;
 	
 	public MSMSFeatureExtractionSetupDialog(ActionListener listener) {
 		super();
 		setTitle("MSMS feature extraction settings");
 		setIconImage(((ImageIcon) extractMSMSFeaturesIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setPreferredSize(new Dimension(640, 450));
-		setSize(new Dimension(640, 450));
+		setPreferredSize(new Dimension(640, 550));
+		setSize(new Dimension(640, 550));
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		preferences = Preferences.userNodeForPackage(this.getClass());
@@ -134,8 +145,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[]{277, 0, 0, 0, 0, 0};
 		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.columnWeights = new double[]{1.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 
 		limitExtractionRtCheckBox = new JCheckBox("Extract data only for retention time from ");
@@ -403,31 +414,91 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblMajorFragments.gridy = 2;
 		panel.add(lblMajorFragments, gbc_lblMajorFragments);
 		
+		JPanel panel_4 = new JPanel();
+		panel_4.setBorder(new CompoundBorder(
+				new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, 
+						new Color(255, 255, 255), new Color(160, 160, 160)), 
+						"MS1 pattern extraction", 
+						TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
+				new EmptyBorder(10, 0, 10, 0)));
+		GridBagConstraints gbc_panel_4 = new GridBagConstraints();
+		gbc_panel_4.gridwidth = 5;
+		gbc_panel_4.fill = GridBagConstraints.BOTH;
+		gbc_panel_4.gridx = 0;
+		gbc_panel_4.gridy = 6;
+		panel_1.add(panel_4, gbc_panel_4);
+		GridBagLayout gbl_panel_4 = new GridBagLayout();
+		gbl_panel_4.columnWidths = new int[]{0, 0, 0, 0, 0};
+		gbl_panel_4.rowHeights = new int[]{0, 0, 0, 0};
+		gbl_panel_4.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_4.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		panel_4.setLayout(gbl_panel_4);
+		
 		flagMinorIsotopesPrecursorsCheckBox = 
 				new JCheckBox("Flag MSMS features where precursor is not monoisotopic peak");
 		GridBagConstraints gbc_flagMinorIsotopesPrecursorsCheckBox = new GridBagConstraints();
-		gbc_flagMinorIsotopesPrecursorsCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_flagMinorIsotopesPrecursorsCheckBox.gridwidth = 2;
-		gbc_flagMinorIsotopesPrecursorsCheckBox.insets = new Insets(0, 0, 0, 5);
+		gbc_flagMinorIsotopesPrecursorsCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_flagMinorIsotopesPrecursorsCheckBox.gridx = 0;
-		gbc_flagMinorIsotopesPrecursorsCheckBox.gridy = 6;
-		panel_1.add(flagMinorIsotopesPrecursorsCheckBox, gbc_flagMinorIsotopesPrecursorsCheckBox);
+		gbc_flagMinorIsotopesPrecursorsCheckBox.gridy = 0;
+		panel_4.add(flagMinorIsotopesPrecursorsCheckBox, gbc_flagMinorIsotopesPrecursorsCheckBox);
 		
 		JLabel lblNewLabel_7 = new JLabel("Max. charge");
 		GridBagConstraints gbc_lblNewLabel_7 = new GridBagConstraints();
-		gbc_lblNewLabel_7.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_7.insets = new Insets(0, 0, 0, 5);
-		gbc_lblNewLabel_7.gridx = 3;
-		gbc_lblNewLabel_7.gridy = 6;
-		panel_1.add(lblNewLabel_7, gbc_lblNewLabel_7);
+		gbc_lblNewLabel_7.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_7.gridx = 2;
+		gbc_lblNewLabel_7.gridy = 0;
+		panel_4.add(lblNewLabel_7, gbc_lblNewLabel_7);
 		
 		maxChargeSpinner = new JSpinner();
-		maxChargeSpinner.setModel(new SpinnerNumberModel(2, 1, 3, 1));
 		GridBagConstraints gbc_maxChargeSpinner = new GridBagConstraints();
-		gbc_maxChargeSpinner.anchor = GridBagConstraints.WEST;
-		gbc_maxChargeSpinner.gridx = 4;
-		gbc_maxChargeSpinner.gridy = 6;
-		panel_1.add(maxChargeSpinner, gbc_maxChargeSpinner);
+		gbc_maxChargeSpinner.insets = new Insets(0, 0, 5, 0);
+		gbc_maxChargeSpinner.gridx = 3;
+		gbc_maxChargeSpinner.gridy = 0;
+		panel_4.add(maxChargeSpinner, gbc_maxChargeSpinner);
+		maxChargeSpinner.setModel(new SpinnerNumberModel(2, 1, 3, 1));
+		
+		lblNewLabel_9 = new JLabel("Chromatogram extraction window");
+		GridBagConstraints gbc_lblNewLabel_9 = new GridBagConstraints();
+		gbc_lblNewLabel_9.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_9.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_9.gridx = 0;
+		gbc_lblNewLabel_9.gridy = 1;
+		panel_4.add(lblNewLabel_9, gbc_lblNewLabel_9);
+		
+		xicWindowTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getRtFormat());
+		GridBagConstraints gbc_xicWindowTextField = new GridBagConstraints();
+		gbc_xicWindowTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_xicWindowTextField.gridwidth = 2;
+		gbc_xicWindowTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_xicWindowTextField.gridx = 1;
+		gbc_xicWindowTextField.gridy = 1;
+		panel_4.add(xicWindowTextField, gbc_xicWindowTextField);
+		
+		JLabel lblNewLabel_10 = new JLabel("min.");
+		GridBagConstraints gbc_lblNewLabel_10 = new GridBagConstraints();
+		gbc_lblNewLabel_10.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_10.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel_10.gridx = 3;
+		gbc_lblNewLabel_10.gridy = 1;
+		panel_4.add(lblNewLabel_10, gbc_lblNewLabel_10);
+		
+		lblNewLabel_8 = new JLabel("Smoothing filter width");
+		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
+		gbc_lblNewLabel_8.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_8.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_8.gridx = 0;
+		gbc_lblNewLabel_8.gridy = 2;
+		panel_4.add(lblNewLabel_8, gbc_lblNewLabel_8);
+		
+		filterWidthComboBox = new JComboBox<SavitzkyGolayWidth>(
+				new DefaultComboBoxModel<SavitzkyGolayWidth>(SavitzkyGolayWidth.values()));
+		GridBagConstraints gbc_filterWidthComboBox = new GridBagConstraints();
+		gbc_filterWidthComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_filterWidthComboBox.gridwidth = 2;
+		gbc_filterWidthComboBox.insets = new Insets(0, 0, 0, 5);
+		gbc_filterWidthComboBox.gridx = 1;
+		gbc_filterWidthComboBox.gridy = 2;
+		panel_4.add(filterWidthComboBox, gbc_filterWidthComboBox);
 
 		//	Buttons
 		JPanel panel_2 = new JPanel();
@@ -528,6 +599,14 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		return (int)maxChargeSpinner.getValue();
 	}
 
+	public int getSmoothingFilterWidth() {		
+		return ((SavitzkyGolayWidth)filterWidthComboBox.getSelectedItem()).getWidth();
+	}
+	
+	public double getChromatogramExtractionWindow() {
+		return Double.valueOf(xicWindowTextField.getText());
+	}
+		
 	@Override
 	public void loadPreferences(Preferences prefs) {
 
@@ -551,7 +630,12 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 				IntensityMeasure.geIntensityMeasureByName(
 						preferences.get(INTENSITY_MEASURE, IntensityMeasure.ABSOLUTE.name())));	
 		flagMinorIsotopesPrecursorsCheckBox.setSelected(preferences.getBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, true));	
-		maxChargeSpinner.setValue(preferences.getInt(MAX_PRECURSOR_CHARGE, 2));
+		maxChargeSpinner.setValue(preferences.getInt(MAX_PRECURSOR_CHARGE, 2));		
+		filterWidthComboBox.setSelectedItem(
+				SavitzkyGolayWidth.getSavitzkyGolayWidthByName(
+				preferences.get(FILTER_WIDTH, SavitzkyGolayWidth.NINE.name())));
+		
+		xicWindowTextField.setText(Double.toString(preferences.getDouble(CHROMATOGRAM_WIDTH, 0.3d)));
 	}
 
 	@Override
@@ -574,7 +658,9 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		preferences.putInt(MAX_FRAGMENTS_COUNT, (int) maxFragmentsSpinner.getValue());		
 		preferences.put(INTENSITY_MEASURE, getIntensityMeasure().name());		
 		preferences.putBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, flagMinorIsotopesPrecursorsCheckBox.isSelected());		
-		preferences.putInt(MAX_PRECURSOR_CHARGE, (int) maxChargeSpinner.getValue());
+		preferences.putInt(MAX_PRECURSOR_CHARGE, (int) maxChargeSpinner.getValue());		
+		preferences.put(FILTER_WIDTH, ((SavitzkyGolayWidth)filterWidthComboBox.getSelectedItem()).name());		
+		preferences.putDouble(CHROMATOGRAM_WIDTH, getChromatogramExtractionWindow());
 	}
 
 	@Override
@@ -603,7 +689,35 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 			if(minCounts > 100.0d || minCounts < 0.0d)
 				errors.add("Relative intensity cutoff should be between 0 and 100");
 		}
+		if(getChromatogramExtractionWindow() <= 0)
+			errors.add("Chromatogram extraction window should be > 0");
+		
 		return errors;
+	}
+	
+	public MSMSExtractionParameterSet getMSMSExtractionParameterSet() {
+		
+		Collection<String>errors = validateParameters();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+			return null;
+		}
+		MSMSExtractionParameterSet ps = new MSMSExtractionParameterSet();
+		ps.setDataExtractionRtRange(getDataExtractionRtRange());
+		ps.setMsmsIsolationWindowLowerBorder(getIsolationWindowLowerBorder());
+		ps.setMsmsIsolationWindowUpperBorder(getIsolationWindowUpperBorder());	
+		ps.setMsmsGroupingRtWindow(getMsmsGroupingRtWindow());
+		ps.setPrecursorGroupingMassError(getPrecursorGroupingMassError());
+		ps.setPrecursorGroupingMassErrorType(getPrecursorGroupingMassErrorType());		
+		ps.setRemoveAllMassesAboveParent(removeAllMassesAboveParent());
+		ps.setMsMsCountsCutoff(getMsMsCountsCutoff());
+		ps.setFilterIntensityMeasure(getFilterIntensityMeasure());
+		ps.setMaxFragmentsCutoff(getMaxFragmentsCutoff());	
+		ps.setFlagMinorIsotopesPrecursors(flagMinorIsotopesPrecursors());
+		ps.setMaxPrecursorCharge(getMaxPrecursorCharge());
+		ps.setSmoothingFilterWidth(getSmoothingFilterWidth());		
+		ps.setChromatogramExtractionWindow(getChromatogramExtractionWindow());
+		return ps;
 	}
 }
 

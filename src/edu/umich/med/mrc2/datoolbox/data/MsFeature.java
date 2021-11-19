@@ -33,6 +33,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
@@ -47,6 +50,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureListener;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.StoredMsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -866,6 +870,29 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			return 0;
 		else
 			return msmsHits.size();
+	}
+	
+	public Element getXmlElement(Document parentDocument) {
+		
+		Element msFeatureElement = parentDocument.createElement(
+				StoredMsFeatureFields.MsFeature.name());
+		
+		msFeatureElement.setAttribute(StoredMsFeatureFields.Id.name(), id);	
+		msFeatureElement.setAttribute(StoredMsFeatureFields.Name.name(), name);
+		msFeatureElement.setAttribute(StoredMsFeatureFields.rt.name(), Double.toString(retentionTime));
+		if(rtRange != null)
+			msFeatureElement.setAttribute(StoredMsFeatureFields.rtRange.name(), rtRange.getStorableString());
+		
+		if(polarity != null)
+			msFeatureElement.setAttribute(StoredMsFeatureFields.pol.name(), polarity.getCode());
+		
+		//	Spectrum
+		if(spectrum != null) 
+			msFeatureElement.appendChild(spectrum.getXmlElement(parentDocument));
+
+		
+		//	Identifications
+		return msFeatureElement;		
 	}
 }
 

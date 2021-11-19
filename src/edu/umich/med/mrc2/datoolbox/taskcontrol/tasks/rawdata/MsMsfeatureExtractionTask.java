@@ -34,9 +34,11 @@ import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.XicDataBundle;
@@ -62,8 +64,7 @@ import edu.umich.med.mrc2.datoolbox.utils.ClusterUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
-import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
-import edu.umich.med.mrc2.datoolbox.utils.filter.WeightedMovingAverageFilter;
+import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayFilter;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.LCMSDataSubset;
 import umich.ms.datatypes.scan.IScan;
@@ -72,6 +73,8 @@ import umich.ms.datatypes.spectrum.ISpectrum;
 import umich.ms.fileio.exceptions.FileParsingException;
 
 public class MsMsfeatureExtractionTask extends AbstractTask {
+	
+	private MSMSExtractionParameterSet ps;
 
 	private DataFile rawDataFile;
 	private Range dataExtractionRtRange;
@@ -86,43 +89,34 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private MassErrorType precursorGroupingMassErrorType;
 	private boolean flagMinorIsotopesPrecursors;
 	private int maxPrecursorCharge;
+	private double chromatogramExtractionWindow;
+	private int smoothingFilterWidth;	
+	private SavitzkyGolayFilter smoothingFilter; 
+	
 	private LCMSData data;
 	private Collection<MsFeature>features;
-	private double xicWindowHalfWidth;
-	
-	private Filter smoothingFilter;
+	private Collection<MsFeatureInfoBundle>featureBundles;
 
 	public MsMsfeatureExtractionTask(
 			DataFile rawDataFile,
-			Range dataExtractionRtRange,
-			boolean removeAllMassesAboveParent,
-			double msMsCountsCutoff,
-			int maxFragmentsCutoff,
-			IntensityMeasure filterIntensityMeasure,
-			double msmsIsolationWindowLowerBorder,
-			double msmsIsolationWindowUpperBorder,
-			double msmsGroupingRtWindow,
-			double precursorGroupingMassError,
-			MassErrorType precursorGroupingMassErrorType,
-			boolean flagMinorIsotopesPrecursors,
-			int maxPrecursorCharge) {
+			MSMSExtractionParameterSet ps) {
 		super();
-		this.rawDataFile = rawDataFile;
-		this.dataExtractionRtRange = dataExtractionRtRange;
-		this.removeAllMassesAboveParent = removeAllMassesAboveParent;
-		this.msMsCountsCutoff = msMsCountsCutoff;
-		this.maxFragmentsCutoff = maxFragmentsCutoff;
-		this.filterIntensityMeasure = filterIntensityMeasure;
-		this.msmsIsolationWindowLowerBorder = msmsIsolationWindowLowerBorder;
-		this.msmsIsolationWindowUpperBorder = msmsIsolationWindowUpperBorder;
-		this.msmsGroupingRtWindow = msmsGroupingRtWindow;
-		this.precursorGroupingMassError = precursorGroupingMassError;
-		this.precursorGroupingMassErrorType = precursorGroupingMassErrorType;
-		this.flagMinorIsotopesPrecursors = flagMinorIsotopesPrecursors;
-		this.maxPrecursorCharge = maxPrecursorCharge;
-		
-		xicWindowHalfWidth = 0.2d;	//	TODO pass as parameter
-		smoothingFilter = new WeightedMovingAverageFilter(9);	//	TODO pass as parameter
+		this.ps = ps;
+		this.rawDataFile = rawDataFile;	
+		this.dataExtractionRtRange = ps.getDataExtractionRtRange();
+		this.removeAllMassesAboveParent = ps.isRemoveAllMassesAboveParent();
+		this.msMsCountsCutoff = ps.getMsMsCountsCutoff();
+		this.maxFragmentsCutoff = ps.getMaxFragmentsCutoff();
+		this.filterIntensityMeasure = ps.getFilterIntensityMeasure();
+		this.msmsIsolationWindowLowerBorder = ps.getMsmsIsolationWindowLowerBorder();
+		this.msmsIsolationWindowUpperBorder = ps.getMsmsIsolationWindowUpperBorder();
+		this.msmsGroupingRtWindow = ps.getMsmsGroupingRtWindow();
+		this.precursorGroupingMassError = ps.getPrecursorGroupingMassError();
+		this.precursorGroupingMassErrorType = ps.getPrecursorGroupingMassErrorType();
+		this.flagMinorIsotopesPrecursors = ps.isFlagMinorIsotopesPrecursors();
+		this.maxPrecursorCharge = ps.getMaxPrecursorCharge();		
+		this.chromatogramExtractionWindow = ps.getChromatogramExtractionWindow();
+		smoothingFilter = new SavitzkyGolayFilter(ps.getSmoothingFilterWidth());
 		features = new ArrayList<MsFeature>();
 	}
 
@@ -163,12 +157,19 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		}
 		if(flagMinorIsotopesPrecursors) {
 			try {
-				flagFeaturesWithMinorIsotopesPrecursors();
+//				flagFeaturesWithMinorIsotopesPrecursors();
 			}
 			catch (Exception e1) {
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
 			}
+		}
+		try {
+			createFeatureInfoBundles();
+		}
+		catch (Exception e1) {
+			e1.printStackTrace();
+			setStatus(TaskStatus.ERROR);
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -188,8 +189,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			Range mzRange = MsUtils.createMassRange(
 					mz, precursorGroupingMassError, precursorGroupingMassErrorType);
 			Range rtRange = new Range(
-					feature.getRetentionTime() - xicWindowHalfWidth, 
-					feature.getRetentionTime() + xicWindowHalfWidth);			
+					feature.getRetentionTime() - chromatogramExtractionWindow / 2.0d, 
+					feature.getRetentionTime() + chromatogramExtractionWindow / 2.0d);			
 			XicDataBundle parentBundle = getXicDataBundleForMzAroundRt(mzRange, rtRange);
 			findPeakBordersForScan(parentBundle, scanNum);
 			
@@ -560,7 +561,6 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 						precursorGroupingMassError, 
 						precursorGroupingMassErrorType, 
 						msmsGroupingRtWindow)) {
-
 					fClust.addFeature(cf, dataPipeline);
 					assigned.add(cf);
 					break;
@@ -643,7 +643,17 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			
 			MsFeature f = new MsFeature(s.getRt(), polarity);
 			MassSpectrum spectrum = new MassSpectrum();
-			spectrum.addDataPoints(RawDataUtils.getScanPoints(parentScan));		
+			
+			//	TODO interpolate flanking MS1 scans
+			IScan nextMsOneScan = data.getScans().getNextScanAtMsLevel(parentScan.getNum(), 1);
+			if(nextMsOneScan != null) {
+				Collection<MsPoint>interpolatedMsOne = 
+						interpolateScanData(parentScan, nextMsOneScan, s.getRt());
+				spectrum.addDataPoints(interpolatedMsOne);	
+			}
+			else {
+				spectrum.addDataPoints(RawDataUtils.getScanPoints(parentScan));	
+			}		
 			PrecursorInfo precursor = s.getPrecursor();
 			Double targetMz = precursor.getMzTarget();
 			if(targetMz == null)
@@ -693,6 +703,19 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		}
 	}
 	
+	private Collection<MsPoint>interpolateScanData(IScan leftScan, IScan rightScan, double rtOfInterest){
+		
+		double splitRatio = (rtOfInterest - leftScan.getRt()) / (rightScan.getRt() - leftScan.getRt());
+		Collection<MsPoint>interpolated = MsUtils.averageTwoSpectraWithInterpolation(
+				RawDataUtils.getScanPoints(leftScan), 
+				RawDataUtils.getScanPoints(rightScan), 
+				splitRatio, 
+				precursorGroupingMassError, 
+				precursorGroupingMassErrorType);
+		
+		return interpolated;
+	}
+	
 	private Collection<MsPoint>getMinorParentIons(
 			IScan ms1can, Range isolationWindow, double parentMz){
 				
@@ -737,7 +760,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		if(s.getPrecursor() == null)
 			return null;
 					
-		int parentScanNumber = s.getPrecursor().getParentScanNum();
+		int parentScanNumber = s.getPrecursor().getParentScanNum();		
 		return data.getScans().getScanByNum(parentScanNumber);
 	}
 	
@@ -755,23 +778,24 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		}
 		data.load(LCMSDataSubset.WHOLE_RUN, this);		
 	}
+	
+	private void createFeatureInfoBundles() {
+
+		featureBundles = new ArrayList<MsFeatureInfoBundle>();
+		for(MsFeature f : features) {
+			
+			MsFeatureInfoBundle bundle = new MsFeatureInfoBundle(f);
+			bundle.setAcquisitionMethod(rawDataFile.getDataAcquisitionMethod());
+			bundle.setSample((IDTExperimentalSample) rawDataFile.getParentSample());
+			bundle.setInjectionId(rawDataFile.getInjectionId());
+			featureBundles.add(bundle);
+		}	
+		System.err.println("***");
+	}
 
 	@Override
 	public Task cloneTask() {
-		return new MsMsfeatureExtractionTask(
-				rawDataFile,
-				dataExtractionRtRange,
-				removeAllMassesAboveParent,
-				msMsCountsCutoff,
-				maxFragmentsCutoff,
-				filterIntensityMeasure,
-				msmsIsolationWindowLowerBorder,
-				msmsIsolationWindowUpperBorder,
-				msmsGroupingRtWindow,
-				precursorGroupingMassError,
-				precursorGroupingMassErrorType,
-				flagMinorIsotopesPrecursors,
-				maxPrecursorCharge);
+		return new MsMsfeatureExtractionTask(rawDataFile, ps);
 	}
 
 	public Collection<MsFeature> getMSMSFeatures() {
@@ -781,4 +805,9 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	public DataFile getRawDataFile() {
 		return rawDataFile;
 	}
+	
+	public Collection<MsFeatureInfoBundle> getMsFeatureInfoBundles() {
+		return featureBundles;
+	}
+	
 }
