@@ -23,8 +23,11 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -294,9 +297,25 @@ public class MsFeatureInfoBundle implements Serializable {
 					MsFeatureInfoBundleFields.Inj.name(), 
 					injectionId);
 		
-		Element featureElement =  msFeature.getXmlElement(parentDocument);
-		msFeatureInfoBundleElement.appendChild(featureElement);
-					
+		msFeatureInfoBundleElement.appendChild(
+				msFeature.getXmlElement(parentDocument));	
+		
+		if(idFollowupSteps != null && !idFollowupSteps.isEmpty()) {
+			
+			List<String> fusList = idFollowupSteps.stream().
+					map(s -> s.getId()).collect(Collectors.toList());
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.FUS.name(), 
+					StringUtils.join(fusList, "@"));
+		}
+		if(standadAnnotations != null && !standadAnnotations.isEmpty()) {
+			
+			List<String> stanList = standadAnnotations.stream().
+					map(s -> s.getId()).collect(Collectors.toList());
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.StAn.name(), 
+					StringUtils.join(stanList, "@"));
+		}				
 		return msFeatureInfoBundleElement;		
 	}
 }

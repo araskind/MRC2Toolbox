@@ -493,7 +493,7 @@ public class MassSpectrum implements Serializable {
 				MassSpectrumFields.Spectrum.name());
 		
 		if(msPoints != null && !msPoints.isEmpty()) {
-			double[]mzValues = msPoints.stream().mapToDouble(p -> p.getMz()).toArray();
+			double[]mzValues = msPoints.stream().mapToDouble(p -> Math.floor(p.getMz() * 1000000) / 1000000).toArray();
 			String mz = "";
 			try {
 				mz = NumberArrayUtils.encodeNumberArray(mzValues);
@@ -502,7 +502,7 @@ public class MassSpectrum implements Serializable {
 				e.printStackTrace();
 			}
 			spectrumElement.setAttribute(MassSpectrumFields.MZ.name(), mz);			
-			double[]intensityValues = msPoints.stream().mapToDouble(p -> p.getIntensity()).toArray();
+			double[]intensityValues = msPoints.stream().mapToDouble(p -> Math.floor(p.getIntensity() * 100) / 100).toArray();
 			String intensity = "";
 			try {
 				intensity = NumberArrayUtils.encodeNumberArray(intensityValues);

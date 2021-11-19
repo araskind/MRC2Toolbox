@@ -889,9 +889,16 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		//	Spectrum
 		if(spectrum != null) 
 			msFeatureElement.appendChild(spectrum.getXmlElement(parentDocument));
-
 		
 		//	Identifications
+		if(!identifications.isEmpty()) {
+			
+			Element cidListElement = parentDocument.createElement(
+					StoredMsFeatureFields.CIDs.name());
+			msFeatureElement.appendChild(cidListElement);
+			for(MsFeatureIdentity mscid : identifications)			
+				cidListElement.appendChild(mscid.getXmlElement(parentDocument));						
+		}			
 		return msFeatureElement;		
 	}
 }

@@ -24,6 +24,7 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -32,6 +33,8 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.Inflater;
 
 import org.apache.commons.codec.binary.Base64;
@@ -82,7 +85,7 @@ public class NumberArrayUtils {
             buffer.putDouble(aDoubleArray);
         
         byte[] data = buffer.array();
-        byte[] compressed = compress(data);
+        byte[] compressed = gzipCompress(data);
         byte[] binArray = base64.encode(compressed);
         return new String(binArray, "ASCII");
     }
@@ -91,7 +94,7 @@ public class NumberArrayUtils {
     	
     	byte[] compressed = encodedValues.getBytes("ASCII");
     	byte[]decoded = base64.decode(compressed); 	
-    	byte[] uncompressed = decompress(decoded);   	
+    	byte[] uncompressed = gzipUncompress(decoded);   	
     	Number[]dataArray = convertData(uncompressed, Precision.FLOAT64BIT);
         return Arrays.asList(dataArray).stream().
         		mapToDouble(v -> v.doubleValue()).toArray();
@@ -140,6 +143,37 @@ public class NumberArrayUtils {
             resultArray[indexOut / step] = num;
         }
         return resultArray;
+    }
+    
+	private static byte[] gzipCompress(byte[] uncompressedData) {
+        byte[] result = new byte[]{};
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(uncompressedData.length);
+             GZIPOutputStream gzipOS = new GZIPOutputStream(bos)) {
+            gzipOS.write(uncompressedData);
+            // You need to close it before using bos
+            gzipOS.close();
+            result = bos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+	private static byte[] gzipUncompress(byte[] compressedData) {
+        byte[] result = new byte[]{};
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(compressedData);
+             ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             GZIPInputStream gzipIS = new GZIPInputStream(bis)) {
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = gzipIS.read(buffer)) != -1) {
+                bos.write(buffer, 0, len);
+            }
+            result = bos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 	
     private static byte[] compress(byte[] uncompressedData) {

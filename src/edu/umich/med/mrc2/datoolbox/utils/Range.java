@@ -277,6 +277,6 @@ public class Range implements Serializable, Comparable<Range> {
 	}
 	
 	public String getStorableString() {
-		return Double.toString(min) + " " + Double.toString(max);
+		return Double.toString(min) + "_" + Double.toString(max);
 	}
 }

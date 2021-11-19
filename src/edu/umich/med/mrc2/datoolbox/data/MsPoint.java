@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+
 public class MsPoint implements Serializable {
 
 	/**
@@ -97,7 +99,8 @@ public class MsPoint implements Serializable {
 	}
 
 	public String toString() {
-		return Double.toString(mz) + " @ " + Double.toString(intensity);
+		return MsUtils.spectrumMzExportFormat.format(mz) + "_" + 
+				MsUtils.spectrumIntensityFormat.format(intensity);
 	}
 
 	/**

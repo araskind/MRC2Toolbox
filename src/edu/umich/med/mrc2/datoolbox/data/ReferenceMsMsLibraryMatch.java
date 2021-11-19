@@ -23,7 +23,11 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.project.store.ReferenceMsMsLibraryMatchFields;
 
 public class ReferenceMsMsLibraryMatch implements Serializable {
 
@@ -370,4 +374,93 @@ public class ReferenceMsMsLibraryMatch implements Serializable {
 	public void setPosteriorErrorProbability(double posteriorErrorProbability) {
 		this.posteriorErrorProbability = posteriorErrorProbability;
 	}
+	
+	public Element getXmlElement(Document parentDocument) {
+		
+		Element refMsmsElement = parentDocument.createElement(
+				ReferenceMsMsLibraryMatchFields.RefMsms.name());
+		
+		if(matchedLibraryFeature != null)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.DbId.name(), matchedLibraryFeature.getUniqueId());
+		
+		if(matchType != null)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.MType.name(), matchType.name());
+		
+		if(searchParameterSetId != null)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.ParSet.name(), searchParameterSetId);
+		
+		if(score > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.Score.name(), Double.toString(score));
+		
+		if(forwardScore > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.FwdScore.name(), Double.toString(forwardScore));
+		
+		if(reverseScore > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.RevScore.name(), Double.toString(reverseScore));
+		
+		if(probability > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.Prob.name(), Double.toString(probability));
+		
+		if(dotProduct > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.DotProd.name(), Double.toString(dotProduct));
+		
+		if(reverseDotProduct > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.RevDotProd.name(), Double.toString(reverseDotProduct));		
+		
+		if(hybridDotProduct > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.HybDotProd.name(), Double.toString(hybridDotProduct));
+				
+		if(hybridScore > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.HybScore.name(), Double.toString(hybridScore));
+				
+		if(hybridDeltaMz > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.HybDMZ.name(), Double.toString(hybridDeltaMz));
+		
+		refMsmsElement.setAttribute(
+				ReferenceMsMsLibraryMatchFields.Decoy.name(), Boolean.toString(decoyMatch));
+		
+		if(percolatorScore > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.PercScore.name(), Double.toString(percolatorScore));
+		
+		if(qValue > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.Qval.name(), Double.toString(qValue));
+		
+		if(posteriorErrorProbability > 0.0d)
+			refMsmsElement.setAttribute(
+					ReferenceMsMsLibraryMatchFields.PEP.name(), Double.toString(posteriorErrorProbability));
+		
+		return refMsmsElement;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

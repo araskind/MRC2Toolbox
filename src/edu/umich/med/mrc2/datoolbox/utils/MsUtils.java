@@ -122,6 +122,7 @@ public class MsUtils {
 			new LabeledIsotopePatternGenerator(MIN_ISOTOPE_ABUNDANCE);
 	
 	public static final NumberFormat spectrumMzFormat = new DecimalFormat("#.####");
+	public static final NumberFormat spectrumMzExportFormat = new DecimalFormat("#.######");
 	public static final NumberFormat spectrumIntensityFormat = new DecimalFormat("#.##");
 	
 	public static final MsDataPointComparator reverseIntensitySorter = 
