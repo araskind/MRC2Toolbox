@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.AdductComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
@@ -501,7 +502,14 @@ public class MassSpectrum implements Serializable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			spectrumElement.setAttribute(MassSpectrumFields.MZ.name(), mz);			
+			Element mzElement = 
+					parentDocument.createElement(MassSpectrumFields.MZ.name());		
+			Text mzText = parentDocument.createTextNode(mz);
+			mzElement.appendChild(mzText);		
+			spectrumElement.appendChild(mzElement);
+			
+//			spectrumElement.setAttribute(MassSpectrumFields.MZ.name(), mz);		
+			
 			double[]intensityValues = msPoints.stream().mapToDouble(p -> Math.floor(p.getIntensity() * 100) / 100).toArray();
 			String intensity = "";
 			try {
@@ -510,7 +518,13 @@ public class MassSpectrum implements Serializable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			spectrumElement.setAttribute(MassSpectrumFields.Intensity.name(), intensity);
+			Element intensityElement = 
+					parentDocument.createElement(MassSpectrumFields.Intensity.name());		
+			Text intensityText = parentDocument.createTextNode(intensity);
+			intensityElement.appendChild(intensityText);		
+			spectrumElement.appendChild(intensityElement);
+			
+//			spectrumElement.setAttribute(MassSpectrumFields.Intensity.name(), intensity);
 		}
 		if(detectionAlgorithm != null)
 			spectrumElement.setAttribute(MassSpectrumFields.Algo.name(), detectionAlgorithm);

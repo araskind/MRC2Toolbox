@@ -723,7 +723,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				ProjectRawDataFileOpenTask task = (ProjectRawDataFileOpenTask)e.getSource();
 				finalizeProjectRawDataLoad(task);
 			}
-			if (e.getSource().getClass().equals(SaveRawDataAnalysisProjectTask.class))
+			if (e.getSource().getClass().equals(SaveRawDataAnalysisProjectTask.class) ||
+					e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class))
 				finalizeRawDataAnalysisProjectSave();
 			
 			if (e.getSource().getClass().equals(LoadRawDataAnalysisProjectTask.class))
@@ -773,6 +774,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeRawDataAnalysisProjectSave() {
 		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();		
 		if(showNewProjectDialog) {
 
 			showNewProjectDialog = false;

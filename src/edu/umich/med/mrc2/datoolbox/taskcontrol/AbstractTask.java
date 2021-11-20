@@ -57,7 +57,7 @@ public abstract class AbstractTask implements Task {
 	/**
 	 * Triggers a TaskEvent and notifies the listeners
 	 */
-	private void fireTaskEvent() {
+	protected void fireTaskEvent() {
 		TaskEvent event = new TaskEvent(this);
 		for (TaskListener t : this.taskListeners) {
 			t.statusChanged(event);

@@ -28,6 +28,7 @@ import java.util.Collection;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
@@ -150,7 +151,11 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		extractedChromatogramElement.setAttribute(XICFields.Time.name(), time);	
+		Element timeElement = 
+				parentDocument.createElement(XICFields.Time.name());		
+		Text timeText = parentDocument.createTextNode(time);
+		timeElement.appendChild(timeText);		
+		extractedChromatogramElement.appendChild(timeElement);
 		
 		String intensity = "";
 		try {
@@ -159,7 +164,11 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		extractedChromatogramElement.setAttribute(XICFields.Intensity.name(), intensity);	
+		Element intensityElement = 
+				parentDocument.createElement(XICFields.Intensity.name());		
+		Text intensityText = parentDocument.createTextNode(intensity);
+		intensityElement.appendChild(intensityText);		
+		extractedChromatogramElement.appendChild(intensityElement);
 		
 		if(color != null)
 			extractedChromatogramElement.setAttribute(XICFields.Color.name(), 

@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
@@ -556,7 +557,14 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			msmsElement.setAttribute(TandemMassSpectrumFields.MZ.name(), mz);			
+			Element mzElement = 
+					parentDocument.createElement(TandemMassSpectrumFields.MZ.name());		
+			Text mzText = parentDocument.createTextNode(mz);
+			mzElement.appendChild(mzText);		
+			msmsElement.appendChild(mzElement);
+			
+//			msmsElement.setAttribute(TandemMassSpectrumFields.MZ.name(), mz);	
+			
 			double[]intensityValues = spectrum.stream().mapToDouble(p -> p.getIntensity()).toArray();
 			String intensity = "";
 			try {
@@ -565,7 +573,13 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			msmsElement.setAttribute(TandemMassSpectrumFields.Intensity.name(), intensity);
+			Element intensityElement = 
+					parentDocument.createElement(TandemMassSpectrumFields.Intensity.name());		
+			Text intensityText = parentDocument.createTextNode(intensity);
+			intensityElement.appendChild(intensityText);		
+			msmsElement.appendChild(intensityElement);
+			
+//			msmsElement.setAttribute(TandemMassSpectrumFields.Intensity.name(), intensity);
 		}
 		if(fragmenterVoltage > 0.0d)
 			msmsElement.setAttribute(TandemMassSpectrumFields.FragV.name(), 

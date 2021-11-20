@@ -32,19 +32,28 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntryRequest;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.compress.parallel.InputStreamSupplier;
+import org.apache.commons.io.FileUtils;
 
-public class ScatterSample { 
+public class ScatterZipArchiver { 
 
-    ParallelScatterZipCreator scatterZipCreator = new ParallelScatterZipCreator(); 
-    ScatterZipOutputStream dirs = 
-    		ScatterZipOutputStream.fileBased(
-    				File.createTempFile("scatter-dirs", "tmp"), 
-    				Deflater.BEST_COMPRESSION); 
+    private ParallelScatterZipCreator scatterZipCreator;
+    private ScatterZipOutputStream dirs; 
+    private File tempDir;
 
-    public ScatterSample() throws IOException { 
-    	
+    public ScatterZipArchiver() throws IOException { 
+    	scatterZipCreator = new ParallelScatterZipCreator(); 
+    	tempDir = File.createTempFile("scatter-dirs", "tmp");
+    	dirs = ScatterZipOutputStream.fileBased(tempDir, 
+        				Deflater.BEST_COMPRESSION);
     } 
 
+    public ScatterZipArchiver(File tmpDirParent) throws IOException { 
+    	scatterZipCreator = new ParallelScatterZipCreator(); 
+    	tempDir = File.createTempFile("scatter-dirs", "tmp", tmpDirParent);
+    	dirs = ScatterZipOutputStream.fileBased(tempDir, 
+        				Deflater.BEST_COMPRESSION);
+    } 
+    
     public void addEntry(
     		ZipArchiveEntry zipArchiveEntry, 
     		InputStreamSupplier streamSupplier) throws IOException { 
@@ -59,5 +68,17 @@ public class ScatterSample {
         dirs.writeTo(zipArchiveOutputStream); 
         dirs.close(); 
         scatterZipCreator.writeTo(zipArchiveOutputStream); 
-    } 
+    }
+
+	public void cleanup() {
+		
+		if(tempDir != null) {
+			try {
+				FileUtils.deleteDirectory(tempDir);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	} 
 }
