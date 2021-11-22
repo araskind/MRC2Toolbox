@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.awt.Color;
 import java.io.File;
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -32,13 +33,17 @@ import java.util.TreeMap;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
+import edu.umich.med.mrc2.datoolbox.project.store.AvgMSFields;
 import edu.umich.med.mrc2.datoolbox.project.store.StoredDataFileFields;
+import edu.umich.med.mrc2.datoolbox.project.store.XICFields;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class DataFile implements Comparable<DataFile>, Serializable {
@@ -121,6 +126,70 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();
 	}
 	
+	public DataFile(Element fileElement) {
+		
+		name = fileElement.getAttribute(StoredDataFileFields.Name.name());
+		String path = fileElement.getAttribute(StoredDataFileFields.Path.name());
+		if(!path.isEmpty())
+			fullPath = path;
+
+		String acqMethodId = fileElement.getAttribute(StoredDataFileFields.InjTimestamp.name());
+		if(!acqMethodId.isEmpty())
+			acquisitionMethod = IDTDataCash.getAcquisitionMethodById(acqMethodId);
+		
+		String colorCode = fileElement.getAttribute(StoredDataFileFields.Color.name());
+		if(colorCode.isEmpty())
+			color = Color.BLACK;
+		else
+			color = ColorUtils.hex2rgb(colorCode);
+		
+		String injId = fileElement.getAttribute(StoredDataFileFields.Injection.name());
+		if(!injId.isEmpty())
+			injectionId = injId;
+		
+		String injTime = fileElement.getAttribute(StoredDataFileFields.InjTimestamp.name());
+		if(!injTime.isEmpty()) {
+			try {
+				injectionTime = ProjectUtils.dateTimeFormat.parse(injTime);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		String sampPposition = fileElement.getAttribute(StoredDataFileFields.SamplePosition.name());
+		if(!sampPposition.isEmpty())
+			samplePosition = sampPposition;
+		
+		String injVol = fileElement.getAttribute(StoredDataFileFields.InjVol.name());
+		if(!injVol.isEmpty())
+			injectionVolume = Double.parseDouble(injVol);
+		
+		String sampleId = fileElement.getAttribute(StoredDataFileFields.Sample.name());
+		if(!sampleId.isEmpty())
+			parentSample = 
+					OfflineProjectLoadCash.getExperimentalSampleById(sampleId);
+
+		enabled = true;
+		chromatograms = new ArrayList<ExtractedChromatogram>();
+		userSpectra = new ArrayList<AverageMassSpectrum>();		
+		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();		
+		scalingFactor = 1.0d;
+		batchNumber = 1;
+		
+		//	TODO - add chromatograms
+		NodeList xicNodeList = 
+				fileElement.getElementsByTagName(XICFields.XIC.name());
+		for (int i = 0; i < xicNodeList.getLength(); i++) {
+			
+		}	
+		//	TODO - add averaged spectra
+		NodeList avgMsNodeList = 
+				fileElement.getElementsByTagName(AvgMSFields.AvgMs.name());
+		for (int i = 0; i < avgMsNodeList.getLength(); i++) {
+			
+		}	
+	}
+
 	public void addResultFile(ResultsFile result) {
 		
 		if(result.getMethod() == null)
@@ -359,9 +428,8 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 			Element userSpectraElement = parentDocument.createElement(
 					StoredDataFileFields.AvgMsList.name());
 			dataFileElement.appendChild(userSpectraElement);
-			for(AverageMassSpectrum avgMs : userSpectra) {
-				//	TODO
-			}
+			for(AverageMassSpectrum avgMs : userSpectra)
+				userSpectraElement.appendChild(avgMs.getXmlElement(parentDocument));			
 		}		
 		return dataFileElement;
 	}

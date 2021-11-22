@@ -354,27 +354,60 @@ public class IDTUtils {
 
 	public static IDTExperimentalSample getExperimentalSample(String sampleId, Connection conn) throws SQLException {
 
-			IDTExperimentalSample sample = null;
-			String query =
-				"SELECT SAMPLE_NAME, USER_DESCRIPTION, DATE_CREATED, "
-				+ "STOCK_SAMPLE_ID FROM SAMPLE WHERE SAMPLE_ID = ?";
-			PreparedStatement ps = conn.prepareStatement(query);
+		IDTExperimentalSample sample = null;
+		String query =
+			"SELECT SAMPLE_NAME, USER_DESCRIPTION, DATE_CREATED, "
+			+ "STOCK_SAMPLE_ID FROM SAMPLE WHERE SAMPLE_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, sampleId);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()) {
+
+			StockSample stockSample = IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+			sample = new IDTExperimentalSample(
+					sampleId,
+					rs.getString("SAMPLE_NAME"),
+					rs.getString("USER_DESCRIPTION"),
+					new Date(rs.getDate("DATE_CREATED").getTime()),
+					stockSample);
+		}
+		rs.close();
+		ps.close();
+		return sample;
+	}
+	
+	public static Collection<IDTExperimentalSample> getExperimentalSamples(
+			Collection<String> sampleIdList, Connection conn) throws SQLException {
+
+		Collection<IDTExperimentalSample> sampleList = 
+				new ArrayList<IDTExperimentalSample>();
+		Collection<String>cleanList = 
+				sampleIdList.stream().collect(Collectors.toCollection(TreeSet::new));
+		String query =
+			"SELECT SAMPLE_NAME, USER_DESCRIPTION, DATE_CREATED, "
+			+ "STOCK_SAMPLE_ID FROM SAMPLE WHERE SAMPLE_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		for(String sampleId : cleanList) {
+			
 			ps.setString(1, sampleId);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 
 				StockSample stockSample = IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
-				sample = new IDTExperimentalSample(
+				IDTExperimentalSample sample = new IDTExperimentalSample(
 						sampleId,
 						rs.getString("SAMPLE_NAME"),
 						rs.getString("USER_DESCRIPTION"),
 						new Date(rs.getDate("DATE_CREATED").getTime()),
 						stockSample);
+				sampleList.add(sample);
 			}
 			rs.close();
-			ps.close();
-			return sample;
 		}
+		ps.close();
+		return sampleList;
+	}
 
 	public static Collection<StockSample> getStockSampleList() throws Exception{
 

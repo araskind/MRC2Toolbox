@@ -80,7 +80,8 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 	
 	private Set<String>uniqueCompoundIds;
 	private Set<String>uniqueMSMSLibraryIds;
-	private Set<String>uniqueMSRTLibraryIds;	
+	private Set<String>uniqueMSRTLibraryIds;
+	private Set<String>uniqueSampleIds;
 	
 	public SaveStoredRawDataAnalysisProjectTask(RawDataAnalysisProject rawDataAnalyzerProject) {
 
@@ -97,7 +98,8 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		fileFeatureCount = getFeatureFileCount();
 		processedFiles = 0;
 		try {
-			Path tmpDir = Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), "xmlpParts");
+			Path tmpDir = 
+					Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), "xmlpParts");
 			xmlTmpDir = tmpDir.toFile();
 			xmlTmpDir.mkdirs();
 		} catch (Exception e) {
@@ -136,6 +138,10 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				filter(i -> i.getMsRtLibraryMatch() != null).
 				map(i -> i.getMsRtLibraryMatch().getLibraryTargetId()).
 				collect(Collectors.toCollection(TreeSet::new));
+		
+		uniqueSampleIds = projectToSave.getExperimentalSamples().
+				stream().map(s -> s.getId()).
+				collect(Collectors.toCollection(TreeSet::new));
 	}
 
 	private void createProjectXml() throws Exception {
@@ -153,6 +159,8 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		projectRoot.setAttribute(StoredProjectFields.Id.name(), 
 				projectToSave.getId());
 		projectRoot.setAttribute(StoredProjectFields.Name.name(), 
+				projectToSave.getName());
+		projectRoot.setAttribute(StoredProjectFields.Description.name(), 
 				projectToSave.getDescription());
 		projectRoot.setAttribute(StoredProjectFields.ProjectFile.name(), 
 				projectToSave.getProjectFile().getAbsolutePath());
@@ -185,6 +193,13 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				projectDocument.createTextNode(StringUtils.join(uniqueMSRTLibraryIds, ","));
 		uniqueMSRTLibIdListElement.appendChild(uniqueMSRTLibIdList);
 		projectRoot.appendChild(uniqueMSRTLibIdListElement);
+		
+		Element uniqueSampleIdListElement = projectDocument.createElement(
+				StoredProjectFields.UniqueSampleIdList.name());
+		Text uniqueSampleIdList = 
+				projectDocument.createTextNode(StringUtils.join(uniqueSampleIds, ","));
+		uniqueSampleIdListElement.appendChild(uniqueSampleIdList);
+		projectRoot.appendChild(uniqueSampleIdListElement);
 		
 		//	MS2 file list
 		Element msTwoFileListElement = projectDocument.createElement(

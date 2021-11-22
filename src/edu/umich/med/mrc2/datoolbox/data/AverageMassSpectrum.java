@@ -24,7 +24,11 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.io.Serializable;
 import java.util.Collection;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.AvgMSFields;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class AverageMassSpectrum implements Serializable, Comparable<AverageMassSpectrum>{
@@ -85,5 +89,19 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 	@Override
 	public int compareTo(AverageMassSpectrum o) {
 		return this.toString().compareTo(o.toString());
+	}
+	
+	public Element getXmlElement(Document parentDocument) {
+		//	TODO
+		Element avgMsElement = 
+				parentDocument.createElement(AvgMSFields.AvgMs.name());
+		
+//		private MassSpectrum masSpectrum;
+//		private DataFile dataFile;
+//		private int msLlevel;
+//		private Range rtRange;
+//		private Collection<Integer>scanNumbers;
+	
+		return avgMsElement;
 	}
 }

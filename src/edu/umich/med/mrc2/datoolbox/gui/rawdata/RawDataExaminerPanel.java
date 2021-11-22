@@ -89,6 +89,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadRawDataAnalysisProjectTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
@@ -498,7 +499,10 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
 			
 			File projectFile = chooser.getSelectedFile();
-			LoadRawDataAnalysisProjectTask ltp = new LoadRawDataAnalysisProjectTask(projectFile);
+			//	LoadRawDataAnalysisProjectTask ltp = 
+			//		new LoadRawDataAnalysisProjectTask(projectFile);
+			OpenStoredRawDataAnalysisProjectTask ltp = 
+					new OpenStoredRawDataAnalysisProjectTask(projectFile);
 			ltp.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(ltp);
 		}
@@ -728,13 +732,16 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				finalizeRawDataAnalysisProjectSave();
 			
 			if (e.getSource().getClass().equals(LoadRawDataAnalysisProjectTask.class))
-				finalizeRawDataAnalysisProjectSave((LoadRawDataAnalysisProjectTask)e.getSource());	
+				finalizeRawDataAnalysisProjectLoad((LoadRawDataAnalysisProjectTask)e.getSource());	
+			
+			if (e.getSource().getClass().equals(OpenStoredRawDataAnalysisProjectTask.class))
+				finalizeStoredRawDataAnalysisProjectOpen((OpenStoredRawDataAnalysisProjectTask)e.getSource());			
 			
 			if (e.getSource().getClass().equals(MsMsfeatureBatchExtractionTask.class))
 				finalizeRawMSMSBatchExtractionTask((MsMsfeatureBatchExtractionTask)e.getSource());
 		}
 	}
-	
+
 	private void finalizeRawMSMSBatchExtractionTask(MsMsfeatureBatchExtractionTask task) {
 
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -752,8 +759,27 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
 	}
+	
+	private void finalizeStoredRawDataAnalysisProjectOpen(OpenStoredRawDataAnalysisProjectTask task) {
 
-	private void finalizeRawDataAnalysisProjectSave(LoadRawDataAnalysisProjectTask task) {
+		if(!task.getErrors().isEmpty()) {
+			
+			MessageDialog.showErrorMsg(
+					StringUtils.join(task.getErrors(), "\n"), this.getContentPane());
+			return;
+		}
+		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(task.getProject());
+		activeRawDataAnalysisProject = task.getProject();
+		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
+				activeRawDataAnalysisProject.getMSMSDataFiles());
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+
+	private void finalizeRawDataAnalysisProjectLoad(LoadRawDataAnalysisProjectTask task) {
 
 		if(!task.getErrors().isEmpty()) {
 			
