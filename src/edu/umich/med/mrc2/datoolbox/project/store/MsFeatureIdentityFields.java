@@ -32,6 +32,7 @@ public enum MsFeatureIdentityFields {
 	Prim,
 	Qc,
 	User,
+	AssignedOn,
 	IdLevel,
 	Adduct,
 	SCO,

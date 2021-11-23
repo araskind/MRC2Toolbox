@@ -372,7 +372,8 @@ public class MsFeatureInfoBundle implements Serializable {
 		if(stAnStepsString != null) {
 			String[]stAnList = stAnStepsString.split("@");
 			for(String stAnId : stAnList) {
-				StandardFeatureAnnotation stan = IDTDataCash.getStandardFeatureAnnotationById(stAnId);
+				StandardFeatureAnnotation stan = 
+						IDTDataCash.getStandardFeatureAnnotationById(stAnId);
 				if(stan != null)
 					standadAnnotations.add(stan);
 			}		

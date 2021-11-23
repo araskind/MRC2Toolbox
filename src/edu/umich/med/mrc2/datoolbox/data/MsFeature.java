@@ -51,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureListener;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
 import edu.umich.med.mrc2.datoolbox.project.store.StoredMsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -908,6 +909,10 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	}
 	
 	public MsFeature(org.jdom2.Element featureElement) {
+		
+		identifications = new HashSet<MsFeatureIdentity>();
+		annotations = new TreeSet<ObjectAnnotation>();
+		eventListeners = ConcurrentHashMap.newKeySet();
 
 		id = featureElement.getAttributeValue(StoredMsFeatureFields.Id.name());
 		name = featureElement.getAttributeValue(StoredMsFeatureFields.Name.name());
@@ -928,6 +933,25 @@ public class MsFeature implements AnnotatedObject, Serializable {
 				featureElement.getAttributeValue(StoredMsFeatureFields.QS.name());
 		if(qsValue != null)
 			qualityScore = Double.parseDouble(qsValue);
+		
+		//	Identifications
+		List<org.jdom2.Element> msfIdListElements = 
+				featureElement.getChildren(StoredMsFeatureFields.CIDs.name());
+		if(msfIdListElements.size() > 0) {
+			
+			List<org.jdom2.Element> msfIdList = 
+					msfIdListElements.get(0).getChildren(MsFeatureIdentityFields.MSFID.name());
+			for(org.jdom2.Element msfIdElement : msfIdList) {
+				
+				MsFeatureIdentity msfId = new MsFeatureIdentity(msfIdElement);
+				identifications.add(msfId);
+				if(msfId.isPrimary())
+					primaryIdentity = msfId;
+			}
+		}		
+		//	Followups
+		
+		//	STD annotations
 	}
 }
 

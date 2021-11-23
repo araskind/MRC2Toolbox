@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
@@ -33,7 +34,13 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MsRtLibraryMatchFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ReferenceMsMsLibraryMatchFields;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class MsFeatureIdentity implements Serializable {
 
@@ -73,6 +80,7 @@ public class MsFeatureIdentity implements Serializable {
 		if(confidenceLevel.getLevel() > 4)
 			idSource = CompoundIdSource.UNKNOWN;
 	}
+
 
 	public CompoundIdentity getCompoundIdentity() {
 		return compoundIdentity;
@@ -370,6 +378,10 @@ public class MsFeatureIdentity implements Serializable {
 			msIdElement.setAttribute(MsFeatureIdentityFields.User.name(), 
 					assignedBy.getId());
 		
+		if(assignedOn != null)
+			msIdElement.setAttribute(MsFeatureIdentityFields.AssignedOn.name(), 
+					ProjectUtils.dateTimeFormat.format(assignedOn));			
+		
 		if(identificationLevel != null)
 			msIdElement.setAttribute(MsFeatureIdentityFields.IdLevel.name(), 
 					identificationLevel.getId());
@@ -384,7 +396,89 @@ public class MsFeatureIdentity implements Serializable {
 		
 		return msIdElement;
 	}
+	
+	public MsFeatureIdentity(org.jdom2.Element msfIdElement) {
+
+		uniqueId = msfIdElement.getAttributeValue(MsFeatureIdentityFields.Id.name());		
+		String cid = msfIdElement.getAttributeValue(MsFeatureIdentityFields.CID.name());
+		if(cid != null)
+			compoundIdentity = OfflineProjectLoadCash.getCompoundIdentityByAccession(cid);
+		
+		compoundIdName = msfIdElement.getAttributeValue(MsFeatureIdentityFields.Name.name());	
+		String idSourceString = 
+				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Source.name());	
+		if(idSourceString != null)
+			idSource = CompoundIdSource.getIdSourceByName(idSourceString);
+			
+		String confString = 
+				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Conf.name());
+		if(confString != null)
+			confidenceLevel = CompoundIdentificationConfidence.getLevelByName(confString);
+
+		String identificationLevelString = 
+				msfIdElement.getAttributeValue(MsFeatureIdentityFields.IdLevel.name());
+		if(identificationLevelString != null)
+			identificationLevel = 
+				IDTDataCash.getMSFeatureIdentificationLevelById(identificationLevelString);
+		
+		isPrimary = Boolean.parseBoolean(
+				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Prim.name()));
+		qcStandard = Boolean.parseBoolean(
+				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Qc.name()));
+
+		org.jdom2.Element msmsMatch = 
+				msfIdElement.getChild(ReferenceMsMsLibraryMatchFields.RefMsms.name());	
+		if(msmsMatch != null)
+			referenceMsMsLibraryMatch = 
+					new ReferenceMsMsLibraryMatch(msmsMatch);
+
+		org.jdom2.Element msRtMatch = 
+				msfIdElement.getChild(MsRtLibraryMatchFields.RefMsRt.name());	
+		if(msRtMatch != null)
+			msRtLibraryMatch = 
+					new MsRtLibraryMatch(msRtMatch);
+		
+		String assignedOnString = 
+				msfIdElement.getAttributeValue(MsFeatureIdentityFields.AssignedOn.name());
+		if(assignedOnString != null) {
+			try {
+				assignedOn = ProjectUtils.dateTimeFormat.parse(assignedOnString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		String userId = 
+				msfIdElement.getAttributeValue(MsFeatureIdentityFields.User.name());
+		if(userId != null)
+			assignedBy = IDTDataCash.getUserById(userId);
+		
+		String primaryAdductId = 
+				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Adduct.name());
+		if(primaryAdductId != null)
+			primaryAdduct = AdductManager.getAdductById(primaryAdductId);
+
+		String scoreCarryOverString = 
+				msfIdElement.getAttributeValue(MsFeatureIdentityFields.SCO.name());
+		if(scoreCarryOverString != null)
+			scoreCarryOver = Double.parseDouble(scoreCarryOverString);
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

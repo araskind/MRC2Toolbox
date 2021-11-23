@@ -217,6 +217,10 @@ public class MsRtLibraryMatch implements Serializable {
 		}		
 		return refMsRtElement;
 	}
+	
+	public MsRtLibraryMatch(org.jdom2.Element msRtMatch) {
+		// TODO Auto-generated constructor stub
+	}
 }
 
 

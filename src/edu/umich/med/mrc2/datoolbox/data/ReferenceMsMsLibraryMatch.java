@@ -27,6 +27,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
 import edu.umich.med.mrc2.datoolbox.project.store.ReferenceMsMsLibraryMatchFields;
 
 public class ReferenceMsMsLibraryMatch implements Serializable {
@@ -445,7 +446,95 @@ public class ReferenceMsMsLibraryMatch implements Serializable {
 		
 		return refMsmsElement;
 	}
+	
+	public ReferenceMsMsLibraryMatch(org.jdom2.Element msmsMatch) {
+
+		String msmsId = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.DbId.name());
+		if(msmsId != null)
+			matchedLibraryFeature = 
+			OfflineProjectLoadCash.getMsMsLibraryFeatureById(msmsId);
+
+		String matchTypeId = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.MType.name());
+		if(matchTypeId != null)
+			matchType = MSMSMatchType.getMSMSMatchTypeByName(matchTypeId);
+		
+		searchParameterSetId = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.ParSet.name());
+
+		decoyMatch = 
+			Boolean.parseBoolean(
+					msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.Decoy.name()));
+		
+		String scoreString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.Score.name());
+		if(scoreString != null)
+			score = Double.parseDouble(scoreString);
+
+		String forwardScoreString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.FwdScore.name());
+		if(forwardScoreString != null)
+			forwardScore = Double.parseDouble(forwardScoreString);
+		
+		String reverseScoreString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.RevScore.name());
+		if(reverseScoreString != null)
+			reverseScore = Double.parseDouble(reverseScoreString);
+		
+		String probabilityString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.Prob.name());
+		if(probabilityString != null)
+			probability = Double.parseDouble(probabilityString);
+		
+		String dotProductString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.DotProd.name());
+		if(dotProductString != null)
+			dotProduct = Double.parseDouble(dotProductString);
+		
+		String reverseDotProductString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.RevDotProd.name());
+		if(reverseDotProductString != null)
+			reverseDotProduct = Double.parseDouble(reverseDotProductString);
+
+		String hybridDotProductString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.HybDotProd.name());
+		if(hybridDotProductString != null)
+			hybridDotProduct = Double.parseDouble(hybridDotProductString);
+		
+		String hybridScoreString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.HybScore.name());
+		if(hybridScoreString != null)
+			hybridScore = Double.parseDouble(hybridScoreString);
+		
+		String hybridDeltaMzString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.HybDMZ.name());
+		if(hybridDeltaMzString != null)
+			hybridDeltaMz = Double.parseDouble(hybridDeltaMzString);
+		
+		String percolatorScoreString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.PercScore.name());
+		if(percolatorScoreString != null)
+			percolatorScore = Double.parseDouble(percolatorScoreString);
+
+		String qValueString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.Qval.name());
+		if(qValueString != null)
+			qValue = Double.parseDouble(qValueString);
+		
+		String posteriorErrorProbabilityString = 
+				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.PEP.name());
+		if(posteriorErrorProbabilityString != null)
+			posteriorErrorProbability = Double.parseDouble(posteriorErrorProbabilityString);
+	}
 }
+
+
+
+
+
+
+
 
 
 

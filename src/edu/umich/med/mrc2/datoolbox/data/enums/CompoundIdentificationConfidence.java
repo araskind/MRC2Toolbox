@@ -98,6 +98,15 @@ public enum CompoundIdentificationConfidence {
 		}
 		return null;
 	}
+	
+	public static CompoundIdentificationConfidence getLevelByName(String name) {
+
+		for(CompoundIdentificationConfidence cl : CompoundIdentificationConfidence.values()) {
+			if(cl.name().equals(name))
+				return cl;
+		}
+		return null;
+	}
 }
 
 
