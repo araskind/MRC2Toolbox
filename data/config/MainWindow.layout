@@ -169,9 +169,9 @@
 													<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 													<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 													<placeholder>dock.single.WorklistPanel</placeholder>
-													<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 													<placeholder>dock.single.ExperimentDesignPanel</placeholder>
 													<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
+													<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 													<placeholder>dock.single.LabNoteBookPanel</placeholder>
 													<placeholder>dock.single.AutomatorPanel</placeholder>
 													<placeholder>dock.single.QCPanel</placeholder>

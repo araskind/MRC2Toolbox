@@ -25,9 +25,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
@@ -48,7 +46,6 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -58,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.StoredDataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.StoredProjectFields;
@@ -67,14 +65,13 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
-import edu.umich.med.mrc2.datoolbox.utils.zip.ParallelZip;
 
 public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implements TaskListener {
 
 	private RawDataAnalysisProject projectToSave;
 	private File xmlFile;
 	private Document projectDocument;
-	private File xmlTmpDir;
+//	private File xmlTmpDir;
 	private int fileFeatureCount;
 	private int processedFiles;
 	
@@ -97,15 +94,6 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		projectToSave.setLastModified(new Date());
 		fileFeatureCount = getFeatureFileCount();
 		processedFiles = 0;
-		try {
-			Path tmpDir = 
-					Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), "xmlpParts");
-			xmlTmpDir = tmpDir.toFile();
-			xmlTmpDir.mkdirs();
-		} catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-		}
 		extractDatabaseReferences();
 		try {
 			createProjectXml();
@@ -113,8 +101,15 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
-		if(fileFeatureCount == 0)
-			compressAndCleanup();
+		if(fileFeatureCount == 0) {
+			//compressAndCleanup();
+			try {
+				compressProjectFile();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
 	}
 	
 	private void extractDatabaseReferences() {
@@ -211,9 +206,15 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			msTwoFileListElement.appendChild(dataFileElement);	
 			Collection<MsFeatureInfoBundle>fileFeatures = 
 					projectToSave.getMsFeaturesForDataFile(ms2dataFile);
+			dataFileElement.setAttribute(
+					StoredDataFileFields.FeatureCount.name(), 
+					Integer.toString(fileFeatures.size()));
 			if(fileFeatures.size() > 0) {
 				SaveFileMsFeaturesTask task = 
-						new SaveFileMsFeaturesTask(ms2dataFile, xmlTmpDir, fileFeatures);
+						new SaveFileMsFeaturesTask(
+								ms2dataFile, 
+								projectToSave.getUncompressedProjectFilesDirectory(), 
+								fileFeatures);
 				task.addTaskListener(this);
 				MRC2ToolBoxCore.getTaskController().addTask(task);
 			}			
@@ -228,15 +229,23 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			msOneFileListElement.appendChild(dataFileElement);			
 			Collection<MsFeatureInfoBundle>fileFeatures = 
 					projectToSave.getMsFeaturesForDataFile(msOnedataFile);
+			dataFileElement.setAttribute(
+					StoredDataFileFields.FeatureCount.name(), 
+					Integer.toString(fileFeatures.size()));
 			if(fileFeatures.size() > 0) {
 				SaveFileMsFeaturesTask task = 
-						new SaveFileMsFeaturesTask(msOnedataFile, xmlTmpDir, fileFeatures);
+						new SaveFileMsFeaturesTask(
+								msOnedataFile, 
+								projectToSave.getUncompressedProjectFilesDirectory(), 
+								fileFeatures);
 				task.addTaskListener(this);
 				MRC2ToolBoxCore.getTaskController().addTask(task);
 			}
 		}
 		//	Save XML document
-		xmlFile = Paths.get(xmlTmpDir.getAbsolutePath(), "Project.xml").toFile();
+		xmlFile = Paths.get(
+				projectToSave.getUncompressedProjectFilesDirectory().getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.PROJECT_FILE_NAME).toFile();
 		TransformerFactory transfac = TransformerFactory.newInstance();
 		Transformer transformer = transfac.newTransformer();
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
@@ -373,9 +382,10 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 	        archive.finish();
 	        archive.close();
 	        archiveStream.close();	        
-	        xmlFile.delete();
+	        //	xmlFile.delete();
 	        processed = 100;
 		}
+		setStatus(TaskStatus.FINISHED);
 	}
 
 	@Override
@@ -393,7 +403,13 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			if (e.getSource().getClass().equals(SaveFileMsFeaturesTask.class)) {	
 				processedFiles++;
 				if(processedFiles == fileFeatureCount) {
-					compressAndCleanup();
+					//	compressAndCleanup();
+					try {
+						compressProjectFile();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}				
 			}
 		}
@@ -401,22 +417,22 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 
 	private void compressAndCleanup() {
 		
-		taskDescription = "Compressing project ...";
-		total = 100;
-		processed = 70;	
-		this.fireTaskEvent();
-		ParallelZip.compressFolder(
-				xmlTmpDir.getAbsolutePath(), 
-				projectToSave.getProjectFile().getAbsolutePath(), 
-				projectToSave.getProjectDirectory(), "xml");		
-		if(xmlTmpDir != null) {
-			try {
-				FileUtils.deleteDirectory(xmlTmpDir);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		setStatus(TaskStatus.FINISHED);
+//		taskDescription = "Compressing project ...";
+//		total = 100;
+//		processed = 70;	
+//		this.fireTaskEvent();
+//		ParallelZip.compressFolder(
+//				xmlTmpDir.getAbsolutePath(), 
+//				projectToSave.getProjectFile().getAbsolutePath(), 
+//				projectToSave.getProjectDirectory(), "xml");		
+//		if(xmlTmpDir != null) {
+//			try {
+//				FileUtils.deleteDirectory(xmlTmpDir);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		setStatus(TaskStatus.FINISHED);
 	}
 }

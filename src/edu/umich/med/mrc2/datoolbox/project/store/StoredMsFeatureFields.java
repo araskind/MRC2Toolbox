@@ -32,5 +32,6 @@ public enum StoredMsFeatureFields {
 	idList,
 	Spectrum,
 	CIDs,
+	QS,
 	;
 }

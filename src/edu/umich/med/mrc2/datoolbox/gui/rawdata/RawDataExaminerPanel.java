@@ -982,11 +982,13 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		msmsPlotPane.clearPanel();
 		msmsTable.clearTable();
 	
-		TandemMassSpectrum msms = 
-				msFeature.getSpectrum().getExperimentalTandemSpectrum();
-		if(msms != null) {
-			msmsPlotPane.showTandemMs(msms);;
-			msmsTable.setTableModelFromTandemMs(msms);
+		if(msFeature.getSpectrum() != null) {
+			TandemMassSpectrum msms = 
+					msFeature.getSpectrum().getExperimentalTandemSpectrum();
+			if(msms != null) {
+				msmsPlotPane.showTandemMs(msms);;
+				msmsTable.setTableModelFromTandemMs(msms);
+			}
 		}
 		DataFile df = dataFileTreePanel.getDataFileForMsFeature(msFeature);
 		if(df != null) {

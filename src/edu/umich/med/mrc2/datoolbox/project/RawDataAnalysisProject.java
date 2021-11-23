@@ -49,6 +49,7 @@ public class RawDataAnalysisProject {
 	protected String name;
 	protected String description;
 	protected File projectFile;
+	protected File uncompressedProjectFilesDirectory;
 	protected File projectDirectory;
 	protected File exportsDirectory;
 	protected File rawDataDirectory;
@@ -72,6 +73,8 @@ public class RawDataAnalysisProject {
 
 		projectDirectory = 
 				Paths.get(parentDirectory.getAbsolutePath(), projectName.replaceAll("\\W+", "_")).toFile();
+		uncompressedProjectFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();		
 		projectFile = 
 				Paths.get(projectDirectory.getAbsolutePath(), projectName.replaceAll("\\W+", "_") + "."
 				+ MRC2ToolBoxConfiguration.RAW_DATA_PROJECT_FILE_EXTENSION).toFile();
@@ -84,26 +87,6 @@ public class RawDataAnalysisProject {
 	}
 	
 	//	Recreate existing project
-	
-	
-	public RawDataAnalysisProject(RawDataAnalysisProject activeProject) {
-		
-		this.id = activeProject.getId();
-		this.name = activeProject.getName();
-		this.description = activeProject.getDescription();
-		this.projectFile = activeProject.getProjectFile();
-		this.projectDirectory = activeProject.getProjectDirectory();
-		this.exportsDirectory = activeProject.getExportsDirectory();
-		this.rawDataDirectory = activeProject.getRawDataDirectory();		
-		this.dateCreated = activeProject.getDateCreated();
-		this.lastModified = new Date();
-		this.msmsDataFiles = new TreeSet<DataFile>();
-		this.msmsDataFiles.addAll(activeProject.getMSMSDataFiles());
-		this.msOneDataFiles = new TreeSet<DataFile>();
-		this.msmsDataFiles.addAll(activeProject.getMSOneDataFiles());
-		msFeatureMap = new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
-	}
-	
 	public RawDataAnalysisProject(
 			String id, 
 			String name, 
@@ -124,9 +107,29 @@ public class RawDataAnalysisProject {
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();	
 		rawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
+		uncompressedProjectFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();
 		initFields();
 	}
-
+	
+	public RawDataAnalysisProject(RawDataAnalysisProject activeProject) {
+		
+		this.id = activeProject.getId();
+		this.name = activeProject.getName();
+		this.description = activeProject.getDescription();
+		this.projectFile = activeProject.getProjectFile();
+		this.projectDirectory = activeProject.getProjectDirectory();
+		this.exportsDirectory = activeProject.getExportsDirectory();
+		this.rawDataDirectory = activeProject.getRawDataDirectory();		
+		this.dateCreated = activeProject.getDateCreated();
+		this.lastModified = new Date();
+		this.msmsDataFiles = new TreeSet<DataFile>();
+		this.msmsDataFiles.addAll(activeProject.getMSMSDataFiles());
+		this.msOneDataFiles = new TreeSet<DataFile>();
+		this.msmsDataFiles.addAll(activeProject.getMSOneDataFiles());
+		msFeatureMap = new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
+	}
+	
 	public void updateProjectLocation(File newProjectFile) {
 		
 		projectFile = newProjectFile;
@@ -173,6 +176,13 @@ public class RawDataAnalysisProject {
 		} catch (IOException e) {
 			e.printStackTrace();
 			MessageDialog.showWarningMsg("Failed to create raw data directory");
+			return;
+		}
+		try {
+			Files.createDirectories(Paths.get(uncompressedProjectFilesDirectory.getAbsolutePath()));
+		} catch (IOException e) {
+			e.printStackTrace();
+			MessageDialog.showWarningMsg("Failed to create project files directory");
 			return;
 		}
 	}
@@ -304,6 +314,10 @@ public class RawDataAnalysisProject {
 		return msOneDataFiles;
 	}
 	
+	public Collection<DataFile> getDataFiles() {
+		return msFeatureMap.keySet();
+	}
+	
 	public Collection<ExperimentalSample> getExperimentalSamples() {
 		
 		Collection<ExperimentalSample>samples = new TreeSet<ExperimentalSample>();
@@ -324,5 +338,9 @@ public class RawDataAnalysisProject {
 				filter(f -> f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null).
 				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
 				collect(Collectors.toList());
+	}
+
+	public File getUncompressedProjectFilesDirectory() {
+		return uncompressedProjectFilesDirectory;
 	}
 }

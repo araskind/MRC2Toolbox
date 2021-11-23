@@ -64,6 +64,7 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
 
 	@Override
 	public void run() {
+		setStatus(TaskStatus.PROCESSING);
 		try {
 			createXmlForFeatureList();
 		} catch (Exception ex) {
@@ -99,6 +100,9 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
 			processed++;
 		}
 		//	Save XML document
+		taskDescription = "Saving XML for " + file.getName();
+		total = 100;
+		processed = 80;
 		File xmlFile = Paths.get(
 				xmlTmpDir.getAbsolutePath(), 
 				FilenameUtils.getBaseName(file.getName()) + ".xml").toFile();

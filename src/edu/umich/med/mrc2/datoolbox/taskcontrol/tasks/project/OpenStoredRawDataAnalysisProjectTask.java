@@ -22,8 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -55,6 +53,8 @@ import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.StoredDataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.StoredProjectFields;
@@ -71,7 +71,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 
 	private RawDataAnalysisProject project;
 	private File projectFile;
-	private File xmlTmpDir;
+	private File xmlProjectDir;
 	private int featureFileCount;
 	private int processedFiles;
 	
@@ -94,27 +94,21 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		total = 100;
 		processed = 0;
 		processedFiles = 0;
-		try {
-			Path tmpDir = Paths.get(projectFile.getParentFile().getAbsolutePath(), "xmlpParts");
-			xmlTmpDir = tmpDir.toFile();
-			xmlTmpDir.mkdirs();			
-		} catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-		}
-		try {
-			extractProject();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-		}
+		xmlProjectDir = Paths.get(projectFile.getParentFile().getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();		
+//		try {
+//			extractProject();
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//			setStatus(TaskStatus.ERROR);
+//		}
 		Iterator<File> i = 
-				FileUtils.iterateFiles(xmlTmpDir, new String[] { "xml" }, true);
+				FileUtils.iterateFiles(xmlProjectDir, new String[] { "xml" }, true);
 		Collection<File>featureFiles = new ArrayList<File>();
 		while (i.hasNext()) {
 			
 			File file = i.next();
-			if(FilenameUtils.getBaseName(file.getName()).equals("Project")) {
+			if(file.getName().equals(MRC2ToolBoxConfiguration.PROJECT_FILE_NAME)) {
 				try {
 					parseProjectFile(file);
 				} catch (Exception e) {
@@ -126,15 +120,31 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				featureFiles.add(file);
 			}
 		}
-		setStatus(TaskStatus.FINISHED);
-//		featureFileCount = featureFiles.size();
-//		if(featureFileCount == 0)
-//			cleanup();
-//		else {
-//			for(File ff : featureFiles) {
-//				
-//			}
-//		}
+		featureFileCount = featureFiles.size();
+		if(featureFileCount == 0)
+			cleanup();
+		else {
+			for(File ff : featureFiles) {
+				
+				DataFile dataFile = getDataFileForFeatureFile(ff);
+				MsFeatureBundleExtractionTask task = 
+						new MsFeatureBundleExtractionTask(dataFile, ff);
+				task.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(task);
+			}
+		}
+	}
+	
+	private DataFile getDataFileForFeatureFile(File featureFile) {
+		
+		String fileName = FilenameUtils.getBaseName(featureFile.getName());		
+		for(DataFile df : project.getDataFiles()) {
+			
+			String dfName = FilenameUtils.getBaseName(df.getName());
+			if(fileName.equals(dfName))
+				return df;
+		}
+		return null;
 	}
 	
 	private void parseProjectFile(File projectXmlFile) throws Exception {
@@ -333,7 +343,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		processed = 30;
 		ParallelZip.extractZip(
 				projectFile.getAbsolutePath(), 
-				xmlTmpDir.getAbsolutePath());
+				xmlProjectDir.getAbsolutePath());
 	}
 
 	@Override
@@ -348,8 +358,11 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(SaveFileMsFeaturesTask.class)) {	
+			if (e.getSource().getClass().equals(MsFeatureBundleExtractionTask.class)) {	
 				processedFiles++;
+				
+				MsFeatureBundleExtractionTask task = (MsFeatureBundleExtractionTask)e.getSource();
+				project.addMsFeaturesForDataFile(task.getDataFile(), task.getFeatures());
 				if(processedFiles == featureFileCount) {
 					cleanup();
 				}				
@@ -359,14 +372,14 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 
 	private void cleanup() {
 				
-		if(xmlTmpDir != null) {
-			try {
-				FileUtils.deleteDirectory(xmlTmpDir);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+//		if(xmlProjectDir != null) {
+//			try {
+//				FileUtils.deleteDirectory(xmlProjectDir);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 		setStatus(TaskStatus.FINISHED);
 	}
 	

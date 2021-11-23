@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.msmsscore.SpectrumMatcher;
 import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
+import edu.umich.med.mrc2.datoolbox.project.store.TandemMassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
@@ -72,7 +74,7 @@ public class MassSpectrum implements Serializable {
 	public MassSpectrum() {
 
 		super();
-		msPoints = new HashSet<MsPoint>();
+		msPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		adductMap = new TreeMap<Adduct, List<MsPoint>>(new AdductComparator(SortProperty.Name));
 		primaryAdduct = null;
 		tandemSpectra = new HashSet<TandemMassSpectrum>();
@@ -557,6 +559,51 @@ public class MassSpectrum implements Serializable {
 				msmsListElement.appendChild(msms.getXmlElement(parentDocument));
 		}
 		return spectrumElement;
+	}
+	
+	public MassSpectrum(org.jdom2.Element spectrumElement) {
+		
+		msPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		adductMap = new TreeMap<Adduct, List<MsPoint>>(new AdductComparator(SortProperty.Name));
+		primaryAdduct = null;
+		tandemSpectra = new HashSet<TandemMassSpectrum>();
+		patternMap = new TreeMap<String, List<MsPoint>>();	
+		detectionAlgorithm = 
+				spectrumElement.getAttributeValue(MassSpectrumFields.Algo.name());
+
+		String adductId = 
+				spectrumElement.getAttributeValue(MassSpectrumFields.PAdduct.name());
+		if(adductId != null)
+			primaryAdduct = AdductManager.getAdductById(adductId);
+		
+		double[] mzValues = null;
+		double[] intensityValues = null;
+		String mzText =  
+				spectrumElement.getChild(MassSpectrumFields.MZ.name()).getContent().get(0).getValue();
+		try {
+			mzValues = NumberArrayUtils.decodeNumberArray(mzText);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String intensityText =  
+				spectrumElement.getChild(MassSpectrumFields.Intensity.name()).getContent().get(0).getValue();
+		try {
+			intensityValues = NumberArrayUtils.decodeNumberArray(intensityText);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(int i=0; i<mzValues.length; i++)
+			msPoints.add(new MsPoint(mzValues[i], intensityValues[i]));
+		
+		org.jdom2.Element msmsListElement = spectrumElement.getChildren(MassSpectrumFields.MsmsList.name()).get(0);
+		List<org.jdom2.Element> msmsList = msmsListElement.getChildren(TandemMassSpectrumFields.MSMS.name());
+		for(org.jdom2.Element msmsElement : msmsList) {
+			
+			if(msmsElement.getName().equals(TandemMassSpectrumFields.MSMS.name()))
+				tandemSpectra.add(new TandemMassSpectrum(msmsElement));
+		}
 	}
 }
 

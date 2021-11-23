@@ -50,6 +50,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureListener;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.project.store.StoredMsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -898,8 +899,35 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			msFeatureElement.appendChild(cidListElement);
 			for(MsFeatureIdentity mscid : identifications)			
 				cidListElement.appendChild(mscid.getXmlElement(parentDocument));						
-		}			
+		}	
+		if(qualityScore > 0)
+			msFeatureElement.setAttribute(
+					StoredMsFeatureFields.QS.name(), Double.toString(qualityScore));
+						
 		return msFeatureElement;		
+	}
+	
+	public MsFeature(org.jdom2.Element featureElement) {
+
+		id = featureElement.getAttributeValue(StoredMsFeatureFields.Id.name());
+		name = featureElement.getAttributeValue(StoredMsFeatureFields.Name.name());
+		retentionTime = Double.parseDouble(
+				featureElement.getAttributeValue(StoredMsFeatureFields.rt.name()));
+		String polCode = featureElement.getAttributeValue(StoredMsFeatureFields.pol.name());
+		if(polCode != null)
+			polarity = Polarity.getPolarityByCode(polCode);
+		
+		String rtRangeString = 
+				featureElement.getAttributeValue(StoredMsFeatureFields.rtRange.name());
+		if(rtRangeString != null)
+			rtRange = new Range(rtRangeString);
+		
+		spectrum = new MassSpectrum(
+				featureElement.getChild(MassSpectrumFields.Spectrum.name()));		
+		String qsValue = 
+				featureElement.getAttributeValue(StoredMsFeatureFields.QS.name());
+		if(qsValue != null)
+			qualityScore = Double.parseDouble(qsValue);
 	}
 }
 

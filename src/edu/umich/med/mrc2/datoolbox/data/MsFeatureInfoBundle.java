@@ -35,7 +35,10 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
+import edu.umich.med.mrc2.datoolbox.project.store.StoredMsFeatureFields;
 
 public class MsFeatureInfoBundle implements Serializable {
 
@@ -317,5 +320,62 @@ public class MsFeatureInfoBundle implements Serializable {
 					StringUtils.join(stanList, "@"));
 		}				
 		return msFeatureInfoBundleElement;		
+	}
+	
+	public MsFeatureInfoBundle(org.jdom2.Element featureElement) {
+		
+		msFeature = new MsFeature(
+				featureElement.getChild(StoredMsFeatureFields.MsFeature.name()));
+		
+		String acqMethodId = 
+				featureElement.getAttributeValue(MsFeatureInfoBundleFields.AcqMethod.name());
+		if(acqMethodId != null)
+			acquisitionMethod = IDTDataCash.getAcquisitionMethodById(acqMethodId);
+
+		String daMethodId = 
+				featureElement.getAttributeValue(MsFeatureInfoBundleFields.DaMethod.name());
+		if(daMethodId != null)
+			dataExtractionMethod = IDTDataCash.getDataExtractionMethodById(daMethodId);
+		
+		String experimentId = 
+				featureElement.getAttributeValue(MsFeatureInfoBundleFields.Exp.name());
+		if(experimentId != null)
+			experiment = IDTDataCash.getExperimentById(experimentId);
+		
+		String sampleId = 
+				featureElement.getAttributeValue(MsFeatureInfoBundleFields.Sample.name());
+		if(sampleId != null)
+			sample = (IDTExperimentalSample)OfflineProjectLoadCash.getExperimentalSampleById(sampleId);
+		if(sample != null)
+			stockSample = sample.getParentStockSample();
+		
+		injectionId = 
+				featureElement.getAttributeValue(MsFeatureInfoBundleFields.Inj.name());
+		
+		idFollowupSteps =  
+				new TreeSet<MSFeatureIdentificationFollowupStep>();
+		String idFollowupStepsString = 
+				featureElement.getAttributeValue(MsFeatureInfoBundleFields.FUS.name());
+		if(idFollowupStepsString != null) {
+			String[]fusList = idFollowupStepsString.split("@");
+			for(String fusId : fusList) {
+				MSFeatureIdentificationFollowupStep fus = 
+						IDTDataCash.getMSFeatureIdentificationFollowupStepById(fusId);
+				if(fus != null)
+					idFollowupSteps.add(fus);
+			}		
+		}
+		standadAnnotations = 
+				new TreeSet<StandardFeatureAnnotation>();
+		String stAnStepsString = 
+				featureElement.getAttributeValue(MsFeatureInfoBundleFields.StAn.name());
+		if(stAnStepsString != null) {
+			String[]stAnList = stAnStepsString.split("@");
+			for(String stAnId : stAnList) {
+				StandardFeatureAnnotation stan = IDTDataCash.getStandardFeatureAnnotationById(stAnId);
+				if(stan != null)
+					standadAnnotations.add(stan);
+			}		
+		}
 	}
 }

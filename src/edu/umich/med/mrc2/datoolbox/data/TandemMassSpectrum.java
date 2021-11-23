@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,7 +94,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + 
 				UUID.randomUUID().toString().substring(0, 12);
 		annotations = new TreeSet<ObjectAnnotation>();
-		minorParentIons = new HashSet<MsPoint>();
+		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
 	}
 
@@ -104,11 +103,11 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		this.depth = depth;
 		this.parent = parent;
 		this.polarity = polarity;
-		spectrum = new HashSet<MsPoint>();
 		uniqueId = DataPrefix.MSMS_SPECTRUM.getName() + 
 				UUID.randomUUID().toString().substring(0, 12);
+		spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		annotations = new TreeSet<ObjectAnnotation>();
-		minorParentIons = new HashSet<MsPoint>();
+		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
 	}
 
@@ -117,7 +116,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		depth = source.getDepth();
 		parent = new MsPoint(source.getParent());
 		polarity = source.getPolarity();
-		spectrum = new HashSet<MsPoint>();
+		spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		source.getSpectrum().stream().forEach(dp -> spectrum.add(new MsPoint(dp)));
 		fragmenterVoltage = source.getFragmenterVoltage();
 		cidLevel = source.getCidLevel();
@@ -128,7 +127,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		scanNumber = source.getScanNumber();
 		parentScanNumber = source.getParentScanNumber();
 		
-		minorParentIons = new HashSet<MsPoint>();
+		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		minorParentIons.addAll(source.getMinorParentIons());
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
 		averagedScanNumbers.putAll(source.getAveragedScanNumbers());
@@ -146,9 +145,9 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		this.fragmenterVoltage = fragmenterVoltage;
 		this.cidLevel = cidLevel;
 		this.polarity = polarity;
-		spectrum = new HashSet<MsPoint>();
+		spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		annotations = new TreeSet<ObjectAnnotation>();
-		minorParentIons = new HashSet<MsPoint>();
+		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
 	}
 
@@ -158,9 +157,9 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 				UUID.randomUUID().toString().substring(0, 12);;
 		this.depth = 2;
 		this.polarity = polarity;
-		spectrum = new HashSet<MsPoint>();
+		spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		annotations = new TreeSet<ObjectAnnotation>();
-		minorParentIons = new HashSet<MsPoint>();
+		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
 	}
 
@@ -633,6 +632,117 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 				Boolean.toString(parentIonIsMinorIsotope));
 		
 		return msmsElement;
+	}
+	
+	public TandemMassSpectrum(org.jdom2.Element msmsElement) {		
+		
+		spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		annotations = new TreeSet<ObjectAnnotation>();
+		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		averagedScanNumbers = new TreeMap<Integer,Integer>();
+		
+		uniqueId = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.Id.name());
+		String sourceString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.Source.name());
+		if(sourceString != null)
+			spectrumSource = SpectrumSource.getSpectrumSourceByName(sourceString);
+		
+		detectionAlgorithm = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.Algo.name());
+		
+		depth = Integer.parseInt(
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.Depth.name()));
+
+		String parentString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.Parent.name());
+		if(parentString != null)
+			parent = new MsPoint(parentString);
+		
+		String fragVString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.FragV.name());
+		if(fragVString != null)
+			fragmenterVoltage = Double.parseDouble(fragVString);
+		
+		String cidString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.CID.name());
+		if(cidString != null)
+			cidLevel = Double.parseDouble(cidString);
+
+		ionisationType = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.Ioniz.name());
+
+		String scanNumString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.Scan.name());
+		if(scanNumString != null)
+			scanNumber = Integer.parseInt(scanNumString);
+		
+		String parentScanNumString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.PScan.name());
+		if(parentScanNumString != null)
+			parentScanNumber = Integer.parseInt(parentScanNumString);
+		
+		String isolationWindowString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.IsolWindow.name());
+		if(isolationWindowString != null)
+			isolationWindow = new Range(isolationWindowString);
+		
+		String polarityCode = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.Pol.name());
+		if(polarityCode != null)
+			polarity = Polarity.getPolarityByCode(polarityCode);
+		
+		description = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.Desc.name());
+	
+		String aotString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.AOT.name());
+		if(aotString != null)
+			annotatedObjectType = AnnotatedObjectType.getObjectTypeByName(aotString);
+		
+		String minorParentIonsString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.MinorParents.name());
+		if(minorParentIonsString != null) {
+			String[]mpChunks = minorParentIonsString.split(";");
+			for(String mpChunk : mpChunks) {
+				String[]parts = mpChunk.split("_");
+				minorParentIons.add(new MsPoint(
+						Double.parseDouble(parts[0]), 
+						Double.parseDouble(parts[1])));
+			}
+		}				
+		String avgScanString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.AOT.name());
+		if(avgScanString != null) {
+			String[]asChunks = avgScanString.split(";");
+			for(String asChunk : asChunks) {
+				String[]parts = asChunk.split("_");
+				averagedScanNumbers.put(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+			}
+		}		
+		parentIonIsMinorIsotope = Boolean.parseBoolean(
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.IsMinor.name()));
+
+		double[] mzValues = null;
+		double[] intensityValues = null;
+		String mzText =  
+				msmsElement.getChild(TandemMassSpectrumFields.MZ.name()).getContent().get(0).getValue();
+		try {
+			mzValues = NumberArrayUtils.decodeNumberArray(mzText);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String intensityText =  
+				msmsElement.getChild(TandemMassSpectrumFields.Intensity.name()).getContent().get(0).getValue();
+		try {
+			intensityValues = NumberArrayUtils.decodeNumberArray(intensityText);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(int i=0; i<mzValues.length; i++)
+			spectrum.add(new MsPoint(mzValues[i], intensityValues[i]));
 	}
 }
 

@@ -78,6 +78,7 @@ public class Range implements Serializable, Comparable<Range> {
 		this(mzRange.getLo(), mzRange.getHi());
 	}
 
+
 	/**
 	 * Compares two Ranges
 	 */
@@ -279,4 +280,22 @@ public class Range implements Serializable, Comparable<Range> {
 	public String getStorableString() {
 		return Double.toString(min) + "_" + Double.toString(max);
 	}
+	
+	public Range(String rtRangeString) {
+		if(rtRangeString == null || rtRangeString.isEmpty() || !rtRangeString.contains("_"))
+			throw (new IllegalArgumentException("Invalid string"));
+		
+		String[]parts = rtRangeString.split("_");
+		if(parts.length != 2)
+			throw (new IllegalArgumentException("Invalid string"));
+		
+		min = Double.parseDouble(parts[0]);
+		max = Double.parseDouble(parts[1]);
+		if(min > max) 
+			throw (new IllegalArgumentException("Range minimum (" + min + ") must be <= maximum (" + max + ")"));
+	}
 }
+
+
+
+

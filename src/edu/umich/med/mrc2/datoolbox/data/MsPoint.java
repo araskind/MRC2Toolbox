@@ -101,6 +101,18 @@ public class MsPoint implements Serializable {
 	public String toString() {
 		return MsUtils.spectrumMzExportFormat.format(mz) + "_" + 
 				MsUtils.spectrumIntensityFormat.format(intensity);
+	}	
+
+	public MsPoint(String msPointString) {
+		if(msPointString == null || msPointString.isEmpty() || !msPointString.contains("_"))
+			throw (new IllegalArgumentException("Invalid string"));
+		
+		String[]parts = msPointString.split("_");
+		if(parts.length != 2)
+			throw (new IllegalArgumentException("Invalid string"));
+		
+		mz = Double.parseDouble(parts[0]);
+		intensity = Double.parseDouble(parts[1]);
 	}
 
 	/**

@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -129,7 +130,7 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		if(doSmooth)
 			smoothingFilter = new SavitzkyGolayFilter(filterWidth.getWidth());
 	}
-	
+
 	public ChromatogramPlotMode getMode() {
 		return mode;
 	}
@@ -225,14 +226,55 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 			chromatogramDefinitionElement.setAttribute(
 					XICDefinitionFields.RTRange.name(), rtRange.getStorableString());	
 		
-		if(smoothingFilter != null)
+		//	TODO save filter type and parameters
+		if(smoothingFilter != null) {
 				chromatogramDefinitionElement.setAttribute(
-						XICDefinitionFields.Filter.name(), smoothingFilter.getCode());
-		
+						XICDefinitionFields.Filter.name(), smoothingFilter.getCode());			
+		}
 		chromatogramDefinitionElement.setAttribute(
 				XICDefinitionFields.Smooth.name(), 
 				Boolean.toString(doSmooth));
 		return chromatogramDefinitionElement;		
+	}
+		
+	public ChromatogramDefinition(Element cdElement) {
+		
+		mode = ChromatogramPlotMode.getChromatogramPlotModeByName(
+				cdElement.getAttribute(XICDefinitionFields.Mode.name()));
+		String polCode = cdElement.getAttribute(XICDefinitionFields.Pol.name());
+		if(!polCode.isEmpty())
+			Polarity.getPolarityByCode(polCode);
+		
+		msLevel = Integer.parseInt(
+				cdElement.getAttribute(XICDefinitionFields.MsLevel.name()));
+
+		mzList = new TreeSet<Double>();
+		String mzListString = cdElement.getAttribute(XICDefinitionFields.MZList.name());
+		if(!mzListString.isEmpty()) {
+			String[] mzChunks = mzListString.split(" ");
+			for(String mz : mzChunks)
+				mzList.add(Double.parseDouble(mz));
+		}
+		sumAllMassChromatograms = Boolean.parseBoolean(
+				cdElement.getAttribute(XICDefinitionFields.SumAll.name()));
+		mzWindowValue = Double.parseDouble(
+				cdElement.getAttribute(XICDefinitionFields.MzWindow.name()));
+		String massErrorTypeString = 
+				cdElement.getAttribute(XICDefinitionFields.METype.name());
+		if(!massErrorTypeString.isEmpty())
+			massErrorType = MassErrorType.getTypeByName(massErrorTypeString);
+		
+		String rtRangeString = cdElement.getAttribute(XICDefinitionFields.RTRange.name());
+		if(!rtRangeString.isEmpty())
+			rtRange = new Range(rtRangeString);
+		
+		doSmooth = Boolean.parseBoolean(
+				cdElement.getAttribute(XICDefinitionFields.Smooth.name()));
+		
+		String filterCode = cdElement.getAttribute(XICDefinitionFields.Filter.name());
+		if(!filterCode.isEmpty()) {
+			//	TODO - restore filter type and parameters
+		}
 	}
 }
 

@@ -59,6 +59,8 @@ public class MRC2ToolBoxConfiguration {
 	public static final String DATA_EXPORT_DIRECTORY = "exports";
 	public static final String RAW_DATA_DIRECTORY = "RawData";
 	public static final String TAB_DATA_DELIMITER = "\t";
+	public static final String UNCOMPRESSED_PROJECT_FILES_DIRECTORY = "ProjectFiles";
+	public static final String PROJECT_FILE_NAME = "Project.xml";
 
 	//	LIMS connection	
 	public static String metLimsUser;

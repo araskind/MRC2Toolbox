@@ -67,6 +67,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 	private Collection<ExtractedChromatogram>chromatograms;
 	private Collection<AverageMassSpectrum>userSpectra;
 	private Map<DataExtractionMethod,ResultsFile>resultFiles;
+	private int featureCount;
 
 	public DataFile(String fileName) {
 
@@ -168,7 +169,11 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		if(!sampleId.isEmpty())
 			parentSample = 
 					OfflineProjectLoadCash.getExperimentalSampleById(sampleId);
-
+		
+		String featureCountString = fileElement.getAttribute(StoredDataFileFields.FeatureCount.name());
+		if(!featureCountString.isEmpty())
+			featureCount = Integer.parseInt(featureCountString);
+		
 		enabled = true;
 		chromatograms = new ArrayList<ExtractedChromatogram>();
 		userSpectra = new ArrayList<AverageMassSpectrum>();		
@@ -180,13 +185,15 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		NodeList xicNodeList = 
 				fileElement.getElementsByTagName(XICFields.XIC.name());
 		for (int i = 0; i < xicNodeList.getLength(); i++) {
-			
+			ExtractedChromatogram xic = 
+					new ExtractedChromatogram((Element)xicNodeList.item(i), this);
+			chromatograms.add(xic);
 		}	
 		//	TODO - add averaged spectra
 		NodeList avgMsNodeList = 
 				fileElement.getElementsByTagName(AvgMSFields.AvgMs.name());
 		for (int i = 0; i < avgMsNodeList.getLength(); i++) {
-			
+
 		}	
 	}
 
@@ -432,6 +439,14 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 				userSpectraElement.appendChild(avgMs.getXmlElement(parentDocument));			
 		}		
 		return dataFileElement;
+	}
+
+	public int getFeatureCount() {
+		return featureCount;
+	}
+
+	public void setFeatureCount(int featureCount) {
+		this.featureCount = featureCount;
 	}
 }
 

@@ -36,5 +36,6 @@ public enum StoredDataFileFields {
 	FeatureList,
 	XicList,
 	AvgMsList,
+	FeatureCount,
 	;
 }

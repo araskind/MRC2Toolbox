@@ -33,6 +33,7 @@ import org.w3c.dom.Text;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
 import edu.umich.med.mrc2.datoolbox.project.store.XICFields;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
@@ -55,7 +56,8 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 		this.dataFile = dataFile;
 		this.definition = definition;
 	}
-	
+
+
 	public DataFile getDataFile() {
 		return dataFile;
 	}
@@ -181,6 +183,40 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 				definition.getXmlElement(parentDocument));
 				
 		return extractedChromatogramElement;		
+	}
+		
+	public ExtractedChromatogram(Element xicItem, DataFile dataFile) {
+		
+		this.dataFile = dataFile;
+		String timeText =  xicItem.getElementsByTagName(XICFields.Time.name()).
+				item(0).getChildNodes().item(0).getTextContent();
+		try {
+			timeValues = NumberArrayUtils.decodeNumberArray(timeText);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String intensityText =  xicItem.getElementsByTagName(XICFields.Intensity.name()).
+				item(0).getChildNodes().item(0).getTextContent();
+		try {
+			intensityValues = NumberArrayUtils.decodeNumberArray(intensityText);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String colorCode = xicItem.getAttribute(XICFields.Color.name());
+		if(colorCode.isEmpty())
+			color = Color.BLACK;
+		else
+			color = ColorUtils.hex2rgb(colorCode);
+		
+		String noteText = xicItem.getAttribute(XICFields.Note.name());
+		if(!noteText.isEmpty())
+			note = noteText;
+		
+		Element cdElement = 
+				(Element)xicItem.getElementsByTagName(XICDefinitionFields.XICDefinition.name()).item(0);		
+		definition = new ChromatogramDefinition(cdElement);
 	}
 }
 
