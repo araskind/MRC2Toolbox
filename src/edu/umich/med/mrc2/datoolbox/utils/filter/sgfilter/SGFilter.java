@@ -28,6 +28,8 @@ import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.FilterClass;
@@ -661,5 +663,34 @@ public class SGFilter implements Filter {
 	@Override
 	public String getCode() {
 		return FilterClass.SAVITZKY_GOLAY.getCode();
+	}
+
+	@Override
+	public boolean equals(Filter obj) {
+		
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+        
+        if (!SGFilter.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final SGFilter other = (SGFilter) obj;
+        
+        //	TODO compare parameters
+        
+		return true;
+	}
+
+	@Override
+	public Element getXmlElement(Document parentDocument) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public SGFilter(org.jdom2.Element filterElement) {
+		// TODO Auto-generated method stub
 	}
 }

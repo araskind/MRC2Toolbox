@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.utils.filter;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 /**
  * Implementation of a LOESS filter (also known as local regression) for smoothing
  * signals. The method is also called Locally Weighted Polynomial Regression, because
@@ -58,10 +61,10 @@ public class LoessFilter implements Filter
 	}
 	
 	
-	public LoessFilter(int windowsize)
-	{
-		this.window = windowsize;
-	}
+//	public LoessFilter(int windowsize)
+//	{
+//		this.window = windowsize;
+//	}
 	
 	// Filter overrides
 	public double[] filter(double[] xvals, double[] yvals) throws IllegalArgumentException
@@ -194,6 +197,41 @@ public class LoessFilter implements Filter
 	public String getCode() {
 		return FilterClass.LOESS.getCode();
 	}
+
+	public double getWindowsize() {
+		return windowsize;
+	}
+
+	@Override
+	public boolean equals(Filter obj) {
+		
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+        
+        if (!LoessFilter.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final LoessFilter other = (LoessFilter) obj;
+        
+       if(this.windowsize != other.getWindowsize())
+    	   return false;
+        
+		return true;
+	}
+
+	@Override
+	public Element getXmlElement(Document parentDocument) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public LoessFilter(org.jdom2.Element filterElement) {
+		// TODO Auto-generated method stub
+	}
+
 }
 
 

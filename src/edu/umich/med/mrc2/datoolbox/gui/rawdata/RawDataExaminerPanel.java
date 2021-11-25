@@ -91,6 +91,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveRawDataAnalysisProjectTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectJdomTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MSMSExtractionParameterSet;
@@ -476,8 +477,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 //				new SaveRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
 //		task.addTaskListener(this);
 		
-		SaveStoredRawDataAnalysisProjectTask task = 
-				new SaveStoredRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
+//		SaveStoredRawDataAnalysisProjectTask task = 
+//				new SaveStoredRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
+		
+		SaveStoredRawDataAnalysisProjectJdomTask task = 
+				new SaveStoredRawDataAnalysisProjectJdomTask(activeRawDataAnalysisProject);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
@@ -728,7 +732,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				finalizeProjectRawDataLoad(task);
 			}
 			if (e.getSource().getClass().equals(SaveRawDataAnalysisProjectTask.class) ||
-					e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class))
+					e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class) ||
+					e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectJdomTask.class))
 				finalizeRawDataAnalysisProjectSave();
 			
 			if (e.getSource().getClass().equals(LoadRawDataAnalysisProjectTask.class))

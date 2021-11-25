@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -39,6 +40,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.jdom2.input.SAXBuilder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -148,6 +150,79 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 	}
 	
 	private void parseProjectFile(File projectXmlFile) throws Exception {
+		
+		taskDescription = "Parsing project file ...";
+		total = 100;
+		processed = 10;
+		
+		uniqueCompoundIds = new TreeSet<String>();
+		uniqueMSMSLibraryIds = new TreeSet<String>();
+		uniqueMSRTLibraryIds = new TreeSet<String>();
+		uniqueSampleIds = new TreeSet<String>();
+		
+		SAXBuilder sax = new SAXBuilder();
+		org.jdom2.Document doc = sax.build(projectXmlFile);
+		org.jdom2.Element projectElement = doc.getRootElement();
+		
+		String id = projectElement.getAttributeValue(StoredProjectFields.Id.name()); 
+		String name = projectElement.getAttributeValue(StoredProjectFields.Name.name()); 
+		String description = projectElement.getAttributeValue(StoredProjectFields.Description.name()); 
+		Date dateCreated = ProjectUtils.dateTimeFormat.parse(
+				projectElement.getAttributeValue(StoredProjectFields.DateCreated.name())); 
+		Date lastModified = ProjectUtils.dateTimeFormat.parse(
+				projectElement.getAttributeValue(StoredProjectFields.DateModified.name())); 		
+		project = new RawDataAnalysisProject(
+				id, 
+				name, 
+				description, 
+				projectFile, 
+				projectFile.getParentFile(),
+				dateCreated, 
+				lastModified);
+
+//		Element projectElement = (Element) projectDocument.getElementsByTagName(
+//				StoredProjectFields.IDTrackerRawDataProject.name()).item(0);
+		
+		String compoundIdList = 
+				projectElement.getChild(StoredProjectFields.UniqueCIDList.name()).getText();
+		uniqueCompoundIds.addAll(getIdList(compoundIdList));
+		
+		String msmsLibIdIdList = 
+				projectElement.getChild(StoredProjectFields.UniqueMSMSLibIdList.name()).getText();
+		uniqueMSMSLibraryIds.addAll(getIdList(msmsLibIdIdList));
+
+		String msRtLibIdIdList = 
+				projectElement.getChild(StoredProjectFields.UniqueMSRTLibIdList.name()).getText();
+		uniqueMSRTLibraryIds.addAll(getIdList(msRtLibIdIdList));
+
+		String sampleIdIdList = 
+				projectElement.getChild(StoredProjectFields.UniqueSampleIdList.name()).getText();
+		uniqueSampleIds.addAll(getIdList(sampleIdIdList));
+				
+		try {
+			populateDatabaseCashData();
+		} catch (Exception e) {
+			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);			
+		}		
+		List<org.jdom2.Element> msmsFileList = 
+				projectElement.getChild(StoredProjectFields.MsTwoFiles.name()).
+				getChildren(StoredDataFileFields.DataFile.name());
+		for (org.jdom2.Element msmsFileElement : msmsFileList) {
+			DataFile msmsFile = new DataFile(msmsFileElement);
+			project.addMSMSDataFile(msmsFile);
+		}
+		//	MS1 files
+		List<org.jdom2.Element> msOneFileList = 
+				projectElement.getChild(StoredProjectFields.MsOneFiles.name()).
+				getChildren(StoredDataFileFields.DataFile.name());
+		for (org.jdom2.Element msOneFileElement : msOneFileList) {
+			DataFile msOneFile = new DataFile(msOneFileElement);
+			project.addMSMSDataFile(msOneFile);
+		}
+	}
+	
+	private void parseProjectFileOld(File projectXmlFile) throws Exception {
 		
 		taskDescription = "Parsing project file ...";
 		total = 100;
@@ -334,6 +409,15 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		else {
 			String listString = idListElement.getChildNodes().item(0).getTextContent();
 			return Arrays.asList(listString.split(","));
+		}
+	}
+	
+	private Collection<String>getIdList(String idListString){
+		
+		if(idListString == null || idListString.isEmpty())
+			return Arrays.asList(new String[0]);
+		else {
+			return Arrays.asList(idListString.split(","));
 		}
 	}
 

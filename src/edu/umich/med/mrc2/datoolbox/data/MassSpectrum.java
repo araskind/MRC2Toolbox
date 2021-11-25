@@ -560,11 +560,79 @@ public class MassSpectrum implements Serializable {
 		}
 		return spectrumElement;
 	}
+
+	public org.jdom2.Element getXmlElement() {
+		
+		org.jdom2.Element spectrumElement = new org.jdom2.Element(
+				MassSpectrumFields.Spectrum.name());
+		if(msPoints != null && !msPoints.isEmpty()) {
+			double[]mzValues = msPoints.stream().
+					mapToDouble(p -> Math.floor(p.getMz() * 1000000) / 1000000).toArray();
+			String mz = "";
+			try {
+				mz = NumberArrayUtils.encodeNumberArray(mzValues);
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			org.jdom2.Element mzElement = 
+					new org.jdom2.Element(MassSpectrumFields.MZ.name()).setText(mz);			
+			spectrumElement.addContent(mzElement);
+			double[]intensityValues = msPoints.stream().
+					mapToDouble(p -> Math.floor(p.getIntensity() * 100) / 100).toArray();
+			String intensity = "";
+			try {
+				intensity = NumberArrayUtils.encodeNumberArray(intensityValues);
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			org.jdom2.Element intensityElement = 
+					new org.jdom2.Element(MassSpectrumFields.Intensity.name()).setText(intensity);			
+			spectrumElement.addContent(intensityElement);
+		}
+		if(detectionAlgorithm != null)
+			spectrumElement.setAttribute(MassSpectrumFields.Algo.name(), detectionAlgorithm);
+		
+		if(adductMap != null && !adductMap.isEmpty()) {
+			
+			org.jdom2.Element adductMapElement = 
+					new org.jdom2.Element(MassSpectrumFields.AdductMap.name());
+			for(Entry<Adduct, List<MsPoint>>am : adductMap.entrySet()) {
+				
+				org.jdom2.Element amEntryElement = 
+						new org.jdom2.Element(MassSpectrumFields.Adduct.name());
+				amEntryElement.setAttribute(MassSpectrumFields.AName.name(), am.getKey().getId());
+				List<String>mpList = am.getValue().stream().
+						map(p -> p.toString()).collect(Collectors.toList());
+				amEntryElement.setAttribute(
+						MassSpectrumFields.ASpec.name(), StringUtils.join(mpList, ";"));
+				adductMapElement.addContent(amEntryElement);
+			}	
+			spectrumElement.addContent(adductMapElement);
+		}
+		if(primaryAdduct != null)
+			spectrumElement.setAttribute(
+					MassSpectrumFields.PAdduct.name(), primaryAdduct.getId());
+		
+		if(tandemSpectra != null && !tandemSpectra.isEmpty()) {
+			
+			org.jdom2.Element msmsListElement = 
+					new org.jdom2.Element(MassSpectrumFields.MsmsList.name());
+			
+			for(TandemMassSpectrum msms : tandemSpectra) 
+				msmsListElement.addContent(msms.getXmlElement());
+			
+			spectrumElement.addContent(msmsListElement);
+		}
+		return spectrumElement;
+	}
 	
 	public MassSpectrum(org.jdom2.Element spectrumElement) {
 		
 		msPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		adductMap = new TreeMap<Adduct, List<MsPoint>>(new AdductComparator(SortProperty.Name));
+		adductMap = new TreeMap<Adduct, 
+				List<MsPoint>>(new AdductComparator(SortProperty.Name));
 		primaryAdduct = null;
 		tandemSpectra = new HashSet<TandemMassSpectrum>();
 		patternMap = new TreeMap<String, List<MsPoint>>();	

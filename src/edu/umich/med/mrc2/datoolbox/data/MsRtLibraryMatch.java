@@ -218,9 +218,41 @@ public class MsRtLibraryMatch implements Serializable {
 		return refMsRtElement;
 	}
 	
+	public org.jdom2.Element getXmlElement() {
+		
+		org.jdom2.Element refMsRtElement = 
+				new org.jdom2.Element(MsRtLibraryMatchFields.RefMsRt.name());
+		
+		if(libraryId != null)
+			refMsRtElement.setAttribute(
+					MsRtLibraryMatchFields.LibId.name(), libraryId);
+		
+		if(libraryTargetId != null)
+			refMsRtElement.setAttribute(
+					MsRtLibraryMatchFields.TGID.name(), libraryTargetId);
+		
+		if(score > 0.0)
+			refMsRtElement.setAttribute(
+					MsRtLibraryMatchFields.Score.name(), Double.toString(score));
+		
+		if(adductScoreMap != null && !adductScoreMap.isEmpty()) {
+			
+			List<String> amList = adductScoreMap.stream().
+					map(s -> s.getLibraryMatch().getId() + "|" 
+							+ s.getUnknownMatch().getId() + "|" 
+							+ Double.toString(s.getScore())).collect(Collectors.toList());
+			refMsRtElement.setAttribute(
+					MsRtLibraryMatchFields.AdScores.name(), 
+					StringUtils.join(amList, "@"));
+		}		
+		return refMsRtElement;
+	}
+	
 	public MsRtLibraryMatch(org.jdom2.Element msRtMatch) {
 		// TODO Auto-generated constructor stub
 	}
+
+
 }
 
 

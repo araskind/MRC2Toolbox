@@ -59,6 +59,11 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 		masSpectrum = new MassSpectrum();
 	}
 
+	public AverageMassSpectrum(org.jdom2.Element avgMsElement, DataFile dataFile2) {
+		// TODO Auto-generated constructor stub
+		this.dataFile = dataFile2;
+	}
+
 	public MassSpectrum getMasSpectrum() {
 		return masSpectrum;
 	}
@@ -102,6 +107,20 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 //		private Range rtRange;
 //		private Collection<Integer>scanNumbers;
 	
+		return avgMsElement;
+	}
+
+	public org.jdom2.Element getXmlElement() {
+		// TODO Auto-generated method stub
+		
+		org.jdom2.Element avgMsElement = new org.jdom2.Element(AvgMSFields.AvgMs.name());
+
+//		private MassSpectrum masSpectrum;
+//		private DataFile dataFile;
+//		private int msLlevel;
+//		private Range rtRange;
+//		private Collection<Integer>scanNumbers;
+		
 		return avgMsElement;
 	}
 }

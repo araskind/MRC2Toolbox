@@ -1196,7 +1196,13 @@ public class MsUtils {
 		}
 	    return null;
 	}
-	
+		
+	/**
+	 * @param spectrum
+	 * @return pattern recognition entropy
+	 * Based on paper
+	 * https://www.sciencedirect.com/science/article/pii/S0021967318304758
+	 */
 	public static double calculateSpectrumEntropy(Collection<MsPoint>spectrum) {
 		
 		double totalIntensity = spectrum.stream().mapToDouble(p -> p.getIntensity()).sum();

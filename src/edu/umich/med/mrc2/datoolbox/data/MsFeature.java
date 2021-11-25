@@ -908,6 +908,41 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		return msFeatureElement;		
 	}
 	
+	public org.jdom2.Element getXmlElement() {
+		
+		org.jdom2.Element msFeatureElement = 
+				new org.jdom2.Element(StoredMsFeatureFields.MsFeature.name());
+		msFeatureElement.setAttribute(StoredMsFeatureFields.Id.name(), id);	
+		msFeatureElement.setAttribute(StoredMsFeatureFields.Name.name(), name);
+		msFeatureElement.setAttribute(StoredMsFeatureFields.rt.name(), Double.toString(retentionTime));
+		if(rtRange != null)
+			msFeatureElement.setAttribute(StoredMsFeatureFields.rtRange.name(), rtRange.getStorableString());
+		
+		if(polarity != null)
+			msFeatureElement.setAttribute(StoredMsFeatureFields.pol.name(), polarity.getCode());
+		
+		//	Spectrum
+		if(spectrum != null) 
+			msFeatureElement.addContent(spectrum.getXmlElement());
+		
+		//	Identifications
+		if(!identifications.isEmpty()) {
+			
+			org.jdom2.Element cidListElement = 
+					new org.jdom2.Element(StoredMsFeatureFields.CIDs.name());					
+			
+			for(MsFeatureIdentity mscid : identifications)			
+				cidListElement.addContent(mscid.getXmlElement());	
+			
+			msFeatureElement.addContent(cidListElement);
+		}	
+		if(qualityScore > 0)
+			msFeatureElement.setAttribute(
+					StoredMsFeatureFields.QS.name(), Double.toString(qualityScore));
+		
+		return msFeatureElement;
+	}
+	
 	public MsFeature(org.jdom2.Element featureElement) {
 		
 		identifications = new HashSet<MsFeatureIdentity>();
@@ -928,7 +963,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			rtRange = new Range(rtRangeString);
 		
 		spectrum = new MassSpectrum(
-				featureElement.getChild(MassSpectrumFields.Spectrum.name()));		
+				featureElement.getChild(MassSpectrumFields.Spectrum.name()));	
+//		MsUtils.calculateMcMillanMassDefectForSpectrum(spectrum);
 		String qsValue = 
 				featureElement.getAttributeValue(StoredMsFeatureFields.QS.name());
 		if(qsValue != null)
@@ -948,10 +984,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 				if(msfId.isPrimary())
 					primaryIdentity = msfId;
 			}
-		}		
-		//	Followups
-		
-		//	STD annotations
+		}
 	}
 }
 

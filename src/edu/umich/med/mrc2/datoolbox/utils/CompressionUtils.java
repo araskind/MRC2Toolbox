@@ -106,7 +106,8 @@ public class CompressionUtils {
         archiveStream.close();
     }
 
-    public static void zipFile(File source, File destination) throws IOException, ArchiveException {
+    public static void zipFile(File source, File destination) 
+    		throws IOException, ArchiveException {
 
     	if (source == null || !source.exists())
             return;
@@ -114,8 +115,11 @@ public class CompressionUtils {
     	if(source.isDirectory())
     		return;
 
-        OutputStream archiveStream = new FileOutputStream(destination);
-        ArchiveOutputStream archive = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
+        OutputStream archiveStream = 
+        		new FileOutputStream(destination);
+        ArchiveOutputStream archive = 
+        		new ArchiveStreamFactory().createArchiveOutputStream(
+        				ArchiveStreamFactory.ZIP, archiveStream);
         ZipArchiveEntry entry = new ZipArchiveEntry(source.getName());
         archive.putArchiveEntry(entry);
         BufferedInputStream input = new BufferedInputStream(new FileInputStream(source));

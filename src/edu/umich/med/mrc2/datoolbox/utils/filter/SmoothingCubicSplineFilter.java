@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.utils.filter;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 public class SmoothingCubicSplineFilter implements Filter {
 
 	private SmoothingCubicSpline spline;
@@ -56,5 +59,39 @@ public class SmoothingCubicSplineFilter implements Filter {
 	@Override
 	public String getCode() {
 		return FilterClass.SMOOTHING_CUBIC_SPLINE.getCode();
+	}
+
+	public double getRho() {
+		return rho;
+	}
+	
+	@Override
+	public boolean equals(Filter obj) {
+		
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+        
+        if (!SmoothingCubicSplineFilter.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final SmoothingCubicSplineFilter other = (SmoothingCubicSplineFilter) obj;
+        
+       if(this.rho != other.getRho())
+    	   return false;
+       
+		return true;
+	}
+
+	@Override
+	public Element getXmlElement(Document parentDocument) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public SmoothingCubicSplineFilter(org.jdom2.Element filterElement) {
+		// TODO Auto-generated method stub
 	}
 }

@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.utils.filter;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 /**
  * Interface for classes implementing a filter on a signal (a combination between
  * x-values and y-values). All classes implementing a filter should inherit from
@@ -41,4 +44,8 @@ public interface Filter
 	public double[] filter(double xvals[], double yvals[]) throws IllegalArgumentException;
 	
 	public String getCode();
+	
+	public boolean equals(Filter otherFilter);
+	
+	public Element getXmlElement(Document parentDocument);
 }

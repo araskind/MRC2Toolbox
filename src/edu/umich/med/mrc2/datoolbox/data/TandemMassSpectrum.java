@@ -633,6 +633,110 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		
 		return msmsElement;
 	}
+
+	public org.jdom2.Element getXmlElement() {
+		
+		org.jdom2.Element msmsElement = 
+				new org.jdom2.Element(TandemMassSpectrumFields.MSMS.name());
+		
+		msmsElement.setAttribute(TandemMassSpectrumFields.Id.name(), uniqueId);
+		if(spectrumSource != null)
+			msmsElement.setAttribute(TandemMassSpectrumFields.Source.name(), spectrumSource.name());
+		
+		if(detectionAlgorithm != null)
+			msmsElement.setAttribute(
+					TandemMassSpectrumFields.Algo.name(), detectionAlgorithm);
+		
+		msmsElement.setAttribute(
+				TandemMassSpectrumFields.Depth.name(), Integer.toString(depth));
+		
+		if(parent != null)
+			msmsElement.setAttribute(
+					TandemMassSpectrumFields.Parent.name(), parent.toString());
+		
+		if(spectrum != null && !spectrum.isEmpty()) {
+			
+			double[]mzValues = spectrum.stream().
+					mapToDouble(p -> p.getMz()).toArray();
+			String mz = "";
+			try {
+				mz = NumberArrayUtils.encodeNumberArray(mzValues);
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			org.jdom2.Element mzElement = 
+					new org.jdom2.Element(TandemMassSpectrumFields.MZ.name()).
+					setText(mz);			
+			msmsElement.addContent(mzElement);
+			
+			double[]intensityValues = spectrum.stream().
+					mapToDouble(p -> p.getIntensity()).toArray();
+			String intensity = "";
+			try {
+				intensity = NumberArrayUtils.encodeNumberArray(intensityValues);
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			org.jdom2.Element intensityElement = 
+					new org.jdom2.Element(TandemMassSpectrumFields.Intensity.name()).
+					setText(intensity);			
+			msmsElement.addContent(intensityElement);
+		}
+		if(fragmenterVoltage > 0.0d)
+			msmsElement.setAttribute(TandemMassSpectrumFields.FragV.name(), 
+					Double.toString(fragmenterVoltage));
+		
+		if(cidLevel > 0.0d)
+			msmsElement.setAttribute(TandemMassSpectrumFields.CID.name(), 
+					Double.toString(cidLevel));
+		
+		if(ionisationType != null)
+			msmsElement.setAttribute(TandemMassSpectrumFields.Ioniz.name(), ionisationType);
+		
+		if(scanNumber > 0.0d)
+			msmsElement.setAttribute(TandemMassSpectrumFields.Scan.name(), 
+					Integer.toString(scanNumber));
+		
+		if(parentScanNumber > 0.0d)
+			msmsElement.setAttribute(TandemMassSpectrumFields.PScan.name(), 
+					Integer.toString(parentScanNumber));
+		
+		if(isolationWindow != null)
+			msmsElement.setAttribute(TandemMassSpectrumFields.IsolWindow.name(), 
+					isolationWindow.getStorableString());
+		
+		if(polarity != null)
+			msmsElement.setAttribute(TandemMassSpectrumFields.Pol.name(), polarity.getCode());
+		
+		if(description != null)
+			msmsElement.setAttribute(TandemMassSpectrumFields.Desc.name(), description);
+		
+		if(annotatedObjectType != null)
+			msmsElement.setAttribute(TandemMassSpectrumFields.AOT.name(), annotatedObjectType.name());
+		
+		if(minorParentIons != null && !minorParentIons.isEmpty()) {			
+			List<String>mpList = minorParentIons.stream().
+					map(p -> p.toString()).collect(Collectors.toList());
+			msmsElement.setAttribute(
+					TandemMassSpectrumFields.MinorParents.name(), 
+					StringUtils.join(mpList, ";"));
+		}
+		if(averagedScanNumbers != null && !averagedScanNumbers.isEmpty()) {
+			
+			List<String>asList = averagedScanNumbers.entrySet().stream().
+				map(e -> Integer.toString(e.getKey()) + "_" + Integer.toString(e.getValue())).
+						collect(Collectors.toList());
+			msmsElement.setAttribute(
+					TandemMassSpectrumFields.AvgScans.name(), 
+					StringUtils.join(asList, ";"));
+		}
+		msmsElement.setAttribute(TandemMassSpectrumFields.IsMinor.name(), 
+				Boolean.toString(parentIonIsMinorIsotope));
+
+		return msmsElement;
+	}
 	
 	public TandemMassSpectrum(org.jdom2.Element msmsElement) {		
 		

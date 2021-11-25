@@ -322,6 +322,58 @@ public class MsFeatureInfoBundle implements Serializable {
 		return msFeatureInfoBundleElement;		
 	}
 	
+	public org.jdom2.Element getXmlElement() {
+		
+		org.jdom2.Element msFeatureInfoBundleElement = 
+				new org.jdom2.Element(MsFeatureInfoBundleFields.MFIB.name());
+		
+		if(acquisitionMethod != null)
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.AcqMethod.name(), 
+					acquisitionMethod.getId());
+		
+		if(dataExtractionMethod != null)
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.DaMethod.name(), 
+					dataExtractionMethod.getId());
+		
+		if(experiment != null)
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.Exp.name(), 
+					experiment.getId());
+		
+		if(sample != null)
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.Sample.name(), 
+					sample.getId());
+		
+		if(injectionId != null)
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.Inj.name(), 
+					injectionId);
+		
+		msFeatureInfoBundleElement.addContent(
+				msFeature.getXmlElement());
+		
+		if(idFollowupSteps != null && !idFollowupSteps.isEmpty()) {
+			
+			List<String> fusList = idFollowupSteps.stream().
+					map(s -> s.getId()).collect(Collectors.toList());
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.FUS.name(), 
+					StringUtils.join(fusList, "@"));
+		}
+		if(standadAnnotations != null && !standadAnnotations.isEmpty()) {
+			
+			List<String> stanList = standadAnnotations.stream().
+					map(s -> s.getId()).collect(Collectors.toList());
+			msFeatureInfoBundleElement.setAttribute(
+					MsFeatureInfoBundleFields.StAn.name(), 
+					StringUtils.join(stanList, "@"));
+		}	
+		return msFeatureInfoBundleElement;
+	}
+	
 	public MsFeatureInfoBundle(org.jdom2.Element featureElement) {
 		
 		msFeature = new MsFeature(

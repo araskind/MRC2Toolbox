@@ -396,6 +396,63 @@ public class MsFeatureIdentity implements Serializable {
 		
 		return msIdElement;
 	}
+
+	public org.jdom2.Element getXmlElement() {
+		
+		org.jdom2.Element msIdElement = 
+				new org.jdom2.Element(MsFeatureIdentityFields.MSFID.name());
+		
+		msIdElement.setAttribute(MsFeatureIdentityFields.Id.name(), uniqueId);
+		if(compoundIdentity != null) 
+			msIdElement.setAttribute(MsFeatureIdentityFields.CID.name(), 
+					compoundIdentity.getPrimaryDatabaseId());
+		
+		if(compoundIdName != null)
+			msIdElement.setAttribute(MsFeatureIdentityFields.Name.name(), 
+					compoundIdName);
+		
+		if(idSource != null)
+			msIdElement.setAttribute(MsFeatureIdentityFields.Source.name(), 
+					idSource.name());
+		
+		if(confidenceLevel != null)
+			msIdElement.setAttribute(MsFeatureIdentityFields.Conf.name(), 
+					confidenceLevel.name());
+		
+		msIdElement.setAttribute(MsFeatureIdentityFields.Prim.name(), 
+				Boolean.toString(isPrimary));
+		msIdElement.setAttribute(MsFeatureIdentityFields.Qc.name(), 
+				Boolean.toString(qcStandard));		
+		if(referenceMsMsLibraryMatch != null)
+			msIdElement.addContent(
+					referenceMsMsLibraryMatch.getXmlElement());
+		
+		if(msRtLibraryMatch != null) {
+			msIdElement.addContent(
+					msRtLibraryMatch.getXmlElement());
+		}	
+		if(assignedBy != null)
+			msIdElement.setAttribute(MsFeatureIdentityFields.User.name(), 
+					assignedBy.getId());
+		
+		if(assignedOn != null)
+			msIdElement.setAttribute(MsFeatureIdentityFields.AssignedOn.name(), 
+					ProjectUtils.dateTimeFormat.format(assignedOn));			
+		
+		if(identificationLevel != null)
+			msIdElement.setAttribute(MsFeatureIdentityFields.IdLevel.name(), 
+					identificationLevel.getId());
+		
+		if(primaryAdduct != null)
+			msIdElement.setAttribute(MsFeatureIdentityFields.Adduct.name(), 
+					primaryAdduct.getId());
+		
+		if(scoreCarryOver > 0.0d)
+			msIdElement.setAttribute(MsFeatureIdentityFields.SCO.name(), 
+					Double.toString(scoreCarryOver));
+		
+		return msIdElement;
+	}
 	
 	public MsFeatureIdentity(org.jdom2.Element msfIdElement) {
 

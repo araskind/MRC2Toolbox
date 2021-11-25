@@ -27,6 +27,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.apache.commons.math3.stat.descriptive.rank.Min;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class WeightedMovingAverageFilter implements Filter{
 
@@ -152,5 +154,48 @@ public class WeightedMovingAverageFilter implements Filter{
 	@Override
 	public String getCode() {
 		return FilterClass.WEIGHTED_MOVING_AVERAGE.getCode();
+	}
+
+	public int getPeriod() {
+		return period;
+	}
+
+	public int getPadding() {
+		return padding;
+	}
+	
+	@Override
+	public boolean equals(Filter obj) {
+		
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+        
+        if (!WeightedMovingAverageFilter.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final WeightedMovingAverageFilter other = (WeightedMovingAverageFilter) obj;
+        
+       if(this.period != other.getPeriod())
+    	   return false;
+       
+       if(this.padding != other.getPadding())
+    	   return false;
+       
+		return true;
+	}
+
+	@Override
+	public Element getXmlElement(Document parentDocument) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public WeightedMovingAverageFilter(org.jdom2.Element filterElement) {
+		// TODO Auto-generated method stub
+		this.period = 5;
+		this.padding = 2;
 	}
 }

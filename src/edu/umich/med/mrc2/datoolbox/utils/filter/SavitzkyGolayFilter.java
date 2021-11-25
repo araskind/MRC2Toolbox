@@ -24,6 +24,9 @@ package edu.umich.med.mrc2.datoolbox.utils.filter;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 
 /**
  * Utilities for the Savitzky-Golay smoother.
@@ -175,5 +178,39 @@ public class SavitzkyGolayFilter implements Filter {
 	@Override
 	public String getCode() {
 		return FilterClass.SAVITZKY_GOLAY_MZMINE.getCode();
+	}
+	
+	public int getFilterWidth() {
+		return filterWidth;
+	}
+	
+	@Override
+	public boolean equals(Filter obj) {
+		
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+        
+        if (!SavitzkyGolayFilter.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final SavitzkyGolayFilter other = (SavitzkyGolayFilter) obj;
+        
+       if(this.filterWidth != other.getFilterWidth())
+    	   return false;
+       
+		return true;
+	}
+
+	@Override
+	public Element getXmlElement(Document parentDocument) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public SavitzkyGolayFilter(org.jdom2.Element filterElement) {
+		// TODO Auto-generated method stub
 	}
 }

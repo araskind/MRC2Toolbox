@@ -57,7 +57,6 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 		this.definition = definition;
 	}
 
-
 	public DataFile getDataFile() {
 		return dataFile;
 	}
@@ -184,7 +183,44 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 				
 		return extractedChromatogramElement;		
 	}
+	public org.jdom2.Element getXmlElement(DataFile dataFile) {
+
+		org.jdom2.Element extractedChromatogramElement = 
+				new org.jdom2.Element(XICFields.XIC.name());		
+		String time = "";
+		try {
+			time = NumberArrayUtils.encodeNumberArray(timeValues);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		org.jdom2.Element  timeElement = 
+				new org.jdom2.Element (XICFields.Time.name()).setText(time);		
+		extractedChromatogramElement.addContent(timeElement);
 		
+		String intensity = "";
+		try {
+			intensity = NumberArrayUtils.encodeNumberArray(intensityValues);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		org.jdom2.Element  intensityElement = 
+				new org.jdom2.Element (XICFields.Intensity.name()).setText(intensity);		
+		extractedChromatogramElement.addContent(intensityElement);
+		
+		if(color != null)
+			extractedChromatogramElement.setAttribute(XICFields.Color.name(), 
+					ColorUtils.rgb2hex(color));	
+		
+		if(note != null)
+			extractedChromatogramElement.setAttribute(XICFields.Note.name(), note);	
+		
+		extractedChromatogramElement.addContent(definition.getXmlElement());
+		
+		return extractedChromatogramElement;
+	}
+	
 	public ExtractedChromatogram(Element xicItem, DataFile dataFile) {
 		
 		this.dataFile = dataFile;
@@ -216,6 +252,40 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 		
 		Element cdElement = 
 				(Element)xicItem.getElementsByTagName(XICDefinitionFields.XICDefinition.name()).item(0);		
+		definition = new ChromatogramDefinition(cdElement);
+	}
+
+	public ExtractedChromatogram(org.jdom2.Element xicElement, DataFile dataFile2) {
+
+		this.dataFile = dataFile2;
+		String timeText =  
+				xicElement.getChild(XICFields.Time.name()).getText();
+		try {
+			timeValues = NumberArrayUtils.decodeNumberArray(timeText);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String intensityText =  
+				xicElement.getChild(XICFields.Intensity.name()).getText();
+		try {
+			intensityValues = NumberArrayUtils.decodeNumberArray(intensityText);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String colorCode = xicElement.getAttributeValue(XICFields.Color.name());
+		if(colorCode == null)
+			color = Color.BLACK;
+		else
+			color = ColorUtils.hex2rgb(colorCode);
+		
+		String noteText = xicElement.getAttributeValue(XICFields.Note.name());
+		if(noteText != null)
+			note = noteText;
+		
+		org.jdom2.Element cdElement = 
+				xicElement.getChild(XICDefinitionFields.XICDefinition.name());		
 		definition = new ChromatogramDefinition(cdElement);
 	}
 }
