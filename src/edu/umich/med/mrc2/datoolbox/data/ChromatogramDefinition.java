@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -237,58 +235,58 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
         return true;
     }
 		
-	public Element getXmlElement(Document parentDocument) {
-		
-		Element chromatogramDefinitionElement = parentDocument.createElement(
-				XICDefinitionFields.XICDefinition.name());
-		chromatogramDefinitionElement.setAttribute(
-				XICDefinitionFields.Mode.name(), mode.name());
-		if(polarity != null)
-			chromatogramDefinitionElement.setAttribute(
-				XICDefinitionFields.Pol.name(), polarity.getCode());
-		
-		chromatogramDefinitionElement.setAttribute(
-				XICDefinitionFields.MsLevel.name(), Integer.toString(msLevel));
-		if(mzList != null && !mzList.isEmpty()) {
-			if(mzList.size() == 1) {
-				chromatogramDefinitionElement.setAttribute(
-						XICDefinitionFields.MZList.name(), 
-						Double.toString(mzList.iterator().next()));
-			}
-			else {
-				List<String> stringList = mzList.stream().
-						map(mz -> Double.toString(mz)).
-						collect(Collectors.toList());
-				chromatogramDefinitionElement.setAttribute(
-						XICDefinitionFields.MZList.name(), 
-						StringUtils.join(stringList, " "));
-			}
-		}
-		chromatogramDefinitionElement.setAttribute(
-				XICDefinitionFields.SumAll.name(), 
-				Boolean.toString(sumAllMassChromatograms));
-		chromatogramDefinitionElement.setAttribute(
-				XICDefinitionFields.MzWindow.name(), 
-				Double.toString(mzWindowValue));
-		
-		if(massErrorType != null)
-			chromatogramDefinitionElement.setAttribute(
-				XICDefinitionFields.METype.name(), massErrorType.name());	
-		
-		if(rtRange != null)
-			chromatogramDefinitionElement.setAttribute(
-					XICDefinitionFields.RTRange.name(), rtRange.getStorableString());	
-		
-		//	TODO save filter type and parameters
-		if(smoothingFilter != null) {
-				chromatogramDefinitionElement.setAttribute(
-						XICDefinitionFields.Filter.name(), smoothingFilter.getCode());			
-		}
-		chromatogramDefinitionElement.setAttribute(
-				XICDefinitionFields.Smooth.name(), 
-				Boolean.toString(doSmooth));
-		return chromatogramDefinitionElement;		
-	}
+//	public Element getXmlElement(Document parentDocument) {
+//		
+//		Element chromatogramDefinitionElement = parentDocument.createElement(
+//				XICDefinitionFields.XICDefinition.name());
+//		chromatogramDefinitionElement.setAttribute(
+//				XICDefinitionFields.Mode.name(), mode.name());
+//		if(polarity != null)
+//			chromatogramDefinitionElement.setAttribute(
+//				XICDefinitionFields.Pol.name(), polarity.getCode());
+//		
+//		chromatogramDefinitionElement.setAttribute(
+//				XICDefinitionFields.MsLevel.name(), Integer.toString(msLevel));
+//		if(mzList != null && !mzList.isEmpty()) {
+//			if(mzList.size() == 1) {
+//				chromatogramDefinitionElement.setAttribute(
+//						XICDefinitionFields.MZList.name(), 
+//						Double.toString(mzList.iterator().next()));
+//			}
+//			else {
+//				List<String> stringList = mzList.stream().
+//						map(mz -> Double.toString(mz)).
+//						collect(Collectors.toList());
+//				chromatogramDefinitionElement.setAttribute(
+//						XICDefinitionFields.MZList.name(), 
+//						StringUtils.join(stringList, " "));
+//			}
+//		}
+//		chromatogramDefinitionElement.setAttribute(
+//				XICDefinitionFields.SumAll.name(), 
+//				Boolean.toString(sumAllMassChromatograms));
+//		chromatogramDefinitionElement.setAttribute(
+//				XICDefinitionFields.MzWindow.name(), 
+//				Double.toString(mzWindowValue));
+//		
+//		if(massErrorType != null)
+//			chromatogramDefinitionElement.setAttribute(
+//				XICDefinitionFields.METype.name(), massErrorType.name());	
+//		
+//		if(rtRange != null)
+//			chromatogramDefinitionElement.setAttribute(
+//					XICDefinitionFields.RTRange.name(), rtRange.getStorableString());	
+//		
+//		//	TODO save filter type and parameters
+//		if(smoothingFilter != null) {
+//				chromatogramDefinitionElement.setAttribute(
+//						XICDefinitionFields.Filter.name(), smoothingFilter.getCode());			
+//		}
+//		chromatogramDefinitionElement.setAttribute(
+//				XICDefinitionFields.Smooth.name(), 
+//				Boolean.toString(doSmooth));
+//		return chromatogramDefinitionElement;		
+//	}
 
 	public org.jdom2.Element getXmlElement() {
 		
@@ -344,45 +342,45 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		return chromatogramDefinitionElement;
 	}
 	
-	public ChromatogramDefinition(Element cdElement) {
-		
-		mode = ChromatogramPlotMode.getChromatogramPlotModeByName(
-				cdElement.getAttribute(XICDefinitionFields.Mode.name()));
-		String polCode = cdElement.getAttribute(XICDefinitionFields.Pol.name());
-		if(!polCode.isEmpty())
-			Polarity.getPolarityByCode(polCode);
-		
-		msLevel = Integer.parseInt(
-				cdElement.getAttribute(XICDefinitionFields.MsLevel.name()));
-
-		mzList = new TreeSet<Double>();
-		String mzListString = cdElement.getAttribute(XICDefinitionFields.MZList.name());
-		if(!mzListString.isEmpty()) {
-			String[] mzChunks = mzListString.split(" ");
-			for(String mz : mzChunks)
-				mzList.add(Double.parseDouble(mz));
-		}
-		sumAllMassChromatograms = Boolean.parseBoolean(
-				cdElement.getAttribute(XICDefinitionFields.SumAll.name()));
-		mzWindowValue = Double.parseDouble(
-				cdElement.getAttribute(XICDefinitionFields.MzWindow.name()));
-		String massErrorTypeString = 
-				cdElement.getAttribute(XICDefinitionFields.METype.name());
-		if(!massErrorTypeString.isEmpty())
-			massErrorType = MassErrorType.getTypeByName(massErrorTypeString);
-		
-		String rtRangeString = cdElement.getAttribute(XICDefinitionFields.RTRange.name());
-		if(!rtRangeString.isEmpty())
-			rtRange = new Range(rtRangeString);
-		
-		doSmooth = Boolean.parseBoolean(
-				cdElement.getAttribute(XICDefinitionFields.Smooth.name()));
-		
-		String filterCode = cdElement.getAttribute(XICDefinitionFields.Filter.name());
-		if(!filterCode.isEmpty()) {
-			//	TODO - restore filter type and parameters
-		}
-	}
+//	public ChromatogramDefinition(Element cdElement) {
+//		
+//		mode = ChromatogramPlotMode.getChromatogramPlotModeByName(
+//				cdElement.getAttribute(XICDefinitionFields.Mode.name()));
+//		String polCode = cdElement.getAttribute(XICDefinitionFields.Pol.name());
+//		if(!polCode.isEmpty())
+//			Polarity.getPolarityByCode(polCode);
+//		
+//		msLevel = Integer.parseInt(
+//				cdElement.getAttribute(XICDefinitionFields.MsLevel.name()));
+//
+//		mzList = new TreeSet<Double>();
+//		String mzListString = cdElement.getAttribute(XICDefinitionFields.MZList.name());
+//		if(!mzListString.isEmpty()) {
+//			String[] mzChunks = mzListString.split(" ");
+//			for(String mz : mzChunks)
+//				mzList.add(Double.parseDouble(mz));
+//		}
+//		sumAllMassChromatograms = Boolean.parseBoolean(
+//				cdElement.getAttribute(XICDefinitionFields.SumAll.name()));
+//		mzWindowValue = Double.parseDouble(
+//				cdElement.getAttribute(XICDefinitionFields.MzWindow.name()));
+//		String massErrorTypeString = 
+//				cdElement.getAttribute(XICDefinitionFields.METype.name());
+//		if(!massErrorTypeString.isEmpty())
+//			massErrorType = MassErrorType.getTypeByName(massErrorTypeString);
+//		
+//		String rtRangeString = cdElement.getAttribute(XICDefinitionFields.RTRange.name());
+//		if(!rtRangeString.isEmpty())
+//			rtRange = new Range(rtRangeString);
+//		
+//		doSmooth = Boolean.parseBoolean(
+//				cdElement.getAttribute(XICDefinitionFields.Smooth.name()));
+//		
+//		String filterCode = cdElement.getAttribute(XICDefinitionFields.Filter.name());
+//		if(!filterCode.isEmpty()) {
+//			//	TODO - restore filter type and parameters
+//		}
+//	}
 
 	public ChromatogramDefinition(org.jdom2.Element cdElement) {
 

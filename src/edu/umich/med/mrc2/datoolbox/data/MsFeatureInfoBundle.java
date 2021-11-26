@@ -28,8 +28,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
@@ -270,62 +269,10 @@ public class MsFeatureInfoBundle implements Serializable {
 			return null;
 	}
 	
-	public Element getXmlElement(Document parentDocument) {
+	public Element getXmlElement() {
 		
-		Element msFeatureInfoBundleElement = parentDocument.createElement(
-				MsFeatureInfoBundleFields.MFIB.name());
-		
-		if(acquisitionMethod != null)
-			msFeatureInfoBundleElement.setAttribute(
-					MsFeatureInfoBundleFields.AcqMethod.name(), 
-					acquisitionMethod.getId());
-		
-		if(dataExtractionMethod != null)
-			msFeatureInfoBundleElement.setAttribute(
-					MsFeatureInfoBundleFields.DaMethod.name(), 
-					dataExtractionMethod.getId());
-		
-		if(experiment != null)
-			msFeatureInfoBundleElement.setAttribute(
-					MsFeatureInfoBundleFields.Exp.name(), 
-					experiment.getId());
-		
-		if(sample != null)
-			msFeatureInfoBundleElement.setAttribute(
-					MsFeatureInfoBundleFields.Sample.name(), 
-					sample.getId());
-		
-		if(injectionId != null)
-			msFeatureInfoBundleElement.setAttribute(
-					MsFeatureInfoBundleFields.Inj.name(), 
-					injectionId);
-		
-		msFeatureInfoBundleElement.appendChild(
-				msFeature.getXmlElement(parentDocument));	
-		
-		if(idFollowupSteps != null && !idFollowupSteps.isEmpty()) {
-			
-			List<String> fusList = idFollowupSteps.stream().
-					map(s -> s.getId()).collect(Collectors.toList());
-			msFeatureInfoBundleElement.setAttribute(
-					MsFeatureInfoBundleFields.FUS.name(), 
-					StringUtils.join(fusList, "@"));
-		}
-		if(standadAnnotations != null && !standadAnnotations.isEmpty()) {
-			
-			List<String> stanList = standadAnnotations.stream().
-					map(s -> s.getId()).collect(Collectors.toList());
-			msFeatureInfoBundleElement.setAttribute(
-					MsFeatureInfoBundleFields.StAn.name(), 
-					StringUtils.join(stanList, "@"));
-		}				
-		return msFeatureInfoBundleElement;		
-	}
-	
-	public org.jdom2.Element getXmlElement() {
-		
-		org.jdom2.Element msFeatureInfoBundleElement = 
-				new org.jdom2.Element(MsFeatureInfoBundleFields.MFIB.name());
+		Element msFeatureInfoBundleElement = 
+				new Element(MsFeatureInfoBundleFields.MFIB.name());
 		
 		if(acquisitionMethod != null)
 			msFeatureInfoBundleElement.setAttribute(
@@ -374,7 +321,7 @@ public class MsFeatureInfoBundle implements Serializable {
 		return msFeatureInfoBundleElement;
 	}
 	
-	public MsFeatureInfoBundle(org.jdom2.Element featureElement) {
+	public MsFeatureInfoBundle(Element featureElement) {
 		
 		msFeature = new MsFeature(
 				featureElement.getChild(StoredMsFeatureFields.MsFeature.name()));

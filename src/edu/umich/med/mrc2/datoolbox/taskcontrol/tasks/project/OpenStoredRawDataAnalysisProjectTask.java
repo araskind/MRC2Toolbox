@@ -292,8 +292,8 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				(NodeList) expr.evaluate(projectDocument, XPathConstants.NODESET);	
 		for (int i = 0; i < msmsDataFileNodes.getLength(); i++) {
 			Element msmsFileElement = (Element) msmsDataFileNodes.item(i);
-			DataFile msmsFile = new DataFile(msmsFileElement);
-			project.addMSMSDataFile(msmsFile);
+//			DataFile msmsFile = new DataFile(msmsFileElement);
+//			project.addMSMSDataFile(msmsFile);
 		}
 		//	MS1 files
 		expr = xpath.compile("//" + 
@@ -304,8 +304,8 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				(NodeList) expr.evaluate(projectDocument, XPathConstants.NODESET);	
 		for (int i = 0; i < msOneDataFileNodes.getLength(); i++) {
 			Element msOneFileElement = (Element) msOneDataFileNodes.item(i);
-			DataFile msOneFile = new DataFile(msOneFileElement);
-			project.addMSOneDataFile(msOneFile);
+//			DataFile msOneFile = new DataFile(msOneFileElement);
+//			project.addMSOneDataFile(msOneFile);
 		}
 	}
 	

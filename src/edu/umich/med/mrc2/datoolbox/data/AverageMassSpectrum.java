@@ -24,8 +24,7 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.io.Serializable;
 import java.util.Collection;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.AvgMSFields;
@@ -59,11 +58,6 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 		masSpectrum = new MassSpectrum();
 	}
 
-	public AverageMassSpectrum(org.jdom2.Element avgMsElement, DataFile dataFile2) {
-		// TODO Auto-generated constructor stub
-		this.dataFile = dataFile2;
-	}
-
 	public MassSpectrum getMasSpectrum() {
 		return masSpectrum;
 	}
@@ -95,25 +89,11 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 	public int compareTo(AverageMassSpectrum o) {
 		return this.toString().compareTo(o.toString());
 	}
-	
-	public Element getXmlElement(Document parentDocument) {
-		//	TODO
-		Element avgMsElement = 
-				parentDocument.createElement(AvgMSFields.AvgMs.name());
-		
-//		private MassSpectrum masSpectrum;
-//		private DataFile dataFile;
-//		private int msLlevel;
-//		private Range rtRange;
-//		private Collection<Integer>scanNumbers;
-	
-		return avgMsElement;
-	}
 
-	public org.jdom2.Element getXmlElement() {
+	public Element getXmlElement() {
 		// TODO Auto-generated method stub
 		
-		org.jdom2.Element avgMsElement = new org.jdom2.Element(AvgMSFields.AvgMs.name());
+		Element avgMsElement = new Element(AvgMSFields.AvgMs.name());
 
 //		private MassSpectrum masSpectrum;
 //		private DataFile dataFile;
@@ -122,5 +102,10 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 //		private Collection<Integer>scanNumbers;
 		
 		return avgMsElement;
+	}
+	
+	public AverageMassSpectrum(Element avgMsElement, DataFile dataFile2) {
+		// TODO Auto-generated constructor stub
+		this.dataFile = dataFile2;
 	}
 }

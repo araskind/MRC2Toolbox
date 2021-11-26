@@ -88,10 +88,7 @@ import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisProjectTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveRawDataAnalysisProjectTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectJdomTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MSMSExtractionParameterSet;
@@ -480,8 +477,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 //		SaveStoredRawDataAnalysisProjectTask task = 
 //				new SaveStoredRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
 		
-		SaveStoredRawDataAnalysisProjectJdomTask task = 
-				new SaveStoredRawDataAnalysisProjectJdomTask(activeRawDataAnalysisProject);
+		SaveStoredRawDataAnalysisProjectTask task = 
+				new SaveStoredRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
@@ -731,13 +728,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				ProjectRawDataFileOpenTask task = (ProjectRawDataFileOpenTask)e.getSource();
 				finalizeProjectRawDataLoad(task);
 			}
-			if (e.getSource().getClass().equals(SaveRawDataAnalysisProjectTask.class) ||
-					e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class) ||
-					e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectJdomTask.class))
+			if (e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class))
 				finalizeRawDataAnalysisProjectSave();
-			
-			if (e.getSource().getClass().equals(LoadRawDataAnalysisProjectTask.class))
-				finalizeRawDataAnalysisProjectLoad((LoadRawDataAnalysisProjectTask)e.getSource());	
 			
 			if (e.getSource().getClass().equals(OpenStoredRawDataAnalysisProjectTask.class))
 				finalizeStoredRawDataAnalysisProjectOpen((OpenStoredRawDataAnalysisProjectTask)e.getSource());			
@@ -775,25 +767,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}
 		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(task.getProject());
 		activeRawDataAnalysisProject = task.getProject();
-		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
-				activeRawDataAnalysisProject.getMSMSDataFiles());
-		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-		MainWindow.hideProgressDialog();
-		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
-		idp.setLocationRelativeTo(this.getContentPane());
-		idp.setVisible(true);
-	}
-
-	private void finalizeRawDataAnalysisProjectLoad(LoadRawDataAnalysisProjectTask task) {
-
-		if(!task.getErrors().isEmpty()) {
-			
-			MessageDialog.showErrorMsg(
-					StringUtils.join(task.getErrors(), "\n"), this.getContentPane());
-			return;
-		}
-		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(task.getNewProject());
-		activeRawDataAnalysisProject = task.getNewProject();
 		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
 				activeRawDataAnalysisProject.getMSMSDataFiles());
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();

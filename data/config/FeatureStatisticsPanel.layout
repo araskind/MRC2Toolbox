@@ -158,7 +158,7 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213792565" orientation="VERTICAL" divider="0.47350620067643745">
 											<node nodeId="1600213792567" orientation="VERTICAL" divider="0.6">
-												<leaf id="2" nodeId="1600213792571">
+												<leaf id="1" nodeId="1600213792571">
 													<placeholders>
 														<placeholder>dock.single.FeatureDataPanelDockableFeatureDataTable</placeholder>
 													</placeholders>
@@ -226,7 +226,7 @@
 														</placeholder-map>
 													</leaf>
 												</node>
-												<leaf id="1" nodeId="1600213792596">
+												<leaf id="2" nodeId="1600213792596">
 													<placeholders>
 														<placeholder>dock.single.FeatureDataPanelAnnotations</placeholder>
 													</placeholders>
@@ -351,6 +351,16 @@
 									</children>
 								</child>
 								<child>
+									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelDockableFeatureDataTable">
+										<replacement id="dockablesingle FeatureDataPanelDockableFeatureDataTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>FeatureDataPanelDockableFeatureDataTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>1</selected>
 										<placeholders>
@@ -432,16 +442,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.FeatureDataPanelDockableFeatureDataTable">
-										<replacement id="dockablesingle FeatureDataPanelDockableFeatureDataTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>FeatureDataPanelDockableFeatureDataTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

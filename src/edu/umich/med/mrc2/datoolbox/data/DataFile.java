@@ -32,9 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
@@ -125,155 +123,6 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		userSpectra = new ArrayList<AverageMassSpectrum>();
 		color = Color.BLACK;
 		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();
-	}
-	
-	public DataFile(Element fileElement) {
-		
-		name = fileElement.getAttribute(StoredDataFileFields.Name.name());
-		String path = fileElement.getAttribute(StoredDataFileFields.Path.name());
-		if(!path.isEmpty())
-			fullPath = path;
-
-		String acqMethodId = fileElement.getAttribute(StoredDataFileFields.InjTimestamp.name());
-		if(!acqMethodId.isEmpty())
-			acquisitionMethod = IDTDataCash.getAcquisitionMethodById(acqMethodId);
-		
-		String colorCode = fileElement.getAttribute(StoredDataFileFields.Color.name());
-		if(colorCode.isEmpty())
-			color = Color.BLACK;
-		else
-			color = ColorUtils.hex2rgb(colorCode);
-		
-		String injId = fileElement.getAttribute(StoredDataFileFields.Injection.name());
-		if(!injId.isEmpty())
-			injectionId = injId;
-		
-		String injTime = fileElement.getAttribute(StoredDataFileFields.InjTimestamp.name());
-		if(!injTime.isEmpty()) {
-			try {
-				injectionTime = ProjectUtils.dateTimeFormat.parse(injTime);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		String sampPposition = fileElement.getAttribute(StoredDataFileFields.SamplePosition.name());
-		if(!sampPposition.isEmpty())
-			samplePosition = sampPposition;
-		
-		String injVol = fileElement.getAttribute(StoredDataFileFields.InjVol.name());
-		if(!injVol.isEmpty())
-			injectionVolume = Double.parseDouble(injVol);
-		
-		String sampleId = fileElement.getAttribute(StoredDataFileFields.Sample.name());
-		if(!sampleId.isEmpty())
-			parentSample = 
-					OfflineProjectLoadCash.getExperimentalSampleById(sampleId);
-		
-		enabled = true;
-		chromatograms = new ArrayList<ExtractedChromatogram>();
-		userSpectra = new ArrayList<AverageMassSpectrum>();		
-		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();		
-		scalingFactor = 1.0d;
-		batchNumber = 1;
-		
-		//	TODO - add chromatograms
-		NodeList xicNodeList = 
-				fileElement.getElementsByTagName(XICFields.XIC.name());
-		for (int i = 0; i < xicNodeList.getLength(); i++) {
-			ExtractedChromatogram xic = 
-					new ExtractedChromatogram((Element)xicNodeList.item(i), this);
-			chromatograms.add(xic);
-		}	
-		//	TODO - add averaged spectra
-		NodeList avgMsNodeList = 
-				fileElement.getElementsByTagName(AvgMSFields.AvgMs.name());
-		for (int i = 0; i < avgMsNodeList.getLength(); i++) {
-
-		}	
-	}
-	
-	public DataFile(org.jdom2.Element fileElement) {
-		
-		name = fileElement.getAttributeValue(StoredDataFileFields.Name.name());
-		String path = 
-				fileElement.getAttributeValue(StoredDataFileFields.Path.name());
-		if(path != null)
-			fullPath = path;
-
-		String acqMethodId = 
-				fileElement.getAttributeValue(StoredDataFileFields.InjTimestamp.name());
-		if(acqMethodId != null)
-			acquisitionMethod = IDTDataCash.getAcquisitionMethodById(acqMethodId);
-		
-		String colorCode = 
-				fileElement.getAttributeValue(StoredDataFileFields.Color.name());
-		if(colorCode == null)
-			color = Color.BLACK;
-		else
-			color = ColorUtils.hex2rgb(colorCode);
-		
-		String injId = 
-				fileElement.getAttributeValue(StoredDataFileFields.Injection.name());
-		if(injId != null)
-			injectionId = injId;
-		
-		String injTime = 
-				fileElement.getAttributeValue(StoredDataFileFields.InjTimestamp.name());
-		if(injTime != null) {
-			try {
-				injectionTime = ProjectUtils.dateTimeFormat.parse(injTime);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		String sampPposition = 
-				fileElement.getAttributeValue(StoredDataFileFields.SamplePosition.name());
-		if(sampPposition != null)
-			samplePosition = sampPposition;
-		
-		String injVol = 
-				fileElement.getAttributeValue(StoredDataFileFields.InjVol.name());
-		if(injVol != null)
-			injectionVolume = Double.parseDouble(injVol);
-		
-		String sampleId = 
-				fileElement.getAttributeValue(StoredDataFileFields.Sample.name());
-		if(sampleId != null)
-			parentSample = 
-					OfflineProjectLoadCash.getExperimentalSampleById(sampleId);
-		
-		enabled = true;
-		chromatograms = new ArrayList<ExtractedChromatogram>();
-		userSpectra = new ArrayList<AverageMassSpectrum>();		
-		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();		
-		scalingFactor = 1.0d;
-		batchNumber = 1;
-		
-		org.jdom2.Element xicListElement = 
-				fileElement.getChild(StoredDataFileFields.XicList.name());
-		if(xicListElement != null) {
-			List<org.jdom2.Element> xicElementList = 
-					xicListElement.getChildren(XICFields.XIC.name());
-			for (org.jdom2.Element xicElement : xicElementList) {
-				ExtractedChromatogram xic = 
-						new ExtractedChromatogram(xicElement, this);
-				chromatograms.add(xic);
-			}
-		}
-		org.jdom2.Element avgMsListElement = 
-				fileElement.getChild(StoredDataFileFields.AvgMsList.name());
-		if(avgMsListElement != null) {
-			
-			List<org.jdom2.Element> avgMsElementList = 
-					avgMsListElement.getChildren(AvgMSFields.AvgMs.name());		
-			for (org.jdom2.Element avgMsElement : avgMsElementList) {
-				AverageMassSpectrum avgMs = 
-						new AverageMassSpectrum(avgMsElement, this);
-				userSpectra.add(avgMs);
-			}
-		}
 	}
 
 	public void addResultFile(ResultsFile result) {
@@ -469,74 +318,28 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 	public Map<DataExtractionMethod, ResultsFile> getResultFiles() {
 		return resultFiles;
 	}
-	
-	public Element getXmlElement(Document parentDocument) {
-		
-		Element dataFileElement = parentDocument.createElement(
-				StoredDataFileFields.DataFile.name());
-		dataFileElement.setAttribute(StoredDataFileFields.Name.name(), name);	
-		dataFileElement.setAttribute(StoredDataFileFields.Path.name(), fullPath);	
-		
-		if(parentSample != null)
-			dataFileElement.setAttribute(StoredDataFileFields.Sample.name(), parentSample.getId());	
-		
-		if(acquisitionMethod != null)
-			dataFileElement.setAttribute(StoredDataFileFields.AcqMethod.name(), acquisitionMethod.getId());	
-		
-		if(injectionId != null)
-			dataFileElement.setAttribute(StoredDataFileFields.Injection.name(), injectionId);	
-		
-		if(samplePosition != null)
-			dataFileElement.setAttribute(StoredDataFileFields.SamplePosition.name(), samplePosition);	
-		
-		if(injectionTime != null)
-			dataFileElement.setAttribute(StoredDataFileFields.InjTimestamp.name(), 
-					ProjectUtils.dateTimeFormat.format(injectionTime));
-		
-		if(injectionVolume > 0)
-			dataFileElement.setAttribute(StoredDataFileFields.InjVol.name(), 
-					Double.toString(injectionVolume));
-		
-		if(color != null)
-			dataFileElement.setAttribute(StoredDataFileFields.Color.name(), 
-					ColorUtils.rgb2hex(color));
-			
-		if(chromatograms != null && !chromatograms.isEmpty()) {
-			
-			Element xicListElement = parentDocument.createElement(
-					StoredDataFileFields.XicList.name());
-			dataFileElement.appendChild(xicListElement);
-			for(ExtractedChromatogram xic : chromatograms)	
-				xicListElement.appendChild(xic.getXmlElement(parentDocument));		
-		}
-		if(userSpectra != null && !userSpectra.isEmpty()) {
-			
-			Element userSpectraElement = parentDocument.createElement(
-					StoredDataFileFields.AvgMsList.name());
-			dataFileElement.appendChild(userSpectraElement);
-			for(AverageMassSpectrum avgMs : userSpectra)
-				userSpectraElement.appendChild(avgMs.getXmlElement(parentDocument));			
-		}		
-		return dataFileElement;
-	}
 
-	public org.jdom2.Element getXmlElement() {
-		org.jdom2.Element dataFileElement = 
-        		new org.jdom2.Element(StoredDataFileFields.DataFile.name());
+	public Element getXmlElement() {
+		Element dataFileElement = 
+        		new Element(StoredDataFileFields.DataFile.name());
 		dataFileElement.setAttribute(StoredDataFileFields.Name.name(), name);	
 		dataFileElement.setAttribute(StoredDataFileFields.Path.name(), fullPath);	
 		
 		if(parentSample != null)
-			dataFileElement.setAttribute(StoredDataFileFields.Sample.name(), parentSample.getId());	
+			dataFileElement.setAttribute(
+					StoredDataFileFields.Sample.name(), parentSample.getId());	
 		
 		if(acquisitionMethod != null)
-			dataFileElement.setAttribute(StoredDataFileFields.AcqMethod.name(), acquisitionMethod.getId());	
+			dataFileElement.setAttribute(
+					StoredDataFileFields.AcqMethod.name(), acquisitionMethod.getId());	
 		
 		if(injectionId != null)
-			dataFileElement.setAttribute(StoredDataFileFields.Injection.name(), injectionId);	
+			dataFileElement.setAttribute(
+					StoredDataFileFields.Injection.name(), injectionId);	
 		
 		if(samplePosition != null)
-			dataFileElement.setAttribute(StoredDataFileFields.SamplePosition.name(), samplePosition);	
+			dataFileElement.setAttribute(
+					StoredDataFileFields.SamplePosition.name(), samplePosition);	
 		
 		if(injectionTime != null)
 			dataFileElement.setAttribute(StoredDataFileFields.InjTimestamp.name(), 
@@ -552,7 +355,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		
 		if(chromatograms != null && !chromatograms.isEmpty()) {
 			
-			org.jdom2.Element xicListElement = new org.jdom2.Element(
+			Element xicListElement = new Element(
 					StoredDataFileFields.XicList.name());			
 			for(ExtractedChromatogram xic : chromatograms)	
 				xicListElement.addContent(xic.getXmlElement(this));
@@ -561,7 +364,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		}
 		if(userSpectra != null && !userSpectra.isEmpty()) {
 			
-			org.jdom2.Element userSpectraElement = new org.jdom2.Element(
+			Element userSpectraElement = new Element(
 					StoredDataFileFields.AvgMsList.name());
 			for(AverageMassSpectrum avgMs : userSpectra)
 				userSpectraElement.addContent(avgMs.getXmlElement());
@@ -569,6 +372,89 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 			dataFileElement.addContent(userSpectraElement);
 		}
 		return dataFileElement;
+	}
+	
+	public DataFile(Element fileElement) {
+		
+		name = fileElement.getAttributeValue(StoredDataFileFields.Name.name());
+		String path = 
+				fileElement.getAttributeValue(StoredDataFileFields.Path.name());
+		if(path != null)
+			fullPath = path;
+
+		String acqMethodId = 
+				fileElement.getAttributeValue(StoredDataFileFields.InjTimestamp.name());
+		if(acqMethodId != null)
+			acquisitionMethod = IDTDataCash.getAcquisitionMethodById(acqMethodId);
+		
+		String colorCode = 
+				fileElement.getAttributeValue(StoredDataFileFields.Color.name());
+		if(colorCode == null)
+			color = Color.BLACK;
+		else
+			color = ColorUtils.hex2rgb(colorCode);
+		
+		String injId = 
+				fileElement.getAttributeValue(StoredDataFileFields.Injection.name());
+		if(injId != null)
+			injectionId = injId;
+		
+		String injTime = 
+				fileElement.getAttributeValue(StoredDataFileFields.InjTimestamp.name());
+		if(injTime != null) {
+			try {
+				injectionTime = ProjectUtils.dateTimeFormat.parse(injTime);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		String sampPposition = 
+				fileElement.getAttributeValue(StoredDataFileFields.SamplePosition.name());
+		if(sampPposition != null)
+			samplePosition = sampPposition;
+		
+		String injVol = 
+				fileElement.getAttributeValue(StoredDataFileFields.InjVol.name());
+		if(injVol != null)
+			injectionVolume = Double.parseDouble(injVol);
+		
+		String sampleId = 
+				fileElement.getAttributeValue(StoredDataFileFields.Sample.name());
+		if(sampleId != null)
+			parentSample = 
+					OfflineProjectLoadCash.getExperimentalSampleById(sampleId);
+		
+		enabled = true;
+		chromatograms = new ArrayList<ExtractedChromatogram>();
+		userSpectra = new ArrayList<AverageMassSpectrum>();		
+		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();		
+		scalingFactor = 1.0d;
+		batchNumber = 1;
+		
+		Element xicListElement = 
+				fileElement.getChild(StoredDataFileFields.XicList.name());
+		if(xicListElement != null) {
+			List<Element> xicElementList = 
+					xicListElement.getChildren(XICFields.XIC.name());
+			for (Element xicElement : xicElementList) {
+				ExtractedChromatogram xic = 
+						new ExtractedChromatogram(xicElement, this);
+				chromatograms.add(xic);
+			}
+		}
+		Element avgMsListElement = 
+				fileElement.getChild(StoredDataFileFields.AvgMsList.name());
+		if(avgMsListElement != null) {
+			
+			List<Element> avgMsElementList = 
+					avgMsListElement.getChildren(AvgMSFields.AvgMs.name());		
+			for (Element avgMsElement : avgMsElementList) {
+				AverageMassSpectrum avgMs = 
+						new AverageMassSpectrum(avgMsElement, this);
+				userSpectra.add(avgMs);
+			}
+		}
 	}
 }
 

@@ -26,9 +26,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Text;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
@@ -139,54 +137,11 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 	public void setColor(Color color) {
 		this.color = color;
 	}
-	
-	public Element getXmlElement(Document parentDocument) {
-		
-		Element extractedChromatogramElement = 
-				parentDocument.createElement(XICFields.XIC.name());
-		
-		String time = "";
-		try {
-			time = NumberArrayUtils.encodeNumberArray(timeValues);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Element timeElement = 
-				parentDocument.createElement(XICFields.Time.name());		
-		Text timeText = parentDocument.createTextNode(time);
-		timeElement.appendChild(timeText);		
-		extractedChromatogramElement.appendChild(timeElement);
-		
-		String intensity = "";
-		try {
-			intensity = NumberArrayUtils.encodeNumberArray(intensityValues);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Element intensityElement = 
-				parentDocument.createElement(XICFields.Intensity.name());		
-		Text intensityText = parentDocument.createTextNode(intensity);
-		intensityElement.appendChild(intensityText);		
-		extractedChromatogramElement.appendChild(intensityElement);
-		
-		if(color != null)
-			extractedChromatogramElement.setAttribute(XICFields.Color.name(), 
-					ColorUtils.rgb2hex(color));	
-		
-		if(note != null)
-			extractedChromatogramElement.setAttribute(XICFields.Note.name(), note);	
-		
-		extractedChromatogramElement.appendChild(
-				definition.getXmlElement(parentDocument));
-				
-		return extractedChromatogramElement;		
-	}
-	public org.jdom2.Element getXmlElement(DataFile dataFile) {
 
-		org.jdom2.Element extractedChromatogramElement = 
-				new org.jdom2.Element(XICFields.XIC.name());		
+	public Element getXmlElement(DataFile dataFile) {
+
+		Element extractedChromatogramElement = 
+				new Element(XICFields.XIC.name());		
 		String time = "";
 		try {
 			time = NumberArrayUtils.encodeNumberArray(timeValues);
@@ -194,8 +149,8 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		org.jdom2.Element  timeElement = 
-				new org.jdom2.Element (XICFields.Time.name()).setText(time);		
+		Element  timeElement = 
+				new Element (XICFields.Time.name()).setText(time);		
 		extractedChromatogramElement.addContent(timeElement);
 		
 		String intensity = "";
@@ -205,8 +160,8 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		org.jdom2.Element  intensityElement = 
-				new org.jdom2.Element (XICFields.Intensity.name()).setText(intensity);		
+		Element  intensityElement = 
+				new Element (XICFields.Intensity.name()).setText(intensity);		
 		extractedChromatogramElement.addContent(intensityElement);
 		
 		if(color != null)
@@ -221,41 +176,7 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 		return extractedChromatogramElement;
 	}
 	
-	public ExtractedChromatogram(Element xicItem, DataFile dataFile) {
-		
-		this.dataFile = dataFile;
-		String timeText =  xicItem.getElementsByTagName(XICFields.Time.name()).
-				item(0).getChildNodes().item(0).getTextContent();
-		try {
-			timeValues = NumberArrayUtils.decodeNumberArray(timeText);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		String intensityText =  xicItem.getElementsByTagName(XICFields.Intensity.name()).
-				item(0).getChildNodes().item(0).getTextContent();
-		try {
-			intensityValues = NumberArrayUtils.decodeNumberArray(intensityText);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		String colorCode = xicItem.getAttribute(XICFields.Color.name());
-		if(colorCode.isEmpty())
-			color = Color.BLACK;
-		else
-			color = ColorUtils.hex2rgb(colorCode);
-		
-		String noteText = xicItem.getAttribute(XICFields.Note.name());
-		if(!noteText.isEmpty())
-			note = noteText;
-		
-		Element cdElement = 
-				(Element)xicItem.getElementsByTagName(XICDefinitionFields.XICDefinition.name()).item(0);		
-		definition = new ChromatogramDefinition(cdElement);
-	}
-
-	public ExtractedChromatogram(org.jdom2.Element xicElement, DataFile dataFile2) {
+	public ExtractedChromatogram(Element xicElement, DataFile dataFile2) {
 
 		this.dataFile = dataFile2;
 		String timeText =  
@@ -284,7 +205,7 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 		if(noteText != null)
 			note = noteText;
 		
-		org.jdom2.Element cdElement = 
+		Element cdElement = 
 				xicElement.getChild(XICDefinitionFields.XICDefinition.name());		
 		definition = new ChromatogramDefinition(cdElement);
 	}

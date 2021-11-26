@@ -28,8 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.project.store.MsRtLibraryMatchFields;
 
@@ -187,11 +186,11 @@ public class MsRtLibraryMatch implements Serializable {
 	public void setLibraryId(String libraryId) {
 		this.libraryId = libraryId;
 	}
-
-	public Element getXmlElement(Document parentDocument)  {
+	
+	public Element getXmlElement() {
 		
-		Element refMsRtElement = parentDocument.createElement(
-				MsRtLibraryMatchFields.RefMsRt.name());
+		Element refMsRtElement = 
+				new Element(MsRtLibraryMatchFields.RefMsRt.name());
 		
 		if(libraryId != null)
 			refMsRtElement.setAttribute(
@@ -218,41 +217,9 @@ public class MsRtLibraryMatch implements Serializable {
 		return refMsRtElement;
 	}
 	
-	public org.jdom2.Element getXmlElement() {
-		
-		org.jdom2.Element refMsRtElement = 
-				new org.jdom2.Element(MsRtLibraryMatchFields.RefMsRt.name());
-		
-		if(libraryId != null)
-			refMsRtElement.setAttribute(
-					MsRtLibraryMatchFields.LibId.name(), libraryId);
-		
-		if(libraryTargetId != null)
-			refMsRtElement.setAttribute(
-					MsRtLibraryMatchFields.TGID.name(), libraryTargetId);
-		
-		if(score > 0.0)
-			refMsRtElement.setAttribute(
-					MsRtLibraryMatchFields.Score.name(), Double.toString(score));
-		
-		if(adductScoreMap != null && !adductScoreMap.isEmpty()) {
-			
-			List<String> amList = adductScoreMap.stream().
-					map(s -> s.getLibraryMatch().getId() + "|" 
-							+ s.getUnknownMatch().getId() + "|" 
-							+ Double.toString(s.getScore())).collect(Collectors.toList());
-			refMsRtElement.setAttribute(
-					MsRtLibraryMatchFields.AdScores.name(), 
-					StringUtils.join(amList, "@"));
-		}		
-		return refMsRtElement;
-	}
-	
-	public MsRtLibraryMatch(org.jdom2.Element msRtMatch) {
+	public MsRtLibraryMatch(Element msRtMatch) {
 		// TODO Auto-generated constructor stub
 	}
-
-
 }
 
 

@@ -33,8 +33,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -874,44 +873,10 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			return msmsHits.size();
 	}
 	
-	public Element getXmlElement(Document parentDocument) {
+	public Element getXmlElement() {
 		
-		Element msFeatureElement = parentDocument.createElement(
-				StoredMsFeatureFields.MsFeature.name());
-		
-		msFeatureElement.setAttribute(StoredMsFeatureFields.Id.name(), id);	
-		msFeatureElement.setAttribute(StoredMsFeatureFields.Name.name(), name);
-		msFeatureElement.setAttribute(StoredMsFeatureFields.rt.name(), Double.toString(retentionTime));
-		if(rtRange != null)
-			msFeatureElement.setAttribute(StoredMsFeatureFields.rtRange.name(), rtRange.getStorableString());
-		
-		if(polarity != null)
-			msFeatureElement.setAttribute(StoredMsFeatureFields.pol.name(), polarity.getCode());
-		
-		//	Spectrum
-		if(spectrum != null) 
-			msFeatureElement.appendChild(spectrum.getXmlElement(parentDocument));
-		
-		//	Identifications
-		if(!identifications.isEmpty()) {
-			
-			Element cidListElement = parentDocument.createElement(
-					StoredMsFeatureFields.CIDs.name());
-			msFeatureElement.appendChild(cidListElement);
-			for(MsFeatureIdentity mscid : identifications)			
-				cidListElement.appendChild(mscid.getXmlElement(parentDocument));						
-		}	
-		if(qualityScore > 0)
-			msFeatureElement.setAttribute(
-					StoredMsFeatureFields.QS.name(), Double.toString(qualityScore));
-						
-		return msFeatureElement;		
-	}
-	
-	public org.jdom2.Element getXmlElement() {
-		
-		org.jdom2.Element msFeatureElement = 
-				new org.jdom2.Element(StoredMsFeatureFields.MsFeature.name());
+		Element msFeatureElement = 
+				new Element(StoredMsFeatureFields.MsFeature.name());
 		msFeatureElement.setAttribute(StoredMsFeatureFields.Id.name(), id);	
 		msFeatureElement.setAttribute(StoredMsFeatureFields.Name.name(), name);
 		msFeatureElement.setAttribute(StoredMsFeatureFields.rt.name(), Double.toString(retentionTime));
@@ -928,8 +893,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		//	Identifications
 		if(!identifications.isEmpty()) {
 			
-			org.jdom2.Element cidListElement = 
-					new org.jdom2.Element(StoredMsFeatureFields.CIDs.name());					
+			Element cidListElement = 
+					new Element(StoredMsFeatureFields.CIDs.name());					
 			
 			for(MsFeatureIdentity mscid : identifications)			
 				cidListElement.addContent(mscid.getXmlElement());	
@@ -943,7 +908,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		return msFeatureElement;
 	}
 	
-	public MsFeature(org.jdom2.Element featureElement) {
+	public MsFeature(Element featureElement) {
 		
 		identifications = new HashSet<MsFeatureIdentity>();
 		annotations = new TreeSet<ObjectAnnotation>();
@@ -964,20 +929,19 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		
 		spectrum = new MassSpectrum(
 				featureElement.getChild(MassSpectrumFields.Spectrum.name()));	
-//		MsUtils.calculateMcMillanMassDefectForSpectrum(spectrum);
 		String qsValue = 
 				featureElement.getAttributeValue(StoredMsFeatureFields.QS.name());
 		if(qsValue != null)
 			qualityScore = Double.parseDouble(qsValue);
 		
 		//	Identifications
-		List<org.jdom2.Element> msfIdListElements = 
+		List<Element> msfIdListElements = 
 				featureElement.getChildren(StoredMsFeatureFields.CIDs.name());
 		if(msfIdListElements.size() > 0) {
 			
-			List<org.jdom2.Element> msfIdList = 
+			List<Element> msfIdList = 
 					msfIdListElements.get(0).getChildren(MsFeatureIdentityFields.MSFID.name());
-			for(org.jdom2.Element msfIdElement : msfIdList) {
+			for(Element msfIdElement : msfIdList) {
 				
 				MsFeatureIdentity msfId = new MsFeatureIdentity(msfIdElement);
 				identifications.add(msfId);

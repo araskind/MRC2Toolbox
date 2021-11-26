@@ -22,21 +22,15 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.nio.file.Paths;
 import java.util.Collection;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import org.apache.commons.io.FilenameUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
@@ -46,12 +40,11 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class SaveFileMsFeaturesTask extends AbstractTask {
-	
+
 	private DataFile file;
 	private File xmlTmpDir;	
 	private Collection<MsFeatureInfoBundle>features;
-	private Document dataFileDocument;
-	
+
 	public SaveFileMsFeaturesTask(
 			DataFile file, 
 			File xmlTmpDir, 
@@ -64,6 +57,7 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
 
 	@Override
 	public void run() {
+
 		setStatus(TaskStatus.PROCESSING);
 		try {
 			createXmlForFeatureList();
@@ -81,24 +75,21 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
 		total = features.size();
 		processed = 0;
 		
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		dataFileDocument = dBuilder.newDocument();
-		Element dataFileElement = 
-				dataFileDocument.createElement(
-						StoredDataFileFields.DataFile.name());
+        Document dataFileDocument = new Document();
+        Element dataFileElement = 
+        		new Element(StoredDataFileFields.DataFile.name());
 		dataFileElement.setAttribute("version", "1.0.0.0");
 		dataFileElement.setAttribute(StoredDataFileFields.Name.name(), file.getName());
-		dataFileDocument.appendChild(dataFileElement);
 		Element featureListElement =  
-				dataFileDocument.createElement(StoredDataFileFields.FeatureList.name());
-		dataFileElement.appendChild(featureListElement);
+				 new Element(StoredDataFileFields.FeatureList.name());
+
 		for(MsFeatureInfoBundle msf : features) {
-			
-			Element featureElement =  msf.getXmlElement(dataFileDocument);
-			featureListElement.appendChild(featureElement);
+			featureListElement.addContent(msf.getXmlElement());
 			processed++;
 		}
+		dataFileElement.addContent(featureListElement);
+		dataFileDocument.addContent(dataFileElement);
+        
 		//	Save XML document
 		taskDescription = "Saving XML for " + file.getName();
 		total = 100;
@@ -106,20 +97,21 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
 		File xmlFile = Paths.get(
 				xmlTmpDir.getAbsolutePath(), 
 				FilenameUtils.getBaseName(file.getName()) + ".xml").toFile();
-		TransformerFactory transfac = TransformerFactory.newInstance();
-		Transformer transformer = transfac.newTransformer();
-		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-		StreamResult result = new StreamResult(new FileOutputStream(xmlFile));
-		DOMSource source = new DOMSource(dataFileDocument);
-		transformer.transform(source, result);
-		result.getOutputStream().close();
+        try {
+            FileWriter writer = new FileWriter(xmlFile, false);
+            XMLOutputter outputter = new XMLOutputter();
+            outputter.setFormat(Format.getCompactFormat());
+            outputter.output(dataFileDocument, writer);
+            outputter.output(dataFileDocument, System.out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        processed = 100;
 	}
-
+	
 	@Override
 	public Task cloneTask() {
-		return new SaveFileMsFeaturesTask(file, xmlTmpDir, features);
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

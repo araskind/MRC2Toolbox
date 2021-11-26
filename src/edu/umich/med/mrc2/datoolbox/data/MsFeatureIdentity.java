@@ -26,8 +26,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.UUID;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
@@ -340,67 +339,10 @@ public class MsFeatureIdentity implements Serializable {
 		this.scoreCarryOver = scoreCarryOver;
 	}
 	
-	public Element getXmlElement(Document parentDocument) {
+	public Element getXmlElement() {
 		
-		Element msIdElement = parentDocument.createElement(
-				MsFeatureIdentityFields.MSFID.name());
-		
-		msIdElement.setAttribute(MsFeatureIdentityFields.Id.name(), uniqueId);
-		if(compoundIdentity != null) 
-			msIdElement.setAttribute(MsFeatureIdentityFields.CID.name(), 
-					compoundIdentity.getPrimaryDatabaseId());
-		
-		if(compoundIdName != null)
-			msIdElement.setAttribute(MsFeatureIdentityFields.Name.name(), 
-					compoundIdName);
-		
-		if(idSource != null)
-			msIdElement.setAttribute(MsFeatureIdentityFields.Source.name(), 
-					idSource.name());
-		
-		if(confidenceLevel != null)
-			msIdElement.setAttribute(MsFeatureIdentityFields.Conf.name(), 
-					confidenceLevel.name());
-		
-		msIdElement.setAttribute(MsFeatureIdentityFields.Prim.name(), 
-				Boolean.toString(isPrimary));
-		msIdElement.setAttribute(MsFeatureIdentityFields.Qc.name(), 
-				Boolean.toString(qcStandard));		
-		if(referenceMsMsLibraryMatch != null)
-			msIdElement.appendChild(
-					referenceMsMsLibraryMatch.getXmlElement(parentDocument));
-		
-		if(msRtLibraryMatch != null) {
-			msIdElement.appendChild(
-					msRtLibraryMatch.getXmlElement(parentDocument));
-		}	
-		if(assignedBy != null)
-			msIdElement.setAttribute(MsFeatureIdentityFields.User.name(), 
-					assignedBy.getId());
-		
-		if(assignedOn != null)
-			msIdElement.setAttribute(MsFeatureIdentityFields.AssignedOn.name(), 
-					ProjectUtils.dateTimeFormat.format(assignedOn));			
-		
-		if(identificationLevel != null)
-			msIdElement.setAttribute(MsFeatureIdentityFields.IdLevel.name(), 
-					identificationLevel.getId());
-		
-		if(primaryAdduct != null)
-			msIdElement.setAttribute(MsFeatureIdentityFields.Adduct.name(), 
-					primaryAdduct.getId());
-		
-		if(scoreCarryOver > 0.0d)
-			msIdElement.setAttribute(MsFeatureIdentityFields.SCO.name(), 
-					Double.toString(scoreCarryOver));
-		
-		return msIdElement;
-	}
-
-	public org.jdom2.Element getXmlElement() {
-		
-		org.jdom2.Element msIdElement = 
-				new org.jdom2.Element(MsFeatureIdentityFields.MSFID.name());
+		Element msIdElement = 
+				new Element(MsFeatureIdentityFields.MSFID.name());
 		
 		msIdElement.setAttribute(MsFeatureIdentityFields.Id.name(), uniqueId);
 		if(compoundIdentity != null) 
@@ -454,7 +396,7 @@ public class MsFeatureIdentity implements Serializable {
 		return msIdElement;
 	}
 	
-	public MsFeatureIdentity(org.jdom2.Element msfIdElement) {
+	public MsFeatureIdentity(Element msfIdElement) {
 
 		uniqueId = msfIdElement.getAttributeValue(MsFeatureIdentityFields.Id.name());		
 		String cid = msfIdElement.getAttributeValue(MsFeatureIdentityFields.CID.name());
@@ -483,13 +425,13 @@ public class MsFeatureIdentity implements Serializable {
 		qcStandard = Boolean.parseBoolean(
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Qc.name()));
 
-		org.jdom2.Element msmsMatch = 
+		Element msmsMatch = 
 				msfIdElement.getChild(ReferenceMsMsLibraryMatchFields.RefMsms.name());	
 		if(msmsMatch != null)
 			referenceMsMsLibraryMatch = 
 					new ReferenceMsMsLibraryMatch(msmsMatch);
 
-		org.jdom2.Element msRtMatch = 
+		Element msRtMatch = 
 				msfIdElement.getChild(MsRtLibraryMatchFields.RefMsRt.name());	
 		if(msRtMatch != null)
 			msRtLibraryMatch = 
