@@ -210,7 +210,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			openRawDataAnalysisProject();
 		
 		if (command.equals(MainActionCommands.CLOSE_RAW_DATA_PROJECT_COMMAND.getName())) 
-			closeRawDataAnalysisProject();
+			closeRawDataAnalysisProject(false);
 		
 		if (command.equals(MainActionCommands.SAVE_RAW_DATA_PROJECT_COMMAND.getName())) 
 			saveRawDataAnalysisProject();
@@ -313,8 +313,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(ps == null)
 			return;
 		
-		MsMsfeatureBatchExtractionTask task = new MsMsfeatureBatchExtractionTask(
-				ps, activeRawDataAnalysisProject.getMSMSDataFiles(), null);
+		MsMsfeatureBatchExtractionTask task = 
+				new MsMsfeatureBatchExtractionTask(
+						ps, 
+						activeRawDataAnalysisProject.getMSMSDataFiles(), 
+						activeRawDataAnalysisProject.getMSOneDataFiles());
 		
 //		Collection<String>errors = msmsFeatureExtractionSetupDialog.validateParameters();
 //		if(!errors.isEmpty()) {
@@ -465,17 +468,10 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			runSaveProjectTask();
 	}
 	
-	private void runSaveProjectTask() {
+	public void runSaveProjectTask() {
 
 		if(activeRawDataAnalysisProject == null)
 			return;
-		
-//		SaveRawDataAnalysisProjectTask task = 
-//				new SaveRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
-//		task.addTaskListener(this);
-		
-//		SaveStoredRawDataAnalysisProjectTask task = 
-//				new SaveStoredRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
 		
 		SaveStoredRawDataAnalysisProjectTask task = 
 				new SaveStoredRawDataAnalysisProjectTask(activeRawDataAnalysisProject);
@@ -509,11 +505,19 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 
-	private void closeRawDataAnalysisProject() {
+	public void closeRawDataAnalysisProject(boolean exitProgram) {
 
-		if (activeRawDataAnalysisProject == null)
-			return;
-
+		if (activeRawDataAnalysisProject == null) {
+			
+			if(exitProgram) {
+				if (MessageDialog.showChoiceWithWarningMsg(
+						"Are you sure you want to exit?", this.getContentPane()) == JOptionPane.YES_OPTION)
+					MRC2ToolBoxCore.getMainWindow().shutDown();
+			}
+			else {
+				return;
+			}
+		}
 		String yesNoQuestion = "You are going to close current project,"
 				+ " do you want to save the results (Yes - save, No - discard)?";
 		int selectedValue = MessageDialog.showChooseOrCancelMsg(
@@ -522,11 +526,28 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			return;
 
 		if (selectedValue == JOptionPane.YES_OPTION) {
-			saveOnCloseRequested = true;
+			
+			if(exitProgram)
+				saveOnExitRequested = true;
+			else
+				saveOnCloseRequested = true;
+			
 			runSaveProjectTask();
 			return;
 		}
-		clearGuiAfterProjectClosed();
+		if (selectedValue == JOptionPane.NO_OPTION) {
+			
+			if(exitProgram) {
+				selectedValue = 
+						MessageDialog.showChoiceWithWarningMsg("Are you sure you want to exit?", 
+								this.getContentPane());
+				if (selectedValue == JOptionPane.YES_OPTION)
+					MRC2ToolBoxCore.getMainWindow().shutDown();
+			}
+			else {
+				clearGuiAfterProjectClosed();
+			}
+		}			
 	}
 	
 	private void clearGuiAfterProjectClosed() {		
@@ -796,10 +817,9 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(saveOnExitRequested) {
 
 			saveOnExitRequested = false;
-			int selectedValue = JOptionPane.showInternalConfirmDialog(this.getContentPane(),
-					"Are you sure you want to exit?", "Exiting...", JOptionPane.YES_NO_OPTION,
-					JOptionPane.WARNING_MESSAGE);
-
+			int selectedValue = 
+					MessageDialog.showChoiceWithWarningMsg("Are you sure you want to exit?", 
+							this.getContentPane());
 			if (selectedValue == JOptionPane.YES_OPTION)
 				MRC2ToolBoxCore.getMainWindow().shutDown();
 		}

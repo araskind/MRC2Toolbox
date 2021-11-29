@@ -24,31 +24,34 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayFilter;
 
 public class MsMsfeatureBatchExtractionTask extends AbstractTask implements TaskListener {
 
 	private MSMSExtractionParameterSet ps;
-	
+
 	private Collection<DataFile> msmsDataFiles;	
 	private Collection<DataFile> msOneDataFiles;	
-	private boolean flagMinorIsotopesPrecursors;
-	private int maxPrecursorCharge;	
-	private double chromatogramExtractionWindow;
-	private int smoothingFilterWidth;
-	
-	private SavitzkyGolayFilter smoothingFilter; 
+//	private boolean flagMinorIsotopesPrecursors;
+//	private int maxPrecursorCharge;	
+//	private double chromatogramExtractionWindow;
+//	private int smoothingFilterWidth;
+//	
+//	private SavitzkyGolayFilter smoothingFilter; 
 	
 	private Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;
+	
 
 	public MsMsfeatureBatchExtractionTask(
 			MSMSExtractionParameterSet ps, 	
@@ -58,11 +61,12 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 		this.ps = ps;
 		this.msmsDataFiles = msmsDataFiles;
 		this.msOneDataFiles = msOneDataFiles;
-		this.flagMinorIsotopesPrecursors = ps.isFlagMinorIsotopesPrecursors();
-		this.maxPrecursorCharge = ps.getMaxPrecursorCharge();
-		this.smoothingFilterWidth = ps.getSmoothingFilterWidth();
+//		this.flagMinorIsotopesPrecursors = ps.isFlagMinorIsotopesPrecursors();
+//		this.maxPrecursorCharge = ps.getMaxPrecursorCharge();
+//		this.smoothingFilterWidth = ps.getSmoothingFilterWidth();
 		
-		msFeatureMap = new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
+		msFeatureMap = 
+				new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
 	}
 
 	@Override
@@ -98,10 +102,35 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 				MsMsfeatureExtractionTask task = (MsMsfeatureExtractionTask)e.getSource();
 				msFeatureMap.put(task.getRawDataFile(), task.getMsFeatureInfoBundles());
 				processed++;
-				if(processed == msmsDataFiles.size())
+				if(processed == msmsDataFiles.size() && msOneDataFiles.size() > 0) {
+					initChromatogramExtraction();
+				}
+				else {
 					setStatus(TaskStatus.FINISHED);
+					return;
+				}
+			}
+			if (e.getSource().getClass().equals(MsFeatureChromatogramBatchExtractionTask.class)) {
+				//	TODO attach chromatograms
+				setStatus(TaskStatus.FINISHED);
 			}
 		}
+	}
+
+	private void initChromatogramExtraction() {
+
+		Collection<MsFeatureInfoBundle> features = msFeatureMap.entrySet().stream().
+					flatMap(e -> e.getValue().stream()).
+					sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
+					collect(Collectors.toList());
+		MsFeatureChromatogramBatchExtractionTask task = 
+				new MsFeatureChromatogramBatchExtractionTask(
+						msOneDataFiles, 
+						features, 
+						ps.getCommonChromatogramDefinition(),
+						ps.getXicTarget());
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 
 	public Map<DataFile, Collection<MsFeatureInfoBundle>> getMsFeatureMap() {

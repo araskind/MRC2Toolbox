@@ -77,6 +77,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private MSMSExtractionParameterSet ps;
 
 	private DataFile rawDataFile;
+	private Polarity polarity;
 	private Range dataExtractionRtRange;
 	private boolean removeAllMassesAboveParent;
 	private double msMsCountsCutoff;
@@ -103,6 +104,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		super();
 		this.ps = ps;
 		this.rawDataFile = rawDataFile;	
+		this.polarity = ps.getPolarity();
 		this.dataExtractionRtRange = ps.getDataExtractionRtRange();
 		this.removeAllMassesAboveParent = ps.isRemoveAllMassesAboveParent();
 		this.msMsCountsCutoff = ps.getMsMsCountsCutoff();
@@ -628,19 +630,20 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			num2scan = data.getScans().getScansByRtSpanAtMsLevel(
 					dataExtractionRtRange.getMin(), dataExtractionRtRange.getMax(), 2);
 		
+		umich.ms.datatypes.scan.props.Polarity scanPolarity = RawDataUtils.getScanPolarity(polarity);
+		
 		for(Entry<Integer, IScan> entry: num2scan.entrySet()) {
 			
 			IScan s = entry.getValue();	
+			if(!s.getPolarity().equals(scanPolarity))
+				continue;
+				
 			int scanNum = entry.getKey();
 			IScan parentScan = getParentScan(s);
 			if(parentScan == null) {
 				processed++;
 				continue;			
-			}
-			Polarity polarity = Polarity.Positive;
-			if(s.getPolarity().equals(umich.ms.datatypes.scan.props.Polarity.NEGATIVE))
-				polarity = Polarity.Negative;
-			
+			}			
 			MsFeature f = new MsFeature(s.getRt(), polarity);
 			MassSpectrum spectrum = new MassSpectrum();
 			

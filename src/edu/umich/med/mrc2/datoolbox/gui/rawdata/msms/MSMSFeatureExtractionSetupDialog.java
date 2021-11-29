@@ -62,15 +62,20 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MsFeatureChromatogramExtractionTarget;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayFilter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
 
 public class MSMSFeatureExtractionSetupDialog extends JDialog  implements ActionListener, BackedByPreferences{
@@ -98,6 +103,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 
 	private static final NumberFormat twoDecFormat = new DecimalFormat("###.##");
 	
+	public static final String POLARITY = "POLARITY";
 	public static final String USE_RT_RANGE = "USE_RT_RANGE";
 	public static final String RT_BORDER_LEFT_MIN = "RT_BORDER_LEFT_MIN";
 	public static final String RT_BORDER_RIGHT_MIN = "RT_BORDER_RIGHT_MIN";
@@ -123,10 +129,9 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	private JComboBox precursorGroupingMassErrorTypeComboBox;
 	private JCheckBox flagMinorIsotopesPrecursorsCheckBox;
 	private JSpinner maxChargeSpinner;
-	private JLabel lblNewLabel_8;
 	private JComboBox filterWidthComboBox;
-	private JLabel lblNewLabel_9;
 	private JFormattedTextField xicWindowTextField;
+	private JComboBox polarityComboBox;
 	
 	public MSMSFeatureExtractionSetupDialog(ActionListener listener) {
 		super();
@@ -143,18 +148,38 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		panel_1.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(panel_1, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[]{277, 0, 0, 0, 0, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_1.columnWidths = new int[]{274, 68, 0, 78, 0, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel_1.columnWeights = new double[]{1.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
+				
+		JLabel lblNewLabel_11 = new JLabel("Polarity");
+		GridBagConstraints gbc_lblNewLabel_11 = new GridBagConstraints();
+		gbc_lblNewLabel_11.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_11.fill = GridBagConstraints.VERTICAL;
+		gbc_lblNewLabel_11.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_11.gridx = 0;
+		gbc_lblNewLabel_11.gridy = 0;
+		panel_1.add(lblNewLabel_11, gbc_lblNewLabel_11);
+		
+		polarityComboBox = new JComboBox<Polarity>(
+				new DefaultComboBoxModel<Polarity>(
+						new Polarity[] {Polarity.Positive, Polarity.Negative}));
+		GridBagConstraints gbc_polarityComboBox = new GridBagConstraints();
+		gbc_polarityComboBox.gridwidth = 3;
+		gbc_polarityComboBox.insets = new Insets(0, 0, 5, 5);
+		gbc_polarityComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_polarityComboBox.gridx = 1;
+		gbc_polarityComboBox.gridy = 0;
+		panel_1.add(polarityComboBox, gbc_polarityComboBox);
 
-		limitExtractionRtCheckBox = new JCheckBox("Extract data only for retention time from ");
+		limitExtractionRtCheckBox = new JCheckBox("Extract data only for retention time from");
 		GridBagConstraints gbc_limitExtractionRtCheckBox = new GridBagConstraints();
 		gbc_limitExtractionRtCheckBox.anchor = GridBagConstraints.EAST;
 		gbc_limitExtractionRtCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_limitExtractionRtCheckBox.gridx = 0;
-		gbc_limitExtractionRtCheckBox.gridy = 0;
+		gbc_limitExtractionRtCheckBox.gridy = 1;
 		panel_1.add(limitExtractionRtCheckBox, gbc_limitExtractionRtCheckBox);
 
 		rtFromTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getRtFormat());
@@ -163,15 +188,15 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_rtFromTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_rtFromTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_rtFromTextField.gridx = 1;
-		gbc_rtFromTextField.gridy = 0;
+		gbc_rtFromTextField.gridy = 1;
 		panel_1.add(rtFromTextField, gbc_rtFromTextField);
-
+		
 		JLabel lblTo = new JLabel(" to ");
 		GridBagConstraints gbc_lblTo = new GridBagConstraints();
 		gbc_lblTo.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTo.anchor = GridBagConstraints.EAST;
 		gbc_lblTo.gridx = 2;
-		gbc_lblTo.gridy = 0;
+		gbc_lblTo.gridy = 1;
 		panel_1.add(lblTo, gbc_lblTo);
 
 		rtToTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getRtFormat());
@@ -180,7 +205,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_rtToTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_rtToTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_rtToTextField.gridx = 3;
-		gbc_rtToTextField.gridy = 0;
+		gbc_rtToTextField.gridy = 1;
 		panel_1.add(rtToTextField, gbc_rtToTextField);
 
 		JLabel lblMin = new JLabel("min");
@@ -188,7 +213,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblMin.insets = new Insets(0, 0, 5, 0);
 		gbc_lblMin.anchor = GridBagConstraints.WEST;
 		gbc_lblMin.gridx = 4;
-		gbc_lblMin.gridy = 0;
+		gbc_lblMin.gridy = 1;
 		panel_1.add(lblMin, gbc_lblMin);
 
 		JLabel lblRtAlignmentWindow = new JLabel("Precursor isolation window (if not in data)");
@@ -196,7 +221,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblRtAlignmentWindow.anchor = GridBagConstraints.EAST;
 		gbc_lblRtAlignmentWindow.insets = new Insets(0, 0, 5, 5);
 		gbc_lblRtAlignmentWindow.gridx = 0;
-		gbc_lblRtAlignmentWindow.gridy = 1;
+		gbc_lblRtAlignmentWindow.gridy = 2;
 		panel_1.add(lblRtAlignmentWindow, gbc_lblRtAlignmentWindow);
 		
 		JLabel lblNewLabel_4 = new JLabel("Below precursor M/Z");
@@ -204,7 +229,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_4.gridx = 0;
-		gbc_lblNewLabel_4.gridy = 2;
+		gbc_lblNewLabel_4.gridy = 3;
 		panel_1.add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
 		isolationWindowLowerTextField = 
@@ -214,7 +239,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_precursorRtAlignTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_precursorRtAlignTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_precursorRtAlignTextField.gridx = 1;
-		gbc_precursorRtAlignTextField.gridy = 2;
+		gbc_precursorRtAlignTextField.gridy = 3;
 		panel_1.add(isolationWindowLowerTextField, gbc_precursorRtAlignTextField);
 		
 		JLabel lblNewLabel_3 = new JLabel("Da");
@@ -222,7 +247,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblNewLabel_3.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_3.gridx = 2;
-		gbc_lblNewLabel_3.gridy = 2;
+		gbc_lblNewLabel_3.gridy = 3;
 		panel_1.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		JLabel lblNewLabel_5 = new JLabel("Above precursor M/Z");
@@ -230,7 +255,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_5.gridx = 0;
-		gbc_lblNewLabel_5.gridy = 3;
+		gbc_lblNewLabel_5.gridy = 4;
 		panel_1.add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
 		isolationWindowUpperTextField = 
@@ -240,14 +265,14 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_precursorMzAlignTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_precursorMzAlignTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_precursorMzAlignTextField.gridx = 1;
-		gbc_precursorMzAlignTextField.gridy = 3;
+		gbc_precursorMzAlignTextField.gridy = 4;
 		panel_1.add(isolationWindowUpperTextField, gbc_precursorMzAlignTextField);
 		
 		JLabel lblNewLabel_6 = new JLabel("Da");
 		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
 		gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_6.gridx = 2;
-		gbc_lblNewLabel_6.gridy = 3;
+		gbc_lblNewLabel_6.gridy = 4;
 		panel_1.add(lblNewLabel_6, gbc_lblNewLabel_6);
 		
 		JPanel panel_3 = new JPanel();
@@ -261,10 +286,10 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_panel_3.insets = new Insets(0, 0, 5, 0);
 		gbc_panel_3.fill = GridBagConstraints.BOTH;
 		gbc_panel_3.gridx = 0;
-		gbc_panel_3.gridy = 4;
+		gbc_panel_3.gridy = 5;
 		panel_1.add(panel_3, gbc_panel_3);
 		GridBagLayout gbl_panel_3 = new GridBagLayout();
-		gbl_panel_3.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_panel_3.columnWidths = new int[]{0, 87, 0, 0};
 		gbl_panel_3.rowHeights = new int[]{0, 0, 0};
 		gbl_panel_3.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panel_3.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
@@ -337,7 +362,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_panel.gridwidth = 5;
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 0;
-		gbc_panel.gridy = 5;
+		gbc_panel.gridy = 6;
 		panel_1.add(panel, gbc_panel);
 
 		GridBagLayout gbl_panel = new GridBagLayout();
@@ -425,7 +450,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_panel_4.gridwidth = 5;
 		gbc_panel_4.fill = GridBagConstraints.BOTH;
 		gbc_panel_4.gridx = 0;
-		gbc_panel_4.gridy = 6;
+		gbc_panel_4.gridy = 7;
 		panel_1.add(panel_4, gbc_panel_4);
 		GridBagLayout gbl_panel_4 = new GridBagLayout();
 		gbl_panel_4.columnWidths = new int[]{0, 0, 0, 0, 0};
@@ -457,7 +482,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		panel_4.add(maxChargeSpinner, gbc_maxChargeSpinner);
 		maxChargeSpinner.setModel(new SpinnerNumberModel(2, 1, 3, 1));
 		
-		lblNewLabel_9 = new JLabel("Chromatogram extraction window");
+		JLabel lblNewLabel_9 = new JLabel("Chromatogram extraction window");
 		GridBagConstraints gbc_lblNewLabel_9 = new GridBagConstraints();
 		gbc_lblNewLabel_9.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_9.anchor = GridBagConstraints.EAST;
@@ -482,7 +507,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblNewLabel_10.gridy = 1;
 		panel_4.add(lblNewLabel_10, gbc_lblNewLabel_10);
 		
-		lblNewLabel_8 = new JLabel("Smoothing filter width");
+		JLabel lblNewLabel_8 = new JLabel("Smoothing filter width");
 		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
 		gbc_lblNewLabel_8.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_8.insets = new Insets(0, 0, 0, 5);
@@ -542,6 +567,10 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 			return new Range(fromRt, toRt);
 		else
 			return null;
+	}
+	
+	public Polarity getPolarity() {
+		return (Polarity)polarityComboBox.getSelectedItem();
 	}
 	
 	public double getIsolationWindowLowerBorder() {
@@ -606,11 +635,29 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	public double getChromatogramExtractionWindow() {
 		return Double.valueOf(xicWindowTextField.getText());
 	}
+	
+	public ChromatogramDefinition getCommonChromatogramDefinition() {
+		
+		ChromatogramDefinition ccd = new ChromatogramDefinition(
+				ChromatogramPlotMode.XIC, 
+				getPolarity(),
+				1, 
+				null,
+				false, 
+				getPrecursorGroupingMassError(),				
+				getPrecursorGroupingMassErrorType(),  
+				new Range(3.0d - getChromatogramExtractionWindow(), 
+						3.0d + getChromatogramExtractionWindow()),
+				new SavitzkyGolayFilter(getSmoothingFilterWidth()));
+		return ccd;
+	}
 		
 	@Override
 	public void loadPreferences(Preferences prefs) {
 
 		preferences = prefs;
+		polarityComboBox.setSelectedItem(
+				Polarity.getPolarityByCode(preferences.get(POLARITY, Polarity.Positive.getCode())));
 		limitExtractionRtCheckBox.setSelected(preferences.getBoolean(USE_RT_RANGE, false));
 		rtFromTextField.setText(Double.toString(preferences.getDouble(RT_BORDER_LEFT_MIN, 0.0d)));
 		rtToTextField.setText(Double.toString(preferences.getDouble(RT_BORDER_RIGHT_MIN, 0.0d)));
@@ -641,7 +688,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	@Override
 	public void savePreferences() {
 
-		preferences = Preferences.userNodeForPackage(this.getClass());
+		preferences = Preferences.userNodeForPackage(this.getClass());		
+		preferences.put(POLARITY, ((Polarity)polarityComboBox.getSelectedItem()).getCode());
 		preferences.putBoolean(USE_RT_RANGE, limitExtractionRtCheckBox.isSelected());
 		preferences.putDouble(RT_BORDER_LEFT_MIN, Double.valueOf(rtFromTextField.getText()));
 		preferences.putDouble(RT_BORDER_RIGHT_MIN, Double.valueOf(rtToTextField.getText()));
@@ -677,6 +725,9 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	public Collection<String>validateParameters(){
 		
 		Collection<String>errors = new ArrayList<String>();
+		if(getPolarity() == null)
+			errors.add("Polarity has to be specified");
+		
 		if(limitExtractionRtCheckBox.isSelected()) {
 			double lb = Double.valueOf(rtFromTextField.getText());
 			double rb = Double.valueOf(rtToTextField.getText());
@@ -703,6 +754,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 			return null;
 		}
 		MSMSExtractionParameterSet ps = new MSMSExtractionParameterSet();
+		ps.setPolarity(getPolarity());
 		ps.setDataExtractionRtRange(getDataExtractionRtRange());
 		ps.setMsmsIsolationWindowLowerBorder(getIsolationWindowLowerBorder());
 		ps.setMsmsIsolationWindowUpperBorder(getIsolationWindowUpperBorder());	
@@ -717,6 +769,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		ps.setMaxPrecursorCharge(getMaxPrecursorCharge());
 		ps.setSmoothingFilterWidth(getSmoothingFilterWidth());		
 		ps.setChromatogramExtractionWindow(getChromatogramExtractionWindow());
+		ps.setCommonChromatogramDefinition(getCommonChromatogramDefinition());
+		ps.setXicTarget(MsFeatureChromatogramExtractionTarget.MSMSParentIon);
 		return ps;
 	}
 }

@@ -19,30 +19,11 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
+package edu.umich.med.mrc2.datoolbox.data.enums;
 
-import java.io.File;
-
-import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
-
-public class ExtractMsFeaturesFromFileTask extends AbstractTask {
+public enum MsFeatureChromatogramExtractionTarget {
 	
-	private File featureFile;
-
-	public ExtractMsFeaturesFromFileTask(File featureFile) {
-		super();
-		this.featureFile = featureFile;
-	}
-
-	@Override
-	public Task cloneTask() {
-		return new ExtractMsFeaturesFromFileTask(featureFile);
-	}
-
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-
-	}
+	MSMSParentIon,
+	MS1PrimaryAdduct,
+	;
 }

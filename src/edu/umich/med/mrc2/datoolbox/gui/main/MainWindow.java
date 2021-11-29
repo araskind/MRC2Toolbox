@@ -88,6 +88,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.PreferencesDialog;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLlayoutManager;
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.ProjectSetupDraw;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.refsamples.ReferenceSampleManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.users.UserManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -515,15 +516,12 @@ public class MainWindow extends JFrame
 
 	public void exitProgram() {
 
+		String yesNoQuestion = "You are going to close current project, "
+				+ "do you want to save the results (Yes - save, No - discard)?";
+		int selectedValue = -1;
 		if (currentProject != null) {
-
-//			int selectedValue = JOptionPane.showInternalConfirmDialog(this.getContentPane(),
-//					"You are going to close current project, do you want to save the results (Yes - save, No - discard)?",
-//					"Run analysis", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-
-			String yesNoQuestion = "You are going to close current project, do you want to save the results (Yes - save, No - discard)?";
-			int selectedValue = MessageDialog.showChooseOrCancelMsg(yesNoQuestion);
-
+			
+			selectedValue = MessageDialog.showChooseOrCancelMsg(yesNoQuestion);
 			if (selectedValue == JOptionPane.YES_OPTION) {
 
 				saveOnExitRequested = true;
@@ -542,17 +540,19 @@ public class MainWindow extends JFrame
 			if (selectedValue == JOptionPane.CANCEL_OPTION)
 				return;
 		}
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			
+					
+			RawDataExaminerPanel rdaPanel = 
+					(RawDataExaminerPanel)getPanel(PanelList.RAW_DATA_EXAMINER);
+			rdaPanel.closeRawDataAnalysisProject(true);
+			return;
+		}
 		if (!saveOnExitRequested) {
-
-//			int selectedValue = JOptionPane.showInternalConfirmDialog(this.getContentPane(),
-//					"Are you sure you want to exit?", "Exiting...", JOptionPane.YES_NO_OPTION,
-//					JOptionPane.WARNING_MESSAGE);
-
 			if (MessageDialog.showChoiceWithWarningMsg(
-					"Are you sure you want to exit?") == JOptionPane.YES_OPTION)
+					"Are you sure you want to exit?", this.getContentPane()) == JOptionPane.YES_OPTION)
 				shutDown();
 		}
-
 	}
 
 	private void exportAnalysisResults(MainActionCommands exportType) {

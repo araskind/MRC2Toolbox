@@ -27,10 +27,15 @@ import java.util.TreeSet;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
 import edu.umich.med.mrc2.datoolbox.data.XicDataBundle;
+import edu.umich.med.mrc2.datoolbox.data.compare.ExtractedIonDataComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 
 public class ChromatogramUtils {
 	
-	private static final PearsonsCorrelation pearsonsCorrelation = new PearsonsCorrelation();
+	private static final PearsonsCorrelation pearsonsCorrelation = 
+			new PearsonsCorrelation();
+	public static final ExtractedIonDataComparator eidComparator = 
+			new ExtractedIonDataComparator(SortProperty.MZ);
 
 	public static double calculateXicCorrelationInPeak(
 			XicDataBundle bundleOne,

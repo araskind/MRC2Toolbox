@@ -34,6 +34,7 @@ import org.apache.commons.io.FilenameUtils;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.RawMsPoint;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SupportedRawDataTypes;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import umich.ms.datatypes.LCMSData;
@@ -190,4 +191,14 @@ public class RawDataUtils {
 		return 0.0d;
 	}
 	
+	public static umich.ms.datatypes.scan.props.Polarity getScanPolarity(Polarity polarity){
+		
+		if(polarity.equals(Polarity.Positive))
+			return umich.ms.datatypes.scan.props.Polarity.POSITIVE;
+		
+		if(polarity.equals(Polarity.Negative))
+			return umich.ms.datatypes.scan.props.Polarity.POSITIVE;
+		
+		return null;
+	}
 }

@@ -21,12 +21,16 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata;
 
+import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MsFeatureChromatogramExtractionTarget;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MSMSExtractionParameterSet {
 	
+	private Polarity polarity;
 	private Range dataExtractionRtRange;
 	private boolean removeAllMassesAboveParent;
 	private double msMsCountsCutoff;
@@ -41,9 +45,11 @@ public class MSMSExtractionParameterSet {
 	private int maxPrecursorCharge;
 	private int smoothingFilterWidth;
 	private double chromatogramExtractionWindow;
+	private ChromatogramDefinition commonChromatogramDefinition;
+	private MsFeatureChromatogramExtractionTarget xicTarget;
 	
 	public MSMSExtractionParameterSet(
-
+			Polarity polarity,
 			Range dataExtractionRtRange, 
 			boolean removeAllMassesAboveParent, 
 			double msMsCountsCutoff,
@@ -59,6 +65,7 @@ public class MSMSExtractionParameterSet {
 			int smoothingFilterWidth,
 			double chromatogramExtractionWindow) {
 		super();
+		this.polarity = polarity;
 		this.dataExtractionRtRange = dataExtractionRtRange;
 		this.removeAllMassesAboveParent = removeAllMassesAboveParent;
 		this.msMsCountsCutoff = msMsCountsCutoff;
@@ -190,6 +197,30 @@ public class MSMSExtractionParameterSet {
 
 	public void setChromatogramExtractionWindow(double chromatogramExtractionWindow) {
 		this.chromatogramExtractionWindow = chromatogramExtractionWindow;
+	}
+
+	public Polarity getPolarity() {
+		return polarity;
+	}	
+
+	public void setPolarity(Polarity polarity) {
+		this.polarity = polarity;
+	}
+
+	public ChromatogramDefinition getCommonChromatogramDefinition() {
+		return commonChromatogramDefinition;
+	}
+
+	public void setCommonChromatogramDefinition(ChromatogramDefinition commonChromatogramDefinition) {
+		this.commonChromatogramDefinition = commonChromatogramDefinition;
+	}
+
+	public MsFeatureChromatogramExtractionTarget getXicTarget() {
+		return xicTarget;
+	}
+
+	public void setXicTarget(MsFeatureChromatogramExtractionTarget xicTarget) {
+		this.xicTarget = xicTarget;
 	}
 }
 

@@ -93,6 +93,24 @@
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.ProjectSetupDraw</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">size</item>
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+													<item type="s">hold</item>
+												</item>
+												<item key="dock.size" type="i">400</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.ProjectSetupDraw</item>
+												<item key="dock.hold" type="b">false</item>
+											</entry>
 										</placeholders>
 									</content>
 								</delegate>
@@ -102,7 +120,18 @@
 									<type>dock.CContentArea.minimize</type>
 								</layout>
 							</adjacent>
-							<children ignore="false"/>
+							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
+										<replacement id="dockablesingle ProjectSetupDraw"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ProjectSetupDraw</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+							</children>
 						</root>
 						<root name="ccontrol south">
 							<layout factory="predefined">
@@ -153,10 +182,9 @@
 									<id>ccontrol center</id>
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
-										<fullscreen id="0"/>
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1631029354244" orientation="HORIZONTAL" divider="0.246900269541779">
-											<leaf id="1" nodeId="1631029354246">
+											<leaf id="-1" nodeId="1631029354246">
 												<placeholders>
 													<placeholder>dock.single.ProjectSetupDraw</placeholder>
 												</placeholders>
@@ -233,7 +261,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>6</selected>
+										<selected>9</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -517,16 +545,6 @@
 										</child>
 									</children>
 								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
-										<replacement id="dockablesingle ProjectSetupDraw"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ProjectSetupDraw</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
 							</children>
 						</root>
 						<root name="ccontrol west">
@@ -769,11 +787,11 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single IDWorkbenchPanel" current="dock.mode.maximized">
+						<entry id="single IDWorkbenchPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.externalized</mode>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -835,10 +853,10 @@
 							<history/>
 							<properties/>
 						</entry>
-						<entry id="single WorklistPanel" current="dock.mode.maximized">
+						<entry id="single WorklistPanel" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -873,11 +891,11 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single RawDataExaminerPanel" current="dock.mode.maximized">
+						<entry id="single RawDataExaminerPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.externalized</mode>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -931,11 +949,11 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single CompoundDatabasePanel" current="dock.mode.maximized">
+						<entry id="single CompoundDatabasePanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.externalized</mode>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -993,10 +1011,10 @@
 							<history/>
 							<properties/>
 						</entry>
-						<entry id="single FeatureDataPanel" current="dock.mode.maximized">
+						<entry id="single FeatureDataPanel" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -1031,11 +1049,25 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ProjectSetupDraw" current="dock.mode.normal">
+						<entry id="single ProjectSetupDraw" current="dock.mode.minimized">
 							<history>
 								<mode>dock.mode.normal</mode>
+								<mode>dock.mode.minimized</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.ProjectSetupDraw</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -1044,7 +1076,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.ProjectSetupDraw</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.2" id="1631029354244"/>
+												<node location="LEFT" size="0.246900269541779" id="1631029354244"/>
 												<leaf id="1631029354246"/>
 											</backup-path>
 										</property>
@@ -1052,11 +1084,11 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single METLIMSPanel" current="dock.mode.maximized">
+						<entry id="single METLIMSPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.externalized</mode>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -1110,10 +1142,10 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ExperimentDesignPanel" current="dock.mode.maximized">
+						<entry id="single ExperimentDesignPanel" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -1148,10 +1180,10 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DuplicatesPanelClusterDisplayPanel" current="dock.mode.maximized">
+						<entry id="single DuplicatesPanelClusterDisplayPanel" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -1224,11 +1256,11 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single MsLibraryPanel" current="dock.mode.maximized">
+						<entry id="single MsLibraryPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.externalized</mode>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -1290,11 +1322,11 @@
 							<history/>
 							<properties/>
 						</entry>
-						<entry id="single IDTrackerLimsManagerPanel" current="dock.mode.maximized">
+						<entry id="single IDTrackerLimsManagerPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.externalized</mode>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -1350,24 +1382,7 @@
 						</entry>
 					</dockables>
 					<modes>
-						<entry id="dock.mode.maximized">
-							<maximized>
-								<item id="ccontrol center">
-									<mode>dock.mode.normal</mode>
-									<location>
-										<mode>dock.mode.normal</mode>
-										<root>ccontrol center</root>
-										<applicationDefined>false</applicationDefined>
-										<location>
-											<property factory="SplitDockPathProperty">
-												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
-												<leaf id="1631029354257"/>
-											</property>
-										</location>
-									</location>
-								</item>
-							</maximized>
-						</entry>
+						<entry id="dock.mode.maximized"/>
 					</modes>
 				</modes>
 			</current>
