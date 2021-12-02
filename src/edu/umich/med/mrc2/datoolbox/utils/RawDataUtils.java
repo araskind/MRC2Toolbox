@@ -27,15 +27,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.RawMsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SupportedRawDataTypes;
+import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.LCMSDataSubset;
@@ -200,5 +204,32 @@ public class RawDataUtils {
 			return umich.ms.datatypes.scan.props.Polarity.POSITIVE;
 		
 		return null;
+	}
+	
+	public static Collection<Double>getMSMSScanRtMarkersForFeature(MsFeature msFeature, DataFile df){
+		
+		Collection<Double>markers = new TreeSet<Double>();
+		if(msFeature.getSpectrum() != null
+				&& msFeature.getSpectrum().getExperimentalTandemSpectrum() != null) {
+			
+			Set<Integer> msmsScanNums = msFeature.getSpectrum().
+					getExperimentalTandemSpectrum().getAveragedScanNumbers().keySet();
+			if(!msmsScanNums.isEmpty()) {
+				
+				LCMSData rawData = RawDataManager.getRawData(df);	
+				TreeMap<Integer, IScan> num2scan = 
+						rawData.getScans().getMapMsLevel2index().get(2).getNum2scan();
+
+				for(int scanNum : msmsScanNums) {
+					IScan scan = num2scan.get(scanNum);
+					if(scan != null)
+						markers.add(scan.getRt());
+				}
+			}
+		}	
+		if(markers.isEmpty())
+			markers.add(msFeature.getRetentionTime());
+		
+		return markers;
 	}
 }

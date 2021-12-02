@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -103,6 +102,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataFileOpenTas
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryIndexingTask;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.scan.IScan;
 import umich.ms.datatypes.scancollection.IScanCollection;
@@ -320,28 +320,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				new MsMsfeatureBatchExtractionTask(
 						ps, 
 						activeRawDataAnalysisProject.getMSMSDataFiles(), 
-						activeRawDataAnalysisProject.getMSOneDataFiles());
-		
-//		Collection<String>errors = msmsFeatureExtractionSetupDialog.validateParameters();
-//		if(!errors.isEmpty()) {
-//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msmsFeatureExtractionSetupDialog);
-//			return;
-//		}
-//		MsMsfeatureBatchExtractionTask task = new MsMsfeatureBatchExtractionTask(
-//				activeRawDataAnalysisProject.getRawDataFiles(), 
-//				msmsFeatureExtractionSetupDialog.getDataExtractionRtRange(),
-//				msmsFeatureExtractionSetupDialog.removeAllMassesAboveParent(), 
-//				msmsFeatureExtractionSetupDialog.getMsMsCountsCutoff(), 
-//				msmsFeatureExtractionSetupDialog.getMaxFragmentsCutoff(),
-//				msmsFeatureExtractionSetupDialog.getIntensityMeasure(),
-//				msmsFeatureExtractionSetupDialog.getIsolationWindowLowerBorder(),
-//				msmsFeatureExtractionSetupDialog.getIsolationWindowUpperBorder(),
-//				msmsFeatureExtractionSetupDialog.getMsmsGroupingRtWindow(),
-//				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassError(),
-//				msmsFeatureExtractionSetupDialog.getPrecursorGroupingMassErrorType(),
-//				msmsFeatureExtractionSetupDialog.flagMinorIsotopesPrecursors(),
-//				msmsFeatureExtractionSetupDialog.getMaxPrecursorCharge(),
-//				msmsFeatureExtractionSetupDialog.getSmoothingFilterWidth());
+						activeRawDataAnalysisProject.getMSOneDataFiles());	
 		
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
@@ -386,7 +365,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		rawDataAnalysisProjectSetupDialog.dispose();
 		
 		//	Save project file
-		ProjectUtils.saveProjectFile(newProject);
+		ProjectUtils.saveStorableRawDataAnalysisProject(newProject);
 		
 		//	Set project as active
 		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(newProject);
@@ -996,7 +975,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				msmsTable.setTableModelFromTandemMs(msms);
 			}
 		}
-		DataFile df = dataFileTreePanel.getDataFileForMsFeature(msFeature);
+		DataFile df = msFeatureInfoBundle.getDataFile();
 		if(df != null) {
 			xicSetupPanel.selectFiles(Collections.singleton(df));
 			msExtractorPanel.selectFiles(Collections.singleton(df));
@@ -1008,38 +987,39 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 					activeRawDataAnalysisProject.getChromatogramMap().get(msFeature.getId());			
 			if(msfCb != null) {
 				Collection<Double>markers = 
-						getMsFeatureRtMarkers(msFeature, msFeatureInfoBundle.getDataFile());
+						RawDataUtils.getMSMSScanRtMarkersForFeature(
+								msFeature, msFeatureInfoBundle.getDataFile());
 				chromatogramPanel.showMsFeatureChromatogramBundle(msfCb, markers);
 			}
 		}
 	}
 	
-	private Collection<Double>getMsFeatureRtMarkers(MsFeature msFeature, DataFile df){
-		
-		Collection<Double>markers = new TreeSet<Double>();
-		if(msFeature.getSpectrum() != null
-				&& msFeature.getSpectrum().getExperimentalTandemSpectrum() != null) {
-			
-			Set<Integer> msmsScanNums = msFeature.getSpectrum().
-					getExperimentalTandemSpectrum().getAveragedScanNumbers().keySet();
-			if(!msmsScanNums.isEmpty()) {
-				
-				LCMSData rawData = RawDataManager.getRawData(df);	
-				TreeMap<Integer, IScan> num2scan = 
-						rawData.getScans().getMapMsLevel2index().get(2).getNum2scan();
-
-				for(int scanNum : msmsScanNums) {
-					IScan scan = num2scan.get(scanNum);
-					if(scan != null)
-						markers.add(scan.getRt());
-				}
-			}
-		}	
-		if(markers.isEmpty())
-			markers.add(msFeature.getRetentionTime());
-		
-		return markers;
-	}
+//	private Collection<Double>getMsFeatureRtMarkers(MsFeature msFeature, DataFile df){
+//		
+//		Collection<Double>markers = new TreeSet<Double>();
+//		if(msFeature.getSpectrum() != null
+//				&& msFeature.getSpectrum().getExperimentalTandemSpectrum() != null) {
+//			
+//			Set<Integer> msmsScanNums = msFeature.getSpectrum().
+//					getExperimentalTandemSpectrum().getAveragedScanNumbers().keySet();
+//			if(!msmsScanNums.isEmpty()) {
+//				
+//				LCMSData rawData = RawDataManager.getRawData(df);	
+//				TreeMap<Integer, IScan> num2scan = 
+//						rawData.getScans().getMapMsLevel2index().get(2).getNum2scan();
+//
+//				for(int scanNum : msmsScanNums) {
+//					IScan scan = num2scan.get(scanNum);
+//					if(scan != null)
+//						markers.add(scan.getRt());
+//				}
+//			}
+//		}	
+//		if(markers.isEmpty())
+//			markers.add(msFeature.getRetentionTime());
+//		
+//		return markers;
+//	}
 
 	private void showFiles(List<DataFile> files) {
 

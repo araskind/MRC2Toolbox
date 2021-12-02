@@ -43,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SupportedRawDataTypes;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.LCMSDataSubset;
@@ -137,7 +138,15 @@ public class RawDataManager {
 	}
 	
 	public static void releaseAllDataSources() {	
-		rawDataMap.values().stream().forEach(d -> d.releaseMemory());
+		
+		ReleaseAllDataSourcesTask task = new ReleaseAllDataSourcesTask();
+		IndeterminateProgressDialog idp = 
+				new IndeterminateProgressDialog("Releasing memory for raw data files ...", 
+						MRC2ToolBoxCore.getMainWindow(), task);
+		idp.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow().getContentPane());
+		idp.setVisible(true);
+		
+		//	rawDataMap.values().stream().forEach(d -> d.releaseMemory());
 	}
 	
 	public static DataFile getDataFileForInjectionId(String injectionId) {

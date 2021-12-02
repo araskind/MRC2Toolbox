@@ -26,6 +26,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Paths;
@@ -33,11 +35,16 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FilenameUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -52,8 +59,10 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
 
 public class ProjectUtils {
 	
@@ -138,4 +147,80 @@ public class ProjectUtils {
 			ex.printStackTrace();
 		}
 	}
+	
+	public static void saveStorableRawDataAnalysisProject(RawDataAnalysisProject projectToSave) {
+		
+		Document document = new Document();
+	    Element projectRoot = 
+	    		new Element(ProjectFields.IDTrackerRawDataProject.name());
+		projectRoot.setAttribute("version", "1.0.0.0");
+		projectRoot.setAttribute(ProjectFields.Id.name(), 
+				projectToSave.getId());
+		projectRoot.setAttribute(ProjectFields.Name.name(), 
+				projectToSave.getName());
+		projectRoot.setAttribute(ProjectFields.Description.name(), 
+				projectToSave.getDescription());
+		projectRoot.setAttribute(ProjectFields.ProjectFile.name(), 
+				projectToSave.getProjectFile().getAbsolutePath());
+		projectRoot.setAttribute(ProjectFields.ProjectDir.name(), 
+				projectToSave.getProjectDirectory().getAbsolutePath());	
+		projectRoot.setAttribute(ProjectFields.DateCreated.name(), 
+				ProjectUtils.dateTimeFormat.format(projectToSave.getDateCreated()));
+		projectRoot.setAttribute(ProjectFields.DateModified.name(), 
+				ProjectUtils.dateTimeFormat.format(projectToSave.getLastModified()));
+		
+		projectRoot.addContent(       		
+				new Element(ProjectFields.UniqueCIDList.name()).setText(""));
+		projectRoot.addContent(       		
+				new Element(ProjectFields.UniqueMSMSLibIdList.name()).setText(""));
+		projectRoot.addContent(       		
+				new Element(ProjectFields.UniqueMSRTLibIdList.name()).setText(""));
+		projectRoot.addContent(       		
+				new Element(ProjectFields.UniqueSampleIdList.name()).setText(""));
+		
+		//	MS2 file list
+		Element msTwoFileListElement = 
+				new Element(ProjectFields.MsTwoFiles.name());		
+		for(DataFile ms2dataFile : projectToSave.getMSMSDataFiles())	        	
+			msTwoFileListElement.addContent(ms2dataFile.getXmlElement());
+		
+		projectRoot.addContent(msTwoFileListElement);
+		
+		//	MS1 file list
+		Element msOneFileListElement = 
+				new Element(ProjectFields.MsOneFiles.name());		
+		for(DataFile msOnedataFile : projectToSave.getMSOneDataFiles())         	
+			msOneFileListElement.addContent(msOnedataFile.getXmlElement());
+		
+		
+		projectRoot.addContent(msOneFileListElement);        
+		document.setContent(projectRoot);
+		
+		//	Save XML document
+		File xmlFile = Paths.get(
+				projectToSave.getUncompressedProjectFilesDirectory().getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.PROJECT_FILE_NAME).toFile();
+		try {
+		    FileWriter writer = new FileWriter(xmlFile, false);
+		    XMLOutputter outputter = new XMLOutputter();
+		    outputter.setFormat(Format.getCompactFormat());
+		    outputter.output(document, writer);
+		    outputter.output(document, System.out);
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+		try {
+			CompressionUtils.zipFile(xmlFile, projectToSave.getProjectFile());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ArchiveException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
+
+
+
+

@@ -75,84 +75,6 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 		initTicExtraction();
 	}
 	
-	private void loadRawData() {
-		
-		taskDescription = "Loading raw data files for project ...";
-		total = project.getMSMSDataFiles().size() + project.getMSOneDataFiles().size();
-		processed = 0;	
-		
-		for(DataFile df : project.getMSMSDataFiles()) {
-			
-			LCMSData dataSource = RawDataManager.getRawData(df);
-			if(!dataSource.getScans().getMapMsLevel2index().containsKey(2)) {
-				errors.add("Data file \"" + df.getName() + 
-						"\" does not contatin MSMS data; not included in the project.");
-				project.removeMSMSDataFile(df);
-				RawDataManager.removeDataSource(df);
-			}
-			processed++;
-		}
-		for(DataFile df : project.getMSOneDataFiles()) {
-			
-			LCMSData dataSource = RawDataManager.getRawData(df);
-			if(dataSource.getScans().getMapMsLevel2index().containsKey(2)) {
-				errors.add("Data file \"" + df.getName() + 
-						"\" contatin MSMS data and can not be used as MS1 "
-						+ "reference file; not included in the project.");
-				project.removeMSOneDataFile(df);
-				RawDataManager.removeDataSource(df);
-			}
-			processed++;
-		}
-	}
-		
-	private void initTicExtraction() {
-		
-		taskDescription = "Extracting TICs ...";
-		total = project.getMSMSDataFiles().size();
-		processed = 1;	
-		Collection<Double> mzList = new ArrayList<Double>();
-		int fileCount = 0;
-		for(DataFile df : project.getMSMSDataFiles()) {
-			
-			df.setColor(ColorUtils.getBrewerColor(fileCount));			
-			ChromatogramExtractionTask xicTask = new ChromatogramExtractionTask(
-					Collections.singleton(df), 
-					ChromatogramPlotMode.TIC, 
-					null, 
-					1, 
-					mzList,
-					false, 
-					Double.NaN, 
-					null, 
-					null,
-					false,
-					SavitzkyGolayWidth.FIVE);
-			xicTask.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(xicTask);
-			fileCount++;
-		}
-		for(DataFile df : project.getMSOneDataFiles()) {
-			
-			df.setColor(ColorUtils.getBrewerColor(fileCount));			
-			ChromatogramExtractionTask xicTask = new ChromatogramExtractionTask(
-					Collections.singleton(df), 
-					ChromatogramPlotMode.TIC, 
-					null, 
-					1, 
-					mzList,
-					false, 
-					Double.NaN, 
-					null, 
-					null,
-					false,
-					SavitzkyGolayWidth.FIVE);
-			xicTask.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(xicTask);
-			fileCount++;
-		}
-	}
-	
 	private void copyDataFiles() {
 		
 		taskDescription = "Copying raw data files to project directory ...";
@@ -185,6 +107,66 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 			processed++;
 		}
 	}
+	
+	private void loadRawData() {
+		
+		taskDescription = "Loading raw data files for project ...";
+		total = project.getDataFiles().size();
+		processed = 0;	
+		
+		for(DataFile df : project.getMSMSDataFiles()) {
+			
+			LCMSData dataSource = RawDataManager.getRawData(df);
+			if(!dataSource.getScans().getMapMsLevel2index().containsKey(2)) {
+				errors.add("Data file \"" + df.getName() + 
+						"\" does not contatin MSMS data; not included in the project.");
+				project.removeMSMSDataFile(df);
+				RawDataManager.removeDataSource(df);
+			}
+			processed++;
+		}
+		for(DataFile df : project.getMSOneDataFiles()) {
+			
+			LCMSData dataSource = RawDataManager.getRawData(df);
+			if(dataSource.getScans().getMapMsLevel2index().containsKey(2)) {
+				errors.add("Data file \"" + df.getName() + 
+						"\" contatin MSMS data and can not be used as MS1 "
+						+ "reference file; not included in the project.");
+				project.removeMSOneDataFile(df);
+				RawDataManager.removeDataSource(df);
+			}
+			processed++;
+		}
+	}
+		
+	private void initTicExtraction() {
+		
+		taskDescription = "Extracting TICs ...";
+		total = project.getDataFiles().size();
+		processed = 1;	
+		Collection<Double> mzList = new ArrayList<Double>();
+		int fileCount = 0;
+		for(DataFile df : project.getDataFiles()) {
+			
+			df.setColor(ColorUtils.getColor(fileCount));			
+			ChromatogramExtractionTask xicTask = 
+					new ChromatogramExtractionTask(
+							Collections.singleton(df), 
+							ChromatogramPlotMode.TIC, 
+							null, 
+							1, 
+							mzList,
+							false, 
+							Double.NaN, 
+							null, 
+							null,
+							false,
+							SavitzkyGolayWidth.FIVE);
+			xicTask.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(xicTask);
+			fileCount++;
+		}
+	}
 
 	@Override
 	public Task cloneTask() {
@@ -206,7 +188,7 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class)) {
 				
 				ticCount++;
-				if(ticCount == project.getMSMSDataFiles().size())
+				if(ticCount == project.getDataFiles().size())
 					setStatus(TaskStatus.FINISHED);
 			}
 		}		

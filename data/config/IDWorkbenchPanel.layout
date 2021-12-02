@@ -42,32 +42,19 @@
 												<key shared="false">
 													<placeholder>dock.single.DockableCompoundClasyFireViewer</placeholder>
 												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
-													<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
-													<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
-												</key>
-												<item key="map" type="p">
-													<version>0</version>
-													<format>dock.PlaceholderList</format>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
-														</key>
-													</entry>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">size</item>
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+													<item type="s">hold</item>
 												</item>
+												<item key="dock.size" type="i">400</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableCompoundClasyFireViewer</item>
+												<item key="dock.hold" type="b">false</item>
 											</entry>
 										</placeholders>
 									</content>
@@ -78,7 +65,18 @@
 									<type>dock.CContentArea.minimize</type>
 								</layout>
 							</adjacent>
-							<children ignore="false"/>
+							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableCompoundClasyFireViewer">
+										<replacement id="dockablesingle DockableCompoundClasyFireViewer"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableCompoundClasyFireViewer</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+							</children>
 						</root>
 						<root name="ccontrol south">
 							<layout factory="predefined">
@@ -130,34 +128,37 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1603303580004" orientation="VERTICAL" divider="0.5820348304307974">
-											<node nodeId="1603303580006" orientation="VERTICAL" divider="0.49947025395704236">
-												<node nodeId="1603303580008" orientation="HORIZONTAL" divider="0.8338595106550908">
-													<leaf id="3" nodeId="1603303580010">
-														<placeholders>
-															<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
-															<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
-														</placeholders>
-														<placeholder-map>
-															<version>0</version>
-															<format>dock.PlaceholderList</format>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
-																</key>
-																<item key="convert" type="b">true</item>
-																<item key="convert-keys" type="a"/>
-															</entry>
-														</placeholder-map>
-													</leaf>
-													<leaf id="4" nodeId="1603303580013">
+										<node nodeId="1638478432739" orientation="VERTICAL" divider="0.5791044776119403">
+											<node nodeId="1638478432741" orientation="VERTICAL" divider="0.6586206896551724">
+												<node nodeId="1638478432743" orientation="HORIZONTAL" divider="0.8">
+													<node nodeId="1638479373375" orientation="HORIZONTAL" divider="0.8273310310804144">
+														<leaf id="0" nodeId="1638478432744">
+															<placeholder-map>
+																<version>0</version>
+																<format>dock.PlaceholderList</format>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
+																	</key>
+																	<item key="convert" type="b">true</item>
+																	<item key="convert-keys" type="a"/>
+																</entry>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
+																	</key>
+																	<item key="convert" type="b">true</item>
+																	<item key="convert-keys" type="a"/>
+																</entry>
+															</placeholder-map>
+														</leaf>
+														<leaf id="5" nodeId="1638479360233">
+															<placeholders>
+																<placeholder>dock.single.IDWorkbenchPanelDockableMolStructurePanel</placeholder>
+															</placeholders>
+														</leaf>
+													</node>
+													<leaf id="-1" nodeId="1638478432748">
 														<placeholders>
 															<placeholder>dock.single.DockableCompoundClasyFireViewer</placeholder>
 														</placeholders>
@@ -172,37 +173,16 @@
 														</placeholder-map>
 													</leaf>
 												</node>
-												<node nodeId="1612402950243" orientation="HORIZONTAL" divider="0.8164874551971326">
-													<leaf id="0" nodeId="1603303580015">
-														<placeholders>
-															<placeholder>dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable</placeholder>
-														</placeholders>
-														<placeholder-map>
-															<version>0</version>
-															<format>dock.PlaceholderList</format>
-															<entry>
-																<key shared="false">
-																	<placeholder>dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable</placeholder>
-																</key>
-															</entry>
-														</placeholder-map>
-													</leaf>
-													<leaf id="5" nodeId="1612402950241">
-														<placeholders>
-															<placeholder>dock.single.IDWorkbenchPanelDockableMolStructurePanel</placeholder>
-														</placeholders>
-													</leaf>
-												</node>
+												<leaf id="2" nodeId="1638478432749">
+													<placeholders>
+														<placeholder>dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable</placeholder>
+													</placeholders>
+												</leaf>
 											</node>
-											<node nodeId="1603303993826" orientation="HORIZONTAL" divider="0.761569416498994">
-												<node nodeId="1603304005988" orientation="HORIZONTAL" divider="0.7096560846560845">
-													<node nodeId="1635535708972" orientation="HORIZONTAL" divider="0.4360410830999067">
-														<leaf id="6" nodeId="1603303580021">
-															<placeholders>
-																<placeholder>dock.single.IDWorkbenchPanelDockableMsMsTableMs2</placeholder>
-																<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS1</placeholder>
-																<placeholder>dock.single.IDWorkbenchPanelDockableMsTableMS1</placeholder>
-															</placeholders>
+											<node nodeId="1638479239422" orientation="HORIZONTAL" divider="0.798717316230883">
+												<node nodeId="1638479277795" orientation="HORIZONTAL" divider="0.6389481165600569">
+													<node nodeId="1638479580230" orientation="HORIZONTAL" divider="0.48988870532808704">
+														<leaf id="1" nodeId="1638478432753">
 															<placeholder-map>
 																<version>0</version>
 																<format>dock.PlaceholderList</format>
@@ -222,6 +202,63 @@
 																</entry>
 																<entry>
 																	<key shared="false">
+																		<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS2</placeholder>
+																	</key>
+																</entry>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.IDWorkbenchPanelDockableMsMsTableMs2</placeholder>
+																	</key>
+																</entry>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
+																	</key>
+																</entry>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
+																	</key>
+																</entry>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
+																	</key>
+																</entry>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
+																	</key>
+																</entry>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.DockableFollowupStepTable</placeholder>
+																	</key>
+																</entry>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
+																	</key>
+																</entry>
+															</placeholder-map>
+														</leaf>
+														<leaf id="6" nodeId="1638479580229">
+															<placeholders>
+																<placeholder>dock.single.IDWorkbenchPanelDockableMsMsTableMs2</placeholder>
+																<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS2</placeholder>
+															</placeholders>
+															<placeholder-map>
+																<version>0</version>
+																<format>dock.PlaceholderList</format>
+																<entry>
+																	<key shared="false">
+																		<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS2</placeholder>
+																	</key>
+																	<item key="convert" type="b">true</item>
+																	<item key="convert-keys" type="a"/>
+																</entry>
+																<entry>
+																	<key shared="false">
 																		<placeholder>dock.single.IDWorkbenchPanelDockableMsMsTableMs2</placeholder>
 																	</key>
 																	<item key="convert" type="b">true</item>
@@ -229,22 +266,24 @@
 																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="7" nodeId="1635535708970">
-															<placeholders>
-																<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS2</placeholder>
-															</placeholders>
-														</leaf>
 													</node>
-													<leaf id="1" nodeId="1603304005986">
+													<leaf id="4" nodeId="1638479277793">
 														<placeholders>
+															<placeholder>dock.single.IDWorkbenchPanelDockableChromatogramPlot</placeholder>
 															<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
-															<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
 															<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
 															<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
 														</placeholders>
 														<placeholder-map>
 															<version>0</version>
 															<format>dock.PlaceholderList</format>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.IDWorkbenchPanelDockableChromatogramPlot</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
 															<entry>
 																<key shared="false">
 																	<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
@@ -269,30 +308,44 @@
 														</placeholder-map>
 													</leaf>
 												</node>
-												<leaf id="2" nodeId="1603303993825">
-													<placeholders>
-														<placeholder>dock.single.DockableFollowupStepTable</placeholder>
-														<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
-													</placeholders>
-													<placeholder-map>
-														<version>0</version>
-														<format>dock.PlaceholderList</format>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
-															</key>
-															<item key="convert" type="b">true</item>
-															<item key="convert-keys" type="a"/>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableFollowupStepTable</placeholder>
-															</key>
-															<item key="convert" type="b">true</item>
-															<item key="convert-keys" type="a"/>
-														</entry>
-													</placeholder-map>
-												</leaf>
+												<node nodeId="1638479250667" orientation="VERTICAL" divider="0.75">
+													<leaf id="-1" nodeId="1638479250665">
+														<placeholders>
+															<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
+														</placeholders>
+													</leaf>
+													<leaf id="3" nodeId="1638479239421">
+														<placeholders>
+															<placeholder>dock.single.DockableFollowupStepTable</placeholder>
+															<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
+														</placeholders>
+														<placeholder-map>
+															<version>0</version>
+															<format>dock.PlaceholderList</format>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.DockableFollowupStepTable</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
+														</placeholder-map>
+													</leaf>
+												</node>
 											</node>
 										</node>
 									</content>
@@ -304,6 +357,164 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>1</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableReferenceMsOneFeatureTable</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMSMSFeatureTable</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableReferenceMsOneFeatureTable">
+												<replacement id="dockablesingle DockableReferenceMsOneFeatureTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableReferenceMsOneFeatureTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableMSMSFeatureTable">
+												<replacement id="dockablesingle DockableMSMSFeatureTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableMSMSFeatureTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS1</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelDockableSpectumPlotMS1</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.IDWorkbenchPanelDockableMsTableMS1</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelDockableMsTableMS1</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS2</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.IDWorkbenchPanelDockableMsMsTableMs2</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableFollowupStepTable</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
+												</key>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableSpectumPlotMS1">
+												<replacement id="dockablesingle IDWorkbenchPanelDockableSpectumPlotMS1"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>IDWorkbenchPanelDockableSpectumPlotMS1</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableMsTableMS1">
+												<replacement id="dockablesingle IDWorkbenchPanelDockableMsTableMS1"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>IDWorkbenchPanelDockableMsTableMS1</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
 								<child>
 									<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable">
 										<replacement id="dockablesingle IDWorkbenchPanelDockableUniversalIdentificationResultsTable"/>
@@ -317,89 +528,6 @@
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockablePepSearchParameterListingPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableMSMSLibraryEntryPropertiesTable</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">2</item>
-												<item key="dock.id" type="i">2</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableMsMsInfoPanel</item>
-											</entry>
-										</placeholders>
-									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockablePepSearchParameterListingPanel">
-												<replacement id="dockablesingle DockablePepSearchParameterListingPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockablePepSearchParameterListingPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableMSMSLibraryEntryPropertiesTable">
-												<replacement id="dockablesingle DockableMSMSLibraryEntryPropertiesTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableMSMSLibraryEntryPropertiesTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableMsMsInfoPanel">
-												<replacement id="dockablesingle DockableMsMsInfoPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableMsMsInfoPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
-								</child>
-								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -482,13 +610,13 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
+										<selected>0</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
+													<placeholder>dock.single.IDWorkbenchPanelDockableChromatogramPlot</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -498,11 +626,11 @@
 												</item>
 												<item key="dock.index" type="i">0</item>
 												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableReferenceMsOneFeatureTable</item>
+												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelDockableChromatogramPlot</item>
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
+													<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -512,42 +640,80 @@
 												</item>
 												<item key="dock.index" type="i">1</item>
 												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableMSMSFeatureTable</item>
+												<item key="dock.placeholder" type="s">dock.single.DockablePepSearchParameterListingPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMSMSLibraryEntryPropertiesTable</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMsMsInfoPanel</item>
 											</entry>
 										</placeholders>
 									</layout>
 									<children ignore="false">
 										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableReferenceMsOneFeatureTable">
-												<replacement id="dockablesingle DockableReferenceMsOneFeatureTable"/>
+											<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableChromatogramPlot">
+												<replacement id="dockablesingle IDWorkbenchPanelDockableChromatogramPlot"/>
 												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableReferenceMsOneFeatureTable</id>
+													<id>IDWorkbenchPanelDockableChromatogramPlot</id>
 													<area/>
 												</delegate>
 											</layout>
 											<children ignore="false"/>
 										</child>
 										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableMSMSFeatureTable">
-												<replacement id="dockablesingle DockableMSMSFeatureTable"/>
+											<layout factory="predefined" placeholder="dock.single.DockablePepSearchParameterListingPanel">
+												<replacement id="dockablesingle DockablePepSearchParameterListingPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableMSMSFeatureTable</id>
+													<id>DockablePepSearchParameterListingPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableMSMSLibraryEntryPropertiesTable">
+												<replacement id="dockablesingle DockableMSMSLibraryEntryPropertiesTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableMSMSLibraryEntryPropertiesTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableMsMsInfoPanel">
+												<replacement id="dockablesingle DockableMsMsInfoPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableMsMsInfoPanel</id>
 													<area/>
 												</delegate>
 											</layout>
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableCompoundClasyFireViewer">
-										<replacement id="dockablesingle DockableCompoundClasyFireViewer"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableCompoundClasyFireViewer</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableMolStructurePanel">
@@ -567,7 +733,7 @@
 											<format>dock.PlaceholderList</format>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS1</placeholder>
+													<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS2</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -577,26 +743,7 @@
 												</item>
 												<item key="dock.index" type="i">0</item>
 												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelDockableSpectumPlotMS1</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.IDWorkbenchPanelDockableMsTableMS1</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelDockableMsTableMS1</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS2</placeholder>
-												</key>
+												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelDockableSpectumPlotMS2</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -608,58 +755,18 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">2</item>
-												<item key="dock.id" type="i">2</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
 												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelDockableMsMsTableMs2</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableFollowupStepTable</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
-												</key>
 											</entry>
 										</placeholders>
 									</layout>
 									<children ignore="false">
 										<child>
-											<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableSpectumPlotMS1">
-												<replacement id="dockablesingle IDWorkbenchPanelDockableSpectumPlotMS1"/>
+											<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableSpectumPlotMS2">
+												<replacement id="dockablesingle IDWorkbenchPanelDockableSpectumPlotMS2"/>
 												<delegate id="delegate_ccontrol backup factory id">
-													<id>IDWorkbenchPanelDockableSpectumPlotMS1</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableMsTableMS1">
-												<replacement id="dockablesingle IDWorkbenchPanelDockableMsTableMS1"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>IDWorkbenchPanelDockableMsTableMS1</id>
+													<id>IDWorkbenchPanelDockableSpectumPlotMS2</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -676,16 +783,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableSpectumPlotMS2">
-										<replacement id="dockablesingle IDWorkbenchPanelDockableSpectumPlotMS2"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>IDWorkbenchPanelDockableSpectumPlotMS2</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>
@@ -716,55 +813,14 @@
 				<modes>
 					<dockables>
 						<entry id="single DockableMSMSFeatureTable" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
-											<backup-path>
-												<node location="TOP" size="0.5" id="1603303580004"/>
-												<node location="TOP" size="0.6" id="1603303580006"/>
-												<node location="LEFT" size="0.8" id="1603303580008"/>
-												<leaf id="1603303580010"/>
-											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>1</index>
-											<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
-										</property>
-									</location>
-								</property>
-							</properties>
+							<history/>
+							<properties/>
 						</entry>
 						<entry id="single DockablePepSearchParameterListingPanel" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
-								<property id="dock.mode.minimized">
-									<mode>dock.mode.minimized</mode>
-									<root>ccontrol north</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="flap dock">
-											<index>0</index>
-											<holding>false</holding>
-											<size>400</size>
-											<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
-										</property>
-									</location>
-								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -773,15 +829,11 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.4179651695692026" id="1603303580004"/>
-												<node location="LEFT" size="0.5920114122681883" id="1603303993826"/>
-												<node location="RIGHT" size="0.39705419056529123" id="1603304005988"/>
-												<leaf id="1603304005986"/>
+												<node location="BOTTOM" size="0.5" id="1638478432739"/>
+												<node location="LEFT" size="0.7455026455026456" id="1638479239422"/>
+												<node location="RIGHT" size="0.30632551528073915" id="1638479277795"/>
+												<leaf id="1638479277793"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockablePepSearchParameterListingPanel</placeholder>
 										</property>
 									</location>
 								</property>
@@ -800,13 +852,13 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableFollowupStepTable</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.4179651695692026" id="1603303580004"/>
-												<node location="RIGHT" size="0.238430583501006" id="1603303993826"/>
-												<leaf id="1603303993825"/>
+												<node location="BOTTOM" size="0.5" id="1638478432739"/>
+												<node location="RIGHT" size="0.22804232804232805" id="1638479239422"/>
+												<leaf id="1638479239421"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>2</index>
+											<index>0</index>
 											<placeholder>dock.single.DockableFollowupStepTable</placeholder>
 										</property>
 									</location>
@@ -826,45 +878,18 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.4179651695692026" id="1603303580004"/>
-												<node location="RIGHT" size="0.238430583501006" id="1603303993826"/>
-												<leaf id="1603303993825"/>
+												<node location="BOTTOM" size="0.5" id="1638478432739"/>
+												<node location="RIGHT" size="0.22804232804232805" id="1638479239422"/>
+												<leaf id="1638479239421"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>2</index>
-											<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
 						<entry id="single DockableReferenceMsOneFeatureTable" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
-											<backup-path>
-												<node location="TOP" size="0.5" id="1603303580004"/>
-												<node location="TOP" size="0.6" id="1603303580006"/>
-												<node location="LEFT" size="0.8" id="1603303580008"/>
-												<leaf id="1603303580010"/>
-											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
-										</property>
-									</location>
-								</property>
-							</properties>
+							<history/>
+							<properties/>
 						</entry>
 						<entry id="single IDWorkbenchPanelDockableMolStructurePanel" current="dock.mode.normal">
 							<history>
@@ -879,99 +904,29 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.IDWorkbenchPanelDockableMolStructurePanel</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.595166163141994" id="1603303580004"/>
-												<node location="BOTTOM" size="0.4561649955326119" id="1603303580006"/>
-												<leaf id="1603303580015"/>
+												<node location="TOP" size="0.5791044776119403" id="1638478432739"/>
+												<node location="BOTTOM" size="0.3413793103448276" id="1638478432741"/>
+												<node location="RIGHT" size="0.1726689689195856" id="1638479360235"/>
+												<leaf id="1638479360233"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>1</index>
-											<placeholder>dock.single.IDWorkbenchPanelDockableMolStructurePanel</placeholder>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
 						<entry id="single IDWorkbenchPanelDockableUniversalIdentificationResultsTable" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.maximized</mode>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.maximized">
-									<mode>dock.mode.maximized</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockFullScreenPropertyFactory"/>
-									</location>
-								</property>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable</placeholder>
-											<backup-path>
-												<node location="TOP" size="0.595166163141994" id="1603303580004"/>
-												<node location="BOTTOM" size="0.4561649955326119" id="1603303580006"/>
-												<node location="LEFT" size="0.8247541931752458" id="1603303981319"/>
-												<leaf id="1603303580015"/>
-											</backup-path>
-										</property>
-									</location>
-								</property>
-							</properties>
+							<history/>
+							<properties/>
 						</entry>
 						<entry id="single IDWorkbenchPanelDockableMsTableMS1" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.IDWorkbenchPanelDockableMsTableMS1</placeholder>
-											<backup-path>
-												<node location="BOTTOM" size="0.5" id="1603303580004"/>
-												<leaf id="1603303580021"/>
-											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>1</index>
-											<placeholder>dock.single.IDWorkbenchPanelDockableMsTableMS1</placeholder>
-										</property>
-									</location>
-								</property>
-							</properties>
+							<history/>
+							<properties/>
 						</entry>
 						<entry id="single DockableMsMsInfoPanel" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
-								<property id="dock.mode.minimized">
-									<mode>dock.mode.minimized</mode>
-									<root>ccontrol north</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="flap dock">
-											<index>0</index>
-											<holding>false</holding>
-											<size>400</size>
-											<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
-										</property>
-									</location>
-								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -980,10 +935,10 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableMsMsInfoPanel</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.4179651695692026" id="1603303580004"/>
-												<node location="LEFT" size="0.5920114122681883" id="1603303993826"/>
-												<node location="RIGHT" size="0.39705419056529123" id="1603304005988"/>
-												<leaf id="1603304005986"/>
+												<node location="BOTTOM" size="0.5" id="1638478432739"/>
+												<node location="LEFT" size="0.7455026455026456" id="1638479239422"/>
+												<node location="RIGHT" size="0.30632551528073915" id="1638479277795"/>
+												<leaf id="1638479277793"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
@@ -1007,12 +962,15 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.IDWorkbenchPanelDockableMsMsTableMs2</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.5" id="1603303580004"/>
-												<leaf id="1603303580021"/>
+												<node location="BOTTOM" size="0.4208955223880597" id="1638478432739"/>
+												<node location="LEFT" size="0.7622101628021707" id="1638479239422"/>
+												<node location="LEFT" size="0.6389481165600569" id="1638479277795"/>
+												<node location="RIGHT" size="0.6077872319215685" id="1638479580230"/>
+												<leaf id="1638479580229"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>3</index>
+											<index>1</index>
 											<placeholder>dock.single.IDWorkbenchPanelDockableMsMsTableMs2</placeholder>
 										</property>
 									</location>
@@ -1020,29 +978,8 @@
 							</properties>
 						</entry>
 						<entry id="single IDWorkbenchPanelDockableSpectumPlotMS1" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS1</placeholder>
-											<backup-path>
-												<node location="BOTTOM" size="0.5" id="1603303580004"/>
-												<leaf id="1603303580021"/>
-											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS1</placeholder>
-										</property>
-									</location>
-								</property>
-							</properties>
+							<history/>
+							<properties/>
 						</entry>
 						<entry id="single IDWorkbenchPanelDockableSpectumPlotMS2" current="dock.mode.normal">
 							<history>
@@ -1057,15 +994,12 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS2</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.4179651695692026" id="1603303580004"/>
-												<node location="LEFT" size="0.671152720889409" id="1603303993826"/>
-												<node location="LEFT" size="0.6029458094347088" id="1603304005988"/>
-												<leaf id="1603303580021"/>
+												<node location="BOTTOM" size="0.4208955223880597" id="1638478432739"/>
+												<node location="LEFT" size="0.7622101628021707" id="1638479239422"/>
+												<node location="LEFT" size="0.6389481165600569" id="1638479277795"/>
+												<node location="RIGHT" size="0.6077872319215685" id="1638479580230"/>
+												<leaf id="1638479580229"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>2</index>
-											<placeholder>dock.single.IDWorkbenchPanelDockableSpectumPlotMS2</placeholder>
 										</property>
 									</location>
 								</property>
@@ -1084,15 +1018,11 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.4179651695692026" id="1603303580004"/>
-												<node location="LEFT" size="0.7362007168458782" id="1603303993826"/>
-												<node location="RIGHT" size="0.39705419056529123" id="1603304005988"/>
-												<leaf id="1603304005986"/>
+												<node location="BOTTOM" size="0.5" id="1638478432739"/>
+												<node location="RIGHT" size="0.22804232804232805" id="1638479239422"/>
+												<node location="TOP" size="0.75" id="1638479250667"/>
+												<leaf id="1638479250665"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>1</index>
-											<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
 										</property>
 									</location>
 								</property>
@@ -1100,27 +1030,9 @@
 						</entry>
 						<entry id="single DockableMSMSLibraryEntryPropertiesTable" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
-								<property id="dock.mode.minimized">
-									<mode>dock.mode.minimized</mode>
-									<root>ccontrol north</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="flap dock">
-											<index>0</index>
-											<holding>false</holding>
-											<size>400</size>
-											<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
-										</property>
-									</location>
-								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -1129,10 +1041,10 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.4179651695692026" id="1603303580004"/>
-												<node location="LEFT" size="0.5920114122681883" id="1603303993826"/>
-												<node location="RIGHT" size="0.39705419056529123" id="1603304005988"/>
-												<leaf id="1603304005986"/>
+												<node location="BOTTOM" size="0.5" id="1638478432739"/>
+												<node location="LEFT" size="0.7455026455026456" id="1638479239422"/>
+												<node location="RIGHT" size="0.30632551528073915" id="1638479277795"/>
+												<leaf id="1638479277793"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
@@ -1143,10 +1055,10 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableCompoundClasyFireViewer" current="dock.mode.normal">
+						<entry id="single DockableCompoundClasyFireViewer" current="dock.mode.minimized">
 							<history>
-								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
+								<mode>dock.mode.minimized</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.minimized">
@@ -1170,11 +1082,38 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableCompoundClasyFireViewer</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.595166163141994" id="1603303580004"/>
-												<node location="TOP" size="0.5438350044673881" id="1603303580006"/>
-												<node location="RIGHT" size="0.19999999999999996" id="1603303580008"/>
-												<leaf id="1603303580013"/>
+												<node location="TOP" size="0.5791044776119403" id="1638478432739"/>
+												<node location="TOP" size="0.6586206896551724" id="1638478432741"/>
+												<node location="RIGHT" size="0.19999999999999996" id="1638478432743"/>
+												<leaf id="1638478432748"/>
 											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single IDWorkbenchPanelDockableChromatogramPlot" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.IDWorkbenchPanelDockableChromatogramPlot</placeholder>
+											<backup-path>
+												<node location="BOTTOM" size="0.4208955223880597" id="1638478432739"/>
+												<node location="LEFT" size="0.7455026455026456" id="1638479239422"/>
+												<node location="RIGHT" size="0.3610518834399431" id="1638479277795"/>
+												<leaf id="1638479277793"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.IDWorkbenchPanelDockableChromatogramPlot</placeholder>
 										</property>
 									</location>
 								</property>

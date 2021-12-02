@@ -93,12 +93,12 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 				MsMsfeatureExtractionTask task = (MsMsfeatureExtractionTask)e.getSource();
 				msFeatureMap.put(task.getRawDataFile(), task.getMsFeatureInfoBundles());
 				processed++;
-				if(processed == msmsDataFiles.size() && msOneDataFiles.size() > 0) {
-					initChromatogramExtraction();
-				}
-				else {
-					setStatus(TaskStatus.FINISHED);
-					return;
+				if(processed == msmsDataFiles.size()) {
+					
+					if(msOneDataFiles.size() > 0)
+						initChromatogramExtraction();					
+					else
+						setStatus(TaskStatus.FINISHED);					
 				}
 			}
 			if (e.getSource().getClass().equals(MsFeatureChromatogramBatchExtractionTask.class)) {

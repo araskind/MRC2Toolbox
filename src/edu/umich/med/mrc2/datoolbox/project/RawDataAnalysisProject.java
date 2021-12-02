@@ -143,13 +143,7 @@ public class RawDataAnalysisProject {
 				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
 		if(!newRawDataDirectory.equals(rawDataDirectory)) {
 			
-			for(DataFile df : msmsDataFiles) {
-				
-				File rdf = new File(df.getFullPath());
-				if(rdf.getParentFile().equals(rawDataDirectory))
-					df.setFullPath(Paths.get(newRawDataDirectory.getAbsolutePath(), df.getName()).toString());
-			}
-			for(DataFile df : msOneDataFiles) {
+			for(DataFile df : getDataFiles()) {
 				
 				File rdf = new File(df.getFullPath());
 				if(rdf.getParentFile().equals(rawDataDirectory))

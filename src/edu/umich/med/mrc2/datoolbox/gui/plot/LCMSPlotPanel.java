@@ -36,11 +36,11 @@ import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.DatasetRenderingOrder;
@@ -117,6 +117,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	private Collection<ExtractedChromatogram> chromatograms;
 	private RawDataExaminerPanel rawDataExaminerPanel;
 	private MsFeatureChromatogramBundle xicBundle;
+	private Collection<Double>precursorMarkers;
 
 	public LCMSPlotPanel(PlotType type) {
 
@@ -137,6 +138,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 		dataPointsVisible = false;
 		annotationsVisible = true;
+		precursorMarkers = new TreeSet<Double>();
 	}
 
 	public void actionPerformed(ActionEvent event) {
@@ -494,19 +496,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	public void removeMarkers() {
 
-		try {
-			if (!plot.getDomainMarkers(Layer.FOREGROUND).isEmpty()) {
-
-				for (Object m : plot.getDomainMarkers(Layer.FOREGROUND)) {
-
-					if (m instanceof Marker)
-						plot.removeDomainMarker((Marker) m, Layer.FOREGROUND);
-				}
-			}
-		} catch (Exception e) {
-
-			// e.printStackTrace();
-		}
+		plot.clearDomainMarkers();
+		plot.clearRangeMarkers();
 		markerRectangle = null;
 	}
 
@@ -573,16 +564,20 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 		if(plot != null) {
 
-			plot.clearDomainMarkers();
-			
+			removeMarkers();			
 			for (int i = 0; i < plot.getDatasetCount(); i++)
 				plot.setDataset(i, null);
 
-			for(Object annotation : plot.getAnnotations())
-				plot.removeAnnotation((XYAnnotation)annotation);
-
+			plot.clearAnnotations();
 			numberOfDataSets = 0;
 		}
+		if(chromatograms != null)
+			chromatograms.clear();
+		
+		xicBundle = null;
+		
+		if(precursorMarkers != null)
+			precursorMarkers.clear();
 	}
 	
 	public void showScan(IScan s) {
@@ -718,11 +713,14 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	}
 
 	public void redrawChromatogram(ChromatogramRenderingType newRtype) {
-		// TODO Auto-generated method stub
+
 		if(plotType.equals(PlotType.CHROMATOGRAM)) {
 			
 			if(chromatograms != null && !chromatograms.isEmpty())
 				showExtractedChromatogramCollection(chromatograms, newRtype);
+			
+			if(xicBundle != null)
+				showMsFeatureChromatogramBundle(xicBundle, precursorMarkers, newRtype);
 		}
 	}
 
@@ -776,6 +774,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		//	Collection<Color>usedColors = new HashSet<Color>();
 		
 		int seriesCount = 0;
+		int fileChromCount = 0;
 		for(Entry<DataFile, Collection<ExtractedIonData>> ce : xicBundle.getChromatograms().entrySet()) {
 			
 			DataFile dataFile = ce.getKey();
@@ -783,6 +782,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
             		ColorUtils.getColorBands(dataFile.getColor(), ce.getValue().size(), SortDirection.ASC);
 			for(ExtractedIonData eid : ce.getValue()) {
 				
+				fileChromCount = 0;
 				XYSeries series = new XYSeries(dataFile.getName() + " " + eid.toString());
 				double[] times = eid.getTimeValues();
 				double[] intensities = eid.getIntensityValues();			
@@ -791,7 +791,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				
 				dataSet.addSeries(series);
 				
-				Color seriesColor = lineColorListList.get(seriesCount);		
+				Color seriesColor = lineColorListList.get(fileChromCount);		
 				if(rType.equals(ChromatogramRenderingType.Lines)) {
 					renderer.setSeriesFillPaint(seriesCount, seriesColor);
 					renderer.setSeriesPaint(seriesCount, seriesColor);
@@ -806,10 +806,12 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 					renderer.setSeriesPaint(seriesCount, seriesColorTp);
 				}
 				renderer.setSeriesShape(seriesCount, FilledChromatogramRenderer.dataPointsShape);
+				fileChromCount++;
 				seriesCount++;
 			}		
 		}
 		((XYPlot) this.getPlot()).setDataset(1, dataSet);	
+		precursorMarkers.addAll(markers);
 		if(markers != null && !markers.isEmpty()) {
 			
 			for(double markerPosition : markers) {

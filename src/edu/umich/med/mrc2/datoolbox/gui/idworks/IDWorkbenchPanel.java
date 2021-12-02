@@ -56,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
@@ -132,6 +133,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.main.StatusBar;
+import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.DockableChromatogramPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
@@ -168,6 +170,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.msms.DecoyLibraryGeneratio
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataLoadForInjectionsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryIndexingTask;
+import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.LCMSData;
 
 public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeatureBundleDataUpdater{
@@ -189,6 +192,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	private DockableMsMsInfoPanel msMsInfoPanel;
 	private DockableMSMSLibraryEntryPropertiesTable msmsLibraryEntryPropertiesTable;
 	private DockableCompoundClasyFireViewer clasyFireViewer;
+	private DockableChromatogramPlot chromatogramPanel;
 	
 	//	Compound data panels, hide for now
 //	private NarrativeDataPanel narrativeDataPanel;
@@ -280,6 +284,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 				"IDWorkbenchPanelDockableMolStructurePanel");
 		clasyFireViewer = new DockableCompoundClasyFireViewer();
 		
+		chromatogramPanel =  new DockableChromatogramPlot(
+				"IDWorkbenchPanelDockableChromatogramPlot", "Chromatograms");
+		
 //		narrativeDataPanel = new NarrativeDataPanel();
 //		dbLinksTable = new DockableDatabaseLinksTable();
 //		synonymsTable = new DockableSynonymsTable(this);
@@ -308,7 +315,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		grid.add(0, 0, 80, 30, msOneFeatureTable, msTwoFeatureTable
 				//, idTrackerFeatureSearchPanel
 				);
-		grid.add(80, 0, 20, 30, molStructurePanel, clasyFireViewer);
+		grid.add(80, 0, 20, 30, molStructurePanel, clasyFireViewer,
+				chromatogramPanel);
 		grid.add(0, 30, 100, 20, identificationsTable);
 //		grid.add(0, 50, 50, 50, narrativeDataPanel, synonymsTable,
 //				propertiesTable, concentrationsTable, spectraTable);
@@ -2336,7 +2344,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		featureAnnotationPanel.clearPanel();
 		followupStepTable.clearTable();
 		standardFeatureAnnotationTable.clearTable();
-		
+		chromatogramPanel.clearPanel();
 		//	TODO
 		
 //		idTable.getTable().getSelectionModel().addListSelectionListener(this);
@@ -2375,7 +2383,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 				msTwoFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
 				msTwoFeatureTable.getTable().clearSelection();
 				msTwoFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
-				showInfoBundle(msOneFeatureTable.getSelectedBundle());
+				showMsFeatureInfoBundle(msOneFeatureTable.getSelectedBundle());
 				return;
 			}
 			if(listener.equals(msTwoFeatureTable.getTable())) {
@@ -2383,7 +2391,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 				msOneFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
 				msOneFeatureTable.getTable().clearSelection();
 				msOneFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
-				showInfoBundle(msTwoFeatureTable.getSelectedBundle());
+				showMsFeatureInfoBundle(msTwoFeatureTable.getSelectedBundle());
 				return;
 			}
 			if(listener.equals(identificationsTable.getTable())){
@@ -2411,7 +2419,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			return;
 		
 		updateMSFeatures(selectedBundles);
-		showInfoBundle(selectedBundles.iterator().next());
+		showMsFeatureInfoBundle(selectedBundles.iterator().next());
 		msOneFeatureTable.getTable().scrollToSelected();
 	}
 	
@@ -2442,7 +2450,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			return;
 
 		updateMSMSFeature(selectedBundles);
-		showInfoBundle(selectedBundles.iterator().next());
+		showMsFeatureInfoBundle(selectedBundles.iterator().next());
 		msTwoFeatureTable.getTable().scrollToSelected();
 	}
 	
@@ -2508,7 +2516,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		//	TODO show other compound info
 	}
 
-	private void showInfoBundle(MsFeatureInfoBundle selectedBundle) {
+	private void showMsFeatureInfoBundle(MsFeatureInfoBundle selectedBundle) {
 		
 		clearFeatureData();
 		if(selectedBundle == null)
@@ -2557,6 +2565,26 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		//	Show annotations
 		featureAnnotationPanel.loadFeatureData(feature);		
 		identificationsTable.getTable().selectPrimaryIdentity();
+		
+		//	Show chromatogram
+		showFeatureChromatogram(selectedBundle);
+	}
+	
+	private void showFeatureChromatogram(MsFeatureInfoBundle selectedBundle) {
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null || 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getChromatogramMap().isEmpty())
+			return;
+			
+		MsFeatureChromatogramBundle msfCb = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+				getChromatogramMap().get(selectedBundle.getMsFeature().getId());			
+		if(msfCb != null) {
+			Collection<Double>markers = 
+					RawDataUtils.getMSMSScanRtMarkersForFeature(
+							selectedBundle.getMsFeature(), selectedBundle.getDataFile());
+			chromatogramPanel.showMsFeatureChromatogramBundle(msfCb, markers);
+		}		
 	}
 	
 	private void loadPepSearchParameters(MsFeatureIdentity featureId) {

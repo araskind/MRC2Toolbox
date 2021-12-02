@@ -69,7 +69,7 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 			chromatogramTypeComboBox = new JComboBox<ChromatogramRenderingType>(
 					new DefaultComboBoxModel(ChromatogramRenderingType.values()));
 			chromatogramTypeComboBox.setMaximumSize(new Dimension(120, 26));
-			chromatogramTypeComboBox.setSelectedItem(ChromatogramRenderingType.Lines);			
+			chromatogramTypeComboBox.setSelectedItem(ChromatogramRenderingType.Spline);			
 			chromatogramTypeComboBox.addItemListener(this);
 			add(chromatogramTypeComboBox);
 
