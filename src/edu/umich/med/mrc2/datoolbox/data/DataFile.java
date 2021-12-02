@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.AvgMSFields;
-import edu.umich.med.mrc2.datoolbox.project.store.StoredDataFileFields;
+import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.XICFields;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
@@ -321,42 +321,42 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 
 	public Element getXmlElement() {
 		Element dataFileElement = 
-        		new Element(StoredDataFileFields.DataFile.name());
-		dataFileElement.setAttribute(StoredDataFileFields.Name.name(), name);	
-		dataFileElement.setAttribute(StoredDataFileFields.Path.name(), fullPath);	
+        		new Element(DataFileFields.DataFile.name());
+		dataFileElement.setAttribute(DataFileFields.Name.name(), name);	
+		dataFileElement.setAttribute(DataFileFields.Path.name(), fullPath);	
 		
 		if(parentSample != null)
 			dataFileElement.setAttribute(
-					StoredDataFileFields.Sample.name(), parentSample.getId());	
+					DataFileFields.Sample.name(), parentSample.getId());	
 		
 		if(acquisitionMethod != null)
 			dataFileElement.setAttribute(
-					StoredDataFileFields.AcqMethod.name(), acquisitionMethod.getId());	
+					DataFileFields.AcqMethod.name(), acquisitionMethod.getId());	
 		
 		if(injectionId != null)
 			dataFileElement.setAttribute(
-					StoredDataFileFields.Injection.name(), injectionId);	
+					DataFileFields.Injection.name(), injectionId);	
 		
 		if(samplePosition != null)
 			dataFileElement.setAttribute(
-					StoredDataFileFields.SamplePosition.name(), samplePosition);	
+					DataFileFields.SamplePosition.name(), samplePosition);	
 		
 		if(injectionTime != null)
-			dataFileElement.setAttribute(StoredDataFileFields.InjTimestamp.name(), 
+			dataFileElement.setAttribute(DataFileFields.InjTimestamp.name(), 
 					ProjectUtils.dateTimeFormat.format(injectionTime));
 		
 		if(injectionVolume > 0)
-			dataFileElement.setAttribute(StoredDataFileFields.InjVol.name(), 
+			dataFileElement.setAttribute(DataFileFields.InjVol.name(), 
 					Double.toString(injectionVolume));
 		
 		if(color != null)
-			dataFileElement.setAttribute(StoredDataFileFields.Color.name(), 
+			dataFileElement.setAttribute(DataFileFields.Color.name(), 
 					ColorUtils.rgb2hex(color));
 		
 		if(chromatograms != null && !chromatograms.isEmpty()) {
 			
 			Element xicListElement = new Element(
-					StoredDataFileFields.XicList.name());			
+					DataFileFields.XicList.name());			
 			for(ExtractedChromatogram xic : chromatograms)	
 				xicListElement.addContent(xic.getXmlElement(this));
 			
@@ -365,7 +365,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		if(userSpectra != null && !userSpectra.isEmpty()) {
 			
 			Element userSpectraElement = new Element(
-					StoredDataFileFields.AvgMsList.name());
+					DataFileFields.AvgMsList.name());
 			for(AverageMassSpectrum avgMs : userSpectra)
 				userSpectraElement.addContent(avgMs.getXmlElement());
 			
@@ -376,31 +376,31 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 	
 	public DataFile(Element fileElement) {
 		
-		name = fileElement.getAttributeValue(StoredDataFileFields.Name.name());
+		name = fileElement.getAttributeValue(DataFileFields.Name.name());
 		String path = 
-				fileElement.getAttributeValue(StoredDataFileFields.Path.name());
+				fileElement.getAttributeValue(DataFileFields.Path.name());
 		if(path != null)
 			fullPath = path;
 
 		String acqMethodId = 
-				fileElement.getAttributeValue(StoredDataFileFields.InjTimestamp.name());
+				fileElement.getAttributeValue(DataFileFields.InjTimestamp.name());
 		if(acqMethodId != null)
 			acquisitionMethod = IDTDataCash.getAcquisitionMethodById(acqMethodId);
 		
 		String colorCode = 
-				fileElement.getAttributeValue(StoredDataFileFields.Color.name());
+				fileElement.getAttributeValue(DataFileFields.Color.name());
 		if(colorCode == null)
 			color = Color.BLACK;
 		else
 			color = ColorUtils.hex2rgb(colorCode);
 		
 		String injId = 
-				fileElement.getAttributeValue(StoredDataFileFields.Injection.name());
+				fileElement.getAttributeValue(DataFileFields.Injection.name());
 		if(injId != null)
 			injectionId = injId;
 		
 		String injTime = 
-				fileElement.getAttributeValue(StoredDataFileFields.InjTimestamp.name());
+				fileElement.getAttributeValue(DataFileFields.InjTimestamp.name());
 		if(injTime != null) {
 			try {
 				injectionTime = ProjectUtils.dateTimeFormat.parse(injTime);
@@ -410,17 +410,17 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 			}
 		}
 		String sampPposition = 
-				fileElement.getAttributeValue(StoredDataFileFields.SamplePosition.name());
+				fileElement.getAttributeValue(DataFileFields.SamplePosition.name());
 		if(sampPposition != null)
 			samplePosition = sampPposition;
 		
 		String injVol = 
-				fileElement.getAttributeValue(StoredDataFileFields.InjVol.name());
+				fileElement.getAttributeValue(DataFileFields.InjVol.name());
 		if(injVol != null)
 			injectionVolume = Double.parseDouble(injVol);
 		
 		String sampleId = 
-				fileElement.getAttributeValue(StoredDataFileFields.Sample.name());
+				fileElement.getAttributeValue(DataFileFields.Sample.name());
 		if(sampleId != null)
 			parentSample = 
 					OfflineProjectLoadCash.getExperimentalSampleById(sampleId);
@@ -433,7 +433,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		batchNumber = 1;
 		
 		Element xicListElement = 
-				fileElement.getChild(StoredDataFileFields.XicList.name());
+				fileElement.getChild(DataFileFields.XicList.name());
 		if(xicListElement != null) {
 			List<Element> xicElementList = 
 					xicListElement.getChildren(XICFields.XIC.name());
@@ -444,7 +444,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 			}
 		}
 		Element avgMsListElement = 
-				fileElement.getChild(StoredDataFileFields.AvgMsList.name());
+				fileElement.getChild(DataFileFields.AvgMsList.name());
 		if(avgMsListElement != null) {
 			
 			List<Element> avgMsElementList = 

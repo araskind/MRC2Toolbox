@@ -50,8 +50,8 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureListener;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
-import edu.umich.med.mrc2.datoolbox.project.store.StoredMsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -876,15 +876,15 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	public Element getXmlElement() {
 		
 		Element msFeatureElement = 
-				new Element(StoredMsFeatureFields.MsFeature.name());
-		msFeatureElement.setAttribute(StoredMsFeatureFields.Id.name(), id);	
-		msFeatureElement.setAttribute(StoredMsFeatureFields.Name.name(), name);
-		msFeatureElement.setAttribute(StoredMsFeatureFields.rt.name(), Double.toString(retentionTime));
+				new Element(MsFeatureFields.MsFeature.name());
+		msFeatureElement.setAttribute(MsFeatureFields.Id.name(), id);	
+		msFeatureElement.setAttribute(MsFeatureFields.Name.name(), name);
+		msFeatureElement.setAttribute(MsFeatureFields.rt.name(), Double.toString(retentionTime));
 		if(rtRange != null)
-			msFeatureElement.setAttribute(StoredMsFeatureFields.rtRange.name(), rtRange.getStorableString());
+			msFeatureElement.setAttribute(MsFeatureFields.rtRange.name(), rtRange.getStorableString());
 		
 		if(polarity != null)
-			msFeatureElement.setAttribute(StoredMsFeatureFields.pol.name(), polarity.getCode());
+			msFeatureElement.setAttribute(MsFeatureFields.pol.name(), polarity.getCode());
 		
 		//	Spectrum
 		if(spectrum != null) 
@@ -894,7 +894,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		if(!identifications.isEmpty()) {
 			
 			Element cidListElement = 
-					new Element(StoredMsFeatureFields.CIDs.name());					
+					new Element(MsFeatureFields.CIDs.name());					
 			
 			for(MsFeatureIdentity mscid : identifications)			
 				cidListElement.addContent(mscid.getXmlElement());	
@@ -903,7 +903,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		}	
 		if(qualityScore > 0)
 			msFeatureElement.setAttribute(
-					StoredMsFeatureFields.QS.name(), Double.toString(qualityScore));
+					MsFeatureFields.QS.name(), Double.toString(qualityScore));
 		
 		return msFeatureElement;
 	}
@@ -914,29 +914,29 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		annotations = new TreeSet<ObjectAnnotation>();
 		eventListeners = ConcurrentHashMap.newKeySet();
 
-		id = featureElement.getAttributeValue(StoredMsFeatureFields.Id.name());
-		name = featureElement.getAttributeValue(StoredMsFeatureFields.Name.name());
+		id = featureElement.getAttributeValue(MsFeatureFields.Id.name());
+		name = featureElement.getAttributeValue(MsFeatureFields.Name.name());
 		retentionTime = Double.parseDouble(
-				featureElement.getAttributeValue(StoredMsFeatureFields.rt.name()));
-		String polCode = featureElement.getAttributeValue(StoredMsFeatureFields.pol.name());
+				featureElement.getAttributeValue(MsFeatureFields.rt.name()));
+		String polCode = featureElement.getAttributeValue(MsFeatureFields.pol.name());
 		if(polCode != null)
 			polarity = Polarity.getPolarityByCode(polCode);
 		
 		String rtRangeString = 
-				featureElement.getAttributeValue(StoredMsFeatureFields.rtRange.name());
+				featureElement.getAttributeValue(MsFeatureFields.rtRange.name());
 		if(rtRangeString != null)
 			rtRange = new Range(rtRangeString);
 		
 		spectrum = new MassSpectrum(
 				featureElement.getChild(MassSpectrumFields.Spectrum.name()));	
 		String qsValue = 
-				featureElement.getAttributeValue(StoredMsFeatureFields.QS.name());
+				featureElement.getAttributeValue(MsFeatureFields.QS.name());
 		if(qsValue != null)
 			qualityScore = Double.parseDouble(qsValue);
 		
 		//	Identifications
 		List<Element> msfIdListElements = 
-				featureElement.getChildren(StoredMsFeatureFields.CIDs.name());
+				featureElement.getChildren(MsFeatureFields.CIDs.name());
 		if(msfIdListElements.size() > 0) {
 			
 			List<Element> msfIdList = 

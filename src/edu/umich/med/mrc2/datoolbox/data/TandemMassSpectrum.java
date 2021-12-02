@@ -51,6 +51,10 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
+/**
+ * @author Sasha
+ *
+ */
 public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 
 	/**
@@ -502,6 +506,11 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		return averagedScanNumbers;
 	}
 	
+	/**
+	 * Add pairs of MSMS scan and it's parent MS1 scan
+	 * @param msmsScan
+	 * @param parentScan
+	 */
 	public void addAveragedScanNumbers(int msmsScan, int parentScan) {
 		averagedScanNumbers.put(msmsScan, parentScan);
 	}

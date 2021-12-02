@@ -24,35 +24,28 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Paths;
-import java.util.Collection;
+import java.util.Map.Entry;
 
-import org.apache.commons.io.FilenameUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
-import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class SaveFileMsFeaturesTask extends AbstractTask {
+public class SaveFeatureChromatogramsTask extends AbstractTask {
+	
+	private RawDataAnalysisProject projectToSave;
 
-	private DataFile file;
-	private File xmlTmpDir;	
-	private Collection<MsFeatureInfoBundle>features;
-
-	public SaveFileMsFeaturesTask(
-			DataFile file, 
-			File xmlTmpDir, 
-			Collection<MsFeatureInfoBundle> features) {
+	public SaveFeatureChromatogramsTask(RawDataAnalysisProject projectToSave) {
 		super();
-		this.file = file;
-		this.xmlTmpDir = xmlTmpDir;
-		this.features = features;
+		this.projectToSave = projectToSave;
 	}
 
 	@Override
@@ -60,58 +53,48 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
 
 		setStatus(TaskStatus.PROCESSING);
 		try {
-			createXmlForFeatureList();
+			createChoromatogramsXml();
 		} catch (Exception ex) {
-
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
-	
-	private void createXmlForFeatureList() throws Exception {
 
-		taskDescription = "Creating XML for " + file.getName();
-		total = features.size();
+	private void createChoromatogramsXml() {
+
+		taskDescription = "Creating chromatogram XML file";
+		total = projectToSave.getChromatogramMap().size();
 		processed = 0;
 		
-        Document dataFileDocument = new Document();
-        Element dataFileElement = 
-        		new Element(DataFileFields.DataFile.name());
-		dataFileElement.setAttribute("version", "1.0.0.0");
-		dataFileElement.setAttribute(DataFileFields.Name.name(), file.getName());
-		Element featureListElement =  
-				 new Element(DataFileFields.FeatureList.name());
+        Document document = new Document();
+        Element chromatogramListRoot = 
+        		new Element(ProjectFields.FeatureChromatogramList.name());
+		chromatogramListRoot.setAttribute("version", "1.0.0.0");
 
-		for(MsFeatureInfoBundle msf : features) {
-			featureListElement.addContent(msf.getXmlElement());
-			processed++;
-		}
-		dataFileElement.addContent(featureListElement);
-		dataFileDocument.addContent(dataFileElement);
+        for(Entry<String, MsFeatureChromatogramBundle> ce : projectToSave.getChromatogramMap().entrySet()) {   	
+        	chromatogramListRoot.addContent(ce.getValue().getXmlElement(ce.getKey()));
+        	processed++;
+        }
+        document.addContent(chromatogramListRoot);
         
 		//	Save XML document
-		taskDescription = "Saving XML for " + file.getName();
-		total = 100;
-		processed = 80;
 		File xmlFile = Paths.get(
-				xmlTmpDir.getAbsolutePath(), 
-				FilenameUtils.getBaseName(file.getName()) + ".xml").toFile();
+				projectToSave.getUncompressedProjectFilesDirectory().getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.FEATURE_CHROMATOGRAMS_FILE_NAME).toFile();
         try {
             FileWriter writer = new FileWriter(xmlFile, false);
             XMLOutputter outputter = new XMLOutputter();
             outputter.setFormat(Format.getCompactFormat());
-            outputter.output(dataFileDocument, writer);
-            outputter.output(dataFileDocument, System.out);
+            outputter.output(document, writer);
+            outputter.output(document, System.out);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        processed = 100;
+        }		
 	}
-	
+
 	@Override
 	public Task cloneTask() {
-		// TODO Auto-generated method stub
-		return null;
+		return new SaveFeatureChromatogramsTask(projectToSave);
 	}
 }

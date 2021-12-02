@@ -21,17 +21,11 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum StoredMsFeatureFields {
-
-	MsFeature,
-	Id,
-	Name,
-	rt,
-	rtRange,
-	pol,
-	idList,
-	Spectrum,
-	CIDs,
-	QS,
+public enum MsFeatureChromatogramBundleFields {
+	FChrBundle,
+	FID,
+	DF,
+	FName,
+	XICList,
 	;
 }

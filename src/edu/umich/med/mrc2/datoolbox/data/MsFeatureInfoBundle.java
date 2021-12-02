@@ -36,8 +36,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
-import edu.umich.med.mrc2.datoolbox.project.store.StoredMsFeatureFields;
 
 public class MsFeatureInfoBundle implements Serializable {
 
@@ -324,7 +324,7 @@ public class MsFeatureInfoBundle implements Serializable {
 	public MsFeatureInfoBundle(Element featureElement) {
 		
 		msFeature = new MsFeature(
-				featureElement.getChild(StoredMsFeatureFields.MsFeature.name()));
+				featureElement.getChild(MsFeatureFields.MsFeature.name()));
 		
 		String acqMethodId = 
 				featureElement.getAttributeValue(MsFeatureInfoBundleFields.AcqMethod.name());

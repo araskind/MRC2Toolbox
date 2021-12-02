@@ -34,6 +34,8 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.jfree.chart.ChartFactory;
@@ -60,7 +62,10 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
+import edu.umich.med.mrc2.datoolbox.data.ExtractedIonData;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.ChromatogramToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.ContinuousCromatogramRenderer;
@@ -69,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.FilledChromatogramRenderer
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MassSpectrumRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MsLabelGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -110,6 +116,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	
 	private Collection<ExtractedChromatogram> chromatograms;
 	private RawDataExaminerPanel rawDataExaminerPanel;
+	private MsFeatureChromatogramBundle xicBundle;
 
 	public LCMSPlotPanel(PlotType type) {
 
@@ -376,7 +383,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	}
 	
 	public void showExtractedChromatogramCollection(
-			Collection<ExtractedChromatogram> chromatograms, ChromatogramRenderingType rType) {
+			Collection<ExtractedChromatogram> chromatograms, 
+			ChromatogramRenderingType rType) {
 			
 		this.chromatograms = chromatograms;
 		XYItemRenderer renderer = null;
@@ -741,6 +749,80 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				}
 			}
 		}
+	}
+
+	public void showMsFeatureChromatogramBundle(
+			MsFeatureChromatogramBundle xicBundle,
+			Collection<Double>markers,
+			ChromatogramRenderingType rType) {
+		
+		this.xicBundle = xicBundle;	
+		XYItemRenderer renderer = null;
+		if(rType.equals(ChromatogramRenderingType.Spline))
+			renderer = splineRenderer;
+		
+		if(rType.equals(ChromatogramRenderingType.Lines))
+			renderer = linesChromatogramRenderer;
+		
+		if(rType.equals(ChromatogramRenderingType.Filled))
+			renderer = filledChromatogramRenderer;
+		
+		final XYToolTipGenerator toolTipGenerator = 				
+				new ChromatogramToolTipGenerator();		
+		renderer.setDefaultToolTipGenerator(toolTipGenerator);
+						
+		((XYPlot) this.getPlot()).setRenderer(1, renderer);
+		XYSeriesCollection dataSet = new XYSeriesCollection();
+		//	Collection<Color>usedColors = new HashSet<Color>();
+		
+		int seriesCount = 0;
+		for(Entry<DataFile, Collection<ExtractedIonData>> ce : xicBundle.getChromatograms().entrySet()) {
+			
+			DataFile dataFile = ce.getKey();
+            List<Color> lineColorListList = 
+            		ColorUtils.getColorBands(dataFile.getColor(), ce.getValue().size(), SortDirection.ASC);
+			for(ExtractedIonData eid : ce.getValue()) {
+				
+				XYSeries series = new XYSeries(dataFile.getName() + " " + eid.toString());
+				double[] times = eid.getTimeValues();
+				double[] intensities = eid.getIntensityValues();			
+				for(int i=0; i<times.length; i++)
+					series.add(times[i], intensities[i]);
+				
+				dataSet.addSeries(series);
+				
+				Color seriesColor = lineColorListList.get(seriesCount);		
+				if(rType.equals(ChromatogramRenderingType.Lines)) {
+					renderer.setSeriesFillPaint(seriesCount, seriesColor);
+					renderer.setSeriesPaint(seriesCount, seriesColor);
+				}
+				else {
+					Paint seriesColorTp = new Color(
+							seriesColor.getRed()/255.0f, 
+							seriesColor.getGreen()/255.0f, 
+							seriesColor.getBlue()/255.0f, 
+							0.3f);
+					renderer.setSeriesFillPaint(seriesCount, seriesColorTp);
+					renderer.setSeriesPaint(seriesCount, seriesColorTp);
+				}
+				renderer.setSeriesShape(seriesCount, FilledChromatogramRenderer.dataPointsShape);
+				seriesCount++;
+			}		
+		}
+		((XYPlot) this.getPlot()).setDataset(1, dataSet);	
+		if(markers != null && !markers.isEmpty()) {
+			
+			for(double markerPosition : markers) {
+				
+				ValueMarker marker = new ValueMarker(markerPosition);
+				marker.setPaint(Color.RED);
+				((XYPlot) this.getPlot()).addDomainMarker(marker);
+			}
+		}	
+	}
+
+	public MsFeatureChromatogramBundle getXicBundle() {
+		return xicBundle;
 	}
 }
 

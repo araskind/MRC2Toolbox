@@ -61,6 +61,7 @@ public class MRC2ToolBoxConfiguration {
 	public static final String TAB_DATA_DELIMITER = "\t";
 	public static final String UNCOMPRESSED_PROJECT_FILES_DIRECTORY = "ProjectFiles";
 	public static final String PROJECT_FILE_NAME = "Project.xml";
+	public static final String FEATURE_CHROMATOGRAMS_FILE_NAME = "FeatureChromatograms.xml";
 
 	//	LIMS connection	
 	public static String metLimsUser;

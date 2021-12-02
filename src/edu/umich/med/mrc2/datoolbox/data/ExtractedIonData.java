@@ -21,7 +21,14 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import java.io.UnsupportedEncodingException;
+
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.ExtractedIonDataFields;
+import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
 public class ExtractedIonData {
 
@@ -57,6 +64,16 @@ public class ExtractedIonData {
 	public String getName() {
 		return name;
 	}
+	
+	@Override
+	public String toString() {
+		
+		String returnName = name;
+		if(adduct != null)
+			returnName += " (" + adduct.getName() + ")";
+		
+		return returnName;		
+	}
 
 	public double getExtractedMass() {
 		return extractedMass;
@@ -77,4 +94,102 @@ public class ExtractedIonData {
 	public void setAdduct(Adduct adduct) {
 		this.adduct = adduct;
 	}
+
+	public Element getXmlElement() {
+		
+		Element extractedIonDataElement = 
+				new Element(ExtractedIonDataFields.XICData.name());
+		
+		if(name != null)
+			extractedIonDataElement.setAttribute(
+					ExtractedIonDataFields.Name.name(), name);
+		
+		if(adduct != null)
+			extractedIonDataElement.setAttribute(
+					ExtractedIonDataFields.Adduct.name(), adduct.getId());
+		
+		String targetMz = 
+				Double.toString(Math.floor(extractedMass * 1000000) / 1000000);
+		extractedIonDataElement.setAttribute(
+				ExtractedIonDataFields.Target.name(), targetMz);	
+		
+		double[]times = new double[timeValues.length];
+		for(int i=0; i<timeValues.length; i++)
+			times[i] =  Math.floor(timeValues[i] * 1000) / 1000;
+
+		String timeString = "";
+		try {
+			timeString = NumberArrayUtils.encodeNumberArray(times);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Element timeElement = 
+				new Element(ExtractedIonDataFields.Time.name()).setText(timeString);			
+		extractedIonDataElement.addContent(timeElement);
+		
+		double[]intensities = new double[intensityValues.length];
+		for(int i=0; i<intensityValues.length; i++)
+			intensities[i] =  Math.floor(intensityValues[i] * 100) / 100;
+
+		String intensityString = "";
+		try {
+			intensityString = NumberArrayUtils.encodeNumberArray(intensities);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Element intensityElement = 
+				new Element(ExtractedIonDataFields.Intensity.name()).setText(intensityString);			
+		extractedIonDataElement.addContent(intensityElement);
+				
+		return extractedIonDataElement;
+	}
+	
+	public ExtractedIonData(Element xicElement) {
+		
+		name = xicElement.getAttributeValue(ExtractedIonDataFields.Name.name());		
+		String targetMass = 
+				xicElement.getAttributeValue(ExtractedIonDataFields.Target.name());
+		if(targetMass != null)
+			extractedMass = Double.parseDouble(targetMass);
+		
+		String adductId = 
+				xicElement.getAttributeValue(ExtractedIonDataFields.Adduct.name());
+		if (adductId != null)
+			adduct = AdductManager.getAdductById(adductId);
+	
+		String timeText =  
+				xicElement.getChild(ExtractedIonDataFields.Time.name()).
+					getContent().get(0).getValue();
+		try {
+			timeValues = NumberArrayUtils.decodeNumberArray(timeText);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String intensityText =  
+				xicElement.getChild(ExtractedIonDataFields.Intensity.name()).
+					getContent().get(0).getValue();
+		try {
+			intensityValues = NumberArrayUtils.decodeNumberArray(intensityText);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

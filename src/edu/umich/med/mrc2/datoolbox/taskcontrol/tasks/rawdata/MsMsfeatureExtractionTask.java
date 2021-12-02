@@ -775,7 +775,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		data = RawDataManager.getRawData(rawDataFile);
 		
 		if(!data.getScans().getMapMsLevel2index().containsKey(2)) {
-			System.out.println("No MSMS data in file " + rawDataFile.getName());
+			System.err.println("No MSMS data in file " + rawDataFile.getName());
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
@@ -791,6 +791,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			bundle.setAcquisitionMethod(rawDataFile.getDataAcquisitionMethod());
 			bundle.setSample((IDTExperimentalSample) rawDataFile.getParentSample());
 			bundle.setInjectionId(rawDataFile.getInjectionId());
+			bundle.setDataFile(rawDataFile);
 			featureBundles.add(bundle);
 		}	
 		System.err.println("***");

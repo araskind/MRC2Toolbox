@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -58,6 +60,7 @@ public class RawDataAnalysisProject {
 	protected Collection<DataFile>msmsDataFiles;
 	protected Collection<DataFile>msOneDataFiles;
 	protected Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;	
+	protected Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 	
 	//	New project
 	public RawDataAnalysisProject(
@@ -192,6 +195,7 @@ public class RawDataAnalysisProject {
 		msmsDataFiles = new TreeSet<DataFile>();
 		msOneDataFiles = new TreeSet<DataFile>();
 		msFeatureMap = new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
+		chromatogramMap = new HashMap<String, MsFeatureChromatogramBundle>();
 		//	TODO
 	}
 	
@@ -342,5 +346,13 @@ public class RawDataAnalysisProject {
 
 	public File getUncompressedProjectFilesDirectory() {
 		return uncompressedProjectFilesDirectory;
+	}
+
+	public Map<String, MsFeatureChromatogramBundle> getChromatogramMap() {
+		return chromatogramMap;
+	}
+
+	public void setChromatogramMap(Map<String, MsFeatureChromatogramBundle> chromatogramMap) {
+		this.chromatogramMap = chromatogramMap;
 	}
 }

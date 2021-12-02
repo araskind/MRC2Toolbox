@@ -37,9 +37,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Text;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.AdductComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
@@ -489,81 +487,10 @@ public class MassSpectrum implements Serializable {
 	public Set<MsPoint> getMsPoints() {
 		return msPoints;
 	}
-	
-	public Element getXmlElement(Document parentDocument) {
-		
-		Element spectrumElement = parentDocument.createElement(
-				MassSpectrumFields.Spectrum.name());
-		
-		if(msPoints != null && !msPoints.isEmpty()) {
-			double[]mzValues = msPoints.stream().mapToDouble(p -> Math.floor(p.getMz() * 1000000) / 1000000).toArray();
-			String mz = "";
-			try {
-				mz = NumberArrayUtils.encodeNumberArray(mzValues);
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			Element mzElement = 
-					parentDocument.createElement(MassSpectrumFields.MZ.name());		
-			Text mzText = parentDocument.createTextNode(mz);
-			mzElement.appendChild(mzText);		
-			spectrumElement.appendChild(mzElement);
-			
-//			spectrumElement.setAttribute(MassSpectrumFields.MZ.name(), mz);		
-			
-			double[]intensityValues = msPoints.stream().mapToDouble(p -> Math.floor(p.getIntensity() * 100) / 100).toArray();
-			String intensity = "";
-			try {
-				intensity = NumberArrayUtils.encodeNumberArray(intensityValues);
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			Element intensityElement = 
-					parentDocument.createElement(MassSpectrumFields.Intensity.name());		
-			Text intensityText = parentDocument.createTextNode(intensity);
-			intensityElement.appendChild(intensityText);		
-			spectrumElement.appendChild(intensityElement);
-			
-//			spectrumElement.setAttribute(MassSpectrumFields.Intensity.name(), intensity);
-		}
-		if(detectionAlgorithm != null)
-			spectrumElement.setAttribute(MassSpectrumFields.Algo.name(), detectionAlgorithm);
-		
-		if(adductMap != null && !adductMap.isEmpty()) {
-			
-			Element adductMapElement = parentDocument.createElement(
-					MassSpectrumFields.AdductMap.name());
-			spectrumElement.appendChild(adductMapElement);
-			
-			for(Entry<Adduct, List<MsPoint>>am : adductMap.entrySet()) {
-				Element amEntryElement = parentDocument.createElement(
-						MassSpectrumFields.Adduct.name());
-				amEntryElement.setAttribute(MassSpectrumFields.AName.name(), am.getKey().getId());
-				List<String>mpList = am.getValue().stream().
-						map(p -> p.toString()).collect(Collectors.toList());
-				amEntryElement.setAttribute(MassSpectrumFields.ASpec.name(), StringUtils.join(mpList, ";"));
-				adductMapElement.appendChild(amEntryElement);
-			}		
-		}
-		if(primaryAdduct != null)
-			spectrumElement.setAttribute(MassSpectrumFields.PAdduct.name(), primaryAdduct.getId());
-		
-		if(tandemSpectra != null && !tandemSpectra.isEmpty()) {
-			
-			Element msmsListElement = parentDocument.createElement(
-					MassSpectrumFields.MsmsList.name());
-			spectrumElement.appendChild(msmsListElement);
-			for(TandemMassSpectrum msms : tandemSpectra) 
-				msmsListElement.appendChild(msms.getXmlElement(parentDocument));
-		}
-		return spectrumElement;
-	}
 
-	public org.jdom2.Element getXmlElement() {
+	public Element getXmlElement() {
 		
-		org.jdom2.Element spectrumElement = new org.jdom2.Element(
+		Element spectrumElement = new Element(
 				MassSpectrumFields.Spectrum.name());
 		if(msPoints != null && !msPoints.isEmpty()) {
 			double[]mzValues = msPoints.stream().
@@ -575,8 +502,8 @@ public class MassSpectrum implements Serializable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			org.jdom2.Element mzElement = 
-					new org.jdom2.Element(MassSpectrumFields.MZ.name()).setText(mz);			
+			Element mzElement = 
+					new Element(MassSpectrumFields.MZ.name()).setText(mz);			
 			spectrumElement.addContent(mzElement);
 			double[]intensityValues = msPoints.stream().
 					mapToDouble(p -> Math.floor(p.getIntensity() * 100) / 100).toArray();
@@ -587,8 +514,8 @@ public class MassSpectrum implements Serializable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			org.jdom2.Element intensityElement = 
-					new org.jdom2.Element(MassSpectrumFields.Intensity.name()).setText(intensity);			
+			Element intensityElement = 
+					new Element(MassSpectrumFields.Intensity.name()).setText(intensity);			
 			spectrumElement.addContent(intensityElement);
 		}
 		if(detectionAlgorithm != null)
@@ -596,12 +523,12 @@ public class MassSpectrum implements Serializable {
 		
 		if(adductMap != null && !adductMap.isEmpty()) {
 			
-			org.jdom2.Element adductMapElement = 
-					new org.jdom2.Element(MassSpectrumFields.AdductMap.name());
+			Element adductMapElement = 
+					new Element(MassSpectrumFields.AdductMap.name());
 			for(Entry<Adduct, List<MsPoint>>am : adductMap.entrySet()) {
 				
-				org.jdom2.Element amEntryElement = 
-						new org.jdom2.Element(MassSpectrumFields.Adduct.name());
+				Element amEntryElement = 
+						new Element(MassSpectrumFields.Adduct.name());
 				amEntryElement.setAttribute(MassSpectrumFields.AName.name(), am.getKey().getId());
 				List<String>mpList = am.getValue().stream().
 						map(p -> p.toString()).collect(Collectors.toList());
@@ -617,8 +544,8 @@ public class MassSpectrum implements Serializable {
 		
 		if(tandemSpectra != null && !tandemSpectra.isEmpty()) {
 			
-			org.jdom2.Element msmsListElement = 
-					new org.jdom2.Element(MassSpectrumFields.MsmsList.name());
+			Element msmsListElement = 
+					new Element(MassSpectrumFields.MsmsList.name());
 			
 			for(TandemMassSpectrum msms : tandemSpectra) 
 				msmsListElement.addContent(msms.getXmlElement());
@@ -628,7 +555,7 @@ public class MassSpectrum implements Serializable {
 		return spectrumElement;
 	}
 	
-	public MassSpectrum(org.jdom2.Element spectrumElement) {
+	public MassSpectrum(Element spectrumElement) {
 		
 		msPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		adductMap = new TreeMap<Adduct, 
@@ -665,9 +592,9 @@ public class MassSpectrum implements Serializable {
 		for(int i=0; i<mzValues.length; i++)
 			msPoints.add(new MsPoint(mzValues[i], intensityValues[i]));
 		
-		org.jdom2.Element msmsListElement = spectrumElement.getChildren(MassSpectrumFields.MsmsList.name()).get(0);
-		List<org.jdom2.Element> msmsList = msmsListElement.getChildren(TandemMassSpectrumFields.MSMS.name());
-		for(org.jdom2.Element msmsElement : msmsList) {
+		Element msmsListElement = spectrumElement.getChildren(MassSpectrumFields.MsmsList.name()).get(0);
+		List<Element> msmsList = msmsListElement.getChildren(TandemMassSpectrumFields.MSMS.name());
+		for(Element msmsElement : msmsList) {
 			
 			if(msmsElement.getName().equals(TandemMassSpectrumFields.MSMS.name()))
 				tandemSpectra.add(new TandemMassSpectrum(msmsElement));

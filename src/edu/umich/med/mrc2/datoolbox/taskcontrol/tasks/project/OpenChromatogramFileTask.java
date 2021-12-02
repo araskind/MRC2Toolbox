@@ -22,33 +22,34 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
-import edu.umich.med.mrc2.datoolbox.project.store.StoredDataFileFields;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureChromatogramBundleFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class MsFeatureBundleExtractionTask extends AbstractTask {
+public class OpenChromatogramFileTask extends AbstractTask {
 	
-	private DataFile dataFile;
-	private File featureFile;
-	private Collection<MsFeatureInfoBundle>features;
+	private File chromatogramFile;
+	private Map<String, MsFeatureChromatogramBundle>chromatogramMap;
+	private Collection<DataFile>projectDataFiles;
 
-	public MsFeatureBundleExtractionTask(DataFile dataFile, File featureFile) {
+	public OpenChromatogramFileTask(
+			File chromatogramFile, Collection<DataFile>projectDataFiles) {
 		super();
-		this.dataFile = dataFile;
-		this.featureFile = featureFile;
-		features = new ArrayList<MsFeatureInfoBundle>();
+		this.chromatogramFile = chromatogramFile;
+		this.projectDataFiles = projectDataFiles;
+		chromatogramMap = new HashMap<String, MsFeatureChromatogramBundle>();
 	}
 
 	@Override
@@ -65,24 +66,23 @@ public class MsFeatureBundleExtractionTask extends AbstractTask {
 
 	private void extractMsFeatureBundles() throws Exception {
 
-		taskDescription = "Opening data for " + dataFile.getName();
+		taskDescription = "Reading chromatograms from " + chromatogramFile.getName();
 		total = 100;
 		processed = 20;
 		try {
 			SAXBuilder sax = new SAXBuilder();
-			Document doc = sax.build(featureFile);
+			Document doc = sax.build(chromatogramFile);
 			Element rootNode = doc.getRootElement();
 			List<Element> list = 
-					rootNode.getChild(StoredDataFileFields.FeatureList.name()).
-					getChildren(MsFeatureInfoBundleFields.MFIB.name());
-			taskDescription = "Extracting MS features for " + dataFile.getName();
+					rootNode.getChildren(MsFeatureChromatogramBundleFields.FChrBundle.name());
 			total = list.size();
 			processed = 0;
-			for (Element featureElement : list) {
+			for (Element chromBundleElement : list) {
 
-				MsFeatureInfoBundle bundle = 
-						new MsFeatureInfoBundle(featureElement);
-				features.add(bundle);
+				MsFeatureChromatogramBundle fcb = 
+						new MsFeatureChromatogramBundle(
+								chromBundleElement, projectDataFiles);
+				chromatogramMap.put(fcb.getFeatureId(), fcb);
 				processed++;
 			}
 		} catch (Exception e) {
@@ -90,17 +90,13 @@ public class MsFeatureBundleExtractionTask extends AbstractTask {
 		}	
 	}
 
-	public DataFile getDataFile() {
-		return dataFile;
-	}
-
-	public Collection<MsFeatureInfoBundle> getFeatures() {
-		return features;
+	public Map<String, MsFeatureChromatogramBundle> getChromatogramMap() {
+		return chromatogramMap;
 	}
 	
 	@Override
 	public Task cloneTask() {
-		return new MsFeatureBundleExtractionTask(dataFile, featureFile);
+		return new OpenChromatogramFileTask(
+				chromatogramFile, projectDataFiles);
 	}
-
 }

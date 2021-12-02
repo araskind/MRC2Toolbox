@@ -22,11 +22,14 @@
 package edu.umich.med.mrc2.datoolbox.gui.utils;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.geotools.brewer.color.ColorBrewer;
 import org.jfree.chart.renderer.LookupPaintScale;
 
+import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorGradient;
 import edu.umich.med.mrc2.datoolbox.gui.plot.ColorScale;
 
@@ -174,6 +177,47 @@ public class ColorUtils {
 			return colourValue;
 		}
 	}	
+	
+	public static List<Color> getColorBands(
+			Color color, 
+			int bands, 
+			SortDirection direction) {
+
+	    List<Color> colorBands = new ArrayList<>(bands);
+	    if(direction.equals(SortDirection.ASC)) {
+	    	
+		    for (int index = 0; index < bands; index++)
+		        colorBands.add(lighten(color, (double) index / (double) bands));
+	    }
+	    if(direction.equals(SortDirection.DESC)) {
+	    	
+		    for (int index = 0; index < bands; index++)
+		        colorBands.add(darken(color, (double) index / (double) bands));
+	    }	    
+	    return colorBands;
+	}
+
+	public static Color darken(Color color, double fraction) {
+
+	    int red = (int) Math.round(Math.max(0, color.getRed() - 255 * fraction));
+	    int green = (int) Math.round(Math.max(0, color.getGreen() - 255 * fraction));
+	    int blue = (int) Math.round(Math.max(0, color.getBlue() - 255 * fraction));
+
+	    int alpha = color.getAlpha();
+
+	    return new Color(red, green, blue, alpha);
+	}
+	
+	public static Color lighten(Color color, double fraction) {
+
+	    int red = (int) Math.round(Math.min(255, color.getRed() + 255 * fraction));
+	    int green = (int) Math.round(Math.min(255, color.getGreen() + 255 * fraction));
+	    int blue = (int) Math.round(Math.min(255, color.getBlue() + 255 * fraction));
+
+	    int alpha = color.getAlpha();
+
+	    return new Color(red, green, blue, alpha);
+	}
 }
 
 

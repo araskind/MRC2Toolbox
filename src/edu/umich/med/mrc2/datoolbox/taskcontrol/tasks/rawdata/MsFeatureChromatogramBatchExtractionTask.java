@@ -49,7 +49,7 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 	private ChromatogramDefinition commonDefinition;
 	private MsFeatureChromatogramExtractionTarget xicTarget;	
 	private Map<MsFeatureInfoBundle, ChromatogramDefinition>featureChromatogramDefinitions;
-	private Map<MsFeatureInfoBundle, MsFeatureChromatogramBundle>chromatogramMap;
+	private Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 	private int processedFilesCount;
 	
 	public MsFeatureChromatogramBatchExtractionTask(
@@ -63,7 +63,7 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 		this.commonDefinition = commonDefinition;
 		this.xicTarget = xicTarget;
 		chromatogramMap = 
-				new HashMap<MsFeatureInfoBundle, MsFeatureChromatogramBundle>();
+				new HashMap<String, MsFeatureChromatogramBundle>();
 	}
 
 	@Override
@@ -144,13 +144,15 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 		DataFile df = task.getRawDataFile();
 		for(Entry<MsFeatureInfoBundle, Collection<ExtractedIonData>> entry : fileChromatograms.entrySet()) {
 			
-			MsFeatureInfoBundle mfb = entry.getKey();
-			if(chromatogramMap.get(mfb) == null) {
+			String featureId = entry.getKey().getMsFeature().getId();
+			if(chromatogramMap.get(featureId) == null) {
 				MsFeatureChromatogramBundle cBundle = 
-						new MsFeatureChromatogramBundle(featureChromatogramDefinitions.get(mfb));
-				chromatogramMap.put(mfb, cBundle);
+						new MsFeatureChromatogramBundle(
+								featureId,
+								featureChromatogramDefinitions.get(entry.getKey()));
+				chromatogramMap.put(featureId, cBundle);
 			}
-			chromatogramMap.get(mfb).addChromatogramsForDataFile(df, entry.getValue());
+			chromatogramMap.get(featureId).addChromatogramsForDataFile(df, entry.getValue());
 		}		
 	}
 
@@ -160,7 +162,7 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 				rawDataFiles, features, commonDefinition, xicTarget);
 	}
 
-	public Map<MsFeatureInfoBundle, MsFeatureChromatogramBundle> getChromatogramMap() {
+	public Map<String, MsFeatureChromatogramBundle> getChromatogramMap() {
 		return chromatogramMap;
 	}
 }

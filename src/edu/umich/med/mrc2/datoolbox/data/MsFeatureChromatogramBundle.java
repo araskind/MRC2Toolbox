@@ -22,18 +22,28 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.ExtractedIonDataFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureChromatogramBundleFields;
+import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
 import edu.umich.med.mrc2.datoolbox.utils.ChromatogramUtils;
 
 public class MsFeatureChromatogramBundle {
 	
 	private ChromatogramDefinition chromatogramDefinition;
 	private Map<DataFile, Collection<ExtractedIonData>>chromatograms;
+	private String featureId;
 	
-	public MsFeatureChromatogramBundle(ChromatogramDefinition chromatogramDefinition) {
+	public MsFeatureChromatogramBundle(
+			String featureId, 
+			ChromatogramDefinition chromatogramDefinition) {
 		super();
 		this.chromatogramDefinition = chromatogramDefinition;
 		chromatograms = new TreeMap<DataFile, Collection<ExtractedIonData>>();
@@ -68,4 +78,81 @@ public class MsFeatureChromatogramBundle {
 	public Map<DataFile, Collection<ExtractedIonData>> getChromatograms() {
 		return chromatograms;
 	}
+	
+	public Element getXmlElement(String featureId) {
+		
+		Element msFeatureChromatogramBundleElement = 
+				new Element(MsFeatureChromatogramBundleFields.FChrBundle.name());
+		msFeatureChromatogramBundleElement.setAttribute(
+				MsFeatureChromatogramBundleFields.FID.name(), featureId);
+		msFeatureChromatogramBundleElement.addContent(
+				chromatogramDefinition.getXmlElement());
+		
+		if(!chromatograms.isEmpty()) {
+			
+			for(Entry<DataFile, Collection<ExtractedIonData>> ce : chromatograms.entrySet()) {
+				
+				Element dfElement = new Element(
+						MsFeatureChromatogramBundleFields.DF.name());	
+				dfElement.setAttribute(
+						MsFeatureChromatogramBundleFields.FName.name(), ce.getKey().getName());
+				Element xicListElement = new Element(
+						MsFeatureChromatogramBundleFields.XICList.name());			
+				for(ExtractedIonData xic : ce.getValue())	
+					xicListElement.addContent(xic.getXmlElement());
+				
+				dfElement.addContent(xicListElement);				
+				msFeatureChromatogramBundleElement.addContent(dfElement);
+			}
+		}		
+		return msFeatureChromatogramBundleElement;
+	}
+	
+	public MsFeatureChromatogramBundle(Element cbElement, Collection<DataFile>dataFiles) {
+		
+		featureId = 
+				cbElement.getAttributeValue(MsFeatureChromatogramBundleFields.FID.name());
+		Element cdElement = 
+				cbElement.getChild(XICDefinitionFields.XICDefinition.name());		
+		this.chromatogramDefinition = new ChromatogramDefinition(cdElement);
+		
+		chromatograms = new TreeMap<DataFile, Collection<ExtractedIonData>>();
+		List<Element> dfElementList = 
+				cbElement.getChildren(MsFeatureChromatogramBundleFields.DF.name());
+		for (Element dfElement : dfElementList) {
+			
+			String fileName = dfElement.getAttributeValue(
+					MsFeatureChromatogramBundleFields.FName.name());
+			DataFile df = dataFiles.stream().
+				filter(f -> f.getName().equals(fileName)).
+				findFirst().orElse(null);
+			if(df != null) {
+				
+				List<Element> xicList = 
+						dfElement.getChild(MsFeatureChromatogramBundleFields.XICList.name()).
+						getChildren(ExtractedIonDataFields.XICData.name());
+				Collection<ExtractedIonData>xicObjects = 
+						new TreeSet<ExtractedIonData>(ChromatogramUtils.eidComparator);
+				for (Element xicElement : xicList) 					
+					xicObjects.add(new ExtractedIonData(xicElement));	
+				
+				chromatograms.put(df, xicObjects);
+			}
+		}		
+	}
+
+	public String getFeatureId() {
+		return featureId;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+

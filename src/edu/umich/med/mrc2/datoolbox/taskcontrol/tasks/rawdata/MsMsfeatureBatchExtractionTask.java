@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -43,15 +44,9 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 
 	private Collection<DataFile> msmsDataFiles;	
 	private Collection<DataFile> msOneDataFiles;	
-//	private boolean flagMinorIsotopesPrecursors;
-//	private int maxPrecursorCharge;	
-//	private double chromatogramExtractionWindow;
-//	private int smoothingFilterWidth;
-//	
-//	private SavitzkyGolayFilter smoothingFilter; 
 	
 	private Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;
-	
+	private Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 
 	public MsMsfeatureBatchExtractionTask(
 			MSMSExtractionParameterSet ps, 	
@@ -60,11 +55,7 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 		super();
 		this.ps = ps;
 		this.msmsDataFiles = msmsDataFiles;
-		this.msOneDataFiles = msOneDataFiles;
-//		this.flagMinorIsotopesPrecursors = ps.isFlagMinorIsotopesPrecursors();
-//		this.maxPrecursorCharge = ps.getMaxPrecursorCharge();
-//		this.smoothingFilterWidth = ps.getSmoothingFilterWidth();
-		
+		this.msOneDataFiles = msOneDataFiles;		
 		msFeatureMap = 
 				new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
 	}
@@ -111,7 +102,9 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 				}
 			}
 			if (e.getSource().getClass().equals(MsFeatureChromatogramBatchExtractionTask.class)) {
-				//	TODO attach chromatograms
+				MsFeatureChromatogramBatchExtractionTask task = 
+						(MsFeatureChromatogramBatchExtractionTask)e.getSource();
+				chromatogramMap = task.getChromatogramMap();
 				setStatus(TaskStatus.FINISHED);
 			}
 		}
@@ -136,4 +129,11 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 	public Map<DataFile, Collection<MsFeatureInfoBundle>> getMsFeatureMap() {
 		return msFeatureMap;
 	}
-}
+
+	public Map<String, MsFeatureChromatogramBundle> getChromatogramMap() {
+		return chromatogramMap;
+	}
+}	
+	
+	
+	

@@ -21,7 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum StoredDataFileFields {
+public enum DataFileFields {
 
 	DataFile,
 	Name,

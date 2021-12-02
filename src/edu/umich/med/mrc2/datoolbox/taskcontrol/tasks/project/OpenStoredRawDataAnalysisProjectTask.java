@@ -33,17 +33,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -58,15 +52,14 @@ import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.store.StoredDataFileFields;
-import edu.umich.med.mrc2.datoolbox.project.store.StoredProjectFields;
+import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
-import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 import edu.umich.med.mrc2.datoolbox.utils.zip.ParallelZip;
 
 public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implements TaskListener {
@@ -76,6 +69,8 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 	private File xmlProjectDir;
 	private int featureFileCount;
 	private int processedFiles;
+	private boolean featureReadCompleted;
+	private boolean chromatogramReadCompleted;
 	
 	private Set<String>uniqueCompoundIds;
 	private Set<String>uniqueMSMSLibraryIds;
@@ -97,7 +92,8 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		processed = 0;
 		processedFiles = 0;
 		xmlProjectDir = Paths.get(projectFile.getParentFile().getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();		
+				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();
+		File chromatogramsFile = null;
 //		try {
 //			extractProject();
 //		} catch (Exception ex) {
@@ -118,22 +114,35 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 					e.printStackTrace();
 				}			
 			}
+			else if(file.getName().equals(MRC2ToolBoxConfiguration.FEATURE_CHROMATOGRAMS_FILE_NAME)) {
+				chromatogramsFile = file;
+			}		
 			else {
 				featureFiles.add(file);
 			}
 		}
 		featureFileCount = featureFiles.size();
-		if(featureFileCount == 0)
+		if(featureFileCount == 0 && chromatogramsFile == null)
 			cleanup();
-		else {
+		
+		if(featureFileCount > 0) {
 			for(File ff : featureFiles) {
 				
 				DataFile dataFile = getDataFileForFeatureFile(ff);
-				MsFeatureBundleExtractionTask task = 
-						new MsFeatureBundleExtractionTask(dataFile, ff);
+				OpenMsFeatureBundleFileTask task = 
+						new OpenMsFeatureBundleFileTask(dataFile, ff);
 				task.addTaskListener(this);
 				MRC2ToolBoxCore.getTaskController().addTask(task);
 			}
+		}
+		if(chromatogramsFile != null) {
+			OpenChromatogramFileTask task = 
+					new OpenChromatogramFileTask(chromatogramsFile, project.getDataFiles());
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);
+		}
+		else {
+			chromatogramReadCompleted = true;
 		}
 	}
 	
@@ -161,16 +170,16 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		uniqueSampleIds = new TreeSet<String>();
 		
 		SAXBuilder sax = new SAXBuilder();
-		org.jdom2.Document doc = sax.build(projectXmlFile);
-		org.jdom2.Element projectElement = doc.getRootElement();
+		Document doc = sax.build(projectXmlFile);
+		Element projectElement = doc.getRootElement();
 		
-		String id = projectElement.getAttributeValue(StoredProjectFields.Id.name()); 
-		String name = projectElement.getAttributeValue(StoredProjectFields.Name.name()); 
-		String description = projectElement.getAttributeValue(StoredProjectFields.Description.name()); 
+		String id = projectElement.getAttributeValue(ProjectFields.Id.name()); 
+		String name = projectElement.getAttributeValue(ProjectFields.Name.name()); 
+		String description = projectElement.getAttributeValue(ProjectFields.Description.name()); 
 		Date dateCreated = ProjectUtils.dateTimeFormat.parse(
-				projectElement.getAttributeValue(StoredProjectFields.DateCreated.name())); 
+				projectElement.getAttributeValue(ProjectFields.DateCreated.name())); 
 		Date lastModified = ProjectUtils.dateTimeFormat.parse(
-				projectElement.getAttributeValue(StoredProjectFields.DateModified.name())); 		
+				projectElement.getAttributeValue(ProjectFields.DateModified.name())); 		
 		project = new RawDataAnalysisProject(
 				id, 
 				name, 
@@ -179,24 +188,21 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				projectFile.getParentFile(),
 				dateCreated, 
 				lastModified);
-
-//		Element projectElement = (Element) projectDocument.getElementsByTagName(
-//				StoredProjectFields.IDTrackerRawDataProject.name()).item(0);
 		
 		String compoundIdList = 
-				projectElement.getChild(StoredProjectFields.UniqueCIDList.name()).getText();
+				projectElement.getChild(ProjectFields.UniqueCIDList.name()).getText();
 		uniqueCompoundIds.addAll(getIdList(compoundIdList));
 		
 		String msmsLibIdIdList = 
-				projectElement.getChild(StoredProjectFields.UniqueMSMSLibIdList.name()).getText();
+				projectElement.getChild(ProjectFields.UniqueMSMSLibIdList.name()).getText();
 		uniqueMSMSLibraryIds.addAll(getIdList(msmsLibIdIdList));
 
 		String msRtLibIdIdList = 
-				projectElement.getChild(StoredProjectFields.UniqueMSRTLibIdList.name()).getText();
+				projectElement.getChild(ProjectFields.UniqueMSRTLibIdList.name()).getText();
 		uniqueMSRTLibraryIds.addAll(getIdList(msRtLibIdIdList));
 
 		String sampleIdIdList = 
-				projectElement.getChild(StoredProjectFields.UniqueSampleIdList.name()).getText();
+				projectElement.getChild(ProjectFields.UniqueSampleIdList.name()).getText();
 		uniqueSampleIds.addAll(getIdList(sampleIdIdList));
 				
 		try {
@@ -205,107 +211,20 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);			
 		}		
-		List<org.jdom2.Element> msmsFileList = 
-				projectElement.getChild(StoredProjectFields.MsTwoFiles.name()).
-				getChildren(StoredDataFileFields.DataFile.name());
-		for (org.jdom2.Element msmsFileElement : msmsFileList) {
+		List<Element> msmsFileList = 
+				projectElement.getChild(ProjectFields.MsTwoFiles.name()).
+				getChildren(DataFileFields.DataFile.name());
+		for (Element msmsFileElement : msmsFileList) {
 			DataFile msmsFile = new DataFile(msmsFileElement);
 			project.addMSMSDataFile(msmsFile);
 		}
 		//	MS1 files
-		List<org.jdom2.Element> msOneFileList = 
-				projectElement.getChild(StoredProjectFields.MsOneFiles.name()).
-				getChildren(StoredDataFileFields.DataFile.name());
-		for (org.jdom2.Element msOneFileElement : msOneFileList) {
+		List<Element> msOneFileList = 
+				projectElement.getChild(ProjectFields.MsOneFiles.name()).
+				getChildren(DataFileFields.DataFile.name());
+		for (Element msOneFileElement : msOneFileList) {
 			DataFile msOneFile = new DataFile(msOneFileElement);
-			project.addMSMSDataFile(msOneFile);
-		}
-	}
-	
-	private void parseProjectFileOld(File projectXmlFile) throws Exception {
-		
-		taskDescription = "Parsing project file ...";
-		total = 100;
-		processed = 10;
-		
-		uniqueCompoundIds = new TreeSet<String>();
-		uniqueMSMSLibraryIds = new TreeSet<String>();
-		uniqueMSRTLibraryIds = new TreeSet<String>();
-		uniqueSampleIds = new TreeSet<String>();
-		
-		Document projectDocument = null;
-		try {
-			projectDocument = XmlUtils.readXmlFile(projectXmlFile);
-		} catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-		}
-		Element projectElement = (Element) projectDocument.getElementsByTagName(
-				StoredProjectFields.IDTrackerRawDataProject.name()).item(0);
-		
-		String id = projectElement.getAttribute(StoredProjectFields.Id.name()); 
-		String name = projectElement.getAttribute(StoredProjectFields.Name.name()); 
-		String description = projectElement.getAttribute(StoredProjectFields.Description.name()); 
-		Date dateCreated = ProjectUtils.dateTimeFormat.parse(
-				projectElement.getAttribute(StoredProjectFields.DateCreated.name())); 
-		Date lastModified = ProjectUtils.dateTimeFormat.parse(
-				projectElement.getAttribute(StoredProjectFields.DateModified.name())); 		
-		project = new RawDataAnalysisProject(
-				id, 
-				name, 
-				description, 
-				projectFile, 
-				projectFile.getParentFile(),
-				dateCreated, 
-				lastModified);
-		
-		Element compoundIdElement = (Element) projectDocument.getElementsByTagName(
-				StoredProjectFields.UniqueCIDList.name()).item(0);
-		uniqueCompoundIds.addAll(getIdList(compoundIdElement));
-		
-		Element msmsLibIdElement = (Element) projectDocument.getElementsByTagName(
-				StoredProjectFields.UniqueMSMSLibIdList.name()).item(0);
-		uniqueMSMSLibraryIds.addAll(getIdList(msmsLibIdElement));
-		
-		Element msRtLibIdElement = (Element) projectDocument.getElementsByTagName(
-				StoredProjectFields.UniqueMSRTLibIdList.name()).item(0);
-		uniqueMSRTLibraryIds.addAll(getIdList(msRtLibIdElement));
-		
-		Element sampleIdElement = (Element) projectDocument.getElementsByTagName(
-				StoredProjectFields.UniqueSampleIdList.name()).item(0);
-		uniqueSampleIds.addAll(getIdList(sampleIdElement));			
-		try {
-			populateDatabaseCashData();
-		} catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);			
-		}
-		XPathFactory factory = XPathFactory.newInstance();
-		XPath xpath = factory.newXPath();
-		
-		//	MSMS files
-		XPathExpression expr = xpath.compile("//" + 
-				StoredProjectFields.IDTrackerRawDataProject.name() + 
-				"/" + StoredProjectFields.MsTwoFiles.name() + "/" + 
-				StoredDataFileFields.DataFile.name());
-		NodeList msmsDataFileNodes = 
-				(NodeList) expr.evaluate(projectDocument, XPathConstants.NODESET);	
-		for (int i = 0; i < msmsDataFileNodes.getLength(); i++) {
-			Element msmsFileElement = (Element) msmsDataFileNodes.item(i);
-//			DataFile msmsFile = new DataFile(msmsFileElement);
-//			project.addMSMSDataFile(msmsFile);
-		}
-		//	MS1 files
-		expr = xpath.compile("//" + 
-				StoredProjectFields.IDTrackerRawDataProject.name() + 
-				"/" + StoredProjectFields.MsOneFiles.name() + "/" + 
-				StoredDataFileFields.DataFile.name());
-		NodeList msOneDataFileNodes = 
-				(NodeList) expr.evaluate(projectDocument, XPathConstants.NODESET);	
-		for (int i = 0; i < msOneDataFileNodes.getLength(); i++) {
-			Element msOneFileElement = (Element) msOneDataFileNodes.item(i);
-//			DataFile msOneFile = new DataFile(msOneFileElement);
-//			project.addMSOneDataFile(msOneFile);
+			project.addMSOneDataFile(msOneFile);
 		}
 	}
 	
@@ -397,18 +316,20 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 	}
 	
 	private void getExperimentalSamples(Connection conn) throws Exception {
-		// TODO Auto-generated method stub
+
 		Collection<IDTExperimentalSample>samples = 
 				IDTUtils.getExperimentalSamples(uniqueSampleIds, conn);
+		
+		for(IDTExperimentalSample sample :samples)
+			OfflineProjectLoadCash.addExperimentalSample(sample);		
 	}
 	
 	private Collection<String>getIdList(Element idListElement){
 		
-		if(idListElement.getChildNodes().getLength() == 0)
+		if(idListElement.getText().isEmpty())
 			return Arrays.asList(new String[0]);
 		else {
-			String listString = idListElement.getChildNodes().item(0).getTextContent();
-			return Arrays.asList(listString.split(","));
+			return Arrays.asList(idListElement.getText().split(","));
 		}
 	}
 	
@@ -442,15 +363,21 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(MsFeatureBundleExtractionTask.class)) {	
+			if (e.getSource().getClass().equals(OpenMsFeatureBundleFileTask.class)) {	
 				processedFiles++;
 				
-				MsFeatureBundleExtractionTask task = (MsFeatureBundleExtractionTask)e.getSource();
+				OpenMsFeatureBundleFileTask task = (OpenMsFeatureBundleFileTask)e.getSource();
 				project.addMsFeaturesForDataFile(task.getDataFile(), task.getFeatures());
-				if(processedFiles == featureFileCount) {
-					cleanup();
-				}				
-			}
+				if(processedFiles == featureFileCount)
+					featureReadCompleted = true;				
+			}	
+			if (e.getSource().getClass().equals(OpenChromatogramFileTask.class)) {
+				chromatogramReadCompleted = true;			
+				project.setChromatogramMap(
+						((OpenChromatogramFileTask)e.getSource()).getChromatogramMap());
+			}			
+			if(featureReadCompleted && chromatogramReadCompleted)
+				cleanup();
 		}
 	}
 

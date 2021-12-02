@@ -31,6 +31,7 @@ import javax.swing.Icon;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.gui.plot.LCMSPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.LCMSPlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
@@ -71,6 +72,7 @@ public class DockableChromatogramPlot extends DefaultSingleCDockable implements 
 	public void showExtractedChromatogramCollection(
 			Collection<ExtractedChromatogram> chromatograms) {
 
+		chromatogramPlot.removeAllDataSets();
 		chromatogramPlot.showExtractedChromatogramCollection(
 				chromatograms, chromatogramToolbar.getChromatogramRenderingType());
 	}
@@ -82,4 +84,30 @@ public class DockableChromatogramPlot extends DefaultSingleCDockable implements 
 	public void removeChromatogramsForFiles(Collection<DataFile>files) {
 		chromatogramPlot.removeChromatogramsForFiles(files);
 	}
+	
+	public void showMsFeatureChromatogramBundle(
+			MsFeatureChromatogramBundle xicBundle, Collection<Double>markers) {
+		
+		chromatogramPlot.removeAllDataSets();
+		chromatogramPlot.showMsFeatureChromatogramBundle(xicBundle, markers,
+				chromatogramToolbar.getChromatogramRenderingType());
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

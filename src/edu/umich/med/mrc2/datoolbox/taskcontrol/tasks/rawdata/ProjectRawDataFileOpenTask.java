@@ -157,9 +157,10 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 		
 		taskDescription = "Copying raw data files to project directory ...";
 		TreeSet<DataFile>filesToCopy = new TreeSet<DataFile>();
-		for(DataFile df : project.getMSMSDataFiles()) {
+		for(DataFile df : project.getDataFiles()) {
 			
-			File existingFile = Paths.get(project.getRawDataDirectory().getAbsolutePath(), 
+			File existingFile = 
+					Paths.get(project.getRawDataDirectory().getAbsolutePath(), 
 					df.getName()).toFile();
 			if(!existingFile.exists())
 				filesToCopy.add(df);			

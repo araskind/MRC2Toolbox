@@ -21,7 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum StoredProjectFields {
+public enum ProjectFields {
 
 	IDTrackerRawDataProject,
 	Id,
@@ -37,5 +37,6 @@ public enum StoredProjectFields {
 	UniqueMSMSLibIdList,
 	UniqueMSRTLibIdList,
 	UniqueSampleIdList,
+	FeatureChromatogramList,
 	;
 }

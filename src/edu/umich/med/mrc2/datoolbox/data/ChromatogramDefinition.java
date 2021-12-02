@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -257,10 +258,10 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
         return true;
     }
     
-	public org.jdom2.Element getXmlElement() {
+	public Element getXmlElement() {
 		
-		org.jdom2.Element chromatogramDefinitionElement = 
-				new org.jdom2.Element(XICDefinitionFields.XICDefinition.name());
+		Element chromatogramDefinitionElement = 
+				new Element(XICDefinitionFields.XICDefinition.name());
 		chromatogramDefinitionElement.setAttribute(
 				XICDefinitionFields.Mode.name(), mode.name());
 		if(polarity != null)
@@ -311,7 +312,7 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		return chromatogramDefinitionElement;
 	}
 
-	public ChromatogramDefinition(org.jdom2.Element cdElement) {
+	public ChromatogramDefinition(Element cdElement) {
 
 		mode = ChromatogramPlotMode.getChromatogramPlotModeByName(
 				cdElement.getAttributeValue(XICDefinitionFields.Mode.name()));

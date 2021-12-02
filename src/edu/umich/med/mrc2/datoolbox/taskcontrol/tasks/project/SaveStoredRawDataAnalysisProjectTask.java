@@ -43,7 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.store.StoredProjectFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -58,6 +58,8 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 	private File xmlFile;
 	private int fileFeatureCount;
 	private int processedFiles;
+	private boolean featureSaveCompleted;
+	private boolean chromatogramSaveCompleted;
 	
 	private Set<String>uniqueCompoundIds;
 	private Set<String>uniqueMSMSLibraryIds;
@@ -77,6 +79,8 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		fileFeatureCount = getFeatureFileCount();
 		processedFiles = 0;
 		extractDatabaseReferences();
+		initChromatogramSave();
+//		chromatogramSaveCompleted = true;
 		try {
 			createProjectXml();
 		} catch (Exception ex) {
@@ -94,45 +98,58 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		}
 	}
 
+	private void initChromatogramSave() {
+
+        if(!projectToSave.getChromatogramMap().isEmpty()) {
+        	SaveFeatureChromatogramsTask task = 
+        			new SaveFeatureChromatogramsTask(projectToSave);
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);
+        }
+        else {
+        	chromatogramSaveCompleted = true;
+        }
+	}
+
 	private void createProjectXml() {
 		taskDescription = "Creating XML file";
 		processed = 10;
 		
         Document document = new Document();
         Element projectRoot = 
-        		new Element(StoredProjectFields.IDTrackerRawDataProject.name());
+        		new Element(ProjectFields.IDTrackerRawDataProject.name());
 		projectRoot.setAttribute("version", "1.0.0.0");
-		projectRoot.setAttribute(StoredProjectFields.Id.name(), 
+		projectRoot.setAttribute(ProjectFields.Id.name(), 
 				projectToSave.getId());
-		projectRoot.setAttribute(StoredProjectFields.Name.name(), 
+		projectRoot.setAttribute(ProjectFields.Name.name(), 
 				projectToSave.getName());
-		projectRoot.setAttribute(StoredProjectFields.Description.name(), 
+		projectRoot.setAttribute(ProjectFields.Description.name(), 
 				projectToSave.getDescription());
-		projectRoot.setAttribute(StoredProjectFields.ProjectFile.name(), 
+		projectRoot.setAttribute(ProjectFields.ProjectFile.name(), 
 				projectToSave.getProjectFile().getAbsolutePath());
-		projectRoot.setAttribute(StoredProjectFields.ProjectDir.name(), 
+		projectRoot.setAttribute(ProjectFields.ProjectDir.name(), 
 				projectToSave.getProjectDirectory().getAbsolutePath());	
-		projectRoot.setAttribute(StoredProjectFields.DateCreated.name(), 
+		projectRoot.setAttribute(ProjectFields.DateCreated.name(), 
 				ProjectUtils.dateTimeFormat.format(projectToSave.getDateCreated()));
-		projectRoot.setAttribute(StoredProjectFields.DateModified.name(), 
+		projectRoot.setAttribute(ProjectFields.DateModified.name(), 
 				ProjectUtils.dateTimeFormat.format(projectToSave.getLastModified()));
         
 		projectRoot.addContent(       		
-        		new Element(StoredProjectFields.UniqueCIDList.name()).
+        		new Element(ProjectFields.UniqueCIDList.name()).
         		setText(StringUtils.join(uniqueCompoundIds, ",")));
 		projectRoot.addContent(       		
-        		new Element(StoredProjectFields.UniqueMSMSLibIdList.name()).
+        		new Element(ProjectFields.UniqueMSMSLibIdList.name()).
         		setText(StringUtils.join(uniqueMSMSLibraryIds, ",")));
 		projectRoot.addContent(       		
-        		new Element(StoredProjectFields.UniqueMSRTLibIdList.name()).
+        		new Element(ProjectFields.UniqueMSRTLibIdList.name()).
         		setText(StringUtils.join(uniqueMSRTLibraryIds, ",")));
 		projectRoot.addContent(       		
-        		new Element(StoredProjectFields.UniqueSampleIdList.name()).
+        		new Element(ProjectFields.UniqueSampleIdList.name()).
         		setText(StringUtils.join(uniqueSampleIds, ",")));
 		
 		//	MS2 file list
         Element msTwoFileListElement = 
-        		new Element(StoredProjectFields.MsTwoFiles.name());		
+        		new Element(ProjectFields.MsTwoFiles.name());		
         for(DataFile ms2dataFile : projectToSave.getMSMSDataFiles()) {
         	
         	msTwoFileListElement.addContent(ms2dataFile.getXmlElement());
@@ -151,7 +168,7 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
         projectRoot.addContent(msTwoFileListElement);
 		//	MS1 file list
         Element msOneFileListElement = 
-        		new Element(StoredProjectFields.MsOneFiles.name());		
+        		new Element(ProjectFields.MsOneFiles.name());		
         for(DataFile msOnedataFile : projectToSave.getMSOneDataFiles()) {
         	
         	msOneFileListElement.addContent(msOnedataFile.getXmlElement());
@@ -228,22 +245,7 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		processed = 50;		
 		if(xmlFile != null && xmlFile.exists()) {		
 			
-			processed = 60;
-//	        OutputStream archiveStream = new FileOutputStream(projectToSave.getProjectFile());
-//	        ZipArchiveOutputStream archive =
-//	        	(ZipArchiveOutputStream) new ArchiveStreamFactory().
-//	        	createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
-//	        archive.setUseZip64(Zip64Mode.Always);
-//	        ZipArchiveEntry entry = new ZipArchiveEntry(projectToSave.getName());
-//	        archive.putArchiveEntry(entry);
-//
-//	        BufferedInputStream input = new BufferedInputStream(new FileInputStream(xmlFile));
-//	        org.apache.commons.io.IOUtils.copy(input, archive);
-//	        input.close();
-//	        archive.closeArchiveEntry();
-//	        archive.finish();
-//	        archive.close();
-//	        archiveStream.close();	
+			processed = 60;	
 			CompressionUtils.zipFile(
 					xmlFile, projectToSave.getProjectFile());
 	        //	xmlFile.delete();
@@ -261,15 +263,20 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			
 			if (e.getSource().getClass().equals(SaveFileMsFeaturesTask.class)) {	
 				processedFiles++;
-				if(processedFiles == fileFeatureCount) {
-					//	compressAndCleanup();
-					try {
-						compressProjectFile();
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}				
+				if(processedFiles == fileFeatureCount)
+					featureSaveCompleted = true;
+			}
+			if (e.getSource().getClass().equals(SaveFeatureChromatogramsTask.class))
+				chromatogramSaveCompleted = true;
+			
+			if(featureSaveCompleted && chromatogramSaveCompleted) {
+				//	compressAndCleanup();
+				try {
+					compressProjectFile();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		}		
 	}

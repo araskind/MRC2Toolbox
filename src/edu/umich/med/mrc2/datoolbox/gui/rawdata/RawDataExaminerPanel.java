@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -66,6 +68,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
+import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.DockableChromatogramPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
@@ -770,6 +773,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			activeRawDataAnalysisProject.setMsFeaturesForDataFile(e.getKey(), e.getValue());
 			log.add(e.getKey().getName() + " -> " + Integer.toString(e.getValue().size()) + " features");
 		}
+		activeRawDataAnalysisProject.setChromatogramMap(task.getChromatogramMap());
 		MessageDialog.showInfoMsg(StringUtils.join(log, "\n"), this.getContentPane());
 		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
 				activeRawDataAnalysisProject.getMSMSDataFiles(), false);
@@ -789,7 +793,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(task.getProject());
 		activeRawDataAnalysisProject = task.getProject();
 		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
-				activeRawDataAnalysisProject.getMSMSDataFiles());
+				activeRawDataAnalysisProject.getDataFiles());
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
@@ -838,6 +842,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this.getContentPane());
 			ProjectUtils.saveProjectFile(activeRawDataAnalysisProject);
 		}
+		activeRawDataAnalysisProject.updateProjectLocation(activeRawDataAnalysisProject.getProjectFile());
 		Collection<DataFile> filesToLoad = new ArrayList<DataFile>();
 		filesToLoad.addAll(task.getProject().getMSMSDataFiles());
 		filesToLoad.addAll(task.getProject().getMSOneDataFiles());
@@ -870,7 +875,9 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			dataFileTreePanel.addObject(ec);
 
 		chromatogramPanel.showExtractedChromatogramCollection(chroms);			
-		Set<DataFile> chromFiles = chroms.stream().map(c -> c.getDataFile()).distinct().collect(Collectors.toSet());
+		Set<DataFile> chromFiles = chroms.stream().
+				map(c -> c.getDataFile()).distinct().
+				collect(Collectors.toSet());
 		xicSetupPanel.selectFiles(chromFiles);
 		msExtractorPanel.selectFiles(chromFiles);
 	}
@@ -955,7 +962,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		
 		//	Show first selected MSMS feature
 		if(selected.stream().findFirst().get() instanceof MsFeatureInfoBundle)
-			showMsFeature(((MsFeatureInfoBundle)selected.stream().findFirst().get()).getMsFeature());
+			showMsFeatureInfoBundle(((MsFeatureInfoBundle)selected.stream().findFirst().get()));
 		
 		//	Show selected chromatograms
 		List<ExtractedChromatogram> chroms = 
@@ -973,8 +980,9 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			showFiles(files);
 	}
 
-	private void showMsFeature(MsFeature msFeature) {
+	private void showMsFeatureInfoBundle(MsFeatureInfoBundle msFeatureInfoBundle) {
 
+		MsFeature msFeature = msFeatureInfoBundle.getMsFeature();
 		msPlotPanel.showMsForFeature(msFeature, false);
 		msTable.setTableModelFromSpectrum(msFeature);
 		msmsPlotPane.clearPanel();
@@ -993,6 +1001,44 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			xicSetupPanel.selectFiles(Collections.singleton(df));
 			msExtractorPanel.selectFiles(Collections.singleton(df));
 		}
+		if(activeRawDataAnalysisProject != null && 
+				!activeRawDataAnalysisProject.getChromatogramMap().isEmpty()) {
+			
+			MsFeatureChromatogramBundle msfCb = 
+					activeRawDataAnalysisProject.getChromatogramMap().get(msFeature.getId());			
+			if(msfCb != null) {
+				Collection<Double>markers = 
+						getMsFeatureRtMarkers(msFeature, msFeatureInfoBundle.getDataFile());
+				chromatogramPanel.showMsFeatureChromatogramBundle(msfCb, markers);
+			}
+		}
+	}
+	
+	private Collection<Double>getMsFeatureRtMarkers(MsFeature msFeature, DataFile df){
+		
+		Collection<Double>markers = new TreeSet<Double>();
+		if(msFeature.getSpectrum() != null
+				&& msFeature.getSpectrum().getExperimentalTandemSpectrum() != null) {
+			
+			Set<Integer> msmsScanNums = msFeature.getSpectrum().
+					getExperimentalTandemSpectrum().getAveragedScanNumbers().keySet();
+			if(!msmsScanNums.isEmpty()) {
+				
+				LCMSData rawData = RawDataManager.getRawData(df);	
+				TreeMap<Integer, IScan> num2scan = 
+						rawData.getScans().getMapMsLevel2index().get(2).getNum2scan();
+
+				for(int scanNum : msmsScanNums) {
+					IScan scan = num2scan.get(scanNum);
+					if(scan != null)
+						markers.add(scan.getRt());
+				}
+			}
+		}	
+		if(markers.isEmpty())
+			markers.add(msFeature.getRetentionTime());
+		
+		return markers;
 	}
 
 	private void showFiles(List<DataFile> files) {
@@ -1002,6 +1048,12 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		
 		LCMSData data = RawDataManager.getRawData(files.get(0));
 		rawDataFilePropertiesTable.showDataFileProperties(data);
+		
+		List<ExtractedChromatogram> chromList = files.stream().
+				flatMap(f -> f.getChromatograms().stream()).
+				filter(c -> c.getChromatogramDefinition().getMode().equals(ChromatogramPlotMode.TIC)).
+				collect(Collectors.toList());
+		chromatogramPanel.showExtractedChromatogramCollection(chromList);
 	}
 
 	private void showAverageMassSpectrum(AverageMassSpectrum averageMassSpectrum) {
