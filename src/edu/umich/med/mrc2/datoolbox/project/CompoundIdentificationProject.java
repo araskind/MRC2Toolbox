@@ -28,7 +28,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class CompoundIdentificationProject extends DataAnalysisProject{
+public class CompoundIdentificationProject extends DataAnalysisProject {
 
 	/**
 	 *

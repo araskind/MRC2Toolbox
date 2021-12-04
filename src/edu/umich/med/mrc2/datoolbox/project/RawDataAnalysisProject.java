@@ -32,7 +32,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -45,18 +44,11 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class RawDataAnalysisProject {
-
-	protected String id;
-	protected String name;
-	protected String description;
-	protected File projectFile;
-	protected File uncompressedProjectFilesDirectory;
-	protected File projectDirectory;
-	protected File exportsDirectory;
-	protected File rawDataDirectory;
+public class RawDataAnalysisProject extends Project {
 	
-	protected Date dateCreated, lastModified;
+	protected File rawDataDirectory;
+	protected File uncompressedProjectFilesDirectory;
+
 	protected Collection<DataFile>msmsDataFiles;
 	protected Collection<DataFile>msOneDataFiles;
 	protected Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;	
@@ -68,69 +60,34 @@ public class RawDataAnalysisProject {
 			String projectDescription, 
 			File parentDirectory) {
 
-		this.name = projectName;
-		this.description = projectDescription;
-		this.id = UUID.randomUUID().toString();
-		dateCreated = new Date();
-		lastModified = new Date();
-
-		projectDirectory = 
-				Paths.get(parentDirectory.getAbsolutePath(), projectName.replaceAll("\\W+", "_")).toFile();
-		uncompressedProjectFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();		
-		projectFile = 
-				Paths.get(projectDirectory.getAbsolutePath(), projectName.replaceAll("\\W+", "_") + "."
-				+ MRC2ToolBoxConfiguration.RAW_DATA_PROJECT_FILE_EXTENSION).toFile();
-		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();	
-		rawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();		
-		initNewProject();
-		initFields();
-	}
-	
-	//	Recreate existing project
-	public RawDataAnalysisProject(
-			String id, 
-			String name, 
-			String description, 
-			File projectFile, 
-			File projectDirectory,
-			Date dateCreated, 
-			Date lastModified) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.description = description;
-		this.projectFile = projectFile;
-		this.projectDirectory = projectDirectory;
-		this.dateCreated = dateCreated;
-		this.lastModified = lastModified;
-		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();	
-		rawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
-		uncompressedProjectFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();
+		super(projectName, projectDescription, parentDirectory);
+		initNewProject(parentDirectory);
 		initFields();
 	}
 	
 	public RawDataAnalysisProject(RawDataAnalysisProject activeProject) {
 		
-		this.id = activeProject.getId();
-		this.name = activeProject.getName();
-		this.description = activeProject.getDescription();
-		this.projectFile = activeProject.getProjectFile();
-		this.projectDirectory = activeProject.getProjectDirectory();
+		super(activeProject);
+
 		this.exportsDirectory = activeProject.getExportsDirectory();
 		this.rawDataDirectory = activeProject.getRawDataDirectory();		
-		this.dateCreated = activeProject.getDateCreated();
-		this.lastModified = new Date();
 		this.msmsDataFiles = new TreeSet<DataFile>();
 		this.msmsDataFiles.addAll(activeProject.getMSMSDataFiles());
 		this.msOneDataFiles = new TreeSet<DataFile>();
 		this.msmsDataFiles.addAll(activeProject.getMSOneDataFiles());
-		msFeatureMap = new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
+		initFields();
+	}
+	
+	public RawDataAnalysisProject(
+			String id, 
+			String name, 
+			String description, 
+			File projectFile, 
+			Date dateCreated,
+			Date lastModified) {
+		super(id, name, description, projectFile, dateCreated, lastModified);
+		setProjectDirectories();
+		initFields();
 	}
 	
 	public void updateProjectLocation(File newProjectFile) {
@@ -153,21 +110,14 @@ public class RawDataAnalysisProject {
 		}
 	}
 	
-	protected void initNewProject() {
-		try {
-			Files.createDirectories(Paths.get(projectDirectory.getAbsolutePath()));
-		} catch (IOException e) {
-			e.printStackTrace();
-			MessageDialog.showWarningMsg("Failed to create project directory");
-			return;
-		}
-		try {
-			Files.createDirectories(Paths.get(exportsDirectory.getAbsolutePath()));
-		} catch (IOException e) {
-			e.printStackTrace();
-			MessageDialog.showWarningMsg("Failed to create exports directory");
-			return;
-		}
+	@Override
+	protected void initNewProject(File parentDirectory) {
+		
+		super.initNewProject(parentDirectory);
+		rawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
+		uncompressedProjectFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();
 		try {
 			Files.createDirectories(Paths.get(rawDataDirectory.getAbsolutePath()));
 		} catch (IOException e) {
@@ -184,6 +134,17 @@ public class RawDataAnalysisProject {
 		}
 	}
 	
+	@Override
+	protected void setProjectDirectories() {
+		
+		super.setProjectDirectories();
+		
+		rawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
+		uncompressedProjectFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();
+	}
+
 	private void initFields() {
 		
 		msmsDataFiles = new TreeSet<DataFile>();

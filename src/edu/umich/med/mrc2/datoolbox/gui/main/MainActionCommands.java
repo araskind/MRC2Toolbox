@@ -1002,6 +1002,10 @@ public enum MainActionCommands {
 	SHOW_ONLY_BEST_LIB_HIT_FOR_COMPOUND("Show only best library hit per compound"),
 	SHOW_ALL_LIB_HITS_FOR_COMPOUND("Show all library hits for each compound"),
 	
+	//	Mass-spectrum plot
+	ZOOM_TO_MSMS_PRECURSOR_COMMAND("Zoom to MSMS precursor"),
+	SHOW_FULL_MS_RANGE_COMMAND("Show full spectrum range"),
+	
 	//	Mass-defect plot
 	RECALCULATE_MASS_DEFECTS_FOR_RT_RANGE("Recalculate mass defects for RT range"),
 	

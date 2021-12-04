@@ -57,24 +57,26 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 	private double topIntensity;
 	private ArrayList<MsPoint> allPoints;
 	private Range massRange;
+	private Object spectrumSource;
 
 	public MsDataSet(LibraryMsFeature lt, boolean scaleMs) {
-
 		createDataSetFromLibraryTarget(lt, scaleMs);
 	}
 
 	public MsDataSet(Collection<MsFeature> featureList, boolean scaleMs) {
-
+		spectrumSource = featureList;
 		createDataSetFromFeatureCollection(featureList, scaleMs);
 	}
 
 	public MsDataSet(List<SimpleMsMs> selectedFeatures, boolean scaleMs) {
-
+		spectrumSource = selectedFeatures;
 		createDataSetFromMsCollection(selectedFeatures, scaleMs);
 	}
 
 	public MsDataSet(MsFeature selectedFeature, boolean scaleMs) {
 
+		spectrumSource = selectedFeature;
+		
 		if(selectedFeature.getClass().equals(MsFeature.class))
 			createDataSetFromCompoundFeature(selectedFeature, scaleMs);
 
@@ -83,12 +85,11 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 	}
 
 	public MsDataSet(MsFeatureCluster selectedCluster, boolean scaleMs) {
-
+		spectrumSource = selectedCluster;
 		createDataSetFromFeatureCollection(selectedCluster.getFeatures(), scaleMs);
 	}
 
 	public MsDataSet(MsMsCluster selectedCluster, boolean scaleMs) {
-
 		createDataSetFromMsCollection(selectedCluster.getClusterFeatures(), scaleMs);
 	}
 
@@ -99,11 +100,13 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 			String libraryLabel,
 			boolean scale) {
 
+		spectrumSource = featurePoints;
 		createHeadToTailDataSet(featurePoints, libraryPoints, featureLabel, libraryLabel, scale);
 	}
 
 	public MsDataSet(IsotopePattern isoPattern) {
 
+		spectrumSource = isoPattern;
 		msSeries = new TreeMap<Integer, MsPoint[]>();
 		labels = new TreeMap<Integer, String>();
 		massRange = new Range(0d);
@@ -134,6 +137,7 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 
 	public MsDataSet(TandemMassSpectrum msms) {
 
+		spectrumSource = msms;
 		msSeries = new TreeMap<Integer, MsPoint[]>();
 		labels = new TreeMap<Integer, String>();
 		massRange = new Range(0d);
@@ -161,6 +165,7 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 
 	public MsDataSet(Collection<MsPoint> msPoints) {
 
+		spectrumSource = msPoints;
 		msSeries = new TreeMap<Integer, MsPoint[]>();
 		labels = new TreeMap<Integer, String>();
 		massRange = new Range(0d);
@@ -186,6 +191,7 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 
 	public MsDataSet(Collection<MsPoint> msPoints, boolean scale, String label) {
 
+		spectrumSource = msPoints;
 		msSeries = new HashMap<Integer, MsPoint[]>();
 		labels = new HashMap<Integer, String>();
 		massRange = null;
@@ -215,6 +221,7 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 
 	public MsDataSet(AverageMassSpectrum averageMassSpectrum) {
 		
+		spectrumSource = averageMassSpectrum;
 		msSeries = new TreeMap<Integer, MsPoint[]>();
 		labels = new TreeMap<Integer, String>();
 		massRange = new Range(0d);
@@ -412,11 +419,21 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 	public double getEndYValue(int series, int item) {
 		return getYValue(series, item);
 	}
+	
+	public double getHighestIntensityInRange(org.jfree.data.Range massRange) {
 
-	public double getHighestIntensity(Range massRange) {
+		double top = 0.001;
+		for (MsPoint p : allPoints) {
 
-		double top = 0.1;
+			if (massRange.contains(p.getMz()) && p.getIntensity() > top)
+				top = p.getIntensity();
+		}
+		return top;
+	}
 
+	public double getHighestIntensityInRange(Range massRange) {
+
+		double top = 0.001;
 		for (MsPoint p : allPoints) {
 
 			if (massRange.contains(p.getMz()) && p.getIntensity() > top)
@@ -467,5 +484,9 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 
 	public Number getY(int series, int item) {
 		return msSeries.get(series)[item].getIntensity();
+	}
+
+	public Object getSpectrumSource() {
+		return spectrumSource;
 	}
 }

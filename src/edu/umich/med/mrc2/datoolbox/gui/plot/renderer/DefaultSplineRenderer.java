@@ -21,7 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.renderer;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -49,9 +48,9 @@ public class DefaultSplineRenderer extends XYSplineRenderer{
 		setDefaultShapesVisible(true);
 		setDrawOutlines(false);
 
-		setSeriesItemLabelsVisible(0, false);
-		setSeriesShapesVisible(0, true);
-		setSeriesPaint(0, Color.red);
-		setSeriesStroke(0, new BasicStroke(1.5f));
+//		setSeriesItemLabelsVisible(0, false);
+//		setSeriesShapesVisible(0, true);
+//		setSeriesPaint(0, Color.red);
+//		setSeriesStroke(0, new BasicStroke(1.5f));
 	}
 }

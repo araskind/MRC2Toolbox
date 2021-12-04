@@ -185,7 +185,6 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				name, 
 				description, 
 				projectFile, 
-				projectFile.getParentFile(),
 				dateCreated, 
 				lastModified);
 		

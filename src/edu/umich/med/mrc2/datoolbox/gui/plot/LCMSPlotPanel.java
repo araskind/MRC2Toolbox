@@ -402,11 +402,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		final XYToolTipGenerator toolTipGenerator = 				
 				new ChromatogramToolTipGenerator();		
 		renderer.setDefaultToolTipGenerator(toolTipGenerator);
-						
-		((XYPlot) this.getPlot()).setRenderer(1, renderer);
-		XYSeriesCollection dataSet = new XYSeriesCollection();
-		//	Collection<Color>usedColors = new HashSet<Color>();
+		renderer.setDefaultShape(FilledChromatogramRenderer.dataPointsShape);
+		((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);	
 		
+		XYSeriesCollection dataSet = new XYSeriesCollection();
 		int seriesCount = 0;
 		for(ExtractedChromatogram chrom : chromatograms) {
 			
@@ -417,12 +416,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				series.add(times[i], intensities[i]);
 			
 			dataSet.addSeries(series);
-			Color seriesColor = chrom.getColor();		
-//			if(chrom.getChromatogramDefinition().getMode().equals(ChromatogramPlotMode.XIC)) {
-//				if(usedColors.contains(seriesColor))
-//					seriesColor = ColorUtils.getNextFreeBrewerColor(usedColors);
-//			}
-//			usedColors.add(seriesColor);
+			Color seriesColor = chrom.getColor();
 			if(rType.equals(ChromatogramRenderingType.Lines)) {
 				renderer.setSeriesFillPaint(seriesCount, seriesColor);
 				renderer.setSeriesPaint(seriesCount, seriesColor);
@@ -436,10 +430,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				renderer.setSeriesFillPaint(seriesCount, seriesColorTp);
 				renderer.setSeriesPaint(seriesCount, seriesColorTp);
 			}
-			renderer.setSeriesShape(seriesCount, FilledChromatogramRenderer.dataPointsShape);
 			seriesCount++;
 		}	
-		((XYPlot) this.getPlot()).setDataset(1, dataSet);
+		((XYPlot) this.getPlot()).setDataset(dataSet);
+		((XYPlot) this.getPlot()).setRenderer(renderer);
 	}
 
 	@Override
@@ -531,14 +525,12 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 		dataPointsVisible = !dataPointsVisible;
 
-		final int count = plot.getDatasetCount();
-
+		final int count = plot.getRendererCount();
 		for (int i = 0; i < count; i++) {
 
 			if (plot.getRenderer(i) instanceof XYLineAndShapeRenderer) {
 
 				final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer(i);
-
 				renderer.setDefaultShapesVisible(dataPointsVisible);
 			}
 		}
@@ -767,12 +759,11 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		
 		final XYToolTipGenerator toolTipGenerator = 				
 				new ChromatogramToolTipGenerator();		
-		renderer.setDefaultToolTipGenerator(toolTipGenerator);
-						
-		((XYPlot) this.getPlot()).setRenderer(1, renderer);
+		renderer.setDefaultToolTipGenerator(toolTipGenerator);	
+		renderer.setDefaultShape(FilledChromatogramRenderer.dataPointsShape);
+		((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);
+								
 		XYSeriesCollection dataSet = new XYSeriesCollection();
-		//	Collection<Color>usedColors = new HashSet<Color>();
-		
 		int seriesCount = 0;
 		int fileChromCount = 0;
 		for(Entry<DataFile, Collection<ExtractedIonData>> ce : xicBundle.getChromatograms().entrySet()) {
@@ -805,12 +796,12 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 					renderer.setSeriesFillPaint(seriesCount, seriesColorTp);
 					renderer.setSeriesPaint(seriesCount, seriesColorTp);
 				}
-				renderer.setSeriesShape(seriesCount, FilledChromatogramRenderer.dataPointsShape);
 				fileChromCount++;
 				seriesCount++;
 			}		
 		}
-		((XYPlot) this.getPlot()).setDataset(1, dataSet);	
+		((XYPlot) this.getPlot()).setDataset(dataSet);	
+		((XYPlot) this.getPlot()).setRenderer(renderer);
 		precursorMarkers.addAll(markers);
 		if(markers != null && !markers.isEmpty()) {
 			
