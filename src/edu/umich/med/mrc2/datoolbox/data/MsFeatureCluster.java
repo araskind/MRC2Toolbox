@@ -491,6 +491,7 @@ public class MsFeatureCluster implements Serializable {
 		msms.setScanNumber(primaryTandemMs.getScanNumber());
 		msms.setParentScanNumber(primaryTandemMs.getParentScanNumber());
 		msmsList.stream().forEach(s -> msms.addAveragedScanNumbers(s.getScanNumber(), s.getParentScanNumber()));
+		msms.setEntropy(MsUtils.calculateSpectrumEntropy(msms.getSpectrum()));
 		
 		Collection<MsPoint>minorParentIons = msmsList.stream().
 				flatMap(f -> f.getMinorParentIons().stream()).

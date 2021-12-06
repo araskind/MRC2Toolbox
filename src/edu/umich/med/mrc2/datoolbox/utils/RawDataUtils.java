@@ -201,7 +201,7 @@ public class RawDataUtils {
 			return umich.ms.datatypes.scan.props.Polarity.POSITIVE;
 		
 		if(polarity.equals(Polarity.Negative))
-			return umich.ms.datatypes.scan.props.Polarity.POSITIVE;
+			return umich.ms.datatypes.scan.props.Polarity.NEGATIVE;
 		
 		return null;
 	}

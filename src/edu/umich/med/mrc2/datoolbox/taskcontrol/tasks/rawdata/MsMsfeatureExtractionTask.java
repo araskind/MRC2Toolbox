@@ -668,9 +668,13 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				isolationWindow = new Range(isolationWindow.getMin(), isolationWindow.getMax());
 			
 			MsPoint parent = getActualPrecursor(parentScan, isolationWindow);
-			if(parent == null)
-				parent = new MsPoint(targetMz, s.getPrecursor().getIntensity());				
-			
+			if(parent == null && s.getPrecursor() != null) {
+				Double pInt = s.getPrecursor().getIntensity();
+				if(pInt == null)
+					pInt = 1.0d;
+				
+				parent = new MsPoint(targetMz, pInt);
+			}		
 			String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
 					MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
 					MRC2ToolBoxConfiguration.defaultRtFormat.format(parentScan.getRt());

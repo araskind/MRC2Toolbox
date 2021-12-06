@@ -2572,8 +2572,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	
 	private void showFeatureChromatogram(MsFeatureInfoBundle selectedBundle) {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null || 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getChromatogramMap().isEmpty())
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			return;
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getChromatogramMap() == null)
 			return;
 			
 		MsFeatureChromatogramBundle msfCb = 

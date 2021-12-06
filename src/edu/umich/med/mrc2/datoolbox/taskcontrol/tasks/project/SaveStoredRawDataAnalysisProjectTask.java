@@ -100,7 +100,8 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 
 	private void initChromatogramSave() {
 
-        if(!projectToSave.getChromatogramMap().isEmpty()) {
+        if(projectToSave.getChromatogramMap() != null 
+        		&& !projectToSave.getChromatogramMap().isEmpty()) {
         	SaveFeatureChromatogramsTask task = 
         			new SaveFeatureChromatogramsTask(projectToSave);
 			task.addTaskListener(this);

@@ -403,7 +403,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				new ChromatogramToolTipGenerator();		
 		renderer.setDefaultToolTipGenerator(toolTipGenerator);
 		renderer.setDefaultShape(FilledChromatogramRenderer.dataPointsShape);
-		((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);	
+		if(XYLineAndShapeRenderer.class.isAssignableFrom(renderer.getClass()))
+			((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);	
 		
 		XYSeriesCollection dataSet = new XYSeriesCollection();
 		int seriesCount = 0;
