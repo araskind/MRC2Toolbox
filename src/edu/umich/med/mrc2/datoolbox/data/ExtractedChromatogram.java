@@ -101,7 +101,7 @@ public class ExtractedChromatogram implements Comparable<ExtractedChromatogram>,
 			name += " | RT " + definition.getRtRange().getFormattedString(MRC2ToolBoxConfiguration.getRtFormat());
 		
 		if(definition.getSmoothingFilter() != null)
-			name += " " + definition.getSmoothingFilter().getCode();
+			name += " " + definition.getSmoothingFilter().getFilterClass();
 			
 		if(note != null)
 			name += " |  " + note;

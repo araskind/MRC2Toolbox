@@ -42,10 +42,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import umich.ms.datatypes.LCMSData;
-import umich.ms.datatypes.LCMSDataSubset;
 import umich.ms.datatypes.scan.IScan;
-import umich.ms.datatypes.scan.StorageStrategy;
-import umich.ms.datatypes.scancollection.IScanCollection;
 import umich.ms.datatypes.scancollection.ScanIndex;
 import umich.ms.fileio.exceptions.FileParsingException;
 
@@ -224,11 +221,7 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 			return;
 		
 		LCMSData data = RawDataManager.getRawData(rawDataFile);
-		data.load(LCMSDataSubset.WHOLE_RUN, this);	
-		IScanCollection scans = data.getScans();
-		scans.isAutoloadSpectra(true);
-		scans.setDefaultStorageStrategy(StorageStrategy.SOFT);
-		msLevel2index = scans.getMapMsLevel2index();
+		msLevel2index = data.getScans().getMapMsLevel2index();
 	}
 	
 	@Override

@@ -52,4 +52,6 @@ public abstract class FilterGuiPanel extends JPanel implements BackedByPreferenc
 	public FilterClass getFilterClass() {
 		return filterClass;
 	}
+
+	public abstract void loadFilterParameters(Filter newFilter);
 }

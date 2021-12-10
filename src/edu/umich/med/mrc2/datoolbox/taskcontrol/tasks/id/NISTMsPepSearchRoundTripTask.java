@@ -67,6 +67,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -283,7 +284,10 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 					matchType,
 					poo.isDecoy(),
 					pepSearchParameterObject.getId());			
-			id.setReferenceMsMsLibraryMatch(match);		
+			id.setReferenceMsMsLibraryMatch(match);
+			match.setEntropyBasedScore(
+					MSMSScoreCalculator.calculateEntropyMatchScore(
+							msf.getSpectrum().getExperimentalTandemSpectrum(), match));
 			msf.addIdentity(id);						
 			processed++;
 		}

@@ -121,6 +121,8 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 		getContentPane().add(panel, BorderLayout.SOUTH);
 		
 		copyFilesCheckBox = new JCheckBox("Copy raw data to project");
+		copyFilesCheckBox.setSelected(true);
+		copyFilesCheckBox.setEnabled(false);
 		panel.add(copyFilesCheckBox);
 
 		JButton btnCancel = new JButton("Cancel");

@@ -94,6 +94,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -810,6 +811,9 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					fb.getMsFeature().addIdentity(id);
 					if(id.isPrimary() && !fb.getMsFeature().isIdDisabled())
 						fb.getMsFeature().setPrimaryIdentity(id);
+					
+					match.setEntropyBasedScore(
+							MSMSScoreCalculator.calculateEntropyMatchScore(msms, match));
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -827,6 +831,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
+
+
 	protected void retievePepSearchParameters() {		
 		
 		Set<String> pepSearchParIds = features.stream().

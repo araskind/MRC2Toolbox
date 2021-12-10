@@ -66,7 +66,8 @@ public class OpenChromatogramFileTask extends AbstractTask {
 
 	private void extractMsFeatureBundles() throws Exception {
 
-		taskDescription = "Reading chromatograms from " + chromatogramFile.getName();
+		taskDescription = "Reading chromatograms from " + 
+				chromatogramFile.getName();
 		total = 100;
 		processed = 20;
 		try {

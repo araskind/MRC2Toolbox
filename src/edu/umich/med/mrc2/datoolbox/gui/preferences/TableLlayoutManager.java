@@ -63,8 +63,10 @@ public class TableLlayoutManager {
 		
 		try {
 			XStream projectXstream = initXstream();
-			RandomAccessFile raf = new RandomAccessFile(tableLayoutFile.getAbsolutePath(), "rw");
-			FileOutputStream fout = new FileOutputStream(raf.getFD());	        
+			RandomAccessFile raf = 
+					new RandomAccessFile(tableLayoutFile.getAbsolutePath(), "rw");
+			FileOutputStream fout = 
+					new FileOutputStream(raf.getFD());	        
 			BufferedOutputStream bout = new BufferedOutputStream(fout);
 			projectXstream.toXML(tableLayouts, bout);
 			bout.close();

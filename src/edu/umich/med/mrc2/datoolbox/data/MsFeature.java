@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureListener;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
@@ -944,6 +945,14 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			for(Element msfIdElement : msfIdList) {
 				
 				MsFeatureIdentity msfId = new MsFeatureIdentity(msfIdElement);
+				if(spectrum != null && spectrum.getExperimentalTandemSpectrum() != null 
+						&& msfId.getReferenceMsMsLibraryMatch() != null) {
+					
+					msfId.getReferenceMsMsLibraryMatch().setEntropyBasedScore(
+							MSMSScoreCalculator.calculateEntropyMatchScore(
+									spectrum.getExperimentalTandemSpectrum(), 
+									msfId.getReferenceMsMsLibraryMatch()));
+				}
 				identifications.add(msfId);
 				if(msfId.isPrimary())
 					primaryIdentity = msfId;

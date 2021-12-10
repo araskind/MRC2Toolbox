@@ -68,13 +68,10 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.MsPointBucket;
 import edu.umich.med.mrc2.datoolbox.data.MsRtLibraryMatch;
-import edu.umich.med.mrc2.datoolbox.data.RawMsPoint;
-import edu.umich.med.mrc2.datoolbox.data.RawMsPointBucket;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsMs;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.compare.AdductComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.RawMsPointComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
@@ -1219,6 +1216,36 @@ public class MsUtils {
 		return -entropy;
 	}
 	
+	public static double calculateSpectrumEntropy(MsPoint[]spectrum) {
+		return calculateSpectrumEntropy(Arrays.asList(spectrum));
+	}
+	
+	/**
+	 * @param spectrum
+	 * @return pattern recognition entropy
+	 * Based on paper
+	 * https://www.nature.com/articles/s41592-021-01331-z
+	 */
+	public static double calculateSpectrumEntropyNatLog(Collection<MsPoint>spectrum) {
+		
+		double totalIntensity = 
+				spectrum.stream().mapToDouble(p -> p.getIntensity()).sum();
+		double entropy = 0.0d;
+		for(MsPoint p : spectrum) {
+			
+			if(p.getIntensity() == 0)
+				continue;
+			
+			double norm = p.getIntensity() / totalIntensity;
+			entropy += norm * Math.log(norm);
+		}	
+		return -entropy;
+	}
+	
+	public static double calculateSpectrumEntropyNatLog(MsPoint[]spectrum) {
+		return calculateSpectrumEntropyNatLog(Arrays.asList(spectrum));
+	}
+	
 	public static Collection<MsPoint>averageTwoSpectraWithInterpolation(
 			Collection<MsPoint>spectrumOne, 
 			Collection<MsPoint>spectrumTwo, 
@@ -1227,48 +1254,42 @@ public class MsUtils {
 			MassErrorType errorType){
 		
 		double multiplier = 1.0 - splitRatio;	
-		List<RawMsPoint> rawInputPoints = spectrumTwo.stream().
-				map(p -> new RawMsPoint(p.getMz(), p.getIntensity() * splitRatio, p.getScanNum())).
+		List<MsPoint> rawInputPoints = spectrumTwo.stream().
+				map(p -> new MsPoint(p.getMz(), p.getIntensity() * splitRatio, p.getScanNum())).
 				collect(Collectors.toList());
-		List<RawMsPoint> rawInputPointsTwo = spectrumOne.stream().
-				map(p -> new RawMsPoint(p.getMz(), p.getIntensity() * multiplier, p.getScanNum())).
+		List<MsPoint> rawInputPointsTwo = spectrumOne.stream().
+				map(p -> new MsPoint(p.getMz(), p.getIntensity() * multiplier, p.getScanNum())).
 				collect(Collectors.toList());
 		rawInputPoints.addAll(rawInputPointsTwo);
 		return averageMassSpectrum(rawInputPoints, mzBinWidth, errorType);
 	}
 	
-	public static Collection<MsPoint>averageSpectrum(
-			Collection<MsPoint>inputPoints, Double mzBinWidth, MassErrorType errorType){
-		
-		List<RawMsPoint> rawInputPoints = inputPoints.stream().
-				map(p -> new RawMsPoint(p.getMz(), p.getIntensity(), p.getScanNum())).
-				collect(Collectors.toList());
-		return averageMassSpectrum(rawInputPoints, mzBinWidth, errorType);
-	}
-	
 	public static Collection<MsPoint>averageMassSpectrum(
-			Collection<RawMsPoint>inputPoints, Double mzBinWidth, MassErrorType errorType) {
+			Collection<MsPoint>inputPoints, double mzBinWidth, MassErrorType errorType) {
 		
-		RawMsPoint[] points = inputPoints.stream().
-				sorted(new RawMsPointComparator(SortProperty.MZ)).
-				toArray(size -> new RawMsPoint[size]);
+		MsPoint[] points = inputPoints.stream().
+				sorted(mzSorter).
+				toArray(size -> new MsPoint[size]);
 		
-		ArrayList<RawMsPointBucket> msBins = new ArrayList<RawMsPointBucket>();
-		RawMsPointBucket first = new RawMsPointBucket(points[0], mzBinWidth, errorType);
+		ArrayList<MsPointBucket> msBins = new ArrayList<MsPointBucket>();
+		MsPointBucket first = new MsPointBucket(points[0], mzBinWidth, errorType);
 		msBins.add(first);
 		for(int i= 1; i< points.length; i++) {
 			
-			RawMsPointBucket current = msBins.get(msBins.size()-1);
-			if(current.pointFits(points[i]))
+			MsPointBucket current = msBins.get(msBins.size()-1);
+			if(current.pointBelongs(points[i]))
 				current.addPoint(points[i]);
 			else
-				msBins.add(new RawMsPointBucket(points[i], mzBinWidth, errorType));
+				msBins.add(new MsPointBucket(points[i], mzBinWidth, errorType));
 		}
-		return msBins.stream().
+		 Collection<MsPoint>avgSpectrum =  msBins.stream().
 				map(b -> b.getAveragePoint()).
 				map(p -> new MsPoint(p.getMz(), p.getIntensity())).
 				sorted(mzSorter).
 				collect(Collectors.toList());
+		 
+		 msBins.stream().forEach(b -> b = null); 		 
+		 return avgSpectrum;
 	}
 	
 	public static MsPoint getAveragePoint(Collection<MsPoint>inputPoints) {
@@ -1279,8 +1300,10 @@ public class MsUtils {
 		if(inputPoints.size() == 1)
 			return inputPoints.iterator().next();
 		
-		double totalIntensity =  inputPoints.stream().mapToDouble(p -> p.getIntensity()).sum();
-		double massIntensityProductSum = inputPoints.stream().mapToDouble(p -> p.getMz() * p.getIntensity()).sum();
+		double totalIntensity =  
+				inputPoints.stream().mapToDouble(p -> p.getIntensity()).sum();
+		double massIntensityProductSum = 
+				inputPoints.stream().mapToDouble(p -> p.getMz() * p.getIntensity()).sum();
 		double avgMz = massIntensityProductSum / totalIntensity;
 		return new MsPoint(avgMz, totalIntensity);
 	}

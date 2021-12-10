@@ -123,7 +123,6 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationAs
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.tdexplor.IDTrackerDataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.tophit.ReassignDefaultMSMSLibraryHitDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.xic.XICSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.msms.DecoyMSMSLibraryImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.msms.ReferenceMSMSLibraryExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableMsMsInfoPanel;
@@ -136,6 +135,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.StatusBar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.DockableChromatogramPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.xic.XICSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -713,14 +713,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	}
 
 	private void showTrackerSearchDialog() {
-
-//		ShowTrackerSearchDialogTask task = 
-//				new ShowTrackerSearchDialogTask();
-//		idp = new IndeterminateProgressDialog(
-//				"Populating IDTracker search form data ...", this.getContentPane(), task);
-//		idp.setLocationRelativeTo(this.getContentPane());
-//		idp.setVisible(true);
 		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			MessageDialog.showWarningMsg(
+					"Please close active raw data analysis project first.", 
+					this.getContentPane());
+			return;
+		}		
 		idTrackerDataSearchDialog = new IDTrackerDataSearchDialog(this);
 		idTrackerDataSearchDialog.setLocationRelativeTo(this.getContentPane());
 		idTrackerDataSearchDialog.setVisible(true);

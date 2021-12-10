@@ -77,6 +77,9 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 					LCMSPlotPanel.TOGGLE_DATA_POINTS_COMMAND, "Show data points", buttonDimension);
 
 			xAxisUnits = "time";
+			
+			//	Smooting block
+			createSmoothingBlock();
 		}
 		if (plotType.equals(PlotType.SPECTRUM)) {
 
@@ -118,7 +121,7 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 		if (e.getSource().equals(chromatogramTypeComboBox) &&
 				e.getStateChange() == ItemEvent.SELECTED) {
 
-			parentPlot.redrawChromatogram((ChromatogramRenderingType)chromatogramTypeComboBox.getSelectedItem());
+			parentPlot.redrawChromatograms((ChromatogramRenderingType)chromatogramTypeComboBox.getSelectedItem());
 		}
 	}
 }

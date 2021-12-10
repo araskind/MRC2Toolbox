@@ -124,7 +124,8 @@ public class RawDataUtils {
 		return getRawScanPoints(scan, 0.0d);
 	}
 	
-	public static Map<DataFile, LCMSData>createDataSources(Collection<DataFile> files, int msLevel, Object parent) throws FileParsingException{
+	public static Map<DataFile, LCMSData>createDataSources(
+			Collection<DataFile> files, int msLevel, Object parent) throws FileParsingException{
 
 		Map<DataFile, LCMSData>dataSourcesmap = new HashMap<DataFile,LCMSData>();
 		
@@ -173,6 +174,7 @@ public class RawDataUtils {
 				}
 			}
 		}
+		labelText += " (" + s.getPolarity().toString() + ")";
 		return labelText;
 	}
 	

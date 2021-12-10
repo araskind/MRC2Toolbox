@@ -34,9 +34,11 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
+import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
 import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
+import edu.umich.med.mrc2.datoolbox.utils.filter.FilterFactory;
 import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayFilter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
 
@@ -299,12 +301,10 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		if(rtRange != null)
 			chromatogramDefinitionElement.setAttribute(
 					XICDefinitionFields.RTRange.name(), rtRange.getStorableString());	
+
+		if(smoothingFilter != null)
+			chromatogramDefinitionElement.addContent(smoothingFilter.getXmlElement());				
 		
-		//	TODO save filter type and parameters
-		if(smoothingFilter != null) {
-				chromatogramDefinitionElement.setAttribute(
-						XICDefinitionFields.Filter.name(), smoothingFilter.getCode());			
-		}
 		chromatogramDefinitionElement.setAttribute(
 				XICDefinitionFields.Smooth.name(), 
 				Boolean.toString(doSmooth));
@@ -345,10 +345,14 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		
 		doSmooth = Boolean.parseBoolean(
 				cdElement.getAttributeValue(XICDefinitionFields.Smooth.name()));
-		
-		String filterCode = cdElement.getAttributeValue(XICDefinitionFields.Filter.name());
-		if(filterCode != null) {
-			//	TODO - restore filter type and parameters
+		Element filterElement = cdElement.getChild(SmoothingFilterFields.Filter.name());
+		if(filterElement != null) {
+			try {
+				smoothingFilter = FilterFactory.getFilter(filterElement);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	
 		}
 	}
 

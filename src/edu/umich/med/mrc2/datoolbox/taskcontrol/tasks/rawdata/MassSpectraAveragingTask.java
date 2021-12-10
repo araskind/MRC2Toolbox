@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
-import edu.umich.med.mrc2.datoolbox.data.RawMsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -87,7 +86,8 @@ public class MassSpectraAveragingTask extends AbstractTask {
 		} 
 		catch (Throwable e) {
 			setStatus(TaskStatus.ERROR);
-			InformationDialog errorDilalog = new InformationDialog("Spectrum extraction failed!", e, null);
+			InformationDialog errorDilalog = 
+					new InformationDialog("Spectrum extraction failed!", e, null);
 		}
 		this.setStatus(TaskStatus.FINISHED);
 	}
@@ -112,11 +112,13 @@ public class MassSpectraAveragingTask extends AbstractTask {
 			Set<IScan> filteredScans = ms2idx.getNum2scan().values().stream().
 					filter(s -> rtRange.contains(s.getRt())).collect(Collectors.toSet());			
 			
-			Collection<RawMsPoint> inputPoints = 
+			Collection<MsPoint> inputPoints = 
 					filteredScans.stream().
-					flatMap(s -> RawDataUtils.getRawScanPoints(s).stream()).collect(Collectors.toList());
+					flatMap(s -> RawDataUtils.getScanPoints(s).stream()).
+					collect(Collectors.toList());
 			
-			Collection<MsPoint> avgPoints = MsUtils.averageMassSpectrum(inputPoints, mzBinWidth2, errorType2);
+			Collection<MsPoint> avgPoints = 
+					MsUtils.averageMassSpectrum(inputPoints, mzBinWidth2, errorType2);
 			avgMs.getMasSpectrum().addDataPoints(avgPoints);
 			extractedSpectra.add(avgMs);
 			f.getAverageSpectra().add(avgMs);

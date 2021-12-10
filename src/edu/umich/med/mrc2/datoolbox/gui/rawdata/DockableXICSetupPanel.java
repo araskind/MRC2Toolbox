@@ -31,7 +31,7 @@ import javax.swing.Icon;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.xic.XICSetupPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.xic.XICSetupPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 

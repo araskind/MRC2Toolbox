@@ -457,7 +457,7 @@ public class MsFeatureCluster implements Serializable {
 				flatMap(f -> f.getSpectrum().getMsPoints().stream()).
 				collect(Collectors.toList());
 		Collection<MsPoint>averageMS1Spectrum = 
-				MsUtils.averageSpectrum(inputPoints, mzBinWidth, errorType);
+				MsUtils.averageMassSpectrum(inputPoints, mzBinWidth, errorType);
 		spectrum.replaceDataPoints(averageMS1Spectrum);
 		
 		//	MS2
@@ -477,7 +477,7 @@ public class MsFeatureCluster implements Serializable {
 				flatMap(s -> s.getSpectrum().stream()).
 				collect(Collectors.toList());
 		Collection<MsPoint>averageMS2Spectrum = 
-				MsUtils.averageSpectrum(inputMS2Points, mzBinWidth, errorType);
+				MsUtils.averageMassSpectrum(inputMS2Points, mzBinWidth, errorType);
 		TandemMassSpectrum msms = new TandemMassSpectrum(
 				2, 
 				parent,
@@ -498,7 +498,7 @@ public class MsFeatureCluster implements Serializable {
 				collect(Collectors.toList());
 		if(!minorParentIons.isEmpty()) {
 			Collection<MsPoint>averageMinorParentIons = 
-					MsUtils.averageSpectrum(minorParentIons, mzBinWidth, errorType);
+					MsUtils.averageMassSpectrum(minorParentIons, mzBinWidth, errorType);
 			msms.setMinorParentIons(averageMinorParentIons);
 		}	
 		spectrum.addTandemMs(msms);			

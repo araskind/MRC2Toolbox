@@ -102,6 +102,16 @@ public class SmoothingCubicSplineGuiPanel extends FilterGuiPanel {
 		return new SmoothingCubicSplineFilter(smoothingFactor);
 	}
 	
+	@Override
+	public void loadFilterParameters(Filter newFilter) {
+
+		if(!SmoothingCubicSplineFilter.class.isAssignableFrom(newFilter.getClass()))
+			return;
+		
+		double rho = ((SmoothingCubicSplineFilter)newFilter).getRho();
+		smoothingFactorTextField.setText(Double.toString(rho));
+	}
+	
 	private double getSmoothingFactor() {
 		return Double.parseDouble(smoothingFactorTextField.getText().trim());
 	}

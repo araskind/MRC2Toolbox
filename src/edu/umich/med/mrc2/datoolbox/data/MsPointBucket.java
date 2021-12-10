@@ -63,13 +63,7 @@ public class MsPointBucket implements Serializable {
 	}
 	
 	public MsPoint getAveragePoint() {
-		
-		if(basketPoints.isEmpty())
-			return null;
-		
-		double avgMz = basketPoints.stream().mapToDouble(p -> p.getMz()).average().getAsDouble();
-		double avgIntensity = basketPoints.stream().mapToDouble(p -> p.getIntensity()).average().getAsDouble();
-		return new MsPoint(avgMz, avgIntensity / basketPoints.size());	
+		return MsUtils.getAveragePoint(basketPoints);
 	}
 	
 	public MsPoint getMostIntensivePoint() {
@@ -77,7 +71,9 @@ public class MsPointBucket implements Serializable {
 		if(basketPoints.isEmpty())
 			return null;
 		
-		return basketPoints.stream().sorted(MsUtils.reverseIntensitySorter).findFirst().orElse(null);
+		return basketPoints.stream().
+				sorted(MsUtils.reverseIntensitySorter).findFirst().
+				orElse(null);
 	}
 	
 	public int getSize() {
@@ -101,7 +97,8 @@ public class MsPointBucket implements Serializable {
 	public boolean pointBelongs(MsPoint newPoint) {
 
 		boolean belongs = false;
-		testTange = MsUtils.createMassRange(mzRange.getAverage(), massWindow, errorType);
+		testTange = MsUtils.createMassRange(
+				mzRange.getAverage(), massWindow, errorType);
 
 		if (testTange.contains(newPoint.getMz()))
 			belongs = true;

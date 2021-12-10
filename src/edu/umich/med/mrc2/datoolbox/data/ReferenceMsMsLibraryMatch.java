@@ -38,6 +38,7 @@ public class ReferenceMsMsLibraryMatch implements Serializable {
 	private static final long serialVersionUID = 1980840150518719361L;
 	private MsMsLibraryFeature matchedLibraryFeature;
 	private double score;
+	private double entropyBasedScore;
 	private double forwardScore;
 	private double reverseScore;
 	private double probability;
@@ -525,6 +526,14 @@ public class ReferenceMsMsLibraryMatch implements Serializable {
 				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.PEP.name());
 		if(posteriorErrorProbabilityString != null)
 			posteriorErrorProbability = Double.parseDouble(posteriorErrorProbabilityString);
+	}
+
+	public double getEntropyBasedScore() {
+		return entropyBasedScore;
+	}
+
+	public void setEntropyBasedScore(double entropyBasedScore) {
+		this.entropyBasedScore = entropyBasedScore;
 	}
 }
 

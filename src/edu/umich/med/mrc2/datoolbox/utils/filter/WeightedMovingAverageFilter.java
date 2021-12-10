@@ -27,10 +27,11 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.apache.commons.math3.stat.descriptive.rank.Min;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
 
-public class WeightedMovingAverageFilter implements Filter{
+import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
+
+public class WeightedMovingAverageFilter extends Filter{
 
 	private final Queue<Double> window = new LinkedList<Double>();
 	private double[] weights;
@@ -39,18 +40,23 @@ public class WeightedMovingAverageFilter implements Filter{
     private double sum;
     private Min minCalc;
  
-    public WeightedMovingAverageFilter(int period) {
+    public WeightedMovingAverageFilter(int period) {   	
+    	this(period, 0);
+    }
+
+	public WeightedMovingAverageFilter(int period, int padding) {
     	
+		super(null);
         if(period <= 0)
         	throw new IllegalArgumentException("Period must be a positive integer");
         
         this.period = period;
-        padding = 0;
+        this.padding = padding;
         minCalc = new Min();
         
         generateWeights();
     }
-    
+	
     private void generateWeights() {
     	
     	weights = new double[period];
@@ -76,17 +82,6 @@ public class WeightedMovingAverageFilter implements Filter{
     		weights[i] = (double)multipliers[i] / multSum;
 	}
 
-	public WeightedMovingAverageFilter(int period, int padding) {
-    	
-        if(period <= 0)
-        	throw new IllegalArgumentException("Period must be a positive integer");
-        
-        this.period = period;
-        this.padding = padding;
-        minCalc = new Min();
-        
-        generateWeights();
-    }
  
     private void addPoint(double num) {
         
@@ -152,8 +147,8 @@ public class WeightedMovingAverageFilter implements Filter{
 	}
 
 	@Override
-	public String getCode() {
-		return FilterClass.WEIGHTED_MOVING_AVERAGE.getCode();
+	public FilterClass getFilterClass() {
+		return FilterClass.WEIGHTED_MOVING_AVERAGE;
 	}
 
 	public int getPeriod() {
@@ -186,16 +181,31 @@ public class WeightedMovingAverageFilter implements Filter{
        
 		return true;
 	}
-
-	@Override
-	public Element getXmlElement(Document parentDocument) {
-		// TODO Auto-generated method stub
-		return null;
+	
+	public WeightedMovingAverageFilter(Element filterElement) {
+		
+		super(filterElement);
+		String periodWidth = 
+				filterElement.getAttributeValue(SmoothingFilterFields.Width.name());		
+		period = Integer.parseInt(periodWidth);
+		String paddingWidth = 
+				filterElement.getAttributeValue(SmoothingFilterFields.Padd.name());		
+		padding = Integer.parseInt(paddingWidth);
 	}
 
-	public WeightedMovingAverageFilter(org.jdom2.Element filterElement) {
-		// TODO Auto-generated method stub
-		this.period = 5;
-		this.padding = 2;
+	@Override
+	public Element getXmlElement() {
+
+		Element filterElement = super.getXmlElement();
+		filterElement.setAttribute(
+				SmoothingFilterFields.Width.name(), Integer.toString(period));
+		filterElement.setAttribute(
+				SmoothingFilterFields.Padd.name(), Integer.toString(padding));
+		return filterElement;
+	}
+
+	@Override
+	protected void parseParameters(Element xmlElement) {
+
 	}
 }

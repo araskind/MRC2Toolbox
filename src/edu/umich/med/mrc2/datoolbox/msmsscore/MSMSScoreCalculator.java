@@ -29,12 +29,15 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
-import edu.umich.med.mrc2.datoolbox.data.MsPointBucket;
+import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
+import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.SpectumPair;
+import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -51,7 +54,8 @@ public class MSMSScoreCalculator {
 	
 	public static MsPoint[] createWeigtedPattern(
 			Collection<MsPoint>spectrum, MSMSWeigtingType wType) {	
-		return createWeigtedPattern(spectrum, wType.getIntensityPower(), wType.getMzPower());
+		return createWeigtedPattern(
+				spectrum, wType.getIntensityPower(), wType.getMzPower());
 	}
 	
 	public static MsPoint[] createWeigtedPattern(
@@ -63,7 +67,9 @@ public class MSMSScoreCalculator {
 		MsPoint[]weigtedPattern = new MsPoint[spectrum.size()];
 		int count = 0;
 		for(MsPoint p :spectrum) {
-			double weightedIntensity = Math.pow(p.getIntensity(), intensityPower) * Math.pow(p.getMz(), mzPower);
+			double weightedIntensity = 
+					Math.pow(p.getIntensity(), intensityPower) *
+					Math.pow(p.getMz(), mzPower);
 			weigtedPattern[count] = new MsPoint(p.getMz(), weightedIntensity);
 			count++;
 		}
@@ -89,7 +95,8 @@ public class MSMSScoreCalculator {
 		Collection<MsPoint> commonUnknownSpectrum = new ArrayList<MsPoint>(); 
 		Collection<MsPoint> commonLibrarySpectrum = new ArrayList<MsPoint>();
 		for(MsPoint u : unknownSpectrum) {
-			Range mzRange = MsUtils.createMassRange(u.getMz(), mzWindowValue, massErrorType);
+			Range mzRange = MsUtils.createMassRange(
+					u.getMz(), mzWindowValue, massErrorType);
 			List<MsPoint>matchingPoints = librarySpectrum.stream().
 				filter(p -> mzRange.contains(p.getMz())).
 				sorted(reverseIntensitySorter).
@@ -129,29 +136,32 @@ public class MSMSScoreCalculator {
 						mzWindowValue, 
 						massErrorType);
 		
-		if(commonPeaks.getLibrarySpectrum().isEmpty() || commonPeaks.getUnknownSpectrum().isEmpty())
+		if(commonPeaks.getLibrarySpectrum().isEmpty() 
+				|| commonPeaks.getUnknownSpectrum().isEmpty())
 			return 0.0d;
 		
-		MsPoint[]weigthedUnknownSpectrum = createWeigtedPattern(unknownSpectrum, wType);
-		MsPoint[]weigthedLibrarySpectrum = createWeigtedPattern(librarySpectrum, wType);
+		MsPoint[]weigthedUnknownSpectrum = 
+				createWeigtedPattern(unknownSpectrum, wType);
+		MsPoint[]weigthedLibrarySpectrum = 
+				createWeigtedPattern(librarySpectrum, wType);
 		
 		double libUnkSum = 0.0d;
 		double libSum = 0.0d;
 		double unkSum = 0.0d;
 		
 		for(int i=0; i<weigthedUnknownSpectrum.length; i++) {
-			libUnkSum += weigthedUnknownSpectrum[i].getIntensity() * weigthedLibrarySpectrum[i].getIntensity();
-			libSum += weigthedLibrarySpectrum[i].getIntensity() * weigthedLibrarySpectrum[i].getIntensity();
-			unkSum += weigthedUnknownSpectrum[i].getIntensity() * weigthedUnknownSpectrum[i].getIntensity();
-			
+			libUnkSum += weigthedUnknownSpectrum[i].getIntensity() * 
+					weigthedLibrarySpectrum[i].getIntensity();
+			libSum += weigthedLibrarySpectrum[i].getIntensity() * 
+					weigthedLibrarySpectrum[i].getIntensity();
+			unkSum += weigthedUnknownSpectrum[i].getIntensity() * 
+					weigthedUnknownSpectrum[i].getIntensity();
 		}
-		double cosineCorrelation =  (libUnkSum * libUnkSum)/(libSum * unkSum);
-		
+		double cosineCorrelation =  (libUnkSum * libUnkSum)/(libSum * unkSum);		
 		double factorRsum = 0.0d;
 		for(int i=1; i<weigthedUnknownSpectrum.length; i++) {
 			double fiSum =  (weigthedLibrarySpectrum[i].getIntensity() / weigthedLibrarySpectrum[i-1].getIntensity()) * 
-					(weigthedUnknownSpectrum[i-1].getIntensity() / weigthedUnknownSpectrum[i].getIntensity());
-			
+					(weigthedUnknownSpectrum[i-1].getIntensity() / weigthedUnknownSpectrum[i].getIntensity());			
 			if(fiSum <= 1)
 				factorRsum += fiSum;
 			else
@@ -161,7 +171,7 @@ public class MSMSScoreCalculator {
 		double score = (unknownSpectrum.size() * cosineCorrelation + weigthedUnknownSpectrum.length * factorR) / 
 				(unknownSpectrum.size() + weigthedUnknownSpectrum.length);
 		
-		return score	;
+		return score;
 	}
 	
 	public static SpectumPair alignSpectra(			
@@ -171,8 +181,10 @@ public class MSMSScoreCalculator {
 			MassErrorType massErrorType,
 			MatchDirection direction) {
 		
-		unknownSpectrum = binSpectrum(unknownSpectrum, mzWindowValue, massErrorType);
-		librarySpectrum = binSpectrum(librarySpectrum, mzWindowValue, massErrorType);
+		unknownSpectrum = 
+				MsUtils.averageMassSpectrum(unknownSpectrum, mzWindowValue, massErrorType);
+		librarySpectrum = 
+				MsUtils.averageMassSpectrum(librarySpectrum, mzWindowValue, massErrorType);
 		
 		Collection<MsPoint> alignedUnknownSpectrum = new ArrayList<MsPoint>(); 
 		Collection<MsPoint> alignedLibrarySpectrum = new ArrayList<MsPoint>();
@@ -211,35 +223,93 @@ public class MSMSScoreCalculator {
 		}		
 		return new SpectumPair(alignedUnknownSpectrum, alignedLibrarySpectrum);
 	}
-
-	public static Collection<MsPoint>binSpectrum(
-			Collection<MsPoint> spectrum,
-			double mzWindowValue, 
-			MassErrorType massErrorType){
+	
+	public static MsPoint[] createEntropyWeigtedPattern(Collection<MsPoint>spectrum) {
 		
-		ArrayList<MsPointBucket> pointBaskets = new ArrayList<MsPointBucket>();
-		boolean added;
-		for (MsPoint p : spectrum) {
-			added = false;
-			for (MsPointBucket basket : pointBaskets) {
-				if (basket.pointBelongs(p)) {
-					basket.addPoint(p);
-					added = true;
-					break;
-				}
-			}
-			if (!added) {
-				MsPointBucket newBasket = 
-						new MsPointBucket(p, mzWindowValue, massErrorType);
-				newBasket.addPoint(p);
-				pointBaskets.add(newBasket);
-			}
+		if(spectrum == null || spectrum.isEmpty())
+			return null;
+		
+		double entropy = MsUtils.calculateSpectrumEntropyNatLog(spectrum);		
+		MsPoint[]weigtedPattern = new MsPoint[spectrum.size()];
+		int count = 0;
+		for(MsPoint p :spectrum) {
+			double weightedIntensity = p.getIntensity();
+			if(entropy < 3.0d)
+				weightedIntensity = Math.pow(p.getIntensity(), (0.25d + entropy / 4.0d));
+
+			weigtedPattern[count] = new MsPoint(p.getMz(), weightedIntensity);
+			count++;
 		}
-		Collection<MsPoint> maxPoints = new TreeSet<MsPoint>(mzSorter);
-		pointBaskets.stream().forEach(p -> maxPoints.add(p.getMostIntensivePoint()));
-		return maxPoints;
+		Arrays.sort(weigtedPattern, mzSorter);
+		return weigtedPattern;
+	}
+	
+	public static MsPoint[] normalizeToUnitSum(Collection<MsPoint>spectrum) {
+		
+		MsPoint[]unitNormPattern = new MsPoint[spectrum.size()];
+		double totalIntensity = 
+				spectrum.stream().mapToDouble(p -> p.getIntensity()).sum();
+		int count = 0;
+		for(MsPoint p : spectrum) {
+			unitNormPattern[count] = new MsPoint(p.getMz(), p.getIntensity() / totalIntensity);
+			count++;
+		}
+		Arrays.sort(unitNormPattern, mzSorter);
+		return unitNormPattern;
+	}
+	
+	public static double calculateEntropyBasedMatchScore(			
+			Collection<MsPoint> unknownSpectrum, 
+			Collection<MsPoint> librarySpectrum,
+			double mzWindowValue, 
+			MassErrorType massErrorType) {
+		
+		MsPoint[]unknownSpectrumWeighted = createEntropyWeigtedPattern(unknownSpectrum);
+		MsPoint[]librarySpectrumWeighted = createEntropyWeigtedPattern(librarySpectrum);
+		
+		Collection<MsPoint>allPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		allPoints.addAll(Arrays.asList(unknownSpectrumWeighted));
+		allPoints.addAll(Arrays.asList(librarySpectrumWeighted));
+		Collection<MsPoint>avgSpectrum = 
+				MsUtils.averageMassSpectrum(allPoints, mzWindowValue, massErrorType);	
+		
+		//	MsPoint[]avgSpectrumWeighted = createEntropyWeigtedPattern(avgSpectrum);
+		MsPoint[]avgSpectrumWeighted = normalizeToUnitSum(avgSpectrum);
+		
+		double unknownEntropy = 
+				MsUtils.calculateSpectrumEntropyNatLog(unknownSpectrumWeighted);
+		double libraryEntropy = 
+				MsUtils.calculateSpectrumEntropyNatLog(librarySpectrumWeighted);
+		double avgEntropy = 
+				MsUtils.calculateSpectrumEntropyNatLog(avgSpectrumWeighted);
+		
+		double score = 
+				1 - ((2.0d * avgEntropy - unknownEntropy - libraryEntropy) / Math.log(4.0d));
+		
+		return score;
+	}
+	
+	public static double calculateEntropyMatchScore(TandemMassSpectrum msms, ReferenceMsMsLibraryMatch match) {
+
+		NISTPepSearchParameterObject params = 
+				IDTDataCash.getNISTPepSearchParameterObjectById(match.getSearchParameterSetId());
+		if(params == null)
+			return 0.0d;
+
+		return calculateEntropyBasedMatchScore(			
+				msms.getSpectrum(), 
+				match.getMatchedLibraryFeature().getSpectrum(),
+				params.getFragmentMzErrorValue(), 
+				params.getFragmentMzErrorType());
 	}
 }
+
+
+
+
+
+
+
 
 
 

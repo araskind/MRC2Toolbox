@@ -66,6 +66,8 @@ import edu.umich.med.mrc2.datoolbox.data.ExtractedIonData;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.SmoothingPreferencesDialog;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.ChromatogramToolTipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.ContinuousCromatogramRenderer;
@@ -75,10 +77,12 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MassSpectrumRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.MsLabelGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
+import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.scan.IScan;
 
@@ -112,12 +116,18 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	
 	protected FilledChromatogramRenderer filledChromatogramRenderer;
 	protected FilledChromatogramRenderer linesChromatogramRenderer;
-	private XYItemRenderer splineRenderer;
+	protected XYItemRenderer splineRenderer;
 	
-	private Collection<ExtractedChromatogram> chromatograms;
-	private RawDataExaminerPanel rawDataExaminerPanel;
-	private MsFeatureChromatogramBundle xicBundle;
-	private Collection<Double>precursorMarkers;
+	protected Collection<ExtractedChromatogram> chromatograms;
+	protected RawDataExaminerPanel rawDataExaminerPanel;
+	protected MsFeatureChromatogramBundle xicBundle;
+	protected Collection<Double>precursorMarkers;
+	
+	protected ChromatogramRenderingType chromatogramRenderingType;
+	protected SmoothingPreferencesDialog smoothingPreferencesDialog;
+	protected boolean smoothChromatogram;
+	protected Filter smoothingFilter;
+	protected String filterId;
 
 	public LCMSPlotPanel(PlotType type) {
 
@@ -185,14 +195,73 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			plot.getRangeAxis().setAutoRange(true);
 			return;
 		}
-
 		if (command.equals(MasterPlotPanel.TOGGLE_DATA_POINTS_COMMAND)) {
 			toggleDataPoints();
 			return;
 		}
+		if (command.equals(MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName())) 
+			smoothChromatograms();
+		
+		if (command.equals(MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName())) 
+			showRawChromatograms();
+		
+		if (command.equals(MainActionCommands.SHOW_SMOOTHING_PREFERENCES_COMMAND.getName())) 
+			showChromatogramSmoothingPreferences();
+		
+		if (command.equals(MainActionCommands.SAVE_SMOOTHING_PREFERENCES_COMMAND.getName())) 
+			saveChromatogramSmoothingPreferences();
+		
 		super.actionPerformed(event);
 	}
 	
+	private void smoothChromatograms() {
+
+		if(plotType.equals(PlotType.SPECTRUM))
+			return;
+		
+		if(smoothingFilter == null) {
+			MessageDialog.showWarningMsg("Smoothing parameters not defined.", this);
+			return;
+		}
+		smoothChromatogram = true;	
+		redrawChromatograms(chromatogramRenderingType);
+		toolbar.toggleSmoothingIcon(smoothChromatogram);
+	}
+
+	private void showRawChromatograms() {
+
+		if(plotType.equals(PlotType.SPECTRUM))
+			return;
+		
+		smoothChromatogram = false;
+		redrawChromatograms(chromatogramRenderingType);		
+		toolbar.toggleSmoothingIcon(smoothChromatogram);
+	}
+
+	private void showChromatogramSmoothingPreferences() {
+		// TODO Auto-generated method stub
+		if(plotType.equals(PlotType.SPECTRUM))
+			return;
+		
+		smoothingPreferencesDialog = new SmoothingPreferencesDialog(this, filterId);
+		smoothingPreferencesDialog.setLocationRelativeTo(this);
+		smoothingPreferencesDialog.setVisible(true);
+	}
+
+	private void saveChromatogramSmoothingPreferences() {
+
+		if(plotType.equals(PlotType.SPECTRUM))
+			return;
+		
+		smoothingFilter = smoothingPreferencesDialog.getSmoothingFilter();
+		smoothingPreferencesDialog.dispose();
+		try {
+			smoothChromatograms();
+		} catch (Exception e) {
+			MessageDialog.showErrorMsg("Bad filter parameters", this);
+		}	
+	}
+
 	public void resetDomainAxis() {
 		plot.getDomainAxis().setAutoRange(true);
 	}
@@ -267,7 +336,6 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	@Override
 	public Plot getPlot() {
-
 		return plot;
 	}
 
@@ -383,64 +451,11 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			splineRenderer.setDefaultShape(DefaultSplineRenderer.dataPointsShape);
 		}
 	}
-	
-	public void showExtractedChromatogramCollection(
-			Collection<ExtractedChromatogram> chromatograms, 
-			ChromatogramRenderingType rType) {
-			
-		this.chromatograms = chromatograms;
-		XYItemRenderer renderer = null;
-		if(rType.equals(ChromatogramRenderingType.Spline))
-			renderer = splineRenderer;
-		
-		if(rType.equals(ChromatogramRenderingType.Lines))
-			renderer = linesChromatogramRenderer;
-		
-		if(rType.equals(ChromatogramRenderingType.Filled))
-			renderer = filledChromatogramRenderer;
-		
-		final XYToolTipGenerator toolTipGenerator = 				
-				new ChromatogramToolTipGenerator();		
-		renderer.setDefaultToolTipGenerator(toolTipGenerator);
-		renderer.setDefaultShape(FilledChromatogramRenderer.dataPointsShape);
-		if(XYLineAndShapeRenderer.class.isAssignableFrom(renderer.getClass()))
-			((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);	
-		
-		XYSeriesCollection dataSet = new XYSeriesCollection();
-		int seriesCount = 0;
-		for(ExtractedChromatogram chrom : chromatograms) {
-			
-			XYSeries series = new XYSeries(chrom.toString());
-			double[] times = chrom.getTimeValues();
-			double[] intensities = chrom.getIntensityValues();			
-			for(int i=0; i<times.length; i++)
-				series.add(times[i], intensities[i]);
-			
-			dataSet.addSeries(series);
-			Color seriesColor = chrom.getColor();
-			if(rType.equals(ChromatogramRenderingType.Lines)) {
-				renderer.setSeriesFillPaint(seriesCount, seriesColor);
-				renderer.setSeriesPaint(seriesCount, seriesColor);
-			}
-			else {
-				Paint seriesColorTp = new Color(
-						seriesColor.getRed()/255.0f, 
-						seriesColor.getGreen()/255.0f, 
-						seriesColor.getBlue()/255.0f, 
-						0.3f);
-				renderer.setSeriesFillPaint(seriesCount, seriesColorTp);
-				renderer.setSeriesPaint(seriesCount, seriesColorTp);
-			}
-			seriesCount++;
-		}	
-		((XYPlot) this.getPlot()).setDataset(dataSet);
-		((XYPlot) this.getPlot()).setRenderer(renderer);
-	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
 
-		if (MouseEvent.getMouseModifiersText(e.getModifiers()).equals("Shift+Button1")) {
+		if (MouseEvent.getMouseModifiersText(e.getModifiersEx()).equals("Shift+Button1")) {
 
 			Rectangle2D scaledDataArea = getScreenDataArea((int) this.markerStartPoint.getX(),
 					(int) this.markerStartPoint.getY());
@@ -460,7 +475,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	@Override
 	public void mousePressed(MouseEvent e) {
 
-		if (MouseEvent.getMouseModifiersText(e.getModifiers()).equals("Shift+Button1")) {
+		if (MouseEvent.getMouseModifiersText(e.getModifiersEx()).equals("Shift+Button1")) {
 
 			markerStart = getPosition(e);
 
@@ -477,7 +492,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	@Override
 	public void mouseReleased(MouseEvent e) {
 
-		if (MouseEvent.getMouseModifiersText(e.getModifiers()).equals("Shift+Button1")) {
+		if (MouseEvent.getMouseModifiersText(e.getModifiersEx()).equals("Shift+Button1")) {
 
 			markerEnd = getPosition(e);
 			updateMarker();
@@ -572,6 +587,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		if(precursorMarkers != null)
 			precursorMarkers.clear();
 	}
+	
+	/*
+	 * Mass spectra display
+	 */
 	
 	public void showScan(IScan s) {
 		
@@ -705,41 +724,74 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		}
 	}
 
-	public void redrawChromatogram(ChromatogramRenderingType newRtype) {
-
-		if(plotType.equals(PlotType.CHROMATOGRAM)) {
-			
-			if(chromatograms != null && !chromatograms.isEmpty())
-				showExtractedChromatogramCollection(chromatograms, newRtype);
-			
-			if(xicBundle != null)
-				showMsFeatureChromatogramBundle(xicBundle, precursorMarkers, newRtype);
-		}
-	}
-
 	public void setRawDataExaminerPanel(RawDataExaminerPanel rawDataExaminerPanel) {
 		this.rawDataExaminerPanel = rawDataExaminerPanel;
 	}
 	
-	public void removeChromatogramsForFiles(Collection<DataFile>files) {
+	/*
+	 * Chromatogram display
+	 */
+	
+	public void showExtractedChromatogramCollection(
+			Collection<ExtractedChromatogram> chromatograms, 
+			ChromatogramRenderingType rType) {
 		
-		if(chromatograms == null)
-			return;
+		chromatogramRenderingType = rType;
+		this.chromatograms = chromatograms;
+		XYItemRenderer renderer = null;
+		if(rType.equals(ChromatogramRenderingType.Spline))
+			renderer = splineRenderer;
 		
-		XYSeriesCollection dataSet = (XYSeriesCollection)((XYPlot) this.getPlot()).getDataset(1);
-		for(DataFile f : files) {
+		if(rType.equals(ChromatogramRenderingType.Lines))
+			renderer = linesChromatogramRenderer;
+		
+		if(rType.equals(ChromatogramRenderingType.Filled))
+			renderer = filledChromatogramRenderer;
+		
+		final XYToolTipGenerator toolTipGenerator = 				
+				new ChromatogramToolTipGenerator();		
+		renderer.setDefaultToolTipGenerator(toolTipGenerator);
+		renderer.setDefaultShape(FilledChromatogramRenderer.dataPointsShape);
+		if(XYLineAndShapeRenderer.class.isAssignableFrom(renderer.getClass()))
+			((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);	
+		
+		XYSeriesCollection dataSet = new XYSeriesCollection();
+		int seriesCount = 0;
+		for(ExtractedChromatogram chrom : chromatograms) {
 			
-			Collection<ExtractedChromatogram> chroms = 
-					chromatograms.stream().filter(c -> c.getDataFile().equals(f)).collect(Collectors.toList());
-			if(!chroms.isEmpty()) {
-				
-				for(ExtractedChromatogram c : chroms) {
-					XYSeries series = dataSet.getSeries(c.toString());
-					if(series != null)
-						dataSet.removeSeries(series);
+			XYSeries series = new XYSeries(chrom.toString());
+			double[] times = chrom.getTimeValues();
+			double[] intensities = chrom.getIntensityValues();				
+			if(smoothChromatogram && smoothingFilter != null) {			
+				try {
+					intensities = smoothingFilter.filter(times, chrom.getIntensityValues());
+				} catch (IllegalArgumentException e) {					
+					//e.printStackTrace();
+					MessageDialog.showErrorMsg("Bad filter parameters", this);
 				}
 			}
-		}
+			for(int i=0; i<times.length; i++)
+				series.add(times[i], intensities[i]);
+
+			dataSet.addSeries(series);
+			Color seriesColor = chrom.getColor();
+			if(rType.equals(ChromatogramRenderingType.Lines)) {
+				renderer.setSeriesFillPaint(seriesCount, seriesColor);
+				renderer.setSeriesPaint(seriesCount, seriesColor);
+			}
+			else {
+				Paint seriesColorTp = new Color(
+						seriesColor.getRed()/255.0f, 
+						seriesColor.getGreen()/255.0f, 
+						seriesColor.getBlue()/255.0f, 
+						0.3f);
+				renderer.setSeriesFillPaint(seriesCount, seriesColorTp);
+				renderer.setSeriesPaint(seriesCount, seriesColorTp);
+			}
+			seriesCount++;
+		}	
+		((XYPlot) this.getPlot()).setDataset(dataSet);
+		((XYPlot) this.getPlot()).setRenderer(renderer);
 	}
 
 	public void showMsFeatureChromatogramBundle(
@@ -747,6 +799,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			Collection<Double>markers,
 			ChromatogramRenderingType rType) {
 		
+		chromatogramRenderingType = rType;
 		this.xicBundle = xicBundle;	
 		XYItemRenderer renderer = null;
 		if(rType.equals(ChromatogramRenderingType.Spline))
@@ -762,7 +815,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				new ChromatogramToolTipGenerator();		
 		renderer.setDefaultToolTipGenerator(toolTipGenerator);	
 		renderer.setDefaultShape(FilledChromatogramRenderer.dataPointsShape);
-		((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);
+		if(XYLineAndShapeRenderer.class.isAssignableFrom(renderer.getClass()))		
+			((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);
 								
 		XYSeriesCollection dataSet = new XYSeriesCollection();
 		int seriesCount = 0;
@@ -777,9 +831,17 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				fileChromCount = 0;
 				XYSeries series = new XYSeries(dataFile.getName() + " " + eid.toString());
 				double[] times = eid.getTimeValues();
-				double[] intensities = eid.getIntensityValues();			
+				double[] intensities = eid.getIntensityValues();	
+				if(smoothChromatogram && smoothingFilter != null) {			
+					try {
+						intensities = smoothingFilter.filter(times, eid.getIntensityValues());
+					} catch (IllegalArgumentException e) {					
+						//e.printStackTrace();
+						MessageDialog.showErrorMsg("Bad filter parameters", this);
+					}
+				}
 				for(int i=0; i<times.length; i++)
-					series.add(times[i], intensities[i]);
+					series.add(times[i], intensities[i]);	
 				
 				dataSet.addSeries(series);
 				
@@ -814,9 +876,60 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			}
 		}	
 	}
+	
+	public void removeChromatogramsForFiles(Collection<DataFile>files) {
+		
+		if(chromatograms == null)
+			return;
+		
+		XYSeriesCollection dataSet = (XYSeriesCollection)((XYPlot) this.getPlot()).getDataset(1);
+		for(DataFile f : files) {
+			
+			Collection<ExtractedChromatogram> chroms = 
+					chromatograms.stream().filter(c -> c.getDataFile().equals(f)).collect(Collectors.toList());
+			if(!chroms.isEmpty()) {
+				
+				for(ExtractedChromatogram c : chroms) {
+					XYSeries series = dataSet.getSeries(c.toString());
+					if(series != null)
+						dataSet.removeSeries(series);
+				}
+			}
+		}
+	}
+	
+	public void redrawChromatograms(ChromatogramRenderingType newRtype) {
+
+		if(plotType.equals(PlotType.CHROMATOGRAM)) {
+			
+			chromatogramRenderingType = newRtype;
+			
+			if(chromatograms != null && !chromatograms.isEmpty())
+				showExtractedChromatogramCollection(chromatograms, newRtype);
+			
+			if(xicBundle != null)
+				showMsFeatureChromatogramBundle(xicBundle, precursorMarkers, newRtype);
+		}
+	}
 
 	public MsFeatureChromatogramBundle getXicBundle() {
 		return xicBundle;
+	}
+
+	public String getFilterId() {
+		return filterId;
+	}
+
+	public void setFilterId(String filterId) {
+		this.filterId = filterId;
+	}
+
+	public Filter getSmoothingFilter() {
+		return smoothingFilter;
+	}
+
+	public void setSmoothingFilter(Filter smoothingFilter) {
+		this.smoothingFilter = smoothingFilter;
 	}
 }
 

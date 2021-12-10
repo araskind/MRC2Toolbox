@@ -23,20 +23,22 @@ package edu.umich.med.mrc2.datoolbox.utils.filter;
 
 public enum FilterClass {
 
-	SAVITZKY_GOLAY("Savitzky-Golay", "SG"),
-	SAVITZKY_GOLAY_MZMINE("Savitzky-Golay | MZMine", "SGMZ"),
-	MOVING_AVERAGE("Moving Average", "MA"),
-	WEIGHTED_MOVING_AVERAGE("Weighted Moving Average", "WMA"),
-	LOESS("Loess", "L"),
-	SMOOTHING_CUBIC_SPLINE("Cubic Spline", "CS"),
+	//	SAVITZKY_GOLAY("Savitzky-Golay", "SG", SGFilter.class),
+	SAVITZKY_GOLAY_MZMINE("Savitzky-Golay | MZMine", "SGMZ", SavitzkyGolayFilter.class),
+	MOVING_AVERAGE("Moving Average", "MA", MovingAverageFilter.class),
+	WEIGHTED_MOVING_AVERAGE("Weighted Moving Average", "WMA", WeightedMovingAverageFilter.class),
+	LOESS("Loess", "L", LoessFilter.class),
+	SMOOTHING_CUBIC_SPLINE("Cubic Spline", "CS", SmoothingCubicSplineFilter.class),
 	;
 
 	private final String name;
 	private final String code;
+	private final Class<? extends Filter> filterClass;
 
-	FilterClass(String type, String code) {
+	FilterClass(String type, String code, Class<? extends Filter> filterClass) {
 		this.name = type;
 		this.code = code;
+		this.filterClass = filterClass;
 	}
 
 	public String getName() {
@@ -51,10 +53,23 @@ public enum FilterClass {
 		return name + " (" + code + ")";
 	}
 	
+	public Class<? extends Filter> getFilterClass() {
+		return filterClass;
+	}
+	
 	public static FilterClass getFilterClassByName(String name) {
 		
 		for(FilterClass v : FilterClass.values()) {
 			if(v.name().equals(name))
+				return v;
+		}	
+		return null;
+	}
+	
+	public static FilterClass getFilterClassByCode(String code) {
+		
+		for(FilterClass v : FilterClass.values()) {
+			if(v.getCode().equals(code))
 				return v;
 		}	
 		return null;

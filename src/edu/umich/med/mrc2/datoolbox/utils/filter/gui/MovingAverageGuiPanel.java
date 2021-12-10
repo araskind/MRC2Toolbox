@@ -82,6 +82,8 @@ public class MovingAverageGuiPanel extends FilterGuiPanel {
 		gbc_pointsBeforeSpinner.gridx = 1;
 		gbc_pointsBeforeSpinner.gridy = 0;
 		add(windowWidthSpinner, gbc_pointsBeforeSpinner);
+		
+		//		TODO add padding
 	}
 
 	@Override
@@ -94,6 +96,18 @@ public class MovingAverageGuiPanel extends FilterGuiPanel {
 		}
 		int period = (int)windowWidthSpinner.getValue();
 		return new MovingAverageFilter(period);
+	}
+	
+	@Override
+	public void loadFilterParameters(Filter newFilter) {
+
+		if(!MovingAverageFilter.class.isAssignableFrom(newFilter.getClass()))
+			return;
+		
+		int period = ((MovingAverageFilter)newFilter).getPeriod();
+		windowWidthSpinner.setValue(period);
+		
+		//	TODO add padding
 	}
 
 	@Override

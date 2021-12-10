@@ -56,7 +56,7 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 	public static final String NEUTRAL_MASS_COLUMN = "Monoisotopic mass";
 	public static final String ID_SOURCE_COLUMN = "ID source";
 	public static final String ID_CONFIDENCE_COLUMN = "Conf. level";
-	public static final String ID_SCORE_COLUMN = "Score";	// LIB_SCORE_COLUMN
+	public static final String ID_SCORE_COLUMN = "Score";
 	
 	//	MS1/RT library match
 	public static final String MASS_ERROR_COLUMN = "Mass error";
@@ -65,6 +65,7 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 	public static final String MSRT_LIB_COLUMN = "MS/RT library";
 		
 	//	MSMS library match
+	public static final String ENTROPY_BASED_SCORE_COLUMN = "EScore";
 	public static final String MSMS_MATCH_TYPE_COLUMN = "MType";
 	public static final String PARENT_MZ_COLUMN = "Parent M/Z";
 	public static final String MSMS_LIB_COLUMN = "MSMS library";
@@ -100,12 +101,13 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 			new ColumnContext(ID_SOURCE_COLUMN, CompoundIdSource.class, false),
 			new ColumnContext(ID_CONFIDENCE_COLUMN, CompoundIdentificationConfidence.class, false),			
 			new ColumnContext(ID_SCORE_COLUMN, Double.class, false),	//	Also LIB_SCORE_COLUMN
+			new ColumnContext(ENTROPY_BASED_SCORE_COLUMN, Double.class, false),
 			//	MS1/RT library match
 			new ColumnContext(MASS_ERROR_COLUMN, Double.class, false),
 			new ColumnContext(RETENTION_ERROR_COLUMN, Double.class, false),
 			new ColumnContext(BEST_MATCH_ADDUCT_COLUMN, Adduct.class, false),
 			new ColumnContext(MSRT_LIB_COLUMN, String.class, false),	//	TODO replace by library class?
-			//	MSMS library match
+			//	MSMS library match						
 			new ColumnContext(MSMS_MATCH_TYPE_COLUMN, ReferenceMsMsLibraryMatch.class, false),
 			new ColumnContext(PARENT_MZ_COLUMN, Double.class, false),
 			new ColumnContext(MSMS_LIB_COLUMN, ReferenceMsMsLibrary.class, false),
@@ -156,7 +158,8 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 			if(id.getMsRtLibraryMatch() != null) {
 				//	adductMatch = id.getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
 				msRtLibrary = id.getMsRtLibraryMatch().getLibraryId();	//	TODO reeplace by library object or name
-			}			
+			}
+			double entropyBasedScore = 0.0d;
 			double parentMz = 0.0d;
 			String collisionEnergyValue = null;
 			double forwardScore = 0.0d;
@@ -172,7 +175,8 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 			double posteriorProbability = 0.0d;
 			double percolatorScore = 0.0d;
 
-			TandemMassSpectrum experimentalMsMs = parentFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
+			TandemMassSpectrum experimentalMsMs = 
+					parentFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 			if(experimentalMsMs != null) {
 
 				if(experimentalMsMs.getParent() != null)
@@ -185,6 +189,7 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 				matchFeature = msmslibMatch.getMatchedLibraryFeature();
 				lib = IDTDataCash.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
 				collisionEnergyValue = matchFeature.getCollisionEnergyValue();
+				entropyBasedScore = msmslibMatch.getEntropyBasedScore();
 				forwardScore = msmslibMatch.getForwardScore();
 				reverseScore = msmslibMatch.getReverseScore();
 				probability = msmslibMatch.getProbability();
@@ -213,11 +218,12 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 					id.getCompoundIdentity().getExactMass(),
 					id.getIdSource(),
 					id.getConfidenceLevel(),
-					id.getScore(),					
+					id.getScore(),	
+					entropyBasedScore,
 					deltaMz,
 					deltaRt,
 					adductMatch,
-					msRtLibrary,
+					msRtLibrary,					
 					msmslibMatch,
 					parentMz,
 					lib,

@@ -21,8 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.utils.filter;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
 
 /**
  * Implementation of a LOESS filter (also known as local regression) for smoothing
@@ -44,7 +45,7 @@ import org.w3c.dom.Element;
  * Code from mzmatch
  * http://mzmatch.sourceforge.net/peakml/peakml/math/filter/LoessFilter.html
  */
-public class LoessFilter implements Filter
+public class LoessFilter extends Filter
 {
 	protected double windowsize;
 	protected int window;
@@ -53,26 +54,32 @@ public class LoessFilter implements Filter
 	 * Standard constructor, which accepts the window-size to use for the
 	 * smoothing filter.
 	 * 
-	 * @param windowsize		The windowsize expressed in percentage of the number of data-points.
+	 * @param windowsize		
+	 * 		The windowsize expressed in percentage of the number of data-points.
 	 */
-	public LoessFilter(double windowsize)
-	{
+	public LoessFilter(double windowsize){
+		super(null);
+		if(windowsize < 0.0d || windowsize > 1.0d)
+			throw new IllegalArgumentException("Window size has to be larger than 0 and smaller than 1");
+		
 		this.windowsize = windowsize;
 	}
 	
-	
-//	public LoessFilter(int windowsize)
-//	{
-//		this.window = windowsize;
+//	public LoessFilter(int window) {
+//		super(null);
+//		this.window = window;
+//		
+//		//	TODO handle cases when window >= xvals length
 //	}
-	
+
 	// Filter overrides
 	public double[] filter(double[] xvals, double[] yvals) throws IllegalArgumentException
 	{
 		if (xvals.length != yvals.length)
 			throw new IllegalArgumentException("The arrays xvals and yvals need to be of equal length.");
 		
-		window = (int) Math.round(xvals.length * windowsize);
+		if(window == 0 && windowsize > 0.0d)
+			window = (int) Math.round(xvals.length * windowsize);
 		
 		if (window <= 1)
 			return yvals;
@@ -188,14 +195,13 @@ public class LoessFilter implements Filter
 			}
 
 			smooth[index] = L.get(0, 0) + L.get(1, 0) * xvals[index];
-		}
-		
+		}		
 		return smooth;
 	}
 	
 	@Override
-	public String getCode() {
-		return FilterClass.LOESS.getCode();
+	public FilterClass getFilterClass() {
+		return FilterClass.LOESS;
 	}
 
 	public double getWindowsize() {
@@ -222,17 +228,35 @@ public class LoessFilter implements Filter
 		return true;
 	}
 
+	public LoessFilter(Element filterElement) {
+		super(filterElement);
+	}
+
 	@Override
-	public Element getXmlElement(Document parentDocument) {
-		// TODO Auto-generated method stub
-		return null;
+	public Element getXmlElement() {
+		Element filterElement = super.getXmlElement();
+		filterElement.setAttribute(
+				SmoothingFilterFields.RelWidth.name(), Double.toString(windowsize));
+		return filterElement;
 	}
 
-	public LoessFilter(org.jdom2.Element filterElement) {
-		// TODO Auto-generated method stub
-	}
+	@Override
+	protected void parseParameters(Element xmlElement) {
 
+		if(xmlElement == null)
+			return;
+		
+		String relWidth = 
+				xmlElement.getAttributeValue(SmoothingFilterFields.RelWidth.name());		
+		windowsize = Double.parseDouble(relWidth);
+
+	}
 }
+
+
+
+
+
 
 
 

@@ -31,6 +31,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public class MSMSExtractionParameterSet {
 	
 	private Polarity polarity;
+	private double minPrecursorIntensity;
 	private Range dataExtractionRtRange;
 	private boolean removeAllMassesAboveParent;
 	private double msMsCountsCutoff;
@@ -50,6 +51,7 @@ public class MSMSExtractionParameterSet {
 	
 	public MSMSExtractionParameterSet(
 			Polarity polarity,
+			double minPrecursorIntensity,
 			Range dataExtractionRtRange, 
 			boolean removeAllMassesAboveParent, 
 			double msMsCountsCutoff,
@@ -66,6 +68,7 @@ public class MSMSExtractionParameterSet {
 			double chromatogramExtractionWindow) {
 		super();
 		this.polarity = polarity;
+		this.minPrecursorIntensity = minPrecursorIntensity;
 		this.dataExtractionRtRange = dataExtractionRtRange;
 		this.removeAllMassesAboveParent = removeAllMassesAboveParent;
 		this.msMsCountsCutoff = msMsCountsCutoff;
@@ -221,6 +224,14 @@ public class MSMSExtractionParameterSet {
 
 	public void setXicTarget(MsFeatureChromatogramExtractionTarget xicTarget) {
 		this.xicTarget = xicTarget;
+	}
+
+	public double getMinPrecursorIntensity() {
+		return minPrecursorIntensity;
+	}
+
+	public void setMinPrecursorIntensity(double minPrecursorIntensity) {
+		this.minPrecursorIntensity = minPrecursorIntensity;
 	}
 }
 

@@ -19,30 +19,13 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.xic;
+package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum ChromatogramExtractionType {
-
-	RAW("Extract raw chromatogram only"),
-	SMOOTH("Extract smoothed chromatogram only"),
-	BOTH("Extract bot raw and smoothed chromatograms");
-
-	private String type;
-
-	ChromatogramExtractionType(String type) {
-		this.type = type;
-	}
-
-	public String toString() {
-		return type;
-	}
-	
-	public static ChromatogramExtractionType getChromatogramExtractionTypeByName(String name) {
-		
-		for(ChromatogramExtractionType v : ChromatogramExtractionType.values()) {
-			if(v.name().equals(name))
-				return v;
-		}	
-		return null;
-	}
+public enum SmoothingFilterFields {
+	Filter,
+	FilterCode,
+	Width,
+	RelWidth,
+	Padd,
+	;
 }

@@ -1036,6 +1036,12 @@ public enum MainActionCommands {
 	EDIT_FEATURE_COLLECTION_COMMAND("Edit selected feature collection"),
 	DELETE_FEATURE_COLLECTION_COMMAND("Delete selected feature collection"),
 	LOAD_FEATURE_COLLECTION_COMMAND("Load selected feature collection for analysis"),
+	
+	//	Chromatogram smoothing 
+	SMOOTH_CHROMATOGRAM_COMMAND("Smooth chromatogram"),
+	SHOW_RAW_CHROMATOGRAM_COMMAND("Show raw chromatogram"),
+	SHOW_SMOOTHING_PREFERENCES_COMMAND("Show smoothing preferences"),
+	SAVE_SMOOTHING_PREFERENCES_COMMAND("Save smoothing preferences"),
 	;
 
 	private final String name;

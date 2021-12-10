@@ -63,10 +63,10 @@ public enum PanelList {
 	;
 
 	private final String name;
-	private final Class<?> panelClass;
+	private final Class<? extends DockableMRC2ToolboxPanel> panelClass;
 	private final Boolean visibleByDefault;
 
-	PanelList(String type, Class<?> pClass, Boolean visibleByDefault) {
+	PanelList(String type, Class<? extends DockableMRC2ToolboxPanel> pClass, Boolean visibleByDefault) {
 
 		this.name = type;
 		this.panelClass = pClass;

@@ -45,7 +45,6 @@ import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
-import edu.umich.med.mrc2.datoolbox.utils.filter.FilterClass;
 import edu.umich.med.mrc2.datoolbox.utils.filter.sgfilter.SGFilter;
 
 public class SavitzkyGolayGuiPanel extends FilterGuiPanel implements ChangeListener, ItemListener {
@@ -67,7 +66,8 @@ public class SavitzkyGolayGuiPanel extends FilterGuiPanel implements ChangeListe
 	private static final String IS_ASSYMMETRIC = "IS_ASSYMMETRIC";
 
 	public SavitzkyGolayGuiPanel() {		
-		super(FilterClass.SAVITZKY_GOLAY);
+		//	super(FilterClass.SAVITZKY_GOLAY);
+		super(null);
 	}
 
 	@Override
@@ -170,6 +170,24 @@ public class SavitzkyGolayGuiPanel extends FilterGuiPanel implements ChangeListe
 		sgFilter.setPrecalculatedCoefficients(coeffs);
 		
 		return sgFilter;
+	}
+	
+	@Override
+	public void loadFilterParameters(Filter newFilter) {
+		// TODO Auto-generated method stub
+		
+		if(!SGFilter.class.isAssignableFrom(newFilter.getClass()))
+			return;
+		
+		int pointsBefore = ((SGFilter)newFilter).getNl();
+		pointsBeforeSpinner.setValue(pointsBefore);
+		
+		int pointsAfter = ((SGFilter)newFilter).getNr();
+		pointsAfterSpinner.setValue(pointsAfter);
+		
+		//	TODO maybe, if this filter works at all
+//		int polynomialDegree = ((SGFilter)newFilter).get;
+//		pointsAfterSpinner.setValue(pointsAfter);
 	}
 
 	@Override

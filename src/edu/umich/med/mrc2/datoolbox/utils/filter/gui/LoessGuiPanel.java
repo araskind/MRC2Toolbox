@@ -102,6 +102,16 @@ public class LoessGuiPanel extends FilterGuiPanel {
 		double wSize = (double)((int)windowSizeSpinner.getValue() / 100.0d);
 		return new LoessFilter(wSize);
 	}
+	
+	@Override
+	public void loadFilterParameters(Filter newFilter) {
+
+		if(!LoessFilter.class.isAssignableFrom(newFilter.getClass()))
+			return;
+		
+		int wsSpinnerValue = (int) Math.floor(((LoessFilter)newFilter).getWindowsize() * 100);
+		windowSizeSpinner.setValue(wsSpinnerValue);
+	}
 
 	@Override
 	protected Collection<String> validateParameters() {

@@ -31,14 +31,15 @@ public enum SavitzkyGolayWidth {
 	FIVE(5), 
 	SEVEN(7), 
 	NINE(9),
-	ELEVEN(11), 
-	THIRTEEN(13), 
-	FIFTEEN(15), 
-	SEVENTEEN(17), 
-	NINETEEN(19),
-	TWENTYONE(21), 
-	TWENTYTHREE(23), 
-	TWENTYFIVE(25);
+//	ELEVEN(11), 
+//	THIRTEEN(13), 
+//	FIFTEEN(15), 
+//	SEVENTEEN(17), 
+//	NINETEEN(19),
+//	TWENTYONE(21), 
+//	TWENTYTHREE(23), 
+//	TWENTYFIVE(25),
+	;
 	
 	private final int width;
 	
@@ -58,6 +59,15 @@ public enum SavitzkyGolayWidth {
 		
 		for(SavitzkyGolayWidth sgw : SavitzkyGolayWidth.values()) {
 			if(sgw.name().equals(name))
+				return sgw;
+		}		
+		return null;
+	}
+	
+	public static SavitzkyGolayWidth getSavitzkyGolayWidthByValue(int w) {
+		
+		for(SavitzkyGolayWidth sgw : SavitzkyGolayWidth.values()) {
+			if(sgw.getWidth() == w)
 				return sgw;
 		}		
 		return null;

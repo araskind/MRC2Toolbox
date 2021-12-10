@@ -303,7 +303,17 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		
 		if(activeRawDataAnalysisProject == null)
 			return;
-
+		
+		if(!activeRawDataAnalysisProject.getMsMsFeatureBundles().isEmpty()) {
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Do you want to discard previously extracted "
+					+ "MSMS data for the current project?", 
+					this.getContentPane());
+			if(res != JOptionPane.YES_OPTION) 
+				return;
+		}
+		activeRawDataAnalysisProject.clearMSMSFeatures();
+		//System.gc();
 		msmsFeatureExtractionSetupDialog = new MSMSFeatureExtractionSetupDialog(this);
 		msmsFeatureExtractionSetupDialog.setLocationRelativeTo(this.getContentPane());
 		msmsFeatureExtractionSetupDialog.setVisible(true);
@@ -329,8 +339,14 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	public void showNewRawDataAnalysisProjectDialog() {
 		
-		// TODO check if there is active opened project
-		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			MessageDialog.showWarningMsg(
+					"Please close active raw data analysis project \"" + 
+					MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getName() + 
+					"\" first.", 
+					this.getContentPane());
+			return;
+		}		
 		rawDataAnalysisProjectSetupDialog = new RawDataAnalysisProjectSetupDialog(this);
 		rawDataAnalysisProjectSetupDialog.setLocationRelativeTo(this.getContentPane());
 		rawDataAnalysisProjectSetupDialog.setVisible(true);
@@ -410,13 +426,14 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		//	TODO
 	}
 	
-	private void openRawDataAnalysisProject() {
+	private void openRawDataAnalysisProject() {		
 
 		if (activeRawDataAnalysisProject != null) {
 
-			int selectedValue = JOptionPane.showInternalConfirmDialog(this.getContentPane(),
-					"You are going to close current project, do you want to save the results (Yes - save, No - discard)?",
-					"Save active project", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+			int selectedValue = MessageDialog.showChooseOrCancelMsg(
+					"You are going to close current project, do you want "
+					+ "to save the results (Yes - save, No - discard)?", 
+					this.getContentPane());
 
 			if (selectedValue == JOptionPane.YES_OPTION) {
 
@@ -536,6 +553,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		activeRawDataAnalysisProject = null;
 		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(null);
 		clearPanel();
+		System.gc();
 	}
 
 	private void extractChromatogramms() {

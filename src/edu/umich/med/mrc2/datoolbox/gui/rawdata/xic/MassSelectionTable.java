@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.xic;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.xic;
 
 import java.util.Collection;
 import java.util.TreeSet;

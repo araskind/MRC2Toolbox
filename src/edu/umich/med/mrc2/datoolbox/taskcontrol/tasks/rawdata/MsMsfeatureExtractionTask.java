@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -78,6 +79,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 
 	private DataFile rawDataFile;
 	private Polarity polarity;
+	private double minPrecursorIntensity;
 	private Range dataExtractionRtRange;
 	private boolean removeAllMassesAboveParent;
 	private double msMsCountsCutoff;
@@ -95,6 +97,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private SavitzkyGolayFilter smoothingFilter; 
 	
 	private LCMSData data;
+	private Set<Integer> msLvls;
 	private Collection<MsFeature>features;
 	private Collection<MsFeatureInfoBundle>featureBundles;
 
@@ -105,6 +108,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		this.ps = ps;
 		this.rawDataFile = rawDataFile;	
 		this.polarity = ps.getPolarity();
+		this.minPrecursorIntensity = ps.getMinPrecursorIntensity();
 		this.dataExtractionRtRange = ps.getDataExtractionRtRange();
 		this.removeAllMassesAboveParent = ps.isRemoveAllMassesAboveParent();
 		this.msMsCountsCutoff = ps.getMsMsCountsCutoff();
@@ -143,6 +147,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
+		System.gc();
 		try {
 			filterAndDenoise();
 		}
@@ -150,6 +155,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
+		System.gc();
 		try {
 			mergeRelatedMsmsSpectra();
 		}
@@ -577,15 +583,18 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			}
 			processed++;
 		}
-		clusters.stream().forEach(c -> c.setPrimaryFeature(ClusterUtils.getMostIntensiveMsmsFeature(c)));
+		clusters.stream().
+			forEach(c -> c.setPrimaryFeature(ClusterUtils.getMostIntensiveMsmsFeature(c)));
+		Collection<MsFeatureCluster>duplicateList = clusters.stream().
+				filter(c -> c.getFeatures().size() > 1).
+				collect(Collectors.toList());
 		List<MsFeature> uniqueFeatures = clusters.stream().
 			filter(c -> c.getFeatures().size() == 1).
 			map(c -> c.getPrimaryFeature()).
 			collect(Collectors.toList());
-		
-		Collection<MsFeatureCluster>duplicateList = clusters.stream().
-				filter(c -> c.getFeatures().size() > 1).
-				collect(Collectors.toList());
+		clusters.stream().forEach(c -> c = null);
+		clusters = null;
+
 		taskDescription = "Averaging redundant MSMS features in " + rawDataFile.getName();
 		total = duplicateList.size();
 		processed = 0;
@@ -631,9 +640,9 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 					dataExtractionRtRange.getMin(), dataExtractionRtRange.getMax(), 2);
 		
 		umich.ms.datatypes.scan.props.Polarity scanPolarity = RawDataUtils.getScanPolarity(polarity);
-		
+		Integer unloadIntervalStart = 0;
 		for(Entry<Integer, IScan> entry: num2scan.entrySet()) {
-			
+
 			IScan s = entry.getValue();	
 			if(!s.getPolarity().equals(scanPolarity))
 				continue;
@@ -674,7 +683,15 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 					pInt = 1.0d;
 				
 				parent = new MsPoint(targetMz, pInt);
-			}		
+			}
+			if(parent.getIntensity() < minPrecursorIntensity) {
+				f = null;
+				spectrum = null;
+				targetMz = null;
+				isolationWindow = null;	
+				processed++;
+				continue;
+			}
 			String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
 					MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
 					MRC2ToolBoxConfiguration.defaultRtFormat.format(parentScan.getRt());
@@ -706,13 +723,26 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				f.setSpectrum(spectrum);
 				features.add(f);
 			}
+			if(entry.getKey() % 50 == 0) {
+				unloadProcessedScans(unloadIntervalStart,
+						data.getScans().getPrevScan(parentScan.getNum()).getNum());
+				unloadIntervalStart = parentScan.getNum();
+			}
 			processed++;
 		}
+	}
+	
+	private void unloadProcessedScans(Integer scanNumLo, Integer scanNumHi) {
+		LCMSDataSubset subsetToUnload = 
+				new LCMSDataSubset(scanNumLo, scanNumHi, msLvls, null);	
+		data.getScans().unloadData(subsetToUnload);
 	}
 	
 	private Collection<MsPoint>interpolateScanData(IScan leftScan, IScan rightScan, double rtOfInterest){
 		
 		double splitRatio = (rtOfInterest - leftScan.getRt()) / (rightScan.getRt() - leftScan.getRt());
+		Collection<MsPoint> leftPoints = RawDataUtils.getScanPoints(leftScan);
+		Collection<MsPoint> rightPoints = RawDataUtils.getScanPoints(rightScan);
 		Collection<MsPoint>interpolated = MsUtils.averageTwoSpectraWithInterpolation(
 				RawDataUtils.getScanPoints(leftScan), 
 				RawDataUtils.getScanPoints(rightScan), 
@@ -720,6 +750,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				precursorGroupingMassError, 
 				precursorGroupingMassErrorType);
 		
+		leftPoints.stream().forEach(p -> p = null);
+		rightPoints.stream().forEach(p -> p = null);
 		return interpolated;
 	}
 	
@@ -727,6 +759,14 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			IScan ms1can, Range isolationWindow, double parentMz){
 				
 		ISpectrum spectrum = ms1can.getSpectrum();
+		if(spectrum == null) {
+			try {
+				spectrum = ms1can.fetchSpectrum();
+			} catch (FileParsingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		int[] precursorIdx = spectrum.findMzIdxs(isolationWindow.getMin(), isolationWindow.getMax());
 		if(precursorIdx == null)
 			return null;
@@ -743,6 +783,14 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private MsPoint getActualPrecursor(IScan ms1can, Range isolationWindow) {
 	
 		ISpectrum spectrum = ms1can.getSpectrum();
+		if(spectrum == null) {
+			try {
+				spectrum = ms1can.fetchSpectrum();
+			} catch (FileParsingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		int[] precursorIdx = spectrum.findMzIdxs(isolationWindow.getMin(), isolationWindow.getMax());
 		if(precursorIdx == null)
 			return null;
@@ -776,14 +824,14 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		if (isCanceled())
 			return;
 		
-		data = RawDataManager.getRawData(rawDataFile);
-		
+		data = RawDataManager.getRawData(rawDataFile);		
 		if(!data.getScans().getMapMsLevel2index().containsKey(2)) {
 			System.err.println("No MSMS data in file " + rawDataFile.getName());
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		data.load(LCMSDataSubset.WHOLE_RUN, this);		
+		data.load(LCMSDataSubset.STRUCTURE_ONLY, this);			
+		msLvls = data.getScans().getMapMsLevel2index().keySet();
 	}
 	
 	private void createFeatureInfoBundles() {
@@ -798,7 +846,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			bundle.setDataFile(rawDataFile);
 			featureBundles.add(bundle);
 		}	
-		System.err.println("***");
+//		System.err.println("***");
 	}
 
 	@Override

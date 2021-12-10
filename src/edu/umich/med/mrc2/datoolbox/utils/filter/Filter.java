@@ -21,15 +21,16 @@
 
 package edu.umich.med.mrc2.datoolbox.utils.filter;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
 
 /**
  * Interface for classes implementing a filter on a signal (a combination between
  * x-values and y-values). All classes implementing a filter should inherit from
  * this interface as it can be used at various location like {@link peakml.math#Signal}.
  */
-public interface Filter
+public abstract class Filter
 {
 	/**
 	 * With this method actual filtering is performed. The xvals and yvals arrays
@@ -41,11 +42,24 @@ public interface Filter
 	 * @param yvals		The y-values of the signal.
 	 * @return			The resulting smoothed version of the y-values.
 	 */
-	public double[] filter(double xvals[], double yvals[]) throws IllegalArgumentException;
+	public abstract double[] filter(double xvals[], double yvals[]) throws IllegalArgumentException;
 	
-	public String getCode();
+	public abstract FilterClass getFilterClass();
 	
-	public boolean equals(Filter otherFilter);
+	public abstract boolean equals(Filter otherFilter);
 	
-	public Element getXmlElement(Document parentDocument);
+	public Element getXmlElement() {
+		Element filterElement = 
+				new Element(SmoothingFilterFields.Filter.name());
+		filterElement.setAttribute(
+				SmoothingFilterFields.FilterCode.name(), getFilterClass().getCode());
+		
+		return filterElement;
+	}
+	
+	protected abstract void parseParameters(Element xmlElement);
+	
+	public Filter(Element xmlElement) {
+		parseParameters(xmlElement);
+	}
 }

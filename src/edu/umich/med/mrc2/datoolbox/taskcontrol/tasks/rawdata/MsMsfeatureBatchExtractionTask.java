@@ -95,10 +95,11 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 				processed++;
 				if(processed == msmsDataFiles.size()) {
 					
-					if(msOneDataFiles.size() > 0)
-						initChromatogramExtraction();					
-					else
-						setStatus(TaskStatus.FINISHED);					
+					initChromatogramExtraction();
+//					if(msOneDataFiles.size() > 0)
+//						initChromatogramExtraction();					
+//					else
+//						setStatus(TaskStatus.FINISHED);					
 				}
 			}
 			if (e.getSource().getClass().equals(MsFeatureChromatogramBatchExtractionTask.class)) {
@@ -116,12 +117,23 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 					flatMap(e -> e.getValue().stream()).
 					sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
 					collect(Collectors.toList());
-		MsFeatureChromatogramBatchExtractionTask task = 
-				new MsFeatureChromatogramBatchExtractionTask(
-						msOneDataFiles, 
-						features, 
-						ps.getCommonChromatogramDefinition(),
-						ps.getXicTarget());
+		
+		MsFeatureChromatogramBatchExtractionTask task = null;
+		if(msOneDataFiles != null && !msOneDataFiles.isEmpty()) {
+			
+			task = new MsFeatureChromatogramBatchExtractionTask(
+							msOneDataFiles, 
+							features, 
+							ps.getCommonChromatogramDefinition(),
+							ps.getXicTarget());
+		}
+		else {
+			task = new MsFeatureChromatogramBatchExtractionTask(
+					msmsDataFiles, 
+					features, 
+					ps.getCommonChromatogramDefinition(),
+					ps.getXicTarget());
+		}
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}

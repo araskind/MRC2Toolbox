@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -310,4 +311,15 @@ public class RawDataAnalysisProject extends Project {
 	public void setChromatogramMap(Map<String, MsFeatureChromatogramBundle> chromatogramMap) {
 		this.chromatogramMap = chromatogramMap;
 	}
+
+	public void clearMSMSFeatures() {
+		
+		for(Entry<DataFile, Collection<MsFeatureInfoBundle>> e : msFeatureMap.entrySet())
+			e.getValue().clear();
+		
+		chromatogramMap.clear();
+	}
 }
+
+
+

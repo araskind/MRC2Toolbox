@@ -35,6 +35,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.gui.plot.LCMSPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.LCMSPlotToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotType;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.SmoothingFilterManager;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -53,6 +54,8 @@ public class DockableChromatogramPlot extends DefaultSingleCDockable implements 
 		setLayout(new BorderLayout(0,0));
 
 		chromatogramPlot = new LCMSPlotPanel(PlotType.CHROMATOGRAM);
+		chromatogramPlot.setFilterId(id);
+		chromatogramPlot.setSmoothingFilter(SmoothingFilterManager.getFilter(id));
 		add(chromatogramPlot, BorderLayout.CENTER);
 
 		chromatogramToolbar = new LCMSPlotToolbar(chromatogramPlot, this);

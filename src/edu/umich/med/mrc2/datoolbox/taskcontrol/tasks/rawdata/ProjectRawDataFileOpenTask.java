@@ -42,7 +42,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayWidth;
 import umich.ms.datatypes.LCMSData;
 
 public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskListener{
@@ -161,7 +160,7 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 							null, 
 							null,
 							false,
-							SavitzkyGolayWidth.FIVE);
+							null);
 			xicTask.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(xicTask);
 			fileCount++;

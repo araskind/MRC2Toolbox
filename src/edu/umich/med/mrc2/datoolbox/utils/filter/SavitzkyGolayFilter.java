@@ -24,9 +24,9 @@ package edu.umich.med.mrc2.datoolbox.utils.filter;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
 
 /**
  * Utilities for the Savitzky-Golay smoother.
@@ -34,7 +34,7 @@ import org.w3c.dom.Element;
  * @author $Author: araskind $
  * @version $Revision: 3 $
  */
-public class SavitzkyGolayFilter implements Filter {
+public class SavitzkyGolayFilter extends Filter {
 
 	
 	// constructor(s)
@@ -45,7 +45,7 @@ public class SavitzkyGolayFilter implements Filter {
 	 * @param filterWidth		The number of data points to use.
 	 */
 	public SavitzkyGolayFilter(int width){
-		
+		super(null);
 		filterWidth = width;
 	}
 	
@@ -176,8 +176,8 @@ public class SavitzkyGolayFilter implements Filter {
 	};
 	
 	@Override
-	public String getCode() {
-		return FilterClass.SAVITZKY_GOLAY_MZMINE.getCode();
+	public FilterClass getFilterClass() {
+		return FilterClass.SAVITZKY_GOLAY_MZMINE;
 	}
 	
 	public int getFilterWidth() {
@@ -203,14 +203,28 @@ public class SavitzkyGolayFilter implements Filter {
        
 		return true;
 	}
-
-	@Override
-	public Element getXmlElement(Document parentDocument) {
-		// TODO Auto-generated method stub
-		return null;
+	
+	public SavitzkyGolayFilter(Element filterElement) {
+		super(filterElement);
 	}
 
-	public SavitzkyGolayFilter(org.jdom2.Element filterElement) {
-		// TODO Auto-generated method stub
+	@Override
+	public Element getXmlElement() {
+		
+		Element filterElement = super.getXmlElement();
+		filterElement.setAttribute(
+				SmoothingFilterFields.Width.name(), Integer.toString(filterWidth));
+		return filterElement;
+	}
+
+	@Override
+	protected void parseParameters(Element filterElement) {
+
+		if(filterElement == null)
+			return;
+		
+		String width = 
+				filterElement.getAttributeValue(SmoothingFilterFields.Width.name());		
+		filterWidth = Integer.parseInt(width);
 	}
 }

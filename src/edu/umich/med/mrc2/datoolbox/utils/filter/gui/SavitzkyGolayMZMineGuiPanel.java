@@ -95,6 +95,19 @@ public class SavitzkyGolayMZMineGuiPanel extends FilterGuiPanel {
 		int width = ((SavitzkyGolayWidth)filterWidthComboBox.getSelectedItem()).getWidth();
 		return new SavitzkyGolayFilter(width);
 	}
+	
+	@Override
+	public void loadFilterParameters(Filter newFilter) {
+
+		if(!SavitzkyGolayFilter.class.isAssignableFrom(newFilter.getClass()))
+			return;
+		
+		int fWidth = ((SavitzkyGolayFilter)newFilter).getFilterWidth();
+		SavitzkyGolayWidth sgWidth = 
+				SavitzkyGolayWidth.getSavitzkyGolayWidthByValue(fWidth);
+		if(sgWidth != null)
+			filterWidthComboBox.setSelectedItem(sgWidth);
+	}
 
 	@Override
 	protected Collection<String> validateParameters() {

@@ -86,6 +86,7 @@ import edu.umich.med.mrc2.datoolbox.gui.mptrack.MoTrPACDataTrackingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mstools.MSToolsFrame;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.PreferencesDialog;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.SmoothingFilterManager;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLlayoutManager;
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.ProjectSetupDraw;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
@@ -665,6 +666,7 @@ public class MainWindow extends JFrame
 		panelShowing = new LinkedHashMap<PanelList, Boolean>();
 		
 		TableLlayoutManager.loadLayouts();
+		SmoothingFilterManager.loadFilterMap();
 		
 		for(PanelList panelType : PanelList.getPanelListForConfiguration(BuildInformation.getStartupConfiguration())) {
 			
@@ -1413,6 +1415,7 @@ public class MainWindow extends JFrame
 			e.printStackTrace();
 		}
 		TableLlayoutManager.saveLayouts();
+		SmoothingFilterManager.saveFilterMap();
 	}
 
 	private void saveApplicationLayout() {

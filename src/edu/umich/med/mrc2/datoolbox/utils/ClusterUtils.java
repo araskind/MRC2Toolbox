@@ -50,7 +50,11 @@ public class ClusterUtils {
 	}
 	
 	public static MsFeature getMostIntensiveMsmsFeature(MsFeatureCluster fcluster) {
-		return fcluster.getFeatures().stream().
+		
+		if(fcluster.getFeatures().size() == 1)
+			return fcluster.getFeatures().iterator().next();
+		else
+			return fcluster.getFeatures().stream().
 				filter(f -> f.getSpectrum() != null).
 				filter(f -> f.getSpectrum().getExperimentalTandemSpectrum() != null).
 				sorted(new MsFeatureComparator(SortProperty.msmsIntensity, SortDirection.DESC)).

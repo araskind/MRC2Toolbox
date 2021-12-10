@@ -19,10 +19,9 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.xic;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.xic;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -46,10 +45,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -67,13 +64,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtrac
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.FilterClass;
-import edu.umich.med.mrc2.datoolbox.utils.filter.gui.FilterGuiPanel;
-import edu.umich.med.mrc2.datoolbox.utils.filter.gui.LoessGuiPanel;
-import edu.umich.med.mrc2.datoolbox.utils.filter.gui.MovingAverageGuiPanel;
-import edu.umich.med.mrc2.datoolbox.utils.filter.gui.SavitzkyGolayGuiPanel;
-import edu.umich.med.mrc2.datoolbox.utils.filter.gui.SavitzkyGolayMZMineGuiPanel;
-import edu.umich.med.mrc2.datoolbox.utils.filter.gui.SmoothingCubicSplineGuiPanel;
-import edu.umich.med.mrc2.datoolbox.utils.filter.gui.WeightedMovingAverageGuiPanel;
 
 public class XICSetupPanel extends JPanel implements ActionListener, ItemListener, BackedByPreferences {
 
@@ -96,9 +86,12 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 	private JCheckBox chckbxLimitRtRange;
 	private JComboBox mzWindowTypeComboBox;
 	private JCheckBox sumAllMassesCheckBox;
-	private JComboBox filterTypeComboBox;
-	private JPanel filterParameters;
-	private FilterGuiPanel filterGuiPanel;
+	
+//	private JComboBox filterTypeComboBox;
+//	private JPanel filterParameters;
+//	private FilterGuiPanel filterGuiPanel;
+	
+	private SmothingFilterSelectorPanel smothingFilterSelectorPanel;
 
 	private Preferences preferences;
 	private static final String CLASS_NAME = "clusterfinder.gui.rawdata.XICSetupPanel";
@@ -343,59 +336,63 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		gbc_smoothingComboBox.gridx = 1;
 		gbc_smoothingComboBox.gridy = 5;
 		chromatogaramSettingsPanel.add(smoothingComboBox, gbc_smoothingComboBox);
+		
+		smothingFilterSelectorPanel = new SmothingFilterSelectorPanel();
+		tabbedPane.addTab("Smoothing settings", null, smothingFilterSelectorPanel, null);
 
-		JPanel smoothingSettingsPanel = new JPanel();
-		smoothingSettingsPanel.setBorder(new EmptyBorder(10, 0, 10, 10));
-		tabbedPane.addTab("Smoothing settings", null, smoothingSettingsPanel, null);
-		GridBagLayout gbl_smoothingSettingsPanel = new GridBagLayout();
-		gbl_smoothingSettingsPanel.columnWidths = new int[]{0, 0, 0};
-		gbl_smoothingSettingsPanel.rowHeights = new int[]{0, 0, 0};
-		gbl_smoothingSettingsPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_smoothingSettingsPanel.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		smoothingSettingsPanel.setLayout(gbl_smoothingSettingsPanel);
-		
-		JLabel lblNewLabel_1 = new JLabel("Filter type ");
-		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_1.gridx = 0;
-		gbc_lblNewLabel_1.gridy = 0;
-		smoothingSettingsPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
-		
-		filterTypeComboBox = new JComboBox<FilterClass>(
-				new DefaultComboBoxModel<FilterClass>(new FilterClass[] {
-						FilterClass.SAVITZKY_GOLAY_MZMINE, 
-						FilterClass.MOVING_AVERAGE, 
-						FilterClass.WEIGHTED_MOVING_AVERAGE 
-					}));				
-		filterTypeComboBox.setSelectedIndex(-1);	//	TODO read from preferences		
-		filterTypeComboBox.addItemListener(this);
-		GridBagConstraints gbc_filterTypeComboBox = new GridBagConstraints();
-		gbc_filterTypeComboBox.insets = new Insets(0, 0, 5, 0);
-		gbc_filterTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_filterTypeComboBox.gridx = 1;
-		gbc_filterTypeComboBox.gridy = 0;
-		smoothingSettingsPanel.add(filterTypeComboBox, gbc_filterTypeComboBox);
-		
-		filterParameters = new JPanel();
-		filterParameters.setBorder(new CompoundBorder(
-				new TitledBorder(
-						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
-								new Color(160, 160, 160)), "Filter parameters", 
-						TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
-				new EmptyBorder(10, 10, 10, 10)));
-		GridBagConstraints gbc_filterParameters = new GridBagConstraints();
-		gbc_filterParameters.gridwidth = 2;
-		gbc_filterParameters.insets = new Insets(0, 0, 0, 5);
-		gbc_filterParameters.fill = GridBagConstraints.BOTH;
-		gbc_filterParameters.gridx = 0;
-		gbc_filterParameters.gridy = 1;
-		smoothingSettingsPanel.add(filterParameters, gbc_filterParameters);
-		filterParameters.setLayout(new BorderLayout(0, 0));
+//		JPanel smoothingSettingsPanel = new JPanel();
+//		smoothingSettingsPanel.setBorder(new EmptyBorder(10, 0, 10, 10));
+//		tabbedPane.addTab("Smoothing settings", null, smoothingSettingsPanel, null);
+//		GridBagLayout gbl_smoothingSettingsPanel = new GridBagLayout();
+//		gbl_smoothingSettingsPanel.columnWidths = new int[]{0, 0, 0};
+//		gbl_smoothingSettingsPanel.rowHeights = new int[]{0, 0, 0};
+//		gbl_smoothingSettingsPanel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+//		gbl_smoothingSettingsPanel.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+//		smoothingSettingsPanel.setLayout(gbl_smoothingSettingsPanel);
+//		
+//		JLabel lblNewLabel_1 = new JLabel("Filter type ");
+//		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+//		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
+//		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
+//		gbc_lblNewLabel_1.gridx = 0;
+//		gbc_lblNewLabel_1.gridy = 0;
+//		smoothingSettingsPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
+//		
+//		filterTypeComboBox = new JComboBox<FilterClass>(
+//				new DefaultComboBoxModel<FilterClass>(new FilterClass[] {
+//						FilterClass.SAVITZKY_GOLAY_MZMINE, 
+//						FilterClass.MOVING_AVERAGE, 
+//						FilterClass.WEIGHTED_MOVING_AVERAGE 
+//					}));				
+//		filterTypeComboBox.setSelectedIndex(-1);	//	TODO read from preferences		
+//		filterTypeComboBox.addItemListener(this);
+//		GridBagConstraints gbc_filterTypeComboBox = new GridBagConstraints();
+//		gbc_filterTypeComboBox.insets = new Insets(0, 0, 5, 0);
+//		gbc_filterTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
+//		gbc_filterTypeComboBox.gridx = 1;
+//		gbc_filterTypeComboBox.gridy = 0;
+//		smoothingSettingsPanel.add(filterTypeComboBox, gbc_filterTypeComboBox);
+//		
+//		filterParameters = new JPanel();
+//		filterParameters.setBorder(new CompoundBorder(
+//				new TitledBorder(
+//						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
+//								new Color(160, 160, 160)), "Filter parameters", 
+//						TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
+//				new EmptyBorder(10, 10, 10, 10)));
+//		GridBagConstraints gbc_filterParameters = new GridBagConstraints();
+//		gbc_filterParameters.gridwidth = 2;
+//		gbc_filterParameters.insets = new Insets(0, 0, 0, 5);
+//		gbc_filterParameters.fill = GridBagConstraints.BOTH;
+//		gbc_filterParameters.gridx = 0;
+//		gbc_filterParameters.gridy = 1;
+//		smoothingSettingsPanel.add(filterParameters, gbc_filterParameters);
+//		filterParameters.setLayout(new BorderLayout(0, 0));
 
 		mzErrorTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getPpmFormat());
 		mzErrorTextField
-				.setText(MRC2ToolBoxConfiguration.getPpmFormat().format(MRC2ToolBoxConfiguration.getMassAccuracy()));
+				.setText(MRC2ToolBoxConfiguration.getPpmFormat().
+						format(MRC2ToolBoxConfiguration.getMassAccuracy()));
 
 		extractButton = new JButton(MainActionCommands.EXTRACT_CHROMATOGRAM.getName());
 		extractButton.setActionCommand(MainActionCommands.EXTRACT_CHROMATOGRAM.getName());
@@ -415,19 +412,12 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 	public void actionPerformed(ActionEvent e) {
 
 	}
-	
-	private Filter getSmoothingFilter() {
-		
-		if(filterGuiPanel == null)
-			return null;
-		else
-			return filterGuiPanel.getFilter();		
-	}
 
 	public Collection<String> veryfyParameters() {
 
 		Collection<String> errors = new ArrayList<String>();
-		ChromatogramPlotMode mode = (ChromatogramPlotMode) chromTypeComboBox.getSelectedItem();
+		ChromatogramPlotMode mode = 
+				(ChromatogramPlotMode) chromTypeComboBox.getSelectedItem();
 		Collection<Double> mzList = new ArrayList<Double>();
 
 		if (rawDataFileTable.getSelectedFiles().isEmpty()) {
@@ -520,7 +510,7 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 			double toRt = Double.parseDouble(rtToTextField.getText().trim());
 			rtRange = new Range(fromRt, toRt);
 		}
-		Filter smoothingFilter = filterGuiPanel.getFilter();
+		Filter smoothingFilter = smothingFilterSelectorPanel.getSmoothingFilter();
 		ChromatogramExtractionType chexType = 
 				(ChromatogramExtractionType)smoothingComboBox.getSelectedItem();
 		if(chexType.equals(ChromatogramExtractionType.RAW))
@@ -557,7 +547,8 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		if (dataFiles == null || dataFiles.isEmpty())
 			return;
 
-		DataAcquisitionMethod method = dataFiles.iterator().next().getDataAcquisitionMethod();
+		DataAcquisitionMethod method = 
+				dataFiles.iterator().next().getDataAcquisitionMethod();
 		if (method != null && method.getPolarity() != null)
 			polarityComboBox.setSelectedItem(method.getPolarity());
 	}
@@ -591,8 +582,9 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		rtToTextField.setText(preferences.get(RT_MAX_VALUE, RT_MAX_VALUE_DEFAULT));
 		
 		FilterClass fc = FilterClass.getFilterClassByName(
-				preferences.get(FILTER_CLASS, FilterClass.SAVITZKY_GOLAY.name()));
-		filterTypeComboBox.setSelectedItem(fc);
+				preferences.get(FILTER_CLASS, FilterClass.SAVITZKY_GOLAY_MZMINE.name()));
+		smothingFilterSelectorPanel.setFilterClass(fc);
+//		filterTypeComboBox.setSelectedItem(fc);
 		
 		ChromatogramExtractionType cexType = 
 				ChromatogramExtractionType.getChromatogramExtractionTypeByName(
@@ -621,7 +613,7 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		preferences.putBoolean(USE_RT_RANGE, chckbxLimitRtRange.isSelected());
 		preferences.put(RT_MIN_VALUE, rtFromTextField.getText().trim());
 		preferences.put(RT_MAX_VALUE, rtToTextField.getText().trim());
-		preferences.put(FILTER_CLASS, ((FilterClass) filterTypeComboBox.getSelectedItem()).name());
+		preferences.put(FILTER_CLASS, smothingFilterSelectorPanel.getFilterClass().name());
 		preferences.put(CHROMATOGRAM_EXTRACTION_TYPE, 
 				((ChromatogramExtractionType) smoothingComboBox.getSelectedItem()).name());
 	}
@@ -631,8 +623,8 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 
        if (e.getStateChange() == ItemEvent.SELECTED) {
            Object item = e.getItem();
-           if(item instanceof FilterClass)
-        	   showFilterClassParameters((FilterClass)item);
+//           if(item instanceof FilterClass)
+//        	   showFilterClassParameters((FilterClass)item);
            
            if(item instanceof Polarity) {
         	   //	TODO - adjust file selection if necessary
@@ -640,44 +632,44 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
        }
 	}
 
-	private void showFilterClassParameters(FilterClass filterClass) {
-
-		if(filterGuiPanel != null)			
-			filterGuiPanel.savePreferences();
-		
-		filterGuiPanel = null;
-		filterParameters.removeAll();
-		
-		if(filterClass.equals(FilterClass.SAVITZKY_GOLAY))
-			filterGuiPanel = new SavitzkyGolayGuiPanel();	
-		
-		if(filterClass.equals(FilterClass.SAVITZKY_GOLAY_MZMINE))
-			filterGuiPanel = new SavitzkyGolayMZMineGuiPanel();	
-		
-		if(filterClass.equals(FilterClass.MOVING_AVERAGE))
-			filterGuiPanel = new MovingAverageGuiPanel();
-		
-		if(filterClass.equals(FilterClass.WEIGHTED_MOVING_AVERAGE))
-			filterGuiPanel = new WeightedMovingAverageGuiPanel();
-		
-		if(filterClass.equals(FilterClass.LOESS))			
-			filterGuiPanel = new LoessGuiPanel();
-		
-		if(filterClass.equals(FilterClass.SMOOTHING_CUBIC_SPLINE)) 
-			filterGuiPanel = new SmoothingCubicSplineGuiPanel();
-		
-		if(filterGuiPanel != null) {			
-			filterGuiPanel.loadPreferences();
-			filterParameters.add(filterGuiPanel, BorderLayout.CENTER);
-			Filter f = getSmoothingFilter();
-			//	System.err.println("Filter " + filterGuiPanel.getFilterClass().getName() + " - " + f.toString());
-		}
-		else {
-			filterParameters.add(new JPanel(), BorderLayout.CENTER);
-		}
-		filterParameters.revalidate();
-		filterParameters.repaint();		
-	}
+//	private void showFilterClassParameters(FilterClass filterClass) {
+//
+//		if(filterGuiPanel != null)			
+//			filterGuiPanel.savePreferences();
+//		
+//		filterGuiPanel = null;
+//		filterParameters.removeAll();
+//		
+////		if(filterClass.equals(FilterClass.SAVITZKY_GOLAY))
+////			filterGuiPanel = new SavitzkyGolayGuiPanel();	
+//		
+//		if(filterClass.equals(FilterClass.SAVITZKY_GOLAY_MZMINE))
+//			filterGuiPanel = new SavitzkyGolayMZMineGuiPanel();	
+//		
+//		if(filterClass.equals(FilterClass.MOVING_AVERAGE))
+//			filterGuiPanel = new MovingAverageGuiPanel();
+//		
+//		if(filterClass.equals(FilterClass.WEIGHTED_MOVING_AVERAGE))
+//			filterGuiPanel = new WeightedMovingAverageGuiPanel();
+//		
+//		if(filterClass.equals(FilterClass.LOESS))			
+//			filterGuiPanel = new LoessGuiPanel();
+//		
+//		if(filterClass.equals(FilterClass.SMOOTHING_CUBIC_SPLINE)) 
+//			filterGuiPanel = new SmoothingCubicSplineGuiPanel();
+//		
+//		if(filterGuiPanel != null) {			
+//			filterGuiPanel.loadPreferences();
+//			filterParameters.add(filterGuiPanel, BorderLayout.CENTER);
+//			//	Filter f = getSmoothingFilter();
+//			//	System.err.println("Filter " + filterGuiPanel.getFilterClass().getName() + " - " + f.toString());
+//		}
+//		else {
+//			filterParameters.add(new JPanel(), BorderLayout.CENTER);
+//		}
+//		filterParameters.revalidate();
+//		filterParameters.repaint();		
+//	}
 
 	public void removeDataFiles(Collection<DataFile> filesToRemove) {
 		rawDataFileTable.removeDataFiles(filesToRemove);

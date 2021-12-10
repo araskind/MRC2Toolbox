@@ -28,8 +28,7 @@ import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.FilterClass;
@@ -54,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.utils.filter.FilterClass;
  *	smooth = sgFilter.smooth(data, leftPad, new float[0], coeffs);
  *
  */
-public class SGFilter implements Filter {
+public class SGFilter extends Filter {
 	
 	private double[] precalculatedCoefficients = null;
 
@@ -135,6 +134,7 @@ public class SGFilter implements Filter {
 	 *             of {@code nl < 0} or {@code nr < 0}
 	 */
 	public SGFilter(int nl, int nr) {
+		super(null);
 		if (nl < 0 || nr < 0)
 			throw new IllegalArgumentException("Bad arguments");
 		this.nl = nl;
@@ -661,8 +661,9 @@ public class SGFilter implements Filter {
 	}
 
 	@Override
-	public String getCode() {
-		return FilterClass.SAVITZKY_GOLAY.getCode();
+	public FilterClass getFilterClass() {
+		//	return FilterClass.SAVITZKY_GOLAY;
+		return null;	//	TODO
 	}
 
 	@Override
@@ -683,14 +684,21 @@ public class SGFilter implements Filter {
         
 		return true;
 	}
+	
+	public SGFilter(Element filterElement) {
+		super(filterElement);
+	}
 
 	@Override
-	public Element getXmlElement(Document parentDocument) {
+	public Element getXmlElement() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	public SGFilter(org.jdom2.Element filterElement) {
+
+	@Override
+	protected void parseParameters(Element xmlElement) {
 		// TODO Auto-generated method stub
+		if(xmlElement == null)
+			return;
 	}
 }

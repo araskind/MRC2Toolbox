@@ -21,10 +21,11 @@
 
 package edu.umich.med.mrc2.datoolbox.utils.filter;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
 
-public class SmoothingCubicSplineFilter implements Filter {
+import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
+
+public class SmoothingCubicSplineFilter extends Filter {
 
 	private SmoothingCubicSpline spline;
 	private double rho;
@@ -39,7 +40,7 @@ public class SmoothingCubicSplineFilter implements Filter {
 	 * 			if rho has wrong value.
 	 */
 	public SmoothingCubicSplineFilter(double rho) {
-		super();
+		super(null);
 		this.rho = rho;
 		if (rho < 0 || rho > 1)
 			throw new IllegalArgumentException("rho not in [0, 1]");
@@ -57,8 +58,8 @@ public class SmoothingCubicSplineFilter implements Filter {
 	}
 
 	@Override
-	public String getCode() {
-		return FilterClass.SMOOTHING_CUBIC_SPLINE.getCode();
+	public FilterClass getFilterClass() {
+		return FilterClass.SMOOTHING_CUBIC_SPLINE;
 	}
 
 	public double getRho() {
@@ -85,13 +86,26 @@ public class SmoothingCubicSplineFilter implements Filter {
 		return true;
 	}
 
-	@Override
-	public Element getXmlElement(Document parentDocument) {
-		// TODO Auto-generated method stub
-		return null;
+	public SmoothingCubicSplineFilter(Element filterElement) {
+		super(filterElement);
 	}
 
-	public SmoothingCubicSplineFilter(org.jdom2.Element filterElement) {
-		// TODO Auto-generated method stub
+	@Override
+	public Element getXmlElement() {
+		Element filterElement = super.getXmlElement();
+		filterElement.setAttribute(
+				SmoothingFilterFields.RelWidth.name(), Double.toString(rho));
+		return filterElement;
+	}
+
+	@Override
+	protected void parseParameters(Element xmlElement) {
+
+		if(xmlElement == null)
+			return;
+		
+		String rhoString = 
+				xmlElement.getAttributeValue(SmoothingFilterFields.RelWidth.name());		
+		rho = Double.parseDouble(rhoString);
 	}
 }

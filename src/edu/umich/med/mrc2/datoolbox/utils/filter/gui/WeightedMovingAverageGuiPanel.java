@@ -95,6 +95,16 @@ public class WeightedMovingAverageGuiPanel extends FilterGuiPanel {
 		int period = (int)periodSpinner.getValue();
 		return new WeightedMovingAverageFilter(period);
 	}
+	
+	@Override
+	public void loadFilterParameters(Filter newFilter) {
+
+		if(!WeightedMovingAverageFilter.class.isAssignableFrom(newFilter.getClass()))
+			return;
+		
+		int period = ((WeightedMovingAverageFilter)newFilter).getPeriod();
+		periodSpinner.setValue(period);
+	}
 
 	@Override
 	protected Collection<String> validateParameters() {

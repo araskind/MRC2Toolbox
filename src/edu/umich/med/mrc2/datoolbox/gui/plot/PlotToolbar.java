@@ -45,11 +45,7 @@ public class PlotToolbar extends CommonToolbar {
 	 *
 	 */
 	private static final long serialVersionUID = 5809328110952861549L;
-
-	protected static final Icon labelActiveIcon = GuiUtils.getIcon("plotLabelActive", 24);
-	protected static final Icon labelInactiveIcon = GuiUtils.getIcon("plotLabelInactive", 24);
-	protected static final Icon dataPointsOnIcon = GuiUtils.getIcon("chromatogram_dotted", 24);
-	protected static final Icon dataPointsOffIcon = GuiUtils.getIcon("chromatogram", 24);
+	
 	protected static final Icon zoomInHorizontalIcon = GuiUtils.getIcon("zoomX", 24);
 	protected static final Icon zoomOutHorizontalIcon = GuiUtils.getIcon("zoomOutX", 24);
 	protected static final Icon zoomInVerticalIcon = GuiUtils.getIcon("zoomY", 24);
@@ -67,13 +63,24 @@ public class PlotToolbar extends CommonToolbar {
 	protected static final Icon savePdfIcon = GuiUtils.getIcon("savePdf", 24);
 	protected static final Icon saveSvgIcon = GuiUtils.getIcon("saveSvg", 24);
 
+	protected static final Icon labelActiveIcon = GuiUtils.getIcon("plotLabelActive", 24);
+	protected static final Icon labelInactiveIcon = GuiUtils.getIcon("plotLabelInactive", 24);
+	protected static final Icon dataPointsOnIcon = GuiUtils.getIcon("chromatogram_dotted", 24);
+	protected static final Icon dataPointsOffIcon = GuiUtils.getIcon("chromatogram", 24);
+	
+	protected static final Icon smoothingOnIcon = GuiUtils.getIcon("smoothChromatogram", 24);
+	protected static final Icon smoothingOffIcon = GuiUtils.getIcon("rawChromatogram", 24);
+	protected static final Icon smoothingPreferencesIcon = GuiUtils.getIcon("smoothingPreferences", 24);
+	
 	protected Dimension buttonDimension = new Dimension(28, 28);
 
 	protected JButton
 		toggleLegendButton,
 		toggleLabelsButton,
 		toggleDataPointsButton,
-		saveButton;
+		saveButton,
+		toggleSmoothingButton,
+		smoothingPreferencesButton;
 
 	protected String xAxisUnits;
 
@@ -155,21 +162,55 @@ public class PlotToolbar extends CommonToolbar {
 		GuiUtils.addButton(this, null, zoomOutVerticalIcon, commandListener, ChartPanel.ZOOM_OUT_RANGE_COMMAND,
 				"Zoom out intensity axis", buttonDimension);
 	}
+	
+	protected void createSmoothingBlock() {
+		
+		toggleSmoothingButton = GuiUtils.addButton(this, null, smoothingOffIcon, commandListener,
+				MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName(), 
+				MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName(), buttonDimension);
+		
+		smoothingPreferencesButton = GuiUtils.addButton(this, null, smoothingPreferencesIcon, commandListener,
+				MainActionCommands.SHOW_SMOOTHING_PREFERENCES_COMMAND.getName(), 
+				MainActionCommands.SHOW_SMOOTHING_PREFERENCES_COMMAND.getName(), buttonDimension);
+	}
+	
+	public void toggleSmoothingIcon(boolean smoothChromatogram) {
+				
+		if(toggleSmoothingButton == null)
+			return;
+
+		if (smoothChromatogram) {
+
+			toggleSmoothingButton.setIcon(smoothingOnIcon);
+			toggleSmoothingButton.setActionCommand(MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName());
+			toggleSmoothingButton.setToolTipText(MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName());
+		} else {
+			toggleSmoothingButton.setIcon(smoothingOffIcon);
+			toggleSmoothingButton.setActionCommand(MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName());
+			toggleSmoothingButton.setToolTipText(MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName());
+		}
+	}
 
 	public void toggleAnnotationsIcon(boolean isAnnotationVisible) {
 
+		if(toggleLabelsButton == null)
+			return;
+		
 		if (isAnnotationVisible) {
 
-			toggleLabelsButton.setIcon(labelInactiveIcon);
+			toggleLabelsButton.setIcon(labelActiveIcon);
 			toggleLabelsButton.setToolTipText("Hide labels");
 		} else {
-			toggleLabelsButton.setIcon(labelActiveIcon);
+			toggleLabelsButton.setIcon(labelInactiveIcon);
 			toggleLabelsButton.setToolTipText("Show labels");
 		}
 	}
 
 	public void toggleDataPointssIcon(boolean dataPointsVisibleVisible) {
 
+		if(toggleDataPointsButton == null)
+			return;
+		
 		if (toggleDataPointsButton != null) {
 
 			if (dataPointsVisibleVisible) {
@@ -185,14 +226,17 @@ public class PlotToolbar extends CommonToolbar {
 
 	public void toggleLegendIcon(boolean isLegendVisible) {
 
+		if(toggleLegendButton == null)
+			return;
+		
 		if (toggleLegendButton != null) {
 
 			if (isLegendVisible) {
 
-				toggleLegendButton.setIcon(hideLegendIcon);
+				toggleLegendButton.setIcon(showLegendIcon);
 				toggleLegendButton.setToolTipText("Hide legend");
 			} else {
-				toggleLegendButton.setIcon(showLegendIcon);
+				toggleLegendButton.setIcon(hideLegendIcon);
 				toggleLegendButton.setToolTipText("Show legend");
 			}
 		}

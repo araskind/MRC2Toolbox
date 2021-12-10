@@ -26,10 +26,11 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.apache.commons.math3.stat.descriptive.rank.Min;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Element;
 
-public class MovingAverageFilter implements Filter{
+import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
+
+public class MovingAverageFilter extends Filter{
 
 	private final Queue<Double> window = new LinkedList<Double>();
     private final int period;
@@ -39,6 +40,7 @@ public class MovingAverageFilter implements Filter{
  
     public MovingAverageFilter(int period) {
     	
+    	super(null);
         assert period > 0 : "Period must be a positive integer";
         this.period = period;
         padding = 0;
@@ -47,6 +49,7 @@ public class MovingAverageFilter implements Filter{
     
     public MovingAverageFilter(int period, int padding) {
     	
+    	super(null);
         assert period > 0 : "Period must be a positive integer";
         this.period = period;
         this.padding = padding;
@@ -117,8 +120,8 @@ public class MovingAverageFilter implements Filter{
 	}
 	
 	@Override
-	public String getCode() {
-		return FilterClass.MOVING_AVERAGE.getCode();
+	public FilterClass getFilterClass() {
+		return FilterClass.MOVING_AVERAGE;
 	}
 	
 	@Override
@@ -144,16 +147,31 @@ public class MovingAverageFilter implements Filter{
 		return true;
 	}
 
-	@Override
-	public Element getXmlElement(Document parentDocument) {
-		// TODO Auto-generated method stub
-		return null;
+	public MovingAverageFilter(Element filterElement) {
+
+		super(filterElement);
+		String periodWidth = 
+				filterElement.getAttributeValue(SmoothingFilterFields.Width.name());		
+		period = Integer.parseInt(periodWidth);
+		String paddingWidth = 
+				filterElement.getAttributeValue(SmoothingFilterFields.Padd.name());		
+		padding = Integer.parseInt(paddingWidth);
 	}
 
-	public MovingAverageFilter(org.jdom2.Element filterElement) {
-		// TODO Auto-generated method stub
-		 this.period = 5;	// TODO 
-		 this.padding = 2;	// TODO 
+	@Override
+	public Element getXmlElement() {
+		
+		Element filterElement = super.getXmlElement();
+		filterElement.setAttribute(
+				SmoothingFilterFields.Width.name(), Integer.toString(period));
+		filterElement.setAttribute(
+				SmoothingFilterFields.Padd.name(), Integer.toString(padding));
+		return filterElement;
+	}
+
+	@Override
+	protected void parseParameters(Element xmlElement) {
+
 	}
 }
 
