@@ -604,7 +604,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		processed = 0;
 		String query =
 				"SELECT MSMS_FEATURE_ID, PARENT_MZ, FRAGMENTATION_ENERGY, "
-				+ "COLLISION_ENERGY, TOTAL_INTENSITY, ENTROPY, POLARITY, ID_DISABLED " +
+				+ "COLLISION_ENERGY, POLARITY, ID_DISABLED " +
 				"FROM MSMS_FEATURE WHERE PARENT_FEATURE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = null;
@@ -615,12 +615,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		ResultSet msrs = null;
 		
 		for(MsFeatureInfoBundle fb : features) {
-//			try {
-//				IDTMsDataUtils.attachExperimentalTandemSpectra(fb.getMsFeature(), conn);
-//			} catch (SQLException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+
 			try {
 				ps.setString(1, fb.getMsFeature().getId());	
 				rs = ps.executeQuery();
@@ -635,9 +630,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 							rs.getDouble("COLLISION_ENERGY"),
 							polarity);
 					msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
-					msms.setParent(new MsPoint(rs.getDouble("PARENT_MZ"), 999.0d));	
-//					msms.setTotalIntensity(rs.getDouble("TOTAL_INTENSITY"));
-					msms.setEntropy(rs.getDouble("ENTROPY"));		
+					msms.setParent(new MsPoint(rs.getDouble("PARENT_MZ"), 999.0d));		
 					msmsList.add(msms);
 					
 					//	Set flag if ID is disabled
@@ -653,13 +646,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						spectrum.add(new MsPoint(msrs.getDouble("MZ"), msrs.getDouble("HEIGHT")));
 
 					msrs.close();
-					
-//					if(msms.getTotalIntensity() == 0.0d)				
-//						msms.setTotalIntensity(spectrum.stream().mapToDouble(p -> p.getIntensity()).sum());
-					
-					if(msms.getEntropy() == 0.0d)
-						msms.setEntropy(MsUtils.calculateSpectrumEntropy(spectrum));
-					
+					msms.setEntropy(MsUtils.calculateSpectrumEntropyNatLog(spectrum));					
 					fb.getMsFeature().getSpectrum().addTandemMs(msms);
 				}
 			} catch (SQLException e) {

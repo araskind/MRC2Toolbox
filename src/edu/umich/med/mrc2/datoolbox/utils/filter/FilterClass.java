@@ -21,10 +21,13 @@
 
 package edu.umich.med.mrc2.datoolbox.utils.filter;
 
+import edu.umich.med.mrc2.datoolbox.utils.filter.sgjdsp.SavitzkyGolayJdsp;
+
 public enum FilterClass {
 
 	//	SAVITZKY_GOLAY("Savitzky-Golay", "SG", SGFilter.class),
 	SAVITZKY_GOLAY_MZMINE("Savitzky-Golay | MZMine", "SGMZ", SavitzkyGolayFilter.class),
+	SAVITZKY_GOLAY_JDSP("Savitzky-Golay | JDSP", "SGJDSP", SavitzkyGolayJdsp.class),
 	MOVING_AVERAGE("Moving Average", "MA", MovingAverageFilter.class),
 	WEIGHTED_MOVING_AVERAGE("Weighted Moving Average", "WMA", WeightedMovingAverageFilter.class),
 	LOESS("Loess", "L", LoessFilter.class),

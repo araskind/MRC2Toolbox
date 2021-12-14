@@ -115,7 +115,7 @@ public class ExtendedMSPExportTask extends AbstractTask {
 		injectionMap = new TreeMap<String,LIMSInjection>();
 		List<String> injIds = msmsFeatures.stream().
 				map(f -> f.getInjectionId()).distinct().
-				filter(i -> !i.equals(null)).sorted().
+				filter(i -> i != null).sorted().
 				collect(Collectors.toList());
 
 		if(injIds.isEmpty())
@@ -146,7 +146,8 @@ public class ExtendedMSPExportTask extends AbstractTask {
 			MsFeature msf = bundle.getMsFeature();
 			Collection<TandemMassSpectrum> tandemSpectra = msf.getSpectrum().getTandemSpectra();
 			if(instrumentOnly)
-				tandemSpectra = tandemSpectra.stream().filter(t -> t.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
+				tandemSpectra = tandemSpectra.stream().
+					filter(t -> t.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
 					collect(Collectors.toList());
 
 			if(tandemSpectra.isEmpty())
@@ -208,7 +209,7 @@ public class ExtendedMSPExportTask extends AbstractTask {
 	private String createComment(MsFeatureInfoBundle bundle) {
 
 		String comment = MSPField.COMMENT.getName() + ": ";
-		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(bundle.getMsFeature().getRetentionTime()) + " min. | ";
+		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(bundle.getMsFeature().getRetentionTime()) + " min; ";
 		String injId = bundle.getInjectionId();
 		if(injId != null) {
 			LIMSInjection injection = injectionMap.get(injId);
@@ -217,9 +218,13 @@ public class ExtendedMSPExportTask extends AbstractTask {
 				comment += "Timestamp: " + dateFormat.format(injection.getTimestamp()) + "; ";
 			}
 		}
-		comment += "Acq. method: " + bundle.getAcquisitionMethod().getName() + "; ";
-		comment += "DA method: " + bundle.getDataExtractionMethod().getName() + "\n";
-		return comment;
+		if(bundle.getAcquisitionMethod() != null)
+			comment += "Acq. method: " + bundle.getAcquisitionMethod().getName() + "; ";
+		
+		if(bundle.getDataExtractionMethod() != null)
+			comment += "DA method: " + bundle.getDataExtractionMethod().getName();
+		
+		return comment + "\n";
 	}
 
 	private MsPoint[] normalizeAndSortMsPatternForMsp(Collection<MsPoint>pattern) {

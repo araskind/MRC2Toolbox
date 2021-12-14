@@ -143,14 +143,18 @@ public abstract class MasterPlotPanel extends ChartPanel{
 			this.restoreAutoBounds();
 
 		else if (command.equals(ChartPanel.COPY_COMMAND))
-			this.doCopy();
-
+			try {
+				this.doCopy();
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				//e1.printStackTrace();
+			}
 		else if (command.equals(ChartPanel.SAVE_COMMAND)) {
 
 			try {
 				this.doSaveAs();
 			} catch (IOException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 		}
 		else if (command.equals(ChartPanel.PRINT_COMMAND))

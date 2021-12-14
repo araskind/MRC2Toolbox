@@ -43,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.utils.filter.FilterClass;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.FilterGuiPanel;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.LoessGuiPanel;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.MovingAverageGuiPanel;
+import edu.umich.med.mrc2.datoolbox.utils.filter.gui.SavitzkyGolayJdspGuiPanel;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.SavitzkyGolayMZMineGuiPanel;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.SmoothingCubicSplineGuiPanel;
 import edu.umich.med.mrc2.datoolbox.utils.filter.gui.WeightedMovingAverageGuiPanel;
@@ -78,7 +79,8 @@ public class SmothingFilterSelectorPanel extends JPanel implements ItemListener 
 		
 		filterTypeComboBox = new JComboBox<FilterClass>(
 				new DefaultComboBoxModel<FilterClass>(new FilterClass[] {
-						FilterClass.SAVITZKY_GOLAY_MZMINE, 
+//						FilterClass.SAVITZKY_GOLAY_MZMINE, 
+						FilterClass.SAVITZKY_GOLAY_JDSP, 
 						FilterClass.MOVING_AVERAGE, 
 						FilterClass.WEIGHTED_MOVING_AVERAGE 
 					}));				
@@ -131,6 +133,9 @@ public class SmothingFilterSelectorPanel extends JPanel implements ItemListener 
 		
 		if(filterClass.equals(FilterClass.SAVITZKY_GOLAY_MZMINE))
 			filterGuiPanel = new SavitzkyGolayMZMineGuiPanel();	
+		
+		if(filterClass.equals(FilterClass.SAVITZKY_GOLAY_JDSP))
+			filterGuiPanel = new SavitzkyGolayJdspGuiPanel();
 		
 		if(filterClass.equals(FilterClass.MOVING_AVERAGE))
 			filterGuiPanel = new MovingAverageGuiPanel();

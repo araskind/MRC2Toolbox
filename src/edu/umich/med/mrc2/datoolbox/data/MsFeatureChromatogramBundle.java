@@ -55,7 +55,14 @@ public class MsFeatureChromatogramBundle {
 		if(chromatograms.get(df) == null)
 			chromatograms.put(df, new TreeSet<ExtractedIonData>(ChromatogramUtils.eidComparator));
 			
-		chromatograms.get(df).addAll(chromatograms2add);
+		if(chromatograms2add != null && !chromatograms2add.isEmpty()) {
+			try {
+				chromatograms.get(df).addAll(chromatograms2add);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void addChromatogramForDataFile(
@@ -64,7 +71,12 @@ public class MsFeatureChromatogramBundle {
 		if(chromatograms.get(df) == null)
 			chromatograms.put(df, new TreeSet<ExtractedIonData>(ChromatogramUtils.eidComparator));
 			
-		chromatograms.get(df).add(chromatogram2add);
+		try {
+			chromatograms.get(df).add(chromatogram2add);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public Collection<ExtractedIonData>getChromatogramsForDataFile(DataFile df){

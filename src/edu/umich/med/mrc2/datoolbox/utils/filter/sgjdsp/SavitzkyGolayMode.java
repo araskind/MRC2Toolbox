@@ -19,15 +19,12 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.project.store;
+package edu.umich.med.mrc2.datoolbox.utils.filter.sgjdsp;
 
-public enum SmoothingFilterFields {
-	Filter,
-	FilterCode,
-	Width,
-	RelWidth,
-	Padd,
-	POrder,
-	SGMode,
+public enum SavitzkyGolayMode {
+	nearest,
+	constant,
+	mirror,
+	wrap,
 	;
 }

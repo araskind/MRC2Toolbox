@@ -456,7 +456,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				return;
 		}
 		else {
-			clearGuiAfterProjectClosed();
+			//	clearGuiAfterProjectClosed();
 			initRawDataAnalysisProjectLoadTask();
 		}
 	}	
@@ -553,6 +553,10 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		activeRawDataAnalysisProject = null;
 		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(null);
 		clearPanel();
+		IDWorkbenchPanel workbench  = 
+				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
+		workbench.clearPanel();
+		RawDataManager.releaseAllDataSources();
 		System.gc();
 	}
 
@@ -796,6 +800,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
+		
+		sendMSMSFeaturesToIDTrackerWorkbench();
 	}
 
 	private void finalizeRawDataAnalysisProjectSave() {

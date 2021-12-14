@@ -75,14 +75,22 @@ public class DockableRawDataFilePropertiesTable extends DefaultSingleCDockable {
 		if(data == null)
 			return;
 		
-		Map<String,String>properties = new TreeMap<String,String>();
 		LCMSRunInfo runInfo = data.getSource().getRunInfo();
+		if(runInfo == null)
+			return;
 		
+		Map<String,String>properties = new TreeMap<String,String>();
 		Date acqDate = runInfo.getRunStartTime();
 		Map<String, Instrument> instruments = runInfo.getInstruments();
 		List<MsSoftware> softwareList = runInfo.getSoftware();
-		
-		properties.put("Start timestamp", MRC2ToolBoxConfiguration.getDateTimeFormat().format(acqDate));
+		String timestamp = "";
+		try {
+			timestamp = MRC2ToolBoxConfiguration.getDateTimeFormat().format(acqDate);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			//	e.printStackTrace();
+		}
+		properties.put("Start timestamp", timestamp);
 		for(Entry<String, Instrument> entry : instruments.entrySet()) {			
 			properties.put("Instrument " + entry.getKey(), entry.getValue().getManufacturer() + " " + entry.getValue().getModel());
 		}

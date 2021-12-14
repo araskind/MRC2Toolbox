@@ -160,7 +160,7 @@ public class FeatureCollectionManagerDialog extends JDialog
 	}
 
 	private void loadFeatureCollection() {
-
+		
 		MsFeatureInfoBundleCollection selectedCollection = 
 				featureCollectionsTable.getSelectedCollection();
 		if(selectedCollection == null)

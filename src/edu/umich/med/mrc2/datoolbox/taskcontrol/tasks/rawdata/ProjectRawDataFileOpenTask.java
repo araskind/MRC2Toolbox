@@ -107,7 +107,7 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 		}
 	}
 	
-	private void loadRawData() {
+	private synchronized void loadRawData() {
 		
 		taskDescription = "Loading raw data files for project ...";
 		total = project.getDataFiles().size();

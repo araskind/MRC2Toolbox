@@ -66,6 +66,7 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("clusterFeatureTable", 32);
 	private static final Icon fdrIcon = GuiUtils.getIcon("fdr", 32);	
 	private static final Icon reassignTopHitsIcon = GuiUtils.getIcon("recalculateScores", 32);
+	private static final Icon filterIcon = GuiUtils.getIcon("filter", 32);
 	
 	@SuppressWarnings("unused")
 	private JButton
@@ -90,6 +91,7 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 		clearDuplicatesButton,
 		exportRefMSMSLibraryButton,
 		importDecoyRefMSMSLibraryButton,
+		filterFeaturesButton,
 		bubblePlotButton,
 		editFeatureCollectionButton,
 		fdrButton,
@@ -220,6 +222,12 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(),
 				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(), buttonDimension);
 		importDecoyRefMSMSLibraryButton.setEnabled(false);
+		
+		addSeparator(buttonDimension);
+		
+		filterFeaturesButton = GuiUtils.addButton(this, null, filterIcon, commandListener,
+				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(),
+				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(), buttonDimension);
 		
 		addSeparator(buttonDimension);
 		

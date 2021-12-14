@@ -306,7 +306,18 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	public Set<MsFeatureIdentity> getIdentifications() {
 		return identifications;
 	}
-
+	
+	public MsFeatureIdentity getIdentityByPartialName(String partName) {
+		
+		if(identifications == null || identifications.isEmpty())
+			return null;
+		
+		String upName = partName.toUpperCase();
+		return identifications.stream().
+				filter(i -> i.getName().toUpperCase().contains(upName)).
+				findFirst().orElse(null);
+	}
+	
 	public void setIdentifications(HashSet<MsFeatureIdentity> identifications) {
 
 		this.identifications = identifications;

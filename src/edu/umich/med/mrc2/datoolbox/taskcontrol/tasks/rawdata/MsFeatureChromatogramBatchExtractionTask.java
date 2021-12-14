@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
@@ -50,8 +51,9 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 	private MsFeatureChromatogramExtractionTarget xicTarget;	
 	private Map<MsFeatureInfoBundle, ChromatogramDefinition>featureChromatogramDefinitions;
 	private Map<String, MsFeatureChromatogramBundle>chromatogramMap;
-	private int processedFilesCount;
-	
+	private int processedFilesCount;	
+	private Map<DataFile, Map<MsFeatureInfoBundle, Collection<ExtractedIonData>>>fileChromatogramMap;
+
 	public MsFeatureChromatogramBatchExtractionTask(
 			Collection<DataFile> rawDataFiles,
 			Collection<MsFeatureInfoBundle> features, 
@@ -64,6 +66,8 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 		this.xicTarget = xicTarget;
 		chromatogramMap = 
 				new HashMap<String, MsFeatureChromatogramBundle>();
+		fileChromatogramMap = 
+				new TreeMap<DataFile, Map<MsFeatureInfoBundle, Collection<ExtractedIonData>>>();
 	}
 
 	@Override
@@ -131,29 +135,41 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 			
 			if (e.getSource().getClass().equals(MsFeatureChromatogramExtractionTask.class)) {
 				MsFeatureChromatogramExtractionTask task = (MsFeatureChromatogramExtractionTask)e.getSource();
-				createMsFeatureChromatogramBundles(task);
+				fileChromatogramMap.put(task.getRawDataFile(), task.getChromatogramMap());				
+				//	createMsFeatureChromatogramBundles(task);
 				processedFilesCount++;
-				if(processedFilesCount == rawDataFiles.size())
+				if(processedFilesCount == rawDataFiles.size()) {
+					createMsFeatureChromatogramBundles();
 					setStatus(TaskStatus.FINISHED);
+				}
 			}
 		}
 	}
 
-	private void createMsFeatureChromatogramBundles(MsFeatureChromatogramExtractionTask task) {
-		Map<MsFeatureInfoBundle, Collection<ExtractedIonData>> fileChromatograms = task.getChromatogramMap();
-		DataFile df = task.getRawDataFile();
-		for(Entry<MsFeatureInfoBundle, Collection<ExtractedIonData>> entry : fileChromatograms.entrySet()) {
+	private void createMsFeatureChromatogramBundles() {
+		
+		for(Entry<DataFile, Map<MsFeatureInfoBundle, Collection<ExtractedIonData>>> e : fileChromatogramMap.entrySet()) {
 			
-			String featureId = entry.getKey().getMsFeature().getId();
-			if(chromatogramMap.get(featureId) == null) {
-				MsFeatureChromatogramBundle cBundle = 
-						new MsFeatureChromatogramBundle(
-								featureId,
-								featureChromatogramDefinitions.get(entry.getKey()));
-				chromatogramMap.put(featureId, cBundle);
+			Map<MsFeatureInfoBundle, Collection<ExtractedIonData>> fileChromatograms = e.getValue();
+			DataFile df = e.getKey();
+			for(Entry<MsFeatureInfoBundle, Collection<ExtractedIonData>> entry : fileChromatograms.entrySet()) {
+				
+				String featureId = entry.getKey().getMsFeature().getId();
+				if(chromatogramMap.get(featureId) == null) {
+					MsFeatureChromatogramBundle cBundle = 
+							new MsFeatureChromatogramBundle(
+									featureId,
+									featureChromatogramDefinitions.get(entry.getKey()));
+					chromatogramMap.put(featureId, cBundle);
+				}
+				try {
+					chromatogramMap.get(featureId).addChromatogramsForDataFile(df, entry.getValue());
+				} catch (Exception ex) {
+					// TODO Auto-generated catch block
+					ex.printStackTrace();
+				}
 			}
-			chromatogramMap.get(featureId).addChromatogramsForDataFile(df, entry.getValue());
-		}		
+		}
 	}
 
 	@Override

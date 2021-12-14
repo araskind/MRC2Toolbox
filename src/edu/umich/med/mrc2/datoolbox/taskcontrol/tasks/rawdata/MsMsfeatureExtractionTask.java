@@ -540,7 +540,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				}
 				else {
 					msms.setSpecrum(msmsFiltered);
-					msms.setEntropy(MsUtils.calculateSpectrumEntropy(msmsFiltered));
+					msms.setEntropy(MsUtils.calculateSpectrumEntropyNatLog(msmsFiltered));
 				}
 			}
 			processed++;

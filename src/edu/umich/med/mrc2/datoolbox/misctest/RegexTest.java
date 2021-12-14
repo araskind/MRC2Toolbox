@@ -218,10 +218,24 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			testEncodeDecode();
+			validateEntropyCalc();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void validateEntropyCalc() {
+		
+		MsPoint p1 = new MsPoint(41.04, 37.16);
+		MsPoint p2 = new MsPoint(69.07, 66.83);
+		MsPoint p3 = new MsPoint(86.1, 999.0);
+		Collection<MsPoint>spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		spectrum.add(p1);
+		spectrum.add(p2);
+		spectrum.add(p3);
+		
+		double entropy = MsUtils.calculateSpectrumEntropyNatLog(spectrum);
+		System.err.println(Double.toString(entropy));
 	}
 	
 	private static void testEncodeDecode() {

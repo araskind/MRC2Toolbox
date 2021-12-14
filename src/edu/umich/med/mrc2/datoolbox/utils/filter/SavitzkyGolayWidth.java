@@ -31,14 +31,14 @@ public enum SavitzkyGolayWidth {
 	FIVE(5), 
 	SEVEN(7), 
 	NINE(9),
-//	ELEVEN(11), 
-//	THIRTEEN(13), 
-//	FIFTEEN(15), 
-//	SEVENTEEN(17), 
-//	NINETEEN(19),
-//	TWENTYONE(21), 
-//	TWENTYTHREE(23), 
-//	TWENTYFIVE(25),
+	ELEVEN(11), 
+	THIRTEEN(13), 
+	FIFTEEN(15), 
+	SEVENTEEN(17), 
+	NINETEEN(19),
+	TWENTYONE(21), 
+	TWENTYTHREE(23), 
+	TWENTYFIVE(25),
 	;
 	
 	private final int width;

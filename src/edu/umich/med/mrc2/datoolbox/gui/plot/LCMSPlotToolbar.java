@@ -67,18 +67,15 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 			
 			//	Show Chromatogram type selector
 			chromatogramTypeComboBox = new JComboBox<ChromatogramRenderingType>(
-					new DefaultComboBoxModel(ChromatogramRenderingType.values()));
-			chromatogramTypeComboBox.setMaximumSize(new Dimension(120, 26));
-			chromatogramTypeComboBox.setSelectedItem(ChromatogramRenderingType.Spline);			
+					new DefaultComboBoxModel(ChromatogramRenderingType.values()));			
+			chromatogramTypeComboBox.setMaximumSize(new Dimension(120, 26));			
+			chromatogramTypeComboBox.setSelectedItem(ChromatogramRenderingType.Lines);
 			chromatogramTypeComboBox.addItemListener(this);
 			add(chromatogramTypeComboBox);
 
 			toggleDataPointsButton = GuiUtils.addButton(this, null, dataPointsOffIcon, commandListener,
 					LCMSPlotPanel.TOGGLE_DATA_POINTS_COMMAND, "Show data points", buttonDimension);
-
 			xAxisUnits = "time";
-			
-			//	Smooting block
 			createSmoothingBlock();
 		}
 		if (plotType.equals(PlotType.SPECTRUM)) {

@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<FilterList version="1.0.0.0"><Filter FilterCode="WMA" Width="7" Padd="0" FilterId="IDWorkbenchPanelDockableChromatogramPlot" /><Filter FilterCode="WMA" Width="11" Padd="0" FilterId="RawDataExaminerPanelDockableChromatogramPlot" /></FilterList>
+<FilterList version="1.0.0.0"><Filter FilterCode="SGJDSP" Width="11" POrder="4" SGMode="nearest" FilterId="IDWorkbenchPanelDockableChromatogramPlot" /><Filter FilterCode="SGJDSP" Width="15" POrder="4" SGMode="nearest" FilterId="RawDataExaminerPanelDockableChromatogramPlot" /></FilterList>

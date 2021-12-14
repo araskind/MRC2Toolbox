@@ -227,7 +227,7 @@ public class IDTMsDataUtils {
 		String query =
 			"SELECT DISTINCT F.FEATURE_ID, F.RETENTION_TIME, F2.PARENT_MZ, " +
 			"F2.FRAGMENTATION_ENERGY, F2.COLLISION_ENERGY, F.ACCESSION, " +
-			"D.BULK_ACCESSION, F2.MSMS_FEATURE_ID, F2.TOTAL_INTENSITY, F2.ENTROPY  " +
+			"D.BULK_ACCESSION, F2.MSMS_FEATURE_ID " +
 			"FROM MSMS_FEATURE F2,  " +
 			"DATA_ANALYSIS_MAP M,   " +
 			"INJECTION I,  " +
@@ -274,17 +274,8 @@ public class IDTMsDataUtils {
 			MsPoint parent = new MsPoint(bpMz, 999.0d);
 			TandemMassSpectrum msms = new TandemMassSpectrum(2, parent, msmsPoints, polarity);
 			msms.setFragmenterVoltage(rs.getDouble("FRAGMENTATION_ENERGY"));
-			msms.setCidLevel(rs.getDouble("COLLISION_ENERGY"));
-//			double totalIntensity = rs.getDouble("TOTAL_INTENSITY");
-//			if(totalIntensity == 0.0d)
-//				totalIntensity = msmsPoints.stream().mapToDouble(p -> p.getIntensity()).sum();
-//				
-//			msms.setTotalIntensity(totalIntensity);
-			double entropy = rs.getDouble("ENTROPY");
-			if(entropy == 0.0d)
-				entropy = MsUtils.calculateSpectrumEntropy(msmsPoints);
-				
-			msms.setEntropy(entropy);
+			msms.setCidLevel(rs.getDouble("COLLISION_ENERGY"));		
+			msms.setEntropy(MsUtils.calculateSpectrumEntropyNatLog(msmsPoints));
 			
 			MassSpectrum ms = new MassSpectrum();
 			ms.addTandemMs(msms);
@@ -599,7 +590,7 @@ public class IDTMsDataUtils {
 
 		String query =
 			"SELECT MSMS_FEATURE_ID, PARENT_MZ, FRAGMENTATION_ENERGY, "
-			+ "COLLISION_ENERGY, TOTAL_INTENSITY, ENTROPY, POLARITY " +
+			+ "COLLISION_ENERGY, POLARITY " +
 			"FROM MSMS_FEATURE WHERE PARENT_FEATURE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, newTarget.getId());	
@@ -615,14 +606,11 @@ public class IDTMsDataUtils {
 					rs.getDouble("COLLISION_ENERGY"),
 					polarity);
 			msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
-			msms.setParent(new MsPoint(rs.getDouble("PARENT_MZ"), 999.0d));	
-//			msms.setTotalIntensity(rs.getDouble("TOTAL_INTENSITY"));
-			msms.setEntropy(rs.getDouble("ENTROPY"));		
+			msms.setParent(new MsPoint(rs.getDouble("PARENT_MZ"), 999.0d));		// TODO	??
 			msmsList.add(msms);
 		}
 		rs.close();
-		ps.close();
-		
+		ps.close();		
 		String msquery =
 				"SELECT MZ, HEIGHT FROM MSMS_FEATURE_PEAK WHERE MSMS_FEATURE_ID = ?";
 		PreparedStatement msps = conn.prepareStatement(msquery);
@@ -636,13 +624,7 @@ public class IDTMsDataUtils {
 				spectrum.add(new MsPoint(msrs.getDouble("MZ"), msrs.getDouble("HEIGHT")));
 
 			msrs.close();
-			
-//			if(msms.getTotalIntensity() == 0.0d)				
-//				msms.setTotalIntensity(spectrum.stream().mapToDouble(p -> p.getIntensity()).sum());
-			
-			if(msms.getEntropy() == 0.0d)
-				msms.setEntropy(MsUtils.calculateSpectrumEntropy(spectrum));
-			
+			msms.setEntropy(MsUtils.calculateSpectrumEntropyNatLog(spectrum));		
 			newTarget.getSpectrum().addTandemMs(msms);
 		}
 		msps.close();
