@@ -55,6 +55,7 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	private static final Icon closeDataFileIcon = GuiUtils.getIcon("closeDataFile", 32);
 	private static final Icon msConvertIcon = GuiUtils.getIcon("msConvert", 32);
 	private static final Icon indexRawFilesIcon = GuiUtils.getIcon("indexRawFiles", 32);
+	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 32);
 	
 	private JButton 
 		newProjectButton,	
@@ -69,7 +70,8 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 		msConvertButton,
 		indexRawFilesButton,
 		extractMSMSFeaturesButton,
-		sendToIDTrackerButton;
+		sendToIDTrackerButton,
+		dataFileToolsButton;
 
 	public RawDataExaminerToolbar(ActionListener commandListener2) {
 
@@ -148,12 +150,14 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 				MainActionCommands.SETUP_RAW_DATA_CONVERSION_COMMAND.getName(),
 				buttonDimension);
 		
-//		addSeparator(buttonDimension);
-//		
-//		indexRawFilesButton= GuiUtils.addButton(this, null, indexRawFilesIcon, commandListener,
-//				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND.getName(),
-//				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND.getName(),
-//				buttonDimension);
+		indexRawFilesButton= GuiUtils.addButton(this, null, indexRawFilesIcon, commandListener,
+				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND.getName(),
+				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND.getName(),
+				buttonDimension);
+			
+		dataFileToolsButton = GuiUtils.addButton(this, null, dataFileToolsIcon, commandListener,
+				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName(),
+				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName(), buttonDimension);
 	}
 
 	public void groupTree(TreeGrouping grouping) {

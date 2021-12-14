@@ -71,7 +71,7 @@ import edu.umich.med.mrc2.datoolbox.gui.adducts.chemmod.ChemicalModificationMana
 import edu.umich.med.mrc2.datoolbox.gui.assay.AssayManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.dbparse.DbParserFrame;
-import edu.umich.med.mrc2.datoolbox.gui.filetools.FileToolsDialog;
+import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.organization.OrganizationManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
@@ -169,7 +169,6 @@ public class MainWindow extends JFrame
 	private DataExportDialog exportDialog;
 	private IntegratedReportDialog integratedReportDialog;
 	private MWTabExportDialog mwTabExportDialog;
-	private FileToolsDialog fileToolsDialog;
 
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "MainWindow.layout");
@@ -179,7 +178,6 @@ public class MainWindow extends JFrame
 
 		super(BuildInformation.getProgramName());
 		MRC2ToolBoxCore.getTaskController().addTaskControlListener(this);
-
 		initWindow();
 
 		currentProject = null;
@@ -188,6 +186,10 @@ public class MainWindow extends JFrame
 		showNewProjectDialog = false;
 		showOpenProjectDialog = false;
 		savingAsCopy = false;
+		
+		projectDashBooard.setActionListener(this);
+		projectDashBooard.switchDataPipeline(null, null);
+		((FeatureDataPanel)getPanel(PanelList.FEATURE_DATA)).setProjectActionListener(this);
 	}
 
 	@Override
@@ -279,16 +281,6 @@ public class MainWindow extends JFrame
 		
 		if(command.equals(MainActionCommands.SHOW_ORGANIZATION_MANAGER_COMMAND.getName()))
 			showOrganizationManager();
-			
-		if(command.equals(MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName()))
-			showFileToolsDialog();
-	}
-	
-	private void showFileToolsDialog() {
-		
-		fileToolsDialog = new FileToolsDialog();
-		fileToolsDialog.setLocationRelativeTo(this);
-		fileToolsDialog.setVisible(true);
 	}
 	
 	private void showUserManager() {
@@ -451,7 +443,6 @@ public class MainWindow extends JFrame
 			panels.get(PanelList.DESIGN).clearPanel();
 			projectDashBooard.clearPanel();
 			this.setTitle(BuildInformation.getProgramName());
-			toolBar.noProject();
 			clearPanel();
 		}
 		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet()) {
@@ -655,12 +646,6 @@ public class MainWindow extends JFrame
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 
 		grid = new CGrid( control );
-
-		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
-			projectDashBooard = new ProjectSetupDraw();
-			grid.add( -25, 0, 25, 100, projectDashBooard);
-			toolBar.noProject();
-		}
 		// Initialize panels and panel display flags
 		panels = new LinkedHashMap<PanelList, DockableMRC2ToolboxPanel>();
 		panelShowing = new LinkedHashMap<PanelList, Boolean>();
@@ -697,9 +682,10 @@ public class MainWindow extends JFrame
 				e.printStackTrace();
 			}
 		}
-		control.getContentArea().deploy( grid );
-		add(control.getContentArea(), BorderLayout.CENTER);
-
+		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
+			projectDashBooard = new ProjectSetupDraw();
+			grid.add( -25, 0, 25, 100, projectDashBooard);	
+		}		
 		for(PanelList panelType : PanelList.getPanelListForConfiguration(BuildInformation.getStartupConfiguration()))
 			panelShowing.put(panelType, panels.get(panelType).isVisible());
 
@@ -711,6 +697,8 @@ public class MainWindow extends JFrame
 		preferencesDialog.loadPreferences(MRC2ToolBoxConfiguration.getPreferences());
 		msToolsFrame = new MSToolsFrame();
 
+		control.getContentArea().deploy( grid );
+		add(control.getContentArea(), BorderLayout.CENTER);
 		loadLayout(layoutConfigFile);
 		addWindowListener(this);
 		revalidate();

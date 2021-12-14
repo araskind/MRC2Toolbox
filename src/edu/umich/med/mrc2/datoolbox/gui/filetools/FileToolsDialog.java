@@ -86,6 +86,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.RawDataUploadPrepTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.WorklistExtractionTask;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
@@ -98,8 +99,11 @@ public class FileToolsDialog extends JDialog
 	private static final long serialVersionUID = 8176806884989838988L;
 	
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 32);
-	public static final String CURRENT_DIRECTORY = "CURRENT_DIRECTORY";
+
 	private Preferences preferences;
+	public static final String CURRENT_DIRECTORY = "CURRENT_DIRECTORY";
+	public static final String ZIP_DATA_BASE_DIRECTORY = "ZIP_DATA_BASE_DIRECTORY";
+	public static final String RECURSIVE_SCAN = "RECURSIVE_SCAN";
 	
 	private JFileChooser chooser;
 	private File baseDirectory;
@@ -111,12 +115,21 @@ public class FileToolsDialog extends JDialog
 	private IOFileFilter dotDfilter;
 	private FileFilter txtFilter;
 	private Worklist worklist;
-
-	private WorklistTable worklistTable;
+	private WorklistTable worklistTable;	
+	private JTextField rawDataDirTextField;
+	private JTextField zipDirTextField;
+	private File zipBaseDirectory;
+	private JButton cleanAndZipButton;
+	private JButton zipDirBrowseButton;
+	private JButton rawDataBrowseButton;
+	private String fileSelectType;
+	private JCheckBox recursiveScanCheckBox;
+	private JCheckBox createZipsCheckBox;
 
 	public FileToolsDialog() {
 
-		super(MRC2ToolBoxCore.getMainWindow(), "Raw data file tools");
+		super();
+		setTitle("Raw data file tools");
 		setIconImage(((ImageIcon) dataFileToolsIcon).getImage());
 
 		setModalityType(ModalityType.APPLICATION_MODAL);
@@ -133,6 +146,9 @@ public class FileToolsDialog extends JDialog
 		JPanel cleanupPanel = createUntargetedResultsCleanupPanel();
 		tabbedPane.addTab("Cleanup raw data", cleanupPanel);
 		
+		JPanel cleanAndZipPanel = createMoTrPACCleanAndZIPPanel();
+		tabbedPane.addTab("Metabolomics Workbench raw data upload preparation", cleanAndZipPanel);
+		
 		dotDfilter = FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
 		txtFilter = new FileNameExtensionFilter("Text files", "txt", "TXT");
 		loadPreferences();
@@ -140,6 +156,106 @@ public class FileToolsDialog extends JDialog
 		pack();
 	}
 	
+	private JPanel createMoTrPACCleanAndZIPPanel() {
+
+		JPanel panel = new JPanel();		
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[]{0, 86, 86, 86, 89, 0};
+		gbl_panel.rowHeights = new int[]{23, 0, 0, 0, 0, 0};
+		gbl_panel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		panel.setLayout(gbl_panel);
+		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+		
+		JLabel lblSmiles = new JLabel("Data directory");
+		GridBagConstraints gbc_lblSmiles = new GridBagConstraints();
+		gbc_lblSmiles.insets = new Insets(0, 0, 5, 5);
+		gbc_lblSmiles.anchor = GridBagConstraints.EAST;
+		gbc_lblSmiles.gridx = 0;
+		gbc_lblSmiles.gridy = 0;
+		panel.add(lblSmiles, gbc_lblSmiles);
+
+		rawDataDirTextField = new JTextField();
+		//rawDataDirTextField.setEditable(false);
+		GridBagConstraints gbc_rawDataTextField = new GridBagConstraints();
+		gbc_rawDataTextField.gridwidth = 3;
+		gbc_rawDataTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_rawDataTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_rawDataTextField.gridx = 1;
+		gbc_rawDataTextField.gridy = 0;
+		panel.add(rawDataDirTextField, gbc_rawDataTextField);
+		rawDataDirTextField.setColumns(10);
+
+		rawDataBrowseButton = new JButton("Browse ...");
+		rawDataBrowseButton.setActionCommand(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName());
+		rawDataBrowseButton.addActionListener(this);
+		GridBagConstraints gbc_rawDataBrowseButton = new GridBagConstraints();
+		gbc_rawDataBrowseButton.insets = new Insets(0, 0, 5, 0);
+		gbc_rawDataBrowseButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_rawDataBrowseButton.anchor = GridBagConstraints.NORTH;
+		gbc_rawDataBrowseButton.gridx = 4;
+		gbc_rawDataBrowseButton.gridy = 0;
+		panel.add(rawDataBrowseButton, gbc_rawDataBrowseButton);
+		
+		recursiveScanCheckBox = new JCheckBox("Recursively scan for data files");
+		GridBagConstraints gbc_recursiveScanCheckBox = new GridBagConstraints();
+		gbc_recursiveScanCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_recursiveScanCheckBox.gridwidth = 2;
+		gbc_recursiveScanCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_recursiveScanCheckBox.gridx = 0;
+		gbc_recursiveScanCheckBox.gridy = 1;
+		panel.add(recursiveScanCheckBox, gbc_recursiveScanCheckBox);
+		
+		createZipsCheckBox = new JCheckBox("Clean \"Results\" only (do not create compressed files)");
+		GridBagConstraints gbc_createZipsCheckBox = new GridBagConstraints();
+		gbc_createZipsCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_createZipsCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_createZipsCheckBox.gridx = 2;
+		gbc_createZipsCheckBox.gridy = 1;
+		panel.add(createZipsCheckBox, gbc_createZipsCheckBox);
+
+		JLabel lblPeptide = new JLabel("ZIP directory");
+		GridBagConstraints gbc_lblPeptide = new GridBagConstraints();
+		gbc_lblPeptide.anchor = GridBagConstraints.EAST;
+		gbc_lblPeptide.insets = new Insets(0, 0, 5, 5);
+		gbc_lblPeptide.gridx = 0;
+		gbc_lblPeptide.gridy = 2;
+		panel.add(lblPeptide, gbc_lblPeptide);
+
+		zipDirTextField = new JTextField();
+		//zipDirTextField.setEditable(false);
+		GridBagConstraints gbc_zipDirTextField = new GridBagConstraints();
+		gbc_zipDirTextField.gridwidth = 3;
+		gbc_zipDirTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_zipDirTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_zipDirTextField.gridx = 1;
+		gbc_zipDirTextField.gridy = 2;
+		panel.add(zipDirTextField, gbc_zipDirTextField);
+		zipDirTextField.setColumns(10);
+
+		zipDirBrowseButton = new JButton("Browse ...");
+		zipDirBrowseButton.setActionCommand(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName());
+		zipDirBrowseButton.addActionListener(this);
+		GridBagConstraints gbc_zipDirBrowseButton = new GridBagConstraints();
+		gbc_zipDirBrowseButton.insets = new Insets(0, 0, 5, 0);
+		gbc_zipDirBrowseButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_zipDirBrowseButton.gridx = 4;
+		gbc_zipDirBrowseButton.gridy = 2;
+		panel.add(zipDirBrowseButton, gbc_zipDirBrowseButton);
+
+		cleanAndZipButton = new JButton(MainActionCommands.CLEAN_AND_ZIP_COMMAND.getName());
+		cleanAndZipButton.setActionCommand(MainActionCommands.CLEAN_AND_ZIP_COMMAND.getName());
+		cleanAndZipButton.addActionListener(this);
+		GridBagConstraints gbc_cleanAndZipButton = new GridBagConstraints();
+		gbc_cleanAndZipButton.gridwidth = 2;
+		gbc_cleanAndZipButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_cleanAndZipButton.gridx = 3;
+		gbc_cleanAndZipButton.gridy = 4;
+		panel.add(cleanAndZipButton, gbc_cleanAndZipButton);
+		
+		return panel;
+	}
+
 	private void initChooser() {
 
 		chooser = new ImprovedFileChooser();
@@ -287,7 +403,67 @@ public class FileToolsDialog extends JDialog
 		
 		if (command.equals(MainActionCommands.CLEANUP_RAW_DATA.getName())) 
 			removeResultsFolders();
+		
+		if (command.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName()) ||
+				command.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName())) {
+
+			fileSelectType = command;
+			selectFileOrDirectory(command);
+		}
+		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
+
+			File inputFile = chooser.getSelectedFile();
+			if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName())) {
+				baseDirectory = inputFile.getParentFile();
+				rawDataDirTextField.setText(inputFile.getAbsolutePath());
+			}
+			if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName())) {
+				zipBaseDirectory = inputFile.getParentFile();
+				zipDirTextField.setText(inputFile.getAbsolutePath());
+			}
+			savePreferences();
+		}
+		if(command.equals(MainActionCommands.CLEAN_AND_ZIP_COMMAND.getName()))
+			cleanAndZip();
 	}
+	
+	private void cleanAndZip() {
+
+		if(rawDataDirTextField.getText().isEmpty()) {
+			MessageDialog.showErrorMsg("Raw data directory not specified.", this);
+			return;
+		}
+		if(zipDirTextField.getText().isEmpty()) {
+			MessageDialog.showErrorMsg("ZIP output directory not specified.", this);
+			return;
+		}
+		RawDataUploadPrepTask task = new RawDataUploadPrepTask(
+				rawDataDirTextField.getText(),
+				zipDirTextField.getText(),
+				recursiveScanCheckBox.isSelected(),
+				!createZipsCheckBox.isSelected());
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+	}
+	
+	private void selectFileOrDirectory(String command) {
+
+		chooser = new ImprovedFileChooser();
+		chooser.addActionListener(this);
+		chooser.setAcceptAllFileFilterUsed(false);
+		chooser.setMultiSelectionEnabled(false);
+		chooser.setDialogTitle(command);
+		chooser.setApproveButtonText(command);
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+		if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName()))
+			chooser.setCurrentDirectory(baseDirectory);
+
+		if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName()))
+			chooser.setCurrentDirectory(zipBaseDirectory);
+
+		chooser.showOpenDialog(this);
+	}	
 
 	private void scanDirectoryForSampleInfo(boolean appendWorklist) throws Exception {
 
@@ -436,6 +612,12 @@ public class FileToolsDialog extends JDialog
 		baseDirectory = Paths.get(
 				preferences.get(CURRENT_DIRECTORY,
 				MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).toFile();
+		zipBaseDirectory =
+				new File(preferences.get(ZIP_DATA_BASE_DIRECTORY,
+					MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+		rawDataDirTextField.setText(baseDirectory.getAbsolutePath());
+		zipDirTextField.setText(zipBaseDirectory.getAbsolutePath());		
+		recursiveScanCheckBox.setSelected(preferences.getBoolean(RECURSIVE_SCAN, Boolean.FALSE));
 	}
 
 	@Override
@@ -443,6 +625,9 @@ public class FileToolsDialog extends JDialog
 
 		preferences = Preferences.userNodeForPackage(this.getClass());
 		preferences.put(CURRENT_DIRECTORY, baseDirectory.getAbsolutePath());
+		zipBaseDirectory = new File(zipDirTextField.getText());
+		preferences.put(ZIP_DATA_BASE_DIRECTORY, zipBaseDirectory.getAbsolutePath());
+		preferences.putBoolean(RECURSIVE_SCAN, recursiveScanCheckBox.isSelected());
 	}
 
 	@Override

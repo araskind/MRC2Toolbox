@@ -61,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
+import edu.umich.med.mrc2.datoolbox.gui.filetools.FileToolsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableMsMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
@@ -132,6 +133,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private boolean saveOnExitRequested;
 	private boolean showNewProjectDialog;
 	private MSMSFeatureExtractionSetupDialog msmsFeatureExtractionSetupDialog;
+	private FileToolsDialog fileToolsDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("chromatogram", 16);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "RawDataPanel.layout");
@@ -269,10 +271,20 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			convertRawData();
 		
 		if (command.equals(MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND.getName()))	
-			indexRawData();	
+			indexRawDataRepository();	
 		
 		if (command.equals(MainActionCommands.EXTRACT_CHROMATOGRAM.getName()))	
-			extractChromatogramms();		
+			extractChromatogramms();	
+				
+		if(command.equals(MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName()))
+			showFileToolsDialog();
+	}
+		
+	private void showFileToolsDialog() {
+		
+		fileToolsDialog = new FileToolsDialog();
+		fileToolsDialog.setLocationRelativeTo(this.getContentPane());
+		fileToolsDialog.setVisible(true);
 	}
 	
 	private void sendMSMSFeaturesToIDTrackerWorkbench() {
@@ -571,9 +583,24 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
-
-	private void indexRawData() {
-
+	
+	private void indexRawDataRepository() {
+		
+		String repositoryPath = MRC2ToolBoxConfiguration.getRawDataRepository();
+		if(repositoryPath == null) {
+			MessageDialog.showErrorMsg(
+					"Raw data repository has to be specified in program preferences.", 
+					this.getContentPane());
+			return;
+		}
+		File rawDataRepository = new File(repositoryPath);
+		if(!rawDataRepository.exists()) {
+			MessageDialog.showErrorMsg(
+					"Selected raw data repository at \"" + 
+						MRC2ToolBoxConfiguration.getRawDataRepository() + "\" does not exist.", 
+					this.getContentPane());
+			return;
+		}
 		RawDataRepositoryIndexingTask task = new RawDataRepositoryIndexingTask();
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);

@@ -22,24 +22,18 @@
 package edu.umich.med.mrc2.datoolbox.gui.main;
 
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemListener;
 
 import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -50,45 +44,26 @@ public class MainToolbar extends CommonToolbar {
 	 */
 	private static final long serialVersionUID = -4599318790123180479L;
 
-	private static final Icon saveProjectIcon = GuiUtils.getIcon("save", 32);
-	private static final Icon saveProjectCopyIcon = GuiUtils.getIcon("saveAs", 32);
-	private static final Icon newDataAnalysisProjectIcon = GuiUtils.getIcon("newProject", 32);
-	private static final Icon openProjectIcon = GuiUtils.getIcon("open", 32);
-	private static final Icon closeProjectIcon = GuiUtils.getIcon("close", 32);
 	private static final Icon idTrackerLoginIcon = GuiUtils.getIcon("idTrackerLogin", 32);
 	private static final Icon activeUserIcon = GuiUtils.getIcon("activeUser", 32);
 	private static final Icon superUserIcon = GuiUtils.getIcon("superUser", 32);
 	private static final Icon loggedOutUserIcon = GuiUtils.getIcon("loggedOutUser", 32);
 	private static final Icon manageUsersIcon = GuiUtils.getIcon("manageUsers", 32);
 	private static final Icon organizationIcon = GuiUtils.getIcon("organization", 32);
+	
 	private static final Icon msToolboxIcon = GuiUtils.getIcon("toolbox", 32);
 	private static final Icon chemModIcon = GuiUtils.getIcon("chemModList", 32);
 	private static final Icon refSampleIcon = GuiUtils.getIcon("standardSample", 32);
 	private static final Icon assayManagerIcon = GuiUtils.getIcon("acqMethod", 32);
-	private static final Icon exportResultsIcon = GuiUtils.getIcon("export", 32);
-	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 32);
-	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 32);
-	private static final Icon cleanAndZipIcon = GuiUtils.getIcon("cleanAndZip", 32);
-	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 32);
-
+	
 	private static final Icon preferencesIcon = GuiUtils.getIcon("preferences", 32);
 	private static final Icon helpIcon = GuiUtils.getIcon("help", 32);
 	private static final Icon exitIcon = GuiUtils.getIcon("shutDown", 32);
 
 	@SuppressWarnings("unused")
 	private JButton
-		newProjectButton,
-		saveProjectButton,
-		saveProjectCopyButton,
-		openProjectButton,
-		closeProjectButton,
 		idTrackerLoginButton,
 		idTrackerUserButton,
-		exportResultsButton,
-		exportExcelButton,
-		exportMwTabButton,
-		cleanAndZipButton,
-		dataFileToolsButton,
 		preferencesButton,
 		helpButton,
 		exitButton,
@@ -101,85 +76,12 @@ public class MainToolbar extends CommonToolbar {
 		manageUsersButton,
 		manageOrganizationsButton;
 
-	private JComboBox dataPipelineComboBox;
-	private ItemListener iListener;
-
 	private JLabel loggedUserLabel;
 
 	@SuppressWarnings("unchecked")
 	public MainToolbar(ActionListener commandListener) {
 
 		super(commandListener);
-
-		newProjectButton = GuiUtils.addButton(this, null, newDataAnalysisProjectIcon, commandListener,
-				MainActionCommands.NEW_PROJECT_COMMAND.getName(),
-				MainActionCommands.NEW_PROJECT_COMMAND.getName(),
-				buttonDimension);
-
-		addSeparator(buttonDimension);
-
-		openProjectButton = GuiUtils.addButton(this, null, openProjectIcon, commandListener,
-				MainActionCommands.OPEN_PROJECT_COMMAND.getName(),
-				MainActionCommands.OPEN_PROJECT_COMMAND.getName(),
-				buttonDimension);
-
-		closeProjectButton = GuiUtils.addButton(this, null, closeProjectIcon, commandListener,
-				MainActionCommands.CLOSE_PROJECT_COMMAND.getName(),
-				MainActionCommands.CLOSE_PROJECT_COMMAND.getName(),
-				buttonDimension);
-
-		saveProjectButton = GuiUtils.addButton(this, null, saveProjectIcon, commandListener,
-				MainActionCommands.SAVE_PROJECT_COMMAND.getName(),
-				MainActionCommands.SAVE_PROJECT_COMMAND.getName(),
-				buttonDimension);
-
-		saveProjectCopyButton = GuiUtils.addButton(this, null, saveProjectCopyIcon, commandListener,
-				MainActionCommands.SAVE_PROJECT_COPY_COMMAND.getName(),
-				MainActionCommands.SAVE_PROJECT_COPY_COMMAND.getName(),
-				buttonDimension);
-
-		addSeparator(buttonDimension);
-
-		JLabel dataPipelineLabel = new JLabel("Assay: ");
-		dataPipelineLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		add(dataPipelineLabel);
-
-		iListener = (ItemListener) commandListener;
-
-		dataPipelineComboBox = new JComboBox<DataPipeline>();
-		dataPipelineComboBox.setFont(new Font("Tahoma", Font.BOLD, 14));
-		dataPipelineComboBox.setModel(
-				new SortedComboBoxModel<DataPipeline>(new DataPipeline[0]));
-		dataPipelineComboBox.addItemListener(iListener);
-		dataPipelineComboBox.setAlignmentX(Component.CENTER_ALIGNMENT);
-		dataPipelineComboBox.setMaximumSize(new Dimension(300, 30));
-		dataPipelineComboBox.setMinimumSize(new Dimension(300, 30));
-		add(dataPipelineComboBox);
-
-		addSeparator(buttonDimension);
-
-		exportResultsButton = GuiUtils.addButton(this, null, exportResultsIcon, commandListener,
-				MainActionCommands.EXPORT_RESULTS_COMMAND.getName(),
-				MainActionCommands.EXPORT_RESULTS_COMMAND.getName(), buttonDimension);
-
-		exportExcelButton = GuiUtils.addButton(this, null, exportExcelIcon, commandListener,
-				MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND.getName(),
-				MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND.getName(), buttonDimension);
-
-		exportMwTabButton = GuiUtils.addButton(this, null, exportMwTabIcon, commandListener,
-				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName(),
-				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName(), buttonDimension);
-		
-		dataFileToolsButton = GuiUtils.addButton(this, null, dataFileToolsIcon, commandListener,
-				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName(),
-				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName(), buttonDimension);
-
-		cleanAndZipButton = GuiUtils.addButton(this, null, cleanAndZipIcon, commandListener,
-				MainActionCommands.SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG.getName(),
-				MainActionCommands.SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG.getName(), buttonDimension);
-
-		addSeparator(buttonDimension);
-
 		toolboxButton = GuiUtils.addButton(this, null, msToolboxIcon, commandListener,
 				MainActionCommands.SHOW_MS_TOOLBOX_COMMAND.getName(),
 				MainActionCommands.SHOW_MS_TOOLBOX_COMMAND.getName(), buttonDimension);
@@ -260,17 +162,7 @@ public class MainToolbar extends CommonToolbar {
 	
 	private void adjustEnabledButtonsForConfiguration() {
 		
-		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.IDTRACKER)) {
-			
-			newProjectButton.setEnabled(false);
-			openProjectButton.setEnabled(false);
-			closeProjectButton.setEnabled(false);
-			saveProjectButton.setEnabled(false);
-			saveProjectCopyButton.setEnabled(false);
-			dataPipelineComboBox.setEnabled(false);
-			exportResultsButton.setEnabled(false);
-			exportExcelButton.setEnabled(false);
-			exportMwTabButton.setEnabled(false);
+		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.IDTRACKER)) {			
 			showRefSampleEditorButton.setEnabled(false);
 			showAssayManagerButton.setEnabled(false);
 		}
@@ -282,66 +174,10 @@ public class MainToolbar extends CommonToolbar {
 		helpButton.setEnabled(false);
 	}
 
-	public void noProject() {
-
-		saveProjectButton.setEnabled(false);
-		saveProjectCopyButton.setEnabled(false);
-		newProjectButton.setEnabled(true);
-		openProjectButton.setEnabled(true);
-		closeProjectButton.setEnabled(false);
-		exportResultsButton.setEnabled(false);
-		exportExcelButton.setEnabled(false);
-		dataPipelineComboBox.setEnabled(false);
-	}
-
-	public void projectActive() {
-
-		saveProjectButton.setEnabled(true);
-		saveProjectCopyButton.setEnabled(true);
-		newProjectButton.setEnabled(true);
-		openProjectButton.setEnabled(true);
-		closeProjectButton.setEnabled(true);
-		exportResultsButton.setEnabled(true);
-		exportExcelButton.setEnabled(true);
-		dataPipelineComboBox.setEnabled(true);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public void updateGuiFromProjectAndDataPipeline(
 			DataAnalysisProject project, DataPipeline newDataPipeline) {
 
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
-		if(currentProject == null) {
-			noProject();
-			return;
-		}
-		projectActive();
-		if (newDataPipeline != null) {
-			exportResultsButton.setEnabled(
-					currentProject.dataPipelineHasData(newDataPipeline));
-			exportExcelButton.setEnabled(
-					currentProject.dataPipelineHasData(newDataPipeline));
-		}
-		else {
-			exportResultsButton.setEnabled(false);
-			exportExcelButton.setEnabled(false);
-		}
-		// Assay selector
-		dataPipelineComboBox.removeItemListener(iListener);
-		DataPipeline[] projectAssays = currentProject.getDataPipelines().
-				toArray(new DataPipeline[currentProject.getDataPipelines().size()]);
-		dataPipelineComboBox.setModel(new SortedComboBoxModel<DataPipeline>(projectAssays));
-		dataPipelineComboBox.setEnabled(true);
-
-		if (newDataPipeline != null)
-			dataPipelineComboBox.setSelectedItem(newDataPipeline);
-		else
-			dataPipelineComboBox.setSelectedIndex(-1);
-
-		if (projectAssays.length == 0)
-			dataPipelineComboBox.setEnabled(false);
-
-		dataPipelineComboBox.addItemListener(iListener);
 	}
 }

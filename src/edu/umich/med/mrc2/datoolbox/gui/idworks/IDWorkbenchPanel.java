@@ -125,8 +125,6 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationAs
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.tdexplor.IDTrackerDataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.tophit.ReassignDefaultMSMSLibraryHitDialog;
-import edu.umich.med.mrc2.datoolbox.gui.io.msms.DecoyMSMSLibraryImportDialog;
-import edu.umich.med.mrc2.datoolbox.gui.io.msms.ReferenceMSMSLibraryExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableMsMsInfoPanel;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableMsMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
@@ -149,7 +147,6 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -167,8 +164,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerDataExportTas
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerProjectDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ExtendedMSPExportTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ReferenceMSMSLibraryExportTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.msms.DecoyLibraryGenerationTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataLoadForInjectionsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryIndexingTask;
@@ -364,10 +359,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		featureSetataExtractionMethodMap.clear();
 		dataAcquisitionMethods.clear();
 	}
-
-//	DISABLE_PRIMARY_IDENTIFICATION_COMMAND
-//	DELETE_IDENTIFICATION_COMMAND
-//	DELETE_ALL_IDENTIFICATIONS_COMMAND
 	
 	@Override
 	public void actionPerformed(ActionEvent event) {
@@ -518,22 +509,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			showXicSetupDialog();
 		
 		if (command.equals(MainActionCommands.EXTRACT_CHROMATOGRAM.getName()))	
-			extractXic();
-		
-		if (command.equals(MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND.getName()))	
-			indexRawDataRepository();			
+			extractXic();		
 		
 		if (command.equals(MainActionCommands.LOAD_RAW_DATA_FOR_CURRENT_MSMS_FEATURE_SET_COMMAND.getName()))	
 			loadRawDataForCurrentMsMsFeatureSet();	
 		
 		if (command.equals(MainActionCommands.MERGE_DUPLICATES_COMMAND.getName()))	
 			mergeDuplicateMsMsFeatures();
-		
-		if (command.equals(MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName()))	
-			showRefMSMSLibraryExportDialog();
-		
-		if (command.equals(MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName()))	
-			showDecoyMSMSLibraryImportDialog();
 		
 		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT.getName()))	
 			showIDTrackerDataExplorerDialog();
@@ -843,20 +825,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		idTrackerDataExplorerPlotDialog.setVisible(true);
 	}
 	
-	private void showDecoyMSMSLibraryImportDialog() {
-		
-		DecoyMSMSLibraryImportDialog dialog = new DecoyMSMSLibraryImportDialog(this);
-		dialog.setLocationRelativeTo(this.getContentPane());
-		dialog.setVisible(true);
-	}
-	
-	private void showRefMSMSLibraryExportDialog() {
-		
-		ReferenceMSMSLibraryExportDialog dialog = new ReferenceMSMSLibraryExportDialog(this);
-		dialog.setLocationRelativeTo(this.getContentPane());
-		dialog.setVisible(true);
-	}
-	
 	private void mergeDuplicateMsMsFeatures() {
 		
 		LIMSExperiment experiment = IDTDataCash.getExperimentById("IDX0065");
@@ -926,28 +894,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		nistMSSerchSetupDialog = new NISTMSSerchSetupDialog(this);
 		nistMSSerchSetupDialog.setLocationRelativeTo(this.getContentPane());
 		nistMSSerchSetupDialog.setVisible(true);
-	}
-
-	private void indexRawDataRepository() {
-		
-		String repositoryPath = MRC2ToolBoxConfiguration.getRawDataRepository();
-		if(repositoryPath == null) {
-			MessageDialog.showErrorMsg(
-					"Raw data repository has to be specified in program preferences.", 
-					this.getContentPane());
-			return;
-		}
-		File rawDataRepository = new File(repositoryPath);
-		if(!rawDataRepository.exists()) {
-			MessageDialog.showErrorMsg(
-					"Selected raw data repository at \"" + 
-						MRC2ToolBoxConfiguration.getRawDataRepository() + "\" does not exist.", 
-					this.getContentPane());
-			return;
-		}
-		RawDataRepositoryIndexingTask task = new RawDataRepositoryIndexingTask();
-		task.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 
 	private void loadRawDataForCurrentMsMsFeatureSet() {
@@ -2135,12 +2081,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class))
 				finalizeCromatogramExtractionTask((ChromatogramExtractionTask)e.getSource());
 			
-			if (e.getSource().getClass().equals(ReferenceMSMSLibraryExportTask.class))
-				finalizeReferenceMSMSLibraryExportTask((ReferenceMSMSLibraryExportTask)e.getSource());
-			
-			if (e.getSource().getClass().equals(DecoyLibraryGenerationTask.class))
-				finalizeDecoyLibraryGenerationTask((DecoyLibraryGenerationTask)e.getSource());
-			
 			if (e.getSource().getClass().equals(IDTMSMSFeatureDataPullTask.class))
 				finalizeIDTMSMSFeatureDataPullTask((IDTMSMSFeatureDataPullTask)e.getSource());	
 			
@@ -2176,40 +2116,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		activeFeatureCollection.addFeatures(task.getSelectedFeatures());
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
-	}
-
-	private void finalizeDecoyLibraryGenerationTask(DecoyLibraryGenerationTask task) {
-		
-		File results = task.getOutputFile();
-		if(results != null && results.exists()) {
-
-			if(MessageDialog.showChoiceMsg("Decoy MSP file created, do you want to open containing folder?",
-				this.getContentPane()) == JOptionPane.YES_OPTION) {
-				try {
-					Desktop.getDesktop().open(results.getParentFile());
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		}
-	}
-
-	private void finalizeReferenceMSMSLibraryExportTask(ReferenceMSMSLibraryExportTask task) {
-
-		File results = task.getOutputFile();
-		if(results.exists()) {
-
-			if(MessageDialog.showChoiceMsg("Export file created, do you want to open containing folder?",
-				this.getContentPane()) == JOptionPane.YES_OPTION) {
-				try {
-					Desktop.getDesktop().open(results.getParentFile());
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		}
 	}
 
 	private void finalizeCromatogramExtractionTask(ChromatogramExtractionTask task) {

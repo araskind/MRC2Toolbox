@@ -58,10 +58,9 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 	private static final Icon idFollowupStepManagerIcon = GuiUtils.getIcon("idFollowupStepManager", 32);
 	private static final Icon standardFeatureAnnotationManagerIcon = GuiUtils.getIcon("editCollection", 32);
 	private static final Icon openMsMsDataFileIcon = GuiUtils.getIcon("openMsMsDataFile", 32);
-	private static final Icon indexRawFilesIcon = GuiUtils.getIcon("indexRawFiles", 32);
+//	private static final Icon indexRawFilesIcon = GuiUtils.getIcon("indexRawFiles", 32);
 	private static final Icon clearDuplicatesIcon = GuiUtils.getIcon("clearDuplicates", 32);	
-	private static final Icon libraryExportIcon = GuiUtils.getIcon("exportLibrary", 32);
-	private static final Icon libraryImportIcon = GuiUtils.getIcon("importLibraryToDb", 32);
+
 	private static final Icon bubblePlotIcon = GuiUtils.getIcon("bubble", 32);
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("clusterFeatureTable", 32);
 	private static final Icon fdrIcon = GuiUtils.getIcon("fdr", 32);	
@@ -86,7 +85,7 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 		idStatusManagerButton,
 		idFollowupStepManagerButton,
 		standardFeatureAnnotationManagerButton,
-		indexRawFilesButton,
+//		indexRawFilesButton,
 		openMsMsDataFilesButton,
 		clearDuplicatesButton,
 		exportRefMSMSLibraryButton,
@@ -201,28 +200,11 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 		
 		addSeparator(buttonDimension);
 		
-		indexRawFilesButton = GuiUtils.addButton(this, null, indexRawFilesIcon, commandListener,
-				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND.getName(),
-				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND.getName(),
-				buttonDimension);
-		
 		openMsMsDataFilesButton = GuiUtils.addButton(this, null, openMsMsDataFileIcon, commandListener,
 				MainActionCommands.LOAD_RAW_DATA_FOR_CURRENT_MSMS_FEATURE_SET_COMMAND.getName(),
 				MainActionCommands.LOAD_RAW_DATA_FOR_CURRENT_MSMS_FEATURE_SET_COMMAND.getName(),
 				buttonDimension);
-		
-		addSeparator(buttonDimension);
-		
-		exportRefMSMSLibraryButton = GuiUtils.addButton(this, null, libraryExportIcon, commandListener,
-				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName(),
-				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName(), buttonDimension);
-//		exportRefMSMSLibraryButton.setEnabled(false);
-		
-		importDecoyRefMSMSLibraryButton = GuiUtils.addButton(this, null, libraryImportIcon, commandListener,
-				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(),
-				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(), buttonDimension);
-		importDecoyRefMSMSLibraryButton.setEnabled(false);
-		
+				
 		addSeparator(buttonDimension);
 		
 		filterFeaturesButton = GuiUtils.addButton(this, null, filterIcon, commandListener,

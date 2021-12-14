@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.library;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -29,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -68,6 +70,8 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEven
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.CompoundDatabasePanel;
+import edu.umich.med.mrc2.datoolbox.gui.io.msms.DecoyMSMSLibraryImportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.io.msms.ReferenceMSMSLibraryExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableLibraryFeatureEditorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.library.manager.LibraryManager;
 import edu.umich.med.mrc2.datoolbox.gui.library.upload.LibraryRtImportDialog;
@@ -83,8 +87,10 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ReferenceMSMSLibraryExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibEditorImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.msms.DecoyLibraryGenerationTask;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSelectionListener, ItemListener {
@@ -221,6 +227,28 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 
 		if (command.equals(MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName()))
 			copyCompoundName();
+		
+		if (command.equals(MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName()))	
+			showRefMSMSLibraryExportDialog();
+		
+		if (command.equals(MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName()))	
+			showDecoyMSMSLibraryImportDialog();
+	}
+	
+	private void showRefMSMSLibraryExportDialog() {
+		
+		ReferenceMSMSLibraryExportDialog dialog = 
+				new ReferenceMSMSLibraryExportDialog(this);
+		dialog.setLocationRelativeTo(this.getContentPane());
+		dialog.setVisible(true);
+	}
+	
+	private void showDecoyMSMSLibraryImportDialog() {
+		
+		DecoyMSMSLibraryImportDialog dialog = 
+				new DecoyMSMSLibraryImportDialog(this);
+		dialog.setLocationRelativeTo(this.getContentPane());
+		dialog.setVisible(true);
 	}
 
 	private void copyCompoundFormula() {
@@ -833,39 +861,82 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 
 			// Import library
 			if (e.getSource().getClass().equals(LibEditorImportTask.class)) {
-
 				LibEditorImportTask task = (LibEditorImportTask) e.getSource();
 				loadLibrary(task.getLibrary());
 			}
-			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class)) {
+			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class)) 
+				finalizeLoadDatabaseLibraryTask( (LoadDatabaseLibraryTask) e.getSource());
+		
+			if (e.getSource().getClass().equals(DecoyLibraryGenerationTask.class))
+				finalizeDecoyLibraryGenerationTask((DecoyLibraryGenerationTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(ReferenceMSMSLibraryExportTask.class))
+				finalizeReferenceMSMSLibraryExportTask((ReferenceMSMSLibraryExportTask)e.getSource());
+		}
+	}
+	
+	private void finalizeDecoyLibraryGenerationTask(DecoyLibraryGenerationTask task) {
+		
+		File results = task.getOutputFile();
+		if(results != null && results.exists()) {
 
-				LoadDatabaseLibraryTask task = (LoadDatabaseLibraryTask) e.getSource();
-				MRC2ToolBoxCore.getActiveMsLibraries().add(task.getLibrary());
-				loadLibrary(task.getLibrary());
-
-				if (showFeaturePending && pendingFeatureId != null) {
-
-					LibraryMsFeature featureToShow = (LibraryMsFeature) currentLibrary.getFeatureById(pendingFeatureId);
-
-					if (featureToShow != null) {
-						SwingUtilities.invokeLater(() -> {
-							this.selectFeature(featureToShow);
-
-							if (libraryFeatureEditorPanel.getActiveFeature() == null) {
-								loadFeatureData(featureToShow);
-							} else {
-								if (!libraryFeatureEditorPanel.getActiveFeature().equals(featureToShow))
-									loadFeatureData(featureToShow);
-							}
-						});
-					}
-					showFeaturePending = false;
-					pendingFeatureId = null;
+			if(MessageDialog.showChoiceMsg(
+					"Decoy MSP file created, do you want to open containing folder?",
+				this.getContentPane()) == JOptionPane.YES_OPTION) {
+				try {
+					Desktop.getDesktop().open(results.getParentFile());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			}
 		}
 	}
+	
+	private void finalizeLoadDatabaseLibraryTask(LoadDatabaseLibraryTask task) {
+		
+		MRC2ToolBoxCore.getActiveMsLibraries().add(task.getLibrary());
+		loadLibrary(task.getLibrary());
 
+		if (showFeaturePending && pendingFeatureId != null) {
+
+			LibraryMsFeature featureToShow = (LibraryMsFeature) currentLibrary.getFeatureById(pendingFeatureId);
+
+			if (featureToShow != null) {
+				SwingUtilities.invokeLater(() -> {
+					this.selectFeature(featureToShow);
+
+					if (libraryFeatureEditorPanel.getActiveFeature() == null) {
+						loadFeatureData(featureToShow);
+					} else {
+						if (!libraryFeatureEditorPanel.getActiveFeature().equals(featureToShow))
+							loadFeatureData(featureToShow);
+					}
+				});
+			}
+			showFeaturePending = false;
+			pendingFeatureId = null;
+		}
+	}
+
+	private void finalizeReferenceMSMSLibraryExportTask(ReferenceMSMSLibraryExportTask task) {
+
+		File results = task.getOutputFile();
+		if(results.exists()) {
+
+			if(MessageDialog.showChoiceMsg(
+					"Export file created, do you want to open containing folder?",
+				this.getContentPane()) == JOptionPane.YES_OPTION) {
+				try {
+					Desktop.getDesktop().open(results.getParentFile());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	private void loadFeatureData(LibraryMsFeature featureToShow) {
 
 		libraryFeatureEditorPanel.loadFeature(featureToShow, featureToShow.getPolarity());

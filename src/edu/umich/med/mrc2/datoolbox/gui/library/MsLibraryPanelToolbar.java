@@ -59,7 +59,9 @@ public class MsLibraryPanelToolbar extends CommonToolbar {
 	private static final Icon editFeatureIcon = GuiUtils.getIcon("editLibraryFeature", 32);
 	private static final Icon deleteFeatureIcon = GuiUtils.getIcon("deleteFeature", 32);
 	private static final Icon importRtIcon = GuiUtils.getIcon("importLibraryRtValues", 32);
-
+	private static final Icon libraryExportIcon = GuiUtils.getIcon("exportLibrary", 32);
+	private static final Icon libraryImportIcon = GuiUtils.getIcon("importLibraryToDb", 32);
+	
 	@SuppressWarnings("unused")
 	private JButton
 			libraryManagerButton,
@@ -71,10 +73,13 @@ public class MsLibraryPanelToolbar extends CommonToolbar {
 			newFeatureButton,
 			editFeatureButton,
 			deleteFeatureButton,
-			importRtButton;
+			importRtButton,
+			exportRefMSMSLibraryButton,
+			importDecoyRefMSMSLibraryButton;
 
 	private JComboBox activeLibraryComboBox;
 
+	@SuppressWarnings("unchecked")
 	public MsLibraryPanelToolbar(ActionListener commandListener) {
 
 		super(commandListener);
@@ -129,7 +134,19 @@ public class MsLibraryPanelToolbar extends CommonToolbar {
 		deleteFeatureButton = GuiUtils.addButton(this, null, deleteFeatureIcon, commandListener,
 				MainActionCommands.DELETE_LIBRARY_FEATURE_COMMAND.getName(),
 				MainActionCommands.DELETE_LIBRARY_FEATURE_COMMAND.getName(), buttonDimension);
-
+		
+		addSeparator(buttonDimension);
+		
+		exportRefMSMSLibraryButton = GuiUtils.addButton(this, null, libraryExportIcon, commandListener,
+				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName(),
+				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName(), buttonDimension);
+//		exportRefMSMSLibraryButton.setEnabled(false);
+		
+		importDecoyRefMSMSLibraryButton = GuiUtils.addButton(this, null, libraryImportIcon, commandListener,
+				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(),
+				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(), buttonDimension);
+		importDecoyRefMSMSLibraryButton.setEnabled(false);
+		
 		addSeparator(buttonDimension);
 
 		Component horizontalGlue = Box.createHorizontalGlue();
@@ -146,10 +163,13 @@ public class MsLibraryPanelToolbar extends CommonToolbar {
 		add(activeLibraryComboBox);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void updateLibraryName(CompoundLibrary selectedLibrary) {
 
 		activeLibraryComboBox.removeItemListener((ItemListener) commandListener);
-		CompoundLibrary[] libs = MRC2ToolBoxCore.getActiveMsLibraries().toArray(new CompoundLibrary[MRC2ToolBoxCore.getActiveMsLibraries().size()]);
+		CompoundLibrary[] libs = 
+				MRC2ToolBoxCore.getActiveMsLibraries().toArray(
+						new CompoundLibrary[MRC2ToolBoxCore.getActiveMsLibraries().size()]);
 		activeLibraryComboBox.setModel(new SortedComboBoxModel<CompoundLibrary>(libs));
 
 		if(selectedLibrary == null || !MRC2ToolBoxCore.getActiveMsLibraries().contains(selectedLibrary)) {

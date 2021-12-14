@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.fdata;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -196,6 +197,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		activeSet = null;
 		activeFeatureFilter = FeatureFilter.ALL_FEATURES;
 	}
+	
+	public void setProjectActionListener(ActionListener listener) {
+		toolbar.setProjectActionListener(listener);
+	}	
 
 	@Override
 	public void actionPerformed(ActionEvent event) {

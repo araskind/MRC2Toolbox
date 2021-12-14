@@ -21,15 +21,25 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.fdata;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
 
+import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
+import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
+import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class FeatureDataToolbar extends CommonToolbar {
@@ -61,6 +71,10 @@ public class FeatureDataToolbar extends CommonToolbar {
 	private static final Icon bubblePlotIcon = GuiUtils.getIcon("bubble", 32);
 	private static final Icon checkDuplicateNamesIcon = GuiUtils.getIcon("checkDuplicateNames", 32);
 	
+	private static final Icon exportResultsIcon = GuiUtils.getIcon("export", 32);
+	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 32);
+	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 32);
+	
 	@SuppressWarnings("unused")
 	private JButton
 		loadPlainDataFileButton,
@@ -83,8 +97,15 @@ public class FeatureDataToolbar extends CommonToolbar {
 		clearIdentificationsButon,
 		imputeMissingDataButton,
 		bubblePlotButton,
-		checkDuplicateNamesButton;
+		checkDuplicateNamesButton,
+		exportResultsButton,
+		exportExcelButton,
+		exportMwTabButton;
+	
+	private JComboBox dataPipelineComboBox;
+	private ItemListener iListener;
 
+	@SuppressWarnings("unchecked")
 	public FeatureDataToolbar(ActionListener commandListener) {
 
 		super(commandListener);		
@@ -188,33 +209,132 @@ public class FeatureDataToolbar extends CommonToolbar {
 //		imputeMissingDataButton = GuiUtils.addButton(this, null, imputeDataIcon, commandListener,
 //				MainActionCommands.SHOW_IMPUTE_DIALOG_COMMAND.getName(),
 //				MainActionCommands.SHOW_IMPUTE_DIALOG_COMMAND.getName(), buttonDimension);
+		
+		addSeparator(buttonDimension);
+
+		exportResultsButton = GuiUtils.addButton(this, null, exportResultsIcon, null,
+				MainActionCommands.EXPORT_RESULTS_COMMAND.getName(),
+				MainActionCommands.EXPORT_RESULTS_COMMAND.getName(), buttonDimension);
+
+		exportExcelButton = GuiUtils.addButton(this, null, exportExcelIcon, null,
+				MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND.getName(),
+				MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND.getName(), buttonDimension);
+
+		exportMwTabButton = GuiUtils.addButton(this, null, exportMwTabIcon, null,
+				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName(),
+				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName(), buttonDimension);
+
+		addSeparator(buttonDimension);
+		Component horizontalGlue = Box.createHorizontalGlue();
+		add(horizontalGlue);
+
+		JLabel lblNewLabel = new JLabel("Data pipline: ");
+		add(lblNewLabel);
+
+		dataPipelineComboBox = new JComboBox<DataPipeline>();
+		dataPipelineComboBox.setFont(new Font("Tahoma", Font.BOLD, 14));
+		dataPipelineComboBox.setModel(
+				new SortedComboBoxModel<DataPipeline>(new DataPipeline[0]));
+		dataPipelineComboBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+		dataPipelineComboBox.setMaximumSize(new Dimension(200, 30));
+		dataPipelineComboBox.setMinimumSize(new Dimension(200, 30));
+		add(dataPipelineComboBox);
+		
+		adjustEnabledButtonsForConfiguration();
+	}
+	
+	public void setProjectActionListener(ActionListener listener) {
+		
+		exportResultsButton.addActionListener(listener);
+		exportExcelButton.addActionListener(listener);
+		exportMwTabButton.addActionListener(listener);
+		iListener = (ItemListener) listener;
+		dataPipelineComboBox.addItemListener(iListener);
+	}
+	
+	private void adjustEnabledButtonsForConfiguration() {
+		
+		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.IDTRACKER)) {			
+			dataPipelineComboBox.setEnabled(false);
+			exportResultsButton.setEnabled(false);
+			exportExcelButton.setEnabled(false);
+			exportMwTabButton.setEnabled(false);
+		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
-
-		if(project != null) {
-
-			calcStatsButton.setEnabled(true);
-			showKnownOnlyButton.setEnabled(true);
-			showUnknownOnlyButton.setEnabled(true);
-			showQCOnlyButton.setEnabled(true);
-//			inClusterButton.setEnabled(true);
-//			notInClusterButton.setEnabled(true);
-			filterFeaturesButton.setEnabled(true);
-			resetFilterButton.setEnabled(true);
-			//imputeMissingDataButton.setEnabled(true);
+		
+		DataAnalysisProject currentProject = project;
+		if(currentProject == null) {
+			noProject();
+			return;
+		}
+		projectActive();
+		if (newDataPipeline != null) {
+			exportResultsButton.setEnabled(
+					currentProject.dataPipelineHasData(newDataPipeline));
+			exportExcelButton.setEnabled(
+					currentProject.dataPipelineHasData(newDataPipeline));
 		}
 		else {
-			calcStatsButton.setEnabled(false);
-			showKnownOnlyButton.setEnabled(false);
-			showUnknownOnlyButton.setEnabled(false);
-			showQCOnlyButton.setEnabled(false);
-//			inClusterButton.setEnabled(false);
-//			notInClusterButton.setEnabled(false);
-			filterFeaturesButton.setEnabled(false);
-			resetFilterButton.setEnabled(false);
-			//imputeMissingDataButton.setEnabled(false);
+			exportResultsButton.setEnabled(false);
+			exportExcelButton.setEnabled(false);
 		}
+		// Assay selector
+		dataPipelineComboBox.removeItemListener(iListener);
+		DataPipeline[] projectAssays = currentProject.getDataPipelines().
+				toArray(new DataPipeline[currentProject.getDataPipelines().size()]);
+		dataPipelineComboBox.setModel(
+				new SortedComboBoxModel<DataPipeline>(projectAssays));
+		dataPipelineComboBox.setEnabled(true);
+
+		if (newDataPipeline != null)
+			dataPipelineComboBox.setSelectedItem(newDataPipeline);
+		else
+			dataPipelineComboBox.setSelectedIndex(-1);
+
+		if (projectAssays.length == 0)
+			dataPipelineComboBox.setEnabled(false);
+
+		dataPipelineComboBox.addItemListener(iListener);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void noProject() {
+		calcStatsButton.setEnabled(true);
+		showKnownOnlyButton.setEnabled(true);
+		showUnknownOnlyButton.setEnabled(true);
+		showQCOnlyButton.setEnabled(true);
+//		inClusterButton.setEnabled(true);
+//		notInClusterButton.setEnabled(true);
+		filterFeaturesButton.setEnabled(true);
+		resetFilterButton.setEnabled(true);
+		//imputeMissingDataButton.setEnabled(true);
+		exportResultsButton.setEnabled(false);
+		exportExcelButton.setEnabled(false);
+		exportMwTabButton.setEnabled(false);
+		dataPipelineComboBox.removeItemListener(iListener);
+		dataPipelineComboBox.setModel(
+				new SortedComboBoxModel<DataPipeline>(new DataPipeline[0]));
+		dataPipelineComboBox.addItemListener(iListener);
+		dataPipelineComboBox.setEnabled(false);
+	}
+
+	public void projectActive() {
+		calcStatsButton.setEnabled(false);
+		showKnownOnlyButton.setEnabled(false);
+		showUnknownOnlyButton.setEnabled(false);
+		showQCOnlyButton.setEnabled(false);
+//		inClusterButton.setEnabled(false);
+//		notInClusterButton.setEnabled(false);
+		filterFeaturesButton.setEnabled(false);
+		resetFilterButton.setEnabled(false);
+		//imputeMissingDataButton.setEnabled(false);
+		exportResultsButton.setEnabled(true);
+		exportExcelButton.setEnabled(true);
+		exportMwTabButton.setEnabled(true);
+		dataPipelineComboBox.setEnabled(true);
 	}
 }
