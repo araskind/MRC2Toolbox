@@ -43,8 +43,11 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 
 	private MSMSFeatureTable featureTable;
 	private static final Icon componentIcon = GuiUtils.getIcon("msTwo", 16);
+	private static final Icon filterIcon = GuiUtils.getIcon("filter", 16);
 	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 16);
-	private SimpleButtonAction reloadFeaturesButton;
+	private SimpleButtonAction 
+			reloadFeaturesButton, 
+			filterFeaturesButton;
 	
 	public DockableMSMSFeatureTable(DockableMRC2ToolboxPanel parentPanel) {
 
@@ -61,12 +64,18 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 		DefaultDockActionSource actions = new DefaultDockActionSource(
 				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
 
+		filterFeaturesButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(),
+				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(), 
+				filterIcon, l);
+		actions.add(filterFeaturesButton);
+		
 		reloadFeaturesButton = GuiUtils.setupButtonAction(
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
 				reloadIcon, l);
-		
 		actions.add(reloadFeaturesButton);
+		
 		actions.addSeparator();
 		intern().setActionOffers(actions);
 	}

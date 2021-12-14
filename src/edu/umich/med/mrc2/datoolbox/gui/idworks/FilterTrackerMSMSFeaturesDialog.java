@@ -37,6 +37,8 @@ import java.util.Collection;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -60,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -71,7 +74,8 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 	 *
 	 */
 	private static final long serialVersionUID = -5028494778833454970L;
-
+	private static final Icon filterIcon = GuiUtils.getIcon("filter", 32);
+	
 	private static final String RESET_COMMAND = "Reset";
 	
 	private static final NumberFormat twoDecFormat = new DecimalFormat("###.##");
@@ -122,7 +126,8 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 	public FilterTrackerMSMSFeaturesDialog(ActionListener listener) {
 
 		super();
-		setTitle("Filter features");
+		setTitle("Filter MSMS features");
+		setIconImage(((ImageIcon)filterIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setSize(new Dimension(700, 400));
 		setPreferredSize(new Dimension(700, 400));

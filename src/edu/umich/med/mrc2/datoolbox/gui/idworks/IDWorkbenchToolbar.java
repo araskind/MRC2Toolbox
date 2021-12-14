@@ -205,11 +205,11 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 				MainActionCommands.LOAD_RAW_DATA_FOR_CURRENT_MSMS_FEATURE_SET_COMMAND.getName(),
 				buttonDimension);
 				
-		addSeparator(buttonDimension);
-		
-		filterFeaturesButton = GuiUtils.addButton(this, null, filterIcon, commandListener,
-				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(),
-				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(), buttonDimension);
+//		addSeparator(buttonDimension);
+//		
+//		filterFeaturesButton = GuiUtils.addButton(this, null, filterIcon, commandListener,
+//				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(),
+//				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(), buttonDimension);
 		
 		addSeparator(buttonDimension);
 		
