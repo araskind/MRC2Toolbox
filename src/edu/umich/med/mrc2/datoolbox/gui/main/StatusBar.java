@@ -175,7 +175,12 @@ public class StatusBar extends JPanel implements
 	}
 
 	public static void clearProjectData() {	
-		projectNameLabel.setText("");
+		projectNameLabel.setText("");	
+		featureCollectionLabel.setText("");
+	}
+	
+	public static void setProjectName(String projectName) {
+		projectNameLabel.setText(projectName);
 	}
 
 	/**
@@ -263,7 +268,7 @@ public class StatusBar extends JPanel implements
 		clearProjectData();	
 		if(project != null) {
 			projectNameLabel.setText(project.getName());
-//			TODO
+			//	TODO
 		}
 	}
 }

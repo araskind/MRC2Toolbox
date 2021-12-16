@@ -68,6 +68,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
+import edu.umich.med.mrc2.datoolbox.gui.main.StatusBar;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.DockableChromatogramPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
@@ -398,6 +399,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		//	Set project as active
 		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(newProject);
 		activeRawDataAnalysisProject = newProject;
+		StatusBar.setProjectName(activeRawDataAnalysisProject.getName());
 		
 		//	 Load raw data
 		ProjectRawDataFileOpenTask task = 
@@ -750,36 +752,24 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class)) {			
-				ChromatogramExtractionTask task = (ChromatogramExtractionTask)e.getSource();				
-				finalizeChromatogramExtraction(task);						
-			}
-			if (e.getSource().getClass().equals(MassSpectraAveragingTask.class)) {				
-				MassSpectraAveragingTask task = (MassSpectraAveragingTask)e.getSource();			
-				finalizeMassSpectraAveraging(task);		
-			}
-			if(e.getSource().getClass().equals(RawDataFileOpenTask.class)) {
-				
-				RawDataFileOpenTask rdoTask = (RawDataFileOpenTask)e.getSource();		
-				OpenRawDataFilesTask task = new OpenRawDataFilesTask(rdoTask.getOpenedFiles());
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-				MainWindow.hideProgressDialog();
-				idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), task);
-				idp.setLocationRelativeTo(this.getContentPane());
-				idp.setVisible(true);
-			}
-			if(e.getSource().getClass().equals(RawDataBatchCoversionTask.class)) {
-				MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-				MainWindow.hideProgressDialog();
-				MessageDialog.showInfoMsg("Data conversion completed", this.getContentPane());
-			}
+			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class))		
+				finalizeChromatogramExtraction((ChromatogramExtractionTask)e.getSource());						
+			
+			if (e.getSource().getClass().equals(MassSpectraAveragingTask.class))		
+				finalizeMassSpectraAveraging((MassSpectraAveragingTask)e.getSource());		
+			
+			if(e.getSource().getClass().equals(RawDataFileOpenTask.class))				
+				finalizeRawDataFileOpenTask((RawDataFileOpenTask)e.getSource());		
+			
+			if(e.getSource().getClass().equals(RawDataBatchCoversionTask.class))
+				finalizeRawDataFileConversionTask();
+			
 			if(e.getSource().getClass().equals(RawDataRepositoryIndexingTask.class)) 
 				MessageDialog.showInfoMsg("Raw data indexing completed", this.getContentPane());
 			
-			if(e.getSource().getClass().equals(ProjectRawDataFileOpenTask.class)) {
-				ProjectRawDataFileOpenTask task = (ProjectRawDataFileOpenTask)e.getSource();
-				finalizeProjectRawDataLoad(task);
-			}
+			if(e.getSource().getClass().equals(ProjectRawDataFileOpenTask.class))
+				finalizeProjectRawDataLoad((ProjectRawDataFileOpenTask)e.getSource());
+			
 			if (e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class))
 				finalizeRawDataAnalysisProjectSave();
 			
@@ -790,7 +780,22 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				finalizeRawMSMSBatchExtractionTask((MsMsfeatureBatchExtractionTask)e.getSource());
 		}
 	}
-
+	
+	private void finalizeRawDataFileConversionTask() {
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+		MessageDialog.showInfoMsg("Data conversion completed", this.getContentPane());
+	}
+	
+	private void finalizeRawDataFileOpenTask(RawDataFileOpenTask rdoTask) {
+		OpenRawDataFilesTask task = new OpenRawDataFilesTask(rdoTask.getOpenedFiles());
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
 	private void finalizeRawMSMSBatchExtractionTask(MsMsfeatureBatchExtractionTask task) {
 
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -824,10 +829,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				activeRawDataAnalysisProject.getDataFiles());
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
+		StatusBar.clearProjectData();
+		StatusBar.setProjectName(activeRawDataAnalysisProject.getName());
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
 		idp.setLocationRelativeTo(this.getContentPane());
-		idp.setVisible(true);
-		
+		idp.setVisible(true);		
 		sendMSMSFeaturesToIDTrackerWorkbench();
 	}
 

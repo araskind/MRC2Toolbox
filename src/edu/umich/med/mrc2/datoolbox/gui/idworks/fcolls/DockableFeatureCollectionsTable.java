@@ -30,6 +30,8 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 
 public class DockableFeatureCollectionsTable extends DefaultSingleCDockable {
 
@@ -51,6 +53,22 @@ public class DockableFeatureCollectionsTable extends DefaultSingleCDockable {
 		
 		featureCollectionsTable.getSelectionModel().addListSelectionListener(parent);
 		add(new JScrollPane(featureCollectionsTable));
+	}
+	
+	public void loadDatabaseStoredCollections() {
+		FeatureCollectionManager.refreshMsFeatureInformationBundleCollectionList();
+		featureCollectionsTable.setTableModelFromFeatureCollectionList(
+				FeatureCollectionManager.getMsFeatureInformationBundleCollectionList());
+	}
+	
+	public void loadCollectionsForActiveProject() {
+		
+		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
+		if(project == null)
+			return;
+		
+		featureCollectionsTable.setTableModelFromFeatureCollectionList(
+				project.getFeatureCollections());
 	}
 	
 	public void setTableModelFromFeatureCollectionList(

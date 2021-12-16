@@ -137,7 +137,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600214436454" orientation="HORIZONTAL" divider="0.2562358276643991">
-											<leaf id="2" nodeId="1600213801751">
+											<leaf id="0" nodeId="1600213801751">
 												<placeholders>
 													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</placeholders>
@@ -183,7 +183,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="0" nodeId="1600214464136">
+												<leaf id="2" nodeId="1600214464136">
 													<placeholders>
 														<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
 														<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
@@ -259,8 +259,125 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
+										<replacement id="dockablesingle DockableIdProjectTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableIdProjectTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>3</selected>
+										<selected>2</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableIDTrackerExperimentDesignEditorPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableSamplePrepManagerPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableInstrumentSequenceManagerPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableIDTrackerResultsOverviewPanel</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableIDTrackerExperimentDesignEditorPanel">
+												<replacement id="dockablesingle DockableIDTrackerExperimentDesignEditorPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableIDTrackerExperimentDesignEditorPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableSamplePrepManagerPanel">
+												<replacement id="dockablesingle DockableSamplePrepManagerPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableSamplePrepManagerPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableInstrumentSequenceManagerPanel">
+												<replacement id="dockablesingle DockableInstrumentSequenceManagerPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableInstrumentSequenceManagerPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableIDTrackerResultsOverviewPanel">
+												<replacement id="dockablesingle DockableIDTrackerResultsOverviewPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableIDTrackerResultsOverviewPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>5</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -436,123 +553,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>2</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableIDTrackerExperimentDesignEditorPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableSamplePrepManagerPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">2</item>
-												<item key="dock.id" type="i">2</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableInstrumentSequenceManagerPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">3</item>
-												<item key="dock.id" type="i">3</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableIDTrackerResultsOverviewPanel</item>
-											</entry>
-										</placeholders>
-									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableIDTrackerExperimentDesignEditorPanel">
-												<replacement id="dockablesingle DockableIDTrackerExperimentDesignEditorPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableIDTrackerExperimentDesignEditorPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableSamplePrepManagerPanel">
-												<replacement id="dockablesingle DockableSamplePrepManagerPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableSamplePrepManagerPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableInstrumentSequenceManagerPanel">
-												<replacement id="dockablesingle DockableInstrumentSequenceManagerPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableInstrumentSequenceManagerPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableIDTrackerResultsOverviewPanel">
-												<replacement id="dockablesingle DockableIDTrackerResultsOverviewPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableIDTrackerResultsOverviewPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
-										<replacement id="dockablesingle DockableIdProjectTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableIdProjectTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

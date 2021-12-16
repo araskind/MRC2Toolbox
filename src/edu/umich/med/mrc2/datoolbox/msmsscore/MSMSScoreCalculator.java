@@ -289,7 +289,9 @@ public class MSMSScoreCalculator {
 		return score;
 	}
 	
-	public static double calculateEntropyMatchScore(TandemMassSpectrum msms, ReferenceMsMsLibraryMatch match) {
+	public static double calculateEntropyMatchScore(
+			TandemMassSpectrum msms, 
+			ReferenceMsMsLibraryMatch match) {
 
 		NISTPepSearchParameterObject params = 
 				IDTDataCash.getNISTPepSearchParameterObjectById(match.getSearchParameterSetId());

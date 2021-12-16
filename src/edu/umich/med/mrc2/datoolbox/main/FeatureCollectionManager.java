@@ -39,11 +39,14 @@ public class FeatureCollectionManager {
 	
 	public static final String CURRENT_MSMS_FEATURE_SEARCH_RESULT = "Current MSMS feature search";
 	public static final String CURRENT_MS1_FEATURE_SEARCH_RESULT = "Current MS1 feature search";
+	public static final String ACTIVE_PROJECT_FEATURE_SET = "Active project complete feature set";
 	
 	public static final MsFeatureInfoBundleCollection msmsSearchResults = 
 			new MsFeatureInfoBundleCollection(CURRENT_MSMS_FEATURE_SEARCH_RESULT);	
 	public static final MsFeatureInfoBundleCollection msOneSearchResults = 
 			new MsFeatureInfoBundleCollection(CURRENT_MS1_FEATURE_SEARCH_RESULT);
+	public static final MsFeatureInfoBundleCollection activeProjectFeatureSet = 
+			new MsFeatureInfoBundleCollection(ACTIVE_PROJECT_FEATURE_SET);
 	
 	public static final Map<MsFeatureInfoBundleCollection, Set<String>>featureCollectionsMSMSIDMap = 
 			new TreeMap<MsFeatureInfoBundleCollection, Set<String>>(
@@ -52,12 +55,14 @@ public class FeatureCollectionManager {
 	public static void clearActiveSets() {		
 		msmsSearchResults.clearCollection();
 		msOneSearchResults.clearCollection();
+		activeProjectFeatureSet.clearCollection();
 	}
 		
 	public static void refreshMsFeatureInformationBundleCollectionList() {
 		featureCollectionsMSMSIDMap.clear();
 		featureCollectionsMSMSIDMap.put(msmsSearchResults, new TreeSet<String>());
 		featureCollectionsMSMSIDMap.put(msOneSearchResults, new TreeSet<String>());
+		featureCollectionsMSMSIDMap.put(activeProjectFeatureSet, new TreeSet<String>());
 		try {
 			featureCollectionsMSMSIDMap.putAll(
 					FeatureCollectionUtils.getMsFeatureInformationBundleCollections());
@@ -82,6 +87,7 @@ public class FeatureCollectionManager {
 		return featureCollectionsMSMSIDMap.keySet().stream().
 			filter(c -> !c.equals(msmsSearchResults)).
 			filter(c -> !c.equals(msOneSearchResults)).
+			filter(c -> !c.equals(activeProjectFeatureSet)).
 			sorted(new MsFeatureInformationBundleCollectionComparator(SortProperty.Name)).
 			collect(Collectors.toList());
 	}

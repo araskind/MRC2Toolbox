@@ -140,7 +140,7 @@
 												</placeholder-map>
 											</leaf>
 											<node nodeId="1600794782551" orientation="HORIZONTAL" divider="0.5657084188911704">
-												<leaf id="2" nodeId="1600794722848">
+												<leaf id="1" nodeId="1600794722848">
 													<placeholders>
 														<placeholder>dock.single.DockableChromatographicGradientTable</placeholder>
 														<placeholder>dock.single.DockableGradientChartPanel</placeholder>
@@ -164,7 +164,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="1" nodeId="1600794717896">
+												<leaf id="2" nodeId="1600794717896">
 													<placeholders>
 														<placeholder>dock.single.DockableMobilePhaseAndParametersPanel</placeholder>
 													</placeholders>
@@ -185,16 +185,6 @@
 										<replacement id="dockablesingle DockableAcquisitionMethodDataPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>DockableAcquisitionMethodDataPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMobilePhaseAndParametersPanel">
-										<replacement id="dockablesingle DockableMobilePhaseAndParametersPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMobilePhaseAndParametersPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -258,6 +248,16 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMobilePhaseAndParametersPanel">
+										<replacement id="dockablesingle DockableMobilePhaseAndParametersPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMobilePhaseAndParametersPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

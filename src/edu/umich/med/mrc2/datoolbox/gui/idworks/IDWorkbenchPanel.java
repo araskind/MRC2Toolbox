@@ -2229,14 +2229,19 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			return;
 		}
 		activeFeatureCollection = selectedCollection;
-		IDTMSMSFeatureDataPullTask task = 
-				FeatureCollectionManager.getMsFeatureInfoBundleCollectionData(selectedCollection);
-		if(task == null) {
-			 reloadActiveMSMSFeatureCollection();
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			IDTMSMSFeatureDataPullTask task = 
+					FeatureCollectionManager.getMsFeatureInfoBundleCollectionData(selectedCollection);
+			if(task == null) {
+				 reloadActiveMSMSFeatureCollection();
+			}
+			else {
+				task.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(task);
+			}
 		}
 		else {
-			task.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(task);
+			 reloadActiveMSMSFeatureCollection();
 		}
 	}
 	
@@ -2293,9 +2298,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	}
 
 	public void reloadCompleteActiveMSMSFeatureSet() {
-		activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
-		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
-		safelyLoadMSMSFeatures(FeatureCollectionManager.msmsSearchResults.getFeatures());
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
+			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+		}
+		else {
+			activeFeatureCollection = FeatureCollectionManager.activeProjectFeatureSet;
+			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+		}
 	}
 	
 	public void safelyLoadMSMSFeatures(
@@ -2704,12 +2717,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	public void loadFeaturesFromRawDataProject(RawDataAnalysisProject activeRawDataAnalysisProject) {
 		
 		clearPanel();		
-		activeFeatureCollection = 
-				new MsFeatureInfoBundleCollection(activeRawDataAnalysisProject.getName());
-		activeFeatureCollection.setOffLine(true);		
-		Collection<MsFeatureInfoBundle>projectMsmsFeatures = 
-				activeRawDataAnalysisProject.getMsMsFeatureBundles();
-		activeFeatureCollection.addFeatures(projectMsmsFeatures);
+		FeatureCollectionManager.activeProjectFeatureSet.clearCollection();
+		FeatureCollectionManager.activeProjectFeatureSet.addFeatures(
+				activeRawDataAnalysisProject.getMsMsFeatureBundles());
+		activeRawDataAnalysisProject.addMsFeatureInfoBundleCollection(
+				FeatureCollectionManager.activeProjectFeatureSet);
+		activeFeatureCollection = FeatureCollectionManager.activeProjectFeatureSet;
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());			
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 	}	

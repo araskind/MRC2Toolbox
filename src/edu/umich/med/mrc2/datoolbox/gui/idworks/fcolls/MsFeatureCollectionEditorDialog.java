@@ -351,6 +351,20 @@ public class MsFeatureCollectionEditorDialog extends JDialog
 		if(newName.isEmpty())
 			errors.add("Name can not be empty.");
 		
+		String nameError = null;
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			nameError = validateNameAgainstDatabase(newName);
+		else
+			nameError = validateNameAgainstProject(newName);
+		
+		if(nameError != null)
+			errors.add(nameError);
+		
+		return errors;
+	}
+	
+	private String validateNameAgainstDatabase(String newName) {
+				
 		FeatureCollectionManager.refreshMsFeatureInformationBundleCollectionList();
 		MsFeatureInfoBundleCollection existing = null;
 		if(this.featureCollection == null) {
@@ -366,9 +380,32 @@ public class MsFeatureCollectionEditorDialog extends JDialog
 					findFirst().orElse(null);
 		}
 		if(existing != null)
-			errors.add("Collection \"" + newName + "\" already exists.");
+			return "Collection \"" + newName + "\" already exists.";
+		else
+			return null;
+	}
+	
+	private String validateNameAgainstProject(String newName) {
 		
-		return errors;
+		MsFeatureInfoBundleCollection existing = null;
+		Set<MsFeatureInfoBundleCollection> projectCollections = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getFeatureCollections();
+		if(this.featureCollection == null) {
+			existing = projectCollections.stream().
+					filter(f -> f.getName().equalsIgnoreCase(newName)).
+					findFirst().orElse(null);
+		}
+		else {
+			String id = featureCollection.getId();
+			existing = projectCollections.stream().
+					filter(f -> !f.getId().equals(id)).
+					filter(f -> f.getName().equalsIgnoreCase(newName)).
+					findFirst().orElse(null);
+		}
+		if(existing != null)
+			return "Collection \"" + newName + "\" already exists.";
+		else
+			return null;
 	}
 	
 	@Override

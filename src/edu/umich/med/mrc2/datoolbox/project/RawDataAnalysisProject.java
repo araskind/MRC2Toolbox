@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -39,7 +40,9 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -54,6 +57,7 @@ public class RawDataAnalysisProject extends Project {
 	protected Collection<DataFile>msOneDataFiles;
 	protected Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;	
 	protected Map<String, MsFeatureChromatogramBundle>chromatogramMap;
+	protected Set<MsFeatureInfoBundleCollection>featureCollections;
 	
 	//	New project
 	public RawDataAnalysisProject(
@@ -152,6 +156,9 @@ public class RawDataAnalysisProject extends Project {
 		msOneDataFiles = new TreeSet<DataFile>();
 		msFeatureMap = new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
 		chromatogramMap = new HashMap<String, MsFeatureChromatogramBundle>();
+		featureCollections = 
+				new TreeSet<MsFeatureInfoBundleCollection>(
+						new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));
 		//	TODO
 	}
 	
@@ -319,7 +326,24 @@ public class RawDataAnalysisProject extends Project {
 		
 		chromatogramMap.clear();
 	}
+
+	public Set<MsFeatureInfoBundleCollection> getFeatureCollections() {
+		return featureCollections;
+	}
+	
+	public void addMsFeatureInfoBundleCollection(MsFeatureInfoBundleCollection fbCollection) {
+			featureCollections.add(fbCollection);
+	}
+	
+	public void removeMsFeatureInfoBundleCollection(MsFeatureInfoBundleCollection fbCollection) {
+		featureCollections.remove(fbCollection);
+	}
 }
+
+
+
+
+
 
 
 

@@ -59,6 +59,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 
 public class FeatureCollectionManagerDialog extends JDialog 
 		implements ActionListener, ListSelectionListener, PersistentLayout {
@@ -100,6 +101,11 @@ public class FeatureCollectionManagerDialog extends JDialog
 		grid = new CGrid(control);
 			
 		featureCollectionsTable = new DockableFeatureCollectionsTable(this);
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			featureCollectionsTable.loadDatabaseStoredCollections();
+		else
+			featureCollectionsTable.loadCollectionsForActiveProject();
+
 		featureCollectionsTable.getTable().addMouseListener(
 
 				new MouseAdapter() {
@@ -158,22 +164,12 @@ public class FeatureCollectionManagerDialog extends JDialog
 		if(command.equals(MainActionCommands.LOAD_FEATURE_COLLECTION_COMMAND.getName()))
 			 loadFeatureCollection() ;
 	}
-
-	private void loadFeatureCollection() {
-		
-		MsFeatureInfoBundleCollection selectedCollection = 
-				featureCollectionsTable.getSelectedCollection();
-		if(selectedCollection == null)
-			return;
-		
-		loadCollectionIntoWorkBench(selectedCollection);		
-	}
 	
-	public void loadCollectionIntoWorkBench(MsFeatureInfoBundleCollection selectedCollection) {
+	public void showMsFeatureCollectionEditorDialog (MsFeatureInfoBundleCollection collection) {
 		
-		IDWorkbenchPanel panel = (IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);		
-		panel.loadMSMSFeatureInformationBundleCollection(selectedCollection);	
-		dispose();
+		msFeatureCollectionEditorDialog = new MsFeatureCollectionEditorDialog(collection, featuresToAdd, this);
+		msFeatureCollectionEditorDialog.setLocationRelativeTo(this);
+		msFeatureCollectionEditorDialog.setVisible(true);
 	}
 
 	private void saveEditedFeatureCollectionData() {
@@ -238,6 +234,33 @@ public class FeatureCollectionManagerDialog extends JDialog
 		if(msFeatureCollectionEditorDialog.getFeaturesToAdd() != null)
 			newCollection.addFeatures(msFeatureCollectionEditorDialog.getFeaturesToAdd());
 		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			createNewFeatureCollectionInDatabase(newCollection);
+		else
+			createNewFeatureCollectionInProject(newCollection);
+	}
+	
+	private void createNewFeatureCollectionInProject(MsFeatureInfoBundleCollection newCollection) {
+		
+		RawDataAnalysisProject project = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();		
+		project.addMsFeatureInfoBundleCollection(newCollection);
+		boolean loadCollection = 
+				msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
+		msFeatureCollectionEditorDialog.dispose();	
+		if(loadCollection) {
+			loadCollectionIntoWorkBench(newCollection);
+			dispose();
+		}
+		else {
+			featureCollectionsTable.setTableModelFromFeatureCollectionList(
+					project.getFeatureCollections());	
+			featuresToAdd = null;
+		}
+	}
+		
+	private void createNewFeatureCollectionInDatabase(MsFeatureInfoBundleCollection newCollection) {
+
 		String newId = null;
 		try {
 			newId = FeatureCollectionUtils.addNewMsFeatureInformationBundleCollection(newCollection);
@@ -283,21 +306,20 @@ public class FeatureCollectionManagerDialog extends JDialog
 		if(selected == null)
 			return;
 		
-		if(selected.equals(FeatureCollectionManager.msmsSearchResults) 
-				|| selected.equals(FeatureCollectionManager.msOneSearchResults)) {
+		if(!FeatureCollectionManager.getEditableMsFeatureInformationBundleCollectionList().contains(selected)) {
 			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-					"\" represents database search results and can not be edited.", this);
+					"\" is locked and can not be edited.", this);
 			return;
-		}		
+		}
+//		if(selected.equals(FeatureCollectionManager.msmsSearchResults) 
+//				|| selected.equals(FeatureCollectionManager.msOneSearchResults)) {
+//			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
+//					"\" is locked and can not be edited.", this);
+//			return;
+//		}		
 		showMsFeatureCollectionEditorDialog(selected);
 	}
-	
-	public void showMsFeatureCollectionEditorDialog (MsFeatureInfoBundleCollection collection) {
-		
-		msFeatureCollectionEditorDialog = new MsFeatureCollectionEditorDialog(collection, featuresToAdd, this);
-		msFeatureCollectionEditorDialog.setLocationRelativeTo(this);
-		msFeatureCollectionEditorDialog.setVisible(true);
-	}
+
 
 	private void deleteFeatureCollection() {
 		
@@ -345,7 +367,24 @@ public class FeatureCollectionManagerDialog extends JDialog
 	public void setFeaturesToAdd(Collection<MsFeatureInfoBundle> featuresToAdd) {
 		this.featuresToAdd = featuresToAdd;
 	}
-
+	
+	private void loadFeatureCollection() {
+		
+		MsFeatureInfoBundleCollection selectedCollection = 
+				featureCollectionsTable.getSelectedCollection();
+		if(selectedCollection == null)
+			return;
+		
+		loadCollectionIntoWorkBench(selectedCollection);		
+	}
+	
+	public void loadCollectionIntoWorkBench(MsFeatureInfoBundleCollection selectedCollection) {
+		
+		IDWorkbenchPanel panel = (IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);		
+		panel.loadMSMSFeatureInformationBundleCollection(selectedCollection);	
+		dispose();
+	}
+	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		// TODO Auto-generated method stub
