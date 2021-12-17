@@ -184,6 +184,29 @@ public class FeatureCollectionManagerDialog extends JDialog
 		edited.setName(msFeatureCollectionEditorDialog.getFeatureCollectionName());
 		edited.setDescription(msFeatureCollectionEditorDialog.getFeatureCollectionDescription());
 		edited.setLastModified(new Date());
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			saveFeatureCollectionChangesToDatabase(edited);
+		else
+			saveFeatureCollectionChangesToProject(edited);
+	}
+	
+	private void saveFeatureCollectionChangesToProject(MsFeatureInfoBundleCollection edited) {
+		edited.addFeatures(msFeatureCollectionEditorDialog.getFeaturesToAdd());
+		boolean loadCollection = msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
+		msFeatureCollectionEditorDialog.dispose();	
+		if(loadCollection) {
+			loadCollectionIntoWorkBench(edited);
+			dispose();
+		}
+		else {				
+			featureCollectionsTable.getTable().updateCollectionData(edited);
+			featureCollectionsTable.selectCollection(edited);
+		}
+	}
+	
+	private void saveFeatureCollectionChangesToDatabase(MsFeatureInfoBundleCollection edited) { 
+		
 		try {
 			FeatureCollectionUtils.updateMsFeatureInformationBundleCollectionMetadata(edited);
 		} catch (Exception e) {
@@ -191,7 +214,7 @@ public class FeatureCollectionManagerDialog extends JDialog
 			e.printStackTrace();
 		}	
 		Set<String>featureIds = new TreeSet<String>();
-		featureIds.addAll(FeatureCollectionManager.getFeaturecollectionsmsmsidmap().get(edited));
+		featureIds.addAll(FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().get(edited));
 		Set<String> featureIdsToAdd = msFeatureCollectionEditorDialog.getFeatureIdsToAdd();
 		if(featureIdsToAdd != null && !featureIdsToAdd.isEmpty()) {
 			featureIds.addAll(featureIdsToAdd);				
@@ -209,7 +232,7 @@ public class FeatureCollectionManagerDialog extends JDialog
 			dispose();
 		}
 		else {
-			FeatureCollectionManager.getFeaturecollectionsmsmsidmap().put(edited, featureIds);					
+			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().put(edited, featureIds);					
 			featureCollectionsTable.getTable().updateCollectionData(edited);
 			featureCollectionsTable.selectCollection(edited);
 		}
@@ -284,7 +307,7 @@ public class FeatureCollectionManagerDialog extends JDialog
 					e.printStackTrace();
 				}
 			}
-			FeatureCollectionManager.getFeaturecollectionsmsmsidmap().put(newCollection, featureIds);	
+			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().put(newCollection, featureIds);	
 			loadCollection = msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
 			msFeatureCollectionEditorDialog.dispose();	
 			if(loadCollection) {
@@ -293,7 +316,7 @@ public class FeatureCollectionManagerDialog extends JDialog
 			}
 			else {
 				featureCollectionsTable.setTableModelFromFeatureCollectionList(
-						FeatureCollectionManager.getMsFeatureInformationBundleCollectionList());	
+						FeatureCollectionManager.getMsFeatureInfoBundleCollections());	
 				featuresToAdd = null;
 			}
 		}	
@@ -306,7 +329,7 @@ public class FeatureCollectionManagerDialog extends JDialog
 		if(selected == null)
 			return;
 		
-		if(!FeatureCollectionManager.getEditableMsFeatureInformationBundleCollectionList().contains(selected)) {
+		if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
 			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
 					"\" is locked and can not be edited.", this);
 			return;
@@ -323,40 +346,78 @@ public class FeatureCollectionManagerDialog extends JDialog
 
 	private void deleteFeatureCollection() {
 		
-		MsFeatureInfoBundleCollection selected = featureCollectionsTable.getSelectedCollection();
-		if(selected.equals(FeatureCollectionManager.msmsSearchResults) 
-				|| selected.equals(FeatureCollectionManager.msOneSearchResults)) {
-			MessageDialog.showErrorMsg("Collection \"" + selected.getName() + 
-					"\" represents database search results and can not be deleted.", this);
+//		MsFeatureInfoBundleCollection selected = featureCollectionsTable.getSelectedCollection();
+//		if(selected.equals(FeatureCollectionManager.msmsSearchResults) 
+//				|| selected.equals(FeatureCollectionManager.msOneSearchResults)) {
+//			MessageDialog.showErrorMsg("Collection \"" + selected.getName() + 
+//					"\" represents database search results and can not be deleted.", this);
+//			return;
+//		}
+		MsFeatureInfoBundleCollection selected = 
+				featureCollectionsTable.getSelectedCollection();
+		if(selected == null)
 			return;
-		}
-		if(selected != null) {
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			deleteFeatureCollectionFromDatabase(selected);
+		else
+			deleteFeatureCollectionFromProject(selected);
+	}
+	
+	private void deleteFeatureCollectionFromProject(MsFeatureInfoBundleCollection selected) {
+
+		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();	
+		if(!project.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
+			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
+					"\" is locked and can not be deleted.", this);
+			return;
+		}	
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", this);
+		if(res == JOptionPane.YES_OPTION) {
 			
-			if(MRC2ToolBoxCore.getIdTrackerUser().isSuperUser() || 
-					(selected.getOwner() != null && selected.getOwner().equals(MRC2ToolBoxCore.getIdTrackerUser()))) {
-				int res = MessageDialog.showChoiceWithWarningMsg(
-						"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", this);
-				if(res == JOptionPane.YES_OPTION) {
-					try {
-						FeatureCollectionUtils.deleteMsFeatureInformationBundleCollection(selected);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					FeatureCollectionManager.getMsFeatureInformationBundleCollectionList().remove(selected);
-					featureCollectionsTable.setTableModelFromFeatureCollectionList(
-							FeatureCollectionManager.getMsFeatureInformationBundleCollectionList());
-					
-					IDWorkbenchPanel panel = (IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
-					if(panel.getActiveFeatureCollection() != null 
-							&& panel.getActiveFeatureCollection().equals(selected))
-						panel.clearMSMSFeatureData();
+			project.removeMsFeatureInfoBundleCollection(selected);
+			featureCollectionsTable.setTableModelFromFeatureCollectionList(
+					project.getFeatureCollections());	
+			
+			IDWorkbenchPanel panel = (IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
+			if(panel.getActiveFeatureCollection() != null 
+					&& panel.getActiveFeatureCollection().equals(selected))
+				panel.clearMSMSFeatureData();
+		}
+	}
+
+	private void deleteFeatureCollectionFromDatabase(MsFeatureInfoBundleCollection selected) {
+		
+		if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
+			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
+					"\" is locked and can not be deleted.", this);
+			return;
+		}		
+		if(MRC2ToolBoxCore.getIdTrackerUser().isSuperUser() || 
+				(selected.getOwner() != null && selected.getOwner().equals(MRC2ToolBoxCore.getIdTrackerUser()))) {
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", this);
+			if(res == JOptionPane.YES_OPTION) {
+				try {
+					FeatureCollectionUtils.deleteMsFeatureInformationBundleCollection(selected);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
+				FeatureCollectionManager.getMsFeatureInfoBundleCollections().remove(selected);
+				featureCollectionsTable.setTableModelFromFeatureCollectionList(
+						FeatureCollectionManager.getMsFeatureInfoBundleCollections());
+				
+				IDWorkbenchPanel panel = (IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
+				if(panel.getActiveFeatureCollection() != null 
+						&& panel.getActiveFeatureCollection().equals(selected))
+					panel.clearMSMSFeatureData();
 			}
-			else {
-				MessageDialog.showErrorMsg("You are not authorized to delete this feature collection", this);
-				return;
-			}
+		}
+		else {
+			MessageDialog.showErrorMsg("You are not authorized to delete this feature collection", this);
+			return;
 		}
 	}
 

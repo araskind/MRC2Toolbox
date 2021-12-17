@@ -28,7 +28,6 @@ import javax.swing.JButton;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.TreeGrouping;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -47,10 +46,6 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	private static final Icon saveProjectIcon = GuiUtils.getIcon("saveRawDataAnalysisProject", 32);	
 	private static final Icon extractMSMSFeaturesIcon = GuiUtils.getIcon("findMSMSFeatures", 32);	
 	private static final Icon sendToIDTrackerIcon = GuiUtils.getIcon("sendToIDTracker", 32);	
-	private static final Icon expandTreeIcon = GuiUtils.getIcon("expand", 32);
-	private static final Icon collapseTreeIcon = GuiUtils.getIcon("collapse", 32);
-	private static final Icon byFileTreeIcon = GuiUtils.getIcon("groupByFile", 32);
-	private static final Icon byTypeTreeIcon = GuiUtils.getIcon("groupByType", 32);
 	private static final Icon openDataFileIcon = GuiUtils.getIcon("openDataFile", 32);
 	private static final Icon closeDataFileIcon = GuiUtils.getIcon("closeDataFile", 32);
 	private static final Icon msConvertIcon = GuiUtils.getIcon("msConvert", 32);
@@ -63,8 +58,6 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 		closeProjectButton,
 		saveProjectButton,
 		editProjectButton,
-		expandCollapseTreeButton, 
-		toggleTreeGroupingButton,
 		openDataFileButton,
 		closeDataFileButton,
 		msConvertButton,
@@ -76,11 +69,6 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	public RawDataExaminerToolbar(ActionListener commandListener2) {
 
 		super(commandListener2);
-		
-//		NEW_RAW_DATA_PROJECT_COMMAND("New raw data analysis project"),
-//		OPEN_RAW_DATA_PROJECT_COMMAND("Open raw data analysis pproject"),
-//		CLOSE_RAW_DATA_PROJECT_COMMAND("Close raw data analysis pproject"),
-//		SAVE_RAW_DATA_PROJECT_COMMAND("Save raw data analysis pproject"),
 
 		newProjectButton = GuiUtils.addButton(this, null, newRdaProjectIcon, commandListener,
 				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
@@ -108,6 +96,7 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
 				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
 				buttonDimension);
+		editProjectButton.setEnabled(false);	//	TODO
 		
 		addSeparator(buttonDimension);
 		
@@ -119,17 +108,6 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 		sendToIDTrackerButton = GuiUtils.addButton(this, null, sendToIDTrackerIcon, commandListener,
 				MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH.getName(),
 				MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH.getName(),
-				buttonDimension);
-		
-		addSeparator(buttonDimension);
-		
-		expandCollapseTreeButton = GuiUtils.addButton(this, null, expandTreeIcon, commandListener,
-				MainActionCommands.EXPAND_TREE.getName(), 
-				MainActionCommands.EXPAND_TREE.getName(), buttonDimension);
-
-		toggleTreeGroupingButton = GuiUtils.addButton(this, null, byFileTreeIcon, commandListener,
-				MainActionCommands.GROUP_TREE_BY_TYPE.getName(), 
-				MainActionCommands.GROUP_TREE_BY_TYPE.getName(),
 				buttonDimension);
 		
 		addSeparator(buttonDimension);
@@ -158,39 +136,6 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 		dataFileToolsButton = GuiUtils.addButton(this, null, dataFileToolsIcon, commandListener,
 				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName(),
 				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName(), buttonDimension);
-	}
-
-	public void groupTree(TreeGrouping grouping) {
-
-		if (grouping.equals(TreeGrouping.BY_DATA_FILE)) {
-
-			toggleTreeGroupingButton.setIcon(byFileTreeIcon);
-			toggleTreeGroupingButton.setActionCommand(MainActionCommands.GROUP_TREE_BY_TYPE.getName());
-			toggleTreeGroupingButton.setToolTipText(MainActionCommands.GROUP_TREE_BY_TYPE.getName());
-		}
-		if (grouping.equals(TreeGrouping.BY_OBJECT_TYPE)) {
-
-			toggleTreeGroupingButton.setIcon(byTypeTreeIcon);
-			toggleTreeGroupingButton.setActionCommand(MainActionCommands.GROUP_TREE_BY_FILE.getName());
-			toggleTreeGroupingButton.setToolTipText(MainActionCommands.GROUP_TREE_BY_FILE.getName());
-		}
-		//	Tree collapse tree to default state after resorting, so button is reset
-		treeExpanded(false);
-	}
-
-	public void treeExpanded(boolean expanded) {
-
-		if (expanded) {
-
-			expandCollapseTreeButton.setIcon(collapseTreeIcon);
-			expandCollapseTreeButton.setActionCommand(MainActionCommands.COLLAPSE_TREE.getName());
-			expandCollapseTreeButton.setToolTipText("Collapse all file nodes");
-		} else {
-			expandCollapseTreeButton.setIcon(expandTreeIcon);
-			expandCollapseTreeButton.setActionCommand(MainActionCommands.EXPAND_TREE.getName());
-			expandCollapseTreeButton.setToolTipText("Expand all file nodes");
-		}
-
 	}
 
 	@Override

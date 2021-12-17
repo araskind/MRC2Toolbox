@@ -149,6 +149,10 @@ public class RawDataManager {
 		//	rawDataMap.values().stream().forEach(d -> d.releaseMemory());
 	}
 	
+	public static void clearDataSourcesMap() {
+		rawDataMap.clear();
+	}
+	
 	public static DataFile getDataFileForInjectionId(String injectionId) {
 		
 		DataFile df = rawDataMap.keySet().stream().filter(f -> f.getInjectionId() != null).

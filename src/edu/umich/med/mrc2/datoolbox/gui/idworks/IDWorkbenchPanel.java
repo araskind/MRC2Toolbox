@@ -716,7 +716,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 
 		reassignDefaultMSMSLibraryHitDialog = new ReassignDefaultMSMSLibraryHitDialog(this);
 		
-		if(activeFeatureCollection.isOffLine())
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
 			reassignDefaultMSMSLibraryHitDialog.blockCommitToDatabase();
 		
 		reassignDefaultMSMSLibraryHitDialog.setLocationRelativeTo(this.getContentPane());
@@ -1236,7 +1236,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
-				if(!activeFeatureCollection.isOffLine()) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 					try {
 						IdFollowupUtils.setIdFollowupStepsForMS1Feature(fib);
 					} catch (Exception e) {
@@ -1255,7 +1255,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
-				if(!activeFeatureCollection.isOffLine()) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 					try {
 						IdFollowupUtils.setIdFollowupStepsForMSMSFeature(fib);
 					} catch (Exception e) {
@@ -1297,7 +1297,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
-				if(!activeFeatureCollection.isOffLine()) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 					try {
 						StandardAnnotationUtils.setStandardFeatureAnnotationsForMS1Feature(fib);
 					} catch (Exception e) {
@@ -1316,7 +1316,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
-				if(!activeFeatureCollection.isOffLine()) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 					try {
 						StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(fib);
 					} catch (Exception e) {
@@ -1334,26 +1334,35 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	public void createNewMsmsFeatureCollectionFromSelectedFeatures(
 			Collection<MsFeatureInfoBundle> featuresToAdd) {
 		
-		if(featuresToAdd.isEmpty() || activeFeatureCollection.isOffLine())
+		if(featuresToAdd.isEmpty())
 			return;
 		
 		featureCollectionManagerDialog = new FeatureCollectionManagerDialog();
 		featureCollectionManagerDialog.setFeaturesToAdd(featuresToAdd);
 		featureCollectionManagerDialog.setLocationRelativeTo(this.getContentPane());
-//		featureCollectionManagerDialog.setVisible(true);
 		featureCollectionManagerDialog.showMsFeatureCollectionEditorDialog(null);
 	}
 	
 	public void addSelectedFeaturesToExistingMsMsFeatureCollection(
 			Collection<MsFeatureInfoBundle> featuresToAdd) {
 		
-		if(featuresToAdd.isEmpty() || activeFeatureCollection.isOffLine())
+		if(featuresToAdd.isEmpty())
 			return;
 		
-		if(FeatureCollectionManager.getEditableMsFeatureInformationBundleCollectionList().isEmpty()) {
-			MessageDialog.showWarningMsg("No custom collections defined yet.\n"
-					+ "Use \"Create new feature collection\" option instead.", this.getContentPane());
-			return;
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			
+			if(FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().isEmpty()) {
+				MessageDialog.showWarningMsg("No custom collections defined yet.\n"
+						+ "Use \"Create new feature collection\" option instead.", this.getContentPane());
+				return;
+			}
+		}
+		else {
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getEditableMsFeatureInfoBundleCollections().isEmpty()) {
+				MessageDialog.showWarningMsg("No custom collections defined for the project yet.\n"
+						+ "Use \"Create new feature collection\" option instead.", this.getContentPane());
+				return;
+			}
 		}
 		addFeaturesToCollectionDialog = new AddFeaturesToCollectionDialog(featuresToAdd, this);
 		addFeaturesToCollectionDialog.setLocationRelativeTo(this.getContentPane());
@@ -1363,29 +1372,42 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	public void removeSelectedFeaturesFromActiveMsMsFeatureCollection(
 			Collection<MsFeatureInfoBundle> featuresToRemove) {
 		
-		if(activeFeatureCollection == null 
-				|| activeFeatureCollection.getFeatures().isEmpty()
-				|| activeFeatureCollection.isOffLine())
+		if(activeFeatureCollection == null || activeFeatureCollection.getFeatures().isEmpty())
 			return;
 		
-		if(activeFeatureCollection.equals(FeatureCollectionManager.msmsSearchResults) 
-				|| activeFeatureCollection.equals(FeatureCollectionManager.msOneSearchResults)) {
-			MessageDialog.showWarningMsg("Collection \"" + activeFeatureCollection.getName() + 
-					"\" represents database search results and can not be edited.", this.getContentPane());
-			return;
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+						
+			if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(activeFeatureCollection)) {
+				MessageDialog.showWarningMsg("Collection \"" + activeFeatureCollection.getName() + 
+						"\" represents database search results and can not be edited.", this.getContentPane());
+				return;
+			}
+			String message = 
+					"Do you really want to remove " + Integer.toString(featuresToRemove.size()) + 
+					" selected features from collection \"" + 
+					activeFeatureCollection.getName() + "\"?";
+			int res = MessageDialog.showChoiceWithWarningMsg(message, this.getContentPane());
+			if(res == JOptionPane.YES_OPTION) {
+				activeFeatureCollection.removeFeatures(featuresToRemove);
+				FeatureCollectionManager.removeFeaturesFromCollection(
+						activeFeatureCollection, featuresToRemove);
+			}
 		}
-		String message = 
-				"Do you really want to remove " + Integer.toString(featuresToRemove.size()) + 
-				" selected features from collection \"" + 
-				activeFeatureCollection.getName() + "\"?";
-		int res = MessageDialog.showChoiceWithWarningMsg(message, this.getContentPane());
-		if(res != JOptionPane.YES_OPTION)
-			return;
-		
-		activeFeatureCollection.removeFeatures(featuresToRemove);
-		FeatureCollectionManager.removeFeaturesFromCollection(
-				activeFeatureCollection, featuresToRemove);
-		
+		else {
+			if(!MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+					getEditableMsFeatureInfoBundleCollections().contains(activeFeatureCollection)) {
+				MessageDialog.showWarningMsg("Collection \"" + activeFeatureCollection.getName() + 
+						"\" can not be edited.", this.getContentPane());
+				return;
+			}
+			String message = 
+					"Do you really want to remove " + Integer.toString(featuresToRemove.size()) + 
+					" selected features from collection \"" + 
+					activeFeatureCollection.getName() + "\"?";
+			int res = MessageDialog.showChoiceWithWarningMsg(message, this.getContentPane());
+			if(res == JOptionPane.YES_OPTION)
+				activeFeatureCollection.removeFeatures(featuresToRemove);		
+		}		
 		loadMSMSFeatureInformationBundleCollection(activeFeatureCollection);
 	}
 
@@ -1433,7 +1455,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			String yesNoQuestion = "Do you want to remove all identifications for " + feature.getName() + "?";
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				
-				if(!activeFeatureCollection.isOffLine()) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 					try {
 						IdentificationUtils.clearReferenceMS1FeatureLibraryMatches(feature.getId());
 					} catch (Exception e) {
@@ -1457,7 +1479,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 				if(msms != null) {
-					if(!activeFeatureCollection.isOffLine()) {
+					if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 						try {					
 							IdentificationUtils.clearMSMSFeatureLibraryMatches(msms.getId());
 						} catch (Exception e) {
@@ -1494,7 +1516,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 					
 				MsFeature msOneFeature = bundle.getMsFeature();
 				msOneFeature.disablePrimaryIdentity();
-				if(!activeFeatureCollection.isOffLine()) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 					try {
 						IdentificationUtils.disableReferenceMS1FeaturePrimaryIdentity(msOneFeature.getId());
 					} catch (Exception e) {
@@ -1510,7 +1532,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 				
 				MsFeature msTwoFeature = bundle.getMsFeature();
 				msTwoFeature.disablePrimaryIdentity();
-				if(!activeFeatureCollection.isOffLine()) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 					try {
 						String msmsId = msTwoFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL).getId();
 						IdentificationUtils.disableMSMSFeaturePrimaryIdentity(msmsId);
@@ -1597,7 +1619,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				
 				if(id.getMsRtLibraryMatch() != null) {
-					if(!activeFeatureCollection.isOffLine()) {
+					if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 						try {
 							IdentificationUtils.removeReferenceMS1FeatureLibraryMatch(id);
 						} catch (Exception e) {
@@ -1607,7 +1629,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 					}
 				}
 				else {
-					if(!activeFeatureCollection.isOffLine()) {
+					if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 						try {
 							IdentificationUtils.removeReferenceMS1FeatureManualId(id);
 						} catch (Exception e) {
@@ -1637,7 +1659,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 				if(msms != null) {
 					
 					if(id.getReferenceMsMsLibraryMatch() != null) {
-						if(!activeFeatureCollection.isOffLine()) {
+						if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 							try {					
 								IdentificationUtils.removeMSMSFeatureLibraryMatch(id);
 							} catch (Exception e) {
@@ -1647,7 +1669,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 						}
 					}
 					else {
-						if(!activeFeatureCollection.isOffLine()) {
+						if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 							try {
 								IdentificationUtils.removeMSMSFeatureManualIdentification(id);
 							} catch (Exception e) {
@@ -1704,7 +1726,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 //			MsFeatureIdentity manualId = 
 //					new MsFeatureIdentity(compoundIdentity, CompoundIdentificationConfidence.ACCURATE_MASS);
 //			manualId.setIdSource(CompoundIdSource.MANUAL);
-			if(!activeFeatureCollection.isOffLine()) {
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 				try {
 					IdentificationUtils.addReferenceMS1FeatureManualId(feature.getId(), manualId);
 				} catch (Exception e) {
@@ -1724,7 +1746,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 //			new MsFeatureIdentity(compoundIdentity, CompoundIdentificationConfidence.ACCURATE_MASS);
 //			manualId.setIdSource(CompoundIdSource.MANUAL);			
 			TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
-			if(!activeFeatureCollection.isOffLine()) {
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 				try {
 					IdentificationUtils.addMSMSFeatureManualId(msms.getId(), manualId);
 				} catch (Exception e) {
@@ -1876,7 +1898,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}		
-			if(activeFeatureCollection.isOffLine())
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
 				task.setSkipResultsUpload(true);
 			
 			task.addTaskListener(this);
@@ -2401,7 +2423,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		clearFeatureData();
 		clearDataMaps();
 		idTrackerDataExplorerPlotDialog.clearPanels();
-		FeatureCollectionManager.clearActiveSets();
+		FeatureCollectionManager.clearDefaultCollections();
 	}
 	
 	public void clearMSMSFeatureData() {
@@ -2516,7 +2538,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		for(MsFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
-			if(primaryId != null && !activeFeatureCollection.isOffLine()) {
+			if(primaryId != null && MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 				try {
 					IdentificationUtils.setReferenceMS1FeaturePrimaryIdentity(
 							bundle.getMsFeature().getId(),
@@ -2549,7 +2571,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
 			TandemMassSpectrum msmsFeature = 
 					bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
-			if(primaryId != null && !activeFeatureCollection.isOffLine()) {
+			if(primaryId != null && MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 				try {
 					IdentificationUtils.setMSMSFeaturePrimaryIdentity(
 							msmsFeature.getId(),

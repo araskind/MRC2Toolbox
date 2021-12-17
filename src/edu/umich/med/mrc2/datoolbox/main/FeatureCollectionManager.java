@@ -52,13 +52,13 @@ public class FeatureCollectionManager {
 			new TreeMap<MsFeatureInfoBundleCollection, Set<String>>(
 					new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));
 
-	public static void clearActiveSets() {		
+	public static void clearDefaultCollections() {		
 		msmsSearchResults.clearCollection();
 		msOneSearchResults.clearCollection();
 		activeProjectFeatureSet.clearCollection();
 	}
 		
-	public static void refreshMsFeatureInformationBundleCollectionList() {
+	public static void refreshMsFeatureInfoBundleCollections() {
 		featureCollectionsMSMSIDMap.clear();
 		featureCollectionsMSMSIDMap.put(msmsSearchResults, new TreeSet<String>());
 		featureCollectionsMSMSIDMap.put(msOneSearchResults, new TreeSet<String>());
@@ -71,7 +71,7 @@ public class FeatureCollectionManager {
 		}
 	}
 	
-	public static Collection<MsFeatureInfoBundleCollection>getMsFeatureInformationBundleCollectionList() {
+	public static Collection<MsFeatureInfoBundleCollection>getMsFeatureInfoBundleCollections() {
 
 //		try {
 //			featureCollectionsMSMSIDMap.putAll(
@@ -82,7 +82,7 @@ public class FeatureCollectionManager {
 		return featureCollectionsMSMSIDMap.keySet();
 	}
 	
-	public static Collection<MsFeatureInfoBundleCollection>getEditableMsFeatureInformationBundleCollectionList() {
+	public static Collection<MsFeatureInfoBundleCollection>getEditableMsFeatureInfoBundleCollections() {
 		
 		return featureCollectionsMSMSIDMap.keySet().stream().
 			filter(c -> !c.equals(msmsSearchResults)).
@@ -193,7 +193,7 @@ public class FeatureCollectionManager {
 		featureCollectionsMSMSIDMap.get(collection).removeAll(featureIdsToRemove);
 	}
 
-	public static Map<MsFeatureInfoBundleCollection, Set<String>> getFeaturecollectionsmsmsidmap() {
+	public static Map<MsFeatureInfoBundleCollection, Set<String>> getFeatureCollectionsMsmsIdMap() {
 		return featureCollectionsMSMSIDMap;
 	}
 }

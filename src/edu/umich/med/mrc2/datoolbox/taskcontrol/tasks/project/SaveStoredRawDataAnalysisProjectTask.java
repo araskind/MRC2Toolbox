@@ -40,6 +40,7 @@ import org.jdom2.output.XMLOutputter;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
@@ -148,6 +149,17 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
         		new Element(ProjectFields.UniqueSampleIdList.name()).
         		setText(StringUtils.join(uniqueSampleIds, ",")));
 		
+		//	Feature Collections
+        Element msFeatureCollectionListElement = 
+        		new Element(ProjectFields.FeatureCollectionList.name());
+        if(!projectToSave.getEditableMsFeatureInfoBundleCollections().isEmpty()) {
+        	
+        	for(MsFeatureInfoBundleCollection fbc : 
+        		projectToSave.getEditableMsFeatureInfoBundleCollections()) {
+        		msFeatureCollectionListElement.addContent(fbc.getXmlElement());
+        	}
+        }       
+        projectRoot.addContent(msFeatureCollectionListElement);
 		//	MS2 file list
         Element msTwoFileListElement = 
         		new Element(ProjectFields.MsTwoFiles.name());		

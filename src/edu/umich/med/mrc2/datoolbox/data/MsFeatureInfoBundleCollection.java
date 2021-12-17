@@ -22,11 +22,17 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -34,7 +40,10 @@ import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class MsFeatureInfoBundleCollection implements Serializable {
 
@@ -49,8 +58,8 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	private Date lastModified;
 	private LIMSUser owner;
 	private Collection<MsFeatureInfoBundle>features;
+	private Collection<String>featureIds;
 	private TreeSet<ObjectAnnotation> annotations;
-	private boolean offLine;
 	
 	public MsFeatureInfoBundleCollection(String name) {
 		super();
@@ -62,7 +71,6 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
 		annotations = new TreeSet<ObjectAnnotation>();
 		owner = MRC2ToolBoxCore.getIdTrackerUser();
-		offLine = false;
 	}
 
 	public MsFeatureInfoBundleCollection(
@@ -74,6 +82,9 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 			LIMSUser owner) {
 		super();
 		this.id = id;
+		if(id == null)
+			this.id = DataPrefix.MSMS_FEATURE_COLLECTION.getName() + UUID.randomUUID().toString();
+		
 		this.name = name;	
 		this.description = description;
 		this.dateCreated = dateCreated;
@@ -82,7 +93,6 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		features = new TreeSet<MsFeatureInfoBundle>(
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
 		annotations = new TreeSet<ObjectAnnotation>();
-		offLine = false;
 	}
 	
 	public void clearCollection(){
@@ -232,12 +242,83 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 				map(f -> f.getMSMSFeatureId()).
 				collect(Collectors.toSet());
 	}
-
-	public boolean isOffLine() {
-		return offLine;
+	
+	public Collection<String> getFeatureIds() {
+		return featureIds;
+	}
+	
+	public Element getXmlElement() {
+		
+		Element msFeatureCollectionElement = 
+				new Element(FeatureCollectionFields.FeatureCollection.name());
+		msFeatureCollectionElement.setAttribute(
+				FeatureCollectionFields.Id.name(), id);
+		msFeatureCollectionElement.setAttribute(
+				FeatureCollectionFields.Name.name(), name);
+		msFeatureCollectionElement.setAttribute(
+				FeatureCollectionFields.Description.name(), description);
+		msFeatureCollectionElement.setAttribute(
+				FeatureCollectionFields.DateCreataed.name(), 
+				ProjectUtils.dateTimeFormat.format(dateCreated));
+		msFeatureCollectionElement.setAttribute(
+				FeatureCollectionFields.DateModified.name(), 
+				ProjectUtils.dateTimeFormat.format(lastModified));	
+		msFeatureCollectionElement.setAttribute(
+				FeatureCollectionFields.UserId.name(), owner.getId());
+		
+		Set<String>featureIds = features.stream().
+				map(f -> f.getMsFeature().getId()).
+				collect(Collectors.toSet());
+		msFeatureCollectionElement.addContent(       		
+        		new Element(FeatureCollectionFields.FeatureList.name()).
+        		setText(StringUtils.join(featureIds, ",")));
+		
+		return msFeatureCollectionElement;
 	}
 
-	public void setOffLine(boolean offLine) {
-		this.offLine = offLine;
+	public MsFeatureInfoBundleCollection(Element xmlElement) {
+		
+		super();
+		this.id = xmlElement.getAttributeValue(FeatureCollectionFields.Id.name());
+		if(id == null)
+			this.id = DataPrefix.MSMS_FEATURE_COLLECTION.getName() + UUID.randomUUID().toString();
+		
+		this.name = xmlElement.getAttributeValue(FeatureCollectionFields.Name.name());
+		this.description = xmlElement.getAttributeValue(FeatureCollectionFields.Description.name());
+		try {
+			this.dateCreated = ProjectUtils.dateTimeFormat.parse(
+					xmlElement.getAttributeValue(FeatureCollectionFields.DateCreataed.name()));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			this.lastModified = ProjectUtils.dateTimeFormat.parse(
+					xmlElement.getAttributeValue(FeatureCollectionFields.DateModified.name()));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		String userId =  xmlElement.getAttributeValue(FeatureCollectionFields.UserId.name());
+		if(userId != null)
+			this.owner = IDTDataCash.getUserById(userId);
+		
+		features = new TreeSet<MsFeatureInfoBundle>(
+				new MsFeatureInfoBundleComparator(SortProperty.Name));
+		
+		String featureIdIdList = 
+				xmlElement.getChild(FeatureCollectionFields.FeatureList.name()).getText();
+		featureIds = new TreeSet<String>(Arrays.asList(featureIdIdList.split(",")));
+		annotations = new TreeSet<ObjectAnnotation>();
 	}
 }
+
+
+
+
+
+
+
+
+
+

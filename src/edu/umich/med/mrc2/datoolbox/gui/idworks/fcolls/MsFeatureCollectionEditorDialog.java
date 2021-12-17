@@ -365,16 +365,16 @@ public class MsFeatureCollectionEditorDialog extends JDialog
 	
 	private String validateNameAgainstDatabase(String newName) {
 				
-		FeatureCollectionManager.refreshMsFeatureInformationBundleCollectionList();
+		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
 		MsFeatureInfoBundleCollection existing = null;
 		if(this.featureCollection == null) {
-			existing = FeatureCollectionManager.getMsFeatureInformationBundleCollectionList().stream().
+			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
 				filter(f -> f.getName().equalsIgnoreCase(newName)).
 				findFirst().orElse(null);
 		}
 		else {
 			String id = featureCollection.getId();
-			existing = FeatureCollectionManager.getMsFeatureInformationBundleCollectionList().stream().
+			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
 					filter(f -> !f.getId().equals(id)).
 					filter(f -> f.getName().equalsIgnoreCase(newName)).
 					findFirst().orElse(null);

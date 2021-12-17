@@ -47,18 +47,18 @@ public class DockableFeatureCollectionsTable extends DefaultSingleCDockable {
 		this.parent = parent;
 		
 		featureCollectionsTable = new FeatureCollectionsTable();
-		FeatureCollectionManager.refreshMsFeatureInformationBundleCollectionList();
+		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
 		featureCollectionsTable.setTableModelFromFeatureCollectionList(
-				FeatureCollectionManager.getMsFeatureInformationBundleCollectionList());
+				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
 		
 		featureCollectionsTable.getSelectionModel().addListSelectionListener(parent);
 		add(new JScrollPane(featureCollectionsTable));
 	}
 	
 	public void loadDatabaseStoredCollections() {
-		FeatureCollectionManager.refreshMsFeatureInformationBundleCollectionList();
+		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
 		featureCollectionsTable.setTableModelFromFeatureCollectionList(
-				FeatureCollectionManager.getMsFeatureInformationBundleCollectionList());
+				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
 	}
 	
 	public void loadCollectionsForActiveProject() {

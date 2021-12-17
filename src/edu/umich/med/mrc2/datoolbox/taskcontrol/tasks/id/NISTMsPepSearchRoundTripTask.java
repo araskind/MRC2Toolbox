@@ -141,11 +141,17 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 			setStatus(TaskStatus.ERROR);
 		}
 		try {
-			parseAndFilterSearchResults(skipResultsUpload);
+			parseSearchResults();
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
-		}		
+		}
+		try {
+			filterSearchResults(skipResultsUpload);
+		} catch (Exception e) {
+			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+		}
 		if(pooList.size() > 0) {
 			
 			IDTDataCash.refreshNISTPepSearchParameters();
@@ -176,6 +182,53 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		// Cleanup working directory
 		cleanupWorkingDirectory();
 		setStatus(TaskStatus.FINISHED);
+	}
+	
+	@Override
+	protected void checkHitPolarity(Connection conn) throws Exception {
+		
+		taskDescription = "Checking hits for correct polarity ...";
+		total = pooList.size();
+		processed = 0;
+		
+		Collection<PepSearchOutputObject> clean = new ArrayList<PepSearchOutputObject>();
+		String libSql = 
+				"SELECT POLARITY FROM REF_MSMS_LIBRARY_COMPONENT WHERE MRC2_LIB_ID = ?"  ;
+		PreparedStatement libPs = conn.prepareStatement(libSql);
+
+		ResultSet rs = null;
+		for(PepSearchOutputObject poo : pooList) {
+			
+			libPs.setString(1, poo.getMrc2libid());
+			rs = libPs.executeQuery();
+			String libPol = null;
+			while(rs.next())
+				libPol = rs.getString(1);
+			
+			rs.close();
+			String fPol = getFeaturePolarityCode(poo.getMsmsFeatureId());
+			if(fPol != null && libPol != null && libPol.equals(fPol)) {
+				clean.add(poo);
+			}
+			else {
+				addLogLine("Polarity mismatch between " + poo.getOriginalLibid() + 
+						" for library " + poo.getLibraryName() + " and MSMS feature # " + poo.getMsmsFeatureId());
+			}
+			processed++;
+		}	
+		pooList.clear();
+		pooList.addAll(clean);
+		addLogLine(Integer.toString(pooList.size()) + " library matches have correct polarity");
+	}
+	
+	private String getFeaturePolarityCode(String msmsFeatureId) {
+		MsFeatureInfoBundle fb = featuresToSearch.stream().
+				filter(f -> f.getMSMSFeatureId().equals(msmsFeatureId)).
+				findFirst().orElse(null);
+		if(fb == null)
+			return null;
+		else
+			return fb.getMsFeature().getPolarity().getCode();
 	}
 
 	private void assignTopHits() {

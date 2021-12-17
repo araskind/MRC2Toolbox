@@ -161,7 +161,7 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing feature collection list ";
-			FeatureCollectionManager.refreshMsFeatureInformationBundleCollectionList();
+			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing sample type list ";

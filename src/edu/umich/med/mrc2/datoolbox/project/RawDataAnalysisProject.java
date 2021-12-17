@@ -46,6 +46,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleColle
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class RawDataAnalysisProject extends Project {
@@ -306,6 +307,15 @@ public class RawDataAnalysisProject extends Project {
 				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
 				collect(Collectors.toList());
 	}
+	
+	public Collection<MsFeatureInfoBundle>getFeatureBundlesForIds(Collection<String>idList){
+		
+		return msFeatureMap.values().stream().
+				flatMap(v -> v.stream()).
+				filter(f -> idList.contains(f.getMsFeature().getId())).
+				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
+				collect(Collectors.toList());
+	}
 
 	public File getUncompressedProjectFilesDirectory() {
 		return uncompressedProjectFilesDirectory;
@@ -329,6 +339,13 @@ public class RawDataAnalysisProject extends Project {
 
 	public Set<MsFeatureInfoBundleCollection> getFeatureCollections() {
 		return featureCollections;
+	}
+	
+	public Collection<MsFeatureInfoBundleCollection> getEditableMsFeatureInfoBundleCollections(){
+		return featureCollections.stream().
+				filter(c -> !c.equals(FeatureCollectionManager.activeProjectFeatureSet)).
+				sorted(new MsFeatureInformationBundleCollectionComparator(SortProperty.Name)).
+				collect(Collectors.toList());
 	}
 	
 	public void addMsFeatureInfoBundleCollection(MsFeatureInfoBundleCollection fbCollection) {

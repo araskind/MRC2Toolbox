@@ -703,6 +703,10 @@ public class MsFeature implements AnnotatedObject, Serializable {
 
 		screenName += " | " + MRC2ToolBoxConfiguration.getMzFormat().format(mass);
 		screenName += " @ " + MRC2ToolBoxConfiguration.getRtFormat().format(getRetentionTime());
+		
+		if(polarity != null)
+			screenName += " (" + polarity.getSign() + ")";
+			
 		return screenName;
 	}
 
@@ -919,7 +923,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		
 		return msFeatureElement;
 	}
-	
+
 	public MsFeature(Element featureElement) {
 		
 		identifications = new HashSet<MsFeatureIdentity>();

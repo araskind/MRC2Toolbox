@@ -123,9 +123,8 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 		}
 	}
 	
-	protected void parseAndFilterSearchResults(boolean skipResultsUpload) throws Exception {
-
-		//	Parse output file
+	protected void parseSearchResults() {
+		
 		if(!resultFile.exists())
 			return;
 
@@ -148,7 +147,11 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 			addLogLine("No hits found or no MSMS feature IDs in correct format is present");
 			return;
 		}
-		createResultsSummary();		
+		createResultsSummary();	
+	}
+	
+	protected void filterSearchResults(boolean skipResultsUpload) throws Exception {
+
 		Connection conn = ConnectionManager.getConnection();
 		assignMrc2LibIds(conn);	
 		if(pooList.size() == 0) {
@@ -157,19 +160,20 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 			return;
 		}
 		filterOutDuplicateHits();
-		if(!skipResultsUpload) {
-			checkHitPolarity(conn);
-			if(pooList.size() == 0) {
-				addLogLine("No hits of correct polarity found");
-				ConnectionManager.releaseConnection(conn);
-				return;
-			}
-			filterOutExistingHits(conn);	
+		checkHitPolarity(conn);
+		if(pooList.size() == 0) {
+			
+			addLogLine("No hits of correct polarity found");
+			ConnectionManager.releaseConnection(conn);
+			return;
+		}
+		if(skipResultsUpload) {
+			filterOutExistingHitsOffline();	
 			if(pooList.size() == 0)
 				addLogLine("No new hits found");
 		}
 		else {
-			filterOutExistingHitsOffline();	
+			filterOutExistingHits(conn);	
 			if(pooList.size() == 0)
 				addLogLine("No new hits found");
 		}

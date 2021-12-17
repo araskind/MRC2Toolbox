@@ -77,7 +77,6 @@ import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.RawDataConversionSetupDialog
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msms.MSMSFeatureExtractionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisProjectSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTree;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.TreeGrouping;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
@@ -236,26 +235,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH.getName()))
 			sendMSMSFeaturesToIDTrackerWorkbench();
 		
-		if (command.equals(MainActionCommands.GROUP_TREE_BY_FILE.getName())){
-						
-			dataFileTreePanel.groupTree(TreeGrouping.BY_DATA_FILE);
-			toolbar.groupTree(TreeGrouping.BY_DATA_FILE);
-		}
-		if (command.equals(MainActionCommands.GROUP_TREE_BY_TYPE.getName())){
-						
-			dataFileTreePanel.groupTree(TreeGrouping.BY_OBJECT_TYPE);
-			toolbar.groupTree(TreeGrouping.BY_OBJECT_TYPE);
-		}
-		if (command.equals(MainActionCommands.EXPAND_TREE.getName())){
-
-			dataFileTreePanel.toggleTreeExpanded(true);
-			toolbar.treeExpanded(true);
-		}
-		if (command.equals(MainActionCommands.COLLAPSE_TREE.getName())) {
-
-			dataFileTreePanel.toggleTreeExpanded(false);
-			toolbar.treeExpanded(false);
-		}	
 		if (command.equals(MainActionCommands.OPEN_RAW_DATA_FILE_COMMAND.getName())) 
 			openRawDataFiles();
 		

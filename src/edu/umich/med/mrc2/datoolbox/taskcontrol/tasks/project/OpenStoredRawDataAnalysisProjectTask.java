@@ -43,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
@@ -53,6 +54,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
+import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -225,6 +227,16 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			DataFile msOneFile = new DataFile(msOneFileElement);
 			project.addMSOneDataFile(msOneFile);
 		}
+		//	Feature collections
+		Element featureCollectionElement = 
+				projectElement.getChild(ProjectFields.FeatureCollectionList.name());
+		if(featureCollectionElement != null) {
+			List<Element> featureCollectionList = featureCollectionElement.
+					getChildren(FeatureCollectionFields.FeatureCollection.name());
+			for (Element fce : featureCollectionList)
+				project.addMsFeatureInfoBundleCollection(
+						new MsFeatureInfoBundleCollection(fce));
+		}		
 	}
 	
 	private void populateDatabaseCashData() throws Exception {
@@ -367,8 +379,10 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				
 				OpenMsFeatureBundleFileTask task = (OpenMsFeatureBundleFileTask)e.getSource();
 				project.addMsFeaturesForDataFile(task.getDataFile(), task.getFeatures());
-				if(processedFiles == featureFileCount)
-					featureReadCompleted = true;				
+				if(processedFiles == featureFileCount) {
+					populateFeatureCollections();
+					featureReadCompleted = true;	
+				}
 			}	
 			if (e.getSource().getClass().equals(OpenChromatogramFileTask.class)) {
 				chromatogramReadCompleted = true;			
@@ -378,6 +392,15 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			if(featureReadCompleted && chromatogramReadCompleted)
 				cleanup();
 		}
+	}
+
+	private void populateFeatureCollections() {
+
+		if(project.getEditableMsFeatureInfoBundleCollections().isEmpty())
+			return;
+		
+		for(MsFeatureInfoBundleCollection fc : project.getEditableMsFeatureInfoBundleCollections())	
+			fc.addFeatures(project.getFeatureBundlesForIds(fc.getFeatureIds()));	
 	}
 
 	private void cleanup() {

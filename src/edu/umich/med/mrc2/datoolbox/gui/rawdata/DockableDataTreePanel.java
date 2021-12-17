@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.gui.rawdata;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -35,20 +37,34 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import bibliothek.gui.dock.action.DefaultDockActionSource;
+import bibliothek.gui.dock.action.LocationHint;
+import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTree;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTreeModel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.TreeGrouping;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import umich.ms.datatypes.scan.IScan;
 
-public class DockableDataTreePanel extends DefaultSingleCDockable {
+public class DockableDataTreePanel extends DefaultSingleCDockable implements ActionListener {
 	
 	private static final Icon treeIcon = GuiUtils.getIcon("doe-tree", 16);
+	
+	private static final Icon expandTreeIcon = GuiUtils.getIcon("expand", 16);
+	private static final Icon collapseTreeIcon = GuiUtils.getIcon("collapse", 16);
+	private static final Icon byFileTreeIcon = GuiUtils.getIcon("groupByFile", 16);
+	private static final Icon byTypeTreeIcon = GuiUtils.getIcon("groupByType", 16);
+	
+	private SimpleButtonAction
+		expandCollapseTreeButton, 
+		toggleTreeGroupingButton;
+	
 	private JScrollPane panel;
 	private RawDataTree rawDataTree;
 	private RawDataTreeModel treeModel;	
@@ -67,6 +83,46 @@ public class DockableDataTreePanel extends DefaultSingleCDockable {
 		isTreeExpanded = false;
 		add( panel, BorderLayout.CENTER );
 		grouping = TreeGrouping.BY_DATA_FILE;
+		
+		initButtons(this);
+	}
+	
+	private void initButtons(ActionListener l) {
+
+		DefaultDockActionSource actions = new DefaultDockActionSource(
+				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
+
+		expandCollapseTreeButton = GuiUtils.setupButtonAction(
+				MainActionCommands.EXPAND_TREE.getName(),
+				MainActionCommands.EXPAND_TREE.getName(), 
+				expandTreeIcon, l);
+		actions.add(expandCollapseTreeButton);
+		
+		toggleTreeGroupingButton = GuiUtils.setupButtonAction(
+				MainActionCommands.GROUP_TREE_BY_TYPE.getName(), 
+				MainActionCommands.GROUP_TREE_BY_TYPE.getName(), 
+				byFileTreeIcon, l);
+		actions.add(toggleTreeGroupingButton);
+		
+		actions.addSeparator();
+		intern().setActionOffers(actions);
+	}
+		
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		String command = e.getActionCommand();
+		if(command.equals(MainActionCommands.GROUP_TREE_BY_TYPE.getName()))
+			groupTree(TreeGrouping.BY_OBJECT_TYPE);
+		
+		if(command.equals(MainActionCommands.GROUP_TREE_BY_FILE.getName()))
+			groupTree(TreeGrouping.BY_DATA_FILE);
+		
+		if(command.equals(MainActionCommands.COLLAPSE_TREE.getName()))
+			toggleTreeExpanded(false);
+		
+		if(command.equals(MainActionCommands.EXPAND_TREE.getName()))
+			toggleTreeExpanded(true);
 	}
 	
 	public void addTreeSelectionListener(TreeSelectionListener tsl) {
@@ -111,11 +167,43 @@ public class DockableDataTreePanel extends DefaultSingleCDockable {
 				}
 			}			
 		}
+		treeExpanded(isTreeExpanded);
 	}
-	
-	public void groupTree(TreeGrouping grouping) {		
+		
+	public void groupTree(TreeGrouping grouping) {
+		
 		this.grouping = grouping;
 		rawDataTree.loadData(getDataFiles(), grouping, true);
+		
+		if (grouping.equals(TreeGrouping.BY_DATA_FILE)) {
+
+			toggleTreeGroupingButton.setIcon(byFileTreeIcon);
+			toggleTreeGroupingButton.setCommand(MainActionCommands.GROUP_TREE_BY_TYPE.getName());
+			toggleTreeGroupingButton.setTooltip(MainActionCommands.GROUP_TREE_BY_TYPE.getName());
+		}
+		if (grouping.equals(TreeGrouping.BY_OBJECT_TYPE)) {
+
+			toggleTreeGroupingButton.setIcon(byTypeTreeIcon);
+			toggleTreeGroupingButton.setCommand(MainActionCommands.GROUP_TREE_BY_FILE.getName());
+			toggleTreeGroupingButton.setTooltip(MainActionCommands.GROUP_TREE_BY_FILE.getName());
+		}
+		//	Tree collapse tree to default state after resorting, so button is reset
+		treeExpanded(false);
+	}
+	
+	public void treeExpanded(boolean expanded) {
+
+		if (expanded) {
+
+			expandCollapseTreeButton.setIcon(collapseTreeIcon);
+			expandCollapseTreeButton.setCommand(MainActionCommands.COLLAPSE_TREE.getName());
+			expandCollapseTreeButton.setTooltip("Collapse all file nodes");
+		} else {
+			expandCollapseTreeButton.setIcon(expandTreeIcon);
+			expandCollapseTreeButton.setCommand(MainActionCommands.EXPAND_TREE.getName());
+			expandCollapseTreeButton.setTooltip("Expand all file nodes");
+		}
+
 	}
 	
 	public void loadData(Collection<DataFile>files, TreeGrouping grouping) {		

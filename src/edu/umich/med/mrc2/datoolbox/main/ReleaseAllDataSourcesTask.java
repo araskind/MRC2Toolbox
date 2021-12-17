@@ -44,6 +44,7 @@ public class ReleaseAllDataSourcesTask extends LongUpdateTask {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		RawDataManager.clearDataSourcesMap();
 		return null;
 	}
 }

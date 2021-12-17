@@ -51,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class AddFeaturesToCollectionDialog extends JDialog implements ActionListener{
 	
@@ -80,10 +81,7 @@ public class AddFeaturesToCollectionDialog extends JDialog implements ActionList
 		this.parentPanel = parentPanel;
 		
 		featureCollectionsTable = new FeatureCollectionsTable();
-		FeatureCollectionManager.refreshMsFeatureInformationBundleCollectionList();
-		featureCollectionsTable.setTableModelFromFeatureCollectionList(
-				FeatureCollectionManager.getEditableMsFeatureInformationBundleCollectionList());
-		featureCollectionsTable.clearSelection();
+		populateCollectiosTable();
 		getContentPane().add(new JScrollPane(featureCollectionsTable), BorderLayout.CENTER);
 
 		JPanel panel = new JPanel();
@@ -108,8 +106,10 @@ public class AddFeaturesToCollectionDialog extends JDialog implements ActionList
 		};
 		btnCancel.addActionListener(al);
 
-		JButton btnSave = new JButton(MainActionCommands.ADD_FEATURES_TO_SELECTED_COLLECTION_COMMAND.getName());
-		btnSave.setActionCommand(MainActionCommands.ADD_FEATURES_TO_SELECTED_COLLECTION_COMMAND.getName());
+		JButton btnSave = 
+				new JButton(MainActionCommands.ADD_FEATURES_TO_SELECTED_COLLECTION_COMMAND.getName());
+		btnSave.setActionCommand(
+				MainActionCommands.ADD_FEATURES_TO_SELECTED_COLLECTION_COMMAND.getName());
 		btnSave.addActionListener(this);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
@@ -117,6 +117,22 @@ public class AddFeaturesToCollectionDialog extends JDialog implements ActionList
 		rootPane.setDefaultButton(btnSave);
 		
 		pack();
+	}
+	
+	private void populateCollectiosTable() {
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			
+			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
+			featureCollectionsTable.setTableModelFromFeatureCollectionList(
+					FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections());
+		}
+		else {
+			featureCollectionsTable.setTableModelFromFeatureCollectionList(
+					MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+					getEditableMsFeatureInfoBundleCollections());			
+		}
+		featureCollectionsTable.clearSelection();
 	}
 
 	@Override
@@ -135,7 +151,11 @@ public class AddFeaturesToCollectionDialog extends JDialog implements ActionList
 			MessageDialog.showErrorMsg("Please select collection to add features.", this);
 			return;
 		}
-		FeatureCollectionManager.addFeaturesToCollection(selectedCollection, featuresToAdd);
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			FeatureCollectionManager.addFeaturesToCollection(selectedCollection, featuresToAdd);
+		else
+			selectedCollection.addFeatures(featuresToAdd);
+		
 		if(loadCollectionCheckBox.isSelected())
 			parentPanel.loadMSMSFeatureInformationBundleCollection(selectedCollection);
 		
