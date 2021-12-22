@@ -90,7 +90,7 @@ public class DockableMobilePhaseAndParametersPanel extends DefaultSingleCDockabl
 		parametersPanel.add(columnTemperatureFormattedTextField, gbc_columnTemperatureFormattedTextField);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		mobilePhaseTable.clearTable();
 		columnTemperatureFormattedTextField.setText("");
 	}

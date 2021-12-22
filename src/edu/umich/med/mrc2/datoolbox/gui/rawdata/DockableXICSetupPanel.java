@@ -67,7 +67,7 @@ public class DockableXICSetupPanel extends DefaultSingleCDockable implements Act
 		return xicSetupPanel.createChromatogramExtractionTask();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		xicSetupPanel.clearPanel();
 	}
 	

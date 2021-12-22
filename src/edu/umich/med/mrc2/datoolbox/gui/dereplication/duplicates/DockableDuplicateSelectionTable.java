@@ -53,7 +53,7 @@ public class DockableDuplicateSelectionTable extends DefaultSingleCDockable {
 		return duplicateSelectionTable;
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		duplicateSelectionTable.clearTable();
 	}
 }

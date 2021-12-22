@@ -444,7 +444,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		clusterTree.resetTree();
 		clearClusterDataPanel();

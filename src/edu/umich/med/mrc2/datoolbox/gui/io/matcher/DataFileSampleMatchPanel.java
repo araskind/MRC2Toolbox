@@ -141,7 +141,7 @@ public class DataFileSampleMatchPanel extends JPanel implements ActionListener{
 		//	matchTable.assignSamples(fileSampleMap);
 	}
 	
-	public void clearTable() {
+	public synchronized void clearTable() {
 		matchTable.clearTable();
 	}
 

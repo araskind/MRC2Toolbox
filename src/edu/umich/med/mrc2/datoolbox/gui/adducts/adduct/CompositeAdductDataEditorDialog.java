@@ -273,7 +273,7 @@ public class CompositeAdductDataEditorDialog extends JDialog
 		pack();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		nameTextField.setText("");
 		descriptionTextField.setText("");

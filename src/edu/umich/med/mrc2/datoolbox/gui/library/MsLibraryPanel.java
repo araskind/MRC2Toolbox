@@ -695,7 +695,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		((LibraryFeatureTableModel) libraryFeatureTable.getTable().getModel()).setRowCount(0);
 		libraryFeatureEditorPanel.clearPanel();

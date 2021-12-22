@@ -70,7 +70,7 @@ public class DockableDatabaseCompoundTable extends DefaultSingleCDockable{
 		return databaseCompoundTable;
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		databaseCompoundTable.clearTable();
 	}
 

@@ -146,7 +146,7 @@ public class DockableMsMsInfoPanel extends DefaultSingleCDockable {
 		infoPanel.add(scrollPane, gbc_scrollPane_1);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		msmsSourceValue.setText("");
 		msmsIdValue.setText("");

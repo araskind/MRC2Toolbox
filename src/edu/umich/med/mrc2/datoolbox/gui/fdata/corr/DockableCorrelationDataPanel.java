@@ -153,7 +153,7 @@ public class DockableCorrelationDataPanel extends DefaultSingleCDockable {
 		add(corrPlotToolbar, BorderLayout.NORTH);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		corrPlot.removeAllDataSets();
 		pearsonValueLabel.setText("");

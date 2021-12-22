@@ -198,7 +198,7 @@ public class DockableChromatographicColumnManagerPanel  extends DefaultSingleCDo
 		cromatographicColumnEditorDialog.dispose();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		cromatographicColumnTable.clearTable();
 	}
 }

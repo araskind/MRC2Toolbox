@@ -178,7 +178,7 @@ public class DockableMoTrPACTissueCodeManagerPanel extends DefaultSingleCDockabl
 //		stockSampleEditorDialog.setVisible(true);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		tissueCodesTable.clearTable();
 	}
 }

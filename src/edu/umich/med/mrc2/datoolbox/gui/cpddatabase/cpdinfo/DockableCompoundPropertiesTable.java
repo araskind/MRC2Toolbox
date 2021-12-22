@@ -41,7 +41,7 @@ public class DockableCompoundPropertiesTable  extends DefaultSingleCDockable {
 		add(new JScrollPane(compoundProprtiesTable));
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		compoundProprtiesTable.clearTable();
 	}
 }

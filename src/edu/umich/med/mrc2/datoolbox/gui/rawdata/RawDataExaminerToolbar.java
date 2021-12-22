@@ -51,6 +51,8 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	private static final Icon msConvertIcon = GuiUtils.getIcon("msConvert", 32);
 	private static final Icon indexRawFilesIcon = GuiUtils.getIcon("indexRawFiles", 32);
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 32);
+	private static final Icon addMetaDataIcon = GuiUtils.getIcon("addMetadata", 32);
+	private static final Icon sendProjectToDatabaseIcon = GuiUtils.getIcon("xml2Database", 32);
 	
 	private JButton 
 		newProjectButton,	
@@ -64,7 +66,9 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 		indexRawFilesButton,
 		extractMSMSFeaturesButton,
 		sendToIDTrackerButton,
-		dataFileToolsButton;
+		dataFileToolsButton,
+		addMetaDataButton,
+		sendProjectToDatabaseButton;
 
 	public RawDataExaminerToolbar(ActionListener commandListener2) {
 
@@ -109,6 +113,16 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 				MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH.getName(),
 				MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH.getName(),
 				buttonDimension);
+				
+		addSeparator(buttonDimension);
+		
+		addMetaDataButton = GuiUtils.addButton(this, null, addMetaDataIcon, commandListener,
+				MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName(),
+				MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName(), buttonDimension);
+		
+		sendProjectToDatabaseButton = GuiUtils.addButton(this, null, sendProjectToDatabaseIcon, commandListener,
+				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName(),
+				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName(), buttonDimension);
 		
 		addSeparator(buttonDimension);
 		

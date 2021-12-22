@@ -289,7 +289,7 @@ public class DockableAcquisitionMethodManagerPanel extends DefaultSingleCDockabl
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		methodTable.clearTable();
 	}
 }

@@ -56,7 +56,7 @@ public class DockableMoTrPACStudyAssayListingPanel extends DefaultSingleCDockabl
 		return assayTable.getSelectedAssay();
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		assayTable.clearTable();
 	}
 	

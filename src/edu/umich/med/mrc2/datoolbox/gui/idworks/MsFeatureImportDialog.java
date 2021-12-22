@@ -198,7 +198,7 @@ public class MsFeatureImportDialog extends JDialog  implements ActionListener{
 		super.setVisible(visible);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		libraryFile = null;
 	}
 

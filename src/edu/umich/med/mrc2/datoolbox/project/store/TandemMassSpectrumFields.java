@@ -42,5 +42,6 @@ public enum TandemMassSpectrumFields {
 	MinorParents,
 	AvgScans,
 	IsMinor,
+	ScanRtMap,
 	;
 }

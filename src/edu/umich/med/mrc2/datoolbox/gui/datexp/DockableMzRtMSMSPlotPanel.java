@@ -214,7 +214,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 		this.parentPanel = parentPanel;
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		plotPanel.removeAllDataSets();
 		msFeatureInfoBundles = null;
 	}

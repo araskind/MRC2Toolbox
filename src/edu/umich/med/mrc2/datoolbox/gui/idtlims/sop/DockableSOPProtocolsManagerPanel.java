@@ -303,7 +303,7 @@ public class DockableSOPProtocolsManagerPanel  extends DefaultSingleCDockable
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		protocolTable.clearTable();
 	}
 }

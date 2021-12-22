@@ -58,7 +58,7 @@ public class DockableMsMsClusterTable extends DefaultSingleCDockable implements 
 		return msMsClusterTable;
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		msMsClusterTable.clearTable();
 	}
 

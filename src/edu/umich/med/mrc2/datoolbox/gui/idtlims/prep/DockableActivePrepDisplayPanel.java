@@ -213,7 +213,7 @@ public class DockableActivePrepDisplayPanel extends DefaultSingleCDockable imple
 		}
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		idValueLabel.setText("");
 		nameValueLabel.setText("");

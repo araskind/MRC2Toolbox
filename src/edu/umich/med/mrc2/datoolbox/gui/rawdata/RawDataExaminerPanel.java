@@ -258,6 +258,13 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				
 		if(command.equals(MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName()))
 			showFileToolsDialog();
+		
+		if(command.equals(MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName())) {
+			MessageDialog.showWarningMsg("TODO: " + command, this.getContentPane());
+		}
+		if(command.equals(MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName())) {
+			MessageDialog.showWarningMsg("TODO: " + command, this.getContentPane());
+		}
 	}
 		
 	private void showFileToolsDialog() {
@@ -296,16 +303,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(activeRawDataAnalysisProject == null)
 			return;
 		
-		if(!activeRawDataAnalysisProject.getMsMsFeatureBundles().isEmpty()) {
-			int res = MessageDialog.showChoiceWithWarningMsg(
-					"Do you want to discard previously extracted "
-					+ "MSMS data for the current project?", 
-					this.getContentPane());
-			if(res != JOptionPane.YES_OPTION) 
-				return;
-		}
-		activeRawDataAnalysisProject.clearMSMSFeatures();
-		//System.gc();
 		msmsFeatureExtractionSetupDialog = new MSMSFeatureExtractionSetupDialog(this);
 		msmsFeatureExtractionSetupDialog.setLocationRelativeTo(this.getContentPane());
 		msmsFeatureExtractionSetupDialog.setVisible(true);
@@ -313,11 +310,20 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	private void extractMSMSFeatures() {
 		
+		if(!activeRawDataAnalysisProject.getMsMsFeatureBundles().isEmpty()) {
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Do you want to discard previously extracted "
+					+ "MSMS data for the current project?", 
+					msmsFeatureExtractionSetupDialog);
+			if(res != JOptionPane.YES_OPTION) 
+				return;
+		}
+		cleanupForReanalysis();
 		MSMSExtractionParameterSet ps = 
 				msmsFeatureExtractionSetupDialog.getMSMSExtractionParameterSet();
 		if(ps == null)
 			return;
-		
+
 		MsMsfeatureBatchExtractionTask task = 
 				new MsMsfeatureBatchExtractionTask(
 						ps, 
@@ -325,9 +331,25 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 						activeRawDataAnalysisProject.getMSOneDataFiles());	
 		
 		task.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(task);
+		MRC2ToolBoxCore.getTaskController().addTask(task);	
 		msmsFeatureExtractionSetupDialog.dispose();
 	}
+	
+	private void cleanupForReanalysis() {
+		activeRawDataAnalysisProject.clearMSMSFeatures();
+		dataFileTreePanel.clearPanel();
+		chromatogramPanel.clearPanel();
+		msPlotPanel.clearPanel();
+		msTable.clearTable();
+		msmsPlotPane.clearPanel();
+		msmsTable.clearTable();
+		rawDataFilePropertiesTable.clearTable();
+		IDWorkbenchPanel workbench  = 
+				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
+		workbench.clearPanel();		
+		dataFileTreePanel.loadData(activeRawDataAnalysisProject.getDataFiles(), true);	
+		dataFileTreePanel.toggleTreeExpanded(dataFileTreePanel.isTreeExpanded());
+	}	
 
 	public void showNewRawDataAnalysisProjectDialog() {
 		
@@ -906,7 +928,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		dataFileTreePanel.clearPanel();
 		chromatogramPanel.clearPanel();
@@ -918,6 +940,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		msExtractorPanel.clearPanel();
 		rawDataFilePropertiesTable.clearTable();
 	}
+	
+	
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {

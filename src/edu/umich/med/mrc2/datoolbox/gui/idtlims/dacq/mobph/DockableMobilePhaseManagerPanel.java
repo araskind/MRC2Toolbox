@@ -219,7 +219,7 @@ public class DockableMobilePhaseManagerPanel extends DefaultSingleCDockable impl
 		mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCash.getMobilePhaseList());
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		mobilePhaseTable.clearTable();
 	}
 }

@@ -316,7 +316,7 @@ public class LabNoteEditor extends JDialog implements ActionListener, ItemListen
 
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		noteViewer.clearPanel();
 		rtfEditor.clearPanel();

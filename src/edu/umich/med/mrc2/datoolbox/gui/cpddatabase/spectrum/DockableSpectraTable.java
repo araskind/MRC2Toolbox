@@ -44,7 +44,7 @@ public class DockableSpectraTable  extends DefaultSingleCDockable {
 		add(new JScrollPane(spectraTable));
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		spectraTable.clearTable();
 	}
 	

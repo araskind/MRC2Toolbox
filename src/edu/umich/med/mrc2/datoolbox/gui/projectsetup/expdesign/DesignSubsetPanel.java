@@ -411,7 +411,7 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		// TODO Auto-generated method stub
 
 		designSubsetTable.clearTable();

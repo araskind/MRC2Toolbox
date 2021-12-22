@@ -51,7 +51,7 @@ public class DockableChromatographicGradientTable extends DefaultSingleCDockable
 		return gradientTable;
 	}
 	
-	public void clearTable() {
+	public synchronized void clearTable() {
 		gradientTable.clearTable();
 	}
 	

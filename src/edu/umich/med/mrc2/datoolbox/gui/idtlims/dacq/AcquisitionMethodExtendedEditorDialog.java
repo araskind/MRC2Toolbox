@@ -164,7 +164,7 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 		return method;
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		
 		gradientChartPanel.clearPanel();
 		gradientTable.clearTable();

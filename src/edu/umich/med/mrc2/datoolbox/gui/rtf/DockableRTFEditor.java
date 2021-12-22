@@ -70,7 +70,7 @@ public class DockableRTFEditor extends DefaultSingleCDockable implements ActionL
 		return wordProcessor;
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		wordProcessor.clearPanel();
 	}
 

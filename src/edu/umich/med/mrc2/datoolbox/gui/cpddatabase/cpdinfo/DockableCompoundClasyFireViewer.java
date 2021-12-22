@@ -92,7 +92,7 @@ public class DockableCompoundClasyFireViewer  extends DefaultSingleCDockable {
 		canvas.panToObjects();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		
 		canvas.setSelected(new HashSet<OWLObject>());
 		try {

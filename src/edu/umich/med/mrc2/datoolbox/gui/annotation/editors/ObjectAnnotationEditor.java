@@ -119,7 +119,7 @@ public class ObjectAnnotationEditor extends JDialog implements ActionListener, I
 
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		rtfEditor.clearPanel();
 

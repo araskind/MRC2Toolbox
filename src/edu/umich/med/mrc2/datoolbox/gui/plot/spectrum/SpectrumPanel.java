@@ -56,7 +56,7 @@ public class SpectrumPanel extends JPanel implements ActionListener {
 		initPanel();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		msPlot.removeAllDataSets();
 		msTable.clearTable();

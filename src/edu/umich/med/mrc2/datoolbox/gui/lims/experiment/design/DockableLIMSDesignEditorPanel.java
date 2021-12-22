@@ -171,7 +171,7 @@ public class DockableLIMSDesignEditorPanel  extends DefaultSingleCDockable imple
 			expDesignTable.setModelFromDesign(experimentDesign);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		experimentDesign = null;
 		expDesignTable.clearTable();

@@ -177,7 +177,7 @@ public class DockableMotrpacAssayManagerPanel extends DefaultSingleCDockable imp
 //		stockSampleEditorDialog.setVisible(true);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		assayTable.clearTable();
 	}
 }

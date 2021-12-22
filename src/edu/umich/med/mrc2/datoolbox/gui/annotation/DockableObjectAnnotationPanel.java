@@ -137,7 +137,7 @@ public class DockableObjectAnnotationPanel extends DefaultSingleCDockable
 		chooser.setCurrentDirectory(baseDirectory);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		objectAnnotationTable.clearTable();
 		currentObject = null;
 		annotationMetadataPanel.clearPanel();

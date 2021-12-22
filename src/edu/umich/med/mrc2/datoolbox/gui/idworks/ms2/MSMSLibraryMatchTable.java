@@ -184,7 +184,7 @@ public class MSMSLibraryMatchTable extends BasicTable {
 	}
 
 	@Override
-	public void clearTable() {
+	public synchronized void clearTable() {
 
 		if(msmsMatchModelListener != null)
 			model.removeTableModelListener(msmsMatchModelListener);

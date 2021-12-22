@@ -155,7 +155,7 @@ public class BasicTable extends JTable implements ActionListener{
 		}
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 
 		((DefaultTableModel) this.getModel()).setRowCount(0);
 		if (tca != null)

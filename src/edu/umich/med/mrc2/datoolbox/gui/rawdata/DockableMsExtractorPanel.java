@@ -649,7 +649,7 @@ public class DockableMsExtractorPanel extends DefaultSingleCDockable implements 
 		MRC2ToolBoxCore.getTaskController().addTask(msavTask);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 //		fileListModel.clear();
 //		sampleFileList.revalidate();

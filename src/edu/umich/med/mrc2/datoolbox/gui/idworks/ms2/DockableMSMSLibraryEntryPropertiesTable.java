@@ -56,7 +56,7 @@ public class DockableMSMSLibraryEntryPropertiesTable extends DefaultSingleCDocka
 		return propertiesTable;
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		propertiesTable.clearTable();
 	}
 	

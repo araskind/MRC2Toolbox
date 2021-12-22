@@ -220,7 +220,7 @@ public class DockableInstrumentManagerPanel extends DefaultSingleCDockable imple
 		instrumentEditorDialog.setVisible(true);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		instrumentTable.clearTable();
 	}
 }

@@ -1355,7 +1355,7 @@ public class MainWindow extends JFrame
 	}
 	
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 	}
 

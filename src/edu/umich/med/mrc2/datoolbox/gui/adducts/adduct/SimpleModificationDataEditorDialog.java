@@ -333,7 +333,7 @@ public class SimpleModificationDataEditorDialog extends JDialog
 		pack();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		nameTextField.setText("");
 		cefNotationTextField.setText("");

@@ -90,7 +90,9 @@ public enum MainActionCommands {
 	COMPRESS_RAW_DATA("Compress raw data"),
 	SELECT_RAW_DATA_FOLDER_FOR_WORKLIST("Select raw data folder to extract worklist"),
 	EXTRACT_WORKLIST_FROM_RAW_DATA_FOLDER("Extract worklist"),
-	SAVE_EXTRACTED_WORKLIST_TO_FILE("Save worklist to file"),
+	SAVE_EXTRACTED_WORKLIST_TO_FILE("Save worklist to file"),	
+	ADD_PROJECT_METADATA_COMMAND("Add project metadata"),
+	SEND_PROJECT_DATA_TO_DATABASE_COMMAND("Send project data to database"),
 
 	DELETE_DATA_PIPELINE_COMMAND("Delete data pipeline"),
 	EDIT_DATA_PIPELINE_COMMAND("Edit data pipeline"),

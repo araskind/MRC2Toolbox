@@ -51,7 +51,7 @@ public class DockableMsMsTable   extends DefaultSingleCDockable {
 		return msMsTable;
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		msMsTable.clearTable();
 	}
 

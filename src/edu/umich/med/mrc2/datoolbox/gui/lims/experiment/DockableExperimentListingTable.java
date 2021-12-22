@@ -57,7 +57,7 @@ public class DockableExperimentListingTable extends DefaultSingleCDockable {
 		experimentListingTable.setModelFromExperimentCollection(experimentCollection);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		experimentListingTable.clearTable();
 	}
 

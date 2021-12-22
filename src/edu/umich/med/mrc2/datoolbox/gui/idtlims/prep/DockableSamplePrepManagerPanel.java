@@ -332,7 +332,7 @@ public class DockableSamplePrepManagerPanel extends DefaultSingleCDockable
 		return layoutConfigFile;
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		samplePrepTable.clearTable();
 		activePrepPanel.clearPanel();

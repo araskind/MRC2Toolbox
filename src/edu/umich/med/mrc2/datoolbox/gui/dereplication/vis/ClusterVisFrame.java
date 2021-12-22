@@ -135,7 +135,7 @@ public class ClusterVisFrame extends JFrame implements ActionListener, ItemListe
 			showDendrogramm();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		panel.removeAll();
 		label.setIcon(null);

@@ -360,7 +360,7 @@ public class JWordProcessor extends JPanel {
 		}
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		w_doc = (AdvancedRTFDocument) w_kit.createDefaultDocument();
 		textArea.setDocument(w_doc);

@@ -89,7 +89,7 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 		projectToolbar.setActionListener(listener);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		projectDetailsPanel.clearPanel();
 		limsDataPanel.clearPanel();

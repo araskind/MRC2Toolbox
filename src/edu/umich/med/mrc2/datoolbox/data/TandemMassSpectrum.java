@@ -80,6 +80,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	protected double entropy;
 	protected Collection<MsPoint>minorParentIons;
 	protected Map<Integer,Integer>averagedScanNumbers;
+	protected Map<Integer,Double>scanRtMap;
 	protected boolean parentIonIsMinorIsotope;
 
 	public TandemMassSpectrum(
@@ -98,6 +99,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		annotations = new TreeSet<ObjectAnnotation>();
 		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
+		scanRtMap = new TreeMap<Integer,Double>();
 	}
 
 	public TandemMassSpectrum(int depth, MsPoint parent, Polarity polarity) {
@@ -111,6 +113,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		annotations = new TreeSet<ObjectAnnotation>();
 		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
+		scanRtMap = new TreeMap<Integer,Double>();
 	}
 
 	public TandemMassSpectrum(TandemMassSpectrum source) {
@@ -132,7 +135,9 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		minorParentIons.addAll(source.getMinorParentIons());
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
-		averagedScanNumbers.putAll(source.getAveragedScanNumbers());
+		averagedScanNumbers.putAll(source.getAveragedScanNumbers());		
+		scanRtMap = new TreeMap<Integer,Double>();
+		scanRtMap.putAll(source.getScanRtMap());
 	}
 
 	public TandemMassSpectrum(
@@ -151,6 +156,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		annotations = new TreeSet<ObjectAnnotation>();
 		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
+		scanRtMap = new TreeMap<Integer,Double>();
 	}
 
 	public TandemMassSpectrum(Polarity polarity) {
@@ -163,23 +169,29 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		annotations = new TreeSet<ObjectAnnotation>();
 		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
+		scanRtMap = new TreeMap<Integer,Double>();
 	}
 
 	public int getDepth() {
 		return depth;
 	}
+	
 	public void setDepth(int depth) {
 		this.depth = depth;
 	}
+	
 	public MsPoint getParent() {
 		return parent;
 	}
+	
 	public void setParent(MsPoint parent) {
 		this.parent = parent;
 	}
+	
 	public Collection<MsPoint> getSpectrum() {
 		return spectrum;
 	}
+	
 	public void setSpectrum(Collection<MsPoint> spectrum) {
 		this.spectrum = spectrum;
 	}
@@ -523,6 +535,11 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		if(minorParentIons.isEmpty() || parent == null)
 			return 1.0;
 		
+//		double pur = parent.getIntensity() / (minorParentIons.stream().
+//				mapToDouble(p -> p.getIntensity()).sum() + parent.getIntensity());
+//		if(pur > 1 || pur < 0) {
+//			System.err.println(Double.toString(pur));
+//		}		
 		return parent.getIntensity() / (minorParentIons.stream().
 				mapToDouble(p -> p.getIntensity()).sum() + parent.getIntensity());
 	}
@@ -635,7 +652,16 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		}
 		msmsElement.setAttribute(TandemMassSpectrumFields.IsMinor.name(), 
 				Boolean.toString(parentIonIsMinorIsotope));
-
+		
+		if(scanRtMap != null && !scanRtMap.isEmpty()) {
+			
+			List<String>asList = scanRtMap.entrySet().stream().
+				map(e -> Integer.toString(e.getKey()) + "_" + Double.toString(e.getValue())).
+						collect(Collectors.toList());
+			msmsElement.setAttribute(
+					TandemMassSpectrumFields.ScanRtMap.name(), 
+					StringUtils.join(asList, ";"));
+		}
 		return msmsElement;
 	}
 	
@@ -728,6 +754,15 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		parentIonIsMinorIsotope = Boolean.parseBoolean(
 				msmsElement.getAttributeValue(TandemMassSpectrumFields.IsMinor.name()));
 
+		String scanRtMapString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.ScanRtMap.name());
+		if(scanRtMapString != null) {
+			String[]srtChunks = scanRtMapString.split(";");
+			for(String srtChunk : srtChunks) {
+				String[]parts = srtChunk.split("_");
+				scanRtMap.put(Integer.parseInt(parts[0]), Double.parseDouble(parts[1]));
+			}
+		}	
 		double[] mzValues = null;
 		double[] intensityValues = null;
 		String mzText =  
@@ -748,6 +783,10 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		}
 		for(int i=0; i<mzValues.length; i++)
 			spectrum.add(new MsPoint(mzValues[i], intensityValues[i]));
+	}
+
+	public Map<Integer, Double> getScanRtMap() {
+		return scanRtMap;
 	}
 }
 

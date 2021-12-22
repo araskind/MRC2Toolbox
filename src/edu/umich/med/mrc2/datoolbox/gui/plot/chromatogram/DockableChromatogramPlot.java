@@ -62,7 +62,7 @@ public class DockableChromatogramPlot extends DefaultSingleCDockable implements 
 		add(chromatogramToolbar, BorderLayout.NORTH);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		chromatogramPlot.removeAllDataSets();
 	}
 

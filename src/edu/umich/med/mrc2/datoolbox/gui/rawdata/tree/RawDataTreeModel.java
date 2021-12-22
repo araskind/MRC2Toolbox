@@ -237,14 +237,14 @@ public class RawDataTreeModel extends DefaultTreeModel {
 			}
 		}
 		//	Add scans
-		DefaultMutableTreeNode rawScansNode = new DefaultMutableTreeNode(scansNodeName);
-		insertNodeInto(rawScansNode, newNode, getChildCount(newNode));
-		try {
-			addScans(dataFile, rawScansNode);
-		} catch (FileParsingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		DefaultMutableTreeNode rawScansNode = new DefaultMutableTreeNode(scansNodeName);
+//		insertNodeInto(rawScansNode, newNode, getChildCount(newNode));
+//		try {
+//			addScans(dataFile, rawScansNode);
+//		} catch (FileParsingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 	
 	private void addScans(DataFile dataFile, DefaultMutableTreeNode rawScansNode) throws FileParsingException {

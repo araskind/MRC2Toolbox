@@ -129,7 +129,7 @@ public class DockableDataTreePanel extends DefaultSingleCDockable implements Act
 		rawDataTree.addTreeSelectionListener(tsl);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		rawDataTree.clearTree();
 	}
 

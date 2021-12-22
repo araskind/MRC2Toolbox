@@ -61,7 +61,7 @@ public class DockableFeatureIntensitiesTable extends DefaultSingleCDockable{
 		featureIntensitiesTable.sortByFeatureAndSample();
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		featureIntensitiesTable.clearTable();
 	}
 }

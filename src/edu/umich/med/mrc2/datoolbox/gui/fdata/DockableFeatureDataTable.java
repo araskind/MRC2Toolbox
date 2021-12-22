@@ -73,7 +73,7 @@ public class DockableFeatureDataTable extends DefaultSingleCDockable{
 		return featureDataTable.getFeatureAtPopup();
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		featureDataTable.clearTable();
 	}
 

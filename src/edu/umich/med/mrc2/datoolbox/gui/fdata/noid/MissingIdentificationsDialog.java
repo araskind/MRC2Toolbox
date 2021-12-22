@@ -334,7 +334,7 @@ public class MissingIdentificationsDialog extends JDialog implements ActionListe
 		libraryMsTable.clearTable();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		clearFeatureDataPanel();
 		missingIdsTable.clearTable();

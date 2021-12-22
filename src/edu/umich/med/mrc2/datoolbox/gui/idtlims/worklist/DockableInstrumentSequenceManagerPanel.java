@@ -274,7 +274,7 @@ public class DockableInstrumentSequenceManagerPanel  extends DefaultSingleCDocka
 		return false;
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		worklistTable.clearTable();
 		activeSamplePrep = null;
 	}

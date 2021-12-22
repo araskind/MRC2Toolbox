@@ -359,7 +359,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		}
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		((WorklistTableModel) worklistTable.getTable().getModel()).clearModel();
 	}
 

@@ -701,7 +701,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		compoundTable.clearTable();
 		clearDataPanels();

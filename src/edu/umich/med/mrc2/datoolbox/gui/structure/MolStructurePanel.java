@@ -78,7 +78,7 @@ public class MolStructurePanel extends JPanel {
 		dptgen = new DepictionGenerator().withAtomColors();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		structureLabel.setIcon(null);
 	}
 

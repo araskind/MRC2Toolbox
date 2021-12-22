@@ -183,7 +183,7 @@ public class DockableMoTrPACStudyManagerPanel extends DefaultSingleCDockable imp
 		motrpacStudyEditorDialog.setVisible(true);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		studiesTable.clearTable();
 	}
 

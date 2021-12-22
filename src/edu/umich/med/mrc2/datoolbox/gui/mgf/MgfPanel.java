@@ -120,7 +120,7 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 			exportMsMs();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		msMsTree.resetTree();
 		msPlot.removeAllDataSets();

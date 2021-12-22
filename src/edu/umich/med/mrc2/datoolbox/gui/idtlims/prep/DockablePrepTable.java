@@ -61,7 +61,7 @@ public class DockablePrepTable extends DefaultSingleCDockable {
 		return samplePrepTable.getSelectedPrep();
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		samplePrepTable.clearTable();
 	}
 	

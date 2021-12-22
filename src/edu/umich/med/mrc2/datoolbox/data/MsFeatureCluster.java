@@ -491,16 +491,35 @@ public class MsFeatureCluster implements Serializable {
 		msms.setScanNumber(primaryTandemMs.getScanNumber());
 		msms.setParentScanNumber(primaryTandemMs.getParentScanNumber());
 		msmsList.stream().forEach(s -> msms.addAveragedScanNumbers(s.getScanNumber(), s.getParentScanNumber()));
+		msmsList.stream().forEach(s -> s.getScanRtMap().entrySet().stream().forEach(e -> msms.getScanRtMap().put(e.getKey(), e.getValue())));
 		msms.setEntropy(MsUtils.calculateSpectrumEntropyNatLog(msms.getSpectrum()));
+				
+//		Collection<MsPoint>minorParentIons = msmsList.stream().
+//				flatMap(f -> f.getMinorParentIons().stream()).
+//				collect(Collectors.toList());
+//		if(!minorParentIons.isEmpty()) {
+//			Collection<MsPoint>averageMinorParentIons = 
+//					MsUtils.averageMassSpectrum(minorParentIons, mzBinWidth, errorType);
+//			msms.setMinorParentIons(averageMinorParentIons);
+//		}	
+//		double parentMz = parent.getMz();
+//		Collection<MsPoint>minorParentIons = spectrum.getMsPoints().stream().
+//				filter(p -> p.getMz() != parentMz).
+//				filter(p -> isolationWindow.contains(p.getMz())).
+//				sorted(MsUtils.mzSorter).collect(Collectors.toList());
+//		if(!minorParentIons.isEmpty())
+//			msms.setMinorParentIons(minorParentIons);
 		
-		Collection<MsPoint>minorParentIons = msmsList.stream().
-				flatMap(f -> f.getMinorParentIons().stream()).
-				collect(Collectors.toList());
-		if(!minorParentIons.isEmpty()) {
-			Collection<MsPoint>averageMinorParentIons = 
-					MsUtils.averageMassSpectrum(minorParentIons, mzBinWidth, errorType);
-			msms.setMinorParentIons(averageMinorParentIons);
-		}	
+		Range parentMzRange = 
+				MsUtils.createMassRange(parent.getMz(), mzBinWidth, errorType);
+		Range iw = msms.getIsolationWindow();
+		Collection<MsPoint>minorParentIons = spectrum.getMsPoints().stream().
+				filter(p -> !parentMzRange.contains(p.getMz())).
+				filter(p -> iw.contains(p.getMz())).
+				sorted(MsUtils.mzSorter).collect(Collectors.toList());
+		if(!minorParentIons.isEmpty())
+			msms.setMinorParentIons(minorParentIons);
+		
 		spectrum.addTandemMs(msms);			
 		MsFeature averaged = new MsFeature(primaryFeature.getRetentionTime(), polarity);
 		averaged.setRtRange(getRtRange());

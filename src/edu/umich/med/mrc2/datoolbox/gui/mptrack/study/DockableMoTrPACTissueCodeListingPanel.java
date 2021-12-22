@@ -56,7 +56,7 @@ public class DockableMoTrPACTissueCodeListingPanel extends DefaultSingleCDockabl
 		return tissueCodesTable.getSelectedCode();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		tissueCodesTable.clearTable();
 	}
 	

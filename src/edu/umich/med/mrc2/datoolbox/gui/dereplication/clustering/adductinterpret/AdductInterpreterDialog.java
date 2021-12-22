@@ -345,7 +345,7 @@ public class AdductInterpreterDialog extends JDialog implements ActionListener, 
 		parentPanel.refreshClusterData();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		adductInterpreterTable.clearTable();
 		adductComboBox.setSelectedIndex(-1);

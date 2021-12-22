@@ -96,7 +96,7 @@ public class WorksheetPreviewTable extends BasicTable {
 	}
 
 	@Override
-	public void clearTable() {
+	public synchronized void clearTable() {
 
 		model = new WorksheetPreviewTableModel();
 		setModel(model);

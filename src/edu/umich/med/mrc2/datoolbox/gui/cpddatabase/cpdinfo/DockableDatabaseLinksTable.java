@@ -49,7 +49,7 @@ public class DockableDatabaseLinksTable extends DefaultSingleCDockable {
 		dbLinksTable.setModelFromLinks(dbLinks);
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		dbLinksTable.clearTable();
 	}
 

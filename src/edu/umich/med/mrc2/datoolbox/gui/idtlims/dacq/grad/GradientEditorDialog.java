@@ -156,7 +156,7 @@ public class GradientEditorDialog extends JDialog
 		return method;
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		
 		gradientChartPanel.clearPanel();
 		gradientTable.clearTable();

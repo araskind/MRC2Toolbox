@@ -452,7 +452,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		featureSetTable.clearTable();
 	}
 

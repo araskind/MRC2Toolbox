@@ -62,11 +62,12 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		setStatus(TaskStatus.PROCESSING);
-		taskDescription = "Extracting MSMS features from raw data ... ";
+
+		setStatus(TaskStatus.PROCESSING);		
+		taskDescription = "Extracting MSMS features from raw data ... ";		
 		total = 100;
 		processed = 0;
+		System.gc();
 		for(DataFile df : msmsDataFiles) {			
 			MsMsfeatureExtractionTask task = new MsMsfeatureExtractionTask(df, ps);
 			task.addTaskListener(this);

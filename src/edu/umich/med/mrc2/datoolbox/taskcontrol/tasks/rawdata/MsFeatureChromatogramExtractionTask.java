@@ -84,6 +84,7 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
+		RawDataManager.getRawData(rawDataFile).releaseMemory();
 		setStatus(TaskStatus.FINISHED);
 	}
 	

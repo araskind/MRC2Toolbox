@@ -61,7 +61,7 @@ public class DockableNarrativeDataPanel extends DefaultSingleCDockable {
 		compoundInfoTextArea.setText(compoundNarrative);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		compoundInfoTextArea.setText("");
 	}
 }

@@ -408,7 +408,7 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		}		
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		nameTextArea.setText("");
 		descriptionTextArea.setText("");

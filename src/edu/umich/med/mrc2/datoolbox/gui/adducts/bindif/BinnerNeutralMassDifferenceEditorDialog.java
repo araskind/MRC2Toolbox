@@ -258,7 +258,7 @@ public class BinnerNeutralMassDifferenceEditorDialog extends JDialog
 		compositAdductComponentsTable.setTableModelFromBinnerNeutralMassDifference(binnerNeutralMassDifference);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		nameTextField.setText("");
 		binnerNameTextField.setText("");

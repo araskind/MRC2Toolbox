@@ -2416,7 +2416,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		msOneFeatureTable.getTable().clearTable();
 		msTwoFeatureTable.getTable().clearTable();
@@ -2660,7 +2660,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			//	Get experimental spectrum
 			//	TODO deal with MSn n > 2
 			TandemMassSpectrum instrumentSpectrum =
-				feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
+				feature.getSpectrum().getExperimentalTandemSpectrum();
 			
 			if(instrumentSpectrum != null) {
 	
@@ -2684,6 +2684,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		
 		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
 			return;
+		
 		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getChromatogramMap() == null)
 			return;
 			

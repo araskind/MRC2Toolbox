@@ -183,7 +183,7 @@ public class DockableMsMsDataEditorPanel extends DefaultSingleCDockable implemen
 		}
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		msMsInfoPanel.clearPanel();
 		msmsTable.clearTable();

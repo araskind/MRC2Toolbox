@@ -65,7 +65,7 @@ public class RTFEditorPanel extends JRootPane implements ActionListener{
 		return wordProcessor;
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		wordProcessor.clearPanel();
 	}
 

@@ -58,7 +58,7 @@ public class DockableMassDifferenceTable extends DefaultSingleCDockable {
 		return massDifferenceTable;
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		massDifferenceTable.clearTable();
 	}
 

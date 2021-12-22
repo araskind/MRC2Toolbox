@@ -56,7 +56,7 @@ public class Dockable2DQCPanel extends DefaultSingleCDockable{
 		plotPanel.loadDataSetStats(dataSetStats2);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		plotPanel.removeAllDataSets();
 	}
 

@@ -177,7 +177,7 @@ public class DockableMoTrPACSampleTypeManagerPanel extends DefaultSingleCDockabl
 //		stockSampleEditorDialog.setVisible(true);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		sampleTypeTable.clearTable();
 	}
 }

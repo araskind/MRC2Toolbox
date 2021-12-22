@@ -90,7 +90,7 @@ public class DockableAductSelector extends DefaultSingleCDockable{
 		adductsTable.loadFeatureData(activeFeature, polarity);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		adductsTable.clearTable();
 	}
 

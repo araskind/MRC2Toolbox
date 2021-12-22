@@ -349,7 +349,7 @@ public class DockableExperimentSummaryPanel extends DefaultSingleCDockable imple
 					getPrincipalInvestigator().getInfo());
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		expIdValueLabel.setText("");
 		expNameLabel.setText("");

@@ -274,7 +274,7 @@ public class DockableLIMSDataPanel extends DefaultSingleCDockable{
 		dataPanel.add(contactValueLabel, gbc_contactValueLabel);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		expIdValueLabel.setText("");
 		startDateLabel.setText("");

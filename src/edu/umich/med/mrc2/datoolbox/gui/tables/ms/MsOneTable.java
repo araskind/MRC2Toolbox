@@ -117,7 +117,7 @@ public class MsOneTable  extends BasicTable {
 	}
 
 	@Override
-	public void clearTable() {
+	public synchronized void clearTable() {
 
 		super.clearTable();
 		currentFeature = null;

@@ -176,7 +176,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		spectrumPlot.removeAllDataSets();
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		spectrumPlot.removeAllDataSets();
 	}
 
@@ -340,10 +340,14 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 
 		//	Add parent ion
 		XYSeriesCollection parentSet = new XYSeriesCollection();
-		XYSeries parentSeries = new XYSeries("Parent ion");
-		MsPoint trueParent = msms.getActualParentIon();
+		XYSeries parentSeries = new XYSeries("Parent ion");		
+		MsPoint trueParent = msms.getParent();
+		if(trueParent == null)
+			trueParent = msms.getActualParentIon();
+		
 		if(trueParent != null)
 			parentSeries.add(trueParent.getMz(), trueParent.getIntensity());
+				
 		parentSet.addSeries(parentSeries);
 		XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
 		parentRenderer.setSeriesPaint(0, Color.RED);
@@ -370,7 +374,11 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		//	Add parent ion
 		XYSeriesCollection parentSet = new XYSeriesCollection();
 		XYSeries parentSeries = new XYSeries("Parent ion");
-		MsPoint trueParent = msms.getActualParentIon();
+		
+		MsPoint trueParent = msms.getParent();
+		if(trueParent == null)
+			trueParent = msms.getActualParentIon();
+		
 		if(trueParent != null)
 			parentSeries.add(trueParent.getMz(), 100.0d);
 		parentSet.addSeries(parentSeries);

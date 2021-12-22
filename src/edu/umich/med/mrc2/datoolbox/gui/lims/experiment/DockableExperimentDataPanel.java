@@ -116,7 +116,7 @@ public class DockableExperimentDataPanel  extends DefaultSingleCDockable
 
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		experimentListingTable.clearPanel();
 		experimentSummary.clearPanel();

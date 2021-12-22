@@ -63,7 +63,7 @@ public class DockableDocumentsPanel extends DefaultSingleCDockable {
 		return docsTable.getAllAnnotations();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		docsTable.clearTable();
 	}
 }

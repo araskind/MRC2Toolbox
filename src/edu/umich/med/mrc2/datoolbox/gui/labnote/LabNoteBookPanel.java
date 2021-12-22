@@ -431,7 +431,7 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		labNotesTable.clearTable();
 		noteViewer.clearPanel();;

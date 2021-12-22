@@ -153,7 +153,7 @@ public class DockableMoTrPACReportListingPanel extends DefaultSingleCDockable
 		}
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		reportsTable.clearTable();
 	}
 

@@ -59,7 +59,7 @@ public class DockableIsotopePatternTable extends DefaultSingleCDockable {
 		isotopePatternTable.setTableModelFromSimpleMs(ms);
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		isotopePatternTable.clearTable();
 	}
 }

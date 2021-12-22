@@ -71,7 +71,7 @@ public class CompoundStructureTable extends BasicTable {
 	}
 	
 	@Override
-	public void clearTable() {
+	public synchronized void clearTable() {
 		
 		activeCluster = null;
 		super.clearTable();

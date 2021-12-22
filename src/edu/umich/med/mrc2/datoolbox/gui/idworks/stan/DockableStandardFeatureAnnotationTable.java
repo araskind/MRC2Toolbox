@@ -42,7 +42,7 @@ public class DockableStandardFeatureAnnotationTable   extends DefaultSingleCDock
 		add(new JScrollPane(standardAnnotationTable));
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		standardAnnotationTable.clearTable();
 	}
 	

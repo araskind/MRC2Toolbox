@@ -104,7 +104,7 @@ public class DockableMSOneDataEditorPanel extends DefaultSingleCDockable impleme
 		libraryMsTable.setTableModelFromSpectrum(activeFeature);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		activeFeature = null;
 		featureCopy = null;

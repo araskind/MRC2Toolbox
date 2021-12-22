@@ -51,7 +51,7 @@ public class DockablePepSearchParameterListingPanel extends DefaultSingleCDockab
 			pepSearchSetupDialog.loadSearchParameters(parameterSet);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		pepSearchSetupDialog.clearSearchOptionsPanel();
 	}
 }

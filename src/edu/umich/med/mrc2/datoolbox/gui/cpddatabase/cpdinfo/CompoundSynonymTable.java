@@ -85,7 +85,7 @@ public class CompoundSynonymTable extends BasicTable {
 	}
 
 	@Override
-	public void clearTable() {
+	public synchronized void clearTable() {
 
 		thf.setTable(null);
 		model.removeTableModelListener(modelListener);

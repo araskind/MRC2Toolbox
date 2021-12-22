@@ -207,7 +207,7 @@ public class DockableIDTrackerResultsOverviewPanel extends DefaultSingleCDockabl
 		return layoutConfigFile;
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		msOneSummaryPanel.clearPanel();
 		msmsSummaryPanel.clearPanel();

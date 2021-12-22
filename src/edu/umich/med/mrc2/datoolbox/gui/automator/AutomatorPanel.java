@@ -257,7 +257,7 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		//	TODO - properly clean the UI when analysis completed or stopped
 	}
 

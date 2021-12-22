@@ -332,7 +332,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 		}
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		expDesignTable.clearTable();
 		designEditorToolbar.updateGuiFromProjectAndDataPipeline(null, null);

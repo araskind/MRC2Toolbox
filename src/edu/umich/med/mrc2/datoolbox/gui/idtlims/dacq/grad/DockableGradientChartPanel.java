@@ -55,7 +55,7 @@ public class DockableGradientChartPanel extends DefaultSingleCDockable {
 		gradientChartPanel.showGradient(gradient);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		gradientChartPanel.removeAllDataSets();
 	}
 	

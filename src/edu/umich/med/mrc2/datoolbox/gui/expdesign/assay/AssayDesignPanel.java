@@ -125,7 +125,7 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 			assayDesignTable.setTableModelFromExperimentDesign(currentProject, activeDataPipeline);			
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		assayDesignTable.clearTable();
 	}
 

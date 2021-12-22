@@ -51,7 +51,7 @@ public class DockableMzDiffPlot  extends DefaultSingleCDockable {
 		add(mzDifferencePlotToolbar, BorderLayout.NORTH);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		mzDifferencePlot.removeAllDataSets();
 	}
 

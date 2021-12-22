@@ -49,7 +49,7 @@ public class DockableCompoundStructureTable extends DefaultSingleCDockable {
 		return idTable;
 	}
 	
-	public void clearTable() {
+	public synchronized void clearTable() {
 		idTable.clearTable();
 	}
 

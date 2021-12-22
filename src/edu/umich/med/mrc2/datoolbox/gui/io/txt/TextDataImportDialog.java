@@ -304,7 +304,7 @@ public class TextDataImportDialog extends JDialog
 		savePreferences();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		libraryFile = null;
 		libraryTextField.setText("");

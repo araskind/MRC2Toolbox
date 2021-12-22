@@ -69,7 +69,7 @@ public class DockableSopPanel extends DefaultSingleCDockable {
 		return sopTable.getAllProtocols();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		sopTable.clearTable();
 	}
 }

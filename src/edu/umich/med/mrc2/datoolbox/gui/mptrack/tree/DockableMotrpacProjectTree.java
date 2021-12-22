@@ -120,7 +120,7 @@ public class DockableMotrpacProjectTree extends DefaultSingleCDockable {
 		return null;
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		projectTree.getModel().clearModel();
 	}
 }

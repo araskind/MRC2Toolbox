@@ -42,7 +42,7 @@ public class DockableFollowupStepTable extends DefaultSingleCDockable {
 		add(new JScrollPane(followupStepTable));
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		followupStepTable.clearTable();
 	}
 	

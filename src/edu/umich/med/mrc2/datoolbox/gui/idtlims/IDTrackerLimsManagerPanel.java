@@ -887,7 +887,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	}
 
 	@Override
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		designEditor.clearPanel();
 		stockSampleManagerPanel.clearPanel();

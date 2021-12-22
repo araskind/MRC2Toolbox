@@ -687,7 +687,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		clearFeatureData();
 		featureDataTable.clearTable();

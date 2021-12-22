@@ -350,7 +350,7 @@ public class DockableLibraryFeatureEditorPanel extends DefaultSingleCDockable im
 			return Double.parseDouble(massErrorTextField.getText().trim());
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		featureNameTextField.setText("");
 		retentionTextField.setText("");

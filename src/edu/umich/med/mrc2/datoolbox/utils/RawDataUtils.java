@@ -219,6 +219,10 @@ public class RawDataUtils {
 			if(!msmsScanNums.isEmpty()) {
 				
 				LCMSData rawData = RawDataManager.getRawData(df);	
+				ScanIndex si = rawData.getScans().getMapMsLevel2index().get(2);
+				if(si == null)
+					return markers;
+				
 				TreeMap<Integer, IScan> num2scan = 
 						rawData.getScans().getMapMsLevel2index().get(2).getNum2scan();
 

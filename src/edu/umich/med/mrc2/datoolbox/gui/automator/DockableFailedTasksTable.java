@@ -46,7 +46,7 @@ public class DockableFailedTasksTable extends DefaultSingleCDockable{
 		failedTasksTable.addTask(failedTask);
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		failedTasksTable.clearTable();
 	}
 }

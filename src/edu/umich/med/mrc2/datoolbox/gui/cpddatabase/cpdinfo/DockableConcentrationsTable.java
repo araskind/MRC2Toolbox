@@ -44,7 +44,7 @@ public class DockableConcentrationsTable  extends DefaultSingleCDockable {
 		add(new JScrollPane(concentrationsTable));
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		concentrationsTable.clearTable();
 	}
 	

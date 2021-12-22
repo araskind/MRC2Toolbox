@@ -58,7 +58,7 @@ public class DockableMsMsTable extends DefaultSingleCDockable {
 		msmsTable.setTableModelFromScan(scan);
 	}
 	
-	public void clearTable() {
+	public synchronized void clearTable() {
 		msmsTable.clearTable();
 	}
 }

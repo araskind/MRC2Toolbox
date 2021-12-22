@@ -179,6 +179,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
+		data.releaseMemory();
 		setStatus(TaskStatus.FINISHED);
 	}
 
@@ -657,7 +658,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			MassSpectrum spectrum = new MassSpectrum();
 			
 			//	TODO interpolate flanking MS1 scans
-			IScan nextMsOneScan = data.getScans().getNextScanAtMsLevel(parentScan.getNum(), 1);
+			IScan nextMsOneScan = data.getScans().getNextScanAtMsLevel(scanNum, 1);
 			if(nextMsOneScan != null) {
 				Collection<MsPoint>interpolatedMsOne = 
 						interpolateScanData(parentScan, nextMsOneScan, s.getRt());
@@ -676,7 +677,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			if(precursor.getMzRange() != null)
 				isolationWindow = new Range(isolationWindow.getMin(), isolationWindow.getMax());
 			
-			MsPoint parent = getActualPrecursor(parentScan, isolationWindow);
+			//	MsPoint parent = getActualPrecursor(parentScan, isolationWindow);
+			MsPoint parent =  getActualPrecursor(spectrum.getMsPoints(), isolationWindow);
 			if(parent == null && s.getPrecursor() != null) {
 				Double pInt = s.getPrecursor().getIntensity();
 				if(pInt == null)
@@ -713,11 +715,30 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				}
 				msms.setScanNumber(scanNum);
 				msms.setParentScanNumber(parentScan.getNum());
+				msms.getAveragedScanNumbers().put(scanNum, parentScan.getNum());
+				msms.getScanRtMap().put(s.getNum(), s.getRt());
+				msms.getScanRtMap().put(parentScan.getNum(), parentScan.getRt());
 				msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);				
-				Collection<MsPoint>minorParentIons = getMinorParentIons(
-						parentScan, isolationWindow, parent.getMz());
-				if(minorParentIons != null && !minorParentIons.isEmpty())
+//				Collection<MsPoint>minorParentIons = getMinorParentIons(
+//						parentScan, isolationWindow, parent.getMz());
+//				if(minorParentIons != null && !minorParentIons.isEmpty())
+//					msms.setMinorParentIons(minorParentIons);
+				
+				Range parentMzRange = MsUtils.createMassRange(
+						parent.getMz(), precursorGroupingMassError, precursorGroupingMassErrorType);
+				Range iw = msms.getIsolationWindow();
+				Collection<MsPoint>minorParentIons = spectrum.getMsPoints().stream().
+						filter(p -> !parentMzRange.contains(p.getMz())).
+						filter(p -> iw.contains(p.getMz())).
+						sorted(MsUtils.mzSorter).collect(Collectors.toList());
+				if(!minorParentIons.isEmpty()) {
+					
+					MsPoint negInt = minorParentIons.stream().filter(p -> p.getIntensity() < 0).findFirst().orElse(null);
+					if(negInt != null) {
+						System.err.println(Double.toString(negInt.getIntensity()));
+					}	
 					msms.setMinorParentIons(minorParentIons);
+				}
 				
 				spectrum.addTandemMs(msms);		
 				f.setSpectrum(spectrum);
@@ -732,6 +753,13 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		}
 	}
 	
+	private MsPoint getActualPrecursor(Collection<MsPoint>msOne, Range isolationWindow) {	
+		return msOne.stream().
+				filter(p -> isolationWindow.contains(p.getMz())).
+				sorted(MsUtils.reverseIntensitySorter).
+				findFirst().orElse(null);
+	}
+	
 	private void unloadProcessedScans(Integer scanNumLo, Integer scanNumHi) {
 		LCMSDataSubset subsetToUnload = 
 				new LCMSDataSubset(scanNumLo, scanNumHi, msLvls, null);	
@@ -741,6 +769,9 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private Collection<MsPoint>interpolateScanData(IScan leftScan, IScan rightScan, double rtOfInterest){
 		
 		double splitRatio = (rtOfInterest - leftScan.getRt()) / (rightScan.getRt() - leftScan.getRt());
+		if(splitRatio < 0 || splitRatio > 1)
+			System.err.println("Split " + Double.toString(splitRatio));
+		
 		Collection<MsPoint> leftPoints = RawDataUtils.getScanPoints(leftScan);
 		Collection<MsPoint> rightPoints = RawDataUtils.getScanPoints(rightScan);
 		Collection<MsPoint>interpolated = MsUtils.averageTwoSpectraWithInterpolation(

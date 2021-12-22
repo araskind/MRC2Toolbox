@@ -276,7 +276,7 @@ public class DockableActivePrepPanel extends DefaultSingleCDockable
 		}
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		idValueLabel.setText("");
 		nameTextField.setText("");

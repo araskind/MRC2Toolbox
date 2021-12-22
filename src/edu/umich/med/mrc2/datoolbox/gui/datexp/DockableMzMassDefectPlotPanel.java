@@ -238,7 +238,7 @@ public class DockableMzMassDefectPlotPanel extends DefaultSingleCDockable
 		this.featureSetTitle = featureSetTitle;
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		plotPanel.removeAllDataSets();
 	}
 }

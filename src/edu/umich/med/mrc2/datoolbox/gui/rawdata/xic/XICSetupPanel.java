@@ -533,7 +533,7 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		return xicTask;
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		rawDataFileTable.clearTable();
 		rtFromTextField.setText("");

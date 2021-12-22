@@ -97,7 +97,7 @@ public class AnnotationTextEditor extends JDialog {
 		setVisible(false);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		textArea.setText("");
 	}

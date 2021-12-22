@@ -190,7 +190,7 @@ public class DockableStockSampleManagerPanel extends DefaultSingleCDockable impl
 		stockSampleEditorDialog.setVisible(true);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		stockSampleTable.clearTable();
 	}
 }

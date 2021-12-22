@@ -100,7 +100,7 @@ public class ChemModificationTable extends BasicTable {
 	}
 
 	@Override
-	public void clearTable() {
+	public synchronized void clearTable() {
 
 		model.removeTableModelListener(modelListener);
 		super.clearTable();

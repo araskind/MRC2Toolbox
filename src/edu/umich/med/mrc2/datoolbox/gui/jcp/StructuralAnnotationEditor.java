@@ -139,7 +139,7 @@ public class StructuralAnnotationEditor extends JDialog implements ActionListene
 
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		//	TODO
 	}
 

@@ -339,7 +339,7 @@ public class ExcelImportWizard extends JDialog
 	}
 
 	@SuppressWarnings("unchecked")
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		previewTable.clearTable();
 		inputFileTextField.setText("");

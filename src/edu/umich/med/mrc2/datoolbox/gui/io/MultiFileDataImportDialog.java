@@ -740,7 +740,7 @@ public class MultiFileDataImportDialog extends JDialog
 		savePreferences();	
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		libraryFile = null;
 		matchPanel.clearTable();

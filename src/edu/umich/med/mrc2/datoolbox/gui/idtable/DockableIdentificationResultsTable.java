@@ -57,7 +57,7 @@ public class DockableIdentificationResultsTable extends DefaultSingleCDockable {
 		idTable.setValueAt(value, row, col);
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		idTable.clearTable();
 	}
 

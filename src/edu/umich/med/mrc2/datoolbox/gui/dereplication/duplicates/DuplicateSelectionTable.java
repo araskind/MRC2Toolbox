@@ -147,7 +147,7 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 	}
 
 	@Override
-	public void clearTable() {
+	public synchronized void clearTable() {
 
 		model.removeTableModelListener(modelListener);
 		model.setRowCount(0);

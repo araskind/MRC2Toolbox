@@ -50,7 +50,7 @@ public class DockableCompositeAdductDetailsPanel extends DefaultSingleCDockable 
 		compositAdductComponentsTable.setTableModelFromCompositAdduct(composite);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		compositAdductComponentsTable.clearTable();
 	}
 }

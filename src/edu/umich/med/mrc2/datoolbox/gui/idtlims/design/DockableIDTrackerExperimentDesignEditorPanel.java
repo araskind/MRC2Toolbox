@@ -56,7 +56,7 @@ public class DockableIDTrackerExperimentDesignEditorPanel
 		experimentDesignEditorPanel.reloadDesign();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		experimentDesignEditorPanel.clearPanel();
 	}
 

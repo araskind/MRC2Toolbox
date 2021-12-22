@@ -85,7 +85,7 @@ public class ExperimentDesignPanel extends DockableMRC2ToolboxPanel {
 //		}
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		assayDesignPanel.clearPanel();
 		designEditorPanel.clearPanel();
 	}

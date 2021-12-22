@@ -227,7 +227,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 			populateDesignTable(experimentDesign);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		experiment = null;
 		experimentDesign = null;

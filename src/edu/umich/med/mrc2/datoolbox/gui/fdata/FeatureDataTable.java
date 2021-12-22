@@ -170,7 +170,7 @@ public class FeatureDataTable extends BasicFeatureTable {
 		return msf;
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		model.setRowCount(0);
 	}
 

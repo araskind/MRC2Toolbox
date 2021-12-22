@@ -73,7 +73,7 @@ public class DockableSynonymsTable   extends DefaultSingleCDockable {
 		compoundSynonymsTable.setModelFromCompoundNameSet(nameSet);
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		compoundSynonymsTable.clearTable();
 	}
 

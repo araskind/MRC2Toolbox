@@ -186,7 +186,7 @@ public class DockableIdProjectTree extends DefaultSingleCDockable {
 		projectTree.expandNodeForObject(o);
 	}
 	
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		projectTree.getModel().clearModel();
 	}
 }

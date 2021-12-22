@@ -60,7 +60,7 @@ public class DockableLabNotesTable extends DefaultSingleCDockable {
 		return labNotesTable.getSelectedAnnotation();
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		labNotesTable.clearTable();
 	}
 

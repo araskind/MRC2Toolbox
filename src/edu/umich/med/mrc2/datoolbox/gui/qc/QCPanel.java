@@ -110,7 +110,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 		MRC2ToolBoxCore.getTaskController().addTask(statTask);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		twoDQCpanel.clearPanel();
 		threeDpanel.clearPlotPanel();

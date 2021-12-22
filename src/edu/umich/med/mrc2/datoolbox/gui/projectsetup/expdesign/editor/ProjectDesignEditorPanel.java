@@ -266,7 +266,7 @@ public class ProjectDesignEditorPanel extends JPanel implements ActionListener, 
 
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 
 		factorEditorTable.clearTable();
 		levelEditorTable.clearTable();

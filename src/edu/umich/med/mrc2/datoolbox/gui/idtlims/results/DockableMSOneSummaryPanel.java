@@ -51,7 +51,7 @@ public class DockableMSOneSummaryPanel extends DefaultSingleCDockable{
 		summaryTable.setTableModelFromSummaryCollection(dataSummaries);
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		summaryTable.clearTable();
 	}
 }

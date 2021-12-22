@@ -170,7 +170,7 @@ public class IdentificationResultsTable extends BasicTable {
 	}
 
 	@Override
-	public void clearTable() {
+	public synchronized void clearTable() {
 
 		removeModelListeners();
 		super.clearTable();		

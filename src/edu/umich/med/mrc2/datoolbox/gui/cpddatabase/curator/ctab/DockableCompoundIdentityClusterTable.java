@@ -94,7 +94,7 @@ public class DockableCompoundIdentityClusterTable
 		return idTable.getCompoundIdentityAtPopup();
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		idTable.clearTable();
 	}
 

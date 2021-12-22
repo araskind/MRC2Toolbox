@@ -221,7 +221,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 	}
 
 	@Override
-	public void clearTable() {
+	public synchronized void clearTable() {
 
 		removeModelListeners();
 		super.clearTable();		

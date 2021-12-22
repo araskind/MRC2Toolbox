@@ -101,7 +101,7 @@ public class DockableUniversalIdentificationResultsTable
 		idTable.setValueAt(value, row, col);
 	}
 
-	public void clearTable() {
+	public synchronized void clearTable() {
 		idTable.clearTable();
 	}
 

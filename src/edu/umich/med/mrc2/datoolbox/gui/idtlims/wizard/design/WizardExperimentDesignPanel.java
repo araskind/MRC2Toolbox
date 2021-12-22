@@ -61,7 +61,7 @@ public class WizardExperimentDesignPanel extends IDTrackerDataLoadWizardPanel im
 		experimentDesignEditorPanel.reloadDesign();
 	}
 
-	public void clearPanel() {
+	public synchronized void clearPanel() {
 		experimentDesignEditorPanel.clearPanel();
 	}
 
