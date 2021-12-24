@@ -168,7 +168,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtrac
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataLoadForInjectionsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryIndexingTask;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
-import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.LCMSData;
 
 public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeatureBundleDataUpdater{
@@ -2690,11 +2689,21 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 		MsFeatureChromatogramBundle msfCb = 
 				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
-				getChromatogramMap().get(selectedBundle.getMsFeature().getId());			
+				getChromatogramMap().get(selectedBundle.getMsFeature().getId());
+		TandemMassSpectrum msms = null;	
+		if(selectedBundle.getMsFeature().getSpectrum() != null)
+			msms = selectedBundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+		
 		if(msfCb != null) {
-			Collection<Double>markers = 
-					RawDataUtils.getMSMSScanRtMarkersForFeature(
-							selectedBundle.getMsFeature(), selectedBundle.getDataFile());
+			
+//			Collection<Double>markers = 
+//					RawDataUtils.getMSMSScanRtMarkersForFeature(
+//							selectedBundle.getMsFeature(), selectedBundle.getDataFile());
+			
+			Collection<Double>markers = null;
+			if(msms != null)
+				markers = msms.getMSMSScanRtList();
+			
 			chromatogramPanel.showMsFeatureChromatogramBundle(msfCb, markers);
 		}		
 	}

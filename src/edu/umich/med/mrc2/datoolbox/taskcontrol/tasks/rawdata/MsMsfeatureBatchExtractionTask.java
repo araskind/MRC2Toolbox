@@ -67,7 +67,7 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 		taskDescription = "Extracting MSMS features from raw data ... ";		
 		total = 100;
 		processed = 0;
-		System.gc();
+//		System.gc();
 		for(DataFile df : msmsDataFiles) {			
 			MsMsfeatureExtractionTask task = new MsMsfeatureExtractionTask(df, ps);
 			task.addTaskListener(this);

@@ -84,7 +84,7 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
-		RawDataManager.getRawData(rawDataFile).releaseMemory();
+		RawDataManager.removeDataSource(rawDataFile);
 		setStatus(TaskStatus.FINISHED);
 	}
 	
@@ -93,6 +93,10 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 		processed = 0;
 		for(Entry<MsFeatureInfoBundle, ChromatogramDefinition> entry : featureChromatogramDefinitions.entrySet()) {
 			
+			if (isCanceled()) {
+				RawDataManager.removeDataSource(rawDataFile);
+				return;
+			}			
 			taskDescription = "Extracting chromatograms for " + 
 						entry.getKey().getMsFeature().toString();
 			Collection<ExtractedIonData> chromatograms = 

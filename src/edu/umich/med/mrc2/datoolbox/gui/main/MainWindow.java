@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.prefs.Preferences;
 
@@ -50,7 +51,6 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.jcs3.JCS;
@@ -111,6 +111,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveProjectTask;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
 /**
@@ -130,6 +131,8 @@ public class MainWindow extends JFrame
 	public static final String WINDOW_HEIGTH = "WINDOW_HEIGTH";
 	public static final String WINDOW_X = "WINDOW_X";
 	public static final String WINDOW_Y = "WINDOW_Y";
+	public static final String PROJECT_BASE = "PROJECT_BASE";
+	private File projectBaseDirectory; 
 
 //	public static final String PROG_NAME = "MRC2 Data Analysis Toolbox";
 
@@ -813,23 +816,43 @@ public class MainWindow extends JFrame
 	private File selectProjectFile() {
 
 		JFileChooser chooser = new ImprovedFileChooser();
-		File inputFile = null;
-
-		chooser.setCurrentDirectory(new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()));
+		chooser.setCurrentDirectory(projectBaseDirectory);
 		chooser.setDialogTitle("Select project file");
 		chooser.setAcceptAllFileFilterUsed(false);
 		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
 
-		FileNameExtensionFilter projectFileFilter = new FileNameExtensionFilter("Project files",
-				MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION);
-		chooser.setFileFilter(projectFileFilter);
-
-		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			inputFile = chooser.getSelectedFile();
-
-		return inputFile;
+//		FileNameExtensionFilter projectFileFilter = new FileNameExtensionFilter("Project files",
+//				MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION);
+//		chooser.setFileFilter(projectFileFilter);
+//
+//		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+//			inputFile = chooser.getSelectedFile();
+		
+		File projectFile = null;
+		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+			
+			
+			File selectedFile = chooser.getSelectedFile();
+			if(selectedFile.isDirectory()) {
+				List<String> pfList = FIOUtils.findFilesByExtension(
+						Paths.get(selectedFile.getAbsolutePath()), 
+						MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION);
+				if(pfList == null || pfList.isEmpty()) {
+					MessageDialog.showWarningMsg(selectedFile.getName() + " is not a valid project", chooser);
+					return null;
+				}
+				projectFile = new File(pfList.get(0));
+				projectBaseDirectory = selectedFile.getParentFile();
+			}
+			else {
+				projectFile = selectedFile;
+				projectBaseDirectory = projectFile.getParentFile().getParentFile();
+			}
+			savePreferences();
+		}
+		return projectFile;
 	}
 
 	//	TODO shift data loading to specific panels
@@ -949,7 +972,6 @@ public class MainWindow extends JFrame
 			return;
 		}
 		File projectDirectory = projectFile.getParentFile();
-
 		if (projectFile.exists()) {
 			MessageDialog.showWarningMsg("Project with this name already exists in this location!\n"
 					+ "Please choose a different name or different parent directory.");
@@ -972,6 +994,9 @@ public class MainWindow extends JFrame
 		currentProject.getExperimentDesign().addListener(projectDashBooard);
 		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
 			currentProject.getExperimentDesign().addListener(entry.getValue());
+		
+		projectBaseDirectory = projectDirectory.getParentFile();
+		savePreferences();
 		
 		SaveProjectTask spt = new SaveProjectTask(currentProject);
 		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
@@ -1047,6 +1072,9 @@ public class MainWindow extends JFrame
 		if (projectDescription.isEmpty())
 			projectDescription = name;
 
+		projectBaseDirectory = projectDirectory.getParentFile();
+		savePreferences();
+		
 		currentProject = new DataAnalysisProject(name, projectDescription, projectDirectory, projectType);
 		if(design != null)
 			currentProject.getExperimentDesign().replaceDesign(design);
@@ -1453,6 +1481,9 @@ public class MainWindow extends JFrame
 		int x = preferences.getInt(WINDOW_X, 100);
 		int y = preferences.getInt(WINDOW_Y, 100);		
 		setLocation(x,y);
+		
+		projectBaseDirectory = new File(preferences.get(PROJECT_BASE, 
+				MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()));
 	}
 
 	@Override
@@ -1469,6 +1500,8 @@ public class MainWindow extends JFrame
 		Point location = getLocation();
 		preferences.putInt(WINDOW_X, location.x);
 		preferences.putInt(WINDOW_Y, location.y);
+		
+		preferences.put(PROJECT_BASE, projectBaseDirectory.getAbsolutePath());
 	}
 }
 

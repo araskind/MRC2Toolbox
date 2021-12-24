@@ -671,6 +671,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		annotations = new TreeSet<ObjectAnnotation>();
 		minorParentIons = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		averagedScanNumbers = new TreeMap<Integer,Integer>();
+		scanRtMap = new TreeMap<Integer,Double>();
 		
 		uniqueId = 
 				msmsElement.getAttributeValue(TandemMassSpectrumFields.Id.name());
@@ -787,6 +788,13 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 
 	public Map<Integer, Double> getScanRtMap() {
 		return scanRtMap;
+	}
+	
+	public Collection<Double>getMSMSScanRtList(){
+		
+		Collection<Double>msmsScanRtList = new TreeSet<Double>();		
+		averagedScanNumbers.keySet().stream().forEach(s -> msmsScanRtList.add(scanRtMap.get(s)));
+		return msmsScanRtList;
 	}
 }
 

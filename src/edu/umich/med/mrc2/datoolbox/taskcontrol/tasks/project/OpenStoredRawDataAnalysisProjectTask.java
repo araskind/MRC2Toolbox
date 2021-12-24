@@ -68,6 +68,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 
 	private RawDataAnalysisProject project;
 	private File projectFile;
+	private boolean loadResults;
 	private File xmlProjectDir;
 	private int featureFileCount;
 	private int processedFiles;
@@ -81,8 +82,9 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 	
 	private ArrayList<String>errors;
 	
-	public OpenStoredRawDataAnalysisProjectTask(File projectFile) {
+	public OpenStoredRawDataAnalysisProjectTask(File projectFile, boolean loadResults) {
 		this.projectFile = projectFile;
+		this.loadResults = loadResults;
 		errors = new ArrayList<String>();
 	}
 
@@ -123,10 +125,15 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				featureFiles.add(file);
 			}
 		}
-		featureFileCount = featureFiles.size();
-		if(featureFileCount == 0 && chromatogramsFile == null)
+		if(!loadResults) {
 			cleanup();
-		
+			return;
+		}
+		featureFileCount = featureFiles.size();
+		if(featureFileCount == 0 && chromatogramsFile == null) {
+			cleanup();
+			return;
+		}
 		if(featureFileCount > 0) {
 			for(File ff : featureFiles) {
 				
@@ -364,7 +371,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 
 	@Override
 	public Task cloneTask() {
-		return new OpenStoredRawDataAnalysisProjectTask(projectFile);
+		return new OpenStoredRawDataAnalysisProjectTask(projectFile, loadResults);
 	}
 
 	@Override

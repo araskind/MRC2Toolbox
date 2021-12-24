@@ -22,11 +22,15 @@
 package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -92,5 +96,22 @@ public class FIOUtils {
 				return fileToReturn;
 		}		
 		return null;
+	}
+	
+	public static List<String> findFilesByExtension(Path path, String fileExtension) {
+
+		if (!Files.isDirectory(path)) {
+			throw new IllegalArgumentException("Path must be a directory!");
+		}
+		List<String> result = null;
+		try (Stream<Path> walk = Files.walk(path)) {
+			result = walk.filter(p -> !Files.isDirectory(p))
+					.map(p -> p.toString().toLowerCase()).filter(f -> f.endsWith(fileExtension))
+					.collect(Collectors.toList());
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 }

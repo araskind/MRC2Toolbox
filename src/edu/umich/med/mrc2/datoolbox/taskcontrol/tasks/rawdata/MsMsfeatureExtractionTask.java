@@ -179,7 +179,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			e1.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
-		data.releaseMemory();
+		//	data.releaseMemory();
+		RawDataManager.removeDataSource(rawDataFile);
 		setStatus(TaskStatus.FINISHED);
 	}
 
@@ -475,6 +476,10 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		Collection<MsFeature>discarded = new ArrayList<MsFeature>();
 		for(MsFeature feature : features) {
 			
+			if (isCanceled()) {
+				RawDataManager.removeDataSource(rawDataFile);
+				return;
+			}			
 			//	MS1
 //			List<MsPoint> msOneRaw = 
 //					feature.getSpectrum().getMsPoints().stream().
@@ -563,7 +568,11 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				collect(Collectors.toList());
 		
 		for (MsFeature cf : features) {
-
+			
+			if (isCanceled()) {
+				RawDataManager.removeDataSource(rawDataFile);
+				return;
+			}
 			for (MsFeatureCluster fClust : clusters) {
 
 				if (fClust.matchesOnMSMSParentIon(cf,
@@ -601,6 +610,10 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		processed = 0;
 		for (MsFeatureCluster clust : duplicateList){
 			
+			if (isCanceled()) {
+				RawDataManager.removeDataSource(rawDataFile);
+				return;
+			}			
 			MsFeature avg = clust.getAveragedMSMSFeature(
 					precursorGroupingMassError, 
 					precursorGroupingMassErrorType);
@@ -643,7 +656,11 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		umich.ms.datatypes.scan.props.Polarity scanPolarity = RawDataUtils.getScanPolarity(polarity);
 		Integer unloadIntervalStart = 0;
 		for(Entry<Integer, IScan> entry: num2scan.entrySet()) {
-
+			
+			if (isCanceled()) {
+				RawDataManager.removeDataSource(rawDataFile);
+				return;
+			}
 			IScan s = entry.getValue();	
 			if(!s.getPolarity().equals(scanPolarity))
 				continue;
@@ -850,7 +867,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		return data.getScans().getScanByNum(parentScanNumber);
 	}
 	
-	private void createDataSource() throws FileParsingException {
+	private synchronized void createDataSource() throws FileParsingException {
 	
 		if (isCanceled())
 			return;
@@ -870,6 +887,10 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		featureBundles = new ArrayList<MsFeatureInfoBundle>();
 		for(MsFeature f : features) {
 			
+			if (isCanceled()) {
+				RawDataManager.removeDataSource(rawDataFile);
+				return;
+			}			
 			MsFeatureInfoBundle bundle = new MsFeatureInfoBundle(f);
 			bundle.setAcquisitionMethod(rawDataFile.getDataAcquisitionMethod());
 			bundle.setSample((IDTExperimentalSample) rawDataFile.getParentSample());
