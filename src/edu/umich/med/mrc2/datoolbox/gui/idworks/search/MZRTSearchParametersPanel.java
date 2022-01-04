@@ -408,9 +408,12 @@ public class MZRTSearchParametersPanel extends JPanel implements ActionListener 
 		
 		String[] mzStrings = 
 				StringUtils.split(fragmentListTextField.getText().
-						trim().replaceAll("[\\s+,:,;\\,]", ";"), ';');
+						trim().replaceAll("[\\s+,:,;\\,]", ";").trim(), ';');
 		for (String mzs : mzStrings) {
 
+			if(mzs.isEmpty() || mzs.equals(";"))
+				continue;
+			
 			double mz = 0.0d;
 			try {
 				mz = Double.parseDouble(mzs);

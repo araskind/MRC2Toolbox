@@ -58,6 +58,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
+import edu.umich.med.mrc2.datoolbox.data.enums.IncludeSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -99,20 +100,36 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 	public static final String INCLUDE_NORMAL_MATCH = "INCLUDE_NORMAL_MATCH";
 	public static final String INCLUDE_IN_SOURCE_MATCH = "INCLUDE_IN_SOURCE_MATCH";
 	public static final String INCLUDE_HYBRID_MATCH = "INCLUDE_HYBRID_MATCH";
-	public static final String SEARCH_ALL_IDS = "SEARCH_ALL_IDS";
+	public static final String SEARCH_ALL_IDS = "SEARCH_ALL_IDS";	
+	public static final String FRAGMENT_MZ_LIST = "FRAGMENT_MZ_LIST";
+	public static final String FRAGMENT_MASS_ERROR = "FRAGMENT_MASS_ERROR";
+	public static final String FRAGMENT_MASS_ERROR_TYPE = "FRAGMENT_MASS_ERROR_TYPE";
+	public static final String FRAGMENT_SUBSET = "FRAGMENT_SUBSET";
+	public static final String FRAGMENT_MIN_INTENSITY = "FRAGMENT_MIN_INTENSITY";
+	public static final String MASS_DIFF_LIST = "MASS_DIFF_LIST";
+	public static final String MASS_DIFF_MASS_ERROR = "MASS_DIFF_MASS_ERROR";
+	public static final String MASS_DIFF_MASS_ERROR_TYPE = "MASS_DIFF_MASS_ERROR_TYPE";
+	public static final String MASS_DIFF_SUBSET = "MASS_DIFF_SUBSET";
+	public static final String MASS_DIFF_MIN_INTENSITY = "MASS_DIFF_MIN_INTENSITY";
+	
 
-	private JButton cancelButton;
-	private JButton filterButton;
-	private JButton resetButton;
 	private JCheckBox hybridMatchCheckBox;
 	private JCheckBox inSourceCheckBox;
 	private JCheckBox regularMatchCheckBox;
 	private JCheckBox searchAllIDsCheckBox;
 	private JComboBox idStatusComboBox;
-	private JComboBox massErrorTypeComboBox;
+	private JComboBox includeFragmentsComboBox;
+	private JComboBox includeMassDiffsComboBox;
+	private JComboBox<MassErrorType> precursorMassErrorTypeComboBox;
+	private JComboBox<MassErrorType> fragmentMassErrorTypeComboBox;
+	private JComboBox<MassErrorType> massDiffMassErrorTypeComboBox;
 	private JFormattedTextField bpMzMaxTextField;
 	private JFormattedTextField bpmzMinTextField;
+	private JFormattedTextField fragmentMassErrorTextField;
+	private JFormattedTextField massDiffMassErrorTextField;
 	private JFormattedTextField massErrorTextField;
+	private JFormattedTextField minFragmentIntensityTextField;
+	private JFormattedTextField minMassDiffFragmentIntensityTextField;
 	private JFormattedTextField minScoreTextField;
 	private JFormattedTextField peakAreaMaxTextField;
 	private JFormattedTextField peakAreaMinTextField;
@@ -121,16 +138,19 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 	private JFormattedTextField seMaxTextField;
 	private JFormattedTextField seMinTextField;
 	private JFormattedTextField targetMassTextField;
+	private JTextField fragmentMzListTextField;
+	private JTextField massDiffListTextField;
 	private JTextField nameTextField;
 
+	@SuppressWarnings("rawtypes")
 	public FilterTrackerMSMSFeaturesDialog(ActionListener listener) {
 
 		super();
 		setTitle("Filter MSMS features");
 		setIconImage(((ImageIcon)filterIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setSize(new Dimension(700, 400));
-		setPreferredSize(new Dimension(700, 400));
+		setSize(new Dimension(700, 600));
+		setPreferredSize(new Dimension(700, 600));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		JPanel panel = new JPanel();
@@ -138,9 +158,9 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[] { 0, 98, 32, 88, 37, 78, 0, 0, 0, 0 };
-		gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_panel.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
-		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
+		gbl_panel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_panel.columnWeights = new double[] { 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
+		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
 
 		JLabel lblBasePeakMz = new JLabel("Precursor M/Z from ");
@@ -208,14 +228,16 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 		gbc_massErrorTextField.gridy = 0;
 		panel.add(massErrorTextField, gbc_massErrorTextField);
 		
-		massErrorTypeComboBox = new JComboBox<MassErrorType>(
+		precursorMassErrorTypeComboBox = new JComboBox<MassErrorType>(
 				new DefaultComboBoxModel<MassErrorType>(MassErrorType.values()));
+		precursorMassErrorTypeComboBox.setPreferredSize(new Dimension(60, 20));
+		precursorMassErrorTypeComboBox.setMinimumSize(new Dimension(60, 20));
 		GridBagConstraints gbc_massErrorTypeComboBox = new GridBagConstraints();
 		gbc_massErrorTypeComboBox.insets = new Insets(0, 0, 5, 0);
 		gbc_massErrorTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_massErrorTypeComboBox.gridx = 8;
 		gbc_massErrorTypeComboBox.gridy = 0;
-		panel.add(massErrorTypeComboBox, gbc_massErrorTypeComboBox);
+		panel.add(precursorMassErrorTypeComboBox, gbc_massErrorTypeComboBox);
 
 		JLabel lblRetentionTimeFrom = new JLabel("Retention time from ");
 		GridBagConstraints gbc_lblRetentionTimeFrom = new GridBagConstraints();
@@ -358,6 +380,222 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 		gbc_peakAreaMaxTextField.gridx = 3;
 		gbc_peakAreaMaxTextField.gridy = 5;
 		panel.add(peakAreaMaxTextField, gbc_peakAreaMaxTextField);
+		
+		JPanel panel_2 = new JPanel();
+		panel_2.setBorder(new CompoundBorder(
+				new TitledBorder(
+						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
+								new Color(160, 160, 160)), "MSMS fragment filters", 
+						TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
+				new EmptyBorder(10, 10, 10, 0)));
+		GridBagConstraints gbc_panel_2 = new GridBagConstraints();
+		gbc_panel_2.gridwidth = 9;
+		gbc_panel_2.insets = new Insets(0, 0, 5, 0);
+		gbc_panel_2.fill = GridBagConstraints.BOTH;
+		gbc_panel_2.gridx = 0;
+		gbc_panel_2.gridy = 6;
+		panel.add(panel_2, gbc_panel_2);
+		GridBagLayout gbl_panel_2 = new GridBagLayout();
+		gbl_panel_2.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_2.rowHeights = new int[]{0, 0, 0};
+		gbl_panel_2.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		panel_2.setLayout(gbl_panel_2);
+		
+		JLabel lblNewLabel_9 = new JLabel("M/Z list ");
+		GridBagConstraints gbc_lblNewLabel_9 = new GridBagConstraints();
+		gbc_lblNewLabel_9.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_9.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_9.gridx = 0;
+		gbc_lblNewLabel_9.gridy = 0;
+		panel_2.add(lblNewLabel_9, gbc_lblNewLabel_9);
+		
+		fragmentMzListTextField = new JTextField();
+		GridBagConstraints gbc_fragmentMzListTextField = new GridBagConstraints();
+		gbc_fragmentMzListTextField.gridwidth = 4;
+		gbc_fragmentMzListTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_fragmentMzListTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_fragmentMzListTextField.gridx = 1;
+		gbc_fragmentMzListTextField.gridy = 0;
+		panel_2.add(fragmentMzListTextField, gbc_fragmentMzListTextField);
+		fragmentMzListTextField.setColumns(10);
+		
+		JLabel lblNewLabel_10 = new JLabel("+/-");
+		GridBagConstraints gbc_lblNewLabel_10 = new GridBagConstraints();
+		gbc_lblNewLabel_10.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_10.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_10.gridx = 5;
+		gbc_lblNewLabel_10.gridy = 0;
+		panel_2.add(lblNewLabel_10, gbc_lblNewLabel_10);
+		
+		fragmentMassErrorTextField = new JFormattedTextField(twoDecFormat);
+		fragmentMassErrorTextField.setColumns(5);
+		GridBagConstraints gbc_fragmentMassErrorTextField = new GridBagConstraints();
+		gbc_fragmentMassErrorTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_fragmentMassErrorTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_fragmentMassErrorTextField.gridx = 6;
+		gbc_fragmentMassErrorTextField.gridy = 0;
+		panel_2.add(fragmentMassErrorTextField, gbc_fragmentMassErrorTextField);
+		
+		fragmentMassErrorTypeComboBox = new JComboBox<MassErrorType>(
+				new DefaultComboBoxModel<MassErrorType>(MassErrorType.values()));
+		fragmentMassErrorTypeComboBox.setPreferredSize(new Dimension(60, 20));
+		fragmentMassErrorTypeComboBox.setMinimumSize(new Dimension(60, 22));
+		GridBagConstraints gbc_fragmentMassErrorTypeComboBox = new GridBagConstraints();
+		gbc_fragmentMassErrorTypeComboBox.insets = new Insets(0, 0, 5, 0);
+		gbc_fragmentMassErrorTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_fragmentMassErrorTypeComboBox.gridx = 7;
+		gbc_fragmentMassErrorTypeComboBox.gridy = 0;
+		panel_2.add(fragmentMassErrorTypeComboBox, gbc_fragmentMassErrorTypeComboBox);
+		
+		JLabel lblNewLabel_11 = new JLabel("Must contain ");
+		GridBagConstraints gbc_lblNewLabel_11 = new GridBagConstraints();
+		gbc_lblNewLabel_11.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_11.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_11.gridx = 0;
+		gbc_lblNewLabel_11.gridy = 1;
+		panel_2.add(lblNewLabel_11, gbc_lblNewLabel_11);
+		
+		includeFragmentsComboBox = new JComboBox<IncludeSubset>(
+				new DefaultComboBoxModel<IncludeSubset>(IncludeSubset.values()));
+		GridBagConstraints gbc_includeFragmentsComboBox = new GridBagConstraints();
+		gbc_includeFragmentsComboBox.insets = new Insets(0, 0, 0, 5);
+		gbc_includeFragmentsComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_includeFragmentsComboBox.gridx = 1;
+		gbc_includeFragmentsComboBox.gridy = 1;
+		panel_2.add(includeFragmentsComboBox, gbc_includeFragmentsComboBox);
+		
+		JLabel  lblNewLabel_12 = new JLabel("fragments with intensity at least ");
+		GridBagConstraints gbc_lblNewLabel_12 = new GridBagConstraints();
+		gbc_lblNewLabel_12.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_12.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_12.gridx = 2;
+		gbc_lblNewLabel_12.gridy = 1;
+		panel_2.add(lblNewLabel_12, gbc_lblNewLabel_12);
+		
+		minFragmentIntensityTextField = new JFormattedTextField(wholeNumDecFormat);
+		GridBagConstraints gbc_minFragmentIntensityTextField = new GridBagConstraints();
+		gbc_minFragmentIntensityTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_minFragmentIntensityTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_minFragmentIntensityTextField.gridx = 3;
+		gbc_minFragmentIntensityTextField.gridy = 1;
+		panel_2.add(minFragmentIntensityTextField, gbc_minFragmentIntensityTextField);
+		
+		JLabel  lblNewLabel_13 = new JLabel("% of base peak");
+		GridBagConstraints gbc_lblNewLabel_13 = new GridBagConstraints();
+		gbc_lblNewLabel_13.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_13.gridwidth = 4;
+		gbc_lblNewLabel_13.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_13.gridx = 4;
+		gbc_lblNewLabel_13.gridy = 1;
+		panel_2.add(lblNewLabel_13, gbc_lblNewLabel_13);
+		
+		JPanel panel_3 = new JPanel();
+		panel_3.setBorder(new CompoundBorder(new TitledBorder(
+				new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
+						new Color(160, 160, 160)), "Mass difference filters", 
+				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
+				new EmptyBorder(10, 10, 10, 0)));
+		GridBagConstraints gbc_panel_3 = new GridBagConstraints();
+		gbc_panel_3.gridwidth = 9;
+		gbc_panel_3.insets = new Insets(0, 0, 5, 0);
+		gbc_panel_3.fill = GridBagConstraints.BOTH;
+		gbc_panel_3.gridx = 0;
+		gbc_panel_3.gridy = 7;
+		panel.add(panel_3, gbc_panel_3);
+		GridBagLayout gbl_panel_3 = new GridBagLayout();
+		gbl_panel_3.columnWidths = new int[]{0, 0, 159, 0, 0, 0, 0, 0};
+		gbl_panel_3.rowHeights = new int[]{0, 0, 0};
+		gbl_panel_3.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_3.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		panel_3.setLayout(gbl_panel_3);
+		
+		JLabel lblNewLabel_14 = new JLabel("Mass diff. list ");
+		GridBagConstraints gbc_lblNewLabel_14 = new GridBagConstraints();
+		gbc_lblNewLabel_14.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_14.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_14.gridx = 0;
+		gbc_lblNewLabel_14.gridy = 0;
+		panel_3.add(lblNewLabel_14, gbc_lblNewLabel_14);
+		
+		massDiffListTextField = new JTextField();
+		GridBagConstraints gbc_massDiffListTextField = new GridBagConstraints();
+		gbc_massDiffListTextField.gridwidth = 3;
+		gbc_massDiffListTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_massDiffListTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_massDiffListTextField.gridx = 1;
+		gbc_massDiffListTextField.gridy = 0;
+		panel_3.add(massDiffListTextField, gbc_massDiffListTextField);
+		massDiffListTextField.setColumns(10);
+		
+		JLabel lblNewLabel_15 = new JLabel("+/-");
+		GridBagConstraints gbc_lblNewLabel_15 = new GridBagConstraints();
+		gbc_lblNewLabel_15.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_15.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_15.gridx = 4;
+		gbc_lblNewLabel_15.gridy = 0;
+		panel_3.add(lblNewLabel_15, gbc_lblNewLabel_15);
+		
+		massDiffMassErrorTextField = new JFormattedTextField(twoDecFormat);
+		massDiffMassErrorTextField.setColumns(5);
+		GridBagConstraints gbc_massDiffMassErrorTextField = new GridBagConstraints();
+		gbc_massDiffMassErrorTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_massDiffMassErrorTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_massDiffMassErrorTextField.gridx = 5;
+		gbc_massDiffMassErrorTextField.gridy = 0;
+		panel_3.add(massDiffMassErrorTextField, gbc_massDiffMassErrorTextField);
+		
+		massDiffMassErrorTypeComboBox = new JComboBox<MassErrorType>(
+				new DefaultComboBoxModel<MassErrorType>(MassErrorType.values()));
+		massDiffMassErrorTypeComboBox.setPreferredSize(new Dimension(60, 20));
+		massDiffMassErrorTypeComboBox.setMinimumSize(new Dimension(60, 22));
+		GridBagConstraints gbc_massDiffMassErrorTypeComboBox = new GridBagConstraints();
+		gbc_massDiffMassErrorTypeComboBox.insets = new Insets(0, 0, 5, 0);
+		gbc_massDiffMassErrorTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_massDiffMassErrorTypeComboBox.gridx = 6;
+		gbc_massDiffMassErrorTypeComboBox.gridy = 0;
+		panel_3.add(massDiffMassErrorTypeComboBox, gbc_massDiffMassErrorTypeComboBox);
+		
+		JLabel lblNewLabel_16 = new JLabel("Must contain ");
+		GridBagConstraints gbc_lblNewLabel_16 = new GridBagConstraints();
+		gbc_lblNewLabel_16.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_16.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_16.gridx = 0;
+		gbc_lblNewLabel_16.gridy = 1;
+		panel_3.add(lblNewLabel_16, gbc_lblNewLabel_16);
+		
+		includeMassDiffsComboBox = new JComboBox<IncludeSubset>(
+				new DefaultComboBoxModel<IncludeSubset>(IncludeSubset.values()));
+		GridBagConstraints gbc_includeMassDiffsComboBox = new GridBagConstraints();
+		gbc_includeMassDiffsComboBox.insets = new Insets(0, 0, 0, 5);
+		gbc_includeMassDiffsComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_includeMassDiffsComboBox.gridx = 1;
+		gbc_includeMassDiffsComboBox.gridy = 1;
+		panel_3.add(includeMassDiffsComboBox, gbc_includeMassDiffsComboBox);
+		
+		JLabel lblNewLabel_17 = new JLabel("mass differences with fragment intensities at least ");
+		GridBagConstraints gbc_lblNewLabel_17 = new GridBagConstraints();
+		gbc_lblNewLabel_17.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_17.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_17.gridx = 2;
+		gbc_lblNewLabel_17.gridy = 1;
+		panel_3.add(lblNewLabel_17, gbc_lblNewLabel_17);
+		
+		minMassDiffFragmentIntensityTextField = new JFormattedTextField(wholeNumDecFormat);
+		GridBagConstraints gbc_minMassDiffFragmentIntensityTextField = new GridBagConstraints();
+		gbc_minMassDiffFragmentIntensityTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_minMassDiffFragmentIntensityTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_minMassDiffFragmentIntensityTextField.gridx = 3;
+		gbc_minMassDiffFragmentIntensityTextField.gridy = 1;
+		panel_3.add(minMassDiffFragmentIntensityTextField, gbc_minMassDiffFragmentIntensityTextField);
+		
+		JLabel lblNewLabel_18 = new JLabel("% of base peak");
+		GridBagConstraints gbc_lblNewLabel_18 = new GridBagConstraints();
+		gbc_lblNewLabel_18.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_18.gridwidth = 3;
+		gbc_lblNewLabel_18.gridx = 4;
+		gbc_lblNewLabel_18.gridy = 1;
+		panel_3.add(lblNewLabel_18, gbc_lblNewLabel_18);
 
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(
@@ -373,7 +611,7 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 		gbc_panel_1.insets = new Insets(0, 0, 5, 0);
 		gbc_panel_1.fill = GridBagConstraints.BOTH;
 		gbc_panel_1.gridx = 0;
-		gbc_panel_1.gridy = 7;
+		gbc_panel_1.gridy = 8;
 		panel.add(panel_1, gbc_panel_1);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[] { 0, 0, 0, 0 };
@@ -422,31 +660,31 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 		gbc_minScoreTextField.gridy = 1;
 		panel_1.add(minScoreTextField, gbc_minScoreTextField);
 
-		cancelButton = new JButton("Cancel");
+		JButton cancelButton = new JButton("Cancel");
 		GridBagConstraints gbc_cancelButton = new GridBagConstraints();
 		gbc_cancelButton.insets = new Insets(0, 0, 0, 5);
 		gbc_cancelButton.gridx = 0;
-		gbc_cancelButton.gridy = 8;
+		gbc_cancelButton.gridy = 9;
 		panel.add(cancelButton, gbc_cancelButton);
 
-		resetButton = new JButton("Clear filters");
+		JButton resetButton = new JButton("Clear filters");
 		resetButton.addActionListener(this);
 		resetButton.setActionCommand(RESET_COMMAND);
 		GridBagConstraints gbc_resetButton = new GridBagConstraints();
 		gbc_resetButton.anchor = GridBagConstraints.EAST;
 		gbc_resetButton.insets = new Insets(0, 0, 0, 5);
 		gbc_resetButton.gridx = 1;
-		gbc_resetButton.gridy = 8;
+		gbc_resetButton.gridy = 9;
 		panel.add(resetButton, gbc_resetButton);
 
-		filterButton = new JButton("Filter");
+		JButton filterButton = new JButton("Filter");
 		filterButton.addActionListener(listener);
 		filterButton.setActionCommand(MainActionCommands.FILTER_FEATURES_COMMAND.getName());
 		GridBagConstraints gbc_filterButton = new GridBagConstraints();
 		gbc_filterButton.gridwidth = 5;
 		gbc_filterButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_filterButton.gridx = 4;
-		gbc_filterButton.gridy = 8;
+		gbc_filterButton.gridy = 9;
 		panel.add(filterButton, gbc_filterButton);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(filterButton);
@@ -496,7 +734,16 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 		seMaxTextField.setText("");
 		seMinTextField.setText("");
 		targetMassTextField.setText("");
-		nameTextField.setText("");	
+		nameTextField.setText("");
+		fragmentMzListTextField.setText("");
+		fragmentMassErrorTextField.setText("");
+		massDiffListTextField.setText("");
+		massDiffMassErrorTextField.setText("");
+		precursorMassErrorTypeComboBox.setSelectedIndex(-1);
+		fragmentMassErrorTypeComboBox.setSelectedIndex(-1);
+		massDiffMassErrorTypeComboBox.setSelectedIndex(-1);
+		includeFragmentsComboBox.setSelectedIndex(-1);
+		includeMassDiffsComboBox.setSelectedIndex(-1);		
 	}
 
 	public String getFeatureNameSubstring() {
@@ -605,7 +852,7 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 				!massErrorTextField.getText().trim().isEmpty()) {
 			double mz = Double.parseDouble(targetMassTextField.getText().trim());
 			double error = Double.parseDouble(massErrorTextField.getText().trim());
-			MassErrorType eType =  (MassErrorType)massErrorTypeComboBox.getSelectedItem();
+			MassErrorType eType =  (MassErrorType)precursorMassErrorTypeComboBox.getSelectedItem();
 			return MsUtils.createMassRange(mz, error, eType);
 		}
 		else
@@ -703,7 +950,7 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 		if(mzErrorValue > 0)
 			massErrorTextField.setText(Double.toString(mzErrorValue));
 		
-		massErrorTypeComboBox.setSelectedItem(
+		precursorMassErrorTypeComboBox.setSelectedItem(
 				MassErrorType.getTypeByName(
 						preferences.get(MZ_ERROR_TYPE, MassErrorType.ppm.name())));
 		
@@ -738,17 +985,48 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 		double paMax = preferences.getDouble(PEAK_AREA_MAX, 0.0d);
 		if(paMax > 0)
 			peakAreaMaxTextField.setText(Double.toString(paMax));
+	
+		fragmentMzListTextField.setText(preferences.get(FRAGMENT_MZ_LIST, ""));
 		
-		double minScore = preferences.getDouble(MIN_SCORE, 0.0d);
-		if(minScore > 0)
-			minScoreTextField.setText(Double.toString(minScore));
+		double fragmentErrorValue = preferences.getDouble(FRAGMENT_MASS_ERROR, 0.0d);
+		if(fragmentErrorValue > 0)
+			fragmentMassErrorTextField.setText(Double.toString(fragmentErrorValue));
 		
+		fragmentMassErrorTypeComboBox.setSelectedItem(
+				MassErrorType.getTypeByName(
+						preferences.get(FRAGMENT_MASS_ERROR_TYPE, MassErrorType.ppm.name())));
+		includeFragmentsComboBox.setSelectedItem(
+				IncludeSubset.valueOf(
+						preferences.get(FRAGMENT_SUBSET, IncludeSubset.Any.name())));
+		double minFragIntensity = preferences.getDouble(FRAGMENT_MIN_INTENSITY, 0.0d);
+		if(minFragIntensity > 0)
+			minFragmentIntensityTextField.setText(Double.toString(minFragIntensity));
+		
+		massDiffListTextField.setText(preferences.get(MASS_DIFF_LIST, ""));
+		
+		double massDiffErrorValue = preferences.getDouble(MASS_DIFF_MASS_ERROR, 0.0d);
+		if(massDiffErrorValue > 0)
+			massDiffMassErrorTextField.setText(Double.toString(massDiffErrorValue));
+		
+		massDiffMassErrorTypeComboBox.setSelectedItem(
+				MassErrorType.getTypeByName(
+						preferences.get(MASS_DIFF_MASS_ERROR_TYPE, MassErrorType.ppm.name())));
+		includeMassDiffsComboBox.setSelectedItem(
+				IncludeSubset.valueOf(
+						preferences.get(MASS_DIFF_SUBSET, IncludeSubset.Any.name())));
+		double minMassDiffFragIntensity = preferences.getDouble(MASS_DIFF_MIN_INTENSITY, 0.0d);
+		if(minMassDiffFragIntensity > 0)
+			minMassDiffFragmentIntensityTextField.setText(Double.toString(minMassDiffFragIntensity));
+				
 		regularMatchCheckBox.setSelected(
 				preferences.getBoolean(INCLUDE_NORMAL_MATCH, false));
 		inSourceCheckBox.setSelected(
 				preferences.getBoolean(INCLUDE_IN_SOURCE_MATCH, false));
 		hybridMatchCheckBox.setSelected(
 				preferences.getBoolean(INCLUDE_HYBRID_MATCH, false));
+		double minScore = preferences.getDouble(MIN_SCORE, 0.0d);
+		if(minScore > 0)
+			minScoreTextField.setText(Double.toString(minScore));
 	}
 
 	@Override
@@ -779,8 +1057,8 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 
 		preferences.putDouble(MZ_ERROR_VALUE, mzErrorValue);
 		
-		if(massErrorTypeComboBox.getSelectedItem() != null)
-			preferences.put(MZ_ERROR_TYPE, ((MassErrorType)massErrorTypeComboBox.getSelectedItem()).name());
+		if(precursorMassErrorTypeComboBox.getSelectedItem() != null)
+			preferences.put(MZ_ERROR_TYPE, ((MassErrorType)precursorMassErrorTypeComboBox.getSelectedItem()).name());
 		
 		double rtMin = 0.0d;
 		if(!rtFromTextField.getText().trim().isEmpty())
@@ -822,17 +1100,62 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog implements ActionLi
 		if(!peakAreaMaxTextField.getText().trim().isEmpty())
 			paMax = Double.parseDouble(peakAreaMaxTextField.getText().trim());
 		
-		preferences.putDouble(PEAK_AREA_MAX, paMax);
+		preferences.putDouble(PEAK_AREA_MAX, paMax);		
 		
+		//	Fragments
+		preferences.put(FRAGMENT_MZ_LIST, fragmentMzListTextField.getText().trim());
+		
+		double fragmentErrorValue = 0.0d;
+		if(!fragmentMassErrorTextField.getText().trim().isEmpty())
+			fragmentErrorValue = Double.parseDouble(fragmentMassErrorTextField.getText().trim());
+		
+		preferences.putDouble(FRAGMENT_MASS_ERROR, fragmentErrorValue);	
+		
+		if(fragmentMassErrorTypeComboBox.getSelectedItem() != null)
+			preferences.put(FRAGMENT_MASS_ERROR_TYPE, 
+					((MassErrorType)fragmentMassErrorTypeComboBox.getSelectedItem()).name());
+		
+		if(includeFragmentsComboBox.getSelectedItem() != null)
+			preferences.put(FRAGMENT_SUBSET, 
+					((IncludeSubset)includeFragmentsComboBox.getSelectedItem()).name());
+		
+		double minFragIntensity = 0.0d;
+		if(!minFragmentIntensityTextField.getText().trim().isEmpty())
+			minFragIntensity = Double.parseDouble(minFragmentIntensityTextField.getText().trim());
+		
+		preferences.putDouble(FRAGMENT_MIN_INTENSITY, minFragIntensity);
+		
+		//	Mass diffs
+		preferences.put(MASS_DIFF_LIST, massDiffListTextField.getText().trim());
+		
+		double massDiffErrorValue = 0.0d;
+		if(!massDiffMassErrorTextField.getText().trim().isEmpty())
+			massDiffErrorValue = Double.parseDouble(massDiffMassErrorTextField.getText().trim());
+		
+		preferences.putDouble(MASS_DIFF_MASS_ERROR, massDiffErrorValue);	
+		
+		if(massDiffMassErrorTypeComboBox.getSelectedItem() != null)
+			preferences.put(MASS_DIFF_MASS_ERROR_TYPE, 
+					((MassErrorType)massDiffMassErrorTypeComboBox.getSelectedItem()).name());
+		
+		if(includeMassDiffsComboBox.getSelectedItem() != null)
+			preferences.put(MASS_DIFF_SUBSET, 
+					((IncludeSubset)includeMassDiffsComboBox.getSelectedItem()).name());
+		
+		double minMassDiffFragIntensity = 0.0d;
+		if(!minMassDiffFragmentIntensityTextField.getText().trim().isEmpty())
+			minMassDiffFragIntensity = Double.parseDouble(minMassDiffFragmentIntensityTextField.getText().trim());
+		
+		preferences.putDouble(MASS_DIFF_MIN_INTENSITY, minMassDiffFragIntensity);		
+		
+		preferences.putBoolean(INCLUDE_NORMAL_MATCH, regularMatchCheckBox.isSelected());
+		preferences.putBoolean(INCLUDE_IN_SOURCE_MATCH, inSourceCheckBox.isSelected());
+		preferences.putBoolean(INCLUDE_HYBRID_MATCH, hybridMatchCheckBox.isSelected());
 		double minScore = 0.0d;
 		if(!minScoreTextField.getText().trim().isEmpty())
 			minScore = Double.parseDouble(minScoreTextField.getText().trim());
 		
 		preferences.putDouble(MIN_SCORE, minScore);
-		
-		preferences.putBoolean(INCLUDE_NORMAL_MATCH, regularMatchCheckBox.isSelected());
-		preferences.putBoolean(INCLUDE_IN_SOURCE_MATCH, inSourceCheckBox.isSelected());
-		preferences.putBoolean(INCLUDE_HYBRID_MATCH, hybridMatchCheckBox.isSelected());
 	}
 }
 

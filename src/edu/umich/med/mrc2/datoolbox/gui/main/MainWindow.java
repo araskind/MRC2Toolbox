@@ -821,15 +821,7 @@ public class MainWindow extends JFrame
 		chooser.setAcceptAllFileFilterUsed(false);
 		chooser.setMultiSelectionEnabled(false);
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
-
-//		FileNameExtensionFilter projectFileFilter = new FileNameExtensionFilter("Project files",
-//				MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION);
-//		chooser.setFileFilter(projectFileFilter);
-//
-//		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-//			inputFile = chooser.getSelectedFile();
-		
+		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);	
 		File projectFile = null;
 		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
 			

@@ -22,9 +22,13 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
 
 import edu.umich.med.mrc2.datoolbox.data.InstrumentPlatform;
 import edu.umich.med.mrc2.datoolbox.data.MassAnalyzerType;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 
 public class LIMSInstrument implements Serializable, Comparable<LIMSInstrument>{
 
@@ -41,6 +45,7 @@ public class LIMSInstrument implements Serializable, Comparable<LIMSInstrument>{
 	private String serialNumber;
 	private ChromatographicSeparationType chromatographicSeparationType;
 	private InstrumentPlatform instrumentPlatform;
+	private Map<String,String>properties;
 
 	public LIMSInstrument(
 			String instrumentId,
@@ -60,6 +65,8 @@ public class LIMSInstrument implements Serializable, Comparable<LIMSInstrument>{
 		this.manufacturer = manufacturer;
 		this.model = model;
 		this.serialNumber = serialNumber;
+		
+		properties = new TreeMap<String,String>();
 	}
 	
 	public LIMSInstrument(
@@ -75,6 +82,22 @@ public class LIMSInstrument implements Serializable, Comparable<LIMSInstrument>{
 		this.description = description;
 		this.massAnalyzerType = massAnalyzerType;
 		this.chromatographicSeparationType = chromatographicSeparationType;
+		this.manufacturer = manufacturer;
+		this.model = model;
+		this.serialNumber = serialNumber;
+		
+		properties = new TreeMap<String,String>();
+	}
+
+	public LIMSInstrument(
+			String instrumentName, 
+			String manufacturer,
+			String model, 
+			String serialNumber) {
+		super();
+		this.instrumentId = DataPrefix.INSTRUMENT.getName() +
+				UUID.randomUUID().toString().substring(0, 12);
+		this.instrumentName = instrumentName;
 		this.manufacturer = manufacturer;
 		this.model = model;
 		this.serialNumber = serialNumber;
@@ -236,4 +259,20 @@ public class LIMSInstrument implements Serializable, Comparable<LIMSInstrument>{
 	public void setInstrumentPlatform(InstrumentPlatform instrumentPlatform) {
 		this.instrumentPlatform = instrumentPlatform;
 	}
+
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+	
+	public void addProperty(String name, String value) {
+		properties.put(name, value);
+	}
+	
+	public String getProperty(String name) {
+		return properties.get(name);
+	}
 }
+
+
+
+

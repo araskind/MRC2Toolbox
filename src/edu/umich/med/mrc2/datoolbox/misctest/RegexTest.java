@@ -145,6 +145,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDStudy;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDWorkflow;
@@ -191,6 +192,7 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 import edu.umich.med.mrc2.datoolbox.utils.WebUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentAcquisitionMethodReportParser;
+import edu.umich.med.mrc2.datoolbox.utils.acqmethod.AgilentDevicesParser;
 import edu.umich.med.mrc2.datoolbox.utils.filter.SavitzkyGolayFilter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.sgfilter.SGFilter;
 import net.sf.jniinchi.INCHI_RET;
@@ -218,10 +220,40 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			validateEntropyCalc();
+			downloadAllAcqMethods();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void downloadAllAcqMethods() {
+		File destination = new File("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20220104_2");
+		Collection<DataAcquisitionMethod> list = null;
+		try {
+			list = AcquisitionMethodUtils.getAcquisitionMethodList();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(DataAcquisitionMethod method : list) {
+			
+			if (method.getIonizationType() != null && method.getIonizationType().getId().equals("ESI")) {
+				try {
+					AcquisitionMethodUtils.getAcquisitionMethodFile(method, destination);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	private static void deviceParserTest() {
+		
+		File deviceFile = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX00602 (L reuteri lipids)\\A003 - Untargeted\\"
+				+ "Raw data\\POS\\20160819-EX00602-A003-IN0002-S00023699-P.d\\AcqData\\Devices.xml");
+		AgilentDevicesParser.parseDevicesFile(deviceFile);
 	}
 	
 	private static void validateEntropyCalc() {

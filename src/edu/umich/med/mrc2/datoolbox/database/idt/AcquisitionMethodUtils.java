@@ -25,6 +25,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -248,17 +249,22 @@ public class AcquisitionMethodUtils {
 		ps.setString(1, selectedMethod.getId());
 		ResultSet rs = ps.executeQuery();
 		File zipFile = Paths.get(destinationFolder.getAbsolutePath(), selectedMethod.getName() + ".zip").toFile();
-		while(rs.next()) {
-		   BufferedInputStream is = new BufferedInputStream(rs.getBinaryStream("METHOD_CONTAINER"));
-		   FileOutputStream fos = new FileOutputStream(zipFile);
-		   byte[] buffer = new byte[2048];
-		   int r = 0;
-		   while((r = is.read(buffer))!=-1)
-		      fos.write(buffer, 0, r);
-
-		   fos.flush();
-		   fos.close();
-		   is.close();
+		while (rs.next()) {
+			BufferedInputStream is = new BufferedInputStream(rs.getBinaryStream("METHOD_CONTAINER"));
+			FileOutputStream fos = new FileOutputStream(zipFile);
+			byte[] buffer = new byte[2048];
+			int r = 0;
+			try {
+				while ((r = is.read(buffer)) != -1) {
+					fos.write(buffer, 0, r);
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			fos.flush();
+			fos.close();
+			is.close();
 		}
 		rs.close();
 		ps.close();
