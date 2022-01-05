@@ -26,9 +26,11 @@ import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,6 +70,7 @@ import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
+import edu.umich.med.mrc2.datoolbox.data.enums.IncludeSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
@@ -112,6 +115,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.ms1.ReferenceMsOneFeaturePopupMe
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSLibraryEntryPropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockablePepSearchParameterListingPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.FilterTrackerMSMSFeaturesDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.MSMSFilterParameters;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.MsMsFeaturePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.SiriusDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.nistms.NISTMSSerchSetupDialog;
@@ -167,6 +172,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ExtendedMSPExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataLoadForInjectionsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryIndexingTask;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import umich.ms.datatypes.LCMSData;
 
@@ -570,51 +576,54 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			MessageDialog.showErrorMsg(
 					StringUtils.join(errors, "\n"), filterTrackerFeaturesDialog);
 			return;
-		}		
-		Collection<MsFeatureInfoBundle>filtered = filterMSMSFeatureTable(
-				filterTrackerFeaturesDialog.getMzRange(),
-		filterTrackerFeaturesDialog.getRtRange(),
-		filterTrackerFeaturesDialog.getFeatureNameSubstring(),
-		filterTrackerFeaturesDialog.doSearchAllIds(),
-		filterTrackerFeaturesDialog.getIdStatusSubset(),
-		filterTrackerFeaturesDialog.getEntropyRange(),
-		filterTrackerFeaturesDialog.getPeakAreaRange(),
-		filterTrackerFeaturesDialog.getMSMSSearchTypes(),
-		filterTrackerFeaturesDialog.getMinimalMSMSScore());
-		safelyLoadMSMSFeatures(filtered);	
-		filterTrackerFeaturesDialog.dispose();
+		}	
+		FilterMSMSFeaturesTask task = new FilterMSMSFeaturesTask();
+		idp = new IndeterminateProgressDialog("Filtering MSMS features ...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
+	class FilterMSMSFeaturesTask extends LongUpdateTask {
+
+		public FilterMSMSFeaturesTask() {
+
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			MSMSFilterParameters filterParameters = 
+					filterTrackerFeaturesDialog.getMSMSFilterParameters();
+			filterTrackerFeaturesDialog.dispose();
+			Collection<MsFeatureInfoBundle>filtered = 
+					filterMSMSFeatureTable(filterParameters);
+			safelyLoadMSMSFeatures(filtered);			
+			return null;
+		}
 	}
 
-	private Collection<MsFeatureInfoBundle> filterMSMSFeatureTable(
-			Range mzRange, 
-			Range rtRange, 
-			String featureNameSubstring, 
-			boolean doSearchAllIds,
-			FeatureSubsetByIdentification idStatusSubset, 
-			Range entropyRange, 
-			Range peakAreaRange,
-			Collection<HiResSearchOption>msmsSearchTypes, 
-			double minimalMSMSScore) {
+	private Collection<MsFeatureInfoBundle> filterMSMSFeatureTable(MSMSFilterParameters filterParameters) {
 
 		Collection<MsFeatureInfoBundle>features = msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		features = features.stream().
 			filter(f -> f.getMsFeature().getSpectrum() != null).
 			filter(f -> f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null).
 			collect(Collectors.toList());
-		if(idStatusSubset.equals(FeatureSubsetByIdentification.IDENTIFIED_ONLY)) {
+		if(filterParameters.getIdStatusSubset().equals(FeatureSubsetByIdentification.IDENTIFIED_ONLY)) {
 			features = features.stream().
 					filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
 					collect(Collectors.toList());
 			if(features.isEmpty())
 				return features;
 		}
-		if(idStatusSubset.equals(FeatureSubsetByIdentification.UNKNOWN_ONLY)) {
+		if(filterParameters.getIdStatusSubset().equals(FeatureSubsetByIdentification.UNKNOWN_ONLY)) {
 			features = features.stream().
 					filter(f -> f.getMsFeature().getPrimaryIdentity() == null).
 					collect(Collectors.toList());
 			if(features.isEmpty())
 				return features;
 		}
+		Range mzRange = filterParameters.getMzRange();
 		if(mzRange != null) {
 			features = features.stream().
 				filter(f -> f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent() != null).
@@ -623,6 +632,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			if(features.isEmpty())
 				return features;
 		}
+		Range rtRange = filterParameters.getRtRange();
 		if(rtRange != null) {
 			features = features.stream().
 					filter(f -> rtRange.contains(f.getRetentionTime())).
@@ -630,9 +640,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			if(features.isEmpty())
 				return features;
 		}		
-		if(featureNameSubstring != null) {
-			String upName = featureNameSubstring.toUpperCase();		
-			if(doSearchAllIds) {
+		if(filterParameters.getFeatureNameSubstring() != null) {
+			String upName = filterParameters.getFeatureNameSubstring().toUpperCase();		
+			if(filterParameters.isDoSearchAllIds()) {
 				features = features.stream().
 						filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
 						filter(f -> f.getMsFeature().getIdentifications().stream().
@@ -648,6 +658,38 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			if(features.isEmpty())
 				return features;
 		}
+		Range precursorPurityRange = filterParameters.getPrecursorPurityRange();
+		if(filterParameters.getPrecursorPurityRange() != null) {
+			features = features.stream().
+					filter(f -> precursorPurityRange.contains(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParentIonPurity())).
+					collect(Collectors.toList());			
+			if(features.isEmpty())
+				return features;
+		}		
+		//	Fragment masses
+		Collection<Range> fragMzRanges = filterParameters.getFragmentMZRangeList();
+		if(fragMzRanges != null && !fragMzRanges.isEmpty()) {
+			
+			features = filterFeaturesByMSMSFragments(
+					features, fragMzRanges,
+					filterParameters.getFragmentsIncludeSubset(),
+					filterParameters.getFragmentIntensityCutoff());
+			if(features.isEmpty())
+				return features;
+		}		
+		//	Mass differences
+		Collection<Range> massDiffRanges = filterParameters.getMassDifferencesRangeList();
+		if(massDiffRanges != null && !massDiffRanges.isEmpty()) {
+			
+			features = filterFeaturesByMSMSFragmentMassDifferences(
+					features, 
+					massDiffRanges,
+					filterParameters.getMassDiffsIncludeSubset(),
+					filterParameters.getMassDiffsIntensityCutoff());
+			if(features.isEmpty())
+				return features;
+		}		
+		Range entropyRange = filterParameters.getEntropyRange();
 		if(entropyRange != null) {
 			features = features.stream().
 					filter(f -> entropyRange.contains(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getEntropy())).
@@ -655,6 +697,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			if(features.isEmpty())
 				return features;
 		}
+		Range peakAreaRange = filterParameters.getPeakAreaRange();
 		if(peakAreaRange != null) {
 			features = features.stream().
 					filter(f -> peakAreaRange.contains(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getTotalIntensity())).
@@ -662,6 +705,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			if(features.isEmpty())
 				return features;
 		}
+		double minimalMSMSScore = filterParameters.getMinimalMSMSScore();
 		if(minimalMSMSScore > 0.0d) {
 			
 			features = features.stream().
@@ -671,7 +715,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 					collect(Collectors.toList());
 			if(features.isEmpty())
 				return features;
-		}	
+		}
+		Collection<HiResSearchOption> msmsSearchTypes = filterParameters.getMsmsSearchTypes();
 		if(!msmsSearchTypes.isEmpty()) {
 			
 			if(!msmsSearchTypes.contains(HiResSearchOption.z)) {
@@ -704,6 +749,118 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			}
 		}
 		return features;
+	}
+	
+	private Collection<MsFeatureInfoBundle>filterFeaturesByMSMSFragments(
+			Collection<MsFeatureInfoBundle>inputFeatures,
+			Collection<Range> fragMzRanges,
+			IncludeSubset fragmentsIncludeSubset,
+			double fragIntensityCutoff){
+		
+		List<MsFeatureInfoBundle> msmsFeatures = inputFeatures.stream().
+			filter(b -> b.getMsFeature().getSpectrum() != null).
+			filter(b -> b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null).
+			collect(Collectors.toList());
+		Collection<MsFeatureInfoBundle>filtered = new ArrayList<MsFeatureInfoBundle>();
+		Map<Range,Boolean>foundRanges = new HashMap<Range,Boolean>();
+		for(MsFeatureInfoBundle b : msmsFeatures) {
+			
+			Collection<MsPoint> msms = b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getSpectrum();
+			MsPoint[] msmsNorm = MsUtils.normalizeAndSortMsPattern(msms, 1.0d);
+			if(fragmentsIncludeSubset.equals(IncludeSubset.Any)) {
+				
+				boolean fragFound = false;
+				for(Range mzRange : fragMzRanges) {
+					
+					for(MsPoint p : msmsNorm) {
+						
+						if(mzRange.contains(p.getMz()) && p.getIntensity() > fragIntensityCutoff) {
+							
+							filtered.add(b);
+							fragFound = true;
+							break;
+						}
+					}
+					if(fragFound)
+						break;
+				}
+			}
+			else {
+				foundRanges.clear();
+				for(Range mzRange : fragMzRanges)
+					foundRanges.put(mzRange, Boolean.FALSE);
+				
+				for(Range mzRange : fragMzRanges) {
+					
+					for(MsPoint p : msmsNorm) {
+						
+						if(mzRange.contains(p.getMz()) && p.getIntensity() > fragIntensityCutoff) {							
+							foundRanges.put(mzRange, Boolean.TRUE);
+							break;
+						}					
+					}
+				}
+				if(!foundRanges.values().contains(Boolean.FALSE))
+					filtered.add(b);
+			}		
+		}
+		return filtered;	
+	}
+	
+	private Collection<MsFeatureInfoBundle>filterFeaturesByMSMSFragmentMassDifferences(
+			Collection<MsFeatureInfoBundle>inputFeatures,
+			Collection<Range> massDiffRanges,
+			IncludeSubset massDiffIncludeSubset,
+			double massDiffIntensityCutoff){
+		
+		List<MsFeatureInfoBundle> msmsFeatures = inputFeatures.stream().
+				filter(b -> b.getMsFeature().getSpectrum() != null).
+				filter(b -> b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null).
+				collect(Collectors.toList());
+		Collection<MsFeatureInfoBundle>filtered = new ArrayList<MsFeatureInfoBundle>();
+		Map<Range,Boolean>foundRanges = new HashMap<Range,Boolean>();
+		for(MsFeatureInfoBundle b : msmsFeatures) {
+			
+			Collection<MsPoint> msms = b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getSpectrum();
+			Collection<Double>massDiffs = MsUtils.getMassDifferences(msms, massDiffIntensityCutoff);			
+			if(massDiffIncludeSubset.equals(IncludeSubset.Any)) {
+				
+				boolean mdFound = false;
+				for(Range mzRange : massDiffRanges) {
+					
+					for(Double md : massDiffs) {
+						
+						if(mzRange.contains(md)) {
+							
+							filtered.add(b);
+							mdFound = true;
+							break;
+						}
+					}
+					if(mdFound)
+						break;
+				}
+			}
+			else {
+				foundRanges.clear();
+				for(Range mzRange : massDiffRanges)
+					foundRanges.put(mzRange, Boolean.FALSE);
+				
+				for(Range mzRange : massDiffRanges) {
+					
+					for(Double md : massDiffs) {
+						
+						if(mzRange.contains(md)) {							
+							foundRanges.put(mzRange, Boolean.TRUE);
+							break;
+						}					
+					}
+				}
+				if(!foundRanges.values().contains(Boolean.FALSE))
+					filtered.add(b);
+			}
+		}
+		return filtered;		
 	}
 
 	private void setupTopMSMSHitsReassignment() {
@@ -852,22 +1009,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		idTrackerDataSearchDialog.setVisible(true);
 	}
 	
-	class ShowTrackerSearchDialogTask extends LongUpdateTask {
 
-		public ShowTrackerSearchDialogTask() {
-
-		}
-
-		@Override
-		public Void doInBackground() {
-
-			idTrackerDataSearchDialog = new IDTrackerDataSearchDialog(IDWorkbenchPanel.this);
-			idTrackerDataSearchDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
-			idp.dispose();
-			idTrackerDataSearchDialog.setVisible(true);
-			return null;
-		}
-	}
 
 	private void showPepSearchSetupDiaog(boolean runOffline) {
 

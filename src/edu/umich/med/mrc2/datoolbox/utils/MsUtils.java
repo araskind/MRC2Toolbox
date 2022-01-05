@@ -1115,6 +1115,25 @@ public class MsUtils {
 		return normalizeAndSortMsPattern(pattern, 999.0d);
 	}
 	
+	public static Collection<Double> getMassDifferences(Collection<MsPoint>pattern, double relativeIntensityCutoff) {
+		
+		MsPoint[]patternNorm =  normalizeAndSortMsPattern(pattern, 1.0d);
+		MsPoint[]filtered = Arrays.asList(patternNorm).stream().
+			filter(p -> p.getIntensity() > relativeIntensityCutoff).
+			sorted(new MsDataPointComparator(SortProperty.MZ)).
+			toArray(size -> new MsPoint[size]);		
+		Collection<Double>massDiffs = new ArrayList<Double>();
+		if(filtered.length < 2)
+			return massDiffs;
+		
+		for(int i=0; i<filtered.length-1; i++) {
+			
+			for(int j=i+1; j<filtered.length; j++)				
+				massDiffs.add(filtered[j].getMz() - filtered[i].getMz());			
+		}	
+		return massDiffs;
+	}
+	
 	public static Double calculateIntensityStandardDeviationForNormalizedSpectrum(Collection<MsPoint>pattern, double max) {
 		
 		MsPoint[]normSpectrum =  normalizeAndSortMsPattern(pattern, max);
