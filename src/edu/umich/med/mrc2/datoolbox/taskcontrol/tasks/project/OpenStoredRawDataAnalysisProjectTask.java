@@ -47,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
@@ -196,6 +197,10 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				projectFile, 
 				dateCreated, 
 				lastModified);
+		
+		String instrumentId = projectElement.getAttributeValue(ProjectFields.Instrument.name()); 
+		if(instrumentId != null)
+			project.setInstrument(IDTDataCash.getInstrumentById(instrumentId)); 
 		
 		String compoundIdList = 
 				projectElement.getChild(ProjectFields.UniqueCIDList.name()).getText();

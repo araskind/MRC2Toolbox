@@ -127,6 +127,11 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				projectToSave.getName());
 		projectRoot.setAttribute(ProjectFields.Description.name(), 
 				projectToSave.getDescription());
+		
+		if(projectToSave.getInstrument() != null)
+			projectRoot.setAttribute(ProjectFields.Instrument.name(), 
+					projectToSave.getInstrument().getInstrumentId());
+			
 		projectRoot.setAttribute(ProjectFields.ProjectFile.name(), 
 				projectToSave.getProjectFile().getAbsolutePath());
 		projectRoot.setAttribute(ProjectFields.ProjectDir.name(), 

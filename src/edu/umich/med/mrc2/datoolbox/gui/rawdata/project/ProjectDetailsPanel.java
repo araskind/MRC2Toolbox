@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
@@ -36,9 +37,11 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.instrument.InstrumentSelectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 
-public class ProjectDetailsPanel extends JPanel  {
+public class ProjectDetailsPanel extends JPanel implements ActionListener {
 	
 	/**
 	 * 
@@ -47,14 +50,17 @@ public class ProjectDetailsPanel extends JPanel  {
 	private JTextField projectNameTextField;
 	private JTextArea descriptionTextArea;
 	private JTextField projectLocationTextField;
+	private JTextField instrumentTextField;
+	private InstrumentSelectionDialog instrumentSelectionDialog;
+	private LIMSInstrument instrument;
 	
 	public ProjectDetailsPanel(ActionListener listener) {
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gridBagLayout.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		setLayout(gridBagLayout);
 		
 		JLabel lblNewLabel = new JLabel("Name");
@@ -98,13 +104,41 @@ public class ProjectDetailsPanel extends JPanel  {
 		gbc_descriptionTextArea.gridy = 3;
 		add(descriptionTextArea, gbc_descriptionTextArea);
 		
+		JLabel lblNewLabel_2 = new JLabel("Instrument");
+		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+		gbc_lblNewLabel_2.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_2.gridx = 0;
+		gbc_lblNewLabel_2.gridy = 4;
+		add(lblNewLabel_2, gbc_lblNewLabel_2);
+		
+		instrumentTextField = new JTextField();
+		instrumentTextField.setEditable(false);
+		GridBagConstraints gbc_instrumentTextField = new GridBagConstraints();
+		gbc_instrumentTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_instrumentTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_instrumentTextField.gridx = 0;
+		gbc_instrumentTextField.gridy = 5;
+		add(instrumentTextField, gbc_instrumentTextField);
+		instrumentTextField.setColumns(10);
+		
+		JButton selectInstrumentButton = new JButton("Select");
+		
+		selectInstrumentButton.addActionListener(this);
+		GridBagConstraints gbc_selectInstrumentButton = new GridBagConstraints();
+		gbc_selectInstrumentButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_selectInstrumentButton.insets = new Insets(0, 0, 5, 0);
+		gbc_selectInstrumentButton.gridx = 1;
+		gbc_selectInstrumentButton.gridy = 5;
+		add(selectInstrumentButton, gbc_selectInstrumentButton);
+		
 		JLabel locLabel = new JLabel("Location");
 		GridBagConstraints gbc_locLabel = new GridBagConstraints();
 		gbc_locLabel.gridwidth = 2;
 		gbc_locLabel.insets = new Insets(0, 0, 5, 0);
 		gbc_locLabel.anchor = GridBagConstraints.WEST;
 		gbc_locLabel.gridx = 0;
-		gbc_locLabel.gridy = 4;
+		gbc_locLabel.gridy = 6;
 		add(locLabel, gbc_locLabel);
 		
 		projectLocationTextField = new JTextField();
@@ -112,7 +146,7 @@ public class ProjectDetailsPanel extends JPanel  {
 		gbc_projectLocationTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_projectLocationTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_projectLocationTextField.gridx = 0;
-		gbc_projectLocationTextField.gridy = 5;
+		gbc_projectLocationTextField.gridy = 7;
 		add(projectLocationTextField, gbc_projectLocationTextField);
 		projectLocationTextField.setColumns(10);
 		
@@ -121,7 +155,7 @@ public class ProjectDetailsPanel extends JPanel  {
 		btnNewButton.addActionListener(listener);
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
 		gbc_btnNewButton.gridx = 1;
-		gbc_btnNewButton.gridy = 5;
+		gbc_btnNewButton.gridy = 7;
 		add(btnNewButton, gbc_btnNewButton);
 	}
 	
@@ -139,6 +173,29 @@ public class ProjectDetailsPanel extends JPanel  {
 	
 	public String getProjectLocationPath() {
 		return projectLocationTextField.getText().trim();
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if(e.getActionCommand().equals(MainActionCommands.SELECT_INSTRUMENT_DIALOG_COMMAND.getName())) {
+			instrumentSelectionDialog = new InstrumentSelectionDialog(this);
+			instrumentSelectionDialog.setLocationRelativeTo(this);
+			instrumentSelectionDialog.setVisible(true);
+		}
+		if(e.getActionCommand().equals(MainActionCommands.SELECT_INSTRUMENT_COMMAND.getName())) {
+			
+			instrument = instrumentSelectionDialog.getSelectedInstrument();
+			if(instrument != null) {
+				instrumentTextField.setText(instrument.toString() + "; " + 
+						instrument.getManufacturer() + " " + instrument.getModel());
+				instrumentSelectionDialog.dispose();
+			}
+		}
+	}
+
+	public LIMSInstrument getInstrument() {
+		return instrument;
 	}
 }
 

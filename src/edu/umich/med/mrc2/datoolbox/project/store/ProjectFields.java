@@ -39,5 +39,6 @@ public enum ProjectFields {
 	UniqueSampleIdList,
 	FeatureChromatogramList,	
 	FeatureCollectionList,
+	Instrument,
 	;
 }

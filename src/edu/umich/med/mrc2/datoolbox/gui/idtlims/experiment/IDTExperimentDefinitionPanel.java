@@ -26,9 +26,12 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,12 +41,15 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.instrument.InstrumentSelectionDialog;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class IDTExperimentDefinitionPanel extends JPanel {
+public class IDTExperimentDefinitionPanel extends JPanel implements ActionListener {
 
 	/**
 	 * 
@@ -51,6 +57,7 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 	private static final long serialVersionUID = 4115441450930108518L;
 	
 	private LIMSExperiment experiment;
+	private LIMSInstrument instrument;
 	private JLabel expIdValueLabel;
 	private JLabel startDateLabel;
 	private JTextArea descriptionTextArea;
@@ -59,7 +66,10 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 	private JLabel contactDataLabel;
 	private JTextField experimentNameTextField;
 	private JComboBox projectComboBox;
+	private JTextField instrumentTextField;	
+	private InstrumentSelectionDialog instrumentSelectionDialog;
 
+	@SuppressWarnings("unchecked")
 	public IDTExperimentDefinitionPanel(LIMSExperiment experiment) {
 		super();
 
@@ -68,9 +78,9 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
-		gbl_dataPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_dataPanel.columnWeights = new double[] { 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE };
-		gbl_dataPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+		gbl_dataPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_dataPanel.columnWeights = new double[] { 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE };
+		gbl_dataPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0,
 				Double.MIN_VALUE };
 		setLayout(gbl_dataPanel);
 
@@ -142,14 +152,45 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		gbc_lblName.gridy = 1;
 		add(lblName, gbc_lblName);
 
-		projectComboBox = new JComboBox(new SortedComboBoxModel<LIMSProject>(IDTDataCash.getProjects()));
+		projectComboBox = new JComboBox(
+				new SortedComboBoxModel<LIMSProject>(IDTDataCash.getProjects()));
 		GridBagConstraints gbc_projectComboBox = new GridBagConstraints();
 		gbc_projectComboBox.gridwidth = 3;
-		gbc_projectComboBox.insets = new Insets(0, 0, 5, 5);
+		gbc_projectComboBox.insets = new Insets(0, 0, 5, 0);
 		gbc_projectComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_projectComboBox.gridx = 1;
 		gbc_projectComboBox.gridy = 2;
 		add(projectComboBox, gbc_projectComboBox);
+		
+		JLabel lblInstrument = new JLabel("Instrument");
+		lblInstrument.setForeground(Color.BLUE);
+		lblInstrument.setFont(new Font("Tahoma", Font.BOLD, 11));
+		GridBagConstraints gbc_lblInstrument = new GridBagConstraints();
+		gbc_lblInstrument.anchor = GridBagConstraints.EAST;
+		gbc_lblInstrument.insets = new Insets(0, 0, 5, 5);
+		gbc_lblInstrument.gridx = 0;
+		gbc_lblInstrument.gridy = 3;
+		add(lblInstrument, gbc_lblInstrument);
+		
+		instrumentTextField = new JTextField();
+		instrumentTextField.setEditable(false);
+		GridBagConstraints gbc_instrumentTextField = new GridBagConstraints();
+		gbc_instrumentTextField.gridwidth = 2;
+		gbc_instrumentTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_instrumentTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_instrumentTextField.gridx = 1;
+		gbc_instrumentTextField.gridy = 3;
+		add(instrumentTextField, gbc_instrumentTextField);
+		instrumentTextField.setColumns(10);
+		
+		JButton instrumentSelectButton = new JButton("Select");
+		instrumentSelectButton.setActionCommand(MainActionCommands.SELECT_INSTRUMENT_DIALOG_COMMAND.getName());
+		instrumentSelectButton.addActionListener(this);
+		GridBagConstraints gbc_instrumentSelectButton = new GridBagConstraints();
+		gbc_instrumentSelectButton.insets = new Insets(0, 0, 5, 0);
+		gbc_instrumentSelectButton.gridx = 3;
+		gbc_instrumentSelectButton.gridy = 3;
+		add(instrumentSelectButton, gbc_instrumentSelectButton);
 
 		JLabel lblDescription = new JLabel("Description");
 		lblDescription.setForeground(Color.BLUE);
@@ -158,7 +199,7 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		gbc_lblDescription.anchor = GridBagConstraints.NORTHWEST;
 		gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
 		gbc_lblDescription.gridx = 0;
-		gbc_lblDescription.gridy = 3;
+		gbc_lblDescription.gridy = 4;
 		add(lblDescription, gbc_lblDescription);
 
 		descriptionTextArea = new JTextArea();
@@ -173,7 +214,7 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		gbc_scrollPane.gridwidth = 4;
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 4;
+		gbc_scrollPane.gridy = 5;
 		add(scrollPane, gbc_scrollPane);
 
 		JLabel lblNotes = new JLabel("Notes");
@@ -183,7 +224,7 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		gbc_lblNotes.anchor = GridBagConstraints.NORTHWEST;
 		gbc_lblNotes.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNotes.gridx = 0;
-		gbc_lblNotes.gridy = 5;
+		gbc_lblNotes.gridy = 6;
 		add(lblNotes, gbc_lblNotes);
 
 		notesTextArea = new JTextArea();
@@ -198,7 +239,7 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		gbc_scrollPane_1.gridwidth = 4;
 		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane_1.gridx = 0;
-		gbc_scrollPane_1.gridy = 6;
+		gbc_scrollPane_1.gridy = 7;
 		add(scrollPane_1, gbc_scrollPane_1);
 
 		JLabel lblClient = new JLabel("Organization");
@@ -208,7 +249,7 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		gbc_lblClient.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblClient.insets = new Insets(0, 0, 5, 5);
 		gbc_lblClient.gridx = 0;
-		gbc_lblClient.gridy = 7;
+		gbc_lblClient.gridy = 8;
 		add(lblClient, gbc_lblClient);
 
 		organizationDataLabel = new JLabel("");
@@ -217,7 +258,7 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		gbc_clientDataLabel.gridwidth = 3;
 		gbc_clientDataLabel.insets = new Insets(0, 0, 5, 0);
 		gbc_clientDataLabel.gridx = 1;
-		gbc_clientDataLabel.gridy = 7;
+		gbc_clientDataLabel.gridy = 8;
 		add(organizationDataLabel, gbc_clientDataLabel);
 
 		JLabel lblContactPerson = new JLabel("Contact person");
@@ -227,7 +268,7 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		gbc_lblContactPerson.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblContactPerson.insets = new Insets(0, 0, 0, 5);
 		gbc_lblContactPerson.gridx = 0;
-		gbc_lblContactPerson.gridy = 8;
+		gbc_lblContactPerson.gridy = 9;
 		add(lblContactPerson, gbc_lblContactPerson);
 
 		contactDataLabel = new JLabel("");
@@ -235,7 +276,7 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		gbc_contactDataLabel.gridwidth = 3;
 		gbc_contactDataLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_contactDataLabel.gridx = 1;
-		gbc_contactDataLabel.gridy = 8;
+		gbc_contactDataLabel.gridy = 9;
 		add(contactDataLabel, gbc_contactDataLabel);
 		
 		loadExperimentData();
@@ -299,7 +340,33 @@ public class IDTExperimentDefinitionPanel extends JPanel {
 		if (getExperimentProject() == null)
 			errors.add("Experiment parent project should be specified.");
 		
+		if (getInstrument() == null)
+			errors.add("Instrument should be specified.");
+		
 		return errors;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if(e.getActionCommand().equals(MainActionCommands.SELECT_INSTRUMENT_DIALOG_COMMAND.getName())) {
+			instrumentSelectionDialog = new InstrumentSelectionDialog(this);
+			instrumentSelectionDialog.setLocationRelativeTo(this);
+			instrumentSelectionDialog.setVisible(true);
+		}
+		if(e.getActionCommand().equals(MainActionCommands.SELECT_INSTRUMENT_COMMAND.getName())) {
+			
+			instrument = instrumentSelectionDialog.getSelectedInstrument();
+			if(instrument != null) {
+				instrumentTextField.setText(instrument.toString() + "; " + 
+						instrument.getManufacturer() + " " + instrument.getModel());
+				instrumentSelectionDialog.dispose();
+			}
+		}
+	}
+
+	public LIMSInstrument getInstrument() {
+		return instrument;
 	}
 }
 

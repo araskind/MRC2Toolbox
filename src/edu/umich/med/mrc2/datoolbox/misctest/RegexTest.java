@@ -226,6 +226,14 @@ public class RegexTest {
 		}
 	}
 	
+	private static void extractInstrumentData() {
+		
+		File[] methodDirs = new File("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20220104").listFiles(File::isDirectory);
+		for(File methodDir : methodDirs) {
+			
+		}
+	}
+	
 	private static void downloadAllAcqMethods() {
 		File destination = new File("E:\\DataAnalysis\\METHODS\\Acquisition\\Uploaded\\AS_OF_20220104_2");
 		Collection<DataAcquisitionMethod> list = null;

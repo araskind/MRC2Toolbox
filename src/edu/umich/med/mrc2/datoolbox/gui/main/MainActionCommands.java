@@ -694,6 +694,8 @@ public enum MainActionCommands {
 	EDIT_INSTRUMENT_DIALOG_COMMAND("Edit instrument dialog"),
 	EDIT_INSTRUMENT_COMMAND("Edit instrument"),
 	DELETE_INSTRUMENT_COMMAND("Delete instrument"),
+	SELECT_INSTRUMENT_DIALOG_COMMAND("Show instrument selector"),
+	SELECT_INSTRUMENT_COMMAND("Select instrument"),
 
 	//	Data extraction method editor
 	ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND("Add data extraction method dialog"),

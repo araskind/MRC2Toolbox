@@ -50,6 +50,7 @@ import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -188,6 +189,10 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 	
 	public String getProjectLocationPath() {
 		return projectDetailsPanel.getProjectLocationPath();
+	}
+	
+	public LIMSInstrument getInstrument() {
+		return projectDetailsPanel.getInstrument();
 	}
 	
 	public Collection<File> getMSMSDataFiles() {

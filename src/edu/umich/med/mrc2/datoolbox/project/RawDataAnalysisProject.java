@@ -45,6 +45,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -53,7 +54,7 @@ public class RawDataAnalysisProject extends Project {
 	
 	protected File rawDataDirectory;
 	protected File uncompressedProjectFilesDirectory;
-
+	protected LIMSInstrument instrument;
 	protected Collection<DataFile>msmsDataFiles;
 	protected Collection<DataFile>msOneDataFiles;
 	protected Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;	
@@ -354,6 +355,14 @@ public class RawDataAnalysisProject extends Project {
 	
 	public void removeMsFeatureInfoBundleCollection(MsFeatureInfoBundleCollection fbCollection) {
 		featureCollections.remove(fbCollection);
+	}
+
+	public LIMSInstrument getInstrument() {
+		return instrument;
+	}
+
+	public void setInstrument(LIMSInstrument instrument) {
+		this.instrument = instrument;
 	}
 }
 

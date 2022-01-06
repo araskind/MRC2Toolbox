@@ -387,6 +387,9 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				rawDataAnalysisProjectSetupDialog.getProjectName(), 
 				rawDataAnalysisProjectSetupDialog.getProjectDescription(), 
 				baseDirectory);
+		
+		///LIMSInstrument
+		
 		List<DataFile> msmsDataFiles = 
 				rawDataAnalysisProjectSetupDialog.getMSMSDataFiles().stream().
 				map(f -> new DataFile(f)).collect(Collectors.toList());		
@@ -421,7 +424,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		Collection<String>errors = new ArrayList<String>();
 		String name = rawDataAnalysisProjectSetupDialog.getProjectName();
 		String location = rawDataAnalysisProjectSetupDialog.getProjectLocationPath();
-		
+
 		if(name.isEmpty())
 			errors.add("Project name can not be empty");
 		
@@ -436,6 +439,9 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}		
 		if(rawDataAnalysisProjectSetupDialog.getMSMSDataFiles().isEmpty())
 			errors.add("No raw data files added to the project");
+		
+		if(rawDataAnalysisProjectSetupDialog.getInstrument() == null)
+			errors.add("Instrument has to be specified");
 		
 		return errors;
 	}

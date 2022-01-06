@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.wizard;
 import java.util.Collection;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.experiment.IDTExperimentDefinitionPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -74,5 +75,9 @@ public class WizardExperimentDefinitionPanel extends IDTrackerDataLoadWizardPane
 	
 	public Collection<String>validateExperimentDefinition(){
 		return experimentDefinitionPanel.validateExperimentDefinition();
+	}
+	
+	public LIMSInstrument getInstrument() {
+		return experimentDefinitionPanel.getInstrument();
 	}
 }

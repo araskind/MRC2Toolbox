@@ -546,10 +546,11 @@ public class IDTrackerDataLoadWizard extends JDialog implements ActionListener, 
 			String experimentId = IDTUtils.addNewExperiment(newExperiment);
 			newExperiment.setId(experimentId);
 			WizardExperimentDefinitionPanel experimentPanel = 
-					(WizardExperimentDefinitionPanel)panels.get(IDTrackerDataUploadStage.CREATE_EXPERIMENT);
-			
+					(WizardExperimentDefinitionPanel)panels.get(IDTrackerDataUploadStage.CREATE_EXPERIMENT);			
 			experimentPanel.getExperimentProject().getExperiments().add(newExperiment);
-			IDTDataCash.getExperiments().add(newExperiment);
+			IDTDataCash.getExperiments().add(newExperiment);			
+			IDTUtils.setInstrumentForExperiment(
+					newExperiment, experimentPanel.getInstrument());			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -62,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSBioSpecies;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSClient;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInjection;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
@@ -257,6 +258,22 @@ public class IDTUtils {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		return nextExperimentId;
+	}
+	
+	public static void setInstrumentForExperiment(
+			LIMSExperiment experiment, LIMSInstrument instrument) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query  =
+			"INSERT INTO EXPERIMENT_INSTRUMENT_MAP(EXPERIMENT_ID, INSTRUMENT_ID) " +
+			"VALUES (?, ?)";
+
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, experiment.getId());
+		ps.setString(2, instrument.getInstrumentId());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 //	private static String getNextExperimentId(Connection conn) throws Exception{
