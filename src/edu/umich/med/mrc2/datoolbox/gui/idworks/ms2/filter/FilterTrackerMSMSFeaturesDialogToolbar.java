@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.methods;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter;
 
 import java.awt.event.ActionListener;
 
@@ -32,40 +32,33 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class DataAnalysisMethodToolbar  extends CommonToolbar {
+public class FilterTrackerMSMSFeaturesDialogToolbar extends CommonToolbar {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6052615679662350236L;
-
-	private static final Icon addMethodIcon = GuiUtils.getIcon("addDataProcessingMethod", 32);
-	private static final Icon linkToDataAcquisitionMethodIcon = GuiUtils.getIcon("linkToDataProcessingMethod", 32);
-	private static final Icon deleteMethodIcon = GuiUtils.getIcon("deleteDataProcessingMethod", 32);
-		
+	private static final long serialVersionUID = -1934511837376564647L;
+	
+	private static final Icon saveSearchQueryIcon = GuiUtils.getIcon("saveWorklist", 32);
+	private static final Icon loadSearchQueryIcon = GuiUtils.getIcon("loadList", 32);
+	
 	@SuppressWarnings("unused")
 	private JButton
-		addMethodFromDatabaseButton,
-		addMethodButton,
-		deleteMethodButton;
-	
-	public DataAnalysisMethodToolbar(ActionListener commandListener) {
+		loadSearchQueryButton,
+		saveSearchQueryButton;
+
+	public FilterTrackerMSMSFeaturesDialogToolbar(ActionListener commandListener) {
 
 		super(commandListener);
 
-		addMethodFromDatabaseButton = GuiUtils.addButton(this, null, linkToDataAcquisitionMethodIcon, commandListener,
-				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_FROM_DATABASE_DIALOG_COMMAND.getName(),
-				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_FROM_DATABASE_DIALOG_COMMAND.getName(),
+		loadSearchQueryButton = GuiUtils.addButton(this, null, loadSearchQueryIcon, commandListener,
+				MainActionCommands.SHOW_SAVED_MSMS_QUERY_LIST_COMMAND.getName(),
+				MainActionCommands.SHOW_SAVED_MSMS_QUERY_LIST_COMMAND.getName(),
 				buttonDimension);
 
-		addMethodButton = GuiUtils.addButton(this, null, addMethodIcon, commandListener,
-				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
-				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
-				buttonDimension);
-		
-		deleteMethodButton = GuiUtils.addButton(this, null, deleteMethodIcon, commandListener,
-				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName(),
-				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName(),
+		saveSearchQueryButton = GuiUtils.addButton(this, null, saveSearchQueryIcon, commandListener,
+				MainActionCommands.SHOW_SAVE_MSMS_QUERY_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_SAVE_MSMS_QUERY_DIALOG_COMMAND.getName(),
 				buttonDimension);
 	}
 
@@ -74,19 +67,5 @@ public class DataAnalysisMethodToolbar  extends CommonToolbar {
 		// TODO Auto-generated method stub
 
 	}
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

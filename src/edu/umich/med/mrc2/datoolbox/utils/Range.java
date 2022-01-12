@@ -278,7 +278,7 @@ public class Range implements Serializable, Comparable<Range> {
 	}
 	
 	public String getStorableString() {
-		return Double.toString(min) + "_" + Double.toString(max);
+		return MsUtils.spectrumMzExportFormat.format(min) + "_" + MsUtils.spectrumMzExportFormat.format(max);
 	}
 	
 	public Range(String rtRangeString) {

@@ -115,10 +115,10 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.ms1.ReferenceMsOneFeaturePopupMe
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSLibraryEntryPropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockablePepSearchParameterListingPanel;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.FilterTrackerMSMSFeaturesDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.MSMSFilterParameters;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.MsMsFeaturePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.SiriusDataExportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.FilterTrackerMSMSFeaturesDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.MSMSFilterParameters;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.nistms.NISTMSSerchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PepSearchSetupDialog;
@@ -685,7 +685,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 					features, 
 					massDiffRanges,
 					filterParameters.getMassDiffsIncludeSubset(),
-					filterParameters.getMassDiffsIntensityCutoff());
+					filterParameters.getMassDiffsIntensityCutoff(),
+					filterParameters.isNeutralLossesOnly());
 			if(features.isEmpty())
 				return features;
 		}		
@@ -811,7 +812,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			Collection<MsFeatureInfoBundle>inputFeatures,
 			Collection<Range> massDiffRanges,
 			IncludeSubset massDiffIncludeSubset,
-			double massDiffIntensityCutoff){
+			double massDiffIntensityCutoff,
+			boolean neutralLossesOnly){
 		
 		List<MsFeatureInfoBundle> msmsFeatures = inputFeatures.stream().
 				filter(b -> b.getMsFeature().getSpectrum() != null).
@@ -821,8 +823,15 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		Map<Range,Boolean>foundRanges = new HashMap<Range,Boolean>();
 		for(MsFeatureInfoBundle b : msmsFeatures) {
 			
-			Collection<MsPoint> msms = b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getSpectrum();
-			Collection<Double>massDiffs = MsUtils.getMassDifferences(msms, massDiffIntensityCutoff);			
+			TandemMassSpectrum msms = b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+			Collection<Double>massDiffs = new ArrayList<Double>();
+					
+			if(neutralLossesOnly)
+				massDiffs = MsUtils.getNeutralLosses(msms, massDiffIntensityCutoff);
+			
+			else
+				massDiffs = MsUtils.getMassDifferences(msms.getSpectrum(), massDiffIntensityCutoff);
+			
 			if(massDiffIncludeSubset.equals(IncludeSubset.Any)) {
 				
 				boolean mdFound = false;

@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.design;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design;
 
 import java.awt.event.ActionListener;
 

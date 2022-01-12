@@ -78,6 +78,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.RawDataConversionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msms.MSMSFeatureExtractionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisProjectSetupDialog;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTree;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -90,13 +91,13 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MassSpectraAveragingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MsMsfeatureBatchExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ProjectRawDataFileOpenTask;
@@ -136,7 +137,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private boolean saveOnExitRequested;
 	private boolean showNewProjectDialog;
 	private MSMSFeatureExtractionSetupDialog msmsFeatureExtractionSetupDialog;
-	private FileToolsDialog fileToolsDialog;
+	private FileToolsDialog fileToolsDialog;	
+	private RawDataProjectMetadataWizard rawDataProjectMetadataWizard;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("chromatogram", 16);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "RawDataPanel.layout");
@@ -266,12 +268,32 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(command.equals(MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName()))
 			showFileToolsDialog();
 		
-		if(command.equals(MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName())) {
-			MessageDialog.showWarningMsg("TODO: " + command, this.getContentPane());
-		}
-		if(command.equals(MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName())) {
-			MessageDialog.showWarningMsg("TODO: " + command, this.getContentPane());
-		}
+		if(command.equals(MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName()))
+			showProjectMetadataWizard();
+		
+		if(command.equals(MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName()))
+			saveProjectMetadata();		
+		
+		if(command.equals(MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName()))
+			saveProjectToDatabaseAsNewExperiment();		
+	}
+	
+	private void showProjectMetadataWizard() {
+		
+		if (activeRawDataAnalysisProject == null)
+			return;
+		
+		rawDataProjectMetadataWizard = new RawDataProjectMetadataWizard(this);
+		rawDataProjectMetadataWizard.setLocationRelativeTo(this.getContentPane());
+		rawDataProjectMetadataWizard.setVisible(true);
+	}
+	
+	private void saveProjectMetadata() {
+		MessageDialog.showWarningMsg("TODO: Save project metadata", this.getContentPane());
+	}
+	
+	private void saveProjectToDatabaseAsNewExperiment() {
+		MessageDialog.showWarningMsg("TODO: Save Project To Database As New Experiment", this.getContentPane());
 	}
 		
 	private void showFileToolsDialog() {
@@ -310,7 +332,12 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(activeRawDataAnalysisProject == null)
 			return;
 		
-		msmsFeatureExtractionSetupDialog = new MSMSFeatureExtractionSetupDialog(this);
+		msmsFeatureExtractionSetupDialog = new MSMSFeatureExtractionSetupDialog(this);		
+		MSMSExtractionParameterSet ps = 
+				activeRawDataAnalysisProject.getMsmsExtractionParameterSet();
+		if(ps != null)
+			msmsFeatureExtractionSetupDialog.loadParameters(ps);
+		
 		msmsFeatureExtractionSetupDialog.setLocationRelativeTo(this.getContentPane());
 		msmsFeatureExtractionSetupDialog.setVisible(true);
 	}
@@ -331,6 +358,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(ps == null)
 			return;
 
+		activeRawDataAnalysisProject.setMsmsExtractionParameterSet(ps);
 		MsMsfeatureBatchExtractionTask task = 
 				new MsMsfeatureBatchExtractionTask(
 						ps, 

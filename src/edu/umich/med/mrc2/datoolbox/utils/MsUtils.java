@@ -1134,6 +1134,25 @@ public class MsUtils {
 		return massDiffs;
 	}
 	
+	public static Collection<Double> getNeutralLosses(TandemMassSpectrum msms, double relativeIntensityCutoff) {
+		
+		MsPoint[]patternNorm =  normalizeAndSortMsPattern(msms.getSpectrum(), 1.0d);
+		double parentMz = msms.getParent().getMz();
+		MsPoint[]filtered = Arrays.asList(patternNorm).stream().
+			filter(p -> p.getMz() < parentMz).
+			filter(p -> p.getIntensity() > relativeIntensityCutoff).
+			sorted(new MsDataPointComparator(SortProperty.MZ)).
+			toArray(size -> new MsPoint[size]);		
+		Collection<Double>massDiffs = new ArrayList<Double>();
+		if(filtered.length < 1)
+			return massDiffs;		
+		
+		for(int i=0; i<filtered.length-1; i++) 
+			massDiffs.add(parentMz - filtered[i].getMz());			
+		
+		return massDiffs;
+	}
+	
 	public static Double calculateIntensityStandardDeviationForNormalizedSpectrum(Collection<MsPoint>pattern, double max) {
 		
 		MsPoint[]normSpectrum =  normalizeAndSortMsPattern(pattern, max);

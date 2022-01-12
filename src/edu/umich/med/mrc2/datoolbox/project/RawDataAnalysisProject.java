@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
 public class RawDataAnalysisProject extends Project {
 	
@@ -60,6 +61,7 @@ public class RawDataAnalysisProject extends Project {
 	protected Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;	
 	protected Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 	protected Set<MsFeatureInfoBundleCollection>featureCollections;
+	protected MSMSExtractionParameterSet msmsExtractionParameterSet;
 	
 	//	New project
 	public RawDataAnalysisProject(
@@ -363,6 +365,14 @@ public class RawDataAnalysisProject extends Project {
 
 	public void setInstrument(LIMSInstrument instrument) {
 		this.instrument = instrument;
+	}
+
+	public MSMSExtractionParameterSet getMsmsExtractionParameterSet() {
+		return msmsExtractionParameterSet;
+	}
+
+	public void setMsmsExtractionParameterSet(MSMSExtractionParameterSet msmsExtractionParameterSet) {
+		this.msmsExtractionParameterSet = msmsExtractionParameterSet;
 	}
 }
 

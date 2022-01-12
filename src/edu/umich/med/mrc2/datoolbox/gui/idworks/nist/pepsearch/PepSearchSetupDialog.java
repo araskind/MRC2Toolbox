@@ -1633,9 +1633,23 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 				searchLibrariesSeparatelyCheckBox.isSelected());
 	
 		//	Search settings
-		preferences.put(PRESEARCH_MODE, ((PreSearchType)preSearchModeComboBox.getSelectedItem()).name());
-		preferences.put(SEARCH_TYPE, ((HiResSearchType)searchTypeComboBox.getSelectedItem()).name());
-		preferences.put(SEARCH_OPTION, ((HiResSearchOption)searchOptionComboBox.getSelectedItem()).name());
+		PreSearchType pst = (PreSearchType)preSearchModeComboBox.getSelectedItem();
+		if(pst == null)
+			pst = PreSearchType.d;
+		
+		preferences.put(PRESEARCH_MODE, pst.name());
+		
+		HiResSearchType hrst = (HiResSearchType)searchTypeComboBox.getSelectedItem();
+		if(hrst == null)
+			hrst = HiResSearchType.G;
+		
+		preferences.put(SEARCH_TYPE, hrst.name());
+		
+		HiResSearchOption hrso = (HiResSearchOption)searchOptionComboBox.getSelectedItem();
+		if(hrso == null)
+			hrso = HiResSearchOption.z;
+					
+		preferences.put(SEARCH_OPTION, hrso.name());
 
 		String hitRejOption = "";
 		if(hitRejectionComboBox.getSelectedItem() != null)

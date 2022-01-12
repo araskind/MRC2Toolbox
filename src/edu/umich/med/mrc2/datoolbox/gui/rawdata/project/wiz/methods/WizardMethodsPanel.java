@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.methods;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,19 +50,15 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodExtendedEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.DockableAcquisitionMethodDataPanel;
-import edu.umich.med.mrc2.datoolbox.gui.idtlims.data.DataAnalysisMethodSelectionDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.DataExtractionMethodEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.dpl.AcquisitionMethodSelectorDialog;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.RawDataProjectMetadataWizard;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.RawDataProjectMetadataWizardPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -86,19 +82,19 @@ public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel
 	
 	private MethodTable acquisitionMethodTable;
 	private AcquisitionMethodToolbar acquisitionMethodToolbar;
-	private MethodTable dataAnalysisMethodTable;
-	private DataAnalysisMethodToolbar dataAnalysisMethodToolbar;
-	private DataAnalysisMethodSelectionDialog dataAnalysisMethodSelectionDialog;
-	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
-	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
-	private File baseDirectory;
-	
-	private Collection<DataExtractionMethod>dataExtractionMethods;
-	private Collection<DataAcquisitionMethod>dataAcquisitionMethods;
-
-	private TreeMap<String, File> missingMethodNameToFileMap;
-
 	private AcquisitionMethodSelectorDialog acquisitionMethodSelectorDialog;
+	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
+	
+	private File baseDirectory;
+	private Collection<DataAcquisitionMethod>dataAcquisitionMethods;
+	
+//	private MethodTable dataAnalysisMethodTable;
+//	private DataAnalysisMethodToolbar dataAnalysisMethodToolbar;
+//	private DataAnalysisMethodSelectionDialog dataAnalysisMethodSelectionDialog;
+//	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
+//	private Collection<DataExtractionMethod>dataExtractionMethods;
+	
+	private TreeMap<String, File> missingMethodNameToFileMap;
 	
 	public WizardMethodsPanel(RawDataProjectMetadataWizard wizard) {
 		
@@ -106,7 +102,7 @@ public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel
 		JPanel panel  = initPanel();
 		add(panel, gbc_panel);
 		
-		dataExtractionMethods = new TreeSet<DataExtractionMethod>();
+//		dataExtractionMethods = new TreeSet<DataExtractionMethod>();
 		dataAcquisitionMethods = new TreeSet<DataAcquisitionMethod>();
 
 		completeStageButton.setText(
@@ -148,23 +144,23 @@ public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel
 		gbc_panel.gridy = 0;
 		panel.add(panel1, gbc_panel);
 				
-		JPanel panel2 = new JPanel(new BorderLayout(0, 0));		
-		panel2.setBorder(new CompoundBorder(
-				new TitledBorder(
-						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), 
-						"Data analysis methods", TitledBorder.LEADING, TitledBorder.TOP, 
-						new Font("Tahoma", Font.BOLD, 12), new Color(0, 0, 0)), 
-				new EmptyBorder(10, 10, 10, 10)));		
-		dataAnalysisMethodToolbar = new DataAnalysisMethodToolbar(this);
-		panel2.add(dataAnalysisMethodToolbar, BorderLayout.NORTH);		
-		dataAnalysisMethodTable = new MethodTable();
-		panel2.add(new JScrollPane(dataAnalysisMethodTable), BorderLayout.CENTER);
-		
-		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.fill = GridBagConstraints.BOTH;
-		gbc_panel_1.gridx = 0;
-		gbc_panel_1.gridy = 1;
-		panel.add(panel2, gbc_panel_1);
+//		JPanel panel2 = new JPanel(new BorderLayout(0, 0));		
+//		panel2.setBorder(new CompoundBorder(
+//				new TitledBorder(
+//						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), 
+//						"Data analysis methods", TitledBorder.LEADING, TitledBorder.TOP, 
+//						new Font("Tahoma", Font.BOLD, 12), new Color(0, 0, 0)), 
+//				new EmptyBorder(10, 10, 10, 10)));		
+//		dataAnalysisMethodToolbar = new DataAnalysisMethodToolbar(this);
+//		panel2.add(dataAnalysisMethodToolbar, BorderLayout.NORTH);		
+//		dataAnalysisMethodTable = new MethodTable();
+//		panel2.add(new JScrollPane(dataAnalysisMethodTable), BorderLayout.CENTER);
+//		
+//		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+//		gbc_panel_1.fill = GridBagConstraints.BOTH;
+//		gbc_panel_1.gridx = 0;
+//		gbc_panel_1.gridy = 1;
+//		panel.add(panel2, gbc_panel_1);
 		
 		return panel;
 	}
@@ -182,8 +178,8 @@ public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel
 			
 			errors.add(" ");
 		}		
-		if(dataAnalysisMethodTable.getRowCount() == 0)
-			errors.add("No data analysis methods selected for the experiment.");
+//		if(dataAnalysisMethodTable.getRowCount() == 0)
+//			errors.add("No data analysis methods selected for the experiment.");
 		
 		return errors;
 	}
@@ -192,20 +188,20 @@ public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel
 	public void actionPerformed(ActionEvent e) {
 		
 		String command = e.getActionCommand();
-		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_FROM_DATABASE_DIALOG_COMMAND.getName()))
-			showDataExtractionMethodSelectionDialog();
-			
-		if(command.equals(MainActionCommands.SELECT_DA_METHOD_COMMAND.getName()))
-			selectExistingDataExtractionMethod();
-
-		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName()))
-			showNewDataExtractionMethodEditorDialog();
-		
-		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
-			saveDataExtractionMethod();
-				
-		if(command.equals(MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName()))
-			removeSelectedDataExtractionMethod();				
+//		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_FROM_DATABASE_DIALOG_COMMAND.getName()))
+//			showDataExtractionMethodSelectionDialog();
+//			
+//		if(command.equals(MainActionCommands.SELECT_DA_METHOD_COMMAND.getName()))
+//			selectExistingDataExtractionMethod();
+//
+//		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName()))
+//			showNewDataExtractionMethodEditorDialog();
+//		
+//		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
+//			saveDataExtractionMethod();
+//				
+//		if(command.equals(MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName()))
+//			removeSelectedDataExtractionMethod();				
 		
 		if(command.equals(MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName()))
 			try {
@@ -234,73 +230,73 @@ public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel
 	/**
 	 * Data extraction methods
 	 * */	
-	private void showDataExtractionMethodSelectionDialog() {
-		
-		dataAnalysisMethodSelectionDialog = new DataAnalysisMethodSelectionDialog(this);
-		dataAnalysisMethodSelectionDialog.setLocationRelativeTo(this);
-		dataAnalysisMethodSelectionDialog.setVisible(true);
-	}
-	
-	private void selectExistingDataExtractionMethod() {
-		
-		DataExtractionMethod damethod = dataAnalysisMethodSelectionDialog.getSelectedMethod();
-		if(damethod == null)
-			return;
-		
-		dataExtractionMethods.add(damethod);
-		reloadDataAnalysisMethods();
-		dataAnalysisMethodSelectionDialog.dispose();
-	}
-	
-	private void showNewDataExtractionMethodEditorDialog() {
-		
-		dataExtractionMethodEditorDialog = new DataExtractionMethodEditorDialog(null, this);
-		dataExtractionMethodEditorDialog.setLocationRelativeTo(this);
-		dataExtractionMethodEditorDialog.setVisible(true);
-	}
-		
-	private void saveDataExtractionMethod() {
-
-		Collection<String>errors = dataExtractionMethodEditorDialog.validateMethodData();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), dataExtractionMethodEditorDialog);
-			return;
-		}
-		DataExtractionMethod selectedMethod = new DataExtractionMethod(
-					null,
-					dataExtractionMethodEditorDialog.getMethodName(),
-					dataExtractionMethodEditorDialog.getMethodDescription(),
-					MRC2ToolBoxCore.getIdTrackerUser(),
-					new Date());
-		String methodId = null;
-		try {
-			methodId = IDTUtils.addNewDataExtractionMethod(
-					selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
-			selectedMethod.setId(methodId);
-			IDTDataCash.getDataExtractionMethods().add(selectedMethod);
-			dataExtractionMethods.add(selectedMethod);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		reloadDataAnalysisMethods();
-		dataExtractionMethodEditorDialog.dispose();
-	}
-	
-	private void removeSelectedDataExtractionMethod() {
-
-		DataExtractionMethod method =
-				(DataExtractionMethod)dataAnalysisMethodTable.getSelectedAnalysisMethod();
-		if(method == null)
-			return;
-
-		dataExtractionMethods.remove(method);
-		reloadDataAnalysisMethods();
-	}
-	
-	private void reloadDataAnalysisMethods() {
-		dataAnalysisMethodTable.setTableModelFromDataAnalysisMethods(dataExtractionMethods);		
-	}
+//	private void showDataExtractionMethodSelectionDialog() {
+//		
+//		dataAnalysisMethodSelectionDialog = new DataAnalysisMethodSelectionDialog(this);
+//		dataAnalysisMethodSelectionDialog.setLocationRelativeTo(this);
+//		dataAnalysisMethodSelectionDialog.setVisible(true);
+//	}
+//	
+//	private void selectExistingDataExtractionMethod() {
+//		
+//		DataExtractionMethod damethod = dataAnalysisMethodSelectionDialog.getSelectedMethod();
+//		if(damethod == null)
+//			return;
+//		
+//		dataExtractionMethods.add(damethod);
+//		reloadDataAnalysisMethods();
+//		dataAnalysisMethodSelectionDialog.dispose();
+//	}
+//	
+//	private void showNewDataExtractionMethodEditorDialog() {
+//		
+//		dataExtractionMethodEditorDialog = new DataExtractionMethodEditorDialog(null, this);
+//		dataExtractionMethodEditorDialog.setLocationRelativeTo(this);
+//		dataExtractionMethodEditorDialog.setVisible(true);
+//	}
+//		
+//	private void saveDataExtractionMethod() {
+//
+//		Collection<String>errors = dataExtractionMethodEditorDialog.validateMethodData();
+//		if(!errors.isEmpty()) {
+//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), dataExtractionMethodEditorDialog);
+//			return;
+//		}
+//		DataExtractionMethod selectedMethod = new DataExtractionMethod(
+//					null,
+//					dataExtractionMethodEditorDialog.getMethodName(),
+//					dataExtractionMethodEditorDialog.getMethodDescription(),
+//					MRC2ToolBoxCore.getIdTrackerUser(),
+//					new Date());
+//		String methodId = null;
+//		try {
+//			methodId = IDTUtils.addNewDataExtractionMethod(
+//					selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
+//			selectedMethod.setId(methodId);
+//			IDTDataCash.getDataExtractionMethods().add(selectedMethod);
+//			dataExtractionMethods.add(selectedMethod);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}	
+//		reloadDataAnalysisMethods();
+//		dataExtractionMethodEditorDialog.dispose();
+//	}
+//	
+//	private void removeSelectedDataExtractionMethod() {
+//
+//		DataExtractionMethod method =
+//				(DataExtractionMethod)dataAnalysisMethodTable.getSelectedAnalysisMethod();
+//		if(method == null)
+//			return;
+//
+//		dataExtractionMethods.remove(method);
+//		reloadDataAnalysisMethods();
+//	}
+//	
+//	private void reloadDataAnalysisMethods() {
+//		dataAnalysisMethodTable.setTableModelFromDataAnalysisMethods(dataExtractionMethods);		
+//	}
 	
 	/**
 	 * Data acquisition methods
@@ -481,9 +477,9 @@ public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel
 		}
 	}
 	
-	public Collection<DataExtractionMethod> getDataExtractionMethods() {
-		return dataAnalysisMethodTable.getAvailableDataExtractionMethods();
-	}
+//	public Collection<DataExtractionMethod> getDataExtractionMethods() {
+//		return dataAnalysisMethodTable.getAvailableDataExtractionMethods();
+//	}
 
 	public Collection<DataAcquisitionMethod> getDataAcquisitionMethods() {
 		return acquisitionMethodTable.getAvailableDataAcquisitionMethods();

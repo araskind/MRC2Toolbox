@@ -123,7 +123,7 @@ public class ProjectDetailsPanel extends JPanel implements ActionListener {
 		instrumentTextField.setColumns(10);
 		
 		JButton selectInstrumentButton = new JButton("Select");
-		
+		selectInstrumentButton.setActionCommand(MainActionCommands.SELECT_INSTRUMENT_DIALOG_COMMAND.getName());		
 		selectInstrumentButton.addActionListener(this);
 		GridBagConstraints gbc_selectInstrumentButton = new GridBagConstraints();
 		gbc_selectInstrumentButton.fill = GridBagConstraints.HORIZONTAL;

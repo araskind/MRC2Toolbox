@@ -63,6 +63,11 @@ public enum MainActionCommands {
 	MSMS_FEATURE_EXTRACTION_SETUP_COMMAND("Set up MSMS feature extraction"),
 	MSMS_FEATURE_EXTRACTION_COMMAND("Extract MSMS features"),
 	SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH("Send MSMS features to IDTracker workbench"),
+	SHOW_SAVED_MSMS_FEATURE_EXTRACTION_METHOD_LIST_COMMAND("Show MSMS feature extraction method list"),
+	LOAD_SAVED_MSMS_FEATURE_EXTRACTION_METHOD_COMMAND("Load MSMS feature extraction method from database"),
+	SHOW_SAVE_MSMS_FEATURE_EXTRACTION_METHOD_DIALOG_COMMAND("Save current MSMS feature extraction method"),
+	SAVE_MSMS_FEATURE_EXTRACTION_METHOD_COMMAND("Save MSMS feature extraction method to database"),
+	DELETE_MSMS_FEATURE_EXTRACTION_METHOD_COMMAND("Delete selected MSMS feature extraction method"),
 	
 	//	User manager
 	SHOW_USER_MANAGER_COMMAND("Show User Manager"),
@@ -92,6 +97,7 @@ public enum MainActionCommands {
 	EXTRACT_WORKLIST_FROM_RAW_DATA_FOLDER("Extract worklist"),
 	SAVE_EXTRACTED_WORKLIST_TO_FILE("Save worklist to file"),	
 	ADD_PROJECT_METADATA_COMMAND("Add project metadata"),
+	SAVE_PROJECT_METADATA_COMMAND("Save project metadata"),
 	SEND_PROJECT_DATA_TO_DATABASE_COMMAND("Send project data to database"),
 
 	DELETE_DATA_PIPELINE_COMMAND("Delete data pipeline"),
@@ -919,6 +925,13 @@ public enum MainActionCommands {
 	SHOW_ID_TRACKER_SAVE_QUERY_DIALOG_COMMAND("Save current IDTracker search query"),
 	ID_TRACKER_SAVE_QUERY_COMMAND("Save IDTracker search query to database"),
 	ID_TRACKER_DELETE_QUERY_COMMAND("Delete selected IDTracker search query"),
+	
+	//	MSMS search dialog
+	SHOW_SAVED_MSMS_QUERY_LIST_COMMAND("Show MSMS query list"),
+	LOAD_SAVED_MSMS_QUERY_COMMAND("Load MSMS search query from database"),
+	SHOW_SAVE_MSMS_QUERY_DIALOG_COMMAND("Save current MSMS search query"),
+	SAVE_MSMS_QUERY_COMMAND("Save MSMS search query to database"),
+	DELETE_MSMS_QUERY_COMMAND("Delete selected MSMS search query"),
 
 	//	Scan CEFs for MSMS
 	CEF_MSMS_SCAN_SETUP_COMMAND("Set up prescan of CEF files with MSMS search results"),

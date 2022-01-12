@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -56,7 +56,6 @@ import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
@@ -66,9 +65,9 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.design.WizardExperimentDesignPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.methods.WizardMethodsPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.worklist.WizardWorklistPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design.WizardExperimentDesignPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods.WizardMethodsPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl.WizardWorklistPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
@@ -172,8 +171,8 @@ public class RawDataProjectMetadataWizard extends JDialog implements ActionListe
 
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		saveButton = new JButton("Upload data");
-		saveButton.setActionCommand(MainActionCommands.UPLOAD_DATA_TO_IDTRACKER_COMMAND.getName());
+		saveButton = new JButton(MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName());
+		saveButton.setActionCommand(MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName());
 		saveButton.addActionListener(this);
 		GridBagConstraints gbc_saveButton = new GridBagConstraints();
 		gbc_saveButton.anchor = GridBagConstraints.NORTHWEST;
@@ -375,11 +374,11 @@ public class RawDataProjectMetadataWizard extends JDialog implements ActionListe
 				panels.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)).getSamplePrep();
 	}
 	
-	public Collection<DataExtractionMethod> getDataExtractionMethods() {
-
-		return ((WizardMethodsPanel)
-				panels.get(RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS)).getDataExtractionMethods();
-	}
+//	public Collection<DataExtractionMethod> getDataExtractionMethods() {
+//
+//		return ((WizardMethodsPanel)
+//				panels.get(RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS)).getDataExtractionMethods();
+//	}
 
 	public Collection<DataAcquisitionMethod> getDataAcquisitionMethods() {
 		return ((WizardMethodsPanel)

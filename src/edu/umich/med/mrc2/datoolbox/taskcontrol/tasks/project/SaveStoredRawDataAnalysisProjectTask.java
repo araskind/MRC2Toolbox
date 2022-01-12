@@ -154,6 +154,10 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
         		new Element(ProjectFields.UniqueSampleIdList.name()).
         		setText(StringUtils.join(uniqueSampleIds, ",")));
 		
+		//	MSMS method
+		if(projectToSave.getMsmsExtractionParameterSet() != null)
+			projectRoot.addContent(projectToSave.getMsmsExtractionParameterSet().getXmlElement());
+		
 		//	Feature Collections
         Element msFeatureCollectionListElement = 
         		new Element(ProjectFields.FeatureCollectionList.name());

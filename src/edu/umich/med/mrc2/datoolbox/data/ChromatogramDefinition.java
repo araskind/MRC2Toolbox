@@ -22,13 +22,19 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
@@ -36,6 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
 import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
 import edu.umich.med.mrc2.datoolbox.utils.filter.FilterFactory;
@@ -311,6 +318,39 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		
 		return chromatogramDefinitionElement;
 	}
+	
+	public String getChromatogramDefinitionHash(){
+
+		List<String> chunks = new ArrayList<String>();
+		chunks.add(mode.name());
+		chunks.add(polarity.getCode());
+		chunks.add(Integer.toString(msLevel));		
+		if(mzList != null && !mzList.isEmpty()) {
+			List<String> stringList = mzList.stream().
+					map(mz -> MsUtils.spectrumMzExportFormat.format(mz)).
+					collect(Collectors.toList());
+			chunks.add(StringUtils.join(stringList));
+		}		
+		chunks.add(MsUtils.spectrumMzExportFormat.format(mzWindowValue));
+		if(massErrorType != null)
+			chunks.add(massErrorType.name());
+		
+		if(rtRange != null)
+			chunks.add(rtRange.getStorableString());		
+		
+		//	TODO smoothing filter 
+		//	chunks.add("");
+		
+		chunks.add(Boolean.toString(doSmooth));
+	    try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(StringUtils.join(chunks).getBytes(Charset.forName("windows-1252")));
+			return DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+	    return null;
+	}
 
 	public ChromatogramDefinition(Element cdElement) {
 
@@ -318,7 +358,7 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 				cdElement.getAttributeValue(XICDefinitionFields.Mode.name()));
 		String polCode = cdElement.getAttributeValue(XICDefinitionFields.Pol.name());
 		if(polCode != null)
-			Polarity.getPolarityByCode(polCode);
+			polarity = Polarity.getPolarityByCode(polCode);
 		
 		msLevel = Integer.parseInt(
 				cdElement.getAttributeValue(XICDefinitionFields.MsLevel.name()));

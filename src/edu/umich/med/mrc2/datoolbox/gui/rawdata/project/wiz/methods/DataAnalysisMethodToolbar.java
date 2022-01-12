@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.methods;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods;
 
 import java.awt.event.ActionListener;
 
@@ -32,44 +32,40 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class AcquisitionMethodToolbar  extends CommonToolbar {
+public class DataAnalysisMethodToolbar  extends CommonToolbar {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -6052615679662350236L;
-	private static final Icon scanDirIcon = GuiUtils.getIcon("scanFolder", 32);
-	private static final Icon linkToDataAcquisitionMethodIcon = GuiUtils.getIcon("linkToDataAcquisitionMethod", 32);
-	private static final Icon addMethodIcon = GuiUtils.getIcon("addDataAcquisitionMethod", 32);
-	private static final Icon deleteMethodIcon = GuiUtils.getIcon("deleteDataAcquisitionMethod", 32);
+
+	private static final Icon addMethodIcon = GuiUtils.getIcon("addDataProcessingMethod", 32);
+	private static final Icon linkToDataAcquisitionMethodIcon = GuiUtils.getIcon("linkToDataProcessingMethod", 32);
+	private static final Icon deleteMethodIcon = GuiUtils.getIcon("deleteDataProcessingMethod", 32);
 		
 	@SuppressWarnings("unused")
 	private JButton
-		scanDirButton,
-		linkExistingMethodButton,
+		addMethodFromDatabaseButton,
 		addMethodButton,
 		deleteMethodButton;
 	
-	public AcquisitionMethodToolbar(ActionListener commandListener) {
+	public DataAnalysisMethodToolbar(ActionListener commandListener) {
 
 		super(commandListener);
 
-		scanDirButton = GuiUtils.addButton(this, null, scanDirIcon, commandListener,
-				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName(),
-				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName(), buttonDimension);
-		
-		linkExistingMethodButton = GuiUtils.addButton(this, null, linkToDataAcquisitionMethodIcon, commandListener,
-				MainActionCommands.SHOW_DATA_ACQUISITION_SELECTOR_COMMAND.getName(),
-				MainActionCommands.SHOW_DATA_ACQUISITION_SELECTOR_COMMAND.getName(), buttonDimension);
+		addMethodFromDatabaseButton = GuiUtils.addButton(this, null, linkToDataAcquisitionMethodIcon, commandListener,
+				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_FROM_DATABASE_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_FROM_DATABASE_DIALOG_COMMAND.getName(),
+				buttonDimension);
 
 		addMethodButton = GuiUtils.addButton(this, null, addMethodIcon, commandListener,
-				MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName(),
-				MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
 				buttonDimension);
 		
 		deleteMethodButton = GuiUtils.addButton(this, null, deleteMethodIcon, commandListener,
-				MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName(),
-				MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName(),
+				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName(),
+				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName(),
 				buttonDimension);
 	}
 

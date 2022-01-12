@@ -19,11 +19,11 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz;
 
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.design.WizardExperimentDesignPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.methods.WizardMethodsPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.worklist.WizardWorklistPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design.WizardExperimentDesignPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods.WizardMethodsPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl.WizardWorklistPanel;
 
 public enum RawDataProjectMetadataDefinitionStage {
 

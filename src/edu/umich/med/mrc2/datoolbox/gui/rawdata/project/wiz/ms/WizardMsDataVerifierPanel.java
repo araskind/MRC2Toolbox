@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.ms;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.ms;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -55,8 +55,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.data.IDtrackerDataFileSampleMatc
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.RawDataProjectMetadataWizard;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.RawDataProjectMetadataWizardPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
@@ -165,11 +165,11 @@ public class WizardMsDataVerifierPanel extends RawDataProjectMetadataWizardPanel
 		if(command.equals(MainActionCommands.CLEAR_DATA_COMMAND.getName()))
 			clearDataFiles();
 		
-		if (command.equals(MainActionCommands.ASSIGN_DA_METHOD_TO_DATA_FILES_DIALOG_COMMAND.getName()))
-			showDAMethodAssignmentDialog();
-
-		if (command.equals(MainActionCommands.ASSIGN_DA_METHOD_TO_DATA_FILES_COMMAND.getName()))
-			assignDaMethodToFiles();
+//		if (command.equals(MainActionCommands.ASSIGN_DA_METHOD_TO_DATA_FILES_DIALOG_COMMAND.getName()))
+//			showDAMethodAssignmentDialog();
+//
+//		if (command.equals(MainActionCommands.ASSIGN_DA_METHOD_TO_DATA_FILES_COMMAND.getName()))
+//			assignDaMethodToFiles();
 		
 		if (command.equals(MainActionCommands.CEF_MSMS_SCAN_RUN_COMMAND.getName()))
 			runCefMsMsPrescan();				
@@ -216,29 +216,29 @@ public class WizardMsDataVerifierPanel extends RawDataProjectMetadataWizardPanel
 		dataFileSampleMatchTable.removeSelectedDataFiles();
 	}
 
-	private void showDAMethodAssignmentDialog() {
-
-		if(dataFileSampleMatchTable.getSelectedDataFiles().isEmpty())
-			return;
-
-		daMethodAssignmentDialog =
-				new DAMethodAssignmentDialog(
-						dataFileSampleMatchTable.getSelectedDataFiles(), this);
-		daMethodAssignmentDialog.setAvailableDataExtractionMethods(wizard.getDataExtractionMethods());
-		daMethodAssignmentDialog.setLocationRelativeTo(this);
-		daMethodAssignmentDialog.setVisible(true);
-	}
-		
-	private void assignDaMethodToFiles() {
-
-		Collection<DataFile> files = daMethodAssignmentDialog.getDataFiles();
-		DataExtractionMethod method = daMethodAssignmentDialog.getSelectedMethod();
-		if(files.isEmpty() || method == null)
-			return;
-
-		dataFileSampleMatchTable.setDaMethodFoFiles(files, method);
-		daMethodAssignmentDialog.dispose();
-	}
+//	private void showDAMethodAssignmentDialog() {
+//
+//		if(dataFileSampleMatchTable.getSelectedDataFiles().isEmpty())
+//			return;
+//
+//		daMethodAssignmentDialog =
+//				new DAMethodAssignmentDialog(
+//						dataFileSampleMatchTable.getSelectedDataFiles(), this);
+//		daMethodAssignmentDialog.setAvailableDataExtractionMethods(wizard.getDataExtractionMethods());
+//		daMethodAssignmentDialog.setLocationRelativeTo(this);
+//		daMethodAssignmentDialog.setVisible(true);
+//	}
+//		
+//	private void assignDaMethodToFiles() {
+//
+//		Collection<DataFile> files = daMethodAssignmentDialog.getDataFiles();
+//		DataExtractionMethod method = daMethodAssignmentDialog.getSelectedMethod();
+//		if(files.isEmpty() || method == null)
+//			return;
+//
+//		dataFileSampleMatchTable.setDaMethodFoFiles(files, method);
+//		daMethodAssignmentDialog.dispose();
+//	}
 
 	public Collection<String> verifyDataForUpload() {
 

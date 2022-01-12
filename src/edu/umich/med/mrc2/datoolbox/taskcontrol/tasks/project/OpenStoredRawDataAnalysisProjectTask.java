@@ -57,6 +57,8 @@ import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
+import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
+import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameters;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -201,6 +203,13 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		String instrumentId = projectElement.getAttributeValue(ProjectFields.Instrument.name()); 
 		if(instrumentId != null)
 			project.setInstrument(IDTDataCash.getInstrumentById(instrumentId)); 
+		
+		Element msmsParamsElement = 
+				projectElement.getChild(MSMSExtractionParameters.MSMSExtractionParameterSet.name());
+		if(msmsParamsElement != null) {
+			MSMSExtractionParameterSet msmsParamSet = new MSMSExtractionParameterSet(msmsParamsElement);
+			project.setMsmsExtractionParameterSet(msmsParamSet);
+		}
 		
 		String compoundIdList = 
 				projectElement.getChild(ProjectFields.UniqueCIDList.name()).getText();

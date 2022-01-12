@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter;
 
 import java.util.Collection;
 
@@ -44,6 +44,7 @@ public class MSMSFilterParameters {
 	private IncludeSubset fragmentsIncludeSubset;
 	private double fragmentIntensityCutoff;
 	private Collection<Range> massDifferencesRangeList;
+	private boolean neutralLossesOnly;
 	private IncludeSubset massDiffsIncludeSubset;
 	private double massDiffsIntensityCutoff;
 	
@@ -66,7 +67,8 @@ public class MSMSFilterParameters {
 			Collection<Range> fragmentMZRangeList, 
 			IncludeSubset fragmentsIncludeSubset, 
 			double fragmentIntensityCutoff,
-			Collection<Range> massDifferencesRangeList, 
+			Collection<Range> massDifferencesRangeList,			
+			boolean neutralLossesOnly,
 			IncludeSubset massDiffsIncludeSubset,
 			double massDiffsIntensityCutoff) {
 		super();
@@ -84,6 +86,7 @@ public class MSMSFilterParameters {
 		this.fragmentsIncludeSubset = fragmentsIncludeSubset;
 		this.fragmentIntensityCutoff = fragmentIntensityCutoff;
 		this.massDifferencesRangeList = massDifferencesRangeList;
+		this.neutralLossesOnly = neutralLossesOnly;
 		this.massDiffsIncludeSubset = massDiffsIncludeSubset;
 		this.massDiffsIntensityCutoff = massDiffsIntensityCutoff;
 	}
@@ -214,5 +217,13 @@ public class MSMSFilterParameters {
 
 	public void setPrecursorPurityRange(Range precursorPurityRange) {
 		this.precursorPurityRange = precursorPurityRange;
+	}
+
+	public boolean isNeutralLossesOnly() {
+		return neutralLossesOnly;
+	}
+
+	public void setNeutralLossesOnly(boolean neutralLossesOnly) {
+		this.neutralLossesOnly = neutralLossesOnly;
 	}
 }

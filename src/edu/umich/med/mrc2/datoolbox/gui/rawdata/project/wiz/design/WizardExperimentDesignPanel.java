@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.design;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,8 +29,8 @@ import java.util.Collection;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.RawDataProjectMetadataWizard;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.RawDataProjectMetadataWizardPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizardPanel;
 
 public class WizardExperimentDesignPanel extends RawDataProjectMetadataWizardPanel implements ActionListener {
 

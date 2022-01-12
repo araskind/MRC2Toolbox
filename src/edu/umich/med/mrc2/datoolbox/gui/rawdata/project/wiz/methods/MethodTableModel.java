@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.methods;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods;
 
 import java.util.Map;
 import java.util.Map.Entry;

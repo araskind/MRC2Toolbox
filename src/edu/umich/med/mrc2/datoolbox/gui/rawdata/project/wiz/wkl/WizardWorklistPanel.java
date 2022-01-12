@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.worklist;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -51,8 +51,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.worklist.WorklistImportPopupMenu
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.RawDataProjectMetadataWizard;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.mdwizard.RawDataProjectMetadataWizardPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
