@@ -105,13 +105,13 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1625257367452" orientation="HORIZONTAL" divider="0.3027027027027027">
-											<leaf id="2" nodeId="1625257367450">
+											<leaf id="0" nodeId="1625257367450">
 												<placeholders>
 													<placeholder>dock.single.DockableMotrpacStudyAssayListingPanel</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1625257371605" orientation="VERTICAL" divider="0.30866425992779783">
-												<leaf id="1" nodeId="1625257355424">
+											<node nodeId="1625257371605" orientation="VERTICAL" divider="0.45454545454545453">
+												<leaf id="2" nodeId="1625257355424">
 													<placeholders>
 														<placeholder>dock.single.DockableExperimentListingTable</placeholder>
 													</placeholders>
@@ -125,7 +125,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="0" nodeId="1625257364278">
+												<leaf id="1" nodeId="1625257364278">
 													<placeholders>
 														<placeholder>dock.single.DockableMoTrPACTissueCodeListingPanel</placeholder>
 													</placeholders>
@@ -142,6 +142,16 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMotrpacStudyAssayListingPanel">
+										<replacement id="dockablesingle DockableMotrpacStudyAssayListingPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMotrpacStudyAssayListingPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACTissueCodeListingPanel">
 										<replacement id="dockablesingle DockableMoTrPACTissueCodeListingPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
@@ -156,16 +166,6 @@
 										<replacement id="dockablesingle DockableExperimentListingTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>DockableExperimentListingTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMotrpacStudyAssayListingPanel">
-										<replacement id="dockablesingle DockableMotrpacStudyAssayListingPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMotrpacStudyAssayListingPanel</id>
 											<area/>
 										</delegate>
 									</layout>

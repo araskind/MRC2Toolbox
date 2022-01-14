@@ -398,6 +398,8 @@ public enum MainActionCommands {
 	SAVE_MOTRPAC_REPORT_METADATA_COMMAND("Save MoTrpPAC report metadata"),
 	CONFIRM_DELETE_MOTRPAC_REPORT_COMMAND("Authorize deleting MoTrpPAC report"),
 	DELETE_MOTRPAC_REPORT_COMMAND("Delete MoTrpPAC report"),
+	
+	CREATE_MOTRPAC_REPORT_FILES_COMMAND("Create MoTrpPAC report files"),
 		
 	//	MoTrPAC study dialog
 	ADD_MOTRPAC_STUDY_DIALOG_COMMAND("Add MoTrPAC study dialog"),

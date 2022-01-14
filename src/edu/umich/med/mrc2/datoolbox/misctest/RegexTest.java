@@ -220,7 +220,35 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			downloadAllAcqMethods();
+			createMotrpacDataUploadDirectoryStructure();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+		
+	private static void createMotrpacDataUploadDirectoryStructure() {
+		
+		List<String>tissueTypes = new ArrayList<String>(
+				Arrays.asList(
+						"T69 - Adipose brown",
+						"T70 - Adipose white",
+						"T58 - Heart",
+						"T52 - Hippocampus",
+						"T59 - Kidney",
+						"T68 - Liver",
+						"T66 - Lung",
+						"T55 - Muscle",
+						"T31 - Plasma"));
+		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
+		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C Shipment ANI870 10082\\4BIC\\PASS1AC");	
+		try {
+			LIMSReportingUtils.createMotrpacDataUploadDirectoryStructure(
+					tissueTypes, 
+					assayTypes, 
+					parentDirectory,
+					1,
+					"20210603",
+					"20210806");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -3859,36 +3887,7 @@ public class RegexTest {
 		updps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
-	
-	private static void createMotrpacDataUploadDirectoryStructure() {
-		
-		MRC2ToolBoxConfiguration.initConfiguration();
-		List<String>tissueTypes = new ArrayList<String>(
-				Arrays.asList(
-						"T69 - Adipose brown",
-						"T70 - Adipose white",
-						"T58 - Heart",
-						"T52 - Hippocampus",
-						"T59 - Kidney",
-						"T68 - Liver",
-						"T66 - Lung",
-						"T55 - Muscle",
-						"T31 - Plasma"));
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\PASS1B-06");
-		
-		try {
-			LIMSReportingUtils.createMotrpacDataUploadDirectoryStructure(
-					tissueTypes, 
-					assayTypes, 
-					parentDirectory,
-					1,
-					"20200406",
-					"20191008");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+
 	
 	public static void insertDocument() throws Exception {
 		

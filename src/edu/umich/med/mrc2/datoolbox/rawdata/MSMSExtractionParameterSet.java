@@ -108,7 +108,8 @@ public class MSMSExtractionParameterSet {
 
 	public MSMSExtractionParameterSet() {
 		super();
-		// TODO Auto-generated constructor stub
+		this.id = DataPrefix.MSMS_EXTRACTION_PARAMETER_SET.getName() +
+				UUID.randomUUID().toString().substring(0, 12);
 	}
 
 	public Range getDataExtractionRtRange() {
@@ -275,6 +276,11 @@ public class MSMSExtractionParameterSet {
 		
 		Element parametersElement = 
 				new Element(MSMSExtractionParameters.MSMSExtractionParameterSet.name());
+		
+		if(this.id == null)
+			this.id = DataPrefix.MSMS_EXTRACTION_PARAMETER_SET.getName() +
+				UUID.randomUUID().toString().substring(0, 12);
+		
 		parametersElement.setAttribute(
 				MSMSExtractionParameters.ID.name(), id);		
 		if(description == null)

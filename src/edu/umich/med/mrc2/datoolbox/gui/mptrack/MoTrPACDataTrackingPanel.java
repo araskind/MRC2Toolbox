@@ -50,6 +50,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.ref.MotrpacReferenceDataDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.report.DockableMoTrPACReportListingPanel;
+import edu.umich.med.mrc2.datoolbox.gui.mptrack.report.MotrpacReportEmptyFileGeneratorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.report.MotrpacReportUploadDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.study.DockableMoTrPACStudyAssayListingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.study.DockableMoTrPACStudyManagerPanel;
@@ -79,6 +80,7 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 	private DockableMoTrPACReportListingPanel reportListingPanel;
 	
 	private MotrpacReportUploadDialog motrpacReportUploadDialog;
+	private MotrpacReportEmptyFileGeneratorDialog motrpacReportEmptyFileGeneratorDialog;
 	private boolean limsDataLoaded;
 
 	public MoTrPACDataTrackingPanel() {
@@ -138,8 +140,17 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 
 		if(command.equals(MainActionCommands.CREATE_EXPERIMENT_DIRECTORY_STRUCTURE_COMMAND.getName()))
 			createMoTrPACExperimentReportDirectory();
+		
+		if(command.equals(MainActionCommands.CREATE_MOTRPAC_REPORT_FILES_COMMAND.getName()))
+			createEmptyReportFiles();
 	}
-
+	
+	private void createEmptyReportFiles() {
+		motrpacReportEmptyFileGeneratorDialog = new MotrpacReportEmptyFileGeneratorDialog();
+		motrpacReportEmptyFileGeneratorDialog.setLocationRelativeTo(this.getContentPane());
+		motrpacReportEmptyFileGeneratorDialog.setVisible(true);
+	}
+	
 	private void showMetadataReference() {
 		if(motrpacReferenceDataDialog == null) {
 			motrpacReferenceDataDialog = new MotrpacReferenceDataDialog();

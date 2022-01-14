@@ -41,12 +41,14 @@ public class MoTrPACDataTrackingToolbar extends CommonToolbar {
 
 	private static final Icon refreshDataIcon = GuiUtils.getIcon("refreshDbData", 32);
 	private static final Icon showMetadataIcon = GuiUtils.getIcon("metadata", 32);
+	private static final Icon createFilesIcon = GuiUtils.getIcon("addMultifile", 32);
 	private static final Icon uploadReportIcon = GuiUtils.getIcon("addSop", 32);
 
 	@SuppressWarnings("unused")
 	private JButton
 		refreshDataButton,
 		showMetadataButton,
+		createEmtyFilesButton,
 		uploadReportButton;
 
 	public MoTrPACDataTrackingToolbar(ActionListener commandListener) {
@@ -63,6 +65,11 @@ public class MoTrPACDataTrackingToolbar extends CommonToolbar {
 				MainActionCommands.SHOW_MOTRPAC_METADATA_REFERENCE_COMMAND.getName(),
 				buttonDimension);
 		
+		createEmtyFilesButton = GuiUtils.addButton(this, null, createFilesIcon, commandListener,
+				MainActionCommands.CREATE_MOTRPAC_REPORT_FILES_COMMAND.getName(),
+				MainActionCommands.CREATE_MOTRPAC_REPORT_FILES_COMMAND.getName(),
+				buttonDimension);
+		
 //		addSeparator(buttonDimension);
 //		
 //		uploadReportButton = GuiUtils.addButton(this, null, uploadReportIcon, commandListener,
@@ -71,7 +78,6 @@ public class MoTrPACDataTrackingToolbar extends CommonToolbar {
 //				buttonDimension);
 
 //		addSeparator(buttonDimension);
-
 	}
 
 	@Override

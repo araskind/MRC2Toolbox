@@ -40,7 +40,7 @@ public class MoTrPACReportCode implements Serializable, Comparable<MoTrPACReport
 
 	@Override
 	public int compareTo(MoTrPACReportCode o) {
-		return optionName.compareTo(o.getOptionName());
+		return optionCode.compareTo(o.getOptionCode());
 	}
 
 	public String getOptionName() {
@@ -78,7 +78,7 @@ public class MoTrPACReportCode implements Serializable, Comparable<MoTrPACReport
 
         final MoTrPACReportCode other = (MoTrPACReportCode) obj;
 
-        if ((this.optionName == null) ? (other.getOptionName() != null) : !this.optionName.equals(other.getOptionName()))
+        if ((this.optionCode == null) ? (other.getOptionCode() != null) : !this.optionCode.equals(other.getOptionCode()))
             return false;
 
         return true;
@@ -88,7 +88,7 @@ public class MoTrPACReportCode implements Serializable, Comparable<MoTrPACReport
     public int hashCode() {
 
         int hash = 3;
-        hash = 53 * hash + (this.optionName != null ? this.optionName.hashCode() : 0);
+        hash = 53 * hash + (this.optionCode != null ? this.optionCode.hashCode() : 0);
         return hash;
     }
 }

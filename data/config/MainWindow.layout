@@ -183,72 +183,73 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1631029354244" orientation="HORIZONTAL" divider="0.246900269541779">
-											<leaf id="-1" nodeId="1631029354246">
+										<node nodeId="1642002985958" orientation="VERTICAL" divider="0.5">
+											<leaf id="-1" nodeId="1642002985956">
 												<placeholders>
-													<placeholder>dock.single.ProjectSetupDraw</placeholder>
-												</placeholders>
-											</leaf>
-											<leaf id="0" nodeId="1631029354257">
-												<placeholders>
-													<placeholder>dock.single.CompoundDatabasePanel</placeholder>
-													<placeholder>dock.single.MgfPanel</placeholder>
-													<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
-													<placeholder>dock.single.RawDataExaminerPanel</placeholder>
-													<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
-													<placeholder>dock.single.WorklistPanel</placeholder>
-													<placeholder>dock.single.ExperimentDesignPanel</placeholder>
-													<placeholder>dock.single.IDWorkbenchPanel</placeholder>
-													<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
-													<placeholder>dock.single.LabNoteBookPanel</placeholder>
-													<placeholder>dock.single.AutomatorPanel</placeholder>
-													<placeholder>dock.single.QCPanel</placeholder>
-													<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 													<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-													<placeholder>dock.single.MsLibraryPanel</placeholder>
-													<placeholder>dock.single.FeatureDataPanel</placeholder>
-													<placeholder>dock.single.METLIMSPanel</placeholder>
 												</placeholders>
-												<placeholder-map>
-													<version>0</version>
-													<format>dock.PlaceholderList</format>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.QCPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.MgfPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.AutomatorPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.LabNoteBookPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-														</key>
-													</entry>
-												</placeholder-map>
 											</leaf>
+											<node nodeId="1631029354244" orientation="HORIZONTAL" divider="0.246900269541779">
+												<leaf id="-1" nodeId="1631029354246">
+													<placeholders>
+														<placeholder>dock.single.ProjectSetupDraw</placeholder>
+													</placeholders>
+												</leaf>
+												<leaf id="0" nodeId="1631029354257">
+													<placeholders>
+														<placeholder>dock.single.CompoundDatabasePanel</placeholder>
+														<placeholder>dock.single.MgfPanel</placeholder>
+														<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
+														<placeholder>dock.single.RawDataExaminerPanel</placeholder>
+														<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
+														<placeholder>dock.single.WorklistPanel</placeholder>
+														<placeholder>dock.single.ExperimentDesignPanel</placeholder>
+														<placeholder>dock.single.IDWorkbenchPanel</placeholder>
+														<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
+														<placeholder>dock.single.LabNoteBookPanel</placeholder>
+														<placeholder>dock.single.AutomatorPanel</placeholder>
+														<placeholder>dock.single.QCPanel</placeholder>
+														<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
+														<placeholder>dock.single.MsLibraryPanel</placeholder>
+														<placeholder>dock.single.FeatureDataPanel</placeholder>
+														<placeholder>dock.single.METLIMSPanel</placeholder>
+													</placeholders>
+													<placeholder-map>
+														<version>0</version>
+														<format>dock.PlaceholderList</format>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.QCPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.MgfPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.AutomatorPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.LabNoteBookPanel</placeholder>
+															</key>
+														</entry>
+													</placeholder-map>
+												</leaf>
+											</node>
 										</node>
 									</content>
 								</delegate>
@@ -261,7 +262,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>6</selected>
+										<selected>9</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -395,11 +396,6 @@
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
 													<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
@@ -439,6 +435,20 @@
 												<item key="dock.index" type="i">9</item>
 												<item key="dock.id" type="i">9</item>
 												<item key="dock.placeholder" type="s">dock.single.RawDataExaminerPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">10</item>
+												<item key="dock.id" type="i">10</item>
+												<item key="dock.placeholder" type="s">dock.single.MoTrPACDataTrackingPanel</item>
 											</entry>
 										</placeholders>
 									</layout>
@@ -543,6 +553,16 @@
 											</layout>
 											<children ignore="false"/>
 										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.MoTrPACDataTrackingPanel">
+												<replacement id="dockablesingle MoTrPACDataTrackingPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>MoTrPACDataTrackingPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
 									</children>
 								</child>
 							</children>
@@ -639,31 +659,6 @@
 									<replacement id="dockablesingle AutomatorPanel"/>
 									<delegate id="delegate_ccontrol backup factory id">
 										<id>AutomatorPanel</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
-						<child key="single MoTrPACDataTrackingPanel" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-									<backup-path>
-										<node location="RIGHT" size="0.8" id="1631029354244"/>
-										<leaf id="1631029354257"/>
-									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>14</index>
-									<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.MoTrPACDataTrackingPanel">
-									<replacement id="dockablesingle MoTrPACDataTrackingPanel"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>MoTrPACDataTrackingPanel</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -1007,9 +1002,26 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single MoTrPACDataTrackingPanel">
-							<history/>
-							<properties/>
+						<entry id="single MoTrPACDataTrackingPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.5" id="1642002985958"/>
+												<leaf id="1642002985956"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 						<entry id="single FeatureDataPanel" current="dock.mode.normal">
 							<history>
