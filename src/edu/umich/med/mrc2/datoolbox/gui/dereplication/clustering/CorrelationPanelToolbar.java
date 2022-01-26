@@ -51,12 +51,8 @@ public class CorrelationPanelToolbar extends ClusterDisplayToolbar {
 	private static final Icon importBinnerDataIcon = GuiUtils.getIcon("importBins", 32);
 	private static final Icon heatmapIcon = GuiUtils.getIcon("heatmap", 32);
 	private static final Icon exploreDeltasIcon = GuiUtils.getIcon("exploreDeltas", 32);
-
-	@SuppressWarnings("unused")
 	private static final Icon addSelectedFeaturesToSubsetIcon = GuiUtils.getIcon("addSelectedToCollection", 32);
-	@SuppressWarnings("unused")
 	private static final Icon addUnexplainedFeaturesToSubsetIcon = GuiUtils.getIcon("addInactiveToCollection", 32);
-
 	private static final Icon removeUnexplainedFromClustersIcon = GuiUtils.getIcon("clearUnassigned", 32);
 	private static final Icon rejectUnexplainedIcon = GuiUtils.getIcon("rejectUnexplained", 32);
 	private static final Icon molIonOnlyIcon = GuiUtils.getIcon("molIon", 32);

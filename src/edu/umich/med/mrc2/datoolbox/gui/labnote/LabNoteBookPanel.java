@@ -102,7 +102,7 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 		grid.add(0, 0, 100, 100, labNoteSearchForm, labNotesTable, noteViewer, rtfEditor);
 		control.getContentArea().deploy(grid);
 		getContentPane().add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
 	}
 
@@ -445,6 +445,12 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 
 	@Override
 	public void reloadDesign() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initActions() {
 		// TODO Auto-generated method stub
 		
 	}

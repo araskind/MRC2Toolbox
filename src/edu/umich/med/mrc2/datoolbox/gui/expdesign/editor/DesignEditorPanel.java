@@ -91,6 +91,8 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 		designIsFromCurrentProject = false;
 		txtFilter = new FileNameExtensionFilter("Text files", "txt", "TXT", "tsv", "TSV");
 		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
+		
+		initActions();
 	}
 
 	@Override
@@ -401,5 +403,11 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 	public File getLayoutFile() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }

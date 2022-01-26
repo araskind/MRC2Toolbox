@@ -46,6 +46,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.theme.ThemeMap;
@@ -130,6 +131,19 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	private CompoundDatabaseCuratorFrame compoundDatabaseCuratorFrame;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("pubChem", 16);
+	private static final Icon dbSearchIcon = GuiUtils.getIcon("dbLookup", 24);
+	private static final Icon clearSearchIcon = GuiUtils.getIcon("clearSearch", 24);
+	private static final Icon importCompoundsIcon = GuiUtils.getIcon("importLibraryToDb", 24);
+	private static final Icon exportCompoundsIcon = GuiUtils.getIcon("exportFilteredLibraryToFile", 24);
+	private static final Icon addToLibraryIcon = GuiUtils.getIcon("databaseToLibrary", 24);
+	private static final Icon newLibraryIcon = GuiUtils.getIcon("newLibrary", 24);
+	private static final Icon editFeatureIcon = GuiUtils.getIcon("editLibraryFeature", 24);
+	private static final Icon deleteFeatureIcon = GuiUtils.getIcon("deleteFeature", 24);
+	private static final Icon pubChemImportIcon = GuiUtils.getIcon("pubChemDownload", 24);
+	private static final Icon addCompoundIcon = GuiUtils.getIcon("addCompound", 24);
+	private static final Icon findCompoundListIcon = GuiUtils.getIcon("findList", 24);
+	private static final Icon curateCompoundIcon = GuiUtils.getIcon("curateCompound", 24);
+
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "CompoundDatabasePanel.layout");
 
 	public CompoundDatabasePanel() {
@@ -181,7 +195,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		grid.select(0, 50, 100, 60, narrativeDataPanel);
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
 
 		databaseSearchDialog = new DatabaseSearchDialog(this);
@@ -190,6 +204,85 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		databaseCompoundImportDialog = new DatabaseCompoundImportDialog(this);
 	}
 
+	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_DATABASE_BATCH_SEARCH_COMMAND.getName(),
+				MainActionCommands.SHOW_DATABASE_BATCH_SEARCH_COMMAND.getName(), 
+				findCompoundListIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CLEAR_DATABASE_SEARCH_COMMAND.getName(),
+				MainActionCommands.CLEAR_DATABASE_SEARCH_COMMAND.getName(), 
+				clearSearchIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(),
+				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(), 
+				importCompoundsIcon, this));
+		
+		menuActions.addSeparator();
+		
+		SimpleButtonAction editAction = GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_DATABASE_ENTRY_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_DATABASE_ENTRY_DIALOG_COMMAND.getName(), 
+				editFeatureIcon, this);
+		editAction.setEnabled(false);
+		menuActions.add(editAction);
+		
+		SimpleButtonAction deleteAction = GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_DATABASE_ENTRY_COMMAND.getName(),
+				MainActionCommands.DELETE_DATABASE_ENTRY_COMMAND.getName(), 
+				deleteFeatureIcon, this);
+		deleteAction.setEnabled(false);
+		menuActions.add(deleteAction);
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_COMPOUND_LIST_TO_LIBRARY_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_COMPOUND_LIST_TO_LIBRARY_DIALOG_COMMAND.getName(), 
+				addToLibraryIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_PUBCHEM_DATA_LOADER.getName(),
+				MainActionCommands.SHOW_PUBCHEM_DATA_LOADER.getName(), 
+				pubChemImportIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_CUSTOM_COMPOUND_LOADER.getName(),
+				MainActionCommands.SHOW_CUSTOM_COMPOUND_LOADER.getName(), 
+				addCompoundIcon, this));
+		
+		SimpleButtonAction importAction = GuiUtils.setupButtonAction(
+				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(),
+				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(), 
+				importCompoundsIcon, this);
+		importAction.setEnabled(false);
+		menuActions.add(importAction);
+		
+		SimpleButtonAction exportAction = GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_COMPOUNDS_FROM_DATABASE_COMMAND.getName(),
+				MainActionCommands.EXPORT_COMPOUNDS_FROM_DATABASE_COMMAND.getName(), 
+				exportCompoundsIcon, this);
+		exportAction.setEnabled(false);
+		menuActions.add(exportAction);
+		
+		menuActions.addSeparator();
+		
+		SimpleButtonAction curateAction = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_COMPOUND_DATABASE_CURATOR.getName(),
+				MainActionCommands.SHOW_COMPOUND_DATABASE_CURATOR.getName(), 
+				curateCompoundIcon, this);
+		curateAction.setEnabled(false);
+		menuActions.add(curateAction);
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 

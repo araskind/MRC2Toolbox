@@ -96,6 +96,25 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 	private static final Icon componentIcon = 
 			GuiUtils.getIcon("recalculateCorrelations", 16);
+	
+
+	private static final Icon actionsIcon = GuiUtils.getIcon("actions", 24);
+	private static final Icon clusteringIcon = GuiUtils.getIcon("cluster", 24);
+	private static final Icon rerunBinningIcon = GuiUtils.getIcon("rerun", 24);
+	private static final Icon importBinnerDataIcon = GuiUtils.getIcon("importBins", 24);
+	private static final Icon heatmapIcon = GuiUtils.getIcon("heatmap", 24);
+	private static final Icon exploreDeltasIcon = GuiUtils.getIcon("exploreDeltas", 24);
+	private static final Icon addSelectedFeaturesToSubsetIcon = GuiUtils.getIcon("addSelectedToCollection", 24);
+	private static final Icon addUnexplainedFeaturesToSubsetIcon = GuiUtils.getIcon("addInactiveToCollection", 24);
+	private static final Icon removeUnexplainedFromClustersIcon = GuiUtils.getIcon("clearUnassigned", 24);
+	private static final Icon rejectUnexplainedIcon = GuiUtils.getIcon("rejectUnexplained", 24);
+	private static final Icon molIonOnlyIcon = GuiUtils.getIcon("molIon", 24);
+	private static final Icon restoreAllIcon = GuiUtils.getIcon("markAll", 24);
+	private static final Icon annotationIcon = GuiUtils.getIcon("msAnnotation", 24);
+	private static final Icon deltaAnnotationIcon = GuiUtils.getIcon("assignDeltas", 24);
+	private static final Icon batchAssignAnnotationsIcon = GuiUtils.getIcon("calculateAnnotation", 24);
+	private static final Icon recalculateCorrelationsIcon = GuiUtils.getIcon("recalculateCorrelations", 24);
+
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "CorrelationResultsPanel.layout");
 
@@ -114,11 +133,83 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 		createPanelLayout();
 		finalizeLayout();
+		initActions();
 		loadLayout(layoutConfigFile);
 
 		mdExplorerDialog = new MassDifferenceExplorerDialog();
 	}
 
+	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND.getName(),
+				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND.getName(), 
+				filterIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(),
+				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(), 
+				resetFilterIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND.getName(),
+				MainActionCommands.SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND.getName(), 
+				recalculateCorrelationsIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(),
+				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(), 
+				importBinnerDataIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPLORE_MASS_DIFFS_IN_BINNEER_DATA_COMMAND.getName(),
+				MainActionCommands.EXPLORE_MASS_DIFFS_IN_BINNEER_DATA_COMMAND.getName(), 
+				exploreDeltasIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ANNOTATE_CLUSTER_COMMAND.getName(),
+				MainActionCommands.ANNOTATE_CLUSTER_COMMAND.getName(), 
+				annotationIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ANNOTATE_MASS_DIFFERENCES_COMMAND.getName(),
+				MainActionCommands.ANNOTATE_MASS_DIFFERENCES_COMMAND.getName(), 
+				deltaAnnotationIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_BATCH_ANNOTATE_PREFERENCES_COMMAND.getName(),
+				MainActionCommands.SHOW_BATCH_ANNOTATE_PREFERENCES_COMMAND.getName(), 
+				batchAssignAnnotationsIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.REMOVE_UNEXPLAINED_FEATURES_COMMAND.getName(),
+				MainActionCommands.REMOVE_UNEXPLAINED_FEATURES_COMMAND.getName(), 
+				removeUnexplainedFromClustersIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.REJECT_UNEXPLAINED_FEATURES_COMMAND.getName(),
+				MainActionCommands.REJECT_UNEXPLAINED_FEATURES_COMMAND.getName(), 
+				rejectUnexplainedIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.REJECT_ALL_BUT_MOLION_COMMAND.getName(),
+				MainActionCommands.REJECT_ALL_BUT_MOLION_COMMAND.getName(), 
+				molIonOnlyIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.RESTORE_ALL_REJECTED_FEATURES_COMMAND.getName(),
+				MainActionCommands.RESTORE_ALL_REJECTED_FEATURES_COMMAND.getName(), 
+				restoreAllIcon, this));
+		
+		menuActions.addSeparator();	
+
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_HEATMAP_COMMAND.getName(),
+				MainActionCommands.SHOW_HEATMAP_COMMAND.getName(), 
+				heatmapIcon, this));
+	}
+	
 	@Override
 	protected void createPanelLayout() {
 

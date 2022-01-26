@@ -80,6 +80,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 		createPanelLayout();
 		finalizeLayout();
+		initActions();
 		loadLayout(layoutConfigFile);
 	}
 
@@ -414,5 +415,11 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -84,6 +84,9 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 	private File qualAutomationBinary;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("script", 16);
+	private static final Icon runIcon = GuiUtils.getIcon("run", 24);
+	private static final Icon reRunIcon = GuiUtils.getIcon("rerun", 24);
+	private static final Icon stopIcon = GuiUtils.getIcon("stop", 24);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "AutomatorPanel.layout");
 
 	public AutomatorPanel() {
@@ -112,6 +115,7 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 
 		control.getContentArea().deploy( grid );
 		add(control.getContentArea(), BorderLayout.CENTER);
+		initActions();
 		loadLayout(layoutConfigFile);
 
 		dotDfilter = new RegexFileFilter(".+\\.[dD]$");
@@ -119,14 +123,28 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 	}
 
 	@Override
+	protected void initActions() {
+
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.RUN_AUTOMATOR_COMMAND.getName(),
+				MainActionCommands.RUN_AUTOMATOR_COMMAND.getName(), 
+				runIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.RERUN_FAILED_ASSAY_COMMAND.getName(),
+				MainActionCommands.RERUN_FAILED_ASSAY_COMMAND.getName(), 
+				reRunIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.STOP_AUTOMATOR_COMMAND.getName(),
+				MainActionCommands.STOP_AUTOMATOR_COMMAND.getName(), 
+				stopIcon, this));
+	}
+	
+	@Override
 	public void actionPerformed(ActionEvent event) {
 
 		String command = event.getActionCommand();
-
-//		RUN_AUTOMATOR_COMMAND("Run batch raw data analysis"),
-//		RERUN_FAILED_ASSAY_COMMAND("Rerun failed raw data analysis"),
-//		STOP_AUTOMATOR_COMMAND("Stop batch raw data analysis"),
-
 		if (command.equals(MainActionCommands.RUN_AUTOMATOR_COMMAND.getName())) {
 			runAnalysis();
 			return;

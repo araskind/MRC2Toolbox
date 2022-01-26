@@ -71,7 +71,7 @@ public class ExperimentDesignPanel extends DockableMRC2ToolboxPanel {
 		grid.add(0.0d, 0.0d, 100.0d, 100.0d, assayDesignPanel, designEditorPanel);
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
 	}
 
@@ -153,5 +153,11 @@ public class ExperimentDesignPanel extends DockableMRC2ToolboxPanel {
 		if(!e.getValueIsAdjusting()) {
 
 		}
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }

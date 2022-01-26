@@ -25,6 +25,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -78,6 +79,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.FileNameUtils;
@@ -180,6 +183,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsfdr.NISTPepSearchResultManipulator;
 import edu.umich.med.mrc2.datoolbox.rawdata.PeakFinder;
+import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.LIMSReportingUtils;
@@ -220,7 +224,124 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			createMotrpacDataUploadDirectoryStructure();
+			compressMoTrPACRawDataFiles();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void compressMoTrPACRawDataFiles() {
+		
+		List<String>tissueTypes = new ArrayList<String>(
+				Arrays.asList(
+						"T69 - Adipose brown",
+						"T70 - Adipose white",
+						"T58 - Heart",
+						"T59 - Kidney",
+						"T68 - Liver",
+						"T66 - Lung",
+						"T55 - Muscle",
+						"T31 - Plasma"));
+		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
+		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC");	
+		File rawBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC\\RAW_AC");	
+		try {
+			String batchId = "BATCH1_20210603";	
+			String processedFolderId  = "PROCESSED_20210806";
+			for(String tissue : tissueTypes) {
+							
+				for(String assay : assayTypes) {
+					
+					Path zippedRawFilesDirPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW");
+					Path namedDirPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, processedFolderId, "NAMED");
+					Path sampleInfo = Files.find(namedDirPath, Integer.MAX_VALUE, (p, basicFileAttributes) ->
+			                        p.getFileName().toString().startsWith("metadata_sample_")).findFirst().orElse(null);
+					if(sampleInfo != null) {
+						
+						Collection<String>toCompress = new TreeSet<String>();
+						Collection<String>processed = new TreeSet<String>();
+						TreeMap<File,Long> fileSizeMap = new TreeMap<File,Long>();
+						TreeMap<File,String> fileHashMap = new TreeMap<File,String>();
+						File manifest = Paths.get(zippedRawFilesDirPath.toString(), "manifest_" + assay + ".txt").toFile();
+						File checkSumFile = Paths.get(zippedRawFilesDirPath.toString(), " checksum.txt").toFile();
+						FileUtils.copyFile(sampleInfo.toFile(), manifest);						
+						String[][] manifestData = null;
+						try {
+							manifestData = DelimitedTextParser.parseTextFileWithEncoding(manifest, MRC2ToolBoxConfiguration.getTabDelimiter());
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if (manifestData != null) {
+							String[] header = manifestData[0];
+							int fileNameColumn = -1;
+							for(int i=0; i<header.length; i++) {
+								if(header[i].equals("raw_file")) {
+									fileNameColumn = i;
+									break;
+								}
+							}							
+							for(int i=1; i<manifestData.length; i++) 
+								toCompress.add(manifestData[i][fileNameColumn]);
+							
+							System.out.println(sampleInfo.getFileName().toString());
+						}
+						Path rawDataDirectory = Paths.get(rawBaseDir.getAbsolutePath(), tissue, assay);
+						List<Path> pathList = Files.find(rawDataDirectory,
+								1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".d"))).
+							collect(Collectors.toList());
+						for(Path rdp : pathList) {
+							
+							FileUtils.deleteDirectory(Paths.get(rdp.toString(), "Results").toFile());
+							String rawFileName = FilenameUtils.getBaseName(rdp.toString());
+							if(toCompress.contains(rawFileName)) {
+								
+								File destination = Paths.get(zippedRawFilesDirPath.toString(),
+										FilenameUtils.getBaseName(rdp.toString()) + ".zip").toFile();
+								CompressionUtils.zipFolder(rdp.toFile(), destination);
+								if(destination.exists()) {
+									try {
+										String zipHash = DigestUtils.sha256Hex(
+												new FileInputStream(destination.getAbsolutePath()));
+
+										fileHashMap.put(destination, zipHash);
+									} catch (FileNotFoundException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									} catch (IOException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+									fileSizeMap.put(destination, destination.length());
+									processed.add(rawFileName);
+								}								
+							}
+						}
+						@SuppressWarnings({ "unchecked" })
+						Collection<String> missing = CollectionUtils.removeAll(toCompress, processed);
+						if(!missing.isEmpty()) {
+							System.out.println("Missing files in " + zippedRawFilesDirPath.toString());
+							for(String m : missing)
+								System.out.println(m);
+						}					
+						//	Write checksum file
+						StringBuffer checkSumData = new StringBuffer();
+						checkSumData.append("File name\t");
+						checkSumData.append("SHA256\t");
+						checkSumData.append("Size\n");
+						for(Entry<File, String> entry : fileHashMap.entrySet()) {
+							
+							if(fileSizeMap.get(entry.getKey()) != null) {
+								
+								checkSumData.append(entry.getKey().getName() +"\t");
+								checkSumData.append(entry.getValue() +"\t");
+								checkSumData.append(Long.toString(fileSizeMap.get(entry.getKey())) + "\n");
+							}
+						}
+						FileUtils.writeStringToFile(checkSumFile, checkSumData.toString(), Charset.defaultCharset());
+					}
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -251,6 +372,64 @@ public class RegexTest {
 					"20210806");
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	private static void createManifestsDirectoryStructure() {
+		
+		List<String>tissueTypes = new ArrayList<String>(
+				Arrays.asList(
+						"T69 - Adipose brown",
+						"T70 - Adipose white",
+						"T58 - Heart",
+						"T59 - Kidney",
+						"T68 - Liver",
+						"T66 - Lung",
+						"T55 - Muscle",
+						"T31 - Plasma"));
+		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
+		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C Shipment ANI870 10082\\4BIC\\PASS1AC\\Manifests");
+		for(String tissue : tissueTypes) {
+			
+			for(String assay : assayTypes) {
+				
+				try {
+					Files.createDirectories(
+							Paths.get(parentDirectory.getAbsolutePath(), tissue, assay));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	private static void createRawDataVaultDirectoryStructure() {
+		
+		List<String>tissueTypes = new ArrayList<String>(
+				Arrays.asList(
+						"T69 - Adipose brown",
+						"T70 - Adipose white",
+						"T58 - Heart",
+						"T59 - Kidney",
+						"T68 - Liver",
+						"T66 - Lung",
+						"T55 - Muscle",
+						"T31 - Plasma"));
+		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
+		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C Shipment ANI870 10082\\4BIC\\PASS1AC\\RAW_AC");
+		for(String tissue : tissueTypes) {
+			
+			for(String assay : assayTypes) {
+				
+				try {
+					Files.createDirectories(
+							Paths.get(parentDirectory.getAbsolutePath(), tissue, assay));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	

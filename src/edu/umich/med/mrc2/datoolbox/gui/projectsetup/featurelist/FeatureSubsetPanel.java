@@ -90,6 +90,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 		
 		//	TODO switch to "DISPOSE_ON_CLOSE"
 		featureSubsetDialog = new FeatureSubsetDialog(this);
+		initActions();
 		loadLayout(layoutConfigFile);
 	}
 
@@ -491,5 +492,11 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }

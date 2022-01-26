@@ -84,7 +84,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 		grid.select(0, 50, 100, 50, twoDQCpanel);
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
 	}
 
@@ -222,5 +222,11 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 		if(!e.getValueIsAdjusting()) {
 
 		}
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }

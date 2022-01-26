@@ -60,7 +60,6 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 	private static final Icon openMsMsDataFileIcon = GuiUtils.getIcon("openMsMsDataFile", 32);
 //	private static final Icon indexRawFilesIcon = GuiUtils.getIcon("indexRawFiles", 32);
 	private static final Icon clearDuplicatesIcon = GuiUtils.getIcon("clearDuplicates", 32);	
-
 	private static final Icon bubblePlotIcon = GuiUtils.getIcon("bubble", 32);
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("clusterFeatureTable", 32);
 	private static final Icon fdrIcon = GuiUtils.getIcon("fdr", 32);	
@@ -132,23 +131,6 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 		
 		addSeparator(buttonDimension);
 		
-		exportMSPButton = GuiUtils.addButton(this, null, exportMSPIcon, commandListener,
-				MainActionCommands.EXPORT_FEATURES_TO_MSP_COMMAND.getName(),
-				MainActionCommands.EXPORT_FEATURES_TO_MSP_COMMAND.getName(),
-				buttonDimension);
-		
-		exportSiriusMSButton = GuiUtils.addButton(this, null, siriusIcon, commandListener,
-				MainActionCommands.SHOW_SIRIUS_MS_EXPORT_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_SIRIUS_MS_EXPORT_DIALOG_COMMAND.getName(),
-				buttonDimension);
-		
-		exportTrackerDataButton = GuiUtils.addButton(this, null, exportTrackerDataIcon, commandListener,
-				MainActionCommands.SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND.getName(),
-				buttonDimension);
-
-		addSeparator(buttonDimension);
-		
 		nistMsPepButon = GuiUtils.addButton(this, null, nistPepMsIcon, commandListener,
 				MainActionCommands.NIST_MS_PEPSEARCH_SETUP_COMMAND.getName(),
 				MainActionCommands.NIST_MS_PEPSEARCH_SETUP_COMMAND.getName(),
@@ -159,15 +141,20 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 				MainActionCommands.NIST_MS_OFFLINE_PEPSEARCH_SETUP_COMMAND.getName(),
 				buttonDimension);
 		
-		nistMsButon = GuiUtils.addButton(this, null, nistMsIcon, commandListener,
-				MainActionCommands.NIST_MS_SEARCH_SETUP_COMMAND.getName(),
-				MainActionCommands.NIST_MS_SEARCH_SETUP_COMMAND.getName(),
-				buttonDimension);	
-		nistMsButon.setEnabled(false);
+//		nistMsButon = GuiUtils.addButton(this, null, nistMsIcon, commandListener,
+//				MainActionCommands.NIST_MS_SEARCH_SETUP_COMMAND.getName(),
+//				MainActionCommands.NIST_MS_SEARCH_SETUP_COMMAND.getName(),
+//				buttonDimension);	
+//		nistMsButon.setEnabled(false);
 		
 		nistPepSearchOfflineUploadButton = GuiUtils.addButton(this, null, nistPepMsOfflineUploadIcon, commandListener,
 				MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_COMMAND.getName(),
 				MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_COMMAND.getName(),
+				buttonDimension);
+		
+		reassignTopHitsButton = GuiUtils.addButton(this, null, reassignTopHitsIcon, commandListener,
+				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT.getName(),
+				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT.getName(),
 				buttonDimension);
 		
 		fdrButton = GuiUtils.addButton(this, null, fdrIcon, commandListener,
@@ -175,11 +162,6 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 				MainActionCommands.SETUP_FDR_ESTIMATION_FOR_LIBRARY_MATCHES.getName(),
 				buttonDimension);
 		fdrButton.setEnabled(false);
-		
-		reassignTopHitsButton = GuiUtils.addButton(this, null, reassignTopHitsIcon, commandListener,
-				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT.getName(),
-				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT.getName(),
-				buttonDimension);
 		
 		addSeparator(buttonDimension);
 		
@@ -220,6 +202,23 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 		editFeatureCollectionButton = GuiUtils.addButton(this, null, editFeatureCollectionIcon, commandListener,
 				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName(),
 				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName(), buttonDimension);
+	
+		addSeparator(buttonDimension);
+		
+		exportMSPButton = GuiUtils.addButton(this, null, exportMSPIcon, commandListener,
+				MainActionCommands.EXPORT_FEATURES_TO_MSP_COMMAND.getName(),
+				MainActionCommands.EXPORT_FEATURES_TO_MSP_COMMAND.getName(),
+				buttonDimension);
+		
+		exportSiriusMSButton = GuiUtils.addButton(this, null, siriusIcon, commandListener,
+				MainActionCommands.SHOW_SIRIUS_MS_EXPORT_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_SIRIUS_MS_EXPORT_DIALOG_COMMAND.getName(),
+				buttonDimension);
+		
+		exportTrackerDataButton = GuiUtils.addButton(this, null, exportTrackerDataIcon, commandListener,
+				MainActionCommands.SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND.getName(),
+				buttonDimension);
 	}
 
 	@Override

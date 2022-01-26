@@ -51,6 +51,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
 
+import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.theme.ThemeMap;
@@ -119,6 +120,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.MsMsFeaturePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.SiriusDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.FilterTrackerMSMSFeaturesDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.MSMSFilterParameters;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.rtid.MSMSFeatureRTIDSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.nistms.NISTMSSerchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PepSearchSetupDialog;
@@ -255,6 +257,34 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	private ReassignDefaultMSMSLibraryHitDialog reassignDefaultMSMSLibraryHitDialog;
 	private IndeterminateProgressDialog idp;
 	private FilterTrackerMSMSFeaturesDialog filterTrackerFeaturesDialog;
+	private MSMSFeatureRTIDSearchDialog msmsFeatureRTIDSearchDialog;
+	
+	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
+	private static final Icon openCdpIdProjectIcon = GuiUtils.getIcon("openIdExperiment", 24);
+	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
+	private static final Icon idSetupIcon = GuiUtils.getIcon("searchCompounds", 24);
+	private static final Icon nistMsIcon = GuiUtils.getIcon("NISTMS", 24);
+	private static final Icon nistPepMsIcon = GuiUtils.getIcon("NISTMS-pep", 24);
+	private static final Icon nistPepMsOfflineIcon = GuiUtils.getIcon("NISTMS-pep-offline", 24);
+	private static final Icon nistPepMsOfflineUploadIcon = GuiUtils.getIcon("NISTMS-pep-upload", 24);
+	private static final Icon validateNistPepMsIcon = GuiUtils.getIcon("acceptMsMs", 24);
+	private static final Icon iddaIcon = GuiUtils.getIcon("importIDDAdata", 24);
+	private static final Icon trackerManegerIcon = GuiUtils.getIcon("experimentDatabase", 24);
+	private static final Icon exportMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
+	private static final Icon siriusIcon = GuiUtils.getIcon("sirius", 24);
+	private static final Icon exportSiriusMSIcon = GuiUtils.getIcon("exportSiriusMs", 24);
+	private static final Icon exportTrackerDataIcon = GuiUtils.getIcon("saveList", 24);
+	private static final Icon idStatusManagerIcon = GuiUtils.getIcon("idStatusManager", 24);
+	private static final Icon idFollowupStepManagerIcon = GuiUtils.getIcon("idFollowupStepManager", 24);
+	private static final Icon standardFeatureAnnotationManagerIcon = GuiUtils.getIcon("editCollection", 24);
+	private static final Icon openMsMsDataFileIcon = GuiUtils.getIcon("openMsMsDataFile", 24);
+//	private static final Icon indexRawFilesIcon = GuiUtils.getIcon("indexRawFiles", 24);
+	private static final Icon clearDuplicatesIcon = GuiUtils.getIcon("clearDuplicates", 24);	
+	private static final Icon bubblePlotIcon = GuiUtils.getIcon("bubble", 24);
+	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("clusterFeatureTable", 24);
+	private static final Icon fdrIcon = GuiUtils.getIcon("fdr", 24);	
+	private static final Icon reassignTopHitsIcon = GuiUtils.getIcon("recalculateScores", 24);
+	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
 
 	public IDWorkbenchPanel() {
 
@@ -336,13 +366,98 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
 		idSetupDialog = new IDSetupDialog(this);
 		initDataMaps();
 		
 		idTrackerDataExplorerPlotDialog = new IDTrackerDataExplorerPlotFrame(this);
 		idTrackerDataExplorerPlotDialog.setLocationRelativeTo(this.getContentPane());
+	}
+	
+	@Override
+	protected void initActions() {	
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND.getName(), 
+				searchIdTrackerIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.NIST_MS_PEPSEARCH_SETUP_COMMAND.getName(),
+				MainActionCommands.NIST_MS_PEPSEARCH_SETUP_COMMAND.getName(), 
+				nistPepMsIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.NIST_MS_OFFLINE_PEPSEARCH_SETUP_COMMAND.getName(),
+				MainActionCommands.NIST_MS_OFFLINE_PEPSEARCH_SETUP_COMMAND.getName(), 
+				nistPepMsOfflineIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_COMMAND.getName(),
+				MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_COMMAND.getName(), 
+				nistPepMsOfflineUploadIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT.getName(),
+				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT.getName(), 
+				reassignTopHitsIcon, this));
+		
+		SimpleButtonAction fdrItem = GuiUtils.setupButtonAction(
+				MainActionCommands.SETUP_FDR_ESTIMATION_FOR_LIBRARY_MATCHES.getName(),
+				MainActionCommands.SETUP_FDR_ESTIMATION_FOR_LIBRARY_MATCHES.getName(), 
+				fdrIcon, this);
+		fdrItem.setEnabled(false);
+		menuActions.add(fdrItem);
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_ID_LEVEL_MANAGER_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_ID_LEVEL_MANAGER_DIALOG_COMMAND.getName(), 
+				idStatusManagerIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_ID_FOLLOWUP_STEP_MANAGER_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_ID_FOLLOWUP_STEP_MANAGER_DIALOG_COMMAND.getName(), 
+				idFollowupStepManagerIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_STANDARD_FEATURE_ANNOTATION_MANAGER_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_STANDARD_FEATURE_ANNOTATION_MANAGER_DIALOG_COMMAND.getName(), 
+				standardFeatureAnnotationManagerIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.LOAD_RAW_DATA_FOR_CURRENT_MSMS_FEATURE_SET_COMMAND.getName(),
+				MainActionCommands.LOAD_RAW_DATA_FOR_CURRENT_MSMS_FEATURE_SET_COMMAND.getName(), 
+				openMsMsDataFileIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT.getName(),
+				MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT.getName(), 
+				bubblePlotIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName(), 
+				editFeatureCollectionIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_FEATURES_TO_MSP_COMMAND.getName(),
+				MainActionCommands.EXPORT_FEATURES_TO_MSP_COMMAND.getName(), 
+				exportMSPIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_SIRIUS_MS_EXPORT_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_SIRIUS_MS_EXPORT_DIALOG_COMMAND.getName(), 
+				siriusIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND.getName(), 
+				exportTrackerDataIcon, this));
 	}
 
 	private void initDataMaps() {
@@ -559,9 +674,29 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			showFeatureFilter();
 			
 		if (command.equals(MainActionCommands.FILTER_FEATURES_COMMAND.getName()))
-			filterFeatureTable();		
+			filterFeatureTable();
+		
+		if (command.equals(MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND.getName())) 
+			showFeatureRTIDSearchDialog();
+			
+		if (command.equals(MainActionCommands.SEARCH_FEATURES_BY_RT_ID_COMMAND.getName()))
+			searchFeaturesByRtId();
 	}
 	
+	private void showFeatureRTIDSearchDialog() {
+		// TODO Auto-generated method stub
+		msmsFeatureRTIDSearchDialog = new MSMSFeatureRTIDSearchDialog(this);
+		msmsFeatureRTIDSearchDialog.setLocationRelativeTo(this.getContentPane());
+		msmsFeatureRTIDSearchDialog.setVisible(true);
+	}
+
+	private void searchFeaturesByRtId() {
+		// TODO Auto-generated method stub
+		
+		
+		msmsFeatureRTIDSearchDialog.dispose();
+	}
+
 	private void showFeatureFilter() {
 		filterTrackerFeaturesDialog = new FilterTrackerMSMSFeaturesDialog(this);
 		filterTrackerFeaturesDialog.setLocationRelativeTo(this.getContentPane());

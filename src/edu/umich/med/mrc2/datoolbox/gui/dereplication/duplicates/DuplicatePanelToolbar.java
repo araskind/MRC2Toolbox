@@ -64,16 +64,16 @@ public class DuplicatePanelToolbar extends ClusterDisplayToolbar {
 		clearDuplicatesButton = GuiUtils.addButton(this, null, clearDuplicatesIcon, commandListener,
 				MainActionCommands.SHOW_DUPLICATES_MERGE_DIALOG_COMMAND.getName(),
 				MainActionCommands.SHOW_DUPLICATES_MERGE_DIALOG_COMMAND.getName(), buttonDimension);
-
-		exportDuplicatesButton = GuiUtils.addButton(this, null, exportDuplicatesIcon, commandListener,
-				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(),
-				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(), buttonDimension);
 		
 		addSeparator(buttonDimension);
 		
 		checkDuplicateNamesButton = GuiUtils.addButton(this, null, checkDuplicateNamesIcon, commandListener,
 				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(),
 				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(), buttonDimension);
+		
+		exportDuplicatesButton = GuiUtils.addButton(this, null, exportDuplicatesIcon, commandListener,
+				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(),
+				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(), buttonDimension);	
 	}
 
 	@Override

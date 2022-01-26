@@ -80,6 +80,7 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		super("ProjectDetailsPanel", "Project details", componentIcon);
 		setCloseable(false);
 		initPanelGui();
+		initActions();
 	}
 
 	private void initPanelGui() {
@@ -501,6 +502,12 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 
 	@Override
 	public void reloadDesign() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void initActions() {
 		// TODO Auto-generated method stub
 		
 	}

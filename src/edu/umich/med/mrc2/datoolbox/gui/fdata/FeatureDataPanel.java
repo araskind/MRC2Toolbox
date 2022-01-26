@@ -188,7 +188,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		grid.select(0, 50, 50, 50, dataPlot);
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
 		
 		dataImputationSetupDialog = new DataImputationSetupDialog(this);
@@ -1389,5 +1389,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213795362" orientation="HORIZONTAL" divider="0.2">
-											<leaf id="1" nodeId="1600213795364">
+											<leaf id="3" nodeId="1600213795364">
 												<placeholders>
 													<placeholder>dock.single.CorrelationResultsPanelDockableClusterTree</placeholder>
 												</placeholders>
@@ -108,7 +108,7 @@
 											<node nodeId="1600213795366" orientation="VERTICAL" divider="0.5">
 												<node nodeId="1600213795368" orientation="VERTICAL" divider="0.6">
 													<node nodeId="1600213795370" orientation="HORIZONTAL" divider="0.8">
-														<leaf id="0" nodeId="1600213795371">
+														<leaf id="1" nodeId="1600213795371">
 															<placeholders>
 																<placeholder>dock.single.DockableClusterFeatureSelectionTable</placeholder>
 																<placeholder>dock.single.DockableMassDifferenceTable</placeholder>
@@ -132,7 +132,7 @@
 																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="2" nodeId="1600213795373">
+														<leaf id="0" nodeId="1600213795373">
 															<placeholders>
 																<placeholder>dock.single.ClusterDisplayPanelDockableMolStructurePanel</placeholder>
 															</placeholders>
@@ -145,7 +145,7 @@
 													</leaf>
 												</node>
 												<node nodeId="1600213795377" orientation="HORIZONTAL" divider="0.5">
-													<leaf id="3" nodeId="1600213795382">
+													<leaf id="2" nodeId="1600213795382">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableFeatureIntensitiesTable</placeholder>
 															<placeholder>dock.single.ClusterDisplayPanelDockableDataPlot</placeholder>
@@ -222,6 +222,16 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
+									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableMolStructurePanel">
+										<replacement id="dockablesingle ClusterDisplayPanelDockableMolStructurePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ClusterDisplayPanelDockableMolStructurePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>1</selected>
 										<placeholders>
@@ -279,26 +289,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.CorrelationResultsPanelDockableClusterTree">
-										<replacement id="dockablesingle CorrelationResultsPanelDockableClusterTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>CorrelationResultsPanelDockableClusterTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableMolStructurePanel">
-										<replacement id="dockablesingle ClusterDisplayPanelDockableMolStructurePanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ClusterDisplayPanelDockableMolStructurePanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
@@ -382,6 +372,16 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.CorrelationResultsPanelDockableClusterTree">
+										<replacement id="dockablesingle CorrelationResultsPanelDockableClusterTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>CorrelationResultsPanelDockableClusterTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableIdentificationResultsTable">

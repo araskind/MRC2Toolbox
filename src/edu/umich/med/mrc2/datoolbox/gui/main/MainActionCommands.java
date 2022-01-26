@@ -53,9 +53,9 @@ public enum MainActionCommands {
 	// Raw data project
 	NEW_RAW_DATA_PROJECT_SETUP_COMMAND("New raw data analysis project"),
 	NEW_RAW_DATA_PROJECT_COMMAND("Create new raw data analysis project"),
-	OPEN_RAW_DATA_PROJECT_COMMAND("Open raw data analysis pproject"),
-	CLOSE_RAW_DATA_PROJECT_COMMAND("Close raw data analysis pproject"),
-	SAVE_RAW_DATA_PROJECT_COMMAND("Save raw data analysis pproject"),
+	OPEN_RAW_DATA_PROJECT_COMMAND("Open raw data analysis project"),
+	CLOSE_RAW_DATA_PROJECT_COMMAND("Close raw data analysis project"),
+	SAVE_RAW_DATA_PROJECT_COMMAND("Save raw data analysis project"),
 	EDIT_RAW_DATA_PROJECT_SETUP_COMMAND("Show raw data analysis project editor"),
 	EDIT_RAW_DATA_PROJECT_COMMAND("Edit raw data analysis project"),
 	
@@ -288,10 +288,10 @@ public enum MainActionCommands {
 	SHOW_HEATMAP_COMMAND("Show heatmap"),
 	SHOW_DENDROGRAMM_COMMAND("Show dendrogram"),
 	SHOW_CORRELATION_TABLE_COMMAND("Show correlation table"),
-	SHOW_CLUSTER_FILTER_COMMAND("Show filter"),
+	SHOW_CLUSTER_FILTER_COMMAND("Show feature cluster filter"),
 	HIDE_CLUSTER_FILTER_COMMAND("Hide tree filter"),
 	FILTER_CLUSTERS_COMMAND("Filter clusters"),
-	RESET_FILTER_CLUSTERS_COMMAND("Show all"),
+	RESET_FILTER_CLUSTERS_COMMAND("Reset feature cluster filter"),
 	EXPAND_CLUSTERS_COMMAND("Expand all clusters"),
 	COLLAPSE_CLUSTERS_COMMAND("Collapse all clusters"),
 	DELETE_CLUSTER_COMMAND("Delete cluster"),
@@ -304,7 +304,7 @@ public enum MainActionCommands {
 	SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND("Correlation analysis setup"),
 	FIND_FEATURE_CORRELATIONS_COMMAND("Find feature correlations"),
 	RERUN_BINNING_COMMAND("Re-analyze correlations"),
-	SHOW_BINNER_REPORT_IMPORT_DIALOG("Binner analysis results import dialog"),
+	SHOW_BINNER_REPORT_IMPORT_DIALOG("Binner analysis results import setup"),
 	IMPORT_BINNER_DATA_COMMAND("Import Binner analysis results"),
 	EXPLORE_MASS_DIFFS_IN_BINNEER_DATA_COMMAND("Explore mass differences in Binner data"),
 	RACALCULATE_CLUSTER_CORR_MATRIX_COMMAND("Re-calculate correlations within clusters"),
@@ -338,6 +338,8 @@ public enum MainActionCommands {
 	MERGE_SELECTED_FEATURES_COMMAND("Merge selected features"),	
 	SHOW_FEATURE_FILTER_COMMAND("Show feature filter"),
 	FILTER_FEATURES_COMMAND("Filter features"),
+	SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND("Search by RT/identity setup"),
+	SEARCH_FEATURES_BY_RT_ID_COMMAND("Search features by RT/identity"),
 
 	// Duplicates
 	SHOW_FIND_DUPLICATES_DIALOG_COMMAND("Show find duplicates options"),
@@ -916,12 +918,12 @@ public enum MainActionCommands {
 	REASSIGN_DEFAULT_MSMS_LIBRARY_MATCHES("Reassign default MSMS library matches"),
 	
 	//	IDTracker export
-	SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND("Show IDTracker data export dialog"),
+	SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND("IDTracker data export setup"),
 	EXPORT_IDTRACKER_DATA_COMMAND("Export IDTracker data"),
 	RESET_IDTRACKER_DATA_EXPORT_FIELDS_COMMAND("Reset IDTracker data export fields"),
 	
 	//	Tracker search dialog
-	SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND("Show IDTracker search dialog"),
+	SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND("IDTracker search setup"),
 	SHOW_ID_TRACKER_SAVED_QUERIES_LIST_COMMAND("Show IDTracker saved queries list"),
 	LOAD_ID_TRACKER_SAVED_QUERY_COMMAND("Load saved IDTracker search query"),
 	SHOW_ID_TRACKER_SAVE_QUERY_DIALOG_COMMAND("Save current IDTracker search query"),

@@ -123,6 +123,7 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 		wrapper.add(designEditorPanel);
 
 		expDesignEditorDialog = new ExpDesignEditorDialog(this);
+		initActions();
 		loadLayout(layoutConfigFile);
 	}
 
@@ -451,5 +452,11 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -116,7 +116,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		grid.add(0, 0, 100, 100, worklistTable);
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
 		loadPreferences();
 //		dotDfilter = new RegexFileFilter(".+\\.[dD]$");
@@ -557,6 +557,12 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	public void savePreferences() {
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

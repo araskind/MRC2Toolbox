@@ -69,8 +69,12 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 	private DuplicateFindDialog duplicateFindDialog;
 	private DockableDuplicateSelectionTable duplicateSelectionTable;
 
-	private static final Icon componentIcon = 
-			GuiUtils.getIcon("duplicates", 16);
+	private static final Icon componentIcon = GuiUtils.getIcon("duplicates", 16);
+	private static final Icon clearDuplicatesIcon = GuiUtils.getIcon("clearDuplicates", 24);
+	private static final Icon exportDuplicatesIcon = GuiUtils.getIcon("saveDuplicates", 24);
+	private static final Icon showDuplicatesIcon = GuiUtils.getIcon("findDuplicates", 24);
+	private static final Icon checkDuplicateNamesIcon = GuiUtils.getIcon("checkDuplicateNames", 24);
+
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "DuplicatesPanel.layout");
 
@@ -87,7 +91,47 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 		createPanelLayout();
 		finalizeLayout();
+		initActions();
 		loadLayout(layoutConfigFile);
+	}
+	
+	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_FIND_DUPLICATES_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_FIND_DUPLICATES_DIALOG_COMMAND.getName(), 
+				showDuplicatesIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_DUPLICATES_MERGE_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_DUPLICATES_MERGE_DIALOG_COMMAND.getName(), 
+				clearDuplicatesIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(),
+				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(), 
+				checkDuplicateNamesIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(),
+				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(), 
+				exportDuplicatesIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND.getName(),
+				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND.getName(), 
+				filterIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(),
+				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(), 
+				resetFilterIcon, this));
+		
+		menuActions.addSeparator();		
 	}
 
 	@Override

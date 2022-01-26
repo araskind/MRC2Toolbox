@@ -146,6 +146,21 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private Preferences preferences;
 	private static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	private File baseDirectory; 
+
+	private static final Icon newRdaProjectIcon = GuiUtils.getIcon("newRawDataAnalysisProject", 24);
+	private static final Icon editRdaProjectIcon = GuiUtils.getIcon("editRawDataAnalysisProject", 24);
+	private static final Icon openProjectIcon = GuiUtils.getIcon("openRawDataAnalysisProject", 24);
+	private static final Icon closeProjectIcon = GuiUtils.getIcon("closeRawDataAnalysisProject", 24);
+	private static final Icon saveProjectIcon = GuiUtils.getIcon("saveRawDataAnalysisProject", 24);	
+	private static final Icon extractMSMSFeaturesIcon = GuiUtils.getIcon("findMSMSFeatures", 24);	
+	private static final Icon sendToIDTrackerIcon = GuiUtils.getIcon("sendToIDTracker", 24);	
+	private static final Icon openDataFileIcon = GuiUtils.getIcon("openDataFile", 24);
+	private static final Icon closeDataFileIcon = GuiUtils.getIcon("closeDataFile", 24);
+	private static final Icon msConvertIcon = GuiUtils.getIcon("msConvert", 24);
+	private static final Icon indexRawFilesIcon = GuiUtils.getIcon("indexRawFiles", 24);
+	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);
+	private static final Icon addMetaDataIcon = GuiUtils.getIcon("addMetadata", 24);
+	private static final Icon sendProjectToDatabaseIcon = GuiUtils.getIcon("xml2Database", 24);
 	
 	public RawDataExaminerPanel(){
 		
@@ -183,9 +198,88 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		control.getContentArea().deploy( grid );
 
 		add(control.getContentArea(), BorderLayout.CENTER);		
+		initActions();
 		loadLayout(layoutConfigFile);
 		loadPreferences();
 		initChooser();
+	}
+	
+	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
+				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName(), 
+				newRdaProjectIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND.getName(),
+				MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND.getName(), 
+				openProjectIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CLOSE_RAW_DATA_PROJECT_COMMAND.getName(),
+				MainActionCommands.CLOSE_RAW_DATA_PROJECT_COMMAND.getName(), 
+				closeProjectIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SAVE_RAW_DATA_PROJECT_COMMAND.getName(),
+				MainActionCommands.SAVE_RAW_DATA_PROJECT_COMMAND.getName(), 
+				saveProjectIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
+				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND.getName(), 
+				editRdaProjectIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.MSMS_FEATURE_EXTRACTION_SETUP_COMMAND.getName(),
+				MainActionCommands.MSMS_FEATURE_EXTRACTION_SETUP_COMMAND.getName(), 
+				extractMSMSFeaturesIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH.getName(),
+				MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH.getName(), 
+				sendToIDTrackerIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName(),
+				MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName(), 
+				addMetaDataIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName(),
+				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName(), 
+				sendProjectToDatabaseIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.OPEN_RAW_DATA_FILE_COMMAND.getName(),
+				MainActionCommands.OPEN_RAW_DATA_FILE_COMMAND.getName(), 
+				openDataFileIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CLOSE_RAW_DATA_FILE_COMMAND.getName(),
+				MainActionCommands.CLOSE_RAW_DATA_FILE_COMMAND.getName(), 
+				closeDataFileIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SETUP_RAW_DATA_CONVERSION_COMMAND.getName(),
+				MainActionCommands.SETUP_RAW_DATA_CONVERSION_COMMAND.getName(), 
+				msConvertIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND.getName(),
+				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND.getName(), 
+				indexRawFilesIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName(),
+				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName(), 
+				dataFileToolsIcon, this));
 	}
 	
 	private void initChooser() {

@@ -114,7 +114,7 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
 		limsDataLoaded = false;
 	}
@@ -376,6 +376,12 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 
 	public boolean isLimsDataLoaded() {
 		return limsDataLoaded;
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

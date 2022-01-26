@@ -69,6 +69,7 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 		assayDesignTable.setTablePopupEnabled(false);
 		JScrollPane designScrollPane = new JScrollPane(assayDesignTable);
 		add(designScrollPane, BorderLayout.CENTER);
+		initActions();
 	}
 
 	@Override
@@ -227,5 +228,11 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 	public File getLayoutFile() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }

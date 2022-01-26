@@ -65,6 +65,13 @@ import edu.umich.med.mrc2.datoolbox.utils.LIMSReportingUtils;
 public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("experimentDatabase", 16);
+	private static final Icon refreshDataIcon = GuiUtils.getIcon("refreshDbData", 24);
+	private static final Icon resyncExperimentToLimsIcon = GuiUtils.getIcon("resyncExperimentToLims", 24);
+	private static final Icon sendDesignToProjectIcon = GuiUtils.getIcon("sendDesignToProject", 24);
+	private static final Icon syncDbIcon = GuiUtils.getIcon("synchronizeDb", 24);
+	private static final Icon createExperimentDirIcon = GuiUtils.getIcon("newProject", 24);
+	private static final Icon deleteExperimentIcon = GuiUtils.getIcon("deleteCollection", 24);
+	
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "METLIMSPanel.layout");
 
 	private METLIMSToolbar toolbar;
@@ -89,8 +96,41 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
+	}
+	
+	@Override
+	protected void initActions() {
+
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName(),
+				MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName(), 
+				refreshDataIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SYNCHRONIZE_MRC2LIMS_TO_METLIMS_COMMAND.getName(),
+				MainActionCommands.SYNCHRONIZE_MRC2LIMS_TO_METLIMS_COMMAND.getName(), 
+				syncDbIcon, this));
+		
+		menuActions.addSeparator();	
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_EXPERIMENT_FROM_MRC2LIMS_COMMAND.getName(),
+				MainActionCommands.DELETE_EXPERIMENT_FROM_MRC2LIMS_COMMAND.getName(), 
+				deleteExperimentIcon, this));
+		
+		menuActions.addSeparator();	
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SEND_DESIGN_TO_PROJECT_COMMAND.getName(),
+				MainActionCommands.SEND_DESIGN_TO_PROJECT_COMMAND.getName(), 
+				sendDesignToProjectIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CREATE_EXPERIMENT_DIRECTORY_STRUCTURE_COMMAND.getName(),
+				MainActionCommands.CREATE_EXPERIMENT_DIRECTORY_STRUCTURE_COMMAND.getName(), 
+				createExperimentDirIcon, this));
 	}
 
 	@Override

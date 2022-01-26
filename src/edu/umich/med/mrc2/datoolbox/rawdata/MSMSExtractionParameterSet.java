@@ -340,9 +340,13 @@ public class MSMSExtractionParameterSet {
 		if(commonChromatogramDefinition != null)
 			parametersElement.addContent(commonChromatogramDefinition.getXmlElement());	
 		
+		String xicTargetName = MsFeatureChromatogramExtractionTarget.MSMSParentIon.name();
+		if(xicTarget != null)
+			xicTargetName = xicTarget.name();
+		
 		parametersElement.setAttribute(
 				MSMSExtractionParameters.MsFeatureChromatogramExtractionTarget.name(), 
-				xicTarget.name());
+				xicTargetName);
 		
 		return parametersElement;
 	}
@@ -446,6 +450,13 @@ public class MSMSExtractionParameterSet {
 		this.maxPrecursorCharge = Integer.parseInt(
 				parametersElement.getAttributeValue(
 						MSMSExtractionParameters.MaxPrecursorCharge.name()));
+				
+		String xicTargetName = parametersElement.getAttributeValue(
+				MSMSExtractionParameters.MsFeatureChromatogramExtractionTarget.name());
+		if(xicTargetName == null || xicTargetName.isEmpty())
+			this.xicTarget = MsFeatureChromatogramExtractionTarget.MSMSParentIon;
+		else		
+			this.xicTarget = MsFeatureChromatogramExtractionTarget.valueOf(xicTargetName);
 		
 //		TODO smoothing filter for MS1 and/or other MS1 stuff
 		
@@ -463,7 +474,6 @@ public class MSMSExtractionParameterSet {
 				parametersElement.getAttributeValue(
 						MSMSExtractionParameters.ChromatogramExtractionWindow.name()));
 	}
-
 }
 
 

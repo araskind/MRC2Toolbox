@@ -135,7 +135,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		grid.add(0, 50, 100, 60, libraryFeatureEditorPanel);
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
 
 		baseDirectory = new File(MRC2ToolBoxCore.dataDir);
@@ -1082,5 +1082,11 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }

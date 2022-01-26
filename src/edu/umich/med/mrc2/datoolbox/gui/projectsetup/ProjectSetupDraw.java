@@ -82,6 +82,7 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 		control.getContentArea().deploy( grid );
 
 		add(control.getContentArea(), BorderLayout.CENTER);
+		initActions();
 		loadLayout(layoutConfigFile);
 	}
 	
@@ -191,6 +192,12 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 
 	public FeatureSubsetPanel getFeatureSubsetPanel() {
 		return featureSubsetPanel;
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

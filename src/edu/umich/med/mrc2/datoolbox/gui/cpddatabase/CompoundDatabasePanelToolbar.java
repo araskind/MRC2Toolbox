@@ -85,24 +85,16 @@ public class CompoundDatabasePanelToolbar extends CommonToolbar {
 
 		addSeparator(buttonDimension);
 
-		importCompoundsButton = GuiUtils.addButton(this, null, importCompoundsIcon, commandListener,
-				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(),
-				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(), buttonDimension);
-
-//		exportCompoundsButton = GuiUtils.addButton(this, null, exportCompoundsIcon, commandListener,
-//				MainActionCommands.EXPORT_COMPOUNDS_FROM_DATABASE_COMMAND.getName(),
-//				MainActionCommands.EXPORT_COMPOUNDS_FROM_DATABASE_COMMAND.getName(), buttonDimension);
-
-		addSeparator(buttonDimension);
-
 		editEntryButton = GuiUtils.addButton(this, null, editFeatureIcon, commandListener,
 				MainActionCommands.EDIT_DATABASE_ENTRY_DIALOG_COMMAND.getName(),
 				MainActionCommands.EDIT_DATABASE_ENTRY_DIALOG_COMMAND.getName(), buttonDimension);
-
+		editEntryButton.setEnabled(false);
+		
 		deleteEntryButton = GuiUtils.addButton(this, null, deleteFeatureIcon, commandListener,
 				MainActionCommands.DELETE_DATABASE_ENTRY_COMMAND.getName(),
 				MainActionCommands.DELETE_DATABASE_ENTRY_COMMAND.getName(), buttonDimension);
-
+		deleteEntryButton.setEnabled(false);
+		
 		addSeparator(buttonDimension);
 
 //		newLibraryButton = GuiUtils.addButton(this, null, newLibraryIcon, commandListener,
@@ -124,10 +116,16 @@ public class CompoundDatabasePanelToolbar extends CommonToolbar {
 				MainActionCommands.SHOW_CUSTOM_COMPOUND_LOADER.getName(),
 				MainActionCommands.SHOW_CUSTOM_COMPOUND_LOADER.getName(),
 				buttonDimension);
-
+		
+		importCompoundsButton = GuiUtils.addButton(this, null, importCompoundsIcon, commandListener,
+				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(),
+				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(), buttonDimension);
 		importCompoundsButton.setEnabled(false);
-		editEntryButton.setEnabled(false);
-		deleteEntryButton.setEnabled(false);
+		
+		exportCompoundsButton = GuiUtils.addButton(this, null, exportCompoundsIcon, commandListener,
+				MainActionCommands.EXPORT_COMPOUNDS_FROM_DATABASE_COMMAND.getName(),
+				MainActionCommands.EXPORT_COMPOUNDS_FROM_DATABASE_COMMAND.getName(), buttonDimension);
+		exportCompoundsButton.setEnabled(false);
 		
 		addSeparator(buttonDimension);
 		

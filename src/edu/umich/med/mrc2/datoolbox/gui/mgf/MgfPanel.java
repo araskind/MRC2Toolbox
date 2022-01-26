@@ -102,7 +102,7 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
-
+		initActions();
 		loadLayout(layoutConfigFile);
 
 		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
@@ -291,5 +291,11 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		
 	}
 }

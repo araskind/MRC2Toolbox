@@ -45,6 +45,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.apache.commons.lang3.StringUtils;
 
+import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
@@ -105,7 +106,17 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	 *
 	 */
 	private static final long serialVersionUID = -9147078549907652550L;
+	
 	private static final Icon componentIcon = GuiUtils.getIcon("idTrackerDatabase", 16);
+	private static final Icon refreshDataIcon = GuiUtils.getIcon("refreshDbData", 24);
+	private static final Icon newCdpIdProjectIcon = GuiUtils.getIcon("newIdProject", 24);
+	private static final Icon newCdpIdExperimentIcon = GuiUtils.getIcon("newIdExperiment", 24);
+	private static final Icon loadMultiFileIcon = GuiUtils.getIcon("importMultifile", 24);
+	private static final Icon loadAvgMS1DataFileIcon = GuiUtils.getIcon("importTextfile", 24);
+	private static final Icon importBinnerDataIcon = GuiUtils.getIcon("importBins", 24);
+	private static final Icon scanCefIcon = GuiUtils.getIcon("scanCef", 24);
+	private static final Icon wizardIcon = GuiUtils.getIcon("wizard", 24);
+	
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "IDTrackerLimsManager.layout");
 
 	private IDTrackerLimsManagerToolbar toolbar;
@@ -172,7 +183,64 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		add(control.getContentArea(), BorderLayout.CENTER);
 
 		control.getController().setFocusedDockable(designEditor.intern(), true);
+		initActions();
 		loadLayout(layoutConfigFile);
+	}
+	
+	@Override
+	protected void initActions() {
+
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName(),
+				MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName(), 
+				refreshDataIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_DATA_UPLOAD_WIZARD_COMMAND.getName(),
+				MainActionCommands.SHOW_DATA_UPLOAD_WIZARD_COMMAND.getName(), 
+				wizardIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(),
+				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(), 
+				newCdpIdProjectIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName(),
+				MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName(), 
+				newCdpIdExperimentIcon, this));
+		
+		menuActions.addSeparator();
+		
+		SimpleButtonAction avgMS1action = GuiUtils.setupButtonAction(
+				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(),
+				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(), 
+				loadAvgMS1DataFileIcon, this);
+		avgMS1action.setEnabled(false);
+		menuActions.add(avgMS1action);
+		
+		SimpleButtonAction importBinnerDataAction = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(),
+				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(), 
+				importBinnerDataIcon, this);
+		importBinnerDataAction.setEnabled(false);
+		menuActions.add(importBinnerDataAction);
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CEF_MSMS_SCAN_SETUP_COMMAND.getName(),
+				MainActionCommands.CEF_MSMS_SCAN_SETUP_COMMAND.getName(), 
+				scanCefIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.LOAD_MSMS_DATA_FROM_MULTIFILES_COMMAND.getName(),
+				MainActionCommands.LOAD_MSMS_DATA_FROM_MULTIFILES_COMMAND.getName(), 
+				loadMultiFileIcon, this));
 	}
 
 	@Override
