@@ -54,6 +54,7 @@ import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.theme.ThemeMap;
@@ -110,6 +111,19 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 	private LibraryRtImportDialog libraryRtImportDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editLibrary", 16);
+	private static final Icon libraryManagerIcon = GuiUtils.getIcon("libraryManager", 24);
+	private static final Icon closeLibraryIcon = GuiUtils.getIcon("close", 24);
+	private static final Icon importLibraryIcon = GuiUtils.getIcon("importLibraryToDb", 24);
+	private static final Icon exportLibraryIcon = GuiUtils.getIcon("exportLibrary", 24);
+	private static final Icon exportFilteredLibraryIcon = GuiUtils.getIcon("exportFilteredLibraryToFile", 24);
+	private static final Icon mergeLibrariesIcon = GuiUtils.getIcon("mergeLibraries", 24);
+	private static final Icon newFeatureIcon = GuiUtils.getIcon("newLibraryFeature", 24);
+	private static final Icon editFeatureIcon = GuiUtils.getIcon("editLibraryFeature", 24);
+	private static final Icon deleteFeatureIcon = GuiUtils.getIcon("deleteFeature", 24);
+	private static final Icon importRtIcon = GuiUtils.getIcon("importLibraryRtValues", 24);
+	private static final Icon libraryExportIcon = GuiUtils.getIcon("exportLibrary", 24);
+	private static final Icon libraryImportIcon = GuiUtils.getIcon("importLibraryToDb", 24);
+
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "MsLibraryPanel.layout");
 
 	public MsLibraryPanel() {
@@ -142,6 +156,88 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		currentLibrary = null;
 	}
 
+	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_LIBRARY_MANAGER_COMMAND.getName(),
+				MainActionCommands.SHOW_LIBRARY_MANAGER_COMMAND.getName(), 
+				libraryManagerIcon, this));
+		
+		menuActions.addSeparator();	
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CLOSE_LIBRARY_COMMAND.getName(),
+				MainActionCommands.CLOSE_LIBRARY_COMMAND.getName(), 
+				closeLibraryIcon, this));
+		
+		menuActions.addSeparator();	
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.IMPORT_COMPOUND_LIBRARY_COMMAND.getName(),
+				MainActionCommands.IMPORT_COMPOUND_LIBRARY_COMMAND.getName(), 
+				importLibraryIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND.getName(),
+				MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND.getName(), 
+				importRtIcon, this));
+		
+		menuActions.addSeparator();	
+				
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND.getName(),
+				MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND.getName(), 
+				exportLibraryIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_FILTERED_COMPOUND_LIBRARY_COMMAND.getName(),
+				MainActionCommands.EXPORT_FILTERED_COMPOUND_LIBRARY_COMMAND.getName(), 
+				exportFilteredLibraryIcon, this));
+		
+		menuActions.addSeparator();	
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CONVERT_LIBRARY_FOR_RECURSION_DIALOG_COMMAND.getName(),
+				MainActionCommands.CONVERT_LIBRARY_FOR_RECURSION_DIALOG_COMMAND.getName(), 
+				mergeLibrariesIcon, this));
+		
+		menuActions.addSeparator();	
+		
+		SimpleButtonAction newFeatureAction = GuiUtils.setupButtonAction(
+				MainActionCommands.NEW_LIBRARY_FEATURE_DIAOG_COMMAND.getName(),
+				MainActionCommands.NEW_LIBRARY_FEATURE_DIAOG_COMMAND.getName(), 
+				newFeatureIcon, this);
+		newFeatureAction.setEnabled(false);
+		menuActions.add(newFeatureAction);
+		
+		SimpleButtonAction editFeatureAction = GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_LIBRARY_FEATURE_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_LIBRARY_FEATURE_DIALOG_COMMAND.getName(), 
+				editFeatureIcon, this);
+		editFeatureAction.setEnabled(false);
+		menuActions.add(editFeatureAction);
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_LIBRARY_FEATURE_COMMAND.getName(),
+				MainActionCommands.DELETE_LIBRARY_FEATURE_COMMAND.getName(), 
+				deleteFeatureIcon, this));
+		
+		menuActions.addSeparator();	
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName(),
+				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName(), 
+				libraryExportIcon, this));
+				
+		SimpleButtonAction importDecoyAction = GuiUtils.setupButtonAction(
+				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(),
+				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName(), 
+				libraryImportIcon, this);
+		importDecoyAction.setEnabled(false);
+		menuActions.add(importDecoyAction);
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
@@ -1082,11 +1178,5 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
-	}
-
-	@Override
-	protected void initActions() {
-		// TODO Auto-generated method stub
-		
 	}
 }

@@ -68,6 +68,10 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	private DockableDataIntegrationFeatureSelectionTable featureSelectionTable;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("createIntegration", 16);
+	private static final Icon collectIDDataIcon = GuiUtils.getIcon("createIntegration", 24);
+	private static final Icon deleteDataSetIcon = GuiUtils.getIcon("deleteIntegration", 24);
+	private static final Icon acceptListIcon = GuiUtils.getIcon("acceptList", 24);
+
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "DataIntegratorPanel.layout");
 
 	public DataIntegratorPanel() {
@@ -102,6 +106,40 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		grid.select(-25, 0, 25, 100, clusterTree);
 	}
 
+	@Override
+	protected void initActions() {
+			
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DATA_INTEGRATION_DIALOG_COMMAND.getName(),
+				MainActionCommands.DATA_INTEGRATION_DIALOG_COMMAND.getName(), 
+				collectIDDataIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName(),
+				MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName(), 
+				deleteDataSetIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ACCEPT_CLEAN_ID_LIST_COMMAND.getName(),
+				MainActionCommands.ACCEPT_CLEAN_ID_LIST_COMMAND.getName(), 
+				acceptListIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND.getName(),
+				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND.getName(), 
+				filterIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(),
+				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(), 
+				resetFilterIcon, this));
+		
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
@@ -415,11 +453,5 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
-	}
-
-	@Override
-	protected void initActions() {
-		// TODO Auto-generated method stub
-		
 	}
 }

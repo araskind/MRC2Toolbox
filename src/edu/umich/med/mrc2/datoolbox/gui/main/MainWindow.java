@@ -72,6 +72,7 @@ import edu.umich.med.mrc2.datoolbox.gui.assay.AssayManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.dbparse.DbParserFrame;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;
+import edu.umich.med.mrc2.datoolbox.gui.filetools.FileToolsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.organization.OrganizationManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
@@ -90,6 +91,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.SmoothingFilterManager;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLlayoutManager;
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.ProjectSetupDraw;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisProjectSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.refsamples.ReferenceSampleManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.users.UserManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -111,6 +113,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveProjectTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
@@ -172,6 +175,9 @@ public class MainWindow extends JFrame
 	private DataExportDialog exportDialog;
 	private IntegratedReportDialog integratedReportDialog;
 	private MWTabExportDialog mwTabExportDialog;
+	private FileToolsDialog fileToolsDialog;
+	
+	private RawDataAnalysisProjectSetupDialog rawDataAnalysisProjectSetupDialog;
 
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "MainWindow.layout");
@@ -284,8 +290,28 @@ public class MainWindow extends JFrame
 		
 		if(command.equals(MainActionCommands.SHOW_ORGANIZATION_MANAGER_COMMAND.getName()))
 			showOrganizationManager();
+		
+		if(command.equals(MainActionCommands.ABOUT_BOX_COMMAND.getName()))
+			showAboutSoftwareBox();
+		
+		if(command.equals(MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName()))
+			showFileToolsDialog();
+	}
+		
+	public void showFileToolsDialog() {
+		
+		fileToolsDialog = new FileToolsDialog();
+		fileToolsDialog.setLocationRelativeTo(this.getContentPane());
+		fileToolsDialog.setVisible(true);
 	}
 	
+	private void showAboutSoftwareBox() {
+
+		AboutSoftwareDialog absd = new AboutSoftwareDialog();
+		absd.setLocationRelativeTo(this.getContentPane());
+		absd.setVisible(true);
+	}
+
 	private void showUserManager() {
 
 		UserManagerDialog umd = new UserManagerDialog();
@@ -370,6 +396,7 @@ public class MainWindow extends JFrame
 		if(result == JOptionPane.YES_OPTION) {
 			MRC2ToolBoxCore.setIdTrackerUser(null);
 			toolBar.setIdTrackerUser(null);
+			mainMenuBar.setIdTrackerUser(null);
 
 			LabNoteBookPanel notebook = (LabNoteBookPanel)getPanel(PanelList.LAB_NOTEBOOK);
 			if(notebook != null)
@@ -390,6 +417,10 @@ public class MainWindow extends JFrame
 			MoTrPACDataTrackingPanel motrpacPanel = (MoTrPACDataTrackingPanel)getPanel(PanelList.MOTRPAC_REPORT_TRACKER);
 			if(motrpacPanel != null)
 				motrpacPanel.clearPanel();	
+			
+			RawDataExaminerPanel rawDataPanel = (RawDataExaminerPanel)getPanel(PanelList.RAW_DATA_EXAMINER);
+			if(rawDataPanel != null)
+				rawDataPanel.clearPanel();	
 		}
 	}
 
@@ -784,6 +815,20 @@ public class MainWindow extends JFrame
 
 		if (currentProject != null)
 			runSaveProjectTask();
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
+			runSaveRawDataAnalysisProjectTask();	
+	}
+	
+	public void runSaveRawDataAnalysisProjectTask() {
+
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			return;
+		
+		SaveStoredRawDataAnalysisProjectTask task = 
+				new SaveStoredRawDataAnalysisProjectTask(MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 
 	private void saveProjectCopy() {
@@ -1145,12 +1190,50 @@ public class MainWindow extends JFrame
 			if (e.getSource().getClass().equals(LoadProjectTask.class))
 				finalizeProjectLoad((LoadProjectTask) e.getSource());
 
-			//	Save project
+			//	Save metabolomics project
 			if (e.getSource().getClass().equals(SaveProjectTask.class))
 				finalizeProjectSave();
+			
+			//	Save raw data analysis project
+			if (e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class))
+				finalizeRawDataAnalysisProjectSave();
 		}
 		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED)
 			hideProgressDialog();
+	}
+	
+	private void finalizeRawDataAnalysisProjectSave() {
+		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();		
+		if(showNewProjectDialog) {
+
+			showNewProjectDialog = false;
+			clearGuiAfterRawDataAnalysisProjectClosed();
+			rawDataAnalysisProjectSetupDialog = new RawDataAnalysisProjectSetupDialog(this);
+			rawDataAnalysisProjectSetupDialog.setLocationRelativeTo(this.getContentPane());
+			rawDataAnalysisProjectSetupDialog.setVisible(true);
+		}
+		if(saveOnCloseRequested) {
+
+			saveOnCloseRequested = false;
+			clearGuiAfterRawDataAnalysisProjectClosed();
+		}
+		if(saveOnExitRequested) {
+
+			saveOnExitRequested = false;
+			int selectedValue = 
+					MessageDialog.showChoiceWithWarningMsg("Are you sure you want to exit?", 
+							this.getContentPane());
+			if (selectedValue == JOptionPane.YES_OPTION)
+				MRC2ToolBoxCore.getMainWindow().shutDown();
+		}
+		if(showOpenProjectDialog) {
+
+			clearGuiAfterRawDataAnalysisProjectClosed();
+			showOpenProjectDialog = false;
+			//	initRawDataAnalysisProjectLoadTask();
+		}
 	}
 
 	private void finalizeProjectLoad(LoadProjectTask eTask) {
@@ -1227,6 +1310,15 @@ public class MainWindow extends JFrame
 		MRC2ToolBoxCore.setCurrentProject(null);
 		switchDataPipeline(null,  null);
 		setTitle(BuildInformation.getProgramName());
+		System.gc();
+	}
+	
+	public void clearGuiAfterRawDataAnalysisProjectClosed() {	
+		
+		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(null);
+		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.RAW_DATA_EXAMINER).clearPanel();
+		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH).clearPanel();
+		RawDataManager.releaseAllDataSources();
 		System.gc();
 	}
 
@@ -1449,6 +1541,7 @@ public class MainWindow extends JFrame
 
 	public void setIdTrackerUser(LIMSUser user) {
 		toolBar.setIdTrackerUser(user);
+		mainMenuBar.setIdTrackerUser(user);
 	}
 
 	/**

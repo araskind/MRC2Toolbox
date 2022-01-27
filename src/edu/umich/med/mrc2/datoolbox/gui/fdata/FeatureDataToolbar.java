@@ -69,8 +69,7 @@ public class FeatureDataToolbar extends CommonToolbar {
 	private static final Icon clearIdentificationsIcon = GuiUtils.getIcon("clearIdentifications", 32);
 	private static final Icon imputeDataIcon = GuiUtils.getIcon("impute", 32);
 	private static final Icon bubblePlotIcon = GuiUtils.getIcon("bubble", 32);
-	private static final Icon checkDuplicateNamesIcon = GuiUtils.getIcon("checkDuplicateNames", 32);
-	
+	private static final Icon checkDuplicateNamesIcon = GuiUtils.getIcon("checkDuplicateNames", 32);	
 	private static final Icon exportResultsIcon = GuiUtils.getIcon("export", 32);
 	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 32);
 	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 32);
@@ -202,6 +201,7 @@ public class FeatureDataToolbar extends CommonToolbar {
 				MainActionCommands.CLEAR_IDENTIFICATIONS_COMMAND.getName(), buttonDimension);
 
 		addSeparator(buttonDimension);
+		
 		bubblePlotButton = GuiUtils.addButton(this, null, bubblePlotIcon, commandListener,
 				MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName(),
 				MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName(), buttonDimension);

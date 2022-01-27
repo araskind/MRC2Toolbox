@@ -52,6 +52,7 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang3.StringUtils;
 
+import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.theme.ThemeMap;
@@ -97,6 +98,18 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	private WorklistImportDialog worklistImportDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editCollection", 16);
+	private static final Icon loadWorklistFromFileIcon = GuiUtils.getIcon("loadWorklist", 24);
+	private static final Icon addWorklistFromFileIcon = GuiUtils.getIcon("addWorklist", 24);
+	private static final Icon scanDirIcon = GuiUtils.getIcon("scanFolder", 24);
+	private static final Icon addFromDirIcon = GuiUtils.getIcon("addFromFolder", 24);
+	private static final Icon clearWorklistIcon = GuiUtils.getIcon("clearWorklist", 24);
+	private static final Icon saveWorklistIcon = GuiUtils.getIcon("saveWorklist", 24);
+	private static final Icon copyWorklistToClipboardIcon = GuiUtils.getIcon("copyWorklistToClipboard", 24);
+	private static final Icon manifestIcon = GuiUtils.getIcon("manifest", 24);
+	private static final Icon refreshIcon = GuiUtils.getIcon("rerun", 24);	
+	private static final Icon extractWorklistIcon = GuiUtils.getIcon("extractList", 24);
+	private static final Icon sampleWarningIcon = GuiUtils.getIcon("sampleWarning", 24);
+
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "WorklistPanel.layout");
 
 	public WorklistPanel() {
@@ -124,6 +137,73 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		txtFilter = new FileNameExtensionFilter("Text files", "txt", "TXT");
 	}
 
+	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName(),
+				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName(), 
+				scanDirIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName(),
+				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName(), 
+				addFromDirIcon, this));
+		
+		menuActions.addSeparator();
+		
+		SimpleButtonAction loadWorklistAction = GuiUtils.setupButtonAction(
+				MainActionCommands.LOAD_WORKLIST_COMMAND.getName(),
+				MainActionCommands.LOAD_WORKLIST_COMMAND.getName(), 
+				loadWorklistFromFileIcon, this);
+		loadWorklistAction.setEnabled(false);
+		menuActions.add(loadWorklistAction);
+		
+		SimpleButtonAction addWorklistAction = GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_WORKLIST_COMMAND.getName(),
+				MainActionCommands.ADD_WORKLIST_COMMAND.getName(), 
+				addWorklistFromFileIcon, this);
+		addWorklistAction.setEnabled(false);
+		menuActions.add(addWorklistAction);
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CHECK_WORKLIST_FOR_MISSING_DATA.getName(),
+				MainActionCommands.CHECK_WORKLIST_FOR_MISSING_DATA.getName(), 
+				sampleWarningIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SAVE_WORKLIST_COMMAND.getName(),
+				MainActionCommands.SAVE_WORKLIST_COMMAND.getName(), 
+				addFromDirIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.COPY_WORKLIST_COMMAND.getName(),
+				MainActionCommands.COPY_WORKLIST_COMMAND.getName(), 
+				copyWorklistToClipboardIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SAVE_ASSAY_MANIFEST_COMMAND.getName(),
+				MainActionCommands.SAVE_ASSAY_MANIFEST_COMMAND.getName(), 
+				manifestIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CLEAR_WORKLIST_COMMAND.getName(),
+				MainActionCommands.CLEAR_WORKLIST_COMMAND.getName(), 
+				clearWorklistIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXTRACT_WORKLIST_COMMAND.getName(),
+				MainActionCommands.EXTRACT_WORKLIST_COMMAND.getName(), 
+				extractWorklistIcon, this));
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
@@ -557,12 +637,6 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	public void savePreferences() {
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
-	}
-
-	@Override
-	protected void initActions() {
-		// TODO Auto-generated method stub
-		
 	}
 }
 

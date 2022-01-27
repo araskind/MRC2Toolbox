@@ -143,6 +143,31 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private TextDataImportDialog textDataImportDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
+	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
+	private static final Icon loadPlainDataFileIcon = GuiUtils.getIcon("importTextfile", 24);
+	private static final Icon loadMultiFileIcon = GuiUtils.getIcon("importMultifile", 24);	
+	private static final Icon addMultiFileIcon = GuiUtils.getIcon("addMultifile", 24);
+	private static final Icon loadFromExcelIcon = GuiUtils.getIcon("excelImport", 24);
+	private static final Icon calcStatsIcon = GuiUtils.getIcon("calcStats", 24);
+	private static final Icon cleanEmptyFeaturesIcon = GuiUtils.getIcon("cleanEmpty", 24);
+	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
+	private static final Icon resetFilterIcon = GuiUtils.getIcon("resetFilter", 24);
+	private static final Icon knownIcon = GuiUtils.getIcon("showKnowns", 24);
+	private static final Icon qcIcon = GuiUtils.getIcon("qc", 24);
+	private static final Icon unknownIcon = GuiUtils.getIcon("showUnknowns", 24);
+	private static final Icon inClusterIcon = GuiUtils.getIcon("inCluster", 24);
+	private static final Icon notInClusterIcon = GuiUtils.getIcon("notInCluster", 24);
+	private static final Icon searchLibraryIcon = GuiUtils.getIcon("searchLibrary", 24);
+	private static final Icon searchDatabaseIcon = GuiUtils.getIcon("searchDatabase", 24);
+	private static final Icon showMissingIdentificationsIcon = GuiUtils.getIcon("missingIdentifications", 24);
+	private static final Icon clearIdentificationsIcon = GuiUtils.getIcon("clearIdentifications", 24);
+	private static final Icon imputeDataIcon = GuiUtils.getIcon("impute", 24);
+	private static final Icon bubblePlotIcon = GuiUtils.getIcon("bubble", 24);
+	private static final Icon checkDuplicateNamesIcon = GuiUtils.getIcon("checkDuplicateNames", 24);	
+	private static final Icon exportResultsIcon = GuiUtils.getIcon("export", 24);
+	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 24);
+	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 24);
+
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "FeatureStatisticsPanel.layout");
 
@@ -196,6 +221,116 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		selectedFeaturesMap = new TreeMap<DataPipeline, Collection<MsFeature>>();
 		activeSet = null;
 		activeFeatureFilter = FeatureFilter.ALL_FEATURES;
+	}
+
+	@Override
+	protected void initActions() {
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.LOAD_DATA_FROM_MULTIFILES_COMMAND.getName(),
+				MainActionCommands.LOAD_DATA_FROM_MULTIFILES_COMMAND.getName(), 
+				loadMultiFileIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND.getName(),
+				MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND.getName(), 
+				addMultiFileIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.LOAD_DATA_FROM_EXCEL_FILE_COMMAND.getName(),
+				MainActionCommands.LOAD_DATA_FROM_EXCEL_FILE_COMMAND.getName(), 
+				loadFromExcelIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.LOAD_DATA_COMMAND.getName(),
+				MainActionCommands.LOAD_DATA_COMMAND.getName(), 
+				loadPlainDataFileIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.LOAD_LIBRARY_COMMAND.getName(),
+				MainActionCommands.LOAD_LIBRARY_COMMAND.getName(), 
+				loadLibraryIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CALC_FEATURES_STATS_COMMAND.getName(),
+				MainActionCommands.CALC_FEATURES_STATS_COMMAND.getName(), 
+				calcStatsIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName(),
+				MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName(), 
+				cleanEmptyFeaturesIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(),
+				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(), 
+				checkDuplicateNamesIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_KNOWN_FEATURES_COMMAND.getName(),
+				MainActionCommands.SHOW_KNOWN_FEATURES_COMMAND.getName(), 
+				knownIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_UNKNOWN_FEATURES_COMMAND.getName(),
+				MainActionCommands.SHOW_UNKNOWN_FEATURES_COMMAND.getName(), 
+				unknownIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_QC_FEATURES_COMMAND.getName(),
+				MainActionCommands.SHOW_QC_FEATURES_COMMAND.getName(), 
+				qcIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(),
+				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(), 
+				filterIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(),
+				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(), 
+				resetFilterIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND.getName(), 
+				searchLibraryIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND.getName(), 
+				searchDatabaseIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_MISSING_IDENTIFICATIONS_COMMAND.getName(),
+				MainActionCommands.SHOW_MISSING_IDENTIFICATIONS_COMMAND.getName(), 
+				showMissingIdentificationsIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CLEAR_IDENTIFICATIONS_COMMAND.getName(),
+				MainActionCommands.CLEAR_IDENTIFICATIONS_COMMAND.getName(), 
+				clearIdentificationsIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName(),
+				MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName(), 
+				bubblePlotIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_RESULTS_COMMAND.getName(),
+				MainActionCommands.EXPORT_RESULTS_COMMAND.getName(), 
+				exportResultsIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND.getName(),
+				MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND.getName(), 
+				exportExcelIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName(),
+				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName(), 
+				exportMwTabIcon, this));
+		
+		menuActions.addSeparator();
 	}
 	
 	public void setProjectActionListener(ActionListener listener) {
@@ -1389,11 +1524,5 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
-	}
-
-	@Override
-	protected void initActions() {
-		// TODO Auto-generated method stub
-		
 	}
 }

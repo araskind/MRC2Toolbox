@@ -24,9 +24,11 @@ package edu.umich.med.mrc2.datoolbox.gui.main;
 public enum MainActionCommands {
 
 	// Project
+	NEW_PROJECT_COMMAND("New metabolomics project"),
+	OPEN_PROJECT_COMMAND("Open project"),
 	SAVE_PROJECT_COMMAND("Save project"),
-	SAVE_PROJECT_COPY_COMMAND("Save project copy as ..."),
-	NEW_PROJECT_COMMAND("New data analysis project"),
+	SAVE_PROJECT_COPY_COMMAND("Save project as ..."),
+	
 	NEW_CPD_ID_PROJECT_COMMAND("New compound identification project"),
 	DELETE_CPD_ID_PROJECT_COMMAND("Delete compound identification project"),
 	NEW_CPD_ID_PROJECT_DIALOG_COMMAND("Show \"New compound identification project\" dialog"),
@@ -44,7 +46,7 @@ public enum MainActionCommands {
 	CHANGE_ID_TRACKER_PASSWORD_DIALOG_COMMAND("ID tracker password change dialog"),
 	CHANGE_ID_TRACKER_PASSWORD_COMMAND("Change ID tracker password"),
 	COPY_ID_TRACKER_PASSWORD_COMMAND("Copy ID tracker password"),
-	OPEN_PROJECT_COMMAND("Open project"),
+	
 	SHOW_OPEN_CPD_ID_PROJECT_DIALOG_COMMAND("Show \"Open IDTracker project\" dialog"),
 	OPEN_CPD_ID_PROJECT_COMMAND("Open IDTracker project"),
 	CLOSE_PROJECT_COMMAND("Close project"),
@@ -142,7 +144,7 @@ public enum MainActionCommands {
 	LOAD_DATA_COMMAND("Load quantitative data"),
 	LOAD_DATA_FROM_MULTIFILES_COMMAND("Load quantitative data from multiple files"),
 	LOAD_DATA_FROM_PROFINDER_PFA_COMMAND("Load quantitative data from ProFinder PFA file"),
-	ADD_DATA_FROM_MULTIFILES_COMMAND("Add quantitative data to activa assay from multiple files"),
+	ADD_DATA_FROM_MULTIFILES_COMMAND("Add quantitative data to active assay from multiple files"),
 	LOAD_MS1_DATA_FROM_MULTIFILES_COMMAND("Load MS1 features from multiple files"),
 	LOAD_AVG_MS1_DATA_FROM_FILE_COMMAND("Load averaged MS1 features from file"),
 	LOAD_MSMS_DATA_FROM_MULTIFILES_COMMAND("Load MSMS data from multiple files"),
@@ -811,6 +813,7 @@ public enum MainActionCommands {
 
 	EDIT_PREFERENCES_COMMAND("Edit preferences"),
 	SHOW_HELP_COMMAND("Help"),
+	ABOUT_BOX_COMMAND("About ..."),
 	EXIT_COMMAND("Exit"),
 
 	//	Feature tree commands

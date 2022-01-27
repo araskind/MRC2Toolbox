@@ -1,0 +1,52 @@
+<html>
+    <h1 id="metidtracker">MetIDTracker</h1>
+    <p>Large-scale mass-spectrometry based metabolomics experiments became a common place in recent years. Data analysis for such experiments is a complex multi-step process which presents a number of challenges in quality control, within and between-batch normalization, proper alignment of mass-spectral features between the samples, dealing with missing data, identification of unknowns, removal of redundant signals, data integration from multiple assays, etc. It requires the use of multiple software tools, often with heavy emphasis on custom scripts and complex pipelines. The goal of this project is to put an intuitive user interface on a number of the common tasks in metabolomics data analysis in order to better organize and streamline the procedure.</p>
+    <p>GitHub page: <a href="https://github.com/araskind/MRC2Toolbox">https://github.com/araskind/MRC2Toolbox</a></p>
+    <h2 id="downloads">Downloads</h2>
+    <h3 id="software-database">Software &amp; database</h3>
+    <ul>
+      <li>
+        <a href="https://drive.google.com/file/d/1Nm0D2ZFocODAMzZuJ2lleXeHMy5ZULuO/view?usp=sharing">MetIDTracker software</a>
+      </li>
+      <li>
+        <a href="https://drive.google.com/file/d/15smKw8Xo5D8xQDA8TkKg8icQ_EWqZFzr/view?usp=sharing">PostgreSQL database dump</a>
+      </li>
+    </ul>
+    <h3 id="documentation">Documentation</h3>
+    <ul>
+      <li>
+        <a href="https://drive.google.com/file/d/1Nqt6OUTFlo60Xu26Mw2nERc_8DFgmm0s/view?usp=sharing">Database installation and configuration manual</a>
+      </li>
+      <li>
+        <a href="https://drive.google.com/file/d/1xwdk9Cr4FPrGiCDWwtGu1boXAJ3q66hp/view?usp=sharing">MetIDTracker user manual, preliminary draft</a>
+      </li>
+    </ul>
+    <h3 id="msms-libraries">MSMS libraries</h3>
+    <p>Several open access MSMS libraries from <a href="http://prime.psc.riken.jp/compms/msdial/main.html">MS-DIAL</a> were reformatted to include internal MetIDTracker spectrum identifiers and converted to NIST format. They may be used to search experimental data from MetIDTracker.</p>
+    <ul>
+      <li>
+        <a href="https://drive.google.com/file/d/1Pq3VEI5BLUg-Fn_G6sDiYV1bSuOSx1am/view?usp=sharing">MS-DIAL metabolomics MSP spectral kit, VS15, positive mode</a>
+      </li>
+      <li>
+        <a href="https://drive.google.com/file/d/1n4-hIXVa4RBExrvXHEk1GgYL60K71uKA/view?usp=sharing">MS-DIAL metabolomics MSP spectral kit, VS15, negative mode</a>
+      </li>
+      <li>
+        <a href="https://drive.google.com/file/d/1zfLNRdJrNwsiUzj11ZgN6g2ONSA-yRM9/view?usp=sharing">MS-DIAL LipidBlast, V68, positive mode</a>
+      </li>
+      <li>
+        <a href="https://drive.google.com/file/d/1fTPmTwhJ7G0z3P2PxsZ0teYdmuoIsPZn/view?usp=sharing">MS-DIAL LipidBlast, V68, negative mode</a>
+      </li>
+    </ul>
+    <h3 id="third-party-software">Third party software</h3>
+    <p>For a number of operations MetIDTracker relies on third party software. This software needs to be installed on the same computer and the location of each external program has to specified in the preferences.</p>
+    <ul>
+      <li>
+        <a href="https://chemdata.nist.gov/dokuwiki/doku.php?id=peptidew:mspepsearch">NIST MSPepSearch</a>. Please use “Current release (02/22/2019)”; the software is necessary to run MSMS library searches.</li>
+      <li>Msconvert is part of <a href="https://proteowizard.sourceforge.io/index.html">ProteoWizard</a> package. The software is necessary if you are planning to work with raw MS data.</li>
+      <li>
+        <a href="https://bio.informatik.uni-jena.de/software/sirius/">SIRIUS</a> is not properly integrated in the workflow yet, but data may be exported from MetIDTracker in the format accepted by SIRIUS for MSMS  interpretation</li>
+      <li>lib2nist – the tool for converting MSMS libraries to NIST format for use with MSPepSearch. Can be downloaded as standalone or as a part of <a href="https://chemdata.nist.gov/dokuwiki/doku.php?id=chemdata:nist17">NIST Search Software</a></li>
+    </ul>
+    <h2 id="open-source-software-used-in-the-project">Open-source software used in the project</h2>
+    <p>This list is probably incomplete and will be updated soon</p>
+<html>

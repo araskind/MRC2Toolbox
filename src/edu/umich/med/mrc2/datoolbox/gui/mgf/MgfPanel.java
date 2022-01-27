@@ -73,6 +73,9 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 	private File baseDirectory;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("filterMsMs", 16);
+	private static final Icon importMgfIcon = GuiUtils.getIcon("loadMgf", 24);
+	private static final Icon exportMsMsIcon = GuiUtils.getIcon("exportMsMs", 24);
+
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "MgfPanel.layout");
 
 	public MgfPanel() {
@@ -108,6 +111,21 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
 	}
 
+	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.IMPORT_MGF_COMMAND.getName(),
+				MainActionCommands.IMPORT_MGF_COMMAND.getName(), 
+				importMgfIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_MSMS_COMMAND.getName(),
+				MainActionCommands.EXPORT_MSMS_COMMAND.getName(), 
+				exportMsMsIcon, this));		
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
@@ -291,11 +309,5 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
-	}
-
-	@Override
-	protected void initActions() {
-		// TODO Auto-generated method stub
-		
 	}
 }

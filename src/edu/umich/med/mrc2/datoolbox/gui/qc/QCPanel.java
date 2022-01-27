@@ -59,6 +59,8 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 	private Dockable3DChartPanel threeDpanel;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("qc", 16);
+	static final Icon calcStatsIcon = GuiUtils.getIcon("stats", 24);
+	static final Icon pcaIcon = GuiUtils.getIcon("scatterPlot3D", 24);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "QCPanel.layout");
 
 	public QCPanel() {
@@ -88,6 +90,21 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 		loadLayout(layoutConfigFile);
 	}
 
+	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CALC_DATASET_STATS_COMMAND.getName(),
+				MainActionCommands.CALC_DATASET_STATS_COMMAND.getName(), 
+				calcStatsIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CALC_DATASET_PCA_COMMAND.getName(),
+				MainActionCommands.CALC_DATASET_PCA_COMMAND.getName(), 
+				pcaIcon, this));	
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		
@@ -222,11 +239,5 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 		if(!e.getValueIsAdjusting()) {
 
 		}
-	}
-
-	@Override
-	protected void initActions() {
-		// TODO Auto-generated method stub
-		
 	}
 }

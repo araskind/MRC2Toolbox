@@ -31,6 +31,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
+import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.theme.ThemeMap;
@@ -67,6 +68,10 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 	implements TreeSelectionListener {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("MoTrPAC", 16);
+	private static final Icon refreshDataIcon = GuiUtils.getIcon("refreshDbData", 24);
+	private static final Icon showMetadataIcon = GuiUtils.getIcon("metadata", 24);
+	private static final Icon createFilesIcon = GuiUtils.getIcon("addMultifile", 24);
+	private static final Icon uploadReportIcon = GuiUtils.getIcon("addSop", 24);
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "MoTrPACDataTrackingPanel.layout");
 
@@ -119,6 +124,34 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 		limsDataLoaded = false;
 	}
 
+	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName(),
+				MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName(), 
+				refreshDataIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_MOTRPAC_METADATA_REFERENCE_COMMAND.getName(),
+				MainActionCommands.SHOW_MOTRPAC_METADATA_REFERENCE_COMMAND.getName(), 
+				showMetadataIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CREATE_MOTRPAC_REPORT_FILES_COMMAND.getName(),
+				MainActionCommands.CREATE_MOTRPAC_REPORT_FILES_COMMAND.getName(), 
+				createFilesIcon, this));
+		
+		menuActions.addSeparator();
+		
+		SimpleButtonAction uploadAction = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_MOTRPAC_REPORT_UPLOAD_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_MOTRPAC_REPORT_UPLOAD_DIALOG_COMMAND.getName(), 
+				uploadReportIcon, this);
+		uploadAction.setEnabled(false);
+		menuActions.add(uploadAction);		
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
@@ -376,12 +409,6 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 
 	public boolean isLimsDataLoaded() {
 		return limsDataLoaded;
-	}
-
-	@Override
-	protected void initActions() {
-		// TODO Auto-generated method stub
-		
 	}
 }
 

@@ -21,172 +21,206 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.main;
 
-import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.CommonMenuBar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
 import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class MainMenuBar extends JMenuBar {
+public class MainMenuBar extends CommonMenuBar {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -6288875491040382193L;
 
-	private static final Dimension preferredSize = new Dimension(80, 20);
+	
 
 	// Icons
 	private static final Icon newProjectIcon = GuiUtils.getIcon("newProject", 24);
 	private static final Icon openProjectIcon = GuiUtils.getIcon("open", 24);
 	private static final Icon saveProjectIcon = GuiUtils.getIcon("save", 24);
+	private static final Icon saveProjectCopyIcon = GuiUtils.getIcon("saveAs", 24);
+	private static final Icon newRdaProjectIcon = GuiUtils.getIcon("newRawDataAnalysisProject", 24);
+	private static final Icon editRdaProjectIcon = GuiUtils.getIcon("editRawDataAnalysisProject", 24);
+	private static final Icon openRdaProjectIcon = GuiUtils.getIcon("openRawDataAnalysisProject", 24);
+	private static final Icon saveRdaProjectIcon = GuiUtils.getIcon("saveRawDataAnalysisProject", 24);		
 	private static final Icon closeProjectIcon = GuiUtils.getIcon("close", 24);
-	private static final Icon exitIcon = GuiUtils.getIcon("shutDown", 24);
-	private static final Icon loadDesignIcon = GuiUtils.getIcon("loadDesign", 24);
-	private static final Icon loadWorklistIcon = GuiUtils.getIcon("loadWorklist", 24);
-	private static final Icon loadQuantDataMultifileIcon = GuiUtils.getIcon("importMultifile", 24);
-	private static final Icon loadQuantDataIcon = GuiUtils.getIcon("importTextfile", 24);
-	private static final Icon LoadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
-	private static final Icon loadMgfDataIcon = GuiUtils.getIcon("loadMgf", 24);
-	private static final Icon findDuplicatesIcon = GuiUtils.getIcon("findDuplicates", 24);
-	private static final Icon analyzeCorrelationsIcon = GuiUtils.getIcon("filterCluster", 24);
-	private static final Icon exportForRIcon = GuiUtils.getIcon("rScript", 24);
-	private static final Icon exportForMPPIcon = GuiUtils.getIcon("MPP", 24);
-	private static final Icon exportForBinnertIcon = GuiUtils.getIcon("binnerIcon", 24);
-	private static final Icon exportDuplicatesIcon = GuiUtils.getIcon("saveDuplicates", 24);
-	private static final Icon integratedReportIcon = GuiUtils.getIcon("excel", 24);
-
-	private ActionListener alistener;
+	private static final Icon exitIcon = GuiUtils.getIcon("shutDown", 24);	
+	private static final Icon idTrackerLoginIcon = GuiUtils.getIcon("idTrackerLogin", 24);
+	private static final Icon activeUserIcon = GuiUtils.getIcon("activeUser", 24);
+	private static final Icon superUserIcon = GuiUtils.getIcon("superUser", 24);
+	private static final Icon loggedOutUserIcon = GuiUtils.getIcon("loggedOutUser", 24);
+	private static final Icon manageUsersIcon = GuiUtils.getIcon("manageUsers", 24);
+	private static final Icon organizationIcon = GuiUtils.getIcon("organization", 24);	
+	private static final Icon msToolboxIcon = GuiUtils.getIcon("toolbox", 24);
+	private static final Icon chemModIcon = GuiUtils.getIcon("chemModList", 24);
+	private static final Icon refSampleIcon = GuiUtils.getIcon("standardSample", 24);
+	private static final Icon assayManagerIcon = GuiUtils.getIcon("acqMethod", 24);	
+	private static final Icon preferencesIcon = GuiUtils.getIcon("preferences", 24);
+	private static final Icon helpIcon = GuiUtils.getIcon("help", 24);
+	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);
+	private static final Icon aboutIcon = GuiUtils.getIcon("infoGreen", 24);
+	
 	// Menus
 	private JMenu
 		projectMenu,
-		importMenu,
-		actionMenu,
-		exportMenu,
-		panelsMenu;
+		panelsMenu,
+		toolsMenu,
+		dbAccessMenu,
+		preferencesMenu,
+		helpMenu;
 
 	// Project items
 	private JMenuItem
 		newProjectMenuItem,
+		newIDProjectMenuItem,
 		openProjectMenuItem,
 		saveProjectMenuItem,
-		closeProjectMenuItem,
+		saveProjectAsMenuItem,				
+		editIDProjectMenuItem,		
+		closeProjectMenuItem,		
 		exitMenuItem;
 
-	// Import data items
+	// Tools menu items
 	private JMenuItem
-		loadDesignMenuItem,
-		loadQuantDataMenuItem,
-		loadQuantDataMultiFileMenuItem,
-		loadLibraryMenuItem,
-		loadWorklistMenuItem,
-		loadMgfDataMenuItem;
+		msToolsMenuItem,
+		adductManagerMenuItem,
+		rawDataToolsMenuItem;
 
-	// Action items
+	// dbAccess
 	private JMenuItem
-		findDuplicatesMenuItem,
-		analyzeCorrelationsMenuItem;
+		loginMenuItem,
+		userManagerMenuItem,
+		organizationManagerMenuItem;
 
-	// Export data items
+	// Preferences
 	private JMenuItem
-		exportForRMenuItem,
-		exportForMPPMenuItem,
-		exportForBinnerMenuItem,
-		integratedReportMenuItem,
-		exportDuplicatesMenuItem;
+		preferencesMenuItem;
+	
+	//	Help
+	private JMenuItem
+		helpMenuItem,
+		aboutSoftwareMenuItem;
 
 	public MainMenuBar(ActionListener listener) {
 
-		super();
-		alistener = listener;
+		super(listener);
 
+		// Project
+		projectMenu = new JMenu("Project");
+//		projectMenu.setPreferredSize(preferredSize);
+		
 		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
-			// Project
-			projectMenu = new JMenu("Project");
-			projectMenu.setPreferredSize(preferredSize);
 
-			addItem(projectMenu, newProjectMenuItem, 
+			newProjectMenuItem = addItem(projectMenu, newProjectMenuItem, 
 					MainActionCommands.NEW_PROJECT_COMMAND, newProjectIcon);
-			addItem(projectMenu, openProjectMenuItem, 
-					MainActionCommands.OPEN_PROJECT_COMMAND, openProjectIcon);
-			addItem(projectMenu, saveProjectMenuItem,
-					MainActionCommands.SAVE_PROJECT_COMMAND, saveProjectIcon);
-			addItem(projectMenu, closeProjectMenuItem, 
-					MainActionCommands.CLOSE_PROJECT_COMMAND, closeProjectIcon);
-
-			projectMenu.addSeparator();
-
-			addItem(projectMenu, exitMenuItem, MainActionCommands.EXIT_COMMAND, exitIcon);
-
-			add(projectMenu);
-
-			// Import Data
-//			importMenu = new JMenu("Import data");
-//			importMenu.setPreferredSize(preferredSize);
-	//
-//			addItem(importMenu, loadDesignMenuItem, MainActionCommands.LOAD_DESIGN_COMMAND, loadDesignIcon);
-//			addItem(importMenu, loadLibraryMenuItem, MainActionCommands.LOAD_DATA_FROM_MULTIFILES_COMMAND, loadQuantDataMultifileIcon);
-//			addItem(importMenu, loadQuantDataMenuItem, MainActionCommands.LOAD_DATA_COMMAND, loadQuantDataIcon);
-//			addItem(importMenu, loadLibraryMenuItem, MainActionCommands.LOAD_LIBRARY_COMMAND, LoadLibraryIcon);
-//			addItem(importMenu, loadWorklistMenuItem, MainActionCommands.LOAD_WORKLIST_COMMAND, loadWorklistIcon);
-//			importMenu.addSeparator();
-//			addItem(importMenu, loadMgfDataMenuItem, MainActionCommands.LOAD_MGF_COMMAND, loadMgfDataIcon);
-
-//			add(importMenu);
-
-			// Actions
-			actionMenu = new JMenu("Analysis");
-			actionMenu.setPreferredSize(preferredSize);
-
-//			addItem(actionMenu, findDuplicatesMenuItem, MainActionCommands.FIND_DUPLICATES_COMMAND, findDuplicatesIcon);
-//			addItem(actionMenu, analyzeCorrelationsMenuItem, MainActionCommands.FIND_FEATURE_CORRELATIONS_COMMAND,
-//					analyzeCorrelationsIcon);
-
-			add(actionMenu);
-
-			// Export Data
-			exportMenu = new JMenu("Export data");
-			exportMenu.setPreferredSize(preferredSize);
-
-			addItem(exportMenu, exportForRMenuItem, 
-					MainActionCommands.EXPORT_RESULTS_4R_COMMAND, exportForRIcon);
-			addItem(exportMenu, exportForMPPMenuItem, 
-					MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND, exportForMPPIcon);
-			addItem(exportMenu, exportForBinnerMenuItem, 
-					MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND, exportForBinnertIcon);
-			addItem(exportMenu, integratedReportMenuItem, 
-					MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND, integratedReportIcon);
-
-//			exportMenu.addSeparator();
-	//
-//			addItem(exportMenu, exportDuplicatesMenuItem, MainActionCommands.EXPORT_DUPLICATES_COMMAND, exportDuplicatesIcon);
-
-			add(exportMenu);
 		}
+		newIDProjectMenuItem = addItem(projectMenu, newIDProjectMenuItem, 
+				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND, newRdaProjectIcon);
+		
+		projectMenu.addSeparator();
+
+		openProjectMenuItem = addItem(projectMenu, openProjectMenuItem, 
+				MainActionCommands.OPEN_PROJECT_COMMAND, openProjectIcon);
+		editIDProjectMenuItem = addItem(projectMenu, editIDProjectMenuItem,
+				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND, editRdaProjectIcon);		
+		editIDProjectMenuItem.setEnabled(false);
+		
+		saveProjectMenuItem = addItem(projectMenu, saveProjectMenuItem,
+				MainActionCommands.SAVE_PROJECT_COMMAND, saveProjectIcon);
+		saveProjectAsMenuItem = addItem(projectMenu, saveProjectAsMenuItem,
+				MainActionCommands.SAVE_PROJECT_COPY_COMMAND, saveProjectCopyIcon);
+		closeProjectMenuItem = addItem(projectMenu, closeProjectMenuItem, 
+				MainActionCommands.CLOSE_PROJECT_COMMAND, closeProjectIcon);
+		projectMenu.addSeparator();
+		
+		exitMenuItem = addItem(projectMenu, exitMenuItem, MainActionCommands.EXIT_COMMAND, exitIcon);
+		add(projectMenu);
+		
 		// Panels
 		panelsMenu = new JMenu("Panels");
-		panelsMenu.setPreferredSize(preferredSize);
-
+//		panelsMenu.setPreferredSize(preferredSize);
 		add(panelsMenu);
+		
+		//	Tools
+		toolsMenu = new JMenu("Tools");
+//		toolsMenu.setPreferredSize(preferredSize);
+		msToolsMenuItem = addItem(toolsMenu, msToolsMenuItem, 
+				MainActionCommands.SHOW_MS_TOOLBOX_COMMAND, msToolboxIcon);
+		adductManagerMenuItem = addItem(toolsMenu, adductManagerMenuItem, 
+				MainActionCommands.SHOW_CHEM_MOD_EDITOR_COMMAND, chemModIcon);
+		rawDataToolsMenuItem = addItem(toolsMenu, rawDataToolsMenuItem, 
+				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND, dataFileToolsIcon);
+		add(toolsMenu);
+		
+		//	DB Access
+		dbAccessMenu = new JMenu("Database access");
+//		dbAccessMenu.setPreferredSize(preferredSize);
+		
+		loginMenuItem = addItem(dbAccessMenu, loginMenuItem, 
+				MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND, loggedOutUserIcon);
+		userManagerMenuItem = addItem(dbAccessMenu, userManagerMenuItem, 
+				MainActionCommands.SHOW_USER_MANAGER_COMMAND, manageUsersIcon);
+		userManagerMenuItem.setEnabled(false);
+		organizationManagerMenuItem = addItem(dbAccessMenu, organizationManagerMenuItem, 
+				MainActionCommands.SHOW_ORGANIZATION_MANAGER_COMMAND, organizationIcon);
+		organizationManagerMenuItem.setEnabled(false);
+		
+		add(dbAccessMenu);
+		
+		//	Preferences
+		preferencesMenu = new JMenu("Preferences");
+//		preferencesMenu.setPreferredSize(preferredSize);
+		preferencesMenuItem = addItem(preferencesMenu, preferencesMenuItem, 
+				MainActionCommands.EDIT_PREFERENCES_COMMAND, preferencesIcon);
+		
+		add(preferencesMenu);
+		
+		//	Help
+		helpMenu = new JMenu("Help");
+//		helpMenu.setPreferredSize(preferredSize);
+		helpMenuItem = addItem(helpMenu, helpMenuItem, 
+				MainActionCommands.SHOW_HELP_COMMAND, helpIcon);
+		helpMenuItem.setEnabled(false);
+		
+		aboutSoftwareMenuItem = addItem(helpMenu, aboutSoftwareMenuItem, 
+				MainActionCommands.ABOUT_BOX_COMMAND, aboutIcon);
+		
+		add(helpMenu);
 	}
+	
+	public void setIdTrackerUser(LIMSUser user) {
 
-	private void addItem(JMenu menu, JMenuItem item, MainActionCommands command, Icon defaultIcon) {
-
-		item = new JMenuItem(command.getName());
-		item.setActionCommand(command.getName());
-		item.addActionListener(alistener);
-		item.setIcon(defaultIcon);
-		menu.add(item);
+		if(user == null) {
+			loginMenuItem.setIcon(loggedOutUserIcon);
+			loginMenuItem.setActionCommand(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
+			loginMenuItem.setToolTipText(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
+			loginMenuItem.setText(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
+			organizationManagerMenuItem.setEnabled(false);
+			userManagerMenuItem.setEnabled(false);
+		}
+		else {
+			loginMenuItem.setIcon(activeUserIcon);
+			loginMenuItem.setActionCommand(MainActionCommands.ID_TRACKER_LOGOUT_COMMAND.getName());
+			loginMenuItem.setToolTipText(MainActionCommands.ID_TRACKER_LOGOUT_COMMAND.getName());
+			loginMenuItem.setText(user.getFullName() + " (click to log out)");
+			if(user.isSuperUser()) {
+				userManagerMenuItem.setEnabled(true);
+				organizationManagerMenuItem.setEnabled(true);
+				loginMenuItem.setIcon(superUserIcon);
+			}
+		}		
 	}
 
 	public void refreshPanelsMenu(HashMap<PanelList, Boolean> activePanelMap) {
@@ -206,5 +240,4 @@ public class MainMenuBar extends JMenuBar {
 		// TODO Auto-generated method stub
 
 	}
-
 }

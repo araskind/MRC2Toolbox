@@ -67,6 +67,13 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.lims.LimsDataPullTask;
 public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("labNoteBook", 16);
+	private static final Icon instrumentIcon = GuiUtils.getIcon("msInstrument", 24);
+	private static final Icon newAnnotationIcon = GuiUtils.getIcon("newFeatureSubset", 24);
+	private static final Icon editAnnotationIcon = GuiUtils.getIcon("editCollection", 24);
+	private static final Icon deleteAnnotationIcon = GuiUtils.getIcon("deleteCollection", 24);
+	private static final Icon searchAnnotationIcon = GuiUtils.getIcon("searchDatabase", 24);
+	private static final Icon refreshDataIcon = GuiUtils.getIcon("refreshDbData", 24);
+
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "LabNoteBookPanel.layout");
 
 	private LabNotePanelToolbar toolbar;
@@ -104,6 +111,39 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 		getContentPane().add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
+	}
+
+	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CREATE_NEW_LAB_NOTE_COMMAND.getName(),
+				MainActionCommands.CREATE_NEW_LAB_NOTE_COMMAND.getName(), 
+				newAnnotationIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_LAB_NOTE_COMMAND.getName(),
+				MainActionCommands.EDIT_LAB_NOTE_COMMAND.getName(), 
+				editAnnotationIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_LAB_NOTE_COMMAND.getName(),
+				MainActionCommands.DELETE_LAB_NOTE_COMMAND.getName(), 
+				deleteAnnotationIcon, this));
+		
+		menuActions.addSeparator();		
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName(),
+				MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName(), 
+				refreshDataIcon, this));
+		
+		menuActions.addSeparator();		
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_MS_INSTRUMENT_SELECTOR_COMMAND.getName(),
+				MainActionCommands.SHOW_MS_INSTRUMENT_SELECTOR_COMMAND.getName(), 
+				instrumentIcon, this));
 	}
 
 	@Override
@@ -448,11 +488,4 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	protected void initActions() {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

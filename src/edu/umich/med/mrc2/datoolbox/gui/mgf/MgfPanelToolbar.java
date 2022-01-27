@@ -52,11 +52,13 @@ public class MgfPanelToolbar extends CommonToolbar {
 		super(commandListener);
 
 		importMgfButton = GuiUtils.addButton(this, null, importMgfIcon, commandListener,
-				MainActionCommands.IMPORT_MGF_COMMAND.getName(), MainActionCommands.IMPORT_MGF_COMMAND.getName(),
+				MainActionCommands.IMPORT_MGF_COMMAND.getName(), 
+				MainActionCommands.IMPORT_MGF_COMMAND.getName(),
 				buttonDimension);
 
 		exportMsMsButton = GuiUtils.addButton(this, null, exportMsMsIcon, commandListener,
-				MainActionCommands.EXPORT_MSMS_COMMAND.getName(), MainActionCommands.EXPORT_MSMS_COMMAND.getName(),
+				MainActionCommands.EXPORT_MSMS_COMMAND.getName(), 
+				MainActionCommands.EXPORT_MSMS_COMMAND.getName(),
 				buttonDimension);
 	}
 
