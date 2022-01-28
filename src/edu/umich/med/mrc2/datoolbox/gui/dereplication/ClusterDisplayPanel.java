@@ -78,7 +78,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 	implements TreeSelectionListener, ListSelectionListener, ItemListener{
 
-	protected ClusterDisplayToolbar toolbar;
+//	protected ClusterDisplayToolbar toolbar;
 	protected DockableClusterTree clusterTree;
 	protected DockableDataPlot dataPlot;
 	protected DockableFeatureIntensitiesTable featureIntensitiesTable;
@@ -197,7 +197,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 			public void run() {
 				clearClusterDataPanel();
 				clusterTree.resetTree();
-				toolbar.updateGuiFromActiveSet(null);
+				//	toolbar.updateGuiFromActiveSet(null);
 			}
 		};
 		try {
@@ -235,8 +235,6 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 			clusterTree.expandTree();
 		else
 			clusterTree.collapseTree();
-
-		toolbar.treeExpanded(expand);
 	}
 
 	protected abstract void deleteCluster();
@@ -332,7 +330,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 
 			clusterTree.loadFeatureClusters(clusterList);
 			clusterTree.expandClusterBranch();
-			toolbar.treeExpanded(false);
+			clusterTree.treeExpanded(false);
 		}
 	}
 

@@ -926,7 +926,7 @@ public enum MainActionCommands {
 	RESET_IDTRACKER_DATA_EXPORT_FIELDS_COMMAND("Reset IDTracker data export fields"),
 	
 	//	Tracker search dialog
-	SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND("IDTracker search setup"),
+	SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND("IDTracker database search setup"),
 	SHOW_ID_TRACKER_SAVED_QUERIES_LIST_COMMAND("Show IDTracker saved queries list"),
 	LOAD_ID_TRACKER_SAVED_QUERY_COMMAND("Load saved IDTracker search query"),
 	SHOW_ID_TRACKER_SAVE_QUERY_DIALOG_COMMAND("Save current IDTracker search query"),

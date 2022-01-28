@@ -184,7 +184,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "IDWorkbenchPanel.layout");
 
 	private IDWorkbenchToolbar toolbar;
-	
+	private IDWorkbenchMenuBar menuBar;
 	private DockableReferenceMsOneFeatureTable msOneFeatureTable;
 	private DockableMSMSFeatureTable msTwoFeatureTable;
 	private DockableMolStructurePanel molStructurePanel;
@@ -291,8 +291,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		super("IDWorkbenchPanel", PanelList.ID_WORKBENCH.getName(), componentIcon);
 		setLayout(new BorderLayout(0, 0));
 
-		toolbar = new IDWorkbenchToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		//	toolbar = new IDWorkbenchToolbar(this);
+		menuBar = new IDWorkbenchMenuBar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);

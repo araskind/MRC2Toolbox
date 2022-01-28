@@ -213,21 +213,6 @@
 													<format>dock.PlaceholderList</format>
 													<entry>
 														<key shared="false">
-															<placeholder>dock.single.QCPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
 															<placeholder>dock.single.MgfPanel</placeholder>
 														</key>
 													</entry>
@@ -255,7 +240,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
+										<selected>8</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -333,11 +318,6 @@
 												<item key="dock.index" type="i">4</item>
 												<item key="dock.id" type="i">4</item>
 												<item key="dock.placeholder" type="s">dock.single.DuplicatesPanelClusterDisplayPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
-												</key>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -432,6 +412,11 @@
 											<entry>
 												<key shared="false">
 													<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 												</key>
 											</entry>
 										</placeholders>
@@ -574,7 +559,7 @@
 									</backup-path>
 								</property>
 								<property factory="StackDockPropertyFactory">
-									<index>0</index>
+									<index>3</index>
 									<placeholder>dock.single.QCPanel</placeholder>
 								</property>
 							</location>
@@ -674,7 +659,7 @@
 									</backup-path>
 								</property>
 								<property factory="StackDockPropertyFactory">
-									<index>0</index>
+									<index>5</index>
 									<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
 								</property>
 							</location>
@@ -719,12 +704,12 @@
 								<property factory="SplitDockPlaceholderProperty">
 									<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 									<backup-path>
-										<node location="RIGHT" size="0.8" id="1631029354244"/>
+										<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 										<leaf id="1631029354257"/>
 									</backup-path>
 								</property>
 								<property factory="StackDockPropertyFactory">
-									<index>4</index>
+									<index>10</index>
 									<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 								</property>
 							</location>
@@ -1330,8 +1315,25 @@
 							<properties/>
 						</entry>
 						<entry id="single CorrelationResultsPanelClusterDisplayPanel">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.5" id="1643325049364"/>
+												<leaf id="1643325049362"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 						<entry id="single IDTrackerLimsManagerPanel" current="dock.mode.normal">
 							<history>

@@ -66,6 +66,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	private String dataSetName;
 	private MsFeatureClusterSet integratedSet;
 	private DockableDataIntegrationFeatureSelectionTable featureSelectionTable;
+	private DataIntegrationPanelMenuBar menuBar;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("createIntegration", 16);
 	private static final Icon collectIDDataIcon = GuiUtils.getIcon("createIntegration", 24);
@@ -91,8 +92,9 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	@Override
 	protected void createPanelLayout() {
 
-		toolbar = new DataIntegratorToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		menuBar = new DataIntegrationPanelMenuBar(this);
+//		toolbar = new DataIntegratorToolbar(this);
+		add(menuBar, BorderLayout.NORTH);
 		clusterTree = new DockableClusterTree("DataIntegratorPanelDockableClusterTree", "Feature clusters", this, this);
 		clusterTree.getTree().setFeaturePopupMenu(new IntegrationFeaturePopupMenu(this));
 
@@ -115,17 +117,18 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 				MainActionCommands.DATA_INTEGRATION_DIALOG_COMMAND.getName(),
 				MainActionCommands.DATA_INTEGRATION_DIALOG_COMMAND.getName(), 
 				collectIDDataIcon, this));
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName(),
-				MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName(), 
-				deleteDataSetIcon, this));
-		
-		menuActions.addSeparator();
-		
+
 		menuActions.add(GuiUtils.setupButtonAction(
 				MainActionCommands.ACCEPT_CLEAN_ID_LIST_COMMAND.getName(),
 				MainActionCommands.ACCEPT_CLEAN_ID_LIST_COMMAND.getName(), 
 				acceptListIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName(),
+				MainActionCommands.DELETE_INTEGRATION_SET_COMMAND.getName(), 
+				deleteDataSetIcon, this));
 		
 		menuActions.addSeparator();
 		
@@ -136,8 +139,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		menuActions.add(GuiUtils.setupButtonAction(
 				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(),
 				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(), 
-				resetFilterIcon, this));
-		
+				resetFilterIcon, this));		
 	}
 	
 	@Override
@@ -215,7 +217,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			MRC2ToolBoxCore.getCurrentProject().deleteIntegratedFeatureClusterSet(integratedSet);
 			integratedSet = null;
 			clearPanel();
-			toolbar.updateGuiFromActiveSet(null);
+			//	TODO find new place for this functionality?
+			//	toolbar.updateGuiFromActiveSet(null);
 		}
 	}
 
@@ -300,7 +303,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 		integratedSet.setActive(true);
 		currentProject.addIntegratedFeatureClusterSet(integratedSet);
-		toolbar.updateGuiFromActiveSet(integratedSet);
+//		TODO find new place for this functionality?
+//		toolbar.updateGuiFromActiveSet(integratedSet);
 		// MessageDialogue.showInfoMsg(dataSetName + " set as integrated identified data
 		// list", this);
 	}
@@ -319,7 +323,9 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 				IdentifiedFeatureIntegrationTask eTask = (IdentifiedFeatureIntegrationTask) e.getSource();
 
 				integratedSet = eTask.getIdClusterSet();
-				toolbar.updateGuiFromActiveSet(integratedSet);
+				
+//				TODO find new place for this functionality?
+//				toolbar.updateGuiFromActiveSet(integratedSet);
 				// currentProject.addIntegratedFeatureClusterSet(integratedSet);
 
 				loadFeatureClusters(integratedSet.getClusters());
@@ -367,13 +373,16 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		clearPanel();
 		super.switchDataPipeline(project, newDataPipeline);
 		super.clearClusterDataPanel();
-		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+		
+//		TODO find new place for this functionality?
+//		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 		if (currentProject != null) {
 
 			integratedSet = currentProject.getActiveIntegratedFeatureSet();
 			if (integratedSet != null) {
 				loadFeatureClusters(integratedSet.getClusters());
-				toolbar.updateGuiFromActiveSet(integratedSet);
+//				TODO find new place for this functionality?
+//				toolbar.updateGuiFromActiveSet(integratedSet);
 			} else {
 				clearPanel();
 			}
@@ -391,7 +400,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 		super.closeProject();
 		clearPanel();
-		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
+//		TODO find new place for this functionality?
+//		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
 	}
 
 	@Override
@@ -420,7 +430,8 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			integratedSet = (MsFeatureClusterSet) e.getItem();
 			showClusterData(null);
 			loadFeatureClusters(integratedSet.getClusters());
-			toolbar.updateGuiFromActiveSet(integratedSet);
+//			TODO find new place for this functionality?
+//			toolbar.updateGuiFromActiveSet(integratedSet);
 		}
 	}
 

@@ -105,6 +105,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	private static final long serialVersionUID = -1518116406412542826L;
 
 	private CompoundDatabasePanelToolbar toolbar;
+	private CompoundDatabaseMenuBar menuBar;
 	private DockableDatabaseCompoundTable compoundTable;
 	private DockableMolStructurePanel molStructurePanel;
 	private DockableNarrativeDataPanel narrativeDataPanel;
@@ -131,12 +132,10 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	private CompoundDatabaseCuratorFrame compoundDatabaseCuratorFrame;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("pubChem", 16);
-	private static final Icon dbSearchIcon = GuiUtils.getIcon("dbLookup", 24);
 	private static final Icon clearSearchIcon = GuiUtils.getIcon("clearSearch", 24);
 	private static final Icon importCompoundsIcon = GuiUtils.getIcon("importLibraryToDb", 24);
 	private static final Icon exportCompoundsIcon = GuiUtils.getIcon("exportFilteredLibraryToFile", 24);
 	private static final Icon addToLibraryIcon = GuiUtils.getIcon("databaseToLibrary", 24);
-	private static final Icon newLibraryIcon = GuiUtils.getIcon("newLibrary", 24);
 	private static final Icon editFeatureIcon = GuiUtils.getIcon("editLibraryFeature", 24);
 	private static final Icon deleteFeatureIcon = GuiUtils.getIcon("deleteFeature", 24);
 	private static final Icon pubChemImportIcon = GuiUtils.getIcon("pubChemDownload", 24);
@@ -151,8 +150,9 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		super("CompoundDatabasePanel", PanelList.DATABASE.getName(), componentIcon);
 		setLayout(new BorderLayout(0, 0));
 
-		toolbar = new CompoundDatabasePanelToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		menuBar = new CompoundDatabaseMenuBar(this);
+		//	toolbar = new CompoundDatabasePanelToolbar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		compoundTable = new DockableDatabaseCompoundTable();
 		compoundTable.getTable().addCompoundPopupListener(this);
@@ -217,13 +217,6 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 				MainActionCommands.CLEAR_DATABASE_SEARCH_COMMAND.getName(),
 				MainActionCommands.CLEAR_DATABASE_SEARCH_COMMAND.getName(), 
 				clearSearchIcon, this));
-		
-		menuActions.addSeparator();
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(),
-				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(), 
-				importCompoundsIcon, this));
 		
 		menuActions.addSeparator();
 		

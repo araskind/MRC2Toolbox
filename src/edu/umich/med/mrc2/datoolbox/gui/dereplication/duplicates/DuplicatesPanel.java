@@ -68,6 +68,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 	private DuplicateMergeDialog duplicateMergeDialog;
 	private DuplicateFindDialog duplicateFindDialog;
 	private DockableDuplicateSelectionTable duplicateSelectionTable;
+	private DuplicatesPanelMenuBar menuBar;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("duplicates", 16);
 	private static final Icon clearDuplicatesIcon = GuiUtils.getIcon("clearDuplicates", 24);
@@ -115,10 +116,6 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(),
 				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName(), 
 				checkDuplicateNamesIcon, this));
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(),
-				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(), 
-				exportDuplicatesIcon, this));
 		
 		menuActions.addSeparator();
 		
@@ -132,13 +129,19 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 				resetFilterIcon, this));
 		
 		menuActions.addSeparator();		
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(),
+				MainActionCommands.EXPORT_DUPLICATES_COMMAND.getName(), 
+				exportDuplicatesIcon, this));
 	}
 
 	@Override
 	protected void createPanelLayout() {
 
-		toolbar = new DuplicatePanelToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		menuBar = new DuplicatesPanelMenuBar(this);
+//		toolbar = new DuplicatePanelToolbar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		grid.add(0, 0, 80, 30, duplicateSelectionTable);
 		grid.add(80, 0, 20, 30, molStructurePanel);
@@ -396,7 +399,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 		clearPanel();
 		super.switchDataPipeline(project, newPipeline);
-		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+//		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 		if (currentProject != null && activeDataPipeline != null) {
 
 			Set<MsFeatureCluster> clusterList = 
@@ -436,7 +439,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		// TODO Auto-generated method stub
 		super.closeProject();
 		clearPanel();
-		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
+//		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
 	}
 
 	@Override

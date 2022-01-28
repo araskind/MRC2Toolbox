@@ -28,6 +28,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonMenuBar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -40,32 +41,30 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final long serialVersionUID = -6288875491040382193L;
 
 	// Icons
+	
+	private static final Icon searchIconSmall = GuiUtils.getIcon("searchFeatures", 16);
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
-	private static final Icon openCdpIdProjectIcon = GuiUtils.getIcon("openIdExperiment", 24);
-	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
-	private static final Icon idSetupIcon = GuiUtils.getIcon("searchCompounds", 24);
-	private static final Icon nistMsIcon = GuiUtils.getIcon("NISTMS", 24);
 	private static final Icon nistPepMsIcon = GuiUtils.getIcon("NISTMS-pep", 24);
+	private static final Icon nistPepMsIconSmall = GuiUtils.getIcon("NISTMS-pep", 16);
 	private static final Icon nistPepMsOfflineIcon = GuiUtils.getIcon("NISTMS-pep-offline", 24);
 	private static final Icon nistPepMsOfflineUploadIcon = GuiUtils.getIcon("NISTMS-pep-upload", 24);
-	private static final Icon validateNistPepMsIcon = GuiUtils.getIcon("acceptMsMs", 24);
-	private static final Icon iddaIcon = GuiUtils.getIcon("importIDDAdata", 24);
-	private static final Icon trackerManegerIcon = GuiUtils.getIcon("experimentDatabase", 24);
 	private static final Icon exportMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
+	private static final Icon exportMSPIconSmall = GuiUtils.getIcon("exportToMSP", 16);
 	private static final Icon siriusIcon = GuiUtils.getIcon("sirius", 24);
-	private static final Icon exportSiriusMSIcon = GuiUtils.getIcon("exportSiriusMs", 24);
 	private static final Icon exportTrackerDataIcon = GuiUtils.getIcon("saveList", 24);
 	private static final Icon idStatusManagerIcon = GuiUtils.getIcon("idStatusManager", 24);
+	private static final Icon idStatusManagerIconSmall = GuiUtils.getIcon("idStatusManager", 16);
 	private static final Icon idFollowupStepManagerIcon = GuiUtils.getIcon("idFollowupStepManager", 24);
-	private static final Icon standardFeatureAnnotationManagerIcon = GuiUtils.getIcon("editCollection", 24);
-	private static final Icon openMsMsDataFileIcon = GuiUtils.getIcon("openMsMsDataFile", 24);
-//	private static final Icon indexRawFilesIcon = GuiUtils.getIcon("indexRawFiles", 24);
-	private static final Icon clearDuplicatesIcon = GuiUtils.getIcon("clearDuplicates", 24);	
+	private static final Icon standardFeatureAnnotationManagerIcon = GuiUtils.getIcon("editCollection", 24);	
 	private static final Icon bubblePlotIcon = GuiUtils.getIcon("bubble", 24);
+	private static final Icon bubblePlotIconSmall = GuiUtils.getIcon("bubble", 16);
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("clusterFeatureTable", 24);
+	private static final Icon editFeatureCollectionIconSmall = GuiUtils.getIcon("clusterFeatureTable", 16);
 	private static final Icon fdrIcon = GuiUtils.getIcon("fdr", 24);	
 	private static final Icon reassignTopHitsIcon = GuiUtils.getIcon("recalculateScores", 24);
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
+	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 24);
+	private static final Icon findMSMSFeaturesIcon = GuiUtils.getIcon("findMSMSFeatures", 24);
 
 	// Menus
 	private JMenu
@@ -78,7 +77,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 
 	// Database search
 	private JMenuItem
-		databaseSearchMenuItem;
+		databaseSearchMenuItem,
+		findMSMSFeaturesMenuItem,
+		filterMSMSFeaturesMenuItem,
+		resetFeatureFiltersMenuItem;
 
 	// Library search
 	private JMenuItem
@@ -112,55 +114,111 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 
 		super(listener);
 
+		// Database search
+		databaseSearchMenu = new JMenu("Feature search");
+		databaseSearchMenu.setIcon(searchIconSmall);
+		
+		databaseSearchMenuItem = addItem(databaseSearchMenu, databaseSearchMenuItem, 
+			MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND, 
+			searchIdTrackerIcon);
 
-		// MSMS
-//		databaseSearchMenu = new JMenu("MSMS analysis");
-//		databaseSearchMenu.setIcon(extractMSMSFeaturesIconSmall);
-//		
-//		databaseSearchMenuItem = addItem(databaseSearchMenu, databaseSearchMenuItem, 
-//				MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND, 
-//				searchIdTrackerIcon);
-//
-//
-//		add(databaseSearchMenu);
-//		
-//		//	DB linkage
-//		dbLinkageMenu = new JMenu("IDTracker integration");
-//		dbLinkageMenu.setIcon(sendProjectToDatabaseIconSmall);
-//		
-//		addMetadataMenuItem = addItem(dbLinkageMenu, addMetadataMenuItem, 
-//				MainActionCommands.ADD_PROJECT_METADATA_COMMAND, 
-//				addMetaDataIcon);
-//		sendProjectToTrackerMenuItem = addItem(dbLinkageMenu, sendProjectToTrackerMenuItem, 
-//				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND, 
-//				sendProjectToDatabaseIcon);
-//		
-//		add(dbLinkageMenu);
-//		
-//		rawDataMenu = new JMenu("Raw data tools");
-//		
-//		openRawFilesMenuItem = addItem(rawDataMenu, openRawFilesMenuItem, 
-//				MainActionCommands.OPEN_RAW_DATA_FILE_COMMAND, 
-//				openDataFileIcon);
-//		closeRawFilesMenuItem = addItem(rawDataMenu, closeRawFilesMenuItem, 
-//				MainActionCommands.CLOSE_RAW_DATA_FILE_COMMAND, 
-//				closeDataFileIcon);
-//		
-//		rawDataMenu.addSeparator();
-//		rawDataMenu.setIcon(dataFileToolsIconSmall);
-//		
-//		//	RAw data
-//		msConvertSetupMenuItem = addItem(rawDataMenu, msConvertSetupMenuItem, 
-//				MainActionCommands.SETUP_RAW_DATA_CONVERSION_COMMAND, 
-//				msConvertIcon);
-//		indexRawDataRepositoryMenuItem = addItem(rawDataMenu, indexRawDataRepositoryMenuItem, 
-//				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND, 
-//				indexRawFilesIcon);
-//		rawDataToolsMenuItem = addItem(rawDataMenu, rawDataToolsMenuItem, 
-//				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND, 
-//				dataFileToolsIcon);
-//		
-//		add(rawDataMenu);
+		databaseSearchMenu.addSeparator();
+		
+		filterMSMSFeaturesMenuItem = addItem(databaseSearchMenu, filterMSMSFeaturesMenuItem, 
+				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND, 
+				filterIcon);
+		findMSMSFeaturesMenuItem = addItem(databaseSearchMenu, findMSMSFeaturesMenuItem, 
+				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND, 
+				findMSMSFeaturesIcon);
+		
+		databaseSearchMenu.addSeparator();
+		
+		resetFeatureFiltersMenuItem = addItem(databaseSearchMenu, resetFeatureFiltersMenuItem, 
+				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES, 
+				reloadIcon);
+
+		add(databaseSearchMenu);
+
+		// Library search
+		librarySearchMenu = new JMenu("MSMS library earch");
+		librarySearchMenu.setIcon(nistPepMsIconSmall);
+		
+		pepSearchSetupMenuItem = addItem(librarySearchMenu, pepSearchSetupMenuItem, 
+				MainActionCommands.NIST_MS_PEPSEARCH_SETUP_COMMAND, 
+				nistPepMsIcon);
+		pepSearchOfflineSetupMenuItem = addItem(librarySearchMenu, pepSearchOfflineSetupMenuItem, 
+				MainActionCommands.NIST_MS_OFFLINE_PEPSEARCH_SETUP_COMMAND, 
+				nistPepMsOfflineIcon);
+
+		librarySearchMenu.addSeparator();
+
+		pepsearchResultsValidateMenuItem = addItem(librarySearchMenu, pepsearchResultsValidateMenuItem, 
+				MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_COMMAND, 
+				nistPepMsOfflineUploadIcon);
+		defaultMatchReassignMenuItem = addItem(librarySearchMenu, defaultMatchReassignMenuItem, 
+				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT, 
+				reassignTopHitsIcon);
+		
+		librarySearchMenu.addSeparator();
+
+		fdrMenuItem = addItem(librarySearchMenu, fdrMenuItem, 
+				MainActionCommands.SETUP_FDR_ESTIMATION_FOR_LIBRARY_MATCHES, 
+				fdrIcon);
+		fdrMenuItem.setEnabled(false);
+		
+		add(librarySearchMenu);
+		
+		// Annotation managers
+		annotationManagersMenu = new JMenu("Manage annotations");
+		annotationManagersMenu.setIcon(idStatusManagerIconSmall);
+		
+		idLevelManagerMenuItem = addItem(annotationManagersMenu, idLevelManagerMenuItem, 
+				MainActionCommands.SHOW_ID_LEVEL_MANAGER_DIALOG_COMMAND, 
+				idStatusManagerIcon);
+		followupStepsManagerMenuItem = addItem( annotationManagersMenu, followupStepsManagerMenuItem,
+				MainActionCommands.SHOW_ID_FOLLOWUP_STEP_MANAGER_DIALOG_COMMAND, 
+				idFollowupStepManagerIcon);
+		stdAnnotationManagerMenuItem = addItem(annotationManagersMenu, stdAnnotationManagerMenuItem, 
+				MainActionCommands.SHOW_STANDARD_FEATURE_ANNOTATION_MANAGER_DIALOG_COMMAND, 
+				standardFeatureAnnotationManagerIcon);
+		
+		add(annotationManagersMenu);
+		
+		//	Feature collections
+		featureCollectionsMenu = new JMenu("Feature collections");
+		featureCollectionsMenu.setIcon(editFeatureCollectionIconSmall);
+
+		featureCollectionManagerMenuItem = addItem(featureCollectionsMenu, featureCollectionManagerMenuItem, 
+				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND, 
+				editFeatureCollectionIcon);
+		
+		add(featureCollectionsMenu);
+		
+		//	Graphics
+		graphicsMenu = new JMenu("Visualization");
+		graphicsMenu.setIcon(bubblePlotIconSmall);
+		
+		bubblePlotMenuItem = addItem(graphicsMenu, bubblePlotMenuItem, 
+				MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT, 
+				bubblePlotIcon);
+
+		add(graphicsMenu);
+		
+		//	Export
+		exportMenu = new JMenu("Export");
+		exportMenu.setIcon(exportMSPIconSmall);
+		
+		trackerExportMenuItem = addItem(exportMenu, trackerExportMenuItem, 
+				MainActionCommands.SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND, 
+				exportTrackerDataIcon);
+		mspExportMenuItem = addItem(exportMenu, mspExportMenuItem, 
+				MainActionCommands.EXPORT_FEATURES_TO_MSP_COMMAND, 
+				exportMSPIcon);
+		siriusExportMenuItem = addItem(exportMenu, siriusExportMenuItem, 
+				MainActionCommands.SHOW_SIRIUS_MS_EXPORT_DIALOG_COMMAND, 
+				siriusIcon);
+		
+		add(exportMenu);
 	}
 
 	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {

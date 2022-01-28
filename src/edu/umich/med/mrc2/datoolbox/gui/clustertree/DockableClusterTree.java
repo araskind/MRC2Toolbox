@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.clustertree;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 
@@ -29,18 +30,27 @@ import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
+import bibliothek.gui.dock.action.DefaultDockActionSource;
+import bibliothek.gui.dock.action.LocationHint;
+import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class DockableClusterTree extends DefaultSingleCDockable {
+public class DockableClusterTree extends DefaultSingleCDockable implements ActionListener {
 
 	private ClusterTree clusterTree;
 	private static final Icon componentIcon = GuiUtils.getIcon("cluster", 16);
-
+	private static final Icon expandTreeIcon = GuiUtils.getIcon("expand", 16);
+	private static final Icon collapseTreeIcon = GuiUtils.getIcon("collapse", 16);
+	
+	private SimpleButtonAction
+		expandCollapseTreeButton;
+	
 	public DockableClusterTree(String id, String title, ActionListener featurePopupListener, TreeSelectionListener tsl) {
 
 		super(id, componentIcon, title, null, Permissions.MIN_MAX_STACK);
@@ -49,6 +59,46 @@ public class DockableClusterTree extends DefaultSingleCDockable {
 		clusterTree = new ClusterTree(featurePopupListener);
 		clusterTree.addTreeSelectionListener(tsl);
 		add(new JScrollPane(clusterTree));
+		initButtons(this);
+	}
+	
+	private void initButtons(ActionListener l) {
+
+		DefaultDockActionSource actions = new DefaultDockActionSource(
+				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
+
+		expandCollapseTreeButton = GuiUtils.setupButtonAction(
+				MainActionCommands.EXPAND_TREE.getName(),
+				MainActionCommands.EXPAND_TREE.getName(), 
+				expandTreeIcon, l);
+		actions.add(expandCollapseTreeButton);		
+		actions.addSeparator();
+		intern().setActionOffers(actions);
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		String command = e.getActionCommand();	
+		if(command.equals(MainActionCommands.COLLAPSE_TREE.getName()))
+			collapseTree();
+		
+		if(command.equals(MainActionCommands.EXPAND_TREE.getName()))
+			expandTree();
+	}
+	
+	public void treeExpanded(boolean expanded) {
+
+		if (expanded) {
+
+			expandCollapseTreeButton.setIcon(collapseTreeIcon);
+			expandCollapseTreeButton.setCommand(MainActionCommands.COLLAPSE_TREE.getName());
+			expandCollapseTreeButton.setTooltip("Collapse all file nodes");
+		} else {
+			expandCollapseTreeButton.setIcon(expandTreeIcon);
+			expandCollapseTreeButton.setCommand(MainActionCommands.EXPAND_TREE.getName());
+			expandCollapseTreeButton.setTooltip("Expand all file nodes");
+		}
 	}
 
 	public ClusterTree getTree() {
@@ -65,10 +115,12 @@ public class DockableClusterTree extends DefaultSingleCDockable {
 
 	public void collapseTree() {
 		clusterTree.collapseTree();
+		treeExpanded(false);
 	}
 
 	public void expandTree() {
 		clusterTree.expandTree();
+		treeExpanded(true);
 	}
 
 	public Object getClickedObject() {

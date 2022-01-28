@@ -203,7 +203,6 @@ public class DockableDataTreePanel extends DefaultSingleCDockable implements Act
 			expandCollapseTreeButton.setCommand(MainActionCommands.EXPAND_TREE.getName());
 			expandCollapseTreeButton.setTooltip("Expand all file nodes");
 		}
-
 	}
 	
 	public void loadData(Collection<DataFile>files, TreeGrouping grouping) {		

@@ -93,19 +93,15 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	private DockableClusterFeatureSelectionTable clusterFeatureSelectionTable;
 	private MassDifferenceExplorerDialog mdExplorerDialog;
 	private BinnerDataImportDialog binnerDataImportDialog;
+	
+	private CorrelationPanelMenuBar menuBar;
 
 	private static final Icon componentIcon = 
 			GuiUtils.getIcon("recalculateCorrelations", 16);
 	
-
-	private static final Icon actionsIcon = GuiUtils.getIcon("actions", 24);
-	private static final Icon clusteringIcon = GuiUtils.getIcon("cluster", 24);
-	private static final Icon rerunBinningIcon = GuiUtils.getIcon("rerun", 24);
 	private static final Icon importBinnerDataIcon = GuiUtils.getIcon("importBins", 24);
 	private static final Icon heatmapIcon = GuiUtils.getIcon("heatmap", 24);
 	private static final Icon exploreDeltasIcon = GuiUtils.getIcon("exploreDeltas", 24);
-	private static final Icon addSelectedFeaturesToSubsetIcon = GuiUtils.getIcon("addSelectedToCollection", 24);
-	private static final Icon addUnexplainedFeaturesToSubsetIcon = GuiUtils.getIcon("addInactiveToCollection", 24);
 	private static final Icon removeUnexplainedFromClustersIcon = GuiUtils.getIcon("clearUnassigned", 24);
 	private static final Icon rejectUnexplainedIcon = GuiUtils.getIcon("rejectUnexplained", 24);
 	private static final Icon molIonOnlyIcon = GuiUtils.getIcon("molIon", 24);
@@ -145,6 +141,13 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		super.initActions();
 		
 		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND.getName(),
+				MainActionCommands.SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND.getName(), 
+				recalculateCorrelationsIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
 				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND.getName(),
 				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND.getName(), 
 				filterIcon, this));
@@ -152,21 +155,6 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(),
 				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName(), 
 				resetFilterIcon, this));
-		
-		menuActions.addSeparator();
-		
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND.getName(),
-				MainActionCommands.SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND.getName(), 
-				recalculateCorrelationsIcon, this));
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(),
-				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(), 
-				importBinnerDataIcon, this));
-		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.EXPLORE_MASS_DIFFS_IN_BINNEER_DATA_COMMAND.getName(),
-				MainActionCommands.EXPLORE_MASS_DIFFS_IN_BINNEER_DATA_COMMAND.getName(), 
-				exploreDeltasIcon, this));
 		
 		menuActions.addSeparator();
 		
@@ -182,6 +170,17 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 				MainActionCommands.SHOW_BATCH_ANNOTATE_PREFERENCES_COMMAND.getName(),
 				MainActionCommands.SHOW_BATCH_ANNOTATE_PREFERENCES_COMMAND.getName(), 
 				batchAssignAnnotationsIcon, this));
+		
+		menuActions.addSeparator();		
+
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(),
+				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(), 
+				importBinnerDataIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPLORE_MASS_DIFFS_IN_BINNEER_DATA_COMMAND.getName(),
+				MainActionCommands.EXPLORE_MASS_DIFFS_IN_BINNEER_DATA_COMMAND.getName(), 
+				exploreDeltasIcon, this));
 		
 		menuActions.addSeparator();
 		
@@ -213,8 +212,9 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	@Override
 	protected void createPanelLayout() {
 
-		toolbar = new CorrelationPanelToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		menuBar = new CorrelationPanelMenuBar(this);
+//		toolbar = new CorrelationPanelToolbar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		clusterTree = new DockableClusterTree("CorrelationResultsPanelDockableClusterTree", "Feature clusters", this, this);
 		clusterTree.getTree().setFeaturePopupMenu(new CorrelationClusterFeaturePopupMenu(this));
@@ -979,7 +979,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 		clearPanel();
 		super.switchDataPipeline(project, newAssay);
-		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+//		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 		if (currentProject != null && activeDataPipeline != null) {
 			Set<MsFeatureCluster> clusterList = 
 					currentProject.getMsFeatureClustersForDataPipeline(activeDataPipeline);
@@ -993,7 +993,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 		super.closeProject();
 		clearPanel();
-		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+//		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 	}
 
 	@Override
