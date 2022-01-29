@@ -42,6 +42,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.swing.Icon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -97,6 +98,7 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSelectionListener, ItemListener {
 
 	private MsLibraryPanelToolbar toolbar;
+	private MsLibraryPanelMenuBar menuBar;
 	private DockableLibraryFeatureTable libraryFeatureTable;
 	private DockableMolStructurePanel molStructurePanel;
 	private LibraryManager libraryManager;
@@ -132,7 +134,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		setLayout(new BorderLayout(0, 0));
 
 		toolbar = new MsLibraryPanelToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		menuBar = new MsLibraryPanelMenuBar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		libraryFeatureTable = new DockableLibraryFeatureTable(
 				"MsLibraryPanelDockableLibraryFeatureTable", "Library feature listing", this);
@@ -329,6 +332,24 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		
 		if (command.equals(MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName()))	
 			showDecoyMSMSLibraryImportDialog();
+		
+		if (command.equals(MainActionCommands.LOAD_SELECTED_LIBRARY_COMMAND.getName())) {
+			//	event.getSource()
+			
+			if (event.getSource() instanceof JCheckBoxMenuItem) {
+				
+				Object libObject = 
+						((JCheckBoxMenuItem)event.getSource()).getClientProperty(MsLibraryPanelMenuBar.LIBRARY_OBJECT);
+
+				if(libObject != null && libObject instanceof CompoundLibrary) {
+					
+					currentLibrary = (CompoundLibrary) libObject;
+					libraryFeatureEditorPanel.clearPanel();
+					molStructurePanel.clearPanel();
+					loadLibrary(currentLibrary);
+				}
+			}
+		}
 	}
 	
 	private void showRefMSMSLibraryExportDialog() {
@@ -804,6 +825,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 
 		MRC2ToolBoxCore.getActiveMsLibraries().remove(currentLibrary);
 		toolbar.updateLibraryName(null);
+		menuBar.updateLibraryList(null, MRC2ToolBoxCore.getActiveMsLibraries());
 		clearPanel();
 		currentLibrary = null;
 	}
@@ -923,6 +945,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		clearPanel();
 		currentLibrary = selectedLibrary;
 		toolbar.updateLibraryName(currentLibrary);
+		menuBar.updateLibraryList(selectedLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
 		libraryFeatureTable.getTable().setTableModelFromCompoundLibrary(currentLibrary);
 		libraryFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
 	}

@@ -66,7 +66,6 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("experimentDatabase", 16);
 	private static final Icon refreshDataIcon = GuiUtils.getIcon("refreshDbData", 24);
-	private static final Icon resyncExperimentToLimsIcon = GuiUtils.getIcon("resyncExperimentToLims", 24);
 	private static final Icon sendDesignToProjectIcon = GuiUtils.getIcon("sendDesignToProject", 24);
 	private static final Icon syncDbIcon = GuiUtils.getIcon("synchronizeDb", 24);
 	private static final Icon createExperimentDirIcon = GuiUtils.getIcon("newProject", 24);
@@ -74,7 +73,8 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 	
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "METLIMSPanel.layout");
 
-	private METLIMSToolbar toolbar;
+//	private METLIMSToolbar toolbar;
+	private METLIMSMenuBar menuBar;
 	private DockableExperimentDataPanel experimentDataPanel;
 	private DockableDRCCDataPrepPanel drccDataPrepPanel;
 
@@ -83,8 +83,9 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 		super("METLIMSPanel", PanelList.LIMS.getName(), componentIcon);
 		setLayout(new BorderLayout(0, 0));
 
-		toolbar = new METLIMSToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		menuBar = new METLIMSMenuBar(this);
+//		toolbar = new METLIMSToolbar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);

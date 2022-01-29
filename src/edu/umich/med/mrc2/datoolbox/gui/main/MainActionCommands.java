@@ -29,16 +29,18 @@ public enum MainActionCommands {
 	SAVE_PROJECT_COMMAND("Save project"),
 	SAVE_PROJECT_COPY_COMMAND("Save project as ..."),
 	
-	NEW_CPD_ID_PROJECT_COMMAND("New compound identification project"),
-	DELETE_CPD_ID_PROJECT_COMMAND("Delete compound identification project"),
-	NEW_CPD_ID_PROJECT_DIALOG_COMMAND("Show \"New compound identification project\" dialog"),
-	EDIT_CPD_ID_PROJECT_DIALOG_COMMAND("Show \"Edit compound identification project\" dialog"),
-	SAVE_CPD_ID_PROJECT_COMMAND("Save compound identification project"),
-	NEW_CPD_ID_EXPERIMENT_COMMAND("New compound identification experiment"),
-	DELETE_CPD_ID_EXPERIMENT_COMMAND("Delete compound identification experiment"),
-	NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND("Show \"New compound identification experiment\" dialog"),
-	EDIT_CPD_ID_EXPERIMENT_DIALOG_COMMAND("Show \"Edit compound identification experiment\" dialog"),
-	SAVE_CPD_ID_EXPERIMENT_COMMAND("Save compound identification experiment"),
+	NEW_CPD_ID_PROJECT_DIALOG_COMMAND("New IDTracker project"),
+	NEW_CPD_ID_PROJECT_COMMAND("Create new IDTracker project"),
+	EDIT_CPD_ID_PROJECT_DIALOG_COMMAND("Edit IDTracker project"),
+	SAVE_CPD_ID_PROJECT_COMMAND("Save IDTracker project"),
+	DELETE_CPD_ID_PROJECT_COMMAND("Delete IDTracker project"),
+		
+	NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND("New IDTracker experiment"),
+	NEW_CPD_ID_EXPERIMENT_COMMAND("Crearte new IDTracker experiment"),
+	EDIT_CPD_ID_EXPERIMENT_DIALOG_COMMAND("Edit IDTracker experiment"),
+	SAVE_CPD_ID_EXPERIMENT_COMMAND("Save IDTracker experiment"),	
+	DELETE_CPD_ID_EXPERIMENT_COMMAND("Delete IDTracker experiment"),	
+
 	SHOW_ID_TRACKER_LOGIN_COMMAND("Show ID tracker login"),	
 	ID_TRACKER_LOGOUT_COMMAND("Log out from ID tracker"),
 	LOGIN_TO_ID_TRACKER_COMMAND("Login to ID tracker"),
@@ -576,6 +578,7 @@ public enum MainActionCommands {
 
 	//	Library manager
 	SHOW_LIBRARY_MANAGER_COMMAND("Show library manager"),
+	SHOW_LIBRARY_LIST_COMMAND("Open library from database"),
 	CREATE_NEW_LIBRARY_COMMAND("Create new library"),
 	EDIT_MS_LIBRARY_INFO_COMMAND("Edit library information"),
 	DELETE_LIBRARY_COMMAND("Delete library"),
@@ -597,6 +600,7 @@ public enum MainActionCommands {
 	SELECT_INPUT_LIBRARY_FOR_CONVERSION_COMMAND("Select CEF library for conversion"),
 	SELECT_OUTPUT_FOLDER_FOR_CONVERTED_LIBRARY_COMMAND("Select output folder for converted library"),
 	CONVERT_LIBRARY_FOR_RECURSION_COMMAND("Convert library for recursion"),
+	LOAD_SELECTED_LIBRARY_COMMAND("Load selected library"),
 
 	//	MSMS
 	SHOW_MSMS_IMPORT_DIALOG_COMMAND("Show MSMS file import dialog"),

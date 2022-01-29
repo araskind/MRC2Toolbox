@@ -97,19 +97,6 @@
 												<key shared="false">
 													<placeholder>dock.single.ProjectSetupDraw</placeholder>
 												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">size</item>
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-													<item type="s">hold</item>
-												</item>
-												<item key="dock.size" type="i">400</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.ProjectSetupDraw</item>
-												<item key="dock.hold" type="b">false</item>
 											</entry>
 										</placeholders>
 									</content>
@@ -120,18 +107,7 @@
 									<type>dock.CContentArea.minimize</type>
 								</layout>
 							</adjacent>
-							<children ignore="false">
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
-										<replacement id="dockablesingle ProjectSetupDraw"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ProjectSetupDraw</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-							</children>
+							<children ignore="false"/>
 						</root>
 						<root name="ccontrol south">
 							<layout factory="predefined">
@@ -184,13 +160,14 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1631029354244" orientation="HORIZONTAL" divider="0.246900269541779">
-											<leaf id="-1" nodeId="1631029354246">
+											<leaf id="0" nodeId="1631029354246">
 												<placeholders>
 													<placeholder>dock.single.ProjectSetupDraw</placeholder>
 												</placeholders>
 											</leaf>
-											<leaf id="0" nodeId="1631029354257">
+											<leaf id="1" nodeId="1631029354257">
 												<placeholders>
+													<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 													<placeholder>dock.single.MgfPanel</placeholder>
 													<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
 													<placeholder>dock.single.RawDataExaminerPanel</placeholder>
@@ -239,8 +216,18 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
+									<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
+										<replacement id="dockablesingle ProjectSetupDraw"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ProjectSetupDraw</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>8</selected>
+										<selected>2</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -1045,12 +1032,21 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ProjectSetupDraw" current="dock.mode.minimized">
+						<entry id="single ProjectSetupDraw" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.minimized</mode>
+								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.maximized">
+									<mode>dock.mode.maximized</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockFullScreenPropertyFactory"/>
+									</location>
+								</property>
 								<property id="dock.mode.minimized">
 									<mode>dock.mode.minimized</mode>
 									<root>ccontrol north</root>

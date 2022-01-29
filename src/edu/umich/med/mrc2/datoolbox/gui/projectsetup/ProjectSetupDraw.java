@@ -61,7 +61,7 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 
 	public ProjectSetupDraw() {
 
-		super("ProjectSetupDraw", "Settings", componentIcon);
+		super("ProjectSetupDraw", "Project setup", componentIcon);
 		setLayout(new BorderLayout(0, 0));
 		
 		projectToolbar = new ProjectToolbar(null);

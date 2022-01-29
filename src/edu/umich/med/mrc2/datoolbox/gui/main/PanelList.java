@@ -35,6 +35,7 @@ import edu.umich.med.mrc2.datoolbox.gui.library.MsLibraryPanel;
 import edu.umich.med.mrc2.datoolbox.gui.lims.METLIMSPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mgf.MgfPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.MoTrPACDataTrackingPanel;
+import edu.umich.med.mrc2.datoolbox.gui.projectsetup.ProjectSetupDraw;
 import edu.umich.med.mrc2.datoolbox.gui.qc.QCPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.worklist.WorklistPanel;
@@ -42,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 
 public enum PanelList {
 
+	PROJECT_SETUP("Project setup", ProjectSetupDraw.class, Boolean.TRUE),
 	DESIGN("Experiment design", ExperimentDesignPanel.class, Boolean.TRUE),
 	FEATURE_DATA("Feature data", FeatureDataPanel.class, Boolean.FALSE),
 	WORKLIST("Assay worklist", WorklistPanel.class, Boolean.FALSE),

@@ -154,7 +154,7 @@ public class MainWindow extends JFrame
 	private IdTrackerLoginDialog idtLogin;
 
 	private MainMenuBar mainMenuBar;
-	private MainToolbar toolBar;
+//	private MainToolbar toolBar;
 	private static ProjectSetupDraw projectDashBooard;
 	private static LinkedHashMap<PanelList, DockableMRC2ToolboxPanel> panels;
 	private LinkedHashMap<PanelList, Boolean> panelShowing;
@@ -395,7 +395,7 @@ public class MainWindow extends JFrame
 
 		if(result == JOptionPane.YES_OPTION) {
 			MRC2ToolBoxCore.setIdTrackerUser(null);
-			toolBar.setIdTrackerUser(null);
+//			toolBar.setIdTrackerUser(null);
 			mainMenuBar.setIdTrackerUser(null);
 
 			LabNoteBookPanel notebook = (LabNoteBookPanel)getPanel(PanelList.LAB_NOTEBOOK);
@@ -669,9 +669,9 @@ public class MainWindow extends JFrame
 		mainMenuBar = new MainMenuBar(this);
 		setJMenuBar(mainMenuBar);
 
-		toolBar = new MainToolbar(this);
-		getContentPane().add(toolBar, BorderLayout.NORTH);		
-		toolBar.setIdTrackerUser(null);
+//		toolBar = new MainToolbar(this);
+//		getContentPane().add(toolBar, BorderLayout.NORTH);		
+		mainMenuBar.setIdTrackerUser(null);
 		
 		statusBar = new StatusBar();
 		getContentPane().add(statusBar, BorderLayout.SOUTH);
@@ -716,10 +716,13 @@ public class MainWindow extends JFrame
 				e.printStackTrace();
 			}
 		}
-		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
-			projectDashBooard = new ProjectSetupDraw();
-			grid.add( -25, 0, 25, 100, projectDashBooard);	
-		}		
+		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX))
+			projectDashBooard = (ProjectSetupDraw) panels.get(PanelList.PROJECT_SETUP);
+			
+//		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
+//			projectDashBooard = new ProjectSetupDraw();
+//			grid.add( -25, 0, 25, 100, projectDashBooard);	
+//		}		
 		for(PanelList panelType : PanelList.getPanelListForConfiguration(BuildInformation.getStartupConfiguration()))
 			panelShowing.put(panelType, panels.get(panelType).isVisible());
 
@@ -1334,7 +1337,7 @@ public class MainWindow extends JFrame
 		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
 			entry.getValue().switchDataPipeline(currentProject, activeDataPipeline);
 		
-		toolBar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+//		toolBar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 		
 		if(dataExplorerPlotDialog != null) {
 			dataExplorerPlotDialog.clearPanels();
@@ -1395,7 +1398,7 @@ public class MainWindow extends JFrame
 		mainMenuBar.updateMenuFromProject(currentProject, activeDataPipeline);
 
 		// Update main toolbar
-		toolBar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+//		toolBar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 
 		// Update project information
 		projectDashBooard.switchDataPipeline(currentProject, activeDataPipeline);
@@ -1540,7 +1543,7 @@ public class MainWindow extends JFrame
 	}
 
 	public void setIdTrackerUser(LIMSUser user) {
-		toolBar.setIdTrackerUser(user);
+//		toolBar.setIdTrackerUser(user);
 		mainMenuBar.setIdTrackerUser(user);
 	}
 

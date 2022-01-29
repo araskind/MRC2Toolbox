@@ -119,7 +119,8 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "IDTrackerLimsManager.layout");
 
-	private IDTrackerLimsManagerToolbar toolbar;
+	//	private IDTrackerLimsManagerToolbar toolbar;
+	private IDTrackerLimsManagerMenuBar menuBar;
 	private CControl control;
 	private CGrid grid;
 	private DockableIdProjectTree projectTreePanel;
@@ -151,8 +152,10 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	public IDTrackerLimsManagerPanel() {
 
 		super("IDTrackerLimsManagerPanel", PanelList.ID_TRACKER_LIMS.getName(), componentIcon);
-		toolbar = new IDTrackerLimsManagerToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		
+		menuBar = new IDTrackerLimsManagerMenuBar(this);
+		//	toolbar = new IDTrackerLimsManagerToolbar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
@@ -200,13 +203,6 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		menuActions.addSeparator();
 		
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_DATA_UPLOAD_WIZARD_COMMAND.getName(),
-				MainActionCommands.SHOW_DATA_UPLOAD_WIZARD_COMMAND.getName(), 
-				wizardIcon, this));
-		
-		menuActions.addSeparator();
-		
-		menuActions.add(GuiUtils.setupButtonAction(
 				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(),
 				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(), 
 				newCdpIdProjectIcon, this));
@@ -217,19 +213,10 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		
 		menuActions.addSeparator();
 		
-		SimpleButtonAction avgMS1action = GuiUtils.setupButtonAction(
-				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(),
-				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(), 
-				loadAvgMS1DataFileIcon, this);
-		avgMS1action.setEnabled(false);
-		menuActions.add(avgMS1action);
-		
-		SimpleButtonAction importBinnerDataAction = GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(),
-				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(), 
-				importBinnerDataIcon, this);
-		importBinnerDataAction.setEnabled(false);
-		menuActions.add(importBinnerDataAction);
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_DATA_UPLOAD_WIZARD_COMMAND.getName(),
+				MainActionCommands.SHOW_DATA_UPLOAD_WIZARD_COMMAND.getName(), 
+				wizardIcon, this));
 		
 		menuActions.addSeparator();
 		
@@ -241,6 +228,22 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 				MainActionCommands.LOAD_MSMS_DATA_FROM_MULTIFILES_COMMAND.getName(),
 				MainActionCommands.LOAD_MSMS_DATA_FROM_MULTIFILES_COMMAND.getName(), 
 				loadMultiFileIcon, this));
+		
+		SimpleButtonAction avgMS1action = GuiUtils.setupButtonAction(
+				MainActionCommands.LOAD_AVG_MS1_DATA_FROM_FILE_COMMAND.getName(),
+				MainActionCommands.LOAD_AVG_MS1_DATA_FROM_FILE_COMMAND.getName(), 
+				loadAvgMS1DataFileIcon, this);
+		avgMS1action.setEnabled(false);
+		menuActions.add(avgMS1action);
+		
+		menuActions.addSeparator();
+		
+		SimpleButtonAction importBinnerDataAction = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(),
+				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG.getName(), 
+				importBinnerDataIcon, this);
+		importBinnerDataAction.setEnabled(false);
+		menuActions.add(importBinnerDataAction);
 	}
 
 	@Override
