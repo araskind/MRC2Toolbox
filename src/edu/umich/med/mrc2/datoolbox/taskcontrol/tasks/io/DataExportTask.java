@@ -560,6 +560,7 @@ public class DataExportTask extends AbstractTask {
 		final Matrix dataMatrix = currentProject.getDataMatrixForDataPipeline(dataPipeline);
 		TreeSet<ExperimentDesignFactor>activeFactors =
 				experimentDesignSubset.getDesignMap().stream().
+				filter(l->l.getParentFactor() != null).
 				map(l->l.getParentFactor()).
 				collect(Collectors.toCollection(TreeSet::new));
 

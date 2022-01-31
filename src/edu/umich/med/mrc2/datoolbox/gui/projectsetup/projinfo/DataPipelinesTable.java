@@ -26,6 +26,7 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.TristateCheckboxRenderer;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -45,6 +46,8 @@ public class DataPipelinesTable extends BasicTable {
 		rowSorter = new TableRowSorter<DataPipelinesTableModel>(model);
 		setRowSorter(rowSorter);
 		
+		columnModel.getColumnById(DataPipelinesTableModel.ACTIVE_COLUMN)
+			.setCellRenderer(new RadioButtonRenderer());
 		columnModel.getColumnById(DataPipelinesTableModel.WORKLIST_COLUMN)
 			.setCellRenderer(new TristateCheckboxRenderer());
 		

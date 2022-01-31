@@ -37,6 +37,7 @@ public class DataPipelinesTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = 7387427636234648515L;
 
+	public static final String ACTIVE_COLUMN = "Active";
 	public static final String DATA_PIPELINE_COLUMN = "Data pipeline";
 	public static final String NUM_DATA_FILES_COLUMN = "# of data files";
 	public static final String NUM_FEATURES_COLUMN = "# of features";
@@ -46,6 +47,7 @@ public class DataPipelinesTableModel extends BasicTableModel {
 	public DataPipelinesTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
+			new ColumnContext(ACTIVE_COLUMN, Boolean.class, false),
 			new ColumnContext(DATA_PIPELINE_COLUMN, DataPipeline.class, false),
 			new ColumnContext(NUM_DATA_FILES_COLUMN, Integer.class, false),
 			new ColumnContext(NUM_FEATURES_COLUMN, Integer.class, false),
@@ -60,10 +62,14 @@ public class DataPipelinesTableModel extends BasicTableModel {
 
 		for (DataPipeline pipeline : currentProject.getDataPipelines()) {
 
+			boolean isActive = false;
 			int numSamples = 0;
 			int numFeatures = 0;
 			boolean hasWorklist = false;
 			boolean hasLibrary = false;
+			
+			if(pipeline.equals(currentProject.getActiveDataPipeline()))
+				isActive = true;
 
 			Set<DataFile> dataFiles = 
 					currentProject.getDataFilesForAcquisitionMethod(pipeline.getAcquisitionMethod());
@@ -81,6 +87,7 @@ public class DataPipelinesTableModel extends BasicTableModel {
 				hasLibrary = true;
 
 			Object[] obj = {
+					isActive,
 					pipeline,
 					numSamples,
 					numFeatures,
