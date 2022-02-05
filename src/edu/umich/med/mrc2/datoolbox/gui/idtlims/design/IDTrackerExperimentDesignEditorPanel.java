@@ -73,11 +73,16 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 	protected IndeterminateProgressDialog idp;
 
 	public IDTrackerExperimentDesignEditorPanel() {
+		this(true);
+	}
+	
+	public IDTrackerExperimentDesignEditorPanel(boolean showToolbar) {
 
 		setLayout(new BorderLayout(0, 0));
-		designEditorToolbar = new IDTrackerExperimentDesignEditorToolbar(this);
-		add(designEditorToolbar, BorderLayout.NORTH);
-
+		if(showToolbar) {
+			designEditorToolbar = new IDTrackerExperimentDesignEditorToolbar(this);
+			add(designEditorToolbar, BorderLayout.NORTH);
+		}
 		expDesignTable = new IdExperimentSampleTable();
 		JScrollPane designScrollPane = new JScrollPane(expDesignTable);
 		add(designScrollPane, BorderLayout.CENTER);
@@ -118,8 +123,12 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 		if (command.equals(MainActionCommands.DELETE_SAMPLE_COMMAND.getName()))
 			deleteSample();
 	}
+	
+	public IDTExperimentalSample getSelectedSample(){
+		return expDesignTable.getSelectedSample();
+	}
 
-	protected void showSampleEditor(IDTExperimentalSample sample) {
+	public void showSampleEditor(IDTExperimentalSample sample) {
 
 		if(experiment == null)
 			return;
@@ -129,7 +138,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 		expSampleEditorDialog.setVisible(true);
 	}
 
-	protected void saveSampleData() {
+	public void saveSampleData() {
 		
 		Collection<String>errors = vaidateSampleData();
 		if(!errors.isEmpty()) {
@@ -185,7 +194,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 		return errors;
 	}
 
-	protected void deleteSample() {
+	public void deleteSample() {
 
 		Collection<IDTExperimentalSample> selectedSamples = expDesignTable.getSelectedSamples();
 		if(selectedSamples.isEmpty())

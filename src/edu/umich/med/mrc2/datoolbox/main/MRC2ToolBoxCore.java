@@ -32,6 +32,9 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.HashMap;
@@ -69,6 +72,7 @@ import umich.ms.datatypes.LCMSData;
 public final class MRC2ToolBoxCore {
 
 	public static String dataDir = "." + File.separator + "data" + File.separator;
+	public static final File lockFile = new File(dataDir + File.separator + "app.lock");
 	public static String configDir = dataDir + "config" + File.separator;
 	public static String iconDir = dataDir + "icons" + File.separator;
 	public static String fleTypeIconDir = iconDir + "DF" + File.separator;
@@ -111,6 +115,21 @@ public final class MRC2ToolBoxCore {
 	private static Logger logger;
 
 	public static void main(String[] args) {
+		
+		//	Prevent second copy running
+		FileLock lock = null;
+		try {
+		    FileChannel fc = FileChannel.open(lockFile.toPath(),
+		            StandardOpenOption.CREATE,
+		            StandardOpenOption.WRITE);
+		    lock = fc.tryLock();
+		} catch (IOException e) {
+		    throw new Error(e);
+		}
+	    if (lock == null) {
+	        System.out.println("Another instance of the software is already running");
+	        System.exit(1);
+	    }
 		
 		System.setProperty("java.util.prefs.PreferencesFactory", 
 				FilePreferencesFactory.class.getName());
@@ -210,6 +229,25 @@ public final class MRC2ToolBoxCore {
 				//e.printStackTrace();
 			}
         }
+	}
+
+	public static void shutDown() {
+
+		RawDataManager.releaseAllDataSources();
+		try {
+			JCS.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		mainWindow.saveApplicationLayout();
+		mainWindow.savePreferences();
+		mainWindow.dispose();
+		
+		if(lockFile != null)
+			lockFile.delete();
+		
+		System.gc();
+		System.exit(0);
 	}
 	
 	private static void showDatabaseSetup() {

@@ -48,9 +48,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
@@ -113,9 +110,7 @@ import umich.ms.datatypes.scancollection.IScanCollection;
 
 public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel 
 	implements TreeSelectionListener, BackedByPreferences {
-	
-	private RawDataExaminerToolbar toolbar;
-	private RawDataExaminerMenuBar menuBar;
+
 	private DockableChromatogramPlot chromatogramPanel;
 	private DockableSpectumPlot msPlotPanel;
 	private DockableMsTable msTable;
@@ -166,12 +161,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		super("RawDataExaminerPanel", PanelList.RAW_DATA_EXAMINER.getName(), componentIcon);;
 
 		menuBar = new RawDataExaminerMenuBar(this);	
-		//	toolbar = new RawDataExaminerToolbar(this);
 		add(menuBar, BorderLayout.NORTH);
-		
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
 		
 		dataFileTreePanel = new DockableDataTreePanel(this);
 		dataFileTreePanel.addTreeSelectionListener(this);
@@ -190,18 +180,23 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		
 		xicSetupPanel = new DockableXICSetupPanel(this);
 		msExtractorPanel = new DockableMsExtractorPanel(this);
-		
+
 		grid.add( 0, 0, 25, 100, dataFileTreePanel, rawDataFilePropertiesTable );
 		grid.add( 25, 0, 75, 50, chromatogramPanel );
 		grid.add( 25, 50, 50, 50, msPlotPanel, msTable, msmsPlotPane, msmsTable);
 		grid.add( 75, 50, 25, 50, xicSetupPanel, msExtractorPanel);
+				
+//		station.dropTree( grid.toTree() );
+//		add(station, BorderLayout.CENTER);	
+		
 		control.getContentArea().deploy( grid );
-
-		add(control.getContentArea(), BorderLayout.CENTER);		
+		add(control.getContentArea(), BorderLayout.CENTER);	
+		
 		initActions();
 		loadLayout(layoutConfigFile);
 		loadPreferences();
 		initChooser();
+		populatePanelsMenu();
 	}
 	
 	@Override
@@ -670,7 +665,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			if(exitProgram) {
 				if (MessageDialog.showChoiceWithWarningMsg(
 						"Are you sure you want to exit?", this.getContentPane()) == JOptionPane.YES_OPTION)
-					MRC2ToolBoxCore.getMainWindow().shutDown();
+					MRC2ToolBoxCore.shutDown();
 			}
 			else {
 				return;
@@ -700,7 +695,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 						MessageDialog.showChoiceWithWarningMsg("Are you sure you want to exit?", 
 								this.getContentPane());
 				if (selectedValue == JOptionPane.YES_OPTION)
-					MRC2ToolBoxCore.getMainWindow().shutDown();
+					MRC2ToolBoxCore.shutDown();
 			}
 			else {
 				clearGuiAfterProjectClosed();
@@ -1004,7 +999,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 					MessageDialog.showChoiceWithWarningMsg("Are you sure you want to exit?", 
 							this.getContentPane());
 			if (selectedValue == JOptionPane.YES_OPTION)
-				MRC2ToolBoxCore.getMainWindow().shutDown();
+				MRC2ToolBoxCore.shutDown();
 		}
 		if(showOpenProjectDialog) {
 
@@ -1365,6 +1360,12 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	public void savePreferences() {
 		preferences = Preferences.userRoot().node(RawDataExaminerPanel.class.getName());
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }
 

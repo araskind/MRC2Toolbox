@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -39,46 +38,48 @@ import javax.swing.border.EmptyBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class DockableAcquisitionMethodManagerPanel extends DefaultSingleCDockable
-	implements ActionListener, BackedByPreferences{
+public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLimsPanel {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editDataAcquisitionMethod", 16);
+	private static final Icon editMethodIcon = GuiUtils.getIcon("editDataAcquisitionMethod", 24);
+	private static final Icon addMethodIcon = GuiUtils.getIcon("addDataAcquisitionMethod", 24);
+	private static final Icon deleteMethodIcon = GuiUtils.getIcon("deleteDataAcquisitionMethod", 24);
+	private static final Icon downloadMethodIcon = GuiUtils.getIcon("downloadDataAcquisitionMethod", 24);
+	private static final Icon linkToIdExperimentIcon = GuiUtils.getIcon("linkToIdExperiment", 24);
+
 	private Preferences preferences;
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.AcquisitionMethodManagerPanel";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 
-	private AcquisitionMethodManagerToolbar toolbar;
+//	private AcquisitionMethodManagerToolbar toolbar;
 	private AcquisitionMethodTable methodTable;
 	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
 	private JFileChooser chooser;
 	private File baseDirectory;
-	private IDTrackerLimsManagerPanel idTrackerLimsManager;
 
 	public DockableAcquisitionMethodManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
-		super("DockableAcquisitionMethodManagerPanel", componentIcon, "Acquisition methods", null, Permissions.MIN_MAX_STACK);
+		super(idTrackerLimsManager, "DockableAcquisitionMethodManagerPanel", 
+				componentIcon, "Acquisition methods", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-		this.idTrackerLimsManager = idTrackerLimsManager;
-
-		toolbar = new AcquisitionMethodManagerToolbar(this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
+//		toolbar = new AcquisitionMethodManagerToolbar(this);
+//		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		methodTable = new AcquisitionMethodTable();
 		JScrollPane designScrollPane = new JScrollPane(methodTable);
@@ -93,10 +94,40 @@ public class DockableAcquisitionMethodManagerPanel extends DefaultSingleCDockabl
 						showAcquisitionMethodEditor(selectedMethod);
 				}											
 			}
-		});		
+		});	
+		initActions();
 		loadPreferences();
 	}
 
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName(), 
+				addMethodIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_ACQUISITION_METHOD_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_ACQUISITION_METHOD_DIALOG_COMMAND.getName(), 
+				editMethodIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName(),
+				MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName(), 
+				deleteMethodIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DOWNLOAD_ACQUISITION_METHOD_COMMAND.getName(),
+				MainActionCommands.DOWNLOAD_ACQUISITION_METHOD_COMMAND.getName(), 
+				downloadMethodIcon, this));
+	}
+	
 	private void initChooser() {
 
 		chooser = new ImprovedFileChooser();
@@ -110,7 +141,10 @@ public class DockableAcquisitionMethodManagerPanel extends DefaultSingleCDockabl
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+
+		if(!isConnected())
+			return;
+		
 		String command = e.getActionCommand();
 
 		if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName()))

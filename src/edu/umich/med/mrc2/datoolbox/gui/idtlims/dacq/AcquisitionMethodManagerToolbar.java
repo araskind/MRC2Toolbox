@@ -38,6 +38,7 @@ public class AcquisitionMethodManagerToolbar extends CommonToolbar {
 	 *
 	 */
 	private static final long serialVersionUID = -5152677450994169636L;
+	
 	private static final Icon editMethodIcon = GuiUtils.getIcon("editDataAcquisitionMethod", 32);
 	private static final Icon addMethodIcon = GuiUtils.getIcon("addDataAcquisitionMethod", 32);
 	private static final Icon deleteMethodIcon = GuiUtils.getIcon("deleteDataAcquisitionMethod", 32);

@@ -23,43 +23,47 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.mobph;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
+import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
-public class DockableMobilePhaseManagerPanel extends DefaultSingleCDockable implements ActionListener{
+public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editDataAcquisitionMethod", 16);
+	private static final Icon addMobilePhaseIcon = GuiUtils.getIcon("newMobilePhase", 24);
+	private static final Icon editMobilePhaseIcon = GuiUtils.getIcon("editMobilePhase", 24);
+	private static final Icon deleteMobilePhaseIcon = GuiUtils.getIcon("deleteMobilePhase", 24);
 
-	private IDTrackerLimsManagerPanel idTrackerLimsManager;
 	private MobilePhaseManagerToolbar toolbar;
 	private MobilePhaseTable mobilePhaseTable;
 	private MobilePhaseEditorDialog mobilePhaseEditorDialog;
 
 	public DockableMobilePhaseManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
-		super("DockableMobilePhaseManagerPanel", componentIcon, "Mobile phases", null, Permissions.MIN_MAX_STACK);
+		super(idTrackerLimsManager, "DockableMobilePhaseManagerPanel", 
+				componentIcon, "Mobile phases", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 		this.idTrackerLimsManager = idTrackerLimsManager;
 
-		toolbar = new MobilePhaseManagerToolbar(this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
+//		toolbar = new MobilePhaseManagerToolbar(this);
+//		getContentPane().add(toolbar, BorderLayout.NORTH);
+		
 		mobilePhaseTable = new MobilePhaseTable();	
 		JScrollPane designScrollPane = new JScrollPane(mobilePhaseTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
@@ -79,12 +83,39 @@ public class DockableMobilePhaseManagerPanel extends DefaultSingleCDockable impl
 						}											
 					}
 				});
+		initActions();
 	}
 
 	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_MOBILE_PHASE_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_MOBILE_PHASE_DIALOG_COMMAND.getName(), 
+				addMobilePhaseIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_MOBILE_PHASE_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_MOBILE_PHASE_DIALOG_COMMAND.getName(), 
+				editMobilePhaseIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_MOBILE_PHASE_COMMAND.getName(),
+				MainActionCommands.DELETE_MOBILE_PHASE_COMMAND.getName(), 
+				deleteMobilePhaseIcon, this));
+	}
+	
+	@Override
 	public void actionPerformed(ActionEvent e) {
 	
+		if(!isConnected())
+			return;
+		
 		String command = e.getActionCommand();
+		
 		if(command.equals(MainActionCommands.ADD_MOBILE_PHASE_DIALOG_COMMAND.getName()))
 			showMobilePhaseEditor(null);
 		
@@ -221,6 +252,24 @@ public class DockableMobilePhaseManagerPanel extends DefaultSingleCDockable impl
 
 	public synchronized void clearPanel() {
 		mobilePhaseTable.clearTable();
+	}
+
+	@Override
+	public void loadPreferences(Preferences preferences) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void loadPreferences() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void savePreferences() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

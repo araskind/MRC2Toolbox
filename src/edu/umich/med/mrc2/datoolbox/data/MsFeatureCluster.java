@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -86,8 +85,7 @@ public class MsFeatureCluster implements Serializable {
 	public void addFeature(MsFeature cf, DataPipeline pipeline) {
 		
 		if(!clusterFeatures.containsKey(pipeline))
-			clusterFeatures.put(pipeline, 
-					new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.MZ)));
+			clusterFeatures.put(pipeline, new HashSet<MsFeature>());
 		
 		clusterFeatures.get(pipeline).add(cf);
 		if (rtRange == null)

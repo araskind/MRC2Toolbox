@@ -56,7 +56,7 @@ public class WizardExperimentDesignEditorPanel extends IDTrackerExperimentDesign
 	}
 	
 	@Override
-	protected void saveSampleData() {
+	public void saveSampleData() {
 		
 		Collection<String>errors = vaidateSampleData();
 		if(!errors.isEmpty()) {
@@ -127,7 +127,7 @@ public class WizardExperimentDesignEditorPanel extends IDTrackerExperimentDesign
 	}
 	
 	@Override
-	protected void deleteSample() {
+	public void deleteSample() {
 
 		Collection<IDTExperimentalSample> selectedSamples = expDesignTable.getSelectedSamples();
 		if(selectedSamples.isEmpty())

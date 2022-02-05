@@ -23,10 +23,10 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.instrument;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -34,34 +34,36 @@ import javax.swing.JScrollPane;
 
 import org.apache.commons.lang3.StringUtils;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
-public class DockableInstrumentManagerPanel extends DefaultSingleCDockable implements ActionListener{
+public class DockableInstrumentManagerPanel extends AbstractIDTrackerLimsPanel {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editInstrument", 16);
-	private InstrunmentManagerToolbar toolbar;
+	private static final Icon addInstrumentIcon = GuiUtils.getIcon("addInstrument", 24);
+	private static final Icon editInstrumentIcon = GuiUtils.getIcon("editInstrument", 24);	
+	private static final Icon deleteInstrumentIcon = GuiUtils.getIcon("deleteInstrument", 24);
+
+//	private InstrunmentManagerToolbar toolbar;
 	private InstrumentTable instrumentTable;
 	private InstrumentEditorDialog instrumentEditorDialog;
-	private IDTrackerLimsManagerPanel idTrackerLimsManager;
 
 	public DockableInstrumentManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
-		super("DockableInstrumentManagerPanel", componentIcon, "Instruments", null, Permissions.MIN_MAX_STACK);
+		super(idTrackerLimsManager, "DockableInstrumentManagerPanel", 
+				componentIcon, "Instruments", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-		this.idTrackerLimsManager = idTrackerLimsManager;
-
-		toolbar = new InstrunmentManagerToolbar(this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
+//		toolbar = new InstrunmentManagerToolbar(this);
+//		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		instrumentTable = new InstrumentTable();
 		JScrollPane designScrollPane = new JScrollPane(instrumentTable);
@@ -80,10 +82,36 @@ public class DockableInstrumentManagerPanel extends DefaultSingleCDockable imple
 						}											
 					}
 				});
+		initActions();
 	}
 
 	@Override
+	protected void initActions() {
+
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_INSTRUMENT_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_INSTRUMENT_DIALOG_COMMAND.getName(), 
+				addInstrumentIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_INSTRUMENT_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_INSTRUMENT_DIALOG_COMMAND.getName(), 
+				editInstrumentIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_INSTRUMENT_COMMAND.getName(),
+				MainActionCommands.DELETE_INSTRUMENT_COMMAND.getName(), 
+				deleteInstrumentIcon, this));
+	}
+	
+	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		if(!isConnected())
+			return;
 		
 		String command = e.getActionCommand();
 
@@ -222,6 +250,24 @@ public class DockableInstrumentManagerPanel extends DefaultSingleCDockable imple
 
 	public synchronized void clearPanel() {
 		instrumentTable.clearTable();
+	}
+
+	@Override
+	public void loadPreferences(Preferences preferences) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void loadPreferences() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void savePreferences() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

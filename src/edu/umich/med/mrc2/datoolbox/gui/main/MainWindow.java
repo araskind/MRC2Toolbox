@@ -53,12 +53,12 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.jcs3.JCS;
 
 import bibliothek.gui.Dockable;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
+import bibliothek.gui.dock.common.intern.DefaultCDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -71,7 +71,6 @@ import edu.umich.med.mrc2.datoolbox.gui.adducts.chemmod.ChemicalModificationMana
 import edu.umich.med.mrc2.datoolbox.gui.assay.AssayManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.dbparse.DbParserFrame;
-import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.filetools.FileToolsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.organization.OrganizationManagerDialog;
@@ -198,7 +197,7 @@ public class MainWindow extends JFrame
 		
 		projectDashBooard.setActionListener(this);
 		projectDashBooard.switchDataPipeline(null, null);
-		((FeatureDataPanel)getPanel(PanelList.FEATURE_DATA)).setProjectActionListener(this);
+//		((FeatureDataPanel)getPanel(PanelList.FEATURE_DATA)).setProjectActionListener(this);
 	}
 
 	@Override
@@ -577,7 +576,7 @@ public class MainWindow extends JFrame
 		if (!saveOnExitRequested) {
 			if (MessageDialog.showChoiceWithWarningMsg(
 					"Are you sure you want to exit?", this.getContentPane()) == JOptionPane.YES_OPTION)
-				shutDown();
+				MRC2ToolBoxCore.shutDown();
 		}
 	}
 
@@ -1167,21 +1166,6 @@ public class MainWindow extends JFrame
 		}
 	}
 
-	public void shutDown() {
-
-		RawDataManager.releaseAllDataSources();
-		try {
-			JCS.shutdown();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		saveApplicationLayout();
-		savePreferences();
-		this.dispose();
-		System.gc();
-		System.exit(0);
-	}
-
 	@Override
 	public void statusChanged(TaskEvent e) {
 
@@ -1229,7 +1213,7 @@ public class MainWindow extends JFrame
 					MessageDialog.showChoiceWithWarningMsg("Are you sure you want to exit?", 
 							this.getContentPane());
 			if (selectedValue == JOptionPane.YES_OPTION)
-				MRC2ToolBoxCore.getMainWindow().shutDown();
+				MRC2ToolBoxCore.shutDown();
 		}
 		if(showOpenProjectDialog) {
 
@@ -1271,7 +1255,7 @@ public class MainWindow extends JFrame
 					JOptionPane.WARNING_MESSAGE);
 
 			if (selectedValue == JOptionPane.YES_OPTION)
-				shutDown();
+				MRC2ToolBoxCore.shutDown();
 		}
 		if(showOpenProjectDialog) {
 
@@ -1521,16 +1505,18 @@ public class MainWindow extends JFrame
 		SmoothingFilterManager.saveFilterMap();
 	}
 
-	private void saveApplicationLayout() {
+	public void saveApplicationLayout() {
 
 		for(int i=0; i<control.getCDockableCount(); i++) {
 
 			CDockable uiObject = control.getCDockable(i);
-
 			if(uiObject instanceof PersistentLayout) {
 
 				File layoutFile = ((PersistentLayout)uiObject).getLayoutFile();
-				((PersistentLayout)uiObject).saveLayout(layoutFile);
+				if(layoutFile == null) 
+					System.err.println("No layout file for " + ((DefaultCDockable)uiObject).getTitleText());		
+				else
+					((PersistentLayout)uiObject).saveLayout(layoutFile);
 			}
 		}
 		saveLayout(layoutConfigFile);

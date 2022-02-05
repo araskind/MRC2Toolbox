@@ -35,9 +35,6 @@ import javax.swing.event.ListSelectionEvent;
 
 import org.apache.commons.io.filefilter.RegexFileFilter;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -88,6 +85,8 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 	private static final Icon reRunIcon = GuiUtils.getIcon("rerun", 24);
 	private static final Icon stopIcon = GuiUtils.getIcon("stop", 24);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "AutomatorPanel.layout");
+	
+	//	private LinkedHashMap<SingleCDockable, Boolean> panelShowing;
 
 	public AutomatorPanel() {
 
@@ -103,11 +102,8 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 		runningTaskTable = new DockableAutomatorTaskTable(this);
 		failedTasksTable = new DockableFailedTasksTable();
 		console = new DockableAutomatorConsole();
-
-		control = new CControl( MRC2ToolBoxCore.getMainWindow() );
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
+		
 		control.addDockable(parametersPanel);
-		grid = new CGrid( control );
 		grid.add( 0, 0, 25, 25, parametersPanel);
 		grid.add( 0, 25, 25, 25, dataFilesPanel);
 		grid.add( 25, 0, 75, 60, runningTaskTable);
@@ -117,7 +113,8 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
-
+		populatePanelsMenu();
+		
 		dotDfilter = new RegexFileFilter(".+\\.[dD]$");
 		tasksToRerurn = new ArrayList<Task>();
 	}
@@ -440,5 +437,11 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 		if(!e.getValueIsAdjusting()) {
 
 		}
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

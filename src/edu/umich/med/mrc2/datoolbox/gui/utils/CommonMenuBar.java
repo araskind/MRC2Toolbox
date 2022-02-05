@@ -29,7 +29,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class CommonMenuBar extends JMenuBar {
 
@@ -53,5 +55,10 @@ public class CommonMenuBar extends JMenuBar {
 		item.setIcon(defaultIcon);
 		menu.add(item);
 		return item;
+	}
+	
+	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+		// TODO Auto-generated method stub
+
 	}
 }

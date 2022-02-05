@@ -21,23 +21,15 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.fdata;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemListener;
 
-import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
 import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -101,8 +93,8 @@ public class FeatureDataToolbar extends CommonToolbar {
 		exportExcelButton,
 		exportMwTabButton;
 	
-	private JComboBox dataPipelineComboBox;
-	private ItemListener iListener;
+//	private JComboBox dataPipelineComboBox;
+//	private ItemListener iListener;
 
 	@SuppressWarnings("unchecked")
 	public FeatureDataToolbar(ActionListener commandListener) {
@@ -224,38 +216,38 @@ public class FeatureDataToolbar extends CommonToolbar {
 				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName(),
 				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName(), buttonDimension);
 
-		addSeparator(buttonDimension);
-		Component horizontalGlue = Box.createHorizontalGlue();
-		add(horizontalGlue);
+//		addSeparator(buttonDimension);
+//		Component horizontalGlue = Box.createHorizontalGlue();
+//		add(horizontalGlue);
+//
+//		JLabel lblNewLabel = new JLabel("Data pipline: ");
+//		add(lblNewLabel);
 
-		JLabel lblNewLabel = new JLabel("Data pipline: ");
-		add(lblNewLabel);
-
-		dataPipelineComboBox = new JComboBox<DataPipeline>();
-		dataPipelineComboBox.setFont(new Font("Tahoma", Font.BOLD, 14));
-		dataPipelineComboBox.setModel(
-				new SortedComboBoxModel<DataPipeline>(new DataPipeline[0]));
-		dataPipelineComboBox.setAlignmentX(Component.CENTER_ALIGNMENT);
-		dataPipelineComboBox.setMaximumSize(new Dimension(200, 30));
-		dataPipelineComboBox.setMinimumSize(new Dimension(200, 30));
-		add(dataPipelineComboBox);
+//		dataPipelineComboBox = new JComboBox<DataPipeline>();
+//		dataPipelineComboBox.setFont(new Font("Tahoma", Font.BOLD, 14));
+//		dataPipelineComboBox.setModel(
+//				new SortedComboBoxModel<DataPipeline>(new DataPipeline[0]));
+//		dataPipelineComboBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+//		dataPipelineComboBox.setMaximumSize(new Dimension(200, 30));
+//		dataPipelineComboBox.setMinimumSize(new Dimension(200, 30));
+//		add(dataPipelineComboBox);
 		
 		adjustEnabledButtonsForConfiguration();
 	}
 	
-	public void setProjectActionListener(ActionListener listener) {
-		
-		exportResultsButton.addActionListener(listener);
-		exportExcelButton.addActionListener(listener);
-		exportMwTabButton.addActionListener(listener);
-		iListener = (ItemListener) listener;
-		dataPipelineComboBox.addItemListener(iListener);
-	}
+//	public void setProjectActionListener(ActionListener listener) {
+//		
+//		exportResultsButton.addActionListener(listener);
+//		exportExcelButton.addActionListener(listener);
+//		exportMwTabButton.addActionListener(listener);
+//		iListener = (ItemListener) listener;
+//		dataPipelineComboBox.addItemListener(iListener);
+//	}
 	
 	private void adjustEnabledButtonsForConfiguration() {
 		
 		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.IDTRACKER)) {			
-			dataPipelineComboBox.setEnabled(false);
+//			dataPipelineComboBox.setEnabled(false);
 			exportResultsButton.setEnabled(false);
 			exportExcelButton.setEnabled(false);
 			exportMwTabButton.setEnabled(false);
@@ -283,22 +275,22 @@ public class FeatureDataToolbar extends CommonToolbar {
 			exportExcelButton.setEnabled(false);
 		}
 		// Assay selector
-		dataPipelineComboBox.removeItemListener(iListener);
-		DataPipeline[] projectAssays = currentProject.getDataPipelines().
-				toArray(new DataPipeline[currentProject.getDataPipelines().size()]);
-		dataPipelineComboBox.setModel(
-				new SortedComboBoxModel<DataPipeline>(projectAssays));
-		dataPipelineComboBox.setEnabled(true);
-
-		if (newDataPipeline != null)
-			dataPipelineComboBox.setSelectedItem(newDataPipeline);
-		else
-			dataPipelineComboBox.setSelectedIndex(-1);
-
-		if (projectAssays.length == 0)
-			dataPipelineComboBox.setEnabled(false);
-
-		dataPipelineComboBox.addItemListener(iListener);
+//		dataPipelineComboBox.removeItemListener(iListener);
+//		DataPipeline[] projectAssays = currentProject.getDataPipelines().
+//				toArray(new DataPipeline[currentProject.getDataPipelines().size()]);
+//		dataPipelineComboBox.setModel(
+//				new SortedComboBoxModel<DataPipeline>(projectAssays));
+//		dataPipelineComboBox.setEnabled(true);
+//
+//		if (newDataPipeline != null)
+//			dataPipelineComboBox.setSelectedItem(newDataPipeline);
+//		else
+//			dataPipelineComboBox.setSelectedIndex(-1);
+//
+//		if (projectAssays.length == 0)
+//			dataPipelineComboBox.setEnabled(false);
+//
+//		dataPipelineComboBox.addItemListener(iListener);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -315,11 +307,11 @@ public class FeatureDataToolbar extends CommonToolbar {
 		exportResultsButton.setEnabled(false);
 		exportExcelButton.setEnabled(false);
 		exportMwTabButton.setEnabled(false);
-		dataPipelineComboBox.removeItemListener(iListener);
-		dataPipelineComboBox.setModel(
-				new SortedComboBoxModel<DataPipeline>(new DataPipeline[0]));
-		dataPipelineComboBox.addItemListener(iListener);
-		dataPipelineComboBox.setEnabled(false);
+//		dataPipelineComboBox.removeItemListener(iListener);
+//		dataPipelineComboBox.setModel(
+//				new SortedComboBoxModel<DataPipeline>(new DataPipeline[0]));
+//		dataPipelineComboBox.addItemListener(iListener);
+//		dataPipelineComboBox.setEnabled(false);
 	}
 
 	public void projectActive() {
@@ -335,6 +327,6 @@ public class FeatureDataToolbar extends CommonToolbar {
 		exportResultsButton.setEnabled(true);
 		exportExcelButton.setEnabled(true);
 		exportMwTabButton.setEnabled(true);
-		dataPipelineComboBox.setEnabled(true);
+//		dataPipelineComboBox.setEnabled(true);
 	}
 }

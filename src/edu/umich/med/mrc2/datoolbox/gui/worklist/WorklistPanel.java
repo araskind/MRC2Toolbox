@@ -53,9 +53,6 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang3.StringUtils;
 
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
@@ -90,7 +87,6 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	public static final String PREFS_NODE = WorklistPanel.class.getName();
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 
-	private WorklistToolbar toolbar;
 	private DockableWorklistTable worklistTable;
 	private File baseDirectory;
 	private IOFileFilter dotDfilter;
@@ -117,22 +113,20 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		super("WorklistPanel", PanelList.WORKLIST.getName(), componentIcon);
 		setLayout(new BorderLayout(0, 0));
 
-		toolbar = new WorklistToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		menuBar = new WorklistPanelMenuBar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		worklistTable = new DockableWorklistTable();
 		worklistTable.getTable().addKeyListener(new TableClipboardKeyAdapter(worklistTable.getTable()));
 
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
 		grid.add(0, 0, 100, 100, worklistTable);
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
 		loadPreferences();
-//		dotDfilter = new RegexFileFilter(".+\\.[dD]$");
+		populatePanelsMenu();
+		
 		dotDfilter = FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
 		txtFilter = new FileNameExtensionFilter("Text files", "txt", "TXT");
 	}
@@ -520,7 +514,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 		clearPanel();
 		super.switchDataPipeline(project, newDataPipeline);
-		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
 		if(currentProject != null && newDataPipeline != null)
 			showWorklist(currentProject.getWorklistForDataAcquisitionMethod(
 					newDataPipeline.getAcquisitionMethod()));
@@ -531,7 +525,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 		super.closeProject();
 		clearPanel();
-		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
+		menuBar.updateMenuFromProject(null, null);
 	}
 
 	@Override
@@ -637,6 +631,12 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	public void savePreferences() {
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }
 

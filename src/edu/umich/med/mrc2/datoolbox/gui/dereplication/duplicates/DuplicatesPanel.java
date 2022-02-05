@@ -68,8 +68,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 	private DuplicateMergeDialog duplicateMergeDialog;
 	private DuplicateFindDialog duplicateFindDialog;
 	private DockableDuplicateSelectionTable duplicateSelectionTable;
-	private DuplicatesPanelMenuBar menuBar;
-
+	
 	private static final Icon componentIcon = GuiUtils.getIcon("duplicates", 16);
 	private static final Icon clearDuplicatesIcon = GuiUtils.getIcon("clearDuplicates", 24);
 	private static final Icon exportDuplicatesIcon = GuiUtils.getIcon("saveDuplicates", 24);
@@ -94,6 +93,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		finalizeLayout();
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 	
 	@Override
@@ -469,5 +469,11 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

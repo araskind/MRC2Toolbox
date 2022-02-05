@@ -54,8 +54,6 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 	private static final Icon sendProjectToDatabaseIcon = GuiUtils.getIcon("xml2Database", 24);
 	private static final Icon sendProjectToDatabaseIconSmall = GuiUtils.getIcon("xml2Database", 16);
 
-	
-
 	// Menus
 	private JMenu
 		msmsMenu,

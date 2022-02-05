@@ -28,9 +28,6 @@ import java.io.File;
 import javax.swing.Icon;
 import javax.swing.event.ListSelectionEvent;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -47,7 +44,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 
 public class ExperimentDesignPanel extends DockableMRC2ToolboxPanel {
 
-	//private ExperimentDesignToolbar toolbar;
 	private static final Icon componentIcon = GuiUtils.getIcon("editDesignSubset", 16);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "ExperimentDesignPanel.layout");
 
@@ -58,12 +54,6 @@ public class ExperimentDesignPanel extends DockableMRC2ToolboxPanel {
 
 		super("ExperimentDesignPanel", PanelList.DESIGN.getName(), componentIcon);
 		setLayout(new BorderLayout(0, 0));
-//		toolbar = new ExperimentDesignToolbar(this);
-//		add(toolbar, BorderLayout.NORTH);
-
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
 
 		assayDesignPanel = new AssayDesignPanel();
 		designEditorPanel = new DesignEditorPanel();
@@ -73,6 +63,7 @@ public class ExperimentDesignPanel extends DockableMRC2ToolboxPanel {
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 
 	@Override
@@ -159,5 +150,11 @@ public class ExperimentDesignPanel extends DockableMRC2ToolboxPanel {
 	protected void initActions() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

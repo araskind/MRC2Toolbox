@@ -56,9 +56,6 @@ import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
@@ -97,8 +94,6 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSelectionListener, ItemListener {
 
-	private MsLibraryPanelToolbar toolbar;
-	private MsLibraryPanelMenuBar menuBar;
 	private DockableLibraryFeatureTable libraryFeatureTable;
 	private DockableMolStructurePanel molStructurePanel;
 	private LibraryManager libraryManager;
@@ -133,7 +128,6 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		super("MsLibraryPanel", PanelList.MS_LIBRARY.getName(), componentIcon);
 		setLayout(new BorderLayout(0, 0));
 
-		toolbar = new MsLibraryPanelToolbar(this);
 		menuBar = new MsLibraryPanelMenuBar(this);
 		add(menuBar, BorderLayout.NORTH);
 
@@ -143,10 +137,6 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 				"MsLibraryPanelDockableMolStructurePanel");
 		libraryFeatureEditorPanel = new DockableLibraryFeatureEditorPanel(this);
 
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
-
 		grid.add(0, 0, 75, 40, libraryFeatureTable);
 		grid.add(75, 0, 25, 40, molStructurePanel);
 		grid.add(0, 50, 100, 60, libraryFeatureEditorPanel);
@@ -154,7 +144,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
-
+		populatePanelsMenu();
+		
 		baseDirectory = new File(MRC2ToolBoxCore.dataDir);
 		currentLibrary = null;
 	}
@@ -818,14 +809,13 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		libraryFeatureEditorPanel.clearPanel();
 		molStructurePanel.clearPanel();
 		currentLibrary = null;
-		toolbar.updateLibraryName(currentLibrary);
+		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
 	}
 
 	private void closeActiveLibrary() {
 
 		MRC2ToolBoxCore.getActiveMsLibraries().remove(currentLibrary);
-		toolbar.updateLibraryName(null);
-		menuBar.updateLibraryList(null, MRC2ToolBoxCore.getActiveMsLibraries());
+		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(null, MRC2ToolBoxCore.getActiveMsLibraries());
 		clearPanel();
 		currentLibrary = null;
 	}
@@ -873,7 +863,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		} else
 			clearPanel();
 
-		toolbar.updateLibraryName(currentLibrary);
+		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
 	}
 
 	private void editLibraryInformation() {
@@ -892,7 +882,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		libraryManager.refreshLibraryListing();
 		libraryManager.hideLibInfoDialog();
 
-		toolbar.updateLibraryName(currentLibrary);
+		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
 	}
 
 	private void importLibrary() {
@@ -944,8 +934,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		libraryFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
 		clearPanel();
 		currentLibrary = selectedLibrary;
-		toolbar.updateLibraryName(currentLibrary);
-		menuBar.updateLibraryList(selectedLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
+		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
 		libraryFeatureTable.getTable().setTableModelFromCompoundLibrary(currentLibrary);
 		libraryFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
 	}
@@ -1105,13 +1094,13 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 	@Override
 	public void reloadDesign() {
 		super.switchDataPipeline(currentProject, activeDataPipeline);
-		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
 	}
 
 	@Override
 	public void closeProject() {
 		super.closeProject();
-		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
+		menuBar.updateMenuFromProject(null, null);
 	}
 
 	@Override
@@ -1201,5 +1190,11 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

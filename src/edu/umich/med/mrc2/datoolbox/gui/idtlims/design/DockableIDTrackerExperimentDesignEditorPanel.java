@@ -22,31 +22,90 @@
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.design;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignDisplay;
+import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableIDTrackerExperimentDesignEditorPanel 
-		extends DefaultSingleCDockable implements ExperimentDesignDisplay{
+		extends AbstractIDTrackerLimsPanel implements ExperimentDesignDisplay {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editSample", 16);
+	private static final Icon addSampleIcon = GuiUtils.getIcon("addSample", 24);
+	private static final Icon deleteSampleIcon = GuiUtils.getIcon("deleteSample", 24);
+	private static final Icon editSampleIcon = GuiUtils.getIcon("editSample", 24);
+	
 	IDTrackerExperimentDesignEditorPanel experimentDesignEditorPanel;
 
 	public DockableIDTrackerExperimentDesignEditorPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
-		super("DockableIDTrackerExperimentDesignEditorPanel", componentIcon, "Experiment design", null, Permissions.MIN_MAX_STACK);
+		super(idTrackerLimsManager, "DockableIDTrackerExperimentDesignEditorPanel", 
+				componentIcon, "Experiment design", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
-		experimentDesignEditorPanel = new IDTrackerExperimentDesignEditorPanel();
+		experimentDesignEditorPanel = 
+				new IDTrackerExperimentDesignEditorPanel(false);
 		getContentPane().add(experimentDesignEditorPanel, BorderLayout.CENTER);
+		
+		initActions();
 	}
 
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_SAMPLE_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_SAMPLE_DIALOG_COMMAND.getName(), 
+				addSampleIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_SAMPLE_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_SAMPLE_DIALOG_COMMAND.getName(), 
+				editSampleIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_SAMPLE_COMMAND.getName(),
+				MainActionCommands.DELETE_SAMPLE_COMMAND.getName(), 
+				deleteSampleIcon, this));
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if(!isConnected())
+			return;
+		
+		String command = e.getActionCommand();
+
+		if (command.equals(MainActionCommands.ADD_SAMPLE_DIALOG_COMMAND.getName()))
+			experimentDesignEditorPanel.showSampleEditor(null);
+
+		if (command.equals(MainActionCommands.EDIT_SAMPLE_DIALOG_COMMAND.getName())) {
+
+			IDTExperimentalSample sample = experimentDesignEditorPanel.getSelectedSample();
+			if(sample != null)
+				experimentDesignEditorPanel.showSampleEditor(sample);
+		}
+		if (command.equals(MainActionCommands.ADD_SAMPLE_COMMAND.getName()) ||
+				command.equals(MainActionCommands.EDIT_SAMPLE_COMMAND.getName()))
+			experimentDesignEditorPanel.saveSampleData();
+
+		if (command.equals(MainActionCommands.DELETE_SAMPLE_COMMAND.getName()))
+			experimentDesignEditorPanel.deleteSample();		
+	}
+	
 	public void showExperimentDesign(ExperimentDesign newDesign) {
 		experimentDesignEditorPanel.showExperimentDesign(newDesign);
 	}
@@ -70,6 +129,24 @@ public class DockableIDTrackerExperimentDesignEditorPanel
 
 	public LIMSExperiment getExperiment() {
 		return experimentDesignEditorPanel.getExperiment();
+	}
+
+	@Override
+	public void loadPreferences(Preferences preferences) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void loadPreferences() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void savePreferences() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

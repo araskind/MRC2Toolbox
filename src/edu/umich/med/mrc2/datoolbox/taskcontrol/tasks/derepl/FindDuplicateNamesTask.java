@@ -99,6 +99,10 @@ public class FindDuplicateNamesTask extends AbstractTask {
 		duplicateNameList = clusters.stream().
 				filter(c -> c.getFeatures().size() > 1).
 				collect(Collectors.toList());
+		
+		for(MsFeatureCluster cluster : duplicateNameList)
+			cluster.setPrimaryFeature(cluster.getFeatures().iterator().next());
+		
 		return duplicateNameList;
 	}
 

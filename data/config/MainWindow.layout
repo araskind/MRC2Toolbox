@@ -159,52 +159,55 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1631029354244" orientation="HORIZONTAL" divider="0.246900269541779">
-											<leaf id="0" nodeId="1631029354246">
+										<node nodeId="1644019430912" orientation="VERTICAL" divider="0.5">
+											<leaf id="-1" nodeId="1644019430910">
 												<placeholders>
-													<placeholder>dock.single.ProjectSetupDraw</placeholder>
-												</placeholders>
-											</leaf>
-											<leaf id="1" nodeId="1631029354257">
-												<placeholders>
-													<placeholder>dock.single.CompoundDatabasePanel</placeholder>
-													<placeholder>dock.single.MgfPanel</placeholder>
-													<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
-													<placeholder>dock.single.RawDataExaminerPanel</placeholder>
-													<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
-													<placeholder>dock.single.WorklistPanel</placeholder>
-													<placeholder>dock.single.ExperimentDesignPanel</placeholder>
-													<placeholder>dock.single.IDWorkbenchPanel</placeholder>
-													<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 													<placeholder>dock.single.LabNoteBookPanel</placeholder>
-													<placeholder>dock.single.AutomatorPanel</placeholder>
-													<placeholder>dock.single.QCPanel</placeholder>
-													<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
-													<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-													<placeholder>dock.single.MsLibraryPanel</placeholder>
-													<placeholder>dock.single.FeatureDataPanel</placeholder>
-													<placeholder>dock.single.METLIMSPanel</placeholder>
 												</placeholders>
-												<placeholder-map>
-													<version>0</version>
-													<format>dock.PlaceholderList</format>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.MgfPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.AutomatorPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.LabNoteBookPanel</placeholder>
-														</key>
-													</entry>
-												</placeholder-map>
 											</leaf>
+											<node nodeId="1644019417832" orientation="VERTICAL" divider="0.5">
+												<leaf id="-1" nodeId="1644019417830">
+													<placeholders>
+														<placeholder>dock.single.AutomatorPanel</placeholder>
+													</placeholders>
+												</leaf>
+												<node nodeId="1644019399042" orientation="VERTICAL" divider="0.5">
+													<leaf id="-1" nodeId="1644019399040">
+														<placeholders>
+															<placeholder>dock.single.MgfPanel</placeholder>
+														</placeholders>
+													</leaf>
+													<node nodeId="1631029354244" orientation="HORIZONTAL" divider="0.246900269541779">
+														<leaf id="-1" nodeId="1631029354246">
+															<placeholders>
+																<placeholder>dock.single.ProjectSetupDraw</placeholder>
+															</placeholders>
+														</leaf>
+														<leaf id="0" nodeId="1631029354257">
+															<placeholders>
+																<placeholder>dock.single.CompoundDatabasePanel</placeholder>
+																<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
+																<placeholder>dock.single.RawDataExaminerPanel</placeholder>
+																<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
+																<placeholder>dock.single.WorklistPanel</placeholder>
+																<placeholder>dock.single.ExperimentDesignPanel</placeholder>
+																<placeholder>dock.single.IDWorkbenchPanel</placeholder>
+																<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
+																<placeholder>dock.single.QCPanel</placeholder>
+																<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
+																<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
+																<placeholder>dock.single.MsLibraryPanel</placeholder>
+																<placeholder>dock.single.FeatureDataPanel</placeholder>
+																<placeholder>dock.single.METLIMSPanel</placeholder>
+															</placeholders>
+															<placeholder-map>
+																<version>0</version>
+																<format>dock.PlaceholderList</format>
+															</placeholder-map>
+														</leaf>
+													</node>
+												</node>
+											</node>
 										</node>
 									</content>
 								</delegate>
@@ -216,18 +219,8 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
-										<replacement id="dockablesingle ProjectSetupDraw"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ProjectSetupDraw</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>2</selected>
+										<selected>9</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -566,13 +559,9 @@
 								<property factory="SplitDockPlaceholderProperty">
 									<placeholder>dock.single.MgfPanel</placeholder>
 									<backup-path>
-										<node location="RIGHT" size="0.8" id="1631029354244"/>
-										<leaf id="1631029354257"/>
+										<node location="TOP" size="0.5" id="1644019399042"/>
+										<leaf id="1644019399040"/>
 									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>10</index>
-									<placeholder>dock.single.MgfPanel</placeholder>
 								</property>
 							</location>
 							<layout>
@@ -591,13 +580,9 @@
 								<property factory="SplitDockPlaceholderProperty">
 									<placeholder>dock.single.AutomatorPanel</placeholder>
 									<backup-path>
-										<node location="RIGHT" size="0.8" id="1631029354244"/>
-										<leaf id="1631029354257"/>
+										<node location="TOP" size="0.5" id="1644019417832"/>
+										<leaf id="1644019417830"/>
 									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>11</index>
-									<placeholder>dock.single.AutomatorPanel</placeholder>
 								</property>
 							</location>
 							<layout>
@@ -616,6 +601,9 @@
 								<property factory="SplitDockPlaceholderProperty">
 									<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
 									<backup-path>
+										<node location="BOTTOM" size="0.5" id="1644019430912"/>
+										<node location="BOTTOM" size="0.5" id="1644019417832"/>
+										<node location="BOTTOM" size="0.5" id="1644019399042"/>
 										<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 										<leaf id="1631029354257"/>
 									</backup-path>
@@ -630,6 +618,27 @@
 									<replacement id="dockablesingle MoTrPACDataTrackingPanel"/>
 									<delegate id="delegate_ccontrol backup factory id">
 										<id>MoTrPACDataTrackingPanel</id>
+										<area/>
+									</delegate>
+								</layout>
+								<children ignore="false"/>
+							</layout>
+						</child>
+						<child key="single ProjectSetupDraw" root="ccontrol center" location="true">
+							<location>
+								<property factory="SplitDockPlaceholderProperty">
+									<placeholder>dock.single.ProjectSetupDraw</placeholder>
+									<backup-path>
+										<node location="LEFT" size="0.246900269541779" id="1631029354244"/>
+										<leaf id="1631029354246"/>
+									</backup-path>
+								</property>
+							</location>
+							<layout>
+								<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
+									<replacement id="dockablesingle ProjectSetupDraw"/>
+									<delegate id="delegate_ccontrol backup factory id">
+										<id>ProjectSetupDraw</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -666,13 +675,9 @@
 								<property factory="SplitDockPlaceholderProperty">
 									<placeholder>dock.single.LabNoteBookPanel</placeholder>
 									<backup-path>
-										<node location="RIGHT" size="0.8" id="1631029354244"/>
-										<leaf id="1631029354257"/>
+										<node location="TOP" size="0.5" id="1644019430912"/>
+										<leaf id="1644019430910"/>
 									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>13</index>
-									<placeholder>dock.single.LabNoteBookPanel</placeholder>
 								</property>
 							</location>
 							<layout>
@@ -812,12 +817,46 @@
 							</properties>
 						</entry>
 						<entry id="single MgfPanel">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.MgfPanel</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.5" id="1644019399042"/>
+												<leaf id="1644019399040"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 						<entry id="single AutomatorPanel">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.AutomatorPanel</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.5" id="1644019417832"/>
+												<leaf id="1644019417830"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 						<entry id="single WorklistPanel" current="dock.mode.normal">
 							<history>
@@ -1032,7 +1071,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ProjectSetupDraw" current="dock.mode.normal">
+						<entry id="single ProjectSetupDraw">
 							<history>
 								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.maximized</mode>
@@ -1307,8 +1346,25 @@
 							</properties>
 						</entry>
 						<entry id="single LabNoteBookPanel">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.LabNoteBookPanel</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.5" id="1644019430912"/>
+												<leaf id="1644019430910"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 						<entry id="single CorrelationResultsPanelClusterDisplayPanel">
 							<history>

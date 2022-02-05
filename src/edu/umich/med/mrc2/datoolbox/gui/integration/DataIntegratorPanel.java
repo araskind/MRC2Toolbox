@@ -66,7 +66,6 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	private String dataSetName;
 	private MsFeatureClusterSet integratedSet;
 	private DockableDataIntegrationFeatureSelectionTable featureSelectionTable;
-	private DataIntegrationPanelMenuBar menuBar;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("createIntegration", 16);
 	private static final Icon collectIDDataIcon = GuiUtils.getIcon("createIntegration", 24);
@@ -87,13 +86,13 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		finalizeLayout();
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 
 	@Override
 	protected void createPanelLayout() {
 
 		menuBar = new DataIntegrationPanelMenuBar(this);
-//		toolbar = new DataIntegratorToolbar(this);
 		add(menuBar, BorderLayout.NORTH);
 		clusterTree = new DockableClusterTree("DataIntegratorPanelDockableClusterTree", "Feature clusters", this, this);
 		clusterTree.getTree().setFeaturePopupMenu(new IntegrationFeaturePopupMenu(this));
@@ -464,5 +463,11 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

@@ -52,9 +52,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.lang3.StringUtils;
 
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
@@ -183,8 +180,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	private static final Icon componentIcon = GuiUtils.getIcon("missingIdentifications", 16);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "IDWorkbenchPanel.layout");
 
-	private IDWorkbenchToolbar toolbar;
-	private IDWorkbenchMenuBar menuBar;
 	private DockableReferenceMsOneFeatureTable msOneFeatureTable;
 	private DockableMSMSFeatureTable msTwoFeatureTable;
 	private DockableMolStructurePanel molStructurePanel;
@@ -295,10 +290,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		menuBar = new IDWorkbenchMenuBar(this);
 		add(menuBar, BorderLayout.NORTH);
 
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
-
 		msOneFeatureTable = new DockableReferenceMsOneFeatureTable(this);
 		referenceMsOneFeaturePopupMenu = new ReferenceMsOneFeaturePopupMenu(this);
 		msOneFeatureTable.getTable().addTablePopupMenu(referenceMsOneFeaturePopupMenu);
@@ -369,6 +360,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
+		
 		idSetupDialog = new IDSetupDialog(this);
 		initDataMaps();
 		
@@ -3044,5 +3037,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		activeFeatureCollection = FeatureCollectionManager.activeProjectFeatureSet;
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());			
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}	
 }

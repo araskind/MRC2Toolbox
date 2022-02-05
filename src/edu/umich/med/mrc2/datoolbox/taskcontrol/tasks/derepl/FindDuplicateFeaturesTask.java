@@ -155,6 +155,9 @@ public class FindDuplicateFeaturesTask extends AbstractTask {
 			// More than one named
 			if (named.size() > 1)
 				primary = ClusterUtils.getMostIntensiveFeature(named);
+			
+			if(primary == null)
+				primary = fClust.getFeatures().iterator().next();
 
 			fClust.setPrimaryFeature(primary);
 			dataSource = ClusterUtils.getMostIntensiveFeature(fClust);

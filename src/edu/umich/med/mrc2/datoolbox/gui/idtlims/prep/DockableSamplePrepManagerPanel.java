@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.prep;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -32,6 +31,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -42,7 +42,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
@@ -53,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
@@ -60,29 +60,33 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
-public class DockableSamplePrepManagerPanel extends DefaultSingleCDockable
-	implements ActionListener, ListSelectionListener, PersistentLayout {
+public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
+	implements ListSelectionListener, PersistentLayout {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editSamplePrep", 16);
-	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "SamplePrepManagerPanel.layout");
+	private static final Icon editSamplePrepIcon = GuiUtils.getIcon("editSamplePrep", 24);
+	private static final Icon addSamplePrepIcon = GuiUtils.getIcon("addSamplePrep", 24);
+	private static final Icon deleteSamplePrepIcon = GuiUtils.getIcon("deleteSamplePrep", 24);
+
+	private static final File layoutConfigFile = 
+			new File(MRC2ToolBoxCore.configDir + "SamplePrepManagerPanel.layout");
 
 	private SamplePrepManagerToolbar toolbar;
 	private DockablePrepTable samplePrepTable;
 	private DockableActivePrepDisplayPanel activePrepPanel;
 	private SamplePrepEditorDialog samplePrepEditorDialog;
-	private IDTrackerLimsManagerPanel idTrackerLimsManager;
 	private CControl control;
 	private CGrid grid;
 
 	public DockableSamplePrepManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
-		super("DockableSamplePrepManagerPanel", componentIcon, "Sample preparations", null, Permissions.MIN_MAX_STACK);
+		super(idTrackerLimsManager, "DockableSamplePrepManagerPanel", 
+				componentIcon, "Sample preparations", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
-		this.idTrackerLimsManager = idTrackerLimsManager;
 
-		toolbar = new SamplePrepManagerToolbar(this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
+//		toolbar = new SamplePrepManagerToolbar(this);
+//		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
@@ -109,8 +113,31 @@ public class DockableSamplePrepManagerPanel extends DefaultSingleCDockable
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
 		loadLayout(layoutConfigFile);
+		initActions();
 	}
 
+	@Override
+	protected void initActions() {
+
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName(), 
+				addSamplePrepIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName(), 
+				editSamplePrepIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName(),
+				MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName(), 
+				deleteSamplePrepIcon, this));
+	}
+	
 	public void loadPrepData() {		
 		samplePrepTable.setTableModelFromPreps(IDTDataCash.getSamplePreps());
 	}
@@ -121,6 +148,9 @@ public class DockableSamplePrepManagerPanel extends DefaultSingleCDockable
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		if(!isConnected())
+			return;
 
 		if(e.getActionCommand().equals(MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName()))
 			showCreateNewPrepDialog(idTrackerLimsManager.getSelectedExperiment());
@@ -341,6 +371,24 @@ public class DockableSamplePrepManagerPanel extends DefaultSingleCDockable
 	public void clearCurrentPrepData() {
 		samplePrepTable.clearSelection();
 		activePrepPanel.clearPanel();
+	}
+
+	@Override
+	public void loadPreferences(Preferences preferences) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void loadPreferences() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void savePreferences() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

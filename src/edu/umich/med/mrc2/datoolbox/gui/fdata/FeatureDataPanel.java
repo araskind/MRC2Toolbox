@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.fdata;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,9 +45,6 @@ import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.lang3.StringUtils;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -113,7 +109,6 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSelectionListener {
 
-	private FeatureDataToolbar toolbar;
 	private DockableFeatureDataTable featureDataTable;
 	private DockableDataPlot dataPlot;
 	private DockableFeatureIntensitiesTable featureIntensitiesTable;
@@ -176,8 +171,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		super("FeatureDataPanel", PanelList.FEATURE_DATA.getName(), componentIcon);
 		setLayout(new BorderLayout(0, 0));
 
-		toolbar = new FeatureDataToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		menuBar = new FeatureDataPanelMenuBar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		featureDataTable = new DockableFeatureDataTable(
 				"FeatureDataPanelDockableFeatureDataTable", "Feature listing");
@@ -201,10 +196,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		featureAnnotationPanel = new DockableObjectAnnotationPanel(
 				"FeatureDataPanelAnnotations", "Annotations", 80);
 
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
-
 		grid.add(0, 0, 80, 30, featureDataTable);
 		grid.add(80, 0, 20, 30, molStructurePanel);
 		grid.add(0, 30, 100, 20, idTable);
@@ -215,6 +206,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 		
 		dataImputationSetupDialog = new DataImputationSetupDialog(this);
 		duplicateMergeDialog = new DuplicateMergeDialog(this);
@@ -332,10 +324,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		
 		menuActions.addSeparator();
 	}
-	
-	public void setProjectActionListener(ActionListener listener) {
-		toolbar.setProjectActionListener(listener);
-	}	
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
@@ -343,51 +331,12 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		if (currentProject == null)
 			return;
 
-		if (currentProject.getExperimentDesign() == null || currentProject.getExperimentDesign().getSamples().isEmpty())
+		if (currentProject.getExperimentDesign() == null || 
+				currentProject.getExperimentDesign().getSamples().isEmpty())
 			return;
 
 		String command = event.getActionCommand();
-
-		if (command.equals(MainActionCommands.CALC_FEATURES_STATS_COMMAND.getName()))
-			calculateDataStats();
 		
-		if (command.equals(MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName()))
-			cleanEmptyFeatures();
-		
-		if (command.equals(MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName()))
-			showFeatureFilter();
-			
-		if (command.equals(MainActionCommands.FILTER_FEATURES_COMMAND.getName()))
-			filterFeatureTable();
-
-		if (command.equals(MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName()))
-			resetFeatureTable();
-
-		if (command.equals(MainActionCommands.SHOW_KNOWN_FEATURES_COMMAND.getName()))
-			showKnownsOnly();
-
-		if (command.equals(MainActionCommands.SHOW_UNKNOWN_FEATURES_COMMAND.getName()))
-			showUnknownsOnly();
-
-		if (command.equals(MainActionCommands.SHOW_QC_FEATURES_COMMAND.getName()))
-			showQcOnly();
-
-		// Feature popup
-		if (command.equals(MainActionCommands.EDIT_FEATURE_METADATA_COMMAND.getName()))
-			editFeatureMetaData();
-
-		if (command.equals(MainActionCommands.COPY_SELECTED_ROWS_COMMAND.getName()))
-			copySelectedFeaturesData(false);
-
-		if (command.equals(MainActionCommands.COPY_SELECTED_ROWS_WITH_HEADER_COMMAND.getName()))
-			copySelectedFeaturesData(true);
-
-		// if(command.equals(MainActionCommands.ADD_SELECTED_FEATURES_TO_SUBSET_COMMAND.getName()))
-		// addSelectedFeaturesToActiveSubset();
-
-		if (command.equals(MainActionCommands.REMOVE_SELECTED_FEATURES_FROM_SUBSET_COMMAND.getName()))
-			removeSelectedFeaturesFromActiveSubset();
-
 		if (command.equals(MainActionCommands.LOAD_DATA_COMMAND.getName()))
 			showDataLoader();
 
@@ -402,51 +351,96 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		if (command.equals(MainActionCommands.LOAD_LIBRARY_COMMAND.getName()))
 			loadLibrary();
-
-		if (command.equals(MainActionCommands.SHOW_IMPUTE_DIALOG_COMMAND.getName()))
-			showDataImputationDialog();
-
-		if (command.equals(MainActionCommands.IMPUTE_DATA_COMMAND.getName()))
-			imputeMissingData();
-
-		if (command.equals(MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName()))
-			showBubblePlotDialog();
-
-		if (command.equals(MainActionCommands.SEARCH_FEATURE_AGAINST_LIBRARY_COMMAND.getName()))
-			showLibrarySearchSetup(1);
-
-		if (command.equals(MainActionCommands.SEARCH_FEATURE_AGAINST_DATABASE_COMMAND.getName()))
-			searchSelectedFeatureAgainstDatabase();
-
-		if (command.equals(MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND.getName()))
-			showLibrarySearchSetup(10);
-
-		if (command.equals(MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND.getName()))
-			showDatabaseSearchSetup();
-
-		if (command.equals(MainActionCommands.SEARCH_FEATURES_AGAINST_LIBRARIES_COMMAND.getName()))
-			runLibrarySearch();
-
-		if (command.equals(MainActionCommands.SEARCH_FEATURES_AGAINST_DATABASES_COMMAND.getName()))
-			runDatabaseSearch();
-
-		if (command.equals(MainActionCommands.SHOW_MISSING_IDENTIFICATIONS_COMMAND.getName()))
-			showMissingIdentifications();
-
-		if (command.equals(MainActionCommands.CLEAR_IDENTIFICATIONS_COMMAND.getName()))
-			clearAllFeatureIdentifications();
-
-		if (command.equals(MainActionCommands.MERGE_SELECTED_FEATURES_COMMAND.getName()))
-			showMergeSelectedFeaturesDialog();
-
-		if (command.equals(MainActionCommands.MERGE_DUPLICATES_COMMAND.getName()))
-			mergeSelectedFeatures();
-
-		if (command.equals(MainActionCommands.CLEAR_SELECTED_FEATURE_IDENTIFICATION_COMMAND.getName()))
-			clearSelectedFeatureIdentifications();
 		
-		if (command.equals(MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName()))
-			checkForDuplicateNames();		
+		if(activeDataPipeline == null) {
+			return;
+		}
+		else {
+			if (command.equals(MainActionCommands.CALC_FEATURES_STATS_COMMAND.getName()))
+				calculateDataStats();
+			
+			if (command.equals(MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND.getName()))
+				cleanEmptyFeatures();
+			
+			if (command.equals(MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName()))
+				showFeatureFilter();
+				
+			if (command.equals(MainActionCommands.FILTER_FEATURES_COMMAND.getName()))
+				filterFeatureTable();
+
+			if (command.equals(MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName()))
+				resetFeatureTable();
+
+			if (command.equals(MainActionCommands.SHOW_KNOWN_FEATURES_COMMAND.getName()))
+				showKnownsOnly();
+
+			if (command.equals(MainActionCommands.SHOW_UNKNOWN_FEATURES_COMMAND.getName()))
+				showUnknownsOnly();
+
+			if (command.equals(MainActionCommands.SHOW_QC_FEATURES_COMMAND.getName()))
+				showQcOnly();
+
+			// Feature popup
+			if (command.equals(MainActionCommands.EDIT_FEATURE_METADATA_COMMAND.getName()))
+				editFeatureMetaData();
+
+			if (command.equals(MainActionCommands.COPY_SELECTED_ROWS_COMMAND.getName()))
+				copySelectedFeaturesData(false);
+
+			if (command.equals(MainActionCommands.COPY_SELECTED_ROWS_WITH_HEADER_COMMAND.getName()))
+				copySelectedFeaturesData(true);
+
+			// if(command.equals(MainActionCommands.ADD_SELECTED_FEATURES_TO_SUBSET_COMMAND.getName()))
+			// addSelectedFeaturesToActiveSubset();
+
+			if (command.equals(MainActionCommands.REMOVE_SELECTED_FEATURES_FROM_SUBSET_COMMAND.getName()))
+				removeSelectedFeaturesFromActiveSubset();
+
+			if (command.equals(MainActionCommands.SHOW_IMPUTE_DIALOG_COMMAND.getName()))
+				showDataImputationDialog();
+
+			if (command.equals(MainActionCommands.IMPUTE_DATA_COMMAND.getName()))
+				imputeMissingData();
+
+			if (command.equals(MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName()))
+				showBubblePlotDialog();
+
+			if (command.equals(MainActionCommands.SEARCH_FEATURE_AGAINST_LIBRARY_COMMAND.getName()))
+				showLibrarySearchSetup(1);
+
+			if (command.equals(MainActionCommands.SEARCH_FEATURE_AGAINST_DATABASE_COMMAND.getName()))
+				searchSelectedFeatureAgainstDatabase();
+
+			if (command.equals(MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND.getName()))
+				showLibrarySearchSetup(10);
+
+			if (command.equals(MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND.getName()))
+				showDatabaseSearchSetup();
+
+			if (command.equals(MainActionCommands.SEARCH_FEATURES_AGAINST_LIBRARIES_COMMAND.getName()))
+				runLibrarySearch();
+
+			if (command.equals(MainActionCommands.SEARCH_FEATURES_AGAINST_DATABASES_COMMAND.getName()))
+				runDatabaseSearch();
+
+			if (command.equals(MainActionCommands.SHOW_MISSING_IDENTIFICATIONS_COMMAND.getName()))
+				showMissingIdentifications();
+
+			if (command.equals(MainActionCommands.CLEAR_IDENTIFICATIONS_COMMAND.getName()))
+				clearAllFeatureIdentifications();
+
+			if (command.equals(MainActionCommands.MERGE_SELECTED_FEATURES_COMMAND.getName()))
+				showMergeSelectedFeaturesDialog();
+
+			if (command.equals(MainActionCommands.MERGE_DUPLICATES_COMMAND.getName()))
+				mergeSelectedFeatures();
+
+			if (command.equals(MainActionCommands.CLEAR_SELECTED_FEATURE_IDENTIFICATION_COMMAND.getName()))
+				clearSelectedFeatureIdentifications();
+			
+			if (command.equals(MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName()))
+				checkForDuplicateNames();				
+		}	
 	}
 
 	private void checkForDuplicateNames() {
@@ -1494,7 +1488,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		clearPanel();
 		super.switchDataPipeline(project, newDataPipeline);
-		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
 		if (currentProject != null) {
 
 			dataPlot.setActiveDesign(currentProject.getExperimentDesign().getActiveDesignSubset());
@@ -1508,7 +1502,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		// TODO Auto-generated method stub
 		super.closeProject();
 		clearPanel();
-		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
+		menuBar.updateMenuFromProject(null, null);
 	}
 
 	@Override
@@ -1524,5 +1518,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

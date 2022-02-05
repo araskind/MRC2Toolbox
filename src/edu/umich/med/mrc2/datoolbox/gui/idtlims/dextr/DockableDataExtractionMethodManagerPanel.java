@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -39,24 +38,29 @@ import javax.swing.border.EmptyBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class DockableDataExtractionMethodManagerPanel extends DefaultSingleCDockable implements ActionListener, BackedByPreferences{
+public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerLimsPanel {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editDataProcessingMethod", 16);
-	private DataExtractionMethodManagerToolbar toolbar;
+	private static final Icon editMethodIcon = GuiUtils.getIcon("editDataProcessingMethod", 24);
+	private static final Icon addMethodIcon = GuiUtils.getIcon("addDataProcessingMethod", 24);
+	private static final Icon deleteMethodIcon = GuiUtils.getIcon("deleteDataProcessingMethod", 24);
+	private static final Icon downloadMethodIcon = GuiUtils.getIcon("downloadDataProcessingMethod", 24);
+	private static final Icon linkToDataAcquisitionMethodIcon = GuiUtils.getIcon("linkToDataAcquisitionMethod", 24);
+
+//	private DataExtractionMethodManagerToolbar toolbar;
 	private DataExtractionMethodTable dataExtractionMethodTable;
 	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
 	private ImprovedFileChooser chooser;
@@ -64,18 +68,16 @@ public class DockableDataExtractionMethodManagerPanel extends DefaultSingleCDock
 	private Preferences preferences;
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.DataExtractionMethodManagerPanel";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
-	private IDTrackerLimsManagerPanel idTrackerLimsManager;
 
 	public DockableDataExtractionMethodManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
-		super("DockableDataExtractionMethodManagerPanel", componentIcon, "Data extraction methods", null, Permissions.MIN_MAX_STACK);
+		super(idTrackerLimsManager, "DockableDataExtractionMethodManagerPanel", 
+				componentIcon, "Data extraction methods", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-		this.idTrackerLimsManager = idTrackerLimsManager;
-
-		toolbar = new DataExtractionMethodManagerToolbar(this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
+//		toolbar = new DataExtractionMethodManagerToolbar(this);
+//		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		dataExtractionMethodTable = new DataExtractionMethodTable();
 		JScrollPane designScrollPane = new JScrollPane(dataExtractionMethodTable);
@@ -94,8 +96,37 @@ public class DockableDataExtractionMethodManagerPanel extends DefaultSingleCDock
 						}											
 					}
 				});
-		
+		initActions();
 		loadPreferences();
+	}
+
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(), 
+				addMethodIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(), 
+				editMethodIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName(),
+				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName(), 
+				deleteMethodIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DOWNLOAD_DATA_EXTRACTION_METHOD_COMMAND.getName(),
+				MainActionCommands.DOWNLOAD_DATA_EXTRACTION_METHOD_COMMAND.getName(), 
+				downloadMethodIcon, this));
 	}
 
 	private void initChooser() {
@@ -116,6 +147,9 @@ public class DockableDataExtractionMethodManagerPanel extends DefaultSingleCDock
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
+		if(!isConnected())
+			return;
+		
 		String command = e.getActionCommand();
 
 		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName()))

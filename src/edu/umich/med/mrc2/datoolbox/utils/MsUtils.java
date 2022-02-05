@@ -439,6 +439,7 @@ public class MsUtils {
 			boolean ignoreAdductAssignment) {
 
 		boolean match = true;
+		
 		MassSpectrum referenceMs = reference.getSpectrum();
 		if(referenceMs == null)
 			return false;
@@ -469,18 +470,23 @@ public class MsUtils {
 		//	If ignore adduct assignment (including cases when adducts not specified for the feature)
 		if(ignoreAdductAssignment || referenceMs.getAdducts().isEmpty() || possibleMatchMs.getAdducts().isEmpty()) {
 
-			for(BasicIsotopicPattern ref : referenceMs.getIsotopicGroups()) {
-
-				for(BasicIsotopicPattern pm  : possibleMatchMs.getIsotopicGroups()) {
-
-					double refMz = ref.getDataPoints().iterator().next().getMz();
-					double pmMz = pm.getDataPoints().iterator().next().getMz();
-
-					deltaPpm = Math.abs((refMz - pmMz)/refMz * 1000000.0d);
-					if(deltaPpm < ppmMassAccuracy)
-						return true;
-				}
-			}
+			deltaPpm = Math.abs((referenceMs.getMonoisotopicMz() - possibleMatchMs.getMonoisotopicMz())/
+					referenceMs.getMonoisotopicMz() * 1000000.0d);
+			if(deltaPpm > ppmMassAccuracy)
+				return false;
+			
+//			for(BasicIsotopicPattern ref : referenceMs.getIsotopicGroups()) {
+//
+//				for(BasicIsotopicPattern pm  : possibleMatchMs.getIsotopicGroups()) {
+//
+//					double refMz = ref.getDataPoints().iterator().next().getMz();
+//					double pmMz = pm.getDataPoints().iterator().next().getMz();
+//
+//					deltaPpm = Math.abs((refMz - pmMz)/refMz * 1000000.0d);
+//					if(deltaPpm < ppmMassAccuracy)
+//						return true;
+//				}
+//			}
 		}
 		else{ //If consider adduct assignment
 			for(Adduct refAd : referenceMs.getAdducts()) {

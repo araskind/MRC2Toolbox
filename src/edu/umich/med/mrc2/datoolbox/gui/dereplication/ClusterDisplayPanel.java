@@ -42,9 +42,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
@@ -78,7 +75,6 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 	implements TreeSelectionListener, ListSelectionListener, ItemListener{
 
-//	protected ClusterDisplayToolbar toolbar;
 	protected DockableClusterTree clusterTree;
 	protected DockableDataPlot dataPlot;
 	protected DockableFeatureIntensitiesTable featureIntensitiesTable;
@@ -102,10 +98,6 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 		setLayout(new BorderLayout(0, 0));
 
 		activeCluster = null;
-
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
 
 		dataPlot = new DockableDataPlot(
 				"ClusterDisplayPanelDockableDataPlot", "Data plots");

@@ -27,6 +27,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("project", 16);
+	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "ProjectDetailsPanel.layout");
 	
 	private DataPipelinesTable dataPipelinesTable;
 	private JScrollPane scrollPane;
@@ -81,6 +84,7 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		setCloseable(false);
 		initPanelGui();
 		initActions();
+		populatePanelsMenu();
 	}
 
 	private void initPanelGui() {
@@ -204,6 +208,18 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		scrollPane = new JScrollPane();
 		dataPipelinesTable = new DataPipelinesTable();
 		dataPipelinesTable.getSelectionModel().addListSelectionListener(this);
+		dataPipelinesTable.addMouseListener(
+
+		        new MouseAdapter(){
+
+		          public void mouseClicked(MouseEvent e){
+
+		            if (e.getClickCount() == 2)
+		            	activateSelectedDataPipeline();
+		          }
+	        });
+		dataPipelinesTable.addTablePopupMenu(new DataPipelineTablePopupMenu(this));	
+		
 		scrollPane.add(dataPipelinesTable);
 		scrollPane.setViewportView(dataPipelinesTable);
 		scrollPane.setPreferredSize(dataPipelinesTable.getPreferredScrollableViewportSize());
@@ -284,33 +300,50 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		gbc_daMethodNameLabel.gridy = 12;
 		contents.add(daMethodNameLabel, gbc_daMethodNameLabel);
 	}
+	
+	private void activateSelectedDataPipeline() {
+		
+		DataPipeline pl = dataPipelinesTable.getSelectedDataPipeline();
+		if(pl == null || currentProject == null)
+			return;
+		
+		if(activeDataPipeline != null && activeDataPipeline.equals(pl))
+			return;
+		
+		MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentProject, pl);
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		if (currentProject == null)
+			return;
 
-		if (currentProject != null) {
+		String command = e.getActionCommand();
+		
+		if (command.equals(MainActionCommands.ACTIVATE_DATA_PIPELINE_COMMAND.getName()))
+			activateSelectedDataPipeline();
+		
+		if (command.equals(MainActionCommands.DELETE_DATA_PIPELINE_COMMAND.getName()))
+			deleteDataPipeline();
 
-			if (e.getActionCommand().equals(MainActionCommands.DELETE_DATA_PIPELINE_COMMAND.getName()))
-				deleteDataPipeline();
+		if (command.equals(MainActionCommands.EDIT_DATA_PIPELINE_COMMAND.getName()))
+			showAsayTypeDialog();
 
-			if (e.getActionCommand().equals(MainActionCommands.EDIT_DATA_PIPELINE_COMMAND.getName()))
-				showAsayTypeDialog();
+		if (command.equals(MainActionCommands.SAVE_DATA_PIPELINE_COMMAND.getName()))
+			changeDataPipelineType();
 
-			if (e.getActionCommand().equals(MainActionCommands.SAVE_DATA_PIPELINE_COMMAND.getName()))
-				changeDataPipelineType();
+		if (command.equals(MainActionCommands.EDIT_PROJECT_NAME_COMMAND.getName()))
+			editProjectName();
 
-			if (e.getActionCommand().equals(MainActionCommands.EDIT_PROJECT_NAME_COMMAND.getName()))
-				editProjectName();
+		if (command.equals(MainActionCommands.EDIT_PROJECT_DESCRIPTION_COMMAND.getName()))
+			editProjectDescription();
 
-			if (e.getActionCommand().equals(MainActionCommands.EDIT_PROJECT_DESCRIPTION_COMMAND.getName()))
-				editProjectDescription();
+		if (command.equals(MainActionCommands.SAVE_NEW_PROJECT_NAME_COMMAND.getName()))
+			saveProjectName();
 
-			if (e.getActionCommand().equals(MainActionCommands.SAVE_NEW_PROJECT_NAME_COMMAND.getName()))
-				saveProjectName();
-
-			if (e.getActionCommand().equals(MainActionCommands.SAVE_NEW_PROJECT_DESCRIPTION_COMMAND.getName()))
-				saveProjectDescription();
-		}
+		if (command.equals(MainActionCommands.SAVE_NEW_PROJECT_DESCRIPTION_COMMAND.getName()))
+			saveProjectDescription();		
 	}
 
 	private void editProjectName() {
@@ -496,8 +529,7 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 
 	@Override
 	public File getLayoutFile() {
-		// TODO Auto-generated method stub
-		return null;
+		return layoutConfigFile;
 	}
 
 	@Override
@@ -510,6 +542,12 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 	protected void initActions() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }
 

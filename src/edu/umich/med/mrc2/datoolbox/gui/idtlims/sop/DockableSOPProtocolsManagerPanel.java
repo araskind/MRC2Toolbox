@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.sop;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -39,28 +38,30 @@ import javax.swing.border.EmptyBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class DockableSOPProtocolsManagerPanel  extends DefaultSingleCDockable
-	implements ActionListener, BackedByPreferences{
+public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel {
 
 	private ProtocolManagerToolbar toolbar;
 	private static final Icon componentIcon = GuiUtils.getIcon("editSop", 16);
+	private static final Icon editProtocolIcon = GuiUtils.getIcon("editSop", 24);
+	private static final Icon addProtocolIcon = GuiUtils.getIcon("addSop", 24);
+	private static final Icon deleteProtocolIcon = GuiUtils.getIcon("deleteSop", 24);
+	private static final Icon downloadProtocolIcon = GuiUtils.getIcon("downloadSop", 24);
+
 	private ProtocolTable protocolTable;
 	private ProtocolEditorDialog protocolEditorDialog;
-	private IDTrackerLimsManagerPanel idTrackerLimsManager;
 
 	private Preferences preferences;
 	private File baseDirectory;
@@ -70,14 +71,13 @@ public class DockableSOPProtocolsManagerPanel  extends DefaultSingleCDockable
 
 	public DockableSOPProtocolsManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
-		super("DockableSOPProtocolsManagerPanel", componentIcon, "SOP protocols", null, Permissions.MIN_MAX_STACK);
+		super(idTrackerLimsManager, "DockableSOPProtocolsManagerPanel", 
+				componentIcon, "SOP protocols", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-		this.idTrackerLimsManager = idTrackerLimsManager;
-
-		toolbar = new ProtocolManagerToolbar(this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
+//		toolbar = new ProtocolManagerToolbar(this);
+//		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		protocolTable = new ProtocolTable();
 		JScrollPane designScrollPane = new JScrollPane(protocolTable);
@@ -92,9 +92,39 @@ public class DockableSOPProtocolsManagerPanel  extends DefaultSingleCDockable
 							editProtocolDialog();																
 					}
 				});
+		initActions();
 		loadPreferences();
 	}
 
+	@Override
+	protected void initActions() {
+
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_SOP_PROTOCOL_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_SOP_PROTOCOL_DIALOG_COMMAND.getName(), 
+				addProtocolIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_SOP_PROTOCOL_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_SOP_PROTOCOL_DIALOG_COMMAND.getName(), 
+				editProtocolIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_SOP_PROTOCOL_COMMAND.getName(),
+				MainActionCommands.DELETE_SOP_PROTOCOL_COMMAND.getName(), 
+				deleteProtocolIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DOWNLOAD_SOP_PROTOCOL_COMMAND.getName(),
+				MainActionCommands.DOWNLOAD_SOP_PROTOCOL_COMMAND.getName(), 
+				downloadProtocolIcon, this));
+	}
+	
 	private void initChooser() {
 
 		chooser = new ImprovedFileChooser();
@@ -112,6 +142,9 @@ public class DockableSOPProtocolsManagerPanel  extends DefaultSingleCDockable
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		if(!isConnected())
+			return;;
 
 		if(e.getActionCommand().equals(MainActionCommands.ADD_SOP_PROTOCOL_DIALOG_COMMAND.getName()))
 			newProtocolDialog();

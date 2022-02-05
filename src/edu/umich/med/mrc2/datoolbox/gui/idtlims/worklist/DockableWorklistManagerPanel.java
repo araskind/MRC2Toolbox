@@ -26,7 +26,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -51,10 +49,10 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
-import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
@@ -70,18 +68,25 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.LIMSWorklistImportTask;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
-public class DockableInstrumentSequenceManagerPanel  extends DefaultSingleCDockable
-	implements ActionListener, BackedByPreferences, TaskListener {
+public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel implements TaskListener {
 
 	private Preferences preferences;
 	public static final String PREFS_NODE =
 			"edu.umich.med.mrc2.cefanalyzer.gui.idtracker.InstrumentSequenceManagerPanel";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 
-	private InstrumentSequenceManagerToolbar toolbar;
 	private static final Icon componentIcon = GuiUtils.getIcon("table", 16);
+	private static final Icon loadWorklistFromFileIcon = GuiUtils.getIcon("loadWorklist", 24);
+	private static final Icon addWorklistFromFileIcon = GuiUtils.getIcon("addWorklist", 24);
+	private static final Icon scanDirIcon = GuiUtils.getIcon("scanFolder", 24);
+	private static final Icon addFromDirIcon = GuiUtils.getIcon("addFromFolder", 24);
+	private static final Icon clearWorklistIcon = GuiUtils.getIcon("clearWorklist", 24);
+	private static final Icon saveWorklistIcon = GuiUtils.getIcon("saveWorklist", 24);
+	private static final Icon copyWorklistToClipboardIcon = GuiUtils.getIcon("copyWorklistToClipboard", 24);
+
+	//	private InstrumentSequenceManagerToolbar toolbar;
+	private IDTrackerWorklistPanelMenuBar menuBar;
 	private InstrumentSequenceTable worklistTable;
-	private IDTrackerLimsManagerPanel idTrackerLimsManager;
 	private File baseDirectory;
 	private boolean replaceExistingWorklist;
 	private LIMSSamplePreparation activeSamplePrep;
@@ -90,28 +95,78 @@ public class DockableInstrumentSequenceManagerPanel  extends DefaultSingleCDocka
 	private InstrumentSequenceImportDialog instrumentSequenceImportDialog;
 	private Worklist wkl;
 
-	public DockableInstrumentSequenceManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
+	public DockableWorklistManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
-		super("DockableInstrumentSequenceManagerPanel", componentIcon, "Instrument sequences", null, Permissions.MIN_MAX_STACK);
+		super(idTrackerLimsManager, 
+				"DockableInstrumentSequenceManagerPanel", 
+				componentIcon, "Instrument sequences", null, 
+				Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-		this.idTrackerLimsManager = idTrackerLimsManager;
-
-		toolbar = new InstrumentSequenceManagerToolbar(this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
+		menuBar = new IDTrackerWorklistPanelMenuBar(this);
+		//	toolbar = new InstrumentSequenceManagerToolbar(this);
+		getContentPane().add(menuBar, BorderLayout.NORTH);
 
 		worklistTable = new InstrumentSequenceTable();
 		JScrollPane designScrollPane = new JScrollPane(worklistTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 
 		replaceExistingWorklist = false;
+		initActions();
 		loadPreferences();
 	}
 
 	@Override
+	protected void initActions() {
+		
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName(),
+				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName(), 
+				scanDirIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName(),
+				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName(), 
+				addFromDirIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.LOAD_WORKLIST_COMMAND.getName(),
+				MainActionCommands.LOAD_WORKLIST_COMMAND.getName(), 
+				loadWorklistFromFileIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_WORKLIST_COMMAND.getName(),
+				MainActionCommands.ADD_WORKLIST_COMMAND.getName(), 
+				addWorklistFromFileIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CLEAR_WORKLIST_COMMAND.getName(),
+				MainActionCommands.CLEAR_WORKLIST_COMMAND.getName(), 
+				clearWorklistIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SAVE_WORKLIST_COMMAND.getName(),
+				MainActionCommands.SAVE_WORKLIST_COMMAND.getName(), 
+				saveWorklistIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.COPY_WORKLIST_COMMAND.getName(),
+				MainActionCommands.COPY_WORKLIST_COMMAND.getName(), 
+				copyWorklistToClipboardIcon, this));
+	}
+	
+	@Override
 	public void actionPerformed(ActionEvent e) {
 
+		if(!isConnected())
+			return;
+		
 		if(experiment == null || activeSamplePrep == null)
 			return;
 

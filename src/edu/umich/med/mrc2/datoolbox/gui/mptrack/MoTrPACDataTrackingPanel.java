@@ -32,9 +32,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACReport;
@@ -64,8 +61,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.mp.MotrpacLimsDataPullTask;
 
-public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel 
-	implements TreeSelectionListener {
+public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implements TreeSelectionListener {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("MoTrPAC", 16);
 	private static final Icon refreshDataIcon = GuiUtils.getIcon("refreshDbData", 24);
@@ -76,7 +72,6 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 			new File(MRC2ToolBoxCore.configDir + "MoTrPACDataTrackingPanel.layout");
 
 	private MotrpacReferenceDataDialog motrpacReferenceDataDialog;
-	private MoTrPACDataTrackingToolbar toolbar;
 //	private DockableMotrpacProjectTree projectTree;
 	private DockableMoTrPACStudyManagerPanel studyManagerPanel;
 	private DockableExperimentListingTable experimentListingTable;
@@ -93,12 +88,8 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 		super("MoTrPACDataTrackingPanel", PanelList.MOTRPAC_REPORT_TRACKER.getName(), componentIcon);
 		setLayout(new BorderLayout(0, 0));
 
-		toolbar = new MoTrPACDataTrackingToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
-
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
+		menuBar = new MoTrPACPanelMenuBar(this);
+		add(menuBar, BorderLayout.NORTH);
 		
 //		projectTree  = new DockableMotrpacProjectTree(this);
 		studyManagerPanel = new DockableMoTrPACStudyManagerPanel(this);	
@@ -121,6 +112,7 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 		limsDataLoaded = false;
 	}
 
@@ -157,8 +149,8 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 		
 		//	TODO re-enable when coding completed
 		if (MRC2ToolBoxCore.getIdTrackerUser() == null) {
-//			MessageDialogue.showErrorMsg("You are not logged in!", this.getContentPane());
-//			return;
+			MessageDialog.showErrorMsg("You are not logged in!", this.getContentPane());
+			return;
 		}
 		String command = e.getActionCommand();
 
@@ -409,6 +401,12 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel
 
 	public boolean isLimsDataLoaded() {
 		return limsDataLoaded;
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }
 

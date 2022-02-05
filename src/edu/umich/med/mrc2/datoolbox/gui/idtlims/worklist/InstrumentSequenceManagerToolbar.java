@@ -71,32 +71,36 @@ public class InstrumentSequenceManagerToolbar extends CommonToolbar {
 		addSeparator(buttonDimension);
 
 		loadWorklistButton = GuiUtils.addButton(this, null, loadWorklistFromFileIcon, commandListener,
-				MainActionCommands.LOAD_WORKLIST_COMMAND.getName(), MainActionCommands.LOAD_WORKLIST_COMMAND.getName(),
+				MainActionCommands.LOAD_WORKLIST_COMMAND.getName(), 
+				MainActionCommands.LOAD_WORKLIST_COMMAND.getName(),
 				buttonDimension);
 
 		addWorklistButton = GuiUtils.addButton(this, null, addWorklistFromFileIcon, commandListener,
-				MainActionCommands.ADD_WORKLIST_COMMAND.getName(), MainActionCommands.ADD_WORKLIST_COMMAND.getName(),
+				MainActionCommands.ADD_WORKLIST_COMMAND.getName(), 
+				MainActionCommands.ADD_WORKLIST_COMMAND.getName(),
 				buttonDimension);
 
 		loadWorklistButton.setEnabled(false);
 		addWorklistButton.setEnabled(false);
-
-		addSeparator(buttonDimension);
-
-		saveWorklistButton = GuiUtils.addButton(this, null, saveWorklistIcon, commandListener,
-				MainActionCommands.SAVE_WORKLIST_COMMAND.getName(), MainActionCommands.SAVE_WORKLIST_COMMAND.getName(),
-				buttonDimension);
-		saveWorklistButton.setEnabled(false);
-
-		copyWorklistToClipboardButton = GuiUtils.addButton(this, null, copyWorklistToClipboardIcon, commandListener,
-				MainActionCommands.COPY_WORKLIST_COMMAND.getName(), MainActionCommands.COPY_WORKLIST_COMMAND.getName(),
-				buttonDimension);
-
+		
 		addSeparator(buttonDimension);
 
 		clearWorklistButton = GuiUtils.addButton(this, null, clearWorklistIcon, commandListener,
 				MainActionCommands.CLEAR_WORKLIST_COMMAND.getName(),
 				MainActionCommands.CLEAR_WORKLIST_COMMAND.getName(), buttonDimension);
+
+		addSeparator(buttonDimension);
+
+		saveWorklistButton = GuiUtils.addButton(this, null, saveWorklistIcon, commandListener,
+				MainActionCommands.SAVE_WORKLIST_COMMAND.getName(), 
+				MainActionCommands.SAVE_WORKLIST_COMMAND.getName(),
+				buttonDimension);
+		saveWorklistButton.setEnabled(false);
+
+		copyWorklistToClipboardButton = GuiUtils.addButton(this, null, copyWorklistToClipboardIcon, commandListener,
+				MainActionCommands.COPY_WORKLIST_COMMAND.getName(), 
+				MainActionCommands.COPY_WORKLIST_COMMAND.getName(),
+				buttonDimension);
 	}
 
 	@Override

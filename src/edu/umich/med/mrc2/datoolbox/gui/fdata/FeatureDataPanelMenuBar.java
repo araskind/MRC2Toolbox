@@ -1,0 +1,280 @@
+/*******************************************************************************
+ *
+ * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Contributors:
+ * Alexander Raskind (araskind@med.umich.edu)
+ *
+ ******************************************************************************/
+
+package edu.umich.med.mrc2.datoolbox.gui.fdata;
+
+import java.awt.event.ActionListener;
+
+import javax.swing.Icon;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.utils.CommonMenuBar;
+import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
+import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+
+public class FeatureDataPanelMenuBar extends CommonMenuBar {
+
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -6288875491040382193L;
+
+	// Icons
+	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
+	private static final Icon loadPlainDataFileIcon = GuiUtils.getIcon("importTextfile", 24);
+	private static final Icon loadPlainDataFileIconSmall = GuiUtils.getIcon("importTextfile", 16);
+	private static final Icon loadMultiFileIcon = GuiUtils.getIcon("importMultifile", 24);	
+	private static final Icon addMultiFileIcon = GuiUtils.getIcon("addMultifile", 24);
+	private static final Icon loadFromExcelIcon = GuiUtils.getIcon("excelImport", 24);
+	private static final Icon calcStatsIcon = GuiUtils.getIcon("calcStats", 24);
+	private static final Icon calcStatsIconSmall = GuiUtils.getIcon("calcStats", 16);
+	private static final Icon cleanEmptyFeaturesIcon = GuiUtils.getIcon("cleanEmpty", 24);
+	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
+	private static final Icon filterIconSmall = GuiUtils.getIcon("filter", 16);
+	private static final Icon resetFilterIcon = GuiUtils.getIcon("resetFilter", 24);
+	private static final Icon knownIcon = GuiUtils.getIcon("showKnowns", 24);
+	private static final Icon qcIcon = GuiUtils.getIcon("qc", 24);
+	private static final Icon unknownIcon = GuiUtils.getIcon("showUnknowns", 24);
+	private static final Icon inClusterIcon = GuiUtils.getIcon("inCluster", 24);
+	private static final Icon notInClusterIcon = GuiUtils.getIcon("notInCluster", 24);
+	private static final Icon searchLibraryIcon = GuiUtils.getIcon("searchLibrary", 24);
+	private static final Icon searchLibraryIconSmall = GuiUtils.getIcon("searchLibrary", 16);
+	private static final Icon searchDatabaseIcon = GuiUtils.getIcon("searchDatabase", 24);
+	private static final Icon showMissingIdentificationsIcon = GuiUtils.getIcon("missingIdentifications", 24);
+	private static final Icon clearIdentificationsIcon = GuiUtils.getIcon("clearIdentifications", 24);
+	private static final Icon imputeDataIcon = GuiUtils.getIcon("impute", 24);
+	private static final Icon bubblePlotIcon = GuiUtils.getIcon("bubble", 24);
+	private static final Icon bubblePlotIconSmall = GuiUtils.getIcon("bubble", 16);
+	private static final Icon checkDuplicateNamesIcon = GuiUtils.getIcon("checkDuplicateNames", 24);	
+	private static final Icon exportResultsIcon = GuiUtils.getIcon("export", 24);
+	private static final Icon exportResultsIconSmall = GuiUtils.getIcon("export", 16);
+	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 24);
+	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 24);
+	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);
+	
+	// Menus
+	private JMenu
+		loadDataMenu,
+		statsMenu,
+		searchMenu,
+		identificationMenu,
+		exportMenu,
+		utilsMenu,
+		graphicsMenu;
+
+	// Load data items
+	private JMenuItem
+		loadMultiFileMenuItem,
+		addFromMultiFileMenuItem,
+		loadFromTextMenuItem,
+		loadFromExcelMenuItem,
+		loadLibraryDataMenuItem;
+
+	// Statistics items
+	private JMenuItem
+		calculateStatisticsMenuItem;
+
+	// Search items
+	private JMenuItem
+		featureFilterMenuItem,
+		resetFilterMenuItem,
+		showOnlyKnownsMenuItem,
+		showOnlyUnknownsMenuItem,
+		showQcStandardsMenuItem;
+	
+	// Identification items
+	private JMenuItem
+		searchLibraryMenuItem,
+		searchDatabaseMenuItem,
+		showMissingIdsMenuItem,
+		clearIdentificationsMenuItem;
+	
+	// Export items
+	private JMenuItem
+		exportForAnalysisMenuItem,
+		exportIntegratedReportMenuItem,
+		exportMWTabReportMenuItem;
+		
+	// Utils items
+	private JMenuItem
+		sendProjectToTrackerMenuItem,
+		checkForDuplicateNamesMenuItem,
+		cleanEmptyFeaturesMenuItem;
+	
+	// Graphics items
+	private JMenuItem
+		bubblePlotMenuItem;
+
+	public FeatureDataPanelMenuBar(ActionListener listener) {
+
+		super(listener);
+
+		// Load data items
+		loadDataMenu = new JMenu("Load data");
+		loadDataMenu.setIcon(loadPlainDataFileIconSmall);
+		
+		loadMultiFileMenuItem = addItem(loadDataMenu, loadMultiFileMenuItem, 
+				MainActionCommands.LOAD_DATA_FROM_MULTIFILES_COMMAND, 
+				loadMultiFileIcon);
+		addFromMultiFileMenuItem = addItem(loadDataMenu, addFromMultiFileMenuItem, 
+				MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND, 
+				addMultiFileIcon);
+		
+		loadDataMenu.addSeparator();
+		
+		loadFromTextMenuItem = addItem(loadDataMenu, loadFromTextMenuItem, 
+				MainActionCommands.LOAD_DATA_COMMAND, 
+				loadPlainDataFileIcon);
+		loadLibraryDataMenuItem = addItem(loadDataMenu, loadLibraryDataMenuItem, 
+				MainActionCommands.LOAD_LIBRARY_COMMAND, 
+				loadLibraryIcon);
+		
+		loadDataMenu.addSeparator();
+		
+		loadFromExcelMenuItem = addItem(loadDataMenu, loadFromExcelMenuItem, 
+				MainActionCommands.LOAD_DATA_FROM_EXCEL_FILE_COMMAND, 
+				loadFromExcelIcon);
+		
+		add(loadDataMenu);
+
+		// Statistics items
+		statsMenu = new JMenu("Statistics");
+		statsMenu.setIcon(calcStatsIconSmall);
+		
+		calculateStatisticsMenuItem = addItem(statsMenu, calculateStatisticsMenuItem, 
+				MainActionCommands.CALC_FEATURES_STATS_COMMAND, 
+				calcStatsIcon);
+		
+		add(statsMenu);
+		
+		// Search items
+		searchMenu = new JMenu("Search/Filter");
+		searchMenu.setIcon(filterIconSmall);
+		
+		featureFilterMenuItem = addItem(searchMenu, featureFilterMenuItem, 
+				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND, 
+				filterIcon);
+		showOnlyKnownsMenuItem = addItem(searchMenu, showOnlyKnownsMenuItem, 
+				MainActionCommands.SHOW_KNOWN_FEATURES_COMMAND, 
+				knownIcon);
+		showOnlyUnknownsMenuItem = addItem(searchMenu, showOnlyUnknownsMenuItem, 
+				MainActionCommands.SHOW_UNKNOWN_FEATURES_COMMAND, 
+				unknownIcon);
+		showQcStandardsMenuItem = addItem(searchMenu, showQcStandardsMenuItem, 
+				MainActionCommands.SHOW_QC_FEATURES_COMMAND, 
+				qcIcon);
+		
+		searchMenu.addSeparator();
+		
+		resetFilterMenuItem = addItem(searchMenu, resetFilterMenuItem, 
+				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND, 
+				resetFilterIcon);
+		
+		add(searchMenu);
+		
+		// Identification items
+		identificationMenu = new JMenu("Identification");
+		identificationMenu.setIcon(searchLibraryIconSmall);
+		
+		searchLibraryMenuItem = addItem(identificationMenu, searchLibraryMenuItem, 
+				MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND, 
+				searchLibraryIcon);
+		searchDatabaseMenuItem = addItem(identificationMenu, searchDatabaseMenuItem, 
+				MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND, 
+				searchDatabaseIcon);
+		
+		identificationMenu.addSeparator();
+		
+		showMissingIdsMenuItem = addItem(identificationMenu, showMissingIdsMenuItem, 
+				MainActionCommands.SHOW_MISSING_IDENTIFICATIONS_COMMAND, 
+				showMissingIdentificationsIcon);
+		clearIdentificationsMenuItem = addItem(identificationMenu, clearIdentificationsMenuItem, 
+				MainActionCommands.CLEAR_IDENTIFICATIONS_COMMAND, 
+				clearIdentificationsIcon);
+		
+		add(identificationMenu);
+		
+		// Export items
+		exportMenu = new JMenu("Export");
+		exportMenu.setIcon(exportResultsIconSmall);
+		
+		exportForAnalysisMenuItem = addItem(exportMenu, exportForAnalysisMenuItem, 
+				MainActionCommands.EXPORT_RESULTS_COMMAND, 
+				exportResultsIcon);
+		exportIntegratedReportMenuItem = addItem(exportMenu, exportIntegratedReportMenuItem, 
+				MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND, 
+				exportExcelIcon);
+		exportMWTabReportMenuItem = addItem(exportMenu, exportMWTabReportMenuItem, 
+				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND, 
+				exportMwTabIcon);
+		
+		add(exportMenu);
+		
+		// Utils items
+		utilsMenu = new JMenu("Utilities");
+		utilsMenu.setIcon(dataFileToolsIcon);
+		
+		checkForDuplicateNamesMenuItem = addItem(utilsMenu, checkForDuplicateNamesMenuItem, 
+				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND, 
+				checkDuplicateNamesIcon);
+		cleanEmptyFeaturesMenuItem = addItem(utilsMenu, cleanEmptyFeaturesMenuItem, 
+				MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND, 
+				cleanEmptyFeaturesIcon);
+		
+//		utilsMenu.addSeparator();
+//		
+//		sendProjectToTrackerMenuItem = addItem(utilsMenu, sendProjectToTrackerMenuItem, 
+//				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND, 
+//				exportMwTabIcon);
+		
+		add(utilsMenu);
+		
+		// Graphics items
+		graphicsMenu = new JMenu("Visualization");
+		graphicsMenu.setIcon(bubblePlotIconSmall);
+		
+		bubblePlotMenuItem = addItem(graphicsMenu, bubblePlotMenuItem, 
+				MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT, 
+				bubblePlotIcon);
+		
+		add(graphicsMenu);
+		
+		adjustEnabledButtonsForConfiguration();
+	}
+
+	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+		// TODO Auto-generated method stub
+
+	}
+	
+	//	TODO
+	private void adjustEnabledButtonsForConfiguration() {
+				
+		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.IDTRACKER)) {			
+
+		}
+	}
+}

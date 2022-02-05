@@ -92,6 +92,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 		featureSubsetDialog = new FeatureSubsetDialog(this);
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 
 	@Override
@@ -498,5 +499,11 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 	protected void initActions() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

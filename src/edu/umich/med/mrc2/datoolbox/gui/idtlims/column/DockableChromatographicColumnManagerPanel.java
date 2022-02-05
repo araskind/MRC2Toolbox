@@ -23,10 +23,10 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.column;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -34,34 +34,38 @@ import javax.swing.JScrollPane;
 
 import org.apache.commons.lang3.StringUtils;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
-public class DockableChromatographicColumnManagerPanel  extends DefaultSingleCDockable implements ActionListener {
+public class DockableChromatographicColumnManagerPanel extends AbstractIDTrackerLimsPanel {
 
-	private ChromatographicColumnManagerToolbar toolbar;
+	
 	private static final Icon componentIcon = GuiUtils.getIcon("editColumn", 16);
+	private static final Icon editColumnIcon = GuiUtils.getIcon("editColumn", 24);
+	private static final Icon addColumnIcon = GuiUtils.getIcon("addColumn", 24);
+	private static final Icon deleteColumnIcon = GuiUtils.getIcon("deleteColumn", 24);
+	
+//	private ChromatographicColumnManagerToolbar toolbar;
 	private ChromatographicColumnTable cromatographicColumnTable;
 	private ChromatographicColumnEditorDialog cromatographicColumnEditorDialog;
-	private IDTrackerLimsManagerPanel idTrackerLimsManager;
 
 	public DockableChromatographicColumnManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
-		super("DockableChromatographicColumnManagerPanel", componentIcon, "Chromatographic columns", null, Permissions.MIN_MAX_STACK);
+		super(idTrackerLimsManager, 
+			"DockableChromatographicColumnManagerPanel", componentIcon, 
+			"Chromatographic columns", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-		this.idTrackerLimsManager = idTrackerLimsManager;
-
-		toolbar = new ChromatographicColumnManagerToolbar(this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
+//		toolbar = new ChromatographicColumnManagerToolbar(this);
+//		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		cromatographicColumnTable = new ChromatographicColumnTable();
 		JScrollPane designScrollPane = new JScrollPane(cromatographicColumnTable);
@@ -77,14 +81,40 @@ public class DockableChromatographicColumnManagerPanel  extends DefaultSingleCDo
 							editColumnDialog();						
 					}
 				});
+		initActions();
 	}
 
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND.getName(), 
+				addColumnIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND.getName(), 
+				editColumnIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_CHROMATOGRAPHIC_COLUMN_COMMAND.getName(),
+				MainActionCommands.DELETE_CHROMATOGRAPHIC_COLUMN_COMMAND.getName(), 
+				deleteColumnIcon, this));
+	}
+	
 	public void loadColumnData() {
 		cromatographicColumnTable.setTableModelFromColumns(IDTDataCash.getChromatographicColumns());
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		if(!isConnected())
+			return;
 
 		if(e.getActionCommand().equals(MainActionCommands.ADD_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND.getName()))
 			addColumnDialog();
@@ -200,6 +230,24 @@ public class DockableChromatographicColumnManagerPanel  extends DefaultSingleCDo
 
 	public synchronized void clearPanel() {
 		cromatographicColumnTable.clearTable();
+	}
+
+	@Override
+	public void loadPreferences(Preferences preferences) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void loadPreferences() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void savePreferences() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

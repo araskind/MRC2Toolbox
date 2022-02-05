@@ -23,11 +23,11 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.results;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
+import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.event.ListSelectionEvent;
@@ -35,11 +35,11 @@ import javax.swing.event.ListSelectionListener;
 
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.lims.IDTMsSummary;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
@@ -48,14 +48,16 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
-public class DockableIDTrackerResultsOverviewPanel extends DefaultSingleCDockable
-	implements ActionListener, ListSelectionListener, PersistentLayout {
+public class DockableIDTrackerResultsOverviewPanel extends AbstractIDTrackerLimsPanel
+	implements ListSelectionListener, PersistentLayout {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("msms", 16);
-	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "IDTrackerResultsOverviewPanel.layout");
+	private static final Icon refreshDataIcon = GuiUtils.getIcon("refreshDbData", 24);
+
+	private static final File layoutConfigFile = 
+			new File(MRC2ToolBoxCore.configDir + "IDTrackerResultsOverviewPanel.layout");
 	private IDTrackerResultsOverviewToolbar toolbar;
 
-	private IDTrackerLimsManagerPanel idTrackerLimsManager;
 	private CControl control;
 	private CGrid grid;
 
@@ -65,12 +67,12 @@ public class DockableIDTrackerResultsOverviewPanel extends DefaultSingleCDockabl
 
 	public DockableIDTrackerResultsOverviewPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
-		super("DockableIDTrackerResultsOverviewPanel", componentIcon, "Result summaries", null, Permissions.MIN_MAX_STACK);
+		super(idTrackerLimsManager, "DockableIDTrackerResultsOverviewPanel", 
+				componentIcon, "Result summaries", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
-		this.idTrackerLimsManager = idTrackerLimsManager;
-		toolbar = new IDTrackerResultsOverviewToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+//		toolbar = new IDTrackerResultsOverviewToolbar(this);
+//		add(toolbar, BorderLayout.NORTH);
 
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
@@ -86,8 +88,22 @@ public class DockableIDTrackerResultsOverviewPanel extends DefaultSingleCDockabl
 
 		//control.getController().setFocusedDockable(designEditor.intern(), true);
 		loadLayout(layoutConfigFile);
+		initActions();
 	}
 
+	@Override
+	protected void initActions() {
+
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName(),
+				MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName(), 
+				refreshDataIcon, this));
+		
+		//	menuActions.addSeparator();
+	}
+	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		// TODO Auto-generated method stub
@@ -97,6 +113,9 @@ public class DockableIDTrackerResultsOverviewPanel extends DefaultSingleCDockabl
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
+		if(!isConnected())
+			return;
+		
 		String command = e.getActionCommand();
 
 		if(command.equals(MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName()))
@@ -211,5 +230,23 @@ public class DockableIDTrackerResultsOverviewPanel extends DefaultSingleCDockabl
 
 		msOneSummaryPanel.clearPanel();
 		msmsSummaryPanel.clearPanel();
+	}
+
+	@Override
+	public void loadPreferences(Preferences preferences) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void loadPreferences() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void savePreferences() {
+		// TODO Auto-generated method stub
+		
 	}
 }

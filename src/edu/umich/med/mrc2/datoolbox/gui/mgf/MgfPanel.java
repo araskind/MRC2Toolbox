@@ -36,9 +36,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.MsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsMs;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -65,7 +62,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MgfImportTask;
 
 public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionListener {
 
-	private MgfPanelToolbar toolbar;
 	private DockableMsMsTree msMsTree;
 	private DockableSpectumPlot msPlot;
 	private DockableMsMsTable msMsTable;
@@ -82,12 +78,8 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 
 		super("MgfPanel", PanelList.MGF.getName(), componentIcon);
 
-		toolbar = new MgfPanelToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
-
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
+		menuBar = new MGFPanelMenuBar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		msMsTree = new DockableMsMsTree("MgfPanelDockableMsMsTree", "MGF spectra");
 		msMsTree.getTree().addTreeSelectionListener(this);
@@ -107,7 +99,8 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
-
+		populatePanelsMenu();
+		
 		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
 	}
 
@@ -271,7 +264,7 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 
 		clearPanel();
 		super.switchDataPipeline(project, newPipeline);
-		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
 	}
 
 	@Override
@@ -279,7 +272,7 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 		// TODO Auto-generated method stub
 		super.closeProject();
 		clearPanel();
-		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
+		menuBar.updateMenuFromProject(null, null);
 	}
 
 	@Override
@@ -309,5 +302,11 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

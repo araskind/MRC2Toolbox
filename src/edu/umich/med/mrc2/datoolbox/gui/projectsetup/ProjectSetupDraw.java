@@ -29,9 +29,6 @@ import java.io.File;
 import javax.swing.Icon;
 import javax.swing.event.ListSelectionEvent;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -72,9 +69,6 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 		designSubsetPanel = new DesignSubsetPanel();
 		featureSubsetPanel = new FeatureSubsetPanel();
 
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid( control );
 		grid.add( 0, 0, 100, 30, projectDetailsPanel, limsDataPanel);
 		grid.add( 0, 30, 100, 30, designSubsetPanel);
 		grid.add( 0, 60, 100, 30, featureSubsetPanel);
@@ -84,6 +78,7 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 	
 	public void setActionListener(ActionListener listener) {
@@ -198,6 +193,12 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 	protected void initActions() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }
 

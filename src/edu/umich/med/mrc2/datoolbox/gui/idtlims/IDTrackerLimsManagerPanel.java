@@ -46,10 +46,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import org.apache.commons.lang3.StringUtils;
 
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSClient;
@@ -82,7 +79,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.results.DockableIDTrackerResults
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.sop.DockableSOPProtocolsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.DockableStockSampleManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.wizard.IDTrackerDataLoadWizard;
-import edu.umich.med.mrc2.datoolbox.gui.idtlims.worklist.DockableInstrumentSequenceManagerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.worklist.DockableWorklistManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.CefMsMsPrescanSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -119,10 +116,6 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "IDTrackerLimsManager.layout");
 
-	//	private IDTrackerLimsManagerToolbar toolbar;
-	private IDTrackerLimsManagerMenuBar menuBar;
-	private CControl control;
-	private CGrid grid;
 	private DockableIdProjectTree projectTreePanel;
 	private DockableIDTrackerExperimentDesignEditorPanel designEditor;
 	private DockableStockSampleManagerPanel stockSampleManagerPanel;
@@ -133,7 +126,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	private DockableDataExtractionMethodManagerPanel dataExtractionMethodManagerPanel;
 	private DockableSOPProtocolsManagerPanel protocolManagerPanel;
 	private DockableSamplePrepManagerPanel samplePrepManagerPanel;
-	private DockableInstrumentSequenceManagerPanel instrumentSequenceManagerPanel;
+	private DockableWorklistManagerPanel instrumentSequenceManagerPanel;
 	private DockableIDTrackerResultsOverviewPanel resultsOverviewPanel;
 	private IDTrackerProjectDialog projectDialog;
 	private IDTrackerExperimentDialog experimentDialog;
@@ -154,12 +147,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		super("IDTrackerLimsManagerPanel", PanelList.ID_TRACKER_LIMS.getName(), componentIcon);
 		
 		menuBar = new IDTrackerLimsManagerMenuBar(this);
-		//	toolbar = new IDTrackerLimsManagerToolbar(this);
 		add(menuBar, BorderLayout.NORTH);
-
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
 
 		projectTreePanel = new DockableIdProjectTree(this);
 		projectTreePanel.getTree().addTreeSelectionListener(this);
@@ -172,7 +160,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		dataExtractionMethodManagerPanel = new DockableDataExtractionMethodManagerPanel(this);
 		protocolManagerPanel = new DockableSOPProtocolsManagerPanel(this);
 		samplePrepManagerPanel = new DockableSamplePrepManagerPanel(this);
-		instrumentSequenceManagerPanel = new DockableInstrumentSequenceManagerPanel(this);
+		instrumentSequenceManagerPanel = new DockableWorklistManagerPanel(this);
 		resultsOverviewPanel = new DockableIDTrackerResultsOverviewPanel(this);
 
 		grid.add(0, 0, 75, 100, designEditor, stockSampleManagerPanel, instrumentManagerPanel,
@@ -188,6 +176,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		control.getController().setFocusedDockable(designEditor.intern(), true);
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 	
 	@Override
@@ -982,5 +971,11 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	
 	public DockableIdProjectTree getProjectTreePanel() {
 		return projectTreePanel;
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

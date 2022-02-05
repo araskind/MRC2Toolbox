@@ -84,21 +84,11 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.SlidingWindowCluste
 
 public class CorrelationResultsPanel extends ClusterDisplayPanel implements ChartMouseListener {
 
-	private ClusteringMode clusteringMode;
-	private ClusterVisFrame heatMapFrame;
-	private AdductInterpreterDialog adductInterpreterDialog;
-	private BatchAnnotationPreferencesDialog batchAnnotationPreferencesDialog;
-	private ClusteringParametersDialog clusteringParametersDialog;
-	private DockableMassDifferenceTable massDifferenceTable;
-	private DockableClusterFeatureSelectionTable clusterFeatureSelectionTable;
-	private MassDifferenceExplorerDialog mdExplorerDialog;
-	private BinnerDataImportDialog binnerDataImportDialog;
+	private static final File layoutConfigFile = 
+			new File(MRC2ToolBoxCore.configDir + "CorrelationResultsPanel.layout");
 	
-	private CorrelationPanelMenuBar menuBar;
-
 	private static final Icon componentIcon = 
 			GuiUtils.getIcon("recalculateCorrelations", 16);
-	
 	private static final Icon importBinnerDataIcon = GuiUtils.getIcon("importBins", 24);
 	private static final Icon heatmapIcon = GuiUtils.getIcon("heatmap", 24);
 	private static final Icon exploreDeltasIcon = GuiUtils.getIcon("exploreDeltas", 24);
@@ -110,9 +100,16 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	private static final Icon deltaAnnotationIcon = GuiUtils.getIcon("assignDeltas", 24);
 	private static final Icon batchAssignAnnotationsIcon = GuiUtils.getIcon("calculateAnnotation", 24);
 	private static final Icon recalculateCorrelationsIcon = GuiUtils.getIcon("recalculateCorrelations", 24);
-
-	private static final File layoutConfigFile = 
-			new File(MRC2ToolBoxCore.configDir + "CorrelationResultsPanel.layout");
+	
+	private ClusteringMode clusteringMode;
+	private ClusterVisFrame heatMapFrame;
+	private AdductInterpreterDialog adductInterpreterDialog;
+	private BatchAnnotationPreferencesDialog batchAnnotationPreferencesDialog;
+	private ClusteringParametersDialog clusteringParametersDialog;
+	private DockableMassDifferenceTable massDifferenceTable;
+	private DockableClusterFeatureSelectionTable clusterFeatureSelectionTable;
+	private MassDifferenceExplorerDialog mdExplorerDialog;
+	private BinnerDataImportDialog binnerDataImportDialog;
 
 	public CorrelationResultsPanel() {
 
@@ -131,7 +128,8 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		finalizeLayout();
 		initActions();
 		loadLayout(layoutConfigFile);
-
+		populatePanelsMenu();
+		
 		mdExplorerDialog = new MassDifferenceExplorerDialog();
 	}
 
@@ -213,7 +211,6 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	protected void createPanelLayout() {
 
 		menuBar = new CorrelationPanelMenuBar(this);
-//		toolbar = new CorrelationPanelToolbar(this);
 		add(menuBar, BorderLayout.NORTH);
 
 		clusterTree = new DockableClusterTree("CorrelationResultsPanelDockableClusterTree", "Feature clusters", this, this);
@@ -1044,5 +1041,11 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 		super.saveLayout(layoutFile);
 		if(mdExplorerDialog != null)
 			mdExplorerDialog.saveLayout(MassDifferenceExplorerDialog.getLayoutconfigfile());
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

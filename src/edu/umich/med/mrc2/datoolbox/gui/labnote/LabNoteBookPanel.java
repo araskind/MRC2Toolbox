@@ -36,9 +36,6 @@ import javax.swing.text.Document;
 
 import org.apache.commons.lang3.StringUtils;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.QcEventType;
@@ -92,13 +89,12 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 		super("LabNoteBookPanel", PanelList.LAB_NOTEBOOK.getName(), componentIcon);
 		setLayout(new BorderLayout(0, 0));
 
+		//	Add menu toolbar
 		toolbar = new LabNotePanelToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		activeInstrument = null;
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
+		
 		labNotesTable = new DockableLabNotesTable(this);
 		labNotesTable.getLabNotesTable().addTablePopupMenu(new AnnotationTablePopupMenu(this));
 		noteViewer = new DockableLabNotePlainTextViewer();
@@ -111,6 +107,7 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 		getContentPane().add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 
 	@Override
@@ -487,5 +484,11 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 	public void reloadDesign() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

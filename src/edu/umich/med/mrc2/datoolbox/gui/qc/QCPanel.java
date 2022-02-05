@@ -28,9 +28,6 @@ import java.io.File;
 import javax.swing.Icon;
 import javax.swing.event.ListSelectionEvent;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -53,7 +50,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.PCATask;
 
 public class QCPanel extends DockableMRC2ToolboxPanel {
 
-	private QCToolbar toolbar;
 	private DockableDataSetStatsTable dataSetStatsTable;
 	private Dockable2DQCPanel twoDQCpanel;
 	private Dockable3DChartPanel threeDpanel;
@@ -66,9 +62,8 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 	public QCPanel() {
 
 		super("QCPanel", PanelList.QC.getName(), componentIcon);
-
-		toolbar = new QCToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		menuBar = new QCPanelMenuBar(this);
+		add(menuBar, BorderLayout.NORTH);
 
 		dataSetStatsTable = new DockableDataSetStatsTable(
 				"QCPanelDockableDataSetStatsTable", "Global data set statistics");
@@ -77,10 +72,6 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 		threeDpanel = new Dockable3DChartPanel(
 				"QCPanelDockable3DChartPanel", "3D QC plots");
 
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
-
 		grid.add(0, 0, 100, 50, dataSetStatsTable);
 		grid.add(0, 50, 100, 50, twoDQCpanel, threeDpanel);
 		grid.select(0, 50, 100, 50, twoDQCpanel);
@@ -88,6 +79,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 
 	@Override
@@ -187,7 +179,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 
 		clearPanel();
 		super.switchDataPipeline(project, newDataPipeline);
-		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
 		twoDQCpanel.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 		threeDpanel.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 		if(currentProject != null && activeDataPipeline != null) {
@@ -201,7 +193,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 
 		super.closeProject();
 		clearPanel();
-		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromProject(null, null);
 	}
 
 	@Override
@@ -239,5 +231,11 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 		if(!e.getValueIsAdjusting()) {
 
 		}
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

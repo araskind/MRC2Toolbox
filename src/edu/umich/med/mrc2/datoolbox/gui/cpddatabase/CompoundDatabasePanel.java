@@ -47,9 +47,6 @@ import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
@@ -104,8 +101,6 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	 */
 	private static final long serialVersionUID = -1518116406412542826L;
 
-	private CompoundDatabasePanelToolbar toolbar;
-	private CompoundDatabaseMenuBar menuBar;
 	private DockableDatabaseCompoundTable compoundTable;
 	private DockableMolStructurePanel molStructurePanel;
 	private DockableNarrativeDataPanel narrativeDataPanel;
@@ -151,7 +146,6 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		setLayout(new BorderLayout(0, 0));
 
 		menuBar = new CompoundDatabaseMenuBar(this);
-		//	toolbar = new CompoundDatabasePanelToolbar(this);
 		add(menuBar, BorderLayout.NORTH);
 
 		compoundTable = new DockableDatabaseCompoundTable();
@@ -183,10 +177,6 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		
 		clasyFireViewer = new DockableCompoundClasyFireViewer();
 
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
-
 		grid.add(0, 0, 75, 40, compoundTable);
 		grid.add(75, 0, 25, 40, molStructurePanel, compoundDatabaseSearchPanel);
 		grid.add(0, 50, 100, 60, narrativeDataPanel, dbLinksTable, synonymsTable, 				
@@ -197,7 +187,8 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
-
+		populatePanelsMenu();
+		
 		databaseSearchDialog = new DatabaseSearchDialog(this);
 		databaseEntryEditDialog = new DatabaseEntryEditDialog(this);
 		dbLibDialog = new DatabaseToLibraryDialog();
@@ -944,7 +935,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	@Override
 	public void closeProject() {
 		super.closeProject();
-		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
+		menuBar.updateMenuFromProject(null, null);
 	}
 
 	@Override
@@ -1023,5 +1014,11 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 			}
 			return null;
 		}
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }

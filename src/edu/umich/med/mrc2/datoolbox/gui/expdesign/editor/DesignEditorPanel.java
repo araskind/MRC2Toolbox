@@ -59,9 +59,21 @@ import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
+	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "DesignEditorPanel.layout");
+	
 	private static final Icon componentIcon = GuiUtils.getIcon("editDesignSubset", 16);
-
-	private DesignEditorToolbar designEditorToolbar;
+	private static final Icon loadDesignIcon = GuiUtils.getIcon("loadDesign", 24);
+	private static final Icon appendDesignIcon = GuiUtils.getIcon("appendDesign", 24);
+	private static final Icon clearDesignIcon = GuiUtils.getIcon("clearDesign", 24);
+	private static final Icon exportDesignIcon = GuiUtils.getIcon("exportDesign", 24);
+	private static final Icon addFactorIcon = GuiUtils.getIcon("addFactor", 24);
+	private static final Icon editFactorIcon = GuiUtils.getIcon("editFactor", 24);
+	private static final Icon deleteFactorIcon = GuiUtils.getIcon("deleteFactor", 24);
+	private static final Icon addSampleIcon = GuiUtils.getIcon("addSample", 24);
+	private static final Icon editSampleIcon = GuiUtils.getIcon("editSample", 24);
+	private static final Icon deleteSampleIcon = GuiUtils.getIcon("deleteSample", 24);
+	private static final Icon editReferenceSamplesIcon = GuiUtils.getIcon("standardSample", 24);
+	
 	private ExperimentDesignTable expDesignTable;
 	private JScrollPane designScrollPane;
 	private ExperimentDesign experimentDesign;
@@ -69,7 +81,6 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 	private FileFilter txtFilter;
 	private ReferenceSampleDialog rsd;
 	private File baseDirectory;
-
 	private IndeterminateProgressDialog idp;
 
 	public DesignEditorPanel() {
@@ -77,9 +88,9 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 		super("DesignEditorPanel", "Sample properties", componentIcon);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
-		designEditorToolbar = new DesignEditorToolbar(this);
-		getContentPane().add(designEditorToolbar, BorderLayout.NORTH);
-		designEditorToolbar.setAcceptDesignStatus(false);
+		
+		menuBar = new ExperimentDesignEditorMenuBar(this);
+		getContentPane().add(menuBar, BorderLayout.NORTH);
 
 		expDesignTable = new ExperimentDesignTable();
 		expDesignTable.addTablePopupMenu(new GlobalDesignPopupMenu(this));
@@ -93,8 +104,70 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
 		
 		initActions();
+		
+		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 
+	@Override
+	protected void initActions() {
+		// TODO Auto-generated method stub
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.LOAD_DESIGN_COMMAND.getName(),
+				MainActionCommands.LOAD_DESIGN_COMMAND.getName(), 
+				loadDesignIcon, this));		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.APPEND_DESIGN_COMMAND.getName(),
+				MainActionCommands.APPEND_DESIGN_COMMAND.getName(), 
+				appendDesignIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CLEAR_DESIGN_COMMAND.getName(),
+				MainActionCommands.CLEAR_DESIGN_COMMAND.getName(), 
+				clearDesignIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EXPORT_DESIGN_COMMAND.getName(),
+				MainActionCommands.EXPORT_DESIGN_COMMAND.getName(), 
+				exportDesignIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_FACTOR_COMMAND.getName(),
+				MainActionCommands.ADD_FACTOR_COMMAND.getName(), 
+				addFactorIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.EDIT_FACTOR_COMMAND.getName(),
+				MainActionCommands.EDIT_FACTOR_COMMAND.getName(), 
+				editFactorIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_FACTOR_COMMAND.getName(),
+				MainActionCommands.DELETE_FACTOR_COMMAND.getName(), 
+				deleteFactorIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ADD_SAMPLE_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_SAMPLE_DIALOG_COMMAND.getName(), 
+				addSampleIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_SAMPLE_COMMAND.getName(),
+				MainActionCommands.DELETE_SAMPLE_COMMAND.getName(), 
+				deleteSampleIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND.getName(), 
+				editReferenceSamplesIcon, this));
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
@@ -337,7 +410,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 	public synchronized void clearPanel() {
 
 		expDesignTable.clearTable();
-		designEditorToolbar.updateGuiFromProjectAndDataPipeline(null, null);
+		menuBar.updateMenuFromProject(null, null);
 	}
 	
 	@Override
@@ -345,7 +418,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 		clearPanel();
 		super.switchDataPipeline(project, newPipeline);
-		designEditorToolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
 		if(currentProject == null) 
 			return;
 
@@ -401,13 +474,12 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 	@Override
 	public File getLayoutFile() {
-		// TODO Auto-generated method stub
-		return null;
+		return layoutConfigFile;
 	}
 
 	@Override
-	protected void initActions() {
+	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
-		
+		super.populatePanelsMenu();
 	}
 }

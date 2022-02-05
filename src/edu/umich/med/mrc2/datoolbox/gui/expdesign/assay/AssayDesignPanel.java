@@ -47,22 +47,33 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 
 public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 
+	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "AssayDesignPanel.layout");
+	
 	private static final Icon componentIcon = GuiUtils.getIcon("link", 16);
+	private static final Icon editDesignIcon = GuiUtils.getIcon("editDesignSubset", 24);
+	private static final Icon linkFilesIcon = GuiUtils.getIcon("link", 24);
+	private static final Icon enableSelectedIcon = GuiUtils.getIcon("checkboxFull", 24);
+	private static final Icon disableSelectedIcon = GuiUtils.getIcon("checkboxEmpty", 24);
+	private static final Icon enableAllIcon = GuiUtils.getIcon("enableAll", 24);
+	private static final Icon disableAllIcon = GuiUtils.getIcon("disableAll", 24);
+	private static final Icon invertEnabledIcon = GuiUtils.getIcon("invertSelection", 24);
+	private static final Icon resetFilterIcon = GuiUtils.getIcon("resetFilter", 24);
+	private static final Icon deleteFilesIcon = GuiUtils.getIcon("deleteDataFile", 24);
 
-	private AssayDesignToolbar toolbar;
 	private AssayDesignTable assayDesignTable;
 
 	public AssayDesignPanel() {
 
 		super("AssayDesignPanel", "Active data pieline design", componentIcon);
 		setLayout(new BorderLayout(0, 0));
-		toolbar = new AssayDesignToolbar(this);
-		add(toolbar, BorderLayout.NORTH);
+		menuBar = new AssayDesignEditorMenuBar(this); 
+		add(menuBar, BorderLayout.NORTH);
 
 		assayDesignTable = new AssayDesignTable();
 		assayDesignTable.addTablePopupMenu(new AssayDesignPopupMenu(this));
@@ -70,8 +81,49 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 		JScrollPane designScrollPane = new JScrollPane(assayDesignTable);
 		add(designScrollPane, BorderLayout.CENTER);
 		initActions();
+		
+		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 
+	@Override
+	protected void initActions() {
+		super.initActions();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ENABLE_SELECTED_SAMPLES_COMMAND.getName(),
+				MainActionCommands.ENABLE_SELECTED_SAMPLES_COMMAND.getName(), 
+				enableSelectedIcon, this));
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DISABLE_SELECTED_SAMPLES_COMMAND.getName(),
+				MainActionCommands.DISABLE_SELECTED_SAMPLES_COMMAND.getName(), 
+				disableSelectedIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.ENABLE_ALL_SAMPLES_COMMAND.getName(),
+				MainActionCommands.ENABLE_ALL_SAMPLES_COMMAND.getName(), 
+				enableAllIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DISABLE_ALL_SAMPLES_COMMAND.getName(),
+				MainActionCommands.DISABLE_ALL_SAMPLES_COMMAND.getName(), 
+				disableAllIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.INVERT_ENABLED_SAMPLES_COMMAND.getName(),
+				MainActionCommands.INVERT_ENABLED_SAMPLES_COMMAND.getName(), 
+				invertEnabledIcon, this));
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.CLEAR_SAMPLES_FILTER_COMMAND.getName(),
+				MainActionCommands.CLEAR_SAMPLES_FILTER_COMMAND.getName(), 
+				resetFilterIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.DELETE_DATA_FILES_COMMAND.getName(),
+				MainActionCommands.DELETE_DATA_FILES_COMMAND.getName(), 
+				deleteFilesIcon, this));
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
@@ -226,13 +278,13 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 
 	@Override
 	public File getLayoutFile() {
-		// TODO Auto-generated method stub
-		return null;
+		return layoutConfigFile;
 	}
 
 	@Override
-	protected void initActions() {
+	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
-		
+		super.populatePanelsMenu();
 	}
+
 }

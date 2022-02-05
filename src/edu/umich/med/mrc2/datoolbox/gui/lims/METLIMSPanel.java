@@ -31,9 +31,6 @@ import javax.swing.Icon;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
@@ -73,8 +70,6 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 	
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "METLIMSPanel.layout");
 
-//	private METLIMSToolbar toolbar;
-	private METLIMSMenuBar menuBar;
 	private DockableExperimentDataPanel experimentDataPanel;
 	private DockableDRCCDataPrepPanel drccDataPrepPanel;
 
@@ -84,12 +79,7 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 		setLayout(new BorderLayout(0, 0));
 
 		menuBar = new METLIMSMenuBar(this);
-//		toolbar = new METLIMSToolbar(this);
 		add(menuBar, BorderLayout.NORTH);
-
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		grid = new CGrid(control);
 
 		experimentDataPanel = new DockableExperimentDataPanel();
 		drccDataPrepPanel = new DockableDRCCDataPrepPanel();
@@ -99,6 +89,7 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 		add(control.getContentArea(), BorderLayout.CENTER);
 		initActions();
 		loadLayout(layoutConfigFile);
+		populatePanelsMenu();
 	}
 	
 	@Override
@@ -350,6 +341,12 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 	public void reloadDesign() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void populatePanelsMenu() {
+		// TODO Auto-generated method stub
+		super.populatePanelsMenu();
 	}
 }
 
