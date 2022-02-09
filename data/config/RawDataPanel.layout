@@ -28,24 +28,407 @@
 							</adjacent>
 							<children ignore="false"/>
 						</root>
+						<root name="ccontrol north">
+							<layout factory="predefined">
+								<replacement id="rootccontrol north"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="SOUTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol south">
+							<layout factory="predefined">
+								<replacement id="rootccontrol south"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="NORTH"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol east">
+							<layout factory="predefined">
+								<replacement id="rootccontrol east"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="WEST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
+						<root name="ccontrol center">
+							<layout factory="predefined" placeholder="dock.single.ccontrol\ center">
+								<replacement id="rootccontrol center"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<id>ccontrol center</id>
+									<root>true</root>
+									<content delegate="SplitDockStationFactory">
+										<fullscreen-action>false</fullscreen-action>
+										<node nodeId="1644193083061" orientation="HORIZONTAL" divider="0.25">
+											<node nodeId="1644193174299" orientation="VERTICAL" divider="0.8227091633466136">
+												<leaf id="0" nodeId="1644193083070">
+													<placeholders>
+														<placeholder>dock.single.DockableDataTreePanel</placeholder>
+													</placeholders>
+													<placeholder-map>
+														<version>0</version>
+														<format>dock.PlaceholderList</format>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableDataTreePanel</placeholder>
+															</key>
+														</entry>
+													</placeholder-map>
+												</leaf>
+												<leaf id="2" nodeId="1644193174297">
+													<placeholders>
+														<placeholder>dock.single.DockableRawDataFilePropertiesTable</placeholder>
+													</placeholders>
+												</leaf>
+											</node>
+											<node nodeId="1644193083072" orientation="VERTICAL" divider="0.5">
+												<leaf id="3" nodeId="1644193083074">
+													<placeholders>
+														<placeholder>dock.single.RawDataExaminerPanelDockableChromatogramPlot</placeholder>
+													</placeholders>
+												</leaf>
+												<node nodeId="1644193083076" orientation="HORIZONTAL" divider="0.6666666666666666">
+													<leaf id="1" nodeId="1644193083078">
+														<placeholders>
+															<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS2</placeholder>
+															<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</placeholder>
+															<placeholder>dock.single.RawDataExaminerPanelDockableMsMsTable</placeholder>
+															<placeholder>dock.single.RawDataExaminerPanelDockableMsTableMS1</placeholder>
+														</placeholders>
+														<placeholder-map>
+															<version>0</version>
+															<format>dock.PlaceholderList</format>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.RawDataExaminerPanelDockableMsTableMS1</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS2</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.RawDataExaminerPanelDockableMsMsTable</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
+														</placeholder-map>
+													</leaf>
+													<leaf id="4" nodeId="1644193083080">
+														<placeholders>
+															<placeholder>dock.single.DockableMsExtractorPanel</placeholder>
+															<placeholder>dock.single.DockableXICSetupPanel</placeholder>
+														</placeholders>
+														<placeholder-map>
+															<version>0</version>
+															<format>dock.PlaceholderList</format>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.DockableXICSetupPanel</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.DockableMsExtractorPanel</placeholder>
+																</key>
+																<item key="convert" type="b">true</item>
+																<item key="convert-keys" type="a"/>
+															</entry>
+														</placeholder-map>
+													</leaf>
+												</node>
+											</node>
+										</node>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.center</type>
+								</layout>
+							</adjacent>
+							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableDataTreePanel">
+										<replacement id="dockablesingle DockableDataTreePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableDataTreePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>3</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.RawDataExaminerPanelDockableMsTableMS1</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.RawDataExaminerPanelDockableMsTableMS1</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS2</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.RawDataExaminerPanelDockableSpectumPlotMS2</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.RawDataExaminerPanelDockableMsMsTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
+												<item key="dock.placeholder" type="s">dock.single.RawDataExaminerPanelDockableMsMsTable</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableSpectumPlotMS1">
+												<replacement id="dockablesingle RawDataExaminerPanelDockableSpectumPlotMS1"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>RawDataExaminerPanelDockableSpectumPlotMS1</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableMsTableMS1">
+												<replacement id="dockablesingle RawDataExaminerPanelDockableMsTableMS1"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>RawDataExaminerPanelDockableMsTableMS1</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableSpectumPlotMS2">
+												<replacement id="dockablesingle RawDataExaminerPanelDockableSpectumPlotMS2"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>RawDataExaminerPanelDockableSpectumPlotMS2</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableMsMsTable">
+												<replacement id="dockablesingle RawDataExaminerPanelDockableMsMsTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>RawDataExaminerPanelDockableMsMsTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableRawDataFilePropertiesTable">
+										<replacement id="dockablesingle DockableRawDataFilePropertiesTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableRawDataFilePropertiesTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableChromatogramPlot">
+										<replacement id="dockablesingle RawDataExaminerPanelDockableChromatogramPlot"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>RawDataExaminerPanelDockableChromatogramPlot</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>1</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableXICSetupPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableXICSetupPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMsExtractorPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMsExtractorPanel</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableXICSetupPanel">
+												<replacement id="dockablesingle DockableXICSetupPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableXICSetupPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableMsExtractorPanel">
+												<replacement id="dockablesingle DockableMsExtractorPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableMsExtractorPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+							</children>
+						</root>
+						<root name="ccontrol west">
+							<layout factory="predefined">
+								<replacement id="rootccontrol west"/>
+								<delegate id="delegate_CommonDockStationFactory">
+									<root>true</root>
+									<content delegate="flap dock">
+										<window auto="false" direction="EAST"/>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+										</placeholders>
+									</content>
+								</delegate>
+							</layout>
+							<adjacent>
+								<layout factory="dock.RootStationAdjacentFactory">
+									<type>dock.CContentArea.minimize</type>
+								</layout>
+							</adjacent>
+							<children ignore="false"/>
+						</root>
 					</roots>
 					<children/>
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single RawDataExaminerPanelDockableMsMsTable">
-							<history/>
-							<properties/>
-						</entry>
-						<entry id="single RawDataExaminerPanelDockableSpectumPlotMS2">
-							<history/>
-							<properties/>
-						</entry>
-						<entry id="single RawDataExaminerPanelDockableChromatogramPlot">
-							<history/>
-							<properties/>
-						</entry>
-						<entry id="single DockableRawDataFilePropertiesTable">
+						<entry id="single RawDataExaminerPanelDockableMsMsTable" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -55,32 +438,24 @@
 									<root>ccontrol center</root>
 									<applicationDefined>false</applicationDefined>
 									<location>
-										<property factory="SplitDockPathProperty">
-											<node location="LEFT" size="0.25" id="1644026639444"/>
-											<node location="BOTTOM" size="0.46513944223107573" id="1644026670500"/>
-											<leaf id="1644026670498"/>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.RawDataExaminerPanelDockableMsMsTable</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1644193083061"/>
+												<node location="BOTTOM" size="0.5" id="1644193083072"/>
+												<node location="LEFT" size="0.6666666666666666" id="1644193083076"/>
+												<leaf id="1644193083078"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>3</index>
+											<placeholder>dock.single.RawDataExaminerPanelDockableMsMsTable</placeholder>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single RawDataExaminerPanelDockableSpectumPlotMS1">
-							<history/>
-							<properties/>
-						</entry>
-						<entry id="single RawDataExaminerPanelDockableMsTableMS1">
-							<history/>
-							<properties/>
-						</entry>
-						<entry id="single DockableMsExtractorPanel">
-							<history/>
-							<properties/>
-						</entry>
-						<entry id="single DockableXICSetupPanel">
-							<history/>
-							<properties/>
-						</entry>
-						<entry id="single DockableDataTreePanel">
+						<entry id="single RawDataExaminerPanelDockableSpectumPlotMS2" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -90,10 +465,192 @@
 									<root>ccontrol center</root>
 									<applicationDefined>false</applicationDefined>
 									<location>
-										<property factory="SplitDockPathProperty">
-											<node location="LEFT" size="0.25" id="1644026639444"/>
-											<node location="TOP" size="0.5348605577689243" id="1644026670500"/>
-											<leaf id="1644026639449"/>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS2</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1644193083061"/>
+												<node location="BOTTOM" size="0.5" id="1644193083072"/>
+												<node location="LEFT" size="0.6666666666666666" id="1644193083076"/>
+												<leaf id="1644193083078"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>2</index>
+											<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS2</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single RawDataExaminerPanelDockableChromatogramPlot" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.RawDataExaminerPanelDockableChromatogramPlot</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1644193083061"/>
+												<node location="TOP" size="0.5" id="1644193083072"/>
+												<leaf id="1644193083074"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableRawDataFilePropertiesTable" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableRawDataFilePropertiesTable</placeholder>
+											<backup-path>
+												<node location="LEFT" size="0.25" id="1644193083061"/>
+												<node location="BOTTOM" size="0.46513944223107573" id="1644193174299"/>
+												<leaf id="1644193174297"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single RawDataExaminerPanelDockableSpectumPlotMS1" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1644193083061"/>
+												<node location="BOTTOM" size="0.5" id="1644193083072"/>
+												<node location="LEFT" size="0.6666666666666666" id="1644193083076"/>
+												<leaf id="1644193083078"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single RawDataExaminerPanelDockableMsTableMS1" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.RawDataExaminerPanelDockableMsTableMS1</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1644193083061"/>
+												<node location="BOTTOM" size="0.5" id="1644193083072"/>
+												<node location="LEFT" size="0.6666666666666666" id="1644193083076"/>
+												<leaf id="1644193083078"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.RawDataExaminerPanelDockableMsTableMS1</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableMsExtractorPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableMsExtractorPanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1644193083061"/>
+												<node location="BOTTOM" size="0.5" id="1644193083072"/>
+												<node location="RIGHT" size="0.33333333333333337" id="1644193083076"/>
+												<leaf id="1644193083080"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableMsExtractorPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableXICSetupPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableXICSetupPanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1644193083061"/>
+												<node location="BOTTOM" size="0.5" id="1644193083072"/>
+												<node location="RIGHT" size="0.33333333333333337" id="1644193083076"/>
+												<leaf id="1644193083080"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableXICSetupPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableDataTreePanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableDataTreePanel</placeholder>
+											<backup-path>
+												<node location="LEFT" size="0.25" id="1644193083061"/>
+												<node location="TOP" size="0.5348605577689243" id="1644193174299"/>
+												<leaf id="1644193083070"/>
+											</backup-path>
 										</property>
 									</location>
 								</property>

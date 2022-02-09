@@ -199,7 +199,7 @@
 											<placeholder>dock.single.DockableLIMSDesignEditorPanel</placeholder>
 											<backup-path>
 												<node location="LEFT" size="0.7592223330009971" id="1600213802276"/>
-												<node location="BOTTOM" size="0.5" id="1600213802278"/>
+												<node location="BOTTOM" size="0.5108583247156153" id="1600213802278"/>
 												<leaf id="1600213802282"/>
 											</backup-path>
 										</property>

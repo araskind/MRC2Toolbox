@@ -71,6 +71,7 @@ import edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates.DuplicateMergeD
 import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.noid.MissingIdentificationsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableIdentificationResultsTable;
+import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.MultiFileDataImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.excel.ExcelImportWizard;
 import edu.umich.med.mrc2.datoolbox.gui.io.txt.TextDataImportDialog;
@@ -136,6 +137,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private MultiFileDataImportDialog multiFileDataImportDialog;
 	private ExcelImportWizard excelImportWizard;
 	private TextDataImportDialog textDataImportDialog;
+	private DataExportDialog exportDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -439,8 +441,22 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				clearSelectedFeatureIdentifications();
 			
 			if (command.equals(MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName()))
-				checkForDuplicateNames();				
+				checkForDuplicateNames();
+			
+			if(DataExportDialog.getExportTypes().contains(command))
+				exportAnalysisResults(command);
 		}	
+	}
+	
+	private void exportAnalysisResults(String command) {
+		
+		MainActionCommands exportType = 
+				DataExportDialog.getExportTypeByName(command);
+		if(exportType != null) {
+			exportDialog = new DataExportDialog(exportType);
+			exportDialog.setLocationRelativeTo(this.getContentPane());
+			exportDialog.setVisible(true);
+		}
 	}
 
 	private void checkForDuplicateNames() {

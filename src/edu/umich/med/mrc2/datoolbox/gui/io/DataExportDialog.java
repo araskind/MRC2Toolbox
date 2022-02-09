@@ -36,9 +36,11 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
@@ -63,6 +65,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.apache.commons.jcs3.access.exception.InvalidArgumentException;
 import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
@@ -122,10 +125,18 @@ public class DataExportDialog extends JDialog
 	private JTextField resultsFileTextField;
 	private ImprovedFileChooser chooser;
 
-	public DataExportDialog() {
+	public DataExportDialog() {		
+		this(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND);
+	}
+	
+	public DataExportDialog(MainActionCommands exportType) {
 
 		super();
-		setPreferredSize(new Dimension(800, 250));
+		
+		if(!Arrays.asList(exportTypes).contains(exportType)) {
+			throw new InvalidArgumentException("Invalid export type \"" + exportType.getName() +"\"");
+		}
+		setPreferredSize(new Dimension(800, 300));
 		setIconImage(((ImageIcon) exportIcon).getImage());
 		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
 		DataPipeline pipeline = currentProject.getActiveDataPipeline();
@@ -133,7 +144,7 @@ public class DataExportDialog extends JDialog
 		setTitle("Export results for data pipeline " + pipeline.getName() + " (" + dsName + ")");
 
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setSize(new Dimension(800, 250));
+		setSize(new Dimension(800, 300));
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -326,7 +337,7 @@ public class DataExportDialog extends JDialog
 		loadPreferences();
 		initChooser();
 		setBaseDirectory(currentProject.getExportsDirectory());
-		
+		exportTypeComboBox.setSelectedItem(exportType);
 		pack();
 	}
 	
@@ -591,6 +602,21 @@ public class DataExportDialog extends JDialog
 		prefs.putBoolean(ENABLE_FILTERS, enableFiltersCheckBox.isSelected());
 		prefs.putInt(MAX_RSD, Integer.parseInt(maxRsdTextField.getText()));
 		prefs.putInt(MIN_FREQUENCY, (Integer)minFrequencySpinner.getValue());
+	}
+	
+	public static Collection<String>getExportTypes(){
+		return Arrays.asList(exportTypes).stream().
+				map(e -> e.getName()).collect(Collectors.toList());
+	}
+	
+	public static MainActionCommands getExportTypeByName(String name) {
+		
+		for(MainActionCommands c : exportTypes) {
+			
+			if(c.getName().equals(name))
+				return c;
+		}
+		return null;
 	}
 }
 

@@ -52,6 +52,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -102,6 +103,7 @@ public class MotrpacReportEmptyFileGeneratorDialog extends JDialog implements Ac
 	private JComboBox studyComboBox;
 	private JComboBox assayComboBox;
 	private JComboBox tissueComboBox;
+	private JComboBox namingComboBox;
 	private JButton btnSave;
 	private JTextField reportFolderTextField;
 	private JLabel authorInfoLabel;
@@ -136,9 +138,9 @@ public class MotrpacReportEmptyFileGeneratorDialog extends JDialog implements Ac
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[] {50, 100, 50, 100, 50, 100};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{1.0, 1.0, 0.0, 0.0, 0.0, 1.0};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 
 		int rowCount = 0;
@@ -241,6 +243,29 @@ public class MotrpacReportEmptyFileGeneratorDialog extends JDialog implements Ac
 			dataPanel.add(mpcp, gbc_panel_1);
 			rowCount++;
 		}		
+		
+		rowCount++;
+		
+		JLabel lblNewLabel_5 = new JLabel("Naming");
+		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
+		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_5.gridx = 0;
+		gbc_lblNewLabel_5.gridy = rowCount;
+		dataPanel.add(lblNewLabel_5, gbc_lblNewLabel_5);
+		
+		namingComboBox = new JComboBox<String>(
+				new DefaultComboBoxModel<String>(
+						new String[] {"named", "unnamed"}));
+		GridBagConstraints gbc_namingComboBox = new GridBagConstraints();
+		gbc_namingComboBox.insets = new Insets(0, 0, 5, 5);
+		gbc_namingComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_namingComboBox.gridx = 1;
+		gbc_namingComboBox.gridy = rowCount;
+		dataPanel.add(namingComboBox, gbc_namingComboBox);
+		
+		rowCount++;
+		
 		JLabel lblNewLabel_2 = new JLabel("  ");
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
 		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
@@ -420,7 +445,8 @@ public class MotrpacReportEmptyFileGeneratorDialog extends JDialog implements Ac
 		String fileName = StringUtils.join(fileNameParts, "_").trim().replaceAll("\\s+", "_") + ".txt";	
 		for(String prefix : reportFileNames) {
 			
-			Path reportPath = Paths.get(reportFolder, prefix + "_" + fileName);
+			String prefixNamed = prefix + "_" + (String)namingComboBox.getSelectedItem();			
+			Path reportPath = Paths.get(reportFolder, prefixNamed + "_" + fileName);
 			try {
 				Files.createFile(reportPath);
 			} catch (IOException e) {
@@ -436,11 +462,13 @@ public class MotrpacReportEmptyFileGeneratorDialog extends JDialog implements Ac
 		fileNameParts.add(getMoTrPACAssay().getPolarity());
 		fileName = StringUtils.join(fileNameParts, "_").trim().replaceAll("\\s+", "_") + ".txt";	
 		Path missPath = Paths.get(getReportFolder().getParentFile().getAbsolutePath(), "metadata_failedsamples_" + fileName);
-		try {
-			Files.createFile(missPath);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(!missPath.toFile().exists()) {
+			try {
+				Files.createFile(missPath);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	

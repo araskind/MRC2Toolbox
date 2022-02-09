@@ -224,9 +224,75 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			compressMoTrPACRawDataFiles();
+			createMoTrPACFileManifest();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	private static void createMoTrPACFileManifest() throws IOException {
+		
+		List<String>tissueTypes = new ArrayList<String>(
+				Arrays.asList(
+						"T69 - Adipose brown",
+						"T70 - Adipose white",
+						"T58 - Heart",
+						"T59 - Kidney",
+						"T68 - Liver",
+						"T66 - Lung",
+						"T55 - Muscle",
+						"T31 - Plasma"));
+		List<String>assayTypes = 
+				new ArrayList<String>(Arrays.asList("IONPNEG" ,"RPNEG", "RPPOS"));
+		File parentDirectory = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06");	
+		String batchId = "BATCH1_20210603";	
+		String processedFolderId  = "PROCESSED_20210806";
+		for(String tissue : tissueTypes) {
+			
+			for(String assay : assayTypes) {
+				
+				StringBuffer checkSumData = new StringBuffer();
+				checkSumData.append("file_name,md5\n");
+				Path processedPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, processedFolderId);
+				Path namedDirPath = Paths.get(processedPath.toString(), "NAMED");
+				List<Path> pathList = Files.find(namedDirPath,
+						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
+					collect(Collectors.toList());
+				for(Path filePath : pathList) {
+					String zipHash = DigestUtils.sha256Hex(
+							new FileInputStream(filePath.toString()));
+					String localPath = processedFolderId + File.separator + "NAMED" + File.separator + filePath.toFile().getName();
+					checkSumData.append(localPath + "," + zipHash + "\n");
+				}
+				Path unnamedDirPath = Paths.get(processedPath.toString(), "UNNAMED");
+				pathList = Files.find(unnamedDirPath,
+						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
+					collect(Collectors.toList());
+				for(Path filePath : pathList) {
+					String zipHash = DigestUtils.sha256Hex(
+							new FileInputStream(filePath.toString()));
+					String localPath = processedFolderId + File.separator + "UNNAMED" + File.separator + filePath.toFile().getName();
+					checkSumData.append(localPath + "," + zipHash + "\n");
+				}
+				pathList = Files.find(processedPath,
+						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_failedsamples_"))).
+					collect(Collectors.toList());
+				for(Path filePath : pathList) {
+					String zipHash = DigestUtils.sha256Hex(
+							new FileInputStream(filePath.toString()));
+					String localPath = processedFolderId + File.separator + filePath.toFile().getName();
+					checkSumData.append(localPath + "," + zipHash + "\n");
+				}
+				Path rawChecksumPathPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW", " checksum.txt");
+				List<String> zipCs = Files.readAllLines(rawChecksumPathPath);
+				for(int i=1; i<zipCs.size(); i++) {
+					String[]parts = zipCs.get(i).split("\t");
+					checkSumData.append(parts[0].replace(".zip", "") + "," + parts[1] + "\n");
+				}
+				File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "file_manifest_20220208.csv").toFile();
+				FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
+			}
 		}
 	}
 	
@@ -360,8 +426,8 @@ public class RegexTest {
 						"T66 - Lung",
 						"T55 - Muscle",
 						"T31 - Plasma"));
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C Shipment ANI870 10082\\4BIC\\PASS1AC");	
+		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));		
+		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC\\_DOCS\\_INTERMEDIATES");	
 		try {
 			LIMSReportingUtils.createMotrpacDataUploadDirectoryStructure(
 					tissueTypes, 

@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.main;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
@@ -178,62 +179,29 @@ public abstract class DockableMRC2ToolboxPanel extends DefaultSingleCDockable
 		}
 	}
 	
-	protected JMenuItem createMenuItem(final DefaultCDockable observed){
+	protected JMenuItem createMenuItem(final DefaultCDockable panel){
 		
-        /* Here we create a JCheckBoxMenuItem that is selected only if "observed" is visible. */
-        final JCheckBoxMenuItem item = new JCheckBoxMenuItem( observed.getTitleText() );
-       
-        //	TODO
-        
-//        /* We add a DockFrontendListener to "frontend" to be informed whenever a Dockable
-//         * is opened or closed (shown and hidden in the terminology of DockFrontend) */
-//        frontend.addFrontendListener( new DockFrontendAdapter(){
-//        	
-//            @Override
-//            public void shown( DockFrontend frontend, Dockable dockable ){
-//                if( dockable == observed ){
-//                    item.setSelected( true );
-//                }
-//            }
-//            
-//            @Override
-//            public void hidden( DockFrontend fronend, Dockable dockable ){
-//                if( dockable == observed ){
-//                    item.setSelected( false );
-//                }
-//            }
-//        });
-//        /* And an ActionListener added to "item" will tell us when the user clicks
-//         * on the menu item. */
-//        item.addActionListener( new ActionListener(){
-//            public void actionPerformed( ActionEvent e ){
-//                if( item.isSelected() ){
-//                    frontend.show( observed.intern() );
-//                }
-//                else{
-//                    frontend.hide( observed.intern() );
-//                }
-//            }
-//        });             
-//        /* Be sure the initial state of "item" is the correct one */
-//        item.setSelected( frontend.isShown( observed.intern() ));
-        
+        final JCheckBoxMenuItem item = new JCheckBoxMenuItem( panel.getTitleText() );
+        item.setSelected(panel.isVisible());
+        item.addActionListener( new ActionListener(){
+        	
+            public void actionPerformed( ActionEvent e ){
+            	
+            	panel.setVisible(item.isSelected());
+            }
+        });
         return item;
     }
-	
-	
+		
 	public void populatePanelsMenu() {
 	
 		if(menuBar == null)
 			return;
 		
 		panelsMenu = new JMenu("Panels");
-		panelsMenu.setIcon(windowLayoutIcon);
-		
+		panelsMenu.setIcon(windowLayoutIcon);	
 		for(SingleCDockable cd : control.getRegister().getSingleDockables()) {
-			
-//			frontend.addDockable(cd.intern().getTitleText(), (Dockable) cd.intern());
-//			frontend.setHideable((Dockable) cd.intern(), true);
+
 			JMenuItem cdItem = createMenuItem((DefaultCDockable) cd);
 			panelsMenu.add(cdItem);
 		}

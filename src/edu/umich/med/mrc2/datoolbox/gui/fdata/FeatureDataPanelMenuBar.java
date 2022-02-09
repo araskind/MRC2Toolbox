@@ -70,11 +70,14 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon bubblePlotIconSmall = GuiUtils.getIcon("bubble", 16);
 	private static final Icon checkDuplicateNamesIcon = GuiUtils.getIcon("checkDuplicateNames", 24);	
 	private static final Icon exportResultsIcon = GuiUtils.getIcon("export", 24);
+	private static final Icon exportResults4MPPIcon = GuiUtils.getIcon("export4MPP", 24);
+	private static final Icon exportResults4BinnerIcon = GuiUtils.getIcon("export4Binner", 24);
+	private static final Icon exportResults4RIcon = GuiUtils.getIcon("export4R", 24);	
 	private static final Icon exportResultsIconSmall = GuiUtils.getIcon("export", 16);
 	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 24);
 	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 24);
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);
-	
+		
 	// Menus
 	private JMenu
 		loadDataMenu,
@@ -114,7 +117,9 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	
 	// Export items
 	private JMenuItem
-		exportForAnalysisMenuItem,
+		exportForBinnerAnalysisMenuItem,
+		exportForMPPAnalysisMenuItem,
+		exportForRAnalysisMenuItem,
 		exportIntegratedReportMenuItem,
 		exportMWTabReportMenuItem;
 		
@@ -221,9 +226,18 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportMenu = new JMenu("Export");
 		exportMenu.setIcon(exportResultsIconSmall);
 		
-		exportForAnalysisMenuItem = addItem(exportMenu, exportForAnalysisMenuItem, 
-				MainActionCommands.EXPORT_RESULTS_COMMAND, 
-				exportResultsIcon);
+		exportForBinnerAnalysisMenuItem = addItem(exportMenu, exportForBinnerAnalysisMenuItem, 
+				MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND, 
+				exportResults4BinnerIcon);
+		exportForMPPAnalysisMenuItem = addItem(exportMenu, exportForMPPAnalysisMenuItem, 
+				MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND, 
+				exportResults4MPPIcon);
+		exportForRAnalysisMenuItem = addItem(exportMenu, exportForRAnalysisMenuItem, 
+				MainActionCommands.EXPORT_RESULTS_4R_COMMAND, 
+				exportResults4RIcon);
+		
+		exportMenu.addSeparator();
+		
 		exportIntegratedReportMenuItem = addItem(exportMenu, exportIntegratedReportMenuItem, 
 				MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND, 
 				exportExcelIcon);
