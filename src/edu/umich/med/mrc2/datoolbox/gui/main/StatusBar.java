@@ -44,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.LabeledProgressBar;
 
 public class StatusBar extends JPanel implements 
@@ -271,4 +272,25 @@ public class StatusBar extends JPanel implements
 			//	TODO
 		}
 	}
+	
+	public static void showRawDataAnalysisProjectData(RawDataAnalysisProject project) {
+		
+		clearProjectData();	
+		if(project != null) {
+			projectNameLabel.setText(project.getName());
+			//	TODO
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

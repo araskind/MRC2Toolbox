@@ -31,7 +31,6 @@ import javax.swing.Icon;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
@@ -244,26 +243,27 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 		if(activeExperiment == null)
 			return;
 
-		if(MRC2ToolBoxCore.getCurrentProject() != null) {
-
-			String yesNoQuestion =
-					"Do you want to replace the design for the current project\n"
-					+ "with the data for selected LIMS experiment?";
-			int result = MessageDialog.showChoiceWithWarningMsg(yesNoQuestion , this.getContentPane());
-			if(result != JOptionPane.YES_OPTION)
-				return;
-
-			MRC2ToolBoxCore.getCurrentProject().setLimsExperiment(activeExperiment);
-			MRC2ToolBoxCore.getCurrentProject().setLimsProject(activeExperiment.getProject());
-			ExperimentDesign design = MRC2ToolBoxCore.getCurrentProject().getExperimentDesign();
-
-			if(design.getSamples().isEmpty() && activeExperiment.getExperimentDesign() != null)
-				design.replaceDesign(activeExperiment.getExperimentDesign());
-		}
-		else {
+		//	TODO check if it works? Maybe just force to create new project?
+//		if(MRC2ToolBoxCore.getCurrentProject() != null) {
+//
+//			String yesNoQuestion =
+//					"Do you want to replace the design for the current project\n"
+//					+ "with the data for selected LIMS experiment?";
+//			int result = MessageDialog.showChoiceWithWarningMsg(yesNoQuestion , this.getContentPane());
+//			if(result != JOptionPane.YES_OPTION)
+//				return;
+//
+//			MRC2ToolBoxCore.getCurrentProject().setLimsExperiment(activeExperiment);
+//			MRC2ToolBoxCore.getCurrentProject().setLimsProject(activeExperiment.getProject());
+//			ExperimentDesign design = MRC2ToolBoxCore.getCurrentProject().getExperimentDesign();
+//
+//			if(design.getSamples().isEmpty() && activeExperiment.getExperimentDesign() != null)
+//				design.replaceDesign(activeExperiment.getExperimentDesign());
+//		}
+//		else {
 			MRC2ToolBoxCore.getMainWindow().
-				showNewProjectFromLimsExperimentDialogue(ProjectType.DATA_ANALYSIS, activeExperiment);
-		}
+				showNewProjectDialog(ProjectType.DATA_ANALYSIS, null, activeExperiment);
+//		}
 	}
 
 	private void refreshLimsData() {

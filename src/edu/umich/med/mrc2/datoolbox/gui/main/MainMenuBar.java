@@ -86,6 +86,7 @@ public class MainMenuBar extends CommonMenuBar {
 		newProjectMenuItem,
 		newIDProjectMenuItem,
 		openProjectMenuItem,
+		openRdaProjectMenuItem,
 		saveProjectMenuItem,
 		saveProjectAsMenuItem,				
 		editIDProjectMenuItem,		
@@ -133,6 +134,12 @@ public class MainMenuBar extends CommonMenuBar {
 
 		openProjectMenuItem = addItem(projectMenu, openProjectMenuItem, 
 				MainActionCommands.OPEN_PROJECT_COMMAND, openProjectIcon);
+		
+		openRdaProjectMenuItem = addItem(projectMenu, openProjectMenuItem, 
+				MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND, openRdaProjectIcon);
+		
+		projectMenu.addSeparator();
+		
 		editIDProjectMenuItem = addItem(projectMenu, editIDProjectMenuItem,
 				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND, editRdaProjectIcon);		
 		editIDProjectMenuItem.setEnabled(false);
@@ -141,11 +148,16 @@ public class MainMenuBar extends CommonMenuBar {
 				MainActionCommands.SAVE_PROJECT_COMMAND, saveProjectIcon);
 		saveProjectAsMenuItem = addItem(projectMenu, saveProjectAsMenuItem,
 				MainActionCommands.SAVE_PROJECT_COPY_COMMAND, saveProjectCopyIcon);
+		saveProjectAsMenuItem.setEnabled(false);
+		
+		projectMenu.addSeparator();
+		
 		closeProjectMenuItem = addItem(projectMenu, closeProjectMenuItem, 
 				MainActionCommands.CLOSE_PROJECT_COMMAND, closeProjectIcon);
 		projectMenu.addSeparator();
 		
-		exitMenuItem = addItem(projectMenu, exitMenuItem, MainActionCommands.EXIT_COMMAND, exitIcon);
+		exitMenuItem = addItem(projectMenu, exitMenuItem, 
+				MainActionCommands.EXIT_COMMAND, exitIcon);
 		add(projectMenu);
 		
 		// Panels

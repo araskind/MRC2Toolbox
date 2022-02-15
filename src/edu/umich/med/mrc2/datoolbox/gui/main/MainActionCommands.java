@@ -25,7 +25,7 @@ public enum MainActionCommands {
 
 	// Project
 	NEW_PROJECT_COMMAND("New metabolomics project"),
-	OPEN_PROJECT_COMMAND("Open project"),
+	OPEN_PROJECT_COMMAND("Open metabolomics project"),
 	SAVE_PROJECT_COMMAND("Save project"),
 	SAVE_PROJECT_COPY_COMMAND("Save project as ..."),
 	

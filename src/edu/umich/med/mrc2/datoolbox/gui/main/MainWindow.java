@@ -51,8 +51,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
-
-import org.apache.commons.io.FileUtils;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import bibliothek.gui.Dockable;
 import bibliothek.gui.dock.common.CControl;
@@ -61,6 +60,8 @@ import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.intern.DefaultCDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
+import edu.umich.med.mrc2.datoolbox.data.ProjectSwitchController;
+import edu.umich.med.mrc2.datoolbox.data.ProjectSwitchController.ProjectState;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -90,6 +91,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.SmoothingFilterManager;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLlayoutManager;
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.ProjectSetupDraw;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataProjectOpenComponent;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisProjectSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.refsamples.ReferenceSampleManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.users.UserManagerDialog;
@@ -111,6 +113,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadProjectTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
@@ -136,8 +139,6 @@ public class MainWindow extends JFrame
 	public static final String PROJECT_BASE = "PROJECT_BASE";
 	private File projectBaseDirectory; 
 
-//	public static final String PROG_NAME = "MRC2 Data Analysis Toolbox";
-
 	private static PreferencesDialog preferencesDialog;
 	private static NewProjectDialog newProjectFrame;
 	private static DbParserFrame dbParserFrame;
@@ -153,15 +154,12 @@ public class MainWindow extends JFrame
 	private IdTrackerLoginDialog idtLogin;
 
 	private MainMenuBar mainMenuBar;
-//	private MainToolbar toolBar;
 	private static ProjectSetupDraw projectDashBooard;
 	private static LinkedHashMap<PanelList, DockableMRC2ToolboxPanel> panels;
 	private LinkedHashMap<PanelList, Boolean> panelShowing;
-
-	private boolean saveOnExitRequested;
-	private boolean saveOnCloseRequested;
-	private boolean showNewProjectDialog;
-	private boolean showOpenProjectDialog;
+	
+	private ProjectSwitchController projectSwitchController;
+	
 	private boolean savingAsCopy;
 
 	private DataAnalysisProject currentProject;
@@ -190,10 +188,12 @@ public class MainWindow extends JFrame
 
 		currentProject = null;
 		activeDataPipeline = null;
-		saveOnExitRequested = false;
-		showNewProjectDialog = false;
-		showOpenProjectDialog = false;
-		savingAsCopy = false;
+		projectSwitchController = new ProjectSwitchController();
+		
+//		saveOnExitRequested = false;
+//		showNewMetabolomicProjectDialog = false;
+//		showOpenProjectDialog = false;
+//		savingAsCopy = false;
 		
 		projectDashBooard.setActionListener(this);
 		projectDashBooard.switchDataPipeline(null, null);
@@ -225,10 +225,13 @@ public class MainWindow extends JFrame
 			closeProject();
 
 		if (command.equals(MainActionCommands.NEW_PROJECT_COMMAND.getName()))
-			showNewProjectDialog(ProjectType.DATA_ANALYSIS, null);
+			showNewProjectDialog(ProjectType.DATA_ANALYSIS, null, null);
+		
+		if (command.equals(MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName()))
+			showNewProjectDialog(ProjectType.RAW_DATA_ANALYSIS, null, null);		
 
 		if (command.equals(MainActionCommands.NEW_CPD_ID_PROJECT_COMMAND.getName()))
-			showNewProjectDialog(ProjectType.FEATURE_IDENTIFICATION, null);
+			showNewProjectDialog(ProjectType.FEATURE_IDENTIFICATION, null, null);
 
 		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName()))
 			showIdTrackerLogin();
@@ -240,7 +243,10 @@ public class MainWindow extends JFrame
 			logoutIdTracker();
 
 		if (command.equals(MainActionCommands.OPEN_PROJECT_COMMAND.getName()))
-			openProject();
+			openProject(ProjectType.DATA_ANALYSIS);
+		
+		if (command.equals(MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND.getName()))
+			openProject(ProjectType.RAW_DATA_ANALYSIS);	
 
 		if (command.equals(MainActionCommands.SHOW_MS_TOOLBOX_COMMAND.getName()))
 			showMsTools();
@@ -476,6 +482,7 @@ public class MainWindow extends JFrame
 			panels.get(PanelList.DESIGN).clearPanel();
 			projectDashBooard.clearPanel();
 			this.setTitle(BuildInformation.getProgramName());
+			StatusBar.clearProjectData();
 			clearPanel();
 		}
 		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet()) {
@@ -491,7 +498,7 @@ public class MainWindow extends JFrame
 	@Override
 	public void closeProject() {
 
-		if (currentProject != null) {
+		if (currentProject != null || MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 
 			String yesNoQuestion = "You are going to close current project,"
 					+ " do you want to save the results (Yes - save, No - discard)?";
@@ -501,22 +508,44 @@ public class MainWindow extends JFrame
 				return;
 
 			if (selectedValue == JOptionPane.YES_OPTION) {
-				saveOnCloseRequested = true;
+				//saveOnCloseRequested = true;
+				
+				ProjectType activeProjectType = null;
+				if(currentProject != null)
+					activeProjectType = ProjectType.DATA_ANALYSIS;
+				
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
+					activeProjectType = ProjectType.RAW_DATA_ANALYSIS;
+						
+				projectSwitchController = new ProjectSwitchController(
+						true,
+						null,
+						false,
+						activeProjectType, 
+						null);			
 				runSaveProjectTask();
 				return;
 			}
-			clearGuiAfterProjectClosed();
+			else
+				clearGuiAfterProjectClosed();
 		}
 	}
 	
 	public void runSaveProjectTask() {
 		
-		if(currentProject == null)
-			return;
-
-		SaveProjectTask spt = new SaveProjectTask(currentProject);
-		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
-		MRC2ToolBoxCore.getTaskController().addTask(spt);
+		if(currentProject != null) {
+			SaveProjectTask spt = new SaveProjectTask(currentProject);
+			spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
+			MRC2ToolBoxCore.getTaskController().addTask(spt);
+		}
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			
+			SaveStoredRawDataAnalysisProjectTask task = 
+					new SaveStoredRawDataAnalysisProjectTask(
+							MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);
+		}		
 	}
 
 	public static void displayErrorMessage(String title, String msg) {
@@ -541,39 +570,32 @@ public class MainWindow extends JFrame
 
 	public void exitProgram() {
 
-		String yesNoQuestion = "You are going to close current project, "
-				+ "do you want to save the results (Yes - save, No - discard)?";
-		int selectedValue = -1;
-		if (currentProject != null) {
+		if (currentProject != null || MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 			
-			selectedValue = MessageDialog.showChooseOrCancelMsg(yesNoQuestion);
+			String yesNoQuestion = "You are going to close current project, "
+					+ "do you want to save the results (Yes - save, No - discard)?";
+			int selectedValue = MessageDialog.showChooseOrCancelMsg(yesNoQuestion);
+			if (selectedValue == JOptionPane.CANCEL_OPTION)
+				return;
+			
 			if (selectedValue == JOptionPane.YES_OPTION) {
 
-				saveOnExitRequested = true;
+				projectSwitchController = new ProjectSwitchController(
+						true,
+						null,
+						true,
+						null, 
+						null);	
 				runSaveProjectTask();
-				clearGui(true);
-				currentProject = null;
-				MRC2ToolBoxCore.setCurrentProject(currentProject);
 			}
 			if (selectedValue == JOptionPane.NO_OPTION) {
 
-				saveOnExitRequested = false;
-				clearGui(true);
-				currentProject = null;
-				MRC2ToolBoxCore.setCurrentProject(currentProject);
+				if (MessageDialog.showChoiceWithWarningMsg(
+						"Are you sure you want to exit?", this.getContentPane()) == JOptionPane.YES_OPTION)
+					MRC2ToolBoxCore.shutDown();
 			}
-			if (selectedValue == JOptionPane.CANCEL_OPTION)
-				return;
 		}
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
-			
-					
-			RawDataExaminerPanel rdaPanel = 
-					(RawDataExaminerPanel)getPanel(PanelList.RAW_DATA_EXAMINER);
-			rdaPanel.closeRawDataAnalysisProject(true);
-			return;
-		}
-		if (!saveOnExitRequested) {
+		else {
 			if (MessageDialog.showChoiceWithWarningMsg(
 					"Are you sure you want to exit?", this.getContentPane()) == JOptionPane.YES_OPTION)
 				MRC2ToolBoxCore.shutDown();
@@ -622,7 +644,6 @@ public class MainWindow extends JFrame
 	private void initProgressDialog() {
 
 		progressPanel = MRC2ToolBoxCore.getTaskController().getTaskPanel();
-
 		progressDialogue = new JDialog(this, "Task in progress...", ModalityType.APPLICATION_MODAL);
 		progressDialogue.setTitle("Operation in progress ...");
 		progressDialogue.setSize(new Dimension(600, 150));
@@ -635,15 +656,128 @@ public class MainWindow extends JFrame
 		progressDialogue.setVisible(false);
 	}
 
-	private void initProjectLoadTask() {
+	private void initProjectLoadTask(ProjectType projectType) {
 
-		File savedProjectFile = selectProjectFile();
-		if (savedProjectFile != null && savedProjectFile.exists()) {
+//		File savedProjectFile = selectProjectFile(projectType);
+		
+		JFileChooser chooser = new ImprovedFileChooser();
+		chooser.setCurrentDirectory(projectBaseDirectory);
+		chooser.setDialogTitle("Select project file");
+		chooser.setAcceptAllFileFilterUsed(false);
+		chooser.setMultiSelectionEnabled(false);
+		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);	
+		FileNameExtensionFilter projectFileFilter = null;
+		RawDataProjectOpenComponent acc = null;
+		boolean loadResults = false;
+		if(projectType.equals(ProjectType.DATA_ANALYSIS)) {
+			projectFileFilter = new FileNameExtensionFilter("Raw data project files",
+					MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION);
+		}
+		if(projectType.equals(ProjectType.RAW_DATA_ANALYSIS)) {			
+			projectFileFilter = new FileNameExtensionFilter("Raw data project files",
+					MRC2ToolBoxConfiguration.RAW_DATA_PROJECT_FILE_EXTENSION);
+			acc = new RawDataProjectOpenComponent(chooser);
+			chooser.setAccessory(acc);
+			chooser.setSize(800, 640);
+		}
+		chooser.setFileFilter(projectFileFilter);
+		File projectFile = null;
+		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+			
+			File selectedFile = chooser.getSelectedFile();		
+			if(projectType.equals(ProjectType.DATA_ANALYSIS)) {
 
-			LoadProjectTask ltp = new LoadProjectTask(savedProjectFile);
+				if(selectedFile.isDirectory()) {
+					List<String> pfList = FIOUtils.findFilesByExtension(
+							Paths.get(selectedFile.getAbsolutePath()), 
+							MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION);
+					if(pfList == null || pfList.isEmpty()) {
+						MessageDialog.showWarningMsg(selectedFile.getName() + 
+								" is not a valid metabolomics project", chooser);
+						return;
+					}
+					projectFile = new File(pfList.get(0));
+					projectBaseDirectory = selectedFile.getParentFile();
+				}
+				else {
+					projectFile = selectedFile;
+					projectBaseDirectory = projectFile.getParentFile().getParentFile();
+				}		
+			}
+			if(projectType.equals(ProjectType.RAW_DATA_ANALYSIS)) {
+				
+				loadResults = acc.loadResults();
+				
+				if(selectedFile.isDirectory()) {
+					List<String> pfList = FIOUtils.findFilesByExtension(
+							Paths.get(selectedFile.getAbsolutePath()), 
+							MRC2ToolBoxConfiguration.RAW_DATA_PROJECT_FILE_EXTENSION);
+					if(pfList == null || pfList.isEmpty()) {
+						MessageDialog.showWarningMsg(selectedFile.getName() + 
+								" is not a valid raw data analysis project", chooser);
+						return;
+					}
+					projectFile = new File(pfList.get(0));
+					projectBaseDirectory = selectedFile.getParentFile();
+				}
+				else {
+					projectFile = selectedFile;
+					projectBaseDirectory = projectFile.getParentFile().getParentFile();
+				}
+			}
+		}
+		if (projectFile == null || !projectFile.exists())
+			return;
+
+		savePreferences();
+		if(projectType.equals(ProjectType.DATA_ANALYSIS)) {
+
+			LoadProjectTask ltp = new LoadProjectTask(projectFile);
 			ltp.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(ltp);			
+		}
+		if(projectType.equals(ProjectType.RAW_DATA_ANALYSIS)) {
+			
+			OpenStoredRawDataAnalysisProjectTask ltp = 
+					new OpenStoredRawDataAnalysisProjectTask(projectFile, loadResults);
+			ltp.addTaskListener(getPanel(PanelList.RAW_DATA_EXAMINER));
 			MRC2ToolBoxCore.getTaskController().addTask(ltp);
-		}		
+		}
+	}
+	
+	private File selectProjectFile(ProjectType projectType) {
+
+		JFileChooser chooser = new ImprovedFileChooser();
+		chooser.setCurrentDirectory(projectBaseDirectory);
+		chooser.setDialogTitle("Select project file");
+		chooser.setAcceptAllFileFilterUsed(false);
+		chooser.setMultiSelectionEnabled(false);
+		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);	
+		File projectFile = null;
+		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+			
+			
+			File selectedFile = chooser.getSelectedFile();
+			if(selectedFile.isDirectory()) {
+				List<String> pfList = FIOUtils.findFilesByExtension(
+						Paths.get(selectedFile.getAbsolutePath()), 
+						MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION);
+				if(pfList == null || pfList.isEmpty()) {
+					MessageDialog.showWarningMsg(selectedFile.getName() + " is not a valid project", chooser);
+					return null;
+				}
+				projectFile = new File(pfList.get(0));
+				projectBaseDirectory = selectedFile.getParentFile();
+			}
+			else {
+				projectFile = selectedFile;
+				projectBaseDirectory = projectFile.getParentFile().getParentFile();
+			}
+			savePreferences();
+		}
+		return projectFile;
 	}
 
 	private synchronized void initWindow() {
@@ -774,35 +908,112 @@ public class MainWindow extends JFrame
 		// if(numOfTasks > 0)
 		// showProgressWindow();
 	}
+	
+	public void showNewProjectDialog(
+			ProjectType newProjectType, 
+			ExperimentDesign design,
+			LIMSExperiment newLimsExperiment) {
+		
+		if (currentProject != null || MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			
+			int selectedValue = 
+					MessageDialog.showChooseOrCancelMsg(
+							"Save current project before creating a new one?", this.getContentPane());
+			if (selectedValue == JOptionPane.CANCEL_OPTION)
+				return;
+			
+			if (selectedValue == JOptionPane.YES_OPTION) {
+				
+				ProjectType activeProjectType = ProjectType.DATA_ANALYSIS;
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
+					activeProjectType = ProjectType.RAW_DATA_ANALYSIS;
+				
+				projectSwitchController = new ProjectSwitchController(
+						true,
+						ProjectState.NEW_PROJECT,
+						false,
+						activeProjectType, 
+						newProjectType);
+				projectSwitchController.setLimsExperiment(newLimsExperiment);			
+				runSaveProjectTask();
+			}
+			
+			//	TODO LIMS experiment
+			else {
+				clearGuiAfterProjectClosed();
+				if(newProjectType.equals(ProjectType.DATA_ANALYSIS))
+					showNewMetabolomicsProjectDialog(design, newLimsExperiment);
+												
+				if(newProjectType.equals(ProjectType.RAW_DATA_ANALYSIS)) 
+					showNewRawDataAnalysisProjectDialog();	
+			}
+		}
+		else {
+			if(newProjectType.equals(ProjectType.DATA_ANALYSIS))
+				showNewMetabolomicsProjectDialog(design, newLimsExperiment);
+											
+			if(newProjectType.equals(ProjectType.RAW_DATA_ANALYSIS)) 
+				showNewRawDataAnalysisProjectDialog();			
+		}
+	}
+	
+//	public void showNewProjectFromLimsExperimentDialogue(ProjectType type, LIMSExperiment activeExperiment) {
+//
+//		newProjectFrame = new NewProjectDialog(this);
+//		newProjectFrame.setDesign(null);
+//		newProjectFrame.setLimsExperiment(activeExperiment);
+//		newProjectFrame.setProjectType(type);
+//
+//		int selectedValue = JOptionPane.YES_OPTION;
+//		if (currentProject != null)
+//			selectedValue = MessageDialog.showChoiceMsg("Current project will be saved and closed, proceed?");
+//
+//		if (selectedValue == JOptionPane.YES_OPTION) {
+//
+//			if (currentProject != null) {
+//				runSaveProjectTask();
+//			}
+//			else {
+//				newProjectFrame.setLocationRelativeTo(this);
+//				newProjectFrame.setVisible(true);
+//			}
+//		}
+//	}
 
-	private void openProject() {
+	private void openProject(ProjectType newProjectType) {
 
-		if (currentProject != null) {
+		if (currentProject != null || MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 
-			int selectedValue = JOptionPane.showInternalConfirmDialog(this.getContentPane(),
-					"You are going to close current project, do you want to save the results (Yes - save, No - discard)?",
-					"Save active project", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-
+			int selectedValue = 
+					MessageDialog.showChooseOrCancelMsg(
+							"Save current project before opening another one?", this.getContentPane());
+			if(selectedValue == JOptionPane.CANCEL_OPTION)
+				return;
+			
 			if (selectedValue == JOptionPane.YES_OPTION) {
 
+				ProjectType activeProjectType = ProjectType.DATA_ANALYSIS;
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
+					activeProjectType = ProjectType.RAW_DATA_ANALYSIS;
+				
+				projectSwitchController = new ProjectSwitchController(
+						true,
+						ProjectState.EXISTING_PROJECT,
+						false,
+						activeProjectType, 
+						newProjectType);
 				runSaveProjectTask();
-				clearGui(true);
-				this.setTitle(BuildInformation.getProgramName());
-				currentProject = null;
-				showOpenProjectDialog = true;
+				return;
 			}
 			if (selectedValue == JOptionPane.NO_OPTION) {
 
-				clearGui(true);
-				this.setTitle(BuildInformation.getProgramName());
-				currentProject = null;
-				initProjectLoadTask();
-			}
-			if (selectedValue == JOptionPane.CANCEL_OPTION)
+				clearGuiAfterProjectClosed();
+				initProjectLoadTask(newProjectType);
 				return;
+			}
 		}
 		else
-			initProjectLoadTask();
+			initProjectLoadTask(newProjectType);
 	}
 
 	public void reloadDesign() {
@@ -860,40 +1071,6 @@ public class MainWindow extends JFrame
 		return inputFile;
 	}
 
-	private File selectProjectFile() {
-
-		JFileChooser chooser = new ImprovedFileChooser();
-		chooser.setCurrentDirectory(projectBaseDirectory);
-		chooser.setDialogTitle("Select project file");
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);	
-		File projectFile = null;
-		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-			
-			
-			File selectedFile = chooser.getSelectedFile();
-			if(selectedFile.isDirectory()) {
-				List<String> pfList = FIOUtils.findFilesByExtension(
-						Paths.get(selectedFile.getAbsolutePath()), 
-						MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION);
-				if(pfList == null || pfList.isEmpty()) {
-					MessageDialog.showWarningMsg(selectedFile.getName() + " is not a valid project", chooser);
-					return null;
-				}
-				projectFile = new File(pfList.get(0));
-				projectBaseDirectory = selectedFile.getParentFile();
-			}
-			else {
-				projectFile = selectedFile;
-				projectBaseDirectory = projectFile.getParentFile().getParentFile();
-			}
-			savePreferences();
-		}
-		return projectFile;
-	}
-
 	//	TODO shift data loading to specific panels
 	public void showDataLoader(String command) {
 
@@ -939,61 +1116,24 @@ public class MainWindow extends JFrame
 			integratedReportDialog.setVisible(true);
 		}
 	}
-
-	public void showNewProjectDialog(ProjectType type, ExperimentDesign design) {
-
-		if(newProjectFrame == null)
-			newProjectFrame = new NewProjectDialog(this);
-
-		newProjectFrame.setDesign(design);
-		newProjectFrame.setLimsExperiment(null);
-		newProjectFrame.setProjectType(type);
-
-		int selectedValue = JOptionPane.YES_OPTION;
-
-		if (currentProject != null)
-			selectedValue = MessageDialog.showChoiceMsg("Current project will be saved and closed, proceed?");
-
-		if (selectedValue == JOptionPane.YES_OPTION) {
-
-			if (currentProject != null) {
-
-				runSaveProjectTask();
-				clearGui(true);
-				currentProject = null;
-				showNewProjectDialog = true;
-			}
-			else {
-				newProjectFrame.setLocationRelativeTo(this);
-				newProjectFrame.setVisible(true);
-			}
-		}
+	
+	private void showNewRawDataAnalysisProjectDialog() {
+			
+		rawDataAnalysisProjectSetupDialog = new RawDataAnalysisProjectSetupDialog(this);
+		rawDataAnalysisProjectSetupDialog.setLocationRelativeTo(this.getContentPane());
+		rawDataAnalysisProjectSetupDialog.setVisible(true);
 	}
-
-	public void showNewProjectFromLimsExperimentDialogue(ProjectType type, LIMSExperiment activeExperiment) {
-
-		if(newProjectFrame == null)
-			newProjectFrame = new NewProjectDialog(this);
-
-		newProjectFrame.setDesign(null);
-		newProjectFrame.setLimsExperiment(activeExperiment);
-		newProjectFrame.setProjectType(type);
-
-		int selectedValue = JOptionPane.YES_OPTION;
-		if (currentProject != null)
-			selectedValue = MessageDialog.showChoiceMsg("Current project will be saved and closed, proceed?");
-
-		if (selectedValue == JOptionPane.YES_OPTION) {
-
-			if (currentProject != null) {
-				runSaveProjectTask();
-				showNewProjectDialog = true;
-			}
-			else {
-				newProjectFrame.setLocationRelativeTo(this);
-				newProjectFrame.setVisible(true);
-			}
-		}
+	
+	private void showNewMetabolomicsProjectDialog(
+			ExperimentDesign design, 
+			LIMSExperiment newLimsExperiment) {
+		
+		newProjectFrame = new NewProjectDialog(this);
+		newProjectFrame.setDesign(design);
+		newProjectFrame.setLimsExperiment(newLimsExperiment);
+		newProjectFrame.setProjectType(ProjectType.DATA_ANALYSIS);
+		newProjectFrame.setLocationRelativeTo(this);
+		newProjectFrame.setVisible(true);
 	}
 
 	public void createNewProjectFromLimsExperiment(
@@ -1126,6 +1266,9 @@ public class MainWindow extends JFrame
 		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
 			currentProject.getExperimentDesign().addListener(entry.getValue());
 		
+		projectSwitchController = 
+				new ProjectSwitchController(true, null, false, ProjectType.DATA_ANALYSIS, null);
+		
 		SaveProjectTask spt = new SaveProjectTask(currentProject);
 		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
 		MRC2ToolBoxCore.getTaskController().addTask(spt);
@@ -1178,49 +1321,105 @@ public class MainWindow extends JFrame
 				finalizeProjectLoad((LoadProjectTask) e.getSource());
 
 			//	Save metabolomics project
-			if (e.getSource().getClass().equals(SaveProjectTask.class))
+			if (e.getSource().getClass().equals(SaveProjectTask.class) || 
+					e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class))
 				finalizeProjectSave();
 			
 			//	Save raw data analysis project
-			if (e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class))
-				finalizeRawDataAnalysisProjectSave();
+//			if (e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class))
+//				finalizeRawDataAnalysisProjectSave();
 		}
 		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED)
 			hideProgressDialog();
 	}
 	
+	private void finalizeProjectSave() {
+		
+		if(projectSwitchController.isExitProgram()) {
+			MRC2ToolBoxCore.shutDown();
+			return;
+		}
+		//	If just saving current project
+		if(projectSwitchController.getProjectState() == null)			
+			return;
+		else	// If opening existing project or creating a new one
+			clearGuiAfterProjectClosed();
+		
+		if(projectSwitchController.getProjectState().equals(
+				ProjectSwitchController.ProjectState.NEW_PROJECT)) {
+			
+			showNewProjectDialog(
+					projectSwitchController.getNewProjectType(),
+					null, 
+					projectSwitchController.getLimsExperiment());
+			
+		}
+		if(projectSwitchController.getProjectState().equals(
+				ProjectSwitchController.ProjectState.EXISTING_PROJECT))
+			initProjectLoadTask(projectSwitchController.getNewProjectType());
+
+		//	TODO
+//		if(savingAsCopy) {
+//
+//			savingAsCopy = false;
+//			File projectCopy = selectProjectCopyDirectory();
+//
+//			if(projectCopy != null) {
+//				
+//				//	TODO update project name and project file name
+//				try {
+//					FileUtils.copyDirectory(currentProject.getProjectDirectory(), projectCopy);
+//					currentProject.getProjectFile();				
+//					File oldProjectFile = 
+//							Paths.get(projectCopy.getAbsolutePath(), currentProject.getProjectFile().getName()).toFile();				
+//					File newProjectFile = 
+//							Paths.get(projectCopy.getAbsolutePath(), projectCopy.getName() + "."
+//							+ MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION).toFile();
+//					
+//					oldProjectFile.renameTo(newProjectFile);
+//					
+//					MessageDialog.showInfoMsg("Project " + currentProject.getName() + 
+//							" copied to\n" + projectCopy.getAbsolutePath());
+//				} catch (IOException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//			}
+//		}
+	}
+	
 	private void finalizeRawDataAnalysisProjectSave() {
 		
-		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-		MainWindow.hideProgressDialog();		
-		if(showNewProjectDialog) {
-
-			showNewProjectDialog = false;
-			clearGuiAfterRawDataAnalysisProjectClosed();
-			rawDataAnalysisProjectSetupDialog = new RawDataAnalysisProjectSetupDialog(this);
-			rawDataAnalysisProjectSetupDialog.setLocationRelativeTo(this.getContentPane());
-			rawDataAnalysisProjectSetupDialog.setVisible(true);
-		}
-		if(saveOnCloseRequested) {
-
-			saveOnCloseRequested = false;
-			clearGuiAfterRawDataAnalysisProjectClosed();
-		}
-		if(saveOnExitRequested) {
-
-			saveOnExitRequested = false;
-			int selectedValue = 
-					MessageDialog.showChoiceWithWarningMsg("Are you sure you want to exit?", 
-							this.getContentPane());
-			if (selectedValue == JOptionPane.YES_OPTION)
-				MRC2ToolBoxCore.shutDown();
-		}
-		if(showOpenProjectDialog) {
-
-			clearGuiAfterRawDataAnalysisProjectClosed();
-			showOpenProjectDialog = false;
-			//	initRawDataAnalysisProjectLoadTask();
-		}
+//		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+//		MainWindow.hideProgressDialog();		
+//		if(showNewMetabolomicProjectDialog) {
+//
+//			showNewMetabolomicProjectDialog = false;
+//			clearGuiAfterRawDataAnalysisProjectClosed();
+//			rawDataAnalysisProjectSetupDialog = new RawDataAnalysisProjectSetupDialog(this);
+//			rawDataAnalysisProjectSetupDialog.setLocationRelativeTo(this.getContentPane());
+//			rawDataAnalysisProjectSetupDialog.setVisible(true);
+//		}
+//		if(saveOnCloseRequested) {
+//
+//			saveOnCloseRequested = false;
+//			clearGuiAfterRawDataAnalysisProjectClosed();
+//		}
+//		if(saveOnExitRequested) {
+//
+//			saveOnExitRequested = false;
+//			int selectedValue = 
+//					MessageDialog.showChoiceWithWarningMsg("Are you sure you want to exit?", 
+//							this.getContentPane());
+//			if (selectedValue == JOptionPane.YES_OPTION)
+//				MRC2ToolBoxCore.shutDown();
+//		}
+//		if(showOpenProjectDialog) {
+//
+//			clearGuiAfterRawDataAnalysisProjectClosed();
+//			showOpenProjectDialog = false;
+//			//	initRawDataAnalysisProjectLoadTask();
+//		}
 	}
 
 	private void finalizeProjectLoad(LoadProjectTask eTask) {
@@ -1228,73 +1427,11 @@ public class MainWindow extends JFrame
 		MRC2ToolBoxCore.setCurrentProject(eTask.getNewProject());
 		setGuiFromActiveProject();
 	}
-
-	private void finalizeProjectSave() {
-
-		if(showNewProjectDialog) {
-
-			showNewProjectDialog = false;
-			clearGuiAfterProjectClosed();
-
-			if(newProjectFrame == null)
-				newProjectFrame = new NewProjectDialog(this);
-
-			newProjectFrame.setLocationRelativeTo(this);
-			newProjectFrame.setVisible(true);
-		}
-		if(saveOnCloseRequested) {
-
-			saveOnCloseRequested = false;
-			clearGuiAfterProjectClosed();
-		}
-		if(saveOnExitRequested) {
-
-			saveOnExitRequested = false;
-			int selectedValue = JOptionPane.showInternalConfirmDialog(this.getContentPane(),
-					"Are you sure you want to exit?", "Exiting...", JOptionPane.YES_NO_OPTION,
-					JOptionPane.WARNING_MESSAGE);
-
-			if (selectedValue == JOptionPane.YES_OPTION)
-				MRC2ToolBoxCore.shutDown();
-		}
-		if(showOpenProjectDialog) {
-
-			clearGuiAfterProjectClosed();
-			showOpenProjectDialog = false;
-			initProjectLoadTask();
-		}
-		if(savingAsCopy) {
-
-			savingAsCopy = false;
-			File projectCopy = selectProjectCopyDirectory();
-
-			if(projectCopy != null) {
-				
-				//	TODO update project name and project file name
-				try {
-					FileUtils.copyDirectory(currentProject.getProjectDirectory(), projectCopy);
-					currentProject.getProjectFile();				
-					File oldProjectFile = 
-							Paths.get(projectCopy.getAbsolutePath(), currentProject.getProjectFile().getName()).toFile();				
-					File newProjectFile = 
-							Paths.get(projectCopy.getAbsolutePath(), projectCopy.getName() + "."
-							+ MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION).toFile();
-					
-					oldProjectFile.renameTo(newProjectFile);
-					
-					MessageDialog.showInfoMsg("Project " + currentProject.getName() + 
-							" copied to\n" + projectCopy.getAbsolutePath());
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		}
-	}
 	
 	private void clearGuiAfterProjectClosed() {
 		
 		MRC2ToolBoxCore.setCurrentProject(null);
+		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(null);
 		switchDataPipeline(null,  null);
 		setTitle(BuildInformation.getProgramName());
 		System.gc();
@@ -1370,23 +1507,47 @@ public class MainWindow extends JFrame
 	@Override
 	public void setGuiFromActiveProject() {
 
-		setTitle(BuildInformation.getProgramName());
+		setTitle(BuildInformation.getProgramName());		
+		if(MRC2ToolBoxCore.getCurrentProject() != null) {
+			setGuiFromMetabolomicsProject();
+			return;
+		}
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			setGuiFromRawDataAnalysisProject();
+			return;
+		}
+	}
+	
+	private void setGuiFromRawDataAnalysisProject() {
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+
+			this.setTitle(BuildInformation.getProgramName() + " - " + 
+					MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getName());
+			StatusBar.showRawDataAnalysisProjectData(
+					MRC2ToolBoxCore.getActiveRawDataAnalysisProject());;
+		}
+		//	TODO more
+	}
+	
+	private void setGuiFromMetabolomicsProject() {
+		
 		currentProject = MRC2ToolBoxCore.getCurrentProject();
 		activeDataPipeline = null;
 		if(currentProject != null) {
+			
 			activeDataPipeline = currentProject.getActiveDataPipeline();
-			// Set window title
+			// Set window title and status bar
 			this.setTitle(BuildInformation.getProgramName() + " - " + currentProject.getName());
+			StatusBar.switchDataPipeline(currentProject, activeDataPipeline);
 		}
 		// Update menu
 		mainMenuBar.updateMenuFromProject(currentProject, activeDataPipeline);
 
-		// Update main toolbar
-//		toolBar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
-
 		// Update project information
 		projectDashBooard.switchDataPipeline(currentProject, activeDataPipeline);
 
+		//	TODO this may need updating for new panel display controls
 		if (activeDataPipeline != null &&  !(currentProject instanceof CompoundIdentificationProject)) {
 
 			panelShowing.put(PanelList.FEATURE_DATA, 
