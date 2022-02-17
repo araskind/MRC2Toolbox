@@ -275,6 +275,7 @@ public enum MainActionCommands {
 	EXPORT_RESULTS_4METSCAPE_COMMAND("Export results for MetScape"),
 	EXPORT_RESULTS_4BINNER_COMMAND("Export results for Binner"),
 	EXPORT_RESULTS_TO_MWTAB_COMMAND("Export project report in MWTab format"),
+	EXPORT_MZRT_STATISTICS_COMMAND("Export M/Z & RT data for individual samples"),
 	SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG("Prepare raw data for upload"),
 
 	//	Copy/paste/cut etc...

@@ -85,7 +85,7 @@ public class SaveProjectTask extends AbstractTask {
 		setStatus(TaskStatus.PROCESSING);
 		long startTime = System.currentTimeMillis();
 		projectToSave.setLastModified(new Date());
-		projectToSave.createMetaDataMaps();
+//		projectToSave.createMetaDataMaps();
 		backUpListeners();
 
 		// Save project file

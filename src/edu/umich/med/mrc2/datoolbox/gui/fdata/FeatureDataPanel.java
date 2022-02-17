@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.fdata;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -442,21 +443,46 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			
 			if (command.equals(MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName()))
 				checkForDuplicateNames();
-			
-			if(DataExportDialog.getExportTypes().contains(command))
+						
+			if(DataExportDialog.getExportTypes().contains(command) 
+					|| command.equals(MainActionCommands.EXPORT_RESULTS_COMMAND.getName()))
 				exportAnalysisResults(command);
 		}	
 	}
 	
 	private void exportAnalysisResults(String command) {
 		
-		MainActionCommands exportType = 
-				DataExportDialog.getExportTypeByName(command);
-		if(exportType != null) {
-			exportDialog = new DataExportDialog(exportType);
+		if(command.equals(MainActionCommands.EXPORT_RESULTS_COMMAND.getName())) {
+			exportDialog = new DataExportDialog();
 			exportDialog.setLocationRelativeTo(this.getContentPane());
 			exportDialog.setVisible(true);
-		}
+			return;
+		}			
+		MainActionCommands exportType = 
+				DataExportDialog.getExportTypeByName(command);
+		if(exportType == null)
+			return;
+		
+		if(exportType.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND)) {
+			
+			if(currentProject.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline) == null) {
+				MessageDialog.showWarningMsg(
+						"M/Z and RT data for features from individual samples not available", 
+						this.getContentPane());
+				return;
+			}
+			File featureMatrixFile = Paths.get(currentProject.getProjectDirectory().getAbsolutePath(), 
+					currentProject.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline)).toFile();
+			if (!featureMatrixFile.exists()) {
+				MessageDialog.showWarningMsg(
+						"M/Z and RT data for features from individual samples not available", 
+						this.getContentPane());
+				return;
+			}
+		}		
+		exportDialog = new DataExportDialog(exportType);
+		exportDialog.setLocationRelativeTo(this.getContentPane());
+		exportDialog.setVisible(true);		
 	}
 
 	private void checkForDuplicateNames() {

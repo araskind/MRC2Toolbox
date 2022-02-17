@@ -112,6 +112,7 @@ public class DataExportDialog extends JDialog
 			MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND,
 			MainActionCommands.EXPORT_RESULTS_4METSCAPE_COMMAND,
 			MainActionCommands.EXPORT_DUPLICATES_COMMAND,
+			MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND,
 		};
 	private JComboBox exportTypeComboBox;
 	private JComboBox<MissingExportType> missingTypeComboBox;
@@ -423,6 +424,10 @@ public class DataExportDialog extends JDialog
 
 		if (type.equals(MainActionCommands.EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND))
 			typeString = "_4MWB_";
+		
+		if (type.equals(MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND))
+			typeString = "_FEATURE_STATS_";
+		
 		
 		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
 		DataPipeline dataPipeline = currentProject.getActiveDataPipeline();

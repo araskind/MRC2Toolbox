@@ -230,8 +230,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	
 	private void addDataToProject() {
 		
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
-		
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();		
 		currentProject.addDataPipeline(dataPipeline);
 
 		//	Attach library
@@ -239,6 +238,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 
 		//	Attach data
 		currentProject.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
+		
 		currentProject.setFeaturesForDataPipeline(
 				dataPipeline, new HashSet<MsFeature>(library.getFeatures()));
 		currentProject.setDataFilesForAcquisitionMethod(
@@ -251,6 +251,8 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		allFeatures.setActive(true);
 		allFeatures.setLocked(true);
 		currentProject.addFeatureSetForDataPipeline(allFeatures, dataPipeline);
+		
+
 	}
 	
 	private void saveDataMatrixes() {
@@ -273,13 +275,15 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 				e.printStackTrace();
 //					setStatus(TaskStatus.ERROR);
 			}
-			if(projectToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline) != null) {
+			String featureMatrixFileName = projectToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
+			if(featureMatrixFileName != null) {
 				
 				taskDescription = "Saving feature matrix for  " + projectToSave.getName() +
 						"(" + dataPipeline.getName() + ")";
 				processed = 90;
-				File featureMatrixFile = Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
-						projectToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+				File featureMatrixFile = 
+						Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
+						featureMatrixFileName).toFile();
 				try {
 					Matrix featureMatrix = Matrix.Factory
 							.linkToArray(projectToSave.getFeatureMatrixForDataPipeline(dataPipeline).toObjectArray());
@@ -289,7 +293,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 					e.printStackTrace();
 //					setStatus(TaskStatus.ERROR);
 				}
-				projectToSave.addFeatureMatrixForDataPipeline(dataPipeline, null);
+				projectToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
 				featureMatrix = null;
 				System.gc();
 			}

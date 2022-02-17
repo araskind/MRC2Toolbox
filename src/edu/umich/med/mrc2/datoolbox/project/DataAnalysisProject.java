@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -173,6 +172,7 @@ public class DataAnalysisProject implements Serializable {
 		experimentDesign = new ExperimentDesign();
 		featureSetMap = new TreeMap<DataPipeline, Set<MsFeatureSet>>();
 		dataIntegrationSets = new TreeSet<MsFeatureClusterSet>();
+		metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
 	}
 	
 	public String getId() {
@@ -387,20 +387,19 @@ public class DataAnalysisProject implements Serializable {
 		metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
 	}
 
-	//	TODO - remove, obsolete
-	public void createMetaDataMaps() {
-
-		metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
-
-		for (Entry<DataPipeline, Matrix> entry : dataMatrixMap.entrySet()) {
-
-			Matrix[] mdata = new Matrix[2];
-			mdata[0] = entry.getValue().getMetaDataDimensionMatrix(0);
-			mdata[1] = entry.getValue().getMetaDataDimensionMatrix(1);
-
-			metaDataMap.put(entry.getKey(), mdata);
-		}
-	}
+//	public void createMetaDataMaps() {
+//		
+//		if(metaDataMap == null)
+//			metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
+//			
+//		for (Entry<DataPipeline, Matrix> entry : dataMatrixMap.entrySet()) {
+//
+//			Matrix[] mdata = new Matrix[2];
+//			mdata[0] = entry.getValue().getMetaDataDimensionMatrix(0);
+//			mdata[1] = entry.getValue().getMetaDataDimensionMatrix(1);
+//			metaDataMap.put(entry.getKey(), mdata);
+//		}
+//	}
 
 	public void deleteDataFiles(Set<DataFile> filesToRemove) {
 
@@ -737,6 +736,11 @@ public class DataAnalysisProject implements Serializable {
 	public void setDataMatrixForDataPipeline(
 			DataPipeline pipeline, Matrix dataMatrix) {
 		dataMatrixMap.put(pipeline, dataMatrix);
+		
+		Matrix[] mdata = new Matrix[2];
+		mdata[0] = dataMatrix.getMetaDataDimensionMatrix(0);
+		mdata[1] = dataMatrix.getMetaDataDimensionMatrix(1);
+		metaDataMap.put(pipeline, mdata);
 	}
 	
 	public void setFeatureMatrixForDataPipeline(

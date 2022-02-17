@@ -101,7 +101,7 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1644193083061" orientation="HORIZONTAL" divider="0.25">
 											<node nodeId="1644193174299" orientation="VERTICAL" divider="0.8227091633466136">
-												<leaf id="1" nodeId="1644193083070">
+												<leaf id="2" nodeId="1644193083070">
 													<placeholders>
 														<placeholder>dock.single.DockableDataTreePanel</placeholder>
 													</placeholders>
@@ -168,7 +168,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="2" nodeId="1644193083080">
+													<leaf id="1" nodeId="1644193083080">
 														<placeholders>
 															<placeholder>dock.single.DockableMsExtractorPanel</placeholder>
 															<placeholder>dock.single.DockableXICSetupPanel</placeholder>
@@ -209,16 +209,6 @@
 										<replacement id="dockablesingle DockableRawDataFilePropertiesTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>DockableRawDataFilePropertiesTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDataTreePanel">
-										<replacement id="dockablesingle DockableDataTreePanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDataTreePanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -282,6 +272,16 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableDataTreePanel">
+										<replacement id="dockablesingle DockableDataTreePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableDataTreePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableChromatogramPlot">

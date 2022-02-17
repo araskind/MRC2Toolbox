@@ -76,7 +76,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon exportResultsIconSmall = GuiUtils.getIcon("export", 16);
 	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 24);
 	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 24);
-	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);
+	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);	
+	private static final Icon exportMzRtStatsIcon = GuiUtils.getIcon("exportMZRT", 24);
 		
 	// Menus
 	private JMenu
@@ -120,6 +121,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportForBinnerAnalysisMenuItem,
 		exportForMPPAnalysisMenuItem,
 		exportForRAnalysisMenuItem,
+		exportMzRtStatsMenuItem,
+		exportDialogMenuItem,
 		exportIntegratedReportMenuItem,
 		exportMWTabReportMenuItem;
 		
@@ -235,6 +238,16 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportForRAnalysisMenuItem = addItem(exportMenu, exportForRAnalysisMenuItem, 
 				MainActionCommands.EXPORT_RESULTS_4R_COMMAND, 
 				exportResults4RIcon);
+		
+		exportMzRtStatsMenuItem = addItem(exportMenu, exportForRAnalysisMenuItem, 
+				MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND, 
+				exportMzRtStatsIcon);
+		
+		exportMenu.addSeparator();
+		
+		exportDialogMenuItem = addItem(exportMenu, exportForRAnalysisMenuItem, 
+				MainActionCommands.EXPORT_RESULTS_COMMAND, 
+				exportResultsIcon);
 		
 		exportMenu.addSeparator();
 		
