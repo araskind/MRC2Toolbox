@@ -52,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureClusterSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -89,12 +90,14 @@ public class DataAnalysisProject implements Serializable {
 	protected TreeMap<DataPipeline, CompoundLibrary> libraryMap;
 	protected TreeMap<DataPipeline, Set<MsFeature>> featureMap;
 	protected TreeMap<DataPipeline, Matrix> dataMatrixMap;
+	protected TreeMap<DataPipeline, String> dataMatrixFileMap;	
+	protected TreeMap<DataPipeline, Matrix> featureMatrixMap;
+	protected TreeMap<DataPipeline, String> featureMatrixFileMap;	
 	protected TreeMap<DataPipeline, Matrix> imputedDataMatrixMap;
 	protected TreeMap<DataPipeline, Matrix> corrMatrixMap;
 	protected TreeMap<DataPipeline, Matrix[]> metaDataMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> duplicatesMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureCluster>> clusterMap;
-	protected TreeMap<DataPipeline, String> dataMatrixFileMap;	
 	protected TreeMap<DataPipeline, Boolean> statsCalculatedMap;
 	protected TreeMap<DataPipeline, Set<MsFeatureSet>> featureSetMap;
 	protected TreeMap<DataAcquisitionMethod, Set<DataFile>> dataFileMap;
@@ -160,9 +163,11 @@ public class DataAnalysisProject implements Serializable {
 		dataFileMap = new TreeMap<DataAcquisitionMethod, Set<DataFile>>();
 		statsCalculatedMap = new TreeMap<DataPipeline, Boolean>();
 		dataMatrixMap = new TreeMap<DataPipeline, Matrix>();
-		imputedDataMatrixMap = new TreeMap<DataPipeline, Matrix>();
-		corrMatrixMap = new TreeMap<DataPipeline, Matrix>();
 		dataMatrixFileMap = new TreeMap<DataPipeline, String>();
+		featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
+		featureMatrixFileMap = new TreeMap<DataPipeline, String>();
+		imputedDataMatrixMap = new TreeMap<DataPipeline, Matrix>();
+		corrMatrixMap = new TreeMap<DataPipeline, Matrix>();	
 		dataPipelines = new TreeSet<DataPipeline>();
 		activeDataPipeline = null;
 		experimentDesign = new ExperimentDesign();
@@ -271,6 +276,7 @@ public class DataAnalysisProject implements Serializable {
 	public void recreateMatrixMaps() {
 		dataMatrixMap = new TreeMap<DataPipeline, Matrix>();
 		corrMatrixMap = new TreeMap<DataPipeline, Matrix>();
+		featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
 	}
 
 	public void setProjectFile(File newProjectFile) {
@@ -290,33 +296,49 @@ public class DataAnalysisProject implements Serializable {
 			return;
 		}		
 		dataPipelines.add(pipeline);
-		String matrixFileName = "DMAT_" + UUID.randomUUID().toString() + "." + 
+		String matrixFileName = DataPrefix.DATA_MATRIX.getName() + UUID.randomUUID().toString() + "." + 
 				MRC2ToolBoxConfiguration.DATA_MATRIX_EXTENSION;
 		dataMatrixFileMap.put(pipeline, matrixFileName);
 		statsCalculatedMap.put(pipeline, false);
 		featureSetMap.put(pipeline, new TreeSet<MsFeatureSet>());
+	}
+	
+	public void addFeatureMatrixForDataPipeline(DataPipeline pipeline, Matrix featureMatrix) {
+
+		String matrixFileName = DataPrefix.FEATURE_MATRIX.getName() + UUID.randomUUID().toString() + "." + 
+				MRC2ToolBoxConfiguration.DATA_MATRIX_EXTENSION;
+		featureMatrixFileMap.put(pipeline, matrixFileName);
+		featureMatrixMap.put(pipeline, featureMatrix);
 	}
 
 	public void removeDataPipeline(DataPipeline pipeline) {
 
 		// Remove all objects related to data pipeline
 		libraryMap.remove(pipeline);
-		featureMap.remove(pipeline);
-		dataMatrixMap.remove(pipeline);
+		featureMap.remove(pipeline);		
 		corrMatrixMap.remove(pipeline);
 		duplicatesMap.remove(pipeline);
 		clusterMap.remove(pipeline);	
 		statsCalculatedMap.remove(pipeline);
-		dataMatrixMap.remove(pipeline);
 		corrMatrixMap.remove(pipeline);		
 
-		// Delete data matrix storage file
-		File matrixFile = Paths.get(projectDirectory.getAbsolutePath(), 
+		// Delete data matrix and storage file
+		dataMatrixMap.remove(pipeline);
+		File dataMatrixFile = Paths.get(projectDirectory.getAbsolutePath(), 
 				dataMatrixFileMap.get(pipeline)).toFile();
-		if (matrixFile.exists())
-			matrixFile.delete();
+		if (dataMatrixFile.exists())
+			dataMatrixFile.delete();
 
 		dataMatrixFileMap.remove(pipeline);
+		
+		//	Delete feature matrix and storage file
+		featureMatrixMap.remove(pipeline);
+		File featureMatrixFile = Paths.get(projectDirectory.getAbsolutePath(), 
+				featureMatrixFileMap.get(pipeline)).toFile();
+		if (featureMatrixFile.exists())
+			featureMatrixFile.delete();
+
+		featureMatrixFileMap.remove(pipeline);
 		
 		//	Remove all data linked to acquisition method 
 		//	if it is not part of another data pipeline
@@ -495,6 +517,14 @@ public class DataAnalysisProject implements Serializable {
 
 	public Matrix getDataMatrixForDataPipeline(DataPipeline pipeline) {
 		return dataMatrixMap.get(pipeline);
+	}
+	
+	public String getFeatureMatrixFileNameForDataPipeline(DataPipeline pipeline) {
+		return featureMatrixFileMap.get(pipeline);
+	}
+	
+	public Matrix getFeatureMatrixForDataPipeline(DataPipeline pipeline) {
+		return featureMatrixMap.get(pipeline);
 	}
 
 	public Set<MsFeatureCluster> getDuplicateClustersForDataPipeline(DataPipeline pipeline) {
@@ -707,6 +737,11 @@ public class DataAnalysisProject implements Serializable {
 	public void setDataMatrixForDataPipeline(
 			DataPipeline pipeline, Matrix dataMatrix) {
 		dataMatrixMap.put(pipeline, dataMatrix);
+	}
+	
+	public void setFeatureMatrixForDataPipeline(
+			DataPipeline pipeline, Matrix featureMatrix) {
+		featureMatrixMap.put(pipeline, featureMatrix);
 	}
 
 	public void setCorrelationMatrixForDataPipeline(

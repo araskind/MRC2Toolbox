@@ -1284,27 +1284,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private void finalizeMultiCefDataLoad(MultiCefImportTask multiCefImportTask) {
 		
 		DataPipeline dataPipeline = multiCefImportTask.getDataPipeline();
-		currentProject.addDataPipeline(dataPipeline);
-
-		//	Attach library
-		CompoundLibrary library = multiCefImportTask.getLibrary();
-		currentProject.setCompoundLibraryForDataPipeline(dataPipeline, library);
-
-		//		Attach data
-		currentProject.setDataMatrixForDataPipeline(
-				dataPipeline, multiCefImportTask.getDataMatrix());
-		currentProject.setFeaturesForDataPipeline(
-				dataPipeline, new HashSet<MsFeature>(library.getFeatures()));
-		currentProject.setDataFilesForAcquisitionMethod(
-				dataPipeline.getAcquisitionMethod(), multiCefImportTask.getDataFiles());
-
-		MsFeatureSet allFeatures = 
-				new MsFeatureSet(GlobalDefaults.ALL_FEATURES.getName(),	
-						currentProject.getMsFeaturesForDataPipeline(dataPipeline));
-		allFeatures.setActive(true);
-		allFeatures.setLocked(true);
-		currentProject.addFeatureSetForDataPipeline(allFeatures, dataPipeline);
-
 		MRC2ToolBoxCore.getMainWindow().
 			switchDataPipeline(currentProject, dataPipeline);
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -1464,8 +1443,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			flatMap(c -> c.stream()).collect(Collectors.toList());
 
 		allSelected.stream().forEach(f -> f.addListener(this));
-		MsFeature firstSelected = allSelected.get(0);
-		
+		MsFeature firstSelected = allSelected.get(0);	
 		dataPlot.loadMultipleFeatureData(selectedFeaturesMap);	
 		featureIntensitiesTable.setTableModelFromFeatureMap(selectedFeaturesMap);
 		if(firstSelected.getSpectrum() != null) {

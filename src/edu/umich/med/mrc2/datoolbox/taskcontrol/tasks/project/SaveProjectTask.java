@@ -159,10 +159,28 @@ public class SaveProjectTask extends AbstractTask {
 							.linkToArray(projectToSave.getDataMatrixForDataPipeline(dp).
 									toDoubleArray());
 					dataMatrix.save(dataMatrixFile);
-					processed = 100;
+					processed = 80;
 				} catch (IOException e) {
 					e.printStackTrace();
 					setStatus(TaskStatus.ERROR);
+				}
+				if(projectToSave.getFeatureMatrixFileNameForDataPipeline(dp) != null
+						&& projectToSave.getFeatureMatrixForDataPipeline(dp) != null) {
+					
+					taskDescription = "Saving feature matrix for  " + projectToSave.getName() +
+							"(" + dp.getName() + ")";
+					
+					File featureMatrixFile = Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
+							projectToSave.getFeatureMatrixFileNameForDataPipeline(dp)).toFile();
+					try {
+						Matrix featureMatrix = Matrix.Factory
+								.linkToArray(projectToSave.getFeatureMatrixForDataPipeline(dp).toObjectArray());
+						featureMatrix.save(featureMatrixFile);
+						processed = 100;
+					} catch (IOException e) {
+						e.printStackTrace();
+						setStatus(TaskStatus.ERROR);
+					}
 				}
 			}
 		}
@@ -227,6 +245,7 @@ public class SaveProjectTask extends AbstractTask {
 		xstream.addPermission(PrimitiveTypePermission.PRIMITIVES);
 		
 		xstream.omitField(DataAnalysisProject.class, "dataMatrixMap");
+		xstream.omitField(DataAnalysisProject.class, "featureMatrixMap");
 		xstream.omitField(DataAnalysisProject.class, "corrMatrixMap");
 		xstream.omitField(MsFeature.class, "eventListeners");
 		xstream.omitField(MsFeatureSet.class, "eventListeners");

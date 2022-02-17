@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -49,18 +50,21 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.SampleDataResultObject;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureAlignmentType;
+import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -214,11 +218,82 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			dataParsed = true;
 			try {
 				finalizeDataParsing();
+				addDataToProject();
+				saveDataMatrixes();
+				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e1) {
 				e1.printStackTrace();
 				setStatus(TaskStatus.ERROR);
 			}
 		}
+	}
+	
+	private void addDataToProject() {
+		
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
+		
+		currentProject.addDataPipeline(dataPipeline);
+
+		//	Attach library
+		currentProject.setCompoundLibraryForDataPipeline(dataPipeline, library);
+
+		//	Attach data
+		currentProject.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
+		currentProject.setFeaturesForDataPipeline(
+				dataPipeline, new HashSet<MsFeature>(library.getFeatures()));
+		currentProject.setDataFilesForAcquisitionMethod(
+				dataPipeline.getAcquisitionMethod(), getDataFiles());		
+		currentProject.addFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);		
+
+		MsFeatureSet allFeatures = 
+				new MsFeatureSet(GlobalDefaults.ALL_FEATURES.getName(),	
+						currentProject.getMsFeaturesForDataPipeline(dataPipeline));
+		allFeatures.setActive(true);
+		allFeatures.setLocked(true);
+		currentProject.addFeatureSetForDataPipeline(allFeatures, dataPipeline);
+	}
+	
+	private void saveDataMatrixes() {
+		
+		DataAnalysisProject projectToSave = MRC2ToolBoxCore.getCurrentProject();
+		if (projectToSave.getDataMatrixForDataPipeline(dataPipeline) != null) {
+
+			taskDescription = "Saving data matrix for  " + projectToSave.getName() +
+					"(" + dataPipeline.getName() + ")";
+			processed = 50;
+			File dataMatrixFile = Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
+					projectToSave.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+			try {
+				Matrix dataMatrix = Matrix.Factory
+						.linkToArray(projectToSave.getDataMatrixForDataPipeline(dataPipeline).
+								toDoubleArray());
+				dataMatrix.save(dataMatrixFile);
+				processed = 80;
+			} catch (IOException e) {
+				e.printStackTrace();
+//					setStatus(TaskStatus.ERROR);
+			}
+			if(projectToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline) != null) {
+				
+				taskDescription = "Saving feature matrix for  " + projectToSave.getName() +
+						"(" + dataPipeline.getName() + ")";
+				processed = 90;
+				File featureMatrixFile = Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
+						projectToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+				try {
+					Matrix featureMatrix = Matrix.Factory
+							.linkToArray(projectToSave.getFeatureMatrixForDataPipeline(dataPipeline).toObjectArray());
+					featureMatrix.save(featureMatrixFile);
+					processed = 100;
+				} catch (IOException e) {
+					e.printStackTrace();
+//					setStatus(TaskStatus.ERROR);
+				}
+				projectToSave.addFeatureMatrixForDataPipeline(dataPipeline, null);
+				featureMatrix = null;
+				System.gc();
+			}
+		}		
 	}
 
 	private void removeEmptyFeatures() {
@@ -313,7 +388,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 				e.printStackTrace();
 			}
 		}
-		setStatus(TaskStatus.FINISHED);
 	}
 
 	private void initDataMatrixes() {

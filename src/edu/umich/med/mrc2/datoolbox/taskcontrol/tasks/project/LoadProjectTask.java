@@ -73,7 +73,7 @@ public class LoadProjectTask extends AbstractTask {
 				FilenameUtils.getBaseName(projectFile.getName());
 
 		total = 100;
-		processed = 0;
+		processed = 30;
 		newProject = null;
 		try {
 			loadProjectFile();
@@ -90,6 +90,8 @@ public class LoadProjectTask extends AbstractTask {
 
 			for (DataPipeline dataPipeline : newProject.getDataPipelines()) {
 
+				taskDescription = "Reading data matrix for " + dataPipeline.getName();
+				//	Data matrix
 				File dataMatrixFile = 
 						Paths.get(projectDirectory.getAbsolutePath(), 
 							newProject.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
@@ -111,6 +113,33 @@ public class LoadProjectTask extends AbstractTask {
 						newProject.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
 					}
 				}
+				//	Feature matrix			
+//				if(newProject.getFeatureMatrixFileNameForDataPipeline(dataPipeline) != null) {
+//					
+//					taskDescription = "Reading feature matrix for " + dataPipeline.getName();
+//					
+//					File featureMatrixFile = 
+//							Paths.get(projectDirectory.getAbsolutePath(), 
+//								newProject.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+//
+//					Matrix featureMatrix = null;
+//					if (featureMatrixFile.exists()) {
+//						try {
+//							featureMatrix = Matrix.Factory.load(featureMatrixFile);
+//						} catch (ClassNotFoundException | IOException e) {
+//							setStatus(TaskStatus.ERROR);
+//							e.printStackTrace();
+//						}
+//						if (featureMatrix != null) {
+//
+//							featureMatrix.setMetaDataDimensionMatrix(0, 
+//									newProject.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
+//							featureMatrix.setMetaDataDimensionMatrix(1, 
+//									newProject.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
+//							newProject.setFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);
+//						}
+//					}
+//				}
 			}
 			newProject.restoreData();
 		}
@@ -120,6 +149,7 @@ public class LoadProjectTask extends AbstractTask {
 
 	private void loadProjectFile() throws ZipException, IOException {
 
+		taskDescription = "Unzipping and reading project file ...";
 		ZipFile zipFile;
 		ZipEntry zippedProject;
 		InputStream input;

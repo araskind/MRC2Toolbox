@@ -146,7 +146,7 @@ public class CefDataImportTask  extends AbstractTask {
 
 	private void parseCefData() throws Exception {
 
-		taskDescription = "Prsing CEF data file...";
+		taskDescription = "Parsing CEF data file...";
 		features = new HashSet<SimpleMsFeature>();
 		XPathExpression expr = null;
 		NodeList targetNodes;

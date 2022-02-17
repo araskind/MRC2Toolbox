@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.projectsetup;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.Icon;
@@ -51,7 +50,7 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 	private DockableLIMSDataPanel limsDataPanel;
 	private DesignSubsetPanel designSubsetPanel;
 	private FeatureSubsetPanel featureSubsetPanel;
-	private ProjectToolbar projectToolbar;
+//	private ProjectToolbar projectToolbar;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("MDAToolkit_icon", 16);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "ProjectSetupDraw.layout");
@@ -61,8 +60,8 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 		super("ProjectSetupDraw", "Project setup", componentIcon);
 		setLayout(new BorderLayout(0, 0));
 		
-		projectToolbar = new ProjectToolbar(null);
-		add(projectToolbar, BorderLayout.NORTH);
+//		projectToolbar = new ProjectToolbar(null);
+//		add(projectToolbar, BorderLayout.NORTH);
 
 		projectDetailsPanel = new ProjectDetailsPanel();
 		limsDataPanel = new DockableLIMSDataPanel();
@@ -81,9 +80,9 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 		populatePanelsMenu();
 	}
 	
-	public void setActionListener(ActionListener listener) {
-		projectToolbar.setActionListener(listener);
-	}
+//	public void setActionListener(ActionListener listener) {
+//		projectToolbar.setActionListener(listener);
+//	}
 
 	public synchronized void clearPanel() {
 
@@ -91,7 +90,7 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 		limsDataPanel.clearPanel();
 		designSubsetPanel.clearPanel();
 		featureSubsetPanel.clearPanel();
-		projectToolbar.noProject();
+//		projectToolbar.noProject();
 	}
 
 	public void closeProject() {
@@ -122,7 +121,7 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 		super.switchDataPipeline(project, newDataPipeline);
 		clearPanel();
 		if(currentProject == null) {
-			projectToolbar.updateGuiFromProjectAndDataPipeline(null, null);
+//			projectToolbar.updateGuiFromProjectAndDataPipeline(null, null);
 			return;
 		}
 		projectDetailsPanel.switchDataPipeline(currentProject, activeDataPipeline);
@@ -133,7 +132,7 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 					currentProject.getLimsProject(),
 					currentProject.getLimsExperiment());
 		}
-		projectToolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
+//		projectToolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 	}
 
 	@Override

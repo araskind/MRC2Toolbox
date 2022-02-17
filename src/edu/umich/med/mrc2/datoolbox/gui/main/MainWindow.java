@@ -195,7 +195,7 @@ public class MainWindow extends JFrame
 //		showOpenProjectDialog = false;
 //		savingAsCopy = false;
 		
-		projectDashBooard.setActionListener(this);
+//		projectDashBooard.setActionListener(this);
 		projectDashBooard.switchDataPipeline(null, null);
 //		((FeatureDataPanel)getPanel(PanelList.FEATURE_DATA)).setProjectActionListener(this);
 	}
@@ -216,7 +216,7 @@ public class MainWindow extends JFrame
 			}
 		}
 		if (command.equals(MainActionCommands.SAVE_PROJECT_COMMAND.getName()))
-			saveProject();
+			saveProjectAndContinue();
 
 		if (command.equals(MainActionCommands.SAVE_PROJECT_COPY_COMMAND.getName()))
 			saveProjectCopy();
@@ -519,11 +519,11 @@ public class MainWindow extends JFrame
 						
 				projectSwitchController = new ProjectSwitchController(
 						true,
-						null,
+						ProjectState.CLOSING_PROJECT,
 						false,
 						activeProjectType, 
 						null);			
-				runSaveProjectTask();
+				saveProject();
 				return;
 			}
 			else
@@ -531,7 +531,7 @@ public class MainWindow extends JFrame
 		}
 	}
 	
-	public void runSaveProjectTask() {
+	public void saveProject() {
 		
 		if(currentProject != null) {
 			SaveProjectTask spt = new SaveProjectTask(currentProject);
@@ -546,6 +546,24 @@ public class MainWindow extends JFrame
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}		
+	}
+	
+	private void saveProjectAndContinue() {
+		
+		ProjectType activeProjectType = null;
+		if(currentProject != null)
+			activeProjectType = ProjectType.DATA_ANALYSIS;
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
+			activeProjectType = ProjectType.RAW_DATA_ANALYSIS;
+				
+		projectSwitchController = new ProjectSwitchController(
+				true,
+				null,
+				false,
+				activeProjectType, 
+				null);			
+		saveProject();
 	}
 
 	public static void displayErrorMessage(String title, String msg) {
@@ -586,7 +604,7 @@ public class MainWindow extends JFrame
 						true,
 						null, 
 						null);	
-				runSaveProjectTask();
+				saveProject();
 			}
 			if (selectedValue == JOptionPane.NO_OPTION) {
 
@@ -935,7 +953,7 @@ public class MainWindow extends JFrame
 						activeProjectType, 
 						newProjectType);
 				projectSwitchController.setLimsExperiment(newLimsExperiment);			
-				runSaveProjectTask();
+				saveProject();
 			}
 			
 			//	TODO LIMS experiment
@@ -1002,7 +1020,7 @@ public class MainWindow extends JFrame
 						false,
 						activeProjectType, 
 						newProjectType);
-				runSaveProjectTask();
+				saveProject();
 				return;
 			}
 			if (selectedValue == JOptionPane.NO_OPTION) {
@@ -1024,31 +1042,11 @@ public class MainWindow extends JFrame
 		projectDashBooard.switchDataPipeline(currentProject, activeDataPipeline);
 	}
 
-	private void saveProject() {
-
-		if (currentProject != null)
-			runSaveProjectTask();
-		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
-			runSaveRawDataAnalysisProjectTask();	
-	}
-	
-	public void runSaveRawDataAnalysisProjectTask() {
-
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
-			return;
-		
-		SaveStoredRawDataAnalysisProjectTask task = 
-				new SaveStoredRawDataAnalysisProjectTask(MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
-		task.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(task);
-	}
-
 	private void saveProjectCopy() {
 
 		if (currentProject != null) {
 
-			runSaveProjectTask();
+			saveProject();
 			savingAsCopy = true;
 		}
 	}
@@ -1431,8 +1429,11 @@ public class MainWindow extends JFrame
 	private void clearGuiAfterProjectClosed() {
 		
 		MRC2ToolBoxCore.setCurrentProject(null);
-		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(null);
 		switchDataPipeline(null,  null);
+		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(null);
+		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.RAW_DATA_EXAMINER).clearPanel();
+		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH).clearPanel();
+		RawDataManager.releaseAllDataSources();
 		setTitle(BuildInformation.getProgramName());
 		System.gc();
 	}
