@@ -251,8 +251,6 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		allFeatures.setActive(true);
 		allFeatures.setLocked(true);
 		currentProject.addFeatureSetForDataPipeline(allFeatures, dataPipeline);
-		
-
 	}
 	
 	private void saveDataMatrixes() {

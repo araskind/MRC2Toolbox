@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -53,8 +56,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			DataAnalysisProject currentProject,
 			DataPipeline activeDataPipeline,
 			DuplicatesCleanupOptions duplicatesCleanupOptions) {
-
-		taskDescription = "Removing duplicate features for active data pipeline";
+		
 		this.activeDataPipeline = activeDataPipeline;
 		this.currentProject = currentProject;
 		this.mergeOption = duplicatesCleanupOptions;
@@ -62,7 +64,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		duplicateList = 
 				currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline);
 		total = duplicateList.size();
-		processed = 0;
+		processed = 20;
 	}
 
 	public MergeDuplicateFeaturesTask(
@@ -71,7 +73,6 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			DataPipeline activeDataPipeline,
 			DuplicatesCleanupOptions duplicatesCleanupOptions) {
 
-		taskDescription = "Removing duplicate features for active data pipeline";
 		this.activeDataPipeline = activeDataPipeline;
 		this.currentProject = currentProject;
 		this.mergeOption = duplicatesCleanupOptions;
@@ -83,14 +84,13 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		duplicateList = new HashSet<MsFeatureCluster>();
 		duplicateList.add(mergeCluster);
 		total = duplicateList.size();
-		processed = 0;
+		processed = 20;
 	}
 
 	@Override
 	public void run() {
 
 		setStatus(TaskStatus.PROCESSING);
-
 		try {
 			removeDuplicateFeatures();
 			setStatus(TaskStatus.FINISHED);
@@ -101,12 +101,45 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
+	
+	private Matrix readFeatureMatrix() {
+
+		taskDescription = "Reading MS feature matrix data";
+		processed = 30;
+		
+		File featureMatrixFile = Paths.get(currentProject.getProjectDirectory().getAbsolutePath(), 
+				currentProject.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline)).toFile();
+		if (!featureMatrixFile.exists())
+			return null;
+		
+		Matrix featureMatrix = null;
+		if (featureMatrixFile.exists()) {
+			try {
+				featureMatrix = Matrix.Factory.load(featureMatrixFile);
+			} catch (ClassNotFoundException | IOException e) {
+				setStatus(TaskStatus.ERROR);
+				e.printStackTrace();
+			}
+			if (featureMatrix != null) {
+
+				featureMatrix.setMetaDataDimensionMatrix(0, 
+						currentProject.getMetaDataMatrixForDataPipeline(activeDataPipeline, 0));
+				featureMatrix.setMetaDataDimensionMatrix(1, 
+						currentProject.getMetaDataMatrixForDataPipeline(activeDataPipeline, 1));
+			}
+		}		
+		return featureMatrix;
+	}
 
 	public void removeDuplicateFeatures() {
 
 		if (duplicateList.isEmpty())
 			return;
-
+				
+		Matrix msFeatureMatrix = readFeatureMatrix();		
+		
+		taskDescription = "Removing duplicate features for active data pipeline";
+		processed = 50;
 		Matrix dataMatrix = 
 				currentProject.getDataMatrixForDataPipeline(activeDataPipeline);
 		Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
@@ -124,7 +157,6 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		int dfId = 0;
 		long[] coordinates = new long[2];
 		double area, topArea;
-
 
 		for (MsFeatureCluster fclust : duplicateList) {
 
@@ -210,12 +242,55 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 				0, newFeatureMatrix);
 		newDataMatrix.setMetaDataDimensionMatrix(
 				1, dataMatrix.getMetaDataDimensionMatrix(1));
-
+		
+		if(msFeatureMatrix != null) {
+			
+			Matrix newMsFeatureMatrix = msFeatureMatrix.deleteColumns(Ret.NEW, rem);
+			newMsFeatureMatrix.setMetaDataDimensionMatrix(
+					0, newFeatureMatrix);
+			newMsFeatureMatrix.setMetaDataDimensionMatrix(
+					1, dataMatrix.getMetaDataDimensionMatrix(1));
+			
+			//	TODO - there is no undo for it here, if the project is not saved
+			//	Same for areas matrix?? they need backup for this case !!!
+			//	Maybe for now force save the project and warn that there is no UNDO
+			saveMsFeatureMatrix(newMsFeatureMatrix);
+			
+			System.err.println("Data: " + newDataMatrix.getRowCount() + 
+					" by " + newDataMatrix.getColumnCount());
+			System.err.println("Features: " + newMsFeatureMatrix.getRowCount() + 
+					" by " + newMsFeatureMatrix.getColumnCount());
+		}
 		currentProject.setDataMatrixForDataPipeline(
 				activeDataPipeline, newDataMatrix);
 		duplicateList = new HashSet<MsFeatureCluster>();
 		currentProject.setDuplicateClustersForDataPipeline(
 				activeDataPipeline, duplicateList);
+	}
+	
+	private void saveMsFeatureMatrix(Matrix msFeatureMatrix) {
+		
+		String featureMatrixFileName = currentProject.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline);
+		if(featureMatrixFileName != null) {
+			
+			taskDescription = "Saving feature matrix for  " + currentProject.getName() +
+					"(" + currentProject.getName() + ")";
+			processed = 90;
+			File featureMatrixFile = 
+					Paths.get(currentProject.getProjectDirectory().getAbsolutePath(), 
+					featureMatrixFileName).toFile();
+			try {
+				Matrix featureMatrix = 
+						Matrix.Factory.linkToArray(msFeatureMatrix.toObjectArray());
+				featureMatrix.save(featureMatrixFile);
+				processed = 100;
+			} catch (IOException e) {
+				e.printStackTrace();
+//					setStatus(TaskStatus.ERROR);
+			}
+			msFeatureMatrix = null;
+			System.gc();
+		}				
 	}
 
 	private void swapFeatureStats(MsFeature featureOne, MsFeature featureTwo) {
