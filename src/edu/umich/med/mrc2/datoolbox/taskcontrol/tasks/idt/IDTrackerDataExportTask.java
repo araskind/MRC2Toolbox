@@ -633,7 +633,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 				return entropyFormat.format(instrumentMsMs.getEntropy());
 			
 			if(property.equals(IDTrackerMsFeatureProperties.TOTAL_INTENSITY))
-				return intensityFormat.format(instrumentMsMs.getTotalIntensity());			
+				return intensityFormat.format(instrumentMsMs.getTotalIntensity());		
 		}
 		return "";
 	}
@@ -748,12 +748,16 @@ public class IDTrackerDataExportTask extends AbstractTask {
 			double qValue = 0.0d;
 			double posteriorProbability = 0.0d;
 			double percolatorScore = 0.0d;
+			String featureSpectrumArray = "";
+			String libraryHitSpectrumArray = "";
 			
 			instrumentMsMs = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 			if(instrumentMsMs != null) {
 
 				if(instrumentMsMs.getParent() != null)
 					parentMz = instrumentMsMs.getParent().getMz();
+				
+				featureSpectrumArray = instrumentMsMs.getSpectrumAsPythonArray();
 			}
 			ReferenceMsMsLibraryMatch msmslibMatch = id.getReferenceMsMsLibraryMatch();
 			ReferenceMsMsLibrary lib = null;
@@ -778,7 +782,8 @@ public class IDTrackerDataExportTask extends AbstractTask {
 				
 				qValue = msmslibMatch.getqValue();
 				posteriorProbability = msmslibMatch.getPosteriorErrorProbability();
-				percolatorScore = msmslibMatch.getPercolatorScore();
+				percolatorScore = msmslibMatch.getPercolatorScore();				
+				libraryHitSpectrumArray = matchFeature.getSpectrumAsPythonArray();
 			}	
 			if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY) && lib != null)
 				return lib.getName();
@@ -835,6 +840,12 @@ public class IDTrackerDataExportTask extends AbstractTask {
 			}
 			if(property.equals(IDTrackerFeatureIdentificationProperties.PERCOLATOR_SCORE) && percolatorScore != 0.0d)
 				return entropyFormat.format(percolatorScore);	
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.FEATURE_MSMS))
+				return featureSpectrumArray;	
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_MATCH_MSMS))
+				return libraryHitSpectrumArray;
 		}
 		return "";
 	}

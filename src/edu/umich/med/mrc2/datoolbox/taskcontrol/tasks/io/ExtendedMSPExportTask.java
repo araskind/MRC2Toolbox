@@ -27,11 +27,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -42,8 +39,6 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -55,14 +50,15 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class ExtendedMSPExportTask extends AbstractTask {
 
 	private Collection<MsFeatureInfoBundle>featuresToExport;
 	private File exportFile;
 	private boolean instrumentOnly;
-	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
-	private static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+	private static final DateFormat dateFormat = 
+			new SimpleDateFormat(MRC2ToolBoxConfiguration.DATE_TIME_FORMAT_DEFAULT);
 	private Map<String,LIMSInjection>injectionMap;
 
 	public ExtendedMSPExportTask(
@@ -187,13 +183,13 @@ public class ExtendedMSPExportTask extends AbstractTask {
 					MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()) + "\n");
 				writer.append(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()) + "\n");
 
-				MsPoint[] msms = normalizeAndSortMsPatternForMsp(tandemMs.getSpectrum());
+				MsPoint[] msms = MsUtils.normalizeAndSortMsPatternForMsp(tandemMs.getSpectrum());
 				int pointCount = 0;
 				for(MsPoint point : msms) {
 
 					writer.append(
 						MRC2ToolBoxConfiguration.getMzFormat().format(point.getMz())
-						+ " " + intensityFormat.format(point.getIntensity()) + "; ") ;
+						+ " " + MsUtils.mspIntensityFormat.format(point.getIntensity()) + "; ") ;
 					pointCount++;
 					if(pointCount % 5 == 0)
 						writer.append("\n");
@@ -225,17 +221,6 @@ public class ExtendedMSPExportTask extends AbstractTask {
 			comment += "DA method: " + bundle.getDataExtractionMethod().getName();
 		
 		return comment + "\n";
-	}
-
-	private MsPoint[] normalizeAndSortMsPatternForMsp(Collection<MsPoint>pattern) {
-
-		MsPoint basePeak = Collections.max(pattern, Comparator.comparing(MsPoint::getIntensity));
-		double maxIntensity  = basePeak.getIntensity();
-
-		return pattern.stream()
-				.map(dp -> new MsPoint(dp.getMz(), Math.round(dp.getIntensity()/maxIntensity*999.0d)))
-				.sorted(new MsDataPointComparator(SortProperty.MZ)).
-				toArray(size -> new MsPoint[size]);
 	}
 
 	@Override

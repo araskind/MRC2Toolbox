@@ -101,7 +101,7 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1644193083061" orientation="HORIZONTAL" divider="0.25">
 											<node nodeId="1644193174299" orientation="VERTICAL" divider="0.8227091633466136">
-												<leaf id="2" nodeId="1644193083070">
+												<leaf id="3" nodeId="1644193083070">
 													<placeholders>
 														<placeholder>dock.single.DockableDataTreePanel</placeholder>
 													</placeholders>
@@ -122,13 +122,13 @@
 												</leaf>
 											</node>
 											<node nodeId="1644193083072" orientation="VERTICAL" divider="0.5">
-												<leaf id="3" nodeId="1644193083074">
+												<leaf id="4" nodeId="1644193083074">
 													<placeholders>
 														<placeholder>dock.single.RawDataExaminerPanelDockableChromatogramPlot</placeholder>
 													</placeholders>
 												</leaf>
 												<node nodeId="1644193083076" orientation="HORIZONTAL" divider="0.6666666666666666">
-													<leaf id="4" nodeId="1644193083078">
+													<leaf id="2" nodeId="1644193083078">
 														<placeholders>
 															<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS2</placeholder>
 															<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</placeholder>
@@ -274,26 +274,6 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDataTreePanel">
-										<replacement id="dockablesingle DockableDataTreePanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDataTreePanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableChromatogramPlot">
-										<replacement id="dockablesingle RawDataExaminerPanelDockableChromatogramPlot"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>RawDataExaminerPanelDockableChromatogramPlot</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>3</selected>
 										<placeholders>
@@ -399,6 +379,26 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableDataTreePanel">
+										<replacement id="dockablesingle DockableDataTreePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableDataTreePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableChromatogramPlot">
+										<replacement id="dockablesingle RawDataExaminerPanelDockableChromatogramPlot"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>RawDataExaminerPanelDockableChromatogramPlot</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

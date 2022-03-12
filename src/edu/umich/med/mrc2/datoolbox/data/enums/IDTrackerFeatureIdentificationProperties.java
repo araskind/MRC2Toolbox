@@ -58,6 +58,8 @@ public enum IDTrackerFeatureIdentificationProperties {
 	FDR_Q_VALUE("q-value"),
 	POSTERIOR_PROBABILITY("Posterior probability"),
 	PERCOLATOR_SCORE("Percolator score"),
+	FEATURE_MSMS("Feature MSMS"),
+	LIBRARY_MATCH_MSMS("Library match MSMS"),
 	;
 
 	private final String name;

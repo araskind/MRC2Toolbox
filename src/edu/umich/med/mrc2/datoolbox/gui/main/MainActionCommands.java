@@ -280,13 +280,15 @@ public enum MainActionCommands {
 
 	//	Copy/paste/cut etc...
 	COPY_SELECTED_ROWS_COMMAND(	"Copy selected rows"),
-	COPY_SELECTED_ROWS_WITH_HEADER_COMMAND(	"Copy selected rows with header"),
+	COPY_SELECTED_ROWS_WITH_HEADER_COMMAND("Copy selected rows with header"),
 
 	//
-	COPY_SELECTED_MS1_ROWS_COMMAND(	"Copy selected MS1 features (TAB separated)"),
+	COPY_SELECTED_MS1_ROWS_COMMAND("Copy selected MS1 features (TAB separated)"),
 	COPY_SELECTED_MS1_ROWS_WITH_HEADER_COMMAND(	"Copy selected MS1 features (TAB separated) with header"),
-	COPY_SELECTED_MS2_ROWS_COMMAND(	"Copy selected MS2 features (TAB separated)"),
-	COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND(	"Copy selected MS2 features (TAB separated) with header"),
+	COPY_SELECTED_MS2_ROWS_COMMAND("Copy selected MS2 features (TAB separated)"),
+	COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND("Copy selected MS2 features (TAB separated) with header"),
+	COPY_FEATURE_SPECTRUM_AS_MSP_COMMAND("Copy selected MS2 feature spectrum as MSP"),
+	COPY_FEATURE_SPECTRUM_AS_ARRAY_COMMAND("Copy selected MS2 feature spectrum as array"),
 
 	// Correlation panel commands
 	SHOW_REFERENCE_DATA_COMMAND("Show reference data"),
@@ -560,6 +562,8 @@ public enum MainActionCommands {
 	GO_TO_PRIMARY_COMPOUND_IN_DATABASE_COMMAND("Show compound database entry for feature"),
 	SHOW_ID_LEVEL_ASSIGNMENT_DIALOG_COMMAND("Select ID level"),
 	ASSIGN_ID_LEVEL_COMMAND("Assign ID level"),
+	COPY_LIBRARY_SPECTRUM_AS_MSP_COMMAND("Copy library spectrum to MSP"),
+	COPY_LIBRARY_SPECTRUM_AS_ARRAY_COMMAND("Copy library spectrum to array"),
 
 	//	Reordering toolbar commands
 	MOVE_TO_TOP_COMMAND("Move to the top"),
@@ -914,6 +918,7 @@ public enum MainActionCommands {
 	//	PepSearch data verifier
 	SELECT_PEPSEARCH_OUTPUT_FILE_COMMAND("Select NIST pepsearch output file"),
 	VALIDATE_PEPSEARCH_RESULTS_COMMAND("Validate NIST pepsearch results"),
+	VALIDATE_PEPSEARCH_RESULTS_AND_WRITE_FILE_WITH_SPECTRA_COMMAND("Validate results and write new file with spectra"),
 	UPLOAD_PEPSEARCH_RESULTS_COMMAND("Upload NIST pepsearch results"),
 	
 	//	FDR estimation

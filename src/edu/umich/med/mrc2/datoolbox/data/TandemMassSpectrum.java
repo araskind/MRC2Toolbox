@@ -796,6 +796,10 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		averagedScanNumbers.keySet().stream().forEach(s -> msmsScanRtList.add(scanRtMap.get(s)));
 		return msmsScanRtList;
 	}
+	
+	public String getSpectrumAsPythonArray() {		
+		return MsUtils.getSpectrumAsPythonArray(spectrum);		
+	}
 }
 
 

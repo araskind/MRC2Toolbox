@@ -57,20 +57,25 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 	private static final Icon createNewCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 24);
 	private static final Icon addToExistingCollectionIcon = GuiUtils.getIcon("addCollection", 24);
 	private static final Icon removeFromActiveCollectionIcon = GuiUtils.getIcon("deleteCollection", 24);
+	private static final Icon exportMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
+	private static final Icon copyAsArrayIcon = GuiUtils.getIcon("copyAsArray", 24);
 
-	private JMenuItem setupNISTPepSearchMenuItem;
-	private JMenuItem addManualIdentificationMenuItem;
-	private JMenuItem disablePrimaryIdMenuItem;
-	private JMenuItem clearFeatureIdentificationsMenuItem;
-	private JMenuItem copySelectedMenuItem;
-	private JMenuItem copySelectedWithHeaderMenuItem;
-	private JMenuItem editFollowupStepsMenuItem;
-	private JMenuItem editIdStandardFeatureAnnotationMenuItem;
-	private JMenuItem goToCompoundDatabaseMenuItem;
-	private JMenuItem xicMenuItem;
-	private JMenuItem createNewCollectionMenuItem;
-	private JMenuItem addToExistingCollectionMenuItem;
-	private JMenuItem removeFromActiveCollectionMenuItem;
+	private JMenuItem 
+			setupNISTPepSearchMenuItem,
+			addManualIdentificationMenuItem,
+			disablePrimaryIdMenuItem,
+			clearFeatureIdentificationsMenuItem,
+			copySelectedMenuItem,
+			copySelectedWithHeaderMenuItem,
+			editFollowupStepsMenuItem,
+			editIdStandardFeatureAnnotationMenuItem,
+			goToCompoundDatabaseMenuItem,
+			xicMenuItem,
+			createNewCollectionMenuItem,
+			addToExistingCollectionMenuItem,
+			removeFromActiveCollectionMenuItem,
+			copySpectrumAsMSPMenuItem, 
+			copyAsArrayMenuItem;
 	
 	private JMenu idLevelMenu;
 	private ActionListener listener;
@@ -147,6 +152,16 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 				MainActionCommands.COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND.getName());
 		copySelectedWithHeaderMenuItem.setIcon(copySelectedWithHeaderIcon);
 		copySelectedWithHeaderMenuItem.setEnabled(false);
+		
+		copySpectrumAsMSPMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.COPY_FEATURE_SPECTRUM_AS_MSP_COMMAND.getName(), listener,
+				MainActionCommands.COPY_FEATURE_SPECTRUM_AS_MSP_COMMAND.getName());
+		copySpectrumAsMSPMenuItem.setIcon(exportMSPIcon);
+		
+		copyAsArrayMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.COPY_FEATURE_SPECTRUM_AS_ARRAY_COMMAND.getName(), listener,
+				MainActionCommands.COPY_FEATURE_SPECTRUM_AS_ARRAY_COMMAND.getName());
+		copyAsArrayMenuItem.setIcon(copyAsArrayIcon);
 		
 		addSeparator();
 		

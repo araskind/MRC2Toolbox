@@ -83,6 +83,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 /**
  * @author Sasha
@@ -121,6 +122,8 @@ public class MsUtils {
 	public static final NumberFormat spectrumMzFormat = new DecimalFormat("#.####");
 	public static final NumberFormat spectrumMzExportFormat = new DecimalFormat("#.######");
 	public static final NumberFormat spectrumIntensityFormat = new DecimalFormat("#.##");
+	public static final DecimalFormat mspIntensityFormat = new DecimalFormat("###");
+	public static final DecimalFormat pythonIntensityFormat = new DecimalFormat("###.#");
 	
 	public static final MsDataPointComparator reverseIntensitySorter = 
 			new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC);
@@ -1318,7 +1321,7 @@ public class MsUtils {
 		ArrayList<MsPointBucket> msBins = new ArrayList<MsPointBucket>();
 		MsPointBucket first = new MsPointBucket(points[0], mzBinWidth, errorType);
 		msBins.add(first);
-		for(int i= 1; i< points.length; i++) {
+		for(int i=1; i<points.length; i++) {
 			
 			MsPointBucket current = msBins.get(msBins.size()-1);
 			if(current.pointBelongs(points[i]))
@@ -1326,7 +1329,7 @@ public class MsUtils {
 			else
 				msBins.add(new MsPointBucket(points[i], mzBinWidth, errorType));
 		}
-		 Collection<MsPoint>avgSpectrum =  msBins.stream().
+		Collection<MsPoint>avgSpectrum =  msBins.stream().
 				map(b -> b.getAveragePoint()).
 				map(p -> new MsPoint(p.getMz(), p.getIntensity())).
 				sorted(mzSorter).
@@ -1334,6 +1337,25 @@ public class MsUtils {
 		 
 		 msBins.stream().forEach(b -> b = null); 		 
 		 return avgSpectrum;
+	}
+	
+	public static Collection<MsPoint>averageMassSpectrumAndRemoveNoise(
+			Collection<MsPoint>inputPoints, 
+			double mzBinWidth, 
+			MassErrorType errorType,
+			double relIntNoiseCutoff) {
+		
+		Collection<MsPoint>avgMs = 
+				averageMassSpectrum(inputPoints, mzBinWidth, errorType);		
+		double intensityCutoff = avgMs.stream().
+				mapToDouble(p -> p.getIntensity()).
+				max().getAsDouble() * relIntNoiseCutoff;
+		Collection<MsPoint>cleanAvgMs = avgMs.stream().
+				filter(p -> p.getIntensity() > intensityCutoff).
+				sorted(mzSorter).
+				collect(Collectors.toList());
+		
+		return cleanAvgMs;
 	}
 	
 	public static MsPoint getAveragePoint(Collection<MsPoint>inputPoints) {
@@ -1392,6 +1414,23 @@ public class MsUtils {
 	public static double getRelativeMassDefectPpm(double mz) {		
 		double md = mz - Math.round(mz);
 		return md/mz * 1000000.0d;
+	}
+	
+	public static String getSpectrumAsPythonArray(Collection<MsPoint>spectrum) {
+		
+		if(spectrum == null || spectrum.isEmpty())
+			return "";
+		
+		MsPoint[] spectrumNorm = normalizeAndSortMsPatternForMsp(spectrum);
+		ArrayList<String>line = new ArrayList<String>();
+		for(MsPoint point : spectrumNorm) {
+			
+			String msPoint = "[" +  MRC2ToolBoxConfiguration.getMzFormat().format(point.getMz())
+					+ ", " + MsUtils.pythonIntensityFormat.format(point.getIntensity()) + "]";
+			line.add(msPoint);
+		}
+		String arrayString = "[" + StringUtils.join(line, ", ") + "]";
+		return arrayString;
 	}
 }
 

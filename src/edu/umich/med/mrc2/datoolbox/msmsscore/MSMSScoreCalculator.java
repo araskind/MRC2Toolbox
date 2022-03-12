@@ -48,6 +48,8 @@ public class MSMSScoreCalculator {
 	public static final MsDataPointComparator reverseIntensitySorter = 
 			new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC);
 	
+	public static final double DEFAULT_MS_REL_INT_NISE_CUTOFF = 0.01d;
+	
 	public static MsPoint[] createMassBankWeigtedPattern(Collection<MsPoint>spectrum) {	
 		return createWeigtedPattern(spectrum, MSMSWeigtingType.MASS_BANK);
 	}
@@ -264,8 +266,15 @@ public class MSMSScoreCalculator {
 			double mzWindowValue, 
 			MassErrorType massErrorType) {
 		
-		MsPoint[]unknownSpectrumWeighted = createEntropyWeigtedPattern(unknownSpectrum);
-		MsPoint[]librarySpectrumWeighted = createEntropyWeigtedPattern(librarySpectrum);
+		Collection<MsPoint>unkAvgSpectrum = 
+				MsUtils.averageMassSpectrumAndRemoveNoise(
+						unknownSpectrum, mzWindowValue, massErrorType, DEFAULT_MS_REL_INT_NISE_CUTOFF);
+		Collection<MsPoint>libAvgSpectrum = 
+				MsUtils.averageMassSpectrumAndRemoveNoise(
+						librarySpectrum, mzWindowValue, massErrorType, DEFAULT_MS_REL_INT_NISE_CUTOFF);
+		
+		MsPoint[]unknownSpectrumWeighted = createEntropyWeigtedPattern(unkAvgSpectrum);
+		MsPoint[]librarySpectrumWeighted = createEntropyWeigtedPattern(libAvgSpectrum);
 		
 		Collection<MsPoint>allPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		allPoints.addAll(Arrays.asList(unknownSpectrumWeighted));
@@ -273,7 +282,7 @@ public class MSMSScoreCalculator {
 		Collection<MsPoint>avgSpectrum = 
 				MsUtils.averageMassSpectrum(allPoints, mzWindowValue, massErrorType);	
 		
-		//	MsPoint[]avgSpectrumWeighted = createEntropyWeigtedPattern(avgSpectrum);
+		//MsPoint[]avgSpectrumWeighted = createEntropyWeigtedPattern(avgSpectrum);
 		MsPoint[]avgSpectrumWeighted = normalizeToUnitSum(avgSpectrum);
 		
 		double unknownEntropy = 
@@ -289,16 +298,23 @@ public class MSMSScoreCalculator {
 		return score;
 	}
 	
+	//	This is a stop-gap to calculate entropy score for 
+	//	METLIN hits that don't have mass error specified
 	public static double calculateEntropyMatchScore(
 			TandemMassSpectrum msms, 
 			ReferenceMsMsLibraryMatch match) {
 
 		NISTPepSearchParameterObject params = 
 				IDTDataCash.getNISTPepSearchParameterObjectById(match.getSearchParameterSetId());
-		if(params == null)
-			return 0.0d;
-
-		return calculateEntropyBasedMatchScore(			
+		if(params == null) {
+			return calculateEntropyBasedMatchScore(			
+					msms.getSpectrum(), 
+					match.getMatchedLibraryFeature().getSpectrum(),
+					20, 
+					MassErrorType.ppm);
+		}
+		else
+			return calculateEntropyBasedMatchScore(			
 				msms.getSpectrum(), 
 				match.getMatchedLibraryFeature().getSpectrum(),
 				params.getFragmentMzErrorValue(), 

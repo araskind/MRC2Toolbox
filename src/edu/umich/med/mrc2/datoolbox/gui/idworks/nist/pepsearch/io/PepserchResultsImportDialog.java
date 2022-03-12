@@ -49,6 +49,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
@@ -221,6 +222,13 @@ public class PepserchResultsImportDialog extends JDialog
 		JButton btnCancel = new JButton("Cancel");
 		buttonPanel.add(btnCancel);
 		btnCancel.addActionListener(al);
+		
+		JButton validateAndWriteSpectra = 
+				new JButton(MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_AND_WRITE_FILE_WITH_SPECTRA_COMMAND.getName());
+		validateAndWriteSpectra.setActionCommand(
+				MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_AND_WRITE_FILE_WITH_SPECTRA_COMMAND.getName());		
+		validateAndWriteSpectra.addActionListener(this);
+		buttonPanel.add(validateAndWriteSpectra);
 
 		JButton validateButton = new JButton(
 				MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_COMMAND.getName());
@@ -280,14 +288,23 @@ public class PepserchResultsImportDialog extends JDialog
 			}
 		}
 		if(command.equals(MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_COMMAND.getName())) 
-			startResultValidationAndUpload(true);
+			startResultValidationAndUpload(true, false);
 		
 		if(command.equals(MainActionCommands.UPLOAD_PEPSEARCH_RESULTS_COMMAND.getName())) 
-			startResultValidationAndUpload(false);
+			startResultValidationAndUpload(false, false);
+		
+		if(command.equals(MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_AND_WRITE_FILE_WITH_SPECTRA_COMMAND.getName()))
+			startResultValidationAndUpload(true, true);
 	}	
 
-	private void startResultValidationAndUpload(boolean validateOnly) {
+	private void startResultValidationAndUpload(boolean validateOnly, boolean writeResultsFileWithSpectra) {
 		
+		if(!validateOnly) {
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Are you sure you want to upload validated results into the database?", this);
+			if(res != JOptionPane.YES_OPTION)
+				return;
+		}
 		textArea.setText("");
 		String command = getPepSearchCommand();
 		if(command == null || command.isEmpty()) {
@@ -305,7 +322,8 @@ public class PepserchResultsImportDialog extends JDialog
 				pepSearchParameterObject, 
 				validateOnly, 
 				addMissingParamsCheckBox.isSelected(),
-				getMaxHitsPerMSMSFeature());
+				getMaxHitsPerMSMSFeature(),
+				writeResultsFileWithSpectra);
 		task.setSearchCommand(command);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);

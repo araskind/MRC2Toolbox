@@ -62,7 +62,8 @@ public class SiriusMsExportTask extends AbstractTask {
 	private File exportFile;
 	private boolean instrumentOnly;
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
-	private static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+	private static final DateFormat dateFormat = 
+			new SimpleDateFormat(MRC2ToolBoxConfiguration.DATE_TIME_FORMAT_DEFAULT);
 	private Map<String,LIMSInjection>injectionMap;
 
 	public SiriusMsExportTask(

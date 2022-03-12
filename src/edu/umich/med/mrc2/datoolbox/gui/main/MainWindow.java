@@ -36,10 +36,13 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
@@ -53,12 +56,15 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.apache.commons.lang3.StringUtils;
+
 import bibliothek.gui.Dockable;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.intern.DefaultCDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ProjectSwitchController;
 import edu.umich.med.mrc2.datoolbox.data.ProjectSwitchController.ProjectState;
@@ -106,6 +112,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.CompoundIdentificationProject;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskControlListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -116,7 +123,9 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.LoadProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ProjectRawDataFileOpenTask;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
 /**
@@ -228,7 +237,10 @@ public class MainWindow extends JFrame
 			showNewProjectDialog(ProjectType.DATA_ANALYSIS, null, null);
 		
 		if (command.equals(MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName()))
-			showNewProjectDialog(ProjectType.RAW_DATA_ANALYSIS, null, null);		
+			showNewProjectDialog(ProjectType.RAW_DATA_ANALYSIS, null, null);
+		
+		if (command.equals(MainActionCommands.NEW_RAW_DATA_PROJECT_COMMAND.getName())) 
+			createNewRawDataAnalysisProject();
 
 		if (command.equals(MainActionCommands.NEW_CPD_ID_PROJECT_COMMAND.getName()))
 			showNewProjectDialog(ProjectType.FEATURE_IDENTIFICATION, null, null);
@@ -301,6 +313,77 @@ public class MainWindow extends JFrame
 		
 		if(command.equals(MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName()))
 			showFileToolsDialog();
+	}
+	
+	private void createNewRawDataAnalysisProject() {
+		
+		Collection<String>errors = validateRawDataAnalysisProjectSetup();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), 
+					rawDataAnalysisProjectSetupDialog);
+			return;
+		}				
+		projectBaseDirectory = 
+				new File(rawDataAnalysisProjectSetupDialog.getProjectLocationPath());	
+		savePreferences();
+		RawDataAnalysisProject newProject = new RawDataAnalysisProject(
+				rawDataAnalysisProjectSetupDialog.getProjectName(), 
+				rawDataAnalysisProjectSetupDialog.getProjectDescription(), 
+				projectBaseDirectory);
+
+		List<DataFile> msmsDataFiles = 
+				rawDataAnalysisProjectSetupDialog.getMSMSDataFiles().stream().
+				map(f -> new DataFile(f)).collect(Collectors.toList());		
+		newProject.addMSMSDataFiles(msmsDataFiles);
+		
+		List<DataFile> msOneDataFiles = 
+				rawDataAnalysisProjectSetupDialog.getMSOneDataFiles().stream().
+				map(f -> new DataFile(f)).collect(Collectors.toList());		
+		newProject.addMSOneDataFiles(msOneDataFiles);
+		
+		boolean copyDataToProject = 
+				rawDataAnalysisProjectSetupDialog.copyRawDataToProject();
+		rawDataAnalysisProjectSetupDialog.dispose();
+		
+		//	Save project file
+		ProjectUtils.saveStorableRawDataAnalysisProject(newProject);
+		
+		//	Set project as active
+		MRC2ToolBoxCore.setActiveRawDataAnalysisProject(newProject);
+		StatusBar.setProjectName(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getName());
+		
+		//	 Load raw data
+		ProjectRawDataFileOpenTask task = 
+				new ProjectRawDataFileOpenTask(newProject, copyDataToProject);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);	
+	}
+	
+	private Collection<String>validateRawDataAnalysisProjectSetup(){
+		
+		Collection<String>errors = new ArrayList<String>();
+		String name = rawDataAnalysisProjectSetupDialog.getProjectName();
+		String location = rawDataAnalysisProjectSetupDialog.getProjectLocationPath();
+
+		if(name.isEmpty())
+			errors.add("Project name can not be empty");
+		
+		if(location.isEmpty())		
+			errors.add("Project name can not be empty");
+		
+		if(!location.isEmpty() && !name.isEmpty()) {	
+
+			File projectDir = Paths.get(location, name).toFile();
+			if(projectDir.exists())
+				errors.add("Project \"" + name + "\" alredy exists at " + location);
+		}		
+		if(rawDataAnalysisProjectSetupDialog.getMSMSDataFiles().isEmpty())
+			errors.add("No raw data files added to the project");
+		
+		if(rawDataAnalysisProjectSetupDialog.getInstrument() == null)
+			errors.add("Instrument has to be specified");
+		
+		return errors;
 	}
 		
 	public void showFileToolsDialog() {
@@ -407,7 +490,8 @@ public class MainWindow extends JFrame
 			if(notebook != null)
 				notebook.clearPanel();
 			
-			IDTrackerLimsManagerPanel idtLims = (IDTrackerLimsManagerPanel)getPanel(PanelList.ID_TRACKER_LIMS);
+			IDTrackerLimsManagerPanel idtLims = 
+					(IDTrackerLimsManagerPanel)getPanel(PanelList.ID_TRACKER_LIMS);
 			if(idtLims != null)
 				idtLims.clearPanel();
 			
@@ -419,11 +503,13 @@ public class MainWindow extends JFrame
 			if(metlimsPanel != null)
 				metlimsPanel.clearPanel();
 			
-			MoTrPACDataTrackingPanel motrpacPanel = (MoTrPACDataTrackingPanel)getPanel(PanelList.MOTRPAC_REPORT_TRACKER);
+			MoTrPACDataTrackingPanel motrpacPanel = 
+					(MoTrPACDataTrackingPanel)getPanel(PanelList.MOTRPAC_REPORT_TRACKER);
 			if(motrpacPanel != null)
 				motrpacPanel.clearPanel();	
 			
-			RawDataExaminerPanel rawDataPanel = (RawDataExaminerPanel)getPanel(PanelList.RAW_DATA_EXAMINER);
+			RawDataExaminerPanel rawDataPanel = 
+					(RawDataExaminerPanel)getPanel(PanelList.RAW_DATA_EXAMINER);
 			if(rawDataPanel != null)
 				rawDataPanel.clearPanel();	
 		}
@@ -1326,9 +1412,20 @@ public class MainWindow extends JFrame
 			//	Save raw data analysis project
 //			if (e.getSource().getClass().equals(SaveStoredRawDataAnalysisProjectTask.class))
 //				finalizeRawDataAnalysisProjectSave();
+			
+			if(e.getSource().getClass().equals(ProjectRawDataFileOpenTask.class))
+				finalizeProjectRawDataLoad((ProjectRawDataFileOpenTask)e.getSource());
 		}
 		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED)
 			hideProgressDialog();
+	}
+	
+	private void finalizeProjectRawDataLoad(ProjectRawDataFileOpenTask task) {
+		
+		showPanel(PanelList.RAW_DATA_EXAMINER);
+		RawDataExaminerPanel rawDataPanel = 
+				(RawDataExaminerPanel)getPanel(PanelList.RAW_DATA_EXAMINER);
+		rawDataPanel.finalizeProjectRawDataLoad(task);
 	}
 	
 	private void finalizeProjectSave() {

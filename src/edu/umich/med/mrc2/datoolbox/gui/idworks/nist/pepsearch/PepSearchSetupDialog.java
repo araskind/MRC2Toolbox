@@ -292,11 +292,11 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		pack();
 	}
 
-	@Override
-	public void dispose() {
-		savePreferences();
-		super.dispose();
-	}
+//	@Override
+//	public void dispose() {
+//		savePreferences();
+//		super.dispose();
+//	}
 
 	protected void initFileChoosers() {
 
@@ -1664,10 +1664,19 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		preferences.putBoolean(ENABLE_REVERSE_SEARCH, chckbxReverseSearch.isSelected());
 		preferences.putBoolean(ENABLE_ALTERNATIVE_PEAK_MATCHING, chckbxAlternativePeakMatching.isSelected());
 		preferences.putBoolean(IGNORE_PEAKS_AROUND_PRECURSOR, chckbxIgnorePeaksAroundPrecursor.isSelected());
-		preferences.putDouble(IGNORE_PEAKS_AROUND_PRECURSOR_WINDOW,
-			Double.parseDouble(ignoreAroundPrecursorTextField.getText()));
-		preferences.put(IGNORE_PEAKS_AROUND_PRECURSOR_UNITS,
-			((MassErrorType)ignoreAroundPrecursorAccuracyComboBox.getSelectedItem()).name());
+		
+		double ipap = 1.6d;
+		if(!ignoreAroundPrecursorTextField.getText().trim().isEmpty())
+			ipap = Double.parseDouble(ignoreAroundPrecursorTextField.getText());
+		
+		preferences.putDouble(IGNORE_PEAKS_AROUND_PRECURSOR_WINDOW, ipap);
+		
+		MassErrorType ipapEt = MassErrorType.Da;
+		if(ignoreAroundPrecursorAccuracyComboBox.getSelectedItem() != null)
+			ipapEt = (MassErrorType)ignoreAroundPrecursorAccuracyComboBox.getSelectedItem();
+			
+		preferences.put(IGNORE_PEAKS_AROUND_PRECURSOR_UNITS, ipapEt.name());
+		
 		preferences.put(SEARCH_THRESHOLD_OPTION,
 			((HiResSearchThreshold)searchThresholdComboBox.getSelectedItem()).name());
 		preferences.putDouble(PRECURSOR_MASS_ACCURACY,

@@ -70,7 +70,8 @@ public class PassatuttoDecoyGeneratorTask extends AbstractTask {
 	
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
 	private static final NumberFormat mzFormat =  MRC2ToolBoxConfiguration.getMzFormat();
-	private static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+	private static final DateFormat dateFormat = 
+			new SimpleDateFormat(MRC2ToolBoxConfiguration.DATE_TIME_FORMAT_DEFAULT);
 	
 	private Semaphore outputSem;
 	private Semaphore errorSem;

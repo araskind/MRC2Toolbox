@@ -23,6 +23,9 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks;
 
 import java.awt.BorderLayout;
 import java.awt.Desktop;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -63,13 +66,16 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
+import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IncludeSubset;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSComponentTableFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
@@ -118,6 +124,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.SiriusDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.FilterTrackerMSMSFeaturesDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.MSMSFilterParameters;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.rtid.MSMSFeatureRTIDSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTReferenceLibraries;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.nistms.NISTMSSerchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PepSearchSetupDialog;
@@ -151,6 +158,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -675,8 +683,217 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 		if (command.equals(MainActionCommands.SEARCH_FEATURES_BY_RT_ID_COMMAND.getName()))
 			searchFeaturesByRtId();
+		
+		if (command.equals(MainActionCommands.COPY_FEATURE_SPECTRUM_AS_MSP_COMMAND.getName()))
+			copySelectedMSMSFeatureSpectrumAsMSP();
+		
+		if (command.equals(MainActionCommands.COPY_FEATURE_SPECTRUM_AS_ARRAY_COMMAND.getName()))
+			copySelectedMSMSFeatureSpectrumAsArray();
+				
+		if (command.equals(MainActionCommands.COPY_LIBRARY_SPECTRUM_AS_MSP_COMMAND.getName()))
+			copySelectedLibraryFeatureSpectrumAsMSP();	
+		
+		if (command.equals(MainActionCommands.COPY_LIBRARY_SPECTRUM_AS_ARRAY_COMMAND.getName()))
+			copySelectedLibraryFeatureSpectrumAsArray();	
+		
 	}
 	
+	private void copySelectedLibraryFeatureSpectrumAsArray() {
+
+		MsFeatureIdentity selectedIdentity = 
+				identificationsTable.getSelectedIdentity();
+		if(selectedIdentity == null)
+			return;
+		
+		ReferenceMsMsLibraryMatch refMatch = 
+				selectedIdentity.getReferenceMsMsLibraryMatch();
+		if(refMatch == null)
+			return;
+		
+		MsMsLibraryFeature feature = refMatch.getMatchedLibraryFeature();		
+		String mspString = feature.getSpectrumAsPythonArray();
+		StringSelection stringSelection = new StringSelection(mspString);
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
+	}
+	
+	private void copySelectedLibraryFeatureSpectrumAsMSP() {
+
+		MsFeatureIdentity selectedIdentity = 
+				identificationsTable.getSelectedIdentity();
+		if(selectedIdentity == null)
+			return;
+		
+		ReferenceMsMsLibraryMatch refMatch = 
+				selectedIdentity.getReferenceMsMsLibraryMatch();
+		if(refMatch == null)
+			return;
+		
+		MsMsLibraryFeature feature = refMatch.getMatchedLibraryFeature();
+		ArrayList<String>contents = new ArrayList<String>();
+		
+		Collection<MSPField>individual = new ArrayList<MSPField>();
+		individual.add(MSPField.NAME);
+		individual.add(MSPField.FORMULA);
+		individual.add(MSPField.EXACTMASS);
+		individual.add(MSPField.MW);
+		individual.add(MSPField.INCHI_KEY);
+		individual.add(MSPField.PRECURSORMZ);
+		individual.add(MSPField.NUM_PEAKS);
+	
+		CompoundIdentity cid = feature.getCompoundIdentity();
+		contents.add(MSPField.NAME.getName() + ": " + cid.getName());
+
+		if (cid.getFormula() != null)
+			contents.add(MSPField.FORMULA.getName() + ": " + cid.getFormula());
+		contents.add(MSPField.EXACTMASS.getName() + ": "
+				+ MRC2ToolBoxConfiguration.getMzFormat().format(cid.getExactMass()));
+		contents.add(MSPField.MW.getName() + ": " + 
+				Integer.toString((int) Math.round(cid.getExactMass())));
+		if (cid.getInChiKey() != null)
+			contents.add(MSPField.INCHI_KEY.getName() + ": " + cid.getInChiKey());
+
+		Map<String, String> properties = feature.getProperties();
+		properties.put(MSMSComponentTableFields.MRC2_LIB_ID.getName(), feature.getUniqueId());
+		ReferenceMsMsLibrary refLib =
+				IDTDataCash.getReferenceMsMsLibraryById(feature.getMsmsLibraryIdentifier());
+		
+		if((refLib.getPrimaryLibraryId().equals(NISTReferenceLibraries.nist_msms.name()) || 
+				refLib.getPrimaryLibraryId().equals(NISTReferenceLibraries.hr_msms_nist.name()))
+				&& properties.get(MSMSComponentTableFields.ORIGINAL_LIBRARY_ID.getName()) != null)
+			contents.add(MSPField.NIST_NUM.getName() + ": " + 
+					properties.get(MSMSComponentTableFields.ORIGINAL_LIBRARY_ID.getName()));
+						
+		for (MSMSComponentTableFields field : MSMSComponentTableFields.values()) {
+
+			if (individual.contains(field.getMSPField()))
+				continue;
+			
+			String prop = properties.get(field.getName());
+			if(prop == null || prop.isEmpty())
+				continue;
+				
+			contents.add(field.getMSPField().getName() + ": " + prop);					
+		}
+		contents.add(MSPField.PRECURSORMZ.getName() + ": "
+				+ MRC2ToolBoxConfiguration.getMzFormat().format(feature.getParent().getMz()));
+		contents.add(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(feature.getSpectrum().size()));
+
+		for(MsPoint point : feature.getSpectrum()) {
+
+			String msPoint = MRC2ToolBoxConfiguration.getMzFormat().format(point.getMz())
+					+ " " + MsUtils.mspIntensityFormat.format(point.getIntensity());
+			String annotation = feature.getMassAnnotations().get(point);
+			if(annotation != null)
+				msPoint += " \"" + annotation + "\"";
+				
+			contents.add(msPoint);
+		}
+		contents.add("");	
+		String mspString = StringUtils.join(contents, "\n");
+		if(mspString == null || mspString.isEmpty())
+			return;
+
+		StringSelection stringSelection = new StringSelection(mspString);
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
+	}
+	
+	private void copySelectedMSMSFeatureSpectrumAsArray(){
+		
+		Collection<MsFeatureInfoBundle> selected = 
+				msTwoFeatureTable.getBundles(TableRowSubset.SELECTED);
+		if(selected.isEmpty())
+			return;
+		
+		ArrayList<String>contents = new ArrayList<String>();
+		for(MsFeatureInfoBundle bundle : selected) {
+			
+			MsFeature msf = bundle.getMsFeature();
+			Collection<TandemMassSpectrum> tandemSpectra = msf.getSpectrum().getTandemSpectra().stream().
+					filter(t -> t.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
+					collect(Collectors.toList());
+
+			if(tandemSpectra.isEmpty())
+				continue;
+			
+			for(TandemMassSpectrum tandemMs : tandemSpectra)
+				contents.add(tandemMs.getSpectrumAsPythonArray());			
+		}
+		String mspString = StringUtils.join(contents, "\n");
+		StringSelection stringSelection = new StringSelection(mspString);
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
+	}	
+
+	private void copySelectedMSMSFeatureSpectrumAsMSP() {
+
+		Collection<MsFeatureInfoBundle> selected = 
+				msTwoFeatureTable.getBundles(TableRowSubset.SELECTED);
+		if(selected.isEmpty())
+			return;
+		
+		ArrayList<String>contents = new ArrayList<String>();
+		for(MsFeatureInfoBundle bundle : selected) {
+
+			MsFeature msf = bundle.getMsFeature();
+			Collection<TandemMassSpectrum> tandemSpectra = msf.getSpectrum().getTandemSpectra().stream().
+					filter(t -> t.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
+					collect(Collectors.toList());
+
+			if(tandemSpectra.isEmpty())
+				continue;
+			
+			for(TandemMassSpectrum tandemMs : tandemSpectra) {
+
+				if(tandemMs.getSpectrum().isEmpty())
+					continue;
+
+				contents.add(MSPField.NAME.getName() + ": " + msf.getId());
+				contents.add("Feature name: " + msf.getName());
+				if(msf.isIdentified()) {
+					CompoundIdentity cid = msf.getPrimaryIdentity().getCompoundIdentity();
+					contents.add(MSPField.SYNONYM.getName() + ": " + cid.getName());
+					if(cid.getFormula() != null)
+						contents.add(MSPField.FORMULA.getName() + ": " + cid.getFormula());
+					if(cid.getInChiKey() != null)
+						contents.add(MSPField.INCHI_KEY.getName() + ": " + cid.getInChiKey());
+				}
+				String polarity = "P";
+				if(msf.getPolarity().equals(Polarity.Negative))
+					polarity = "N";
+				contents.add(MSPField.ION_MODE.getName() + ": " + polarity);
+
+				if(tandemMs.getCidLevel() >0)
+					contents.add(MSPField.COLLISION_ENERGY.getName() + ": " + Double.toString(tandemMs.getCidLevel()));
+
+				//	RT
+				contents.add(MSPField.RETENTION_INDEX.getName() + ": " +
+						MRC2ToolBoxConfiguration.getRtFormat().format(msf.getRetentionTime()) + " min. ");
+
+				contents.add(MSPField.PRECURSORMZ.getName() + ": " +
+					MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()));
+				contents.add(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()));
+
+				MsPoint[] msms = MsUtils.normalizeAndSortMsPatternForMsp(tandemMs.getSpectrum());
+				for(MsPoint point : msms) {
+
+					contents.add(
+						MRC2ToolBoxConfiguration.getMzFormat().format(point.getMz())
+						+ " " + MsUtils.mspIntensityFormat.format(point.getIntensity()) + "; ") ;
+				}
+				contents.add("");
+			}
+		}
+		String mspString = StringUtils.join(contents, "\n");
+		if(mspString == null || mspString.isEmpty())
+			return;
+
+		StringSelection stringSelection = new StringSelection(mspString);
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
+	}
+
 	private void showFeatureRTIDSearchDialog() {
 		// TODO Auto-generated method stub
 		msmsFeatureRTIDSearchDialog = new MSMSFeatureRTIDSearchDialog(this);
@@ -2154,6 +2371,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), pepSearchSetupDialog);
 			return;
 		}
+		pepSearchSetupDialog.savePreferences();
 		List<String>commandParts = pepSearchSetupDialog.getSearchCommandParts();
 		if(pepSearchSetupDialog.getFeaturesFromDatabase()) {
 
@@ -2194,6 +2412,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
+		pepSearchSetupDialog.savePreferences();
 		pepSearchSetupDialog.dispose();
 	}
 	
@@ -2243,6 +2462,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		task.setPepSearchParameterObject(pepSearchSetupDialog.getPepSearchParameterObject());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
+		pepSearchSetupDialog.savePreferences();
 		pepSearchSetupDialog.dispose();
 	}
 

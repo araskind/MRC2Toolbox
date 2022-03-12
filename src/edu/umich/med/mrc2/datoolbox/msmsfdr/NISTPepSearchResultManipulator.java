@@ -937,10 +937,22 @@ public class NISTPepSearchResultManipulator {
 		commandLine = commandLine.replace( "> \"" + commands[0] + ".exe\"", "");
 		
 		String[] inputs = StringUtils.substringsBetween(commandLine, "/INP \"", "\"");
-		commandLine = commandLine.replace( "/INP \"" + inputs[0] + "\"", "");
-		
+		if(inputs != null)
+			commandLine = commandLine.replace( "/INP \"" + inputs[0] + "\"", "");
+		else {
+			inputs = StringUtils.substringsBetween(commandLine, "/INP", "/OUTTAB");
+			if(inputs != null)
+				commandLine = commandLine.replace( "/INP" + inputs[0] + "/OUTTAB", "/OUTTAB");
+		}		
 		String[] outputs = StringUtils.substringsBetween(commandLine, "/OUTTAB \"", "\"");
-		commandLine = commandLine.replace( "/OUTTAB \"" + outputs[0] + "\"", "");
+		if(outputs != null)
+			commandLine = commandLine.replace( "/OUTTAB \"" + outputs[0] + "\"", "");
+		else {
+			outputs = StringUtils.substringsBetween(commandLine, "/OUTTAB", "/");
+			if(outputs != null)
+				commandLine = commandLine.replace( "/OUTTAB" + outputs[0] + "/", "/");
+		}	
+		//commandLine = commandLine.replace( "/OUTTAB \"" + outputs[0] + "\"", "");
 
 		String[] libraries = StringUtils.substringsBetween(commandLine, "/LIB \"", "\"");
 		for (String v : libraries) {

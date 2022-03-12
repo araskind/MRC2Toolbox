@@ -304,7 +304,13 @@ public class DataAnalysisProject implements Serializable {
 	}
 	
 	public void addFeatureMatrixForDataPipeline(DataPipeline pipeline, Matrix featureMatrix) {
-
+		
+		if(featureMatrixFileMap == null)
+			featureMatrixFileMap = new TreeMap<DataPipeline, String>();
+		
+		if(featureMatrixMap == null)
+			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
+		
 		String matrixFileName = DataPrefix.FEATURE_MATRIX.getName() + UUID.randomUUID().toString() + "." + 
 				MRC2ToolBoxConfiguration.DATA_MATRIX_EXTENSION;
 		featureMatrixFileMap.put(pipeline, matrixFileName);
@@ -330,6 +336,12 @@ public class DataAnalysisProject implements Serializable {
 			dataMatrixFile.delete();
 
 		dataMatrixFileMap.remove(pipeline);
+		
+		if(featureMatrixFileMap == null)
+			featureMatrixFileMap = new TreeMap<DataPipeline, String>();
+		
+		if(featureMatrixMap == null)
+			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
 		
 		//	Delete feature matrix and storage file
 		featureMatrixMap.remove(pipeline);
@@ -519,11 +531,19 @@ public class DataAnalysisProject implements Serializable {
 	}
 	
 	public String getFeatureMatrixFileNameForDataPipeline(DataPipeline pipeline) {
-		return featureMatrixFileMap.get(pipeline);
+		
+		if(featureMatrixFileMap == null)
+			return null;
+		else
+			return featureMatrixFileMap.get(pipeline);
 	}
 	
 	public Matrix getFeatureMatrixForDataPipeline(DataPipeline pipeline) {
-		return featureMatrixMap.get(pipeline);
+		
+		if(featureMatrixMap == null)
+			return null;
+		else
+			return featureMatrixMap.get(pipeline);
 	}
 
 	public Set<MsFeatureCluster> getDuplicateClustersForDataPipeline(DataPipeline pipeline) {
@@ -744,7 +764,11 @@ public class DataAnalysisProject implements Serializable {
 	}
 	
 	public void setFeatureMatrixForDataPipeline(
-			DataPipeline pipeline, Matrix featureMatrix) {
+			DataPipeline pipeline, Matrix featureMatrix) {	
+		
+		if(featureMatrixMap == null)
+			featureMatrixMap = new TreeMap<DataPipeline, Matrix>();
+		
 		featureMatrixMap.put(pipeline, featureMatrix);
 	}
 

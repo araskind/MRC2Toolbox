@@ -302,12 +302,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			return;
 		}
 		String command = event.getActionCommand();
-		
-		if (command.equals(MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName())) 
-			showNewRawDataAnalysisProjectDialog();
-		
-		if (command.equals(MainActionCommands.NEW_RAW_DATA_PROJECT_COMMAND.getName())) 
-			createNewRawDataAnalysisProject();
 			
 		if (command.equals(MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND.getName())) 
 			openRawDataAnalysisProject();
@@ -1009,14 +1003,15 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
-	private void finalizeProjectRawDataLoad(ProjectRawDataFileOpenTask task) {
+	public void finalizeProjectRawDataLoad(ProjectRawDataFileOpenTask task) {
 		
 		Collection<String> errors = task.getErrors();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this.getContentPane());
 			ProjectUtils.saveProjectFile(MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
 		}
-		MRC2ToolBoxCore.getActiveRawDataAnalysisProject().updateProjectLocation(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getProjectFile());
+		MRC2ToolBoxCore.getActiveRawDataAnalysisProject().updateProjectLocation(
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getProjectFile());
 		Collection<DataFile> filesToLoad = new ArrayList<DataFile>();
 		filesToLoad.addAll(task.getProject().getMSMSDataFiles());
 		filesToLoad.addAll(task.getProject().getMSOneDataFiles());

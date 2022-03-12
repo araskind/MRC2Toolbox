@@ -35,6 +35,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class MsMsLibraryFeature implements Serializable {
 
@@ -284,5 +285,9 @@ public class MsMsLibraryFeature implements Serializable {
 
 	public void setSpectrumEntropy(double spectrumEntropy) {
 		this.spectrumEntropy = spectrumEntropy;
+	}
+	
+	public String getSpectrumAsPythonArray() {		
+		return MsUtils.getSpectrumAsPythonArray(spectrum);		
 	}
 }

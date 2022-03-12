@@ -50,13 +50,17 @@ public class UniversalIdentificationResultsTablePopupMenu
 	private static final Icon goToLibraryIcon = GuiUtils.getIcon("goToLibrary", 24);
 	private static final Icon setIdLevelIcon = GuiUtils.getIcon("editIdStatus", 24);
 	private static final Icon goToDatabaseIcon = GuiUtils.getIcon("goToDatabase", 24);
-
+	private static final Icon exportMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
+	private static final Icon copyAsArrayIcon = GuiUtils.getIcon("copyAsArray", 24);
+	
 	private JMenuItem
 		deleteIdMenuItem,
 		deleteAllIdsMenuItem,
 		disablePrimaryIdMenuItem,
 		goToCompoundDatabaseMenuItem,
-		goToLibraryMenuItem;
+		goToLibraryMenuItem,
+		copySpectrumAsMSPMenuItem,
+		copyAsArrayMenuItem;
 	
 	private JMenu idLevelMenu;
 	private ActionListener listener;
@@ -99,6 +103,18 @@ public class UniversalIdentificationResultsTablePopupMenu
 				MainActionCommands.GO_TO_LIBRARY_FEATURE_COMMAND.getName(), listener,
 				MainActionCommands.GO_TO_LIBRARY_FEATURE_COMMAND.getName());
 		goToLibraryMenuItem.setIcon(goToLibraryIcon);
+		
+		addSeparator();
+		
+		copySpectrumAsMSPMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.COPY_LIBRARY_SPECTRUM_AS_MSP_COMMAND.getName(), listener,
+				MainActionCommands.COPY_LIBRARY_SPECTRUM_AS_MSP_COMMAND.getName());
+		copySpectrumAsMSPMenuItem.setIcon(exportMSPIcon);
+		
+		copyAsArrayMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.COPY_LIBRARY_SPECTRUM_AS_ARRAY_COMMAND.getName(), listener,
+				MainActionCommands.COPY_LIBRARY_SPECTRUM_AS_ARRAY_COMMAND.getName());
+		copyAsArrayMenuItem.setIcon(copyAsArrayIcon);
 	}
 
 	private void populateIdLevelMenu() {

@@ -57,7 +57,8 @@ public class MSMSLibraryMSPExportTask extends AbstractTask {
 	private Collection<MsMsLibraryFeature>featuresToExport;
 	private File exportFile;
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
-	private static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+	private static final DateFormat dateFormat = 
+			new SimpleDateFormat(MRC2ToolBoxConfiguration.DATE_TIME_FORMAT_DEFAULT);
 	
 	private String libraryId;
 	private Polarity polarity;

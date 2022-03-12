@@ -96,13 +96,9 @@ public class MsPointBucket implements Serializable {
 
 	public boolean pointBelongs(MsPoint newPoint) {
 
-		boolean belongs = false;
-		testTange = MsUtils.createMassRange(
-				mzRange.getAverage(), massWindow, errorType);
-
-		if (testTange.contains(newPoint.getMz()))
-			belongs = true;
-
-		return belongs;
+		if (MsUtils.createMassRange(mzRange.getAverage(), massWindow, errorType).contains(newPoint.getMz()))
+			return true;
+		else
+			return false;
 	}
 }
