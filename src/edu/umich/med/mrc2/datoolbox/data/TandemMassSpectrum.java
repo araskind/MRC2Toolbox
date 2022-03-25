@@ -784,6 +784,8 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		}
 		for(int i=0; i<mzValues.length; i++)
 			spectrum.add(new MsPoint(mzValues[i], intensityValues[i]));
+		
+		setEntropy(MsUtils.calculateSpectrumEntropyNatLog(spectrum));
 	}
 
 	public Map<Integer, Double> getScanRtMap() {

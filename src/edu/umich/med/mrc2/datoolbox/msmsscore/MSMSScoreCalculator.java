@@ -29,6 +29,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.MsPointBucket;
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.SpectumPair;
@@ -48,7 +49,7 @@ public class MSMSScoreCalculator {
 	public static final MsDataPointComparator reverseIntensitySorter = 
 			new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC);
 	
-	public static final double DEFAULT_MS_REL_INT_NISE_CUTOFF = 0.01d;
+	public static final double DEFAULT_MS_REL_INT_NOISE_CUTOFF = 0.01d;
 	
 	public static MsPoint[] createMassBankWeigtedPattern(Collection<MsPoint>spectrum) {	
 		return createWeigtedPattern(spectrum, MSMSWeigtingType.MASS_BANK);
@@ -226,6 +227,41 @@ public class MSMSScoreCalculator {
 		return new SpectumPair(alignedUnknownSpectrum, alignedLibrarySpectrum);
 	}
 	
+	public static double[] createEntropyWeigtedPattern(double[]spectrum) {
+		
+		if(spectrum == null || spectrum.length == 0)
+			return new double[] {0};
+		
+		double entropy = calculateEntropyNatLog(spectrum);		
+		double[]weigtedPattern = new double[spectrum.length];
+		int count = 0;
+		for(double p :spectrum) {
+			double weightedIntensity = p;
+			if(entropy < 3.0d)
+				weightedIntensity = Math.pow(p, (0.25d + entropy / 4.0d));
+
+			weigtedPattern[count] = weightedIntensity;
+			count++;
+		}
+		// Arrays.sort(weigtedPattern);
+		return normalizeToUnitSum(weigtedPattern);
+	}
+	
+	public static double calculateEntropyNatLog(double[]spectrum) {
+		
+		double totalIntensity = Arrays.stream(spectrum).sum();
+		double entropy = 0.0d;
+		for(double p : spectrum) {
+			
+			if(p == 0)
+				continue;
+			
+			double norm = p / totalIntensity;
+			entropy += norm * Math.log(norm);
+		}	
+		return -entropy;
+	}
+	
 	public static MsPoint[] createEntropyWeigtedPattern(Collection<MsPoint>spectrum) {
 		
 		if(spectrum == null || spectrum.isEmpty())
@@ -243,7 +279,11 @@ public class MSMSScoreCalculator {
 			count++;
 		}
 		Arrays.sort(weigtedPattern, mzSorter);
-		return weigtedPattern;
+		return normalizeToUnitSum(weigtedPattern);
+	}
+	
+	public static MsPoint[] normalizeToUnitSum(MsPoint[]spectrum) {
+		return normalizeToUnitSum(Arrays.asList(spectrum));
 	}
 	
 	public static MsPoint[] normalizeToUnitSum(Collection<MsPoint>spectrum) {
@@ -260,44 +300,92 @@ public class MSMSScoreCalculator {
 		return unitNormPattern;
 	}
 	
+	public static double[] normalizeToUnitSum(double[]spectrum) {
+		
+		double[]unitNormPattern = new double[spectrum.length];
+		double totalIntensity = Arrays.stream(spectrum).sum();
+		int count = 0;
+		for(double p : spectrum) {
+			unitNormPattern[count] = p / totalIntensity;
+			count++;
+		}
+		//	Arrays.sort(unitNormPattern);
+		return unitNormPattern;
+	}
+	
+	public static Collection<MsPoint> normalizeToUnitSumCollection(Collection<MsPoint>spectrum) {
+		
+		MsPoint[]unitNormPattern = new MsPoint[spectrum.size()];
+		double totalIntensity = 
+				spectrum.stream().mapToDouble(p -> p.getIntensity()).sum();
+		int count = 0;
+		for(MsPoint p : spectrum) {
+			unitNormPattern[count] = new MsPoint(p.getMz(), p.getIntensity() / totalIntensity);
+			count++;
+		}
+		Arrays.sort(unitNormPattern, mzSorter);
+		return Arrays.asList(unitNormPattern);
+	}
+	
 	public static double calculateEntropyBasedMatchScore(			
 			Collection<MsPoint> unknownSpectrum, 
 			Collection<MsPoint> librarySpectrum,
 			double mzWindowValue, 
-			MassErrorType massErrorType) {
+			MassErrorType massErrorType,
+			double noiseCutoff) {
 		
 		Collection<MsPoint>unkAvgSpectrum = 
-				MsUtils.averageMassSpectrumAndRemoveNoise(
-						unknownSpectrum, mzWindowValue, massErrorType, DEFAULT_MS_REL_INT_NISE_CUTOFF);
+				MsUtils.averageAndDenoiseMassSpectrum(
+						unknownSpectrum, mzWindowValue, massErrorType, noiseCutoff);
 		Collection<MsPoint>libAvgSpectrum = 
-				MsUtils.averageMassSpectrumAndRemoveNoise(
-						librarySpectrum, mzWindowValue, massErrorType, DEFAULT_MS_REL_INT_NISE_CUTOFF);
-		
-		MsPoint[]unknownSpectrumWeighted = createEntropyWeigtedPattern(unkAvgSpectrum);
-		MsPoint[]librarySpectrumWeighted = createEntropyWeigtedPattern(libAvgSpectrum);
+				MsUtils.averageAndDenoiseMassSpectrum(
+						librarySpectrum, mzWindowValue, massErrorType, noiseCutoff);;
+
+		MsPoint[]unknownSpectrumUnorm = normalizeToUnitSum(unkAvgSpectrum);
+		MsPoint[]librarySpectrumUnorm = normalizeToUnitSum(libAvgSpectrum);
 		
 		Collection<MsPoint>allPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		allPoints.addAll(Arrays.asList(unknownSpectrumWeighted));
-		allPoints.addAll(Arrays.asList(librarySpectrumWeighted));
-		Collection<MsPoint>avgSpectrum = 
-				MsUtils.averageMassSpectrum(allPoints, mzWindowValue, massErrorType);	
-		
-		//MsPoint[]avgSpectrumWeighted = createEntropyWeigtedPattern(avgSpectrum);
-		MsPoint[]avgSpectrumWeighted = normalizeToUnitSum(avgSpectrum);
-		
-		double unknownEntropy = 
-				MsUtils.calculateSpectrumEntropyNatLog(unknownSpectrumWeighted);
-		double libraryEntropy = 
-				MsUtils.calculateSpectrumEntropyNatLog(librarySpectrumWeighted);
-		double avgEntropy = 
-				MsUtils.calculateSpectrumEntropyNatLog(avgSpectrumWeighted);
+		allPoints.addAll(Arrays.asList(unknownSpectrumUnorm));
+		allPoints.addAll(Arrays.asList(librarySpectrumUnorm));		
+		MsPoint[] points = allPoints.stream().
+				sorted(mzSorter).
+				toArray(size -> new MsPoint[size]);
+		ArrayList<MsPointBucket> msBins = new ArrayList<MsPointBucket>();
+		MsPointBucket first = new MsPointBucket(points[0], mzWindowValue, massErrorType);
+		msBins.add(first);
+		for(int i=1; i<points.length; i++) {
+			
+			MsPointBucket current = msBins.get(msBins.size()-1);
+			if(current.pointBelongs(points[i]))
+				current.addPoint(points[i]);
+			else
+				msBins.add(new MsPointBucket(points[i], mzWindowValue, massErrorType));
+		}
+		double[][]matchedIntensities = new double[3][msBins.size()];
+		for(int i=0; i<msBins.size(); i++) {
+			
+			MsPointBucket bin = msBins.get(i);
+			for(int j=0; j<unknownSpectrumUnorm.length; j++) {
+				if(bin.pointBelongs(unknownSpectrumUnorm[j]))
+					matchedIntensities[0][i] = unknownSpectrumUnorm[j].getIntensity();
+			}
+			for(int j=0; j<librarySpectrumUnorm.length; j++) {
+				if(bin.pointBelongs(librarySpectrumUnorm[j]))
+					matchedIntensities[1][i] = librarySpectrumUnorm[j].getIntensity();
+			}
+		}	
+		double[]unknownSpectrumWeighted = createEntropyWeigtedPattern(matchedIntensities[0]);
+		double[]librarySpectrumWeighted = createEntropyWeigtedPattern(matchedIntensities[1]);
+		for(int i=0; i<msBins.size(); i++)
+			matchedIntensities[2][i] = unknownSpectrumWeighted[i] + librarySpectrumWeighted[i]; 
 		
 		double score = 
-				1 - ((2.0d * avgEntropy - unknownEntropy - libraryEntropy) / Math.log(4.0d));
-		
+				1 - ((2.0d * calculateEntropyNatLog(matchedIntensities[2]) 
+						- calculateEntropyNatLog(unknownSpectrumWeighted) 
+						- calculateEntropyNatLog(librarySpectrumWeighted)) / Math.log(4.0d));
 		return score;
 	}
-	
+
 	//	This is a stop-gap to calculate entropy score for 
 	//	METLIN hits that don't have mass error specified
 	public static double calculateEntropyMatchScore(
@@ -311,14 +399,16 @@ public class MSMSScoreCalculator {
 					msms.getSpectrum(), 
 					match.getMatchedLibraryFeature().getSpectrum(),
 					20, 
-					MassErrorType.ppm);
+					MassErrorType.ppm,
+					DEFAULT_MS_REL_INT_NOISE_CUTOFF);
 		}
 		else
 			return calculateEntropyBasedMatchScore(			
 				msms.getSpectrum(), 
 				match.getMatchedLibraryFeature().getSpectrum(),
 				params.getFragmentMzErrorValue(), 
-				params.getFragmentMzErrorType());
+				params.getFragmentMzErrorType(),
+				DEFAULT_MS_REL_INT_NOISE_CUTOFF);
 	}
 }
 

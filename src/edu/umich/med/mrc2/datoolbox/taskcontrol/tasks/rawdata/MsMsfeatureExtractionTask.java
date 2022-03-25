@@ -756,8 +756,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 						System.err.println(Double.toString(negInt.getIntensity()));
 					}	
 					msms.setMinorParentIons(minorParentIons);
-				}
-				
+				}				
 				spectrum.addTandemMs(msms);		
 				f.setSpectrum(spectrum);
 				features.add(f);

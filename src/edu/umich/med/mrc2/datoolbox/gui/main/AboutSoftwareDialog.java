@@ -158,7 +158,4 @@ public class AboutSoftwareDialog extends JDialog {
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		pack();
 	}
-	
-
-	
 }

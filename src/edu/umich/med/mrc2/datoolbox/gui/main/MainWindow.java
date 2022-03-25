@@ -1422,6 +1422,9 @@ public class MainWindow extends JFrame
 	
 	private void finalizeProjectRawDataLoad(ProjectRawDataFileOpenTask task) {
 		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+		
 		showPanel(PanelList.RAW_DATA_EXAMINER);
 		RawDataExaminerPanel rawDataPanel = 
 				(RawDataExaminerPanel)getPanel(PanelList.RAW_DATA_EXAMINER);
@@ -1429,6 +1432,9 @@ public class MainWindow extends JFrame
 	}
 	
 	private void finalizeProjectSave() {
+		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
 		
 		if(projectSwitchController.isExitProgram()) {
 			MRC2ToolBoxCore.shutDown();

@@ -1339,14 +1339,35 @@ public class MsUtils {
 		 return avgSpectrum;
 	}
 	
-	public static Collection<MsPoint>averageMassSpectrumAndRemoveNoise(
+	public static Collection<MsPoint>denoiseAndAverageMassSpectrum(
+			Collection<MsPoint>inputPoints, 
+			double mzBinWidth, 
+			MassErrorType errorType,
+			double relIntNoiseCutoff) {
+		
+		double intensityCutoff = inputPoints.stream().
+				mapToDouble(p -> p.getIntensity()).
+				max().getAsDouble() * relIntNoiseCutoff;
+		Collection<MsPoint>cleanMs = inputPoints.stream().
+				filter(p -> p.getIntensity() > intensityCutoff).
+				sorted(mzSorter).
+				collect(Collectors.toList());
+		
+		Collection<MsPoint>cleanAvgMs = 
+				averageMassSpectrum(cleanMs, mzBinWidth, errorType);		
+		
+		return cleanAvgMs;
+	}
+	
+	public static Collection<MsPoint>averageAndDenoiseMassSpectrum(
 			Collection<MsPoint>inputPoints, 
 			double mzBinWidth, 
 			MassErrorType errorType,
 			double relIntNoiseCutoff) {
 		
 		Collection<MsPoint>avgMs = 
-				averageMassSpectrum(inputPoints, mzBinWidth, errorType);		
+				averageMassSpectrum(inputPoints, mzBinWidth, errorType);
+		
 		double intensityCutoff = avgMs.stream().
 				mapToDouble(p -> p.getIntensity()).
 				max().getAsDouble() * relIntNoiseCutoff;

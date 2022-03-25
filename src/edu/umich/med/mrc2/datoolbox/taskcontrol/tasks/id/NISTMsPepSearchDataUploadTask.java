@@ -106,13 +106,14 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
-		try {
-			filterSearchResults(false);
-		} catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-		}
 		if(writeResultsFileWithSpectra) {
+			
+			try {
+				assignLibraryIds();
+			} catch (Exception e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
 			try {
 				getMSMSLibraryEntries();
 			} catch (Exception e1) {
@@ -131,6 +132,14 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			setStatus(TaskStatus.FINISHED);
+			return;
+		}
+		try {
+			filterSearchResults(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
 		}
 		if(validateOnly) {
 			setStatus(TaskStatus.FINISHED);

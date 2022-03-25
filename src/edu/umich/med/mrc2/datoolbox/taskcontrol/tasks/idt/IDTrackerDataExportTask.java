@@ -426,6 +426,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		
 		taskDescription = "Getting injection information ...";
 		Collection<String> injectionIds = featuresToExport.stream().
+				filter(f -> f.getInjectionId() != null).
 				map(f -> f.getInjectionId()).collect(Collectors.toCollection(TreeSet::new));
 		
 		total = injectionIds.size();

@@ -305,6 +305,9 @@ public class XTableColumnModel extends DefaultTableColumnModel {
 
 	@Override
 	public TableColumn getColumn(int columnIndex) {
+		
+		if(columnIndex == -1)
+			return null;
 
 		if(columnIndex >= 0 && columnIndex < tableColumns.size())
 			return (TableColumn) tableColumns.elementAt(columnIndex);

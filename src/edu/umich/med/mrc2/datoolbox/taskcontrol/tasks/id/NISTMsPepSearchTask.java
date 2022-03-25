@@ -150,6 +150,13 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 		createResultsSummary();	
 	}
 	
+	protected void assignLibraryIds() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		assignMrc2LibIds(conn);
+		ConnectionManager.releaseConnection(conn);
+	}
+	
 	protected void filterSearchResults(boolean skipResultsUpload) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();

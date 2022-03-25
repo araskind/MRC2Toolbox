@@ -140,7 +140,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		add(databaseSearchMenu);
 
 		// Library search
-		librarySearchMenu = new JMenu("MSMS library earch");
+		librarySearchMenu = new JMenu("MSMS library search");
 		librarySearchMenu.setIcon(nistPepMsIconSmall);
 		
 		pepSearchSetupMenuItem = addItem(librarySearchMenu, pepSearchSetupMenuItem, 

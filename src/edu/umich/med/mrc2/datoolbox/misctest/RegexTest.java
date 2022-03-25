@@ -224,7 +224,7 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			createMoTrPACFileManifest();
+			createRMDIRScript();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1531,11 +1531,45 @@ public class RegexTest {
 		List<String>commands = new ArrayList<String>();
 		for(File expDir : expDirs) {
 			
-			String command = "robocopy \"" + expDir.getAbsolutePath() + "\\ \"" + 
+			String command = "robocopy \"" + expDir.getAbsolutePath() + "\\ \" " + 
 			"\"R:\\Metabolomics-BRCF\\Shared\\_Reports\\" + expDir.getName() + " \" /mir /mt:16 /tbd /r:1 /w:3 /fft /np";
 			commands.add(command);
 		}
 		Path mspOutputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\robocopy.bat");
+	    try {
+			Files.createFile(mspOutputPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	    try {
+			Files.write(mspOutputPath, 
+					commands, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.WRITE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	private static void createRMDIRScript() {
+		
+		List<File>expDirs = new ArrayList<File>();
+		try {
+			expDirs = Files.list(Paths.get("Y:\\DataAnalysis\\_Reports"))
+			        .map(Path::toFile).filter(f -> f.getName().startsWith("EX"))
+			        .collect(Collectors.toList());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		List<String>commands = new ArrayList<String>();
+		for(File expDir : expDirs) {
+			
+			String command = "rm -rf \"" + expDir.getAbsolutePath() +"\"";
+			commands.add(command);
+		}
+		Path mspOutputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\rmdir.bat");
 	    try {
 			Files.createFile(mspOutputPath);
 		} catch (IOException e) {

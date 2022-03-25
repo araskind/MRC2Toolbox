@@ -324,8 +324,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName(),
 				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName(), 
 				exportMwTabIcon, this));
-		
-		menuActions.addSeparator();
 	}
 
 	@Override
