@@ -87,10 +87,10 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		msmsMenu = new JMenu("MSMS analysis");
 		msmsMenu.setIcon(extractMSMSFeaturesIconSmall);
 		
-		extractMSMSMenuItem = addItem(msmsMenu, extractMSMSMenuItem, 
+		extractMSMSMenuItem = addItem(msmsMenu, 
 				MainActionCommands.MSMS_FEATURE_EXTRACTION_SETUP_COMMAND, 
 				extractMSMSFeaturesIcon);
-		sendMSMS2TrackerMenuItem = addItem(msmsMenu, sendMSMS2TrackerMenuItem, 
+		sendMSMS2TrackerMenuItem = addItem(msmsMenu, 
 				MainActionCommands.SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH, 
 				sendToIDTrackerIcon);
 
@@ -100,10 +100,10 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		dbLinkageMenu = new JMenu("IDTracker integration");
 		dbLinkageMenu.setIcon(sendProjectToDatabaseIconSmall);
 		
-		addMetadataMenuItem = addItem(dbLinkageMenu, addMetadataMenuItem, 
+		addMetadataMenuItem = addItem(dbLinkageMenu, 
 				MainActionCommands.ADD_PROJECT_METADATA_COMMAND, 
 				addMetaDataIcon);
-		sendProjectToTrackerMenuItem = addItem(dbLinkageMenu, sendProjectToTrackerMenuItem, 
+		sendProjectToTrackerMenuItem = addItem(dbLinkageMenu, 
 				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND, 
 				sendProjectToDatabaseIcon);
 		
@@ -111,10 +111,10 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		
 		rawDataMenu = new JMenu("Raw data tools");
 		
-		openRawFilesMenuItem = addItem(rawDataMenu, openRawFilesMenuItem, 
+		openRawFilesMenuItem = addItem(rawDataMenu, 
 				MainActionCommands.OPEN_RAW_DATA_FILE_COMMAND, 
 				openDataFileIcon);
-		closeRawFilesMenuItem = addItem(rawDataMenu, closeRawFilesMenuItem, 
+		closeRawFilesMenuItem = addItem(rawDataMenu, 
 				MainActionCommands.CLOSE_RAW_DATA_FILE_COMMAND, 
 				closeDataFileIcon);
 		
@@ -122,13 +122,13 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		rawDataMenu.setIcon(dataFileToolsIconSmall);
 		
 		//	RAw data
-		msConvertSetupMenuItem = addItem(rawDataMenu, msConvertSetupMenuItem, 
+		msConvertSetupMenuItem = addItem(rawDataMenu, 
 				MainActionCommands.SETUP_RAW_DATA_CONVERSION_COMMAND, 
 				msConvertIcon);
-		indexRawDataRepositoryMenuItem = addItem(rawDataMenu, indexRawDataRepositoryMenuItem, 
+		indexRawDataRepositoryMenuItem = addItem(rawDataMenu, 
 				MainActionCommands.INDEX_RAW_DATA_REPOSITORY_COMMAND, 
 				indexRawFilesIcon);
-		rawDataToolsMenuItem = addItem(rawDataMenu, rawDataToolsMenuItem, 
+		rawDataToolsMenuItem = addItem(rawDataMenu, 
 				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND, 
 				dataFileToolsIcon);
 		

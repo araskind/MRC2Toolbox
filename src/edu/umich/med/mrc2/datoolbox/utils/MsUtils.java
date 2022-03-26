@@ -1280,17 +1280,38 @@ public class MsUtils {
 		double entropy = 0.0d;
 		for(MsPoint p : spectrum) {
 			
-			if(p.getIntensity() == 0)
-				continue;
-			
-			double norm = p.getIntensity() / totalIntensity;
-			entropy += norm * Math.log(norm);
+			if(p.getIntensity() > 0.0d) {
+				double norm = p.getIntensity() / totalIntensity;
+				entropy += norm * Math.log(norm);
+			}
 		}	
 		return -entropy;
 	}
 	
 	public static double calculateSpectrumEntropyNatLog(MsPoint[]spectrum) {
 		return calculateSpectrumEntropyNatLog(Arrays.asList(spectrum));
+	}
+	
+	public static double calculateCleanedSpectrumEntropyNatLog(Collection<MsPoint>spectrum) {
+		
+		Collection<MsPoint>cleanedSpectrum = 
+				MsUtils.averageAndDenoiseMassSpectrum(
+						spectrum, 					
+						MRC2ToolBoxConfiguration.getSpectrumEntropyMassError(), 
+						MRC2ToolBoxConfiguration.getSpectrumEntropyMassErrorType(),
+						MRC2ToolBoxConfiguration.getSpectrumEntropyNoiseCutoff());
+		
+		double totalIntensity = 
+				cleanedSpectrum.stream().mapToDouble(p -> p.getIntensity()).sum();
+		double entropy = 0.0d;
+		for(MsPoint p : cleanedSpectrum) {
+			
+			if(p.getIntensity() > 0.0d) {
+				double norm = p.getIntensity() / totalIntensity;
+				entropy += norm * Math.log(norm);
+			}
+		}	
+		return -entropy;
 	}
 	
 	public static Collection<MsPoint>averageTwoSpectraWithInterpolation(
@@ -1313,6 +1334,9 @@ public class MsUtils {
 	
 	public static Collection<MsPoint>averageMassSpectrum(
 			Collection<MsPoint>inputPoints, double mzBinWidth, MassErrorType errorType) {
+		
+		if(inputPoints.isEmpty())
+			return inputPoints;
 		
 		MsPoint[] points = inputPoints.stream().
 				sorted(mzSorter).
@@ -1364,6 +1388,9 @@ public class MsUtils {
 			double mzBinWidth, 
 			MassErrorType errorType,
 			double relIntNoiseCutoff) {
+		
+		if(inputPoints.isEmpty())
+			return inputPoints;
 		
 		Collection<MsPoint>avgMs = 
 				averageMassSpectrum(inputPoints, mzBinWidth, errorType);

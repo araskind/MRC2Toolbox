@@ -80,25 +80,25 @@ public class AssayDesignEditorMenuBar extends CommonMenuBar {
 		selectMenu = new JMenu("Selection");
 		selectMenu.setIcon(enableAllIconSmall);
 		
-		enableSelectedMenuItem = addItem(selectMenu, enableSelectedMenuItem, 
+		enableSelectedMenuItem = addItem(selectMenu, 
 				MainActionCommands.ENABLE_SELECTED_SAMPLES_COMMAND, 
 				enableSelectedIcon);
-		disableSelectedMenuItem = addItem(selectMenu, disableSelectedMenuItem, 
+		disableSelectedMenuItem = addItem(selectMenu, 
 				MainActionCommands.DISABLE_SELECTED_SAMPLES_COMMAND, 
 				disableSelectedIcon);
-		enableAllMenuItem = addItem(selectMenu, enableAllMenuItem, 
+		enableAllMenuItem = addItem(selectMenu, 
 				MainActionCommands.ENABLE_ALL_SAMPLES_COMMAND, 
 				enableAllIcon);
-		disableAllMenuItem = addItem(selectMenu, disableAllMenuItem, 
+		disableAllMenuItem = addItem(selectMenu, 
 				MainActionCommands.DISABLE_ALL_SAMPLES_COMMAND, 
 				disableAllIcon);
-		invertSelectionMenuItem = addItem(selectMenu, invertSelectionMenuItem, 
+		invertSelectionMenuItem = addItem(selectMenu, 
 				MainActionCommands.INVERT_ENABLED_SAMPLES_COMMAND, 
 				invertEnabledIcon);
 		
 		selectMenu.addSeparator();
 		
-		clearFiltersMenuItem = addItem(selectMenu, clearFiltersMenuItem, 
+		clearFiltersMenuItem = addItem(selectMenu, 
 				MainActionCommands.CLEAR_SAMPLES_FILTER_COMMAND, 
 				resetFilterIcon);
 		
@@ -107,7 +107,7 @@ public class AssayDesignEditorMenuBar extends CommonMenuBar {
 		editMenu = new JMenu("Edit");
 		editMenu.setIcon(editIconSmall);
 		
-		deleteDataFilesMenuItem = addItem(editMenu, deleteDataFilesMenuItem, 
+		deleteDataFilesMenuItem = addItem(editMenu, 
 				MainActionCommands.DELETE_DATA_FILES_COMMAND, 
 				deleteFilesIcon);
 		

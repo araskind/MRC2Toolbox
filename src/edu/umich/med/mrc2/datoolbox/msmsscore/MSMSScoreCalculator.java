@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.MsPointBucket;
-import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.SpectumPair;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
@@ -38,7 +37,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -253,11 +252,10 @@ public class MSMSScoreCalculator {
 		double entropy = 0.0d;
 		for(double p : spectrum) {
 			
-			if(p == 0)
-				continue;
-			
-			double norm = p / totalIntensity;
-			entropy += norm * Math.log(norm);
+			if(p > 0.0d) {
+				double norm = p / totalIntensity;
+				entropy += norm * Math.log(norm);
+			}
 		}	
 		return -entropy;
 	}
@@ -388,27 +386,39 @@ public class MSMSScoreCalculator {
 
 	//	This is a stop-gap to calculate entropy score for 
 	//	METLIN hits that don't have mass error specified
-	public static double calculateEntropyMatchScore(
+//	public static double calculateEntropyMatchScore(
+//			TandemMassSpectrum msms, 
+//			ReferenceMsMsLibraryMatch match) {
+//
+//		NISTPepSearchParameterObject params = 
+//				IDTDataCash.getNISTPepSearchParameterObjectById(match.getSearchParameterSetId());
+//		if(params == null) {
+//			return calculateEntropyBasedMatchScore(			
+//					msms.getSpectrum(), 
+//					match.getMatchedLibraryFeature().getSpectrum(),
+//					20, 
+//					MassErrorType.ppm,
+//					DEFAULT_MS_REL_INT_NOISE_CUTOFF);
+//		}
+//		else
+//			return calculateEntropyBasedMatchScore(			
+//				msms.getSpectrum(), 
+//				match.getMatchedLibraryFeature().getSpectrum(),
+//				params.getFragmentMzErrorValue(), 
+//				params.getFragmentMzErrorType(),
+//				DEFAULT_MS_REL_INT_NOISE_CUTOFF);
+//	}
+	
+	public static double calculateDefaultEntropyMatchScore(
 			TandemMassSpectrum msms, 
 			ReferenceMsMsLibraryMatch match) {
 
-		NISTPepSearchParameterObject params = 
-				IDTDataCash.getNISTPepSearchParameterObjectById(match.getSearchParameterSetId());
-		if(params == null) {
 			return calculateEntropyBasedMatchScore(			
 					msms.getSpectrum(), 
 					match.getMatchedLibraryFeature().getSpectrum(),
-					20, 
-					MassErrorType.ppm,
-					DEFAULT_MS_REL_INT_NOISE_CUTOFF);
-		}
-		else
-			return calculateEntropyBasedMatchScore(			
-				msms.getSpectrum(), 
-				match.getMatchedLibraryFeature().getSpectrum(),
-				params.getFragmentMzErrorValue(), 
-				params.getFragmentMzErrorType(),
-				DEFAULT_MS_REL_INT_NOISE_CUTOFF);
+					MRC2ToolBoxConfiguration.getSpectrumEntropyMassError(), 
+					MRC2ToolBoxConfiguration.getSpectrumEntropyMassErrorType(),
+					MRC2ToolBoxConfiguration.getSpectrumEntropyNoiseCutoff());
 	}
 }
 

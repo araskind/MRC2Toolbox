@@ -51,14 +51,10 @@ public class MGFPanelMenuBar extends CommonMenuBar {
 		importMenu,
 		exportMenu;
 
-	// Import items
 	private JMenuItem
-		importMGFMenuItem;
-	
-	// Export items
-	private JMenuItem
+		importMGFMenuItem,
 		exportMGFMenuItem;
-
+	
 	public MGFPanelMenuBar(ActionListener listener) {
 
 		super(listener);
@@ -67,7 +63,7 @@ public class MGFPanelMenuBar extends CommonMenuBar {
 		importMenu = new JMenu("Import");
 		importMenu.setIcon(importMgfIconSmall);		
 		
-		importMGFMenuItem = addItem(importMenu, importMGFMenuItem, 
+		importMGFMenuItem = addItem(importMenu, 
 				MainActionCommands.IMPORT_MGF_COMMAND, 
 				importMgfIcon);
 		
@@ -77,7 +73,7 @@ public class MGFPanelMenuBar extends CommonMenuBar {
 		exportMenu = new JMenu("Export");
 		exportMenu.setIcon(exportMsMsIconSmall);		
 		
-		exportMGFMenuItem = addItem(exportMenu, exportMGFMenuItem, 
+		exportMGFMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_MSMS_COMMAND, 
 				exportMsMsIcon);
 		

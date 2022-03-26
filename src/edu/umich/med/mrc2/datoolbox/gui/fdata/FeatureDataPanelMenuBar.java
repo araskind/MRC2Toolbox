@@ -144,25 +144,25 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		loadDataMenu = new JMenu("Load data");
 		loadDataMenu.setIcon(loadPlainDataFileIconSmall);
 		
-		loadMultiFileMenuItem = addItem(loadDataMenu, loadMultiFileMenuItem, 
+		loadMultiFileMenuItem = addItem(loadDataMenu, 
 				MainActionCommands.LOAD_DATA_FROM_MULTIFILES_COMMAND, 
 				loadMultiFileIcon);
-		addFromMultiFileMenuItem = addItem(loadDataMenu, addFromMultiFileMenuItem, 
+		addFromMultiFileMenuItem = addItem(loadDataMenu, 
 				MainActionCommands.ADD_DATA_FROM_MULTIFILES_COMMAND, 
 				addMultiFileIcon);
 		
 		loadDataMenu.addSeparator();
 		
-		loadFromTextMenuItem = addItem(loadDataMenu, loadFromTextMenuItem, 
+		loadFromTextMenuItem = addItem(loadDataMenu, 
 				MainActionCommands.LOAD_DATA_COMMAND, 
 				loadPlainDataFileIcon);
-		loadLibraryDataMenuItem = addItem(loadDataMenu, loadLibraryDataMenuItem, 
+		loadLibraryDataMenuItem = addItem(loadDataMenu, 
 				MainActionCommands.LOAD_LIBRARY_COMMAND, 
 				loadLibraryIcon);
 		
 		loadDataMenu.addSeparator();
 		
-		loadFromExcelMenuItem = addItem(loadDataMenu, loadFromExcelMenuItem, 
+		loadFromExcelMenuItem = addItem(loadDataMenu,
 				MainActionCommands.LOAD_DATA_FROM_EXCEL_FILE_COMMAND, 
 				loadFromExcelIcon);
 		
@@ -172,7 +172,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		statsMenu = new JMenu("Statistics");
 		statsMenu.setIcon(calcStatsIconSmall);
 		
-		calculateStatisticsMenuItem = addItem(statsMenu, calculateStatisticsMenuItem, 
+		calculateStatisticsMenuItem = addItem(statsMenu, 
 				MainActionCommands.CALC_FEATURES_STATS_COMMAND, 
 				calcStatsIcon);
 		
@@ -182,22 +182,22 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		searchMenu = new JMenu("Search/Filter");
 		searchMenu.setIcon(filterIconSmall);
 		
-		featureFilterMenuItem = addItem(searchMenu, featureFilterMenuItem, 
+		featureFilterMenuItem = addItem(searchMenu, 
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND, 
 				filterIcon);
-		showOnlyKnownsMenuItem = addItem(searchMenu, showOnlyKnownsMenuItem, 
+		showOnlyKnownsMenuItem = addItem(searchMenu, 
 				MainActionCommands.SHOW_KNOWN_FEATURES_COMMAND, 
 				knownIcon);
-		showOnlyUnknownsMenuItem = addItem(searchMenu, showOnlyUnknownsMenuItem, 
+		showOnlyUnknownsMenuItem = addItem(searchMenu, 
 				MainActionCommands.SHOW_UNKNOWN_FEATURES_COMMAND, 
 				unknownIcon);
-		showQcStandardsMenuItem = addItem(searchMenu, showQcStandardsMenuItem, 
+		showQcStandardsMenuItem = addItem(searchMenu, 
 				MainActionCommands.SHOW_QC_FEATURES_COMMAND, 
 				qcIcon);
 		
 		searchMenu.addSeparator();
 		
-		resetFilterMenuItem = addItem(searchMenu, resetFilterMenuItem, 
+		resetFilterMenuItem = addItem(searchMenu, 
 				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND, 
 				resetFilterIcon);
 		
@@ -207,19 +207,19 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		identificationMenu = new JMenu("Identification");
 		identificationMenu.setIcon(searchLibraryIconSmall);
 		
-		searchLibraryMenuItem = addItem(identificationMenu, searchLibraryMenuItem, 
+		searchLibraryMenuItem = addItem(identificationMenu, 
 				MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND, 
 				searchLibraryIcon);
-		searchDatabaseMenuItem = addItem(identificationMenu, searchDatabaseMenuItem, 
+		searchDatabaseMenuItem = addItem(identificationMenu, 
 				MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND, 
 				searchDatabaseIcon);
 		
 		identificationMenu.addSeparator();
 		
-		showMissingIdsMenuItem = addItem(identificationMenu, showMissingIdsMenuItem, 
+		showMissingIdsMenuItem = addItem(identificationMenu, 
 				MainActionCommands.SHOW_MISSING_IDENTIFICATIONS_COMMAND, 
 				showMissingIdentificationsIcon);
-		clearIdentificationsMenuItem = addItem(identificationMenu, clearIdentificationsMenuItem, 
+		clearIdentificationsMenuItem = addItem(identificationMenu,
 				MainActionCommands.CLEAR_IDENTIFICATIONS_COMMAND, 
 				clearIdentificationsIcon);
 		
@@ -229,32 +229,32 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		exportMenu = new JMenu("Export");
 		exportMenu.setIcon(exportResultsIconSmall);
 		
-		exportForBinnerAnalysisMenuItem = addItem(exportMenu, exportForBinnerAnalysisMenuItem, 
+		exportForBinnerAnalysisMenuItem = addItem(exportMenu,
 				MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND, 
 				exportResults4BinnerIcon);
-		exportForMPPAnalysisMenuItem = addItem(exportMenu, exportForMPPAnalysisMenuItem, 
+		exportForMPPAnalysisMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_RESULTS_4MPP_COMMAND, 
 				exportResults4MPPIcon);
-		exportForRAnalysisMenuItem = addItem(exportMenu, exportForRAnalysisMenuItem, 
+		exportForRAnalysisMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_RESULTS_4R_COMMAND, 
 				exportResults4RIcon);
 		
-		exportMzRtStatsMenuItem = addItem(exportMenu, exportForRAnalysisMenuItem, 
+		exportMzRtStatsMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_MZRT_STATISTICS_COMMAND, 
 				exportMzRtStatsIcon);
 		
 		exportMenu.addSeparator();
 		
-		exportDialogMenuItem = addItem(exportMenu, exportForRAnalysisMenuItem, 
+		exportDialogMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_RESULTS_COMMAND, 
 				exportResultsIcon);
 		
 		exportMenu.addSeparator();
 		
-		exportIntegratedReportMenuItem = addItem(exportMenu, exportIntegratedReportMenuItem, 
+		exportIntegratedReportMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND, 
 				exportExcelIcon);
-		exportMWTabReportMenuItem = addItem(exportMenu, exportMWTabReportMenuItem, 
+		exportMWTabReportMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND, 
 				exportMwTabIcon);
 		
@@ -264,10 +264,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		utilsMenu = new JMenu("Utilities");
 		utilsMenu.setIcon(dataFileToolsIcon);
 		
-		checkForDuplicateNamesMenuItem = addItem(utilsMenu, checkForDuplicateNamesMenuItem, 
+		checkForDuplicateNamesMenuItem = addItem(utilsMenu, 
 				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND, 
 				checkDuplicateNamesIcon);
-		cleanEmptyFeaturesMenuItem = addItem(utilsMenu, cleanEmptyFeaturesMenuItem, 
+		cleanEmptyFeaturesMenuItem = addItem(utilsMenu, 
 				MainActionCommands.CLEAN_EMPTY_FEATURES_COMMAND, 
 				cleanEmptyFeaturesIcon);
 		
@@ -283,7 +283,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		graphicsMenu = new JMenu("Visualization");
 		graphicsMenu.setIcon(bubblePlotIconSmall);
 		
-		bubblePlotMenuItem = addItem(graphicsMenu, bubblePlotMenuItem, 
+		bubblePlotMenuItem = addItem(graphicsMenu,  
 				MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT, 
 				bubblePlotIcon);
 		

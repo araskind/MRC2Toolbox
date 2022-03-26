@@ -74,16 +74,16 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		integrationMenu = new JMenu("Data integration");
 		integrationMenu.setIcon(collectIDDataIconSmall);
 		
-		integrationSetupMenuItem = addItem(integrationMenu, integrationSetupMenuItem, 
+		integrationSetupMenuItem = addItem(integrationMenu, 
 				MainActionCommands.DATA_INTEGRATION_DIALOG_COMMAND, 
 				collectIDDataIcon);
-		acceptListMenuItem = addItem(integrationMenu, acceptListMenuItem, 
+		acceptListMenuItem = addItem(integrationMenu, 
 				MainActionCommands.ACCEPT_CLEAN_ID_LIST_COMMAND, 
 				acceptListIcon);
 		
 		integrationMenu.addSeparator();
 		
-		deleteIntegrationMenuItem = addItem(integrationMenu, deleteIntegrationMenuItem, 
+		deleteIntegrationMenuItem = addItem(integrationMenu, 
 				MainActionCommands.DELETE_INTEGRATION_SET_COMMAND, 
 				deleteDataSetIcon);
 
@@ -93,10 +93,10 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		searchMenu = new JMenu("Filter");
 		searchMenu.setIcon(filterIconSmall);
 		
-		filterMenuItem = addItem(searchMenu, filterMenuItem, 
+		filterMenuItem = addItem(searchMenu, 
 				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND, 
 				filterIcon);
-		resetFilterMenuItem = addItem(searchMenu, resetFilterMenuItem, 
+		resetFilterMenuItem = addItem(searchMenu, 
 				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND, 
 				resetFilterIcon);
 		

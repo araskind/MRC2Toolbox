@@ -175,6 +175,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureSearchTa
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerDataExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerProjectDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.SpectrumEntropyRecalculationTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ExtendedMSPExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataLoadForInjectionsTask;
@@ -260,7 +261,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	private ReassignDefaultMSMSLibraryHitDialog reassignDefaultMSMSLibraryHitDialog;
 	private IndeterminateProgressDialog idp;
 	private FilterTrackerMSMSFeaturesDialog filterTrackerFeaturesDialog;
-	private MSMSFeatureRTIDSearchDialog msmsFeatureRTIDSearchDialog;
+	private MSMSFeatureRTIDSearchDialog msmsFeatureRTIDSearchDialog;	
+	private EntropyScoringSetupDialog entropyScoringSetupDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon openCdpIdProjectIcon = GuiUtils.getIcon("openIdExperiment", 24);
@@ -288,6 +290,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	private static final Icon fdrIcon = GuiUtils.getIcon("fdr", 24);	
 	private static final Icon reassignTopHitsIcon = GuiUtils.getIcon("recalculateScores", 24);
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
+	private static final Icon entropyIcon = GuiUtils.getIcon("spectrumEntropy", 24);
 
 	public IDWorkbenchPanel() {
 
@@ -405,6 +408,15 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT.getName(),
 				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT.getName(), 
 				reassignTopHitsIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SETUP_SPECTRUM_ENTROPY_SCORING.getName(),
+				MainActionCommands.SETUP_SPECTRUM_ENTROPY_SCORING.getName(), 
+				entropyIcon, this));
+		
+		menuActions.addSeparator();		
 		
 		SimpleButtonAction fdrItem = GuiUtils.setupButtonAction(
 				MainActionCommands.SETUP_FDR_ESTIMATION_FOR_LIBRARY_MATCHES.getName(),
@@ -696,8 +708,49 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		if (command.equals(MainActionCommands.COPY_LIBRARY_SPECTRUM_AS_ARRAY_COMMAND.getName()))
 			copySelectedLibraryFeatureSpectrumAsArray();	
 		
+		if (command.equals(MainActionCommands.SETUP_SPECTRUM_ENTROPY_SCORING.getName()))
+			setupSpectrumEntropyScoringParameters();
+		
+		if (command.equals(MainActionCommands.RECALCULATE_SPECTRUM_ENTROPY_SCORES.getName()))
+			recalculateSpectrumEntropyScores();		
 	}
 	
+	private void setupSpectrumEntropyScoringParameters() {
+		
+		Collection<MsFeatureInfoBundle> bundles = 
+				getMsMsFeatureBundles(TableRowSubset.ALL);
+		if(bundles == null || bundles.isEmpty())
+			return;
+
+		entropyScoringSetupDialog = new EntropyScoringSetupDialog(this);
+		entropyScoringSetupDialog.setLocationRelativeTo(this.getContentPane());
+		entropyScoringSetupDialog.setVisible(true);
+	}	
+	
+	private void recalculateSpectrumEntropyScores() {
+
+		//	Check if parameters changed
+		Collection<String> errors = entropyScoringSetupDialog.validateParameters();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), entropyScoringSetupDialog);
+			return;		
+		}	
+		entropyScoringSetupDialog.savePreferences();
+		entropyScoringSetupDialog.dispose();
+		
+		//	Recalculate entropies/scores
+		Collection<MsFeatureInfoBundle> bundles = 
+				getMsMsFeatureBundles(TableRowSubset.ALL);
+		if(bundles == null || bundles.isEmpty())
+			return;
+		
+		SpectrumEntropyRecalculationTask task = 
+				new SpectrumEntropyRecalculationTask(bundles);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+	}
+
 	private void copySelectedLibraryFeatureSpectrumAsArray() {
 
 		MsFeatureIdentity selectedIdentity = 
@@ -2610,8 +2663,19 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			
 			if (e.getSource().getClass().equals(DefaultMSMSLibraryHitReassignmentTask.class))
 				finalizeDefaultMSMSLibraryHitReassignmentTask((DefaultMSMSLibraryHitReassignmentTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(SpectrumEntropyRecalculationTask.class))
+				finalizeSpectrumEntropyRecalculation();
 		}
 	}		
+
+	private void finalizeSpectrumEntropyRecalculation() {
+		
+		MsFeatureInfoBundle selected = msTwoFeatureTable.getSelectedBundle();
+		reloadActiveMSMSFeatureCollection();			
+		if(selected != null)
+			msTwoFeatureTable.selectBundle(selected);
+	}
 
 	private void finalizeDefaultMSMSLibraryHitReassignmentTask(
 			DefaultMSMSLibraryHitReassignmentTask source) {

@@ -112,16 +112,16 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		manageMenu = new JMenu("Manage");
 		manageMenu.setIcon(libraryManagerIconSmall);
 		
-		libraryManagerMenuItem = addItem(manageMenu, libraryManagerMenuItem, 
+		libraryManagerMenuItem = addItem(manageMenu, 
 				MainActionCommands.SHOW_LIBRARY_MANAGER_COMMAND, 
 				libraryManagerIcon);
 		
 		manageMenu.addSeparator();
 		
-		openLibraryMenuItem = addItem(manageMenu, openLibraryMenuItem, 
+		openLibraryMenuItem = addItem(manageMenu, 
 				MainActionCommands.SHOW_LIBRARY_LIST_COMMAND, 
 				openLibraryIcon);
-		closeLibraryMenuItem = addItem(manageMenu, closeLibraryMenuItem, 
+		closeLibraryMenuItem = addItem(manageMenu, 
 				MainActionCommands.CLOSE_LIBRARY_COMMAND, 
 				closeLibraryIcon);
 		
@@ -131,19 +131,19 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		editFeaturesMenu = new JMenu("Edit");
 		editFeaturesMenu.setIcon(editFeatureIconSmall);
 		
-		newFeatureMenuItem = addItem(editFeaturesMenu, newFeatureMenuItem, 
+		newFeatureMenuItem = addItem(editFeaturesMenu, 
 				MainActionCommands.NEW_LIBRARY_FEATURE_DIAOG_COMMAND, 
 				newFeatureIcon);
 		newFeatureMenuItem.setEnabled(false);
 		
-//		editFeatureMenuItem = addItem(editFeaturesMenu, editFeatureMenuItem, 
+//		editFeatureMenuItem = addItem(editFeaturesMenu, 
 //				MainActionCommands.EDIT_LIBRARY_FEATURE_DIALOG_COMMAND, 
 //				editFeatureIcon);
 //		editFeatureMenuItem.setEnabled(false);
 		
 		editFeaturesMenu.addSeparator();
 		
-		deleteFeatureMenuItem = addItem(editFeaturesMenu, deleteFeatureMenuItem, 
+		deleteFeatureMenuItem = addItem(editFeaturesMenu, 
 				MainActionCommands.DELETE_LIBRARY_FEATURE_COMMAND, 
 				deleteFeatureIcon);
 		
@@ -153,16 +153,16 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		importMenu = new JMenu("Import");
 		importMenu.setIcon(importLibraryIconSmall);
 		
-		importLibraryMenuItem = addItem(importMenu, importLibraryMenuItem, 
+		importLibraryMenuItem = addItem(importMenu, 
 				MainActionCommands.IMPORT_COMPOUND_LIBRARY_COMMAND, 
 				importLibraryIcon);
-		importRtDataMenuItem = addItem(importMenu, importRtDataMenuItem, 
+		importRtDataMenuItem = addItem(importMenu, 
 				MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND, 
 				importRtIcon);
 		
 		importMenu.addSeparator();
 		
-		importDecoyMSMSLibrary = addItem(importMenu, importDecoyMSMSLibrary, 
+		importDecoyMSMSLibrary = addItem(importMenu, 
 				MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND, 
 				libraryImportIcon);	//	TODO create different icon
 		importDecoyMSMSLibrary.setEnabled(false);
@@ -173,16 +173,16 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		exportMenu = new JMenu("Export");
 		exportMenu.setIcon(exportLibraryIconSmall);
 		
-		exportMzRtLibraryMenuItem = addItem(exportMenu, exportMzRtLibraryMenuItem, 
+		exportMzRtLibraryMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND, 
 				exportLibraryIcon);
-		exportFilteredMzRtLibraryMenuItem = addItem(exportMenu, exportFilteredMzRtLibraryMenuItem, 
+		exportFilteredMzRtLibraryMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_FILTERED_COMPOUND_LIBRARY_COMMAND, 
 				exportFilteredLibraryIcon);
 		
 		exportMenu.addSeparator();
 		
-		exportReferenceMSMSLibraryMenuItem = addItem(exportMenu, exportReferenceMSMSLibraryMenuItem, 
+		exportReferenceMSMSLibraryMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND, 
 				libraryExportIcon);	//	TODO create different icon
 		
@@ -192,7 +192,7 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		utilitiesMenu = new JMenu("Utilities");
 		utilitiesMenu.setIcon(utilitiesIconSmall);
 		
-		convertCefForRecursionMenuItem = addItem(utilitiesMenu, convertCefForRecursionMenuItem, 
+		convertCefForRecursionMenuItem = addItem(utilitiesMenu, 
 				MainActionCommands.CONVERT_LIBRARY_FOR_RECURSION_DIALOG_COMMAND, 
 				mergeLibrariesIcon);
 		

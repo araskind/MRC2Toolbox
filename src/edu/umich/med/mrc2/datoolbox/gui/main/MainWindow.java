@@ -1260,7 +1260,9 @@ public class MainWindow extends JFrame
 		
 		projectBaseDirectory = projectDirectory.getParentFile();
 		savePreferences();
-		
+
+		projectSwitchController = 
+				new ProjectSwitchController(false, null, false, ProjectType.DATA_ANALYSIS, null);
 		SaveProjectTask spt = new SaveProjectTask(currentProject);
 		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
 		MRC2ToolBoxCore.getTaskController().addTask(spt);
@@ -1452,75 +1454,13 @@ public class MainWindow extends JFrame
 			showNewProjectDialog(
 					projectSwitchController.getNewProjectType(),
 					null, 
-					projectSwitchController.getLimsExperiment());
-			
+					projectSwitchController.getLimsExperiment());			
 		}
 		if(projectSwitchController.getProjectState().equals(
 				ProjectSwitchController.ProjectState.EXISTING_PROJECT))
 			initProjectLoadTask(projectSwitchController.getNewProjectType());
 
-		//	TODO
-//		if(savingAsCopy) {
-//
-//			savingAsCopy = false;
-//			File projectCopy = selectProjectCopyDirectory();
-//
-//			if(projectCopy != null) {
-//				
-//				//	TODO update project name and project file name
-//				try {
-//					FileUtils.copyDirectory(currentProject.getProjectDirectory(), projectCopy);
-//					currentProject.getProjectFile();				
-//					File oldProjectFile = 
-//							Paths.get(projectCopy.getAbsolutePath(), currentProject.getProjectFile().getName()).toFile();				
-//					File newProjectFile = 
-//							Paths.get(projectCopy.getAbsolutePath(), projectCopy.getName() + "."
-//							+ MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION).toFile();
-//					
-//					oldProjectFile.renameTo(newProjectFile);
-//					
-//					MessageDialog.showInfoMsg("Project " + currentProject.getName() + 
-//							" copied to\n" + projectCopy.getAbsolutePath());
-//				} catch (IOException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-//			}
-//		}
-	}
-	
-	private void finalizeRawDataAnalysisProjectSave() {
-		
-//		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-//		MainWindow.hideProgressDialog();		
-//		if(showNewMetabolomicProjectDialog) {
-//
-//			showNewMetabolomicProjectDialog = false;
-//			clearGuiAfterRawDataAnalysisProjectClosed();
-//			rawDataAnalysisProjectSetupDialog = new RawDataAnalysisProjectSetupDialog(this);
-//			rawDataAnalysisProjectSetupDialog.setLocationRelativeTo(this.getContentPane());
-//			rawDataAnalysisProjectSetupDialog.setVisible(true);
-//		}
-//		if(saveOnCloseRequested) {
-//
-//			saveOnCloseRequested = false;
-//			clearGuiAfterRawDataAnalysisProjectClosed();
-//		}
-//		if(saveOnExitRequested) {
-//
-//			saveOnExitRequested = false;
-//			int selectedValue = 
-//					MessageDialog.showChoiceWithWarningMsg("Are you sure you want to exit?", 
-//							this.getContentPane());
-//			if (selectedValue == JOptionPane.YES_OPTION)
-//				MRC2ToolBoxCore.shutDown();
-//		}
-//		if(showOpenProjectDialog) {
-//
-//			clearGuiAfterRawDataAnalysisProjectClosed();
-//			showOpenProjectDialog = false;
-//			//	initRawDataAnalysisProjectLoadTask();
-//		}
+		//	TODO if(savingAsCopy) {}
 	}
 
 	private void finalizeProjectLoad(LoadProjectTask eTask) {

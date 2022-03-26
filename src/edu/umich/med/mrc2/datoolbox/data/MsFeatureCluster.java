@@ -490,7 +490,7 @@ public class MsFeatureCluster implements Serializable {
 		msms.setParentScanNumber(primaryTandemMs.getParentScanNumber());
 		msmsList.stream().forEach(s -> msms.addAveragedScanNumbers(s.getScanNumber(), s.getParentScanNumber()));
 		msmsList.stream().forEach(s -> s.getScanRtMap().entrySet().stream().forEach(e -> msms.getScanRtMap().put(e.getKey(), e.getValue())));
-		msms.setEntropy(MsUtils.calculateSpectrumEntropyNatLog(msms.getSpectrum()));
+		msms.setEntropy(MsUtils.calculateCleanedSpectrumEntropyNatLog(msms.getSpectrum()));	
 		
 		Range parentMzRange = 
 				MsUtils.createMassRange(parent.getMz(), mzBinWidth, errorType);

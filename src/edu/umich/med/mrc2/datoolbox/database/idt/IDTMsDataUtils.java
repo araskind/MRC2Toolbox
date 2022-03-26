@@ -275,7 +275,7 @@ public class IDTMsDataUtils {
 			TandemMassSpectrum msms = new TandemMassSpectrum(2, parent, msmsPoints, polarity);
 			msms.setFragmenterVoltage(rs.getDouble("FRAGMENTATION_ENERGY"));
 			msms.setCidLevel(rs.getDouble("COLLISION_ENERGY"));		
-			msms.setEntropy(MsUtils.calculateSpectrumEntropyNatLog(msmsPoints));
+			msms.setEntropy(MsUtils.calculateCleanedSpectrumEntropyNatLog(msmsPoints));
 			
 			MassSpectrum ms = new MassSpectrum();
 			ms.addTandemMs(msms);
@@ -624,7 +624,7 @@ public class IDTMsDataUtils {
 				spectrum.add(new MsPoint(msrs.getDouble("MZ"), msrs.getDouble("HEIGHT")));
 
 			msrs.close();
-			msms.setEntropy(MsUtils.calculateSpectrumEntropyNatLog(spectrum));		
+			msms.setEntropy(MsUtils.calculateCleanedSpectrumEntropyNatLog(spectrum));		
 			newTarget.getSpectrum().addTandemMs(msms);
 		}
 		msps.close();

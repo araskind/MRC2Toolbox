@@ -65,6 +65,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
 	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 24);
 	private static final Icon findMSMSFeaturesIcon = GuiUtils.getIcon("findMSMSFeatures", 24);
+	private static final Icon entropyIcon = GuiUtils.getIcon("spectrumEntropy", 24);
 
 	// Menus
 	private JMenu
@@ -88,6 +89,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		pepSearchOfflineSetupMenuItem,
 		pepsearchResultsValidateMenuItem,
 		defaultMatchReassignMenuItem,
+		entropyMenuItem,
 		fdrMenuItem;
 
 	// Annotation managers
@@ -118,22 +120,22 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		databaseSearchMenu = new JMenu("Feature search");
 		databaseSearchMenu.setIcon(searchIconSmall);
 		
-		databaseSearchMenuItem = addItem(databaseSearchMenu, databaseSearchMenuItem, 
+		databaseSearchMenuItem = addItem(databaseSearchMenu, 
 			MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND, 
 			searchIdTrackerIcon);
 
 		databaseSearchMenu.addSeparator();
 		
-		filterMSMSFeaturesMenuItem = addItem(databaseSearchMenu, filterMSMSFeaturesMenuItem, 
+		filterMSMSFeaturesMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND, 
 				filterIcon);
-		findMSMSFeaturesMenuItem = addItem(databaseSearchMenu, findMSMSFeaturesMenuItem, 
+		findMSMSFeaturesMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND, 
 				findMSMSFeaturesIcon);
 		
 		databaseSearchMenu.addSeparator();
 		
-		resetFeatureFiltersMenuItem = addItem(databaseSearchMenu, resetFeatureFiltersMenuItem, 
+		resetFeatureFiltersMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES, 
 				reloadIcon);
 
@@ -143,25 +145,31 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		librarySearchMenu = new JMenu("MSMS library search");
 		librarySearchMenu.setIcon(nistPepMsIconSmall);
 		
-		pepSearchSetupMenuItem = addItem(librarySearchMenu, pepSearchSetupMenuItem, 
+		pepSearchSetupMenuItem = addItem(librarySearchMenu, 
 				MainActionCommands.NIST_MS_PEPSEARCH_SETUP_COMMAND, 
 				nistPepMsIcon);
-		pepSearchOfflineSetupMenuItem = addItem(librarySearchMenu, pepSearchOfflineSetupMenuItem, 
+		pepSearchOfflineSetupMenuItem = addItem(librarySearchMenu, 
 				MainActionCommands.NIST_MS_OFFLINE_PEPSEARCH_SETUP_COMMAND, 
 				nistPepMsOfflineIcon);
 
 		librarySearchMenu.addSeparator();
 
-		pepsearchResultsValidateMenuItem = addItem(librarySearchMenu, pepsearchResultsValidateMenuItem, 
+		pepsearchResultsValidateMenuItem = addItem(librarySearchMenu, 
 				MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_COMMAND, 
 				nistPepMsOfflineUploadIcon);
-		defaultMatchReassignMenuItem = addItem(librarySearchMenu, defaultMatchReassignMenuItem, 
+		defaultMatchReassignMenuItem = addItem(librarySearchMenu, 
 				MainActionCommands.SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT, 
 				reassignTopHitsIcon);
 		
 		librarySearchMenu.addSeparator();
+		
+		entropyMenuItem = addItem(librarySearchMenu, 
+				MainActionCommands.SETUP_SPECTRUM_ENTROPY_SCORING, 
+				entropyIcon);
+		
+		librarySearchMenu.addSeparator();
 
-		fdrMenuItem = addItem(librarySearchMenu, fdrMenuItem, 
+		fdrMenuItem = addItem(librarySearchMenu, 
 				MainActionCommands.SETUP_FDR_ESTIMATION_FOR_LIBRARY_MATCHES, 
 				fdrIcon);
 		fdrMenuItem.setEnabled(false);
@@ -172,13 +180,13 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		annotationManagersMenu = new JMenu("Manage annotations");
 		annotationManagersMenu.setIcon(idStatusManagerIconSmall);
 		
-		idLevelManagerMenuItem = addItem(annotationManagersMenu, idLevelManagerMenuItem, 
+		idLevelManagerMenuItem = addItem(annotationManagersMenu, 
 				MainActionCommands.SHOW_ID_LEVEL_MANAGER_DIALOG_COMMAND, 
 				idStatusManagerIcon);
-		followupStepsManagerMenuItem = addItem( annotationManagersMenu, followupStepsManagerMenuItem,
+		followupStepsManagerMenuItem = addItem( annotationManagersMenu, 
 				MainActionCommands.SHOW_ID_FOLLOWUP_STEP_MANAGER_DIALOG_COMMAND, 
 				idFollowupStepManagerIcon);
-		stdAnnotationManagerMenuItem = addItem(annotationManagersMenu, stdAnnotationManagerMenuItem, 
+		stdAnnotationManagerMenuItem = addItem(annotationManagersMenu, 
 				MainActionCommands.SHOW_STANDARD_FEATURE_ANNOTATION_MANAGER_DIALOG_COMMAND, 
 				standardFeatureAnnotationManagerIcon);
 		
@@ -188,7 +196,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		featureCollectionsMenu = new JMenu("Feature collections");
 		featureCollectionsMenu.setIcon(editFeatureCollectionIconSmall);
 
-		featureCollectionManagerMenuItem = addItem(featureCollectionsMenu, featureCollectionManagerMenuItem, 
+		featureCollectionManagerMenuItem = addItem(featureCollectionsMenu, 
 				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND, 
 				editFeatureCollectionIcon);
 		
@@ -198,7 +206,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		graphicsMenu = new JMenu("Visualization");
 		graphicsMenu.setIcon(bubblePlotIconSmall);
 		
-		bubblePlotMenuItem = addItem(graphicsMenu, bubblePlotMenuItem, 
+		bubblePlotMenuItem = addItem(graphicsMenu, 
 				MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT, 
 				bubblePlotIcon);
 
@@ -208,13 +216,13 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		exportMenu = new JMenu("Export");
 		exportMenu.setIcon(exportMSPIconSmall);
 		
-		trackerExportMenuItem = addItem(exportMenu, trackerExportMenuItem, 
+		trackerExportMenuItem = addItem(exportMenu, 
 				MainActionCommands.SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND, 
 				exportTrackerDataIcon);
-		mspExportMenuItem = addItem(exportMenu, mspExportMenuItem, 
+		mspExportMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_FEATURES_TO_MSP_COMMAND, 
 				exportMSPIcon);
-		siriusExportMenuItem = addItem(exportMenu, siriusExportMenuItem, 
+		siriusExportMenuItem = addItem(exportMenu, 
 				MainActionCommands.SHOW_SIRIUS_MS_EXPORT_DIALOG_COMMAND, 
 				siriusIcon);
 		

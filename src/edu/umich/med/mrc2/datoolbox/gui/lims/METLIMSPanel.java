@@ -238,32 +238,17 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 	}
 	
 	private void sendDesignToProject() {
-
+		
 		LIMSExperiment activeExperiment = experimentDataPanel.getSelectedExperiment();
 		if(activeExperiment == null)
 			return;
-
-		//	TODO check if it works? Maybe just force to create new project?
-//		if(MRC2ToolBoxCore.getCurrentProject() != null) {
-//
-//			String yesNoQuestion =
-//					"Do you want to replace the design for the current project\n"
-//					+ "with the data for selected LIMS experiment?";
-//			int result = MessageDialog.showChoiceWithWarningMsg(yesNoQuestion , this.getContentPane());
-//			if(result != JOptionPane.YES_OPTION)
-//				return;
-//
-//			MRC2ToolBoxCore.getCurrentProject().setLimsExperiment(activeExperiment);
-//			MRC2ToolBoxCore.getCurrentProject().setLimsProject(activeExperiment.getProject());
-//			ExperimentDesign design = MRC2ToolBoxCore.getCurrentProject().getExperimentDesign();
-//
-//			if(design.getSamples().isEmpty() && activeExperiment.getExperimentDesign() != null)
-//				design.replaceDesign(activeExperiment.getExperimentDesign());
-//		}
-//		else {
-			MRC2ToolBoxCore.getMainWindow().
+		
+		if(MRC2ToolBoxCore.getCurrentProject() != null || MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			MessageDialog.showWarningMsg("Please close currently active project first!");
+			return;
+		}
+		MRC2ToolBoxCore.getMainWindow().
 				showNewProjectDialog(ProjectType.DATA_ANALYSIS, null, activeExperiment);
-//		}
 	}
 
 	private void refreshLimsData() {

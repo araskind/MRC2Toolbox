@@ -62,10 +62,10 @@ public class QCPanelMenuBar extends CommonMenuBar {
 		toolsMenu = new JMenu("Analysis");
 		toolsMenu.setIcon(calcStatsIconSmall);		
 		
-		calculateFileStatisticsMenuItem = addItem(toolsMenu, calculateFileStatisticsMenuItem, 
+		calculateFileStatisticsMenuItem = addItem(toolsMenu, 
 				MainActionCommands.CALC_DATASET_STATS_COMMAND, 
 				calcStatsIcon);
-		runPCAMenuItem = addItem(toolsMenu, runPCAMenuItem, 
+		runPCAMenuItem = addItem(toolsMenu, 
 				MainActionCommands.CALC_DATASET_PCA_COMMAND, 
 				pcaIcon);
 		

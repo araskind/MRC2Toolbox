@@ -80,16 +80,16 @@ public class DuplicatesPanelMenuBar extends CommonMenuBar {
 		analysisMenu = new JMenu("Analysis");
 		analysisMenu.setIcon(showDuplicatesIconSmall);
 		
-		findDuplicatesMenuItem = addItem(analysisMenu, findDuplicatesMenuItem, 
+		findDuplicatesMenuItem = addItem(analysisMenu, 
 				MainActionCommands.SHOW_FIND_DUPLICATES_DIALOG_COMMAND, 
 				showDuplicatesIcon);
-		mergeDuplicatesMenuItem = addItem(analysisMenu, mergeDuplicatesMenuItem, 
+		mergeDuplicatesMenuItem = addItem(analysisMenu, 
 				MainActionCommands.SHOW_DUPLICATES_MERGE_DIALOG_COMMAND, 
 				clearDuplicatesIcon);
 		
 		analysisMenu.addSeparator();
 		
-		checkNamesMenuItem = addItem(analysisMenu, checkNamesMenuItem, 
+		checkNamesMenuItem = addItem(analysisMenu, 
 				MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND, 
 				checkDuplicateNamesIcon);
 
@@ -99,10 +99,10 @@ public class DuplicatesPanelMenuBar extends CommonMenuBar {
 		searchMenu = new JMenu("Filter");
 		searchMenu.setIcon(filterIconSmall);
 		
-		filterMenuItem = addItem(searchMenu, filterMenuItem, 
+		filterMenuItem = addItem(searchMenu, 
 				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND, 
 				filterIcon);
-		resetFilterMenuItem = addItem(searchMenu, resetFilterMenuItem, 
+		resetFilterMenuItem = addItem(searchMenu, 
 				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND, 
 				resetFilterIcon);
 		
@@ -112,7 +112,7 @@ public class DuplicatesPanelMenuBar extends CommonMenuBar {
 		exportMenu = new JMenu("Export");
 		exportMenu.setIcon(exportDuplicatesIconSmall);
 
-		exportDuplicatesMenuItem = addItem(exportMenu, exportDuplicatesMenuItem, 
+		exportDuplicatesMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_DUPLICATES_COMMAND, 
 				exportDuplicatesIcon);
 		

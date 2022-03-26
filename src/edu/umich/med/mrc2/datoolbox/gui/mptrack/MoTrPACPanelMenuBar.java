@@ -75,7 +75,7 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 		databaseMenu = new JMenu("Database");
 		databaseMenu.setIcon(databaseIconSmall);		
 		
-		refreshDatabaseDataMenuItem = addItem(databaseMenu, refreshDatabaseDataMenuItem, 
+		refreshDatabaseDataMenuItem = addItem(databaseMenu, 
 				MainActionCommands.REFRESH_LIMS_DATA_COMMAND, 
 				refreshDataIcon);
 		
@@ -85,7 +85,7 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 		referenceMenu = new JMenu("Reference");
 		referenceMenu.setIcon(showMetadataIconSmall);		
 		
-		showReferenceDataMenuItem = addItem(referenceMenu, showReferenceDataMenuItem, 
+		showReferenceDataMenuItem = addItem(referenceMenu,
 				MainActionCommands.SHOW_MOTRPAC_METADATA_REFERENCE_COMMAND, 
 				showMetadataIcon);
 		
@@ -95,7 +95,7 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 		reportMenu = new JMenu("Report");
 		reportMenu.setIcon(createFilesIconSmall);		
 		
-		createReportTemplateFilesMenuItem = addItem(reportMenu, createReportTemplateFilesMenuItem, 
+		createReportTemplateFilesMenuItem = addItem(reportMenu, 
 				MainActionCommands.CREATE_MOTRPAC_REPORT_FILES_COMMAND, 
 				createFilesIcon);
 		

@@ -101,7 +101,7 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 		clusteringMenu = new JMenu("Clustering");
 		clusteringMenu.setIcon(clusteringIconSmall);
 
-		clusteringSetupMenuItem = addItem(clusteringMenu, clusteringSetupMenuItem, 
+		clusteringSetupMenuItem = addItem(clusteringMenu, 
 				MainActionCommands.SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND, 
 				recalculateCorrelationsIcon);
 		
@@ -111,10 +111,10 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 		searchMenu = new JMenu("Filter");
 		searchMenu.setIcon(filterIconSmall);
 
-		filterClustersMenuItem = addItem(searchMenu, filterClustersMenuItem, 
+		filterClustersMenuItem = addItem(searchMenu, 
 				MainActionCommands.SHOW_CLUSTER_FILTER_COMMAND, 
 				filterIcon);
-		resetClusterFilteringMenuItem = addItem(searchMenu, resetClusterFilteringMenuItem, 
+		resetClusterFilteringMenuItem = addItem(searchMenu, 
 				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND, 
 				resetFilterIcon);
 		
@@ -124,34 +124,34 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 		annotationMenu = new JMenu("Annotation");
 		annotationMenu.setIcon(annotationIconSmall);
 
-		annotateClusterMenuItem = addItem(annotationMenu, annotateClusterMenuItem, 
+		annotateClusterMenuItem = addItem(annotationMenu, 
 				MainActionCommands.ANNOTATE_CLUSTER_COMMAND, 
 				annotationIcon);
-		annotateMassDifferencesMenuItem = addItem(annotationMenu, annotateMassDifferencesMenuItem, 
+		annotateMassDifferencesMenuItem = addItem(annotationMenu, 
 				MainActionCommands.ANNOTATE_MASS_DIFFERENCES_COMMAND, 
 				deltaAnnotationIcon);
-		batchAnnotationPreferencesMenuItem = addItem(annotationMenu, batchAnnotationPreferencesMenuItem, 
+		batchAnnotationPreferencesMenuItem = addItem(annotationMenu, 
 				MainActionCommands.SHOW_BATCH_ANNOTATE_PREFERENCES_COMMAND, 
 				batchAssignAnnotationsIcon);
 		
 		annotationMenu.addSeparator();
 		
-		binnerImportMenuItemMenuItem = addItem(annotationMenu, binnerImportMenuItemMenuItem, 
+		binnerImportMenuItemMenuItem = addItem(annotationMenu, 
 				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG, 
 				importBinnerDataIcon);
 		
 		annotationMenu.addSeparator();
 		
-		removeUnexplainedMenuItem = addItem(annotationMenu, removeUnexplainedMenuItem, 
+		removeUnexplainedMenuItem = addItem(annotationMenu, 
 				MainActionCommands.REMOVE_UNEXPLAINED_FEATURES_COMMAND, 
 				removeUnexplainedFromClustersIcon);
-		rejectUnexplainedMenuItem = addItem(annotationMenu, rejectUnexplainedMenuItem, 
+		rejectUnexplainedMenuItem = addItem(annotationMenu, 
 				MainActionCommands.REJECT_UNEXPLAINED_FEATURES_COMMAND, 
 				rejectUnexplainedIcon);
-		rejactAllButMolIonMenuItem = addItem(annotationMenu, rejactAllButMolIonMenuItem, 
+		rejactAllButMolIonMenuItem = addItem(annotationMenu, 
 				MainActionCommands.REJECT_ALL_BUT_MOLION_COMMAND, 
 				molIonOnlyIcon);
-		restoreAllRejectedMenuItem = addItem(annotationMenu, restoreAllRejectedMenuItem, 
+		restoreAllRejectedMenuItem = addItem(annotationMenu, 
 				MainActionCommands.RESTORE_ALL_REJECTED_FEATURES_COMMAND, 
 				restoreAllIcon);
 		
@@ -161,10 +161,10 @@ public class CorrelationPanelMenuBar extends CommonMenuBar {
 		graphicsMenu = new JMenu("Visualization");
 		graphicsMenu.setIcon(heatmapIconSmall);
 		
-		heatmapMenuItem = addItem(graphicsMenu, heatmapMenuItem, 
+		heatmapMenuItem = addItem(graphicsMenu, 
 				MainActionCommands.SHOW_HEATMAP_COMMAND, 
 				heatmapIcon);
-		massDiffsInBinnerMenuItem = addItem(graphicsMenu, massDiffsInBinnerMenuItem, 
+		massDiffsInBinnerMenuItem = addItem(graphicsMenu, 
 				MainActionCommands.EXPLORE_MASS_DIFFS_IN_BINNEER_DATA_COMMAND, 
 				exploreDeltasIcon);
 		

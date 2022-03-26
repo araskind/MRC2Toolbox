@@ -79,16 +79,16 @@ public class IDTrackerLimsManagerMenuBar extends CommonMenuBar {
 		limsMenu = new JMenu("LIMS");
 		limsMenu.setIcon(limsIconSmall);
 		
-		refreshLimsDataMenuItem = addItem(limsMenu, refreshLimsDataMenuItem, 
+		refreshLimsDataMenuItem = addItem(limsMenu, 
 				MainActionCommands.REFRESH_LIMS_DATA_COMMAND, 
 				refreshDataIcon);
 		
 		limsMenu.addSeparator();
 
-		newProjectMenuItem = addItem(limsMenu, newProjectMenuItem, 
+		newProjectMenuItem = addItem(limsMenu, 
 				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND, 
 				newCdpIdProjectIcon);
-		newExperimentMenuItem = addItem(limsMenu, newExperimentMenuItem, 
+		newExperimentMenuItem = addItem(limsMenu, 
 				MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND, 
 				newCdpIdExperimentIcon);
 		
@@ -97,25 +97,25 @@ public class IDTrackerLimsManagerMenuBar extends CommonMenuBar {
 		dataLoadMenu = new JMenu("Data upload");
 		dataLoadMenu.setIcon(loadMultiFileIconSmall);
 		
-		wizardMenuItem = addItem(dataLoadMenu, wizardMenuItem, 
+		wizardMenuItem = addItem(dataLoadMenu, 
 				MainActionCommands.SHOW_DATA_UPLOAD_WIZARD_COMMAND, 
 				wizardIcon);
 		
 		dataLoadMenu.addSeparator();
 		
-		prescanCefMenuItem = addItem(dataLoadMenu, prescanCefMenuItem, 
+		prescanCefMenuItem = addItem(dataLoadMenu, 
 				MainActionCommands.CEF_MSMS_SCAN_SETUP_COMMAND, 
 				scanCefIcon);
-		uploadMSMSFromCefMenuItem = addItem(dataLoadMenu, uploadMSMSFromCefMenuItem, 
+		uploadMSMSFromCefMenuItem = addItem(dataLoadMenu, 
 				MainActionCommands.LOAD_MSMS_DATA_FROM_MULTIFILES_COMMAND, 
 				loadMultiFileIcon);
-		uploadMS1FromCefMenuItem = addItem(dataLoadMenu, uploadMSMSFromCefMenuItem, 
+		uploadMS1FromCefMenuItem = addItem(dataLoadMenu, 
 				MainActionCommands.LOAD_AVG_MS1_DATA_FROM_FILE_COMMAND, 
 				loadAvgMS1DataFileIcon);
 		
 		dataLoadMenu.addSeparator();
 		
-		uploadBinnerDataMenuItem = addItem(dataLoadMenu, uploadBinnerDataMenuItem, 
+		uploadBinnerDataMenuItem = addItem(dataLoadMenu, 
 				MainActionCommands.SHOW_BINNER_REPORT_IMPORT_DIALOG, 
 				importBinnerDataIcon);
 		uploadBinnerDataMenuItem.setEnabled(false);

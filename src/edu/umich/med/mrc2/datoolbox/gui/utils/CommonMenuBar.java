@@ -47,9 +47,9 @@ public class CommonMenuBar extends JMenuBar {
 		this.alistener = alistener;
 	}
 	
-	protected JMenuItem addItem(JMenu menu, JMenuItem item, MainActionCommands command, Icon defaultIcon) {
+	protected JMenuItem addItem(JMenu menu, MainActionCommands command, Icon defaultIcon) {
 
-		item = new JMenuItem(command.getName());
+		JMenuItem item = new JMenuItem(command.getName());
 		item.setActionCommand(command.getName());
 		item.addActionListener(alistener);
 		item.setIcon(defaultIcon);

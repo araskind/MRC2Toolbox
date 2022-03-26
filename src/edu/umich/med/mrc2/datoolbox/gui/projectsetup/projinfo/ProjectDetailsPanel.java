@@ -65,7 +65,6 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "ProjectDetailsPanel.layout");
 	
 	private DataPipelinesTable dataPipelinesTable;
-	private JScrollPane scrollPane;
 	private JLabel lastModifiedValueLabel;
 	private JLabel createdOnValueLabel;
 	private JButton deleteAssayButtonButton;
@@ -205,7 +204,7 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		gbc_lastModifiedValueLabel.gridy = 5;
 		contents.add(lastModifiedValueLabel, gbc_lastModifiedValueLabel);
 
-		scrollPane = new JScrollPane();
+		
 		dataPipelinesTable = new DataPipelinesTable();
 		dataPipelinesTable.getSelectionModel().addListSelectionListener(this);
 		dataPipelinesTable.addMouseListener(
@@ -219,10 +218,10 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		          }
 	        });
 		dataPipelinesTable.addTablePopupMenu(new DataPipelineTablePopupMenu(this));	
-		
-		scrollPane.add(dataPipelinesTable);
-		scrollPane.setViewportView(dataPipelinesTable);
-		scrollPane.setPreferredSize(dataPipelinesTable.getPreferredScrollableViewportSize());
+		JScrollPane scrollPane = new JScrollPane(dataPipelinesTable);
+//		scrollPane.add(dataPipelinesTable);
+//		scrollPane.setViewportView(dataPipelinesTable);
+//		scrollPane.setPreferredSize(dataPipelinesTable.getPreferredScrollableViewportSize());
 
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
@@ -448,7 +447,9 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 		descriptionTextArea.setText("");
 		createdOnValueLabel.setText("");
 		lastModifiedValueLabel.setText("");
-		dataPipelinesTable.clearTable();
+		dataPipelinesTable.clearTable();		
+		acqMethodNameLabel.setText("");
+		daMethodNameLabel.setText("");
 	}
 	
 	@Override
@@ -478,7 +479,7 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 
 		lastModifiedValueLabel.setText(modified);
 		dataPipelinesTable.setTableModelFromProject(currentProject);
-		scrollPane.setPreferredSize(dataPipelinesTable.getPreferredScrollableViewportSize());
+//		scrollPane.setPreferredSize(dataPipelinesTable.getPreferredScrollableViewportSize());
 		dataPipelinesTable.selectPipeline(newDataPipeline);
 	}
 

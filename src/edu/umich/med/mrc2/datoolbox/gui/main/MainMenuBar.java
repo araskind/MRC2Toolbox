@@ -124,39 +124,39 @@ public class MainMenuBar extends CommonMenuBar {
 		
 		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
 
-			newProjectMenuItem = addItem(projectMenu, newProjectMenuItem, 
+			newProjectMenuItem = addItem(projectMenu, 
 					MainActionCommands.NEW_PROJECT_COMMAND, newProjectIcon);
 		}
-		newIDProjectMenuItem = addItem(projectMenu, newIDProjectMenuItem, 
+		newIDProjectMenuItem = addItem(projectMenu, 
 				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND, newRdaProjectIcon);
 		
 		projectMenu.addSeparator();
 
-		openProjectMenuItem = addItem(projectMenu, openProjectMenuItem, 
+		openProjectMenuItem = addItem(projectMenu, 
 				MainActionCommands.OPEN_PROJECT_COMMAND, openProjectIcon);
 		
-		openRdaProjectMenuItem = addItem(projectMenu, openProjectMenuItem, 
+		openRdaProjectMenuItem = addItem(projectMenu, 
 				MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND, openRdaProjectIcon);
 		
 		projectMenu.addSeparator();
 		
-		editIDProjectMenuItem = addItem(projectMenu, editIDProjectMenuItem,
+		editIDProjectMenuItem = addItem(projectMenu, 
 				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND, editRdaProjectIcon);		
 		editIDProjectMenuItem.setEnabled(false);
 		
-		saveProjectMenuItem = addItem(projectMenu, saveProjectMenuItem,
+		saveProjectMenuItem = addItem(projectMenu, 
 				MainActionCommands.SAVE_PROJECT_COMMAND, saveProjectIcon);
-		saveProjectAsMenuItem = addItem(projectMenu, saveProjectAsMenuItem,
+		saveProjectAsMenuItem = addItem(projectMenu, 
 				MainActionCommands.SAVE_PROJECT_COPY_COMMAND, saveProjectCopyIcon);
 		saveProjectAsMenuItem.setEnabled(false);
 		
 		projectMenu.addSeparator();
 		
-		closeProjectMenuItem = addItem(projectMenu, closeProjectMenuItem, 
+		closeProjectMenuItem = addItem(projectMenu, 
 				MainActionCommands.CLOSE_PROJECT_COMMAND, closeProjectIcon);
 		projectMenu.addSeparator();
 		
-		exitMenuItem = addItem(projectMenu, exitMenuItem, 
+		exitMenuItem = addItem(projectMenu, 
 				MainActionCommands.EXIT_COMMAND, exitIcon);
 		add(projectMenu);
 		
@@ -168,11 +168,11 @@ public class MainMenuBar extends CommonMenuBar {
 		//	Tools
 		toolsMenu = new JMenu("Tools");
 //		toolsMenu.setPreferredSize(preferredSize);
-		msToolsMenuItem = addItem(toolsMenu, msToolsMenuItem, 
+		msToolsMenuItem = addItem(toolsMenu, 
 				MainActionCommands.SHOW_MS_TOOLBOX_COMMAND, msToolboxIcon);
-		adductManagerMenuItem = addItem(toolsMenu, adductManagerMenuItem, 
+		adductManagerMenuItem = addItem(toolsMenu, 
 				MainActionCommands.SHOW_CHEM_MOD_EDITOR_COMMAND, chemModIcon);
-		rawDataToolsMenuItem = addItem(toolsMenu, rawDataToolsMenuItem, 
+		rawDataToolsMenuItem = addItem(toolsMenu, 
 				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND, dataFileToolsIcon);
 		add(toolsMenu);
 		
@@ -180,12 +180,12 @@ public class MainMenuBar extends CommonMenuBar {
 		dbAccessMenu = new JMenu("Database access");
 //		dbAccessMenu.setPreferredSize(preferredSize);
 		
-		loginMenuItem = addItem(dbAccessMenu, loginMenuItem, 
+		loginMenuItem = addItem(dbAccessMenu, 
 				MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND, loggedOutUserIcon);
-		userManagerMenuItem = addItem(dbAccessMenu, userManagerMenuItem, 
+		userManagerMenuItem = addItem(dbAccessMenu, 
 				MainActionCommands.SHOW_USER_MANAGER_COMMAND, manageUsersIcon);
 		userManagerMenuItem.setEnabled(false);
-		organizationManagerMenuItem = addItem(dbAccessMenu, organizationManagerMenuItem, 
+		organizationManagerMenuItem = addItem(dbAccessMenu, 
 				MainActionCommands.SHOW_ORGANIZATION_MANAGER_COMMAND, organizationIcon);
 		organizationManagerMenuItem.setEnabled(false);
 		
@@ -194,7 +194,7 @@ public class MainMenuBar extends CommonMenuBar {
 		//	Preferences
 		preferencesMenu = new JMenu("Preferences");
 //		preferencesMenu.setPreferredSize(preferredSize);
-		preferencesMenuItem = addItem(preferencesMenu, preferencesMenuItem, 
+		preferencesMenuItem = addItem(preferencesMenu, 
 				MainActionCommands.EDIT_PREFERENCES_COMMAND, preferencesIcon);
 		
 		add(preferencesMenu);
@@ -202,11 +202,11 @@ public class MainMenuBar extends CommonMenuBar {
 		//	Help
 		helpMenu = new JMenu("Help");
 //		helpMenu.setPreferredSize(preferredSize);
-		helpMenuItem = addItem(helpMenu, helpMenuItem, 
+		helpMenuItem = addItem(helpMenu, 
 				MainActionCommands.SHOW_HELP_COMMAND, helpIcon);
 		helpMenuItem.setEnabled(false);
 		
-		aboutSoftwareMenuItem = addItem(helpMenu, aboutSoftwareMenuItem, 
+		aboutSoftwareMenuItem = addItem(helpMenu, 
 				MainActionCommands.ABOUT_BOX_COMMAND, aboutIcon);
 		
 		add(helpMenu);

@@ -78,10 +78,10 @@ public class METLIMSMenuBar extends CommonMenuBar {
 		limsMenu = new JMenu("Database");
 		limsMenu.setIcon(componentIcon);
 		
-		refreshLimsDataMenuItem = addItem(limsMenu, refreshLimsDataMenuItem, 
+		refreshLimsDataMenuItem = addItem(limsMenu, 
 				MainActionCommands.REFRESH_LIMS_DATA_COMMAND, 
 				refreshDataIcon);
-		syncDatabaseMenuItem = addItem(limsMenu, syncDatabaseMenuItem, 
+		syncDatabaseMenuItem = addItem(limsMenu, 
 				MainActionCommands.SYNCHRONIZE_MRC2LIMS_TO_METLIMS_COMMAND, 
 				syncDbIcon);
 		
@@ -90,13 +90,13 @@ public class METLIMSMenuBar extends CommonMenuBar {
 		utilitiesMenu = new JMenu("Utilities");
 		utilitiesMenu.setIcon(utilsIconSmall);
 		
-		createExperimentDirectoryMenuItem = addItem(utilitiesMenu, createExperimentDirectoryMenuItem, 
+		createExperimentDirectoryMenuItem = addItem(utilitiesMenu, 
 				MainActionCommands.CREATE_EXPERIMENT_DIRECTORY_STRUCTURE_COMMAND, 
 				createExperimentDirIcon);
 		
 		utilitiesMenu.addSeparator();
 		
-		deleteExperimentMenuItem = addItem(utilitiesMenu, deleteExperimentMenuItem, 
+		deleteExperimentMenuItem = addItem(utilitiesMenu, 
 				MainActionCommands.DELETE_EXPERIMENT_FROM_MRC2LIMS_COMMAND, 
 				deleteExperimentIcon);
 		
@@ -105,7 +105,7 @@ public class METLIMSMenuBar extends CommonMenuBar {
 		dataRetrievalMenu = new JMenu("Data retrieval");
 		dataRetrievalMenu.setIcon(sendDesignToProjectIconSmall);
 		
-		limsExpToProjectMenuItem = addItem(dataRetrievalMenu, limsExpToProjectMenuItem, 
+		limsExpToProjectMenuItem = addItem(dataRetrievalMenu, 
 				MainActionCommands.SEND_DESIGN_TO_PROJECT_COMMAND, 
 				sendDesignToProjectIcon);
 		

@@ -40,6 +40,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DatabseDialect;
 import edu.umich.med.mrc2.datoolbox.data.enums.IntensityFormat;
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.RetentionUnits;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
@@ -203,6 +204,16 @@ public class MRC2ToolBoxConfiguration {
     // MSCONVERT	    
     public static final String MS_CONVERT_EXECUTABLE_FILE = "msConvertExecutableFile";
     public static final String MS_CONVERT_EXECUTABLE_FILE_DEFAULT = "";
+    
+    //	Spectrum entropy
+    public static final String SPECTRUM_ENTROPY_MASS_ERROR = "SPECTRUM_ENTROPY_MASS_ERROR";
+    public static final double SPECTRUM_ENTROPY_MASS_ERROR_DEFAULT = 0.05d;
+    
+    public static final String SPECTRUM_ENTROPY_MASS_ERROR_TYPE = "SPECTRUM_ENTROPY_MASS_ERROR_TYPE";
+    public static final MassErrorType SPECTRUM_ENTROPY_MASS_ERROR_TYPE_DEFAULT = MassErrorType.Da;
+    
+    public static final String SPECTRUM_ENTROPY_NOISE_CUTOFF = "SPECTRUM_ENTROPY_NOISE_CUTOFF";
+    public static final double SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT = 0.01d;
 
 	//	Params
     private static NumberFormat mzFormat;
@@ -760,6 +771,34 @@ public class MRC2ToolBoxConfiguration {
 
 	public static void setPercolatorBinaryPath(String percolatorBinaryPath) {
 		prefs.put(PERCOLATOR_BINARY_PATH, percolatorBinaryPath);
+	}
+	
+	public static double getSpectrumEntropyMassError() {
+		return prefs.getDouble(SPECTRUM_ENTROPY_MASS_ERROR, 
+				SPECTRUM_ENTROPY_MASS_ERROR_DEFAULT);
+	}
+
+	public static void setSpectrumEntropyMassError(double massError) {
+		prefs.putDouble(SPECTRUM_ENTROPY_MASS_ERROR, massError);
+	}
+	
+	public static MassErrorType getSpectrumEntropyMassErrorType() {
+		return MassErrorType.getTypeByName(
+				prefs.get(SPECTRUM_ENTROPY_MASS_ERROR_TYPE, 
+						SPECTRUM_ENTROPY_MASS_ERROR_TYPE_DEFAULT.name()));
+	}
+
+	public static void setSpectrumEntropyMassErrorType(MassErrorType massErrorType) {
+		prefs.put(SPECTRUM_ENTROPY_MASS_ERROR_TYPE, massErrorType.name());
+	}
+	
+	public static double getSpectrumEntropyNoiseCutoff() {
+		return prefs.getDouble(SPECTRUM_ENTROPY_NOISE_CUTOFF, 
+				SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT);
+	}
+
+	public static void setSpectrumEntropyNoiseCutoff(double noiseCutoff) {
+		prefs.putDouble(SPECTRUM_ENTROPY_NOISE_CUTOFF, noiseCutoff);
 	}
 	
 	private static Properties getPropertyValues() throws IOException {

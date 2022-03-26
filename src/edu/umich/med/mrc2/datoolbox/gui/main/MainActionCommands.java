@@ -931,6 +931,10 @@ public enum MainActionCommands {
 	SETUP_DEFAULT_MSMS_LIBRARY_MATCH_REASSIGNMENT("Set up default MSMS library match re-assignment"),
 	REASSIGN_DEFAULT_MSMS_LIBRARY_MATCHES("Reassign default MSMS library matches"),
 	
+	//	Spectrum entropy
+	SETUP_SPECTRUM_ENTROPY_SCORING("Set parameters for MSMS entropy-based scoring"),
+	RECALCULATE_SPECTRUM_ENTROPY_SCORES("Recalculate entropy-based MSMS scores"),
+	
 	//	IDTracker export
 	SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND("IDTracker data export setup"),
 	EXPORT_IDTRACKER_DATA_COMMAND("Export IDTracker data"),

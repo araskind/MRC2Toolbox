@@ -43,6 +43,7 @@ public class IDTrackerDataPullTask extends AbstractTask {
 	@Override
 	public void run() {
 
+		taskDescription = "Retrieving data from database ...";
 		setStatus(TaskStatus.PROCESSING);
 		total = 100;
 		processed = 1;

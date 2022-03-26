@@ -94,10 +94,10 @@ public class CompoundDatabaseMenuBar extends CommonMenuBar {
 		searchMenu = new JMenu("Search");
 		searchMenu.setIcon(findCompoundListIconSmall);
 		
-		batchSearchMenuItem = addItem(searchMenu, batchSearchMenuItem, 
+		batchSearchMenuItem = addItem(searchMenu,
 				MainActionCommands.SHOW_DATABASE_BATCH_SEARCH_COMMAND, 
 				findCompoundListIcon);
-		clearSearchResultsMenuItem = addItem(searchMenu, clearSearchResultsMenuItem, 
+		clearSearchResultsMenuItem = addItem(searchMenu, 
 				MainActionCommands.CLEAR_DATABASE_SEARCH_COMMAND, 
 				clearSearchIcon);
 
@@ -107,19 +107,19 @@ public class CompoundDatabaseMenuBar extends CommonMenuBar {
 		editMenu = new JMenu("Edit");
 		editMenu.setIcon(editFeatureIconSmall);
 		
-		editEntryMenuItem = addItem(editMenu, editEntryMenuItem, 
+		editEntryMenuItem = addItem(editMenu, 
 				MainActionCommands.EDIT_DATABASE_ENTRY_DIALOG_COMMAND, 
 				editFeatureIcon);
 		editEntryMenuItem.setEnabled(false);
 		
-		deleteEntryMenuItem = addItem(editMenu, deleteEntryMenuItem, 
+		deleteEntryMenuItem = addItem(editMenu, 
 				MainActionCommands.DELETE_DATABASE_ENTRY_COMMAND, 
 				deleteFeatureIcon);
 		deleteEntryMenuItem.setEnabled(false);
 		
 		editMenu.addSeparator();
 		
-		curateDbMenuItem = addItem(editMenu, curateDbMenuItem, 
+		curateDbMenuItem = addItem(editMenu, 
 				MainActionCommands.SHOW_COMPOUND_DATABASE_CURATOR, 
 				curateCompoundIcon);
 		
@@ -129,13 +129,13 @@ public class CompoundDatabaseMenuBar extends CommonMenuBar {
 		importMenu = new JMenu("Import");
 		importMenu.setIcon(addCompoundIconSmall);
 		
-		addFromPubChemMenuItem = addItem(importMenu, addFromPubChemMenuItem, 
+		addFromPubChemMenuItem = addItem(importMenu, 
 				MainActionCommands.SHOW_PUBCHEM_DATA_LOADER, 
 				pubChemImportIcon);
-		addManualMenuItem = addItem(importMenu, addManualMenuItem, 
+		addManualMenuItem = addItem(importMenu, 
 				MainActionCommands.SHOW_CUSTOM_COMPOUND_LOADER, 
 				addCompoundIcon);
-		batchAddMenuItem = addItem(importMenu, batchAddMenuItem, 
+		batchAddMenuItem = addItem(importMenu, 
 				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND, 
 				importCompoundsIcon);
 		batchAddMenuItem.setEnabled(false);
@@ -146,13 +146,13 @@ public class CompoundDatabaseMenuBar extends CommonMenuBar {
 		exportMenu = new JMenu("Export");
 		exportMenu.setIcon(exportCompoundsIconSmall);
 		
-		sendToLibraryMenuItem = addItem(exportMenu, sendToLibraryMenuItem, 
+		sendToLibraryMenuItem = addItem(exportMenu, 
 				MainActionCommands.ADD_COMPOUND_LIST_TO_LIBRARY_DIALOG_COMMAND, 
 				addToLibraryIcon);
 		
 		exportMenu.addSeparator();
 		
-		exportCompoundsMenuItem = addItem(exportMenu, sendToLibraryMenuItem, 
+		exportCompoundsMenuItem = addItem(exportMenu, 
 				MainActionCommands.EXPORT_COMPOUNDS_FROM_DATABASE_COMMAND, 
 				exportCompoundsIcon);
 		exportCompoundsMenuItem.setEnabled(false);

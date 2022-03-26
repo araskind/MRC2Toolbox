@@ -89,19 +89,19 @@ public class ExperimentDesignEditorMenuBar extends CommonMenuBar {
 		desingnMenu = new JMenu("Design actions");
 		desingnMenu.setIcon(loadDesignIconSmall);
 		
-		loadDesignMenuItem = addItem(desingnMenu, loadDesignMenuItem, 
+		loadDesignMenuItem = addItem(desingnMenu, 
 				MainActionCommands.LOAD_DESIGN_COMMAND, 
 				loadDesignIcon);
-		appendDesignMenuItem = addItem(desingnMenu, appendDesignMenuItem, 
+		appendDesignMenuItem = addItem(desingnMenu, 
 				MainActionCommands.APPEND_DESIGN_COMMAND, 
 				appendDesignIcon);
-		clearDesignMenuItem = addItem(desingnMenu, clearDesignMenuItem, 
+		clearDesignMenuItem = addItem(desingnMenu, 
 				MainActionCommands.CLEAR_DESIGN_COMMAND, 
 				clearDesignIcon);
 		
 		desingnMenu.addSeparator();
 		
-		exportDesignMenuItem = addItem(desingnMenu, exportDesignMenuItem, 
+		exportDesignMenuItem = addItem(desingnMenu, 
 				MainActionCommands.EXPORT_DESIGN_COMMAND, 
 				exportDesignIcon);
 		
@@ -111,13 +111,13 @@ public class ExperimentDesignEditorMenuBar extends CommonMenuBar {
 		factorMenu = new JMenu("Factors");
 		factorMenu.setIcon(editFactorIconSmall);
 		
-		addFactorMenuItem = addItem(factorMenu, addFactorMenuItem, 
+		addFactorMenuItem = addItem(factorMenu, 
 				MainActionCommands.ADD_FACTOR_COMMAND, 
 				addFactorIcon);
-		editFactorMenuItem = addItem(factorMenu, editFactorMenuItem, 
+		editFactorMenuItem = addItem(factorMenu, 
 				MainActionCommands.EDIT_FACTOR_COMMAND, 
 				editFactorIcon);
-		deleteFactorMenuItem = addItem(factorMenu, deleteFactorMenuItem, 
+		deleteFactorMenuItem = addItem(factorMenu, 
 				MainActionCommands.DELETE_FACTOR_COMMAND, 
 				deleteFactorIcon);
 		
@@ -127,16 +127,16 @@ public class ExperimentDesignEditorMenuBar extends CommonMenuBar {
 		sampleMenu = new JMenu("Samples");
 		sampleMenu.setIcon(editSampleIconSmall);
 		
-		addSamplesMenuItem = addItem(sampleMenu, addSamplesMenuItem, 
+		addSamplesMenuItem = addItem(sampleMenu, 
 				MainActionCommands.ADD_SAMPLE_DIALOG_COMMAND, 
 				addSampleIcon);
-		deleteSamplesMenuItem = addItem(sampleMenu, deleteSamplesMenuItem, 
+		deleteSamplesMenuItem = addItem(sampleMenu, 
 				MainActionCommands.DELETE_SAMPLE_COMMAND, 
 				deleteSampleIcon);
 		
 		sampleMenu.addSeparator();
 		
-		editReferenceSamplesMenuItem = addItem(sampleMenu, editReferenceSamplesMenuItem, 
+		editReferenceSamplesMenuItem = addItem(sampleMenu, 
 				MainActionCommands.SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND, 
 				editReferenceSamplesIcon);
 		

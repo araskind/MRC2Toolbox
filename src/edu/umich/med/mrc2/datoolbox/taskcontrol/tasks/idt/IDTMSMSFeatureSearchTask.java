@@ -646,7 +646,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						spectrum.add(new MsPoint(msrs.getDouble("MZ"), msrs.getDouble("HEIGHT")));
 
 					msrs.close();
-					msms.setEntropy(MsUtils.calculateSpectrumEntropyNatLog(spectrum));					
+					msms.setEntropy(MsUtils.calculateCleanedSpectrumEntropyNatLog(spectrum));					
 					fb.getMsFeature().getSpectrum().addTandemMs(msms);
 				}
 			} catch (SQLException e) {
@@ -800,7 +800,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						fb.getMsFeature().setPrimaryIdentity(id);
 					
 					match.setEntropyBasedScore(
-							MSMSScoreCalculator.calculateEntropyMatchScore(msms, match));
+							MSMSScoreCalculator.calculateDefaultEntropyMatchScore(msms, match));
 				}
 				rs.close();
 			} catch (SQLException e) {

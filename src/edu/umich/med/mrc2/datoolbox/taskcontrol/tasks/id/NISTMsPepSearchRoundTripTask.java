@@ -339,7 +339,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 					pepSearchParameterObject.getId());			
 			id.setReferenceMsMsLibraryMatch(match);
 			match.setEntropyBasedScore(
-					MSMSScoreCalculator.calculateEntropyMatchScore(
+					MSMSScoreCalculator.calculateDefaultEntropyMatchScore(
 							msf.getSpectrum().getExperimentalTandemSpectrum(), match));
 			msf.addIdentity(id);						
 			processed++;

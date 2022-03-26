@@ -115,7 +115,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="2" nodeId="1644193174297">
+												<leaf id="3" nodeId="1644193174297">
 													<placeholders>
 														<placeholder>dock.single.DockableRawDataFilePropertiesTable</placeholder>
 													</placeholders>
@@ -128,7 +128,7 @@
 													</placeholders>
 												</leaf>
 												<node nodeId="1644193083076" orientation="HORIZONTAL" divider="0.6666666666666666">
-													<leaf id="3" nodeId="1644193083078">
+													<leaf id="1" nodeId="1644193083078">
 														<placeholders>
 															<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS2</placeholder>
 															<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</placeholder>
@@ -168,7 +168,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="1" nodeId="1644193083080">
+													<leaf id="2" nodeId="1644193083080">
 														<placeholders>
 															<placeholder>dock.single.DockableMsExtractorPanel</placeholder>
 															<placeholder>dock.single.DockableXICSetupPanel</placeholder>
@@ -209,75 +209,6 @@
 										<replacement id="dockablesingle DockableDataTreePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>DockableDataTreePanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableXICSetupPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableXICSetupPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableMsExtractorPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableMsExtractorPanel</item>
-											</entry>
-										</placeholders>
-									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableXICSetupPanel">
-												<replacement id="dockablesingle DockableXICSetupPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableXICSetupPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableMsExtractorPanel">
-												<replacement id="dockablesingle DockableMsExtractorPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableMsExtractorPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableRawDataFilePropertiesTable">
-										<replacement id="dockablesingle DockableRawDataFilePropertiesTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableRawDataFilePropertiesTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -389,6 +320,75 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>1</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableXICSetupPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableXICSetupPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMsExtractorPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMsExtractorPanel</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableXICSetupPanel">
+												<replacement id="dockablesingle DockableXICSetupPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableXICSetupPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableMsExtractorPanel">
+												<replacement id="dockablesingle DockableMsExtractorPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableMsExtractorPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableRawDataFilePropertiesTable">
+										<replacement id="dockablesingle DockableRawDataFilePropertiesTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableRawDataFilePropertiesTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableChromatogramPlot">

@@ -964,7 +964,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 						&& msfId.getReferenceMsMsLibraryMatch() != null) {
 					
 					msfId.getReferenceMsMsLibraryMatch().setEntropyBasedScore(
-							MSMSScoreCalculator.calculateEntropyMatchScore(
+							MSMSScoreCalculator.calculateDefaultEntropyMatchScore(
 									spectrum.getExperimentalTandemSpectrum(), 
 									msfId.getReferenceMsMsLibraryMatch()));
 				}

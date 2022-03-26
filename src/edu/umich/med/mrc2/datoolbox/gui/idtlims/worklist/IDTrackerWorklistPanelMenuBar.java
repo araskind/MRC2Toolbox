@@ -91,25 +91,25 @@ public class IDTrackerWorklistPanelMenuBar extends CommonMenuBar {
 		loadMenu = new JMenu("Load");
 		loadMenu.setIcon(loadWorklistFromFileIconSmall);		
 		
-		scanDirMenuItem = addItem(loadMenu, scanDirMenuItem, 
+		scanDirMenuItem = addItem(loadMenu, 
 				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND, 
 				scanDirIcon);
-		scanDirAddMenuItem = addItem(loadMenu, scanDirAddMenuItem, 
+		scanDirAddMenuItem = addItem(loadMenu, 
 				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND, 
 				addFromDirIcon);
 		
 		loadMenu.addSeparator();
 		
-		loadWorklistMenuItem = addItem(loadMenu, loadWorklistMenuItem, 
+		loadWorklistMenuItem = addItem(loadMenu, 
 				MainActionCommands.LOAD_WORKLIST_COMMAND, 
 				loadWorklistFromFileIcon);
-		addWorklistMenuItem = addItem(loadMenu, addWorklistMenuItem, 
+		addWorklistMenuItem = addItem(loadMenu, 
 				MainActionCommands.ADD_WORKLIST_COMMAND, 
 				addWorklistFromFileIcon);
 		
 		loadMenu.addSeparator();
 		
-		clearWorklistMenuItem = addItem(loadMenu, clearWorklistMenuItem, 
+		clearWorklistMenuItem = addItem(loadMenu, 
 				MainActionCommands.CLEAR_WORKLIST_COMMAND, 
 				clearWorklistIcon);
 		
@@ -118,13 +118,13 @@ public class IDTrackerWorklistPanelMenuBar extends CommonMenuBar {
 		exportMenu = new JMenu("Export");
 		exportMenu.setIcon(saveWorklistIconSmall);		
 		
-		saveWorklistMenuItem = addItem(exportMenu, saveWorklistMenuItem, 
+		saveWorklistMenuItem = addItem(exportMenu, 
 				MainActionCommands.SAVE_WORKLIST_COMMAND, 
 				saveWorklistIcon);
-		copyWorklistMenuItem = addItem(exportMenu, copyWorklistMenuItem, 
+		copyWorklistMenuItem = addItem(exportMenu, 
 				MainActionCommands.COPY_WORKLIST_COMMAND, 
 				copyWorklistToClipboardIcon);
-//		saveManifestMenuItem = addItem(exportMenu, saveManifestMenuItem, 
+//		saveManifestMenuItem = addItem(exportMenu, 
 //				MainActionCommands.SAVE_ASSAY_MANIFEST_COMMAND, 
 //				manifestIcon);
 		
@@ -133,13 +133,13 @@ public class IDTrackerWorklistPanelMenuBar extends CommonMenuBar {
 //		utilsMenu = new JMenu("Utilities");
 //		utilsMenu.setIcon(utilsIconSmall);		
 //		
-//		checkMissingDataMenuItem = addItem(utilsMenu, checkMissingDataMenuItem, 
+//		checkMissingDataMenuItem = addItem(utilsMenu, 
 //				MainActionCommands.CHECK_WORKLIST_FOR_MISSING_DATA, 
 //				sampleWarningIcon);
 //		
 //		utilsMenu.addSeparator();
 //		
-//		extractWorklistMenuItem = addItem(utilsMenu, extractWorklistMenuItem, 
+//		extractWorklistMenuItem = addItem(utilsMenu, 
 //				MainActionCommands.EXTRACT_WORKLIST_COMMAND, 
 //				extractWorklistIcon);
 //		
