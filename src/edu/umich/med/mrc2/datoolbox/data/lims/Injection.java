@@ -107,6 +107,43 @@ public class Injection  implements Serializable, Comparable<Injection>{
 
 	@Override
 	public int compareTo(Injection o) {
-		return this.acquisitionMethodId.compareTo(o.getId());
+		return this.id.compareTo(o.getId());
 	}
+	
+//	public Element getXmlElement() {
+//		
+//		Element injectionElement = 
+//        		new Element(InjectionFields.Injection.name());
+//		injectionElement.setAttribute(InjectionFields.InjId.name(), id);	
+//		
+//		if(dataFileName != null)
+//			injectionElement.setAttribute(
+//					InjectionFields.DataFile.name(), dataFileName);	
+//		
+//		if(timeStamp != null)
+//			injectionElement.setAttribute(InjectionFields.Timestamp.name(), 
+//					ProjectUtils.dateTimeFormat.format(timeStamp));
+//		
+//		//private String prepItemId;
+//		//private String acquisitionMethodId;
+//		//private double injectionVolume;
+//		
+//		return injectionElement;
+//	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

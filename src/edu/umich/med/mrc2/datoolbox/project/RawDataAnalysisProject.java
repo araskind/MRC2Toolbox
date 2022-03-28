@@ -45,6 +45,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
@@ -62,6 +63,7 @@ public class RawDataAnalysisProject extends Project {
 	protected Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 	protected Set<MsFeatureInfoBundleCollection>featureCollections;
 	protected MSMSExtractionParameterSet msmsExtractionParameterSet;
+	protected Set<Injection>injections;
 	
 	//	New project
 	public RawDataAnalysisProject(
@@ -163,47 +165,98 @@ public class RawDataAnalysisProject extends Project {
 		featureCollections = 
 				new TreeSet<MsFeatureInfoBundleCollection>(
 						new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));
+		injections = new TreeSet<Injection>();
 		//	TODO
+	}
+	
+	public void repopulateInjectionList() {
+		
+		injections = new TreeSet<Injection>();
+		if(!msmsDataFiles.isEmpty())
+			msmsDataFiles.stream().forEach(f -> injections.add(f.generateInjectionFromFileData()));
+		
+		if(!msOneDataFiles.isEmpty())
+			msOneDataFiles.stream().forEach(f -> injections.add(f.generateInjectionFromFileData()));
 	}
 	
 	public void addMSMSDataFile(DataFile fileToAdd) {
 		msmsDataFiles.add(fileToAdd);
 		msFeatureMap.put(fileToAdd, new HashSet<MsFeatureInfoBundle>());
+		
+		if(injections == null)
+			injections = new TreeSet<Injection>();
+		
+		injections.add(fileToAdd.generateInjectionFromFileData());
+		
 		//	TODO
 	}
 	
 	public void addMSMSDataFiles(Collection<DataFile> filesToAdd) {		
 		msmsDataFiles.addAll(filesToAdd);
-		for(DataFile df : filesToAdd)
-			msFeatureMap.put(df, new HashSet<MsFeatureInfoBundle>());
 		
+		if(injections == null)
+			injections = new TreeSet<Injection>();
+		
+		for(DataFile df : filesToAdd) {
+			msFeatureMap.put(df, new HashSet<MsFeatureInfoBundle>());
+			injections.add(df.generateInjectionFromFileData());
+		}
 		//	TODO
 	}
 
 	public void addMSOneDataFile(DataFile fileToAdd) {
 		msOneDataFiles.add(fileToAdd);
 		msFeatureMap.put(fileToAdd, new HashSet<MsFeatureInfoBundle>());
+		
+		if(injections == null)
+			injections = new TreeSet<Injection>();
+		
+		injections.add(fileToAdd.generateInjectionFromFileData());
+		
 		//	TODO
 	}
 	
-	public void addMSOneDataFiles( Collection<DataFile> filesToAdd) {		
-		msOneDataFiles.addAll(filesToAdd);
-		for(DataFile df : filesToAdd)
-			msFeatureMap.put(df, new HashSet<MsFeatureInfoBundle>());
+	public void addMSOneDataFiles( Collection<DataFile> filesToAdd) {	
 		
+		msOneDataFiles.addAll(filesToAdd);
+		if(injections == null)
+			injections = new TreeSet<Injection>();
+		
+		for(DataFile df : filesToAdd) {
+			msFeatureMap.put(df, new HashSet<MsFeatureInfoBundle>());
+			injections.add(df.generateInjectionFromFileData());
+		}		
 		//	TODO
 	}
 	
 	public void removeMSMSDataFile(DataFile fileToRemove) {
 		msmsDataFiles.remove(fileToRemove);
 		msFeatureMap.remove(fileToRemove);
+		removeInjectionForFile(fileToRemove);
+		
 		//	TODO
 	}
 	
 	public void removeMSOneDataFile(DataFile fileToRemove) {
 		msOneDataFiles.remove(fileToRemove);
 		msFeatureMap.remove(fileToRemove);
+		removeInjectionForFile(fileToRemove);
+				
 		//	TODO
+	}
+	
+	private void removeInjectionForFile(DataFile fileToRemove) {
+		
+		if(injections == null)
+			injections = new TreeSet<Injection>();
+		
+		if(!injections.isEmpty()) {
+			
+			String injId = fileToRemove.getInjectionId();
+			injections = injections.stream().
+					filter(i -> !i.getId().equals(injId)).
+					collect(Collectors.toCollection(TreeSet::new));
+		}
 	}
 	
 	public Collection<MsFeatureInfoBundle>getMsFeaturesForDataFile(DataFile df){
@@ -373,6 +426,23 @@ public class RawDataAnalysisProject extends Project {
 
 	public void setMsmsExtractionParameterSet(MSMSExtractionParameterSet msmsExtractionParameterSet) {
 		this.msmsExtractionParameterSet = msmsExtractionParameterSet;
+	}
+
+	public Collection<Injection> getInjections() {
+		
+		if(injections == null)
+			injections = new TreeSet<Injection>();
+		
+		return injections;
+	}
+
+	public void setInjections(Set<Injection> injections2) {
+		
+		if(injections == null)
+			injections = new TreeSet<Injection>();
+
+		injections.clear();
+		injections.addAll(injections2);
 	}
 }
 

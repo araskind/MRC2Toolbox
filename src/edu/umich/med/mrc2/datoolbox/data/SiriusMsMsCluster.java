@@ -33,6 +33,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -63,6 +64,9 @@ public class SiriusMsMsCluster implements Serializable {
 		this.mzError = mzError;	
 		msmsComponents.add(firstBundle);		
 		adduct = firstBundle.getMsFeature().getSpectrum().getPrimaryAdduct();
+		if(adduct == null)
+			adduct = AdductManager.getDefaultAdductForPolarity(firstBundle.getMsFeature().getPolarity());
+			
 		TandemMassSpectrum msms = 
 				firstBundle.getMsFeature().getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 		parentIon = msms.getParent();

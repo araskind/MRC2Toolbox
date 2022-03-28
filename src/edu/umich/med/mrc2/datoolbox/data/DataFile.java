@@ -31,9 +31,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
@@ -317,6 +319,27 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 
 	public Map<DataExtractionMethod, ResultsFile> getResultFiles() {
 		return resultFiles;
+	}
+	
+	public Injection generateInjectionFromFileData() {
+		
+		if(injectionId == null)
+			injectionId = DataPrefix.INJECTION.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);
+		
+		String acquisitionMethodId = null;
+		if(acquisitionMethod != null)
+			acquisitionMethodId = acquisitionMethod.getId();
+		
+		Injection inj = new Injection(
+				injectionId,
+				name, 
+				injectionTime, 
+				null, //	TODO
+				acquisitionMethodId,
+				injectionVolume);
+		
+		return inj;
 	}
 
 	public Element getXmlElement() {

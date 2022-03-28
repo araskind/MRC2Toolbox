@@ -71,6 +71,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -425,21 +426,26 @@ public class IDTrackerDataExportTask extends AbstractTask {
 	private void getInjections() throws Exception {
 		
 		taskDescription = "Getting injection information ...";
-		Collection<String> injectionIds = featuresToExport.stream().
-				filter(f -> f.getInjectionId() != null).
-				map(f -> f.getInjectionId()).collect(Collectors.toCollection(TreeSet::new));
-		
-		total = injectionIds.size();
-		processed = 0;
-		injections = new TreeSet<Injection>();
-		Connection conn = ConnectionManager.getConnection();		
-		for(String id : injectionIds) {
-			
-			Injection inj = IDTRawDataUtils.getInjectionForId(id, conn);
-			if(inj != null)
-				injections.add(inj);
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			injections = MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getInjections();
 		}
-		ConnectionManager.releaseConnection(conn);
+		else {
+			Collection<String> injectionIds = featuresToExport.stream().
+					filter(f -> f.getInjectionId() != null).
+					map(f -> f.getInjectionId()).collect(Collectors.toCollection(TreeSet::new));
+			
+			total = injectionIds.size();
+			processed = 0;
+			injections = new TreeSet<Injection>();
+			Connection conn = ConnectionManager.getConnection();		
+			for(String id : injectionIds) {
+				
+				Injection inj = IDTRawDataUtils.getInjectionForId(id, conn);
+				if(inj != null)
+					injections.add(inj);
+			}
+			ConnectionManager.releaseConnection(conn);
+		}
 	}
 	
 	private void writeExportFile() throws IOException {

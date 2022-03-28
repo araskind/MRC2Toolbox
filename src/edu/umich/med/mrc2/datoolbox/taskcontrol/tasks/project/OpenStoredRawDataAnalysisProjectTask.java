@@ -248,6 +248,8 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			DataFile msOneFile = new DataFile(msOneFileElement);
 			project.addMSOneDataFile(msOneFile);
 		}
+		//	project.repopulateInjectionList();
+		
 		//	Feature collections
 		Element featureCollectionElement = 
 				projectElement.getChild(ProjectFields.FeatureCollectionList.name());
