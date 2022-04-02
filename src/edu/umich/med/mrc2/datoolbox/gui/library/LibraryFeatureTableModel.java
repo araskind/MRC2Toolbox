@@ -99,7 +99,6 @@ public class LibraryFeatureTableModel extends BasicTableModel {
 					formula = identity.getCompoundIdentity().getFormula();
 
 					String smiles = identity.getCompoundIdentity().getSmiles();
-
 					if(smiles != null)
 						innateCharge = StringUtils.countMatches(smiles, "+") - StringUtils.countMatches(smiles, "-");
 				}

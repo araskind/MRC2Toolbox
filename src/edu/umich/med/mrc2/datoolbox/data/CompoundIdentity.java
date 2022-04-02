@@ -36,6 +36,7 @@ import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class CompoundIdentity implements Serializable, Comparable<CompoundIdentity> {
 
@@ -180,13 +181,9 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 
 	public double getExactMass() {
 
-		if(exactMass == 0.0) {
-
-			if(formula != null) {
-				IMolecularFormula mf = MolecularFormulaManipulator.getMolecularFormula(formula, DefaultChemObjectBuilder.getInstance());
-				exactMass = MolecularFormulaManipulator.getMajorIsotopeMass(mf);
-			}
-		}
+		if(exactMass == 0.0)
+			exactMass = MsUtils.getExactMassForCompoundIdentity(this);
+			
 		return exactMass;
 	}
 

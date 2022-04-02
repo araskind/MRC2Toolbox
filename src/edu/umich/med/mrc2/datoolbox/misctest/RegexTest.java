@@ -126,6 +126,7 @@ import com.Ostermiller.util.CSVParser;
 //import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 //import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
 import edu.umich.med.mrc2.datoolbox.data.LibraryEntrySource;
@@ -224,11 +225,54 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			createRMDIRScript();
+			updateExactMassForLabeledCompounds();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
+	private static void updateExactMassForLabeledCompounds() throws Exception {
+		
+		String selectQuery = "SELECT ACCESSION, EXACT_MASS, SMILES FROM COMPOUND_DATA "
+				+ "WHERE (SMILES like '%[2H%' OR SMILES like '%[13C%' OR SMILES like '%[15N%')";
+		String updQuery = "UPDATE COMPOUND_DATA SET EXACT_MASS = ? WHERE ACCESSION = ?";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(selectQuery);
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+		ResultSet rs = ps.executeQuery();
+		
+		String accession = null;
+		String smiles = null;
+		double exactMass = 0.0d;
+		double exactMassCalc = 0.0d;
+		Adduct neutralAdduct = AdductManager.getDefaultAdductForCharge(0);
+		while(rs.next()) {
+			
+			accession = rs.getString("ACCESSION");
+			smiles = rs.getString("SMILES");
+			exactMass = rs.getDouble("EXACT_MASS");			
+			exactMassCalc  = 0.0d;					
+			Collection<MsPoint>points =MsUtils.calculateIsotopeDistributionFromSmiles(smiles, neutralAdduct);		
+			if(points == null || points.isEmpty())
+				exactMassCalc = 0.0d;
+			else
+				exactMassCalc = points.iterator().next().getMz();
+			
+			if(Math.abs(exactMassCalc - exactMass) > 0.1d) {
+								
+				updPs.setDouble(1, exactMassCalc);
+				updPs.setString(2, accession);
+				updPs.executeUpdate();
+				
+				System.err.println("Updated mass for " + smiles);
+			}
+		}
+		rs.close();
+		ps.close();
+		updPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
 	
 	private static void createMoTrPACFileManifest() throws IOException {
 		

@@ -37,11 +37,13 @@ import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -75,6 +77,7 @@ import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.RawDataConversionSetupDialog
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msms.MSMSFeatureExtractionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisProjectSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.scan.DockableScanPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTree;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -106,7 +109,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.scan.IScan;
-import umich.ms.datatypes.scancollection.IScanCollection;
+import umich.ms.fileio.exceptions.FileParsingException;
 
 public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel 
 	implements TreeSelectionListener, BackedByPreferences {
@@ -120,6 +123,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private DockableXICSetupPanel xicSetupPanel;
 	private DockableMsExtractorPanel msExtractorPanel;
 	private DockableRawDataFilePropertiesTable rawDataFilePropertiesTable;
+	private DockableScanPanel scanNavigationPanel;
 	private ImprovedFileChooser chooser;
 	private IndeterminateProgressDialog idp;
 	private CloseRawDataFilesDialog closeRawDataFilesDialog;
@@ -178,10 +182,14 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				"RawDataExaminerPanelDockableMsMsTable", "MS2 table");
 		rawDataFilePropertiesTable = new DockableRawDataFilePropertiesTable();
 		
+		scanNavigationPanel = new DockableScanPanel();
+		scanNavigationPanel.addScanSelectionListener(this);
+		
 		xicSetupPanel = new DockableXICSetupPanel(this);
 		msExtractorPanel = new DockableMsExtractorPanel(this);
 
-		grid.add( 0, 0, 25, 100, dataFileTreePanel, rawDataFilePropertiesTable );
+		grid.add( 0, 0, 25, 100, dataFileTreePanel, 
+				scanNavigationPanel, rawDataFilePropertiesTable );
 		grid.add( 25, 0, 75, 50, chromatogramPanel );
 		grid.add( 25, 50, 50, 50, msPlotPanel, msTable, msmsPlotPane, msmsTable);
 		grid.add( 75, 50, 25, 50, xicSetupPanel, msExtractorPanel);
@@ -454,6 +462,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		msmsPlotPane.clearPanel();
 		msmsTable.clearTable();
 		rawDataFilePropertiesTable.clearTable();
+		scanNavigationPanel.clearPanel();
 		IDWorkbenchPanel workbench  = 
 				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
 		workbench.clearPanel();		
@@ -840,6 +849,42 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			return null;
 		}
 	}
+	
+	class ShowRawDataFilesTask extends LongUpdateTask {
+		/*
+		 * Main task. Executed in background thread.
+		 */
+		private List<DataFile>files;
+
+		public ShowRawDataFilesTask(List<DataFile>files2show) {
+			this.files = files2show;
+		}
+		
+		@Override
+		public Void doInBackground() {
+
+			try {
+				xicSetupPanel.selectFiles(files);
+				msExtractorPanel.selectFiles(files);
+				
+				LCMSData data = RawDataManager.getRawData(files.get(0));
+				rawDataFilePropertiesTable.showDataFileProperties(data);
+				
+				scanNavigationPanel.setModelFromDataFile(files.get(0));
+				
+				List<ExtractedChromatogram> chromList = files.stream().
+						flatMap(f -> f.getChromatograms().stream()).
+						filter(c -> c.getChromatogramDefinition().getMode().equals(ChromatogramPlotMode.TIC)).
+						collect(Collectors.toList());
+				chromatogramPanel.showExtractedChromatogramCollection(chromList);		
+			} 
+			catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
 
 	private void showCloseRawDataFilesDialog() {
 		
@@ -1071,14 +1116,24 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		xicSetupPanel.clearPanel();
 		msExtractorPanel.clearPanel();
 		rawDataFilePropertiesTable.clearTable();
+		scanNavigationPanel.clearPanel();
 	}
-	
-	
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		// TODO Auto-generated method stub
 		
+		if(e.getValueIsAdjusting() || e.getSource() == null)
+			return;
+
+		for(ListSelectionListener listener : ((DefaultListSelectionModel)e.getSource()).getListSelectionListeners()) {
+
+			if(listener.equals(scanNavigationPanel.getTable())) {
+				
+				IScan scan = scanNavigationPanel.getSelectedScan();
+				if(scan != null)
+					showScan(scan);
+			}
+		}
 	}
 	
 	@Override
@@ -1214,18 +1269,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 //	}
 
 	private void showFiles(List<DataFile> files) {
-
-		xicSetupPanel.selectFiles(files);
-		msExtractorPanel.selectFiles(files);
 		
-		LCMSData data = RawDataManager.getRawData(files.get(0));
-		rawDataFilePropertiesTable.showDataFileProperties(data);
-		
-		List<ExtractedChromatogram> chromList = files.stream().
-				flatMap(f -> f.getChromatograms().stream()).
-				filter(c -> c.getChromatogramDefinition().getMode().equals(ChromatogramPlotMode.TIC)).
-				collect(Collectors.toList());
-		chromatogramPanel.showExtractedChromatogramCollection(chromList);
+		ShowRawDataFilesTask task = new ShowRawDataFilesTask(files);
+		idp = new IndeterminateProgressDialog("Loading raw data display ...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
 	}
 
 	private void showAverageMassSpectrum(AverageMassSpectrum averageMassSpectrum) {
@@ -1239,16 +1287,33 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	private void showScan(IScan s) {
 		
+		if(s.getSpectrum() == null) {
+			try {
+				s.fetchSpectrum();
+			} catch (FileParsingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		if(s.getMsLevel() == 1) {
 			msPlotPanel.showScan(s);
 			msTable.setTableModelFromScan(s);
 			msmsPlotPane.clearPanel();
 			msmsTable.clearTable();
+			
+			IScan next = s.getScanCollection().getNextScan(s.getNum());
+			if(next.getMsLevel() == 2) {
+				msmsPlotPane.showScan(next);
+				msmsTable.setTableModelFromScan(next);
+			}
 		}
 		else {
 			msmsPlotPane.showScan(s);
 			msmsTable.setTableModelFromScan(s);
-			IScan parent = getParentScan(s);
+			
+			IScan parent = 
+					s.getScanCollection().getPrevScanAtMsLevel(s.getNum(), 1);
+//			IScan parent = getParentScan(s);
 			if(parent != null) {
 				msPlotPanel.showScan(parent);
 				msTable.setTableModelFromScan(parent);
@@ -1263,16 +1328,22 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	public IScan getParentScan(IScan s) {
 		
+		if(s.getMsLevel() == 1)
+			return null;
+		
 		if(s.getPrecursor() != null) {
-			int parentScanNumber = s.getPrecursor().getParentScanNum();
-			DataFile df = dataFileTreePanel.getDataFileForScan(s);
-			if(df != null) {
-				LCMSData data = RawDataManager.getRawData(df);
-				if(data != null) {
-					IScanCollection scans = data.getScans();
-					return scans.getScanByNum(parentScanNumber);
-				}
-			}
+			
+			int parentScanNumber = s.getPrecursor().getParentScanNum();			
+			return s.getScanCollection().getScanByNum(parentScanNumber);
+			
+//			DataFile df = dataFileTreePanel.getDataFileForScan(s);
+//			if(df != null) {
+//				LCMSData data = RawDataManager.getRawData(df);
+//				if(data != null) {
+//					IScanCollection scans = data.getScans();
+//					return scans.getScanByNum(parentScanNumber);
+//				}
+//			}
 		}
 		return null;
 	}

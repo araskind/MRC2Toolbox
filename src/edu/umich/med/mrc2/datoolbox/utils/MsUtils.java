@@ -115,7 +115,7 @@ public class MsUtils {
 
 	public static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
 	public static final SmilesParser smipar = new SmilesParser(builder);
-	public static final Pattern pattern = Pattern.compile("(\\[\\d+)");
+	public static final Pattern isoLabelSmilesPattern = Pattern.compile("(\\[\\d+)");
 	public static final LabeledIsotopePatternGenerator isotopePatternGenerator = 
 			new LabeledIsotopePatternGenerator(MIN_ISOTOPE_ABUNDANCE);
 	
@@ -1190,7 +1190,7 @@ public class MsUtils {
 					e1.printStackTrace();
 					return adductMap;
 				}
-				if(pattern.matcher(smiles).find()) {
+				if(isoLabelSmilesPattern.matcher(smiles).find()) {
 
 					for (Adduct adduct : adducts) {
 
@@ -1222,6 +1222,38 @@ public class MsUtils {
 			e.printStackTrace();;
 		}
 		return adductMap;
+	}
+	
+	public static double getExactMassForCompoundIdentity(CompoundIdentity id) {
+		
+		if(id == null)
+			return 0.0;
+		
+		String formula = id.getFormula();
+		String smiles = id.getSmiles();
+		
+		if(formula == null && smiles == null)
+			return 0.0;
+			
+		if(smiles != null && MsUtils.isoLabelSmilesPattern.matcher(smiles).find()) {
+			
+			Collection<MsPoint>points =
+					MsUtils.calculateIsotopeDistributionFromSmiles(
+							smiles, AdductManager.getDefaultAdductForCharge(0));
+			
+			if(points == null || points.isEmpty())
+				return 0.0d;
+			else
+				return points.iterator().next().getMz();
+		}
+		else {
+			if(formula != null) {
+				IMolecularFormula mf = MolecularFormulaManipulator.getMolecularFormula(
+						formula, DefaultChemObjectBuilder.getInstance());
+				return MolecularFormulaManipulator.getMajorIsotopeMass(mf);
+			}
+		}		
+		return 0.0d;
 	}
 
 	public static String calculateSpectrumHash(Collection<MsPoint>spectrum){

@@ -47,12 +47,15 @@ public class WebUtils {
 			}
 			stream = connection.getInputStream();
 		} catch (MalformedURLException mue) {
-			System.err.println("Error: Could create URL object!");
+			System.err.println("Error: Could create URL object for " + urlname);
 			throw new Exception();
 		} catch (IOException e) {
 			System.err.println("Error: Could not open URL connection!");
 			System.err.println(urlname);
 			throw new Exception();
+		}
+		catch(Exception e) {
+			//	Leave it alone
 		}
 		return stream;
 	}
