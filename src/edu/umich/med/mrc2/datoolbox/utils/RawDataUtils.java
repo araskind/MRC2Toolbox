@@ -32,6 +32,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -43,7 +44,9 @@ import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.LCMSDataSubset;
+import umich.ms.datatypes.lcmsrun.LCMSRunInfo;
 import umich.ms.datatypes.scan.IScan;
+import umich.ms.datatypes.scan.props.PrecursorInfo;
 import umich.ms.datatypes.scancollection.IScanCollection;
 import umich.ms.datatypes.scancollection.ScanIndex;
 import umich.ms.datatypes.spectrum.ISpectrum;
@@ -88,6 +91,66 @@ public class RawDataUtils {
 			}
 		}
 		return pattern;
+	}
+	
+	public static String getScanWithMetadata(IScan scan) { 
+		
+		if(scan == null)
+			return "";
+		
+		Collection<String> lines = new ArrayList<String>();
+		lines.add(scan.toString());
+		
+		String name = scan.getScanCollection().getDataSource().getName();
+		lines.add("Path: " + name);
+		
+		LCMSRunInfo ri = scan.getScanCollection().getDataSource().getRunInfo();
+		if(ri.getOriginalFiles() != null && !ri.getOriginalFiles().isEmpty())
+			lines.add("Original data file: "+ ri.getOriginalFiles().get(0).name);
+		
+		if(ri.getRunStartTime() != null)
+			lines.add("Run start time: " + 
+					MRC2ToolBoxConfiguration.getDateTimeFormat().format(ri.getRunStartTime()));
+		
+		if(scan.getPrecursor() != null) {			
+			
+			PrecursorInfo pi = scan.getPrecursor();
+			lines.add("Precursor M/Z: " + 
+					MsUtils.spectrumMzExportFormat.format(pi.getMzTarget()));
+			Range isolationWindow = new Range(pi.getMzRangeStart(), pi.getMzRangeEnd());
+			lines.add("Isolation window: " + 
+					isolationWindow.getFormattedString(MsUtils.spectrumMzExportFormat));
+			
+			lines.add("Parent scan #: " + pi.getParentScanNum().toString());
+			if(pi.getActivationInfo() != null)
+				lines.add(pi.getActivationInfo().toString());
+		}
+		ISpectrum spectrum = scan.getSpectrum();
+		if(spectrum == null) {
+			try {
+				spectrum = scan.fetchSpectrum();
+			} catch (FileParsingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		double maxIntensity = scan.getBasePeakIntensity();
+		lines.add("");
+		lines.add("M/Z\tIntensity\tRelative intensity");
+		if(spectrum != null) {
+			
+			double[] mzs = spectrum.getMZs();
+			double[] intens = spectrum.getIntensities();
+			for(int i=0; i<mzs.length; i++) {
+				
+				String line = 					
+						MsUtils.spectrumMzExportFormat.format(mzs[i]) + "\t" + 
+						MsUtils.spectrumIntensityFormat.format(intens[i]) + "\t" + 
+						MsUtils.spectrumMzExportFormat.format(intens[i]/maxIntensity);
+				lines.add(line);
+			}
+		}
+		return StringUtils.join(lines, "\n");
 	}
 	
 	public static Collection<MsPoint> getScanPoints(IScan scan) { 		

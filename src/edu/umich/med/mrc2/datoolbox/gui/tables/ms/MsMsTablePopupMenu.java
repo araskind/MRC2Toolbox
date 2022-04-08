@@ -30,7 +30,7 @@ import javax.swing.JPopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class MsTablePopupMenu extends JPopupMenu {
+public class MsMsTablePopupMenu extends JPopupMenu {
 
 	/**
 	 *
@@ -40,7 +40,7 @@ public class MsTablePopupMenu extends JPopupMenu {
 	private static final Icon copyMassListIcon = GuiUtils.getIcon("clipBoard", 24);
 	private static final Icon copySublistListIcon = GuiUtils.getIcon("adductToClipBoard", 24);		
 	private static final Icon copyAsTSVIcon = GuiUtils.getIcon("copyWorklistToClipboard", 24);
-	private static final Icon copyAsMSPIcon = GuiUtils.getIcon("exportToMSP", 24);	
+	private static final Icon copyAsMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
 	private static final Icon copyFeatureIcon = GuiUtils.getIcon("extractList", 24);
 	private static final Icon copyScanIcon = GuiUtils.getIcon("copyScan", 24);
 
@@ -48,12 +48,12 @@ public class MsTablePopupMenu extends JPopupMenu {
 		copySpectrumAsTsvMenuItem,
 		copyNormalizedSpectrumAsTsvMenuItem,
 		copyFeatureWithMetadataMenuItem,
-		copyScanWithMetadataMenuItem,
-		copySubMassList2MenuItem,
-		copySubMassList3MenuItem,
-		copyCompleteMassListMenuItem;
+		copyScanWithMetadataMenuItem;
+//		copySubMassList2MenuItem,
+//		copySubMassList3MenuItem,
+//		copyCompleteMassListMenuItem;
 
-	public MsTablePopupMenu(ActionListener listener) {
+	public MsMsTablePopupMenu(ActionListener listener) {
 
 		super();
 		
@@ -79,21 +79,21 @@ public class MsTablePopupMenu extends JPopupMenu {
 				MainActionCommands.COPY_SCAN_WITH_METADATA_COMMAND.getName());
 		copyScanWithMetadataMenuItem.setIcon(copyScanIcon);
 		
-		addSeparator();
-		
-		copySubMassList2MenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_2_AS_CSV_COMMAND.getName(), listener,
-				MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_2_AS_CSV_COMMAND.getName());
-		copySubMassList2MenuItem.setIcon(copySublistListIcon);
-
-		copySubMassList3MenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_3_AS_CSV_COMMAND.getName(), listener,
-				MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_3_AS_CSV_COMMAND.getName());
-		copySubMassList3MenuItem.setIcon(copySublistListIcon);
-
-		copyCompleteMassListMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_MASS_LIST_AS_CSV_COMMAND.getName(), listener,
-				MainActionCommands.COPY_MASS_LIST_AS_CSV_COMMAND.getName());
-		copyCompleteMassListMenuItem.setIcon(copyMassListIcon);
+//		addSeparator();
+//
+//		copySubMassList2MenuItem = GuiUtils.addMenuItem(this,
+//				MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_2_AS_CSV_COMMAND.getName(), listener,
+//				MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_2_AS_CSV_COMMAND.getName());
+//		copySubMassList2MenuItem.setIcon(copySublistListIcon);
+//
+//		copySubMassList3MenuItem = GuiUtils.addMenuItem(this,
+//				MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_3_AS_CSV_COMMAND.getName(), listener,
+//				MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_3_AS_CSV_COMMAND.getName());
+//		copySubMassList3MenuItem.setIcon(copySublistListIcon);
+//
+//		copyCompleteMassListMenuItem = GuiUtils.addMenuItem(this,
+//				MainActionCommands.COPY_MASS_LIST_AS_CSV_COMMAND.getName(), listener,
+//				MainActionCommands.COPY_MASS_LIST_AS_CSV_COMMAND.getName());
+//		copyCompleteMassListMenuItem.setIcon(copyMassListIcon);
 	}
 }

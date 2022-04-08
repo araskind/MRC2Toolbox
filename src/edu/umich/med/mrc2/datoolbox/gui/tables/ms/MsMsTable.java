@@ -1,22 +1,22 @@
 /*******************************************************************************
- *
+ * 
  * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ * 
  * Contributors:
  * Alexander Raskind (araskind@med.umich.edu)
- *
+ *  
  ******************************************************************************/
 
 package edu.umich.med.mrc2.datoolbox.gui.tables.ms;
@@ -26,26 +26,19 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.umich.med.mrc2.datoolbox.data.Adduct;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -53,79 +46,68 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.scan.IScan;
 
-public class MsOneTable  extends BasicTable {
+public class MsMsTable extends BasicTable {
 
 	/**
 	 *
 	 */
-	private static final long serialVersionUID = 883564169882286269L;
-	private MsOneTableModel model;
-	private MsFeature currentFeature;
+	private static final long serialVersionUID = 5088486364694169431L;
+	private MsMsTableModel model;
+	private TandemMassSpectrum currentMsms;
 	private IScan currentScan;
 
-	public MsOneTable() {
+	public MsMsTable() {
 
 		super();
-
-		model = new MsOneTableModel();
+		model = new MsMsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MsOneTableModel>(model);
+		rowSorter = new TableRowSorter<MsMsTableModel>(model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-		chmodRenderer = new ChemicalModificationRenderer();
-		setDefaultRenderer(Adduct.class, chmodRenderer);
-
-		columnModel.getColumnById(MsOneTableModel.MZ_COLUMN)
+		columnModel.getColumnById(MsMsTableModel.MZ_COLUMN)
 			.setCellRenderer(mzRenderer);
-		columnModel.getColumnById(MsOneTableModel.INTENSITY_COLUMN)
-			.setCellRenderer(new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getSpectrumIntensityFormat()));
+		columnModel.getColumnById(MsMsTableModel.INTENSITY_COLUMN)
+			.setCellRenderer(new FormattedDecimalRenderer(
+					MRC2ToolBoxConfiguration.getSpectrumIntensityFormat()));
 
-		addTablePopupMenu(new MsTablePopupMenu(this));
-
-		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		addTablePopupMenu(new MsMsTablePopupMenu(this));
+		
+		thf = new TableFilterHeader(this, AutoChoices.DISABLED);
 		finalizeLayout();
 	}
-
-	public void setTableModelFromSpectrum(MsFeature feature) {
-
-		thf.setTable(null);
-		model.setTableModelFromSpectrum(feature);
-		thf.setTable(this);
-		currentFeature = feature;
-		currentScan = null;
-		tca.adjustColumns();
-	}
 	
-	public void setTableModelFromScan(IScan scan) {
-		
-		thf.setTable(null);
-		model.setTableModelFromScan(scan);
-		thf.setTable(this);
-		currentFeature = null;
-		currentScan = scan;
-		tca.adjustColumns();
-	}
-
 	@Override
 	public void clearTable() {
-		currentFeature = null;
+		currentMsms = null;
 		currentScan = null;
 		super.clearTable();
 	}
 
+	public void setTableModelFromTandemMs(TandemMassSpectrum msms) {
+
+		model.setTableModelFromTandemMs(msms);
+		tca.adjustColumns();	
+		currentMsms = msms;
+		currentScan = null;
+	}
+
+	public void setTableModelFromScan(IScan scan) {
+		model.setTableModelFromScan(scan);
+		tca.adjustColumns();
+		currentMsms = null;
+		currentScan = scan;
+	}
+	
+	public void setTableModelFromDataPoints(Collection<MsPoint> points, MsPoint parent) {
+		model.setTableModelFromDataPoints(points, parent);
+		currentMsms = null;
+		currentScan = null;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-
-		if (e.getActionCommand().equals(MainActionCommands.COPY_MASS_LIST_AS_CSV_COMMAND.getName()))
-			copyMassListAsCSV(0);
-
-		if (e.getActionCommand().equals(MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_2_AS_CSV_COMMAND.getName()))
-			copyMassListAsCSV(2);
-
-		if (e.getActionCommand().equals(MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_3_AS_CSV_COMMAND.getName()))
-			copyMassListAsCSV(3);
 		
 		if (e.getActionCommand().equals(MainActionCommands.COPY_SPECTRUM_AS_TSV_COMMAND.getName()))
 			copyMassListAsTSV(false);
@@ -144,7 +126,7 @@ public class MsOneTable  extends BasicTable {
 
 	private void copyFeatureWithMetadata() {
 		// TODO Auto-generated method stub
-		if(currentFeature == null)
+		if(currentMsms == null)
 			return;
 		else {
 			MessageDialog.showInfoMsg("Feature under development.", this);
@@ -156,7 +138,7 @@ public class MsOneTable  extends BasicTable {
 
 		if(currentScan == null)
 			return;
-		else {
+		else {			
 			String scanWithMetadata = 
 					RawDataUtils.getScanWithMetadata(currentScan);			
 			StringSelection stringSelection = 
@@ -165,39 +147,11 @@ public class MsOneTable  extends BasicTable {
 			clpbrd.setContents(stringSelection, null);
 		}
 	}
-
-	public void copyMassListAsCSV(int massCount) {
-
-		ArrayList<String> massList = new ArrayList<String>();
-		int massColumn = model.getColumnIndex(MsOneTableModel.MZ_COLUMN);
-		if(massCount == 0) {
-
-			for (int i = 0; i < model.getRowCount(); i++) {
-
-				double mz = (double) getValueAt(i, massColumn);
-				massList.add(MRC2ToolBoxConfiguration.getMzFormat().format(mz));
-			}
-		}
-		else {
-			HashSet<Adduct> visibleAdducts = getVisibleAdducts();
-			for(Adduct ad : visibleAdducts) {
-
-				MsPoint[] points = currentFeature.getSpectrum().getMsForAdduct(ad);
-				Arrays.sort(points, new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC));
-				for (int i = 0; i < massCount; i++)
-					massList.add(MRC2ToolBoxConfiguration.getMzFormat().format(points[i].getMz()));
-			}
-		}
-		StringSelection stringSelection = new StringSelection(StringUtils.join(massList, ","));
-		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-		clpbrd.setContents(stringSelection, null);
-	}
 	
-
 	private void copyMassListAsTSV(boolean normalize) {
 		
-		int massColumn = model.getColumnIndex(MsOneTableModel.MZ_COLUMN);
-		int intensityColumn = model.getColumnIndex(MsOneTableModel.INTENSITY_COLUMN);
+		int massColumn = model.getColumnIndex(MsMsTableModel.MZ_COLUMN);
+		int intensityColumn = model.getColumnIndex(MsMsTableModel.INTENSITY_COLUMN);
 		Collection<MsPoint>spectrum = new ArrayList<MsPoint>();
 		MsPoint[] pattern = new MsPoint[0];
 		for(int i=0; i<model.getRowCount(); i++) {
@@ -233,45 +187,4 @@ public class MsOneTable  extends BasicTable {
 		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clpbrd.setContents(stringSelection, null);
 	}
-
-	public HashSet<Adduct>getVisibleAdducts(){
-
-		HashSet<Adduct>visAdducts = new HashSet<Adduct>();
-		int adductColumn = model.getColumnIndex(MsOneTableModel.ADDUCT_COLUMN);
-
-		for(int i=0; i<getRowCount(); i++)
-			visAdducts.add((Adduct) model.getValueAt(convertRowIndexToModel(i), adductColumn));
-
-		return visAdducts;
-	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

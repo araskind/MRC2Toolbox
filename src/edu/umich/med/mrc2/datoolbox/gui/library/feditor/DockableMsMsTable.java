@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.gui.tables.ms.MsMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import umich.ms.datatypes.scan.IScan;
 

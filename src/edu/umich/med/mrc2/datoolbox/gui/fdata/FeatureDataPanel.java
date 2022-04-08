@@ -75,6 +75,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableIdentificationResultsTab
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.MultiFileDataImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.excel.ExcelImportWizard;
+import edu.umich.med.mrc2.datoolbox.gui.io.mwtab.MWTabExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.txt.TextDataImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.library.search.LibrarySearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
@@ -139,6 +140,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private ExcelImportWizard excelImportWizard;
 	private TextDataImportDialog textDataImportDialog;
 	private DataExportDialog exportDialog;
+	private MWTabExportDialog mwTabExportDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -445,7 +447,20 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if(DataExportDialog.getExportTypes().contains(command) 
 					|| command.equals(MainActionCommands.EXPORT_RESULTS_COMMAND.getName()))
 				exportAnalysisResults(command);
+			
+			if (command.equals(MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName()))
+				showMwTabReportDialog();
 		}	
+	}
+	
+	private void showMwTabReportDialog() {
+
+		if(currentProject == null)
+			return;
+
+		mwTabExportDialog = new MWTabExportDialog();
+		mwTabExportDialog.setLocationRelativeTo(this.getContentPane());
+		mwTabExportDialog.setVisible(true);
 	}
 	
 	private void exportAnalysisResults(String command) {

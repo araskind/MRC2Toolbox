@@ -85,7 +85,6 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.NewProjectDialog;
-import edu.umich.med.mrc2.datoolbox.gui.io.mwtab.MWTabExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.raw.RawDataUploadPrepDialog;
 import edu.umich.med.mrc2.datoolbox.gui.labnote.LabNoteBookPanel;
 import edu.umich.med.mrc2.datoolbox.gui.lims.METLIMSPanel;
@@ -180,7 +179,6 @@ public class MainWindow extends JFrame
 
 	private DataExportDialog exportDialog;
 	private IntegratedReportDialog integratedReportDialog;
-	private MWTabExportDialog mwTabExportDialog;
 	private FileToolsDialog fileToolsDialog;
 	
 	private RawDataAnalysisProjectSetupDialog rawDataAnalysisProjectSetupDialog;
@@ -286,9 +284,6 @@ public class MainWindow extends JFrame
 
 		if (command.equals(MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND.getName()))
 			showIntegratedReportDialog();
-
-		if (command.equals(MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName()))
-			showMwTabReportDialog();
 
 		if (command.equals(MainActionCommands.SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG.getName()))
 			showRawDataUploadPrepDialog();
@@ -419,16 +414,6 @@ public class MainWindow extends JFrame
 		rawDataUploadPrepDialog = new RawDataUploadPrepDialog();
 		rawDataUploadPrepDialog.setLocationRelativeTo(this.getContentPane());
 		rawDataUploadPrepDialog.setVisible(true);
-	}
-
-	private void showMwTabReportDialog() {
-
-		if(currentProject == null)
-			return;
-
-		mwTabExportDialog = new MWTabExportDialog();
-		mwTabExportDialog.setLocationRelativeTo(this.getContentPane());
-		mwTabExportDialog.setVisible(true);
 	}
 
 	private void showIdTrackerLogin() {

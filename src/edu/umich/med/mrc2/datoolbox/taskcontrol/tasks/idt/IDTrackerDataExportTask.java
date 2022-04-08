@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -52,6 +53,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
@@ -453,7 +455,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		taskDescription = "Wtiting output";
 		total = featuresToExport.size();
 		processed = 0;
-		final Writer writer = new BufferedWriter(new FileWriter(outputFile));
+		final Writer writer = new BufferedWriter(new FileWriter(outputFile, StandardCharsets.UTF_8));
 		
 		//	Header
 		ArrayList<String>header = new ArrayList<String>();
@@ -756,15 +758,19 @@ public class IDTrackerDataExportTask extends AbstractTask {
 			double posteriorProbability = 0.0d;
 			double percolatorScore = 0.0d;
 			String featureSpectrumArray = "";
-			String libraryHitSpectrumArray = "";
+			String libraryHitSpectrumArray = "";		
+			double libraryPrecursorDeltaMz = 0.0d;
+			double neutralMassDeltaMz = 0.0d;
+			double precursorPurity = 1.0d;
 			
-			instrumentMsMs = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
+			instrumentMsMs = feature.getSpectrum().getExperimentalTandemSpectrum();
 			if(instrumentMsMs != null) {
 
 				if(instrumentMsMs.getParent() != null)
 					parentMz = instrumentMsMs.getParent().getMz();
 				
-				featureSpectrumArray = instrumentMsMs.getSpectrumAsPythonArray();
+				featureSpectrumArray = instrumentMsMs.getSpectrumAsPythonArray();				
+				precursorPurity = instrumentMsMs.getParentIonPurity();
 			}
 			ReferenceMsMsLibraryMatch msmslibMatch = id.getReferenceMsMsLibraryMatch();
 			ReferenceMsMsLibrary lib = null;
@@ -791,6 +797,14 @@ public class IDTrackerDataExportTask extends AbstractTask {
 				posteriorProbability = msmslibMatch.getPosteriorErrorProbability();
 				percolatorScore = msmslibMatch.getPercolatorScore();				
 				libraryHitSpectrumArray = matchFeature.getSpectrumAsPythonArray();
+
+				if(id.getCompoundIdentity() != null) {
+					double neutralMass = id.getCompoundIdentity().getExactMass();
+					neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
+				}
+				MsPoint libPrecursor = msmslibMatch.getMatchedLibraryFeature().getParent();
+				if(libPrecursor != null) 
+					libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();				
 			}	
 			if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY) && lib != null)
 				return lib.getName();
@@ -833,6 +847,15 @@ public class IDTrackerDataExportTask extends AbstractTask {
 			if(property.equals(IDTrackerFeatureIdentificationProperties.SPECTRUM_ENTROPY) && msmsEntropy != 0.0d)
 				return entropyFormat.format(msmsEntropy);
 			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_PRECURSOR_DELTA_MZ) && libraryPrecursorDeltaMz != 0.0d)
+				return mzFormat.format(libraryPrecursorDeltaMz);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.NEUTRAL_MASS_PRECURSOR_DELTA_MZ) && neutralMassDeltaMz != 0.0d)
+				return mzFormat.format(neutralMassDeltaMz);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.PRECURSOR_PURITY) && precursorPurity != 0.0d)
+				return entropyFormat.format(precursorPurity);
+			
 			if(property.equals(IDTrackerFeatureIdentificationProperties.FDR_Q_VALUE) && qValue != 0.0d) {
 				if(qValue < 0.001d || qValue > 1000.d)
 					return sciFormatter.format(qValue);
@@ -853,6 +876,8 @@ public class IDTrackerDataExportTask extends AbstractTask {
 			
 			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_MATCH_MSMS))
 				return libraryHitSpectrumArray;
+			
+			
 		}
 		return "";
 	}

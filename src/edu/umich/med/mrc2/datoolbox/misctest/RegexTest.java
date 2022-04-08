@@ -25,7 +25,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,7 +38,6 @@ import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -79,8 +77,6 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.FileNameUtils;
@@ -144,7 +140,6 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DocumentFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSComponentTableFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSResolution;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
-import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACmetaboliteMetaDataFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
@@ -184,10 +179,8 @@ import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsfdr.NISTPepSearchResultManipulator;
 import edu.umich.med.mrc2.datoolbox.rawdata.PeakFinder;
-import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
-import edu.umich.med.mrc2.datoolbox.utils.LIMSReportingUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MGFUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
@@ -271,276 +264,6 @@ public class RegexTest {
 		ps.close();
 		updPs.close();
 		ConnectionManager.releaseConnection(conn);
-	}
-	
-	
-	private static void createMoTrPACFileManifest() throws IOException {
-		
-		List<String>tissueTypes = new ArrayList<String>(
-				Arrays.asList(
-						"T69 - Adipose brown",
-						"T70 - Adipose white",
-						"T58 - Heart",
-						"T59 - Kidney",
-						"T68 - Liver",
-						"T66 - Lung",
-						"T55 - Muscle",
-						"T31 - Plasma"));
-		List<String>assayTypes = 
-				new ArrayList<String>(Arrays.asList("IONPNEG" ,"RPNEG", "RPPOS"));
-		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06");	
-		String batchId = "BATCH1_20210603";	
-		String processedFolderId  = "PROCESSED_20210806";
-		for(String tissue : tissueTypes) {
-			
-			for(String assay : assayTypes) {
-				
-				StringBuffer checkSumData = new StringBuffer();
-				checkSumData.append("file_name,md5\n");
-				Path processedPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, processedFolderId);
-				Path namedDirPath = Paths.get(processedPath.toString(), "NAMED");
-				List<Path> pathList = Files.find(namedDirPath,
-						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
-					collect(Collectors.toList());
-				for(Path filePath : pathList) {
-					String zipHash = DigestUtils.sha256Hex(
-							new FileInputStream(filePath.toString()));
-					String localPath = processedFolderId + File.separator + "NAMED" + File.separator + filePath.toFile().getName();
-					checkSumData.append(localPath + "," + zipHash + "\n");
-				}
-				Path unnamedDirPath = Paths.get(processedPath.toString(), "UNNAMED");
-				pathList = Files.find(unnamedDirPath,
-						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
-					collect(Collectors.toList());
-				for(Path filePath : pathList) {
-					String zipHash = DigestUtils.sha256Hex(
-							new FileInputStream(filePath.toString()));
-					String localPath = processedFolderId + File.separator + "UNNAMED" + File.separator + filePath.toFile().getName();
-					checkSumData.append(localPath + "," + zipHash + "\n");
-				}
-				pathList = Files.find(processedPath,
-						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_failedsamples_"))).
-					collect(Collectors.toList());
-				for(Path filePath : pathList) {
-					String zipHash = DigestUtils.sha256Hex(
-							new FileInputStream(filePath.toString()));
-					String localPath = processedFolderId + File.separator + filePath.toFile().getName();
-					checkSumData.append(localPath + "," + zipHash + "\n");
-				}
-				Path rawChecksumPathPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW", " checksum.txt");
-				List<String> zipCs = Files.readAllLines(rawChecksumPathPath);
-				for(int i=1; i<zipCs.size(); i++) {
-					String[]parts = zipCs.get(i).split("\t");
-					checkSumData.append(parts[0].replace(".zip", "") + "," + parts[1] + "\n");
-				}
-				File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "file_manifest_20220208.csv").toFile();
-				FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
-			}
-		}
-	}
-	
-	private static void compressMoTrPACRawDataFiles() {
-		
-		List<String>tissueTypes = new ArrayList<String>(
-				Arrays.asList(
-						"T69 - Adipose brown",
-						"T70 - Adipose white",
-						"T58 - Heart",
-						"T59 - Kidney",
-						"T68 - Liver",
-						"T66 - Lung",
-						"T55 - Muscle",
-						"T31 - Plasma"));
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC");	
-		File rawBaseDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC\\RAW_AC");	
-		try {
-			String batchId = "BATCH1_20210603";	
-			String processedFolderId  = "PROCESSED_20210806";
-			for(String tissue : tissueTypes) {
-							
-				for(String assay : assayTypes) {
-					
-					Path zippedRawFilesDirPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW");
-					Path namedDirPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, processedFolderId, "NAMED");
-					Path sampleInfo = Files.find(namedDirPath, Integer.MAX_VALUE, (p, basicFileAttributes) ->
-			                        p.getFileName().toString().startsWith("metadata_sample_")).findFirst().orElse(null);
-					if(sampleInfo != null) {
-						
-						Collection<String>toCompress = new TreeSet<String>();
-						Collection<String>processed = new TreeSet<String>();
-						TreeMap<File,Long> fileSizeMap = new TreeMap<File,Long>();
-						TreeMap<File,String> fileHashMap = new TreeMap<File,String>();
-						File manifest = Paths.get(zippedRawFilesDirPath.toString(), "manifest_" + assay + ".txt").toFile();
-						File checkSumFile = Paths.get(zippedRawFilesDirPath.toString(), " checksum.txt").toFile();
-						FileUtils.copyFile(sampleInfo.toFile(), manifest);						
-						String[][] manifestData = null;
-						try {
-							manifestData = DelimitedTextParser.parseTextFileWithEncoding(manifest, MRC2ToolBoxConfiguration.getTabDelimiter());
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						if (manifestData != null) {
-							String[] header = manifestData[0];
-							int fileNameColumn = -1;
-							for(int i=0; i<header.length; i++) {
-								if(header[i].equals("raw_file")) {
-									fileNameColumn = i;
-									break;
-								}
-							}							
-							for(int i=1; i<manifestData.length; i++) 
-								toCompress.add(manifestData[i][fileNameColumn]);
-							
-							System.out.println(sampleInfo.getFileName().toString());
-						}
-						Path rawDataDirectory = Paths.get(rawBaseDir.getAbsolutePath(), tissue, assay);
-						List<Path> pathList = Files.find(rawDataDirectory,
-								1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".d"))).
-							collect(Collectors.toList());
-						for(Path rdp : pathList) {
-							
-							FileUtils.deleteDirectory(Paths.get(rdp.toString(), "Results").toFile());
-							String rawFileName = FilenameUtils.getBaseName(rdp.toString());
-							if(toCompress.contains(rawFileName)) {
-								
-								File destination = Paths.get(zippedRawFilesDirPath.toString(),
-										FilenameUtils.getBaseName(rdp.toString()) + ".zip").toFile();
-								CompressionUtils.zipFolder(rdp.toFile(), destination);
-								if(destination.exists()) {
-									try {
-										String zipHash = DigestUtils.sha256Hex(
-												new FileInputStream(destination.getAbsolutePath()));
-
-										fileHashMap.put(destination, zipHash);
-									} catch (FileNotFoundException e1) {
-										// TODO Auto-generated catch block
-										e1.printStackTrace();
-									} catch (IOException e1) {
-										// TODO Auto-generated catch block
-										e1.printStackTrace();
-									}
-									fileSizeMap.put(destination, destination.length());
-									processed.add(rawFileName);
-								}								
-							}
-						}
-						@SuppressWarnings({ "unchecked" })
-						Collection<String> missing = CollectionUtils.removeAll(toCompress, processed);
-						if(!missing.isEmpty()) {
-							System.out.println("Missing files in " + zippedRawFilesDirPath.toString());
-							for(String m : missing)
-								System.out.println(m);
-						}					
-						//	Write checksum file
-						StringBuffer checkSumData = new StringBuffer();
-						checkSumData.append("File name\t");
-						checkSumData.append("SHA256\t");
-						checkSumData.append("Size\n");
-						for(Entry<File, String> entry : fileHashMap.entrySet()) {
-							
-							if(fileSizeMap.get(entry.getKey()) != null) {
-								
-								checkSumData.append(entry.getKey().getName() +"\t");
-								checkSumData.append(entry.getValue() +"\t");
-								checkSumData.append(Long.toString(fileSizeMap.get(entry.getKey())) + "\n");
-							}
-						}
-						FileUtils.writeStringToFile(checkSumFile, checkSumData.toString(), Charset.defaultCharset());
-					}
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-		
-	private static void createMotrpacDataUploadDirectoryStructure() {
-		
-		List<String>tissueTypes = new ArrayList<String>(
-				Arrays.asList(
-						"T69 - Adipose brown",
-						"T70 - Adipose white",
-						"T58 - Heart",
-						"T52 - Hippocampus",
-						"T59 - Kidney",
-						"T68 - Liver",
-						"T66 - Lung",
-						"T55 - Muscle",
-						"T31 - Plasma"));
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));		
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC\\_DOCS\\_INTERMEDIATES");	
-		try {
-			LIMSReportingUtils.createMotrpacDataUploadDirectoryStructure(
-					tissueTypes, 
-					assayTypes, 
-					parentDirectory,
-					1,
-					"20210603",
-					"20210806");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private static void createManifestsDirectoryStructure() {
-		
-		List<String>tissueTypes = new ArrayList<String>(
-				Arrays.asList(
-						"T69 - Adipose brown",
-						"T70 - Adipose white",
-						"T58 - Heart",
-						"T59 - Kidney",
-						"T68 - Liver",
-						"T66 - Lung",
-						"T55 - Muscle",
-						"T31 - Plasma"));
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C Shipment ANI870 10082\\4BIC\\PASS1AC\\Manifests");
-		for(String tissue : tissueTypes) {
-			
-			for(String assay : assayTypes) {
-				
-				try {
-					Files.createDirectories(
-							Paths.get(parentDirectory.getAbsolutePath(), tissue, assay));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	private static void createRawDataVaultDirectoryStructure() {
-		
-		List<String>tissueTypes = new ArrayList<String>(
-				Arrays.asList(
-						"T69 - Adipose brown",
-						"T70 - Adipose white",
-						"T58 - Heart",
-						"T59 - Kidney",
-						"T68 - Liver",
-						"T66 - Lung",
-						"T55 - Muscle",
-						"T31 - Plasma"));
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C Shipment ANI870 10082\\4BIC\\PASS1AC\\RAW_AC");
-		for(String tissue : tissueTypes) {
-			
-			for(String assay : assayTypes) {
-				
-				try {
-					Files.createDirectories(
-							Paths.get(parentDirectory.getAbsolutePath(), tissue, assay));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 	
 	private static void extractInstrumentData() {
@@ -1560,76 +1283,7 @@ public class RegexTest {
 			e.printStackTrace();
 		}
 	}
-	
-	private static void createRoboCopyScript() {
-		
-		List<File>expDirs = new ArrayList<File>();
-		try {
-			expDirs = Files.list(Paths.get("Y:\\DataAnalysis\\_Reports"))
-			        .map(Path::toFile).filter(f -> f.getName().startsWith("EX"))
-			        .collect(Collectors.toList());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		List<String>commands = new ArrayList<String>();
-		for(File expDir : expDirs) {
-			
-			String command = "robocopy \"" + expDir.getAbsolutePath() + "\\ \" " + 
-			"\"R:\\Metabolomics-BRCF\\Shared\\_Reports\\" + expDir.getName() + " \" /mir /mt:16 /tbd /r:1 /w:3 /fft /np";
-			commands.add(command);
-		}
-		Path mspOutputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\robocopy.bat");
-	    try {
-			Files.createFile(mspOutputPath);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	    try {
-			Files.write(mspOutputPath, 
-					commands, 
-					StandardCharsets.UTF_8,
-					StandardOpenOption.WRITE, 
-					StandardOpenOption.APPEND);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-	}
-	
-	private static void createRMDIRScript() {
-		
-		List<File>expDirs = new ArrayList<File>();
-		try {
-			expDirs = Files.list(Paths.get("Y:\\DataAnalysis\\_Reports"))
-			        .map(Path::toFile).filter(f -> f.getName().startsWith("EX"))
-			        .collect(Collectors.toList());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		List<String>commands = new ArrayList<String>();
-		for(File expDir : expDirs) {
-			
-			String command = "rm -rf \"" + expDir.getAbsolutePath() +"\"";
-			commands.add(command);
-		}
-		Path mspOutputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\rmdir.bat");
-	    try {
-			Files.createFile(mspOutputPath);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	    try {
-			Files.write(mspOutputPath, 
-					commands, 
-					StandardCharsets.UTF_8,
-					StandardOpenOption.WRITE, 
-					StandardOpenOption.APPEND);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} 
-	}
-	
+
 	private static void parseOldPassatuttoDecoys() {
 
 		File inputFile = new File("E:\\DataAnalysis\\MSMS\\DecoyDB\\Passatutto\\_OLD\\NIST_POS_DECOY_PASSATUTTO_CONDITIONAL.MS");
@@ -1684,8 +1338,7 @@ public class RegexTest {
 	}
 	
 	private static void parseOldPassatuttoDecoysOld() {
-		
-		
+				
 		Collection<File> decoys = new ArrayList<File>();
 		try {
 			//	"E:\\DataAnalysis\\MSMS\\DecoyDB\\Passatutto\\_OLD\\NIST_NEG"
@@ -1990,8 +1643,7 @@ public class RegexTest {
 			e.printStackTrace();
 		}
 	}
-	
-	
+		
 	private static void calculateEntropyForMsmsLibraryFeatures() throws Exception {
 		
 		System.out.println("Updating entropy and hash data for MSMS libraries ...");
@@ -2291,259 +1943,8 @@ public class RegexTest {
 		}
 		return null;
 	}
-	
-	private static void fixMetaboliteNames() throws Exception {
-		
-		File sourceDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\UploadPrep docs\\metaboliteData2fix");
-		String destinationDirName = "Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\UploadPrep docs\\metaboliteData2fix\\Fixed";
-		IOFileFilter metNameFilter = 
-				FileFilterUtils.makeFileOnly(new RegexFileFilter("^metadata_metabolites_named_.+\\.(txt)|(TXT)$"));
-		Collection<File> metNamefiles = FileUtils.listFiles(
-				sourceDirectory,
-				metNameFilter,
-				null);
-		
-		Path bucketFileListing = Paths.get("Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\UploadPrep docs\\metadata_metabolites_named_listing.txt");
-		List<String>bucketAddresses = Files.readAllLines(bucketFileListing);
-		List<String>copyCommands = new ArrayList<String>();		
-		String[]lipidsWithNoIsomers = new String[] {"LPC(15:0)", "MG(14:0)", "LPC(18:1)", "LPC(17:0)",};
-		if (!metNamefiles.isEmpty()) {
 
-			for(File mnf : metNamefiles) {
-				
-				boolean hasChanged = false;
-				//	Read file and replace names if necessary
-				Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>metaboliteMetadata = 
-						parseMetaboliteMetadataFile(mnf);
-				
-				for(Map<MoTrPACmetaboliteMetaDataFields, String> mData : metaboliteMetadata) {
-					
-					String mName = mData.get(MoTrPACmetaboliteMetaDataFields.METABOLITE_NAME);
-					for(String lipid : lipidsWithNoIsomers) {
-						
-						if(mName.contains(lipid) && !mName.equals(lipid)) {
-							mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, lipid);
-							hasChanged = true;
-						}
-					}
-					if(mName.endsWith("_a")) {
-						
-						if(mName.endsWith("_rp_a"))
-							mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, mName);
-						else
-							mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, mName.replace("_a", "_rp_a"));
-						
-						hasChanged = true;
-					}
-					if(mName.endsWith("_b")) {
-						
-						if(mName.endsWith("_rp_b"))
-							mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, mName);
-						else
-							mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, mName.replace("_b", "_rp_b"));
-						
-						hasChanged = true;
-					}
-					if(mName.endsWith("_a_b")) {
-						if(mName.endsWith("_rp_a_b"))
-							mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, mName.replace("_rp_a_b", ""));
-						else
-							mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, mName.replace("_a_b", ""));
-						hasChanged = true;
-					}
-					if(mName.equals("Car(5:0) isomers")) {
-						mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, "CAR(5:0)_rp_a_b");
-						hasChanged = true;
-					}
-				}			
-				if(hasChanged) {
-					Path newFilePath = Paths.get(destinationDirName, mnf.getName());
-					try {
-						writeMetaboliteMetadataFile(metaboliteMetadata, newFilePath);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					String fName = mnf.getName();
-					String bucketAddres = bucketAddresses.stream().
-							filter(l -> l.contains(fName)).
-							findFirst().orElse(null);
-					
-					if(bucketAddres != null) {
-						copyCommands.add("gsutil cp \"" + newFilePath.toString() + "\" " + bucketAddres.replace("PROCESSED_20191008", "PROCESSED_20210629"));
-					}
-				}
-			}
-		}
-		Path copyCommandsFilePath = Paths.get("Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\UploadPrep docs\\metaboliteData2fix\\Fixed\\copyCommands.txt");
-		try {
-			Files.write(copyCommandsFilePath, 
-					copyCommands, 					
-					StandardCharsets.UTF_8,
-					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	private static void fixMetaboliteNamesStepTwo() throws Exception {
-		
-		File sourceDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\UploadPrep docs\\metaboliteData2fix");
-		String destinationDirName = "Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\UploadPrep docs\\metaboliteData2fix\\Fixed";
-		IOFileFilter metNameFilter = 
-				FileFilterUtils.makeFileOnly(new RegexFileFilter("^metadata_metabolites_named_.+\\.(txt)|(TXT)$"));
-		Collection<File> metNamefiles = FileUtils.listFiles(
-				sourceDirectory,
-				metNameFilter,
-				null);
-		
-		Path bucketFileListing = Paths.get("Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\UploadPrep docs\\metadata_metabolites_named_listing.txt");
-		List<String>bucketAddresses = Files.readAllLines(bucketFileListing);
-		List<String>copyCommands = new ArrayList<String>();		
-		if (!metNamefiles.isEmpty()) {
 
-			for(File mnf : metNamefiles) {
-				
-				boolean hasChanged = false;
-				//	Read file and replace names if necessary
-				Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>metaboliteMetadata = 
-						parseMetaboliteMetadataFile(mnf);
-				
-				for(Map<MoTrPACmetaboliteMetaDataFields, String> mData : metaboliteMetadata) {
-					
-					String refmetOld = mData.get(MoTrPACmetaboliteMetaDataFields.REFMET_NAME);
-					if(refmetOld.equalsIgnoreCase("CAR(3:0(2Me))")) {
-						mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, "CAR(4:0)_rp_a");
-						hasChanged = true;
-					}				
-					if(refmetOld.equalsIgnoreCase("Car(5:0)")) {
-						mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, "CAR(5:0)_rp_b");
-						hasChanged = true;
-					}
-					if(refmetOld.equalsIgnoreCase("Car(5:0) isomers") || refmetOld.equals("CAR(5:0)_rp_a_b")) {
-						mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, "CAR(5:0)");
-						hasChanged = true;
-					}
-					
-					if(refmetOld.equalsIgnoreCase("Car(4:0)")) {
-						mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, "CAR(4:0)_rp_b");
-						hasChanged = true;
-					}
-					if(refmetOld.equalsIgnoreCase("Car(4:0) isomers") || refmetOld.equals("CAR(4:0)_rp_a_b")) {
-						mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, "CAR(4:0)");
-						hasChanged = true;
-					}
-					if(refmetOld.equalsIgnoreCase("CAR(4:0(3Me))")) {
-						mData.put(MoTrPACmetaboliteMetaDataFields.REFMET_NAME, "CAR(5:0)_rp_a");
-						hasChanged = true;
-					}
-				}			
-				if(hasChanged) {
-					Path newFilePath = Paths.get(destinationDirName, mnf.getName());
-					try {
-						writeMetaboliteMetadataFile(metaboliteMetadata, newFilePath);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					String fName = mnf.getName();
-					String bucketAddres = bucketAddresses.stream().
-							filter(l -> l.contains(fName)).
-							findFirst().orElse(null);
-					
-					if(bucketAddres != null) {
-						copyCommands.add("gsutil cp \"" + newFilePath.toString() + "\" " + bucketAddres.replace("PROCESSED_20191008", "PROCESSED_20210629"));
-					}
-				}
-			}
-		}
-		Path copyCommandsFilePath = Paths.get("Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\UploadPrep docs\\metaboliteData2fix\\Fixed\\copyCommands.txt");
-		try {
-			Files.write(copyCommandsFilePath, 
-					copyCommands, 					
-					StandardCharsets.UTF_8,
-					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	private static void writeMetaboliteMetadataFile(
-			Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>metaboliteMetadata,
-			Path metaboliteMetadataFilePath) {
-		
-		ArrayList<String>lines = new ArrayList<String>();
-		ArrayList<String>header = new ArrayList<String>();
-		for(MoTrPACmetaboliteMetaDataFields field : MoTrPACmetaboliteMetaDataFields.values())
-			header.add(field.getName());
-		
-		lines.add(StringUtils.join(header, MRC2ToolBoxConfiguration.getTabDelimiter()));
-		for(Map<MoTrPACmetaboliteMetaDataFields, String> mmd : metaboliteMetadata) {
-			
-			ArrayList<String>line = new ArrayList<String>();
-			for(MoTrPACmetaboliteMetaDataFields field : MoTrPACmetaboliteMetaDataFields.values()) {
-				
-				String value = mmd.get(field);
-				if(value != null)
-					line.add(value);
-				else
-					line.add("");				
-			}
-			lines.add(StringUtils.join(line, MRC2ToolBoxConfiguration.getTabDelimiter()));
-		}
-		try {
-			Files.write(metaboliteMetadataFilePath, 
-					lines, 					
-					StandardCharsets.UTF_8,
-					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	private static Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>parseMetaboliteMetadataFile(File metaboliteMetadataFile) throws Exception{
-		
-		Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>metaboliteMetadata = 
-				new ArrayList<Map<MoTrPACmetaboliteMetaDataFields,String>>();
-		String[][] metaboliteData = null;
-		try {
-			metaboliteData =
-				DelimitedTextParser.parseTextFileWithEncodingSkippingComments(
-						metaboliteMetadataFile, MRC2ToolBoxConfiguration.getTabDelimiter(), ">");
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		if(metaboliteData == null) {
-			throw new Exception("Unable to read metabolite data file!");
-		}
-		Map<MoTrPACmetaboliteMetaDataFields,Integer>columnMap = 
-				new TreeMap<MoTrPACmetaboliteMetaDataFields,Integer>();
-		String[]header = metaboliteData[0];
-		for(int i=0; i<header.length; i++) {
-			if(header[i].trim().isEmpty())
-				continue;
-			
-			MoTrPACmetaboliteMetaDataFields field = 
-					MoTrPACmetaboliteMetaDataFields.getMoTrPACmetaboliteMetadataFieldByName(header[i].trim());
-			
-			if(field != null)
-				columnMap.put(field, i);
-		}
-		for(int i=1; i<metaboliteData.length; i++) {
-			Map<MoTrPACmetaboliteMetaDataFields,String>mDataMap = new TreeMap<MoTrPACmetaboliteMetaDataFields,String>();
-			for(Entry<MoTrPACmetaboliteMetaDataFields, Integer> col : columnMap.entrySet())				
-				mDataMap.put(col.getKey(), metaboliteData[i][col.getValue()]);
-
-			metaboliteMetadata.add(mDataMap);
-		}
-		return metaboliteMetadata;
-	}
 	
 	private static void batchRenameCefs() {
 		
@@ -2683,79 +2084,6 @@ public class RegexTest {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-	}
-	
-	private static void updateMotrPacRefSampleAssignment() throws Exception {
-		
-		//	Read list of files
-		Path listPath = Paths.get("Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\RefSampleCorrection\\PASS1A-06_sample_metadata_file_list.txt");
-		String tmpDir = "Y:\\DataAnalysis\\_Reports\\EX00979 - PASS 1B\\RefSampleCorrection\\TMP";
-		String gsUtilBinary = "C:\\Users\\Sasha\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin\\gsutil.cmd";
-		List<String>sampleMetaDataList = new ArrayList<String>();
-		try {
-			sampleMetaDataList = Files.readAllLines(listPath);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-		for (String bucketPath : sampleMetaDataList) {
-
-			Path tmpFilePath = Paths.get(tmpDir, "sample_metadata.txt").toAbsolutePath();
-			Path correctedTmpFilePath = Paths.get(tmpDir, "sample_metadata_corrected.txt");
-			ProcessBuilder pb = new ProcessBuilder(
-					gsUtilBinary, "cp", bucketPath, tmpFilePath.toString());
-			try {
-				Process p = pb.start();
-				int exitCode = p.waitFor();
-				if (exitCode == 0) {
-					p.destroy();
-					List<String> sampleDataLines = new ArrayList<String>();
-					if(tmpFilePath.toFile() != null && tmpFilePath.toFile().exists())
-						sampleDataLines  = Files.readAllLines(tmpFilePath, Charset.forName("ISO-8859-1"));
-					
-					boolean corrected = false;
-					List<String> correctedSampleDataLines = new ArrayList<String>();
-					for(String sdl : sampleDataLines) {
-						
-						if(sdl.startsWith("CS0UM")) {
-							correctedSampleDataLines.add(sdl.replace("QC-Reference", "QC-ReCAS"));
-							corrected = true;
-						}
-						else {
-							correctedSampleDataLines.add(sdl);
-						}
-					}
-					if(corrected) {						
-					    try {
-							Files.write(correctedTmpFilePath, 
-									correctedSampleDataLines, 
-									StandardCharsets.UTF_8,
-									StandardOpenOption.CREATE, 
-									StandardOpenOption.APPEND);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}					    
-					    //	Upload corrected file 
-					    if(correctedTmpFilePath.toFile() != null && correctedTmpFilePath.toFile().exists()) {
-							pb = new ProcessBuilder(
-									gsUtilBinary, "cp", correctedTmpFilePath.toString(), bucketPath);
-							p = pb.start();
-							exitCode = p.waitFor();
-							if (exitCode == 0) {
-								System.out.println("Updated " + bucketPath);
-							}
-					    }
-					    //	Delete corrected file					    
-					    Files.delete(correctedTmpFilePath);
-					}
-					Files.delete(tmpFilePath);
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}			
 		}
 	}
 
@@ -4165,10 +3493,7 @@ public class RegexTest {
 			bundle.addDescription(desc);
 		}
 		return bundle;
-	}
-
-
-	
+	}	
 	
 	private static void calculateEntropyForMsmsFeatures() throws Exception {
 		
@@ -4657,7 +3982,6 @@ public class RegexTest {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
-
 
 	public static void addNistCompoundData() throws Exception {
 

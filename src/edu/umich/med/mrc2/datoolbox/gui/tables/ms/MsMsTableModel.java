@@ -19,7 +19,7 @@
  *  
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.library.feditor;
+package edu.umich.med.mrc2.datoolbox.gui.tables.ms;
 
 import java.util.Collection;
 import java.util.TreeSet;

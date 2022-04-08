@@ -658,7 +658,11 @@ public enum MainActionCommands {
 	//	Library MS table
 	COPY_MASS_LIST_AS_CSV_COMMAND("Copy complete mass list (CSV)"),
 	COPY_SELECTED_ADUCT_MASS_SUBLIST_2_AS_CSV_COMMAND("Copy top 2 masses from visible adducts (CSV)"),
-	COPY_SELECTED_ADUCT_MASS_SUBLIST_3_AS_CSV_COMMAND("Copy top 3 masses from visible adducts (CSV)"),
+	COPY_SELECTED_ADUCT_MASS_SUBLIST_3_AS_CSV_COMMAND("Copy top 3 masses from visible adducts (CSV)"),	
+	COPY_SPECTRUM_AS_TSV_COMMAND("Copy spectrum as TAB-separated text"),
+	COPY_NORMALIZED_SPECTRUM_AS_TSV_COMMAND("Copy normalized spectrum as TAB-separated text"),
+	COPY_FEATURE_WITH_METADATA_COMMAND("Copy feature with metadata"),
+	COPY_SCAN_WITH_METADATA_COMMAND("Copy scan with metadata"),
 
 	//	MGF panel
 	IMPORT_MGF_COMMAND("Import data from MGF"),

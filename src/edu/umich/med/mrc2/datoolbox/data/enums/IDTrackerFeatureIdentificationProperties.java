@@ -48,6 +48,9 @@ public enum IDTrackerFeatureIdentificationProperties {
 	HYBRID_SCORE("Hybrid score"),
 	HYBRID_DELTA_MZ("Hybrid mass shift"),
 	SPECTRUM_ENTROPY("Entropy (lib)"),
+	LIBRARY_PRECURSOR_DELTA_MZ("Lib " + '\u0394' + " M/Z"),
+	NEUTRAL_MASS_PRECURSOR_DELTA_MZ("MW " + '\u0394' + " M/Z"),
+	PRECURSOR_PURITY("Prec.Purity"),
 	MASS_ERROR("Mass error"),
 	RETENTION_ERROR("RT error"),
 	BEST_MATCH_ADDUCT("Adduct"),
@@ -59,7 +62,7 @@ public enum IDTrackerFeatureIdentificationProperties {
 	POSTERIOR_PROBABILITY("Posterior probability"),
 	PERCOLATOR_SCORE("Percolator score"),
 	FEATURE_MSMS("Feature MSMS"),
-	LIBRARY_MATCH_MSMS("Library match MSMS"),
+	LIBRARY_MATCH_MSMS("Library match MSMS"),	
 	;
 
 	private final String name;
