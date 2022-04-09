@@ -92,11 +92,21 @@ public class ScanTableModel extends BasicTableModel {
 			double precMz = 0.0d;
 			String precRange = null;
 			if(sc.getPrecursor() != null) {
-				precMz = sc.getPrecursor().getMzTarget();
-				Range mzRange = new Range(
-						sc.getPrecursor().getMzRangeStart(), 
-						sc.getPrecursor().getMzRangeEnd());
-				precRange = mzRange.getFormattedString(mzRangeFormat);
+				
+				if(sc.getPrecursor().getMzTarget() != null) {
+					precMz = sc.getPrecursor().getMzTarget();
+				}
+				else {
+					if(sc.getPrecursor().getMzTargetMono() != null)
+						precMz = sc.getPrecursor().getMzTargetMono();
+				}
+				if( sc.getPrecursor().getMzRangeStart() != null 
+						&& sc.getPrecursor().getMzRangeEnd() != null) { 
+					Range mzRange = new Range(
+							sc.getPrecursor().getMzRangeStart(), 
+							sc.getPrecursor().getMzRangeEnd());
+					precRange = mzRange.getFormattedString(mzRangeFormat);
+				}
 			}			
 			Object[] obj = new Object[] { 
 					sc, 
