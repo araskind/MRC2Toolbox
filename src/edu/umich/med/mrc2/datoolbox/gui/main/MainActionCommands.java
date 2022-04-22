@@ -747,7 +747,11 @@ public enum MainActionCommands {
 	EDIT_SAMPLE_PREP_DIALOG_COMMAND("Edit sample preparation dialog"),
 	EDIT_SAMPLE_PREP_COMMAND("Edit sample preparation"),
 	DELETE_SAMPLE_PREP_COMMAND("Delete sample preparation"),
+	SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND("Select existing sample prep"),
+	LOAD_SAMPLE_PREP_FROM_DATABASE_COMMAND("Load selected sample prep data"),
+	CLEAR_SAMPLE_PREP_DEFINITION_COMMAND("Clear sample prep definition"),
 	
+		
 	//	Add processing results
 	ADD_DATA_PROCESSING_RESULTS_DIALOG_COMMAND("Show \"Add data processing results\" dialog"),
 	ADD_DATA_PROCESSING_RESULTS_COMMAND("Add data processing results"),

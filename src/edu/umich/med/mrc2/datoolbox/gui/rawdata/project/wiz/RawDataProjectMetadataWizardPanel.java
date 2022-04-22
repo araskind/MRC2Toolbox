@@ -49,14 +49,16 @@ public class RawDataProjectMetadataWizardPanel extends JPanel {
 		gbl_stagePanel.columnWidths = new int[]{0, 0};
 		gbl_stagePanel.rowHeights = new int[]{0, 0, 0};
 		gbl_stagePanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gbl_stagePanel.rowWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
+		gbl_stagePanel.rowWeights = new double[]{1.0, 0.1, Double.MIN_VALUE};
 		setLayout(gbl_stagePanel);
 
 		gbc_panel = new GridBagConstraints();
-		gbc_panel.insets = new Insets(0, 0, 5, 0);
 		gbc_panel.fill = GridBagConstraints.BOTH;
+		gbc_panel.insets = new Insets(0, 0, 5, 0);
 		gbc_panel.gridx = 0;
 		gbc_panel.gridy = 0;
+		
+		//add(new JPanel(), gbc_panel);
 		
 		completeStageButton = new JButton("");
 		completeStageButton.setFont(new Font("Tahoma", Font.BOLD, 12));

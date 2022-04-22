@@ -32,13 +32,12 @@ public class ReleaseAllDataSourcesTask extends LongUpdateTask {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Void doInBackground() {
 
 		try {
 			RawDataManager.getRawDataMap().values().
-				stream().forEach(d -> d.releaseMemory());;				
+				stream().forEach(d -> d.releaseMemory());		
 		} 
 		catch (Exception e) {
 			// TODO Auto-generated catch block

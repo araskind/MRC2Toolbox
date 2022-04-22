@@ -44,7 +44,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 
 import com.github.lgooddatepicker.components.DatePicker;
 
@@ -69,14 +69,16 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
-public class SamplePrepEditorPanel extends JPanel implements ActionListener, PersistentLayout, BackedByPreferences {
+public class SamplePrepEditorPanel extends JPanel 
+		implements ActionListener, PersistentLayout, BackedByPreferences {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 3179269432134132136L;
 
-	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "SamplePrepEditorDialog.layout");
+	private static final File layoutConfigFile = 
+			new File(MRC2ToolBoxCore.configDir + "SamplePrepEditorDialog.layout");
 	private LIMSSamplePreparation prep;
 	private LIMSExperiment experiment;
 	private LIMSUser prepUser;
@@ -93,12 +95,14 @@ public class SamplePrepEditorPanel extends JPanel implements ActionListener, Per
 	private CControl control;
 	private CGrid grid;
 	
+	private ExistingPrepSelectorDialog existingPrepSelectorDialog;
+	
 	/**
 	 * This constructor is for the creation of the new sample preparation;
 	 * @param experiment
 	 */
 	public SamplePrepEditorPanel(LIMSExperiment experiment) {
-		super();
+		super(new BorderLayout(0, 0));
 		this.experiment = experiment;
 		if(experiment == null) {
 			throw new IllegalArgumentException("Experiment can not be null!");
@@ -113,7 +117,7 @@ public class SamplePrepEditorPanel extends JPanel implements ActionListener, Per
 	 * @param prep
 	 */
 	public SamplePrepEditorPanel(LIMSSamplePreparation prep) {
-		super();
+		super(new BorderLayout(0, 0));
 		this.prep = prep;
 		if(prep == null) {
 			throw new IllegalArgumentException("SamplePrep can not be null!");
@@ -132,14 +136,36 @@ public class SamplePrepEditorPanel extends JPanel implements ActionListener, Per
 	}
 
 	private void initGui() {
-		
-		setBorder(new EmptyBorder(10, 10, 10, 10));
+	
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
-		gbl_dataPanel.columnWidths = new int[]{0, 407, 407, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
-		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_dataPanel.columnWidths = new int[]{50, 300, 50, 300, 200, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		setLayout(gbl_dataPanel);
+		
+		JButton selectPrepButton = new JButton(
+				MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
+		selectPrepButton.setActionCommand(
+				MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
+		selectPrepButton.addActionListener(this);
+		GridBagConstraints gbc_selectPrepButton = new GridBagConstraints();
+		gbc_selectPrepButton.anchor = GridBagConstraints.WEST;
+		gbc_selectPrepButton.insets = new Insets(0, 0, 5, 5);
+		gbc_selectPrepButton.gridx = 1;
+		gbc_selectPrepButton.gridy = 0;
+		add(selectPrepButton, gbc_selectPrepButton);
+		
+		JButton clearPanelButton = new JButton(
+				MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName());
+		clearPanelButton.setActionCommand(
+				MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName());
+		clearPanelButton.addActionListener(this);
+		GridBagConstraints gbc_clearPanelButton = new GridBagConstraints();
+		gbc_clearPanelButton.insets = new Insets(0, 0, 5, 0);
+		gbc_clearPanelButton.gridx = 4;
+		gbc_clearPanelButton.gridy = 0;
+		add(clearPanelButton, gbc_clearPanelButton);
 
 		JLabel lblId = new JLabel("ID");
 		lblId.setForeground(Color.BLUE);
@@ -148,18 +174,18 @@ public class SamplePrepEditorPanel extends JPanel implements ActionListener, Per
 		gbc_lblId.anchor = GridBagConstraints.EAST;
 		gbc_lblId.insets = new Insets(0, 0, 5, 5);
 		gbc_lblId.gridx = 0;
-		gbc_lblId.gridy = 0;
+		gbc_lblId.gridy = 1;
 		add(lblId, gbc_lblId);
 
 		idValueLabel = new JLabel("");
 		idValueLabel.setForeground(Color.BLACK);
 		idValueLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_idValueLabel = new GridBagConstraints();
-		gbc_idValueLabel.gridwidth = 2;
+		gbc_idValueLabel.gridwidth = 3;
 		gbc_idValueLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_idValueLabel.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_idValueLabel.gridx = 1;
-		gbc_idValueLabel.gridy = 0;
+		gbc_idValueLabel.gridy = 1;
 		add(idValueLabel, gbc_idValueLabel);
 
 		JLabel lblName = new JLabel("Name");
@@ -169,16 +195,16 @@ public class SamplePrepEditorPanel extends JPanel implements ActionListener, Per
 		gbc_lblName.anchor = GridBagConstraints.EAST;
 		gbc_lblName.insets = new Insets(0, 0, 5, 5);
 		gbc_lblName.gridx = 0;
-		gbc_lblName.gridy = 1;
+		gbc_lblName.gridy = 2;
 		add(lblName, gbc_lblName);
 
 		nameTextField = new JTextField();
 		GridBagConstraints gbc_nameTextField = new GridBagConstraints();
-		gbc_nameTextField.gridwidth = 3;
+		gbc_nameTextField.gridwidth = 4;
 		gbc_nameTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_nameTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_nameTextField.gridx = 1;
-		gbc_nameTextField.gridy = 1;
+		gbc_nameTextField.gridy = 2;
 		add(nameTextField, gbc_nameTextField);
 		nameTextField.setColumns(10);
 
@@ -187,25 +213,27 @@ public class SamplePrepEditorPanel extends JPanel implements ActionListener, Per
 		gbc_lblType.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblType.insets = new Insets(0, 0, 5, 5);
 		gbc_lblType.gridx = 0;
-		gbc_lblType.gridy = 2;
+		gbc_lblType.gridy = 3;
 		add(lblType, gbc_lblType);
 
-		prepUserLabel = new JLabel("");
+		prepUserLabel = new JLabel("      ");
+		prepUserLabel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		GridBagConstraints gbc_prepUserLabel = new GridBagConstraints();
 		gbc_prepUserLabel.gridwidth = 2;
 		gbc_prepUserLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_prepUserLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_prepUserLabel.gridx = 1;
-		gbc_prepUserLabel.gridy = 2;
+		gbc_prepUserLabel.gridy = 3;
 		add(prepUserLabel, gbc_prepUserLabel);
-
+		
 		btnSelectUser = new JButton("Select user");
 		btnSelectUser.setActionCommand(MainActionCommands.SELECT_USER_DIALOG_COMMAND.getName());
 		btnSelectUser.addActionListener(this);
 		GridBagConstraints gbc_btnSelectUser = new GridBagConstraints();
-		gbc_btnSelectUser.insets = new Insets(0, 0, 5, 0);
+		gbc_btnSelectUser.anchor = GridBagConstraints.WEST;
+		gbc_btnSelectUser.insets = new Insets(0, 0, 5, 5);
 		gbc_btnSelectUser.gridx = 3;
-		gbc_btnSelectUser.gridy = 2;
+		gbc_btnSelectUser.gridy = 3;
 		add(btnSelectUser, gbc_btnSelectUser);
 
 		JLabel lblPreparedOn = new JLabel("Prepared on");
@@ -213,44 +241,53 @@ public class SamplePrepEditorPanel extends JPanel implements ActionListener, Per
 		gbc_lblPreparedOn.anchor = GridBagConstraints.EAST;
 		gbc_lblPreparedOn.insets = new Insets(0, 0, 5, 5);
 		gbc_lblPreparedOn.gridx = 0;
-		gbc_lblPreparedOn.gridy = 3;
+		gbc_lblPreparedOn.gridy = 4;
 		add(lblPreparedOn, gbc_lblPreparedOn);
 
 		datePicker = new DatePicker();
 		GridBagConstraints gbc_datePicker = new GridBagConstraints();
+		gbc_datePicker.gridwidth = 2;
 		gbc_datePicker.insets = new Insets(0, 0, 5, 5);
 		gbc_datePicker.fill = GridBagConstraints.BOTH;
 		gbc_datePicker.gridx = 1;
-		gbc_datePicker.gridy = 3;
+		gbc_datePicker.gridy = 4;
 		add(datePicker, gbc_datePicker);
 
-		JPanel panel_1 = new JPanel();
-		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.gridwidth = 4;
-		gbc_panel_1.fill = GridBagConstraints.BOTH;
-		gbc_panel_1.gridx = 0;
-		gbc_panel_1.gridy = 4;
-		add(panel_1, gbc_panel_1);
-		panel_1.setLayout(new BorderLayout(0, 0));
-
+		JPanel panel_1 = new JPanel(new BorderLayout(0, 0));
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
 		sopPanel = new DockableSopPanel(this);
 		documentsPanel = new DockableDocumentsPanel(this);
 		prepSampleTable =  new DockablePrepSampleTable();
-
-		grid.add(0, 0, 100, 100, sopPanel, documentsPanel, prepSampleTable);
-		control.getContentArea().deploy(grid);
+		grid.add(0, 0, 100, 100, documentsPanel, sopPanel, prepSampleTable);				
+		control.getContentArea().deploy(grid);		
+				
 		panel_1.add(control.getContentArea(), BorderLayout.CENTER);
 		
+		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+		gbc_panel_1.gridwidth = 5;
+		gbc_panel_1.fill = GridBagConstraints.BOTH;
+		gbc_panel_1.gridx = 0;
+		gbc_panel_1.gridy = 5;
+		add(panel_1, gbc_panel_1);
+		
 		loadLayout(layoutConfigFile);
+	}
+	
+	@Override
+	public void setVisible(boolean b) {
+		
+		if(b)
+			control.getController().setFocusedDockable(prepSampleTable.intern(), true);
+		
+		super.setVisible(b);
 	}
 	
 	public void loadPrepData(LIMSSamplePreparation samplePrep) {
 		
 		this.prep = samplePrep;
-		if(prep == null) {
+		if(prep == null && experiment != null) {
 			prepSampleTable.setTableModelFromSamples(experiment.getExperimentDesign().getSamples());
 		}
 		else {
@@ -291,7 +328,8 @@ public class SamplePrepEditorPanel extends JPanel implements ActionListener, Per
 		
 		this.prep = samplePrep;
 		this.experiment = prepExperiment;
-		prepSampleTable.setTableModelFromSamples(experiment.getExperimentDesign().getSamples());
+		prepSampleTable.setTableModelFromSamples(
+				experiment.getExperimentDesign().getSamples());
 		
 		if(prep == null)
 			return;
@@ -301,11 +339,17 @@ public class SamplePrepEditorPanel extends JPanel implements ActionListener, Per
 		prepUserLabel.setText(prep.getCreator().getInfo());
 		prepUser = prep.getCreator();
 		if (prep.getPrepDate() != null) {
-			LocalDate localDate = prep.getPrepDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			LocalDate localDate = 
+					prep.getPrepDate().toInstant().
+						atZone(ZoneId.systemDefault()).toLocalDate();
 			datePicker.setDate(localDate);
 		}
 		sopPanel.setTableModelFromProtocols(prep.getProtocols());
 		documentsPanel.setModelFromAnnotations(prep.getAnnotations());
+	}
+	
+	public void lockPrepEditing() {
+		//	TODO
 	}
 
 	@Override
@@ -336,6 +380,56 @@ public class SamplePrepEditorPanel extends JPanel implements ActionListener, Per
 
 		if(command.equals(MainActionCommands.DELETE_DOCUMENT_COMMAND.getName()))
 			deleteDocument();
+		
+		if(command.equals(MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName()))
+			selectExistingSamplePrep();
+		
+		if(command.equals(MainActionCommands.LOAD_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName()))
+			loadSelectedSamplePrep();
+		
+		if(command.equals(MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName()))
+			clearPanel();
+	}
+
+	private void selectExistingSamplePrep() {
+		
+		existingPrepSelectorDialog = new ExistingPrepSelectorDialog(this);
+		existingPrepSelectorDialog.setLocationRelativeTo(this);
+		existingPrepSelectorDialog.setVisible(true);
+	}
+	
+	private void loadSelectedSamplePrep() {
+
+		LIMSSamplePreparation selectedPrep = 
+				existingPrepSelectorDialog.getSelectedPrep();
+		if(selectedPrep == null)
+			return;
+		
+		loadPrepData(selectedPrep);
+		existingPrepSelectorDialog.dispose();
+	}
+	
+	private void clearPanel() {
+		
+		if(prep != null) {
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Do you want to reset the sample prep definition?", this);
+			if(res != JOptionPane.YES_OPTION)
+				return;
+		}
+		this.prep = null;
+		this.experiment = null;
+		prepSampleTable.clearTable();;
+		idValueLabel.setText("");
+		nameTextField.setText("");
+		prepUserLabel.setText("    ");
+		prepUser = null;
+		LocalDate localDate = 
+				new Date().toInstant().
+					atZone(ZoneId.systemDefault()).toLocalDate();
+		datePicker.setDate(localDate);		
+		sopPanel.clearPanel();
+		documentsPanel.clearPanel();
 	}
 
 	private void deleteDocument() {
