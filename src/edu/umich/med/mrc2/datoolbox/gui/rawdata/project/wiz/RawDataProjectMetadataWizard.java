@@ -616,6 +616,9 @@ public class RawDataProjectMetadataWizard extends JDialog
 		}
 	}
 
+	/**
+	 *
+	 */
 	@Override
 	public void samplePrepStatusChanged(SamplePrepEvent e) {
 		
