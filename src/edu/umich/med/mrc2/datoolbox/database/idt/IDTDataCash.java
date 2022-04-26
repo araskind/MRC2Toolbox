@@ -428,6 +428,13 @@ public class IDTDataCash {
 		}
 		return projects;
 	}
+	
+	public static LIMSProject getProjectById(String projectId) {
+		
+		return getProjects().stream().
+				filter(p -> p.getId().equals(projectId)).
+				findFirst().orElse(null);
+	}
 
 	/**
 	 * @return the experiments

@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.prep.SamplePrepEditorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 
-public class WizardSamplePrepPanel extends RawDataProjectMetadataWizardPanel {
+public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 
 	/**
 	 * 
@@ -40,7 +40,7 @@ public class WizardSamplePrepPanel extends RawDataProjectMetadataWizardPanel {
 	private static final long serialVersionUID = 2460123645924507011L;
 	private SamplePrepEditorPanel samplePrepEditorPanel;
 
-	public WizardSamplePrepPanel(RawDataProjectMetadataWizard wizard) {
+	public RDPSamplePrepPanel(RDPMetadataWizard wizard) {
 		
 		super(wizard);
 		

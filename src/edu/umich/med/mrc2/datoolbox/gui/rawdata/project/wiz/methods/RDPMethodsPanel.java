@@ -57,8 +57,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.DockableAcquisitionMethodDa
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.dpl.AcquisitionMethodSelectorDialog;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizardPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -69,7 +69,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.LIMSWorklistAcquisitiomMethodScanTask;
 
-public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel 
+public class RDPMethodsPanel extends RDPMetadataWizardPanel 
 	implements ActionListener, BackedByPreferences, TaskListener {
 
 	/**
@@ -96,7 +96,7 @@ public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel
 	
 	private TreeMap<String, File> missingMethodNameToFileMap;
 	
-	public WizardMethodsPanel(RawDataProjectMetadataWizard wizard) {
+	public RDPMethodsPanel(RDPMetadataWizard wizard) {
 		
 		super(wizard);
 		JPanel panel  = initPanel();

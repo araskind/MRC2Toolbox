@@ -76,7 +76,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.RawDataConversionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msms.MSMSFeatureExtractionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisProjectSetupDialog;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.scan.DockableScanPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTree;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
@@ -136,7 +136,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private boolean showNewProjectDialog;
 	
 	private MSMSFeatureExtractionSetupDialog msmsFeatureExtractionSetupDialog;	
-	private RawDataProjectMetadataWizard rawDataProjectMetadataWizard;
+	private RDPMetadataWizard rawDataProjectMetadataWizard;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("chromatogram", 16);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "RawDataPanel.layout");
@@ -374,7 +374,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if (MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
 			return;
 		
-		rawDataProjectMetadataWizard = new RawDataProjectMetadataWizard(this);
+		rawDataProjectMetadataWizard = new RDPMetadataWizard(this);
 		rawDataProjectMetadataWizard.setLocationRelativeTo(this.getContentPane());
 		rawDataProjectMetadataWizard.setVisible(true);
 	}
@@ -499,7 +499,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		RawDataAnalysisProject newProject = new RawDataAnalysisProject(
 				rawDataAnalysisProjectSetupDialog.getProjectName(), 
 				rawDataAnalysisProjectSetupDialog.getProjectDescription(), 
-				baseDirectory);
+				baseDirectory,
+				MRC2ToolBoxCore.getIdTrackerUser());
 		
 		///LIMSInstrument
 		
@@ -846,6 +847,12 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			for(DataFile df : newRawFiles) {
+				if(df.getInjectionTime() == null) {
+					LCMSData rd = RawDataManager.getRawData(df);
+					df.setInjectionTime(rd.getSource().getRunInfo().getRunStartTime());
+				}				
+			}
 			return null;
 		}
 	}
@@ -1059,8 +1066,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getProjectFile());
 		Collection<DataFile> filesToLoad = new ArrayList<DataFile>();
 		filesToLoad.addAll(task.getProject().getMSMSDataFiles());
-		filesToLoad.addAll(task.getProject().getMSOneDataFiles());
-		
+		filesToLoad.addAll(task.getProject().getMSOneDataFiles());		
 		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(filesToLoad);
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();

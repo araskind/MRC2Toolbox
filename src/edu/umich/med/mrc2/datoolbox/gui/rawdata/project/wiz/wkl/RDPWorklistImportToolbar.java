@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class WorklistImportToolbar extends CommonToolbar {
+public class RDPWorklistImportToolbar extends CommonToolbar {
 
 	/**
 	 *
@@ -53,7 +53,7 @@ public class WorklistImportToolbar extends CommonToolbar {
 		deleteSelectedFilesButton,
 		clearWorklistButton;
 
-	public WorklistImportToolbar(ActionListener commandListener) {
+	public RDPWorklistImportToolbar(ActionListener commandListener) {
 
 		super(commandListener);
 

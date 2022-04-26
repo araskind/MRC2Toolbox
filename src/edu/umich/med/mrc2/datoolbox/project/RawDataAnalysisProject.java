@@ -47,7 +47,9 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleColle
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -66,16 +68,20 @@ public class RawDataAnalysisProject extends Project {
 	protected MSMSExtractionParameterSet msmsExtractionParameterSet;
 	protected Set<Injection>injections;
 	protected ExperimentDesign experimentDesign;
+	protected LIMSUser createdBy;
+	protected LIMSExperiment idTrackerExperiment;
 	
 	//	New project
 	public RawDataAnalysisProject(
 			String projectName, 
 			String projectDescription, 
-			File parentDirectory) {
+			File parentDirectory,
+			LIMSUser createdBy) {
 
 		super(projectName, projectDescription, parentDirectory);
 		initNewProject(parentDirectory);
 		experimentDesign = new ExperimentDesign();
+		this.createdBy = createdBy;
 		initFields();
 	}
 	
@@ -89,6 +95,7 @@ public class RawDataAnalysisProject extends Project {
 		this.msmsDataFiles.addAll(activeProject.getMSMSDataFiles());
 		this.msOneDataFiles = new TreeSet<DataFile>();
 		this.msmsDataFiles.addAll(activeProject.getMSOneDataFiles());
+		this.createdBy = activeProject.getCreatedBy();
 		experimentDesign = activeProject.getExperimentDesign();
 		initFields();
 	}
@@ -451,6 +458,22 @@ public class RawDataAnalysisProject extends Project {
 
 	public ExperimentDesign getExperimentDesign() {
 		return experimentDesign;
+	}
+
+	public LIMSUser getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(LIMSUser createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public LIMSExperiment getIdTrackerExperiment() {
+		return idTrackerExperiment;
+	}
+
+	public void setIdTrackerExperiment(LIMSExperiment idTrackerExperiment) {
+		this.idTrackerExperiment = idTrackerExperiment;
 	}
 }
 

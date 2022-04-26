@@ -33,6 +33,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetListener;
@@ -350,6 +352,15 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 			return orderedLevelMap.get(factor).values();
 		else
 			return null;
+	}
+	
+	public Element getXmlElement() {
+		//	TODO
+		return null;
+	}
+	
+	public ExperimentDesignSubset(Element EexperimentDesignSubsetElement) {
+		//	TODO
 	}
 }
 

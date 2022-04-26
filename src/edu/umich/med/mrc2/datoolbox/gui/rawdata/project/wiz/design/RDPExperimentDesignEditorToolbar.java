@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class WizardExperimentDesignEditorToolbar  extends CommonToolbar {
+public class RDPExperimentDesignEditorToolbar  extends CommonToolbar {
 
 	/**
 	 *
@@ -51,7 +51,7 @@ public class WizardExperimentDesignEditorToolbar  extends CommonToolbar {
 		editSampleButton,
 		addRefSampleButton;
 
-	public WizardExperimentDesignEditorToolbar(ActionListener commandListener) {
+	public RDPExperimentDesignEditorToolbar(ActionListener commandListener) {
 
 		super(commandListener);
 

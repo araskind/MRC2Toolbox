@@ -21,22 +21,23 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz;
 
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design.WizardExperimentDesignPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods.WizardMethodsPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl.WizardWorklistPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design.RDPExperimentDesignPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods.RDPMethodsPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl.RDPWorklistPanel;
 
-public enum RawDataProjectMetadataDefinitionStage {
+public enum RDPMetadataDefinitionStage {
 
-	ADD_SAMPLES("Add samples", WizardExperimentDesignPanel.class),
-	ADD_SAMPLE_PREPARATION_DATA("Add sample preparation data", WizardSamplePrepPanel.class),
-	ADD_ACQ_DA_METHODS("Add acquisition and data analysis methods", WizardMethodsPanel.class),
-	ADD_WORKLISTS("Add instrument worklists", WizardWorklistPanel.class),
+	CREATE_EXPERIMENT("Create experiment", RDPExperimentDefinitionPanel.class),
+	ADD_SAMPLES("Add samples", RDPExperimentDesignPanel.class),
+	ADD_SAMPLE_PREPARATION_DATA("Add sample preparation data", RDPSamplePrepPanel.class),
+	ADD_ACQ_DA_METHODS("Add acquisition and data analysis methods", RDPMethodsPanel.class),
+	ADD_WORKLISTS("Add instrument worklists", RDPWorklistPanel.class),
 	;
 
 	private final String name;
 	private final Class<?> panelClass;
 
-	RawDataProjectMetadataDefinitionStage(String name, Class<?> pClass) {
+	RDPMetadataDefinitionStage(String name, Class<?> pClass) {
 
 		this.name = name;
 		this.panelClass = pClass;		

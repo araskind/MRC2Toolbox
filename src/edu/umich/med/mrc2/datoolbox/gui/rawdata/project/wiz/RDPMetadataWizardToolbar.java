@@ -37,13 +37,14 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class RawDataProjectMetadataWizardToolbar  extends CommonToolbar {
+public class RDPMetadataWizardToolbar  extends CommonToolbar {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 228367951475752870L;
 
+	private static final Icon newCdpIdExperimentIcon = GuiUtils.getIcon("newIdExperiment", 48);
 	private static final Icon addSampleIcon = GuiUtils.getIcon("editExperimentDesign", 48);
 	private static final Icon addSamplePrepIcon = GuiUtils.getIcon("samplePrep", 48);
 	private static final Icon addMethodIcon = GuiUtils.getIcon("dataAnalysisPipeline", 48);
@@ -54,6 +55,7 @@ public class RawDataProjectMetadataWizardToolbar  extends CommonToolbar {
 	
 	@SuppressWarnings("unused")
 	private JButton
+		createExperimentButton,
 		addSampleButton,
 		addSamplePrepButton,
 		addMethodsButton,
@@ -61,32 +63,38 @@ public class RawDataProjectMetadataWizardToolbar  extends CommonToolbar {
 
 	private Collection<JButton>buttons;
 	
-	public RawDataProjectMetadataWizardToolbar(ActionListener commandListener) {
+	public RDPMetadataWizardToolbar(ActionListener commandListener) {
 
 		super(commandListener);
 		buttons = new ArrayList<JButton>();
 
+		createExperimentButton = GuiUtils.addButton(this, null, newCdpIdExperimentIcon, commandListener,
+				RDPMetadataDefinitionStage.CREATE_EXPERIMENT.getName(),
+				RDPMetadataDefinitionStage.CREATE_EXPERIMENT.getName(),
+				largeButtonDimension);
+		buttons.add(createExperimentButton);
+		
 		addSampleButton = GuiUtils.addButton(this, null, addSampleIcon, commandListener,
-				RawDataProjectMetadataDefinitionStage.ADD_SAMPLES.getName(),
-				RawDataProjectMetadataDefinitionStage.ADD_SAMPLES.getName(),
+				RDPMetadataDefinitionStage.ADD_SAMPLES.getName(),
+				RDPMetadataDefinitionStage.ADD_SAMPLES.getName(),
 				largeButtonDimension);
 		buttons.add(addSampleButton);
 		
 		addSamplePrepButton = GuiUtils.addButton(this, null, addSamplePrepIcon, commandListener,
-				RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA.getName(),
-				RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA.getName(),
+				RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA.getName(),
+				RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA.getName(),
 				largeButtonDimension);
 		buttons.add(addSamplePrepButton);
 
 		addMethodsButton = GuiUtils.addButton(this, null, addMethodIcon, commandListener,
-				RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS.getName(),
-				RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS.getName(),
+				RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS.getName(),
+				RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS.getName(),
 				largeButtonDimension);
 		buttons.add(addMethodsButton);
 		
 		addWorklistsButton = GuiUtils.addButton(this, null, loadWorklistIcon, commandListener,
-				RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS.getName(),
-				RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS.getName(),
+				RDPMetadataDefinitionStage.ADD_WORKLISTS.getName(),
+				RDPMetadataDefinitionStage.ADD_WORKLISTS.getName(),
 				largeButtonDimension);
 		buttons.add(addWorklistsButton);
 	}
@@ -97,7 +105,7 @@ public class RawDataProjectMetadataWizardToolbar  extends CommonToolbar {
 
 	}
 	
-	public void highlightStageButton(RawDataProjectMetadataDefinitionStage stage) {
+	public void highlightStageButton(RDPMetadataDefinitionStage stage) {
 		
 		for(JButton b : buttons) {
 			

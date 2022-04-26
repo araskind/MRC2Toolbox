@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class WizardMsDataFileImportToolbar extends CommonToolbar {
+public class RDPMsDataFileImportToolbar extends CommonToolbar {
 
 	/**
 	 *
@@ -50,7 +50,7 @@ public class WizardMsDataFileImportToolbar extends CommonToolbar {
 		clearDataButton,
 		scanCefButton;
 
-	public WizardMsDataFileImportToolbar(ActionListener commandListener) {
+	public RDPMsDataFileImportToolbar(ActionListener commandListener) {
 		
 		super(commandListener);
 

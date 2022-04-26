@@ -22,11 +22,17 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 
@@ -269,6 +275,93 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 
 	public void setCreator(LIMSUser creator) {
 		this.creator = creator;
+	}
+	
+	public Element getXmlElement() {
+		
+		Element experimentElement = 
+				new Element(LIMSExperimentFields.limsExperiment.name());
+
+		if(id != null)
+			experimentElement.setAttribute(
+					LIMSExperimentFields.Id.name(), id);	
+		
+		if(name != null)
+			experimentElement.setAttribute(
+					LIMSExperimentFields.Name.name(), name);
+		
+		if(description != null)
+			experimentElement.setAttribute(
+					LIMSExperimentFields.Description.name(), description);
+		
+		if(notes != null)
+			experimentElement.setAttribute(
+					LIMSExperimentFields.Notes.name(), notes);
+		
+		if(project != null)
+			experimentElement.setAttribute(
+					LIMSExperimentFields.ProjectId.name(), project.getId());
+					
+		if(startDate == null)
+			startDate = new Date();
+		
+		experimentElement.setAttribute(LIMSExperimentFields.DateCreated.name(), 
+				ProjectUtils.dateTimeFormat.format(startDate));
+		
+		if(creator != null)
+			experimentElement.setAttribute(
+					LIMSExperimentFields.UserId.name(), creator.getId());
+		
+		//	ExperimentDesign
+		if(design != null) {
+			
+		}
+		
+		//	LIMSSamplePreparation list
+		Element samplePrepListElement = 
+				new Element(LIMSExperimentFields.SamplePrepList.name());
+		experimentElement.addContent(samplePrepListElement);
+		if(samplePreps != null && !samplePreps.isEmpty()) {
+			
+		}		
+		return experimentElement;
+	}
+	
+	public LIMSExperiment(Element experimentElement) {
+		
+		id = experimentElement.getAttributeValue(
+				LIMSExperimentFields.Id.name());
+		name = experimentElement.getAttributeValue(
+				LIMSExperimentFields.Name.name());
+		description = experimentElement.getAttributeValue(
+				LIMSExperimentFields.Description.name());
+		notes = experimentElement.getAttributeValue(
+				LIMSExperimentFields.Notes.name());
+		String projectId = 
+				experimentElement.getAttributeValue(
+						LIMSExperimentFields.ProjectId.name());
+		if(projectId != null)
+			project = IDTDataCash.getProjectById(projectId);
+		
+		startDate = new Date();
+		String startDateString = 
+				experimentElement.getAttributeValue(LIMSExperimentFields.DateCreated.name());
+		if(startDateString != null) {
+			try {
+				startDate = ProjectUtils.dateTimeFormat.parse(startDateString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		}
+		String userId = 
+				experimentElement.getAttributeValue(LIMSExperimentFields.UserId.name());
+		if(userId != null)
+			creator = IDTDataCash.getUserById(userId);
+		
+		//		ExperimentDesign
+				
+		//		LIMSSamplePreparation list
 	}
 }
 

@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.NameComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
@@ -44,6 +45,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorListener;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignListener;
+import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFields;
 
 public class ExperimentDesign implements ExperimentDesignFactorListener, Serializable {
 
@@ -53,13 +55,14 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 	private static final long serialVersionUID = 4767740368780330627L;
 
 	protected TreeSet<ExperimentDesignFactor> factorSet;
-	protected TreeSet<ExperimentalSample> sampleSet;
-	protected ParameterSetStatus designStatus;
-	protected boolean suppressEvents;
-	protected Set<ExperimentDesignListener> eventListeners;
-	protected TreeSet<ExperimentDesignSubset> designSubsets;
 	protected ExperimentDesignFactor sampleTypeFactor;
-
+	protected TreeSet<ExperimentalSample> sampleSet;	
+	protected TreeSet<ExperimentDesignSubset> designSubsets;
+	
+	protected ParameterSetStatus designStatus;
+	protected Set<ExperimentDesignListener> eventListeners;
+	protected boolean suppressEvents;
+	
 	public ExperimentDesign() {
 
 		super();
@@ -644,6 +647,80 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		return sampleSet.stream().
 				filter(s -> !s.getLevel(refFactor).equals(ReferenceSamplesManager.sampleLevel)).
 				collect(Collectors.toList());
+	}
+	
+	public Element getXmlElement() {
+		
+		Element experimentDesignElement = 
+				new Element(ExperimentDesignFields.ExperimentDesign.name());
+		
+		Element factorSetElement = 
+				new Element(ExperimentDesignFields.FactorSet.name());
+		for(ExperimentDesignFactor f : factorSet)
+			factorSetElement.addContent(f.getXmlElement());
+		
+		experimentDesignElement.addContent(factorSetElement);
+		
+		Element sampleSetElement = 
+				new Element(ExperimentDesignFields.SampleSet.name());
+		for(ExperimentalSample s : sampleSet)
+			sampleSetElement.addContent(s.getXmlElement());
+		
+		experimentDesignElement.addContent(sampleSetElement);
+		
+		Element designSubsetListElement = 
+				new Element(ExperimentDesignFields.DesignSubsetList.name());
+		for(ExperimentDesignSubset sub : designSubsets)
+			designSubsetListElement.addContent(sub.getXmlElement());
+		
+		experimentDesignElement.addContent(designSubsetListElement);
+		
+		return experimentDesignElement;
+	}
+	
+	public ExperimentDesign(Element experimentDesignElement) {
+		
+		factorSet = new TreeSet<ExperimentDesignFactor>();
+		sampleSet = new TreeSet<ExperimentalSample>();
+		suppressEvents = false;
+		eventListeners = ConcurrentHashMap.newKeySet();
+		initCleanDesign();
+		suppressEvents = false;
+		eventListeners = ConcurrentHashMap.newKeySet();
+		
+		List<Element> factorListElements = 
+				experimentDesignElement.getChildren(
+						ExperimentDesignFields.FactorSet.name());
+		if(factorListElements.size() > 0) {
+			
+			for(Element factorElement : factorListElements) {
+				
+				ExperimentDesignFactor factor = new ExperimentDesignFactor(factorElement);
+				factorSet.add(factor);
+			}
+		}
+		List<Element> sampleListElements = 
+				experimentDesignElement.getChildren(
+						ExperimentDesignFields.SampleSet.name());
+		if(sampleListElements.size() > 0) {
+			
+			for(Element sampleElement : sampleListElements) {
+				
+				ExperimentalSample sample = new ExperimentalSample(sampleElement);
+				sampleSet.add(sample);
+			}
+		}
+		List<Element> subsetListElements = 
+				experimentDesignElement.getChildren(
+						ExperimentDesignFields.DesignSubsetList.name());
+		if(subsetListElements.size() > 0) {
+			
+			for(Element subsetElement : subsetListElements) {
+				
+				ExperimentDesignSubset subset = new ExperimentDesignSubset(subsetElement);
+				designSubsets.add(subset);
+			}
+		}
 	}
 }
 

@@ -40,18 +40,18 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.StockSampleEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
-public class WizardExperimentDesignEditorPanel extends IDTrackerExperimentDesignEditorPanel {
+public class RDPExperimentDesignEditorPanel extends IDTrackerExperimentDesignEditorPanel {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8971145226550968788L;
-	private WizardExperimentDesignEditorToolbar toolbar;
+	private RDPExperimentDesignEditorToolbar toolbar;
 	private StockSampleEditorDialog stockSampleEditorDialog;
 	
-	public WizardExperimentDesignEditorPanel() {
+	public RDPExperimentDesignEditorPanel() {
 		super();
-		toolbar = new WizardExperimentDesignEditorToolbar(this);
+		toolbar = new RDPExperimentDesignEditorToolbar(this);
 		add(toolbar, BorderLayout.NORTH);
 	}
 	

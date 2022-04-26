@@ -52,9 +52,9 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.worklist.WorklistImportPopupMenu
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataDefinitionStage;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizardPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataDefinitionStage;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -65,7 +65,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.LIMSWorklistImportTask;
 
-public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel 
+public class RDPWorklistPanel extends RDPMetadataWizardPanel 
 		implements ActionListener, BackedByPreferences, TaskListener {
 
 	/**
@@ -83,12 +83,12 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 	private boolean appendWorklist;
 
 	private InstrumentSequenceTable instrumentSequenceTable;
-	private WorklistImportToolbar toolbar;
+	private RDPWorklistImportToolbar toolbar;
 	private BatchSampleAssignmentDialog batchSampleAssignmentDialog;	
 	private AcquisitionMethodAssignmentDialog acquisitionMethodAssignmentDialog;
 	private InjectionVolumeAssignmentDialog injectionVolumeAssignmentDialog;
 	
-	public WizardWorklistPanel(RawDataProjectMetadataWizard wizard) {
+	public RDPWorklistPanel(RDPMetadataWizard wizard) {
 		
 		super(wizard);
 			
@@ -112,7 +112,7 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 		JScrollPane scrollPane = new JScrollPane(instrumentSequenceTable);
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
-		toolbar = new WorklistImportToolbar(this);
+		toolbar = new RDPWorklistImportToolbar(this);
 		panel.add(toolbar, BorderLayout.NORTH);
 		return panel;
 	}
@@ -209,7 +209,7 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 		if(acquisitionMethods.isEmpty()) {
 			MessageDialog.showWarningMsg(
 					"Please add data acquisition method(s) to the project first.", this);
-			wizard.showStagePanel(RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
+			wizard.showStagePanel(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
 			return;
 		}		
 		acquisitionMethodAssignmentDialog = 
@@ -469,12 +469,12 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 	@Override
 	public void loadPreferences() {
 		loadPreferences(
-				Preferences.userRoot().node(WizardWorklistPanel.class.getName()));
+				Preferences.userRoot().node(RDPWorklistPanel.class.getName()));
 	}
 
 	@Override
 	public void savePreferences() {
-		preferences = Preferences.userRoot().node(WizardWorklistPanel.class.getName());
+		preferences = Preferences.userRoot().node(RDPWorklistPanel.class.getName());
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
 

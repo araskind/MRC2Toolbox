@@ -34,7 +34,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class RawDataProjectMetadataProgressToolbar  extends CommonToolbar {
+public class RDPMetadataProgressToolbar  extends CommonToolbar {
 
 	/**
 	 *
@@ -45,8 +45,8 @@ public class RawDataProjectMetadataProgressToolbar  extends CommonToolbar {
 	private static final Icon stepPendingIcon = GuiUtils.getIcon("levelInactive", 24);
 	private static final Dimension largeButtonDimension = new Dimension(26, 26);
 	
-	@SuppressWarnings("unused")
 	private JButton
+		createExperimentButton,
 		addSampleButton,
 		addSamplePrepButton,
 		addMethodsButton,
@@ -54,28 +54,33 @@ public class RawDataProjectMetadataProgressToolbar  extends CommonToolbar {
 
 	private Collection<JButton>buttons;
 	
-	public RawDataProjectMetadataProgressToolbar(ActionListener commandListener) {
+	public RDPMetadataProgressToolbar(ActionListener commandListener) {
 
 		super(commandListener);
 		buttons = new ArrayList<JButton>();
-
+		
+		createExperimentButton = GuiUtils.addButton(this, null, stepPendingIcon, null, null,
+				RDPMetadataDefinitionStage.CREATE_EXPERIMENT.getName(),
+				largeButtonDimension);
+		buttons.add(createExperimentButton);
+		
 		addSampleButton = GuiUtils.addButton(this, null, stepPendingIcon, null, null,
-				RawDataProjectMetadataDefinitionStage.ADD_SAMPLES.getName(),
+				RDPMetadataDefinitionStage.ADD_SAMPLES.getName(),
 				largeButtonDimension);
 		buttons.add(addSampleButton);
 		
 		addSamplePrepButton = GuiUtils.addButton(this, null, stepPendingIcon, null, null,
-				RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA.getName(),
+				RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA.getName(),
 				largeButtonDimension);
 		buttons.add(addSamplePrepButton);
 
 		addMethodsButton = GuiUtils.addButton(this, null, stepPendingIcon, null, null,
-				RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS.getName(),
+				RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS.getName(),
 				largeButtonDimension);
 		buttons.add(addMethodsButton);
 		
 		addWorklistsButton = GuiUtils.addButton(this, null, stepPendingIcon, null, null,
-				RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS.getName(),
+				RDPMetadataDefinitionStage.ADD_WORKLISTS.getName(),
 				largeButtonDimension);
 		buttons.add(addWorklistsButton);
 	}
@@ -86,7 +91,7 @@ public class RawDataProjectMetadataProgressToolbar  extends CommonToolbar {
 
 	}
 	
-	public void markStageCompletedStatus(RawDataProjectMetadataDefinitionStage stage, boolean completed) {
+	public void markStageCompletedStatus(RDPMetadataDefinitionStage stage, boolean completed) {
 		
 		for(JButton b : buttons) {
 			

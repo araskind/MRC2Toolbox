@@ -21,26 +21,16 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum ProjectFields {
-
-	IDTrackerRawDataProject,
+public enum LIMSExperimentFields {
+	
+	limsExperiment,
 	Id,
+	ProjectId,
 	Name,
 	Description,
-	ProjectFile,
-	ProjectDir,
+	Notes,
 	DateCreated,
-	DateModified,
-	MsOneFiles,
-	MsTwoFiles,
-	Injections,
-	UniqueCIDList,
-	UniqueMSMSLibIdList,
-	UniqueMSRTLibIdList,
-	UniqueSampleIdList,
-	FeatureChromatogramList,	
-	FeatureCollectionList,
-	Instrument,
 	UserId,
+	SamplePrepList
 	;
 }

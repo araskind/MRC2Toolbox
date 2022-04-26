@@ -23,15 +23,20 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorListener;
+import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFactorFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignLevelFields;
 
 public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor>, Serializable, Renamable {
 
@@ -226,5 +231,65 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 	 */
 	public Set<ExperimentDesignFactorListener> getEventListeners() {
 		return eventListeners;
+	}
+	
+	public Element getXmlElement() {
+		
+		Element experimentDesignFactorElement = 
+				new Element(ExperimentDesignLevelFields.ExperimentDesignLevel.name());
+		
+		if(factorId != null)
+			experimentDesignFactorElement.setAttribute(
+					ExperimentDesignFactorFields.Id.name(), factorId);
+		
+		if(factorName != null)
+			experimentDesignFactorElement.setAttribute(
+					ExperimentDesignFactorFields.Name.name(), factorName);
+		
+		if(factorDescription != null)
+			experimentDesignFactorElement.setAttribute(
+					ExperimentDesignFactorFields.Description.name(), factorDescription);
+		
+		experimentDesignFactorElement.setAttribute(
+				ExperimentDesignFactorFields.Enabled.name(), Boolean.toString(enabled));
+		
+		Element levelSetElement = 
+				new Element(ExperimentDesignFactorFields.LevelSet.name());
+		
+		for(ExperimentDesignLevel level : factorLevels)
+			levelSetElement.addContent(level.getXmlElement());
+		
+		experimentDesignFactorElement.addContent(levelSetElement);
+		
+		return experimentDesignFactorElement;
+	}
+	
+	public ExperimentDesignFactor(Element experimentDesignFactorElement) {
+		super();
+		
+		factorId = experimentDesignFactorElement.getAttributeValue(
+				ExperimentDesignFactorFields.Id.name());
+		factorName = experimentDesignFactorElement.getAttributeValue(
+				ExperimentDesignFactorFields.Name.name());
+		factorDescription = experimentDesignFactorElement.getAttributeValue(
+				ExperimentDesignFactorFields.Description.name());		
+		enabled = Boolean.parseBoolean(experimentDesignFactorElement.getAttributeValue(
+				ExperimentDesignFactorFields.Enabled.name()));
+		
+		eventListeners = ConcurrentHashMap.newKeySet();
+		suppressEvents = false;
+		factorLevels = new TreeSet<ExperimentDesignLevel>();
+		List<Element> levelListElements = 
+				experimentDesignFactorElement.getChildren(
+						ExperimentDesignFactorFields.LevelSet.name());
+		if(levelListElements.size() > 0) {
+			
+			for(Element levelElement : levelListElements) {
+				
+				ExperimentDesignLevel level = new ExperimentDesignLevel(levelElement);
+				level.setParentFactor(this);
+				factorLevels.add(level);
+			}
+		}
 	}
 }

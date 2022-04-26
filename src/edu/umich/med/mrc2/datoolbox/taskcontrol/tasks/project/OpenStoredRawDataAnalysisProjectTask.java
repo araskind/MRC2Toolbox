@@ -200,6 +200,13 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				dateCreated, 
 				lastModified);
 		
+		String userId = projectElement.getAttributeValue(ProjectFields.UserId.name()); 
+		if(userId != null)
+			project.setCreatedBy(IDTDataCash.getUserById(userId)); 
+		
+		if(project.getCreatedBy() == null)
+			project.setCreatedBy(MRC2ToolBoxCore.getIdTrackerUser());
+		
 		String instrumentId = projectElement.getAttributeValue(ProjectFields.Instrument.name()); 
 		if(instrumentId != null)
 			project.setInstrument(IDTDataCash.getInstrumentById(instrumentId)); 

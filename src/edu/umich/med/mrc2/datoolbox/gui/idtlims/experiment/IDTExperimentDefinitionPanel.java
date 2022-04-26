@@ -42,6 +42,7 @@ import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSOrganization;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.instrument.InstrumentSelectionDialog;
@@ -295,7 +296,16 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		projectComboBox.setSelectedItem(experiment.getProject());
 		descriptionTextArea.setText(experiment.getDescription());
 		notesTextArea.setText(experiment.getNotes());
-		organizationDataLabel.setText(experiment.getProject().getOrganization().getOrganizationInfo());
+		
+		LIMSOrganization organization = null;
+		if(experiment.getProject() != null && experiment.getProject().getOrganization() != null)
+			organization = experiment.getProject().getOrganization();
+		
+		if(organization == null && experiment.getCreator() != null)
+			organization = IDTDataCash.getOrganizationForUser(experiment.getCreator());
+				
+		if(organization != null)
+			organizationDataLabel.setText(organization.getOrganizationInfo());
 		
 		if(experiment.getCreator() != null)
 			contactDataLabel.setText(experiment.getCreator().getInfo());	
@@ -367,6 +377,13 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 
 	public LIMSInstrument getInstrument() {
 		return instrument;
+	}
+
+	public void setInstrument(LIMSInstrument instrument) {
+		this.instrument = instrument;
+		if(instrument != null)
+			instrumentTextField.setText(instrument.toString() + "; " + 
+					instrument.getManufacturer() + " " + instrument.getModel());
 	}
 }
 

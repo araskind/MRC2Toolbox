@@ -70,9 +70,9 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepListener;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design.WizardExperimentDesignPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods.WizardMethodsPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl.WizardWorklistPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design.RDPExperimentDesignPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods.RDPMethodsPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl.RDPWorklistPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
@@ -85,7 +85,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTCefMSMSPrescanOrImportTask;
 
-public class RawDataProjectMetadataWizard extends JDialog 
+public class RDPMetadataWizard extends JDialog 
 			implements ActionListener, TaskListener, SamplePrepListener {
 	
 	/**
@@ -94,19 +94,19 @@ public class RawDataProjectMetadataWizard extends JDialog
 	private static final long serialVersionUID = -3308258276718203363L;
 	private static final Icon newCdpIdExperimentIcon = GuiUtils.getIcon("newIdExperiment", 32);
 	private RawDataExaminerPanel parentPanel;
-	private RawDataProjectMetadataWizardToolbar toolbar;
+	private RDPMetadataWizardToolbar toolbar;
 	private JPanel stagePanel;
 	private JButton saveButton;
-	private LinkedHashMap<RawDataProjectMetadataDefinitionStage, RawDataProjectMetadataWizardPanel> panels;
-	private LinkedHashMap<RawDataProjectMetadataDefinitionStage, Boolean> stageCompleted;
-	private RawDataProjectMetadataDefinitionStage activeStage;
+	private LinkedHashMap<RDPMetadataDefinitionStage, RDPMetadataWizardPanel> panels;
+	private LinkedHashMap<RDPMetadataDefinitionStage, Boolean> stageCompleted;
+	private RDPMetadataDefinitionStage activeStage;
 	private GridBagConstraints gbc_panel;
-	private RawDataProjectMetadataProgressToolbar progressToolbar;
+	private RDPMetadataProgressToolbar progressToolbar;
 	private LIMSExperiment newExperiment;
 	private IndeterminateProgressDialog idp;
 	private int processedFiles, fileNumber;
 
-	public RawDataProjectMetadataWizard(RawDataExaminerPanel parentPanel) {
+	public RDPMetadataWizard(RawDataExaminerPanel parentPanel) {
 		
 		super();
 		setIconImage(((ImageIcon) newCdpIdExperimentIcon).getImage());
@@ -117,7 +117,7 @@ public class RawDataProjectMetadataWizard extends JDialog
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.parentPanel = parentPanel;
 		
-		toolbar = new RawDataProjectMetadataWizardToolbar(this);
+		toolbar = new RDPMetadataWizardToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 		
 		stagePanel = new JPanel();
@@ -125,9 +125,9 @@ public class RawDataProjectMetadataWizard extends JDialog
 		getContentPane().add(stagePanel, BorderLayout.CENTER);
 		
 		initWizardPanels();
-		WizardSamplePrepPanel prepPanel = 
-				(WizardSamplePrepPanel)panels.get(
-						RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+		RDPSamplePrepPanel prepPanel = 
+				(RDPSamplePrepPanel)panels.get(
+						RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
 		prepPanel.getSamplePrepEditorPanel().addSamplePrepListener(this);
 				
 		GridBagLayout gbl_stagePanel = new GridBagLayout();
@@ -142,10 +142,10 @@ public class RawDataProjectMetadataWizard extends JDialog
 		gbc_panel.gridx = 0;
 		gbc_panel.gridy = 0;
 		
-		stagePanel.add(panels.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLES), gbc_panel);		
-		setTitle(RawDataProjectMetadataDefinitionStage.ADD_SAMPLES.getName());
-		toolbar.highlightStageButton(RawDataProjectMetadataDefinitionStage.ADD_SAMPLES);
-		activeStage = RawDataProjectMetadataDefinitionStage.ADD_SAMPLES;
+		stagePanel.add(panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT), gbc_panel);		
+		setTitle(RDPMetadataDefinitionStage.CREATE_EXPERIMENT.getName());
+		toolbar.highlightStageButton(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
+		activeStage = RDPMetadataDefinitionStage.CREATE_EXPERIMENT;
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -157,7 +157,7 @@ public class RawDataProjectMetadataWizard extends JDialog
 		gbl_panel_1.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 
-		progressToolbar = new RawDataProjectMetadataProgressToolbar(this);
+		progressToolbar = new RDPMetadataProgressToolbar(this);
 		progressToolbar.setFloatable(false);
 		GridBagConstraints gbc_toolBar = new GridBagConstraints();
 		gbc_toolBar.fill = GridBagConstraints.HORIZONTAL;
@@ -199,16 +199,33 @@ public class RawDataProjectMetadataWizard extends JDialog
 	}
 	
 	private void populateWizardByProjectData() {
-		// TODO Auto-generated method stub
-		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
+
+		RawDataAnalysisProject project = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
 		if(project == null)
 			return;
 		
+		//	Experiment details
+		LIMSExperiment newExperiment = new LIMSExperiment(
+						null, 
+						project.getName(), 
+						project.getDescription(), 
+						null, 
+						null, 
+						project.getDateCreated());
+		newExperiment.setCreator(project.getCreatedBy());
+		
+		RDPExperimentDefinitionPanel experimentDefinitionPanel = 
+				((RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT));
+		experimentDefinitionPanel.loadExperiment(newExperiment);	
+		experimentDefinitionPanel.setInstrument(project.getInstrument());
+	
+		//	Raw data files
 		Collection<DataFile> dataFileList = project.getDataFiles();
 		if(dataFileList != null && !dataFileList.isEmpty()) {
 			
-			WizardWorklistPanel wklPanel = ((WizardWorklistPanel)panels.get(
-					RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS));
+			RDPWorklistPanel wklPanel = 
+					((RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS));
 			Worklist worklist = generateWorklistFromDataFiles(dataFileList);
 			wklPanel.loadWorklistWithoutValidation(worklist, null, null);
 		}	
@@ -225,7 +242,7 @@ public class RawDataProjectMetadataWizard extends JDialog
 				null,
 				null,
 				null,
-				null,
+				df.getInjectionTime(),
 				0.0d);
 			worklist.addItem(wklItem);
 		}
@@ -234,15 +251,15 @@ public class RawDataProjectMetadataWizard extends JDialog
 		
 	private void initWizardPanels() {
 		
-		panels = new LinkedHashMap<RawDataProjectMetadataDefinitionStage, RawDataProjectMetadataWizardPanel>();
-		stageCompleted = new LinkedHashMap<RawDataProjectMetadataDefinitionStage, Boolean>();
+		panels = new LinkedHashMap<RDPMetadataDefinitionStage, RDPMetadataWizardPanel>();
+		stageCompleted = new LinkedHashMap<RDPMetadataDefinitionStage, Boolean>();
 
-		for(RawDataProjectMetadataDefinitionStage panelType : RawDataProjectMetadataDefinitionStage.values()) {
+		for(RDPMetadataDefinitionStage panelType : RDPMetadataDefinitionStage.values()) {
 			
 			try {
-				panels.put(panelType, (RawDataProjectMetadataWizardPanel) 
+				panels.put(panelType, (RDPMetadataWizardPanel) 
 						panelType.getPanelClass().
-						getDeclaredConstructor(RawDataProjectMetadataWizard.class).newInstance(this));			
+						getDeclaredConstructor(RDPMetadataWizard.class).newInstance(this));			
 				stageCompleted.put(panelType, false);
 			}
 			catch (InstantiationException e) {
@@ -271,10 +288,13 @@ public class RawDataProjectMetadataWizard extends JDialog
 	public void actionPerformed(ActionEvent e) {
 
 		String command = e.getActionCommand();
-		for(RawDataProjectMetadataDefinitionStage stage : RawDataProjectMetadataDefinitionStage.values()) {
+		for(RDPMetadataDefinitionStage stage : RDPMetadataDefinitionStage.values()) {
 			if(command.equals(stage.getName())) 
 				showStagePanel(stage);
-		}		
+		}	
+		if(command.equals(MainActionCommands.COMPLETE_EXPERIMENT_DEFINITION_COMMAND.getName())) 
+			completeExperimentDefinitionStage();
+		
 		if(command.equals(MainActionCommands.COMPLETE_SAMPLE_LIST_DEFINITION_COMMAND.getName()))
 			completeSampleListDefinitionStage();
 		
@@ -291,7 +311,7 @@ public class RawDataProjectMetadataWizard extends JDialog
 			uploadDataToIDdTracker();
 	}
 	
-	public void showStagePanel(RawDataProjectMetadataDefinitionStage stage) {
+	public void showStagePanel(RDPMetadataDefinitionStage stage) {
 		
 		stagePanel.remove(panels.get(activeStage));
 		revalidate();
@@ -301,32 +321,66 @@ public class RawDataProjectMetadataWizard extends JDialog
 		setTitle(stage.getName());
 		toolbar.highlightStageButton(stage);
 	}
+	
+	private void completeExperimentDefinitionStage() {
+
+		RDPExperimentDefinitionPanel experimentPanel = 
+				(RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
+		Collection<String>errors = experimentPanel.validateExperimentDefinition();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+			return;
+		}
+		if(newExperiment == null) {
+			
+			newExperiment = new LIMSExperiment(
+					experimentPanel.getExperimentName(),
+					experimentPanel.getExperimentDescription(), 
+					experimentPanel.getExperimentNotes(),
+					experimentPanel.getExperimentProject());
+			newExperiment.setDesign(new ExperimentDesign());
+			newExperiment.setCreator(MRC2ToolBoxCore.getIdTrackerUser());
+		}
+		else {
+			newExperiment.setName(experimentPanel.getExperimentName());
+			newExperiment.setDescription(experimentPanel.getExperimentDescription());
+		}
+		experimentPanel.loadExperiment(newExperiment);
+		
+		RDPExperimentDesignPanel designPanel = 
+				(RDPExperimentDesignPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
+		designPanel.loadExperiment(newExperiment);
+
+		stageCompleted.put(RDPMetadataDefinitionStage.CREATE_EXPERIMENT, true);
+		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.CREATE_EXPERIMENT, true);
+		showStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLES);
+	}
 
 	private void completeSampleListDefinitionStage() {
 		
-		WizardExperimentDesignPanel designPanel = 
-				(WizardExperimentDesignPanel)panels.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLES);
+		RDPExperimentDesignPanel designPanel = 
+				(RDPExperimentDesignPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
 		Collection<String>errors = designPanel.validateExperimentDesign();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return;
 		}
-		WizardSamplePrepPanel prepPanel = 
-				(WizardSamplePrepPanel)panels.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+		RDPSamplePrepPanel prepPanel = 
+				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
 
 		prepPanel.loadPrepDataForExperiment(getSamplePrep(), newExperiment);
-		stageCompleted.put(RawDataProjectMetadataDefinitionStage.ADD_SAMPLES, true);
-		progressToolbar.markStageCompletedStatus(RawDataProjectMetadataDefinitionStage.ADD_SAMPLES, true);
-		showStagePanel(RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);		
+		stageCompleted.put(RDPMetadataDefinitionStage.ADD_SAMPLES, true);
+		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_SAMPLES, true);
+		showStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);		
 	}
 
 	private void completeSamplePrepDefinitionStage() {
 		
-		if(!stageCompleted.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLES) )
+		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLES) )
 			return;
 
-		WizardSamplePrepPanel prepPanel = 
-				(WizardSamplePrepPanel)panels.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+		RDPSamplePrepPanel prepPanel = 
+				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
 		Collection<String>errors = prepPanel.validateSamplePrepDefinition();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
@@ -369,41 +423,41 @@ public class RawDataProjectMetadataWizard extends JDialog
 			count++;
 		}
 		prepPanel.loadPrepDataForExperiment(samplePrep, newExperiment);							
-		WizardWorklistPanel worklistPanel = 
-				(WizardWorklistPanel)panels.get(RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS);
+		RDPWorklistPanel worklistPanel = 
+				(RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS);
 		worklistPanel.setExperiment(newExperiment);
 		worklistPanel.setSamplePrep(samplePrep);
 		
-		stageCompleted.put(RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA, true);
-		progressToolbar.markStageCompletedStatus(RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA, true);
-		showStagePanel(RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS);		
+		stageCompleted.put(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA, true);
+		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA, true);
+		showStagePanel(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);		
 	}
 
 	private void completeAnalysisMethodsDefinitionStage() {
 
-		Collection<String>errors = ((WizardMethodsPanel)panels.get(
-				RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS)).validateMethodsData();
+		Collection<String>errors = ((RDPMethodsPanel)panels.get(
+				RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS)).validateMethodsData();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return;
 		}
 		//	TODO upload new methods to the database
 				
-		stageCompleted.put(RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS, true);
-		progressToolbar.markStageCompletedStatus(RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS, true);
-		showStagePanel(RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS);
+		stageCompleted.put(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS, true);
+		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS, true);
+		showStagePanel(RDPMetadataDefinitionStage.ADD_WORKLISTS);
 	}
 
 	private void completeWorklistVerificationStage() {
 
-		Collection<String>errors = ((WizardWorklistPanel)panels.get(
-				RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS)).validateWorklistData();
+		Collection<String>errors = ((RDPWorklistPanel)panels.get(
+				RDPMetadataDefinitionStage.ADD_WORKLISTS)).validateWorklistData();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return;
 		}		
-		stageCompleted.put(RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS, true);
-		progressToolbar.markStageCompletedStatus(RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS, true);	
+		stageCompleted.put(RDPMetadataDefinitionStage.ADD_WORKLISTS, true);
+		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_WORKLISTS, true);	
 	}
 	
 	public LIMSExperiment getExperiment() {
@@ -413,12 +467,12 @@ public class RawDataProjectMetadataWizard extends JDialog
 	
 	public LIMSSamplePreparation getSamplePrep() {
 		
-		if(!stageCompleted.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLES)
-				||	!stageCompleted.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA))
+		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLES)
+				||	!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA))
 			return null;
 		
-		return ((WizardSamplePrepPanel)
-				panels.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)).getSamplePrep();
+		return ((RDPSamplePrepPanel)
+				panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)).getSamplePrep();
 	}
 	
 //	public Collection<DataExtractionMethod> getDataExtractionMethods() {
@@ -428,19 +482,19 @@ public class RawDataProjectMetadataWizard extends JDialog
 //	}
 
 	public Collection<DataAcquisitionMethod> getDataAcquisitionMethods() {
-		return ((WizardMethodsPanel)
-				panels.get(RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS)).getDataAcquisitionMethods();
+		return ((RDPMethodsPanel)
+				panels.get(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS)).getDataAcquisitionMethods();
 	}
 	
 	public Worklist getWorklist() {
-		return ((WizardWorklistPanel)
-				panels.get(RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS)).getWorklist();
+		return ((RDPWorklistPanel)
+				panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS)).getWorklist();
 	}
 	
 	public Collection<String>checkStageCompletion(){
 		
 		Collection<String>errors = new ArrayList<String>();		
-		for(RawDataProjectMetadataDefinitionStage stage : RawDataProjectMetadataDefinitionStage.values()) {
+		for(RDPMetadataDefinitionStage stage : RDPMetadataDefinitionStage.values()) {
 			
 			if(!stageCompleted.get(stage))
 				errors.add("Step \"" + stage.getName() + "\" not completed.");
@@ -538,8 +592,8 @@ public class RawDataProjectMetadataWizard extends JDialog
 			IDTDataCash.getSamplePreps().add(prep2save);
 			IDTDataCash.getExperimentSamplePrepMap().put(newExperiment, new TreeSet<LIMSSamplePreparation>());
 			IDTDataCash.getExperimentSamplePrepMap().get(newExperiment).add(prep2save);
-			WizardSamplePrepPanel prepPanel = 
-					(WizardSamplePrepPanel)panels.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+			RDPSamplePrepPanel prepPanel = 
+					(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
 			prepPanel.loadPrepDataForExperiment(prep2save, newExperiment);
 		} 
 		catch (Exception e) {
@@ -622,10 +676,10 @@ public class RawDataProjectMetadataWizard extends JDialog
 	@Override
 	public void samplePrepStatusChanged(SamplePrepEvent e) {
 		
-		WizardExperimentDesignPanel designPanel = 
-				(WizardExperimentDesignPanel)panels.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLES);
-		WizardWorklistPanel worklistPanel = 
-				(WizardWorklistPanel)panels.get(RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS);
+		RDPExperimentDesignPanel designPanel = 
+				(RDPExperimentDesignPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
+		RDPWorklistPanel worklistPanel = 
+				(RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS);
 
 		if(e.getStatus().equals(ParameterSetStatus.REMOVED)) {
 			designPanel.clearPanel();

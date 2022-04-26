@@ -27,9 +27,12 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
+import edu.umich.med.mrc2.datoolbox.project.store.ExperimentalSampleFields;
 
 public class ExperimentalSample implements Comparable<ExperimentalSample>, Serializable, Renamable {
 
@@ -358,6 +361,65 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 
 	public void setIncloodeInPoolStats(boolean incloodeInPoolStats) {
 		this.incloodeInPoolStats = incloodeInPoolStats;
+	}
+	
+	public Element getXmlElement() {
+		
+		Element sampleElement = 
+				new Element(ExperimentalSampleFields.ExperimentalSample.name());
+		
+		if(id != null)
+			sampleElement.setAttribute(
+					ExperimentalSampleFields.Id.name(), id);
+		
+		if(name != null)
+			sampleElement.setAttribute(
+					ExperimentalSampleFields.Name.name(), name);
+		
+		if(limsSampleType != null)
+			sampleElement.setAttribute(
+					ExperimentalSampleFields.LimsSampleType.name(), limsSampleType);
+
+		sampleElement.setAttribute(
+				ExperimentalSampleFields.Enabled.name(), Boolean.toString(enabled));
+		
+		sampleElement.setAttribute(
+				ExperimentalSampleFields.LockedReference.name(), Boolean.toString(lockedReference));
+		
+		sampleElement.setAttribute(
+				ExperimentalSampleFields.IncloodeInPoolStats.name(), Boolean.toString(incloodeInPoolStats));
+
+		sampleElement.setAttribute(
+				ExperimentalSampleFields.BatchNum.name(), Integer.toString(batchNumber));
+
+		if(moTrPACQCSampleType != null)
+			sampleElement.setAttribute(
+					ExperimentalSampleFields.MoTrPACQCSampleType.name(), moTrPACQCSampleType.name());
+		
+		Element designCellContainerElement = 
+				new Element(ExperimentalSampleFields.DesignCell.name());
+		
+		for(Entry<ExperimentDesignFactor, ExperimentDesignLevel> dce : designCell.entrySet()) {
+			
+			Element designCellElement = 
+					new Element(ExperimentalSampleFields.DesignCellElement.name());
+			designCellElement.setAttribute(ExperimentalSampleFields.DCFactorId.name(), 
+					dce.getKey().getFactorId());
+			designCellElement.setAttribute(ExperimentalSampleFields.DCLevelId.name(), 
+					dce.getValue().getLevelId());
+			designCellContainerElement.addContent(designCellElement);
+			
+			
+		}
+		sampleElement.addContent(designCellContainerElement);
+
+//		protected TreeMap<DataAcquisitionMethod, TreeSet<DataFile>> dataFilesMap;
+		
+		return sampleElement;
+	}
+	
+	public ExperimentalSample(Element sampleElement) {
+		//	TODO
 	}
 }
 

@@ -55,8 +55,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.data.IDtrackerDataFileSampleMatc
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizardPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
@@ -68,7 +68,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSSearchResultsBatchPrescanTask;
 
-public class WizardMsDataVerifierPanel extends RawDataProjectMetadataWizardPanel 
+public class RDPMsDataVerifierPanel extends RDPMetadataWizardPanel 
 		implements ActionListener, BackedByPreferences, TaskListener{
 
 	/**
@@ -80,7 +80,7 @@ public class WizardMsDataVerifierPanel extends RawDataProjectMetadataWizardPanel
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	private File baseDirectory;
 	private IDtrackerDataFileSampleMatchTable dataFileSampleMatchTable;
-	private WizardMsDataFileImportToolbar toolbar;
+	private RDPMsDataFileImportToolbar toolbar;
 	private ImprovedFileChooser chooser;
 	private FileNameExtensionFilter txtFilter, xmlFilter, mgfFilter;
 	private LIMSExperiment experiment;
@@ -88,7 +88,7 @@ public class WizardMsDataVerifierPanel extends RawDataProjectMetadataWizardPanel
 	private DAMethodAssignmentDialog daMethodAssignmentDialog;
 	private boolean dataVerified;
 
-	public WizardMsDataVerifierPanel(RawDataProjectMetadataWizard wizard) {
+	public RDPMsDataVerifierPanel(RDPMetadataWizard wizard) {
 		
 		super(wizard);
 		
@@ -114,7 +114,7 @@ public class WizardMsDataVerifierPanel extends RawDataProjectMetadataWizardPanel
 		JScrollPane scrollPane = new JScrollPane(dataFileSampleMatchTable);
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
-		toolbar = new WizardMsDataFileImportToolbar(this);
+		toolbar = new RDPMsDataFileImportToolbar(this);
 		panel.add(toolbar, BorderLayout.NORTH);
 		return panel;
 	}
@@ -325,12 +325,12 @@ public class WizardMsDataVerifierPanel extends RawDataProjectMetadataWizardPanel
 	@Override
 	public void loadPreferences() {
 		loadPreferences(
-				Preferences.userRoot().node(WizardMsDataVerifierPanel.class.getName()));
+				Preferences.userRoot().node(RDPMsDataVerifierPanel.class.getName()));
 	}
 
 	@Override
 	public void savePreferences() {
-		preferences = Preferences.userRoot().node(WizardMsDataVerifierPanel.class.getName());
+		preferences = Preferences.userRoot().node(RDPMsDataVerifierPanel.class.getName());
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
 

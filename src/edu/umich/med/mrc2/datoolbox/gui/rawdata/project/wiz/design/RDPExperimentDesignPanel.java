@@ -29,22 +29,22 @@ import java.util.Collection;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizardPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizardPanel;
 
-public class WizardExperimentDesignPanel extends RawDataProjectMetadataWizardPanel implements ActionListener {
+public class RDPExperimentDesignPanel extends RDPMetadataWizardPanel implements ActionListener {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 2460123645924507011L;
-	private WizardExperimentDesignEditorPanel experimentDesignEditorPanel;
+	private RDPExperimentDesignEditorPanel experimentDesignEditorPanel;
 
-	public WizardExperimentDesignPanel(RawDataProjectMetadataWizard wizard) {
+	public RDPExperimentDesignPanel(RDPMetadataWizard wizard) {
 		
 		super(wizard);
 		
-		experimentDesignEditorPanel = new WizardExperimentDesignEditorPanel();		
+		experimentDesignEditorPanel = new RDPExperimentDesignEditorPanel();		
 		add(experimentDesignEditorPanel, gbc_panel);		
 		
 		completeStageButton.setText(
