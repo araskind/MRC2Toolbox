@@ -43,10 +43,13 @@ public class WorklistImportToolbar extends CommonToolbar {
 	private static final Icon addFromDirIcon = GuiUtils.getIcon("addFromFolder", 32);
 	private static final Icon deleteIcon = GuiUtils.getIcon("delete", 32);
 	private static final Icon clearWorklistIcon = GuiUtils.getIcon("clearWorklist", 32);
+	private static final Icon dbLookupIcon = GuiUtils.getIcon("dbLookup", 32);
+	
 
 	private JButton
 		scanDirButton,
 		addFromDirButton,
+		databaseLookupButton,
 		deleteSelectedFilesButton,
 		clearWorklistButton;
 
@@ -61,6 +64,12 @@ public class WorklistImportToolbar extends CommonToolbar {
 		addFromDirButton = GuiUtils.addButton(this, null, addFromDirIcon, commandListener,
 				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName(),
 				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName(), buttonDimension);
+		
+		addSeparator(buttonDimension);
+		
+		databaseLookupButton = GuiUtils.addButton(this, null, dbLookupIcon, commandListener,
+				MainActionCommands.LOOKUP_WORKLIST_DATA_IN_DATABASE.getName(),
+				MainActionCommands.LOOKUP_WORKLIST_DATA_IN_DATABASE.getName(), buttonDimension);
 
 		addSeparator(buttonDimension);
 		
@@ -82,6 +91,7 @@ public class WorklistImportToolbar extends CommonToolbar {
 
 		scanDirButton.setEnabled(enabled);
 		addFromDirButton.setEnabled(enabled);
+		databaseLookupButton.setEnabled(enabled);
 		deleteSelectedFilesButton.setEnabled(enabled);
 		clearWorklistButton.setEnabled(enabled);
 	}

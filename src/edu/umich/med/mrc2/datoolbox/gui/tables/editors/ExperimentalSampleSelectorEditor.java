@@ -45,7 +45,7 @@ public class ExperimentalSampleSelectorEditor extends DefaultCellEditor {
 	/**
 	 * @param comboBox
 	 */
-	public ExperimentalSampleSelectorEditor(Collection<ExperimentalSample>samples, JTable table) {
+	public ExperimentalSampleSelectorEditor(Collection<? extends ExperimentalSample>samples, JTable table) {
 
 		super(new JComboBox<>());
 		JComboBox cBox = ((JComboBox)editorComponent);

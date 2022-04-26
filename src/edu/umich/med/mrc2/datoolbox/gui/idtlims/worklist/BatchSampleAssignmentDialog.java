@@ -35,6 +35,7 @@ import java.awt.event.KeyEvent;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -55,6 +56,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
@@ -66,10 +68,10 @@ public class BatchSampleAssignmentDialog extends JDialog implements ItemListener
 	 */
 	private static final long serialVersionUID = 3086453967218181125L;
 	private static final Icon batchDropdownIcon = GuiUtils.getIcon("dropdown", 32);
-	private Collection<ExperimentalSample>samples;
+	private Collection<? extends ExperimentalSample>samples;
 	private Collection<DataFile> dataFiles;
 	private JButton assignSampleButton;
-	private JComboBox<ExperimentalSample> sampleComboBox;
+	private JComboBox<? extends ExperimentalSample> sampleComboBox;
 	private JComboBox prepItemsComboBox;
 	private LIMSSamplePreparation activeSamplePrep;
 
@@ -81,7 +83,20 @@ public class BatchSampleAssignmentDialog extends JDialog implements ItemListener
 
 		super();
 		setTitle("Batch assign samples to data files");
-		this.samples = experiment.getExperimentDesign().getSamples();
+		samples = new TreeSet<>();
+		if(experiment != null && experiment.getExperimentDesign() != null) {				
+			samples = experiment.getExperimentDesign().getSamples();
+		}
+		else {
+			if(activeSamplePrep != null) {
+				try {
+					samples = IDTUtils.getSamplesForPrep(activeSamplePrep);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}	
 		this.dataFiles = selectedDataFiles;
 		this.activeSamplePrep = activeSamplePrep;
 

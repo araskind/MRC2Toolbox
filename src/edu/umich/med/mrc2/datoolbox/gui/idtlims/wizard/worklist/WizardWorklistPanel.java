@@ -156,7 +156,7 @@ public class WizardWorklistPanel extends IDTrackerDataLoadWizardPanel
 		
 		if(res == JOptionPane.YES_OPTION) {
 			selectedFiles.stream().forEach(f -> worklist.removeDataFile(f));
-			instrumentSequenceTable.setTableModelFromLimsWorklist(worklist, experiment, samplePrep);
+			instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(worklist, experiment, samplePrep);
 		}
 	}
 	
@@ -192,7 +192,7 @@ public class WizardWorklistPanel extends IDTrackerDataLoadWizardPanel
 				map(LIMSWorklistItem.class::cast).filter(i -> selectedFiles.contains(i.getDataFile())).
 				forEach(i -> i.setPrepItemId(selectedPrep));
 		}
-		instrumentSequenceTable.setTableModelFromLimsWorklist(worklist, experiment, samplePrep);
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(worklist, experiment, samplePrep);
 		batchSampleAssignmentDialog.dispose();
 	}
 	
@@ -323,7 +323,7 @@ public class WizardWorklistPanel extends IDTrackerDataLoadWizardPanel
 		if(!completeItems.isEmpty())
 			worklist.getWorklistItems().addAll(completeItems);
 		
-		instrumentSequenceTable.setTableModelFromLimsWorklist(worklist, experiment, samplePrep);
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(worklist, experiment, samplePrep);
 		appendWorklist = false;
 	}
 	

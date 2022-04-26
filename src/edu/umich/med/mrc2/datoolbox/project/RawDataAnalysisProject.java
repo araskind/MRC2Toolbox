@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
@@ -64,6 +65,7 @@ public class RawDataAnalysisProject extends Project {
 	protected Set<MsFeatureInfoBundleCollection>featureCollections;
 	protected MSMSExtractionParameterSet msmsExtractionParameterSet;
 	protected Set<Injection>injections;
+	protected ExperimentDesign experimentDesign;
 	
 	//	New project
 	public RawDataAnalysisProject(
@@ -73,6 +75,7 @@ public class RawDataAnalysisProject extends Project {
 
 		super(projectName, projectDescription, parentDirectory);
 		initNewProject(parentDirectory);
+		experimentDesign = new ExperimentDesign();
 		initFields();
 	}
 	
@@ -86,6 +89,7 @@ public class RawDataAnalysisProject extends Project {
 		this.msmsDataFiles.addAll(activeProject.getMSMSDataFiles());
 		this.msOneDataFiles = new TreeSet<DataFile>();
 		this.msmsDataFiles.addAll(activeProject.getMSOneDataFiles());
+		experimentDesign = activeProject.getExperimentDesign();
 		initFields();
 	}
 	
@@ -443,6 +447,10 @@ public class RawDataAnalysisProject extends Project {
 
 		injections.clear();
 		injections.addAll(injections2);
+	}
+
+	public ExperimentDesign getExperimentDesign() {
+		return experimentDesign;
 	}
 }
 

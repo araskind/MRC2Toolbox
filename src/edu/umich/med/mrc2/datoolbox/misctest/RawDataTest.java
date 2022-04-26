@@ -39,8 +39,10 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.LCMSDataSubset;
+import umich.ms.datatypes.lcmsrun.LCMSRunInfo;
 import umich.ms.datatypes.scan.StorageStrategy;
 import umich.ms.fileio.exceptions.FileParsingException;
+import umich.ms.fileio.filetypes.LCMSDataSource;
 import umich.ms.fileio.filetypes.mzml.MZMLFile;
 import umich.ms.fileio.filetypes.mzxml.MZXMLFile;
 import umich.ms.fileio.filetypes.xmlbased.AbstractXMLBasedDataSource;
@@ -63,26 +65,28 @@ public class RawDataTest {
 
 	private static void examineRawData() {
 
-		File dataFile = new File("Z:\\Personal Directories- For CORE only\\Sasha\\2022_0117_BEH_Amide_Rat_FM\\"
-				+ "ThermoRAW\\2022_0117_1P_Rat_FM_05x_5uL_60min_ID01.raw");
-		int length  = 1024*1024;
-		readTheroRawHeader(dataFile, length);
-		
-//		LCMSData rawData = null;
-//		try {
-//			rawData = createDataSource(dataFile);
-//		} catch (FileParsingException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		if(rawData != null) {
-//			
-//			LCMSDataSource<?> source = rawData.getSource();
-//			LCMSRunInfo info = source.getRunInfo();
-//			System.err.println("***");
-//		}
-//		if(rawData != null)
-//			rawData.releaseMemory();
+//		File dataFile = new File("Z:\\Personal Directories- For CORE only\\Sasha\\2022_0117_BEH_Amide_Rat_FM\\"
+//				+ "ThermoRAW\\2022_0117_1P_Rat_FM_05x_5uL_60min_ID01.raw");
+//		int length  = 1024*1024;
+//		readTheroRawHeader(dataFile, length);
+
+		File dataFile = new File("Y:\\DataAnalysis\\IDTRACKER_RAW\\EX00979\\Liver\\RP"
+				+ "\\iDDA\\NEG\\20191021-EX00979-A003-IN0028-CS00000MP-7-IDDA_ce10_1-N.mzML");
+		LCMSData rawData = null;
+		try {
+			rawData = createDataSource(dataFile);
+		} catch (FileParsingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(rawData != null) {
+			
+			LCMSDataSource<?> source = rawData.getSource();
+			LCMSRunInfo info = source.getRunInfo();
+			System.err.println("***");
+		}
+		if(rawData != null)
+			rawData.releaseMemory();
 	}
 	
 	public static LCMSData createDataSource(File sourceRawFile) throws FileParsingException {

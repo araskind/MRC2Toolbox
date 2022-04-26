@@ -80,7 +80,7 @@ public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel
 	private Preferences preferences;
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	
-	private MethodTable acquisitionMethodTable;
+	private AcquisitionMethodTable acquisitionMethodTable;
 	private AcquisitionMethodToolbar acquisitionMethodToolbar;
 	private AcquisitionMethodSelectorDialog acquisitionMethodSelectorDialog;
 	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
@@ -134,7 +134,7 @@ public class WizardMethodsPanel extends RawDataProjectMetadataWizardPanel
 			new EmptyBorder(10, 10, 10, 10)));
 		acquisitionMethodToolbar = new AcquisitionMethodToolbar(this);
 		panel1.add(acquisitionMethodToolbar, BorderLayout.NORTH);		
-		acquisitionMethodTable = new MethodTable();
+		acquisitionMethodTable = new AcquisitionMethodTable();
 		panel1.add(new JScrollPane(acquisitionMethodTable), BorderLayout.CENTER);
 		
 		GridBagConstraints gbc_panel = new GridBagConstraints();

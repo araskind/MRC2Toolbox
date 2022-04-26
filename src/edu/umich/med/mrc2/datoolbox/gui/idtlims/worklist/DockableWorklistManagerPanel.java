@@ -234,7 +234,7 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 	public void loadLimsWorklist(Worklist wkl) {
 
 		this.wkl = wkl;
-		worklistTable.setTableModelFromLimsWorklist(wkl, experiment, activeSamplePrep);
+		worklistTable.populateTableFromWorklistExperimentAndSamplePrep(wkl, experiment, activeSamplePrep);
 	}
 
 	private void copyWorklistToClipboard() {

@@ -166,6 +166,7 @@ public enum MainActionCommands {
 	SEND_WORKLIST_TO_DATABASE("Send worklist to database"),
 	REFRESH_WORKLIST("Refresh worklist"),
 	CHECK_WORKLIST_FOR_MISSING_DATA("Check worklist for missing data"),
+	LOOKUP_WORKLIST_DATA_IN_DATABASE("Add worklist information from database"),
 
 	//	Multi-file import
 	SHOW_DATA_PIPELINE_DEFINITION_DIALOG_COMMAND("Show data pipeline definition dialog"),
@@ -219,6 +220,10 @@ public enum MainActionCommands {
 	ENABLE_ALL_LEVELS_COMMAND("Enable all experimental groups"),
 	DISABLE_ALL_LEVELS_COMMAND("Disable all experimental groups"),
 	EDIT_DESIGN_FOR_SELECTED_SAMPLES_COMMAND("Edit design for selected samples"),
+	CHOOSE_ACQ_METHOD_FOR_SELECTED_DATA_FILES_COMMAND("Choose acquisition method for selected data files"),
+	ASSIGN_ACQ_METHOD_FOR_SELECTED_DATA_FILES_COMMAND("Assign acquisition method for selected data files"),
+	SPECIFY_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND("Specify injection volume for selected data files"),
+	ASSIGN_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND("Assign injection volume for selected data files"),
 	ASSIGN_BATCH_FOR_SELECTED_DATA_FILES_COMMAND("Assign batch for selected data files"),
 	LOAD_EXCEL_DATA_FOR_PREVIEW_COMMAND("Load data from Excel file into preview"),
 	CLEAR_EXCEL_IMPORT_WIZARD_COMMAND("Clear Excel import wizard"),

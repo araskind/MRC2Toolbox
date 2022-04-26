@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.worklist;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.TreeSet;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
@@ -42,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.format.LIMSSamplePreparationFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
@@ -95,20 +97,58 @@ public class InstrumentSequenceTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromLimsWorklist(
+	public void populateTableFromWorklistExperimentAndSamplePrep(
 			Worklist wkl,
 			LIMSExperiment experiment,
 			LIMSSamplePreparation activeSamplePrep) {
 
-		Collection<ExperimentalSample>samples = experiment.getExperimentDesign().getSamples();
+		Collection<? extends ExperimentalSample>samples = new ArrayList<>();
+		if(experiment != null && experiment.getExperimentDesign() != null) {
+			samples = experiment.getExperimentDesign().getSamples();
+		}
+		else {
+			if(activeSamplePrep != null) {
+				try {
+					samples = IDTUtils.getSamplesForPrep(activeSamplePrep);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(samples, this));
 
+		Collection<String>prepItems = new TreeSet<String>();
+		if(activeSamplePrep != null && activeSamplePrep.getPrepItemMap() != null)
+			prepItems = activeSamplePrep.getPrepItemMap().keySet();
+			
 		columnModel.getColumnById(InstrumentSequenceTableModel.SAMPLE_PREP_ITEM_COLUMN).
-				setCellEditor(new StringSelectorEditor(activeSamplePrep.getPrepItemMap().keySet(), this));
+				setCellEditor(new StringSelectorEditor(prepItems, this));
 
 		model.setTableModelFromLimsWorklist(wkl);
 		tca.adjustColumns();
+	}
+	
+	public void updateColumnEditorsFromSamplesAndPrep(
+			Collection<? extends ExperimentalSample>samples, 
+			LIMSSamplePreparation activeSamplePrep) {
+		
+		if(samples == null)
+			samples = new ArrayList<ExperimentalSample>();
+		
+		setDefaultEditor(ExperimentalSample.class,
+				new ExperimentalSampleSelectorEditor(samples, this));
+		
+		Collection<String>prepItems = new TreeSet<String>();
+		if(activeSamplePrep != null && activeSamplePrep.getPrepItemMap() != null)
+			prepItems = activeSamplePrep.getPrepItemMap().keySet();
+			
+		columnModel.getColumnById(InstrumentSequenceTableModel.SAMPLE_PREP_ITEM_COLUMN).
+				setCellEditor(new StringSelectorEditor(prepItems, this));
+		
+		revalidate();
+		repaint();
 	}
 
 	public String getWorklistsAsString() {

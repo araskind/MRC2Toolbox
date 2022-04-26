@@ -121,7 +121,7 @@ public class InstrumentSequenceImportDialog extends JDialog implements ActionLis
 		this.wkl = wkl;
 		this.experiment = experiment;
 		this.activeSamplePrep = activeSamplePrep;
-		table.setTableModelFromLimsWorklist(wkl, experiment, activeSamplePrep);
+		table.populateTableFromWorklistExperimentAndSamplePrep(wkl, experiment, activeSamplePrep);
 	}
 
 	@Override
@@ -158,7 +158,7 @@ public class InstrumentSequenceImportDialog extends JDialog implements ActionLis
 					map(LIMSWorklistItem.class::cast).filter(i -> selectedFiles.contains(i.getDataFile())).
 					forEach(i -> i.setPrepItemId(selectedPrep));
 			}
-			table.setTableModelFromLimsWorklist(wkl, experiment, activeSamplePrep);
+			table.populateTableFromWorklistExperimentAndSamplePrep(wkl, experiment, activeSamplePrep);
 			batchSampleAssignmentDialog.dispose();
 		}
 	}

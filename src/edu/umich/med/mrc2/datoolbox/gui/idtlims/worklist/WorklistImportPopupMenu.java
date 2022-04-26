@@ -37,8 +37,15 @@ public class WorklistImportPopupMenu extends JPopupMenu {
 	 */
 	private static final long serialVersionUID = 6109578300557179546L;
 	private static final Icon assignLevelIcon = GuiUtils.getIcon("dropdown", 24);
+	private static final Icon assignAcqMethodIcon = GuiUtils.getIcon("addDataAcquisitionMethod", 24);
+	private static final Icon assignInjVolumeIcon = GuiUtils.getIcon("samplePrep", 24);	
 	private static final Icon deleteIcon = GuiUtils.getIcon("delete", 24);
-	private JMenuItem assignLevelsMenuItem, deleteFileMenuItem;
+		
+	private JMenuItem 
+		assignLevelsMenuItem, 
+		assignAcqMethodMenuItem, 
+		assignInjVolumeMenuItem, 
+		deleteFileMenuItem;
 
 	public WorklistImportPopupMenu(ActionListener listener) {
 
@@ -48,6 +55,18 @@ public class WorklistImportPopupMenu extends JPopupMenu {
 				MainActionCommands.EDIT_DESIGN_FOR_SELECTED_SAMPLES_COMMAND.getName(), listener,
 				MainActionCommands.EDIT_DESIGN_FOR_SELECTED_SAMPLES_COMMAND.getName());
 		assignLevelsMenuItem.setIcon(assignLevelIcon);
+		
+		assignAcqMethodMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.CHOOSE_ACQ_METHOD_FOR_SELECTED_DATA_FILES_COMMAND.getName(), listener,
+				MainActionCommands.CHOOSE_ACQ_METHOD_FOR_SELECTED_DATA_FILES_COMMAND.getName());
+		assignAcqMethodMenuItem.setIcon(assignAcqMethodIcon);
+		
+		assignInjVolumeMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.SPECIFY_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND.getName(), listener,
+				MainActionCommands.SPECIFY_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND.getName());
+		assignInjVolumeMenuItem.setIcon(assignInjVolumeIcon);
+		
+		addSeparator();
 		
 		deleteFileMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.DELETE_DATA_FILES_COMMAND.getName(), listener,

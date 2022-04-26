@@ -101,4 +101,8 @@ public class WizardSamplePrepPanel extends RawDataProjectMetadataWizardPanel {
 	public void loadPrepDataForExperiment(LIMSSamplePreparation samplePrep, LIMSExperiment newExperiment) {
 		samplePrepEditorPanel.loadPrepDataForExperiment(samplePrep, newExperiment);		
 	}
+
+	public SamplePrepEditorPanel getSamplePrepEditorPanel() {
+		return samplePrepEditorPanel;
+	}
 }

@@ -51,10 +51,13 @@ import javax.swing.border.EmptyBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
@@ -63,6 +66,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepListener;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design.WizardExperimentDesignPanel;
@@ -72,13 +77,16 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTCefMSMSPrescanOrImportTask;
 
-public class RawDataProjectMetadataWizard extends JDialog implements ActionListener, TaskListener {
+public class RawDataProjectMetadataWizard extends JDialog 
+			implements ActionListener, TaskListener, SamplePrepListener {
 	
 	/**
 	 * 
@@ -117,6 +125,10 @@ public class RawDataProjectMetadataWizard extends JDialog implements ActionListe
 		getContentPane().add(stagePanel, BorderLayout.CENTER);
 		
 		initWizardPanels();
+		WizardSamplePrepPanel prepPanel = 
+				(WizardSamplePrepPanel)panels.get(
+						RawDataProjectMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+		prepPanel.getSamplePrepEditorPanel().addSamplePrepListener(this);
 				
 		GridBagLayout gbl_stagePanel = new GridBagLayout();
 		gbl_stagePanel.columnWidths = new int[]{0, 0};
@@ -182,9 +194,44 @@ public class RawDataProjectMetadataWizard extends JDialog implements ActionListe
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
 		rootPane.setDefaultButton(saveButton);
 
+		populateWizardByProjectData();
 		pack();
 	}
 	
+	private void populateWizardByProjectData() {
+		// TODO Auto-generated method stub
+		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
+		if(project == null)
+			return;
+		
+		Collection<DataFile> dataFileList = project.getDataFiles();
+		if(dataFileList != null && !dataFileList.isEmpty()) {
+			
+			WizardWorklistPanel wklPanel = ((WizardWorklistPanel)panels.get(
+					RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS));
+			Worklist worklist = generateWorklistFromDataFiles(dataFileList);
+			wklPanel.loadWorklistWithoutValidation(worklist, null, null);
+		}	
+	}
+
+	//	TODO handle the case, when data already present
+	private Worklist generateWorklistFromDataFiles(Collection<DataFile> dataFileList) {
+		
+		Worklist worklist = new Worklist();
+		for(DataFile df : dataFileList) {
+			LIMSWorklistItem wklItem = new LIMSWorklistItem(
+				df,
+				null,
+				null,
+				null,
+				null,
+				null,
+				0.0d);
+			worklist.addItem(wklItem);
+		}
+		return worklist;
+	}
+		
 	private void initWizardPanels() {
 		
 		panels = new LinkedHashMap<RawDataProjectMetadataDefinitionStage, RawDataProjectMetadataWizardPanel>();
@@ -244,7 +291,7 @@ public class RawDataProjectMetadataWizard extends JDialog implements ActionListe
 			uploadDataToIDdTracker();
 	}
 	
-	private void showStagePanel(RawDataProjectMetadataDefinitionStage stage) {
+	public void showStagePanel(RawDataProjectMetadataDefinitionStage stage) {
 		
 		stagePanel.remove(panels.get(activeStage));
 		revalidate();
@@ -566,6 +613,39 @@ public class RawDataProjectMetadataWizard extends JDialog implements ActionListe
 						newExperiment.getName() + "\" completed.", this);
 				dispose();
 			}
+		}
+	}
+
+	@Override
+	public void samplePrepStatusChanged(SamplePrepEvent e) {
+		
+		WizardExperimentDesignPanel designPanel = 
+				(WizardExperimentDesignPanel)panels.get(RawDataProjectMetadataDefinitionStage.ADD_SAMPLES);
+		WizardWorklistPanel worklistPanel = 
+				(WizardWorklistPanel)panels.get(RawDataProjectMetadataDefinitionStage.ADD_WORKLISTS);
+
+		if(e.getStatus().equals(ParameterSetStatus.REMOVED)) {
+			designPanel.clearPanel();
+			worklistPanel.updateColumnEditorsFromSamplesAndPrep(null, null);
+			worklistPanel.setSamplePrep(null);
+		}
+		if(e.getStatus().equals(ParameterSetStatus.ADDED)) {
+			
+			Collection<IDTExperimentalSample>samples = new ArrayList<IDTExperimentalSample>();
+			LIMSSamplePreparation prep = (LIMSSamplePreparation)e.getSource();
+			try {
+				samples = IDTUtils.getSamplesForPrep(prep);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			ExperimentDesign newDesign = new ExperimentDesign();
+			newDesign.addSamples(samples);
+			designPanel.clearPanel();
+			designPanel.showExperimentDesign(newDesign);
+			
+			worklistPanel.updateColumnEditorsFromSamplesAndPrep(samples, prep);
+			worklistPanel.setSamplePrep(prep);
 		}
 	}
 }

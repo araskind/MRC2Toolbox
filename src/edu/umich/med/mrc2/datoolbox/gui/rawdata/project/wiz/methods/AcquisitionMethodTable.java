@@ -39,31 +39,31 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FileBaseNameRenderer;
 
-public class MethodTable extends BasicTable {
+public class AcquisitionMethodTable extends BasicTable {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private MethodTableModel model;
+	private AcquisitionMethodTableModel model;
 
-	public MethodTable() {
+	public AcquisitionMethodTable() {
 		super();
-		model =  new MethodTableModel();
+		model =  new AcquisitionMethodTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MethodTableModel>(model);
+		rowSorter = new TableRowSorter<AcquisitionMethodTableModel>(model);
 		setRowSorter(rowSorter);
-		rowSorter.setComparator(getColumnIndex(MethodTableModel.METHOD_ID_COLUMN), 
+		rowSorter.setComparator(getColumnIndex(AcquisitionMethodTableModel.METHOD_ID_COLUMN), 
 				new AnalysisMethodComparator(SortProperty.ID));
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setDefaultRenderer(AnalysisMethod.class, new AnalysisMethodRenderer(SortProperty.ID));
 
-		columnModel.getColumnById(MethodTableModel.METHOD_NAME_COLUMN)
+		columnModel.getColumnById(AcquisitionMethodTableModel.METHOD_NAME_COLUMN)
 				.setCellRenderer(new FileBaseNameRenderer());
-		columnModel.getColumnById(MethodTableModel.METHOD_ID_COLUMN).setMaxWidth(80);
+		columnModel.getColumnById(AcquisitionMethodTableModel.METHOD_ID_COLUMN).setMaxWidth(80);
 		
-		columnModel.getColumnById(MethodTableModel.METHOD_ID_COLUMN).
+		columnModel.getColumnById(AcquisitionMethodTableModel.METHOD_ID_COLUMN).
 				setPreferredWidth(80);
 	}
 
@@ -79,8 +79,14 @@ public class MethodTable extends BasicTable {
 		}	
 		model.setTableModelFromMethods(methodFilesMap);
 	}
+	
+	public void setTableModelFromAcquisitionMethodsCollection(
+			Collection<? extends AnalysisMethod> methods) {
+		model.setTableModelFromMethodCollection(methods);
+	}
 
-	public void setTableModelFromDataAnalysisMethods(Collection<DataExtractionMethod> dataExtractionMethods) {
+	public void setTableModelFromDataAnalysisMethods(
+			Collection<DataExtractionMethod> dataExtractionMethods) {
 
 		Map<String,AnalysisMethod>methodFilesMap = new TreeMap<String,AnalysisMethod>();
 		for(DataExtractionMethod mf : dataExtractionMethods)
@@ -96,7 +102,7 @@ public class MethodTable extends BasicTable {
 			return null;
 		
 		return (AnalysisMethod) model.getValueAt(convertRowIndexToModel(row), 
-				model.getColumnIndex(MethodTableModel.METHOD_ID_COLUMN));
+				model.getColumnIndex(AcquisitionMethodTableModel.METHOD_ID_COLUMN));
 	}
 	
 	public String getSelectedAnalysisMethodName() {
@@ -106,13 +112,13 @@ public class MethodTable extends BasicTable {
 			return null;
 		
 		return (String) model.getValueAt(convertRowIndexToModel(row), 
-				model.getColumnIndex(MethodTableModel.METHOD_NAME_COLUMN));
+				model.getColumnIndex(AcquisitionMethodTableModel.METHOD_NAME_COLUMN));
 	}
 	
 	public Collection<DataAcquisitionMethod>getAvailableDataAcquisitionMethods(){
 		
 		Collection<DataAcquisitionMethod>available = new TreeSet<DataAcquisitionMethod>();
-		int methodCol = model.getColumnIndex(MethodTableModel.METHOD_ID_COLUMN);
+		int methodCol = model.getColumnIndex(AcquisitionMethodTableModel.METHOD_ID_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++) {
 			
 			Object value = model.getValueAt(i, methodCol);
@@ -125,7 +131,7 @@ public class MethodTable extends BasicTable {
 	public Collection<DataExtractionMethod>getAvailableDataExtractionMethods(){
 		
 		Collection<DataExtractionMethod>available = new TreeSet<DataExtractionMethod>();
-		int methodCol = model.getColumnIndex(MethodTableModel.METHOD_ID_COLUMN);
+		int methodCol = model.getColumnIndex(AcquisitionMethodTableModel.METHOD_ID_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++) {
 			
 			Object value = model.getValueAt(i, methodCol);
@@ -138,8 +144,8 @@ public class MethodTable extends BasicTable {
 	public Collection<String>getMissingMethodNames(){
 		
 		Collection<String>missing = new TreeSet<String>();
-		int nameCol = model.getColumnIndex(MethodTableModel.METHOD_NAME_COLUMN);
-		int methodCol = model.getColumnIndex(MethodTableModel.METHOD_ID_COLUMN);
+		int nameCol = model.getColumnIndex(AcquisitionMethodTableModel.METHOD_NAME_COLUMN);
+		int methodCol = model.getColumnIndex(AcquisitionMethodTableModel.METHOD_ID_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++) {
 			
 			Object name = model.getValueAt(i, nameCol);
@@ -153,7 +159,7 @@ public class MethodTable extends BasicTable {
 	public Collection< String> getMethodNames() {
 
 		Collection<String>names = new TreeSet<String>();
-		int nameCol = model.getColumnIndex(MethodTableModel.METHOD_NAME_COLUMN);
+		int nameCol = model.getColumnIndex(AcquisitionMethodTableModel.METHOD_NAME_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++) {
 			
 			Object name = model.getValueAt(i, nameCol);

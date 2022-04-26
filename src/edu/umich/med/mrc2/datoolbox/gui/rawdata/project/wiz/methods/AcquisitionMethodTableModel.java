@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -28,7 +29,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.AnalysisMethod;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-public class MethodTableModel extends BasicTableModel {
+public class AcquisitionMethodTableModel extends BasicTableModel {
 
 	/**
 	 *
@@ -38,7 +39,7 @@ public class MethodTableModel extends BasicTableModel {
 	public static final String METHOD_ID_COLUMN = "DB ID";
 	public static final String METHOD_NAME_COLUMN = "Method name";
 
-	public MethodTableModel() {
+	public AcquisitionMethodTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
@@ -50,7 +51,6 @@ public class MethodTableModel extends BasicTableModel {
 	public void setTableModelFromMethods(Map<String,AnalysisMethod>methodFilesMap) {
 
 		setRowCount(0);
-
 		if(methodFilesMap.isEmpty())
 			return;
 
@@ -59,6 +59,22 @@ public class MethodTableModel extends BasicTableModel {
 			Object[] obj = {
 					methodEntry.getValue(),
 					methodEntry.getKey(),
+			};
+			super.addRow(obj);
+		}
+	}
+	
+	public void setTableModelFromMethodCollection(Collection<? extends AnalysisMethod>methods) {
+
+		setRowCount(0);
+		if(methods.isEmpty())
+			return;
+
+		for (AnalysisMethod method : methods) {
+
+			Object[] obj = {
+					method,
+					method.getName(),
 			};
 			super.addRow(obj);
 		}

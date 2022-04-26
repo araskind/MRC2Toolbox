@@ -36,7 +36,9 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
@@ -54,6 +56,7 @@ import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
+import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
@@ -62,6 +65,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepListener;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.user.UserSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
@@ -96,6 +101,7 @@ public class SamplePrepEditorPanel extends JPanel
 	private CGrid grid;
 	
 	private ExistingPrepSelectorDialog existingPrepSelectorDialog;
+	protected Set<SamplePrepListener> eventListeners;
 	
 	/**
 	 * This constructor is for the creation of the new sample preparation;
@@ -321,6 +327,7 @@ public class SamplePrepEditorPanel extends JPanel
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			fireSamplePrepEvent(prep, ParameterSetStatus.ADDED);
 		}
 	}
 	
@@ -400,6 +407,12 @@ public class SamplePrepEditorPanel extends JPanel
 	
 	private void loadSelectedSamplePrep() {
 
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"This operation will automatically load experiment design "
+				+ "associated with the selected sample preparation.\nProceed?");
+		if(res != JOptionPane.YES_OPTION)
+			return;
+		
 		LIMSSamplePreparation selectedPrep = 
 				existingPrepSelectorDialog.getSelectedPrep();
 		if(selectedPrep == null)
@@ -413,10 +426,14 @@ public class SamplePrepEditorPanel extends JPanel
 		
 		if(prep != null) {
 			int res = MessageDialog.showChoiceWithWarningMsg(
-					"Do you want to reset the sample prep definition?", this);
+					"Do you want to reset the sample prep definition?\n"
+					+ "This will also clear the experiment design "
+					+ "associated with the sample preparation.", this);
 			if(res != JOptionPane.YES_OPTION)
 				return;
-		}
+			else
+				fireSamplePrepEvent(prep, ParameterSetStatus.REMOVED);
+		}	
 		this.prep = null;
 		this.experiment = null;
 		prepSampleTable.clearTable();;
@@ -574,6 +591,32 @@ public class SamplePrepEditorPanel extends JPanel
 			errors.add("User in charge of preparation should be specified.");
 		
 		return errors;
+	}
+	
+	public void addSamplePrepListener(SamplePrepListener listener) {
+
+		if(eventListeners == null)
+			eventListeners = ConcurrentHashMap.newKeySet();
+
+		eventListeners.add(listener);
+	}
+
+	public void removeSamplePrepListener(SamplePrepListener listener) {
+
+		if(eventListeners == null)
+			eventListeners = ConcurrentHashMap.newKeySet();
+
+		eventListeners.remove(listener);
+	}
+	
+	public void fireSamplePrepEvent(LIMSSamplePreparation prep, ParameterSetStatus status) {
+
+		if(eventListeners == null){
+			eventListeners = ConcurrentHashMap.newKeySet();
+			return;
+		}
+		SamplePrepEvent event = new SamplePrepEvent(prep, status);
+		eventListeners.stream().forEach(l -> l.samplePrepStatusChanged(event));		
 	}
 
 	@Override

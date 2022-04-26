@@ -41,6 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
@@ -51,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.worklist.WorklistImportPopupMenu
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataDefinitionStage;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RawDataProjectMetadataWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -82,7 +84,9 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 
 	private InstrumentSequenceTable instrumentSequenceTable;
 	private WorklistImportToolbar toolbar;
-	private BatchSampleAssignmentDialog batchSampleAssignmentDialog;
+	private BatchSampleAssignmentDialog batchSampleAssignmentDialog;	
+	private AcquisitionMethodAssignmentDialog acquisitionMethodAssignmentDialog;
+	private InjectionVolumeAssignmentDialog injectionVolumeAssignmentDialog;
 	
 	public WizardWorklistPanel(RawDataProjectMetadataWizard wizard) {
 		
@@ -131,12 +135,27 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 		}
 		if (command.equals(MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName()))
 			loadWorklistFromDirectoryScan(true);
+		
+		if (command.equals(MainActionCommands.LOOKUP_WORKLIST_DATA_IN_DATABASE.getName()))
+			lookupWorklistDataInDatabase();
 
 		if (command.equals(MainActionCommands.CLEAR_WORKLIST_COMMAND.getName()))
 			clearWorklist();
 		
 		if (command.equals(MainActionCommands.EDIT_DESIGN_FOR_SELECTED_SAMPLES_COMMAND.getName()))
 			showSampleDesignEditor();
+			
+		if (command.equals(MainActionCommands.CHOOSE_ACQ_METHOD_FOR_SELECTED_DATA_FILES_COMMAND.getName()))
+			showAcqusitionMethodAssignmentDialog();
+		
+		if (command.equals(MainActionCommands.ASSIGN_ACQ_METHOD_FOR_SELECTED_DATA_FILES_COMMAND.getName()))
+			assignAcqusitionMethodForSelectedDataFiles();
+				
+		if (command.equals(MainActionCommands.SPECIFY_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND.getName()))
+			showInjectionVolumeAssignmentDialog();
+			
+		if (command.equals(MainActionCommands.ASSIGN_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND.getName()))
+			assignInjectionVolumeForSelectedDataFiles();
 		
 		if (command.equals(MainActionCommands.ASSIGN_SAMPLE_TO_DATA_FILES_COMMAND.getName()))
 			assignSamplesToDataFiles();
@@ -145,6 +164,87 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 			deleteSelectedFiles();		
 	}
 	
+	private void showInjectionVolumeAssignmentDialog() {
+		// TODO Auto-generated method stub
+		Collection<DataFile> selectedFiles = instrumentSequenceTable.getSelectedDataFiles();
+		if(selectedFiles.isEmpty())
+			return;
+		
+		injectionVolumeAssignmentDialog = new InjectionVolumeAssignmentDialog(this);
+		injectionVolumeAssignmentDialog.setLocationRelativeTo(this);
+		injectionVolumeAssignmentDialog.setVisible(true);
+	}
+	
+	private void assignInjectionVolumeForSelectedDataFiles() {
+
+		Collection<DataFile> selectedFiles = 
+				instrumentSequenceTable.getSelectedDataFiles();
+		if(selectedFiles.isEmpty())
+			return;
+		
+		double injectionVolume = 
+				injectionVolumeAssignmentDialog.getInjectionVolume();
+		if(injectionVolume == 0.0d)
+			return;
+		
+		worklist.getTimeSortedWorklistItems().stream().
+			filter(LIMSWorklistItem.class::isInstance).
+			map(LIMSWorklistItem.class::cast).
+			filter(i -> selectedFiles.contains(i.getDataFile())).
+			forEach(i -> i.setInjectionVolume(injectionVolume));
+	
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(worklist, experiment, samplePrep);
+		injectionVolumeAssignmentDialog.dispose();
+	}
+
+	private void showAcqusitionMethodAssignmentDialog() {
+
+		Collection<DataFile> selectedFiles = 
+				instrumentSequenceTable.getSelectedDataFiles();
+		if(selectedFiles.isEmpty())
+			return;
+		
+		Collection<DataAcquisitionMethod> acquisitionMethods = 
+				wizard.getDataAcquisitionMethods();
+		if(acquisitionMethods.isEmpty()) {
+			MessageDialog.showWarningMsg(
+					"Please add data acquisition method(s) to the project first.", this);
+			wizard.showStagePanel(RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
+			return;
+		}		
+		acquisitionMethodAssignmentDialog = 
+				new AcquisitionMethodAssignmentDialog(this, acquisitionMethods);
+		acquisitionMethodAssignmentDialog.setLocationRelativeTo(this);
+		acquisitionMethodAssignmentDialog.setVisible(true);
+	}
+	
+	private void assignAcqusitionMethodForSelectedDataFiles() {
+
+		DataAcquisitionMethod method = 
+				acquisitionMethodAssignmentDialog.getSelectedDataAcquisitionMethod();
+		if(method == null)
+			return;
+		
+		Collection<DataFile> selectedFiles = 
+				instrumentSequenceTable.getSelectedDataFiles();
+
+		worklist.getTimeSortedWorklistItems().stream().
+			filter(LIMSWorklistItem.class::isInstance).
+			map(LIMSWorklistItem.class::cast).
+			filter(i -> selectedFiles.contains(i.getDataFile())).
+			forEach(i -> i.setAcquisitionMethod(method));
+		
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(worklist, experiment, samplePrep);
+		acquisitionMethodAssignmentDialog.dispose();
+	}
+
+	private void lookupWorklistDataInDatabase() {
+		// TODO Auto-generated method stub
+		//	TODO Check if files are listed, but no other data (inj time, acq method, etc)
+		
+		MessageDialog.showWarningMsg("Feature under development", this);		
+	}
+
 	private void deleteSelectedFiles() {
 		
 		Collection<DataFile> selectedFiles = instrumentSequenceTable.getSelectedDataFiles();
@@ -156,13 +256,14 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 		
 		if(res == JOptionPane.YES_OPTION) {
 			selectedFiles.stream().forEach(f -> worklist.removeDataFile(f));
-			instrumentSequenceTable.setTableModelFromLimsWorklist(worklist, experiment, samplePrep);
+			instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(worklist, experiment, samplePrep);
 		}
 	}
 	
 	private void showSampleDesignEditor() {
 		
-		Collection<DataFile> selectedDataFiles = instrumentSequenceTable.getSelectedDataFiles();
+		Collection<DataFile> selectedDataFiles = 
+				instrumentSequenceTable.getSelectedDataFiles();
 		if(selectedDataFiles.isEmpty())
 			return;
 
@@ -183,16 +284,18 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 		if(selectedSample != null) {
 			worklist.getTimeSortedWorklistItems().stream().
 				filter(LIMSWorklistItem.class::isInstance).
-				map(LIMSWorklistItem.class::cast).filter(i -> selectedFiles.contains(i.getDataFile())).
+				map(LIMSWorklistItem.class::cast).
+				filter(i -> selectedFiles.contains(i.getDataFile())).
 				forEach(i -> i.setSample(selectedSample));
 		}
 		if(selectedPrep != null) {
 			worklist.getTimeSortedWorklistItems().stream().
 				filter(LIMSWorklistItem.class::isInstance).
-				map(LIMSWorklistItem.class::cast).filter(i -> selectedFiles.contains(i.getDataFile())).
+				map(LIMSWorklistItem.class::cast).
+				filter(i -> selectedFiles.contains(i.getDataFile())).
 				forEach(i -> i.setPrepItemId(selectedPrep));
 		}
-		instrumentSequenceTable.setTableModelFromLimsWorklist(worklist, experiment, samplePrep);
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(worklist, experiment, samplePrep);
 		batchSampleAssignmentDialog.dispose();
 	}
 	
@@ -323,12 +426,33 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 		if(!completeItems.isEmpty())
 			worklist.getWorklistItems().addAll(completeItems);
 		
-		instrumentSequenceTable.setTableModelFromLimsWorklist(worklist, experiment, samplePrep);
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(
+				worklist, experiment, samplePrep);
 		appendWorklist = false;
 	}
 	
+	public void loadWorklistWithoutValidation(
+			Worklist wkl,
+			LIMSExperiment experiment2,
+			LIMSSamplePreparation samplePrep2) {
+		
+		this.worklist = wkl;
+		this.experiment = experiment2;
+		this.samplePrep = samplePrep2;
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(
+				worklist, experiment, samplePrep);
+	}
+	
 	public void setSamplePrep(LIMSSamplePreparation samplePrep) {
-		this.samplePrep = samplePrep;
+		
+		this.samplePrep = samplePrep;			
+		worklist.getTimeSortedWorklistItems().stream().
+			filter(LIMSWorklistItem.class::isInstance).
+			map(LIMSWorklistItem.class::cast).
+			forEach(i -> i.setSamplePrep(samplePrep));
+
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(
+				worklist, experiment, samplePrep);
 	}
 
 	public void setExperiment(LIMSExperiment experiment) {
@@ -357,7 +481,15 @@ public class WizardWorklistPanel extends RawDataProjectMetadataWizardPanel
 	public Worklist getWorklist() {
 		return worklist;
 	}
-
+	
+	public void updateColumnEditorsFromSamplesAndPrep(
+			Collection<? extends ExperimentalSample>samples, 
+			LIMSSamplePreparation activeSamplePrep) {
+		
+		samplePrep = activeSamplePrep;
+		instrumentSequenceTable.updateColumnEditorsFromSamplesAndPrep(samples, activeSamplePrep);
+	}
+	
 	public Collection<String> validateWorklistData() {
 
 		Collection<String>errors = new ArrayList<String>();
