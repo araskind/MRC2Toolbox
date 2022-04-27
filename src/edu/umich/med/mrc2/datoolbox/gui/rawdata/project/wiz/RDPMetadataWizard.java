@@ -307,8 +307,8 @@ public class RDPMetadataWizard extends JDialog
 		if(command.equals(MainActionCommands.COMPLETE_ANALYSIS_WORKLIST_VERIFICATION_COMMAND.getName()))
 			completeWorklistVerificationStage();
 		
-		if(command.equals(MainActionCommands.UPLOAD_DATA_TO_IDTRACKER_COMMAND.getName()))
-			uploadDataToIDdTracker();
+		if(command.equals(MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName()))
+			saveProjectMetadata();
 	}
 	
 	public void showStagePanel(RDPMetadataDefinitionStage stage) {
@@ -350,6 +350,10 @@ public class RDPMetadataWizard extends JDialog
 		RDPExperimentDesignPanel designPanel = 
 				(RDPExperimentDesignPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
 		designPanel.loadExperiment(newExperiment);
+		
+		RDPSamplePrepPanel prepPanel = 
+				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+		prepPanel.loadPrepDataForExperiment(getSamplePrep(), newExperiment);
 
 		stageCompleted.put(RDPMetadataDefinitionStage.CREATE_EXPERIMENT, true);
 		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.CREATE_EXPERIMENT, true);
@@ -502,7 +506,7 @@ public class RDPMetadataWizard extends JDialog
 		return errors;
 	}
 
-	private void uploadDataToIDdTracker() {
+	private void saveProjectMetadata() {
 		
 		Collection<String>errors = checkStageCompletion();
 		if(!errors.isEmpty()) {
@@ -676,6 +680,9 @@ public class RDPMetadataWizard extends JDialog
 	@Override
 	public void samplePrepStatusChanged(SamplePrepEvent e) {
 		
+		if(newExperiment == null)
+			return;
+		
 		RDPExperimentDesignPanel designPanel = 
 				(RDPExperimentDesignPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
 		RDPWorklistPanel worklistPanel = 
@@ -698,9 +705,9 @@ public class RDPMetadataWizard extends JDialog
 			}
 			ExperimentDesign newDesign = new ExperimentDesign();
 			newDesign.addSamples(samples);
+			newExperiment.setDesign(newDesign);		
 			designPanel.clearPanel();
-			designPanel.showExperimentDesign(newDesign);
-			
+			designPanel.loadExperiment(newExperiment);	
 			worklistPanel.updateColumnEditorsFromSamplesAndPrep(samples, prep);
 			worklistPanel.setSamplePrep(prep);
 		}

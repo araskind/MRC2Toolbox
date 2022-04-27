@@ -23,15 +23,20 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentalSampleFields;
 
 public class ExperimentalSample implements Comparable<ExperimentalSample>, Serializable, Renamable {
@@ -408,18 +413,84 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 			designCellElement.setAttribute(ExperimentalSampleFields.DCLevelId.name(), 
 					dce.getValue().getLevelId());
 			designCellContainerElement.addContent(designCellElement);
-			
-			
 		}
 		sampleElement.addContent(designCellContainerElement);
 
 //		protected TreeMap<DataAcquisitionMethod, TreeSet<DataFile>> dataFilesMap;
-		
+		Element dataFileMapContainerElement = 
+				new Element(ExperimentalSampleFields.DataFileMap.name());
+		for(Entry<DataAcquisitionMethod, TreeSet<DataFile>> dfme : dataFilesMap.entrySet()) {
+			
+			Element dataFileMapElement = 
+					new Element(ExperimentalSampleFields.DataFileMapElement.name());
+			dataFileMapElement.setAttribute(ExperimentalSampleFields.AcqMethodId.name(), 
+					dfme.getKey().getId());
+			
+			List<String> fNames = dfme.getValue().stream().
+					map(df -> df.getName()).collect(Collectors.toList());
+			dataFileMapElement.setText(StringUtils.join(fNames, ","));
+			designCellContainerElement.addContent(dataFileMapElement);
+		}
+		sampleElement.addContent(dataFileMapContainerElement);
 		return sampleElement;
 	}
 	
-	public ExperimentalSample(Element sampleElement) {
-		//	TODO
+	public ExperimentalSample(
+			Element sampleElement, 
+			ExperimentDesign design,
+			RawDataAnalysisProject parentProject) {		
+		id = sampleElement.getAttributeValue(ExperimentalSampleFields.Id.name());
+		name = sampleElement.getAttributeValue(ExperimentalSampleFields.Name.name());
+		limsSampleType = 
+				sampleElement.getAttributeValue(ExperimentalSampleFields.LimsSampleType.name());
+		enabled = Boolean.parseBoolean(
+				sampleElement.getAttributeValue(ExperimentalSampleFields.Enabled.name()));
+		lockedReference = Boolean.parseBoolean(
+				sampleElement.getAttributeValue(ExperimentalSampleFields.LockedReference.name()));
+		incloodeInPoolStats = Boolean.parseBoolean(
+				sampleElement.getAttributeValue(ExperimentalSampleFields.IncloodeInPoolStats.name()));
+		batchNumber = Integer.parseInt(
+				sampleElement.getAttributeValue(ExperimentalSampleFields.BatchNum.name()));
+		moTrPACQCSampleType = MoTrPACQCSampleType.valueOf(
+				sampleElement.getAttributeValue(ExperimentalSampleFields.MoTrPACQCSampleType.name()));
+		
+		designCell = new TreeMap<ExperimentDesignFactor, ExperimentDesignLevel>();
+		List<Element> designCellElements = 
+				sampleElement.getChildren(ExperimentalSampleFields.DesignCell.name());
+		for(Element dcElement : designCellElements) {
+			String factorId = dcElement.getAttributeValue(ExperimentalSampleFields.DCFactorId.name());
+			String levelId = dcElement.getAttributeValue(ExperimentalSampleFields.DCLevelId.name());
+			ExperimentDesignFactor factor = design.getFactorById(factorId);
+			ExperimentDesignLevel level = null;
+			if(factor != null)
+				level = factor.getLevelById(levelId);
+			
+			if(factor != null && level != null)
+				designCell.put(factor, level);
+		}
+		dataFilesMap = new TreeMap<DataAcquisitionMethod, TreeSet<DataFile>>();
+		List<Element> dfMapElements = 
+				sampleElement.getChildren(ExperimentalSampleFields.DataFileMap.name());
+		
+		for(Element dfmElement : dfMapElements) {
+			
+			String daqMethodId = 
+					dfmElement.getAttributeValue(ExperimentalSampleFields.AcqMethodId.name());
+			DataAcquisitionMethod method = 
+					IDTDataCash.getAcquisitionMethodById(daqMethodId);
+			String[] fileNames = dfmElement.getText().split(",");			
+			if(method != null && fileNames.length > 0) {
+				
+				TreeSet<DataFile>methodFiles = new TreeSet<DataFile>();
+				for(String fName : fileNames) {
+					
+					DataFile df = parentProject.getDataFileByName(fName);
+					if(df != null)
+						methodFiles.add(df);
+				}
+				dataFilesMap.put(method, methodFiles);
+			}
+		}
 	}
 }
 

@@ -353,6 +353,12 @@ public class RawDataAnalysisProject extends Project {
 		return msFeatureMap.keySet();
 	}
 	
+	public DataFile getDataFileByName(String name) {
+		return getDataFiles().stream().
+				filter(f -> f.getName().equals(name)).
+				findFirst().orElse(null);
+	}
+	
 	public Collection<ExperimentalSample> getExperimentalSamples() {
 		
 		Collection<ExperimentalSample>samples = new TreeSet<ExperimentalSample>();

@@ -101,7 +101,8 @@ public class SamplePrepEditorPanel extends JPanel
 	private CGrid grid;
 	
 	private ExistingPrepSelectorDialog existingPrepSelectorDialog;
-	protected Set<SamplePrepListener> eventListeners;
+	private Set<SamplePrepListener> eventListeners;
+	private boolean isWizardStep;
 	
 	/**
 	 * This constructor is for the creation of the new sample preparation;
@@ -111,11 +112,13 @@ public class SamplePrepEditorPanel extends JPanel
 		super(new BorderLayout(0, 0));
 		this.experiment = experiment;
 		if(experiment == null) {
-			throw new IllegalArgumentException("Experiment can not be null!");
+			throw new IllegalArgumentException(
+					"Experiment can not be null!");
 		}	
 		this.prep = null;
 		initGui();
 		loadPrepData(prep);
+		isWizardStep = false;
 	}
 	
 	/**
@@ -126,11 +129,13 @@ public class SamplePrepEditorPanel extends JPanel
 		super(new BorderLayout(0, 0));
 		this.prep = prep;
 		if(prep == null) {
-			throw new IllegalArgumentException("SamplePrep can not be null!");
+			throw new IllegalArgumentException(
+					"SamplePrep can not be null!");
 		}
 		this.experiment = IDTDataCash.getExperimentForSamplePrep(prep);
 		if(experiment == null) {
-			throw new IllegalArgumentException("Can not find experiment for selected sample prep!");
+			throw new IllegalArgumentException(
+					"Can not find experiment for selected sample prep!");
 		}	
 		initGui();
 		loadPrepData(prep);
@@ -400,18 +405,33 @@ public class SamplePrepEditorPanel extends JPanel
 
 	private void selectExistingSamplePrep() {
 		
+		if(isWizardStep) {
+			
+			if(experiment == null) {
+				MessageDialog.showErrorMsg(
+						"Please complete the experiment definition step first.", this);
+				return;
+			}
+			if(experiment != null && experiment.getId() != null) {
+				MessageDialog.showErrorMsg(
+						"The parent experiment is already in the database\n "
+						+ "and it's design can't be altered through this wizard.", this);
+				return;
+			}
+		}
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"This operation will automatically load experiment design "
+				+ "associated with the selected sample preparation.\nProceed?",
+				this);
+		if(res != JOptionPane.YES_OPTION)
+			return;
+		
 		existingPrepSelectorDialog = new ExistingPrepSelectorDialog(this);
 		existingPrepSelectorDialog.setLocationRelativeTo(this);
 		existingPrepSelectorDialog.setVisible(true);
 	}
 	
 	private void loadSelectedSamplePrep() {
-
-		int res = MessageDialog.showChoiceWithWarningMsg(
-				"This operation will automatically load experiment design "
-				+ "associated with the selected sample preparation.\nProceed?");
-		if(res != JOptionPane.YES_OPTION)
-			return;
 		
 		LIMSSamplePreparation selectedPrep = 
 				existingPrepSelectorDialog.getSelectedPrep();
@@ -681,5 +701,13 @@ public class SamplePrepEditorPanel extends JPanel
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
+	}
+
+	public boolean isWizardStep() {
+		return isWizardStep;
+	}
+
+	public void setWizardStep(boolean isWizardStep) {
+		this.isWizardStep = isWizardStep;
 	}
 }

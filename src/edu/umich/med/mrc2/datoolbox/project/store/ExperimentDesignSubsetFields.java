@@ -21,23 +21,18 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum ExperimentalSampleFields {
+public enum ExperimentDesignSubsetFields {
 
-	ExperimentalSample,
-	Id,
+	ExperimentDesignSubset,
 	Name,
-	LimsSampleType,
-	Enabled,
-	DesignCell,
-	DesignCellElement,
-	DCFactorId,
-	DCLevelId,
-	DataFileMap,
-	DataFileMapElement,
-	AcqMethodId,
-	BatchNum,
-	LockedReference,
-	MoTrPACQCSampleType,
-	IncloodeInPoolStats,
+	IsActive,
+	Islocked,
+	FactorMap,
+	FactorMapElement,
+	FOrder,
+	Fid,
+	LevelMap,
+	LevelMapElement,
+	FactorKey,
 	;
 }

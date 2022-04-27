@@ -45,6 +45,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorListener;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignListener;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFields;
 
 public class ExperimentDesign implements ExperimentDesignFactorListener, Serializable {
@@ -678,7 +679,9 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		return experimentDesignElement;
 	}
 	
-	public ExperimentDesign(Element experimentDesignElement) {
+	public ExperimentDesign(
+			Element experimentDesignElement, 
+			RawDataAnalysisProject parentProject) {
 		
 		factorSet = new TreeSet<ExperimentDesignFactor>();
 		sampleSet = new TreeSet<ExperimentalSample>();
@@ -706,7 +709,8 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 			
 			for(Element sampleElement : sampleListElements) {
 				
-				ExperimentalSample sample = new ExperimentalSample(sampleElement);
+				ExperimentalSample sample = 
+						new ExperimentalSample(sampleElement, this, parentProject);
 				sampleSet.add(sample);
 			}
 		}
@@ -717,7 +721,8 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 			
 			for(Element subsetElement : subsetListElements) {
 				
-				ExperimentDesignSubset subset = new ExperimentDesignSubset(subsetElement);
+				ExperimentDesignSubset subset = 
+						new ExperimentDesignSubset(subsetElement, this);
 				designSubsets.add(subset);
 			}
 		}

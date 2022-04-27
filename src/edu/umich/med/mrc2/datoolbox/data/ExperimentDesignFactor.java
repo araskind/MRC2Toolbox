@@ -144,6 +144,13 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 			findFirst().orElse(null);
 	}
 
+	public ExperimentDesignLevel getLevelById(String id) {
+
+		return factorLevels.stream().
+			filter(l -> l.getLevelId().equals(id)).
+			findFirst().orElse(null);
+	}
+	
 	public Collection<ExperimentDesignLevel> getLevels() {
 		return factorLevels;
 	}

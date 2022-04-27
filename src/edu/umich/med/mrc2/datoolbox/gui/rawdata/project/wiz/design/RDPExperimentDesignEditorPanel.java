@@ -86,6 +86,11 @@ public class RDPExperimentDesignEditorPanel extends IDTrackerExperimentDesignEdi
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		
+		if(experiment == null) {
+			MessageDialog.showErrorMsg(
+					"Please complete the experiment definition step first.", this);
+			return;
+		}
 		super.actionPerformed(event);
 		
 		String command = event.getActionCommand();

@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -33,11 +34,13 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetListener;
+import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignSubsetFields;
 
 public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset>, Serializable, Renamable {
 
@@ -54,7 +57,8 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 	private ParameterSetStatus status;
 	private Set<ExperimentDesignSubsetListener> eventListeners;
 	private TreeMap<Integer, ExperimentDesignFactor>orderedFactorMap;
-	private TreeMap<ExperimentDesignFactor, TreeMap<Integer, ExperimentDesignLevel>>orderedLevelMap;
+	private TreeMap<ExperimentDesignFactor, 
+	TreeMap<Integer, ExperimentDesignLevel>>orderedLevelMap;
 
 	public ExperimentDesignSubset(String name) {
 
@@ -64,7 +68,8 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		suppressEvents = false;
 		status = ParameterSetStatus.CREATED;
 		orderedFactorMap = new TreeMap<Integer, ExperimentDesignFactor>();
-		orderedLevelMap = new TreeMap<ExperimentDesignFactor, TreeMap<Integer, ExperimentDesignLevel>>();
+		orderedLevelMap = new TreeMap<ExperimentDesignFactor, 
+				TreeMap<Integer, ExperimentDesignLevel>>();
 		eventListeners = ConcurrentHashMap.newKeySet();
 	}
 
@@ -76,7 +81,8 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		for (Entry<ExperimentDesignFactor, ExperimentDesignLevel[]> entry : source.getOrderedDesign().entrySet()) {
 
 			orderedFactorMap.put(fCount, entry.getKey());
-			TreeMap<Integer, ExperimentDesignLevel> orderedLevels = new TreeMap<Integer, ExperimentDesignLevel>();
+			TreeMap<Integer, ExperimentDesignLevel> orderedLevels = 
+					new TreeMap<Integer, ExperimentDesignLevel>();
 			for(int i=0; i<entry.getValue().length; i++)
 				orderedLevels.put(i, entry.getValue()[i]);
 
@@ -355,12 +361,115 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 	}
 	
 	public Element getXmlElement() {
-		//	TODO
-		return null;
+		
+		Element subsetElement = 
+				new Element(ExperimentDesignSubsetFields.ExperimentDesignSubset.name());
+		if(subsetName != null)
+			subsetElement.setAttribute(ExperimentDesignSubsetFields.Name.name(), subsetName);
+		
+		subsetElement.setAttribute(
+				ExperimentDesignSubsetFields.IsActive.name(), Boolean.toString(active));
+		subsetElement.setAttribute(
+				ExperimentDesignSubsetFields.Islocked.name(), Boolean.toString(locked));
+
+		Element factorMapContainerElement = 
+				new Element(ExperimentDesignSubsetFields.FactorMap.name());
+		for(Entry<Integer, ExperimentDesignFactor>fme :  orderedFactorMap.entrySet()) {
+			
+			Element factorMapElement = 
+					new Element(ExperimentDesignSubsetFields.FactorMapElement.name());
+			factorMapElement.setAttribute(
+					ExperimentDesignSubsetFields.FOrder.name(), 
+					Integer.toString(fme.getKey()));
+			factorMapElement.setAttribute(
+					ExperimentDesignSubsetFields.Fid.name(), 
+					fme.getValue().getFactorId());
+			factorMapContainerElement.addContent(factorMapElement);
+		}
+		subsetElement.addContent(factorMapContainerElement);
+		
+		Element levelMapContainerElement = 
+				new Element(ExperimentDesignSubsetFields.LevelMap.name());		
+		for(Entry<ExperimentDesignFactor, TreeMap<Integer, ExperimentDesignLevel>>ole : orderedLevelMap.entrySet()) {
+			
+			Element levelMapElement = 
+					new Element(ExperimentDesignSubsetFields.LevelMapElement.name());
+			levelMapElement.setAttribute(
+					ExperimentDesignSubsetFields.FactorKey.name(), 
+					ole.getKey().getFactorId());
+			ArrayList<String>orderedLevels = new ArrayList<String>();
+			for(Entry<Integer, ExperimentDesignLevel>le : ole.getValue().entrySet())
+				orderedLevels.add(Integer.toString(le.getKey()) + "," + le.getValue().getLevelId());
+			
+			levelMapElement.setText(StringUtils.join(orderedLevels, "|"));
+			levelMapContainerElement.addContent(levelMapElement);
+		}		
+		subsetElement.addContent(levelMapContainerElement);
+		
+		return subsetElement;
 	}
 	
-	public ExperimentDesignSubset(Element EexperimentDesignSubsetElement) {
-		//	TODO
+	public ExperimentDesignSubset(
+			Element designSubsetElement,
+			ExperimentDesign parentDesign) {
+		subsetName = designSubsetElement.getAttributeValue(
+				ExperimentDesignSubsetFields.Name.name());
+		active = Boolean.parseBoolean(designSubsetElement.getAttributeValue(
+				ExperimentDesignSubsetFields.IsActive.name()));
+		locked = Boolean.parseBoolean(designSubsetElement.getAttributeValue(
+				ExperimentDesignSubsetFields.Islocked.name()));
+		
+		status = ParameterSetStatus.CREATED;
+		orderedFactorMap = new TreeMap<Integer, ExperimentDesignFactor>();
+		orderedLevelMap = new TreeMap<ExperimentDesignFactor, 
+				TreeMap<Integer, ExperimentDesignLevel>>();
+		eventListeners = ConcurrentHashMap.newKeySet();
+		
+		List<Element> factorMapElements = 
+				designSubsetElement.getChildren(
+						ExperimentDesignSubsetFields.FactorMap.name());
+			
+		for(Element fmElement : factorMapElements) {
+			
+			Integer fPosition = Integer.parseInt(
+					fmElement.getAttributeValue(ExperimentDesignSubsetFields.FOrder.name()));
+			String fid = 
+					fmElement.getAttributeValue(ExperimentDesignSubsetFields.Fid.name());			
+			if(fid != null) {
+				ExperimentDesignFactor factor = parentDesign.getFactorById(fid);
+				if(factor != null)
+					orderedFactorMap.put(fPosition, factor);
+			}
+		}	
+		List<Element> levelMapElements = 
+				designSubsetElement.getChildren(
+						ExperimentDesignSubsetFields.LevelMap.name());
+			
+		for(Element lmElement : levelMapElements) {
+			
+			String fid = 
+					lmElement.getAttributeValue(ExperimentDesignSubsetFields.FactorKey.name());
+			if(fid != null) {
+				ExperimentDesignFactor factor = parentDesign.getFactorById(fid);
+				if(factor != null) {
+					
+					String[]levelStrings = lmElement.getText().split("|");
+					if(levelStrings.length > 0) {
+						
+						TreeMap<Integer, ExperimentDesignLevel>factorLevelMap = 
+								new TreeMap<Integer, ExperimentDesignLevel>();
+						for(String ls : levelStrings) {
+							String[]parts = ls.split(",");
+							Integer order = Integer.parseInt(parts[0]);
+							ExperimentDesignLevel l = factor.getLevelById(parts[1]);
+							if(l != null)
+								factorLevelMap.put(order, l);
+						}
+						orderedLevelMap.put(factor, factorLevelMap);
+					}
+				}
+			}
+		}
 	}
 }
 
