@@ -409,7 +409,8 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 		if(acquisitionMethodTable.getSelectedRow() == -1)
 			return;
 		
-		TreeSet<String>methodNames = new TreeSet<String>(acquisitionMethodTable.getMethodNames());
+		TreeSet<String>methodNames = 
+				new TreeSet<String>(acquisitionMethodTable.getMethodNames());
 		DataAcquisitionMethod method =
 				(DataAcquisitionMethod)acquisitionMethodTable.getSelectedAnalysisMethod();
 		acquisitionMethodTable.removeSelectedRow();
@@ -417,6 +418,7 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 			dataAcquisitionMethods.remove(method);	
 	}
 	
+	//	TODO may need revision to better handle missing methods
 	private void reloadAcquisitionMethods() {
 		
 		Collection<String> methodNames = dataAcquisitionMethods.stream().map(m -> m.getName()).
@@ -483,6 +485,19 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 
 	public Collection<DataAcquisitionMethod> getDataAcquisitionMethods() {
 		return acquisitionMethodTable.getAvailableDataAcquisitionMethods();
+	}
+
+	public void updateAcqusitionMethodList(Collection<DataAcquisitionMethod> newMethods) {
+
+		Collection<DataAcquisitionMethod> presentMethods = 
+				acquisitionMethodTable.getAvailableDataAcquisitionMethods();
+		Collection<DataAcquisitionMethod>toAdd = newMethods.stream().
+				filter(m -> !presentMethods.contains(m)).
+				collect(Collectors.toList());
+		if(!toAdd.isEmpty()) {
+			dataAcquisitionMethods.addAll(toAdd);
+			reloadAcquisitionMethods();			
+		}
 	}
 }
 

@@ -27,7 +27,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import org.apache.commons.compress.utils.FileNameUtils;
+
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 
 public class Worklist implements Serializable {
 
@@ -86,7 +91,43 @@ public class Worklist implements Serializable {
 				collect(Collectors.toList());
 		items.removeAll(toRemove);
 	}
+	
+	public void updateExistingWorklistItem(WorklistItem newItem) {
+		
+		DataFile df = newItem.getDataFile();
+		if(df == null)
+			return;
+		
+		String fileName = FileNameUtils.getBaseName(df.getName());
+		WorklistItem itemToUpdate = 
+				items.stream().
+				filter(i -> FileNameUtils.getBaseName(i.getDataFile().getName()).equals(fileName)).
+				findFirst().orElse(null);
+		if(itemToUpdate == null)
+			return;
+		
+		itemToUpdate.setTimeStamp(newItem.getTimeStamp());
+		for(Entry<String, String>property : newItem.getProperties().entrySet())
+			itemToUpdate.getProperties().put(property.getKey(), property.getValue());
+		
+		if((newItem instanceof LIMSWorklistItem) 
+				&& (itemToUpdate instanceof LIMSWorklistItem)) {
+			
+			LIMSWorklistItem nlwki = (LIMSWorklistItem)newItem;
+			LIMSWorklistItem tupd = (LIMSWorklistItem)itemToUpdate;
+			tupd.setInjectionVolume(nlwki.getInjectionVolume());
+			tupd.setAcquisitionMethod(nlwki.getAcquisitionMethod());
+			tupd.setSample(nlwki.getSample());
+			tupd.setSamplePrep(nlwki.getSamplePrep());
+			tupd.setPrepItemId(nlwki.getPrepItemId());
+		}
+	}
 }
+
+
+
+
+
 
 
 

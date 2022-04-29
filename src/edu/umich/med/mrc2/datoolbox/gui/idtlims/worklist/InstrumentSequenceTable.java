@@ -24,6 +24,8 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.worklist;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.ListSelectionModel;
@@ -180,6 +182,21 @@ public class InstrumentSequenceTable extends BasicTable {
 			selectedFiles.add((DataFile)model.getValueAt(convertRowIndexToModel(i), fileColumn));
 
 		return selectedFiles;
+	}
+	
+	public Set<DataAcquisitionMethod>getDataAcquisitionMethods(){
+		
+		Set<DataAcquisitionMethod>methods = 
+				new HashSet<DataAcquisitionMethod>();
+		
+		int methodColumn = model.getColumnIndex(
+				InstrumentSequenceTableModel.ACQ_METHOD_COLUMN);
+		for(int i=0; i<model.getRowCount(); i++) {
+			DataAcquisitionMethod method = (DataAcquisitionMethod)model.getValueAt(i, methodColumn);
+			if(method != null)
+				methods.add(method);
+		}	
+		return methods;
 	}
 }
 

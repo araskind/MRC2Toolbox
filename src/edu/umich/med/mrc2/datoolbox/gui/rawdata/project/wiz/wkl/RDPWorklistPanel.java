@@ -77,8 +77,6 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	private File baseDirectory;
 
-	private LIMSSamplePreparation samplePrep;
-	private LIMSExperiment experiment;
 	private Worklist worklist;
 	private boolean appendWorklist;
 
@@ -124,13 +122,13 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 
 		if (command.equals(MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName())) {
 			
-			if (instrumentSequenceTable.getRowCount() > 0) {
-
-				int res = MessageDialog.showChoiceWithWarningMsg(
-						"Data for some files already loaded, do you want to replace it?", this);
-				if(res == JOptionPane.NO_OPTION)
-					return;
-			}
+//			if (instrumentSequenceTable.getRowCount() > 0) {
+//
+//				int res = MessageDialog.showChoiceWithWarningMsg(
+//						"Data for some files already loaded, do you want to replace it?", this);
+//				if(res == JOptionPane.NO_OPTION)
+//					return;
+//			}
 			loadWorklistFromDirectoryScan(false);
 		}
 		if (command.equals(MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName()))
@@ -295,7 +293,8 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 				filter(i -> selectedFiles.contains(i.getDataFile())).
 				forEach(i -> i.setPrepItemId(selectedPrep));
 		}
-		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(worklist, experiment, samplePrep);
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(
+				worklist, experiment, samplePrep);
 		batchSampleAssignmentDialog.dispose();
 	}
 	
@@ -305,7 +304,9 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 		experiment = wizard.getExperiment();
 		samplePrep = wizard.getSamplePrep();
 		if(experiment == null || samplePrep == null) {
-			MessageDialog.showErrorMsg("Experiment and/or sample preparation definitions are not completed.", this);
+			MessageDialog.showErrorMsg(
+					"Experiment and/or sample preparation"
+					+ " definitions are not completed.", this);
 			return;
 		}
 		
@@ -401,7 +402,7 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 	private void loadImportedWorklistForReview(LIMSWorklistImportTask task) {
 
 		if(task.getWorklist() == null) {
-			MessageDialog.showErrorMsg("Error creating worklist,", this);
+			MessageDialog.showErrorMsg("Failed reading worklist from specified directory", this);
 			return;
 		}
 		if(!task.getMissingMethods().isEmpty()) {
@@ -415,20 +416,24 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 			if(MessageDialog.showChoiceWithWarningMsg(message, this) == JOptionPane.NO_OPTION)
 				return;
 		}
-		if(worklist == null || !appendWorklist) 
-			worklist = new Worklist();
+		Collection<LIMSWorklistItem>completeItems = 
+				task.getWorklist().getWorklistItems().stream().
+				filter(LIMSWorklistItem.class::isInstance).
+				map(LIMSWorklistItem.class::cast).
+				filter(i -> i.getAcquisitionMethod() != null).
+				collect(Collectors.toList());
 		
-		Collection<LIMSWorklistItem>completeItems = task.getWorklist().getWorklistItems().stream().
-			filter(LIMSWorklistItem.class::isInstance).
-			map(LIMSWorklistItem.class::cast).
-			filter(i -> i.getAcquisitionMethod() != null).collect(Collectors.toList());
-		
-		if(!completeItems.isEmpty())
-			worklist.getWorklistItems().addAll(completeItems);
-		
+		if(!completeItems.isEmpty()) {
+			
+			for(LIMSWorklistItem newItem : completeItems)
+				worklist.updateExistingWorklistItem(newItem);
+		}	
 		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(
 				worklist, experiment, samplePrep);
-		appendWorklist = false;
+		
+		//	Update wizard Data Acq method panel
+		wizard.updateAcqusitionMethodList(
+				instrumentSequenceTable.getDataAcquisitionMethods());
 	}
 	
 	public void loadWorklistWithoutValidation(
@@ -488,6 +493,11 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 		
 		samplePrep = activeSamplePrep;
 		instrumentSequenceTable.updateColumnEditorsFromSamplesAndPrep(samples, activeSamplePrep);
+	}
+	
+	public void updateColumnEditorsFromSamplesAndPrep() {		
+		instrumentSequenceTable.updateColumnEditorsFromSamplesAndPrep(
+				experiment.getExperimentDesign().getSamples(), samplePrep);
 	}
 	
 	public Collection<String> validateWorklistData() {

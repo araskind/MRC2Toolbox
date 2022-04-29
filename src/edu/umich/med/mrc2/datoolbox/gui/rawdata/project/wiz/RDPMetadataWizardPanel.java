@@ -29,12 +29,19 @@ import java.awt.Insets;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
+
 public class RDPMetadataWizardPanel extends JPanel {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6942217820551753695L;
+	
+	protected LIMSSamplePreparation samplePrep;
+	protected LIMSExperiment experiment;
+	
 	protected RDPMetadataDefinitionStage stage;
 	protected RDPMetadataWizard wizard;
 	protected JButton completeStageButton;
@@ -76,5 +83,21 @@ public class RDPMetadataWizardPanel extends JPanel {
 
 	public RDPMetadataDefinitionStage getStage() {
 		return stage;
+	}
+
+	public LIMSSamplePreparation getSamplePrep() {
+		return samplePrep;
+	}
+
+	public void setSamplePrep(LIMSSamplePreparation samplePrep) {
+		this.samplePrep = samplePrep;
+	}
+
+	public LIMSExperiment getExperiment() {
+		return experiment;
+	}
+
+	public void setExperiment(LIMSExperiment experiment) {
+		this.experiment = experiment;
 	}
 }

@@ -83,7 +83,6 @@ public class RDPMsDataVerifierPanel extends RDPMetadataWizardPanel
 	private RDPMsDataFileImportToolbar toolbar;
 	private ImprovedFileChooser chooser;
 	private FileNameExtensionFilter txtFilter, xmlFilter, mgfFilter;
-	private LIMSExperiment experiment;
 	private Collection<CompoundIdentity>missingIdentities;
 	private DAMethodAssignmentDialog daMethodAssignmentDialog;
 	private boolean dataVerified;

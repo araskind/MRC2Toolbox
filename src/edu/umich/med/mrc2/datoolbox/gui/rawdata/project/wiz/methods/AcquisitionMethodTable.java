@@ -177,6 +177,10 @@ public class AcquisitionMethodTable extends BasicTable {
 		
 		model.removeRow(convertRowIndexToModel(row));
 	}
+
+	public void addMethods(Collection<DataAcquisitionMethod> toAdd) {
+		model.addMethods(toAdd);
+	}
 }
 
 

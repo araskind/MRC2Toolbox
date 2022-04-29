@@ -51,7 +51,11 @@ public class LIMSSamplePreparation implements Serializable, AnnotatedObject, Com
 	private TreeSet<ObjectAnnotation> annotations;
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public LIMSSamplePreparation(String prepId, String name, Date prepDate, LIMSUser creator) {
+	public LIMSSamplePreparation(
+			String prepId, 
+			String name, 
+			Date prepDate, 
+			LIMSUser creator) {
 		super();
 		this.prepId = prepId;
 		this.name = name;
@@ -59,8 +63,10 @@ public class LIMSSamplePreparation implements Serializable, AnnotatedObject, Com
 		this.creator = creator;
 		protocols = new TreeSet<LIMSProtocol>();
 		prepItemMap = new TreeMap<String,String>();		
-		Comparator comparator = new AnalysisMethodComparator(SortProperty.Name);
-		assays = new TreeSet<DataAcquisitionMethod>(comparator);
+		Comparator comparator = 
+				new AnalysisMethodComparator(SortProperty.Name);
+		assays = 
+				new TreeSet<DataAcquisitionMethod>(comparator);
 	}
 	
 	/**

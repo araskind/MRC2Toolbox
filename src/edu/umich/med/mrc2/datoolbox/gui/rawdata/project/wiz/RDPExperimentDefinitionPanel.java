@@ -49,8 +49,16 @@ public class RDPExperimentDefinitionPanel extends RDPMetadataWizardPanel {
 				MainActionCommands.COMPLETE_EXPERIMENT_DEFINITION_COMMAND.getName());
 	}
 
+	@Override
 	public LIMSExperiment getExperiment() {
-		return experimentDefinitionPanel.getExperiment();
+		experiment = experimentDefinitionPanel.getExperiment();
+		return experiment;
+	}
+	
+	@Override
+	public void setExperiment(LIMSExperiment newExperiment) {
+		experiment = newExperiment;
+		experimentDefinitionPanel.loadExperiment(experiment);
 	}
 
 	public LIMSProject getExperimentProject() {
@@ -67,10 +75,6 @@ public class RDPExperimentDefinitionPanel extends RDPMetadataWizardPanel {
 
 	public String getExperimentNotes() {
 		return experimentDefinitionPanel.getExperimentNotes();
-	}
-	
-	public void loadExperiment(LIMSExperiment newExperiment) {
-		experimentDefinitionPanel.loadExperiment(newExperiment);
 	}
 	
 	public Collection<String>validateExperimentDefinition(){

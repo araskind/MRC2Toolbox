@@ -45,20 +45,13 @@ public class RDPExperimentDesignPanel extends RDPMetadataWizardPanel implements 
 		super(wizard);
 		
 		experimentDesignEditorPanel = new RDPExperimentDesignEditorPanel();		
+		experimentDesignEditorPanel.setWizardPanel(true);
 		add(experimentDesignEditorPanel, gbc_panel);		
 		
 		completeStageButton.setText(
 				MainActionCommands.COMPLETE_SAMPLE_LIST_DEFINITION_COMMAND.getName());		
 		completeStageButton.setActionCommand(
 				MainActionCommands.COMPLETE_SAMPLE_LIST_DEFINITION_COMMAND.getName());
-	}
-	
-	public void showExperimentDesign(ExperimentDesign newDesign) {
-		experimentDesignEditorPanel.showExperimentDesign(newDesign);
-	}
-
-	public void reloadDesign() {
-		experimentDesignEditorPanel.reloadDesign();
 	}
 
 	public synchronized void clearPanel() {
@@ -69,12 +62,9 @@ public class RDPExperimentDesignPanel extends RDPMetadataWizardPanel implements 
 		return experimentDesignEditorPanel.getExperimentDesign();
 	}
 	
-	public void loadExperiment(LIMSExperiment experiment) {
+	public void setExperiment(LIMSExperiment experiment2) {
+		experiment = experiment2;
 		experimentDesignEditorPanel.loadExperiment(experiment);
-	}
-
-	public LIMSExperiment getExperiment() {
-		return experimentDesignEditorPanel.getExperiment();
 	}
 
 	public Collection<String> validateExperimentDesign() {

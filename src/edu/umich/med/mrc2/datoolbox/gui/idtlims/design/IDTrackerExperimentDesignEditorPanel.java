@@ -42,6 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignDisplay;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -71,6 +72,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 
 	protected ExpSampleEditorDialog expSampleEditorDialog;
 	protected IndeterminateProgressDialog idp;
+	protected boolean isWizardPanel;
 
 	public IDTrackerExperimentDesignEditorPanel() {
 		this(true);
@@ -138,7 +140,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 		expSampleEditorDialog.setVisible(true);
 	}
 
-	public void saveSampleData() {
+	protected void saveSampleData() {
 		
 		Collection<String>errors = vaidateSampleData();
 		if(!errors.isEmpty()) {
@@ -150,28 +152,43 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 		String sampleName = expSampleEditorDialog.getSampleName();
 		String sampleDescription = expSampleEditorDialog.getSampleDescription();
 
-		//	Add new sample
-		if(sample == null) {
-			sample = new IDTExperimentalSample(null, sampleName, sampleDescription, new Date(), stockSample);
-			try {
-				String sampleId = IDTUtils.addNewIDTSample(sample, experiment);
-				sample.setId(sampleId);
-				if(experiment.getExperimentDesign() == null)
-					experiment.setDesign(new ExperimentDesign());
-				
+		// Add new sample
+		if(isWizardPanel) {
+			//	Add new sample
+			if(sample == null) {
+				String count = Integer.toString(experiment.getExperimentDesign().getSamples().size() + 1);
+				String tmpId = DataPrefix.ID_SAMPLE.getName() + StringUtils.leftPad(count, 4, '0');
+				sample = new IDTExperimentalSample(tmpId, sampleName, sampleDescription, new Date(), stockSample);
 				experiment.getExperimentDesign().addSample(sample);
 			}
-			catch (Exception e) {
-				e.printStackTrace();
+			else {
+				sample.setName(sampleName);
+				sample.setDescription(sampleDescription);
 			}
 		}
 		else {
-			sample.setName(sampleName);
-			sample.setDescription(sampleDescription);
-			try {
-				IDTUtils.updateIDTSample(sample);
-			} catch (Exception e) {
-				e.printStackTrace();
+			if(sample == null) {
+				sample = new IDTExperimentalSample(null, sampleName, sampleDescription, new Date(), stockSample);
+				try {
+					String sampleId = IDTUtils.addNewIDTSample(sample, experiment);
+					sample.setId(sampleId);
+					if(experiment.getExperimentDesign() == null)
+						experiment.setDesign(new ExperimentDesign());
+					
+					experiment.getExperimentDesign().addSample(sample);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				sample.setName(sampleName);
+				sample.setDescription(sampleDescription);
+				try {
+					IDTUtils.updateIDTSample(sample);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		reloadDesign();
@@ -195,11 +212,32 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 	}
 
 	public void deleteSample() {
-
-		Collection<IDTExperimentalSample> selectedSamples = expDesignTable.getSelectedSamples();
+		
+		Collection<IDTExperimentalSample> selectedSamples = 
+				expDesignTable.getSelectedSamples();
 		if(selectedSamples.isEmpty())
 			return;
-
+		
+		if(isWizardPanel) {
+			
+			String yesNoQuestion =
+					"Do you want to delete selected sample(s) from the active experiment?\n" +
+					"All associated information will be lost!";
+				if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this) == JOptionPane.NO_OPTION)
+					return;
+				
+			if(experiment.getExperimentDesign() != null)
+				experiment.getExperimentDesign().removeSamples(selectedSamples);
+			
+			reloadDesign();
+		}
+		else {
+			deleteSampleFromDatabase(selectedSamples);
+		}		
+	}
+	
+	private void deleteSampleFromDatabase(Collection<IDTExperimentalSample> selectedSamples) {
+		
 		if(!IDTUtils.isSuperUser(this))
 			return;
 
@@ -218,7 +256,7 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 		}
 		if(experiment.getExperimentDesign() != null)
 			experiment.getExperimentDesign().removeSamples(selectedSamples);
-
+		
 		reloadDesign();
 	}
 
@@ -325,6 +363,14 @@ public class IDTrackerExperimentDesignEditorPanel extends JPanel
 	 */
 	public LIMSExperiment getExperiment() {
 		return experiment;
+	}
+
+	public boolean isWizardPanel() {
+		return isWizardPanel;
+	}
+
+	public void setWizardPanel(boolean isWizardPanel) {
+		this.isWizardPanel = isWizardPanel;
 	}
 }
 

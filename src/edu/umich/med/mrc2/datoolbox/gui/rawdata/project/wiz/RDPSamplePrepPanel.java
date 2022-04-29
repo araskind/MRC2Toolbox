@@ -54,25 +54,31 @@ public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 				MainActionCommands.COMPLETE_SAMPLE_PREP_DEFINITION_COMMAND.getName());
 	}
 	
-	public void loadExperiment(LIMSExperiment experiment) {
-		samplePrepEditorPanel.setExperiment(experiment);
-		samplePrepEditorPanel.loadPrepData(wizard.getSamplePrep());
+	public void loadPrepDataForExperiment(
+			LIMSSamplePreparation samplePrep2, 
+			LIMSExperiment newExperiment) {
+		
+		samplePrep = samplePrep2;
+		experiment = newExperiment;
+		samplePrepEditorPanel.loadPrepDataForExperiment(samplePrep, experiment);		
 	}
 	
-	public void setExperiment(LIMSExperiment experiment) {
-		samplePrepEditorPanel.setExperiment(experiment);
+	@Override
+	public void setExperiment(LIMSExperiment newExperiment) {
+		experiment = newExperiment;
+		samplePrepEditorPanel.setExperiment(experiment);		
 	}
 	
-	public void loadPrepData(LIMSSamplePreparation samplePrep) {
+	@Override
+	public void setSamplePrep(LIMSSamplePreparation samplePrep2) {
+		this.samplePrep = samplePrep2;
+		samplePrepEditorPanel.setExperiment(experiment);
 		samplePrepEditorPanel.loadPrepData(samplePrep);
 	}
 	
 	public LIMSSamplePreparation getSamplePrep() {
-		return samplePrepEditorPanel.getSamplePrep();
-	}
-	
-	public LIMSExperiment getExperiment() {
-		return samplePrepEditorPanel.getExperiment();
+		samplePrep = samplePrepEditorPanel.getSamplePrep();
+		return samplePrep;
 	}
 	
 	public String getPrepName() {
@@ -97,10 +103,6 @@ public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 
 	public Collection<String> validateSamplePrepDefinition() {
 		return samplePrepEditorPanel.vaidateSamplePrepData();
-	}
-
-	public void loadPrepDataForExperiment(LIMSSamplePreparation samplePrep, LIMSExperiment newExperiment) {
-		samplePrepEditorPanel.loadPrepDataForExperiment(samplePrep, newExperiment);		
 	}
 
 	public SamplePrepEditorPanel getSamplePrepEditorPanel() {

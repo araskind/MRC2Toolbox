@@ -24,15 +24,10 @@ package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
-import java.util.Date;
-
-import javax.swing.JOptionPane;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.design.IDTrackerExperimentDesignEditorPanel;
@@ -53,34 +48,6 @@ public class RDPExperimentDesignEditorPanel extends IDTrackerExperimentDesignEdi
 		super();
 		toolbar = new RDPExperimentDesignEditorToolbar(this);
 		add(toolbar, BorderLayout.NORTH);
-	}
-	
-	@Override
-	public void saveSampleData() {
-		
-		Collection<String>errors = vaidateSampleData();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), expSampleEditorDialog);
-			return;
-		}
-		IDTExperimentalSample sample = expSampleEditorDialog.getSample();
-		StockSample stockSample = expSampleEditorDialog.getStockSample();
-		String sampleName = expSampleEditorDialog.getSampleName();
-		String sampleDescription = expSampleEditorDialog.getSampleDescription();
-		
-		//	Add new sample
-		if(sample == null) {
-			String count = Integer.toString(experiment.getExperimentDesign().getSamples().size() + 1);
-			String tmpId = DataPrefix.ID_SAMPLE.getName() + StringUtils.leftPad(count, 4, '0');
-			sample = new IDTExperimentalSample(tmpId, sampleName, sampleDescription, new Date(), stockSample);
-			experiment.getExperimentDesign().addSample(sample);
-		}
-		else {
-			sample.setName(sampleName);
-			sample.setDescription(sampleDescription);
-		}
-		reloadDesign();
-		expSampleEditorDialog.dispose();
 	}
 	
 	@Override
@@ -129,21 +96,5 @@ public class RDPExperimentDesignEditorPanel extends IDTrackerExperimentDesignEdi
 		stockSampleEditorDialog = new StockSampleEditorDialog(sample, this);
 		stockSampleEditorDialog.setLocationRelativeTo(this);
 		stockSampleEditorDialog.setVisible(true);
-	}
-	
-	@Override
-	public void deleteSample() {
-
-		Collection<IDTExperimentalSample> selectedSamples = expDesignTable.getSelectedSamples();
-		if(selectedSamples.isEmpty())
-			return;
-
-		String yesNoQuestion =
-			"Do you want to delete selected sample(s) from the  experiment?";
-		if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this) == JOptionPane.NO_OPTION)
-			return;
-
-		experiment.getExperimentDesign().removeSamples(selectedSamples);
-		reloadDesign();
 	}
 }

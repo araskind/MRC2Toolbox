@@ -79,6 +79,18 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 			super.addRow(obj);
 		}
 	}
+
+	public void addMethods(Collection<? extends AnalysisMethod>methods) {
+
+		for (AnalysisMethod method : methods) {
+
+			Object[] obj = {
+					method,
+					method.getName(),
+			};
+			super.addRow(obj);
+		}
+	}
 }
 
 

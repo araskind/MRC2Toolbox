@@ -154,8 +154,10 @@ public class LIMSWorklistImportTask extends AbstractTask {
 		total = dataDiles.size();
 		processed = 0;
 		worklist = new Worklist();
-		Collection<DataAcquisitionMethod> methods = IDTDataCash.getAcquisitionMethods();
-		TreeSet<ExperimentalSample> samples = limsExperiment.getExperimentDesign().getSamples();
+		Collection<DataAcquisitionMethod> methods = 
+				IDTDataCash.getAcquisitionMethods();
+		TreeSet<ExperimentalSample> samples = 
+				limsExperiment.getExperimentDesign().getSamples();
 
 		for (File df : dataDiles) {
 
