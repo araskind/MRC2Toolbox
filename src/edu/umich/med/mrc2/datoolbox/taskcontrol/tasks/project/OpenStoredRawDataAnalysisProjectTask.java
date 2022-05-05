@@ -45,6 +45,7 @@ import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
@@ -56,6 +57,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
+import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameters;
@@ -209,7 +211,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		
 		String instrumentId = projectElement.getAttributeValue(ProjectFields.Instrument.name()); 
 		if(instrumentId != null)
-			project.setInstrument(IDTDataCash.getInstrumentById(instrumentId)); 
+			project.setInstrument(IDTDataCash.getInstrumentById(instrumentId));
 		
 		Element msmsParamsElement = 
 				projectElement.getChild(MSMSExtractionParameters.MSMSExtractionParameterSet.name());
@@ -266,7 +268,21 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			for (Element fce : featureCollectionList)
 				project.addMsFeatureInfoBundleCollection(
 						new MsFeatureInfoBundleCollection(fce));
-		}		
+		}
+		Element experimentElement = 
+				projectElement.getChild(LIMSExperimentFields.limsExperiment.name());
+		if(experimentElement != null) {
+			
+			LIMSExperiment experiment = null;
+			try {
+				experiment = new LIMSExperiment(experimentElement, project);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(experiment != null)
+				project.setIdTrackerExperiment(experiment);
+		}
 	}
 	
 	private void populateDatabaseCashData() throws Exception {

@@ -75,6 +75,10 @@ public class RDPExperimentDesignPanel extends RDPMetadataWizardPanel implements 
 		
 		return errors;
 	}
+	
+	public void setDesignEditable(boolean editable) {
+		experimentDesignEditorPanel.setDesignEditable(editable);
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {

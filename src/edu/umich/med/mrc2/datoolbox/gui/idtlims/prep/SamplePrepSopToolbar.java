@@ -60,6 +60,11 @@ public class SamplePrepSopToolbar extends CommonToolbar {
 				MainActionCommands.DELETE_SOP_PROTOCOL_COMMAND.getName(),
 				buttonDimension);
 	}
+	
+	public void setEditable(boolean b) {
+		addProtocolButton.setEnabled(b);
+		deleteProtocolButton.setEnabled(b);
+	}
 
 	@Override
 	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {

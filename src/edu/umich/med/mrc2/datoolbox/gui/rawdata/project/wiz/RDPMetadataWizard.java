@@ -33,9 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -62,20 +60,20 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepListener;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design.RDPExperimentDesignPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods.RDPMethodsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl.RDPWorklistPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
@@ -83,7 +81,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTCefMSMSPrescanOrImportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
 
 public class RDPMetadataWizard extends JDialog 
 			implements ActionListener, TaskListener, SamplePrepListener {
@@ -94,6 +92,7 @@ public class RDPMetadataWizard extends JDialog
 	private static final long serialVersionUID = -3308258276718203363L;
 	private static final Icon newCdpIdExperimentIcon = GuiUtils.getIcon("newIdExperiment", 32);
 	private RawDataExaminerPanel parentPanel;
+	private RawDataAnalysisProject project;
 	private RDPMetadataWizardToolbar toolbar;
 	private JPanel stagePanel;
 	private JButton saveButton;
@@ -106,7 +105,9 @@ public class RDPMetadataWizard extends JDialog
 	private IndeterminateProgressDialog idp;
 	private int processedFiles, fileNumber;
 
-	public RDPMetadataWizard(RawDataExaminerPanel parentPanel) {
+	public RDPMetadataWizard(
+			RawDataExaminerPanel parentPanel,
+			RawDataAnalysisProject project) {
 		
 		super();
 		setIconImage(((ImageIcon) newCdpIdExperimentIcon).getImage());
@@ -116,6 +117,7 @@ public class RDPMetadataWizard extends JDialog
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.parentPanel = parentPanel;
+		this.project = project;
 		
 		toolbar = new RDPMetadataWizardToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
@@ -200,53 +202,95 @@ public class RDPMetadataWizard extends JDialog
 	
 	private void populateWizardByProjectData() {
 
-		RawDataAnalysisProject project = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
-		if(project == null)
-			return;
+		LIMSUser createdBy = project.getCreatedBy();
+		if(createdBy == null)
+			createdBy  = MRC2ToolBoxCore.getIdTrackerUser();
 		
-		//	Experiment details
-		newExperiment = new LIMSExperiment(
-						null, 
-						project.getName(), 
-						project.getDescription(), 
-						null, 
-						null, 
-						project.getDateCreated());
-		newExperiment.setCreator(project.getCreatedBy());
-		
-		RDPExperimentDefinitionPanel experimentDefinitionPanel = 
-				((RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT));
-		experimentDefinitionPanel.setExperiment(newExperiment);	
-		experimentDefinitionPanel.setInstrument(project.getInstrument());
-	
-		//	Raw data files
-		Collection<DataFile> dataFileList = project.getDataFiles();
-		if(dataFileList != null && !dataFileList.isEmpty()) {
+		if(project.getIdTrackerExperiment() == null) {
 			
-			RDPWorklistPanel wklPanel = 
-					((RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS));
-			Worklist worklist = generateWorklistFromDataFiles(dataFileList);
-			wklPanel.loadWorklistWithoutValidation(worklist, null, null);
+			newExperiment = new LIMSExperiment(
+							null, 
+							project.getName(), 
+							project.getDescription(), 
+							null, 
+							null, 
+							project.getDateCreated());
+			
+			newExperiment.setCreator(createdBy);
+			newExperiment.setDesign(new ExperimentDesign());
 		}	
+		else {
+			newExperiment = new LIMSExperiment(project.getIdTrackerExperiment());
+			if(newExperiment.getCreator() == null)
+				newExperiment.setCreator(createdBy);
+		}
+		populateExperimentDefinitionPanel();
+		populateSampleAndPrepPanels();
+		populateMethodsPanel();
+		populateWorklistPanel();	
 	}
 
-	//	TODO handle the case, when data already present
-	private Worklist generateWorklistFromDataFiles(Collection<DataFile> dataFileList) {
+	private void populateExperimentDefinitionPanel() {
 		
-		Worklist worklist = new Worklist();
-		for(DataFile df : dataFileList) {
-			LIMSWorklistItem wklItem = new LIMSWorklistItem(
-				df,
-				null,
-				null,
-				null,
-				null,
-				df.getInjectionTime(),
-				0.0d);
-			worklist.addItem(wklItem);
+		RDPExperimentDefinitionPanel experimentDefinitionPanel = 
+				(RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
+		experimentDefinitionPanel.setExperiment(newExperiment);	
+		experimentDefinitionPanel.setInstrument(project.getInstrument());
+	}
+	
+	private void populateSampleAndPrepPanels() {
+		
+		RDPExperimentDesignPanel designPanel = 
+				(RDPExperimentDesignPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
+		designPanel.setExperiment(newExperiment);
+	
+		if(newExperiment.getSamplePreps().isEmpty())
+			return;
+		
+		LIMSSamplePreparation prep = 
+				newExperiment.getSamplePreps().iterator().next();		
+		RDPSamplePrepPanel prepPanel = 
+				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+		prepPanel.loadPrepDataForExperiment(prep, newExperiment);
+		
+		if(prep.getId() != null) {
+			LIMSSamplePreparation existingPrep = 
+					IDTDataCash.getSamplePrepById(prep.getId());
+			if(existingPrep != null){
+				designPanel.setDesignEditable(false);
+				prepPanel.setPrepEditable(false);
+			}
 		}
-		return worklist;
+	}
+		
+	private void populateMethodsPanel() {
+		
+		Collection<DataAcquisitionMethod> acqMethods = project.getDataAcquisitionMethods();
+		if(acqMethods == null || acqMethods.isEmpty())
+			return;
+		
+		RDPMethodsPanel methodPanel = 
+				(RDPMethodsPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
+		
+		methodPanel.updateAcqusitionMethodList(acqMethods);
+	}
+	
+	private void populateWorklistPanel() {
+		
+		//	Raw data files
+		Collection<DataFile> dataFileList = project.getDataFiles();
+		if(dataFileList == null || dataFileList.isEmpty())
+			return;
+		
+		LIMSSamplePreparation prep = null;
+		if(!newExperiment.getSamplePreps().isEmpty())
+			prep = newExperiment.getSamplePreps().iterator().next();
+		
+		Worklist worklist = project.getWorklist();
+		RDPWorklistPanel wklPanel = 
+				((RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS));
+		
+		wklPanel.loadWorklistWithoutValidation(worklist, newExperiment, prep);	
 	}
 		
 	private void initWizardPanels() {
@@ -331,20 +375,11 @@ public class RDPMetadataWizard extends JDialog
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return false;
 		}
-		if(newExperiment == null) {
-			
-			newExperiment = new LIMSExperiment(
-					experimentPanel.getExperimentName(),
-					experimentPanel.getExperimentDescription(), 
-					experimentPanel.getExperimentNotes(),
-					experimentPanel.getExperimentProject());
-			newExperiment.setDesign(new ExperimentDesign());
-			newExperiment.setCreator(MRC2ToolBoxCore.getIdTrackerUser());
-		}
-		else {
-			newExperiment.setName(experimentPanel.getExperimentName());
-			newExperiment.setDescription(experimentPanel.getExperimentDescription());
-		}		
+		newExperiment.setName(experimentPanel.getExperimentName());
+		newExperiment.setDescription(experimentPanel.getExperimentDescription());
+		newExperiment.setNotes(experimentPanel.getExperimentNotes());
+		newExperiment.setProject(experimentPanel.getExperimentProject());
+				
 		for(RDPMetadataDefinitionStage panelType : RDPMetadataDefinitionStage.values()) {
 			panels.get(panelType).setExperiment(newExperiment);
 			panels.get(panelType).setSamplePrep(getSamplePrep());
@@ -376,9 +411,11 @@ public class RDPMetadataWizard extends JDialog
 
 	private boolean completeSamplePrepDefinitionStage() {
 		
-		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLES) )
-			return false;
+		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLES)) {
 
+			if(!completeSampleListDefinitionStage())
+				return false;
+		}
 		RDPSamplePrepPanel prepPanel = 
 				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
 		Collection<String>errors = prepPanel.validateSamplePrepDefinition();
@@ -387,6 +424,8 @@ public class RDPMetadataWizard extends JDialog
 			return false;
 		}
 		LIMSSamplePreparation samplePrep = getSamplePrep();
+		
+		//	New sample prep
 		if(samplePrep == null) {
 			
 			samplePrep = new LIMSSamplePreparation(
@@ -394,33 +433,48 @@ public class RDPMetadataWizard extends JDialog
 					prepPanel.getPrepName(), 
 					prepPanel.getPrepDate(), 
 					prepPanel.getPrepUser());
-			samplePrep.setId(StringUtils.rightPad(DataPrefix.SAMPLE_PREPARATION.getName(), 7, 'X'));		
+			samplePrep.setId(DataPrefix.SAMPLE_PREPARATION.getName() + 
+					UUID.randomUUID().toString().substring(0, 7));		
 			
 			for(LIMSProtocol sop : prepPanel.getPrepSops())
 				samplePrep.addProtocol(sop);
 			
 			for(ObjectAnnotation annotation : prepPanel.getPrepAnnotations())
 				samplePrep.addAnnotation(annotation);
+			
+			int count = 1;
+			for(ExperimentalSample sample : newExperiment.getExperimentDesign().getSamples()) {
+				samplePrep.addPrepItem(sample.getId(), DataPrefix.PREPARED_SAMPLE.getName() 
+						+ StringUtils.leftPad(Integer.toString(count), 7, '0'));
+				count++;
+			}
 		}
 		else {
-			samplePrep.setName(prepPanel.getPrepName());
-			samplePrep.setPrepDate(prepPanel.getPrepDate());
-			samplePrep.setCreator(prepPanel.getPrepUser());
-			
-			samplePrep.getProtocols().clear();
-			for(LIMSProtocol sop : prepPanel.getPrepSops())
-				samplePrep.addProtocol(sop);
-			
-			samplePrep.getAnnotations().clear();
-			for(ObjectAnnotation annotation : prepPanel.getPrepAnnotations())
-				samplePrep.addAnnotation(annotation);
-		}
-		samplePrep.getPrepItemMap().clear();
-		int count = 1;
-		for(ExperimentalSample sample : newExperiment.getExperimentDesign().getSamples()) {
-			samplePrep.addPrepItem(sample.getId(), DataPrefix.PREPARED_SAMPLE.getName() 
-					+ StringUtils.leftPad(Integer.toString(count), 7, '0'));
-			count++;
+			//	Sample prep not in database
+			if(samplePrep.getId() != null 
+					&& IDTDataCash.getSamplePrepById(samplePrep.getId()) == null) {
+				
+				samplePrep.setName(prepPanel.getPrepName());
+				samplePrep.setPrepDate(prepPanel.getPrepDate());
+				samplePrep.setCreator(prepPanel.getPrepUser());
+				
+				samplePrep.getProtocols().clear();
+				for(LIMSProtocol sop : prepPanel.getPrepSops())
+					samplePrep.addProtocol(sop);
+				
+				samplePrep.getAnnotations().clear();
+				for(ObjectAnnotation annotation : prepPanel.getPrepAnnotations())
+					samplePrep.addAnnotation(annotation);
+				
+				samplePrep.getPrepItemMap().clear();
+				int count = 1;
+				for(ExperimentalSample sample : newExperiment.getExperimentDesign().getSamples()) {
+					samplePrep.addPrepItem(sample.getId(), DataPrefix.PREPARED_SAMPLE.getName() 
+							+ StringUtils.leftPad(Integer.toString(count), 7, '0'));
+					count++;
+				}
+			}
+
 		}
 		prepPanel.loadPrepDataForExperiment(samplePrep, newExperiment);							
 		RDPWorklistPanel worklistPanel = 
@@ -451,7 +505,12 @@ public class RDPMetadataWizard extends JDialog
 	}
 
 	private boolean completeWorklistVerificationStage() {
-
+		
+		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS)) {
+			
+			if(!completeAnalysisMethodsDefinitionStage())
+				return false;
+		}
 		Collection<String>errors = ((RDPWorklistPanel)panels.get(
 				RDPMetadataDefinitionStage.ADD_WORKLISTS)).validateWorklistData();
 		if(!errors.isEmpty()) {
@@ -469,9 +528,9 @@ public class RDPMetadataWizard extends JDialog
 	
 	public LIMSSamplePreparation getSamplePrep() {
 		
-		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLES)
-				||	!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA))
-			return null;
+//		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLES)
+//				||	!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA))
+//			return null;
 		
 		return ((RDPSamplePrepPanel)
 				panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)).getSamplePrep();
@@ -531,166 +590,31 @@ public class RDPMetadataWizard extends JDialog
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return;
 		}
-		ExperimentUploadTask task = new ExperimentUploadTask();
-		idp = new IndeterminateProgressDialog("Uploading experiment data ...", this, task);
-		idp.setLocationRelativeTo(this.getContentPane());
-		idp.setVisible(true);
+		//	Experiment
+		project.setIdTrackerExperiment(newExperiment);
+		RDPExperimentDefinitionPanel experimentPanel = 
+				(RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
+		project.setInstrument(experimentPanel.getInstrument());
 		
-		// Initiate MSMS data upload
-	}
-	
-	class ExperimentUploadTask extends LongUpdateTask {
-		/*
-		 * Main task. Executed in background thread.
-		 */
-		public ExperimentUploadTask() {
-			super();
-		}
-
-		@Override
-		public Void doInBackground() {
-
-			saveExperiment();
-			saveSampleData();
-			saveSamplePrepData();
-			sendWorklistToDatabase();		
-			return null;
-		}
+		//	Sample prep
+		RDPSamplePrepPanel prepPanel = 
+				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+		//	TODO this will need a different handling if multiple preps are present
+		newExperiment.getSamplePreps().clear();
+		newExperiment.getSamplePreps().add(prepPanel.getSamplePrep());
 		
-	    @Override
-	    public void done() {
-	    	idp.dispose();
-			initMSMSdataLoad();
-	    }
-	}
-	
-	private void saveExperiment() {
-
-		try {
-			//	TODO
-//			String experimentId = IDTUtils.addNewExperiment(newExperiment);
-//			newExperiment.setId(experimentId);
-//			WizardExperimentDefinitionPanel experimentPanel = 
-//					(WizardExperimentDefinitionPanel)panels.get(RawDataProjectMetadataDefinitionStage.CREATE_EXPERIMENT);
-//			
-//			experimentPanel.getExperimentProject().getExperiments().add(newExperiment);
-//			IDTDataCash.getExperiments().add(newExperiment);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	protected void saveSampleData() {
+		//	Worklist/injections
+		RDPWorklistPanel worklistPanel = 
+				(RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS);
+		Worklist worklist = worklistPanel.getWorklist();
+		project.updateMetadataFromWorklist(worklist);
 		
-		Collection<IDTExperimentalSample>samples = 
-				newExperiment.getExperimentDesign().getSamples().stream().
-				filter(IDTExperimentalSample.class::isInstance).
-				map(IDTExperimentalSample.class::cast).
-				collect(Collectors.toList());
-				
-		for(IDTExperimentalSample sample : samples) {			
-			try {
-				String sampleId = IDTUtils.addNewIDTSample(sample, newExperiment);
-				sample.setId(sampleId);
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	private void saveSamplePrepData() {
-		
-		LIMSSamplePreparation prep2save = getSamplePrep();
-		Map<LIMSExperiment, Collection<LIMSSamplePreparation>> espMap = 
-				IDTDataCash.getExperimentSamplePrepMap();	
-		Collection<IDTExperimentalSample>samples = 
-				newExperiment.getExperimentDesign().getSamples().stream().
-				filter(IDTExperimentalSample.class::isInstance).
-				map(IDTExperimentalSample.class::cast).
-				collect(Collectors.toList());
-		try {
-			IDTUtils.addNewSamplePrepWithSopsAndAnnotations(prep2save, samples);
-			IDTDataCash.getSamplePreps().add(prep2save);
-			IDTDataCash.getExperimentSamplePrepMap().put(newExperiment, new TreeSet<LIMSSamplePreparation>());
-			IDTDataCash.getExperimentSamplePrepMap().get(newExperiment).add(prep2save);
-			RDPSamplePrepPanel prepPanel = 
-					(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
-			prepPanel.loadPrepDataForExperiment(prep2save, newExperiment);
-		} 
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void sendWorklistToDatabase() {
-
-		Worklist newWorklist = getWorklist();
-		Map<String, String> prepItemMap = getSamplePrep().getPrepItemMap();		
-		newWorklist.getWorklistItems().stream().
-			filter(LIMSWorklistItem.class::isInstance).
-			map(LIMSWorklistItem.class::cast).
-			forEach(i -> i.setPrepItemId(prepItemMap.get(i.getSample().getId())));	
-		try {
-			IDTUtils.uploadInjectionData(newWorklist);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		IDTDataCash.refreshSamplePrepDataPipelineMap();
-	}
-	
-	private void initMSMSdataLoad() {
-		// TODO
-		
-//		Map<DataFile,DataExtractionMethod>fileDaMethodMap = getFileDaMethodMap();
-//			
-//		Collection<LIMSWorklistItem>wlItems = getWorklist().getWorklistItems().stream().
-//			filter(LIMSWorklistItem.class::isInstance).
-//			map(LIMSWorklistItem.class::cast).collect(Collectors.toList());
-//			
-//		fileNumber = fileDaMethodMap.size();
-//		processedFiles = 0;
-//		for (Entry<DataFile, DataExtractionMethod> entry : fileDaMethodMap.entrySet()) {
-//			
-//			String baseName = FilenameUtils.getBaseName(entry.getKey().getName());
-//			LIMSWorklistItem rawFileItem = wlItems.stream().
-//					filter(i -> FilenameUtils.getBaseName(i.getDataFile().getName()).equals(baseName)).
-//					findFirst().orElse(null);
-//			if(rawFileItem == null || rawFileItem.getDataFile().getInjectionId() == null) {
-//				System.out.println("ERROR! - No injection for " + entry.getKey().getName());
-//			}
-//			else {
-//				entry.getKey().setInjectionId(rawFileItem.getDataFile().getInjectionId());
-////				IDTCefImportTask task = new IDTCefImportTask(entry.getKey(), entry.getValue());
-////				task.addTaskListener(this);
-////				MRC2ToolBoxCore.getTaskController().addTask(task);
-//				
-//				IDTCefMSMSPrescanOrImportTask task = 
-//						new IDTCefMSMSPrescanOrImportTask(entry.getKey(), entry.getValue(), true);
-//				task.addTaskListener(this);
-//				MRC2ToolBoxCore.getTaskController().addTask(task);
-//			}
-//		}
-	}
-	
-	@Override
-	public void statusChanged(TaskEvent e) {
-
-		if (e.getStatus() == TaskStatus.FINISHED) {
-
-			((AbstractTask)e.getSource()).removeTaskListener(this);
-			if (e.getSource().getClass().equals(IDTCefMSMSPrescanOrImportTask.class)) 
-				processedFiles++;
-			
-			if(processedFiles == fileNumber) {
-
-				MessageDialog.showInfoMsg("Data import for experiment \"" + 
-						newExperiment.getName() + "\" completed.", this);
-				dispose();
-			}
-		}
-	}
+		SaveStoredRawDataAnalysisProjectTask task = 
+				new SaveStoredRawDataAnalysisProjectTask(
+						MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+	}	
 
 	/**
 	 *
@@ -700,40 +624,63 @@ public class RDPMetadataWizard extends JDialog
 		
 		if(newExperiment == null)
 			return;
-
+		
+		LIMSSamplePreparation prep = (LIMSSamplePreparation)e.getSource();
+		RDPSamplePrepPanel prepPanel = 
+				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+		RDPExperimentDesignPanel designPanel = 
+				(RDPExperimentDesignPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
+		
+		Collection<IDTExperimentalSample>samples = new ArrayList<IDTExperimentalSample>();		
+		try {
+			samples = IDTUtils.getSamplesForPrep(prep);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}				
 		if(e.getStatus().equals(ParameterSetStatus.REMOVED)) {
 			
-			newExperiment.getExperimentDesign().getSamples().clear();
+			//	If samples were inferred from existing sample prep, 
+			//	remove them when removing the prep
+			if(!samples.isEmpty())
+				newExperiment.getExperimentDesign().removeSamples(samples);
+			
+			newExperiment.getSamplePreps().remove(prep);
 			for(RDPMetadataDefinitionStage panelType : RDPMetadataDefinitionStage.values()) {
-				panels.get(panelType).setExperiment(newExperiment);
-				panels.get(panelType).setSamplePrep(null);
+				
+				if(!panelType.equals(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)) {
+					
+					panels.get(panelType).setExperiment(newExperiment);
+					panels.get(panelType).setSamplePrep(null);
+				}
 			}
-//			designPanel.clearPanel();
-//			worklistPanel.updateColumnEditorsFromSamplesAndPrep(null, null);
-//			worklistPanel.setSamplePrep(null);
+			prepPanel.setPrepEditable(true);
+			designPanel.setDesignEditable(true);
 		}
 		if(e.getStatus().equals(ParameterSetStatus.ADDED)) {
 			
-			Collection<IDTExperimentalSample>samples = new ArrayList<IDTExperimentalSample>();
-			LIMSSamplePreparation prep = (LIMSSamplePreparation)e.getSource();
-			try {
-				samples = IDTUtils.getSamplesForPrep(prep);
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-//			ExperimentDesign newDesign = new ExperimentDesign();
-//			newDesign.addSamples(samples);
-			newExperiment.getExperimentDesign().getSamples().clear();
-			newExperiment.getExperimentDesign().addSamples(samples);
+			if(!samples.isEmpty()) {
+				newExperiment.getExperimentDesign().getSamples().clear();
+				newExperiment.getExperimentDesign().addSamples(samples);
+			}			
+			//	TODO this will need a different handling if multiple preps are present
+			newExperiment.getSamplePreps().clear();
+			newExperiment.getSamplePreps().add(prep);
 			for(RDPMetadataDefinitionStage panelType : RDPMetadataDefinitionStage.values()) {
-				panels.get(panelType).setExperiment(newExperiment);
-				panels.get(panelType).setSamplePrep(null);
+				
+				if(!panelType.equals(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)) {
+					
+					panels.get(panelType).setExperiment(newExperiment);
+					panels.get(panelType).setSamplePrep(prep);
+				}
 			}
-//			designPanel.clearPanel();
-//			designPanel.setExperiment(newExperiment);	
-//			worklistPanel.updateColumnEditorsFromSamplesAndPrep(samples, prep);
-//			worklistPanel.setSamplePrep(prep);
+			if(prep.getId() != null) {
+				LIMSSamplePreparation existingPrep = IDTDataCash.getSamplePrepById(prep.getId());
+				if(existingPrep != null) {
+					prepPanel.setPrepEditable(false);
+					designPanel.setDesignEditable(false);
+				}
+			}
 		}
 		RDPWorklistPanel worklistPanel = 
 				(RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS);
@@ -746,6 +693,18 @@ public class RDPMetadataWizard extends JDialog
 		RDPMethodsPanel methodsPanel = 
 				(RDPMethodsPanel)panels.get(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
 		methodsPanel.updateAcqusitionMethodList(dataAcquisitionMethods);
+	}
+
+	@Override
+	public void statusChanged(TaskEvent e) {
+
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+			MainWindow.hideProgressDialog();
+			dispose();
+		}
 	}
 }
 

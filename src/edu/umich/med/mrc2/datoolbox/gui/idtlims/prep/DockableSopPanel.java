@@ -72,4 +72,8 @@ public class DockableSopPanel extends DefaultSingleCDockable {
 	public synchronized void clearPanel() {
 		sopTable.clearTable();
 	}
+
+	public void setEditable(boolean b) {
+		toolbar.setEditable(b);
+	}
 }

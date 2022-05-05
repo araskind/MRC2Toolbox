@@ -336,7 +336,9 @@ public class SamplePrepEditorPanel extends JPanel
 		}
 	}
 	
-	public void loadPrepDataForExperiment(LIMSSamplePreparation samplePrep, LIMSExperiment prepExperiment) {
+	public void loadPrepDataForExperiment(
+			LIMSSamplePreparation samplePrep, 
+			LIMSExperiment prepExperiment) {
 		
 		this.prep = samplePrep;
 		this.experiment = prepExperiment;
@@ -358,10 +360,6 @@ public class SamplePrepEditorPanel extends JPanel
 		}
 		sopPanel.setTableModelFromProtocols(prep.getProtocols());
 		documentsPanel.setModelFromAnnotations(prep.getAnnotations());
-	}
-	
-	public void lockPrepEditing() {
-		//	TODO
 	}
 
 	@Override
@@ -451,11 +449,22 @@ public class SamplePrepEditorPanel extends JPanel
 					+ "associated with the sample preparation.", this);
 			if(res != JOptionPane.YES_OPTION)
 				return;
-			else
+			else {
+				clearGui();
 				fireSamplePrepEvent(prep, ParameterSetStatus.REMOVED);
+				prep = null;
+			}
+		}
+		else {
+			clearGui();
 		}	
-		this.prep = null;
-		this.experiment = null;
+		//	fireSamplePrepEvent(prep, ParameterSetStatus.REMOVED);
+		//	this.prep = null;
+		//	this.experiment = null;
+	}
+	
+	private void clearGui() {
+		
 		prepSampleTable.clearTable();;
 		idValueLabel.setText("");
 		nameTextField.setText("");
@@ -709,5 +718,14 @@ public class SamplePrepEditorPanel extends JPanel
 
 	public void setWizardStep(boolean isWizardStep) {
 		this.isWizardStep = isWizardStep;
+	}
+	
+	public void setPrepEditable(boolean b) {
+
+		sopPanel.setEditable(b);
+		documentsPanel.setEditable(b);		
+		nameTextField.setEditable(b);
+		btnSelectUser.setEnabled(b);
+		datePicker.setEnabled(b);
 	}
 }

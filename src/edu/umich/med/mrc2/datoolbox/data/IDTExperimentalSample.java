@@ -22,7 +22,15 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Date;
+
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.store.IDTExperimentalSampleFields;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class IDTExperimentalSample extends ExperimentalSample implements Serializable {
 
@@ -88,5 +96,59 @@ public class IDTExperimentalSample extends ExperimentalSample implements Seriali
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
+	@Override
+	public Element getXmlElement() {
+		
+		Element sampleElement = super.getXmlElement();		
+		if(parentStockSample != null)
+			sampleElement.setAttribute(
+					IDTExperimentalSampleFields.StockSampleId.name(), 
+					parentStockSample.getSampleId());
+		
+		Element descriptionElement = 
+				new Element(IDTExperimentalSampleFields.Description.name());
+		if(description != null)
+			descriptionElement.setText(description);
+		
+		sampleElement.addContent(descriptionElement);
+		
+		if(dateCreated == null)
+			dateCreated = new Date();
+		
+		sampleElement.setAttribute(IDTExperimentalSampleFields.DateCreated.name(), 
+				ProjectUtils.dateTimeFormat.format(dateCreated));
+		
+		return sampleElement;
+	}
 
+	public IDTExperimentalSample(			
+			Element sampleElement, 
+			ExperimentDesign design,
+			RawDataAnalysisProject parentProject) {
+		super(sampleElement, design, parentProject);
+		
+		String stockSampleId = sampleElement.getAttributeValue(
+				IDTExperimentalSampleFields.StockSampleId.name());
+		if(stockSampleId != null)
+			parentStockSample = IDTDataCash.getStockSampleById(stockSampleId);
+
+		Element descriptionElement =
+				sampleElement.getChild(IDTExperimentalSampleFields.Description.name());
+		if(descriptionElement != null && !descriptionElement.getText().isEmpty())
+			description = descriptionElement.getText();
+		
+		dateCreated = new Date();
+		String startDateString = 
+				sampleElement.getAttributeValue(IDTExperimentalSampleFields.DateCreated.name());
+		if(startDateString != null) {
+			try {
+				dateCreated = ProjectUtils.dateTimeFormat.parse(startDateString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		}
+	}
+			
 }

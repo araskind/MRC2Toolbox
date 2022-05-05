@@ -66,6 +66,10 @@ public class DockableDocumentsPanel extends DefaultSingleCDockable {
 	public synchronized void clearPanel() {
 		docsTable.clearTable();
 	}
+
+	public void setEditable(boolean b) {
+		toolbar.setEditable(b);
+	}
 }
 
 

@@ -73,6 +73,19 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 		batchNumber = 1;
 		incloodeInPoolStats = false;
 	}
+	
+	public ExperimentalSample(ExperimentalSample sample) {
+		
+		id = sample.getId();
+		name = sample.getName();
+		designCell = new TreeMap<ExperimentDesignFactor, ExperimentDesignLevel>();
+		designCell.putAll(sample.getDesignCell());
+		dataFilesMap = new TreeMap<DataAcquisitionMethod, TreeSet<DataFile>>();
+		dataFilesMap.putAll(sample.getDataFilesMap());
+		enabled = sample.isEnabled();
+		batchNumber = sample.getBatchNumber();
+		incloodeInPoolStats = sample.isIncloodeInPoolStats();
+	}
 
 	public void addDataFile(DataFile newDataFile) {
 

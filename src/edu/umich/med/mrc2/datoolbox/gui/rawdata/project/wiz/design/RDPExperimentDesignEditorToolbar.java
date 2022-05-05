@@ -76,6 +76,14 @@ public class RDPExperimentDesignEditorToolbar  extends CommonToolbar {
 				MainActionCommands.ADD_REFERENCE_SAMPLE_DIALOG_COMMAND.getName(),
 				MainActionCommands.ADD_REFERENCE_SAMPLE_DIALOG_COMMAND.getName(), buttonDimension);
 	}
+	
+	public void setDesignEditable(boolean editable) {
+		
+		addSampleButton.setEnabled(editable);
+		deleteSampleButton.setEnabled(editable);
+		editSampleButton.setEnabled(editable);
+		addRefSampleButton.setEnabled(editable);
+	}
 
 	@Override
 	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {

@@ -273,6 +273,14 @@ public class MsFeatureIdentity implements Serializable {
 
 		return 0.0d;
 	}
+	
+	public double getEntropyBasedScore() {
+
+		if(referenceMsMsLibraryMatch != null)
+			return referenceMsMsLibraryMatch.getEntropyBasedScore();
+
+		return 0.0d;
+	}
 
 	/**
 	 * @return the assignedOn

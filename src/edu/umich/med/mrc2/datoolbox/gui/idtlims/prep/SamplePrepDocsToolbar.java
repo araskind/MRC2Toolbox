@@ -42,7 +42,6 @@ public class SamplePrepDocsToolbar extends CommonToolbar {
 	private static final Icon addDocumentIcon = GuiUtils.getIcon("addCollection", 32);
 	private static final Icon deleteDocumentIcon = GuiUtils.getIcon("deleteCollection", 32);
 
-	@SuppressWarnings("unused")
 	private JButton
 		addDocumentButton,
 		deleteDocumentButton;
@@ -60,6 +59,12 @@ public class SamplePrepDocsToolbar extends CommonToolbar {
 				MainActionCommands.DELETE_DOCUMENT_COMMAND.getName(),
 				MainActionCommands.DELETE_DOCUMENT_COMMAND.getName(),
 				buttonDimension);
+	}
+	
+	public void setEditable(boolean b) {
+
+		addDocumentButton.setEnabled(b);
+		deleteDocumentButton.setEnabled(b);
 	}
 
 	@Override

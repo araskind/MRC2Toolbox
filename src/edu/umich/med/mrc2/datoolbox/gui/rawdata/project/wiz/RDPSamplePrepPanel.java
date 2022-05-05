@@ -108,4 +108,8 @@ public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 	public SamplePrepEditorPanel getSamplePrepEditorPanel() {
 		return samplePrepEditorPanel;
 	}
+
+	public void setPrepEditable(boolean b) {
+		samplePrepEditorPanel.setPrepEditable(b);
+	}
 }

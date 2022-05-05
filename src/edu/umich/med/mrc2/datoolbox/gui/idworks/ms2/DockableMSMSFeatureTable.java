@@ -66,11 +66,11 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 		DefaultDockActionSource actions = new DefaultDockActionSource(
 				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
 
-		findMSMSFeaturesButton = GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND.getName(),
-				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND.getName(), 
-				findMSMSFeaturesIcon, l);	
-		actions.add(findMSMSFeaturesButton);
+//		findMSMSFeaturesButton = GuiUtils.setupButtonAction(
+//				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND.getName(),
+//				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND.getName(), 
+//				findMSMSFeaturesIcon, l);	
+//		actions.add(findMSMSFeaturesButton);
 		
 		filterFeaturesButton = GuiUtils.setupButtonAction(
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(),

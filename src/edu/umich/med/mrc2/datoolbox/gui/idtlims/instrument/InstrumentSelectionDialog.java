@@ -61,8 +61,8 @@ public class InstrumentSelectionDialog extends JDialog {
 		super();
 		setTitle("Select instrument");
 		setIconImage(((ImageIcon) instrumentIcon).getImage());
-		setPreferredSize(new Dimension(800, 250));
-		setSize(new Dimension(800, 250));
+		setPreferredSize(new Dimension(800, 400));
+		setSize(new Dimension(800, 400));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);

@@ -36,12 +36,15 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.compress.utils.FileNameUtils;
+
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -49,9 +52,12 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
@@ -67,7 +73,6 @@ public class RawDataAnalysisProject extends Project {
 	protected Set<MsFeatureInfoBundleCollection>featureCollections;
 	protected MSMSExtractionParameterSet msmsExtractionParameterSet;
 	protected Set<Injection>injections;
-	protected ExperimentDesign experimentDesign;
 	protected LIMSUser createdBy;
 	protected LIMSExperiment idTrackerExperiment;
 	
@@ -80,7 +85,6 @@ public class RawDataAnalysisProject extends Project {
 
 		super(projectName, projectDescription, parentDirectory);
 		initNewProject(parentDirectory);
-		experimentDesign = new ExperimentDesign();
 		this.createdBy = createdBy;
 		initFields();
 	}
@@ -96,7 +100,6 @@ public class RawDataAnalysisProject extends Project {
 		this.msOneDataFiles = new TreeSet<DataFile>();
 		this.msmsDataFiles.addAll(activeProject.getMSOneDataFiles());
 		this.createdBy = activeProject.getCreatedBy();
-		experimentDesign = activeProject.getExperimentDesign();
 		initFields();
 	}
 	
@@ -169,6 +172,14 @@ public class RawDataAnalysisProject extends Project {
 
 	private void initFields() {
 		
+		idTrackerExperiment = new LIMSExperiment(
+				null, 
+				name, 
+				description, 
+				null, 
+				null, 
+				dateCreated);
+		idTrackerExperiment.setCreator(createdBy);		
 		msmsDataFiles = new TreeSet<DataFile>();
 		msOneDataFiles = new TreeSet<DataFile>();
 		msFeatureMap = new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
@@ -354,8 +365,10 @@ public class RawDataAnalysisProject extends Project {
 	}
 	
 	public DataFile getDataFileByName(String name) {
+		
+		String baseName = FileNameUtils.getBaseName(name);
 		return getDataFiles().stream().
-				filter(f -> f.getName().equals(name)).
+				filter(f -> FileNameUtils.getBaseName(f.getName()).equals(baseName)).
 				findFirst().orElse(null);
 	}
 	
@@ -453,20 +466,28 @@ public class RawDataAnalysisProject extends Project {
 		return injections;
 	}
 
-	public void setInjections(Set<Injection> injections2) {
-		
-		if(injections == null)
-			injections = new TreeSet<Injection>();
-
-		injections.clear();
-		injections.addAll(injections2);
-	}
+//	public void setInjections(Set<Injection> injections2) {
+//		
+//		if(injections == null)
+//			injections = new TreeSet<Injection>();
+//
+//		injections.clear();
+//		injections.addAll(injections2);
+//	}
 
 	public ExperimentDesign getExperimentDesign() {
-		return experimentDesign;
+		
+		if(idTrackerExperiment == null)
+			return null;
+		else
+			return idTrackerExperiment.getExperimentDesign();
 	}
 
 	public LIMSUser getCreatedBy() {
+		
+		if(createdBy == null)
+			createdBy = MRC2ToolBoxCore.getIdTrackerUser();
+		
 		return createdBy;
 	}
 
@@ -475,13 +496,102 @@ public class RawDataAnalysisProject extends Project {
 	}
 
 	public LIMSExperiment getIdTrackerExperiment() {
+		
+		if(idTrackerExperiment == null) {
+			
+			idTrackerExperiment = new LIMSExperiment(
+					null, 
+					name, 
+					description, 
+					null, 
+					null, 
+					dateCreated);
+			
+			if(createdBy == null)
+				createdBy = MRC2ToolBoxCore.getIdTrackerUser();
+			
+			idTrackerExperiment.setCreator(createdBy);
+			idTrackerExperiment.setDesign(new ExperimentDesign());			
+		}
 		return idTrackerExperiment;
 	}
 
 	public void setIdTrackerExperiment(LIMSExperiment idTrackerExperiment) {
 		this.idTrackerExperiment = idTrackerExperiment;
 	}
+	
+	public Worklist getWorklist() {
+		
+		if(injections == null)
+			injections = new TreeSet<Injection>();
+		
+		LIMSSamplePreparation samplePrep = null;
+		ExperimentDesign design = null;
+		if(idTrackerExperiment != null 
+				&& idTrackerExperiment.getSamplePreps() != null
+				&& !idTrackerExperiment.getSamplePreps().isEmpty()) {
+			samplePrep = idTrackerExperiment.getSamplePreps().iterator().next();
+			
+			design = idTrackerExperiment.getExperimentDesign();
+		}		
+		Worklist worklist = new Worklist();
+		for(Injection inj : injections) {
+			
+			DataFile df = getDataFileByName(inj.getDataFileName());
+			if(df == null)
+				continue;
+			
+			ExperimentalSample sample = null;
+			if(design != null)
+				sample = design.getSampleByDataFile(df);
+			
+			LIMSWorklistItem wklItem = new LIMSWorklistItem(
+				df,
+				sample,
+				df.getDataAcquisitionMethod(),
+				samplePrep,
+				inj.getPrepItemId(),
+				df.getInjectionTime(),
+				inj.getInjectionVolume());
+			worklist.addItem(wklItem);
+		}
+		return worklist;
+	}
+	
+	public Collection<DataAcquisitionMethod>getDataAcquisitionMethods(){
+		return getDataFiles().stream().
+				filter(df -> df.getDataAcquisitionMethod() != null).
+				map(df -> df.getDataAcquisitionMethod()).collect(Collectors.toSet());
+	}
+
+	public void updateMetadataFromWorklist(Worklist worklist) {
+		
+		// TODO Rework relation of Injection/data file
+		Collection<LIMSWorklistItem>wklItems = 
+				worklist.getWorklistItems().stream().
+				filter(LIMSWorklistItem.class::isInstance).
+				map(LIMSWorklistItem.class::cast).collect(Collectors.toList());
+		injections = new TreeSet<Injection>();
+		
+		//	Data files
+		for(DataFile df : getDataFiles()) {
+			
+			LIMSWorklistItem item = wklItems.stream().
+					filter(i -> i.getDataFile().getBaseName().equals(df.getBaseName())).
+					findFirst().orElse(null);
+			if(item != null) {
+				df.setDataAcquisitionMethod(item.getAcquisitionMethod());
+				df.setInjectionTime(item.getTimeStamp());
+				df.setInjectionVolume(item.getInjectionVolume());
+				injections.add(df.generateInjectionFromFileData());
+			}
+		}	
+	}
 }
+
+
+
+
 
 
 

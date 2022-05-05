@@ -31,6 +31,8 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
 import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
@@ -86,6 +88,30 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 		this.notes = notes;
 		this.project = parentProject;
 		samplePreps = new TreeSet<LIMSSamplePreparation>();
+	}
+	
+	public LIMSExperiment(LIMSExperiment experimentToCopy) {
+
+		super();
+		this.id = experimentToCopy.getId();
+		this.name = experimentToCopy.getName();
+		this.description = experimentToCopy.getDescription();
+		this.notes = experimentToCopy.getNotes();
+		this.serviceRequestId = experimentToCopy.getServiceRequestId();
+		this.startDate = experimentToCopy.getStartDate();
+		this.creator = experimentToCopy.getCreator();
+		samplePreps = new TreeSet<LIMSSamplePreparation>();
+		for(LIMSSamplePreparation prep : experimentToCopy.getSamplePreps()) {
+			
+			LIMSSamplePreparation prepCopy = new LIMSSamplePreparation (prep);
+			samplePreps.add(prepCopy);
+		}
+		this.nihGrant = experimentToCopy.getNihGrant();
+		this.isChear = experimentToCopy.isChear();
+		this.isMotrpac = experimentToCopy.isMotrpac();
+		
+		if(experimentToCopy.getExperimentDesign() != null)
+			this.design = new ExperimentDesign(experimentToCopy.getExperimentDesign());
 	}
 	
 	public String getId() {
@@ -313,21 +339,26 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 					LIMSExperimentFields.UserId.name(), creator.getId());
 		
 		//	ExperimentDesign
-		if(design != null) {
+		if(design != null) 
+			experimentElement.addContent(design.getXmlElement());
 			
-		}
-		
 		//	LIMSSamplePreparation list
 		Element samplePrepListElement = 
 				new Element(LIMSExperimentFields.SamplePrepList.name());
-		experimentElement.addContent(samplePrepListElement);
+		
 		if(samplePreps != null && !samplePreps.isEmpty()) {
 			
-		}		
+			for(LIMSSamplePreparation prep : samplePreps)
+				samplePrepListElement.addContent(prep.getXmlElement());
+		}	
+		experimentElement.addContent(samplePrepListElement);
+		
 		return experimentElement;
 	}
 	
-	public LIMSExperiment(Element experimentElement) {
+	public LIMSExperiment(
+			Element experimentElement, 
+			RawDataAnalysisProject parentProject) {
 		
 		id = experimentElement.getAttributeValue(
 				LIMSExperimentFields.Id.name());
@@ -360,6 +391,11 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 			creator = IDTDataCash.getUserById(userId);
 		
 		//		ExperimentDesign
+		Element experimentDesignElement =
+				experimentElement.getChild(ExperimentDesignFields.ExperimentDesign.name());
+		if(experimentDesignElement != null)
+			design = new ExperimentDesign(
+					experimentDesignElement, parentProject);
 				
 		//		LIMSSamplePreparation list
 	}

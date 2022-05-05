@@ -22,20 +22,29 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.AnnotatedObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.AnalysisMethodComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.project.store.SamplePreparationFields;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
-public class LIMSSamplePreparation implements Serializable, AnnotatedObject, Comparable<LIMSSamplePreparation>{
+public class LIMSSamplePreparation implements 
+		Serializable, AnnotatedObject, Comparable<LIMSSamplePreparation>{
 
 	/**
 	 * 
@@ -50,7 +59,6 @@ public class LIMSSamplePreparation implements Serializable, AnnotatedObject, Com
 	private TreeSet<DataAcquisitionMethod>assays;
 	private TreeSet<ObjectAnnotation> annotations;
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public LIMSSamplePreparation(
 			String prepId, 
 			String name, 
@@ -63,12 +71,25 @@ public class LIMSSamplePreparation implements Serializable, AnnotatedObject, Com
 		this.creator = creator;
 		protocols = new TreeSet<LIMSProtocol>();
 		prepItemMap = new TreeMap<String,String>();		
-		Comparator comparator = 
-				new AnalysisMethodComparator(SortProperty.Name);
-		assays = 
-				new TreeSet<DataAcquisitionMethod>(comparator);
+		assays = new TreeSet<DataAcquisitionMethod>(
+				new AnalysisMethodComparator(SortProperty.Name));
 	}
 	
+	public LIMSSamplePreparation(LIMSSamplePreparation prep) {
+		super();
+		this.prepId = prep.getId();
+		this.name = prep.getName();
+		this.prepDate = prep.getPrepDate();
+		this.creator = prep.getCreator();
+		protocols = new TreeSet<LIMSProtocol>();
+		protocols.addAll(prep.getProtocols());
+		prepItemMap = new TreeMap<String,String>();	
+		prepItemMap.putAll(prep.getPrepItemMap());
+		assays = new TreeSet<DataAcquisitionMethod>(
+				new AnalysisMethodComparator(SortProperty.Name));
+		assays.addAll(prep.getAssays());
+	}
+
 	/**
 	 * @return the name
 	 */
@@ -236,6 +257,114 @@ public class LIMSSamplePreparation implements Serializable, AnnotatedObject, Com
 	@Override
 	public void setId(String uniqueId) {
 		prepId = uniqueId;		
+	}
+	
+	public Element getXmlElement() {
+		
+		Element prepElement = 
+				new Element(SamplePreparationFields.SamplePrep.name());
+		
+		if(prepId != null)
+			prepElement.setAttribute(
+					SamplePreparationFields.Id.name(), prepId);	
+		
+		if(name != null)
+			prepElement.setAttribute(
+					SamplePreparationFields.Name.name(), name);
+
+		if(prepDate == null)
+			prepDate = new Date();
+		
+		prepElement.setAttribute(SamplePreparationFields.PrepDate.name(), 
+				ProjectUtils.dateTimeFormat.format(prepDate));
+		
+		if(creator != null)
+			prepElement.setAttribute(
+					SamplePreparationFields.Creator.name(), creator.getId());	
+		
+		String protocolIds = "";
+		if(!protocols.isEmpty()) {
+			List<String> protocolIdList = protocols.stream().
+					map(p -> p.getSopId()).collect(Collectors.toList());
+			protocolIds = StringUtils.join(protocolIdList, ",");
+		}
+		Element protocolElement = 
+				new Element(SamplePreparationFields.Protocols.name()).setText(protocolIds);
+		prepElement.addContent(protocolElement);
+		
+//		String documentIds = "";
+//		if(!protocols.isEmpty()) {
+//			List<String> protocolIdList = protocols.stream().
+//					map(p -> p.getSopId()).collect(Collectors.toList());
+//			documentIds = StringUtils.join(protocolIdList, ",");
+//		}
+//		Element documentsElement = 
+//				new Element(SamplePreparationFields.Docs.name()).setText(documentIds);
+//		prepElement.addContent(documentsElement);
+		
+		String itemMapString = "";
+		if(!prepItemMap.isEmpty()) {
+			List<String> mapList = prepItemMap.entrySet().stream().
+					map(i -> (i.getKey() + "," + i.getValue())).
+					collect(Collectors.toList());
+			itemMapString = StringUtils.join(mapList, ";");
+		}
+		Element itemMapElement = 
+				new Element(SamplePreparationFields.ItemMap.name()).setText(itemMapString);
+		prepElement.addContent(itemMapElement);
+		
+		return prepElement;
+	}
+	
+	public LIMSSamplePreparation(Element prepElement) {
+		
+		prepId = prepElement.getAttributeValue(
+				SamplePreparationFields.Id.name());
+		name = prepElement.getAttributeValue(
+				SamplePreparationFields.Name.name());
+		
+		prepDate = new Date();
+		String startDateString = 
+				prepElement.getAttributeValue(SamplePreparationFields.PrepDate.name());
+		if(startDateString != null) {
+			try {
+				prepDate = ProjectUtils.dateTimeFormat.parse(startDateString);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		}
+		String userId = 
+				prepElement.getAttributeValue(SamplePreparationFields.Creator.name());
+		if(userId != null)
+			creator = IDTDataCash.getUserById(userId);
+
+		protocols = new TreeSet<LIMSProtocol>();
+		Element protocolsElement =
+				prepElement.getChild(SamplePreparationFields.Protocols.name());
+		if(protocolsElement != null && !protocolsElement.getText().isEmpty()) {
+			
+			String[]protocolIds = protocolsElement.getText().split(",");
+			for(String protocolId : protocolIds) {
+				
+				LIMSProtocol protocol = IDTDataCash.getProtocolById(protocolId);
+				if(protocol != null)
+					protocols.add(protocol);
+			}		
+		}
+		prepItemMap = new TreeMap<String,String>();	
+		Element prepItemMapElement =
+				prepElement.getChild(SamplePreparationFields.ItemMap.name());
+		if(prepItemMapElement != null && !prepItemMapElement.getText().isEmpty()) {
+			
+			String[]pmElements = prepItemMapElement.getText().split(";");
+			for(String element : pmElements) {
+				
+				String[]mItems = element.split(",");
+				if(mItems.length == 2) 
+					prepItemMap.put(mItems[0], mItems[1]);				
+			}
+		}
 	}
 }
 

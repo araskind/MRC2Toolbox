@@ -30,8 +30,6 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import org.apache.commons.compress.utils.FileNameUtils;
-
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 
 public class Worklist implements Serializable {
@@ -98,10 +96,9 @@ public class Worklist implements Serializable {
 		if(df == null)
 			return;
 		
-		String fileName = FileNameUtils.getBaseName(df.getName());
 		WorklistItem itemToUpdate = 
 				items.stream().
-				filter(i -> FileNameUtils.getBaseName(i.getDataFile().getName()).equals(fileName)).
+				filter(i -> i.getDataFile().getBaseName().equals(df.getBaseName())).
 				findFirst().orElse(null);
 		if(itemToUpdate == null)
 			return;

@@ -48,7 +48,7 @@ public class RDPWorklistImportToolbar extends CommonToolbar {
 
 	private JButton
 		scanDirButton,
-		addFromDirButton,
+//		addFromDirButton,
 		databaseLookupButton,
 		deleteSelectedFilesButton,
 		clearWorklistButton;
@@ -61,11 +61,11 @@ public class RDPWorklistImportToolbar extends CommonToolbar {
 				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName(),
 				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND.getName(), buttonDimension);
 
-		addFromDirButton = GuiUtils.addButton(this, null, addFromDirIcon, commandListener,
-				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName(),
-				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName(), buttonDimension);
-		
-		addSeparator(buttonDimension);
+//		addFromDirButton = GuiUtils.addButton(this, null, addFromDirIcon, commandListener,
+//				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName(),
+//				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND.getName(), buttonDimension);
+//		
+//		addSeparator(buttonDimension);
 		
 		databaseLookupButton = GuiUtils.addButton(this, null, dbLookupIcon, commandListener,
 				MainActionCommands.LOOKUP_WORKLIST_DATA_IN_DATABASE.getName(),
@@ -90,7 +90,7 @@ public class RDPWorklistImportToolbar extends CommonToolbar {
 	public void setButtonsEnabled(boolean enabled) {
 
 		scanDirButton.setEnabled(enabled);
-		addFromDirButton.setEnabled(enabled);
+//		addFromDirButton.setEnabled(enabled);
 		databaseLookupButton.setEnabled(enabled);
 		deleteSelectedFilesButton.setEnabled(enabled);
 		clearWorklistButton.setEnabled(enabled);

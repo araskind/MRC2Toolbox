@@ -97,4 +97,8 @@ public class RDPExperimentDesignEditorPanel extends IDTrackerExperimentDesignEdi
 		stockSampleEditorDialog.setLocationRelativeTo(this);
 		stockSampleEditorDialog.setVisible(true);
 	}
+	
+	public void setDesignEditable(boolean editable) {
+		toolbar.setDesignEditable(editable);
+	}
 }

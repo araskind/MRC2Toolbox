@@ -142,6 +142,9 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 		
 		if (command.equals(MainActionCommands.EDIT_DESIGN_FOR_SELECTED_SAMPLES_COMMAND.getName()))
 			showSampleDesignEditor();
+		
+		if (command.equals(MainActionCommands.ASSIGN_SAMPLE_TO_DATA_FILES_COMMAND.getName()))
+			assignSamplesToDataFiles();
 			
 		if (command.equals(MainActionCommands.CHOOSE_ACQ_METHOD_FOR_SELECTED_DATA_FILES_COMMAND.getName()))
 			showAcqusitionMethodAssignmentDialog();
@@ -154,10 +157,7 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 			
 		if (command.equals(MainActionCommands.ASSIGN_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND.getName()))
 			assignInjectionVolumeForSelectedDataFiles();
-		
-		if (command.equals(MainActionCommands.ASSIGN_SAMPLE_TO_DATA_FILES_COMMAND.getName()))
-			assignSamplesToDataFiles();
-				
+						
 		if (command.equals(MainActionCommands.DELETE_DATA_FILES_COMMAND.getName()))
 			deleteSelectedFiles();		
 	}
@@ -260,6 +260,10 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 	
 	private void showSampleDesignEditor() {
 		
+		if(samplePrep == null || samplePrep.getPrepItemMap().isEmpty()) {
+			MessageDialog.showErrorMsg("Sample preparation not defined yet.", this);
+			return;
+		}		
 		Collection<DataFile> selectedDataFiles = 
 				instrumentSequenceTable.getSelectedDataFiles();
 		if(selectedDataFiles.isEmpty())

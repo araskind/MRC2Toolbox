@@ -57,6 +57,8 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
@@ -374,7 +376,26 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if (MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
 			return;
 		
-		rawDataProjectMetadataWizard = new RDPMetadataWizard(this);
+		LIMSExperiment experiment = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getIdTrackerExperiment();
+		if(experiment != null) {
+			if(experiment.getId() != null) {
+				
+				LIMSExperiment exiting = IDTDataCash.getExperimentById(experiment.getId());
+				if(exiting != null) {
+					MessageDialog.showWarningMsg(
+							"The current project was already uploaded "
+							+ "to the database as experiment " + exiting.getId() 
+							+ "\n\"" + exiting.getName() + "\"\n"
+							+ "Its metadata can not be edited through the wizard now.", 
+							this.getContentPane());
+					return;
+				}
+			}
+		}		
+		rawDataProjectMetadataWizard = 
+				new RDPMetadataWizard(this, 
+						MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
 		rawDataProjectMetadataWizard.setLocationRelativeTo(this.getContentPane());
 		rawDataProjectMetadataWizard.setVisible(true);
 	}

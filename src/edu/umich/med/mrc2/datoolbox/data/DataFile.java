@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import org.apache.commons.compress.utils.FileNameUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -151,6 +152,10 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 
 	public String getName() {
 		return name;
+	}
+	
+	public String getBaseName() {
+		return FileNameUtils.getBaseName(name);
 	}
 
 	public String getFullPath() {

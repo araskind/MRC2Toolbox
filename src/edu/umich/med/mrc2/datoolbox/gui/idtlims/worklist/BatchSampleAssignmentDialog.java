@@ -118,7 +118,8 @@ public class BatchSampleAssignmentDialog extends JDialog implements ItemListener
 
 		//	Instructions
 		JPanel instructionsPanel = new JPanel(new BorderLayout(10,10));
-		instructionsPanel.setBorder(new TitledBorder(null, "Instructions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		instructionsPanel.setBorder(new TitledBorder(null, "Instructions", 
+				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagConstraints gbc_Instructions = new GridBagConstraints();
 		gbc_Instructions.fill = GridBagConstraints.HORIZONTAL;
 		gbc_Instructions.gridwidth = 2;
@@ -142,7 +143,9 @@ public class BatchSampleAssignmentDialog extends JDialog implements ItemListener
 		gbc_lblBatch.gridy = 1;
 		panel.add(lblFactor, gbc_lblBatch);
 
-		sampleComboBox = new JComboBox<ExperimentalSample>(new SortedComboBoxModel(samples));
+		sampleComboBox = 
+				new JComboBox<ExperimentalSample>(
+						new SortedComboBoxModel(samples));
 		sampleComboBox.setSelectedIndex(-1);
 		sampleComboBox.addItemListener(this);
 

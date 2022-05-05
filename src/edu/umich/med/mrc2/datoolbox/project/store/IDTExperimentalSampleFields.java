@@ -21,15 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum SamplePreparationFields {
+public enum IDTExperimentalSampleFields {
 
-	SamplePrep,
-	Id,
-	Name,
-	PrepDate,
-	Creator,
-	Protocols,
-	Docs,
-	ItemMap,
+	StockSampleId,
+	DateCreated,
+	Description,
 	;
 }

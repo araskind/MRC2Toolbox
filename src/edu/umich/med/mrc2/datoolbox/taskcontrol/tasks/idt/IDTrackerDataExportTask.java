@@ -693,6 +693,9 @@ public class IDTrackerDataExportTask extends AbstractTask {
 				if(property.equals(IDTrackerFeatureIdentificationProperties.INCHI_KEY))
 					return id.getCompoundIdentity().getInChiKey();	
 				
+				if(property.equals(IDTrackerFeatureIdentificationProperties.SMILES))
+					return id.getCompoundIdentity().getSmiles();
+								
 				if(property.equals(IDTrackerFeatureIdentificationProperties.REFMET_NAME))
 					return refMetNames.get(id.getCompoundIdentity().getPrimaryDatabaseId());
 								
@@ -717,6 +720,11 @@ public class IDTrackerDataExportTask extends AbstractTask {
 			if(id.getScore() > 0.0d)
 				return entropyFormat.format(id.getScore());
 		}
+		if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_ENTROPY_SCORE)) {
+			
+			if(id.getEntropyBasedScore() > 0.0d)
+				return entropyFormat.format(id.getEntropyBasedScore());
+		}		
 		if(property.equals(IDTrackerFeatureIdentificationProperties.MASS_ERROR) && deltaMz != 0.0d)
 			return ppmFormat.format(deltaMz);
 		
