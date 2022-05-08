@@ -426,8 +426,8 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 		eventListeners = ConcurrentHashMap.newKeySet();
 		
 		List<Element> factorMapElements = 
-				designSubsetElement.getChildren(
-						ExperimentDesignSubsetFields.FactorMap.name());
+				designSubsetElement.getChild(
+						ExperimentDesignSubsetFields.FactorMap.name()).getChildren();
 			
 		for(Element fmElement : factorMapElements) {
 			
@@ -442,8 +442,8 @@ public class ExperimentDesignSubset implements Comparable<ExperimentDesignSubset
 			}
 		}	
 		List<Element> levelMapElements = 
-				designSubsetElement.getChildren(
-						ExperimentDesignSubsetFields.LevelMap.name());
+				designSubsetElement.getChild(
+						ExperimentDesignSubsetFields.LevelMap.name()).getChildren();
 			
 		for(Element lmElement : levelMapElements) {
 			

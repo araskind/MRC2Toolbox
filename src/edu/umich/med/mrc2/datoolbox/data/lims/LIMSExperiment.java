@@ -99,7 +99,8 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 		this.notes = experimentToCopy.getNotes();
 		this.serviceRequestId = experimentToCopy.getServiceRequestId();
 		this.startDate = experimentToCopy.getStartDate();
-		this.creator = experimentToCopy.getCreator();
+		this.creator = experimentToCopy.getCreator();		
+		this.project = experimentToCopy.getProject();
 		samplePreps = new TreeSet<LIMSSamplePreparation>();
 		for(LIMSSamplePreparation prep : experimentToCopy.getSamplePreps()) {
 			
@@ -390,14 +391,25 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 		if(userId != null)
 			creator = IDTDataCash.getUserById(userId);
 		
-		//		ExperimentDesign
+		//	ExperimentDesign
 		Element experimentDesignElement =
 				experimentElement.getChild(ExperimentDesignFields.ExperimentDesign.name());
 		if(experimentDesignElement != null)
 			design = new ExperimentDesign(
 					experimentDesignElement, parentProject);
 				
-		//		LIMSSamplePreparation list
+		//	LIMSSamplePreparation list
+		samplePreps = new TreeSet<LIMSSamplePreparation>();
+		Element prepListElement = 
+				experimentElement.getChild(LIMSExperimentFields.SamplePrepList.name());
+		if(prepListElement != null) {
+			
+			for(Element prepElement : prepListElement.getChildren()) {
+				LIMSSamplePreparation prep = new LIMSSamplePreparation(prepElement);
+				if(prep != null)
+					samplePreps.add(prep);
+			}
+		}
 	}
 }
 

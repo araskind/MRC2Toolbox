@@ -72,7 +72,7 @@ public class RawDataAnalysisProject extends Project {
 	protected Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 	protected Set<MsFeatureInfoBundleCollection>featureCollections;
 	protected MSMSExtractionParameterSet msmsExtractionParameterSet;
-	protected Set<Injection>injections;
+//	protected Set<Injection>injections;
 	protected LIMSUser createdBy;
 	protected LIMSExperiment idTrackerExperiment;
 	
@@ -187,42 +187,22 @@ public class RawDataAnalysisProject extends Project {
 		featureCollections = 
 				new TreeSet<MsFeatureInfoBundleCollection>(
 						new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));
-		injections = new TreeSet<Injection>();
 		//	TODO
 	}
-	
-	public void repopulateInjectionList() {
-		
-		injections = new TreeSet<Injection>();
-		if(!msmsDataFiles.isEmpty())
-			msmsDataFiles.stream().forEach(f -> injections.add(f.generateInjectionFromFileData()));
-		
-		if(!msOneDataFiles.isEmpty())
-			msOneDataFiles.stream().forEach(f -> injections.add(f.generateInjectionFromFileData()));
-	}
-	
+
 	public void addMSMSDataFile(DataFile fileToAdd) {
 		msmsDataFiles.add(fileToAdd);
 		msFeatureMap.put(fileToAdd, new HashSet<MsFeatureInfoBundle>());
 		
-		if(injections == null)
-			injections = new TreeSet<Injection>();
-		
-		injections.add(fileToAdd.generateInjectionFromFileData());
-		
 		//	TODO
 	}
 	
-	public void addMSMSDataFiles(Collection<DataFile> filesToAdd) {		
-		msmsDataFiles.addAll(filesToAdd);
+	public void addMSMSDataFiles(Collection<DataFile> filesToAdd) {	
 		
-		if(injections == null)
-			injections = new TreeSet<Injection>();
-		
-		for(DataFile df : filesToAdd) {
+		msmsDataFiles.addAll(filesToAdd);		
+		for(DataFile df : filesToAdd)
 			msFeatureMap.put(df, new HashSet<MsFeatureInfoBundle>());
-			injections.add(df.generateInjectionFromFileData());
-		}
+
 		//	TODO
 	}
 
@@ -230,31 +210,21 @@ public class RawDataAnalysisProject extends Project {
 		msOneDataFiles.add(fileToAdd);
 		msFeatureMap.put(fileToAdd, new HashSet<MsFeatureInfoBundle>());
 		
-		if(injections == null)
-			injections = new TreeSet<Injection>();
-		
-		injections.add(fileToAdd.generateInjectionFromFileData());
-		
 		//	TODO
 	}
 	
 	public void addMSOneDataFiles( Collection<DataFile> filesToAdd) {	
 		
-		msOneDataFiles.addAll(filesToAdd);
-		if(injections == null)
-			injections = new TreeSet<Injection>();
-		
-		for(DataFile df : filesToAdd) {
+		msOneDataFiles.addAll(filesToAdd);		
+		for(DataFile df : filesToAdd) 
 			msFeatureMap.put(df, new HashSet<MsFeatureInfoBundle>());
-			injections.add(df.generateInjectionFromFileData());
-		}		
+		
 		//	TODO
 	}
 	
 	public void removeMSMSDataFile(DataFile fileToRemove) {
 		msmsDataFiles.remove(fileToRemove);
 		msFeatureMap.remove(fileToRemove);
-		removeInjectionForFile(fileToRemove);
 		
 		//	TODO
 	}
@@ -262,23 +232,8 @@ public class RawDataAnalysisProject extends Project {
 	public void removeMSOneDataFile(DataFile fileToRemove) {
 		msOneDataFiles.remove(fileToRemove);
 		msFeatureMap.remove(fileToRemove);
-		removeInjectionForFile(fileToRemove);
 				
 		//	TODO
-	}
-	
-	private void removeInjectionForFile(DataFile fileToRemove) {
-		
-		if(injections == null)
-			injections = new TreeSet<Injection>();
-		
-		if(!injections.isEmpty()) {
-			
-			String injId = fileToRemove.getInjectionId();
-			injections = injections.stream().
-					filter(i -> !i.getId().equals(injId)).
-					collect(Collectors.toCollection(TreeSet::new));
-		}
 	}
 	
 	public Collection<MsFeatureInfoBundle>getMsFeaturesForDataFile(DataFile df){
@@ -458,22 +413,12 @@ public class RawDataAnalysisProject extends Project {
 		this.msmsExtractionParameterSet = msmsExtractionParameterSet;
 	}
 
-	public Collection<Injection> getInjections() {
+	public Collection<Injection> getInjections() {	
 		
-		if(injections == null)
-			injections = new TreeSet<Injection>();
-		
-		return injections;
+		return getDataFiles().stream().
+				map(f -> f.generateInjectionFromFileData()).
+				collect(Collectors.toList());
 	}
-
-//	public void setInjections(Set<Injection> injections2) {
-//		
-//		if(injections == null)
-//			injections = new TreeSet<Injection>();
-//
-//		injections.clear();
-//		injections.addAll(injections2);
-//	}
 
 	public ExperimentDesign getExperimentDesign() {
 		
@@ -522,37 +467,23 @@ public class RawDataAnalysisProject extends Project {
 	
 	public Worklist getWorklist() {
 		
-		if(injections == null)
-			injections = new TreeSet<Injection>();
-		
 		LIMSSamplePreparation samplePrep = null;
-		ExperimentDesign design = null;
 		if(idTrackerExperiment != null 
 				&& idTrackerExperiment.getSamplePreps() != null
-				&& !idTrackerExperiment.getSamplePreps().isEmpty()) {
+				&& !idTrackerExperiment.getSamplePreps().isEmpty())
 			samplePrep = idTrackerExperiment.getSamplePreps().iterator().next();
 			
-			design = idTrackerExperiment.getExperimentDesign();
-		}		
 		Worklist worklist = new Worklist();
-		for(Injection inj : injections) {
-			
-			DataFile df = getDataFileByName(inj.getDataFileName());
-			if(df == null)
-				continue;
-			
-			ExperimentalSample sample = null;
-			if(design != null)
-				sample = design.getSampleByDataFile(df);
+		for(DataFile df : getDataFiles()) {
 			
 			LIMSWorklistItem wklItem = new LIMSWorklistItem(
 				df,
-				sample,
+				df.getParentSample(),
 				df.getDataAcquisitionMethod(),
 				samplePrep,
-				inj.getPrepItemId(),
+				df.getPrepItemId(),
 				df.getInjectionTime(),
-				inj.getInjectionVolume());
+				df.getInjectionVolume());
 			worklist.addItem(wklItem);
 		}
 		return worklist;
@@ -566,12 +497,10 @@ public class RawDataAnalysisProject extends Project {
 
 	public void updateMetadataFromWorklist(Worklist worklist) {
 		
-		// TODO Rework relation of Injection/data file
 		Collection<LIMSWorklistItem>wklItems = 
 				worklist.getWorklistItems().stream().
 				filter(LIMSWorklistItem.class::isInstance).
 				map(LIMSWorklistItem.class::cast).collect(Collectors.toList());
-		injections = new TreeSet<Injection>();
 		
 		//	Data files
 		for(DataFile df : getDataFiles()) {
@@ -583,7 +512,9 @@ public class RawDataAnalysisProject extends Project {
 				df.setDataAcquisitionMethod(item.getAcquisitionMethod());
 				df.setInjectionTime(item.getTimeStamp());
 				df.setInjectionVolume(item.getInjectionVolume());
-				injections.add(df.generateInjectionFromFileData());
+				df.setParentSample(item.getSample());
+				df.setPrepItemId(item.getPrepItemId());
+				item.getSample().addDataFile(df);
 			}
 		}	
 	}

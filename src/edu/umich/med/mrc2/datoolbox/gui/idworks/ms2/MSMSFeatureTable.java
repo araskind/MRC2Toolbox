@@ -48,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.ExperimentalSampleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.LIMSExperimentComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.ReferenceMsMsLibraryMatchTypeComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SampleTypeComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
@@ -60,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.data.format.FeatureIdentificationStateFormat
 import edu.umich.med.mrc2.datoolbox.data.format.LIMSExperimentFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureInfoBundleFormat;
+import edu.umich.med.mrc2.datoolbox.data.format.ReferenceMsMsLibraryMatchTypeFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.SampleTypeFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
@@ -70,6 +72,7 @@ import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ColorCircleFlagRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalSampleRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FeatureIdentificationStateRenderer;
@@ -95,6 +98,7 @@ public class MSMSFeatureTable extends BasicTable {
 	private MSMSFeatureTableModel model;
 	private MouseMotionAdapter mma;
 	private TableUpdateProgressDialog idp;
+	private FormattedDecimalRenderer scoreRenderer;
 
 	public MSMSFeatureTable() {
 		super();
@@ -120,7 +124,9 @@ public class MSMSFeatureTable extends BasicTable {
 				new SampleTypeComparator(SortProperty.Name));
 		rowSorter.setComparator(model.getColumnIndex(MSMSFeatureTableModel.ADDUCT_COLUMN),
 				new AdductComparator(SortProperty.Name));
-
+		rowSorter.setComparator(model.getColumnIndex(MSMSFeatureTableModel.MSMS_MATCH_TYPE_COLUMN),
+				new ReferenceMsMsLibraryMatchTypeComparator());	
+		
 		//	Renderers
 		setDefaultRenderer(MsFeatureInfoBundle.class, new MsFeatureInfoBundleRenderer(SortProperty.Name));
 		setDefaultRenderer(DataAcquisitionMethod.class, new AnalysisMethodRenderer());
@@ -159,6 +165,11 @@ public class MSMSFeatureTable extends BasicTable {
 			.setCellRenderer(new FormattedDecimalRenderer(new DecimalFormat("##.###")));
 		columnModel.getColumnById(MSMSFeatureTableModel.SPECTRUM_TOTAL_INTENSITY_COLUMN)
 			.setCellRenderer(areaRenderer);
+		scoreRenderer = new FormattedDecimalRenderer(new DecimalFormat("###.##"), true);
+		columnModel.getColumnById(MSMSFeatureTableModel.SPECTRUM_ENTROPY_COLUMN)
+			.setCellRenderer(scoreRenderer);
+		columnModel.getColumnById(MSMSFeatureTableModel.MSMS_MATCH_TYPE_COLUMN)
+			.setCellRenderer(new ColorCircleFlagRenderer(16)); 
 
 		//	Database link adapter
 		mma = new MouseMotionAdapter() {
@@ -207,7 +218,9 @@ public class MSMSFeatureTable extends BasicTable {
 		thf.getParserModel().setFormat(FeatureIdentificationState.class, new FeatureIdentificationStateFormat());
 		thf.getParserModel().setFormat(Adduct.class, new AdductFormat(SortProperty.Name));
 		thf.getParserModel().setComparator(Adduct.class, new AdductComparator(SortProperty.Name));
-
+		thf.getParserModel().setFormat(ReferenceMsMsLibraryMatch.class, new ReferenceMsMsLibraryMatchTypeFormat());
+		thf.getParserModel().setComparator(ReferenceMsMsLibraryMatch.class, new ReferenceMsMsLibraryMatchTypeComparator());
+		
 		finalizeLayout();
 	}
 
@@ -273,6 +286,8 @@ public class MSMSFeatureTable extends BasicTable {
 			Double neutralMassDeltaMz = null;
 			MsFeatureIdentity primaryId = cf.getPrimaryIdentity();
 			Adduct adduct = null;
+			Double entropyMsMsScore = null;
+			ReferenceMsMsLibraryMatch refMatch = null;
 			if(primaryId != null) {
 
 				if(primaryId.getCompoundIdentity() == null) {
@@ -283,12 +298,14 @@ public class MSMSFeatureTable extends BasicTable {
 					compoundName = primaryId.getName();
 					double neutralMass = primaryId.getCompoundIdentity().getExactMass();
 					neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
-					ReferenceMsMsLibraryMatch refMatch = primaryId.getReferenceMsMsLibraryMatch();
+					refMatch = primaryId.getReferenceMsMsLibraryMatch();
 					if(refMatch != null) {
 						
 						MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
 						if(libPrecursor != null) 
 							libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
+					
+						entropyMsMsScore = refMatch.getEntropyBasedScore();
 					}
 				}
 				idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
@@ -315,6 +332,8 @@ public class MSMSFeatureTable extends BasicTable {
 				neutralMassDeltaMz,		//	NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN	Double
 				libraryPrecursorDeltaMz,	//	LIBRARY_PRECURSOR_DELTA_MZ_COLUMN	Double				
 				instrumentMsMs.getCidLevel(),	//	COLLISION_ENERGY_COLUMN	Double
+				entropyMsMsScore,
+				refMatch,
 //				score,	//	LIB_SCORE_COLUMN	Double
 //				lib,	//	MSMS_LIB_COLUMN	CompoundLibrary
 				limsSampleType,	//	SAMPLE_TYPE_COLUMN	LIMSSampleType
@@ -357,7 +376,12 @@ public class MSMSFeatureTable extends BasicTable {
 		
 	    @Override 	
 	    protected void process(List<Object[]> chunks) {
-	        tableModel.addRows(chunks);
+	        try {
+				tableModel.addRows(chunks);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	    }
 	    
 	    @Override

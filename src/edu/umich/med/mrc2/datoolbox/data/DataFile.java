@@ -55,12 +55,14 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 	 */
 	private static final long serialVersionUID = 821945926362226483L;
 	
-	private String name, fullPath;
+	private String name;
+	private String fullPath;
 	private boolean enabled;
 	private ExperimentalSample parentSample;	
 	private DataAcquisitionMethod acquisitionMethod;
 	private int batchNumber;	
 	private String injectionId;
+	private String prepItemId;
 	private Date injectionTime;	
 	private String samplePosition;
 	private double injectionVolume;	
@@ -119,13 +121,16 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		enabled = true;
 		injectionId = injection.getId();
 		injectionTime = injection.getTimeStamp();
-		acquisitionMethod = IDTDataCash.getAcquisitionMethodById(injection.getAcquisitionMethodId());
+		acquisitionMethod = 
+				IDTDataCash.getAcquisitionMethodById(injection.getAcquisitionMethodId());
 		scalingFactor = 1.0d;
 		batchNumber = 1;
+		prepItemId = injection.getPrepItemId();
 		chromatograms = new ArrayList<ExtractedChromatogram>();
 		userSpectra = new ArrayList<AverageMassSpectrum>();
 		color = Color.BLACK;
 		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();
+		
 	}
 
 	public void addResultFile(ResultsFile result) {
@@ -324,6 +329,14 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 
 	public Map<DataExtractionMethod, ResultsFile> getResultFiles() {
 		return resultFiles;
+	}		
+
+	public String getPrepItemId() {
+		return prepItemId;
+	}
+
+	public void setPrepItemId(String prepItemId) {
+		this.prepItemId = prepItemId;
 	}
 	
 	public Injection generateInjectionFromFileData() {
@@ -340,10 +353,9 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 				injectionId,
 				name, 
 				injectionTime, 
-				null, //	TODO
+				prepItemId,
 				acquisitionMethodId,
-				injectionVolume);
-		
+				injectionVolume);		
 		return inj;
 	}
 
@@ -364,6 +376,10 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		if(injectionId != null)
 			dataFileElement.setAttribute(
 					DataFileFields.Injection.name(), injectionId);	
+		
+		if(prepItemId != null)
+			dataFileElement.setAttribute(
+					DataFileFields.PrepItem.name(), prepItemId);
 		
 		if(samplePosition != null)
 			dataFileElement.setAttribute(
@@ -405,13 +421,10 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 	public DataFile(Element fileElement) {
 		
 		name = fileElement.getAttributeValue(DataFileFields.Name.name());
-		String path = 
-				fileElement.getAttributeValue(DataFileFields.Path.name());
-		if(path != null)
-			fullPath = path;
+		fullPath = fileElement.getAttributeValue(DataFileFields.Path.name());
 
 		String acqMethodId = 
-				fileElement.getAttributeValue(DataFileFields.InjTimestamp.name());
+				fileElement.getAttributeValue(DataFileFields.AcqMethod.name());
 		if(acqMethodId != null)
 			acquisitionMethod = IDTDataCash.getAcquisitionMethodById(acqMethodId);
 		
@@ -422,11 +435,9 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		else
 			color = ColorUtils.hex2rgb(colorCode);
 		
-		String injId = 
-				fileElement.getAttributeValue(DataFileFields.Injection.name());
-		if(injId != null)
-			injectionId = injId;
-		
+		injectionId = fileElement.getAttributeValue(DataFileFields.Injection.name());
+		prepItemId= fileElement.getAttributeValue(DataFileFields.PrepItem.name());
+				
 		String injTime = 
 				fileElement.getAttributeValue(DataFileFields.InjTimestamp.name());
 		if(injTime != null) {
@@ -437,10 +448,8 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 				e.printStackTrace();
 			}
 		}
-		String sampPposition = 
+		samplePosition = 
 				fileElement.getAttributeValue(DataFileFields.SamplePosition.name());
-		if(sampPposition != null)
-			samplePosition = sampPposition;
 		
 		String injVol = 
 				fileElement.getAttributeValue(DataFileFields.InjVol.name());

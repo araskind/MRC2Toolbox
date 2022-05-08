@@ -692,19 +692,20 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		eventListeners = ConcurrentHashMap.newKeySet();
 		
 		List<Element> factorListElements = 
-				experimentDesignElement.getChildren(
-						ExperimentDesignFields.FactorSet.name());
+				experimentDesignElement.getChild(
+						ExperimentDesignFields.FactorSet.name()).getChildren();
 		if(factorListElements.size() > 0) {
 			
 			for(Element factorElement : factorListElements) {
 				
-				ExperimentDesignFactor factor = new ExperimentDesignFactor(factorElement);
+				ExperimentDesignFactor factor = 
+						new ExperimentDesignFactor(factorElement);
 				factorSet.add(factor);
 			}
 		}
 		List<Element> sampleListElements = 
-				experimentDesignElement.getChildren(
-						ExperimentDesignFields.SampleSet.name());
+				experimentDesignElement.getChild(
+						ExperimentDesignFields.SampleSet.name()).getChildren();
 		if(sampleListElements.size() > 0) {
 			
 			for(Element sampleElement : sampleListElements) {
@@ -719,8 +720,8 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 			}
 		}
 		List<Element> subsetListElements = 
-				experimentDesignElement.getChildren(
-						ExperimentDesignFields.DesignSubsetList.name());
+				experimentDesignElement.getChild(
+						ExperimentDesignFields.DesignSubsetList.name()).getChildren();
 		if(subsetListElements.size() > 0) {
 			
 			for(Element subsetElement : subsetListElements) {
@@ -738,8 +739,13 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		factorSet.clear();
 		factorSet.addAll(experimentDesign.getFactors());
 		sampleSet.clear();
-		for(ExperimentalSample sample : experimentDesign.getSamples())			
-			sampleSet.add(new ExperimentalSample(sample));		
+		for(ExperimentalSample sample : experimentDesign.getSamples()) {
+			
+			if(sample instanceof IDTExperimentalSample)
+				sampleSet.add(new IDTExperimentalSample((IDTExperimentalSample)sample));
+			else	
+				sampleSet.add(new ExperimentalSample(sample));	
+		}
 	}
 }
 

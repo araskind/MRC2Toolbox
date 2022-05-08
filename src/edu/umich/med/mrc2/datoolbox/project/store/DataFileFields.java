@@ -29,6 +29,7 @@ public enum DataFileFields {
 	Sample,
 	AcqMethod,
 	Injection,
+	PrepItem,
 	SamplePosition,
 	InjTimestamp,
 	InjVol,

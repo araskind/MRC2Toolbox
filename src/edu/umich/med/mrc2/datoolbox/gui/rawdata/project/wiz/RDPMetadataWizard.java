@@ -270,7 +270,7 @@ public class RDPMetadataWizard extends JDialog
 			return;
 		
 		RDPMethodsPanel methodPanel = 
-				(RDPMethodsPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
+				(RDPMethodsPanel)panels.get(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
 		
 		methodPanel.updateAcqusitionMethodList(acqMethods);
 	}

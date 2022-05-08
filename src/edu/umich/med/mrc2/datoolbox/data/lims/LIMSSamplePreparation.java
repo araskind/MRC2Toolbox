@@ -322,6 +322,11 @@ public class LIMSSamplePreparation implements
 				SamplePreparationFields.Id.name());
 		name = prepElement.getAttributeValue(
 				SamplePreparationFields.Name.name());
+
+		protocols = new TreeSet<LIMSProtocol>();
+		prepItemMap = new TreeMap<String,String>();		
+		assays = new TreeSet<DataAcquisitionMethod>(
+				new AnalysisMethodComparator(SortProperty.Name));
 		
 		prepDate = new Date();
 		String startDateString = 
@@ -339,7 +344,6 @@ public class LIMSSamplePreparation implements
 		if(userId != null)
 			creator = IDTDataCash.getUserById(userId);
 
-		protocols = new TreeSet<LIMSProtocol>();
 		Element protocolsElement =
 				prepElement.getChild(SamplePreparationFields.Protocols.name());
 		if(protocolsElement != null && !protocolsElement.getText().isEmpty()) {
@@ -352,7 +356,6 @@ public class LIMSSamplePreparation implements
 					protocols.add(protocol);
 			}		
 		}
-		prepItemMap = new TreeMap<String,String>();	
 		Element prepItemMapElement =
 				prepElement.getChild(SamplePreparationFields.ItemMap.name());
 		if(prepItemMapElement != null && !prepItemMapElement.getText().isEmpty()) {

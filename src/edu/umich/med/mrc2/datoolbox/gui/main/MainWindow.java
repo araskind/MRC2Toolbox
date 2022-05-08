@@ -326,7 +326,8 @@ public class MainWindow extends JFrame
 				rawDataAnalysisProjectSetupDialog.getProjectDescription(), 
 				projectBaseDirectory,
 				MRC2ToolBoxCore.getIdTrackerUser());
-
+		newProject.setInstrument(rawDataAnalysisProjectSetupDialog.getInstrument());
+		
 		List<DataFile> msmsDataFiles = 
 				rawDataAnalysisProjectSetupDialog.getMSMSDataFiles().stream().
 				map(f -> new DataFile(f)).collect(Collectors.toList());		

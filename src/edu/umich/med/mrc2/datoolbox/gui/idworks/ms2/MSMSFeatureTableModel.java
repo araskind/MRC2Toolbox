@@ -57,6 +57,8 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 	public static final String RETENTION_COLUMN = "RT";
 	public static final String PARENT_MZ_COLUMN = "Parent M/Z";
 	public static final String COLLISION_ENERGY_COLUMN = "CE, V";
+	public static final String ENTROPY_BASED_SCORE_COLUMN = "EScore";
+	public static final String MSMS_MATCH_TYPE_COLUMN = "MType";
 //	public static final String LIB_SCORE_COLUMN = "Lib. score";
 //	public static final String MSMS_LIB_COLUMN = "MSMS library";
 	public static final String EXPERIMENT_COLUMN = "Experiment";
@@ -90,6 +92,9 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			new ColumnContext(NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN, Double.class, false),
 			new ColumnContext(LIBRARY_PRECURSOR_DELTA_MZ_COLUMN, Double.class, false),			
 			new ColumnContext(COLLISION_ENERGY_COLUMN, Double.class, false),
+			new ColumnContext(ENTROPY_BASED_SCORE_COLUMN, Double.class, false),
+			new ColumnContext(MSMS_MATCH_TYPE_COLUMN, ReferenceMsMsLibraryMatch.class, false),
+
 //			new ColumnContext(LIB_SCORE_COLUMN, Double.class, false),
 //			new ColumnContext(MSMS_LIB_COLUMN, ReferenceMsMsLibrary.class, false),
 			new ColumnContext(SAMPLE_TYPE_COLUMN, LIMSSampleType.class, false),
@@ -126,6 +131,8 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			Double neutralMassDeltaMz = null;
 			MsFeatureIdentity primaryId = cf.getPrimaryIdentity();
 			Adduct adduct = null;
+			Double entropyMsMsScore = null;
+			ReferenceMsMsLibraryMatch refMatch = null;
 			if(primaryId != null) {
 
 				if(primaryId.getCompoundIdentity() == null) {
@@ -136,12 +143,14 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 					compoundName = primaryId.getName();
 					double neutralMass = primaryId.getCompoundIdentity().getExactMass();
 					neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
-					ReferenceMsMsLibraryMatch refMatch = primaryId.getReferenceMsMsLibraryMatch();
+					refMatch = primaryId.getReferenceMsMsLibraryMatch();
 					if(refMatch != null) {
 						
 						MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
 						if(libPrecursor != null) 
 							libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
+					
+						entropyMsMsScore = refMatch.getEntropyBasedScore();
 					}
 				}
 				idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
@@ -168,6 +177,8 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 				neutralMassDeltaMz,		//	NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN	Double
 				libraryPrecursorDeltaMz,	//	LIBRARY_PRECURSOR_DELTA_MZ_COLUMN	Double				
 				instrumentMsMs.getCidLevel(),	//	COLLISION_ENERGY_COLUMN	Double
+				entropyMsMsScore,
+				refMatch,
 //				score,	//	LIB_SCORE_COLUMN	Double
 //				lib,	//	MSMS_LIB_COLUMN	CompoundLibrary
 				bundle.getStockSample().getLimsSampleType(),	//	SAMPLE_TYPE_COLUMN	LIMSSampleType
@@ -203,18 +214,58 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 				|| !bundle.getStandadAnnotations().isEmpty());
 		boolean hasFollowup = !bundle.getIdFollowupSteps().isEmpty();
 		MSFeatureIdentificationLevel idLevel = null;
+		Double libraryPrecursorDeltaMz = null;
+		Double neutralMassDeltaMz = null;
 		Adduct adduct = null;
-		if(cf.getPrimaryIdentity() != null) {
+		Double entropyMsMsScore = null;
+		ReferenceMsMsLibraryMatch refMatch = null;
+		MsFeatureIdentity primaryId = cf.getPrimaryIdentity();
+	
+		if(primaryId != null) {
 
-			if(cf.getPrimaryIdentity().getCompoundIdentity() == null) {
+//			if(primaryId.getCompoundIdentity() == null) {
+//				System.out.println(primaryId.getReferenceMsMsLibraryMatch().
+//						getMatchedLibraryFeature().getUniqueId() + " has no compound ID");
+//			}
+//			else {
+//				compoundName = cf.getPrimaryIdentity().getName();
+//			}
+//			idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
+//			adduct = cf.getPrimaryIdentity().getPrimaryAdduct();
+//			
+//			compoundName = primaryId.getName();
+//			double neutralMass = primaryId.getCompoundIdentity().getExactMass();
+//			neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
+//			refMatch = primaryId.getReferenceMsMsLibraryMatch();
+//			if(refMatch != null) {
+//				
+//				MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
+//				if(libPrecursor != null) 
+//					libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
+//			
+//				entropyMsMsScore = refMatch.getEntropyBasedScore();
+//			}
+			if(primaryId.getCompoundIdentity() == null) {
 				System.out.println(cf.getPrimaryIdentity().
-						getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId() + " has no compound ID");
+						getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId() + 
+						" has no compound ID");
 			}
 			else {
-				compoundName = cf.getPrimaryIdentity().getName();
+				compoundName = primaryId.getName();
+				double neutralMass = primaryId.getCompoundIdentity().getExactMass();
+				neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
+				refMatch = primaryId.getReferenceMsMsLibraryMatch();
+				if(refMatch != null) {
+					
+					MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
+					if(libPrecursor != null) 
+						libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
+				
+					entropyMsMsScore = refMatch.getEntropyBasedScore();
+				}
 			}
 			idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
-			adduct = cf.getPrimaryIdentity().getPrimaryAdduct();
+			adduct = primaryId.getPrimaryAdduct();
 		}
 		if(adduct == null) {
 			
@@ -236,7 +287,11 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		setValueAt(hasFollowup, row, getColumnIndex(FOLLOWUP_COLUMN));
 		setValueAt(cf.getRetentionTime(), row, getColumnIndex(RETENTION_COLUMN));
 		setValueAt(instrumentMsMs.getParent().getMz(), row, getColumnIndex(PARENT_MZ_COLUMN));
-		setValueAt(instrumentMsMs.getCidLevel(), row, getColumnIndex(COLLISION_ENERGY_COLUMN));
+		setValueAt(neutralMassDeltaMz, row, getColumnIndex(NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN));
+		setValueAt(libraryPrecursorDeltaMz, row, getColumnIndex(LIBRARY_PRECURSOR_DELTA_MZ_COLUMN));	
+		setValueAt(instrumentMsMs.getCidLevel(), row, getColumnIndex(COLLISION_ENERGY_COLUMN));		
+		setValueAt(entropyMsMsScore, row, getColumnIndex(ENTROPY_BASED_SCORE_COLUMN));
+		setValueAt(refMatch, row, getColumnIndex(MSMS_MATCH_TYPE_COLUMN));
 		setValueAt(sType, row, getColumnIndex(SAMPLE_TYPE_COLUMN));
 		setValueAt(bundle.getSample(), row, getColumnIndex(SAMPLE_COLUMN));
 		setValueAt(bundle.getExperiment(), row, getColumnIndex(EXPERIMENT_COLUMN));

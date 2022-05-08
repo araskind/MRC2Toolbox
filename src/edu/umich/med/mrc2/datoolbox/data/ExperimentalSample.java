@@ -462,10 +462,17 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 				sampleElement.getAttributeValue(ExperimentalSampleFields.LockedReference.name()));
 		incloodeInPoolStats = Boolean.parseBoolean(
 				sampleElement.getAttributeValue(ExperimentalSampleFields.IncloodeInPoolStats.name()));
-		batchNumber = Integer.parseInt(
-				sampleElement.getAttributeValue(ExperimentalSampleFields.BatchNum.name()));
-		moTrPACQCSampleType = MoTrPACQCSampleType.valueOf(
-				sampleElement.getAttributeValue(ExperimentalSampleFields.MoTrPACQCSampleType.name()));
+		
+		String batchString = 
+				sampleElement.getAttributeValue(ExperimentalSampleFields.BatchNum.name());
+		if(batchString != null)
+			batchNumber = Integer.parseInt(batchString);
+		else
+			batchNumber = 1;
+		
+		if(sampleElement.getAttributeValue(ExperimentalSampleFields.MoTrPACQCSampleType.name()) != null)
+			moTrPACQCSampleType = MoTrPACQCSampleType.valueOf(
+					sampleElement.getAttributeValue(ExperimentalSampleFields.MoTrPACQCSampleType.name()));
 		
 		designCell = new TreeMap<ExperimentDesignFactor, ExperimentDesignLevel>();
 		List<Element> designCellElements = 

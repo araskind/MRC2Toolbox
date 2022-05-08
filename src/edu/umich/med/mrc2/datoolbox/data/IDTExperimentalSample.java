@@ -150,5 +150,24 @@ public class IDTExperimentalSample extends ExperimentalSample implements Seriali
 			} 
 		}
 	}
-			
+
+	public IDTExperimentalSample(IDTExperimentalSample sample) {
+		super(sample);
+		this.parentStockSample = sample.getParentStockSample();
+		this.dateCreated = sample.getDateCreated();
+		this.description = sample.getDescription();
+	}		
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

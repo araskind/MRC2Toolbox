@@ -36,7 +36,6 @@ import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorListener;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFactorFields;
-import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignLevelFields;
 
 public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor>, Serializable, Renamable {
 
@@ -243,7 +242,7 @@ public class ExperimentDesignFactor implements Comparable<ExperimentDesignFactor
 	public Element getXmlElement() {
 		
 		Element experimentDesignFactorElement = 
-				new Element(ExperimentDesignLevelFields.ExperimentDesignLevel.name());
+				new Element(ExperimentDesignFactorFields.ExperimentDesignFactor.name());
 		
 		if(factorId != null)
 			experimentDesignFactorElement.setAttribute(
