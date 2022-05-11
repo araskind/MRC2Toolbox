@@ -442,7 +442,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 			List<String> fNames = dfme.getValue().stream().
 					map(df -> df.getName()).collect(Collectors.toList());
 			dataFileMapElement.setText(StringUtils.join(fNames, ","));
-			designCellContainerElement.addContent(dataFileMapElement);
+			dataFileMapContainerElement.addContent(dataFileMapElement);
 		}
 		sampleElement.addContent(dataFileMapContainerElement);
 		return sampleElement;
@@ -476,7 +476,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 		
 		designCell = new TreeMap<ExperimentDesignFactor, ExperimentDesignLevel>();
 		List<Element> designCellElements = 
-				sampleElement.getChildren(ExperimentalSampleFields.DesignCell.name());
+				sampleElement.getChild(ExperimentalSampleFields.DesignCell.name()).getChildren();
 		for(Element dcElement : designCellElements) {
 			String factorId = dcElement.getAttributeValue(ExperimentalSampleFields.DCFactorId.name());
 			String levelId = dcElement.getAttributeValue(ExperimentalSampleFields.DCLevelId.name());
@@ -490,7 +490,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 		}
 		dataFilesMap = new TreeMap<DataAcquisitionMethod, TreeSet<DataFile>>();
 		List<Element> dfMapElements = 
-				sampleElement.getChildren(ExperimentalSampleFields.DataFileMap.name());
+				sampleElement.getChild(ExperimentalSampleFields.DataFileMap.name()).getChildren();
 		
 		for(Element dfmElement : dfMapElements) {
 			

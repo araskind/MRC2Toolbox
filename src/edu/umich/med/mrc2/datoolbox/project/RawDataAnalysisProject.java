@@ -476,9 +476,13 @@ public class RawDataAnalysisProject extends Project {
 		Worklist worklist = new Worklist();
 		for(DataFile df : getDataFiles()) {
 			
+			ExperimentalSample parentSample = df.getParentSample();
+			if(parentSample == null)
+				parentSample = idTrackerExperiment.getExperimentDesign().getSampleByDataFile(df);
+						
 			LIMSWorklistItem wklItem = new LIMSWorklistItem(
 				df,
-				df.getParentSample(),
+				parentSample,
 				df.getDataAcquisitionMethod(),
 				samplePrep,
 				df.getPrepItemId(),
@@ -514,7 +518,13 @@ public class RawDataAnalysisProject extends Project {
 				df.setInjectionVolume(item.getInjectionVolume());
 				df.setParentSample(item.getSample());
 				df.setPrepItemId(item.getPrepItemId());
-				item.getSample().addDataFile(df);
+				
+				if(idTrackerExperiment != null && idTrackerExperiment.getExperimentDesign() != null) {
+					ExperimentalSample sample = 
+							idTrackerExperiment.getExperimentDesign().getSampleById(item.getSample().getId());
+					if(sample != null)
+						sample.addDataFile(df);
+				}
 			}
 		}	
 	}

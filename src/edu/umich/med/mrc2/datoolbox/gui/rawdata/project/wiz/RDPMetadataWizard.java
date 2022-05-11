@@ -197,6 +197,7 @@ public class RDPMetadataWizard extends JDialog
 		rootPane.setDefaultButton(saveButton);
 
 		populateWizardByProjectData();
+		silentlyVerifyProjectMetadata();
 		pack();
 	}
 	
@@ -490,8 +491,9 @@ public class RDPMetadataWizard extends JDialog
 
 	private boolean completeAnalysisMethodsDefinitionStage() {
 
-		Collection<String>errors = ((RDPMethodsPanel)panels.get(
-				RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS)).validateMethodsData();
+		RDPMethodsPanel methodsPanel = 
+				(RDPMethodsPanel)panels.get(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
+		Collection<String>errors = methodsPanel.validateMethodsData();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return false;
@@ -511,8 +513,9 @@ public class RDPMetadataWizard extends JDialog
 			if(!completeAnalysisMethodsDefinitionStage())
 				return false;
 		}
-		Collection<String>errors = ((RDPWorklistPanel)panels.get(
-				RDPMetadataDefinitionStage.ADD_WORKLISTS)).validateWorklistData();
+		RDPWorklistPanel worklistPanel = 
+				(RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS);
+		Collection<String>errors = worklistPanel.validateWorklistData();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return false;
@@ -559,6 +562,77 @@ public class RDPMetadataWizard extends JDialog
 			
 			if(!stageCompleted.get(stage))
 				errors.add("Step \"" + stage.getName() + "\" not completed.");
+		}
+		return errors;
+	}
+	
+	public Collection<String> silentlyVerifyProjectMetadata() {
+		
+		Collection<String>errors = new ArrayList<String>();
+		//	
+		RDPExperimentDefinitionPanel experimentPanel = 
+				(RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
+		Collection<String>experimentDefinitionErrors = experimentPanel.validateExperimentDefinition();
+		if(experimentDefinitionErrors.isEmpty()) {
+			stageCompleted.put(RDPMetadataDefinitionStage.CREATE_EXPERIMENT, true);
+			progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.CREATE_EXPERIMENT, true);
+		}
+		else {
+			errors.add(RDPMetadataDefinitionStage.CREATE_EXPERIMENT.getName() + ":");
+			errors.addAll(experimentDefinitionErrors);
+			errors.add("***********\n");
+		}
+		//	
+		RDPExperimentDesignPanel designPanel = 
+				(RDPExperimentDesignPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
+		Collection<String>experimentDesignErrors = designPanel.validateExperimentDesign();
+		if(experimentDesignErrors.isEmpty()) {
+			stageCompleted.put(RDPMetadataDefinitionStage.ADD_SAMPLES, true);
+			progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_SAMPLES, true);
+		}
+		else {
+			errors.add(RDPMetadataDefinitionStage.ADD_SAMPLES.getName() + ":");
+			errors.addAll(experimentDesignErrors);
+			errors.add("***********\n");
+		}
+		//	
+		RDPSamplePrepPanel prepPanel = 
+				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+		Collection<String>samplePrepDefinitionErrors = prepPanel.validateSamplePrepDefinition();
+		if(samplePrepDefinitionErrors.isEmpty()) {
+			stageCompleted.put(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA, true);
+			progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA, true);
+		}
+		else {
+			errors.add(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA.getName() + ":");
+			errors.addAll(samplePrepDefinitionErrors);
+			errors.add("***********\n");
+		}
+		//	
+		RDPMethodsPanel methodsPanel = 
+				((RDPMethodsPanel)panels.get(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS));
+		Collection<String>methodsDataErrors = methodsPanel.validateMethodsData();
+		if(methodsDataErrors.isEmpty()) {
+			stageCompleted.put(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS, true);
+			progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS, true);
+		}
+		else {
+			errors.add(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS.getName() + ":");
+			errors.addAll(methodsDataErrors);
+			errors.add("***********\n");
+		}
+		//	
+		RDPWorklistPanel worklistPanel = 
+				(RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS);
+		Collection<String>worklistErrors = worklistPanel.validateWorklistData();
+		if(worklistErrors.isEmpty()) {
+			stageCompleted.put(RDPMetadataDefinitionStage.ADD_WORKLISTS, true);
+			progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_WORKLISTS, true);
+		}
+		else {
+			errors.add(RDPMetadataDefinitionStage.ADD_WORKLISTS.getName() + ":");
+			errors.addAll(worklistErrors);
+			errors.add("***********\n");
 		}
 		return errors;
 	}

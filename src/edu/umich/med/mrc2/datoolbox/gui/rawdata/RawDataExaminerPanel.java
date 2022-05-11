@@ -97,6 +97,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.OpenStoredRawDataAnalysisProjectTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.RawDataAnalysisProjectDatabaseUploadTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MassSpectraAveragingTask;
@@ -405,9 +406,30 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	private void saveProjectToDatabaseAsNewExperiment() {
-		MessageDialog.showWarningMsg("TODO: Save Project To Database As New Experiment", this.getContentPane());
+		
+		Collection<String>errors = verifyProjectMetadata();
+		if(!errors.isEmpty()) {
+			 showProjectMetadataWizard();
+			 MessageDialog.showErrorMsg(
+					 StringUtils.join(errors, "\n"), 
+					 rawDataProjectMetadataWizard);
+			 return;
+		}
+		//	Initiate project data upload;
+		RawDataAnalysisProjectDatabaseUploadTask task = 
+				new RawDataAnalysisProjectDatabaseUploadTask(
+						MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 	
+	private Collection<String> verifyProjectMetadata() {
+		
+		Collection<String>errors = new ArrayList<String>();
+		
+		return errors;
+	}
+
 	private void sendMSMSFeaturesToIDTrackerWorkbench() {
 		
 		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
@@ -980,13 +1002,30 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				finalizeRawDataAnalysisProjectSave();
 			
 			if (e.getSource().getClass().equals(OpenStoredRawDataAnalysisProjectTask.class))
-				finalizeStoredRawDataAnalysisProjectOpen((OpenStoredRawDataAnalysisProjectTask)e.getSource());			
+				finalizeStoredRawDataAnalysisProjectOpen(
+						(OpenStoredRawDataAnalysisProjectTask)e.getSource());			
 			
 			if (e.getSource().getClass().equals(MsMsfeatureBatchExtractionTask.class))
-				finalizeRawMSMSBatchExtractionTask((MsMsfeatureBatchExtractionTask)e.getSource());
+				finalizeRawMSMSBatchExtractionTask(
+						(MsMsfeatureBatchExtractionTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(RawDataAnalysisProjectDatabaseUploadTask.class))
+				finalizeRawDataAnalysisProjectDatabaseUploadTask(
+						(RawDataAnalysisProjectDatabaseUploadTask)e.getSource());
+		
 		}
 	}
 	
+	private void finalizeRawDataAnalysisProjectDatabaseUploadTask(
+			RawDataAnalysisProjectDatabaseUploadTask task) {
+		// TODO Auto-generated method stub
+		
+		
+		MessageDialog.showInfoMsg("Data for project \"" 
+				+ task.getProject().getName() + "\" uploaded to the MetIDTRacker database", 
+				this.getContentPane());
+	}
+
 	private void finalizeRawDataFileConversionTask() {
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
