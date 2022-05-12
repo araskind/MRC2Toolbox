@@ -328,7 +328,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 				IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 			bundle.setStockSample(stockSample);
 			IDTExperimentalSample sample =
-				IDTUtils.getExperimentalSample(rs.getString("SAMPLE_ID"), conn);
+				IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);
 			bundle.setSample(sample);
 			bundle.setInjectionId(rs.getString("INJECTION_ID"));
 			

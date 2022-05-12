@@ -368,8 +368,18 @@ public class IDTUtils {
 		ps.close();
 		return sample;
 	}
+	
+	public static IDTExperimentalSample getExperimentalSampleById(
+				String sampleId) throws Exception {
+		Connection conn = ConnectionManager.getConnection();
+		IDTExperimentalSample sample = 
+				getExperimentalSampleById(sampleId, conn);
+		ConnectionManager.releaseConnection(conn);
+		return sample;
+	}	
 
-	public static IDTExperimentalSample getExperimentalSample(String sampleId, Connection conn) throws SQLException {
+	public static IDTExperimentalSample getExperimentalSampleById(
+			String sampleId, Connection conn) throws SQLException {
 
 		IDTExperimentalSample sample = null;
 		String query =

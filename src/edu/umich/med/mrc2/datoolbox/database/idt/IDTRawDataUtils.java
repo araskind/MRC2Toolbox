@@ -24,9 +24,17 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 
 public class IDTRawDataUtils {
@@ -39,7 +47,8 @@ public class IDTRawDataUtils {
 		return inj;
 	}
 
-	public static Injection getInjectionForId(String injectionId, Connection conn) throws Exception {
+	public static Injection getInjectionForId(
+			String injectionId, Connection conn) throws Exception {
 		
 		Injection inj = null;
 		String query =
@@ -62,4 +71,68 @@ public class IDTRawDataUtils {
 		ps.close();
 		return inj;
 	}
+	
+	public static Map<LIMSExperiment,Collection<DataFile>>getExistingDataFiles(
+			Collection<DataFile>filesToCheck) throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();		
+		Map<LIMSExperiment,Collection<DataFile>>existingDataFiles = 
+				getExistingDataFiles(filesToCheck, conn);
+		ConnectionManager.releaseConnection(conn);
+		return existingDataFiles;
+	}
+	
+	public static Map<LIMSExperiment,Collection<DataFile>>getExistingDataFiles(
+			Collection<DataFile>filesToCheck, Connection conn) throws Exception {
+		
+		Map<LIMSExperiment,Collection<DataFile>>existingDataFiles = 
+				new TreeMap<LIMSExperiment,Collection<DataFile>>();
+		String query = 
+				"SELECT I.DATA_FILE_NAME, I.INJECTION_TIMESTAMP,  " +
+				"I.ACQUISITION_METHOD_ID, S.SAMPLE_ID, S.EXPERIMENT_ID " +
+				"FROM INJECTION I, " +
+				"PREPARED_SAMPLE P, " +
+				"SAMPLE S " +
+				"WHERE I.PREP_ITEM_ID = P.PREP_ITEM_ID " +
+				"AND P.SAMPLE_ID= S.SAMPLE_ID " +
+				"AND I.DATA_FILE_NAME LIKE ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		for(DataFile df : filesToCheck) {
+			
+			ps.setString(1, df.getBaseName() + "%");
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				LIMSExperiment experiment = 
+						IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+				if(experiment != null) {
+					
+					if(!existingDataFiles.containsKey(experiment))
+						existingDataFiles.put(experiment, new TreeSet<DataFile>());
+					
+					DataAcquisitionMethod acqMethod = IDTDataCash.getAcquisitionMethodById(
+							rs.getString("ACQUISITION_METHOD_ID"));
+					
+					DataFile existingDataFile = 
+							new DataFile(rs.getString("DATA_FILE_NAME"), acqMethod);
+					existingDataFile.setInjectionTime(
+							new Date(rs.getDate("INJECTION_TIMESTAMP").getTime()));
+					
+					IDTExperimentalSample sample = IDTUtils.getExperimentalSampleById(
+							rs.getString("SAMPLE_ID"), conn);
+					existingDataFile.setParentSample(sample);
+					existingDataFiles.get(experiment).add(existingDataFile);
+				}				
+			}		
+		}
+		return existingDataFiles;
+	}
 }
+
+
+
+
+
+
+
+

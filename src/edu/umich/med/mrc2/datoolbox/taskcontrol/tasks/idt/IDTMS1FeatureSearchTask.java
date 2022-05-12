@@ -401,7 +401,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 			bundle.setStockSample(stockSample);
 			IDTExperimentalSample sample =
-				IDTUtils.getExperimentalSample(rs.getString("SAMPLE_ID"), conn);
+				IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);
 			bundle.setSample(sample);
 
 			features.add(bundle);

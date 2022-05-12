@@ -333,7 +333,7 @@ public class IDTMsOneFeatureSearchTask extends IDTFeatureSearchTask {
 		while (rs.next()) {
 
 			MsFeatureDataSource source = new MsFeatureDataSource(rs.getString("SOURCE_DATA_BUNDLE_ID"));
-			IDTExperimentalSample sample = IDTUtils.getExperimentalSample(rs.getString("SAMPLE_ID"),  conn);
+			IDTExperimentalSample sample = IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"),  conn);
 			source.setSample(sample);
 			LIMSExperiment experiment = IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
 			source.setExperiment(experiment);

@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -59,6 +60,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
@@ -78,6 +80,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.RawDataConversionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msms.MSMSFeatureExtractionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisProjectSetupDialog;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.edl.ExistingDataListingDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.scan.DockableScanPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTree;
@@ -374,9 +377,34 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	private void showProjectMetadataWizard() {
 		
-		if (MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+		RawDataAnalysisProject project = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
+		
+		if (project == null)
 			return;
 		
+		if (project.getMSMSDataFiles().isEmpty() 
+				|| project.getMsMsFeatureBundles().isEmpty()) {
+			MessageDialog.showErrorMsg("No data to upload in the current project");
+			return;
+		}		
+		Map<LIMSExperiment, Collection<DataFile>> existingDataFiles = 
+				new TreeMap<LIMSExperiment, Collection<DataFile>>();
+		try {
+			existingDataFiles = 
+					IDTRawDataUtils.getExistingDataFiles(project.getMSMSDataFiles());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(!existingDataFiles.isEmpty()) {
+			
+			ExistingDataListingDialog fListDialog = 
+					new ExistingDataListingDialog(existingDataFiles);
+			fListDialog.setLocationRelativeTo(this.getContentPane());
+			fListDialog.setVisible(true);
+			return;
+		}		
 		LIMSExperiment experiment = 
 				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getIdTrackerExperiment();
 		if(experiment != null) {
@@ -416,9 +444,14 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			 return;
 		}
 		//	Initiate project data upload;
+		
+		//	TODO
+		double msOneMZWindow = 10.0d;
+		
 		RawDataAnalysisProjectDatabaseUploadTask task = 
 				new RawDataAnalysisProjectDatabaseUploadTask(
-						MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
+						MRC2ToolBoxCore.getActiveRawDataAnalysisProject(),
+						msOneMZWindow);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
