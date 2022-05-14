@@ -61,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
+import edu.umich.med.mrc2.datoolbox.data.lims.SoftwareItem;
 import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 
@@ -86,7 +87,9 @@ public class IDTDataCash {
 	public static Collection<ChromatographicSeparationType> chromatographicSeparationTypes = 
 			new TreeSet<ChromatographicSeparationType>();
 	public static Collection<Manufacturer> manufacturers = 
-			new TreeSet<Manufacturer>();
+			new TreeSet<Manufacturer>();	
+	public static Collection<SoftwareItem>softwareList = 
+			new TreeSet<SoftwareItem>();
 	public static Collection<IonizationType>ionizationTypes = 
 			new TreeSet<IonizationType>();
 	public static Collection<MassAnalyzerType>massAnalyzerTypes = 
@@ -164,7 +167,7 @@ public class IDTDataCash {
 		//Collection<MobilePhase>mobilePhaseList;
 	}
 
-	public static void refreshReferenceMsMsLibraryList() {;
+	public static void refreshReferenceMsMsLibraryList() {
 		referenceMsMsLibraries.clear();
 		getReferenceMsMsLibraryList();
 	}
@@ -221,14 +224,19 @@ public class IDTDataCash {
 		getDataExtractionMethods();
 	}
 
-	public static void refreshChromatographicSeparationTypes() {;
+	public static void refreshChromatographicSeparationTypes() {
 		chromatographicSeparationTypes.clear();
 		getChromatographicSeparationTypes();
 	}
 
-	public static void refreshManufacturers() {;
+	public static void refreshManufacturers() {
 		manufacturers.clear();
 		getManufacturers();
+	}
+	
+	public static void refreshSoftwareList() {
+		softwareList.clear();
+		getSoftwareList();
 	}
 
 	public static void refreshIonizationTypes(){
@@ -541,20 +549,44 @@ public class IDTDataCash {
 		return chromatographicSeparationTypes;
 	}
 
-	public static Collection<Manufacturer> getManufacturers() {;
+	public static Collection<Manufacturer> getManufacturers() {
 
 		if(manufacturers == null)
 			manufacturers = new TreeSet<Manufacturer>();
 
 		if(manufacturers.isEmpty()) {
-			try {
-				manufacturers.addAll(IDTUtils.getManufacturerList());
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			{
+				
 			}
 		}
 		return manufacturers;
+	}
+	
+	public static Manufacturer getManufacturerByName(String name) {
+		return getManufacturers().stream().
+				filter(m -> m.getName().equals(name)).
+				findFirst().orElse(null);
+	}
+	
+	public static Collection<SoftwareItem>getSoftwareList(){
+		
+		if(softwareList == null)
+			softwareList = new TreeSet<SoftwareItem>();
+		
+		if(softwareList.isEmpty()) {
+			try {
+				softwareList.addAll(IDTUtils.getSoftwareList());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}		
+		return softwareList;
+	}
+	
+	public static SoftwareItem getSoftwareById(String id) {
+		return getSoftwareList().stream().
+				filter(s -> s.getId().equals(id)).
+				findFirst().orElse(null);
 	}
 
 	public static Collection<IonizationType> getIonizationTypes(){

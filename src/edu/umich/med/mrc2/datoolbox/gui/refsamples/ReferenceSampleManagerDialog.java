@@ -152,7 +152,7 @@ public class ReferenceSampleManagerDialog extends JDialog implements ActionListe
 			if(ReferenceSamplesManager.updateReferenceSample(
 					sample, referenceSampleEditorDialog.getSampleId(), 
 					referenceSampleEditorDialog.getSampleName(),
-					referenceSampleEditorDialog.getMoTrPACQCSampleType()) > 0) {;
+					referenceSampleEditorDialog.getMoTrPACQCSampleType()) > 0) {
 
 				refSampleTable.loadReferenceSamples();
 				refSampleTable.selectSampleRow(sample);
@@ -182,7 +182,7 @@ public class ReferenceSampleManagerDialog extends JDialog implements ActionListe
 			return;
 		}
 		try {
-			if(ReferenceSamplesManager.addReferenceSample(newRefSample) > 0) {;
+			if(ReferenceSamplesManager.addReferenceSample(newRefSample) > 0) {
 
 				refSampleTable.loadReferenceSamples();
 				refSampleTable.selectSampleRow(newRefSample);

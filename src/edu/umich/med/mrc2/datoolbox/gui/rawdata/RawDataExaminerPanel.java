@@ -383,6 +383,17 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if (project == null)
 			return;
 		
+		if(project.getIdTrackerExperiment() != null 
+				&& project.getIdTrackerExperiment().getId() != null) {
+			
+			LIMSExperiment existingExperiment = IDTDataCash.getExperimentById(
+					project.getIdTrackerExperiment().getId());
+			if(existingExperiment != null) {
+				MessageDialog.showErrorMsg("Current project already uploaded to database as\n"
+						+ "experiment " + existingExperiment.toString());
+				return;
+			}
+		}	
 		if (project.getMSMSDataFiles().isEmpty() 
 				|| project.getMsMsFeatureBundles().isEmpty()) {
 			MessageDialog.showErrorMsg("No data to upload in the current project");

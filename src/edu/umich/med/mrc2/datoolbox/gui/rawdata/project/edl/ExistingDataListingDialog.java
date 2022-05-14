@@ -70,7 +70,7 @@ public class ExistingDataListingDialog extends JDialog {
 		
 		ExistingDataFilesTable dfTable = 
 				new ExistingDataFilesTable();
-//		methodTable.setTableModelFromAcquisitionMethodsCollection(acquisitionMethods);
+		dfTable.setTableModelFromExistingDataFiles(existingDataFiles);
 		JScrollPane scroll = new JScrollPane(dfTable);
 		getContentPane().add(scroll, BorderLayout.CENTER);
 		

@@ -24,7 +24,9 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 import java.util.Collection;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -68,7 +70,13 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		processed = 0;
 		for(MsFeatureInfoBundle bundle : bundles) {
 			
+			//	Insert feature
 			
+			
+			//	Insert chromatograms
+			MsFeatureChromatogramBundle msfCb = 
+					MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+					getChromatogramMap().get(bundle.getMsFeature().getId());
 			
 			processed++;
 		}

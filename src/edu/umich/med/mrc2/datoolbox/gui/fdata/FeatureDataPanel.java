@@ -863,7 +863,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 	}
 	
-	private void cleanEmptyFeatures() {;
+	private void cleanEmptyFeatures() {
 	
 		RemoveEmptyFeaturesTask task = 
 				new RemoveEmptyFeaturesTask(currentProject, activeDataPipeline);

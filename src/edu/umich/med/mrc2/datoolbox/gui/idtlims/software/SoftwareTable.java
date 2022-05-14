@@ -19,73 +19,67 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idtlims.stock;
+package edu.umich.med.mrc2.datoolbox.gui.idtlims.software;
 
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
-import edu.umich.med.mrc2.datoolbox.data.StockSample;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.compare.StockSampleComparator;
-import edu.umich.med.mrc2.datoolbox.data.format.StockSampleFormat;
+import edu.umich.med.mrc2.datoolbox.data.lims.SoftwareItem;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.StockSampleRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
-public class StockSampleTable extends BasicTable {
+public class SoftwareTable extends BasicTable {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 2069272556941448636L;
-	private StockSampleTableModel model;
+	private SoftwareTableModel model;
 
-	public StockSampleTable() {
+	public SoftwareTable() {
 		super();
-		model = new StockSampleTableModel();
+		model = new SoftwareTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<StockSampleTableModel>(model);
-		setRowSorter(rowSorter);
-		
+		rowSorter = new TableRowSorter<SoftwareTableModel>(model);
+		setRowSorter(rowSorter);		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		getTableHeader().setReorderingAllowed(false);
-		setDefaultRenderer(StockSample.class, new StockSampleRenderer(SortProperty.ID));
+		columnModel.getColumnById(SoftwareTableModel.SOFTWARE_DESCRIPTION_COLUMN).
+			setCellRenderer(new WordWrapCellRenderer());
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		thf.getParserModel().setFormat(StockSample.class, new StockSampleFormat(SortProperty.ID));
-		thf.getParserModel().setComparator(StockSample.class, new StockSampleComparator(SortProperty.ID));
 		finalizeLayout();
 	}
 
-	public void setTableModelFromSamples(Collection<StockSample>samples) {
+	public void setTableModelFromSamples(Collection<SoftwareItem>softwareItems) {
 
 		thf.setTable(null);
-		model.setTableModelFromSamples(samples);
+		model.setTableModelFromSamples(softwareItems);
 		thf.setTable(this);
 		tca.adjustColumns();
 	}
 
-	public StockSample getSelectedSample(){
+	public SoftwareItem getSelectedSoftware(){
 
 		int row = getSelectedRow();
 		if(row == -1)
 			return null;
 
-		return (StockSample) model.getValueAt(convertRowIndexToModel(row),
-				model.getColumnIndex(StockSampleTableModel.SAMPLE_ID_COLUMN));
+		return (SoftwareItem) model.getValueAt(convertRowIndexToModel(row),
+				model.getColumnIndex(SoftwareTableModel.SOFTWARE_COLUMN));
 	}
 
-	public void selectSample(StockSample sample) {
+	public void selectSoftware(SoftwareItem item) {
 
-		int colIdx = model.getColumnIndex(StockSampleTableModel.SAMPLE_ID_COLUMN);
+		int colIdx = model.getColumnIndex(SoftwareTableModel.SOFTWARE_COLUMN);
 		if(colIdx == -1)
 			return;
 		
 		for(int i=0; i<model.getRowCount(); i++) {
 
-			if(getValueAt(i,colIdx).equals(sample)){
+			if(model.getValueAt(i,colIdx).equals(item)){
 				
 				int row = convertRowIndexToView(i);			
 				setRowSelectionInterval(row, row);

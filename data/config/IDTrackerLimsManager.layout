@@ -38,43 +38,6 @@
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableIdProjectTree</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
-													<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
-													<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
-													<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
-												</key>
-												<item key="map" type="p">
-													<version>0</version>
-													<format>dock.PlaceholderList</format>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
-														</key>
-													</entry>
-												</item>
-											</entry>
 										</placeholders>
 									</content>
 								</delegate>
@@ -136,17 +99,19 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600214436454" orientation="HORIZONTAL" divider="0.2562358276643991">
-											<leaf id="0" nodeId="1600213801751">
+										<node nodeId="1652463396798" orientation="HORIZONTAL" divider="0.25">
+											<leaf id="2" nodeId="1652463396800">
 												<placeholders>
 													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1600214464138" orientation="VERTICAL" divider="0.527542372881356">
-												<leaf id="1" nodeId="1600213801754">
+											<node nodeId="1652463830888" orientation="VERTICAL" divider="0.49422222222222223">
+												<leaf id="0" nodeId="1652463396802">
 													<placeholders>
 														<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
+														<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
 														<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
+														<placeholder>dock.single.DockableSOPProtocolsManagerPanel</placeholder>
 														<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
 														<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
 													</placeholders>
@@ -155,7 +120,21 @@
 														<format>dock.PlaceholderList</format>
 														<entry>
 															<key shared="false">
+																<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
 																<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableSOPProtocolsManagerPanel</placeholder>
 															</key>
 															<item key="convert" type="b">true</item>
 															<item key="convert-keys" type="a"/>
@@ -166,6 +145,36 @@
 															</key>
 															<item key="convert" type="b">true</item>
 															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
+															</key>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
+															</key>
 														</entry>
 														<entry>
 															<key shared="false">
@@ -183,19 +192,39 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="2" nodeId="1600214464136">
+												<leaf id="1" nodeId="1652463830886">
 													<placeholders>
-														<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
 														<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
-														<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
+														<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
 														<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
 														<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
-														<placeholder>dock.single.DockableSOPProtocolsManagerPanel</placeholder>
+														<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
 														<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
 													</placeholders>
 													<placeholder-map>
 														<version>0</version>
 														<format>dock.PlaceholderList</format>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
 														<entry>
 															<key shared="false">
 																<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
@@ -212,35 +241,7 @@
 														</entry>
 														<entry>
 															<key shared="false">
-																<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
-															</key>
-															<item key="convert" type="b">true</item>
-															<item key="convert-keys" type="a"/>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
-															</key>
-															<item key="convert" type="b">true</item>
-															<item key="convert-keys" type="a"/>
-														</entry>
-														<entry>
-															<key shared="false">
 																<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
-															</key>
-															<item key="convert" type="b">true</item>
-															<item key="convert-keys" type="a"/>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
-															</key>
-															<item key="convert" type="b">true</item>
-															<item key="convert-keys" type="a"/>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableSOPProtocolsManagerPanel</placeholder>
 															</key>
 															<item key="convert" type="b">true</item>
 															<item key="convert-keys" type="a"/>
@@ -259,21 +260,25 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
-										<replacement id="dockablesingle DockableIdProjectTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableIdProjectTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>2</selected>
+										<selected>5</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableStockSampleManagerPanel</item>
+											</entry>
 											<entry>
 												<key shared="false">
 													<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
@@ -284,9 +289,23 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableIDTrackerExperimentDesignEditorPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableSOPProtocolsManagerPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableSOPProtocolsManagerPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -298,9 +317,39 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableSamplePrepManagerPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
+												</key>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -312,8 +361,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">2</item>
-												<item key="dock.id" type="i">2</item>
+												<item key="dock.index" type="i">4</item>
+												<item key="dock.id" type="i">4</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableInstrumentSequenceManagerPanel</item>
 											</entry>
 											<entry>
@@ -326,18 +375,38 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">3</item>
-												<item key="dock.id" type="i">3</item>
+												<item key="dock.index" type="i">5</item>
+												<item key="dock.id" type="i">5</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableIDTrackerResultsOverviewPanel</item>
 											</entry>
 										</placeholders>
 									</layout>
 									<children ignore="false">
 										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableStockSampleManagerPanel">
+												<replacement id="dockablesingle DockableStockSampleManagerPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableStockSampleManagerPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
 											<layout factory="predefined" placeholder="dock.single.DockableIDTrackerExperimentDesignEditorPanel">
 												<replacement id="dockablesingle DockableIDTrackerExperimentDesignEditorPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>DockableIDTrackerExperimentDesignEditorPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableSOPProtocolsManagerPanel">
+												<replacement id="dockablesingle DockableSOPProtocolsManagerPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableSOPProtocolsManagerPanel</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -377,10 +446,52 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>6</selected>
+										<selected>0</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableAcquisitionMethodManagerPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableDataExtractionMethodManagerPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableSoftwareManagerPanel</item>
+											</entry>
 											<entry>
 												<key shared="false">
 													<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
@@ -391,8 +502,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableInstrumentManagerPanel</item>
 											</entry>
 											<entry>
@@ -405,37 +516,9 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
+												<item key="dock.index" type="i">4</item>
+												<item key="dock.id" type="i">4</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableChromatographicColumnManagerPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">2</item>
-												<item key="dock.id" type="i">2</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableDataExtractionMethodManagerPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">3</item>
-												<item key="dock.id" type="i">3</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableAcquisitionMethodManagerPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -447,41 +530,43 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">4</item>
-												<item key="dock.id" type="i">4</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableMobilePhaseManagerPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
 												<item key="dock.index" type="i">5</item>
 												<item key="dock.id" type="i">5</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableStockSampleManagerPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableSOPProtocolsManagerPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">6</item>
-												<item key="dock.id" type="i">6</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableSOPProtocolsManagerPanel</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMobilePhaseManagerPanel</item>
 											</entry>
 										</placeholders>
 									</layout>
 									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableAcquisitionMethodManagerPanel">
+												<replacement id="dockablesingle DockableAcquisitionMethodManagerPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableAcquisitionMethodManagerPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableDataExtractionMethodManagerPanel">
+												<replacement id="dockablesingle DockableDataExtractionMethodManagerPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableDataExtractionMethodManagerPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableSoftwareManagerPanel">
+												<replacement id="dockablesingle DockableSoftwareManagerPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableSoftwareManagerPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
 										<child>
 											<layout factory="predefined" placeholder="dock.single.DockableInstrumentManagerPanel">
 												<replacement id="dockablesingle DockableInstrumentManagerPanel"/>
@@ -503,26 +588,6 @@
 											<children ignore="false"/>
 										</child>
 										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableDataExtractionMethodManagerPanel">
-												<replacement id="dockablesingle DockableDataExtractionMethodManagerPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableDataExtractionMethodManagerPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableAcquisitionMethodManagerPanel">
-												<replacement id="dockablesingle DockableAcquisitionMethodManagerPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableAcquisitionMethodManagerPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
 											<layout factory="predefined" placeholder="dock.single.DockableMobilePhaseManagerPanel">
 												<replacement id="dockablesingle DockableMobilePhaseManagerPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
@@ -532,27 +597,17 @@
 											</layout>
 											<children ignore="false"/>
 										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableStockSampleManagerPanel">
-												<replacement id="dockablesingle DockableStockSampleManagerPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableStockSampleManagerPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableSOPProtocolsManagerPanel">
-												<replacement id="dockablesingle DockableSOPProtocolsManagerPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableSOPProtocolsManagerPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
+										<replacement id="dockablesingle DockableIdProjectTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableIdProjectTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>
@@ -582,33 +637,6 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DockableAcquisitionMethodManagerPanel" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
-											<backup-path>
-												<node location="LEFT" size="0.25" id="1600213801749"/>
-												<node location="RIGHT" size="0.7225360954174513" id="1600214436454"/>
-												<node location="BOTTOM" size="0.5104079933388843" id="1600214464138"/>
-												<leaf id="1600214464136"/>
-											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>3</index>
-											<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
 						<entry id="single DockableMobilePhaseManagerPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
@@ -622,13 +650,13 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
 											<backup-path>
-												<node location="RIGHT" size="0.7225360954174513" id="1600214436454"/>
-												<node location="BOTTOM" size="0.5104079933388843" id="1600214464138"/>
-												<leaf id="1600214464136"/>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="BOTTOM" size="0.5057777777777778" id="1652463830888"/>
+												<leaf id="1652463830886"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>4</index>
+											<index>5</index>
 											<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
 										</property>
 									</location>
@@ -648,13 +676,13 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableSOPProtocolsManagerPanel</placeholder>
 											<backup-path>
-												<node location="RIGHT" size="0.7225360954174513" id="1600214436454"/>
-												<node location="BOTTOM" size="0.5104079933388843" id="1600214464138"/>
-												<leaf id="1600214464136"/>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="TOP" size="0.49422222222222223" id="1652463830888"/>
+												<leaf id="1652463396802"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>6</index>
+											<index>2</index>
 											<placeholder>dock.single.DockableSOPProtocolsManagerPanel</placeholder>
 										</property>
 									</location>
@@ -663,27 +691,9 @@
 						</entry>
 						<entry id="single DockableSamplePrepManagerPanel" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
-								<property id="dock.mode.minimized">
-									<mode>dock.mode.minimized</mode>
-									<root>ccontrol north</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="flap dock">
-											<index>0</index>
-											<holding>false</holding>
-											<size>400</size>
-											<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>1</index>
-											<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
-										</property>
-									</location>
-								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -692,58 +702,40 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
 											<backup-path>
-												<node location="RIGHT" size="0.7437641723356009" id="1600214436454"/>
-												<node location="TOP" size="0.527542372881356" id="1600214464138"/>
-												<leaf id="1600213801754"/>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="TOP" size="0.49422222222222223" id="1652463830888"/>
+												<leaf id="1652463396802"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>3</index>
 											<placeholder>dock.single.DockableSamplePrepManagerPanel</placeholder>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableIDTrackerResultsOverviewPanel" current="dock.mode.normal">
+						<entry id="single DockableSoftwareManagerPanel" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
-								<property id="dock.mode.minimized">
-									<mode>dock.mode.minimized</mode>
-									<root>ccontrol north</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="flap dock">
-											<index>0</index>
-											<holding>false</holding>
-											<size>400</size>
-											<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>3</index>
-											<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
-										</property>
-									</location>
-								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
+											<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
 											<backup-path>
-												<node location="RIGHT" size="0.7437641723356009" id="1600214436454"/>
-												<node location="TOP" size="0.527542372881356" id="1600214464138"/>
-												<leaf id="1600213801754"/>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="BOTTOM" size="0.5057777777777778" id="1652463830888"/>
+												<leaf id="1652463830886"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>3</index>
-											<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
+											<index>2</index>
+											<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
 										</property>
 									</location>
 								</property>
@@ -751,23 +743,9 @@
 						</entry>
 						<entry id="single DockableIdProjectTree" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
-								<property id="dock.mode.minimized">
-									<mode>dock.mode.minimized</mode>
-									<root>ccontrol north</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="flap dock">
-											<index>0</index>
-											<holding>false</holding>
-											<size>400</size>
-											<placeholder>dock.single.DockableIdProjectTree</placeholder>
-										</property>
-									</location>
-								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -776,9 +754,8 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableIdProjectTree</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.25" id="1600213801749"/>
-												<node location="LEFT" size="0.2154255319148936" id="1600214436454"/>
-												<leaf id="1600213801751"/>
+												<node location="LEFT" size="0.25" id="1652463396798"/>
+												<leaf id="1652463396800"/>
 											</backup-path>
 										</property>
 									</location>
@@ -798,14 +775,13 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.25" id="1600213801749"/>
-												<node location="RIGHT" size="0.7225360954174513" id="1600214436454"/>
-												<node location="BOTTOM" size="0.5104079933388843" id="1600214464138"/>
-												<leaf id="1600214464136"/>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="BOTTOM" size="0.5057777777777778" id="1652463830888"/>
+												<leaf id="1652463830886"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>2</index>
+											<index>1</index>
 											<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
 										</property>
 									</location>
@@ -814,50 +790,6 @@
 						</entry>
 						<entry id="single DockableInstrumentSequenceManagerPanel" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.minimized</mode>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.minimized">
-									<mode>dock.mode.minimized</mode>
-									<root>ccontrol north</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="flap dock">
-											<index>0</index>
-											<holding>false</holding>
-											<size>400</size>
-											<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>2</index>
-											<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
-										</property>
-									</location>
-								</property>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
-											<backup-path>
-												<node location="RIGHT" size="0.7437641723356009" id="1600214436454"/>
-												<node location="TOP" size="0.527542372881356" id="1600214464138"/>
-												<leaf id="1600213801754"/>
-											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>2</index>
-											<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single DockableInstrumentManagerPanel" current="dock.mode.normal">
-							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
@@ -867,17 +799,16 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
+											<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.25" id="1600213801749"/>
-												<node location="RIGHT" size="0.7225360954174513" id="1600214436454"/>
-												<node location="BOTTOM" size="0.5104079933388843" id="1600214464138"/>
-												<leaf id="1600214464136"/>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="TOP" size="0.49422222222222223" id="1652463830888"/>
+												<leaf id="1652463396802"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
+											<index>4</index>
+											<placeholder>dock.single.DockableInstrumentSequenceManagerPanel</placeholder>
 										</property>
 									</location>
 								</property>
@@ -885,50 +816,6 @@
 						</entry>
 						<entry id="single DockableIDTrackerExperimentDesignEditorPanel" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.minimized</mode>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.minimized">
-									<mode>dock.mode.minimized</mode>
-									<root>ccontrol north</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="flap dock">
-											<index>0</index>
-											<holding>false</holding>
-											<size>400</size>
-											<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
-										</property>
-									</location>
-								</property>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
-											<backup-path>
-												<node location="RIGHT" size="0.7437641723356009" id="1600214436454"/>
-												<node location="TOP" size="0.527542372881356" id="1600214464138"/>
-												<leaf id="1600213801754"/>
-											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single DockableStockSampleManagerPanel" current="dock.mode.normal">
-							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
@@ -938,16 +825,16 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
+											<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
 											<backup-path>
-												<node location="RIGHT" size="0.7225360954174513" id="1600214436454"/>
-												<node location="BOTTOM" size="0.5104079933388843" id="1600214464138"/>
-												<leaf id="1600214464136"/>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="TOP" size="0.49422222222222223" id="1652463830888"/>
+												<leaf id="1652463396802"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>5</index>
-											<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
+											<index>1</index>
+											<placeholder>dock.single.DockableIDTrackerExperimentDesignEditorPanel</placeholder>
 										</property>
 									</location>
 								</property>
@@ -966,15 +853,114 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.25" id="1600213801749"/>
-												<node location="RIGHT" size="0.7225360954174513" id="1600214436454"/>
-												<node location="BOTTOM" size="0.5104079933388843" id="1600214464138"/>
-												<leaf id="1600214464136"/>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="BOTTOM" size="0.5057777777777778" id="1652463830888"/>
+												<leaf id="1652463830886"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>4</index>
 											<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableAcquisitionMethodManagerPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="BOTTOM" size="0.75" id="1652463830888"/>
+												<leaf id="1652463830886"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableIDTrackerResultsOverviewPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="TOP" size="0.49422222222222223" id="1652463830888"/>
+												<leaf id="1652463396802"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>5</index>
+											<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableInstrumentManagerPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="BOTTOM" size="0.5057777777777778" id="1652463830888"/>
+												<leaf id="1652463830886"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>3</index>
+											<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableStockSampleManagerPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
+											<backup-path>
+												<node location="RIGHT" size="0.75" id="1652463396798"/>
+												<node location="TOP" size="0.49422222222222223" id="1652463830888"/>
+												<leaf id="1652463396802"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableStockSampleManagerPanel</placeholder>
 										</property>
 									</location>
 								</property>

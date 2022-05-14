@@ -698,7 +698,15 @@ public enum MainActionCommands {
 	//	ID sample editor
 	SHOW_STOCK_SAMPLE_SELECTOR_COMMAND("Show stock sample selector"),
 	SELECT_STOCK_SAMPLE_COMMAND("Select stock sample"),
-
+	
+	//	Software list editor
+	ADD_SOFTWARE_COMMAND("Add software"),
+	EDIT_SOFTWARE_COMMAND("Edit software"),
+	SAVE_SOFTWARE_DETAILS_COMMAND("Save software details"),
+	DELETE_SOFTWARE_COMMAND("Delete software"),
+	SHOW_SOFTWARE_VENDOR_SELECTOR_COMMAND("Show software vendor selector"),
+	SELECT_SOFTWARE_VENDOR_COMMAND("Select software vendor"),
+	
 	//	Acquisition method editor
 	ADD_ACQUISITION_METHOD_DIALOG_COMMAND("Add acquisition method dialog"),
 	ADD_ACQUISITION_METHOD_COMMAND("Add acquisition method"),

@@ -1,81 +1,94 @@
 /*******************************************************************************
- * 
+ *
  * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Contributors:
  * Alexander Raskind (araskind@med.umich.edu)
- *  
+ *
  ******************************************************************************/
 
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-public class Manufacturer implements Serializable, Comparable<Manufacturer>{
+public class SoftwareItem implements Serializable, Comparable<SoftwareItem>{
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4202108621145097640L;
+	private static final long serialVersionUID = 1559675727554482728L;
+	
+	private String id;
 	private String name;
-	private String catalogWebAddress;
-
-	public Manufacturer(String name, String catalogWebAddress) {
+	private String description;
+	private Manufacturer vendor;
+	
+	public SoftwareItem(
+			String id, 
+			String name, 
+			String description, 
+			Manufacturer vendor) {
 		super();
+		this.id = id;
 		this.name = name;
-		this.catalogWebAddress = catalogWebAddress;
+		this.description = description;
+		this.vendor = vendor;
 	}
 
-	@Override
-	public int compareTo(Manufacturer o) {
-		return this.name.compareTo(o.getName());
+	public String getId() {
+		return id;
 	}
 
-	/**
-	 * @return the name
-	 */
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @return the description
-	 */
-	public String getCatalogWebAddress() {
-		return catalogWebAddress;
-	}
-
-	/**
-	 * @param name the name to set
-	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	/**
-	 * @param description the description to set
-	 */
-	public void setCatalogWebAddress(String catalogWebAddress) {
-		this.catalogWebAddress = catalogWebAddress;
+	public String getDescription() {
+		return description;
 	}
 
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Manufacturer getVendor() {
+		return vendor;
+	}
+
+	public void setVendor(Manufacturer vendor) {
+		this.vendor = vendor;
+	}
+
+	@Override
+	public int compareTo(SoftwareItem o) {
+		return name.compareTo(o.getName());
+	}
+	
 	@Override
 	public String toString() {
 		return name;
 	}
-
+	
     @Override
     public boolean equals(Object obj) {
 
@@ -85,12 +98,12 @@ public class Manufacturer implements Serializable, Comparable<Manufacturer>{
 		if (obj == this)
 			return true;
 		
-        if (!Manufacturer.class.isAssignableFrom(obj.getClass()))
+        if (!SoftwareItem.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        final Manufacturer other = (Manufacturer) obj;
+        final SoftwareItem other = (SoftwareItem) obj;
 
-        if ((this.name == null) ? (other.getName() != null) : !this.name.equals(other.getName()))
+        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
 
         return true;
@@ -100,15 +113,8 @@ public class Manufacturer implements Serializable, Comparable<Manufacturer>{
     public int hashCode() {
 
         int hash = 3;
-        hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
+
 }
-
-
-
-
-
-
-
-

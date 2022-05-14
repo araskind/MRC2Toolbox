@@ -23,14 +23,13 @@ package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.edl;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
-import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -42,55 +41,42 @@ public class ExistingDataFilesTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = 5386419982114129215L;
 
-	public static final String SAMPLE_COLUMN = "Sample ID";
-	public static final String SAMPLE_PREP_COLUMN = "Prep ID";
-	public static final String SAMPLE_PREP_ITEM_COLUMN = "Prep item ID";
+	public static final String EXPERIMENT_COLUMN = "Experiment";
+	public static final String SAMPLE_COLUMN = "Sample";
 	public static final String DATA_FILE_COLUMN = "Data file";
 	public static final String ACQ_METHOD_COLUMN = "Acquisition method";
 	public static final String INJECTION_TIME_COLUMN = "Injection time";
-	public static final String INJECTION_VOLUME_COLUMN = "Injection volume";
 
 	public ExistingDataFilesTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
+			new ColumnContext(EXPERIMENT_COLUMN, LIMSExperiment.class, false),
+			new ColumnContext(SAMPLE_COLUMN, ExperimentalSample.class, false),
 			new ColumnContext(DATA_FILE_COLUMN, DataFile.class, false),
-			new ColumnContext(SAMPLE_COLUMN, ExperimentalSample.class, true),
-			new ColumnContext(SAMPLE_PREP_ITEM_COLUMN, String.class, false),
 			new ColumnContext(ACQ_METHOD_COLUMN, DataAcquisitionMethod.class, false),
 			new ColumnContext(INJECTION_TIME_COLUMN, Date.class, false),
-			new ColumnContext(INJECTION_VOLUME_COLUMN, Double.class, false),
-			new ColumnContext(SAMPLE_PREP_COLUMN, LIMSSamplePreparation.class, false),
 		};
 	}
 
-	public void setTableModelFromLimsWorklistItems(Collection<LIMSWorklistItem>items) {
+	public void setTableModelFromExistingDataFiles(
+			Map<LIMSExperiment, Collection<DataFile>>existingDataFiles) {
 
 		setRowCount(0);
-
-		for (LIMSWorklistItem item : items) {
-
-			Object[] obj = {
-				item.getDataFile(),
-				item.getSample(),
-				item.getPrepItemId(),
-				item.getAcquisitionMethod(),
-				item.getTimeStamp(),
-				item.getInjectionVolume(),
-				item.getSamplePrep(),
-			};
-			super.addRow(obj);
+		for (Entry<LIMSExperiment, Collection<DataFile>>entry : existingDataFiles.entrySet()) {
+			
+			LIMSExperiment experiment = entry.getKey();
+			for(DataFile df : entry.getValue()) {
+				
+				Object[] obj = {
+						experiment,
+						df.getParentSample(),
+						df,
+						df.getDataAcquisitionMethod(),
+						df.getInjectionTime(),
+					};
+				super.addRow(obj);
+			}
 		}
-	}
-
-	public void setTableModelFromLimsWorklist(Worklist wkl) {
-
-		Collection<LIMSWorklistItem>items =
-				wkl.getTimeSortedWorklistItems().stream().
-				filter(LIMSWorklistItem.class::isInstance).
-				map(LIMSWorklistItem.class::cast).
-				collect(Collectors.toList());
-
-		setTableModelFromLimsWorklistItems(items);
 	}
 }

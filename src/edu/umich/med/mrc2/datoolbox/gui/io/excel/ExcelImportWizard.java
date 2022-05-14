@@ -250,7 +250,7 @@ public class ExcelImportWizard extends JDialog
 	}
 
 	@Override
-	public void dispose() {;
+	public void dispose() {
 		savePreferences();
 		super.dispose();
 	}

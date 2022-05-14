@@ -73,6 +73,10 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			IDTDataCash.refreshManufacturers();
 			processed = processed + 3;
 			
+			taskDescription = "Refreshing manufacturers list ";
+			IDTDataCash.refreshSoftwareList();
+			processed = processed + 3;
+			
 			taskDescription = "Refreshing ionization types";
 			IDTDataCash.refreshIonizationTypes();
 			processed = processed + 3;

@@ -21,11 +21,21 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.TreeSet;
+
+import javax.xml.bind.DatatypeConverter;
+
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
@@ -42,6 +52,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 	private RawDataAnalysisProject project;
 	private double msOneMZWindow;
 	private int processedFiles;
+	private DataExtractionMethod dataExtractionMethod;
 	
 	public RawDataAnalysisProjectDatabaseUploadTask(
 			RawDataAnalysisProject project,
@@ -84,9 +95,70 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 		if(!insertSamples()) {
 			setStatus(TaskStatus.ERROR);
 			return;
-		}	
+		}
+		if(!insertSampleprep()) {
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
+		if(!insertMethods()) {
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
+		if(!insertInjections()) {
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
+	}
+
+	private boolean insertInjections() {
+		// TODO Auto-generated method stub
+		
+		//	TODO set injction IDs for data files
+		return false;
 	}
 	
+	private boolean insertMethods() {
+		// TODO Auto-generated method stub
+		
+		//	Data acquisition methods
+		
+		
+		//	Tracker data extraction method
+		if(!uploadDataAnalysisMethod())
+			return false;
+		
+		return true;
+	}
+	
+	private boolean uploadDataAnalysisMethod() {
+		
+		Document methodDocument = new Document();
+		Element paramsElement = 
+				project.getMsmsExtractionParameterSet().getXmlElement();
+		methodDocument.setContent(paramsElement);	
+		String methodString = 
+				new XMLOutputter().outputString(methodDocument);
+		String methodMd5 = "";
+	    try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(methodString.getBytes(StandardCharsets.UTF_8));
+			methodMd5 = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+	    //	Check if method present using MD5
+	    
+	    //	Upload new method
+	    
+	    
+	    return false;
+	}
+
+	private boolean insertSampleprep() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	private boolean insertSamples() {
 		
 		TreeSet<ExperimentalSample> samples = 
@@ -111,6 +183,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 				}
 				catch (Exception e) {
 					e.printStackTrace();
+					return false;
 				}
 			}		
 		}		

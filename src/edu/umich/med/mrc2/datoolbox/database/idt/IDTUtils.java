@@ -70,6 +70,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
+import edu.umich.med.mrc2.datoolbox.data.lims.SoftwareItem;
 import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
@@ -584,6 +585,91 @@ public class IDTUtils {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		return manufacturers;
+	}
+	
+	public static Collection<? extends SoftwareItem>getSoftwareList() throws Exception {
+
+		Collection<SoftwareItem>softwareList = new TreeSet<SoftwareItem>();
+		Connection conn = ConnectionManager.getConnection();
+		String query  =
+			"SELECT SOFTWARE_ID, SOFTWARE_NAME, SOFTWARE_DESCRIPTION, "
+			+ "SOFTWARE_VENDOR FROM DATA_ANALYSIS_SOFTWARE";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()) {
+			
+			Manufacturer vendor = 
+					IDTDataCash.getManufacturerByName(rs.getString("SOFTWARE_VENDOR"));
+
+			SoftwareItem item = new SoftwareItem(
+					rs.getString("SOFTWARE_ID"),
+					rs.getString("SOFTWARE_NAME"),
+					rs.getString("SOFTWARE_DESCRIPTION"),
+					vendor);
+
+			softwareList.add(item);
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return softwareList;
+	}
+	
+	public static String addNewSoftware(SoftwareItem newSoftwareItem) throws Exception{
+
+		Connection conn = ConnectionManager.getConnection();
+		String id = SQLUtils.getNextIdFromSequence(conn, 
+				"SOFTWARE_SEQ",
+				DataPrefix.SOFTWARE,
+				"0",
+				4);
+		newSoftwareItem.setId(id);
+		
+		String query  =
+			"INSERT INTO DATA_ANALYSIS_SOFTWARE(SOFTWARE_ID, "
+			+ "SOFTWARE_NAME, SOFTWARE_DESCRIPTION, SOFTWARE_VENDOR) " +
+			"VALUES(?, ?, ?, ?)";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		ps.setString(1, id);
+		ps.setString(2, newSoftwareItem.getName());
+		ps.setString(3, newSoftwareItem.getDescription());
+		ps.setString(4, newSoftwareItem.getVendor().getName());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return id;
+	}
+	
+	public static void editSoftware(SoftwareItem itemToEdit) throws Exception{
+
+		Connection conn = ConnectionManager.getConnection();	
+		String query  =
+			"UPDATE DATA_ANALYSIS_SOFTWARE SET SOFTWARE_NAME = ?, "
+			+ "SOFTWARE_DESCRIPTION = ?, SOFTWARE_VENDOR = ? " +
+			"WHERE SOFTWARE_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		ps.setString(1, itemToEdit.getName());
+		ps.setString(2, itemToEdit.getDescription());
+		ps.setString(3, itemToEdit.getVendor().getName());
+		ps.setString(4, itemToEdit.getId());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void deleteSoftware(SoftwareItem itemToDelete) throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();	
+		String query  =
+			"DELETE FROM DATA_ANALYSIS_SOFTWARE WHERE SOFTWARE_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		ps.setString(1, itemToDelete.getId());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 
 	public static String addNewDataExtractionMethod(

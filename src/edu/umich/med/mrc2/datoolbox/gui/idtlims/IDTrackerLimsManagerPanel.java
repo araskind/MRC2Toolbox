@@ -76,6 +76,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.project.IDTrackerProjectDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.projecttree.DockableIdProjectTree;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.projecttree.IdProjectTree;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.results.DockableIDTrackerResultsOverviewPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.software.DockableSoftwareManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.sop.DockableSOPProtocolsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.DockableStockSampleManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.wizard.IDTrackerDataLoadWizard;
@@ -120,7 +121,8 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	private DockableIDTrackerExperimentDesignEditorPanel designEditor;
 	private DockableStockSampleManagerPanel stockSampleManagerPanel;
 	private DockableInstrumentManagerPanel instrumentManagerPanel;
-	private DockableAcquisitionMethodManagerPanel acquisitionMethodManagerPanel;
+	private DockableAcquisitionMethodManagerPanel acquisitionMethodManagerPanel;	
+	private DockableSoftwareManagerPanel softwareManagerPanel;
 	private DockableMobilePhaseManagerPanel mobilePhaseManagerPanel;
 	private DockableChromatographicColumnManagerPanel cromatographicColumnManagerPanel;
 	private DockableDataExtractionMethodManagerPanel dataExtractionMethodManagerPanel;
@@ -155,6 +157,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		stockSampleManagerPanel = new DockableStockSampleManagerPanel(this);
 		instrumentManagerPanel = new DockableInstrumentManagerPanel(this);
 		acquisitionMethodManagerPanel = new DockableAcquisitionMethodManagerPanel(this);
+		softwareManagerPanel = new DockableSoftwareManagerPanel(this);
 		mobilePhaseManagerPanel = new DockableMobilePhaseManagerPanel(this);
 		cromatographicColumnManagerPanel = new DockableChromatographicColumnManagerPanel(this);
 		dataExtractionMethodManagerPanel = new DockableDataExtractionMethodManagerPanel(this);
@@ -164,7 +167,8 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		resultsOverviewPanel = new DockableIDTrackerResultsOverviewPanel(this);
 
 		grid.add(0, 0, 75, 100, designEditor, stockSampleManagerPanel, instrumentManagerPanel,
-				acquisitionMethodManagerPanel, mobilePhaseManagerPanel, cromatographicColumnManagerPanel,
+				acquisitionMethodManagerPanel, softwareManagerPanel, 
+				mobilePhaseManagerPanel, cromatographicColumnManagerPanel,
 				dataExtractionMethodManagerPanel, protocolManagerPanel, samplePrepManagerPanel,
 				instrumentSequenceManagerPanel, resultsOverviewPanel);
 
