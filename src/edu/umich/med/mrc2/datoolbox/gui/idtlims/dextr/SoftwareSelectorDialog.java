@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idtlims.software;
+package edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -41,28 +41,28 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.gui.idtlims.vendor.VendorTable;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.software.SoftwareTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class VendorSelectorDialog extends JDialog {
+public class SoftwareSelectorDialog extends JDialog {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -4134991839687534786L;
 
-	private static final Icon vendorIcon = GuiUtils.getIcon("vendor", 32);
+	private static final Icon softwareIcon = GuiUtils.getIcon("software", 32);
 	
-	private VendorTable vendorTable;
+	private SoftwareTable softwareTable;
 	
-	public VendorSelectorDialog(ActionListener listener) {
+	public SoftwareSelectorDialog(ActionListener listener) {
 		
 		super();
-		setTitle("Select software vendor");
-		setIconImage(((ImageIcon) vendorIcon).getImage());
+		setTitle("Select software package");
+		setIconImage(((ImageIcon) softwareIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -73,10 +73,10 @@ public class VendorSelectorDialog extends JDialog {
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		
-		vendorTable = new VendorTable();
-		vendorTable.setTableModelFromManufacturers(
-				IDTDataCash.getManufacturers());
-		JScrollPane scroll = new JScrollPane(vendorTable);
+		softwareTable = new SoftwareTable();
+		softwareTable.setTableModelFromSoftwareList(
+				IDTDataCash.getSoftwareList());
+		JScrollPane scroll = new JScrollPane(softwareTable);
 		dataPanel.add(scroll, BorderLayout.CENTER);
 
 		JPanel panel = new JPanel();
@@ -93,8 +93,8 @@ public class VendorSelectorDialog extends JDialog {
 			}
 		};
 		btnCancel.addActionListener(al);
-		JButton btnSave = new JButton(MainActionCommands.SELECT_SOFTWARE_VENDOR_COMMAND.getName());
-		btnSave.setActionCommand(MainActionCommands.SELECT_SOFTWARE_VENDOR_COMMAND.getName());
+		JButton btnSave = new JButton(MainActionCommands.SELECT_SOFTWARE_COMMAND.getName());
+		btnSave.setActionCommand(MainActionCommands.SELECT_SOFTWARE_COMMAND.getName());
 		btnSave.addActionListener(listener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
@@ -103,8 +103,8 @@ public class VendorSelectorDialog extends JDialog {
 		pack();
 	}
 	
-	public Manufacturer getSelectedVendor() {
-		return vendorTable.getSelectedVendor();
+	public DataProcessingSoftware getSelectedSoftware() {
+		return softwareTable.getSelectedSoftware();
 	}
 }
 

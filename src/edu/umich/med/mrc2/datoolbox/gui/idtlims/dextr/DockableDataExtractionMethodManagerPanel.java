@@ -259,8 +259,7 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 				e.printStackTrace();
 			}
 		}
-		//	TODO remove when tested
-		//	 IDTDataCash.refreshDataExtractionMethodList();
+		IDTDataCash.refreshDataExtractionMethodList();
 		loadMethods();
 		dataExtractionMethodEditorDialog.dispose();
 	}

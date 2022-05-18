@@ -90,6 +90,7 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 	private JLabel idValueLabel;
 	private JLabel methodAuthorLabel;
 	private JTextField softwareTextField;
+	private SoftwareSelectorDialog softwareSelectorDialog;
 
 	public DataExtractionMethodEditorDialog(DataExtractionMethod method, ActionListener actionListener) {
 		super();
@@ -332,14 +333,21 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 			setMethodFile();
 	}
 	
-	private void selectSoftware() {
-		// TODO Auto-generated method stub
-		
-	}
-
 	private void showSoftwareSelector() {
-		// TODO Auto-generated method stub
+
+		softwareSelectorDialog = new SoftwareSelectorDialog(this);
+		softwareSelectorDialog.setLocationRelativeTo(this);
+		softwareSelectorDialog.setVisible(true);
+	}
+	
+	private void selectSoftware() {
 		
+		if(softwareSelectorDialog.getSelectedSoftware() != null) {
+			
+			software = softwareSelectorDialog.getSelectedSoftware();
+			softwareTextField.setText(software.getName());
+			softwareSelectorDialog.dispose();
+		}
 	}
 
 	private void setMethodFile() {
