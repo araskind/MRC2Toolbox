@@ -35,7 +35,6 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 import java.util.TreeSet;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -349,7 +348,7 @@ public class AcquisitionMethodUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"INSERT INTO CHROMATOGRAPHIC_COLUMN(COLUMN_ID, COLUMN_NAME, "
-			+ "SEPARATION_TYPE, CHEMISTRY, MANUFACTURER, CATALOG_NUMBER) " +
+			+ "SEPARATION_TYPE, CHEMISTRY, MANUFACTURER_ID, CATALOG_NUMBER) " +
 			"VALUES(?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		String nextId = SQLUtils.getNextIdFromSequence(conn, 
@@ -362,7 +361,7 @@ public class AcquisitionMethodUtils {
 		ps.setString(2, column.getColumnName());
 		ps.setString(3, column.getSeparationType().getId());
 		ps.setString(4, column.getChemistry());
-		ps.setString(5, column.getManufacturer().getName());
+		ps.setString(5, column.getManufacturer().getId());
 		ps.setString(6, column.getCatalogNumber());
 
 		ps.executeUpdate();
@@ -376,14 +375,14 @@ public class AcquisitionMethodUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"UPDATE CHROMATOGRAPHIC_COLUMN SET COLUMN_NAME = ?, SEPARATION_TYPE = ?, "+
-			"CHEMISTRY = ?, MANUFACTURER = ?, CATALOG_NUMBER = ? " +
+			"CHEMISTRY = ?, MANUFACTURER_ID = ?, CATALOG_NUMBER = ? " +
 			"WHERE COLUMN_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 
 		ps.setString(1, column.getColumnName());
 		ps.setString(2, column.getSeparationType().getId());
 		ps.setString(3, column.getChemistry());
-		ps.setString(4, column.getManufacturer().getName());
+		ps.setString(4, column.getManufacturer().getId());
 		ps.setString(5, column.getCatalogNumber());
 		ps.setString(6, column.getColumnId());
 
@@ -410,7 +409,7 @@ public class AcquisitionMethodUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"SELECT COLUMN_ID, SEPARATION_TYPE, COLUMN_NAME, "
-			+ "CHEMISTRY, MANUFACTURER, CATALOG_NUMBER " +
+			+ "CHEMISTRY, MANUFACTURER_ID, CATALOG_NUMBER " +
 			"FROM CHROMATOGRAPHIC_COLUMN ORDER BY 1 ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -423,19 +422,13 @@ public class AcquisitionMethodUtils {
 					rs.getString("CATALOG_NUMBER"));
 
 			String sepType = rs.getString("SEPARATION_TYPE");
-			Optional<ChromatographicSeparationType> chromatographicSeparationType =
+			ChromatographicSeparationType chromatographicSeparationType =
 				IDTDataCash.getChromatographicSeparationTypes().stream().
-				filter(t -> t.getId().equals(sepType)).findFirst();
-			if(chromatographicSeparationType.isPresent())
-				column.setSeparationType(chromatographicSeparationType.get());
-
-			String mnfct = rs.getString("MANUFACTURER");
-			Optional<Manufacturer> manufacturer =
-				IDTDataCash.getManufacturers().stream().
-					filter(m -> m.getName().equals(mnfct)).findFirst();
-			if(manufacturer.isPresent())
-				column.setManufacturer(manufacturer.get());
-
+				filter(t -> t.getId().equals(sepType)).findFirst().orElse(null);
+			column.setSeparationType(chromatographicSeparationType);
+			Manufacturer manufacturer = 
+					IDTDataCash.getManufacturerById(rs.getString("MANUFACTURER_ID"));
+			column.setManufacturer(manufacturer);
 			chromatographicColumnsList.add(column);
 		}
 		rs.close();

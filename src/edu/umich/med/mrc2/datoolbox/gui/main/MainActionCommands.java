@@ -707,6 +707,12 @@ public enum MainActionCommands {
 	SHOW_SOFTWARE_VENDOR_SELECTOR_COMMAND("Show software vendor selector"),
 	SELECT_SOFTWARE_VENDOR_COMMAND("Select software vendor"),
 	
+	//	Vendor/Manufacturer list editor
+	ADD_VENDOR_COMMAND("Add vendor"),
+	EDIT_VENDOR_COMMAND("Edit vendor"),
+	SAVE_VENDOR_DETAILS_COMMAND("Save vendor details"),
+	DELETE_VENDOR_COMMAND("Delete vendor"),
+	
 	//	Acquisition method editor
 	ADD_ACQUISITION_METHOD_DIALOG_COMMAND("Add acquisition method dialog"),
 	ADD_ACQUISITION_METHOD_COMMAND("Add acquisition method"),
@@ -746,6 +752,8 @@ public enum MainActionCommands {
 	DELETE_DATA_EXTRACTION_METHOD_COMMAND("Delete data extraction method"),
 	DOWNLOAD_DATA_EXTRACTION_METHOD_COMMAND("Download data extraction method"),
 	LINK_DATA_EXTRACTION_METHOD_TO_ACQUISITION_COMMAND("Add data extraction method to acquisition method"),
+	SHOW_SOFTWARE_SELECTOR_COMMAND("Show software selector"),
+	SELECT_SOFTWARE_COMMAND("Select software"),
 
 	//	Chromatographic column manager
 	ADD_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND("Add chromatographic column dialog"),

@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -53,6 +54,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -75,6 +77,7 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 	private static final Icon addMethodIcon = GuiUtils.getIcon("addDataProcessingMethod", 32);
 
 	private DataExtractionMethod method;
+	private DataProcessingSoftware software;
 	private JButton btnSave;
 	private JTextField methodFileTextField;
 	private JLabel dateCreatedLabel;
@@ -86,9 +89,11 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 	private JTextField methodNameTextField;
 	private JLabel idValueLabel;
 	private JLabel methodAuthorLabel;
+	private JTextField softwareTextField;
 
 	public DataExtractionMethodEditorDialog(DataExtractionMethod method, ActionListener actionListener) {
 		super();
+		setPreferredSize(new Dimension(640, 300));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -98,10 +103,10 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
-		gbl_dataPanel.columnWidths = new int[]{0, 114, 126, 78, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.columnWidths = new int[]{0, 114, 126, 140, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 
 		JLabel lblId = new JLabel("ID");
@@ -193,6 +198,28 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 		gbc_textArea.gridx = 1;
 		gbc_textArea.gridy = 3;
 		dataPanel.add(descriptionTextArea, gbc_textArea);
+		
+		softwareTextField = new JTextField();
+		softwareTextField.setEditable(false);
+		GridBagConstraints gbc_softwareTextField = new GridBagConstraints();
+		gbc_softwareTextField.gridwidth = 4;
+		gbc_softwareTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_softwareTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_softwareTextField.gridx = 0;
+		gbc_softwareTextField.gridy = 4;
+		dataPanel.add(softwareTextField, gbc_softwareTextField);
+		softwareTextField.setColumns(10);
+		
+		JButton selectSoftButton = new JButton("Select software");
+		selectSoftButton.setActionCommand(
+				MainActionCommands.SHOW_SOFTWARE_SELECTOR_COMMAND.getName());		
+		selectSoftButton.addActionListener(this);
+		GridBagConstraints gbc_selectSoftButton = new GridBagConstraints();
+		gbc_selectSoftButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_selectSoftButton.insets = new Insets(0, 0, 5, 0);
+		gbc_selectSoftButton.gridx = 4;
+		gbc_selectSoftButton.gridy = 4;
+		dataPanel.add(selectSoftButton, gbc_selectSoftButton);
 
 		methodFileTextField = new JTextField();
 		methodFileTextField.setEditable(false);
@@ -201,7 +228,7 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 		gbc_methodFileTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_methodFileTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_methodFileTextField.gridx = 0;
-		gbc_methodFileTextField.gridy = 4;
+		gbc_methodFileTextField.gridy = 5;
 		dataPanel.add(methodFileTextField, gbc_methodFileTextField);
 		methodFileTextField.setColumns(10);
 
@@ -211,7 +238,7 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 		GridBagConstraints gbc_btnBrowse = new GridBagConstraints();
 		gbc_btnBrowse.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnBrowse.gridx = 4;
-		gbc_btnBrowse.gridy = 4;
+		gbc_btnBrowse.gridy = 5;
 		dataPanel.add(btnBrowse, gbc_btnBrowse);
 
 		JPanel panel = new JPanel();
@@ -261,6 +288,10 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 
 			if(method.getCreatedBy() != null)
 			methodAuthorLabel.setText(method.getCreatedBy().getInfo());
+			
+			software = method.getSoftware();
+			if(software != null)
+				softwareTextField.setText(software.getName());
 		}
 		loadPreferences();
 		initChooser();
@@ -287,6 +318,12 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		if(e.getActionCommand().equals(MainActionCommands.SHOW_SOFTWARE_SELECTOR_COMMAND.getName()))
+			showSoftwareSelector();
+		
+		if(e.getActionCommand().equals(MainActionCommands.SELECT_SOFTWARE_COMMAND.getName()))
+			selectSoftware();
 
 		if(e.getActionCommand().equals(BROWSE_COMMAND))
 			chooser.showOpenDialog(this);
@@ -295,6 +332,16 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 			setMethodFile();
 	}
 	
+	private void selectSoftware() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void showSoftwareSelector() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void setMethodFile() {
 		
 		File inputFile = chooser.getSelectedFile();
@@ -381,7 +428,14 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 					errors.add("Another method named \"" + newName + "\" is already in the database.");
 			}
 		}
+		if(software == null)
+			errors.add("Software should be specified for method definition.");
+		
 		return errors;
+	}
+
+	public DataProcessingSoftware getSoftware() {
+		return software;
 	}
 }
 

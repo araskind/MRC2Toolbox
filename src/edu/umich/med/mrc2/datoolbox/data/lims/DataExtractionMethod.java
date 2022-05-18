@@ -33,6 +33,7 @@ public class DataExtractionMethod extends AnalysisMethod implements Serializable
 	private String description;
 	private LIMSUser createdBy;
 	private Date createdOn;
+	private DataProcessingSoftware software;
 
 	public DataExtractionMethod(
 			String id,
@@ -108,5 +109,13 @@ public class DataExtractionMethod extends AnalysisMethod implements Serializable
 
         return true;
     }
+
+	public DataProcessingSoftware getSoftware() {
+		return software;
+	}
+
+	public void setSoftware(DataProcessingSoftware software) {
+		this.software = software;
+	}
 
 }

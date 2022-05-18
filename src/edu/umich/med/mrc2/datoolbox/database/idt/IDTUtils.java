@@ -57,6 +57,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.IDTMsSummary;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSBioSpecies;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSClient;
@@ -70,7 +71,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
-import edu.umich.med.mrc2.datoolbox.data.lims.SoftwareItem;
 import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
@@ -532,10 +532,12 @@ public class IDTUtils {
 
 	public static Collection<? extends DataExtractionMethod> getDataExtractionMethodList() throws Exception{
 
-		Collection<DataExtractionMethod>methodList = new TreeSet<DataExtractionMethod>();
+		Collection<DataExtractionMethod>methodList = 
+				new TreeSet<DataExtractionMethod>();
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
-			"SELECT EXTRACTION_METHOD_ID, METHOD_NAME, METHOD_DESCRIPTION, CREATED_BY, CREATED_ON " +
+			"SELECT EXTRACTION_METHOD_ID, METHOD_NAME, METHOD_DESCRIPTION, "
+			+ "CREATED_BY, CREATED_ON, SOFTWARE_ID " +
 			"FROM DATA_EXTRACTION_METHOD ORDER BY 1 ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -556,7 +558,11 @@ public class IDTUtils {
 					rs.getString("METHOD_DESCRIPTION"),
 					createBy,
 					createdOn);
-
+			
+			String softwareId = rs.getString("SOFTWARE_ID");
+			if(softwareId != null)
+				method.setSoftware(IDTDataCash.getSoftwareById(softwareId));
+			
 			methodList.add(method);
 		}
 		rs.close();
@@ -570,15 +576,15 @@ public class IDTUtils {
 		Collection<Manufacturer>manufacturers = new TreeSet<Manufacturer>();
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
-			"SELECT SUPPLIER_NAME, CATALOGUE_WEB_PAGE FROM MANUFACTURER ORDER BY 1 ";
+			"SELECT MANUFACTURER_ID, SUPPLIER_NAME, CATALOGUE_WEB_PAGE FROM MANUFACTURER";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 
 			Manufacturer method = new Manufacturer(
+					rs.getString("MANUFACTURER_ID"),
 					rs.getString("SUPPLIER_NAME"),
 					rs.getString("CATALOGUE_WEB_PAGE"));
-
 			manufacturers.add(method);
 		}
 		rs.close();
@@ -587,26 +593,78 @@ public class IDTUtils {
 		return manufacturers;
 	}
 	
-	public static Collection<? extends SoftwareItem>getSoftwareList() throws Exception {
+	public static String addNewManufacturer(Manufacturer newManufacturer) throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String id = SQLUtils.getNextIdFromSequence(conn, 
+				"MANUFACTURER_SEQ",
+				DataPrefix.MANUFACTURER,
+				"0",
+				5);
+		newManufacturer.setId(id);
+		
+		String query  =
+			"INSERT INTO MANUFACTURER(MANUFACTURER_ID, "
+			+ "SUPPLIER_NAME, CATALOGUE_WEB_PAGE) " +
+			"VALUES(?, ?, ?)";
+		PreparedStatement ps = conn.prepareStatement(query);
 
-		Collection<SoftwareItem>softwareList = new TreeSet<SoftwareItem>();
+		ps.setString(1, id);
+		ps.setString(2, newManufacturer.getName());
+		ps.setString(3, newManufacturer.getCatalogWebAddress());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return id;
+	}
+	
+	public static void editManufacturer(Manufacturer manufacturerToEdit) throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query  =
+			"UPDATE MANUFACTURER SET SUPPLIER_NAME = ?, "
+			+ "CATALOGUE_WEB_PAGE = ? WHERE MANUFACTURER_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+
+		ps.setString(1, manufacturerToEdit.getName());
+		ps.setString(2, manufacturerToEdit.getCatalogWebAddress());
+		ps.setString(3, manufacturerToEdit.getId());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void deleteManufacturer(Manufacturer manufacturerToDelete) throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query  =
+			"DELETE FROM MANUFACTURER WHERE MANUFACTURER_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, manufacturerToDelete.getId());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static Collection<? extends DataProcessingSoftware>getSoftwareList() throws Exception {
+
+		Collection<DataProcessingSoftware>softwareList = new TreeSet<DataProcessingSoftware>();
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"SELECT SOFTWARE_ID, SOFTWARE_NAME, SOFTWARE_DESCRIPTION, "
-			+ "SOFTWARE_VENDOR FROM DATA_ANALYSIS_SOFTWARE";
+			+ "MANUFACTURER_ID FROM DATA_ANALYSIS_SOFTWARE";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 			
 			Manufacturer vendor = 
-					IDTDataCash.getManufacturerByName(rs.getString("SOFTWARE_VENDOR"));
+					IDTDataCash.getManufacturerById(rs.getString("MANUFACTURER_ID"));
 
-			SoftwareItem item = new SoftwareItem(
+			DataProcessingSoftware item = new DataProcessingSoftware(
 					rs.getString("SOFTWARE_ID"),
 					rs.getString("SOFTWARE_NAME"),
 					rs.getString("SOFTWARE_DESCRIPTION"),
 					vendor);
-
 			softwareList.add(item);
 		}
 		rs.close();
@@ -615,7 +673,7 @@ public class IDTUtils {
 		return softwareList;
 	}
 	
-	public static String addNewSoftware(SoftwareItem newSoftwareItem) throws Exception{
+	public static String addNewSoftware(DataProcessingSoftware newSoftwareItem) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();
 		String id = SQLUtils.getNextIdFromSequence(conn, 
@@ -627,39 +685,39 @@ public class IDTUtils {
 		
 		String query  =
 			"INSERT INTO DATA_ANALYSIS_SOFTWARE(SOFTWARE_ID, "
-			+ "SOFTWARE_NAME, SOFTWARE_DESCRIPTION, SOFTWARE_VENDOR) " +
+			+ "SOFTWARE_NAME, SOFTWARE_DESCRIPTION, MANUFACTURER_ID) " +
 			"VALUES(?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 
 		ps.setString(1, id);
 		ps.setString(2, newSoftwareItem.getName());
 		ps.setString(3, newSoftwareItem.getDescription());
-		ps.setString(4, newSoftwareItem.getVendor().getName());
+		ps.setString(4, newSoftwareItem.getVendor().getId());
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		return id;
 	}
 	
-	public static void editSoftware(SoftwareItem itemToEdit) throws Exception{
+	public static void editSoftware(DataProcessingSoftware itemToEdit) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();	
 		String query  =
 			"UPDATE DATA_ANALYSIS_SOFTWARE SET SOFTWARE_NAME = ?, "
-			+ "SOFTWARE_DESCRIPTION = ?, SOFTWARE_VENDOR = ? " +
+			+ "SOFTWARE_DESCRIPTION = ?, MANUFACTURER_ID = ? " +
 			"WHERE SOFTWARE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 
 		ps.setString(1, itemToEdit.getName());
 		ps.setString(2, itemToEdit.getDescription());
-		ps.setString(3, itemToEdit.getVendor().getName());
+		ps.setString(3, itemToEdit.getVendor().getId());
 		ps.setString(4, itemToEdit.getId());
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void deleteSoftware(SoftwareItem itemToDelete) throws Exception {
+	public static void deleteSoftware(DataProcessingSoftware itemToDelete) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();	
 		String query  =
@@ -687,8 +745,8 @@ public class IDTUtils {
 				4);
 		String query  =
 			"INSERT INTO DATA_EXTRACTION_METHOD (EXTRACTION_METHOD_ID, METHOD_NAME, " +
-			"METHOD_DESCRIPTION, CREATED_BY, CREATED_ON, METHOD_CONTAINER) " +
-			"VALUES (?, ?, ?, ?, ?, ?)";
+			"METHOD_DESCRIPTION, CREATED_BY, CREATED_ON, METHOD_CONTAINER, SOFTWARE_ID) " +
+			"VALUES (?, ?, ?, ?, ?, ?, ?)";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, id);
@@ -720,6 +778,11 @@ public class IDTUtils {
 		} else {
 			ps.setBinaryStream(6, null, 0);
 		}
+		if(selectedMethod.getSoftware() != null)
+			ps.setString(7, selectedMethod.getSoftware().getId());
+		else
+			ps.setNull(7, java.sql.Types.NULL);
+		
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
@@ -757,20 +820,26 @@ public class IDTUtils {
 		String query  = null;
 		if(methodFile == null) {
 			query  =
-				"UPDATE DATA_EXTRACTION_METHOD SET METHOD_NAME = ?, METHOD_DESCRIPTION = ? " +
+				"UPDATE DATA_EXTRACTION_METHOD SET METHOD_NAME = ?, "
+				+ "METHOD_DESCRIPTION = ?, SOFTWARE_ID = ?" +
 				"WHERE EXTRACTION_METHOD_ID = ?";
 		}
 		else {
 			query  =
-				"UPDATE DATA_EXTRACTION_METHOD SET METHOD_NAME = ?, METHOD_DESCRIPTION = ?, METHOD_CONTAINER = ? " +
+				"UPDATE DATA_EXTRACTION_METHOD SET METHOD_NAME = ?, "
+				+ "METHOD_DESCRIPTION = ?, SOFTWARE_ID = ?, METHOD_CONTAINER = ? " +
 				"WHERE EXTRACTION_METHOD_ID = ?";
 		}
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, selectedMethod.getName());
 		ps.setString(2, selectedMethod.getDescription());
-
+		if(selectedMethod.getSoftware() != null)
+			ps.setString(3, selectedMethod.getSoftware().getId());
+		else
+			ps.setNull(3, java.sql.Types.NULL);
+		
 		if(methodFile == null)
-			ps.setString(3, selectedMethod.getId());
+			ps.setString(4, selectedMethod.getId());
 
 		// Insert new method file
 		FileInputStream fis = null;
@@ -791,13 +860,13 @@ public class IDTUtils {
 					streamLength = (int) archive.length();
 				}
 				if(fis != null)
-					ps.setBinaryStream(3, fis, streamLength);
+					ps.setBinaryStream(4, fis, streamLength);
 				else
-					ps.setBinaryStream(3, null, 0);
+					ps.setBinaryStream(4, null, 0);
 			} else {
-				ps.setBinaryStream(3, null, 0);
+				ps.setBinaryStream(4, null, 0);
 			}
-			ps.setString(4, selectedMethod.getId());
+			ps.setString(5, selectedMethod.getId());
 		}
 		ps.executeUpdate();
 		ps.close();

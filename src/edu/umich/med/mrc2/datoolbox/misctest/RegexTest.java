@@ -146,6 +146,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDStudy;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDWorkflow;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
@@ -155,6 +156,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.DocumentUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTMsDataUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
@@ -218,10 +220,62 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			updateExactMassForLabeledCompounds();
+			addManufacturerIds();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void addManufacturerIds() throws Exception {
+		
+		Collection<? extends Manufacturer>manufacturers = 
+				IDTUtils.getManufacturerList();
+		Connection conn = ConnectionManager.getConnection();
+		String updQuery = 
+				"UPDATE MANUFACTURER SET MANUFACTURER_ID = ? "
+				+ "WHERE SUPPLIER_NAME = ?";
+		PreparedStatement ps = conn.prepareStatement(updQuery);
+		String ccUpdQuery = 
+				"UPDATE CHROMATOGRAPHIC_COLUMN SET MANUFACTURER_ID = ? "
+				+ "WHERE MANUFACTURER = ?";
+		PreparedStatement ccps = conn.prepareStatement(ccUpdQuery);
+		String invUpdQuery = 
+				"UPDATE COMPOUND_INVENTORY SET MANUFACTURER_ID = ? "
+				+ "WHERE SUPPLIER = ?";
+		PreparedStatement invps = conn.prepareStatement(invUpdQuery);	
+		String daUpdQuery = 
+				"UPDATE DATA_ANALYSIS_SOFTWARE SET MANUFACTURER_ID = ? "
+				+ "WHERE SOFTWARE_VENDOR = ?";
+		PreparedStatement daps = conn.prepareStatement(daUpdQuery);
+		
+		for(Manufacturer m : manufacturers) {
+			
+			String id = SQLUtils.getNextIdFromSequence(conn, 
+					"MANUFACTURER_SEQ",
+					DataPrefix.MANUFACTURER,
+					"0",
+					5);
+			ps.setString(1, id);
+			ps.setString(2, m.getName());
+			ps.executeUpdate();
+			
+			ccps.setString(1, id);
+			ccps.setString(2, m.getName());
+			ccps.executeUpdate();
+			
+			invps.setString(1, id);
+			invps.setString(2, m.getName());
+			invps.executeUpdate();
+			
+			daps.setString(1, id);
+			daps.setString(2, m.getName());
+			daps.executeUpdate();
+		}
+		ps.close();
+		ccps.close();
+		invps.close();
+		daps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	private static void updateExactMassForLabeledCompounds() throws Exception {

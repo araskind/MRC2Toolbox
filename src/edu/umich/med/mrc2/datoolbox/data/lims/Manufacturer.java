@@ -29,11 +29,17 @@ public class Manufacturer implements Serializable, Comparable<Manufacturer>{
 	 * 
 	 */
 	private static final long serialVersionUID = 4202108621145097640L;
+	
+	private String id;
 	private String name;
 	private String catalogWebAddress;
 
-	public Manufacturer(String name, String catalogWebAddress) {
+	public Manufacturer(
+			String id, 
+			String name, 
+			String catalogWebAddress) {
 		super();
+		this.id = id;
 		this.name = name;
 		this.catalogWebAddress = catalogWebAddress;
 	}
@@ -90,7 +96,7 @@ public class Manufacturer implements Serializable, Comparable<Manufacturer>{
 
         final Manufacturer other = (Manufacturer) obj;
 
-        if ((this.name == null) ? (other.getName() != null) : !this.name.equals(other.getName()))
+        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
 
         return true;
@@ -100,9 +106,17 @@ public class Manufacturer implements Serializable, Comparable<Manufacturer>{
     public int hashCode() {
 
         int hash = 3;
-        hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getId() {
+		return id;
+	}
 }
 
 

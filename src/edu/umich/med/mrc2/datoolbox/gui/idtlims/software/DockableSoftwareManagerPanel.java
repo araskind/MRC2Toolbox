@@ -23,15 +23,24 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.software;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.util.Collection;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 
+import org.apache.commons.lang.StringUtils;
+
+import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 
@@ -41,6 +50,7 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 	private static final Icon deleteSoftwareIcon = GuiUtils.getIcon("deleteSoftware", 24);
 	private SoftwareManagerToolbar toolbar;
 	private SoftwareTable softwareTable;
+	private SoftwareEditorDialog softwareEditorDialog;
 	
 	public DockableSoftwareManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
 
@@ -89,21 +99,96 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 			return;
 
 		String command = e.getActionCommand();		
-		if(command.equals(MainActionCommands.ADD_SOFTWARE_COMMAND.getName())) {
-			//	showSoftwareEditor(null);
-		}
+		if(command.equals(MainActionCommands.ADD_SOFTWARE_COMMAND.getName()))
+			showSoftwareEditor(null);
+		
 		if(command.equals(MainActionCommands.EDIT_SOFTWARE_COMMAND.getName())) {
 
-//			StockSample sample = stockSampleTable.getSelectedSample();
-//			if(sample != null)
-//				showSoftwareEditor(sample);	
+			DataProcessingSoftware softwareItem = softwareTable.getSelectedSoftware();
+			if(softwareItem != null)
+				showSoftwareEditor(softwareItem);	
 		}		
-		if(command.equals(MainActionCommands.SAVE_SOFTWARE_DETAILS_COMMAND.getName())) {
-			//	saveSoftwareDetails();
+		if(command.equals(MainActionCommands.SAVE_SOFTWARE_DETAILS_COMMAND.getName()))
+			saveSoftwareDetails();
+		
+		if(command.equals(MainActionCommands.DELETE_SOFTWARE_COMMAND.getName()))
+			deleteSoftware();		
+	}
+
+	private void saveSoftwareDetails() {
+
+		Collection<String> errors = 
+				softwareEditorDialog.validateSoftware();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), softwareEditorDialog);
+			return;
 		}
-		if(command.equals(MainActionCommands.DELETE_SOFTWARE_COMMAND.getName())) {
-			//	deleteSoftware();
+		DataProcessingSoftware software = softwareEditorDialog.getSoftwareItem();
+		//	New software
+		if(software == null) {
+			
+			software = new DataProcessingSoftware(null, 
+					softwareEditorDialog.getSoftwareName(), 
+					softwareEditorDialog.getSoftwareDescription(), 
+					softwareEditorDialog.getSoftwareVendor());			
+			try {
+				IDTUtils.addNewSoftware(software);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
+		else {	//	Edit existing software
+			
+			software.setName(softwareEditorDialog.getSoftwareName());
+			software.setDescription(softwareEditorDialog.getSoftwareDescription());
+			software.setVendor(softwareEditorDialog.getSoftwareVendor());
+			try {
+				IDTUtils.editSoftware(software);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		IDTDataCash.refreshSoftwareList();
+		softwareTable.setTableModelFromSoftwareList(IDTDataCash.getSoftwareList());
+		softwareEditorDialog.dispose();
+	}
+
+	private void deleteSoftware() {
+
+		DataProcessingSoftware toDelete = softwareTable.getSelectedSoftware();
+		if(toDelete == null)
+			return;
+		
+		if(!MRC2ToolBoxCore.getIdTrackerUser().isSuperUser()) {
+			MessageDialog.showErrorMsg(
+					"You need to have administrative priviledge\n"
+					+ "to delete the software from the database.", 
+					this.getContentPane());
+			return;
+		}	
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Do you want to delete software \"" + toDelete.getName() +"\"?", 
+				this.getContentPane());
+		if(res != JOptionPane.YES_OPTION)
+			return;
+		
+		try {
+			IDTUtils.deleteSoftware(toDelete);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		IDTDataCash.refreshSoftwareList();
+		softwareTable.setTableModelFromSoftwareList(IDTDataCash.getSoftwareList());
+	}
+
+	private void showSoftwareEditor(DataProcessingSoftware softwareItem) {
+
+		softwareEditorDialog = 
+				new SoftwareEditorDialog(this, softwareItem);
+		softwareEditorDialog.setLocationRelativeTo(this.getContentPane());
+		softwareEditorDialog.setVisible(true);
 	}
 
 	@Override
@@ -122,5 +207,10 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 	public void savePreferences() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void loadSoftwareList() {
+		softwareTable.setTableModelFromSoftwareList(
+				IDTDataCash.getSoftwareList());
 	}
 }

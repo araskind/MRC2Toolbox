@@ -79,6 +79,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.results.DockableIDTrackerResults
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.software.DockableSoftwareManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.sop.DockableSOPProtocolsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.DockableStockSampleManagerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.vendor.DockableVendorManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.wizard.IDTrackerDataLoadWizard;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.worklist.DockableWorklistManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.CefMsMsPrescanSetupDialog;
@@ -122,6 +123,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	private DockableStockSampleManagerPanel stockSampleManagerPanel;
 	private DockableInstrumentManagerPanel instrumentManagerPanel;
 	private DockableAcquisitionMethodManagerPanel acquisitionMethodManagerPanel;	
+	private DockableVendorManagerPanel vendorManagerPanel;
 	private DockableSoftwareManagerPanel softwareManagerPanel;
 	private DockableMobilePhaseManagerPanel mobilePhaseManagerPanel;
 	private DockableChromatographicColumnManagerPanel cromatographicColumnManagerPanel;
@@ -157,6 +159,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		stockSampleManagerPanel = new DockableStockSampleManagerPanel(this);
 		instrumentManagerPanel = new DockableInstrumentManagerPanel(this);
 		acquisitionMethodManagerPanel = new DockableAcquisitionMethodManagerPanel(this);
+		vendorManagerPanel = new DockableVendorManagerPanel(this);
 		softwareManagerPanel = new DockableSoftwareManagerPanel(this);
 		mobilePhaseManagerPanel = new DockableMobilePhaseManagerPanel(this);
 		cromatographicColumnManagerPanel = new DockableChromatographicColumnManagerPanel(this);
@@ -167,7 +170,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		resultsOverviewPanel = new DockableIDTrackerResultsOverviewPanel(this);
 
 		grid.add(0, 0, 75, 100, designEditor, stockSampleManagerPanel, instrumentManagerPanel,
-				acquisitionMethodManagerPanel, softwareManagerPanel, 
+				acquisitionMethodManagerPanel, vendorManagerPanel, softwareManagerPanel, 
 				mobilePhaseManagerPanel, cromatographicColumnManagerPanel,
 				dataExtractionMethodManagerPanel, protocolManagerPanel, samplePrepManagerPanel,
 				instrumentSequenceManagerPanel, resultsOverviewPanel);
@@ -633,7 +636,14 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		cromatographicColumnManagerPanel.loadColumnData();
 		dataExtractionMethodManagerPanel.loadMethods();
 		protocolManagerPanel.loadProtocolData();
-		samplePrepManagerPanel.loadPrepData();
+		samplePrepManagerPanel.loadPrepData();	
+		vendorManagerPanel.loadVendorList();
+		softwareManagerPanel.loadSoftwareList();
+	}
+	
+	public void refreshVendorList() {
+		IDTDataCash.refreshManufacturers();
+		vendorManagerPanel.loadVendorList();
 	}
 
 	public void reloadProjectTree() {

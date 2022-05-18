@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
@@ -41,6 +42,7 @@ public class DataExtractionMethodTableModel extends BasicTableModel {
 	public static final String DEX_METHOD_DESCRIPTION_COLUMN = "Description";
 	public static final String USER_COLUMN = "Created by";
 	public static final String DATE_CREATED_COLUMN = "Created on";
+	public static final String SOFTWARE_COLUMN = "Software";
 
 	public DataExtractionMethodTableModel() {
 
@@ -51,6 +53,7 @@ public class DataExtractionMethodTableModel extends BasicTableModel {
 			new ColumnContext(DEX_METHOD_DESCRIPTION_COLUMN, String.class, false),
 			new ColumnContext(USER_COLUMN, LIMSUser.class, false),
 			new ColumnContext(DATE_CREATED_COLUMN, Date.class, false),
+			new ColumnContext(SOFTWARE_COLUMN, DataProcessingSoftware.class, false),
 		};
 	}
 
@@ -69,6 +72,7 @@ public class DataExtractionMethodTableModel extends BasicTableModel {
 					method.getDescription(),
 					method.getCreatedBy(),
 					method.getCreatedOn(),
+					method.getSoftware(),
 			};
 			super.addRow(obj);
 		}

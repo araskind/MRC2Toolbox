@@ -26,7 +26,7 @@ import java.util.Collection;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
-import edu.umich.med.mrc2.datoolbox.data.lims.SoftwareItem;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
@@ -53,25 +53,25 @@ public class SoftwareTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromSamples(Collection<SoftwareItem>softwareItems) {
+	public void setTableModelFromSoftwareList(Collection<DataProcessingSoftware>softwareItems) {
 
 		thf.setTable(null);
-		model.setTableModelFromSamples(softwareItems);
+		model.setTableModelFromSoftwareList(softwareItems);
 		thf.setTable(this);
 		tca.adjustColumns();
 	}
 
-	public SoftwareItem getSelectedSoftware(){
+	public DataProcessingSoftware getSelectedSoftware(){
 
 		int row = getSelectedRow();
 		if(row == -1)
 			return null;
 
-		return (SoftwareItem) model.getValueAt(convertRowIndexToModel(row),
+		return (DataProcessingSoftware) model.getValueAt(convertRowIndexToModel(row),
 				model.getColumnIndex(SoftwareTableModel.SOFTWARE_COLUMN));
 	}
 
-	public void selectSoftware(SoftwareItem item) {
+	public void selectSoftware(DataProcessingSoftware item) {
 
 		int colIdx = model.getColumnIndex(SoftwareTableModel.SOFTWARE_COLUMN);
 		if(colIdx == -1)

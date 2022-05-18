@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.software;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -49,8 +50,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
-import edu.umich.med.mrc2.datoolbox.data.lims.SoftwareItem;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -67,14 +69,16 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 	private JLabel idValueLabel;
 	private JTextField softwareNameTextField;
 	private JTextArea descriptionTextArea;
-	private SoftwareItem softwareItem;
+	private DataProcessingSoftware softwareItem;
 	private JTextField vendorTextField;
 	private Manufacturer softwareVendor;
+	private VendorSelectorDialog vendorSelectorDialog;
 	
 	public SoftwareEditorDialog(
 			ActionListener listener, 
-			SoftwareItem softwareItem) {
+			DataProcessingSoftware softwareItem) {
 		super();
+		setPreferredSize(new Dimension(700, 300));
 		// TODO Auto-generated constructor stub
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
@@ -85,7 +89,7 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
-		gbl_dataPanel.columnWidths = new int[]{0, 114, 126, 78, 0, 0};
+		gbl_dataPanel.columnWidths = new int[]{0, 114, 126, 132, 0, 0};
 		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
 		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
@@ -146,14 +150,22 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 		gbc_textArea.gridx = 1;
 		gbc_textArea.gridy = 2;
 		dataPanel.add(descriptionTextArea, gbc_textArea);
+		
+		JLabel lblNewLabel = new JLabel("Vendor");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 3;
+		dataPanel.add(lblNewLabel, gbc_lblNewLabel);
 
 		vendorTextField = new JTextField();
 		vendorTextField.setEditable(false);
 		GridBagConstraints gbc_vendorTextField = new GridBagConstraints();
-		gbc_vendorTextField.gridwidth = 4;
+		gbc_vendorTextField.gridwidth = 3;
 		gbc_vendorTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_vendorTextField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_vendorTextField.gridx = 0;
+		gbc_vendorTextField.gridx = 1;
 		gbc_vendorTextField.gridy = 3;
 		dataPanel.add(vendorTextField, gbc_vendorTextField);
 		vendorTextField.setColumns(10);
@@ -197,22 +209,30 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getActionCommand().equals(MainActionCommands.SHOW_SOFTWARE_VENDOR_SELECTOR_COMMAND.getName()))
+		if(e.getActionCommand().equals(
+				MainActionCommands.SHOW_SOFTWARE_VENDOR_SELECTOR_COMMAND.getName()))
 			showSoftwareVendorSelector();
 		
-		if(e.getActionCommand().equals(MainActionCommands.SELECT_SOFTWARE_VENDOR_COMMAND.getName())) 
-			selectSoftwareVendor();
-		
+		if(e.getActionCommand().equals(
+				MainActionCommands.SELECT_SOFTWARE_VENDOR_COMMAND.getName())) 
+			selectSoftwareVendor();		
 	}
 	
 	private void showSoftwareVendorSelector() {
-		// TODO Auto-generated method stub
 		
+		vendorSelectorDialog = new VendorSelectorDialog(this);
+		vendorSelectorDialog.setLocationRelativeTo(this);
+		vendorSelectorDialog.setVisible(true);
 	}
 
 	private void selectSoftwareVendor() {
-		// TODO Auto-generated method stub
-		
+
+		if(vendorSelectorDialog.getSelectedVendor() != null) {
+			
+			softwareVendor = vendorSelectorDialog.getSelectedVendor();
+			vendorTextField.setText(softwareVendor.getName());
+			vendorSelectorDialog.dispose();
+		}
 	}
 
 	private void loadSoftwareData() {
@@ -233,7 +253,7 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 		}
 	}
 
-	public SoftwareItem getSoftwareItem() {
+	public DataProcessingSoftware getSoftwareItem() {
 		return softwareItem;
 	}	
 	
@@ -257,15 +277,31 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 		
 		if(softwareVendor == null)
 			errors.add("Software vendor must be specified");
-		
-		//	Check for duplicate names
-		if(softwareItem != null) {
+
+		DataProcessingSoftware exisingSoftware = null;
+		String name = getSoftwareName();
+		if(!name.isEmpty()) {
 			
+			if(softwareItem == null) {
+				
+				exisingSoftware = IDTDataCash.getSoftwareList().stream().
+					filter(s -> s.getName().equals(name)).
+					findFirst().orElse(null);			
+			}
+			else {
+				String id = softwareItem.getId();
+				exisingSoftware = IDTDataCash.getSoftwareList().stream().
+						filter(s -> !s.getName().equals(id)).
+						filter(s -> s.getName().equals(name)).
+						findFirst().orElse(null);	
+			}
 		}
-		
+		if(exisingSoftware != null) {
+			errors.add("Software \"" + exisingSoftware.getName() +
+					"\" is already in the database.");
+		}
 		return errors;
 	}
-
 }
 
 

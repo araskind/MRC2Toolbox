@@ -50,6 +50,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.IdTrackerOrganization;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -61,7 +62,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
-import edu.umich.med.mrc2.datoolbox.data.lims.SoftwareItem;
 import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 
@@ -88,8 +88,8 @@ public class IDTDataCash {
 			new TreeSet<ChromatographicSeparationType>();
 	public static Collection<Manufacturer> manufacturers = 
 			new TreeSet<Manufacturer>();	
-	public static Collection<SoftwareItem>softwareList = 
-			new TreeSet<SoftwareItem>();
+	public static Collection<DataProcessingSoftware>softwareList = 
+			new TreeSet<DataProcessingSoftware>();
 	public static Collection<IonizationType>ionizationTypes = 
 			new TreeSet<IonizationType>();
 	public static Collection<MassAnalyzerType>massAnalyzerTypes = 
@@ -554,10 +554,13 @@ public class IDTDataCash {
 		if(manufacturers == null)
 			manufacturers = new TreeSet<Manufacturer>();
 
-		if(manufacturers.isEmpty()) {
-			{
-				
-			}
+		if(manufacturers.isEmpty()) {			
+			try {
+				manufacturers.addAll(IDTUtils.getManufacturerList());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
 		}
 		return manufacturers;
 	}
@@ -568,10 +571,16 @@ public class IDTDataCash {
 				findFirst().orElse(null);
 	}
 	
-	public static Collection<SoftwareItem>getSoftwareList(){
+	public static Manufacturer getManufacturerById(String id) {
+		return getManufacturers().stream().
+				filter(m -> m.getId().equals(id)).
+				findFirst().orElse(null);
+	}
+	
+	public static Collection<DataProcessingSoftware>getSoftwareList(){
 		
 		if(softwareList == null)
-			softwareList = new TreeSet<SoftwareItem>();
+			softwareList = new TreeSet<DataProcessingSoftware>();
 		
 		if(softwareList.isEmpty()) {
 			try {
@@ -583,7 +592,7 @@ public class IDTDataCash {
 		return softwareList;
 	}
 	
-	public static SoftwareItem getSoftwareById(String id) {
+	public static DataProcessingSoftware getSoftwareById(String id) {
 		return getSoftwareList().stream().
 				filter(s -> s.getId().equals(id)).
 				findFirst().orElse(null);

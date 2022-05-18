@@ -19,47 +19,43 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idtlims.software;
+package edu.umich.med.mrc2.datoolbox.gui.idtlims.vendor;
 
 import java.util.Collection;
 
-import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-public class SoftwareTableModel extends BasicTableModel {
+public class VendorTableModel extends BasicTableModel {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -1135263422810449762L;
-	public static final String SOFTWARE_COLUMN = "Name";
-	public static final String SOFTWARE_DESCRIPTION_COLUMN = "Description";
-	public static final String VENDOR_COLUMN = "Vendor";
+	public static final String VENDOR_COLUMN = "Company name";
+	public static final String WEB_ADDRESS_COLUMN = "Web page";
 
-	public SoftwareTableModel() {
+	public VendorTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(SOFTWARE_COLUMN, DataProcessingSoftware.class, false),
-			new ColumnContext(SOFTWARE_DESCRIPTION_COLUMN, String.class, false),
 			new ColumnContext(VENDOR_COLUMN, Manufacturer.class, false),
+			new ColumnContext(WEB_ADDRESS_COLUMN, Manufacturer.class, false),
 		};
 	}
 
-	public void setTableModelFromSoftwareList(Collection<DataProcessingSoftware>softwareItems) {
+	public void setTableModelFromManufacturers(Collection<Manufacturer>manufacturerList) {
 
 		setRowCount(0);
-		if(softwareItems.isEmpty())
+		if(manufacturerList.isEmpty())
 			return;
 
-		for (DataProcessingSoftware item : softwareItems) {
+		for (Manufacturer item : manufacturerList) {
 
 			Object[] obj = {
 				item,
-				item.getDescription(),
-				item.getVendor(),			
+				item,		
 			};
 			super.addRow(obj);
 		}

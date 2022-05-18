@@ -23,7 +23,7 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
-public class SoftwareItem implements Serializable, Comparable<SoftwareItem>{
+public class DataProcessingSoftware implements Serializable, Comparable<DataProcessingSoftware>{
 
 	/**
 	 * 
@@ -35,7 +35,7 @@ public class SoftwareItem implements Serializable, Comparable<SoftwareItem>{
 	private String description;
 	private Manufacturer vendor;
 	
-	public SoftwareItem(
+	public DataProcessingSoftware(
 			String id, 
 			String name, 
 			String description, 
@@ -80,7 +80,7 @@ public class SoftwareItem implements Serializable, Comparable<SoftwareItem>{
 	}
 
 	@Override
-	public int compareTo(SoftwareItem o) {
+	public int compareTo(DataProcessingSoftware o) {
 		return name.compareTo(o.getName());
 	}
 	
@@ -98,10 +98,10 @@ public class SoftwareItem implements Serializable, Comparable<SoftwareItem>{
 		if (obj == this)
 			return true;
 		
-        if (!SoftwareItem.class.isAssignableFrom(obj.getClass()))
+        if (!DataProcessingSoftware.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        final SoftwareItem other = (SoftwareItem) obj;
+        final DataProcessingSoftware other = (DataProcessingSoftware) obj;
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;

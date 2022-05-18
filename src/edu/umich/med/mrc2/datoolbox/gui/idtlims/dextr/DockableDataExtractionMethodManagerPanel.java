@@ -190,26 +190,31 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 
 	private void showMethodSaveDialog() {
 
-		DataExtractionMethod method = dataExtractionMethodTable.getSelectedMethod();
+		DataExtractionMethod method = 
+				dataExtractionMethodTable.getSelectedMethod();
 		if(method == null)
 			return;
 
 		if(chooser == null)
 			initChooser();
 
-		chooser.setDialogTitle("Save method \"" + method.getName() + "\" to local drive");
+		chooser.setDialogTitle("Save method \"" + 
+					method.getName() + "\" to local drive");
 		chooser.setSelectedFile(null);
 		chooser.showSaveDialog(this.getContentPane());
 	}
 
 	private void saveDataExtractionMethod() {
 
-		Collection<String>errors = dataExtractionMethodEditorDialog.validateMethodData();
+		Collection<String>errors = 
+				dataExtractionMethodEditorDialog.validateMethodData();
 		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), dataExtractionMethodEditorDialog);
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), 
+					dataExtractionMethodEditorDialog);
 			return;
 		}
-		DataExtractionMethod selectedMethod = dataExtractionMethodEditorDialog.getMethod();
+		DataExtractionMethod selectedMethod = 
+				dataExtractionMethodEditorDialog.getMethod();
 		if(selectedMethod == null) {
 
 			selectedMethod = new DataExtractionMethod(
@@ -218,6 +223,8 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 					dataExtractionMethodEditorDialog.getMethodDescription(),
 					MRC2ToolBoxCore.getIdTrackerUser(),
 					new Date());
+			selectedMethod.setSoftware(
+					dataExtractionMethodEditorDialog.getSoftware());
 			String methodId = null;
 			try {
 				methodId = IDTUtils.addNewDataExtractionMethod(
@@ -234,13 +241,19 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 
 				String yesNoQuestion = "Do you want to replace existing method file?";
 				if (MessageDialog.showChoiceWithWarningMsg(yesNoQuestion,
-						dataExtractionMethodEditorDialog) == JOptionPane.NO_OPTION)
+						dataExtractionMethodEditorDialog) != JOptionPane.YES_OPTION)
 					return;
 			}
-			selectedMethod.setName(dataExtractionMethodEditorDialog.getMethodName());
-			selectedMethod.setDescription(dataExtractionMethodEditorDialog.getMethodDescription());
+			selectedMethod.setName(
+					dataExtractionMethodEditorDialog.getMethodName());
+			selectedMethod.setDescription(
+					dataExtractionMethodEditorDialog.getMethodDescription());			
+			selectedMethod.setSoftware(
+					dataExtractionMethodEditorDialog.getSoftware());
 			try {
-				IDTUtils.updateDataExtractionMethod(selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
+				IDTUtils.updateDataExtractionMethod(
+						selectedMethod, 
+						dataExtractionMethodEditorDialog.getMethodFile());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
