@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -46,6 +47,7 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 	public static final String COLUMN_NAME_COLUMN = "Column";
 	public static final String USER_COLUMN = "Created by";
 	public static final String DATE_CREATED_COLUMN = "Created on";
+	public static final String SOFTWARE_COLUMN = "Software";
 
 	public AcquisitionMethodTableModel() {
 
@@ -60,6 +62,7 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 			new ColumnContext(COLUMN_NAME_COLUMN, LIMSChromatographicColumn.class, false),
 			new ColumnContext(USER_COLUMN, LIMSUser.class, false),
 			new ColumnContext(DATE_CREATED_COLUMN, Date.class, false),
+			new ColumnContext(SOFTWARE_COLUMN, DataProcessingSoftware.class, false),
 		};
 	}
 
@@ -86,6 +89,7 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 					columnName,
 					method.getCreatedBy(),
 					method.getCreatedOn(),
+					method.getSoftware(),
 			};
 			super.addRow(obj);
 		}

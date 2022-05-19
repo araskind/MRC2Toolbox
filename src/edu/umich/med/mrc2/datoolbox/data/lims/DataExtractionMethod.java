@@ -32,8 +32,7 @@ public class DataExtractionMethod extends AnalysisMethod implements Serializable
 	private static final long serialVersionUID = -6671825494245194136L;
 	private String description;
 	private LIMSUser createdBy;
-	private Date createdOn;
-	private DataProcessingSoftware software;
+	private Date createdOn;	
 
 	public DataExtractionMethod(
 			String id,
@@ -109,13 +108,4 @@ public class DataExtractionMethod extends AnalysisMethod implements Serializable
 
         return true;
     }
-
-	public DataProcessingSoftware getSoftware() {
-		return software;
-	}
-
-	public void setSoftware(DataProcessingSoftware software) {
-		this.software = software;
-	}
-
 }

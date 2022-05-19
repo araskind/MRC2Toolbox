@@ -291,7 +291,7 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 			else {
 				String id = softwareItem.getId();
 				exisingSoftware = IDTDataCash.getSoftwareList().stream().
-						filter(s -> !s.getName().equals(id)).
+						filter(s -> !s.getId().equals(id)).
 						filter(s -> s.getName().equals(name)).
 						findFirst().orElse(null);	
 			}

@@ -31,6 +31,7 @@ public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>{
 	private static final long serialVersionUID = -4868124576297836544L;
 	protected String id;
 	protected String name;
+	protected DataProcessingSoftware software;
 	
 	public AnalysisMethod(String id, String name) {
 		super();
@@ -53,7 +54,15 @@ public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>{
 	public void setName(String name) {
 		this.name = name;
 	}
-    
+
+	public DataProcessingSoftware getSoftware() {
+		return software;
+	}
+
+	public void setSoftware(DataProcessingSoftware software) {
+		this.software = software;
+	}
+	
 	@Override
 	public String toString() {
 		return name;

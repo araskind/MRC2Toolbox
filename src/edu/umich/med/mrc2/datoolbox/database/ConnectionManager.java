@@ -22,34 +22,38 @@
 package edu.umich.med.mrc2.datoolbox.database;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import edu.umich.med.mrc2.datoolbox.data.enums.DatabseDialect;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class ConnectionManager {
 
-	private static ThreadLocal<Connection> tranConnection = new ThreadLocal<Connection>();
+	private static ThreadLocal<Connection> tranConnection = 
+			new ThreadLocal<Connection>();
+	
+//	private static final PooledConnectionManager pooledConnectionManager = 
+//			new PooledConnectionManager();
 
 	/** get a connection */
 	public static Connection getConnection() throws Exception {
-
-		if (tranConnection.get() != null) 
-			return tranConnection.get();
-		
-		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.Oracle))
-			Class.forName("oracle.jdbc.driver.OracleDriver");
-		
-		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.PostgreSQL))
-			Class.forName("org.postgresql.Driver");
-		
-		Connection connection = DriverManager.getConnection(
-				MRC2ToolBoxConfiguration.getDatabaseConnectionString(),
-				MRC2ToolBoxConfiguration.getDatabaseUserName(), 
-				MRC2ToolBoxConfiguration.getDatabasePassword());
-		return connection;
+//
+//		if (tranConnection.get() != null) 
+//			return tranConnection.get();
+//		
+//		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.Oracle))
+//			Class.forName("oracle.jdbc.driver.OracleDriver");
+//		
+//		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.PostgreSQL))
+//			Class.forName("org.postgresql.Driver");
+//		
+//		Connection connection = DriverManager.getConnection(
+//				MRC2ToolBoxConfiguration.getDatabaseConnectionString(),
+//				MRC2ToolBoxConfiguration.getDatabaseUserName(), 
+//				MRC2ToolBoxConfiguration.getDatabasePassword());
+//		return connection;
+	
+		return PooledConnectionManager.getConnection();			
 	}
 
 	public static boolean connectionDefined() {
@@ -60,6 +64,10 @@ public class ConnectionManager {
 			return true;
 		}
 		return false;
+	}
+	
+	public static void closeDataSource() {
+		PooledConnectionManager.closeDataSource();
 	}
 
 	public static synchronized void beginTransaction() throws Exception {

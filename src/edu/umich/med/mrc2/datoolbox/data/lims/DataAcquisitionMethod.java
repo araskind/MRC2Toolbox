@@ -218,7 +218,6 @@ public class DataAcquisitionMethod extends AnalysisMethod implements Serializabl
 		this.chromatographicGradient = chromatographicGradient;
 	}
 	
-
 	/**
 	 * @return the motrPacMsMode
 	 */

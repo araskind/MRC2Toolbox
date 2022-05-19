@@ -223,6 +223,7 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 			selectedMethod.setIonizationType(methodData.getIonizationType());
 			selectedMethod.setMassAnalyzerType(methodData.getMassAnalyzerType());
 			selectedMethod.setSeparationType(methodData.getChromatographicSeparationType());
+			selectedMethod.setSoftware(methodData.getSoftware());		
 			try {
 				AcquisitionMethodUtils.addNewAcquisitionMethod(selectedMethod, methodData.getMethodFile());
 			} catch (Exception e) {
@@ -246,6 +247,7 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 			selectedMethod.setColumn(methodData.getColumn());
 			selectedMethod.setIonizationType(methodData.getIonizationType());
 			selectedMethod.setMassAnalyzerType(methodData.getMassAnalyzerType());
+			selectedMethod.setSoftware(methodData.getSoftware());
 			try {
 				AcquisitionMethodUtils.updateAcquisitionMethod(selectedMethod, methodData.getMethodFile());
 			} catch (Exception e) {

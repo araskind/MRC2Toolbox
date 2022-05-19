@@ -81,7 +81,7 @@ public class AcquisitionMethodUtils {
 		String query  =
 			"INSERT INTO DATA_ACQUISITION_METHOD (ACQ_METHOD_ID, METHOD_NAME, " +
 			"METHOD_DESCRIPTION, POLARITY, CREATED_BY, CREATED_ON, IONIZATION_TYPE, " +
-			"MASS_ANALYZER, MS_TYPE, COLUMN_ID, METHOD_CONTAINER, SEPARATION_TYPE) " +
+			"MASS_ANALYZER, MS_TYPE, COLUMN_ID, METHOD_CONTAINER, SEPARATION_TYPE, SOFTWARE_ID) " +
 			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -120,6 +120,7 @@ public class AcquisitionMethodUtils {
 			ps.setBinaryStream(11, null, 0);
 		}
 		ps.setString(12, selectedMethod.getSeparationType().getId());
+		ps.setString(13, selectedMethod.getSoftware().getId());
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
@@ -164,14 +165,14 @@ public class AcquisitionMethodUtils {
 			query  =
 				"UPDATE DATA_ACQUISITION_METHOD SET METHOD_NAME = ?, METHOD_DESCRIPTION = ?, " +
 				"POLARITY = ?, IONIZATION_TYPE = ?, MASS_ANALYZER = ?, MS_TYPE =?, "
-				+ "COLUMN_ID = ?, SEPARATION_TYPE = ? " +
+				+ "COLUMN_ID = ?, SEPARATION_TYPE = ?, SOFTWARE_ID = ? " +
 				"WHERE ACQ_METHOD_ID = ?";
 		}
 		else {
 			query  =
 				"UPDATE DATA_ACQUISITION_METHOD SET METHOD_NAME = ?, METHOD_DESCRIPTION = ?, " +
 				"POLARITY = ?, IONIZATION_TYPE = ?, MASS_ANALYZER = ?, MS_TYPE =?, COLUMN_ID = ?, "
-				+ "METHOD_CONTAINER = ?, SEPARATION_TYPE = ? " +
+				+ "METHOD_CONTAINER = ?, SEPARATION_TYPE = ?, SOFTWARE_ID = ? " +
 				"WHERE ACQ_METHOD_ID = ?";
 		}
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -188,7 +189,8 @@ public class AcquisitionMethodUtils {
 
 		if(methodFile == null) {
 			ps.setString(8, selectedMethod.getSeparationType().getId());
-			ps.setString(9, selectedMethod.getId());
+			ps.setString(9, selectedMethod.getSoftware().getId());
+			ps.setString(10, selectedMethod.getId());
 		}
 		else {
 			// Insert new method file
@@ -213,7 +215,8 @@ public class AcquisitionMethodUtils {
 				ps.setBinaryStream(8, null, 0);
 			}
 			ps.setString(9, selectedMethod.getSeparationType().getId());
-			ps.setString(10, selectedMethod.getId());
+			ps.setString(10, selectedMethod.getSoftware().getId());
+			ps.setString(11, selectedMethod.getId());
 		}
 		ps.executeUpdate();
 		ps.close();
@@ -301,7 +304,7 @@ public class AcquisitionMethodUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"SELECT ACQ_METHOD_ID, METHOD_NAME, METHOD_DESCRIPTION, POLARITY, CREATED_BY, " +
-			"CREATED_ON, IONIZATION_TYPE, MASS_ANALYZER, MS_TYPE, COLUMN_ID, SEPARATION_TYPE " +
+			"CREATED_ON, IONIZATION_TYPE, MASS_ANALYZER, MS_TYPE, COLUMN_ID, SEPARATION_TYPE, SOFTWARE_ID " +
 			"FROM DATA_ACQUISITION_METHOD ORDER BY 1 ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -330,6 +333,7 @@ public class AcquisitionMethodUtils {
 			method.setMassAnalyzerType(IDTDataCash.getMassAnalyzerTypeById(rs.getString("MASS_ANALYZER")));
 			method.setMsType(IDTDataCash.getMsTypeById(rs.getString("MS_TYPE")));
 			method.setSeparationType(IDTDataCash.getChromatographicSeparationTypeById(rs.getString("SEPARATION_TYPE")));
+			method.setSoftware(IDTDataCash.getSoftwareById(rs.getString("SOFTWARE_ID")));
 
 			methodList.add(method);
 		}

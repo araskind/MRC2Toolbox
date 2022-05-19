@@ -691,7 +691,12 @@ public class IDTUtils {
 
 		ps.setString(1, id);
 		ps.setString(2, newSoftwareItem.getName());
-		ps.setString(3, newSoftwareItem.getDescription());
+		String description = newSoftwareItem.getDescription();
+		if(description != null)
+			ps.setString(3, description);
+		else
+			ps.setNull(3, java.sql.Types.NULL);
+				
 		ps.setString(4, newSoftwareItem.getVendor().getId());
 		ps.executeUpdate();
 		ps.close();
@@ -709,7 +714,13 @@ public class IDTUtils {
 		PreparedStatement ps = conn.prepareStatement(query);
 
 		ps.setString(1, itemToEdit.getName());
-		ps.setString(2, itemToEdit.getDescription());
+		//	ps.setString(2, itemToEdit.getDescription());		
+		String description = itemToEdit.getDescription();
+		if(description != null)
+			ps.setString(2, description);
+		else
+			ps.setNull(2, java.sql.Types.NULL);
+		
 		ps.setString(3, itemToEdit.getVendor().getId());
 		ps.setString(4, itemToEdit.getId());
 		ps.executeUpdate();

@@ -56,8 +56,11 @@ import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.SoftwareSelectorDialog;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
@@ -92,6 +95,9 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 	private File baseDirectory;
 	private JDialog parentDialog;
 	private DataAcquisitionMethod method;
+	private JTextField softwareNameTextField;
+	private SoftwareSelectorDialog softwareSelectorDialog;
+	private DataProcessingSoftware software;
 	
 	public DockableAcquisitionMethodDataPanel(JDialog parentDialog) {
 
@@ -117,32 +123,10 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		chooser.setCurrentDirectory(baseDirectory);
 	}
 	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		if(e.getActionCommand().equals(BROWSE_COMMAND))
-			chooser.showOpenDialog(parentDialog);
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
-			setMethodFile(chooser.getSelectedFile());
-	}
-	
-	public void setMethodFile(File methodFile) {
-		
-		baseDirectory = methodFile.getParentFile();
-		methodFileTextField.setText(methodFile.getAbsolutePath());
-		if(method == null) {
-			methodNameTextField.setText(methodFile.getName());
-			descriptionTextArea.setText(methodFile.getName());
-		}
-		savePreferences();
-	}
-	
 	@SuppressWarnings("unchecked")
 	public void loadMethodData(DataAcquisitionMethod method) {
 		
 		this.method = method;
-
 		separationTypeComboBox.removeItemListener(this);
 		if(method == null) {
 
@@ -180,6 +164,10 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 					new SortedComboBoxModel<LIMSChromatographicColumn>(columnSet));
 
 			columnComboBox.setSelectedItem(method.getColumn());
+			
+			software  = method.getSoftware();
+			if(method.getSoftware() != null)
+				softwareNameTextField.setText(method.getSoftware().getName());
 		}
 		loadPreferences();
 		initChooser();
@@ -194,9 +182,9 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{0, 137, 82, 144, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{1.0, 1.0, 0.0, 1.0, 1.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 
 		JLabel lblId = new JLabel("ID");
@@ -399,16 +387,38 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		gbc_massAnalyzerComboBox.gridx = 3;
 		gbc_massAnalyzerComboBox.gridy = 6;
 		dataPanel.add(massAnalyzerComboBox, gbc_massAnalyzerComboBox);
+		
+		softwareNameTextField = new JTextField();
+		softwareNameTextField.setEditable(false);
+		GridBagConstraints gbc_softwareNameTextField = new GridBagConstraints();
+		gbc_softwareNameTextField.gridwidth = 4;
+		gbc_softwareNameTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_softwareNameTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_softwareNameTextField.gridx = 0;
+		gbc_softwareNameTextField.gridy = 7;
+		dataPanel.add(softwareNameTextField, gbc_softwareNameTextField);
+		softwareNameTextField.setColumns(10);
+		
+		JButton selectSoftButton = new JButton("Select software");
+		selectSoftButton.setActionCommand(
+				MainActionCommands.SHOW_SOFTWARE_SELECTOR_COMMAND.getName());		
+		selectSoftButton.addActionListener(this);
+		GridBagConstraints gbc_selectSoftButton = new GridBagConstraints();
+		gbc_selectSoftButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_selectSoftButton.insets = new Insets(0, 0, 5, 0);
+		gbc_selectSoftButton.gridx = 4;
+		gbc_selectSoftButton.gridy = 7;
+		dataPanel.add(selectSoftButton, gbc_selectSoftButton);
 
 		methodFileTextField = new JTextField();
 		methodFileTextField.setEditable(false);
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.gridwidth = 4;
-		gbc_textField.insets = new Insets(0, 0, 5, 5);
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.gridx = 0;
-		gbc_textField.gridy = 7;
-		dataPanel.add(methodFileTextField, gbc_textField);
+		GridBagConstraints gbc_methodFileTextField = new GridBagConstraints();
+		gbc_methodFileTextField.gridwidth = 4;
+		gbc_methodFileTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_methodFileTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_methodFileTextField.gridx = 0;
+		gbc_methodFileTextField.gridy = 8;
+		dataPanel.add(methodFileTextField, gbc_methodFileTextField);
 		methodFileTextField.setColumns(10);
 
 		btnBrowse = new JButton("Method file ...");
@@ -418,12 +428,56 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		gbc_btnBrowse.insets = new Insets(0, 0, 5, 0);
 		gbc_btnBrowse.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnBrowse.gridx = 4;
-		gbc_btnBrowse.gridy = 7;
+		gbc_btnBrowse.gridy = 8;
 		dataPanel.add(btnBrowse, gbc_btnBrowse);
 		
 		return dataPanel;
 	}
 	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if(e.getActionCommand().equals(MainActionCommands.SHOW_SOFTWARE_SELECTOR_COMMAND.getName()))
+			showSoftwareSelector();
+		
+		if(e.getActionCommand().equals(MainActionCommands.SELECT_SOFTWARE_COMMAND.getName()))
+			selectSoftware();
+		
+		if(e.getActionCommand().equals(BROWSE_COMMAND))
+			chooser.showOpenDialog(parentDialog);
+
+		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
+			setMethodFile(chooser.getSelectedFile());
+	}
+	
+	private void showSoftwareSelector() {
+
+		softwareSelectorDialog = new SoftwareSelectorDialog(this);
+		softwareSelectorDialog.setLocationRelativeTo(this.getContentPane());
+		softwareSelectorDialog.setVisible(true);
+	}
+	
+	private void selectSoftware() {
+		
+		if(softwareSelectorDialog.getSelectedSoftware() != null) {
+			
+			software = softwareSelectorDialog.getSelectedSoftware();
+			softwareNameTextField.setText(software.getName());
+			softwareSelectorDialog.dispose();
+		}
+	}
+	
+	public void setMethodFile(File methodFile) {
+		
+		baseDirectory = methodFile.getParentFile();
+		methodFileTextField.setText(methodFile.getAbsolutePath());
+		if(method == null) {
+			methodNameTextField.setText(methodFile.getName());
+			descriptionTextArea.setText(methodFile.getName());
+		}
+		savePreferences();
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void itemStateChanged(ItemEvent e) {
@@ -534,6 +588,9 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		if(getChromatographicSeparationType() == null)
 			errors.add("Chromatographic separation type should be specified.");
 		
+		if(software == null)
+			errors.add("Software should be specified.");
+		
 		return errors;
 	}
 
@@ -554,6 +611,10 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 	public void savePreferences() {
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
+	}
+
+	public DataProcessingSoftware getSoftware() {
+		return software;
 	}
 
 }

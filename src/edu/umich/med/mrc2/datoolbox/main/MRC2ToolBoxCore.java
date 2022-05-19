@@ -246,6 +246,7 @@ public final class MRC2ToolBoxCore {
 		if(lockFile != null)
 			lockFile.delete();
 		
+		ConnectionManager.closeDataSource();
 		System.gc();
 		System.exit(0);
 	}
