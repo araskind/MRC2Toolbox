@@ -598,6 +598,12 @@ public class IDTDataCash {
 				findFirst().orElse(null);
 	}
 
+	public static DataProcessingSoftware getSoftwareByName(String name) {
+		return getSoftwareList().stream().
+				filter(s -> s.getName().equals(name)).
+				findFirst().orElse(null);
+	}
+	
 	public static Collection<IonizationType> getIonizationTypes(){
 
 		if(ionizationTypes == null)

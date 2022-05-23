@@ -69,7 +69,8 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 
 	private DataAcquisitionMethod method;
 	private JButton btnSave;
-	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "AcquisitionMethodExtendedEditorDialog.layout");
+	private static final File layoutConfigFile = 
+			new File(MRC2ToolBoxCore.configDir + "AcquisitionMethodExtendedEditorDialog.layout");
 	
 	private CControl control;
 	private CGrid grid;

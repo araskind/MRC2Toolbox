@@ -143,6 +143,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	private MSMSFeatureExtractionSetupDialog msmsFeatureExtractionSetupDialog;	
 	private RDPMetadataWizard rawDataProjectMetadataWizard;
+	private RawDataAnalysisProjectDatabaseUploadDialog rawDataAnalysisProjectDatabaseUploadDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("chromatogram", 16);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "RawDataPanel.layout");
@@ -260,8 +261,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName(), 
 				addMetaDataIcon, this));
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName(),
-				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName(), 
+				MainActionCommands.SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND.getName(),
+				MainActionCommands.SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND.getName(), 
 				sendProjectToDatabaseIcon, this));
 		
 		menuActions.addSeparator();
@@ -366,15 +367,73 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			MRC2ToolBoxCore.getMainWindow().showFileToolsDialog();
 		
 		if(command.equals(MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName()))
-			showProjectMetadataWizard();
+			showProjectMetadataWizard();	
 		
-		if(command.equals(MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName()))
-			saveProjectMetadata();		
+		if(command.equals(MainActionCommands.SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND.getName()))
+			setProjectDataUploadParameters();
 		
 		if(command.equals(MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName()))
 			saveProjectToDatabaseAsNewExperiment();		
 	}
 	
+	private void setProjectDataUploadParameters() {
+		
+		Map<LIMSExperiment, Collection<DataFile>> existingDataFiles = 
+				checkForExistingDataFiles();
+		if(!existingDataFiles.isEmpty()) {
+			
+			ExistingDataListingDialog fListDialog = 
+					new ExistingDataListingDialog(existingDataFiles);
+			fListDialog.setLocationRelativeTo(this.getContentPane());
+			fListDialog.setVisible(true);
+			return;
+		}		
+		Collection<String>errors = verifyProjectMetadata();
+		if(!errors.isEmpty()) {
+			 showProjectMetadataWizard();
+			 MessageDialog.showErrorMsg(
+					 StringUtils.join(errors, "\n"), 
+					 rawDataProjectMetadataWizard);
+			 return;
+		}
+		rawDataAnalysisProjectDatabaseUploadDialog = 
+				new RawDataAnalysisProjectDatabaseUploadDialog(this);
+		rawDataAnalysisProjectDatabaseUploadDialog.setLocationRelativeTo(this.getContentPane());
+		rawDataAnalysisProjectDatabaseUploadDialog.setVisible(true);
+	}
+	
+	private void saveProjectToDatabaseAsNewExperiment() {
+		
+		
+		
+		double msOneMZWindow = 
+				rawDataAnalysisProjectDatabaseUploadDialog.getMsOneMZWindow();
+		if(msOneMZWindow <= 0.0d) {
+			MessageDialog.showErrorMsg(
+					"MS1 M/Z window must be > 0", 
+					rawDataAnalysisProjectDatabaseUploadDialog);
+			return;
+		}	
+		RawDataAnalysisProjectDatabaseUploadTask task = 
+				new RawDataAnalysisProjectDatabaseUploadTask(
+						MRC2ToolBoxCore.getActiveRawDataAnalysisProject(),
+						msOneMZWindow);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+	}
+	
+	private Collection<String> verifyProjectMetadata() {
+				
+		rawDataProjectMetadataWizard = 
+				new RDPMetadataWizard(this, 
+						MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
+		Collection<String>errors = 
+				rawDataProjectMetadataWizard.silentlyVerifyProjectMetadata();
+		rawDataProjectMetadataWizard.dispose();
+		
+		return errors;
+	}
+
 	private void showProjectMetadataWizard() {
 		
 		RawDataAnalysisProject project = 
@@ -400,14 +459,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			return;
 		}		
 		Map<LIMSExperiment, Collection<DataFile>> existingDataFiles = 
-				new TreeMap<LIMSExperiment, Collection<DataFile>>();
-		try {
-			existingDataFiles = 
-					IDTRawDataUtils.getExistingDataFiles(project.getMSMSDataFiles());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+				checkForExistingDataFiles();
 		if(!existingDataFiles.isEmpty()) {
 			
 			ExistingDataListingDialog fListDialog = 
@@ -440,38 +492,22 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		rawDataProjectMetadataWizard.setVisible(true);
 	}
 	
-	private void saveProjectMetadata() {
-		MessageDialog.showWarningMsg("TODO: Save project metadata", this.getContentPane());
-	}
-	
-	private void saveProjectToDatabaseAsNewExperiment() {
+	private Map<LIMSExperiment, Collection<DataFile>> checkForExistingDataFiles(){
 		
-		Collection<String>errors = verifyProjectMetadata();
-		if(!errors.isEmpty()) {
-			 showProjectMetadataWizard();
-			 MessageDialog.showErrorMsg(
-					 StringUtils.join(errors, "\n"), 
-					 rawDataProjectMetadataWizard);
-			 return;
+		Map<LIMSExperiment, Collection<DataFile>> existingDataFiles = 
+				new TreeMap<LIMSExperiment, Collection<DataFile>>();
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			return existingDataFiles;
+		
+		try {
+			existingDataFiles = 
+				IDTRawDataUtils.getExistingDataFiles(
+					MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMSMSDataFiles());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		//	Initiate project data upload;
-		
-		//	TODO
-		double msOneMZWindow = 10.0d;
-		
-		RawDataAnalysisProjectDatabaseUploadTask task = 
-				new RawDataAnalysisProjectDatabaseUploadTask(
-						MRC2ToolBoxCore.getActiveRawDataAnalysisProject(),
-						msOneMZWindow);
-		task.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(task);
-	}
-	
-	private Collection<String> verifyProjectMetadata() {
-		
-		Collection<String>errors = new ArrayList<String>();
-		
-		return errors;
+		return existingDataFiles;
 	}
 
 	private void sendMSMSFeaturesToIDTrackerWorkbench() {

@@ -473,6 +473,9 @@ public class RawDataAnalysisProject extends Project {
 				&& !idTrackerExperiment.getSamplePreps().isEmpty())
 			samplePrep = idTrackerExperiment.getSamplePreps().iterator().next();
 			
+		if(idTrackerExperiment.getExperimentDesign() == null)
+			idTrackerExperiment.setDesign(new ExperimentDesign());
+			
 		Worklist worklist = new Worklist();
 		for(DataFile df : getDataFiles()) {
 			

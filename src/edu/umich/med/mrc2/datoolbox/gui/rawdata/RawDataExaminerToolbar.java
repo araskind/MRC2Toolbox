@@ -121,8 +121,8 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 				MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName(), buttonDimension);
 		
 		sendProjectToDatabaseButton = GuiUtils.addButton(this, null, sendProjectToDatabaseIcon, commandListener,
-				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName(),
-				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName(), buttonDimension);
+				MainActionCommands.SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND.getName(),
+				MainActionCommands.SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND.getName(), buttonDimension);
 		
 		addSeparator(buttonDimension);
 		

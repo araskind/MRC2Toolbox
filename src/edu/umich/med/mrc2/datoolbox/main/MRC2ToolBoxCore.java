@@ -71,6 +71,8 @@ import umich.ms.datatypes.LCMSData;
 
 public final class MRC2ToolBoxCore {
 
+	public static String trackerSoftwareName = "MetIDTracker";
+	
 	public static String dataDir = "." + File.separator + "data" + File.separator;
 	public static final File lockFile = new File(dataDir + File.separator + "app.lock");
 	public static String configDir = dataDir + "config" + File.separator;

@@ -251,8 +251,10 @@ public class CefMsMsPrescanSetupDialog extends JDialog
 	public void loadPreferences(Preferences prefs) {
 
 		preferences = prefs;
-		cefParentDir = Paths.get(preferences.get(CEF_DIR_PARENT, MRC2ToolBoxCore.dataDir)).toFile();
-		cpdFileParentDir = Paths.get(preferences.get(CPD_FILE_PARENT, MRC2ToolBoxCore.dataDir)).toFile();
+		cefParentDir = 
+				Paths.get(preferences.get(CEF_DIR_PARENT, MRC2ToolBoxCore.dataDir)).toFile();
+		cpdFileParentDir = 
+				Paths.get(preferences.get(CPD_FILE_PARENT, MRC2ToolBoxCore.dataDir)).toFile();
 	}
 
 	@Override

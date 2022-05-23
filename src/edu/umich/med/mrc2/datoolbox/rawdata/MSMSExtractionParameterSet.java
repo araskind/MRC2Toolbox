@@ -46,6 +46,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public class MSMSExtractionParameterSet {
 	
 	private String id;
+	private String name;
 	private String description;
 	private Polarity polarity;
 	private double minPrecursorIntensity;
@@ -67,6 +68,7 @@ public class MSMSExtractionParameterSet {
 	private MsFeatureChromatogramExtractionTarget xicTarget;
 	
 	public MSMSExtractionParameterSet(
+			String name,
 			String description,
 			Polarity polarity,
 			double minPrecursorIntensity,
@@ -87,6 +89,7 @@ public class MSMSExtractionParameterSet {
 		super();
 		this.id = DataPrefix.MSMS_EXTRACTION_PARAMETER_SET.getName() +
 				UUID.randomUUID().toString().substring(0, 12);
+		this.name = name;
 		this.description = description;
 		this.polarity = polarity;
 		this.minPrecursorIntensity = minPrecursorIntensity;
@@ -283,6 +286,13 @@ public class MSMSExtractionParameterSet {
 		
 		parametersElement.setAttribute(
 				MSMSExtractionParameters.ID.name(), id);		
+		
+		if(name == null)
+			name = "";
+		
+		parametersElement.addContent(       		
+        		new Element(MSMSExtractionParameters.Name.name()).setText(name));
+		
 		if(description == null)
 			description = "";
 		
@@ -397,6 +407,13 @@ public class MSMSExtractionParameterSet {
 			this.id = DataPrefix.MSMS_EXTRACTION_PARAMETER_SET.getName() +
 			UUID.randomUUID().toString().substring(0, 12);
 		
+		Element nameElement = 
+				parametersElement.getChild(MSMSExtractionParameters.Name.name());
+		if(nameElement != null)
+			this.name = nameElement.getText();
+		else
+			this.name = "";
+		
 		Element descElement = 
 				parametersElement.getChild(MSMSExtractionParameters.Description.name());
 		if(descElement != null)
@@ -473,6 +490,14 @@ public class MSMSExtractionParameterSet {
 		this.chromatogramExtractionWindow = Double.parseDouble(
 				parametersElement.getAttributeValue(
 						MSMSExtractionParameters.ChromatogramExtractionWindow.name()));
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }
 

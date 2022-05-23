@@ -66,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.search.lib.MSMSLibraryListingTable;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.lib.MSMSLibraryListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;

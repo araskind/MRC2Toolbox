@@ -25,6 +25,7 @@ public enum MSMSExtractionParameters {
 
 	MSMSExtractionParameterSet,
 	ID,
+	Name,
 	Description,
 	Polarity,
 	MinPrecursorIntensity,

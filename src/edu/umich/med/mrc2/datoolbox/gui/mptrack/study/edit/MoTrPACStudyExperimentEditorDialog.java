@@ -55,7 +55,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.search.se.IDTrackerExperimentListingTable;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.se.IDTrackerExperimentListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;

@@ -145,12 +145,31 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 			methodMd5 = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
+			return false;
 		}
 	    //	Check if method present using MD5
-	    
-	    //	Upload new method
-	    
-	    
+	    String existingMethodId = null;
+	    if(methodMd5.length() == 32) {
+			try {
+				existingMethodId = IDTUtils.getTrackerDataAnalysisMethodIdByMD5(methodMd5);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	    if(existingMethodId == null) {  //	Upload new method
+			try {
+				dataExtractionMethod = 
+						IDTUtils.insertNewTrackerDataExtractionMethod(methodString, methodMd5);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	    else {
+	    	dataExtractionMethod = IDTDataCash.getDataExtractionMethodById(existingMethodId);
+	    	return true;
+	    }
 	    return false;
 	}
 
@@ -242,7 +261,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(OpenMsFeatureBundleFileTask.class))	
+			if (e.getSource().getClass().equals(RawDataAnalysisMSFeatureDatabaseUploadTask.class))	
 				processedFiles++;
 			
 			if(processedFiles == project.getMSMSDataFiles().size()) {

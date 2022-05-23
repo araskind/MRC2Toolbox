@@ -23,9 +23,11 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 
 import java.awt.Component;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -2392,6 +2394,92 @@ public class IDTUtils {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);		
 		return uploaded;		
+	}
+	
+	public static String getTrackerDataAnalysisMethodIdByMD5(String md5string) throws Exception{
+		
+		String methodId = null;
+		Connection conn = ConnectionManager.getConnection();
+		String query =
+				"SELECT EXTRACTION_METHOD_ID FROM DATA_EXTRACTION_METHOD WHERE METHOD_MD5 = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, md5string);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			methodId = rs.getString("EXTRACTION_METHOD_ID");
+		
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return methodId;
+	}
+
+	public static DataExtractionMethod insertNewTrackerDataExtractionMethod(
+			String methodString, 
+			String methodMd5) throws Exception {
+		
+		LIMSUser sysUser = MRC2ToolBoxCore.getIdTrackerUser();
+		if(sysUser == null)
+			return null;
+
+		Connection conn = ConnectionManager.getConnection();
+		String id = SQLUtils.getNextIdFromSequence(conn, 
+				"ID_DATA_EXTRACTION_METHOD_SEQ",
+				DataPrefix.DATA_EXTRACTION_METHOD,
+				"0",
+				4);	
+		DataProcessingSoftware trackerSoft = 
+				IDTDataCash.getSoftwareByName(MRC2ToolBoxCore.trackerSoftwareName);
+		
+		DataExtractionMethod newMethod  = new DataExtractionMethod(
+				id,
+				null,
+				null,
+				sysUser,
+				new Date());
+		newMethod.setSoftware(trackerSoft);
+		
+		String query  =
+			"INSERT INTO DATA_EXTRACTION_METHOD (EXTRACTION_METHOD_ID, METHOD_NAME, " +
+			"METHOD_DESCRIPTION, CREATED_BY, CREATED_ON, METHOD_CONTAINER, SOFTWARE_ID, METHOD_MD5) " +
+			"VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, id);
+		
+		//	TODO
+//		ps.setString(2, selectedMethod.getName());
+//		ps.setString(3, selectedMethod.getDescription());
+		ps.setString(4, sysUser.getId());
+		ps.setDate(5, new java.sql.Date(new java.util.Date().getTime()));
+		
+		byte[] compressedMethod = CompressionUtils.compressString(methodString);
+		InputStream is = null;
+		try {
+			is = new ByteArrayInputStream(compressedMethod);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(is != null)
+			ps.setBinaryStream(6, is, compressedMethod.length);
+		else
+			ps.setBinaryStream(6, null, 0);
+
+		if(trackerSoft != null)
+			ps.setString(7, trackerSoft.getId());
+		else
+			ps.setNull(7, java.sql.Types.NULL);
+		
+		ps.setString(8, methodMd5);
+		
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+
+		if(is != null)
+			is.close();
+
+		return newMethod;
 	}
 }
 

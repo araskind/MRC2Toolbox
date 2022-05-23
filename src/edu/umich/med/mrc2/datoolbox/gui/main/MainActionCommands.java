@@ -102,6 +102,7 @@ public enum MainActionCommands {
 	SAVE_EXTRACTED_WORKLIST_TO_FILE("Save worklist to file"),	
 	ADD_PROJECT_METADATA_COMMAND("Add project metadata"),
 	SAVE_PROJECT_METADATA_COMMAND("Save project metadata"),
+	SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND("Set project database upload parameters"),
 	SEND_PROJECT_DATA_TO_DATABASE_COMMAND("Send project data to database"),
 
 	ACTIVATE_DATA_PIPELINE_COMMAND("Activate data pipeline"),
@@ -976,6 +977,10 @@ public enum MainActionCommands {
 	SHOW_ID_TRACKER_SAVE_QUERY_DIALOG_COMMAND("Save current IDTracker search query"),
 	ID_TRACKER_SAVE_QUERY_COMMAND("Save IDTracker search query to database"),
 	ID_TRACKER_DELETE_QUERY_COMMAND("Delete selected IDTracker search query"),
+	
+	//	Tracker by experiment search dialog
+	SHOW_ID_TRACKER_BY_EXPERIMENT_SEARCH_DIALOG_COMMAND("IDTracker database search by experiment setup"),
+	SEARCH_ID_TRACKER_BY_EXPERIMENT_COMMAND("Get selected data from IDTracker"),
 	
 	//	MSMS search dialog
 	SHOW_SAVED_MSMS_QUERY_LIST_COMMAND("Show MSMS query list"),

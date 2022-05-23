@@ -104,7 +104,7 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 				MainActionCommands.ADD_PROJECT_METADATA_COMMAND, 
 				addMetaDataIcon);
 		sendProjectToTrackerMenuItem = addItem(dbLinkageMenu, 
-				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND, 
+				MainActionCommands.SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND, 
 				sendProjectToDatabaseIcon);
 		
 		add(dbLinkageMenu);

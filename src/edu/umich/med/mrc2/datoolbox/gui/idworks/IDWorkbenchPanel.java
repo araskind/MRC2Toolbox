@@ -130,7 +130,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PepSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.io.PepserchResultsImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.project.OpenIDTrackerProjectDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.search.IDTrackerDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.ExperimentDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.DockableStandardFeatureAnnotationTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationAssignmentDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationManagerDialog;
@@ -263,8 +264,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	private FilterTrackerMSMSFeaturesDialog filterTrackerFeaturesDialog;
 	private MSMSFeatureRTIDSearchDialog msmsFeatureRTIDSearchDialog;	
 	private EntropyScoringSetupDialog entropyScoringSetupDialog;
+	private ExperimentDataSearchDialog experimentDataSearchDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
+	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
 	private static final Icon openCdpIdProjectIcon = GuiUtils.getIcon("openIdExperiment", 24);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
 	private static final Icon idSetupIcon = GuiUtils.getIcon("searchCompounds", 24);
@@ -390,6 +393,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 				MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND.getName(), 
 				searchIdTrackerIcon, this));
 		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_SEARCH_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_SEARCH_DIALOG_COMMAND.getName(), 
+				searchExperimentIcon, this));
+		
 		menuActions.addSeparator();
 		
 		menuActions.add(GuiUtils.setupButtonAction(
@@ -513,8 +521,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 			runIdentificationTask();
 		
 		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND.getName()))
-			showTrackerSearchDialog();		
-
+			showTrackerSearchDialog();	
+		
+		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_SEARCH_DIALOG_COMMAND.getName()))
+			showTrackerSearchByExperimentDialog();	
+		
 		if (command.equals(MainActionCommands.NIST_MS_SEARCH_SETUP_COMMAND.getName()))
 			showNistSearchSetup();
 		
@@ -1417,7 +1428,18 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		idTrackerDataSearchDialog.setVisible(true);
 	}
 	
-
+	private void showTrackerSearchByExperimentDialog(){
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			MessageDialog.showWarningMsg(
+					"Please close active raw data analysis project first.", 
+					this.getContentPane());
+			return;
+		}	
+		experimentDataSearchDialog = new ExperimentDataSearchDialog(this);
+		experimentDataSearchDialog.setLocationRelativeTo(this.getContentPane());
+		experimentDataSearchDialog.setVisible(true);
+	}
 
 	private void showPepSearchSetupDiaog(boolean runOffline) {
 
