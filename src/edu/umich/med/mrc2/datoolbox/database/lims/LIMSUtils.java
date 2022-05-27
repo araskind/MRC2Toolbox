@@ -434,6 +434,7 @@ public class LIMSUtils {
 		}
 		rs.close();
 		ps.close();
+		ConnectionManager.releaseConnection(conn);
 		return assays;
 	}
 

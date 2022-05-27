@@ -306,7 +306,6 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 		}
 		msps.close();
 		ConnectionManager.releaseConnection(conn);
-
 	}
 	
 	private void getMSMSLibraryEntries() throws Exception {

@@ -36,6 +36,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -159,10 +160,10 @@ public final class MRC2ToolBoxCore {
 		}		
 		Connection conn = null;
 		try {
-			conn = ConnectionManager.getConnection();
-		} catch (Exception e1) {
+			conn = ConnectionManager.getTestConnection();
+		} catch (Exception e2) {
 			// TODO Auto-generated catch block
-			//	e1.printStackTrace();
+			e2.printStackTrace();
 		}
 		if(conn == null && !conectionSetupTried)
 			showDatabaseSetup();
@@ -176,7 +177,14 @@ public final class MRC2ToolBoxCore {
 		if(conn == null) {
 			MessageDialog.showErrorMsg("Database connection can not be established, exiting the program");
 			System.exit(1);
-		}		
+		} else {
+			try {
+				conn.close();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
         final SplashScreen splash = SplashScreen.getSplashScreen();
         Graphics2D g = null;
         if (splash != null)

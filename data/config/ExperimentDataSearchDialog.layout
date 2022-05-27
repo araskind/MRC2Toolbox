@@ -99,27 +99,11 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600391373263" orientation="VERTICAL" divider="0.5252621544327931">
-											<leaf id="0" nodeId="1600213789536">
-												<placeholders>
-													<placeholder>dock.single.DesignEditorPanel</placeholder>
-												</placeholders>
-												<placeholder-map>
-													<version>0</version>
-													<format>dock.PlaceholderList</format>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DesignEditorPanel</placeholder>
-														</key>
-													</entry>
-												</placeholder-map>
-											</leaf>
-											<leaf id="1" nodeId="1600391373261">
-												<placeholders>
-													<placeholder>dock.single.AssayDesignPanel</placeholder>
-												</placeholders>
-											</leaf>
-										</node>
+										<leaf id="0" nodeId="1653331580531">
+											<placeholders>
+												<placeholder>dock.single.DockableExperimentsTable</placeholder>
+											</placeholders>
+										</leaf>
 									</content>
 								</delegate>
 							</layout>
@@ -130,20 +114,10 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DesignEditorPanel">
-										<replacement id="dockablesingle DesignEditorPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentsTable">
+										<replacement id="dockablesingle DockableExperimentsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DesignEditorPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.AssayDesignPanel">
-										<replacement id="dockablesingle AssayDesignPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>AssayDesignPanel</id>
+											<id>DockableExperimentsTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -177,50 +151,9 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DesignEditorPanel" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DesignEditorPanel</placeholder>
-											<backup-path>
-												<node location="BOTTOM" size="0.7435653002859867" id="1600391350349"/>
-												<leaf id="1600391350347"/>
-											</backup-path>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single AssayDesignPanel" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.AssayDesignPanel</placeholder>
-											<backup-path>
-												<leaf id="1600213789536"/>
-											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.AssayDesignPanel</placeholder>
-										</property>
-									</location>
-								</property>
-							</properties>
+						<entry id="single DockableExperimentsTable" current="dock.mode.normal">
+							<history/>
+							<properties/>
 						</entry>
 					</dockables>
 					<modes>

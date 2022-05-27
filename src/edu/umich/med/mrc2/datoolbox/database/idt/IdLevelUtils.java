@@ -115,19 +115,19 @@ public class IdLevelUtils {
 				+ "COLOR_CODE = ?, ALLOW_TO_REPLACE_AS_DEFAULT = ? "
 				+ "WHERE IDENTIFICATION_LEVEL_ID = ?";
 
-			PreparedStatement ps = conn.prepareStatement(query);
-			ps.setString(1, levelToUpdate.getName());
-			ps.setInt(2, levelToUpdate.getRank());
-			ps.setString(3, levelToUpdate.getHexColorCode());
-			String allowRepDefault = "0";
-			if(levelToUpdate.isAllowToReplaceAsDefault())
-				allowRepDefault = "1";
-			
-			ps.setString(4, allowRepDefault);
-			
-			ps.setString(5, levelToUpdate.getId());
-			ps.executeUpdate();
-			ps.close();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, levelToUpdate.getName());
+		ps.setInt(2, levelToUpdate.getRank());
+		ps.setString(3, levelToUpdate.getHexColorCode());
+		String allowRepDefault = "0";
+		if(levelToUpdate.isAllowToReplaceAsDefault())
+			allowRepDefault = "1";
+		
+		ps.setString(4, allowRepDefault);
+		
+		ps.setString(5, levelToUpdate.getId());
+		ps.executeUpdate();
+		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
 

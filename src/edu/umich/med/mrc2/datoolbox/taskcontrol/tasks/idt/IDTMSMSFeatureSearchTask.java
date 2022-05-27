@@ -817,8 +817,6 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		msmsps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
-	
-
 
 	protected void retievePepSearchParameters() {		
 		

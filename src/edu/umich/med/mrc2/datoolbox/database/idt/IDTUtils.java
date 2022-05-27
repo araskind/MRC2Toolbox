@@ -343,7 +343,8 @@ public class IDTUtils {
 		}
 		rs.close();
 		ps.close();
-
+		ConnectionManager.releaseConnection(conn);
+		
 		// Add sample/control type
 		design.addFactor(ReferenceSamplesManager.getSampleControlTypeFactor());
 		design.getSamples().forEach(s -> s.addDesignLevel(ReferenceSamplesManager.sampleLevel));
@@ -1868,6 +1869,7 @@ public class IDTUtils {
 				df.setInjectionId(rs.getString("INJECTION_ID"));
 			}
 		}
+		ConnectionManager.releaseConnection(conn);
 	}
 
 	public static String addNewDataAnalysis(

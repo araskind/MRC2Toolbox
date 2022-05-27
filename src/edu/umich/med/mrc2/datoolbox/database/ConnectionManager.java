@@ -22,9 +22,11 @@
 package edu.umich.med.mrc2.datoolbox.database;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.DatabseDialect;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class ConnectionManager {
@@ -52,8 +54,23 @@ public class ConnectionManager {
 //				MRC2ToolBoxConfiguration.getDatabaseUserName(), 
 //				MRC2ToolBoxConfiguration.getDatabasePassword());
 //		return connection;
+				
+		return PooledConnectionManager.getConnection();
+	}
 	
-		return PooledConnectionManager.getConnection();			
+	public static Connection getTestConnection() throws Exception {
+		
+		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.Oracle))
+		Class.forName("oracle.jdbc.driver.OracleDriver");
+	
+		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.PostgreSQL))
+			Class.forName("org.postgresql.Driver");
+		
+		Connection connection = DriverManager.getConnection(
+				MRC2ToolBoxConfiguration.getDatabaseConnectionString(),
+				MRC2ToolBoxConfiguration.getDatabaseUserName(), 
+				MRC2ToolBoxConfiguration.getDatabasePassword());
+		return connection;
 	}
 
 	public static boolean connectionDefined() {

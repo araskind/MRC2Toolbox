@@ -269,7 +269,8 @@ public class BinnerUtils {
 		ps.close();
 		compPs.close();
 		ConnectionManager.releaseConnection(conn);
-			return binMdList;
+		
+		return binMdList;
 	}
 	
 	public static void addNewBinnerNeutralMassDifference(

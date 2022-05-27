@@ -535,13 +535,16 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 		}
 	}
 
-	private void insertPepSearchParametersInDatabase() throws Exception {
-
-		Connection conn = ConnectionManager.getConnection();		
-		if(searchParameters != null)		
-			IdentificationUtils.addNewPepSearchParameterSet(searchParameters, conn);
-		
-		ConnectionManager.releaseConnection(conn);
+	private void insertPepSearchParametersInDatabase() {
+	
+		if(searchParameters != null) {
+			try {
+				IdentificationUtils.addNewPepSearchParameterSet(searchParameters);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public Collection<String> getMessageLog() {

@@ -139,7 +139,7 @@ public class QCAnnotationUtils {
 		}
 		ps.executeUpdate();
 		ps.close();
-		MetLIMSConnectionManager.releaseConnection(conn);
+		ConnectionManager.releaseConnection(conn);
 
 		if(fis != null)
 			fis.close();
@@ -153,7 +153,7 @@ public class QCAnnotationUtils {
 	public static void updateAnnotation(
 			AnalysisQcEventAnnotation annotation, Document rtfDocument, LIMSUser noteEditor) throws Exception {
 
-		Connection conn = MetLIMSConnectionManager.getConnection();
+		Connection conn = ConnectionManager.getConnection();
 		annotation.setLastModifiedBy(noteEditor);
 		annotation.setLastModified(new Date());
 
@@ -196,7 +196,7 @@ public class QCAnnotationUtils {
 		ps.setString(10, annotation.getId());
 		ps.executeUpdate();
 		ps.close();
-		MetLIMSConnectionManager.releaseConnection(conn);
+		ConnectionManager.releaseConnection(conn);
 
 		if (fis != null)
 			fis.close();
@@ -209,7 +209,7 @@ public class QCAnnotationUtils {
 
 	public static void deleteAnnotation(AnalysisQcEventAnnotation annotation) throws Exception {
 
-		Connection conn = MetLIMSConnectionManager.getConnection();
+		Connection conn = ConnectionManager.getConnection();
 		String query =
 			"DELETE FROM ANALYSIS_QC_LOG WHERE ANNOTATION_ID = ?";
 
@@ -217,7 +217,7 @@ public class QCAnnotationUtils {
 		stmt.setString(1, annotation.getId());
 		stmt.executeUpdate();
 		stmt.close();
-		MetLIMSConnectionManager.releaseConnection(conn);
+		ConnectionManager.releaseConnection(conn);
 	}
 
 	public static Collection<AnalysisQcEventAnnotation> findAnnotations(
@@ -232,7 +232,7 @@ public class QCAnnotationUtils {
 
 		Collection<AnalysisQcEventAnnotation> annotations =
 				new ArrayList<AnalysisQcEventAnnotation>();
-		Connection conn = MetLIMSConnectionManager.getConnection();
+		Connection conn = ConnectionManager.getConnection();
 		String query =
 			"SELECT ANNOTATION_ID, EXPERIMENT_ID, SAMPLE_ID,  " +
 			"ASSAY_ID, INSTRUMENT_ID, ANNOTATION_TEXT, CREATED_BY,  " +
@@ -336,13 +336,13 @@ public class QCAnnotationUtils {
 		}
 		rs.close();
 		ps.close();
-		MetLIMSConnectionManager.releaseConnection(conn);
+		ConnectionManager.releaseConnection(conn);
 		return annotations;
 	}
 
 	public static Document getAnnotationDocument(String annotationId) throws Exception{
 
-		Connection conn = MetLIMSConnectionManager.getConnection();
+		Connection conn = ConnectionManager.getConnection();
 		AdvancedRTFEditorKit editor = new  AdvancedRTFEditorKit();
 		AdvancedRTFDocument doc = null;
 		String query =
@@ -363,7 +363,7 @@ public class QCAnnotationUtils {
 		}
 		rs.close();
 		ps.close();
-		MetLIMSConnectionManager.releaseConnection(conn);
+		ConnectionManager.releaseConnection(conn);
 		return doc;
 	}
 

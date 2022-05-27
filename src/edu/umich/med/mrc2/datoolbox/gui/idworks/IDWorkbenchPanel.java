@@ -87,7 +87,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
-import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdLevelUtils;
@@ -2817,8 +2816,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		try {
 			String searchParametersId = 
 					IdentificationUtils.addNewPepSearchParameterSet(
-							task.getPepSearchParameterObject(), 
-							ConnectionManager.getConnection());
+							task.getPepSearchParameterObject());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

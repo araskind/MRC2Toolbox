@@ -676,7 +676,7 @@ public class CompoundDatabaseUtils {
 			String inchi,
 			Range massRange)  throws Exception {
 
-		Collection<String>idList = new ArrayList<String>();
+		Collection<String>idList = new ArrayList<String>();		
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 			"SELECT DISTINCT S.ACCESSION  " +

@@ -275,12 +275,16 @@ public class DatabasePreferencesPanel extends JPanel
             if(!silentOnSuccess)
             	MessageDialog.showInfoMsg("Connection successful", this);  
             
+            if(conn != null)
+            	conn.close();
+            
             return true;
         } catch (SQLException e) {
         	System.out.println(e.getMessage());
         	MessageDialog.showErrorMsg("Connection failled!\n\n" + e.getMessage(), this);
         	return false;
         }
+       
 	}
 
 	private Collection<String>verifyConnectionParameters(){

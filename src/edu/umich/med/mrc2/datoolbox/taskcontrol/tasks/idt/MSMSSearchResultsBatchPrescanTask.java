@@ -328,6 +328,7 @@ public class MSMSSearchResultsBatchPrescanTask extends AbstractTask implements T
 			}
 			processed++;
 		}
+		ConnectionManager.releaseConnection(conn);
 	}
 
 	private void extractData(MSMSSearchResultsPrescanTask task) {
