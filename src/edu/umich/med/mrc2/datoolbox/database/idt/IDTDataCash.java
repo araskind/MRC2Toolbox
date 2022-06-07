@@ -296,6 +296,28 @@ public class IDTDataCash {
 		}
 		return experimentSamplePrepMap;
 	}
+	
+	
+	public static Collection<DataPipeline> getDataPipelinesForExperiment(LIMSExperiment experiment){
+		
+		Collection<DataPipeline>pipelines = new TreeSet<DataPipeline>();
+		Collection<LIMSSamplePreparation>preps = 
+				getExperimentSamplePrepMap().get(experiment);
+		
+		if(preps == null || preps.isEmpty())
+			return pipelines;
+		
+		for(LIMSSamplePreparation prep : preps) {
+			
+			Collection<DataPipeline> plList = getSamplePrepDataPipelineMap().get(prep);
+			if(plList == null || plList.isEmpty())
+				continue;
+			
+			pipelines.addAll(plList);
+		}		
+		return pipelines;
+	}
+	
 //
 //	public static void refreshSamplePrepAcquisitionMethodMap() {
 //		samplePrepAcquisitionMethodMap.clear();

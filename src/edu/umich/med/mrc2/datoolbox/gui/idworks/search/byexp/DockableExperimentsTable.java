@@ -25,9 +25,9 @@ import java.awt.BorderLayout;
 import java.util.Collection;
 
 import javax.swing.Icon;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
@@ -35,23 +35,24 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.se.IDTrackerExperimentListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class DockableExperimentsTable extends DefaultSingleCDockable {
+public class DockableExperimentsTable extends DefaultSingleCDockable implements ListSelectionListener {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("idExperiment", 16);
 	
 	private IDTrackerExperimentListingTable experimentsTable;
+	private DataPipelinesTable dataPipelinesTable;
 
-	public DockableExperimentsTable(ListSelectionListener parent)  {
+	public DockableExperimentsTable()  {
 
 		super("DockableExperimentsTable", componentIcon, "IDTracker Experiments", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		
 		experimentsTable = new IDTrackerExperimentListingTable();
-		experimentsTable.getSelectionModel().addListSelectionListener(parent);
+		experimentsTable.getSelectionModel().addListSelectionListener(this);
 		add(new JScrollPane(experimentsTable), BorderLayout.CENTER);
 		
-		JPanel paramsPanel = new JPanel();
-		add(paramsPanel, BorderLayout.SOUTH);
+		dataPipelinesTable = new DataPipelinesTable();
+		add(new JScrollPane(dataPipelinesTable), BorderLayout.SOUTH);
 	}
 	
 	public void setTableModelFromExperimentList(Collection<LIMSExperiment>experimentList) {		
@@ -84,6 +85,12 @@ public class DockableExperimentsTable extends DefaultSingleCDockable {
 			experimentsTable.getSelectionModel().setSelectionMode(
 					ListSelectionModel.SINGLE_SELECTION);	
 		}
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

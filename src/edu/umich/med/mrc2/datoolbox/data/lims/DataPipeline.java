@@ -22,6 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+
+import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
@@ -45,6 +48,8 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>{
 		super();
 		this.acquisitionMethod = acquisitionMethod;
 		this.dataExtractionMethod = dataExtractionMethod;
+		this.name = acquisitionMethod.getName() + 
+				"\n" + dataExtractionMethod.getName();
 	}
 
 	public DataPipeline(
@@ -155,9 +160,17 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>{
 	
 	public String getCode() {
 		
-		return assay.getId() + "_" + 
-				acquisitionMethod.getId() + "_" + 
-				dataExtractionMethod.getId();
+		ArrayList<String>codeParts = new ArrayList<String>();
+		if(assay != null)
+			codeParts.add(assay.getId());
+		
+		if(acquisitionMethod != null)
+			codeParts.add(acquisitionMethod.getId());
+		
+		if(dataExtractionMethod != null)
+			codeParts.add(dataExtractionMethod.getId());
+		
+		return StringUtils.join(codeParts, "_");
 	}
 
 	public String getDescription() {

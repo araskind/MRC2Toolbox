@@ -61,7 +61,6 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class ExperimentDataSearchDialog extends JDialog
 		implements ActionListener, BackedByPreferences, ItemListener, ListSelectionListener, PersistentLayout {
-
 	
 	/**
 	 * 
@@ -95,7 +94,7 @@ public class ExperimentDataSearchDialog extends JDialog
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
 		
-		experimentsTable = new DockableExperimentsTable(this);
+		experimentsTable = new DockableExperimentsTable();
 		experimentsTable.setTableModelFromExperimentList(IDTDataCash.getExperiments());
 		grid.add(0, 0, 75, 100, experimentsTable);
 		//	TODO
