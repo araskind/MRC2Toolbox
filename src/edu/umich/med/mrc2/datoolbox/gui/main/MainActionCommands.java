@@ -1115,6 +1115,9 @@ public enum MainActionCommands {
 	SHOW_RAW_CHROMATOGRAM_COMMAND("Show raw chromatogram"),
 	SHOW_SMOOTHING_PREFERENCES_COMMAND("Show smoothing preferences"),
 	SAVE_SMOOTHING_PREFERENCES_COMMAND("Save smoothing preferences"),
+	
+	//	Feature filter
+	IMPORT_MS1_FEATURES_FROM_FILE_COMMAND("Import MS1 features from file"),
 	;
 
 	private final String name;

@@ -76,8 +76,7 @@ public class DataPipelinesTable extends BasicTable {
 		thf.getParserModel().setComparator(DataExtractionMethod.class, 
 				new AnalysisMethodComparator(SortProperty.Name));
 		thf.getParserModel().setFormat(DataExtractionMethod.class, 
-				new AnalysisMethodFormat(SortProperty.Name));
-		
+				new AnalysisMethodFormat(SortProperty.Name));		
 		thf.getParserModel().setComparator(DataPipeline.class, 
 				new DataPipelineComparator(SortProperty.ID));
 		thf.getParserModel().setFormat(DataPipeline.class, 
@@ -86,7 +85,7 @@ public class DataPipelinesTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromProject(Collection<DataPipeline>pipelines) {
+	public void setTableModelFromDataPipelineCollection(Collection<DataPipeline>pipelines) {
 		model.setTableModelFromDataPipelineCollection(pipelines);
 		tca.adjustColumns();
 	}
@@ -104,5 +103,15 @@ public class DataPipelinesTable extends BasicTable {
 			selected.add(dp);
 		}
 		return selected;		
+	}
+	
+	public Collection<DataPipeline> getAllDataPipelines() {
+		
+		Collection<DataPipeline>pipelines = new ArrayList<DataPipeline>();
+		int dpColumn = model.getColumnIndex(DataPipelinesTableModel.CODE_COLUMN);
+		for(int i=0; i<model.getRowCount(); i++)
+			pipelines.add((DataPipeline)model.getValueAt(i, dpColumn));
+		
+		return pipelines;
 	}
 }

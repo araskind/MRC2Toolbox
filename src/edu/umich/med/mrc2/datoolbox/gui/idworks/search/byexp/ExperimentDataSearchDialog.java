@@ -31,6 +31,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
@@ -50,6 +52,8 @@ import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -78,6 +82,8 @@ public class ExperimentDataSearchDialog extends JDialog
 	private CControl control;
 	private CGrid grid;
 	private DockableExperimentsTable experimentsTable;
+	private DockableFeatureListPanel featureListPanel;
+	private DockableDataPipelinesTable dataPipelinesTable;
 	
 	public ExperimentDataSearchDialog(IDWorkbenchPanel parentPanel) {
 		super();
@@ -94,10 +100,13 @@ public class ExperimentDataSearchDialog extends JDialog
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
 		
-		experimentsTable = new DockableExperimentsTable();
+		experimentsTable = new DockableExperimentsTable(this);
 		experimentsTable.setTableModelFromExperimentList(IDTDataCash.getExperiments());
-		grid.add(0, 0, 75, 100, experimentsTable);
-		//	TODO
+		dataPipelinesTable = new DockableDataPipelinesTable();
+		
+		featureListPanel = new DockableFeatureListPanel();	
+		grid.add(0, 0, 75, 100, experimentsTable, 
+				dataPipelinesTable, featureListPanel);
 		
 		control.getContentArea().deploy(grid);
 		getContentPane().add(control.getContentArea(), BorderLayout.CENTER);
@@ -133,6 +142,7 @@ public class ExperimentDataSearchDialog extends JDialog
 		rootPane.setDefaultButton(searchButton);
 		
 		loadPreferences();
+		loadLayout(layoutConfigFile);
 		pack();
 	}
 	
@@ -186,7 +196,23 @@ public class ExperimentDataSearchDialog extends JDialog
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		// TODO Auto-generated method stub
-
+		if(!e.getValueIsAdjusting()) {
+			
+			Collection<LIMSExperiment> selectedExperiments = 
+					experimentsTable.getSelectedExperiments();
+			if(selectedExperiments.isEmpty())
+				return;
+			
+			Collection<DataPipeline>allPipelines = new TreeSet<DataPipeline>();
+			for(LIMSExperiment experiment : selectedExperiments) {
+				
+				Collection<DataPipeline> pipelines = 
+						IDTDataCash.getDataPipelinesForExperiment(experiment);
+				if(pipelines != null)
+					allPipelines.addAll(pipelines);
+			}
+			dataPipelinesTable.setTableModelFromDataPipelineCollection(allPipelines);
+		}
 	}
 
 	@Override

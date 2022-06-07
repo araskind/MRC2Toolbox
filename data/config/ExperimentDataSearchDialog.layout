@@ -99,11 +99,34 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<leaf id="0" nodeId="1653331580531">
-											<placeholders>
-												<placeholder>dock.single.DockableExperimentsTable</placeholder>
-											</placeholders>
-										</leaf>
+										<node nodeId="1654626686616" orientation="VERTICAL" divider="0.5635294117647058">
+											<node nodeId="1654626696609" orientation="VERTICAL" divider="0.3854838709677419">
+												<leaf id="0" nodeId="1654626682039">
+													<placeholders>
+														<placeholder>dock.single.DockableExperimentsTable</placeholder>
+													</placeholders>
+													<placeholder-map>
+														<version>0</version>
+														<format>dock.PlaceholderList</format>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableExperimentsTable</placeholder>
+															</key>
+														</entry>
+													</placeholder-map>
+												</leaf>
+												<leaf id="1" nodeId="1654626696607">
+													<placeholders>
+														<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
+													</placeholders>
+												</leaf>
+											</node>
+											<leaf id="2" nodeId="1654626686614">
+												<placeholders>
+													<placeholder>dock.single.DockableFeatureListPanel</placeholder>
+												</placeholders>
+											</leaf>
+										</node>
 									</content>
 								</delegate>
 							</layout>
@@ -118,6 +141,26 @@
 										<replacement id="dockablesingle DockableExperimentsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>DockableExperimentsTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableDataPipelinesTable">
+										<replacement id="dockablesingle DockableDataPipelinesTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableDataPipelinesTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableFeatureListPanel">
+										<replacement id="dockablesingle DockableFeatureListPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableFeatureListPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -151,9 +194,70 @@
 				</base>
 				<modes>
 					<dockables>
+						<entry id="single DockableFeatureListPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableFeatureListPanel</placeholder>
+											<backup-path>
+												<node location="BOTTOM" size="0.75" id="1654626686616"/>
+												<leaf id="1654626686614"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
 						<entry id="single DockableExperimentsTable" current="dock.mode.normal">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableExperimentsTable</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.7270194986072424" id="1654626686616"/>
+												<node location="TOP" size="0.25" id="1654626696609"/>
+												<leaf id="1654626682039"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableDataPipelinesTable" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.7270194986072424" id="1654626686616"/>
+												<node location="BOTTOM" size="0.75" id="1654626696609"/>
+												<leaf id="1654626696607"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 					</dockables>
 					<modes>
