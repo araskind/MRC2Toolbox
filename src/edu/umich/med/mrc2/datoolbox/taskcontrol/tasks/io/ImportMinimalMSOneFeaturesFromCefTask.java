@@ -22,9 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.xml.xpath.XPath;
@@ -32,57 +32,33 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
-import org.ujmp.core.Matrix;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.ResultsFile;
+import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
-public class CefDataImportTask  extends AbstractTask {
+public class ImportMinimalMSOneFeaturesFromCefTask  extends AbstractTask {
 
 	private Document dataDocument;
 	private DataFile dataFile;
-	private ResultsFile resultsFile;
-	private DataPipeline dataPipeline;
-	private HashSet<SimpleMsFeature>features;
-	private TreeSet<String> unmatchedAdducts;
-	private int fileIndex;
-	private Matrix featureMatrix;
-	private Matrix dataMatrix;
-	private Map<String, Integer> featureCoordinateMap;
-	private Map<String, List<Double>> retentionMap;
-	private Map<String, List<Double>> mzMap;
+	private Collection<SimpleMsFeature> features;
+	private Set<String> unmatchedAdducts;
+	private Collection<MinimalMSOneFeature>minFeatures;
 
-	public CefDataImportTask(
-			DataFile dataFile,
-			ResultsFile resultsFile,
-			int fileIndex,
-			Matrix featureMatrix,
-			Matrix dataMatrix,
-			Map<String, Integer> featureCoordinateMap,
-			Map<String, List<Double>> retentionMap,
-			Map<String, List<Double>> mzMap) {
+	public ImportMinimalMSOneFeaturesFromCefTask(DataFile dataFile) {
 
 		this.dataFile = dataFile;
-		this.resultsFile = resultsFile;
-		this.fileIndex = fileIndex;
-		this.featureMatrix = featureMatrix;
-		this.dataMatrix = dataMatrix;
-		this.featureCoordinateMap = featureCoordinateMap;
-		this.retentionMap = retentionMap;
-		this.mzMap = mzMap;
-
 		total = 100;
 		processed = 2;
 		taskDescription = "Importing MS data from " + dataFile.getName();
@@ -92,15 +68,7 @@ public class CefDataImportTask  extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-		return new CefDataImportTask(
-				 dataFile,
-				 resultsFile,
-				 fileIndex,
-				 featureMatrix,
-				 dataMatrix,
-				 featureCoordinateMap,
-				 retentionMap,
-				 mzMap);
+		return new ImportMinimalMSOneFeaturesFromCefTask(dataFile);
 	}
 
 	@Override
@@ -109,16 +77,7 @@ public class CefDataImportTask  extends AbstractTask {
 		setStatus(TaskStatus.PROCESSING);
 		dataDocument = null;
 		// Read CEF file
-		String cefPath = null;
-		if(resultsFile != null && resultsFile.getFullPath() != null)
-			cefPath = resultsFile.getFullPath();	
-		else if(dataPipeline != null && dataPipeline.getDataExtractionMethod() != null) 
-			cefPath = dataFile.getResultForDataExtractionMethod(dataPipeline.getDataExtractionMethod()).getFullPath();
-		else {
-			System.out.println("Path to CEF file not specified");
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
+		String cefPath = dataFile.getFullPath();
 		try {
 			dataDocument = XmlUtils.readXmlFile(new File(cefPath));
 		} catch (Exception e) {
@@ -129,19 +88,33 @@ public class CefDataImportTask  extends AbstractTask {
 		if(dataDocument != null) {
 			try {
 				parseCefData();
-				setStatus(TaskStatus.FINISHED);
 			}
 			catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
 			}
 		}
+		convertSimpleMsFeatureToMinimal();
 		setStatus(TaskStatus.FINISHED);
+	}
+
+	private void convertSimpleMsFeatureToMinimal() {
+		
+		minFeatures = new TreeSet<MinimalMSOneFeature>(); 
+		for(SimpleMsFeature sf : features) {
+			
+			double rt = sf.getRetentionTime();
+			for(Adduct aduct : sf.getObservedSpectrum().getAdducts()) {
+				
+				double mz = sf.getObservedSpectrum().getMsForAdduct(aduct)[0].getMz();
+				minFeatures.add(new MinimalMSOneFeature(mz, rt));
+			}
+		}
 	}
 
 	private void parseCefData() throws Exception {
 
-		taskDescription = "Parsing CEF data file...";
+		taskDescription = "Parsing CEF data file " + dataFile.getName();
 		features = new HashSet<SimpleMsFeature>();
 		XPathExpression expr = null;
 		NodeList targetNodes;
@@ -152,8 +125,6 @@ public class CefDataImportTask  extends AbstractTask {
 		targetNodes = (NodeList) expr.evaluate(dataDocument, XPathConstants.NODESET);
 		total = targetNodes.getLength();
 		processed = 0;
-		long[] coordinates = new long[2];
-		coordinates[0] = fileIndex;
 
 		for (int i = 0; i < targetNodes.getLength(); i++) {
 
@@ -187,26 +158,8 @@ public class CefDataImportTask  extends AbstractTask {
 
 			// Parse identifications
 			String targetId = getTargetId(cpdElement);
-			SimpleMsFeature msf = new SimpleMsFeature(targetId, spectrum, rt, dataPipeline);
+			SimpleMsFeature msf = new SimpleMsFeature(targetId, spectrum, rt, null);
 			msf.setPolarity(polarity);
-
-			// TODO	This is not required when matching to library, 
-//			String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
-//					locationElement.getAttribute("m") + "_" + 
-//					locationElement.getAttribute("rt");
-//			if(cpdElement.getElementsByTagName("Molecule").item(0) != null) {
-//
-//				Element moleculeElement = (Element) cpdElement.getElementsByTagName("Molecule").item(0);
-//				name = moleculeElement.getAttribute("name");
-//
-//				// Work-around for old data
-//				if (name.isEmpty())
-//					name = moleculeElement.getAttribute("formula");
-//			}
-//			msf.setName(name);
-//
-//			//	Add extra data for feature
-//			msf.setNeutralMass(neutralMass);
 
 			if(!locationElement.getAttribute("a").isEmpty())
 				msf.setArea(Double.parseDouble(locationElement.getAttribute("a")));
@@ -214,22 +167,6 @@ public class CefDataImportTask  extends AbstractTask {
 			if(!locationElement.getAttribute("y").isEmpty())
 				msf.setHeight(Double.parseDouble(locationElement.getAttribute("y")));
 
-			//	Insert feature in arrays
-			if(featureCoordinateMap != null) {
-				
-				if(featureCoordinateMap.get(msf.getLibraryTargetId()) != null) {
-
-					retentionMap.get(msf.getLibraryTargetId()).add(msf.getRetentionTime());
-					mzMap.get(msf.getLibraryTargetId()).add(msf.getObservedSpectrum().getMonoisotopicMz());
-					coordinates[1] = featureCoordinateMap.get(msf.getLibraryTargetId());
-					featureMatrix.setAsObject(msf, coordinates);
-					dataMatrix.setAsDouble(msf.getArea(), coordinates);
-				}
-				else {
-					//	TODO handle library mismatches
-					System.out.println(msf.getName() + "(" + msf.getLibraryTargetId() + ") not in the library.");
-				}
-			}
 			features.add(msf);
 			processed++;
 		}
@@ -261,15 +198,18 @@ public class CefDataImportTask  extends AbstractTask {
 		return dataFile;
 	}
 
-	public HashSet<SimpleMsFeature> getFeatures() {
+	public Collection<SimpleMsFeature> getFeatures() {
 		return features;
 	}
 
 	/**
 	 * @return the unmatchedAdducts
 	 */
-	public TreeSet<String> getUnmatchedAdducts() {
+	public Set<String> getUnmatchedAdducts() {
 		return unmatchedAdducts;
 	}
 
+	public Collection<MinimalMSOneFeature> getMinFeatures() {
+		return minFeatures;
+	}
 }

@@ -105,4 +105,8 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 		
 		return result;
 	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }

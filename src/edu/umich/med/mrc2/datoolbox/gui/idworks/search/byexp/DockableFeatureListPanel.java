@@ -27,6 +27,8 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Collection;
+import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
@@ -37,15 +39,27 @@ import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.apache.commons.io.FilenameUtils;
+
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ImportMinimalMSOneFeaturesFromCefTask;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
-public class DockableFeatureListPanel extends DefaultSingleCDockable implements ActionListener, BackedByPreferences {
+public class DockableFeatureListPanel extends DefaultSingleCDockable 
+	implements ActionListener, BackedByPreferences, TaskListener {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editCollection", 16);
 	private Preferences preferences;
@@ -129,10 +143,95 @@ public class DockableFeatureListPanel extends DefaultSingleCDockable implements 
 	}
 	
 	private void readFeaturesFromInputFile(File inputFile) {
-		// TODO Auto-generated method stub
-		MessageDialog.showInfoMsg(
-				"Reading features from " + inputFile.getName(), 
-				this.getContentPane());
+		
+		String extension  = 
+				FilenameUtils.getExtension(inputFile.getName()).toLowerCase();
+		
+		if(extension.equals("txt") || extension.equals("tsv"))
+			readFeaturesFromTextFile(inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		
+		if(extension.equals("csv"))
+			readFeaturesFromTextFile(inputFile, ',');
+		
+		if(extension.equals("cef"))
+			readFeaturesFromCefFile(inputFile);
+	}
+
+	private void readFeaturesFromCefFile(File inputFile) {
+
+		DataFile df = new DataFile(inputFile);
+		ImportMinimalMSOneFeaturesFromCefTask task = 
+				new ImportMinimalMSOneFeaturesFromCefTask(df);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+	}
+
+	private void readFeaturesFromTextFile(File inputFile, char delimiter) {
+		
+		Collection<MinimalMSOneFeature>features = new TreeSet<MinimalMSOneFeature>();
+		String[][]featureData = DelimitedTextParser.parseTextFile(inputFile,delimiter);
+		int mzIndex = -1;
+		int rtIndex = -1;
+		int nameIndex = -1;
+		for(int i=0; i<featureData[0].length; i++) {
+			
+			if(featureData[0][i].toLowerCase().equals("mz") 
+					|| featureData[0][i].toLowerCase().equals("m/z"))
+				mzIndex = i;
+			
+			if(featureData[0][i].toLowerCase().equals("rt"))
+				rtIndex = i;
+			
+			if(featureData[0][i].toLowerCase().equals("name"))
+				nameIndex = i;
+		}
+		if(mzIndex == -1 && rtIndex == -1 && nameIndex == -1) {
+			MessageDialog.showErrorMsg("Invalid file format.\n"
+					+ "First line must include \"MZ\", \"RT\" and/or \"Name\" columns", 
+					this.getContentPane());
+			return;
+		}
+		if(mzIndex >= 0 && rtIndex >= 0) {
+			
+			for(int i=1; i<featureData.length; i++) {
+				
+				try {
+					double mz = Double.parseDouble(featureData[i][mzIndex]);
+					double rt = Double.parseDouble(featureData[i][rtIndex]);
+					MinimalMSOneFeature f = new MinimalMSOneFeature(mz, rt);
+					if(nameIndex >= 0)
+						f.setName(featureData[i][nameIndex]);
+					
+					features.add(f);
+				} catch (NumberFormatException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		else {
+			if(nameIndex >= 0) {
+				
+				for(int i=1; i<featureData.length; i++) {
+					String name = featureData[i][nameIndex];
+					String[]mzrt = name.replace("UNK_", "").split("_");
+					if(mzrt.length == 2) {
+						
+						try {
+							double mz = Double.parseDouble(mzrt[0]);
+							double rt = Double.parseDouble(mzrt[1]);
+							MinimalMSOneFeature f = new MinimalMSOneFeature(name, mz, rt);
+							features.add(f);
+						} catch (NumberFormatException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		if(features != null)
+			featureTable.setTableModelFromFeatureCollection(features);		
 	}
 
 	@Override
@@ -153,5 +252,29 @@ public class DockableFeatureListPanel extends DefaultSingleCDockable implements 
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
 
+	@Override
+	public void statusChanged(TaskEvent e) {
 
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+			
+			if (e.getSource().getClass().equals(ImportMinimalMSOneFeaturesFromCefTask.class))
+				finalizeCefImportTask((ImportMinimalMSOneFeaturesFromCefTask)e.getSource());			
+		}		
+	}
+
+	private void finalizeCefImportTask(ImportMinimalMSOneFeaturesFromCefTask task) {
+
+		Collection<MinimalMSOneFeature>features = task.getMinFeatures(); 
+		if(features != null)
+			featureTable.setTableModelFromFeatureCollection(features);
+	}
 }
+
+
+
+
+
+
+
