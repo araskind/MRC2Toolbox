@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.database.idt;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -63,6 +64,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 
 public class IDTDataCash {
@@ -129,8 +132,69 @@ public class IDTDataCash {
 	public static Collection<LIMSSampleType>sampleTypes = 
 			new TreeSet<LIMSSampleType>();
 	public static Collection<Double>collisionEnergies = 
-			new TreeSet<Double>();
+			new TreeSet<Double>();	
+	public static Collection<MSMSClusteringParameterSet>msmsClusteringParameters = 
+			new HashSet<MSMSClusteringParameterSet>();
+	public static Collection<MSMSClusterDataSet>msmsClusterDataSetList = 
+			new HashSet<MSMSClusterDataSet>();
 	
+	public static void refreshMSMSClusterDataSetList() {
+		msmsClusterDataSetList.clear();
+		getMsmsClusteringParameters();
+	}
+	
+	public static Collection<MSMSClusterDataSet> getMSMSClusterDataSetList() {
+
+		if(msmsClusterDataSetList == null)
+			msmsClusterDataSetList = new HashSet<MSMSClusterDataSet>();
+		
+		if(msmsClusterDataSetList.isEmpty()) {
+			try {
+				msmsClusterDataSetList.addAll(MSMSClusteringDBUtils.getMSMSClusterDataSets());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return msmsClusterDataSetList;
+	}
+	
+	public static MSMSClusterDataSet getMsmsMSMSClusterDataSetById(String id) {		
+		return getMSMSClusterDataSetList().stream().
+				filter(s -> s.getId().equals(id)).findFirst().orElse(null);
+	}
+	
+	public static void refreshMsmsClusteringParameters() {
+		msmsClusteringParameters.clear();
+		getMSMSClusterDataSetList();
+	}
+
+	public static Collection<MSMSClusteringParameterSet> getMsmsClusteringParameters() {
+
+		if(msmsClusteringParameters == null)
+			msmsClusteringParameters = new HashSet<MSMSClusteringParameterSet>();
+		
+		if(msmsClusteringParameters.isEmpty()) {
+			try {
+				msmsClusteringParameters.addAll(MSMSClusteringDBUtils.getMSMSClusteringParameterSets());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return msmsClusteringParameters;
+	}
+	
+	public static MSMSClusteringParameterSet getMsmsClusteringParameterSetById(String id) {
+		
+		return getMsmsClusteringParameters().stream().
+				filter(p -> p.getId().equals(id)).findFirst().orElse(null);
+	}
+	
+	public static MSMSClusteringParameterSet getMsmsClusteringParameterSetByMd5(String md5) {
+		
+		return getMsmsClusteringParameters().stream().
+				filter(p -> p.getMd5().equals(md5)).findFirst().orElse(null);
+	}
+
 	public static void refreshCollisionEnergies() {
 		collisionEnergies.clear();
 		getCollisionEnergiesList();

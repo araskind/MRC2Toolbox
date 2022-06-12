@@ -177,6 +177,14 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			IDTDataCash.refreshCollisionEnergies();
 			processed = processed + 3;
 			
+			taskDescription = "Refreshing MSMS clustering parameters list";
+			IDTDataCash.refreshMsmsClusteringParameters();
+			processed = processed + 3;
+			
+			taskDescription = "Refreshing the list of clustered MSMS sets ";
+			IDTDataCash.refreshMSMSClusterDataSetList();
+			processed = processed + 3;
+
 			setStatus(TaskStatus.FINISHED);
 		}
 		catch (Exception e) {

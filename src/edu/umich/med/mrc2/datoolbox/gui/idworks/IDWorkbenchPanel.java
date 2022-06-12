@@ -50,6 +50,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
@@ -102,6 +104,7 @@ import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo.DockableCompoundClas
 import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.DockableUniversalIdentificationResultsTable;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.UniversalIdentificationResultsTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.AddFeaturesToCollectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureCollectionManagerDialog;
@@ -184,7 +187,8 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import umich.ms.datatypes.LCMSData;
 
-public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeatureBundleDataUpdater{
+public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel 
+		implements MSFeatureBundleDataUpdater, TreeSelectionListener {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("missingIdentifications", 16);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "IDWorkbenchPanel.layout");
@@ -202,6 +206,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	private DockableMSMSLibraryEntryPropertiesTable msmsLibraryEntryPropertiesTable;
 	private DockableCompoundClasyFireViewer clasyFireViewer;
 	private DockableChromatogramPlot chromatogramPanel;
+	private DockableMSMSFeatureClusterTree msmsFeatureClusterTreePanel;
 	
 	//	Compound data panels, hide for now
 //	private NarrativeDataPanel narrativeDataPanel;
@@ -350,9 +355,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 		//	idTrackerFeatureSearchPanel =  new IDTrackerFeatureSearchPanel(this);
 		followupStepTable = new DockableFollowupStepTable();
 		standardFeatureAnnotationTable = new DockableStandardFeatureAnnotationTable();
+		
+		msmsFeatureClusterTreePanel = new DockableMSMSFeatureClusterTree(
+				"IdTrackerDockableMSMSFeatureClusterTree",
+				"MSMS Feature Clusters",
+				this, this);
 
 		grid.add(0, 0, 80, 30, msOneFeatureTable, msTwoFeatureTable
-				//, idTrackerFeatureSearchPanel
+				, msmsFeatureClusterTreePanel
 				);
 		grid.add(80, 0, 20, 30, molStructurePanel, clasyFireViewer,
 				chromatogramPanel);
@@ -3347,5 +3357,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel implements MSFeat
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	public void valueChanged(TreeSelectionEvent e) {
+		// TODO Auto-generated method stub
+		
 	}	
 }
