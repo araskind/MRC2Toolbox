@@ -45,6 +45,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon searchIconSmall = GuiUtils.getIcon("searchFeatures", 16);
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
+	private static final Icon searchIdActiveDataSetIcon = GuiUtils.getIcon("searchIdActiveDataSet", 24);
 	private static final Icon nistPepMsIcon = GuiUtils.getIcon("NISTMS-pep", 24);
 	private static final Icon nistPepMsIconSmall = GuiUtils.getIcon("NISTMS-pep", 16);
 	private static final Icon nistPepMsOfflineIcon = GuiUtils.getIcon("NISTMS-pep-offline", 24);
@@ -81,6 +82,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private JMenuItem
 		databaseSearchMenuItem,
 		experimentSearchMenuItem,
+		activeDataSetSearchMenuItem,
 		findMSMSFeaturesMenuItem,
 		filterMSMSFeaturesMenuItem,
 		resetFeatureFiltersMenuItem;
@@ -127,8 +129,12 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 			searchIdTrackerIcon);
 		
 		experimentSearchMenuItem = addItem(databaseSearchMenu, 
-				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_SEARCH_DIALOG_COMMAND, 
+				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND, 
 				searchExperimentIcon);
+				
+		activeDataSetSearchMenuItem = addItem(databaseSearchMenu, 
+				MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND, 
+				searchIdActiveDataSetIcon);
 
 		databaseSearchMenu.addSeparator();
 		

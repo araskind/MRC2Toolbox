@@ -64,6 +64,10 @@ public class MSMSClusterDataSet {
 		clusters = new HashSet<MsFeatureInfoBundleCluster>();
 	}
 	
+	public Set<MsFeatureInfoBundleCluster> getClusters() {
+		return clusters;
+	}
+	
 	public void addCluster(MsFeatureInfoBundleCluster newCluster) {
 		clusters.add(newCluster);
 	}

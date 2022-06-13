@@ -63,7 +63,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
-public class ExperimentDataSearchDialog extends JDialog
+public class ExperimentMZRTDataSearchDialog extends JDialog
 		implements ActionListener, BackedByPreferences, ItemListener, ListSelectionListener, PersistentLayout {
 	
 	/**
@@ -85,7 +85,7 @@ public class ExperimentDataSearchDialog extends JDialog
 	private DockableFeatureListPanel featureListPanel;
 	private DockableDataPipelinesTable dataPipelinesTable;
 	
-	public ExperimentDataSearchDialog(IDWorkbenchPanel parentPanel) {
+	public ExperimentMZRTDataSearchDialog(IDWorkbenchPanel parentPanel) {
 		super();
 		this.parentPanel = parentPanel;
 		
@@ -134,7 +134,7 @@ public class ExperimentDataSearchDialog extends JDialog
 
 		JButton searchButton = new JButton("Search ...");
 		searchButton.addActionListener(this);
-		searchButton.setActionCommand(MainActionCommands.SEARCH_ID_TRACKER_BY_EXPERIMENT_COMMAND.getName());
+		searchButton.setActionCommand(MainActionCommands.SEARCH_ID_TRACKER_BY_EXPERIMENT_MZ_RT_COMMAND.getName());
 		panel_1.add(searchButton);
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);
@@ -163,7 +163,7 @@ public class ExperimentDataSearchDialog extends JDialog
 		if(command.equals(MainActionCommands.IDTRACKER_REFRESH_FORM_OPTIONS_COMMAND.getName()))
 			populateSelectorsFromDatabase();
 
-		if(command.equals(MainActionCommands.SEARCH_ID_TRACKER_BY_EXPERIMENT_COMMAND.getName()))
+		if(command.equals(MainActionCommands.SEARCH_ID_TRACKER_BY_EXPERIMENT_MZ_RT_COMMAND.getName()))
 			searchIdTracker();
 	}
 

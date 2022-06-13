@@ -101,7 +101,7 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1654626686616" orientation="VERTICAL" divider="0.5635294117647058">
 											<node nodeId="1654626696609" orientation="VERTICAL" divider="0.3854838709677419">
-												<leaf id="0" nodeId="1654626682039">
+												<leaf id="1" nodeId="1654626682039">
 													<placeholders>
 														<placeholder>dock.single.DockableExperimentsTable</placeholder>
 													</placeholders>
@@ -115,13 +115,13 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="1" nodeId="1654626696607">
+												<leaf id="2" nodeId="1654626696607">
 													<placeholders>
 														<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
 													</placeholders>
 												</leaf>
 											</node>
-											<leaf id="2" nodeId="1654626686614">
+											<leaf id="0" nodeId="1654626686614">
 												<placeholders>
 													<placeholder>dock.single.DockableFeatureListPanel</placeholder>
 												</placeholders>
@@ -137,6 +137,16 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableFeatureListPanel">
+										<replacement id="dockablesingle DockableFeatureListPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableFeatureListPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="predefined" placeholder="dock.single.DockableExperimentsTable">
 										<replacement id="dockablesingle DockableExperimentsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
@@ -151,16 +161,6 @@
 										<replacement id="dockablesingle DockableDataPipelinesTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>DockableDataPipelinesTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableFeatureListPanel">
-										<replacement id="dockablesingle DockableFeatureListPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableFeatureListPanel</id>
 											<area/>
 										</delegate>
 									</layout>

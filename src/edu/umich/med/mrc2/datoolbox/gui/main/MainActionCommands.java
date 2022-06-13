@@ -979,8 +979,10 @@ public enum MainActionCommands {
 	ID_TRACKER_DELETE_QUERY_COMMAND("Delete selected IDTracker search query"),
 	
 	//	Tracker by experiment search dialog
-	SHOW_ID_TRACKER_BY_EXPERIMENT_SEARCH_DIALOG_COMMAND("IDTracker database search by experiment setup"),
-	SEARCH_ID_TRACKER_BY_EXPERIMENT_COMMAND("Get selected data from IDTracker"),
+	SHOW_ID_TRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND("IDTracker database search by MZ/RT setup"),
+	SEARCH_ID_TRACKER_BY_EXPERIMENT_MZ_RT_COMMAND("Get selected MZ/RT data from IDTracker"),
+	SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND("Active data set search by MZ/RT setup"),
+	SEARCH_ACTIVE_DATA_SET_BY_MZ_RT_COMMAND("Get selected MZ/RT data from active data set"),
 	
 	//	MSMS search dialog
 	SHOW_SAVED_MSMS_QUERY_LIST_COMMAND("Show MSMS query list"),

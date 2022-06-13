@@ -60,6 +60,7 @@ import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
@@ -89,6 +90,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdLevelUtils;
@@ -132,7 +134,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PepSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.io.PepserchResultsImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.project.OpenIDTrackerProjectDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.ExperimentDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.ads.ActiveDataSetMZRTDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.ExperimentMZRTDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.DockableStandardFeatureAnnotationTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationAssignmentDialog;
@@ -178,6 +181,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureSearchTa
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerDataExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerProjectDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSFeatureClusteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.SpectrumEntropyRecalculationTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ExtendedMSPExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
@@ -268,10 +272,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private FilterTrackerMSMSFeaturesDialog filterTrackerFeaturesDialog;
 	private MSMSFeatureRTIDSearchDialog msmsFeatureRTIDSearchDialog;	
 	private EntropyScoringSetupDialog entropyScoringSetupDialog;
-	private ExperimentDataSearchDialog experimentDataSearchDialog;
+	private ExperimentMZRTDataSearchDialog experimentMzRtDataSearchDialog;
+	private ActiveDataSetMZRTDataSearchDialog activeDataSetMZRTDataSearchDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
+	private static final Icon searchIdActiveDataSetIcon = GuiUtils.getIcon("searchIdActiveDataSet", 24);
 	private static final Icon openCdpIdProjectIcon = GuiUtils.getIcon("openIdExperiment", 24);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
 	private static final Icon idSetupIcon = GuiUtils.getIcon("searchCompounds", 24);
@@ -403,9 +409,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				searchIdTrackerIcon, this));
 		
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_SEARCH_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_SEARCH_DIALOG_COMMAND.getName(), 
+				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND.getName(), 
 				searchExperimentIcon, this));
+
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND.getName(), 
+				searchIdActiveDataSetIcon, this));
 		
 		menuActions.addSeparator();
 		
@@ -532,8 +543,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND.getName()))
 			showTrackerSearchDialog();	
 		
-		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_SEARCH_DIALOG_COMMAND.getName()))
-			showTrackerSearchByExperimentDialog();	
+		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND.getName()))
+			showTrackerSearchByExperimentMzRtDialog();
+
+		if (command.equals(MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND.getName()))
+			showTrackerSearchActiveDataSetBMzRtDialog();
+		
+		if (command.equals(MainActionCommands.SEARCH_ACTIVE_DATA_SET_BY_MZ_RT_COMMAND.getName()))
+			searchActiveDataSetBMzRt();	
 		
 		if (command.equals(MainActionCommands.NIST_MS_SEARCH_SETUP_COMMAND.getName()))
 			showNistSearchSetup();
@@ -982,6 +999,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void showFeatureFilter() {
+		
+		Collection<MsFeatureInfoBundle> allFeatures = 
+				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
+		if(allFeatures.isEmpty())
+			return;
+		
 		filterTrackerFeaturesDialog = new FilterTrackerMSMSFeaturesDialog(this);
 		filterTrackerFeaturesDialog.setLocationRelativeTo(this.getContentPane());
 		filterTrackerFeaturesDialog.setVisible(true);
@@ -1437,7 +1460,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		idTrackerDataSearchDialog.setVisible(true);
 	}
 	
-	private void showTrackerSearchByExperimentDialog(){
+	private void showTrackerSearchByExperimentMzRtDialog(){
 		
 		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 			MessageDialog.showWarningMsg(
@@ -1445,11 +1468,47 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					this.getContentPane());
 			return;
 		}	
-		experimentDataSearchDialog = new ExperimentDataSearchDialog(this);
-		experimentDataSearchDialog.setLocationRelativeTo(this.getContentPane());
-		experimentDataSearchDialog.setVisible(true);
+		experimentMzRtDataSearchDialog = new ExperimentMZRTDataSearchDialog(this);
+		experimentMzRtDataSearchDialog.setLocationRelativeTo(this.getContentPane());
+		experimentMzRtDataSearchDialog.setVisible(true);
+	}
+	
+	private void showTrackerSearchActiveDataSetBMzRtDialog(){
+
+		Collection<MsFeatureInfoBundle> allFeatures = 
+				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
+		if(allFeatures.isEmpty())
+			return;
+		
+		activeDataSetMZRTDataSearchDialog = new ActiveDataSetMZRTDataSearchDialog(this);
+		activeDataSetMZRTDataSearchDialog.setLocationRelativeTo(this.getContentPane());
+		activeDataSetMZRTDataSearchDialog.setVisible(true);
 	}
 
+	private void searchActiveDataSetBMzRt(){
+		//		TODO
+		Collection<String>errors = 
+				activeDataSetMZRTDataSearchDialog.validateParameters();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), 
+					activeDataSetMZRTDataSearchDialog);
+			return;
+		}
+		Collection<MsFeatureInfoBundle> msmsFeatures = 
+				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
+		MSMSClusteringParameterSet params = 
+				activeDataSetMZRTDataSearchDialog.getParameters();
+		Collection<MinimalMSOneFeature> lookupFeatures = 
+				activeDataSetMZRTDataSearchDialog.getAllFeatures();
+
+		MSMSFeatureClusteringTask task = 
+				new MSMSFeatureClusteringTask(msmsFeatures, params, lookupFeatures);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+		activeDataSetMZRTDataSearchDialog.dispose();
+	}
+	
 	private void showPepSearchSetupDiaog(boolean runOffline) {
 
 		pepSearchSetupDialog = new PepSearchSetupDialog(this);
@@ -2697,8 +2756,18 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 			if (e.getSource().getClass().equals(SpectrumEntropyRecalculationTask.class))
 				finalizeSpectrumEntropyRecalculation();
+			
+			if (e.getSource().getClass().equals(MSMSFeatureClusteringTask.class))
+				finalizeMSMSFeatureClusteringTask((MSMSFeatureClusteringTask)e.getSource());			
 		}
 	}		
+
+	private void finalizeMSMSFeatureClusteringTask(MSMSFeatureClusteringTask source) {
+		// TODO Auto-generated method stub
+		MessageDialog.showInfoMsg(
+				"MSMS feature clustering completed", 
+				this.getContentPane());
+	}
 
 	private void finalizeSpectrumEntropyRecalculation() {
 		
