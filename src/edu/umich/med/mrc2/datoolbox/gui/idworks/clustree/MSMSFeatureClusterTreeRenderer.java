@@ -33,8 +33,8 @@ import javax.swing.border.Border;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
@@ -72,18 +72,19 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 
 		DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) node;
 		Object embeddedObject = treeNode.getUserObject();
-		if (embeddedObject instanceof MsFeature) {
+		if (embeddedObject instanceof MsFeatureInfoBundle) {
 
 			label.setIcon(featureIcon);
 			label.setFont(smallerFont);
+			label.setText(((MsFeatureInfoBundle)embeddedObject).getMsFeature().getName());
 		}
-		if (embeddedObject instanceof MsFeatureCluster) {
+		if (embeddedObject instanceof MsFeatureInfoBundleCluster) {
 
-			MsFeatureCluster cluster = (MsFeatureCluster) embeddedObject;
+			MsFeatureInfoBundleCluster cluster = (MsFeatureInfoBundleCluster) embeddedObject;
 
-			if (cluster.getNumberOfNamed() > 1)
+			if (cluster.getComponents().size() > 1)
 				label.setIcon(multiNamedClusterIcon);
-			else if (cluster.getNumberOfNamed() == 1)
+			else if (cluster.getComponents().size() == 1)
 				label.setIcon(namedClusterIcon);
 			else
 				label.setIcon(clusterIcon);

@@ -31,8 +31,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -75,22 +75,27 @@ public class MSMSFeatureClusterTreeMouseHandler extends MouseAdapter {
 	/**
 	 * Constructor
 	 */
-	public MSMSFeatureClusterTreeMouseHandler(MSMSFeatureClusterTree clusterTree, ActionListener featurePopupListener) {
+	public MSMSFeatureClusterTreeMouseHandler(
+			MSMSFeatureClusterTree clusterTree, 
+			ActionListener featurePopupListener) {
 
 		this.tree = clusterTree;
 
 		sortPopupMenu = new JPopupMenu();
 
-		sortByAreaMenuItem = GuiUtils.addMenuItem(sortPopupMenu, MainActionCommands.SORT_BY_AREA_COMMAND.getName(),
-				tree, MainActionCommands.SORT_BY_AREA_COMMAND.getName());
+		sortByAreaMenuItem = GuiUtils.addMenuItem(sortPopupMenu, 
+				MainActionCommands.SORT_BY_AREA_COMMAND.getName(), tree, 
+				MainActionCommands.SORT_BY_AREA_COMMAND.getName());
 		sortByAreaMenuItem.setIcon(sortByAreaIcon);
 
-		sortByMzMenuItem = GuiUtils.addMenuItem(sortPopupMenu, MainActionCommands.SORT_BY_MZ_COMMAND.getName(), tree,
+		sortByMzMenuItem = GuiUtils.addMenuItem(sortPopupMenu, 
+				MainActionCommands.SORT_BY_MZ_COMMAND.getName(), tree,
 				MainActionCommands.SORT_BY_MZ_COMMAND.getName());
 		sortByMzMenuItem.setIcon(sortByMzIcon);
 
-		sortByFnumMenuItem = GuiUtils.addMenuItem(sortPopupMenu, MainActionCommands.SORT_BY_FNUM_COMMAND.getName(),
-				tree, MainActionCommands.SORT_BY_FNUM_COMMAND.getName());
+		sortByFnumMenuItem = GuiUtils.addMenuItem(sortPopupMenu, 
+				MainActionCommands.SORT_BY_FNUM_COMMAND.getName(), tree,
+				MainActionCommands.SORT_BY_FNUM_COMMAND.getName());
 		sortByFnumMenuItem.setIcon(sortByFeatureNumIcon);
 
 		sortByCnumMenuItem = GuiUtils.addMenuItem(sortPopupMenu,
@@ -98,14 +103,15 @@ public class MSMSFeatureClusterTreeMouseHandler extends MouseAdapter {
 				MainActionCommands.SORT_BY_CLUSTER_NAME_COMMAND.getName());
 		sortByCnumMenuItem.setIcon(sortByClusterNameIcon);
 
-		sortByRTMenuItem = GuiUtils.addMenuItem(sortPopupMenu, MainActionCommands.SORT_BY_RT_COMMAND.getName(), tree,
+		sortByRTMenuItem = GuiUtils.addMenuItem(sortPopupMenu, 
+				MainActionCommands.SORT_BY_RT_COMMAND.getName(), tree,
 				MainActionCommands.SORT_BY_RT_COMMAND.getName());
 		sortByRTMenuItem.setIcon(sortByRtIcon);
 
-		createXicSetMenuItem = GuiUtils.addMenuItem(sortPopupMenu,
-				MainActionCommands.CREATE_XIC_METHOD_SET_COMMAND.getName(), tree,
-				MainActionCommands.CREATE_XIC_METHOD_SET_COMMAND.getName());
-		createXicSetMenuItem.setIcon(qualIcon);
+//		createXicSetMenuItem = GuiUtils.addMenuItem(sortPopupMenu,
+//				MainActionCommands.CREATE_XIC_METHOD_SET_COMMAND.getName(), tree,
+//				MainActionCommands.CREATE_XIC_METHOD_SET_COMMAND.getName());
+//		createXicSetMenuItem.setIcon(qualIcon);
 
 		clusterPopupMenu = new JPopupMenu();
 
@@ -119,29 +125,30 @@ public class MSMSFeatureClusterTreeMouseHandler extends MouseAdapter {
 				MainActionCommands.DISSOLVE_CLUSTER_COMMAND.getName());
 		dissolveClusterMenuItem.setIcon(forkIcon);
 
-		editClusterMenuItem = GuiUtils.addMenuItem(clusterPopupMenu, MainActionCommands.EDIT_CLUSTER_COMMAND.getName(),
-				tree, MainActionCommands.EDIT_CLUSTER_COMMAND.getName());
+		editClusterMenuItem = GuiUtils.addMenuItem(clusterPopupMenu, 
+				MainActionCommands.EDIT_CLUSTER_COMMAND.getName(), tree,
+				MainActionCommands.EDIT_CLUSTER_COMMAND.getName());
 		editClusterMenuItem.setIcon(editIcon);
 
-		createXicMenuItem = GuiUtils.addMenuItem(clusterPopupMenu,
-				MainActionCommands.CREATE_XIC_METHOD_COMMAND.getName(), tree,
-				MainActionCommands.CREATE_XIC_METHOD_COMMAND.getName());
-		createXicMenuItem.setIcon(qualIcon);
+//		createXicMenuItem = GuiUtils.addMenuItem(clusterPopupMenu,
+//				MainActionCommands.CREATE_XIC_METHOD_COMMAND.getName(), tree,
+//				MainActionCommands.CREATE_XIC_METHOD_COMMAND.getName());
+//		createXicMenuItem.setIcon(qualIcon);
 
 		assingnAnnotationMenuItem = GuiUtils.addMenuItem(clusterPopupMenu,
 				MainActionCommands.ANNOTATE_CLUSTER_COMMAND.getName(), featurePopupListener,
 				MainActionCommands.ANNOTATE_CLUSTER_COMMAND.getName());
 		assingnAnnotationMenuItem.setIcon(annotationIcon);
 
-		showAllSpectraMenuItem = GuiUtils.addMenuItem(clusterPopupMenu,
-				MainActionCommands.SHOW_ALL_CLUSTER_SPECTRA_COMMAND.getName(), featurePopupListener,
-				MainActionCommands.SHOW_ALL_CLUSTER_SPECTRA_COMMAND.getName());
-		showAllSpectraMenuItem.setIcon(showAllSpectraIcon);
-
-		recalculateCorrelationsMenuItem = GuiUtils.addMenuItem(clusterPopupMenu,
-				MainActionCommands.RECALCULATE_CORRRELATIONS_4CLUSTER_COMMAND.getName(), featurePopupListener,
-				MainActionCommands.RECALCULATE_CORRRELATIONS_4CLUSTER_COMMAND.getName());
-		recalculateCorrelationsMenuItem.setIcon(recalculateCorrelationsIcon);
+//		showAllSpectraMenuItem = GuiUtils.addMenuItem(clusterPopupMenu,
+//				MainActionCommands.SHOW_ALL_CLUSTER_SPECTRA_COMMAND.getName(), featurePopupListener,
+//				MainActionCommands.SHOW_ALL_CLUSTER_SPECTRA_COMMAND.getName());
+//		showAllSpectraMenuItem.setIcon(showAllSpectraIcon);
+//
+//		recalculateCorrelationsMenuItem = GuiUtils.addMenuItem(clusterPopupMenu,
+//				MainActionCommands.RECALCULATE_CORRRELATIONS_4CLUSTER_COMMAND.getName(), featurePopupListener,
+//				MainActionCommands.RECALCULATE_CORRRELATIONS_4CLUSTER_COMMAND.getName());
+//		recalculateCorrelationsMenuItem.setIcon(recalculateCorrelationsIcon);
 
 		toggleLockMenuItem = GuiUtils.addMenuItem(clusterPopupMenu,
 				MainActionCommands.TOGGLE_CLUSTER_LOCK_COMMAND.getName(), tree,
@@ -164,11 +171,11 @@ public class MSMSFeatureClusterTreeMouseHandler extends MouseAdapter {
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) clickedPath.getLastPathComponent();
 		Object clickedObject = node.getUserObject();
 
-		if (clickedObject instanceof MsFeatureCluster) {
+		if (clickedObject instanceof MsFeatureInfoBundleCluster) {
 
 		}
 
-		if (clickedObject instanceof MsFeature) {
+		if (clickedObject instanceof MsFeatureInfoBundle) {
 
 		}
 	}
@@ -184,10 +191,10 @@ public class MSMSFeatureClusterTreeMouseHandler extends MouseAdapter {
 
 		Object clickedObject = node.getUserObject();
 
-		if (clickedObject instanceof MsFeatureCluster)
+		if (clickedObject instanceof MsFeatureInfoBundleCluster)
 			clusterPopupMenu.show(e.getComponent(), e.getX(), e.getY());
 
-		if (clickedObject instanceof MsFeature && featurePopupMenu != null)
+		if (clickedObject instanceof MsFeatureInfoBundle && featurePopupMenu != null)
 			featurePopupMenu.show(e.getComponent(), e.getX(), e.getY());
 
 		if (node.equals(tree.getModel().getClustersNode()))

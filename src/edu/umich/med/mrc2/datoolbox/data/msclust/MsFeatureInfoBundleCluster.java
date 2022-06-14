@@ -26,19 +26,29 @@ import java.util.Set;
 import java.util.UUID;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class MsFeatureInfoBundleCluster {
 
 	private String id;
+	private String name;
 	private Set<MsFeatureInfoBundle>components;
 	private double mz;
 	private double rt;
-	private CompoundIdentity prinmaryIdentity;
+	private CompoundIdentity primaryIdentity;
+	private boolean locked;
 	
 	public MsFeatureInfoBundleCluster() {
 		this(null, 0.0d, 0.0d, null);
+		this.id = DataPrefix.MSMS_CLUSTER.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);
+	}
+	
+	public MsFeatureInfoBundleCluster(MinimalMSOneFeature parentFeature) {
+		this(null, parentFeature.getMz(), parentFeature.getRt(), null);
 		this.id = DataPrefix.MSMS_CLUSTER.getName() + 
 				UUID.randomUUID().toString().substring(0, 12);
 	}
@@ -52,8 +62,25 @@ public class MsFeatureInfoBundleCluster {
 		this.id = id;
 		this.mz = mz;
 		this.rt = rt;
-		this.prinmaryIdentity = prinmaryIdentity;
+		this.primaryIdentity = prinmaryIdentity;
 		components = new HashSet<MsFeatureInfoBundle>();
+		
+		String mzRtName = null;
+		if(mz > 0.0d && rt > 0.0d)
+			mzRtName = "MZ " + MRC2ToolBoxConfiguration.getMzFormat().format(mz) + 
+				" | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(rt);
+		
+		if(primaryIdentity != null) {
+			name = primaryIdentity.getName();
+			if(mzRtName != null)
+				name += " | " + mzRtName;
+		}
+		else {
+			if(mzRtName != null)
+				name = mzRtName;
+			else
+				name = id;
+		}
 	}
 	
 	public void addComponent(MsFeatureInfoBundle newComponent) {
@@ -88,12 +115,12 @@ public class MsFeatureInfoBundleCluster {
 		this.rt = rt;
 	}
 
-	public CompoundIdentity getPrinmaryIdentity() {
-		return prinmaryIdentity;
+	public CompoundIdentity getPrimaryIdentity() {
+		return primaryIdentity;
 	}
 
-	public void setPrinmaryIdentity(CompoundIdentity prinmaryIdentity) {
-		this.prinmaryIdentity = prinmaryIdentity;
+	public void setPrimaryIdentity(CompoundIdentity prinmaryIdentity) {
+		this.primaryIdentity = prinmaryIdentity;
 	}
 
 	public Set<MsFeatureInfoBundle> getComponents() {
@@ -127,4 +154,25 @@ public class MsFeatureInfoBundleCluster {
         hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	@Override
+	public String toString() {
+		return name;
+	}
+
+	public boolean isLocked() {
+		return locked;
+	}
+
+	public void setLocked(boolean locked) {
+		this.locked = locked;
+	}
 }

@@ -91,6 +91,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdLevelUtils;
@@ -107,6 +108,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.DockableUniversalIdentificat
 import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.UniversalIdentificationResultsTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClusterTree;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.AddFeaturesToCollectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureCollectionManagerDialog;
@@ -2763,10 +2765,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}		
 
 	private void finalizeMSMSFeatureClusteringTask(MSMSFeatureClusteringTask source) {
-		// TODO Auto-generated method stub
-		MessageDialog.showInfoMsg(
-				"MSMS feature clustering completed", 
-				this.getContentPane());
+
+		msmsFeatureClusterTreePanel.loadFeatureClusters(source.getMsmsClusterDataSet().getClusters());
+//		MessageDialog.showInfoMsg(
+//				"MSMS feature clustering completed", 
+//				this.getContentPane());
 	}
 
 	private void finalizeSpectrumEntropyRecalculation() {
@@ -3430,7 +3433,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		// TODO Auto-generated method stub
-		
+
+		MSMSFeatureClusterTree tree = (MSMSFeatureClusterTree)e.getSource();
+
+		if (tree.getClickedObject() instanceof MsFeatureInfoBundleCluster) {
+			
+			MsFeatureInfoBundleCluster cluster = 
+					(MsFeatureInfoBundleCluster)tree.getClickedObject();
+			safelyLoadMSMSFeatures(cluster.getComponents());
+		}
+		if (tree.getClickedObject() instanceof MsFeatureInfoBundle) {
+			//	TODO
+		}
 	}	
 }

@@ -34,10 +34,10 @@ import bibliothek.gui.dock.action.DefaultDockActionSource;
 import bibliothek.gui.dock.action.LocationHint;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -94,11 +94,11 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 
 			expandCollapseTreeButton.setIcon(collapseTreeIcon);
 			expandCollapseTreeButton.setCommand(MainActionCommands.COLLAPSE_TREE.getName());
-			expandCollapseTreeButton.setTooltip("Collapse all file nodes");
+			expandCollapseTreeButton.setTooltip("Collapse all cluster nodes");
 		} else {
 			expandCollapseTreeButton.setIcon(expandTreeIcon);
 			expandCollapseTreeButton.setCommand(MainActionCommands.EXPAND_TREE.getName());
-			expandCollapseTreeButton.setTooltip("Expand all file nodes");
+			expandCollapseTreeButton.setTooltip("Expand all cluster nodes");
 		}
 	}
 
@@ -106,7 +106,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		return clusterTree;
 	}
 
-	public void expandCluster(MsFeatureCluster cluster) {
+	public void expandCluster(MsFeatureInfoBundleCluster cluster) {
 		clusterTree.expandCluster(cluster);
 	}
 
@@ -140,11 +140,11 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		return clusterTree.getModel();
 	}
 
-	public MsFeatureCluster[] getSelectedClusters() {
+	public MsFeatureInfoBundleCluster[] getSelectedClusters() {
 		return clusterTree.getSelectedClusters();
 	}
 
-	public Collection<MsFeature> getSelectedFeatures() {
+	public Collection<MsFeatureInfoBundle> getSelectedFeatures() {
 		return clusterTree.getSelectedFeatures();
 	}
 
@@ -156,7 +156,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		return clusterTree.getSortDirection();
 	}
 
-	public void loadFeatureClusters(Collection<MsFeatureCluster> clusterList) {
+	public void loadFeatureClusters(Collection<MsFeatureInfoBundleCluster> clusterList) {
 		clusterTree.loadFeatureClusters(clusterList);
 	}
 
@@ -164,11 +164,11 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		clusterTree.removeClickedObject();
 	}
 
-	public void removeFeature(MsFeature feature) {
+	public void removeFeature(MsFeatureInfoBundle feature) {
 		clusterTree.removeFeature(feature);
 	}
 
-	public void removeFeatureCluster(MsFeatureCluster cluster) {
+	public void removeFeatureCluster(MsFeatureInfoBundleCluster cluster) {
 		clusterTree.removeFeatureCluster(cluster);
 	}
 
@@ -184,7 +184,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		clusterTree.resortTree();
 	}
 
-	public void selectFeatureCluster(MsFeatureCluster cluster) {
+	public void selectFeatureCluster(MsFeatureInfoBundleCluster cluster) {
 		clusterTree.selectFeatureCluster(cluster);
 	}
 
@@ -204,7 +204,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		clusterTree.updateElement(element);
 	}
 
-	public TreePath findfeaturePath(MsFeature cf) {
+	public TreePath findfeaturePath(MsFeatureInfoBundle cf) {
 		return clusterTree.findfeaturePath(cf);
 	}
 

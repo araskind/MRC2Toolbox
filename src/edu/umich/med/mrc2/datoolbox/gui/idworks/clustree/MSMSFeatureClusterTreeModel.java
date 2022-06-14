@@ -28,8 +28,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 
 public class MSMSFeatureClusterTreeModel extends DefaultTreeModel {
 
@@ -61,52 +61,52 @@ public class MSMSFeatureClusterTreeModel extends DefaultTreeModel {
 		final DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(object);
 		treeObjects.put(object, newNode);
 
-		if (object instanceof MsFeatureCluster) {
+		if (object instanceof MsFeatureInfoBundleCluster) {
 
 			int childCount = getChildCount(clustersNode);
 			insertNodeInto(newNode, clustersNode, childCount);
 
-			for (MsFeature cf : ((MsFeatureCluster) object).getFeatures()) {
+			for (MsFeatureInfoBundle cf : ((MsFeatureInfoBundleCluster) object).getComponents()) {
 
 				final DefaultMutableTreeNode newFeatureNode = new DefaultMutableTreeNode(cf);
 				treeObjects.put(cf, newFeatureNode);
 				insertNodeInto(newFeatureNode, newNode, getChildCount(newNode));
 			}
 		}
-		if (object instanceof MsFeature) {
-
+		if (object instanceof MsFeatureInfoBundle) {
+			//	TODO
 		}
 	}
 
-	public MsFeatureCluster getParentCluster(MsFeature feature) {
+	public MsFeatureInfoBundleCluster getParentCluster(MsFeatureInfoBundle feature) {
 
 		DefaultMutableTreeNode featureNode = treeObjects.get(feature);
 		if(featureNode!= null) {
 
 			DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) featureNode.getParent();
-			return (MsFeatureCluster) parentNode.getUserObject();
+			return (MsFeatureInfoBundleCluster) parentNode.getUserObject();
 		}
 		return null;
 	}
 
 	public synchronized void clearClusters() {
 
-		MsFeatureCluster[] clusters = getClusters();
+		MsFeatureInfoBundleCluster[] clusters = getClusters();
 		if (clusters.length > 0) {
 
-			for (MsFeatureCluster cl : clusters)
+			for (MsFeatureInfoBundleCluster cl : clusters)
 				removeObject(cl);
 		}
 	}
 
-	public synchronized MsFeatureCluster[] getClusters() {
+	public synchronized MsFeatureInfoBundleCluster[] getClusters() {
 
 		int childrenCount = getChildCount(clustersNode);
-		MsFeatureCluster result[] = new MsFeatureCluster[childrenCount];
+		MsFeatureInfoBundleCluster result[] = new MsFeatureInfoBundleCluster[childrenCount];
 		for (int j = 0; j < childrenCount; j++) {
 
 			DefaultMutableTreeNode child = (DefaultMutableTreeNode) getChild(clustersNode, j);
-			result[j] = (MsFeatureCluster) child.getUserObject();
+			result[j] = (MsFeatureInfoBundleCluster) child.getUserObject();
 		}
 		return result;
 	}
