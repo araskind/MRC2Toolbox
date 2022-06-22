@@ -21,15 +21,12 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.tables.renderers;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.text.NumberFormat;
 
-import javax.swing.Icon;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class RelativeIntensityRenderer extends DefaultTableCellRenderer {
@@ -48,28 +45,33 @@ public class RelativeIntensityRenderer extends DefaultTableCellRenderer {
         maxValue = 0.0d;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	public Component getTableCellRendererComponent(
+			JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
+		
+		if(value == null || Double.isNaN((double)value) || (double) value == 0.0d) {
+			setText("\t");
+			setIcon(null);
+			return this;
+		}
 		if (value instanceof Double) {
 
-			if (value.equals(Double.NaN) || value.equals(0.0d)) {
-				setText("\t");
-				setIcon(null);
-			}
-			else {
-				int width = table.getColumnModel().getColumn(column).getPreferredWidth();
-				int height = table.getRowHeight(row);
-				double relativeValue = 1.0d;
-				if(maxValue > 0)
-					relativeValue = (double)value/maxValue;
+			int width = table.getColumnModel().getColumn(column).getPreferredWidth();
+			int height = table.getRowHeight(row);
+			double relativeValue = 1.0d;
+			if(maxValue > 0)
+				relativeValue = (double)value/maxValue;
 
-				Color backgroundColor = (row % 2 == 0 ? BasicTable.ALTERNATE_ROW_COLOR : BasicTable.WHITE_COLOR);
-				Icon colorBar = new ColorBar(width, height, relativeValue, backgroundColor);
-				setIcon(colorBar);
-				setText(defaultFormat.format(value));
-			}
+			//	Color backgroundColor = (row % 2 == 0 ? BasicTable.ALTERNATE_ROW_COLOR : BasicTable.WHITE_COLOR);
+			//	Icon colorBar = new ColorBar(width, height, relativeValue, backgroundColor);
+			setIcon(new ColorBar(width, height, relativeValue, getBackground()));
+			setText(defaultFormat.format(value));
 		}
 		return this;
 	}

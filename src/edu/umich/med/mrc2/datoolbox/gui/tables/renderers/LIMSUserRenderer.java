@@ -54,19 +54,20 @@ public class LIMSUserRenderer extends DefaultTableCellRenderer implements MouseL
 
 //		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		
-    	Component rendererComponent = table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+    	Component rendererComponent = 
+    			table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
 		setForeground(rendererComponent.getForeground());
 		setBackground(rendererComponent.getBackground());
 		setFont(rendererComponent.getFont());
 		
-		Color fg = rendererComponent.getForeground();
-		String hex = String.format("#%02X%02X%02X", fg.getRed(), fg.getGreen(), fg.getBlue());  
-		
-		String link = null;
 		if(value == null){
 			setText("");
 			return this;
-		}
+		}	
+		Color fg = rendererComponent.getForeground();
+		String hex = String.format("#%02X%02X%02X", fg.getRed(), fg.getGreen(), fg.getBlue());  		
+		String link = null;
+
 		if (value instanceof LIMSUser) {
 
 			LIMSUser user = (LIMSUser)value;

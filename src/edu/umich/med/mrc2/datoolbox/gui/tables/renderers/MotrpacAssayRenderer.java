@@ -46,7 +46,13 @@ public class MotrpacAssayRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		if(value == null) {
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
+
+		if(value == null){
 			setText("");
 			return this;
 		}

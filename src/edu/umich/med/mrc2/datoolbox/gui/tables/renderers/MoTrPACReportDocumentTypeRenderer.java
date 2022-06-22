@@ -37,7 +37,6 @@ public class MoTrPACReportDocumentTypeRenderer extends DefaultTableCellRenderer 
 	 * 
 	 */
 	private static final long serialVersionUID = 8176749198564853226L;
-	private MoTrPACReport report;
 
 	public MoTrPACReportDocumentTypeRenderer() {
 		super();
@@ -47,17 +46,22 @@ public class MoTrPACReportDocumentTypeRenderer extends DefaultTableCellRenderer 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-    	Component rendererComponent = table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
-    	setForeground(rendererComponent.getForeground());
-    	setBackground(rendererComponent.getBackground());
-    	setIcon(null);
-    	setText(null);
-    	setToolTipText(null);
-    	report = null;
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
+		if(value == null){
+			setText("");
+	    	setIcon(null);
+	    	setText(null);
+	    	setToolTipText(null);
+			return this;
+		}
     	if(value instanceof MoTrPACReport) {
 
-    		report = (MoTrPACReport)value;
+    		MoTrPACReport report = (MoTrPACReport)value;
     		if(report.getLinkedDocumentId() != null) {
     			Icon downloadIcon = GuiUtils.getDocumentFormatIcon(
     					report.getLinkedDocumentFormat(), MoTrPACReportTable.iconSize);

@@ -50,8 +50,16 @@ public class MsFeatureInfoBundleRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
+		if(value == null){
+			setText("");
+			return this;
+		}
 		if (value instanceof MsFeatureInfoBundle) {
 
 			MsFeature msf = ((MsFeatureInfoBundle) value).getMsFeature();

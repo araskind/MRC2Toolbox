@@ -59,8 +59,13 @@ public class FormattedDecimalRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
-		if(value == null || (hideZeros && (double) value == 0.0d)) {
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
+		
+		if(value == null || Double.isNaN((double)value) || (hideZeros && (double) value == 0.0d)) {
 			this.setText("");
 			return this;
 		}

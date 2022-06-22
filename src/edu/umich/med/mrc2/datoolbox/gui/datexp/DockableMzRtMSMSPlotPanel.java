@@ -187,7 +187,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	@Override
 	public void chartMouseClicked(ChartMouseEvent event) {
 		
-		if(event.getEntity().getClass().isAssignableFrom(XYItemEntity.class)) {
+		if(XYItemEntity.class.isAssignableFrom(event.getEntity().getClass())) {
 			
 			XYItemEntity xyitem=(XYItemEntity) event.getEntity();
 			XYDataset dataset = (XYDataset)xyitem.getDataset();

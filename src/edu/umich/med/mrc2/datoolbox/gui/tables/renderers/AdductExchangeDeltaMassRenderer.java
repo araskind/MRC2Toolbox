@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.tables.renderers;
 
 import java.awt.Component;
+import java.text.NumberFormat;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -35,6 +36,7 @@ public class AdductExchangeDeltaMassRenderer extends DefaultTableCellRenderer {
 	 * 
 	 */
 	private static final long serialVersionUID = -5038797169323198505L;
+	private static NumberFormat mzFormat = MRC2ToolBoxConfiguration.getMzFormat();
 
 	public AdductExchangeDeltaMassRenderer() {
 
@@ -45,10 +47,18 @@ public class AdductExchangeDeltaMassRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
-
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
+		
+		if(value == null) {
+			setText("");
+			return this;
+		}
 		if (value instanceof AdductExchange)
-			setText(MRC2ToolBoxConfiguration.getMzFormat().format(((AdductExchange) value).getMassDifference()));
+			setText(mzFormat.format(((AdductExchange) value).getMassDifference()));
 
 		return this;
 	}

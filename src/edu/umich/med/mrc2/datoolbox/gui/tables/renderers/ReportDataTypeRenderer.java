@@ -54,14 +54,22 @@ public class ReportDataTypeRenderer extends DefaultTableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-		if(value == null)
-			comboBox.setSelectedIndex(-1);
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
-		if (value instanceof ReportDataType) {
-
-			ReportDataType selectedFile = (ReportDataType) value;
-			comboBox.setSelectedItem(selectedFile);
+		if(value == null){
+			
+			if(value == null)
+				comboBox.setSelectedIndex(-1);
+			
+			return this;
 		}
+		if (value instanceof ReportDataType)
+			comboBox.setSelectedItem((ReportDataType) value);
+		
 		return comboBox;
 	}
 }

@@ -29,7 +29,8 @@ import javax.swing.ListCellRenderer;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 
-public class ExperimentalSampleComboboxRenderer extends JLabel implements ListCellRenderer<ExperimentalSample> {
+public class ExperimentalSampleComboboxRenderer extends JLabel 
+		implements ListCellRenderer<ExperimentalSample> {
 
 	/**
 	 *
@@ -40,15 +41,15 @@ public class ExperimentalSampleComboboxRenderer extends JLabel implements ListCe
 	@Override
 	public Component getListCellRendererComponent(JList<? extends ExperimentalSample> list, ExperimentalSample value,
 			int index, boolean isSelected, boolean cellHasFocus) {
-
-		if (value instanceof ExperimentalSample || value == null) {
-
-			String labelText = "SELECT ...";
-
-			if (value != null)
-				labelText = ((ExperimentalSample) value).getId() + " (" + ((ExperimentalSample) value).getName() + ")";
-
-			this.setText(labelText);
+		
+		if(value == null){
+			setText("SELECT ...");
+			return this;
+		}
+		if (value instanceof ExperimentalSample) {
+			
+			ExperimentalSample sample = (ExperimentalSample) value;
+			setText(sample.getId() + " (" + sample.getName() + ")");
 		}
 		return this;
 	}

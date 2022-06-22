@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.tables.renderers;
 import java.awt.Component;
 
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import edu.umich.med.mrc2.datoolbox.data.FeatureTextAnnotation;
 
@@ -36,14 +37,22 @@ public class FeatureAnnotationRenderer extends WordWrapCellRenderer {
 
 	public FeatureAnnotationRenderer() {
 		super();
-
 	}
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
+
+		if(value == null){
+			setText("");
+			return this;
+		}
 		if (value instanceof FeatureTextAnnotation)
 			setText(((FeatureTextAnnotation) value).getText());
 		

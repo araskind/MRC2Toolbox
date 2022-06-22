@@ -26,6 +26,7 @@ import java.awt.Component;
 import java.text.NumberFormat;
 
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import org.jfree.chart.renderer.LookupPaintScale;
 
@@ -59,11 +60,15 @@ public class McMillanDeltaPercentColorRenderer extends FormattedDecimalRenderer 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		Component rdr = super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
-		if(value == null) {
-			this.setText("");
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
+
+		if(value == null){
+			setText("");
 			setIcon(null);
-			this.setBackground(rdr.getBackground());
 			return this;
 		}
 		Double mcm = (Double)value;

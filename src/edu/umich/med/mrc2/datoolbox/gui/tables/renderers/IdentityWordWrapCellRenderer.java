@@ -39,6 +39,7 @@ public class IdentityWordWrapCellRenderer extends JTextArea implements TableCell
 	 *
 	 */
 	private static final long serialVersionUID = 7135984416347268526L;
+	
 	private CompoundIdentityField idField;
 
 	public IdentityWordWrapCellRenderer(CompoundIdentityField idField) {

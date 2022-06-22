@@ -29,7 +29,7 @@ import java.awt.RenderingHints;
 
 import javax.swing.Icon;
 
-public class ColorBar implements Icon{
+public class ColorBar implements Icon {
 
 	private int height, width;
 	private double relativeValue;

@@ -35,8 +35,8 @@ public class IntensityRenderer extends DefaultTableCellRenderer {
 	 *
 	 */
 	private static final long serialVersionUID = 7858513851675277996L;
-	private static final DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(Locale.US);
-
+	private static final DecimalFormat formatter = 
+			(DecimalFormat) NumberFormat.getInstance(Locale.US);
 
 	public IntensityRenderer() {
 		super();
@@ -47,14 +47,18 @@ public class IntensityRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
+		if(value == null || (double)value == 0.0d || Double.isNaN((double) value)){
+			setText("");
+			return this;
+		}
 		try {
-			if ((double)value == 0.0d || Double.isNaN((double) value))
-				this.setText("");
-			else
-				this.setText(formatter.format(value));
-
+			this.setText(formatter.format(value));
 		} catch (Exception e) {
 
 		}

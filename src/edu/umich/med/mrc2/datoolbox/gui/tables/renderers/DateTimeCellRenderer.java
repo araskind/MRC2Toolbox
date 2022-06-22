@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.tables.renderers;
 
 import java.awt.Component;
+import java.text.DateFormat;
 import java.util.Date;
 
 import javax.swing.JTable;
@@ -35,19 +36,29 @@ public class DateTimeCellRenderer extends DefaultTableCellRenderer {
 	 *
 	 */
 	private static final long serialVersionUID = 4678031402363201987L;
-
+	private DateFormat dateFormat;
+	
 	public DateTimeCellRenderer() {
 		super();
+		dateFormat = MRC2ToolBoxConfiguration.getDateTimeFormat();
 	}
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
+		if(value == null){
+			setText("");
+			return this;
+		}
 		if (value instanceof Date)
-			setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(value));
+			setText(dateFormat.format(value));
 
 		return this;
 	}

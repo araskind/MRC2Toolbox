@@ -52,15 +52,20 @@ public class ObjectAnnotationDocumentTypeRenderer extends DefaultTableCellRender
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-    	Component rendererComponent = table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
-    	setForeground(rendererComponent.getForeground());
-    	setBackground(rendererComponent.getBackground());
-    	setIcon(null);
-    	setText(null);
-    	setToolTipText(null);
-    	annotation = null;
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
-    	if(value instanceof ObjectAnnotation) {
+		if(value == null){
+	    	setIcon(null);
+	    	setText(null);
+	    	setToolTipText(null);
+	    	annotation = null;
+			return this;
+		}
+		if(value instanceof ObjectAnnotation) {
 
     		annotation = (ObjectAnnotation)value;
     		if(annotation.getLinkedDocumentId() != null) {

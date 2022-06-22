@@ -36,6 +36,7 @@ public class IdTrackerOrganizationRenderer extends WordWrapCellRenderer {
 	 *
 	 */
 	private static final long serialVersionUID = 496026278583051985L;
+	
 	private SortProperty property;
 
 	public IdTrackerOrganizationRenderer() {
@@ -57,9 +58,10 @@ public class IdTrackerOrganizationRenderer extends WordWrapCellRenderer {
 		setFont(rendererComponent.getFont());
 		setMargin(new Insets(5,10,5,10));
 
-		if(value == null)
+		if(value == null) {
 			setText("");
-		
+			return this;
+		}
 		if (value instanceof IdTrackerOrganization) {
 			
 			if(property.equals(SortProperty.Name))

@@ -40,16 +40,24 @@ public class SortOrderRenderer  extends DefaultTableCellRenderer {
 	private static final Icon descIcon = GuiUtils.getIcon("sortDesc", 16);
 
 	public SortOrderRenderer() {
-
 		super();
 	}
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
+		
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
-		super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
-
+		if(value == null){
+			setText("");
+			setIcon(null);
+			return this;
+		}
 		if (value instanceof SortOrder) {
 			
 			SortOrder order = (SortOrder) value;

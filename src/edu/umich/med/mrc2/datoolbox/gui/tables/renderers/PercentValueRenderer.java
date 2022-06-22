@@ -25,9 +25,14 @@ import java.awt.Component;
 import java.text.NumberFormat;
 
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public class PercentValueRenderer extends DecimalAlignRenderer {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -397304660915803312L;
 	private final NumberFormat defaultFormat = NumberFormat.getPercentInstance();
 
 	public PercentValueRenderer() {
@@ -41,13 +46,19 @@ public class PercentValueRenderer extends DecimalAlignRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		if (value instanceof Double) {
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
-			if (value.equals(Double.NaN))
-				pane.setText("\t");
-			else
-				pane.setText("\t" + defaultFormat.format(value));
+		if(value == null || value.equals(Double.NaN)){
+			setText("\t");
+			return this;
 		}
-		return pane;
+		if (value instanceof Double) 
+			setText("\t" + defaultFormat.format(value));
+		
+		return this;
 	}
 }

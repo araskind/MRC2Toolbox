@@ -47,10 +47,12 @@ public class TimestampRenderer  extends DefaultTableCellRenderer {
 		setBackground(rendererComponent.getBackground());
 		setFont(rendererComponent.getFont());
 		
+		if(value == null){
+			setText("");
+			return this;
+		}
 		if (value instanceof Date)
 			setText(dateTimeFormat.format((Date)value));
-		else
-			setText("");
 		
 		return this;
 	}

@@ -25,13 +25,11 @@ import java.awt.Component;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 
-public class MsFeatureSuggestedModificationRenderer
-	extends DefaultTableCellRenderer implements TableCellRenderer {
+public class MsFeatureSuggestedModificationRenderer extends DefaultTableCellRenderer {
 
 	/**
 	 *
@@ -39,15 +37,23 @@ public class MsFeatureSuggestedModificationRenderer
 	private static final long serialVersionUID = 5327249872276937995L;
 
 	public MsFeatureSuggestedModificationRenderer() {
-
 		super();
 	}
 
 	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	public Component getTableCellRendererComponent(
+			JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
+		if(value == null){
+			setText("");
+			return this;
+		}
 		if (value instanceof MsFeature){
 
 			Adduct mod = ((MsFeature) value).getSuggestedModification();

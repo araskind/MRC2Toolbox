@@ -31,6 +31,11 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 
 public class StandardFeatureAnnotationRenderer extends DefaultTableCellRenderer {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 496026278583051985L;
+	
 	private SortProperty field;
 
 	public StandardFeatureAnnotationRenderer(SortProperty field) {
@@ -38,17 +43,20 @@ public class StandardFeatureAnnotationRenderer extends DefaultTableCellRenderer 
 		this.field = field;
 	}
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 496026278583051985L;
-
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
+		if(value == null){
+			setText("");
+			return this;
+		}
 		if (value instanceof StandardFeatureAnnotation) {
 			
 			StandardFeatureAnnotation annotation = (StandardFeatureAnnotation)value;

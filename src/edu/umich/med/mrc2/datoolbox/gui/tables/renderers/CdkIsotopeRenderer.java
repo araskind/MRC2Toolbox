@@ -29,21 +29,36 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import org.openscience.cdk.interfaces.IIsotope;
 
-public class CdkIsotopeRenderer  extends DefaultTableCellRenderer {
+public class CdkIsotopeRenderer extends DefaultTableCellRenderer {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3305286666248915370L;
+
+	public CdkIsotopeRenderer() {
+		super();
+		this.setFont(new Font ("Sanserif", Font.BOLD, 12));
+	}
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table,
 			Object value, boolean isSelected, boolean hasFocus, int row,
 			int column) {
 		
-		super.getTableCellRendererComponent(table, value, isSelected, false, row, column);
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
+
+		if(value == null){
+			setText("");
+			return this;
+		}		
+		if(value instanceof IIsotope)			
+			this.setText(((IIsotope) value).getSymbol());
 		
-		if(value instanceof IIsotope){
-			
-			IIsotope element = (IIsotope)value;
-			this.setFont(new Font ("Sanserif", Font.BOLD, 12));
-			this.setText(element.getSymbol());
-		}
 		return this;
 	}
 }

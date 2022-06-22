@@ -28,15 +28,13 @@ import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import edu.umich.med.mrc2.datoolbox.gui.plot.PieChart;
-
 public class PieChartFrequencyRenderer extends DefaultTableCellRenderer {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -6424288724361691172L;
-	private PieChart pieChart;
+	
 	private final NumberFormat defaultFormat = NumberFormat.getPercentInstance();	
 	
 	public PieChartFrequencyRenderer() {
@@ -47,20 +45,24 @@ public class PieChartFrequencyRenderer extends DefaultTableCellRenderer {
 		setBorder(new EmptyBorder(2,2,2,2));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	public Component getTableCellRendererComponent(
+			JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
+
+		if(value == null || value.equals(Double.NaN)){
+			setText("\t");
+			setIcon(null);
+			return this;
+		}	
 		if (value instanceof Double) {
-
-			if (value.equals(Double.NaN)) {
-				setText("\t");
-				setIcon(null);
-			}
-			else {
-				setText("\t" + defaultFormat.format(value));
-				setIcon(new SmallPie(table.getRowHeight()-4, (double) value));
-			}
+			setText("\t" + defaultFormat.format(value));
+			setIcon(new SmallPie(table.getRowHeight()-4, (double) value));
 		}
 		return this;
 	}

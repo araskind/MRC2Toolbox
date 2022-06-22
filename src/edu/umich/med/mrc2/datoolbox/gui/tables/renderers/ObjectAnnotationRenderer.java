@@ -58,9 +58,10 @@ public class ObjectAnnotationRenderer extends JTextArea implements TableCellRend
 		setFont(rendererComponent.getFont());
 		setMargin(new Insets(5,10,5,10));
 
-		if(value == null)
+		if(value == null) {
 			setText("");
-
+			return this;
+		}
 		if (value instanceof ObjectAnnotation) {
 
 			ObjectAnnotation annotation = (ObjectAnnotation)value;

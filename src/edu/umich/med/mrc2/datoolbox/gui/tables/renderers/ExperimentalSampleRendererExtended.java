@@ -38,17 +38,20 @@ public class ExperimentalSampleRendererExtended extends DefaultTableCellRenderer
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
+		
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
-		if (value instanceof ExperimentalSample || value == null) {
-
-			String labelText = "SELECT ...";
-
-			if (value != null) {
-
-				ExperimentalSample selectedSample = (ExperimentalSample) value;
-				labelText = selectedSample.getId() + " (" + selectedSample.getName() + ")";
-			}
-			setText(labelText);
+		if(value == null){
+			setText("SELECT ...");
+			return this;
+		}
+		if (value instanceof ExperimentalSample) {
+			ExperimentalSample selectedSample = (ExperimentalSample) value;
+			setText(selectedSample.getId() + " (" + selectedSample.getName() + ")");
 		}
 		return this;
 	}

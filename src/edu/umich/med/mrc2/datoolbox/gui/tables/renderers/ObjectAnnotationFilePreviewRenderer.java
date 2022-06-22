@@ -56,11 +56,15 @@ public class ObjectAnnotationFilePreviewRenderer extends DefaultTableCellRendere
     	Component rendererComponent = table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
     	setForeground(rendererComponent.getForeground());
     	setBackground(rendererComponent.getBackground());
-    	setIcon(null);
-    	setText(null);
-    	setToolTipText(null);
-    	annotation = null;
-
+    	setFont(rendererComponent.getFont());
+    	
+		if(value == null){
+	    	setIcon(null);
+	    	setText(null);
+	    	setToolTipText(null);
+	    	annotation = null;
+			return this;
+		}
     	if(value instanceof ObjectAnnotation) {
 
     		annotation = (ObjectAnnotation)value;

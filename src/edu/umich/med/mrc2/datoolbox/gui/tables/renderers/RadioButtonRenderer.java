@@ -35,7 +35,8 @@ public class RadioButtonRenderer implements TableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-    	Component rendererComponent = table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+    	Component rendererComponent = 
+    			table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
     	btn.setForeground(rendererComponent.getForeground());
     	btn.setBackground(rendererComponent.getBackground());
 		boolean isTrue = false;

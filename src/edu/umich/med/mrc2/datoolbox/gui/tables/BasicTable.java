@@ -25,6 +25,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -35,8 +38,11 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.swing.AbstractButton;
+import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.JViewport;
 import javax.swing.RowSorter;
 import javax.swing.RowSorter.SortKey;
@@ -388,6 +394,67 @@ public class BasicTable extends JTable implements ActionListener{
 		}
 		if(((Component) event.getSource()).getParent().equals(columnSelectorPopupMenu))
 			toggleColumnVisibility(event);
+	
+		if(event.getActionCommand().equals(MainActionCommands.COPY_TABLE_DATA_COMMAND.getName()))
+			copyTableDataToClipboard();
+	}
+	
+	public String getTableDataAsString() {
+		
+		StringBuffer tableData = new StringBuffer();
+		int numCols = getColumnCount();
+
+		tableData.append(getColumnName(0));
+
+		for(int i=1; i<numCols; i++)
+			tableData.append("\t" + getColumnName(i));
+
+		tableData.append("\n");
+
+		for(int i=0;  i<getRowCount(); i++){
+
+			for(int j=0; j<numCols; j++){
+
+                final TableCellRenderer renderer = getCellRenderer(i, j);
+                final Component comp = prepareRenderer(renderer, i, j);
+                String txt = null;
+                if(comp == null) {
+                	txt = "";
+                }
+                else {
+                    if(JLabel.class.isAssignableFrom(comp.getClass()))             
+                    	txt = ((JLabel) comp).getText();
+
+                    if (JTextPane.class.isAssignableFrom(comp.getClass()))
+                    	txt = ((JTextPane) comp).getText();
+                    
+                    if (JTextField.class.isAssignableFrom(comp.getClass()))
+                    	txt = ((JTextField) comp).getText();
+                }              
+            	try {
+					tableData.append(txt.trim().replaceAll("<[^>]*>", "")); //	Strip HTML code
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+                if(j<numCols-1)
+                	tableData.append("\t");
+                else
+                	tableData.append("\n");
+			}
+		}
+		return tableData.toString();
+	}
+	
+	public void copyTableDataToClipboard() {
+		
+		String dataString = getTableDataAsString();		
+		if(dataString == null)
+			dataString = "";
+
+		StringSelection stringSelection = new StringSelection(dataString);
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
 	}
 	
 	private void showTablePreferencesDialog() {

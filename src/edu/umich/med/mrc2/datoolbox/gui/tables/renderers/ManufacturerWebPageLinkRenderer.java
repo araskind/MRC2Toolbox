@@ -55,13 +55,17 @@ public class ManufacturerWebPageLinkRenderer  extends DefaultTableCellRenderer
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
 			int row, int column) {
 
-		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-		String link = null;
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
 
-		if(value == null) {
+		if(value == null){
 			setText("");
 			return this;
 		}
+		String link = null;
 		Manufacturer vendor = null;
 		if(value instanceof Manufacturer)
 			vendor = (Manufacturer)value;

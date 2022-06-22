@@ -36,15 +36,6 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class FeatureIdentificationStateRenderer extends DefaultTableCellRenderer {
 
-	private static final Border border = BorderFactory.createLineBorder(Color.GRAY, 3);
-	
-	public FeatureIdentificationStateRenderer() {
-		super();
-		setHorizontalAlignment(SwingConstants.CENTER);
-        setVerticalAlignment(SwingConstants.CENTER);
-        setText("");
-	}
-
 	/**
 	 * 
 	 */
@@ -55,11 +46,24 @@ public class FeatureIdentificationStateRenderer extends DefaultTableCellRenderer
 	private static final Icon multipleIdsIcon = GuiUtils.getIcon("multipleIds", 16);
 	private static final Icon multipleIdsDisabledIcon = GuiUtils.getIcon("multipleIdsDisabled", 16);
 	private static final Icon unknownIcon = GuiUtils.getIcon("showUnknowns", 16);
+	
+	private static final Border border = BorderFactory.createLineBorder(Color.GRAY, 3);
+	
+	public FeatureIdentificationStateRenderer() {
+		super();
+		setHorizontalAlignment(SwingConstants.CENTER);
+        setVerticalAlignment(SwingConstants.CENTER);
+        setText("");
+	}
 
 	@Override
 	public Component getTableCellRendererComponent(
 			JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
 		if(value == null) {	
 			setIcon(null);
 			return this;

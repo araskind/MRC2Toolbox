@@ -661,6 +661,9 @@ public enum MainActionCommands {
 	// Manual feature ID
 	SET_MANUAL_FEATURE_ID_COMMAND("Manually set feature identity"),
 
+	//	Table copy
+	COPY_TABLE_DATA_COMMAND("Copy table data as TAB-separated"),
+	
 	//	Library MS table
 	COPY_MASS_LIST_AS_CSV_COMMAND("Copy complete mass list (CSV)"),
 	COPY_SELECTED_ADUCT_MASS_SUBLIST_2_AS_CSV_COMMAND("Copy top 2 masses from visible adducts (CSV)"),

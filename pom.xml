@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.1.16</version>
+	<version>1.1.18</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>
@@ -157,10 +157,6 @@ public final class BuildInformation {
 			<url>http://maven.geomajas.org/</url>
 		</repository>
 		<repository>
-			<id>w3c</id>
-			<url>http://dist.wso2.org/maven2/</url>
-		</repository>
-		<repository>
 			<id>bedatadriven</id>
 			<name>bedatadriven public repo</name>
 			<url>https://nexus.bedatadriven.com/content/groups/public/</url>
@@ -171,10 +167,15 @@ public final class BuildInformation {
 			<url>http://jcenter.bintray.com/</url>
 		</repository>
 		<repository>
+			<id>w3c</id>
+			<url>http://dist.wso2.org/maven2/</url>
+		</repository>
+		<repository>
 			<id>sonatype-oss-snapshots</id>
 			<name>Sonatype OSS Maven Repository for Staging Snapshots</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</repository>
+			<!-- 		
 		<repository>
 			<id>bioinf-jena</id>
 			<name>bioinf-jena-releases</name>
@@ -186,10 +187,7 @@ public final class BuildInformation {
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>org.bbop</id>
-			<url>http://code.berkeleybop.org/maven/repository/</url>
-		</repository>
+		-->
 	</repositories>
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
@@ -480,85 +478,6 @@ public final class BuildInformation {
 			<version>1.0.3</version>
 		</dependency>
 		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-api</artifactId>
-			<version>4.5.6</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-distribution</artifactId>
-			<version>4.5.6</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-apibinding</artifactId>
-			<version>4.5.6</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.8.6</version>
-		</dependency>
-		<dependency>
-			<groupId>org.geneontology</groupId>
-			<artifactId>expression-materializing-reasoner</artifactId>
-			<version>0.1.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.geneontology</groupId>
-			<artifactId>obographs</artifactId>
-			<version>0.2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bbop</groupId>
-			<artifactId>oboformat-tools</artifactId>
-			<version>0.7.3</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.trove4j</groupId>
-			<artifactId>trove4j</artifactId>
-			<version>3.0.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.semanticweb.elk</groupId>
-			<artifactId>elk-owlapi</artifactId>
-			<version>0.4.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.piccolo2d</groupId>
-			<artifactId>piccolo2d-core</artifactId>
-			<version>1.3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.piccolo2d</groupId>
-			<artifactId>piccolo2d-extras</artifactId>
-			<version>1.3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>batik-gvt</artifactId>
-			<version>1.13</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.xmlgraphics</groupId>
-			<artifactId>batik-bridge</artifactId>
-			<version>1.13</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.w3c.dom</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xerces</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>org.w3c.dom</groupId>
 			<artifactId>org.w3c.dom.svg</artifactId>
 			<version>1.1.0.v201011041433</version>
@@ -639,6 +558,11 @@ public final class BuildInformation {
 		   <groupId>com.zaxxer</groupId>
 		   <artifactId>HikariCP</artifactId>
 		   <version>5.0.1</version>
+		</dependency>
+		<dependency>
+		    <groupId>edu.umich.med.mrc2.datoolbox.gui</groupId>
+		    <artifactId>owl</artifactId>
+		    <version>1.01</version>
 		</dependency>
 		<!-- 
 		<dependency>

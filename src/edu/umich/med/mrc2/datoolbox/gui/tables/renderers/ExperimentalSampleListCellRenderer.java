@@ -38,17 +38,19 @@ public class ExperimentalSampleListCellRenderer extends DefaultListCellRenderer 
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 
-		super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-		if (value instanceof ExperimentalSample || value == null) {
-
-			String labelText = "";
-			if (value != null) {
-
-				ExperimentalSample selectedSample = (ExperimentalSample) value;
-				labelText = selectedSample.getId() + " (" + selectedSample.getName() + ")";
-			}
-			setText(labelText);
+		Component rendererComponent = 
+				super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+		setForeground(rendererComponent.getForeground());
+		setBackground(rendererComponent.getBackground());
+		setFont(rendererComponent.getFont());
+		
+		if(value == null){
+			setText("");
+			return this;
+		}
+		if (value instanceof ExperimentalSample) {
+			ExperimentalSample selectedSample = (ExperimentalSample) value;
+			setText(selectedSample.getId() + " (" + selectedSample.getName() + ")");
 		}
 		return this;
 	}

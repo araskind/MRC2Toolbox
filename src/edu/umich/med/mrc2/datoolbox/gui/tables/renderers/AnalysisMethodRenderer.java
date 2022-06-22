@@ -51,16 +51,18 @@ public class AnalysisMethodRenderer extends WordWrapCellRenderer {
 	@Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-    	Component rendererComponent = table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+    	Component rendererComponent = 
+    			table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
 		setForeground(rendererComponent.getForeground());
 		setBackground(rendererComponent.getBackground());
 		setFont(rendererComponent.getFont());
 		setMargin(new Insets(5,10,5,10));
 
-		if(value == null)
+		if(value == null) {
 			setText("");
-		
-		if (value instanceof AnalysisMethod) {
+			 return this;
+		}
+		if (AnalysisMethod.class.isAssignableFrom(value.getClass())) {
 			
 			if(property.equals(SortProperty.Name))
 				setText(((AnalysisMethod) value).getName());
@@ -68,7 +70,6 @@ public class AnalysisMethodRenderer extends WordWrapCellRenderer {
 			if(property.equals(SortProperty.ID))
 				setText(((AnalysisMethod) value).getId());
 		}
-
         setSize(table.getColumnModel().getColumn(column).getWidth(), getPreferredSize().height);
         if (table.getRowHeight(row) != getPreferredSize().height)
             table.setRowHeight(row, getPreferredSize().height);
