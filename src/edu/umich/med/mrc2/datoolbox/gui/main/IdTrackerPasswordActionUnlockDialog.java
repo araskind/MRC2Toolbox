@@ -26,6 +26,9 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -54,11 +57,15 @@ public class IdTrackerPasswordActionUnlockDialog extends JDialog {
 	 *
 	 */
 	private static final long serialVersionUID = -1319197380515710262L;
+	
 	private static final Icon idTrackerLoginIcon = GuiUtils.getIcon("idTrackerLogin", 32);
+	private static final Icon capsLockIcon = GuiUtils.getIcon("capsLock", 16);
+	
 	private JTextField userNameTextField;
 	private JPasswordField passwordTextField;
 	private JButton btnLogIn;
 	private String actionCommand2confirm;
+	private JLabel capsLockLabel;
 
 	public IdTrackerPasswordActionUnlockDialog(ActionListener listener, String actionCommand2confirm) {
 		super();
@@ -75,9 +82,9 @@ public class IdTrackerPasswordActionUnlockDialog extends JDialog {
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_panel.columnWidths = new int[]{0, 0, 0, 0, 0};
 		gbl_panel.rowHeights = new int[]{0, 0, 0, 0};
-		gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 
@@ -93,7 +100,7 @@ public class IdTrackerPasswordActionUnlockDialog extends JDialog {
 		userNameTextField.setEditable(false);
 		GridBagConstraints gbc_userIdTextField = new GridBagConstraints();
 		gbc_userIdTextField.gridwidth = 2;
-		gbc_userIdTextField.insets = new Insets(0, 0, 5, 0);
+		gbc_userIdTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_userIdTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_userIdTextField.gridx = 1;
 		gbc_userIdTextField.gridy = 0;
@@ -110,13 +117,43 @@ public class IdTrackerPasswordActionUnlockDialog extends JDialog {
 
 		passwordTextField = new JPasswordField();
 		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.insets = new Insets(0, 0, 5, 0);
+		gbc_textField.insets = new Insets(0, 0, 5, 5);
 		gbc_textField.gridwidth = 2;
 		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textField.gridx = 1;
 		gbc_textField.gridy = 1;
 		panel.add(passwordTextField, gbc_textField);
 		passwordTextField.setColumns(10);
+		
+		capsLockLabel = new JLabel("");
+		boolean isOn = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+		if (isOn == true) {
+			capsLockLabel.setIcon(capsLockIcon);
+		} else {
+			capsLockLabel.setIcon(null);
+		}
+		GridBagConstraints gbc_capsLockLabel = new GridBagConstraints();
+		gbc_capsLockLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_capsLockLabel.gridx = 3;
+		gbc_capsLockLabel.gridy = 1;
+		panel.add(capsLockLabel, gbc_capsLockLabel);
+		
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher()
+	    {
+	        @Override
+	        public boolean dispatchKeyEvent(KeyEvent e)
+	        {
+				if (KeyEvent.VK_CAPS_LOCK == e.getKeyCode()) {
+					boolean isOn = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+					if (isOn == true) {
+						capsLockLabel.setIcon(capsLockIcon);
+					} else {
+						capsLockLabel.setIcon(null);
+					}
+				}
+	            return false;
+	        }
+	    });
 
 		JButton btnCancel = new JButton("Cancel");
 		GridBagConstraints gbc_btnCancel = new GridBagConstraints();
@@ -137,6 +174,7 @@ public class IdTrackerPasswordActionUnlockDialog extends JDialog {
 		btnLogIn.setActionCommand(MainActionCommands.VERIFY_TRACKER_PASSWORD_COMMAND.getName());
 		btnLogIn.addActionListener(listener);
 		GridBagConstraints gbc_btnLogIn = new GridBagConstraints();
+		gbc_btnLogIn.insets = new Insets(0, 0, 0, 5);
 		gbc_btnLogIn.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnLogIn.gridx = 2;
 		gbc_btnLogIn.gridy = 2;

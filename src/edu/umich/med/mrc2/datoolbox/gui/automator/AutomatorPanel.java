@@ -147,6 +147,7 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(event);
 		
 		String command = event.getActionCommand();
 		if (command.equals(MainActionCommands.RUN_AUTOMATOR_COMMAND.getName())) {
@@ -450,5 +451,11 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }

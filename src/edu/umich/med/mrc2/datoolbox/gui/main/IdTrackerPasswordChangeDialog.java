@@ -26,6 +26,9 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -53,13 +56,16 @@ public class IdTrackerPasswordChangeDialog extends JDialog {
 	 *
 	 */
 	private static final long serialVersionUID = -1319197380515710262L;
+	
 	private static final Icon keyIcon = GuiUtils.getIcon("key", 32);
+	private static final Icon capsLockIcon = GuiUtils.getIcon("capsLock", 16);
 	
 	private JTextField userNameTextField;
 	private JPasswordField oldPasswordTextField;
 	private JPasswordField newPasswordTextField;
 	private JPasswordField newPasswordRetypeField;
 	private JButton changePasswordButton;
+	private JLabel capsLockLabel;
 
 	public IdTrackerPasswordChangeDialog(ActionListener listener) {
 		
@@ -76,9 +82,9 @@ public class IdTrackerPasswordChangeDialog extends JDialog {
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[]{0, 80, 0, 0};
+		gbl_panel.columnWidths = new int[]{0, 80, 0, 0, 0};
 		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
-		gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 		
@@ -93,7 +99,7 @@ public class IdTrackerPasswordChangeDialog extends JDialog {
 		userNameTextField = new JTextField();
 		GridBagConstraints gbc_textField = new GridBagConstraints();
 		gbc_textField.gridwidth = 2;
-		gbc_textField.insets = new Insets(0, 0, 5, 0);
+		gbc_textField.insets = new Insets(0, 0, 5, 5);
 		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textField.gridx = 1;
 		gbc_textField.gridy = 0;
@@ -111,13 +117,43 @@ public class IdTrackerPasswordChangeDialog extends JDialog {
 		oldPasswordTextField = new JPasswordField();
 		GridBagConstraints gbc_userIdTextField = new GridBagConstraints();
 		gbc_userIdTextField.gridwidth = 2;
-		gbc_userIdTextField.insets = new Insets(0, 0, 5, 0);
+		gbc_userIdTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_userIdTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_userIdTextField.gridx = 1;
 		gbc_userIdTextField.gridy = 1;
 		panel.add(oldPasswordTextField, gbc_userIdTextField);
 		oldPasswordTextField.setColumns(10);
+		
+		capsLockLabel = new JLabel("");
+		boolean isOn = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+		if (isOn == true) {
+			capsLockLabel.setIcon(capsLockIcon);
+		} else {
+			capsLockLabel.setIcon(null);
+		}
+		GridBagConstraints gbc_capsLockLabel = new GridBagConstraints();
+		gbc_capsLockLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_capsLockLabel.gridx = 3;
+		gbc_capsLockLabel.gridy = 1;
+		panel.add(capsLockLabel, gbc_capsLockLabel);
 
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher()
+	    {
+	        @Override
+	        public boolean dispatchKeyEvent(KeyEvent e)
+	        {
+				if (KeyEvent.VK_CAPS_LOCK == e.getKeyCode()) {
+					boolean isOn = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+					if (isOn == true) {
+						capsLockLabel.setIcon(capsLockIcon);
+					} else {
+						capsLockLabel.setIcon(null);
+					}
+				}
+	            return false;
+	        }
+	    });
+	    
 		JLabel lblPassword = new JLabel("New password");
 		GridBagConstraints gbc_lblPassword = new GridBagConstraints();
 		gbc_lblPassword.anchor = GridBagConstraints.EAST;
@@ -128,7 +164,7 @@ public class IdTrackerPasswordChangeDialog extends JDialog {
 
 		newPasswordTextField = new JPasswordField();
 		GridBagConstraints gbc_newPasswordTextField = new GridBagConstraints();
-		gbc_newPasswordTextField.insets = new Insets(0, 0, 5, 0);
+		gbc_newPasswordTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_newPasswordTextField.gridwidth = 2;
 		gbc_newPasswordTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_newPasswordTextField.gridx = 1;
@@ -146,7 +182,7 @@ public class IdTrackerPasswordChangeDialog extends JDialog {
 
 		newPasswordRetypeField = new JPasswordField();
 		GridBagConstraints gbc_newPasswordRetypeField = new GridBagConstraints();
-		gbc_newPasswordRetypeField.insets = new Insets(0, 0, 5, 0);
+		gbc_newPasswordRetypeField.insets = new Insets(0, 0, 5, 5);
 		gbc_newPasswordRetypeField.gridwidth = 2;
 		gbc_newPasswordRetypeField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_newPasswordRetypeField.gridx = 1;
@@ -181,6 +217,7 @@ public class IdTrackerPasswordChangeDialog extends JDialog {
 		panel.add(label, gbc_label);
 		
 		GridBagConstraints gbc_changePasswordButton = new GridBagConstraints();
+		gbc_changePasswordButton.insets = new Insets(0, 0, 0, 5);
 		gbc_changePasswordButton.gridwidth = 2;
 		gbc_changePasswordButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_changePasswordButton.gridx = 1;
@@ -208,8 +245,6 @@ public class IdTrackerPasswordChangeDialog extends JDialog {
 	public String getNewPasswordRetyped() {
 		return new String(newPasswordRetypeField.getPassword());
 	}
-	
-
 }
 
 

@@ -152,7 +152,8 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 					this.getContentPane());
 			return;
 		}
-
+		super.actionPerformed(e);
+		
 		String command = e.getActionCommand();
 
 		if (command.equals(MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName()))
@@ -492,5 +493,11 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }

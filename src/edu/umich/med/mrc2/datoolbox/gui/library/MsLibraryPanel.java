@@ -241,6 +241,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(event);
 		
 		String command = event.getActionCommand();
 
@@ -1203,5 +1204,11 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }

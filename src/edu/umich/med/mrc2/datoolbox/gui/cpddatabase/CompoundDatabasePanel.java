@@ -276,6 +276,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(event);
 		
 		String command = event.getActionCommand();
 
@@ -1027,5 +1028,11 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }

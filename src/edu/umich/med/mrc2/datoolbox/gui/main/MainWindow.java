@@ -178,6 +178,7 @@ public class MainWindow extends JFrame
 	private FileToolsDialog fileToolsDialog;
 	
 	private RawDataAnalysisProjectSetupDialog rawDataAnalysisProjectSetupDialog;
+	private IdTrackerPasswordActionUnlockDialog confirmActionDialog;
 
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "MainWindow.layout");
@@ -1754,6 +1755,66 @@ public class MainWindow extends JFrame
 		
 		preferences.put(PROJECT_BASE, projectBaseDirectory.getAbsolutePath());
 	}
+
+	public void reauthenticateAdminCommand(String command) {
+		
+		confirmActionDialog = 
+				new IdTrackerPasswordActionUnlockDialog(this, command);
+		confirmActionDialog.setUser(MRC2ToolBoxCore.getIdTrackerUser());
+		confirmActionDialog.setLocationRelativeTo(this.getContentPane());
+		confirmActionDialog.setVisible(true);
+	}
+	
+	public void verifyAdminPassword() {
+		
+		if(confirmActionDialog == null 
+				|| !confirmActionDialog.isVisible() 
+				|| !confirmActionDialog.isDisplayable())
+			return;
+				
+		LIMSUser currentUser = MRC2ToolBoxCore.getIdTrackerUser();
+		if(currentUser == null) {
+			
+			if(confirmActionDialog != null && confirmActionDialog.isVisible())
+				confirmActionDialog.dispose();
+			
+			MessageDialog.showErrorMsg("Password incorrect!", this.getContentPane());
+			return;
+		}		
+		if(!currentUser.isSuperUser()) {
+			
+			if(confirmActionDialog != null && confirmActionDialog.isVisible())
+				confirmActionDialog.dispose();
+			
+			MessageDialog.showErrorMsg(
+					"You do not have administrative priviledges.", 
+					this.getContentPane());
+			return;
+		}
+		LIMSUser user = null;	
+		try {
+			user = UserUtils.getUserLogon(
+					MRC2ToolBoxCore.getIdTrackerUser().getUserName(), 
+					confirmActionDialog.getPassword());
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		if(user == null) {
+			MessageDialog.showErrorMsg("Password incorrect!", confirmActionDialog);
+			return;
+		}
+		else {	
+			String command = confirmActionDialog.getActionCommand2confirm();
+			confirmActionDialog.dispose();
+			executeAdminCommand(command);
+		}
+	}
+	
+	private void executeAdminCommand(String command) {
+		// TODO Auto-generated
+	}
+	
 }
 
 

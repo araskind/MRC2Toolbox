@@ -207,6 +207,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(event);
 		
 		String command = event.getActionCommand();
 		
@@ -644,6 +645,12 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

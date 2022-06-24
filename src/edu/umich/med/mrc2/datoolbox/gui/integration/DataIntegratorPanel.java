@@ -470,4 +470,10 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
 	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -153,6 +153,7 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(e);
 		
 		String command = e.getActionCommand();
 
@@ -409,6 +410,12 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

@@ -337,6 +337,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(event);
 		
 		if (currentProject == null)
 			return;
@@ -1564,5 +1565,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -46,12 +46,15 @@ import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.intern.DefaultCDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignListener;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetListener;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetListener;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureListener;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonMenuBar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
@@ -69,6 +72,7 @@ public abstract class DockableMRC2ToolboxPanel extends DefaultSingleCDockable
 	protected SplitDockStation station;
 	protected CommonMenuBar menuBar;
 	protected JMenu panelsMenu;
+	protected IdTrackerPasswordActionUnlockDialog confirmActionDialog;
 	
 	protected static final Icon actionIcon = GuiUtils.getIcon("cog", 16);
 	protected static final Icon windowLayoutIcon = GuiUtils.getIcon("windowLayout", 16);
@@ -91,14 +95,77 @@ public abstract class DockableMRC2ToolboxPanel extends DefaultSingleCDockable
 //                PlaceholderStrategy.PLACEHOLDER_STRATEGY, 
 //                new CPlaceholderStrategy(control) );
 	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
 
+		if(e.getActionCommand().equals(MainActionCommands.VERIFY_TRACKER_PASSWORD_COMMAND.getName()))
+			verifyAdminPassword();	
+	}
+	
 	// Clear panel contents
 	public abstract void clearPanel();
 
 	//	refresh if experiment design is updated
 	public abstract void reloadDesign();
-
 	
+	public void reauthenticateAdminCommand(String command) {
+		
+		confirmActionDialog = 
+				new IdTrackerPasswordActionUnlockDialog(this, command);
+		confirmActionDialog.setUser(MRC2ToolBoxCore.getIdTrackerUser());
+		confirmActionDialog.setLocationRelativeTo(this.getContentPane());
+		confirmActionDialog.setVisible(true);
+	}
+	
+	public void verifyAdminPassword() {
+		
+		if(confirmActionDialog == null 
+				|| !confirmActionDialog.isVisible() 
+				|| !confirmActionDialog.isDisplayable())
+			return;
+				
+		LIMSUser currentUser = MRC2ToolBoxCore.getIdTrackerUser();
+		if(currentUser == null) {
+			
+			if(confirmActionDialog != null && confirmActionDialog.isVisible())
+				confirmActionDialog.dispose();
+			
+			MessageDialog.showErrorMsg("Password incorrect!", this.getContentPane());
+			return;
+		}		
+		if(!currentUser.isSuperUser()) {
+			
+			if(confirmActionDialog != null && confirmActionDialog.isVisible())
+				confirmActionDialog.dispose();
+			
+			MessageDialog.showErrorMsg(
+					"You do not have administrative priviledges.", 
+					this.getContentPane());
+			return;
+		}
+		LIMSUser user = null;	
+		try {
+			user = UserUtils.getUserLogon(
+					MRC2ToolBoxCore.getIdTrackerUser().getUserName(), 
+					confirmActionDialog.getPassword());
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		if(user == null) {
+			MessageDialog.showErrorMsg("Password incorrect!", confirmActionDialog);
+			return;
+		}
+		else {	
+			String command = confirmActionDialog.getActionCommand2confirm();
+			confirmActionDialog.dispose();
+			executeAdminCommand(command);
+		}
+	}
+	
+	protected abstract void executeAdminCommand(String command);
+		
 	protected void initActions() {
 		
 		DefaultDockActionSource actions = new DefaultDockActionSource(

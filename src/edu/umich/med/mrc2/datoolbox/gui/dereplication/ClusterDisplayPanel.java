@@ -134,6 +134,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(event);
 		
 		String command = event.getActionCommand();
 

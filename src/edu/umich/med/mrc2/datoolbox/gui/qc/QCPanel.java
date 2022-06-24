@@ -107,6 +107,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(event);
 		
 		if(currentProject == null || activeDataPipeline == null)
 			return;
@@ -245,5 +246,11 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }

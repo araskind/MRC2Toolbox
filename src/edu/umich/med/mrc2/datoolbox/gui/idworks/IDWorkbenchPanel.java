@@ -533,6 +533,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(event);
 		
 		String command = event.getActionCommand();
 
@@ -3448,5 +3449,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (tree.getClickedObject() instanceof MsFeatureInfoBundle) {
 			//	TODO
 		}
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}	
 }

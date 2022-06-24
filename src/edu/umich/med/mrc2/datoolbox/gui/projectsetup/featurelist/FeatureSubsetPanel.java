@@ -104,7 +104,8 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 					this.getContentPane());
 			return;
 		}
-
+		super.actionPerformed(event);
+		
 		if (event.getActionCommand().equals(MainActionCommands.NEW_FEATURE_SUBSET_COMMAND.getName()))
 			showNewFeatureSetDialog();
 
@@ -512,5 +513,11 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }

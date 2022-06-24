@@ -250,6 +250,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(e);
 
 		String command = e.getActionCommand();
 
@@ -274,8 +275,14 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 				|| command.equals(MainActionCommands.NEW_CPD_ID_PROJECT_COMMAND.getName()))
 			saveProject();
 
-		if (command.equals(MainActionCommands.DELETE_CPD_ID_PROJECT_COMMAND.getName()))
-			deleteProject();
+		if (command.equals(MainActionCommands.DELETE_CPD_ID_PROJECT_COMMAND.getName())) {
+			
+			LIMSProject project = getSelectedProject();
+			if (project == null)
+				return;
+			
+			reauthenticateAdminCommand(MainActionCommands.DELETE_CPD_ID_PROJECT_COMMAND.getName());
+		}
 
 		if (command.equals(MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName()))
 			showExperimentEditDialog(null);
@@ -287,8 +294,14 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 				|| command.equals(MainActionCommands.NEW_CPD_ID_EXPERIMENT_COMMAND.getName()))
 			saveExperiment();
 
-		if (command.equals(MainActionCommands.DELETE_CPD_ID_EXPERIMENT_COMMAND.getName()))
-			deleteExperiment();
+		if (command.equals(MainActionCommands.DELETE_CPD_ID_EXPERIMENT_COMMAND.getName())) {
+			
+			LIMSExperiment experiment = getSelectedExperiment();
+			if (experiment == null)
+				return;
+			
+			reauthenticateAdminCommand(MainActionCommands.DELETE_CPD_ID_EXPERIMENT_COMMAND.getName());//	deleteExperiment();
+		}
 
 		if (command.equals(MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName()))
 			editSamplePrepDialog();
@@ -496,8 +509,8 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 			return;
 
 		// Authenticate as superuser
-		if (!IDTUtils.isSuperUser(this.getContentPane()))
-			return;
+//		if (!IDTUtils.isSuperUser(this.getContentPane()))
+//			return;
 
 		int result = MessageDialog.showChoiceWithWarningMsg(
 				"Do you really want to delete project \"" + project.getName() + "\"?\n"
@@ -505,6 +518,8 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 				this.getContentPane());
 
 		if (result == JOptionPane.YES_OPTION) {
+			
+//			TODO xx
 
 			try {
 				IDTUtils.deleteProject(project);
@@ -524,9 +539,9 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		LIMSExperiment experiment = getSelectedExperiment();
 		if (experiment == null)
 			return;
-
-		if (!IDTUtils.isSuperUser(this.getContentPane()))
-			return;
+//
+//		if (!IDTUtils.isSuperUser(this.getContentPane()))
+//			return;
 
 		int result = MessageDialog.showChoiceWithWarningMsg("Do you really want to delete experiment \""
 				+ experiment.getName() + "\"?\n" + "All associated data will be purged from the database!",
@@ -987,5 +1002,16 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		if (command.equals(MainActionCommands.DELETE_CPD_ID_EXPERIMENT_COMMAND.getName())) {
+			deleteExperiment();
+		}
+		if (command.equals(MainActionCommands.DELETE_CPD_ID_PROJECT_COMMAND.getName())) {
+			deleteProject();
+		}		
 	}
 }

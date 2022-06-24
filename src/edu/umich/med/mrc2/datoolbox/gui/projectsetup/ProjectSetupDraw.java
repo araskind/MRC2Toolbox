@@ -145,6 +145,7 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 					this.getContentPane());
 			return;
 		}
+		super.actionPerformed(e);
 	}
 
 	@Override
@@ -204,6 +205,12 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 	public void populatePanelsMenu() {
 		// TODO Auto-generated method stub
 		super.populatePanelsMenu();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 
