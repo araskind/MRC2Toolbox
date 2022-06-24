@@ -58,9 +58,11 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
@@ -316,6 +318,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 					this.getContentPane());
 			return;
 		}
+		
 		String command = event.getActionCommand();
 			
 		if (command.equals(MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND.getName())) 
@@ -378,6 +381,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	private void setProjectDataUploadParameters() {
 		
+		RawDataAnalysisProject activeProject = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
+		if(activeProject == null)
+			return;
+		
 		Map<LIMSExperiment, Collection<DataFile>> existingDataFiles = 
 				checkForExistingDataFiles();
 		if(!existingDataFiles.isEmpty()) {
@@ -396,8 +404,52 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 					 rawDataProjectMetadataWizard);
 			 return;
 		}
+		Collection<DataFile>filesWithMissingMSMSData = new ArrayList<DataFile>();
+		for(DataFile df : activeProject.getMSMSDataFiles()) {
+			if(activeProject.getMsFeaturesForDataFile(df) == null 
+					|| activeProject.getMsFeaturesForDataFile(df).isEmpty())
+				filesWithMissingMSMSData.add(df);
+		}
+		if(!filesWithMissingMSMSData.isEmpty()) {
+			List<String> fileNames = filesWithMissingMSMSData.stream().
+					map(f -> f.getBaseName()).collect(Collectors.toList());
+			
+			 MessageDialog.showErrorMsg("The following files have no extracted MSMS features:\n" + 
+					 StringUtils.join(fileNames, "\n"), 
+					 this.getContentPane());
+			 return;
+		}
+		MSMSExtractionParameterSet deMethod = 
+				activeProject.getMsmsExtractionParameterSet();
+		if(deMethod == null) {
+			 MessageDialog.showErrorMsg("MSMS extraction method not defined for the project", 
+					 this.getContentPane());
+			 return;
+		}	
+		String methodMd5 = deMethod.getParameterSetHash();
+		DataExtractionMethod existingDeMethod = 
+				 IDTDataCash.getDataExtractionMethodByMd5(methodMd5);
+		
+		boolean allowEdit = false;
+			 
+	    if(existingDeMethod == null) {  //	Upload new method
+	    	
+			allowEdit = true;
+			try {
+				existingDeMethod = 
+						IDTUtils.insertNewTrackerDataExtractionMethod(deMethod);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				MessageDialog.showErrorMsg("Failed to upload data analysis method for the project", 
+						 this.getContentPane());
+				return;
+			}
+	    }	
+	    IDTDataCash.getDataExtractionMethods().add(existingDeMethod);
 		rawDataAnalysisProjectDatabaseUploadDialog = 
 				new RawDataAnalysisProjectDatabaseUploadDialog(this);
+		rawDataAnalysisProjectDatabaseUploadDialog.setDataExtractionMethod(existingDeMethod, allowEdit);
 		rawDataAnalysisProjectDatabaseUploadDialog.setLocationRelativeTo(this.getContentPane());
 		rawDataAnalysisProjectDatabaseUploadDialog.setVisible(true);
 	}

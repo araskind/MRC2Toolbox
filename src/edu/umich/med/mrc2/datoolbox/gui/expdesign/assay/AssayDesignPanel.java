@@ -127,6 +127,13 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
+			return;
+		}
+		
 		String command = event.getActionCommand();
 
 		if (command.equals(MainActionCommands.DELETE_DATA_FILES_COMMAND.getName()))

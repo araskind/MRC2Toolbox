@@ -21,16 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.TreeSet;
-
-import javax.xml.bind.DatatypeConverter;
-
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
@@ -132,45 +123,25 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 	
 	private boolean uploadDataAnalysisMethod() {
 		
-		Document methodDocument = new Document();
-		Element paramsElement = 
-				project.getMsmsExtractionParameterSet().getXmlElement();
-		methodDocument.setContent(paramsElement);	
-		String methodString = 
-				new XMLOutputter().outputString(methodDocument);
-		String methodMd5 = "";
-	    try {
-			MessageDigest md = MessageDigest.getInstance("MD5");
-			md.update(methodString.getBytes(StandardCharsets.UTF_8));
-			methodMd5 = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+		String methodMd5 = project.getMsmsExtractionParameterSet().getParameterSetHash();
+		if(methodMd5 == null)
 			return false;
-		}
-	    //	Check if method present using MD5
-	    String existingMethodId = null;
-	    if(methodMd5.length() == 32) {
-			try {
-				existingMethodId = IDTUtils.getTrackerDataAnalysisMethodIdByMD5(methodMd5);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	    }
-	    if(existingMethodId == null) {  //	Upload new method
+		
+	    //	Check if method present using MD5    	
+	    dataExtractionMethod = IDTDataCash.getDataExtractionMethodByMd5(methodMd5);
+
+	    if(dataExtractionMethod == null) {  //	Upload new method
+	    	String methodString = project.getMsmsExtractionParameterSet().getXMLString();
 			try {
 				dataExtractionMethod = 
-						IDTUtils.insertNewTrackerDataExtractionMethod(methodString, methodMd5);
+						IDTUtils.insertNewTrackerDataExtractionMethod(
+								project.getMsmsExtractionParameterSet());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    }
-	    else {
-	    	dataExtractionMethod = IDTDataCash.getDataExtractionMethodById(existingMethodId);
-	    	return true;
-	    }
-	    return false;
+	    return dataExtractionMethod != null;
 	}
 
 	private boolean insertSampleprep() {

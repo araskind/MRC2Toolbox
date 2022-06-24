@@ -31,7 +31,9 @@ import java.util.UUID;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -490,6 +492,12 @@ public class MSMSExtractionParameterSet {
 		this.chromatogramExtractionWindow = Double.parseDouble(
 				parametersElement.getAttributeValue(
 						MSMSExtractionParameters.ChromatogramExtractionWindow.name()));
+	}
+	
+	public String getXMLString() {
+		
+		Document methodDocument = new Document(getXmlElement());
+		return new XMLOutputter().outputString(methodDocument);
 	}
 
 	public String getName() {

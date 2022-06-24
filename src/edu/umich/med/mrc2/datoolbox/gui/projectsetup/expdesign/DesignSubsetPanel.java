@@ -131,6 +131,13 @@ public class DesignSubsetPanel extends DockableMRC2ToolboxPanel implements Table
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
+			return;
+		}
+		
 		if (event.getActionCommand().equals(MainActionCommands.SHOW_DESIGN_SUBSET_DIALOG_COMMAND.getName())) {
 
 			creatingNewSet = true;

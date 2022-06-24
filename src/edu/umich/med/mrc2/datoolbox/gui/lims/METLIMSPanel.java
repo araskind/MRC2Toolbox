@@ -32,7 +32,6 @@ import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
@@ -44,7 +43,6 @@ import edu.umich.med.mrc2.datoolbox.gui.lims.drcc.DockableDRCCDataPrepPanel;
 import edu.umich.med.mrc2.datoolbox.gui.lims.experiment.DockableExperimentDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -127,13 +125,10 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		if (!ConnectionManager.connectionDefined()) {
-			MainWindow.displayErrorMessage("Connection error", 
-					"Database connection not defined!");
-			return;
-		}
-		if (MRC2ToolBoxCore.getIdTrackerUser() == null) {
-			MessageDialog.showErrorMsg("You are not logged in ID tracker!", this.getContentPane());
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
 			return;
 		}
 

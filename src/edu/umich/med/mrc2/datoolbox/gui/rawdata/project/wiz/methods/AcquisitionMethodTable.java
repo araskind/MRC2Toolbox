@@ -67,7 +67,7 @@ public class AcquisitionMethodTable extends BasicTable {
 				setPreferredWidth(80);
 	}
 
-	public void setTableModelFromAcquisitionMethods(Collection<String> methodNames) {
+	public void setTableModelFromAcquisitionMethodsNames(Collection<String> methodNames) {
 		
 		Map<String,AnalysisMethod>methodFilesMap = new TreeMap<String,AnalysisMethod>();
 		for(String methodName : methodNames) {

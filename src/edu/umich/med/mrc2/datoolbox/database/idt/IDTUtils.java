@@ -78,6 +78,7 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
@@ -540,7 +541,7 @@ public class IDTUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 			"SELECT EXTRACTION_METHOD_ID, METHOD_NAME, METHOD_DESCRIPTION, "
-			+ "CREATED_BY, CREATED_ON, SOFTWARE_ID " +
+			+ "CREATED_BY, CREATED_ON, SOFTWARE_ID, METHOD_MD5 " +
 			"FROM DATA_EXTRACTION_METHOD ORDER BY 1 ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -565,6 +566,10 @@ public class IDTUtils {
 			String softwareId = rs.getString("SOFTWARE_ID");
 			if(softwareId != null)
 				method.setSoftware(IDTDataCash.getSoftwareById(softwareId));
+			
+			String md5 = rs.getString("METHOD_MD5");
+			if(md5 != null)
+				method.setMd5(md5);
 			
 			methodList.add(method);
 		}
@@ -2417,13 +2422,15 @@ public class IDTUtils {
 	}
 
 	public static DataExtractionMethod insertNewTrackerDataExtractionMethod(
-			String methodString, 
-			String methodMd5) throws Exception {
+			MSMSExtractionParameterSet newTrackerMethod) throws Exception {
 		
 		LIMSUser sysUser = MRC2ToolBoxCore.getIdTrackerUser();
 		if(sysUser == null)
 			return null;
 
+		String methodMd5 = newTrackerMethod.getParameterSetHash();
+		String methodString = newTrackerMethod.getXMLString();
+		
 		Connection conn = ConnectionManager.getConnection();
 		String id = SQLUtils.getNextIdFromSequence(conn, 
 				"ID_DATA_EXTRACTION_METHOD_SEQ",
@@ -2435,11 +2442,12 @@ public class IDTUtils {
 		
 		DataExtractionMethod newMethod  = new DataExtractionMethod(
 				id,
-				null,
-				null,
+				newTrackerMethod.getName(),
+				newTrackerMethod.getDescription(),
 				sysUser,
 				new Date());
 		newMethod.setSoftware(trackerSoft);
+		newMethod.setMd5(methodMd5);
 		
 		String query  =
 			"INSERT INTO DATA_EXTRACTION_METHOD (EXTRACTION_METHOD_ID, METHOD_NAME, " +
@@ -2448,10 +2456,8 @@ public class IDTUtils {
 		
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, id);
-		
-		//	TODO
-//		ps.setString(2, selectedMethod.getName());
-//		ps.setString(3, selectedMethod.getDescription());
+		ps.setString(2, newMethod.getName());
+		ps.setString(3, newMethod.getDescription());
 		ps.setString(4, sysUser.getId());
 		ps.setDate(5, new java.sql.Date(new java.util.Date().getTime()));
 		

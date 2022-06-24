@@ -147,11 +147,13 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		//	TODO re-enable when coding completed
-		if (MRC2ToolBoxCore.getIdTrackerUser() == null) {
-			MessageDialog.showErrorMsg("You are not logged in!", this.getContentPane());
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
 			return;
 		}
+		
 		String command = e.getActionCommand();
 
 		if(command.equals(MainActionCommands.REFRESH_LIMS_DATA_COMMAND.getName()))

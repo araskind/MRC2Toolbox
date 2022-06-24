@@ -427,7 +427,7 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 		if(!missingMethodNameToFileMap.isEmpty())
 			methodNames.addAll(missingMethodNameToFileMap.keySet());
 			
-		acquisitionMethodTable.setTableModelFromAcquisitionMethods(methodNames);
+		acquisitionMethodTable.setTableModelFromAcquisitionMethodsNames(methodNames);
 	}
 	
 	@Override
@@ -464,7 +464,7 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 				TreeMap<String, File> nameToFileMap = task.getMethodNameToFileMap();			
 				TreeSet<String>methodNames = new TreeSet<String>(acquisitionMethodTable.getMethodNames());
 				methodNames.addAll(nameToFileMap.keySet());
-				acquisitionMethodTable.setTableModelFromAcquisitionMethods(methodNames);			
+				acquisitionMethodTable.setTableModelFromAcquisitionMethodsNames(methodNames);			
 				dataAcquisitionMethods.addAll(acquisitionMethodTable.getAvailableDataAcquisitionMethods());
 				Collection<String>missingNames = acquisitionMethodTable.getMissingMethodNames();
 				if(!missingNames.isEmpty()) {

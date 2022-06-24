@@ -213,7 +213,7 @@ public class MainMenuBar extends CommonMenuBar {
 	}
 	
 	public void setIdTrackerUser(LIMSUser user) {
-
+		
 		if(user == null) {
 			loginMenuItem.setIcon(loggedOutUserIcon);
 			loginMenuItem.setActionCommand(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
@@ -221,6 +221,13 @@ public class MainMenuBar extends CommonMenuBar {
 			loginMenuItem.setText(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
 			organizationManagerMenuItem.setEnabled(false);
 			userManagerMenuItem.setEnabled(false);
+			
+			for(int i=0; i<this.getMenuCount(); i++) {
+				
+				JMenu m = this.getMenu(i);
+				if(!m.equals(dbAccessMenu))
+					m.setEnabled(false);
+			}			
 		}
 		else {
 			loginMenuItem.setIcon(activeUserIcon);
@@ -232,6 +239,8 @@ public class MainMenuBar extends CommonMenuBar {
 				organizationManagerMenuItem.setEnabled(true);
 				loginMenuItem.setIcon(superUserIcon);
 			}
+			for(int i=0; i<this.getMenuCount(); i++)				
+				this.getMenu(i).setEnabled(true);
 		}		
 	}
 

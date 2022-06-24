@@ -32,6 +32,7 @@ public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>{
 	protected String id;
 	protected String name;
 	protected DataProcessingSoftware software;
+	protected String md5;
 	
 	public AnalysisMethod(String id, String name) {
 		super();
@@ -80,4 +81,12 @@ public class AnalysisMethod implements Serializable, Comparable<AnalysisMethod>{
         hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
+
+	public String getMd5() {
+		return md5;
+	}
+
+	public void setMd5(String md5) {
+		this.md5 = md5;
+	}
 }

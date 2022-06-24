@@ -28,21 +28,18 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRootPane;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
@@ -75,7 +72,7 @@ public class IdTrackerLoginDialog extends JDialog implements ActionListener {
 		setSize(new Dimension(400, 200));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(false);
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -123,20 +120,20 @@ public class IdTrackerLoginDialog extends JDialog implements ActionListener {
 		panel.add(passwordTextField, gbc_textField);
 		passwordTextField.setColumns(10);
 
-		JButton btnCancel = new JButton("Cancel");
-		GridBagConstraints gbc_btnCancel = new GridBagConstraints();
-		gbc_btnCancel.insets = new Insets(0, 0, 5, 5);
-		gbc_btnCancel.gridx = 1;
-		gbc_btnCancel.gridy = 2;
-		panel.add(btnCancel, gbc_btnCancel);
-
-		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				dispose();
-			}
-		};
-		btnCancel.addActionListener(al);
+//		JButton btnCancel = new JButton("Cancel");
+//		GridBagConstraints gbc_btnCancel = new GridBagConstraints();
+//		gbc_btnCancel.insets = new Insets(0, 0, 5, 5);
+//		gbc_btnCancel.gridx = 1;
+//		gbc_btnCancel.gridy = 2;
+//		panel.add(btnCancel, gbc_btnCancel);
+//
+//		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+//		ActionListener al = new ActionListener() {
+//			public void actionPerformed(ActionEvent ae) {
+//				dispose();
+//			}
+//		};
+//		btnCancel.addActionListener(al);
 
 		btnLogIn = new JButton("Log in");
 		btnLogIn.setActionCommand(MainActionCommands.LOGIN_TO_ID_TRACKER_COMMAND.getName());
@@ -149,7 +146,7 @@ public class IdTrackerLoginDialog extends JDialog implements ActionListener {
 		panel.add(btnLogIn, gbc_btnLogIn);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(btnLogIn);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+//		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnLogIn);
 		
 		JLabel label = new JLabel("   ");

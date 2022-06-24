@@ -147,7 +147,9 @@ public class LabNoteBookPanel extends DockableMRC2ToolboxPanel {
 	public void actionPerformed(ActionEvent e) {
 
 		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
-			MessageDialog.showErrorMsg("You are not logged in ID tracker!", this.getContentPane());
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
 			return;
 		}
 

@@ -315,6 +315,13 @@ public class ProjectDetailsPanel extends DockableMRC2ToolboxPanel {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
+			return;
+		}
+		
 		if (currentProject == null)
 			return;
 

@@ -81,14 +81,10 @@ import edu.umich.med.mrc2.datoolbox.gui.dbparse.DbParserFrame;
 import edu.umich.med.mrc2.datoolbox.gui.filetools.FileToolsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.organization.OrganizationManagerDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.NewProjectDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.raw.RawDataUploadPrepDialog;
-import edu.umich.med.mrc2.datoolbox.gui.labnote.LabNoteBookPanel;
-import edu.umich.med.mrc2.datoolbox.gui.lims.METLIMSPanel;
-import edu.umich.med.mrc2.datoolbox.gui.mptrack.MoTrPACDataTrackingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mstools.MSToolsFrame;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.PreferencesDialog;
@@ -204,7 +200,7 @@ public class MainWindow extends JFrame
 		
 //		projectDashBooard.setActionListener(this);
 		projectDashBooard.switchDataPipeline(null, null);
-//		((FeatureDataPanel)getPanel(PanelList.FEATURE_DATA)).setProjectActionListener(this);
+//		((FeatureDataPanel)getPanel(PanelList.FEATURE_DATA)).setProjectActionListener(this);	
 	}
 
 	@Override
@@ -418,7 +414,7 @@ public class MainWindow extends JFrame
 		rawDataUploadPrepDialog.setVisible(true);
 	}
 
-	private void showIdTrackerLogin() {
+	public void showIdTrackerLogin() {
 
 		idtLogin = new IdTrackerLoginDialog(this);
 		idtLogin.setLocationRelativeTo(this.getContentPane());
@@ -464,42 +460,30 @@ public class MainWindow extends JFrame
 	}
 
 	private void logoutIdTracker() {
+		
+		if(MRC2ToolBoxCore.getCurrentProject() != null 
+				|| MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			MessageDialog.showWarningMsg(
+					"Please close the project first", 
+					this.getContentPane());
+			return;
+		}
 
 		int result = MessageDialog.showChoiceWithWarningMsg(
 				"Do you want to log out from ID tracker?", this.getContentPane());
-
-		if(result == JOptionPane.YES_OPTION) {
-			MRC2ToolBoxCore.setIdTrackerUser(null);
-//			toolBar.setIdTrackerUser(null);
-			mainMenuBar.setIdTrackerUser(null);
-
-			LabNoteBookPanel notebook = (LabNoteBookPanel)getPanel(PanelList.LAB_NOTEBOOK);
-			if(notebook != null)
-				notebook.clearPanel();
-			
-			IDTrackerLimsManagerPanel idtLims = 
-					(IDTrackerLimsManagerPanel)getPanel(PanelList.ID_TRACKER_LIMS);
-			if(idtLims != null)
-				idtLims.clearPanel();
-			
-			IDWorkbenchPanel idwb = (IDWorkbenchPanel)getPanel(PanelList.ID_WORKBENCH);
-			if(idwb != null)
-				idwb.clearPanel();
-			
-			METLIMSPanel metlimsPanel = (METLIMSPanel)getPanel(PanelList.LIMS);
-			if(metlimsPanel != null)
-				metlimsPanel.clearPanel();
-			
-			MoTrPACDataTrackingPanel motrpacPanel = 
-					(MoTrPACDataTrackingPanel)getPanel(PanelList.MOTRPAC_REPORT_TRACKER);
-			if(motrpacPanel != null)
-				motrpacPanel.clearPanel();	
-			
-			RawDataExaminerPanel rawDataPanel = 
-					(RawDataExaminerPanel)getPanel(PanelList.RAW_DATA_EXAMINER);
-			if(rawDataPanel != null)
-				rawDataPanel.clearPanel();	
-		}
+		
+		if(result != JOptionPane.YES_OPTION)
+			return;
+		
+		for(PanelList panelType : PanelList.getPanelListForConfiguration(
+				BuildInformation.getStartupConfiguration())) {
+			DockableMRC2ToolboxPanel guiPanel = panels.get(panelType);
+			if(guiPanel != null)
+				guiPanel.clearPanel();
+		}	
+		MRC2ToolBoxCore.setIdTrackerUser(null);
+//		toolBar.setIdTrackerUser(null);
+		mainMenuBar.setIdTrackerUser(null);
 	}
 
 	private void showAssayMethodsManagerDialog() {
@@ -891,6 +875,7 @@ public class MainWindow extends JFrame
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setIconImage(((ImageIcon) scriptIcon).getImage());
 		mainMenuBar = new MainMenuBar(this);
+		mainMenuBar.setIdTrackerUser(null);
 		setJMenuBar(mainMenuBar);
 
 //		toolBar = new MainToolbar(this);

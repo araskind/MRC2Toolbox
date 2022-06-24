@@ -528,9 +528,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	public void actionPerformed(ActionEvent event) {
 
 		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
-			MessageDialog.showErrorMsg("You are not logged in ID tracker!", this.getContentPane());
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
 			return;
 		}
+		
 		String command = event.getActionCommand();
 
 		if (command.equals(MainActionCommands.SHOW_OPEN_CPD_ID_PROJECT_DIALOG_COMMAND.getName()))

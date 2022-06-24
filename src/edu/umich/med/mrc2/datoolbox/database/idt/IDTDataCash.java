@@ -1024,6 +1024,13 @@ public class IDTDataCash {
 		return getDataExtractionMethods().stream().
 				filter(e -> e.getName().equals(methodName)).findFirst().orElse(null);
 	}
+	
+	public static DataExtractionMethod getDataExtractionMethodByMd5(String md5) {
+
+		return getDataExtractionMethods().stream().
+				filter(e -> e.getMd5() != null).
+				filter(e -> e.getMd5().equals(md5)).findFirst().orElse(null);
+	}
 
 	public static LIMSProtocol getProtocolById(String protocolId) {
 

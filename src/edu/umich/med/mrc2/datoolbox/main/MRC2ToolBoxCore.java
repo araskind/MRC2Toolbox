@@ -239,6 +239,7 @@ public final class MRC2ToolBoxCore {
 				//e.printStackTrace();
 			}
         }
+        mainWindow.showIdTrackerLogin();
 	}
 
 	public static void shutDown() {

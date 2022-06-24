@@ -40,6 +40,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.plot.qc.threed.Dockable3DChartPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.Dockable2DQCPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -99,6 +100,13 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 	
 	@Override
 	public void actionPerformed(ActionEvent event) {
+		
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
+			return;
+		}
 		
 		if(currentProject == null || activeDataPipeline == null)
 			return;

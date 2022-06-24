@@ -171,6 +171,13 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
+			return;
+		}
+		
 		if(currentProject == null)
 			return;
 

@@ -53,7 +53,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSClient;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
-import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
@@ -245,13 +244,10 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		if (!ConnectionManager.connectionDefined()) {
-			MainWindow.displayErrorMessage("Connection error", 
-					"Database connection not defined!");
-			return;
-		}
-		if (MRC2ToolBoxCore.getIdTrackerUser() == null) {
-			MessageDialog.showErrorMsg("You are not logged in ID tracker!", this.getContentPane());
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
 			return;
 		}
 

@@ -40,6 +40,7 @@ import edu.umich.med.mrc2.datoolbox.gui.projectsetup.featurelist.FeatureSubsetPa
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.projinfo.DockableLIMSDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.projinfo.ProjectDetailsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -138,7 +139,12 @@ public class ProjectSetupDraw extends DockableMRC2ToolboxPanel {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
+			return;
+		}
 	}
 
 	@Override

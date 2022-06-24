@@ -38,6 +38,7 @@ import edu.umich.med.mrc2.datoolbox.gui.expdesign.editor.DesignEditorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -69,6 +70,13 @@ public class ExperimentDesignPanel extends DockableMRC2ToolboxPanel {
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
+		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
+			return;
+		}
+		
 		String command = event.getActionCommand();
 
 //		if (command.equals(MainActionCommands.SHOW_DESIGN_TABLE_EDITOR_COMMAND.getName())) {

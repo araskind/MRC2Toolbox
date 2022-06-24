@@ -50,6 +50,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -72,6 +73,7 @@ public class RawDataAnalysisProjectDatabaseUploadDialog extends JDialog implemen
 	private JTextField methodNameTextField;
 	private JTextArea descriptionTextArea;
 	private MSMSExtractionParameterSet ps;
+	private DataExtractionMethod deMethod;
 	
 	public RawDataAnalysisProjectDatabaseUploadDialog(RawDataExaminerPanel parentPanel) {
 		super();
@@ -79,7 +81,7 @@ public class RawDataAnalysisProjectDatabaseUploadDialog extends JDialog implemen
 		setIconImage(((ImageIcon) sendProjectToDatabaseIcon).getImage());
 		setResizable(true);
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setPreferredSize(new Dimension(500, 250));
+		setPreferredSize(new Dimension(640, 320));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
 		getContentPane().setLayout(new BorderLayout(0, 0));
@@ -121,6 +123,8 @@ public class RawDataAnalysisProjectDatabaseUploadDialog extends JDialog implemen
 		panel.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		descriptionTextArea = new JTextArea();
+		descriptionTextArea.setWrapStyleWord(true);
+		descriptionTextArea.setLineWrap(true);
 		descriptionTextArea.setBorder(new BevelBorder(
 				BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_descriptionTextArea = new GridBagConstraints();
@@ -131,7 +135,7 @@ public class RawDataAnalysisProjectDatabaseUploadDialog extends JDialog implemen
 		gbc_descriptionTextArea.gridy = 3;
 		panel.add(descriptionTextArea, gbc_descriptionTextArea);
 		
-		JLabel lblNewLabel = new JLabel("MS1 extraction window +/-");
+		JLabel lblNewLabel = new JLabel("MS1 extraction window for database upload: +/-");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
@@ -218,6 +222,24 @@ public class RawDataAnalysisProjectDatabaseUploadDialog extends JDialog implemen
 			ps.setDescription(getMethodDescription());
 		
 		return ps;
+	}	
+
+	public DataExtractionMethod getDataExtractionMethod() {
+		return deMethod;
+	}
+
+	public void setDataExtractionMethod(DataExtractionMethod deMethod, boolean allowEdit) {
+		this.deMethod = deMethod;
+		methodNameTextField.setText(deMethod.getName());
+		methodNameTextField.setEditable(allowEdit);
+		methodNameTextField.setEnabled(allowEdit);
+		descriptionTextArea.setText(deMethod.getDescription());
+		descriptionTextArea.setEditable(allowEdit);
+		descriptionTextArea.setEnabled(allowEdit);
+	}
+	
+	public boolean isMethodEditable() {
+		return methodNameTextField.isEditable();
 	}
 	
 	public String getMethodName() {
@@ -252,5 +274,4 @@ public class RawDataAnalysisProjectDatabaseUploadDialog extends JDialog implemen
 		double msOneMZWindow = Double.parseDouble(msOneMzWindowTextField.getText().trim());
 		preferences.putDouble(MS_ONE_MZ_WINDOW, msOneMZWindow);
 	}
-
 }
