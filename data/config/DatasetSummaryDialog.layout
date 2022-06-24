@@ -99,33 +99,26 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600213793228" orientation="VERTICAL" divider="0.5">
-											<leaf id="0" nodeId="1600213793230">
+										<node nodeId="1656109900806" orientation="VERTICAL" divider="0.25">
+											<leaf id="1" nodeId="1656109890669">
 												<placeholders>
-													<placeholder>dock.single.QCPanelDockableDataSetStatsTable</placeholder>
+													<placeholder>dock.single.DockableExperimentsTable</placeholder>
+												</placeholders>
+												<placeholder-map>
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableExperimentsTable</placeholder>
+														</key>
+													</entry>
+												</placeholder-map>
+											</leaf>
+											<leaf id="0" nodeId="1656109900804">
+												<placeholders>
+													<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1600213927553" orientation="HORIZONTAL" divider="0.6147378832838774">
-												<leaf id="1" nodeId="1600213793238">
-													<placeholders>
-														<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
-													</placeholders>
-													<placeholder-map>
-														<version>0</version>
-														<format>dock.PlaceholderList</format>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
-															</key>
-														</entry>
-													</placeholder-map>
-												</leaf>
-												<leaf id="2" nodeId="1600213927551">
-													<placeholders>
-														<placeholder>dock.single.QCPanelDockable3DChartPanel</placeholder>
-													</placeholders>
-												</leaf>
-											</node>
 										</node>
 									</content>
 								</delegate>
@@ -137,30 +130,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockableDataSetStatsTable">
-										<replacement id="dockablesingle QCPanelDockableDataSetStatsTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableDataPipelinesTable">
+										<replacement id="dockablesingle DockableDataPipelinesTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockableDataSetStatsTable</id>
+											<id>DockableDataPipelinesTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockable2DQCPanel">
-										<replacement id="dockablesingle QCPanelDockable2DQCPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentsTable">
+										<replacement id="dockablesingle DockableExperimentsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockable2DQCPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockable3DChartPanel">
-										<replacement id="dockablesingle QCPanelDockable3DChartPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockable3DChartPanel</id>
+											<id>DockableExperimentsTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -194,7 +177,7 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single QCPanelDockableDataSetStatsTable" current="dock.mode.normal">
+						<entry id="single DockableExperimentsTable" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -205,17 +188,17 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.QCPanelDockableDataSetStatsTable</placeholder>
+											<placeholder>dock.single.DockableExperimentsTable</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.5" id="1600213793228"/>
-												<leaf id="1600213793230"/>
+												<node location="TOP" size="0.25" id="1656109900806"/>
+												<leaf id="1656109890669"/>
 											</backup-path>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single QCPanelDockable2DQCPanel" current="dock.mode.normal">
+						<entry id="single DockableDataPipelinesTable" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -226,33 +209,10 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
+											<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.5" id="1600213793228"/>
-												<node location="LEFT" size="0.6147378832838774" id="1600213927553"/>
-												<leaf id="1600213793238"/>
-											</backup-path>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single QCPanelDockable3DChartPanel" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.QCPanelDockable3DChartPanel</placeholder>
-											<backup-path>
-												<node location="BOTTOM" size="0.5" id="1600213793228"/>
-												<node location="RIGHT" size="0.38526211671612265" id="1600213927553"/>
-												<leaf id="1600213927551"/>
+												<node location="BOTTOM" size="0.75" id="1656109900806"/>
+												<leaf id="1656109900804"/>
 											</backup-path>
 										</property>
 									</location>

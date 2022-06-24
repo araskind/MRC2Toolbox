@@ -987,6 +987,9 @@ public enum MainActionCommands {
 	SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND("Active data set search by MZ/RT setup"),
 	SEARCH_ACTIVE_DATA_SET_BY_MZ_RT_COMMAND("Get selected MZ/RT data from active data set"),
 	
+	//	Summary
+	SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND("Show active data set summary"),
+	
 	//	MSMS search dialog
 	SHOW_SAVED_MSMS_QUERY_LIST_COMMAND("Show MSMS query list"),
 	LOAD_SAVED_MSMS_QUERY_COMMAND("Load MSMS search query from database"),

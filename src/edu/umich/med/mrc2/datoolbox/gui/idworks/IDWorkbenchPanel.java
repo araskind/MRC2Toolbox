@@ -142,6 +142,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearc
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.DockableStandardFeatureAnnotationTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationAssignmentDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.stan.StandardFeatureAnnotationManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.summary.DatasetSummaryDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.tdexplor.IDTrackerDataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.tophit.ReassignDefaultMSMSLibraryHitDialog;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableMsMsInfoPanel;
@@ -276,10 +277,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private EntropyScoringSetupDialog entropyScoringSetupDialog;
 	private ExperimentMZRTDataSearchDialog experimentMzRtDataSearchDialog;
 	private ActiveDataSetMZRTDataSearchDialog activeDataSetMZRTDataSearchDialog;
+	private DatasetSummaryDialog datasetSummaryDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
 	private static final Icon searchIdActiveDataSetIcon = GuiUtils.getIcon("searchIdActiveDataSet", 24);
+	private static final Icon dsSummaryIcon = GuiUtils.getIcon("infoGreen", 24);
 	private static final Icon openCdpIdProjectIcon = GuiUtils.getIcon("openIdExperiment", 24);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
 	private static final Icon idSetupIcon = GuiUtils.getIcon("searchCompounds", 24);
@@ -419,6 +422,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND.getName(),
 				MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND.getName(), 
 				searchIdActiveDataSetIcon, this));
+		
+		menuActions.addSeparator();
+		
+		menuActions.add(GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND.getName(),
+				MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND.getName(), 
+				dsSummaryIcon, this));
 		
 		menuActions.addSeparator();
 		
@@ -756,8 +766,27 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if (command.equals(MainActionCommands.RECALCULATE_SPECTRUM_ENTROPY_SCORES.getName()))
 			recalculateSpectrumEntropyScores();		
+		
+		if (command.equals(MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND.getName()))
+			showActiveDataSetSummary();			
 	}
 	
+	private void showActiveDataSetSummary() {
+		
+		// TODO - deal with MS1 stuff later 
+		Collection<MsFeatureInfoBundle> allMSOneFeatures = 
+				msOneFeatureTable.getBundles(TableRowSubset.ALL);
+		Collection<MsFeatureInfoBundle> allMSMSFeatures = 
+				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
+		if(allMSOneFeatures.isEmpty() && allMSMSFeatures.isEmpty())
+			return;
+		
+		datasetSummaryDialog = new DatasetSummaryDialog();
+		datasetSummaryDialog.setLocationRelativeTo(this.getContentPane());
+		datasetSummaryDialog.setVisible(true);
+		datasetSummaryDialog.generateDataSetStats(allMSOneFeatures, allMSMSFeatures);
+	}
+
 	private void setupSpectrumEntropyScoringParameters() {
 		
 		Collection<MsFeatureInfoBundle> bundles = 

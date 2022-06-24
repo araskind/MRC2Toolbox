@@ -68,6 +68,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 24);
 	private static final Icon findMSMSFeaturesIcon = GuiUtils.getIcon("findMSMSFeatures", 24);
 	private static final Icon entropyIcon = GuiUtils.getIcon("spectrumEntropy", 24);
+	private static final Icon dsSummaryIcon = GuiUtils.getIcon("infoGreen", 24);
 
 	// Menus
 	private JMenu
@@ -75,7 +76,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		librarySearchMenu,
 		annotationManagersMenu,
 		featureCollectionsMenu,
-		graphicsMenu,
+		explorationMenu,
 		exportMenu;
 
 	// Database search
@@ -106,9 +107,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private JMenuItem
 		featureCollectionManagerMenuItem;
 	
-	//	Graphics
+	//	Explore
 	private JMenuItem
-		bubblePlotMenuItem;
+		bubblePlotMenuItem,
+		dataSetSummaryMenuItem;
 	
 	//	Export
 	private JMenuItem
@@ -214,15 +216,19 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		
 		add(featureCollectionsMenu);
 		
-		//	Graphics
-		graphicsMenu = new JMenu("Visualization");
-		graphicsMenu.setIcon(bubblePlotIconSmall);
+		//	Explore
+		explorationMenu = new JMenu("Explore data");
+		explorationMenu.setIcon(bubblePlotIconSmall);
 		
-		bubblePlotMenuItem = addItem(graphicsMenu, 
+		bubblePlotMenuItem = addItem(explorationMenu, 
 				MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT, 
 				bubblePlotIcon);
+		
+		dataSetSummaryMenuItem = addItem(explorationMenu, 
+				MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND, 
+				dsSummaryIcon);
 
-		add(graphicsMenu);
+		add(explorationMenu);
 		
 		//	Export
 		exportMenu = new JMenu("Export");
