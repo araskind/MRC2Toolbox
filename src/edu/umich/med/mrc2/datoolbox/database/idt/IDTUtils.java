@@ -1623,40 +1623,6 @@ public class IDTUtils {
 		ConnectionManager.releaseConnection(conn);
 		return prepId;
 	}
-	
-//	public static String getNextSamplePrepId(Connection conn) throws Exception {
-//		
-//		String id = null;
-//		String query  =
-//				"SELECT '" + DataPrefix.SAMPLE_PREPARATION.getName() +
-//				"' || LPAD(ID_SAMPLE_PREP_SEQ.NEXTVAL, 4, '0') AS PREP_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) {
-//			id = rs.getString("PREP_ID");
-//			break;
-//		}
-//		rs.close();
-//		ps.close();		
-//		return id;		
-//	}
-	
-//	public static String getNextPrepItemId(Connection conn) throws Exception {
-//		
-//		String id = null;
-//		String query  =
-//				"SELECT '" + DataPrefix.PREPARED_SAMPLE.getName() + 
-//				"' || LPAD(ID_PREP_ITEM_SEQ.NEXTVAL, 7, '0') AS PREP_ITEM_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) {
-//			id = rs.getString("PREP_ITEM_ID");
-//			break;
-//		}
-//		rs.close();
-//		ps.close();	
-//		return id;		
-//	}
 
 	public static void updateSamplePrep(
 			LIMSSamplePreparation prep2save,

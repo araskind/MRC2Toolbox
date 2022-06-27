@@ -53,7 +53,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 
 		setStatus(TaskStatus.PROCESSING);
 		try {
-			uploadMSMSFeatureData();
+			// uploadMSMSFeatureData();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);

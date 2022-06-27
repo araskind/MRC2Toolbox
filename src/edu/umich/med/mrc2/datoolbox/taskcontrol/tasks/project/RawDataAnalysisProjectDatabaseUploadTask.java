@@ -21,13 +21,20 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -91,63 +98,56 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
-		if(!insertMethods()) {
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
-		if(!insertInjections()) {
+		if(!insertWorklist()) {
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
 	}
 
-	private boolean insertInjections() {
-		// TODO Auto-generated method stub
-		
-		//	TODO set injction IDs for data files
-		return false;
-	}
-	
-	private boolean insertMethods() {
-		// TODO Auto-generated method stub
-		
-		//	Data acquisition methods
-		
-		
-		//	Tracker data extraction method
-		if(!uploadDataAnalysisMethod())
+	private boolean insertWorklist() {
+
+		Worklist newWorklist =  project.getWorklist();
+		Map<String, String> prepItemMap = new TreeMap<String, String>();	
+		project.getIdTrackerExperiment().getSamplePreps().
+			forEach(p -> prepItemMap.putAll(p.getPrepItemMap()));
+		newWorklist.getWorklistItems().stream().
+			filter(LIMSWorklistItem.class::isInstance).
+			map(LIMSWorklistItem.class::cast).
+			forEach(i -> i.setPrepItemId(prepItemMap.get(i.getSample().getId())));	
+		try {
+			IDTUtils.uploadInjectionData(newWorklist);
+		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
-		
+		}
+		IDTDataCash.refreshSamplePrepDataPipelineMap();
 		return true;
-	}
-	
-	//	TODO Check properly if method already in
-	private boolean uploadDataAnalysisMethod() {
-		
-		String methodMd5 = project.getMsmsExtractionParameterSet().getParameterSetHash();
-		if(methodMd5 == null)
-			return false;
-		
-	    //	Check if method present using MD5    	
-	    dataExtractionMethod = IDTDataCash.getDataExtractionMethodByMd5(methodMd5);
-
-	    if(dataExtractionMethod == null) {  //	Upload new method
-	    	String methodString = project.getMsmsExtractionParameterSet().getXMLString();
-			try {
-				dataExtractionMethod = 
-						IDTUtils.insertNewTrackerDataExtractionMethod(
-								project.getMsmsExtractionParameterSet());
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	    }
-	    return dataExtractionMethod != null;
 	}
 
 	private boolean insertSampleprep() {
-		// TODO Auto-generated method stub
-		return false;
+
+		Collection<IDTExperimentalSample>samples = 
+				project.getIdTrackerExperiment().getExperimentDesign().getSamples().stream().
+				filter(IDTExperimentalSample.class::isInstance).
+				map(IDTExperimentalSample.class::cast).
+				collect(Collectors.toList());
+		
+		for(LIMSSamplePreparation prep : project.getIdTrackerExperiment().getSamplePreps()) {
+			
+			if(prep.getId() != null 
+					&& IDTDataCash.getSamplePrepById(prep.getId()) != null) {
+				continue;
+			}
+			try {
+				IDTUtils.addNewSamplePrepWithSopsAndAnnotations(prep, samples);	
+				IDTDataCash.getSamplePreps().add(prep);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}		
+		}
+		return true;
 	}
 
 	private boolean insertSamples() {
@@ -184,6 +184,15 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 	private boolean insertNewExperiment() {
 		
 		LIMSExperiment newExperiment = project.getIdTrackerExperiment();
+		
+		//	If experiment already in the database
+		if(newExperiment.getId() != null) {
+			
+			LIMSExperiment existing = 
+					IDTDataCash.getExperimentById(newExperiment.getId());
+			if(existing != null)
+				return true;
+		}			
 		String experimentId = null;
 		try {
 			experimentId = IDTUtils.addNewExperiment(newExperiment);
