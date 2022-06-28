@@ -102,7 +102,6 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
             XMLOutputter outputter = new XMLOutputter();
             outputter.setFormat(Format.getCompactFormat());
             outputter.output(dataFileDocument, writer);
-            outputter.output(dataFileDocument, System.out);
         } catch (Exception e) {
             e.printStackTrace();
         }

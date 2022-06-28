@@ -88,4 +88,9 @@ public class RDPExperimentDefinitionPanel extends RDPMetadataWizardPanel {
 	public void setInstrument(LIMSInstrument instrument) {
 		experimentDefinitionPanel.setInstrument(instrument);
 	}
+
+	@Override
+	public void clearPanel() {
+		experimentDefinitionPanel.clearPanel();
+	}
 }

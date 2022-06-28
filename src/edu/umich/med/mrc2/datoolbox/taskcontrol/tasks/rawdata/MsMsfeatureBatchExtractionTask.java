@@ -31,6 +31,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -42,7 +43,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 public class MsMsfeatureBatchExtractionTask extends AbstractTask implements TaskListener {
 
 	private MSMSExtractionParameterSet ps;
-
+	private DataExtractionMethod existingDeMethod;
 	private Collection<DataFile> msmsDataFiles;	
 	private Collection<DataFile> msOneDataFiles;	
 	
@@ -51,10 +52,12 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 
 	public MsMsfeatureBatchExtractionTask(
 			MSMSExtractionParameterSet ps, 	
+			DataExtractionMethod existingDeMethod, 
 			Collection<DataFile> msmsDataFiles,
 			Collection<DataFile> msOneDataFiles) {
 		super();
 		this.ps = ps;
+		this.existingDeMethod = existingDeMethod;
 		this.msmsDataFiles = msmsDataFiles;
 		this.msOneDataFiles = msOneDataFiles;		
 		msFeatureMap = 
@@ -80,6 +83,7 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 	public Task cloneTask() {
 		return new  MsMsfeatureBatchExtractionTask(
 				ps,
+				existingDeMethod,
 				msmsDataFiles, 
 				msOneDataFiles);
 	}
@@ -93,6 +97,13 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 			
 			if (e.getSource().getClass().equals(MsMsfeatureExtractionTask.class)) {
 				MsMsfeatureExtractionTask task = (MsMsfeatureExtractionTask)e.getSource();
+				task.getMsFeatureInfoBundles().stream().
+					forEach(b -> b.setDataExtractionMethod(existingDeMethod));
+				
+				String injectionId = task.getRawDataFile().getInjectionId();
+				task.getMsFeatureInfoBundles().stream().
+					forEach(b -> b.setInjectionId(injectionId));
+				
 				msFeatureMap.put(task.getRawDataFile(), task.getMsFeatureInfoBundles());
 				processed++;
 				if(processed == msmsDataFiles.size()) {

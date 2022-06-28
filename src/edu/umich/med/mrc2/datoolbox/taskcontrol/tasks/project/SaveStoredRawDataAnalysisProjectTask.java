@@ -41,6 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -217,7 +218,14 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
         }
         projectRoot.addContent(msOneFileListElement);        
         document.setContent(projectRoot);
-
+        
+        //	Injections
+        Element injectionListElement = 
+        		new Element(ProjectFields.Injections.name());
+        for(Injection injection : projectToSave.getInjections())
+        	injectionListElement.addContent(injection.getXmlElement());
+             
+        projectRoot.addContent(injectionListElement); 
 		//	Save XML document
 		xmlFile = Paths.get(
 				projectToSave.getUncompressedProjectFilesDirectory().getAbsolutePath(), 

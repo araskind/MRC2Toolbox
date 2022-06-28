@@ -40,6 +40,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
@@ -202,7 +203,7 @@ public class RDPMetadataWizard extends JDialog
 	}
 	
 	private void populateWizardByProjectData() {
-
+		
 		LIMSUser createdBy = project.getCreatedBy();
 		if(createdBy == null)
 			createdBy  = MRC2ToolBoxCore.getIdTrackerUser();
@@ -225,10 +226,17 @@ public class RDPMetadataWizard extends JDialog
 			if(newExperiment.getCreator() == null)
 				newExperiment.setCreator(createdBy);
 		}
+		clearWizard();
 		populateExperimentDefinitionPanel();
 		populateSampleAndPrepPanels();
 		populateMethodsPanel();
 		populateWorklistPanel();	
+	}
+
+	private void clearWizard() {
+
+		for(RDPMetadataWizardPanel panel : panels.values())
+			panel.clearPanel();
 	}
 
 	private void populateExperimentDefinitionPanel() {
@@ -266,7 +274,8 @@ public class RDPMetadataWizard extends JDialog
 		
 	private void populateMethodsPanel() {
 		
-		Collection<DataAcquisitionMethod> acqMethods = project.getDataAcquisitionMethods();
+		Collection<DataAcquisitionMethod> acqMethods = 
+				project.getDataAcquisitionMethods();
 		if(acqMethods == null || acqMethods.isEmpty())
 			return;
 		
@@ -354,8 +363,35 @@ public class RDPMetadataWizard extends JDialog
 		
 		if(command.equals(MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName()))
 			saveProjectMetadata();
+		
+		if(command.equals(MainActionCommands.CLEAR_PROJECT_METADATA_COMMAND.getName()))
+			clearProjectMetadata();		
 	}
 	
+	private void clearProjectMetadata() {
+
+		if(project.getIdTrackerExperiment() != null) {
+			LIMSExperiment existingExperiment = 
+					IDTDataCash.getExperimentById(project.getIdTrackerExperiment().getId());
+			if(existingExperiment != null) {
+				MessageDialog.showWarningMsg(
+						"Experiment \"" + existingExperiment.getName() + "\"\n"
+						+ "is already uploaded to the database.\nIts metadata can not be deleted.", this);
+				return;
+			}
+		}		
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Do you want to clear all project metadata?", this);
+		if(res ==  JOptionPane.YES_OPTION) {
+			
+			newExperiment = null;
+			project.setIdTrackerExperiment(null);
+			project.setCreatedBy(null);			
+			populateWizardByProjectData();
+			silentlyVerifyProjectMetadata();
+		}
+	}
+
 	public void showStagePanel(RDPMetadataDefinitionStage stage) {
 		
 		stagePanel.remove(panels.get(activeStage));
@@ -581,6 +617,7 @@ public class RDPMetadataWizard extends JDialog
 			errors.add(RDPMetadataDefinitionStage.CREATE_EXPERIMENT.getName() + ":");
 			errors.addAll(experimentDefinitionErrors);
 			errors.add("***********\n");
+			progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.CREATE_EXPERIMENT, false);
 		}
 		//	
 		RDPExperimentDesignPanel designPanel = 
@@ -594,6 +631,7 @@ public class RDPMetadataWizard extends JDialog
 			errors.add(RDPMetadataDefinitionStage.ADD_SAMPLES.getName() + ":");
 			errors.addAll(experimentDesignErrors);
 			errors.add("***********\n");
+			progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_SAMPLES, false);
 		}
 		//	
 		RDPSamplePrepPanel prepPanel = 
@@ -607,6 +645,7 @@ public class RDPMetadataWizard extends JDialog
 			errors.add(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA.getName() + ":");
 			errors.addAll(samplePrepDefinitionErrors);
 			errors.add("***********\n");
+			progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA, false);
 		}
 		//	
 		RDPMethodsPanel methodsPanel = 
@@ -620,6 +659,7 @@ public class RDPMetadataWizard extends JDialog
 			errors.add(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS.getName() + ":");
 			errors.addAll(methodsDataErrors);
 			errors.add("***********\n");
+			progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS, false);
 		}
 		//	
 		RDPWorklistPanel worklistPanel = 
@@ -633,6 +673,7 @@ public class RDPMetadataWizard extends JDialog
 			errors.add(RDPMetadataDefinitionStage.ADD_WORKLISTS.getName() + ":");
 			errors.addAll(worklistErrors);
 			errors.add("***********\n");
+			progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_WORKLISTS, false);
 		}
 		return errors;
 	}

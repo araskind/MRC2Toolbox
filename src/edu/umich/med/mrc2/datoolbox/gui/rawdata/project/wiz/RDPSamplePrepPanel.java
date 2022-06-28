@@ -112,4 +112,9 @@ public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 	public void setPrepEditable(boolean b) {
 		samplePrepEditorPanel.setPrepEditable(b);
 	}
+
+	@Override
+	public void clearPanel() {
+		samplePrepEditorPanel.clearPanel();
+	}
 }

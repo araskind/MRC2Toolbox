@@ -22,7 +22,13 @@
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.Date;
+
+import org.jdom2.Element;
+
+import edu.umich.med.mrc2.datoolbox.project.store.InjectionFields;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class Injection  implements Serializable, Comparable<Injection>{
 	
@@ -110,26 +116,59 @@ public class Injection  implements Serializable, Comparable<Injection>{
 		return this.id.compareTo(o.getId());
 	}
 	
-//	public Element getXmlElement() {
-//		
-//		Element injectionElement = 
-//        		new Element(InjectionFields.Injection.name());
-//		injectionElement.setAttribute(InjectionFields.InjId.name(), id);	
-//		
-//		if(dataFileName != null)
-//			injectionElement.setAttribute(
-//					InjectionFields.DataFile.name(), dataFileName);	
-//		
-//		if(timeStamp != null)
-//			injectionElement.setAttribute(InjectionFields.Timestamp.name(), 
-//					ProjectUtils.dateTimeFormat.format(timeStamp));
-//		
-//		//private String prepItemId;
-//		//private String acquisitionMethodId;
-//		//private double injectionVolume;
-//		
-//		return injectionElement;
-//	}
+	public Element getXmlElement() {
+		
+		Element injectionElement = 
+        		new Element(InjectionFields.Injection.name());
+		injectionElement.setAttribute(InjectionFields.InjId.name(), id);	
+		
+		if(dataFileName != null)
+			injectionElement.setAttribute(
+					InjectionFields.DataFile.name(), dataFileName);	
+		
+		if(timeStamp != null)
+			injectionElement.setAttribute(InjectionFields.Timestamp.name(), 
+					ProjectUtils.dateTimeFormat.format(timeStamp));
+		
+		if(prepItemId != null)
+			injectionElement.setAttribute(
+					InjectionFields.PrepItem.name(), prepItemId);	
+
+		if(acquisitionMethodId != null)
+			injectionElement.setAttribute(
+					InjectionFields.AcqMethod.name(), acquisitionMethodId);
+		
+		injectionElement.setAttribute(
+				InjectionFields.InjVolume.name(), Double.toString(injectionVolume));
+	
+		return injectionElement;
+	}
+
+	public Injection(Element injectionElement) {
+		super();
+		id = injectionElement.getAttributeValue(
+				InjectionFields.InjId.name());
+		dataFileName = injectionElement.getAttributeValue(
+				InjectionFields.DataFile.name());
+		String injTime = 
+				injectionElement.getAttributeValue(InjectionFields.Timestamp.name());
+		if(injTime != null) {
+			try {
+				timeStamp = ProjectUtils.dateTimeFormat.parse(injTime);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		prepItemId = injectionElement.getAttributeValue(
+				InjectionFields.PrepItem.name());
+		acquisitionMethodId = injectionElement.getAttributeValue(
+				InjectionFields.AcqMethod.name());
+		String injVol = 
+				injectionElement.getAttributeValue(InjectionFields.InjVolume.name());
+		if(injVol != null)
+			injectionVolume = Double.parseDouble(injVol);
+	}
 }
 
 

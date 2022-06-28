@@ -592,11 +592,14 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		}
 		if(property.equals(IDTrackerMsFeatureProperties.RAW_DATA_FILE)) {
 			
-			Injection inj = injections.stream().filter(i -> i.getId().equals(bundle.getInjectionId())).findFirst().orElse(null);
+			String injId = bundle.getInjectionId();
+			Injection inj = injections.stream().
+					filter(i -> i.getId().equals(injId)).
+					findFirst().orElse(null);
 			if(inj != null)
 				return inj.getDataFileName();
 			else
-				return "";
+				return bundle.getDataFile().getName();
 		}
 		
 		//	MS1 only properties

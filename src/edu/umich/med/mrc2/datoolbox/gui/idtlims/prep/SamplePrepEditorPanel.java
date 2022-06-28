@@ -160,6 +160,7 @@ public class SamplePrepEditorPanel extends JPanel
 		selectPrepButton.setActionCommand(
 				MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
 		selectPrepButton.addActionListener(this);
+		selectPrepButton.setEnabled(false);
 		GridBagConstraints gbc_selectPrepButton = new GridBagConstraints();
 		gbc_selectPrepButton.anchor = GridBagConstraints.WEST;
 		gbc_selectPrepButton.insets = new Insets(0, 0, 5, 5);
@@ -398,7 +399,7 @@ public class SamplePrepEditorPanel extends JPanel
 			loadSelectedSamplePrep();
 		
 		if(command.equals(MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName()))
-			clearPanel();
+			clearPanelWithWarning();
 	}
 
 	private void selectExistingSamplePrep() {
@@ -440,7 +441,7 @@ public class SamplePrepEditorPanel extends JPanel
 		existingPrepSelectorDialog.dispose();
 	}
 	
-	private void clearPanel() {
+	private void clearPanelWithWarning() {
 		
 		if(prep != null) {
 			int res = MessageDialog.showChoiceWithWarningMsg(
@@ -461,6 +462,11 @@ public class SamplePrepEditorPanel extends JPanel
 		//	fireSamplePrepEvent(prep, ParameterSetStatus.REMOVED);
 		//	this.prep = null;
 		//	this.experiment = null;
+	}
+	
+	public void clearPanel() {
+		clearGui();
+		prep = null;
 	}
 	
 	private void clearGui() {

@@ -69,6 +69,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsFeatureChromatogramExtractionTarget;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -137,6 +139,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	private JSpinner maxFragmentsSpinner;
 	private JTextArea descriptionTextArea;
 	private JTextField nameTextField;
+	private DataExtractionMethod deMethod;
 	
 	private MSMSFeatureExtractionSetupDialogToolbar toolbar;
 		
@@ -606,14 +609,24 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(al);
 		panel_2.add(cancelButton);
-		JButton extractButton = new JButton(MainActionCommands.MSMS_FEATURE_EXTRACTION_COMMAND.getName());
-		extractButton.setActionCommand(MainActionCommands.MSMS_FEATURE_EXTRACTION_COMMAND.getName());
+		JButton extractButton = new JButton(
+				MainActionCommands.MSMS_FEATURE_EXTRACTION_COMMAND.getName());
+		extractButton.setActionCommand(
+				MainActionCommands.MSMS_FEATURE_EXTRACTION_COMMAND.getName());
 		extractButton.addActionListener(listener);
 		panel_2.add(extractButton);	
 		JRootPane rootPane = SwingUtilities.getRootPane(extractButton);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(extractButton);
 		loadPreferences();
+		
+		MSMSExtractionParameterSet activePs = createParameterSet();
+		deMethod = IDTDataCash.getDataExtractionMethodByMd5(
+				activePs.getParameterSetHash());
+		if(deMethod != null) {
+			nameTextField.setText(deMethod.getName());
+			descriptionTextArea.setText(deMethod.getDescription());
+		}
 		pack();
 	}
 
@@ -855,6 +868,11 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return null;
 		}
+		return createParameterSet();
+	}
+	
+	private MSMSExtractionParameterSet createParameterSet() { 
+		
 		MSMSExtractionParameterSet ps = new MSMSExtractionParameterSet();
 		ps.setName(getParameterSetName());
 		ps.setDescription(getDescription());
@@ -924,6 +942,10 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		xicWindowTextField.setText(Double.toString(ps.getChromatogramExtractionWindow()));
 		
 		//	TODO MS1 stuff
+	}
+
+	public DataExtractionMethod getDeMethod() {
+		return deMethod;
 	}
 }
 

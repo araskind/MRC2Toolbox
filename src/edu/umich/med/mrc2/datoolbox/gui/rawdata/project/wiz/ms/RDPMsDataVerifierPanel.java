@@ -364,4 +364,11 @@ public class RDPMsDataVerifierPanel extends RDPMetadataWizardPanel
 	public Map<DataFile,DataExtractionMethod>getFileDaMethodMap(){
 		return dataFileSampleMatchTable.getFileDaMethodMap();
 	}
+
+	@Override
+	public void clearPanel() {
+		dataFileSampleMatchTable.clearTable();
+		missingIdentities = null;
+		dataVerified = false;
+	}
 }

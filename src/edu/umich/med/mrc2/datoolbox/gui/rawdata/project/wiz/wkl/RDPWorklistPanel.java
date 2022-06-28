@@ -542,4 +542,9 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 	
 		return errors;
 	}
+
+	@Override
+	public void clearPanel() {
+		instrumentSequenceTable.clearTable();		
+	}
 }

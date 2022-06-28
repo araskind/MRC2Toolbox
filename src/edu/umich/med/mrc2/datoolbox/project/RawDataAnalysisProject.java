@@ -68,6 +68,7 @@ public class RawDataAnalysisProject extends Project {
 	protected LIMSInstrument instrument;
 	protected Collection<DataFile>msmsDataFiles;
 	protected Collection<DataFile>msOneDataFiles;
+	protected Collection<Injection>injections;
 	protected Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;	
 	protected Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 	protected Set<MsFeatureInfoBundleCollection>featureCollections;
@@ -182,6 +183,7 @@ public class RawDataAnalysisProject extends Project {
 		idTrackerExperiment.setCreator(createdBy);		
 		msmsDataFiles = new TreeSet<DataFile>();
 		msOneDataFiles = new TreeSet<DataFile>();
+		injections = new HashSet<Injection>();
 		msFeatureMap = new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
 		chromatogramMap = new HashMap<String, MsFeatureChromatogramBundle>();
 		featureCollections = 
@@ -193,22 +195,27 @@ public class RawDataAnalysisProject extends Project {
 	public void addMSMSDataFile(DataFile fileToAdd) {
 		msmsDataFiles.add(fileToAdd);
 		msFeatureMap.put(fileToAdd, new HashSet<MsFeatureInfoBundle>());
-		
+		if(fileToAdd.getInjectionId() == null)		
+			injections.add(fileToAdd.generateInjectionFromFileData());
 		//	TODO
 	}
 	
 	public void addMSMSDataFiles(Collection<DataFile> filesToAdd) {	
 		
 		msmsDataFiles.addAll(filesToAdd);		
-		for(DataFile df : filesToAdd)
+		for(DataFile df : filesToAdd) {
 			msFeatureMap.put(df, new HashSet<MsFeatureInfoBundle>());
-
+			if(df.getInjectionId() == null)
+				injections.add(df.generateInjectionFromFileData());
+		}
 		//	TODO
 	}
 
 	public void addMSOneDataFile(DataFile fileToAdd) {
 		msOneDataFiles.add(fileToAdd);
 		msFeatureMap.put(fileToAdd, new HashSet<MsFeatureInfoBundle>());
+		if(fileToAdd.getInjectionId() == null)
+			injections.add(fileToAdd.generateInjectionFromFileData());
 		
 		//	TODO
 	}
@@ -216,23 +223,37 @@ public class RawDataAnalysisProject extends Project {
 	public void addMSOneDataFiles( Collection<DataFile> filesToAdd) {	
 		
 		msOneDataFiles.addAll(filesToAdd);		
-		for(DataFile df : filesToAdd) 
+		for(DataFile df : filesToAdd) {
 			msFeatureMap.put(df, new HashSet<MsFeatureInfoBundle>());
-		
+			if(df.getInjectionId() == null)
+				injections.add(df.generateInjectionFromFileData());
+		}
 		//	TODO
 	}
 	
 	public void removeMSMSDataFile(DataFile fileToRemove) {
+		
 		msmsDataFiles.remove(fileToRemove);
 		msFeatureMap.remove(fileToRemove);
-		
+		removeInjectionForDataFile(fileToRemove);
 		//	TODO
 	}
 	
+	private void removeInjectionForDataFile(DataFile fileToRemove) {
+		
+		String fileName = fileToRemove.getName();
+		Injection injToRemove = injections.
+				stream().filter(i -> i.getDataFileName().equals(fileName)).
+				findFirst().orElse(null);
+		if(injToRemove != null)
+			injections.remove(injToRemove);
+	}
+	
 	public void removeMSOneDataFile(DataFile fileToRemove) {
+		
 		msOneDataFiles.remove(fileToRemove);
 		msFeatureMap.remove(fileToRemove);
-				
+		removeInjectionForDataFile(fileToRemove);
 		//	TODO
 	}
 	
@@ -415,9 +436,15 @@ public class RawDataAnalysisProject extends Project {
 
 	public Collection<Injection> getInjections() {	
 		
-		return getDataFiles().stream().
+		if(injections == null)
+			injections = new HashSet<Injection>();
+		
+		if(injections.isEmpty())
+			injections = getDataFiles().stream().
 				map(f -> f.generateInjectionFromFileData()).
 				collect(Collectors.toList());
+			
+		return injections;
 	}
 
 	public ExperimentDesign getExperimentDesign() {
@@ -470,9 +497,11 @@ public class RawDataAnalysisProject extends Project {
 		LIMSSamplePreparation samplePrep = null;
 		if(idTrackerExperiment != null 
 				&& idTrackerExperiment.getSamplePreps() != null
-				&& !idTrackerExperiment.getSamplePreps().isEmpty())
-			samplePrep = idTrackerExperiment.getSamplePreps().iterator().next();
+				&& !idTrackerExperiment.getSamplePreps().isEmpty()) {
 			
+			//	TODO handle multiple preps?
+			samplePrep = idTrackerExperiment.getSamplePreps().iterator().next();
+		}
 		if(idTrackerExperiment.getExperimentDesign() == null)
 			idTrackerExperiment.setDesign(new ExperimentDesign());
 			

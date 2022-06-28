@@ -355,7 +355,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 				injectionTime, 
 				prepItemId,
 				acquisitionMethodId,
-				injectionVolume);		
+				injectionVolume);
 		return inj;
 	}
 
@@ -436,7 +436,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 			color = ColorUtils.hex2rgb(colorCode);
 		
 		injectionId = fileElement.getAttributeValue(DataFileFields.Injection.name());
-		prepItemId= fileElement.getAttributeValue(DataFileFields.PrepItem.name());
+		prepItemId = fileElement.getAttributeValue(DataFileFields.PrepItem.name());
 				
 		String injTime = 
 				fileElement.getAttributeValue(DataFileFields.InjTimestamp.name());

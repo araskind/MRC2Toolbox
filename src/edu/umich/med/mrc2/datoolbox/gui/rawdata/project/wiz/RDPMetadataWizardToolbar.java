@@ -33,6 +33,7 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -49,7 +50,8 @@ public class RDPMetadataWizardToolbar  extends CommonToolbar {
 	private static final Icon addSamplePrepIcon = GuiUtils.getIcon("samplePrep", 48);
 	private static final Icon addMethodIcon = GuiUtils.getIcon("dataAnalysisPipeline", 48);
 	private static final Icon loadWorklistIcon = GuiUtils.getIcon("worklist", 48);	
-
+	private static final Icon clearMetadataIcon = GuiUtils.getIcon("clearDesign", 48);
+	
 	private static final Dimension largeButtonDimension = new Dimension(50, 50);
 	private static final Border highlightBorder = new LineBorder(new Color(255, 0, 0), 2, true);
 	
@@ -59,7 +61,8 @@ public class RDPMetadataWizardToolbar  extends CommonToolbar {
 		addSampleButton,
 		addSamplePrepButton,
 		addMethodsButton,
-		addWorklistsButton;
+		addWorklistsButton,
+		clearMetadataButton;
 
 	private Collection<JButton>buttons;
 	
@@ -97,6 +100,14 @@ public class RDPMetadataWizardToolbar  extends CommonToolbar {
 				RDPMetadataDefinitionStage.ADD_WORKLISTS.getName(),
 				largeButtonDimension);
 		buttons.add(addWorklistsButton);
+		
+		addSeparator(largeButtonDimension);
+		
+		clearMetadataButton = GuiUtils.addButton(this, null, clearMetadataIcon, commandListener,
+				MainActionCommands.CLEAR_PROJECT_METADATA_COMMAND.getName(),
+				MainActionCommands.CLEAR_PROJECT_METADATA_COMMAND.getName(),
+				largeButtonDimension);
+		clearMetadataButton.setEnabled(false);
 	}
 
 	@Override

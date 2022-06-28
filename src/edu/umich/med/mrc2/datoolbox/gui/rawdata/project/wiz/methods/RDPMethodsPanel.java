@@ -165,6 +165,10 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 		return panel;
 	}
 
+	public void clearPanel() {
+		acquisitionMethodTable.clearTable();
+	}	
+	
 	public Collection<String> validateMethodsData() {
 
 		Collection<String>errors = new ArrayList<String>();

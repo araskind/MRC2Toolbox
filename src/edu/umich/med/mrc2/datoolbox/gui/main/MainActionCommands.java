@@ -104,6 +104,7 @@ public enum MainActionCommands {
 	SAVE_PROJECT_METADATA_COMMAND("Save project metadata"),
 	SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND("Set project database upload parameters"),
 	SEND_PROJECT_DATA_TO_DATABASE_COMMAND("Send project data to database"),
+	CLEAR_PROJECT_METADATA_COMMAND("Clear project metadata"),
 
 	ACTIVATE_DATA_PIPELINE_COMMAND("Activate data pipeline"),
 	DELETE_DATA_PIPELINE_COMMAND("Delete data pipeline"),

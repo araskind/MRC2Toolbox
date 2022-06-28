@@ -31,6 +31,7 @@ import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
@@ -83,6 +84,16 @@ public class OpenMsFeatureBundleFileTask extends AbstractTask {
 				MsFeatureInfoBundle bundle = 
 						new MsFeatureInfoBundle(featureElement);
 				bundle.setDataFile(dataFile);
+				if(bundle.getAcquisitionMethod() == null)
+					bundle.setAcquisitionMethod(dataFile.getDataAcquisitionMethod());
+				
+				IDTExperimentalSample ps = (IDTExperimentalSample) dataFile.getParentSample();
+				if(bundle.getSample() == null)
+					bundle.setSample(ps);
+				
+				if(bundle.getStockSample() == null)
+					bundle.setStockSample(ps.getParentStockSample());
+				
 				features.add(bundle);
 				processed++;
 			}

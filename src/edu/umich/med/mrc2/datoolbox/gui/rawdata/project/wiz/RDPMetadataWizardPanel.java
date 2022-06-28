@@ -32,7 +32,7 @@ import javax.swing.JPanel;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 
-public class RDPMetadataWizardPanel extends JPanel {
+public abstract class RDPMetadataWizardPanel extends JPanel {
 
 	/**
 	 * 
@@ -100,4 +100,6 @@ public class RDPMetadataWizardPanel extends JPanel {
 	public void setExperiment(LIMSExperiment experiment) {
 		this.experiment = experiment;
 	}
+	
+	public abstract void clearPanel();
 }

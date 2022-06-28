@@ -45,6 +45,7 @@ import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
+import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
@@ -57,6 +58,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
+import edu.umich.med.mrc2.datoolbox.project.store.InjectionFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
@@ -241,7 +243,31 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);			
-		}		
+		}	
+		Element experimentElement = 
+				projectElement.getChild(LIMSExperimentFields.limsExperiment.name());
+		if(experimentElement != null) {
+			
+			LIMSExperiment experiment = null;
+			try {
+				experiment = new LIMSExperiment(experimentElement, project);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(experiment != null)
+				project.setIdTrackerExperiment(experiment);
+		}
+		if(projectElement.getChild(ProjectFields.Injections.name()) != null) {
+			
+			List<Element> injectionsList = 
+					projectElement.getChild(ProjectFields.Injections.name()).
+					getChildren(InjectionFields.Injection.name());
+			for (Element injectionElement : injectionsList) {
+				Injection injection = new Injection(injectionElement);
+				project.getInjections().add(injection);			
+			}
+		}
 		List<Element> msmsFileList = 
 				projectElement.getChild(ProjectFields.MsTwoFiles.name()).
 				getChildren(DataFileFields.DataFile.name());
@@ -257,8 +283,6 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			DataFile msOneFile = new DataFile(msOneFileElement);
 			project.addMSOneDataFile(msOneFile);
 		}
-		//	project.repopulateInjectionList();
-		
 		//	Feature collections
 		Element featureCollectionElement = 
 				projectElement.getChild(ProjectFields.FeatureCollectionList.name());
@@ -269,20 +293,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				project.addMsFeatureInfoBundleCollection(
 						new MsFeatureInfoBundleCollection(fce));
 		}
-		Element experimentElement = 
-				projectElement.getChild(LIMSExperimentFields.limsExperiment.name());
-		if(experimentElement != null) {
-			
-			LIMSExperiment experiment = null;
-			try {
-				experiment = new LIMSExperiment(experimentElement, project);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if(experiment != null)
-				project.setIdTrackerExperiment(experiment);
-		}
+
 	}
 	
 	private void populateDatabaseCashData() throws Exception {
@@ -424,6 +435,10 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				processedFiles++;
 				
 				OpenMsFeatureBundleFileTask task = (OpenMsFeatureBundleFileTask)e.getSource();
+				LIMSExperiment experiment = project.getIdTrackerExperiment();
+				if(experiment != null)
+					task.getFeatures().stream().forEach(f -> f.setExperiment(experiment));
+				
 				project.addMsFeaturesForDataFile(task.getDataFile(), task.getFeatures());
 				if(processedFiles == featureFileCount) {
 					populateFeatureCollections();

@@ -385,6 +385,21 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 			instrumentTextField.setText(instrument.toString() + "; " + 
 					instrument.getManufacturer() + " " + instrument.getModel());
 	}
+	
+	public void clearPanel() {
+		
+		experiment = null;
+		instrument = null;
+		expIdValueLabel.setText("");
+		startDateLabel.setText("");
+		descriptionTextArea.setText("");
+		notesTextArea.setText("");
+		organizationDataLabel.setText("");
+		contactDataLabel.setText("");
+		experimentNameTextField.setText("");
+		projectComboBox.setSelectedIndex(-1);
+		instrumentTextField.setText("");
+	}
 }
 
 

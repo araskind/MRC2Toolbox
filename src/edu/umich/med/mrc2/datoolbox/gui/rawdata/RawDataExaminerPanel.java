@@ -618,10 +618,29 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(ps == null)
 			return;
 
+		//	Get existing or create new data extraction method based on MSMSExtractionParameterSet
+		String methodMd5 = ps.getParameterSetHash();
+		DataExtractionMethod existingDeMethod = 
+				 IDTDataCash.getDataExtractionMethodByMd5(methodMd5);
+			 
+	    if(existingDeMethod == null) {  //	Upload new method
+
+			try {
+				existingDeMethod = 
+						IDTUtils.insertNewTrackerDataExtractionMethod(ps);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				MessageDialog.showErrorMsg("Failed to upload data analysis method for the project", 
+						 this.getContentPane());
+				return;
+			}
+	    }		
 		MRC2ToolBoxCore.getActiveRawDataAnalysisProject().setMsmsExtractionParameterSet(ps);
 		MsMsfeatureBatchExtractionTask task = 
 				new MsMsfeatureBatchExtractionTask(
 						ps, 
+						existingDeMethod,
 						MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMSMSDataFiles(), 
 						MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMSOneDataFiles());			
 		task.addTaskListener(this);
