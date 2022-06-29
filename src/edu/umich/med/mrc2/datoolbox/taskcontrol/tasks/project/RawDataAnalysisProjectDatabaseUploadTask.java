@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -31,7 +32,6 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
@@ -50,7 +50,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 	private RawDataAnalysisProject project;
 	private double msOneMZWindow;
 	private int processedFiles;
-	private DataExtractionMethod dataExtractionMethod;
+	private Map<String,String>featureIdMap;
 	
 	public RawDataAnalysisProjectDatabaseUploadTask(
 			RawDataAnalysisProject project,
@@ -59,6 +59,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 		this.project = project;
 		this.msOneMZWindow = msOneMZWindow;
 		processedFiles = 0;
+		featureIdMap = new HashMap<String,String>();
 	}
 
 	@Override
@@ -242,13 +243,25 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 			
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
-			if (e.getSource().getClass().equals(RawDataAnalysisMSFeatureDatabaseUploadTask.class))	
+			if (e.getSource().getClass().equals(RawDataAnalysisMSFeatureDatabaseUploadTask.class)) {	
+				RawDataAnalysisMSFeatureDatabaseUploadTask task = 
+						(RawDataAnalysisMSFeatureDatabaseUploadTask)e.getSource();
+				featureIdMap.putAll(task.getFeatureIdMap());
 				processedFiles++;
-			
+			}
 			if(processedFiles == project.getMSMSDataFiles().size()) {
-				setStatus(TaskStatus.FINISHED);
-				return;
+				if(!project.getFeatureCollections().isEmpty())
+					uploadFeatureCollections();
+				else
+					setStatus(TaskStatus.FINISHED);
 			}
 		}		
+	}
+
+	private void uploadFeatureCollections() {
+		// TODO Auto-generated method stub
+		
+		
+		setStatus(TaskStatus.FINISHED);
 	}
 }

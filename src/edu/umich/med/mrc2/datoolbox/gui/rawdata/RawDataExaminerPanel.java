@@ -473,6 +473,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 						msOneMZWindow);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
+		rawDataAnalysisProjectDatabaseUploadDialog.dispose();
 	}
 	
 	private Collection<String> verifyProjectMetadata() {
@@ -1171,7 +1172,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private void finalizeRawDataAnalysisProjectDatabaseUploadTask(
 			RawDataAnalysisProjectDatabaseUploadTask task) {
 		// TODO Auto-generated method stub
-		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
 		
 		MessageDialog.showInfoMsg("Data for project \"" 
 				+ task.getProject().getName() + "\" uploaded to the MetIDTRacker database", 

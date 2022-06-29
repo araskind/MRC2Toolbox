@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
@@ -37,6 +39,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 	private RawDataAnalysisProject project;
 	private DataFile dataFile;
 	private double msOneMZWindow;
+	private Map<String,String>featureIdMap;
 	
 	public RawDataAnalysisMSFeatureDatabaseUploadTask(
 			RawDataAnalysisProject project, 
@@ -46,6 +49,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		this.project = project;
 		this.dataFile = dataFile;
 		this.msOneMZWindow = msOneMZWindow;
+		featureIdMap = new HashMap<String,String>();
 	}
 
 	@Override
@@ -53,7 +57,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 
 		setStatus(TaskStatus.PROCESSING);
 		try {
-			// uploadMSMSFeatureData();
+			 uploadMSMSFeatureData();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
@@ -91,5 +95,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 				msOneMZWindow);
 	}
 
-
+	public Map<String, String> getFeatureIdMap() {
+		return featureIdMap;
+	}
 }
