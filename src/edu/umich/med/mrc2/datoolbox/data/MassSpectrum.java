@@ -487,6 +487,10 @@ public class MassSpectrum implements Serializable {
 	public Set<MsPoint> getMsPoints() {
 		return msPoints;
 	}
+	
+	public double getTotalArea() {
+		return msPoints.stream().mapToDouble(p -> p.getIntensity()).sum();
+	}
 
 	public Element getXmlElement() {
 		

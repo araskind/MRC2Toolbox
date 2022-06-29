@@ -73,6 +73,10 @@ public class MsFeatureInfoBundle implements Serializable {
 	public MsFeature getMsFeature() {
 		return msFeature;
 	}
+	
+	public String getMsFeatureId() {
+		return msFeature.getId();
+	}
 
 	/**
 	 * @return the acquisitionMethod

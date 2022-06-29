@@ -67,6 +67,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableMsMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
@@ -456,8 +457,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	private void saveProjectToDatabaseAsNewExperiment() {
-		
-		
 		
 		double msOneMZWindow = 
 				rawDataAnalysisProjectDatabaseUploadDialog.getMsOneMZWindow();
@@ -1171,13 +1170,19 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	private void finalizeRawDataAnalysisProjectDatabaseUploadTask(
 			RawDataAnalysisProjectDatabaseUploadTask task) {
-		// TODO Auto-generated method stub
+		
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
 		
-		MessageDialog.showInfoMsg("Data for project \"" 
-				+ task.getProject().getName() + "\" uploaded to the MetIDTRacker database", 
-				this.getContentPane());
+		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.ID_TRACKER_LIMS);
+		IDTrackerLimsManagerPanel limsPanel = 
+				(IDTrackerLimsManagerPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_TRACKER_LIMS);
+		limsPanel.refreshIdTrackerdata();
+		
+//		task.getProject().getIdTrackerExperiment().getId();
+//		MessageDialog.showInfoMsg("Data for project \"" 
+//				+ task.getProject().getName() + "\" uploaded to the MetIDTRacker database", 
+//				this.getContentPane());
 	}
 
 	private void finalizeRawDataFileConversionTask() {

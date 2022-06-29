@@ -508,6 +508,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			MsFeature f = new MsFeature(id, name, rt);
 			f.setPolarity(polarity);
 			f.setAnnotatedObjectType(AnnotatedObjectType.MSMS_FEATURE);
+			Adduct defaultAdduct = 
+					AdductManager.getDefaultAdductForPolarity(polarity);
 			
 			//	TODO
 //			IDTMsDataUtils.attachMS1SpectrumForMsMs(f, conn);
@@ -527,7 +529,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						AdductManager.getAdductById(adductId);
 
 				if(adduct == null)
-					continue;
+					adduct = defaultAdduct;
 
 				if(!adductMap.containsKey(adduct))
 					adductMap.put(adduct, new ArrayList<MsPoint>());

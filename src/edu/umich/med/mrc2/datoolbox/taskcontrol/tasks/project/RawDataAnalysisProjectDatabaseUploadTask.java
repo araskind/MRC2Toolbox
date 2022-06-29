@@ -32,6 +32,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
@@ -51,6 +52,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 	private double msOneMZWindow;
 	private int processedFiles;
 	private Map<String,String>featureIdMap;
+	private DataExtractionMethod deMethod;
 	
 	public RawDataAnalysisProjectDatabaseUploadTask(
 			RawDataAnalysisProject project,
@@ -66,6 +68,13 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 	public void run() {
 		// TODO Auto-generated method stub
 		setStatus(TaskStatus.PROCESSING);
+		String md5 = project.getMsmsExtractionParameterSet().getParameterSetHash();
+		deMethod = IDTDataCash.getDataExtractionMethodByMd5(md5);
+		if(deMethod == null) {
+			errorMessage = "Data extraction method not defined!";
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
 		try {
 			uploadExperimentMetadata();
 		} catch (Exception ex) {
@@ -220,7 +229,8 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 		for(DataFile df : project.getMSMSDataFiles()) {
 			
 			RawDataAnalysisMSFeatureDatabaseUploadTask task = 				
-					new RawDataAnalysisMSFeatureDatabaseUploadTask(project, df, msOneMZWindow);
+					new RawDataAnalysisMSFeatureDatabaseUploadTask(
+							project, df, deMethod, msOneMZWindow);
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}

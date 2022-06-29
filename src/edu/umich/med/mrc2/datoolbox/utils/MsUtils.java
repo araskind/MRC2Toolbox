@@ -1512,6 +1512,21 @@ public class MsUtils {
 		String arrayString = "[" + StringUtils.join(line, ", ") + "]";
 		return arrayString;
 	}
+	
+	public static Collection<MsPoint>trimSpectrum(
+			Collection<MsPoint>inputSpectrum, double center, double width){
+		
+		Range trimRange = new Range(center - width, center + width);
+		return inputSpectrum.stream().
+				filter(p -> trimRange.contains(p.getMz())).
+				distinct().sorted(mzSorter).
+				collect(Collectors.toList());
+	}
+	
+	public static MsPoint getBasePeak(Collection<MsPoint>inputSpectrum) {
+		
+		return inputSpectrum.stream().sorted(reverseIntensitySorter).findFirst().orElse(null);
+	}
 }
 
 

@@ -21,6 +21,35 @@
 
 package edu.umich.med.mrc2.datoolbox.database.idt;
 
+import java.sql.Connection;
+
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+
 public class IDTRawDataProjectUtils {
 
+	public static String insertFeatureData(
+			MsFeatureInfoBundle bundle, 
+			MsFeatureChromatogramBundle msfCb,
+			LIMSExperiment experiment, 
+			Connection conn) throws Exception {
+		// TODO Auto-generated method stub
+		String trakerFeatureId = null;
+		
+		
+		
+		return trakerFeatureId;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+

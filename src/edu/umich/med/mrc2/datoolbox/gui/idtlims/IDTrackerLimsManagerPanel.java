@@ -636,7 +636,15 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
+	
+	public void selectExperiment(LIMSExperiment experiment) {
+		projectTreePanel.selectNodeForObject(experiment);
+	}
 
+	public void selectProject(LIMSProject project) {
+		projectTreePanel.selectNodeForObject(project);
+	}
+	
 	public void refreshPanelData() {
 
 		projectTreePanel.loadIdTrackerData();
