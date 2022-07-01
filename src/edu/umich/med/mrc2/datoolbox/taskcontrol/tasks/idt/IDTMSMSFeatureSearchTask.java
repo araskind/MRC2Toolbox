@@ -617,6 +617,15 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		PreparedStatement msps = conn.prepareStatement(msquery);
 		ResultSet msrs = null;
 		
+		//	Scan map
+		String scanMapQuery =
+				"SELECT SCAN, PARENT_SCAN, MS_LEVEL, RT,  " +
+				"PARENT_MS_LEVEL, PARENT_RT  " +
+				"FROM MSMS_FEATURE_SCAN_MAP  " +
+				"WHERE MSMS_FEATURE_ID = ? ";
+		PreparedStatement scanMapPs = conn.prepareStatement(scanMapQuery);
+		ResultSet scanMapRs = null;
+		
 		for(MsFeatureInfoBundle fb : features) {
 
 			try {
@@ -687,6 +696,19 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					
 					msms.setMinorParentIons(minorParentIons, msOneParent);
 					
+					//	Get scan map
+					scanMapPs.setString(1, msms.getId());
+					scanMapRs = scanMapPs.executeQuery();
+					while(scanMapRs.next()) {
+						
+						msms.getAveragedScanNumbers().put(
+								scanMapRs.getInt("SCAN"), scanMapRs.getInt("PARENT_SCAN"));
+						msms.getScanRtMap().put(
+								scanMapRs.getInt("SCAN"), scanMapRs.getDouble("RT"));
+						msms.getScanRtMap().put(
+								scanMapRs.getInt("PARENT_SCAN"), scanMapRs.getDouble("PARENT_RT"));
+					}
+					scanMapRs.close();
 					fb.getMsFeature().getSpectrum().addTandemMs(msms);
 				}
 			} catch (SQLException e) {
@@ -697,6 +719,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		}
 		ps.close();
 		msps.close();
+		scanMapPs.close();
 		ConnectionManager.releaseConnection(conn);
 	}
 

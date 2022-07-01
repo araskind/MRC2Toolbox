@@ -1910,7 +1910,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 					try {
 						IdFollowupUtils.setIdFollowupStepsForMS1Feature(fib);
 					} catch (Exception e) {
@@ -1929,7 +1929,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 					try {
 						IdFollowupUtils.setIdFollowupStepsForMSMSFeature(fib);
 					} catch (Exception e) {
@@ -1971,7 +1971,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 					try {
 						StandardAnnotationUtils.setStandardFeatureAnnotationsForMS1Feature(fib);
 					} catch (Exception e) {
@@ -1990,7 +1990,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 					try {
 						StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(fib);
 					} catch (Exception e) {

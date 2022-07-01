@@ -138,7 +138,8 @@ public class StandardAnnotationUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	public static void attachStandardFeatureAnnotationToMSMSFeature(MsFeatureInfoBundle fib) throws Exception {
+	public static void attachStandardFeatureAnnotationToMSMSFeature(
+				MsFeatureInfoBundle fib) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		attachStandardFeatureAnnotationToMSMSFeature(fib, conn);
@@ -165,7 +166,8 @@ public class StandardAnnotationUtils {
 		ps.close();
 	}
 	
-	public static void setStandardFeatureAnnotationsForMSMSFeature(MsFeatureInfoBundle fib) throws Exception {
+	public static void setStandardFeatureAnnotationsForMSMSFeature(
+			MsFeatureInfoBundle fib) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		setStandardFeatureAnnotationsForMSMSFeature(fib, conn);

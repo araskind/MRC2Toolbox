@@ -288,7 +288,7 @@ public class MsFeatureInfoBundle implements Serializable {
 					MsFeatureInfoBundleFields.DaMethod.name(), 
 					dataExtractionMethod.getId());
 		
-		if(experiment != null)
+		if(experiment != null && experiment.getId() != null)
 			msFeatureInfoBundleElement.setAttribute(
 					MsFeatureInfoBundleFields.Exp.name(), 
 					experiment.getId());
