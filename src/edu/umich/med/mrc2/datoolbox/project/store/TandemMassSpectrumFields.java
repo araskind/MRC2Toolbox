@@ -39,6 +39,7 @@ public enum TandemMassSpectrumFields {
 	Pol,
 	Desc,
 	AOT,
+	ParentIonPurity,
 	MinorParents,
 	AvgScans,
 	IsMinor,

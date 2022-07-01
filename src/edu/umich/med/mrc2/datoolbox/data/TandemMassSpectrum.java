@@ -82,6 +82,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	protected Map<Integer,Integer>averagedScanNumbers;
 	protected Map<Integer,Double>scanRtMap;
 	protected boolean parentIonIsMinorIsotope;
+	protected double parentIonPurity = 1.0d;
 
 	public TandemMassSpectrum(
 			int depth,
@@ -529,23 +530,23 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		averagedScanNumbers.put(msmsScan, parentScan);
 	}
 
-	public void setMinorParentIons(Collection<MsPoint> newMinorParentIons) {
+	public void setMinorParentIons(Collection<MsPoint> newMinorParentIons, MsPoint msOneParent) {
 		minorParentIons.clear();
 		minorParentIons.addAll(newMinorParentIons);
+		calculateParentIonPurity(msOneParent);
 	}
 	
-	public double getParentIonPurity() {
+	public double getParentIonPurity() {		
+		return parentIonPurity;
+	}
+	
+	private void calculateParentIonPurity(MsPoint msOneParent) {
 		
-		if(minorParentIons.isEmpty() || parent == null)
-			return 1.0;
-		
-//		double pur = parent.getIntensity() / (minorParentIons.stream().
-//				mapToDouble(p -> p.getIntensity()).sum() + parent.getIntensity());
-//		if(pur > 1 || pur < 0) {
-//			System.err.println(Double.toString(pur));
-//		}		
-		return parent.getIntensity() / (minorParentIons.stream().
-				mapToDouble(p -> p.getIntensity()).sum() + parent.getIntensity());
+		if(minorParentIons.isEmpty() || msOneParent == null)
+			parentIonPurity = 1.0;
+		else
+			parentIonPurity = msOneParent.getIntensity() / (minorParentIons.stream().
+				mapToDouble(p -> p.getIntensity()).sum() + msOneParent.getIntensity());
 	}
 
 	public boolean isParentIonMinorIsotope() {
@@ -637,6 +638,9 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		
 		if(annotatedObjectType != null)
 			msmsElement.setAttribute(TandemMassSpectrumFields.AOT.name(), annotatedObjectType.name());
+		
+		
+		msmsElement.setAttribute(TandemMassSpectrumFields.ParentIonPurity.name(), Double.toString(parentIonPurity));
 		
 		if(minorParentIons != null && !minorParentIons.isEmpty()) {			
 			List<String>mpList = minorParentIons.stream().
@@ -735,6 +739,11 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 				msmsElement.getAttributeValue(TandemMassSpectrumFields.AOT.name());
 		if(aotString != null)
 			annotatedObjectType = AnnotatedObjectType.getObjectTypeByName(aotString);
+		
+		String parentPurityString = 
+				msmsElement.getAttributeValue(TandemMassSpectrumFields.ParentIonPurity.name());
+		if(parentPurityString != null)
+			parentIonPurity = Double.parseDouble(parentPurityString);
 		
 		String minorParentIonsString = 
 				msmsElement.getAttributeValue(TandemMassSpectrumFields.MinorParents.name());

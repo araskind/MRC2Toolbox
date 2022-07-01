@@ -37,6 +37,7 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
@@ -47,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
@@ -119,8 +121,9 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		
 		String msmsFeatureQuery =
 				"INSERT INTO MSMS_FEATURE (PARENT_FEATURE_ID, MSMS_FEATURE_ID, DATA_ANALYSIS_ID, "
-				+ "RETENTION_TIME, PARENT_MZ, FRAGMENTATION_ENERGY, COLLISION_ENERGY, POLARITY) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "RETENTION_TIME, PARENT_MZ, FRAGMENTATION_ENERGY, COLLISION_ENERGY, POLARITY, "
+				+ "ISOLATION_WINDOW_MIN, ISOLATION_WINDOW_MAX) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement msmsFeaturePs = conn.prepareStatement(msmsFeatureQuery);
 		msmsFeaturePs.setString(3, dataAnalysisId);
 		
@@ -134,9 +137,13 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		PreparedStatement precursorPs = conn.prepareStatement(precursorQuery);
 		
 		String libMatchQuery =
-				"INSERT INTO MSMS_FEATURE_LIBRARY_MATCH ( " +
-				"MATCH_ID, MSMS_FEATURE_ID, MRC2_LIB_ID, MATCH_SCORE, IS_PRIMARY, MATCH_TYPE) " +
-				"VALUES (?,?,?,?,?,?) ";
+				"INSERT INTO MSMS_FEATURE_LIBRARY_MATCH (" +
+				"MATCH_ID, MSMS_FEATURE_ID, MRC2_LIB_ID, MATCH_SCORE, IS_PRIMARY, MATCH_TYPE, " +
+				"FWD_SCORE, REVERSE_SCORE, PROBABILITY, DOT_PRODUCT,  " +
+				"SEARCH_PARAMETER_SET_ID, IDENTIFICATION_LEVEL_ID,  " +
+				"REVERSE_DOT_PRODUCT, HYBRID_DOT_PRODUCT,  " +
+				"HYBRID_SCORE, HYBRID_DELTA_MZ) " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";		
 		PreparedStatement libMatchPs = conn.prepareStatement(libMatchQuery);
 		
 		for(MsFeatureInfoBundle bundle : bundles) {
@@ -203,6 +210,16 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 				msmsFeaturePs.setDouble(6, instrumentMsms.getFragmenterVoltage());
 				msmsFeaturePs.setDouble(7, instrumentMsms.getCidLevel());
 				msmsFeaturePs.setString(8, feature.getPolarity().getCode());
+				
+				Range isolationWindow = instrumentMsms.getIsolationWindow();
+				if(isolationWindow != null && isolationWindow.getAverage() > 0.0) {
+					msmsFeaturePs.setDouble(9, isolationWindow.getMin());
+					msmsFeaturePs.setDouble(10, isolationWindow.getMax());
+				}
+				else {
+					msmsFeaturePs.setNull(9, java.sql.Types.NULL);
+					msmsFeaturePs.setNull(10, java.sql.Types.NULL);
+				}
 				msmsFeaturePs.addBatch();
 				
 				//	MS2 points
@@ -235,13 +252,63 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 						libMatchPs.setString(2, msmsId);
 						libMatchPs.setString(3, refMatch.getMatchedLibraryFeature().getUniqueId());
 						libMatchPs.setDouble(4, refMatch.getScore());
-						libMatchPs.setString(5,"Y");
 						
-						String matchType = null;
+						if(identification.isPrimary())
+							libMatchPs.setString(5,"Y");
+						else
+							libMatchPs.setNull(5,java.sql.Types.NULL);
+						
 						if(refMatch.getMatchType() != null)
-							matchType = refMatch.getMatchType().name();
+							libMatchPs.setString(6, refMatch.getMatchType().name());
+						else
+							libMatchPs.setNull(6,java.sql.Types.NULL);
+						
+						if(refMatch.getForwardScore() > 0.0d)
+							libMatchPs.setDouble(7, refMatch.getForwardScore());
+						else
+							libMatchPs.setNull(7,java.sql.Types.NULL);
+
+						if(refMatch.getReverseScore() > 0.0d)
+							libMatchPs.setDouble(8, refMatch.getReverseScore());
+						else
+							libMatchPs.setNull(8,java.sql.Types.NULL);
+						
+						if(refMatch.getProbability() > 0.0d)
+							libMatchPs.setDouble(9, refMatch.getProbability());
+						else
+							libMatchPs.setNull(9,java.sql.Types.NULL);
+						
+						if(refMatch.getDotProduct() > 0.0d)
+							libMatchPs.setDouble(10, refMatch.getDotProduct());
+						else
+							libMatchPs.setNull(10,java.sql.Types.NULL);
+												
+						if(refMatch.getSearchParameterSetId() != null)
+							libMatchPs.setString(11, refMatch.getSearchParameterSetId());
+						else
+							libMatchPs.setNull(11,java.sql.Types.NULL);
+						
+						if(identification.getIdentificationLevel() != null)
+							libMatchPs.setString(12, identification.getIdentificationLevel().getId());
+						else
+							libMatchPs.setNull(12,java.sql.Types.NULL);
+						
+						if(refMatch.getReverseDotProduct() > 0.0d)
+							libMatchPs.setDouble(13, refMatch.getReverseDotProduct());
+						else
+							libMatchPs.setNull(13,java.sql.Types.NULL);
+						
+						if(refMatch.getMatchType().equals(MSMSMatchType.Hybrid)) {
 							
-						libMatchPs.setString(6, matchType);
+							libMatchPs.setDouble(14, refMatch.getHybridDotProduct());
+							libMatchPs.setDouble(15, refMatch.getHybridScore());
+							libMatchPs.setDouble(16, refMatch.getHybridDeltaMz());
+						}
+						else {
+							libMatchPs.setNull(14,java.sql.Types.NULL);
+							libMatchPs.setNull(15,java.sql.Types.NULL);
+							libMatchPs.setNull(16,java.sql.Types.NULL);
+						}					
 						libMatchPs.addBatch();
 					}
 					if(identification.getIdSource().equals(CompoundIdSource.MANUAL))
@@ -249,10 +316,10 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 				}
 			}
 			//	Insert chromatograms
-			MsFeatureChromatogramBundle msfCb = 
-					chromatogramMap.get(bundle.getMsFeature().getId());
+//			MsFeatureChromatogramBundle msfCb = 
+//					chromatogramMap.get(bundle.getMsFeature().getId());
 			
-			//	MS-RT library match and manula IDs
+			//	MS-RT library match
 //			for(MsFeatureIdentity identification : feature.getIdentifications()) {
 //							
 //				MsRtLibraryMatch msRtLibMatch = 

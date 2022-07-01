@@ -46,12 +46,14 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class IDTMsDataUtils {
@@ -217,6 +219,7 @@ public class IDTMsDataUtils {
 	}
 
 	//	TODO Join on asccession will not work anymore, use library and manual ID tables to join
+	@Deprecated
 	public static Collection<MsFeature>getIdentifiedMSMSFeaturesForSample(
 			String sampleId,
 			String samplePrepId,
@@ -227,6 +230,7 @@ public class IDTMsDataUtils {
 		String query =
 			"SELECT DISTINCT F.FEATURE_ID, F.RETENTION_TIME, F2.PARENT_MZ, " +
 			"F2.FRAGMENTATION_ENERGY, F2.COLLISION_ENERGY, F.ACCESSION, " +
+			"F2.ISOLATION_WINDOW_MIN, F2.ISOLATION_WINDOW_MAX, " +	
 			"D.BULK_ACCESSION, F2.MSMS_FEATURE_ID " +
 			"FROM MSMS_FEATURE F2,  " +
 			"DATA_ANALYSIS_MAP M,   " +
@@ -249,7 +253,8 @@ public class IDTMsDataUtils {
 		ps.setString(2, samplePrepId);
 		ps.setString(3, sampleId);
 
-		String msQuery = "SELECT MZ, HEIGHT FROM MSMS_FEATURE_PEAK WHERE MSMS_FEATURE_ID = ? ";
+		String msQuery = 
+				"SELECT MZ, HEIGHT FROM MSMS_FEATURE_PEAK WHERE MSMS_FEATURE_ID = ? ";
 		PreparedStatement psms = conn.prepareStatement(msQuery);
 		ResultSet msrs = null;
 		ResultSet rs = ps.executeQuery();
@@ -276,12 +281,19 @@ public class IDTMsDataUtils {
 			msms.setFragmenterVoltage(rs.getDouble("FRAGMENTATION_ENERGY"));
 			msms.setCidLevel(rs.getDouble("COLLISION_ENERGY"));		
 			msms.setEntropy(MsUtils.calculateCleanedSpectrumEntropyNatLog(msmsPoints));
+			Range isolationWindow = new Range(
+					rs.getDouble("ISOLATION_WINDOW_MIN"), 
+					rs.getDouble("ISOLATION_WINDOW_MAX"));
+			if(isolationWindow.getAverage() == 0.0d)	//	TODO this is a temporary fix based on Agilent narrow window
+				isolationWindow = new Range(parent.getMz() - 0.65, parent.getMz() + 0.65);
 			
+			msms.setIsolationWindow(isolationWindow);
 			MassSpectrum ms = new MassSpectrum();
 			ms.addTandemMs(msms);
 			newFeature.setSpectrum(ms);
 
-			CompoundIdentity cpdId = CompoundDatabaseUtils.getCompoundById(rs.getString("ACCESSION"), conn);
+			CompoundIdentity cpdId = 
+					CompoundDatabaseUtils.getCompoundById(rs.getString("ACCESSION"), conn);
 			String lipidBulk = rs.getString("BULK_ACCESSION");
 			if(lipidBulk != null)
 				cpdId.addDbId(CompoundDatabaseEnum.LIPIDMAPS_BULK, lipidBulk);
@@ -378,8 +390,9 @@ public class IDTMsDataUtils {
 					12);
 			query =
 				"INSERT INTO MSMS_FEATURE (PARENT_FEATURE_ID, MSMS_FEATURE_ID, DATA_ANALYSIS_ID, "
-				+ "RETENTION_TIME, PARENT_MZ, FRAGMENTATION_ENERGY, COLLISION_ENERGY, POLARITY) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "RETENTION_TIME, PARENT_MZ, FRAGMENTATION_ENERGY, COLLISION_ENERGY, POLARITY, "
+				+ "ISOLATION_WINDOW_MIN, ISOLATION_WINDOW_MAX) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			ps = conn.prepareStatement(query);
 
 			ps.setString(1, fid);
@@ -390,6 +403,16 @@ public class IDTMsDataUtils {
 			ps.setDouble(6, instrumentMsms.getFragmenterVoltage());
 			ps.setDouble(7, instrumentMsms.getCidLevel());
 			ps.setString(8, feature.getPolarity().getCode());
+			
+			Range isolationWindow = instrumentMsms.getIsolationWindow();
+			if(isolationWindow != null && isolationWindow.getAverage() > 0.0) {
+				ps.setDouble(9, isolationWindow.getMin());
+				ps.setDouble(10, isolationWindow.getMax());
+			}
+			else {
+				ps.setNull(9, java.sql.Types.NULL);
+				ps.setNull(10, java.sql.Types.NULL);
+			}
 			ps.executeUpdate();
 			ps.close();
 
@@ -585,12 +608,13 @@ public class IDTMsDataUtils {
 		}
 	}
 
+	@Deprecated
 	public static void attachExperimentalTandemSpectra(
 			MsFeature newTarget, Connection conn) throws SQLException {
 
 		String query =
 			"SELECT MSMS_FEATURE_ID, PARENT_MZ, FRAGMENTATION_ENERGY, "
-			+ "COLLISION_ENERGY, POLARITY " +
+			+ "COLLISION_ENERGY, POLARITY, ISOLATION_WINDOW_MIN, ISOLATION_WINDOW_MAX " +
 			"FROM MSMS_FEATURE WHERE PARENT_FEATURE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, newTarget.getId());	
@@ -606,8 +630,18 @@ public class IDTMsDataUtils {
 					rs.getDouble("COLLISION_ENERGY"),
 					polarity);
 			msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
-			msms.setParent(new MsPoint(rs.getDouble("PARENT_MZ"), 999.0d));		// TODO	??
+			
+			MsPoint parent = new MsPoint(rs.getDouble("PARENT_MZ"), 200.0d);
+			msms.setParent(parent);
 			msmsList.add(msms);
+
+			Range isolationWindow = new Range(
+					rs.getDouble("ISOLATION_WINDOW_MIN"), 
+					rs.getDouble("ISOLATION_WINDOW_MAX"));
+			if(isolationWindow.getAverage() == 0.0d)	//	TODO this is a temporary fix based on Agilent narrow window
+				isolationWindow = new Range(parent.getMz() - 0.65, parent.getMz() + 0.65);
+			
+			msms.setIsolationWindow(isolationWindow);
 		}
 		rs.close();
 		ps.close();		
@@ -624,7 +658,18 @@ public class IDTMsDataUtils {
 				spectrum.add(new MsPoint(msrs.getDouble("MZ"), msrs.getDouble("HEIGHT")));
 
 			msrs.close();
-			msms.setEntropy(MsUtils.calculateCleanedSpectrumEntropyNatLog(spectrum));		
+			msms.setEntropy(MsUtils.calculateCleanedSpectrumEntropyNatLog(spectrum));
+			
+			//	Adjust parent intensity
+			Range parentMzRange = MsUtils.createMassRange(
+					msms.getParent().getMz(), 10, MassErrorType.mDa);
+			MsPoint observedParent = spectrum.stream().
+					filter(p -> parentMzRange.contains(p.getMz())).
+					sorted(MsUtils.reverseIntensitySorter).
+					findFirst().orElse(null);
+			if(observedParent != null)
+				msms.setParent(new MsPoint(observedParent));
+								
 			newTarget.getSpectrum().addTandemMs(msms);
 		}
 		msps.close();

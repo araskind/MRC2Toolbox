@@ -74,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
@@ -774,8 +775,9 @@ public class IDTCefMSMSPrescanOrImportTask extends AbstractTask {
 		
 		String msmsFeatureQuery =
 				"INSERT INTO MSMS_FEATURE (PARENT_FEATURE_ID, MSMS_FEATURE_ID, DATA_ANALYSIS_ID, "
-				+ "RETENTION_TIME, PARENT_MZ, FRAGMENTATION_ENERGY, COLLISION_ENERGY, POLARITY) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "RETENTION_TIME, PARENT_MZ, FRAGMENTATION_ENERGY, COLLISION_ENERGY, POLARITY, "
+				+ "ISOLATION_WINDOW_MIN, ISOLATION_WINDOW_MAX) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement msmsFeaturePs = conn.prepareStatement(msmsFeatureQuery);
 		
 		String msTwoQuery = "INSERT INTO MSMS_FEATURE_PEAK (MSMS_FEATURE_ID, MZ, HEIGHT) VALUES (?, ?, ?)";
@@ -875,6 +877,16 @@ public class IDTCefMSMSPrescanOrImportTask extends AbstractTask {
 				msmsFeaturePs.setDouble(6, instrumentMsms.getFragmenterVoltage());
 				msmsFeaturePs.setDouble(7, instrumentMsms.getCidLevel());
 				msmsFeaturePs.setString(8, feature.getPolarity().getCode());
+				
+				Range isolationWindow = instrumentMsms.getIsolationWindow();
+				if(isolationWindow != null && isolationWindow.getAverage() > 0.0) {
+					msmsFeaturePs.setDouble(9, isolationWindow.getMin());
+					msmsFeaturePs.setDouble(10, isolationWindow.getMax());
+				}
+				else {
+					msmsFeaturePs.setNull(9, java.sql.Types.NULL);
+					msmsFeaturePs.setNull(10, java.sql.Types.NULL);
+				}
 				msmsFeaturePs.addBatch();
 				
 				//	MS2

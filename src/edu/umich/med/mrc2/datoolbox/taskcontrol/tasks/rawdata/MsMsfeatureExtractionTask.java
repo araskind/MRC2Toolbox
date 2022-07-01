@@ -696,15 +696,15 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				isolationWindow = new Range(isolationWindow.getMin(), isolationWindow.getMax());
 			
 			//	MsPoint parent = getActualPrecursor(parentScan, isolationWindow);
-			MsPoint parent =  getActualPrecursor(spectrum.getMsPoints(), isolationWindow);
-			if(parent == null && s.getPrecursor() != null) {
+			MsPoint msOneParent =  getActualPrecursor(spectrum.getMsPoints(), isolationWindow);
+			if(msOneParent == null && s.getPrecursor() != null) {
 				Double pInt = s.getPrecursor().getIntensity();
 				if(pInt == null)
 					pInt = 1.0d;
 				
-				parent = new MsPoint(targetMz, pInt);
+				msOneParent = new MsPoint(targetMz, pInt);
 			}
-			if(parent.getIntensity() < minPrecursorIntensity) {
+			if(msOneParent.getIntensity() < minPrecursorIntensity) {
 				f = null;
 				spectrum = null;
 				targetMz = null;
@@ -713,15 +713,23 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				continue;
 			}
 			String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-					MRC2ToolBoxConfiguration.defaultMzFormat.format(parent.getMz()) + "_" + 
+					MRC2ToolBoxConfiguration.defaultMzFormat.format(msOneParent.getMz()) + "_" + 
 					MRC2ToolBoxConfiguration.defaultRtFormat.format(parentScan.getRt());
 			f.setName(name);
 			Collection<MsPoint> msmsPoints = RawDataUtils.getScanPoints(s);
 			if(!msmsPoints.isEmpty()) {
 				
+				Range parentMzRange = MsUtils.createMassRange(
+						msOneParent.getMz(), precursorGroupingMassError, precursorGroupingMassErrorType);
+				MsPoint parent = msmsPoints.stream().
+						filter(p -> parentMzRange.contains(p.getMz())).
+						sorted(MsUtils.mzSorter).findFirst().orElse(null);
+				if(parent == null)
+					parent = msOneParent;
+						
 				TandemMassSpectrum msms = new TandemMassSpectrum(
 						2, 
-						parent,
+						msOneParent,
 						RawDataUtils.getScanPoints(s),
 						polarity);				
 				msms.setIsolationWindow(isolationWindow);
@@ -736,26 +744,24 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				msms.getAveragedScanNumbers().put(scanNum, parentScan.getNum());
 				msms.getScanRtMap().put(s.getNum(), s.getRt());
 				msms.getScanRtMap().put(parentScan.getNum(), parentScan.getRt());
-				msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);				
-//				Collection<MsPoint>minorParentIons = getMinorParentIons(
-//						parentScan, isolationWindow, parent.getMz());
-//				if(minorParentIons != null && !minorParentIons.isEmpty())
-//					msms.setMinorParentIons(minorParentIons);
+				msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
 				
-				Range parentMzRange = MsUtils.createMassRange(
-						parent.getMz(), precursorGroupingMassError, precursorGroupingMassErrorType);
+
 				Range iw = msms.getIsolationWindow();
 				Collection<MsPoint>minorParentIons = spectrum.getMsPoints().stream().
 						filter(p -> !parentMzRange.contains(p.getMz())).
 						filter(p -> iw.contains(p.getMz())).
 						sorted(MsUtils.mzSorter).collect(Collectors.toList());
+				
 				if(!minorParentIons.isEmpty()) {
 					
-					MsPoint negInt = minorParentIons.stream().filter(p -> p.getIntensity() < 0).findFirst().orElse(null);
+					MsPoint negInt = minorParentIons.stream().
+							filter(p -> p.getIntensity() < 0).
+							findFirst().orElse(null);
 					if(negInt != null) {
 						System.err.println(Double.toString(negInt.getIntensity()));
 					}	
-					msms.setMinorParentIons(minorParentIons);
+					msms.setMinorParentIons(minorParentIons, msOneParent);
 				}				
 				spectrum.addTandemMs(msms);		
 				f.setSpectrum(spectrum);

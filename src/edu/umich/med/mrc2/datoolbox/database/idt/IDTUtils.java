@@ -2089,7 +2089,9 @@ public class IDTUtils {
 
 		Collection<Double>collisionEnergies = new TreeSet<Double>();
 		Connection conn = ConnectionManager.getConnection();
-		String query = "SELECT DISTINCT COLLISION_ENERGY FROM MSMS_FEATURE WHERE COLLISION_ENERGY > 0  ORDER BY 1";
+		String query = 
+				"SELECT DISTINCT COLLISION_ENERGY FROM MSMS_FEATURE "
+				+ "WHERE COLLISION_ENERGY > 0  ORDER BY 1";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
 		while (rs.next())

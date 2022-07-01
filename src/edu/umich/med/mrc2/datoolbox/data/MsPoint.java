@@ -104,6 +104,7 @@ public class MsPoint implements Serializable {
 	}	
 
 	public MsPoint(String msPointString) {
+		
 		if(msPointString == null || msPointString.isEmpty() || !msPointString.contains("_"))
 			throw (new IllegalArgumentException("Invalid string"));
 		
@@ -129,6 +130,35 @@ public class MsPoint implements Serializable {
 	public void setScanNum(int scanNum) {
 		this.scanNum = scanNum;
 	}
+	
+    @Override
+    public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+
+        if (!MsPoint.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final MsPoint other = (MsPoint) obj;
+
+        if (this.mz != other.getMz())
+            return false;
+              
+        if (this.intensity != other.getIntensity())
+            return false;
+        
+        if (this.scanNum != other.getScanNum())
+            return false;
+        
+        if (this.charge != other.getCharge())
+            return false;
+
+        return true;
+    }
 }
 
 

@@ -499,9 +499,18 @@ public class MsFeatureCluster implements Serializable {
 				filter(p -> !parentMzRange.contains(p.getMz())).
 				filter(p -> iw.contains(p.getMz())).
 				sorted(MsUtils.mzSorter).collect(Collectors.toList());
-		if(!minorParentIons.isEmpty())
-			msms.setMinorParentIons(minorParentIons);
 		
+		if(!minorParentIons.isEmpty()) {
+			
+			MsPoint msOneParent = averageMS1Spectrum.stream().
+				filter(p -> parentMzRange.contains(p.getMz())).
+				sorted(MsUtils.reverseIntensitySorter).
+				findFirst().orElse(null);
+			if(msOneParent == null)
+				msOneParent = parent;
+			
+			msms.setMinorParentIons(minorParentIons, msOneParent);
+		}		
 		spectrum.addTandemMs(msms);			
 		MsFeature averaged = new MsFeature(primaryFeature.getRetentionTime(), polarity);
 		averaged.setRtRange(getRtRange());

@@ -606,7 +606,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		processed = 0;
 		String query =
 				"SELECT MSMS_FEATURE_ID, PARENT_MZ, FRAGMENTATION_ENERGY, "
-				+ "COLLISION_ENERGY, POLARITY, ID_DISABLED " +
+				+ "COLLISION_ENERGY, POLARITY, ID_DISABLED, "
+				+ "ISOLATION_WINDOW_MIN, ISOLATION_WINDOW_MAX " +
 				"FROM MSMS_FEATURE WHERE PARENT_FEATURE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = null;
@@ -632,7 +633,16 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 							rs.getDouble("COLLISION_ENERGY"),
 							polarity);
 					msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
-					msms.setParent(new MsPoint(rs.getDouble("PARENT_MZ"), 999.0d));		
+					MsPoint parent = new MsPoint(rs.getDouble("PARENT_MZ"), 200.0d);
+					msms.setParent(parent);		
+					
+					Range isolationWindow = new Range(
+							rs.getDouble("ISOLATION_WINDOW_MIN"), 
+							rs.getDouble("ISOLATION_WINDOW_MAX"));
+					if(isolationWindow.getAverage() == 0.0d)	//	TODO this is a temporary fix based on Agilent narrow window
+						isolationWindow = new Range(parent.getMz() - 0.65, parent.getMz() + 0.65);
+					
+					msms.setIsolationWindow(isolationWindow);					
 					msmsList.add(msms);
 					
 					//	Set flag if ID is disabled
@@ -648,7 +658,35 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						spectrum.add(new MsPoint(msrs.getDouble("MZ"), msrs.getDouble("HEIGHT")));
 
 					msrs.close();
-					msms.setEntropy(MsUtils.calculateCleanedSpectrumEntropyNatLog(spectrum));					
+					msms.setEntropy(MsUtils.calculateCleanedSpectrumEntropyNatLog(spectrum));
+					
+					//	Adjust parent intensity
+					Range parentMzRange = MsUtils.createMassRange(
+							msms.getParent().getMz(), 10, MassErrorType.mDa);
+					MsPoint observedParent = spectrum.stream().
+							filter(p -> parentMzRange.contains(p.getMz())).
+							sorted(MsUtils.reverseIntensitySorter).
+							findFirst().orElse(null);
+					if(observedParent != null)
+						msms.setParent(new MsPoint(observedParent));
+					
+					MsPoint msOneParent = fb.getMsFeature().getSpectrum().getMsPoints().stream().
+							filter(p -> parentMzRange.contains(p.getMz())).
+							sorted(MsUtils.reverseIntensitySorter).findFirst().orElse(null);
+					if(msOneParent == null)
+						msOneParent = msms.getParent();
+						
+					// Find isotopes within isolation window
+					final MsPoint m1p = new MsPoint(msOneParent);
+					Range iw = msms.getIsolationWindow();
+					Collection<MsPoint>minorParentIons = 
+							fb.getMsFeature().getSpectrum().getMsPoints().stream().
+							filter(p -> !p.equals(m1p)).
+							filter(p -> iw.contains(p.getMz())).
+							sorted(MsUtils.mzSorter).collect(Collectors.toList());
+					
+					msms.setMinorParentIons(minorParentIons, msOneParent);
+					
 					fb.getMsFeature().getSpectrum().addTandemMs(msms);
 				}
 			} catch (SQLException e) {
