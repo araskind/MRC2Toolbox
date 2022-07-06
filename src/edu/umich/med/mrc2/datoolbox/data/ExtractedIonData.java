@@ -32,11 +32,11 @@ import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
 public class ExtractedIonData {
 
-	private String name;
-	private double extractedMass;
-	private double[] timeValues;
-	private double[] intensityValues;
-	private Adduct adduct;
+	protected String name;
+	protected double extractedMass;
+	protected double[] timeValues;
+	protected double[] intensityValues;
+	protected Adduct adduct;
 	
 	public ExtractedIonData(
 			String name, 
@@ -94,6 +94,38 @@ public class ExtractedIonData {
 	public void setAdduct(Adduct adduct) {
 		this.adduct = adduct;
 	}
+	
+	public String getEncodedTimeString() {
+		
+		double[]times = new double[timeValues.length];
+		for(int i=0; i<timeValues.length; i++)
+			times[i] =  Math.floor(timeValues[i] * 1000) / 1000;
+		
+		String timeString = "";
+		try {
+			timeString = NumberArrayUtils.encodeNumberArray(times);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return timeString;
+	}
+	
+	public String getEncodedIntensityString() {
+		
+		double[]intensities = new double[intensityValues.length];
+		for(int i=0; i<intensityValues.length; i++)
+			intensities[i] =  Math.floor(intensityValues[i] * 100) / 100;
+
+		String intensityString = "";
+		try {
+			intensityString = NumberArrayUtils.encodeNumberArray(intensities);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return intensityString;
+	}
 
 	public Element getXmlElement() {
 		
@@ -113,32 +145,12 @@ public class ExtractedIonData {
 		extractedIonDataElement.setAttribute(
 				ExtractedIonDataFields.Target.name(), targetMz);	
 		
-		double[]times = new double[timeValues.length];
-		for(int i=0; i<timeValues.length; i++)
-			times[i] =  Math.floor(timeValues[i] * 1000) / 1000;
-
-		String timeString = "";
-		try {
-			timeString = NumberArrayUtils.encodeNumberArray(times);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		String timeString = getEncodedTimeString();
 		Element timeElement = 
 				new Element(ExtractedIonDataFields.Time.name()).setText(timeString);			
 		extractedIonDataElement.addContent(timeElement);
-		
-		double[]intensities = new double[intensityValues.length];
-		for(int i=0; i<intensityValues.length; i++)
-			intensities[i] =  Math.floor(intensityValues[i] * 100) / 100;
 
-		String intensityString = "";
-		try {
-			intensityString = NumberArrayUtils.encodeNumberArray(intensities);
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		String intensityString = getEncodedIntensityString();
 		Element intensityElement = 
 				new Element(ExtractedIonDataFields.Intensity.name()).setText(intensityString);			
 		extractedIonDataElement.addContent(intensityElement);

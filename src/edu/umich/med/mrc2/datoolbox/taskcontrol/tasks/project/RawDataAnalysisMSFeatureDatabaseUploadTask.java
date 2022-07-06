@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
@@ -30,7 +33,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.ExtractedIonData;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
@@ -105,8 +110,8 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		total = bundles.size();
 		processed = 0;	
 		Map<String, MsFeatureChromatogramBundle> chromatogramMap = 
-				project.getChromatogramMap();
-		
+				new HashMap<String, MsFeatureChromatogramBundle>();
+						
 		Connection conn = ConnectionManager.getConnection();
 		
 		String dataAnalysisId = IDTUtils.addNewDataAnalysis(
@@ -158,9 +163,19 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";		
 		PreparedStatement libMatchPs = conn.prepareStatement(libMatchQuery);
 		
+		String chromatogramQuery = 
+				"INSERT INTO MSMS_PARENT_FEATURE_CHROMATOGRAM  " +
+				"(FEATURE_ID, INJECTION_ID, MS_LEVEL, EXTRACTED_MASS,  " +
+				"MASS_ERROR_VALUE, MASS_ERROR_TYPE, START_RT, END_RT,  " +
+				"TITLE, TIME_VALUES, INTENSITY_VALUES)  " +
+				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+		PreparedStatement chromPs = conn.prepareStatement(chromatogramQuery);
+		
 		Map<String, MsFeatureIdentity>manualIds = new TreeMap<String, MsFeatureIdentity>();
 		ArrayList<MsFeatureInfoBundle>withStdAnnotations = new ArrayList<MsFeatureInfoBundle>();
 		ArrayList<MsFeatureInfoBundle>withFollowups = new ArrayList<MsFeatureInfoBundle>();
+		Map<String,MsFeatureChromatogramBundle>featureChromatogramMap = 
+				new TreeMap<String, MsFeatureChromatogramBundle>();
 		
 		for(MsFeatureInfoBundle bundle : bundles) {
 			
@@ -172,8 +187,11 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 					"0",
 					12);	
 				
+			chromatogramMap.put(parentFeatureId, 
+					project.getChromatogramMap().get(feature.getId()));
 			featureIdMap.put(feature.getId(), parentFeatureId);
 			feature.setId(parentFeatureId);
+					
 			Collection<MsPoint>msOne = getTrimmedMsOne(feature);
 			double bpMz = 0.0d;
 			if(msOne != null) {
@@ -359,8 +377,10 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 				withFollowups.add(bundle);
 					
 			//	Insert chromatograms
-//			MsFeatureChromatogramBundle msfCb = 
-//					chromatogramMap.get(bundle.getMsFeature().getId());
+			MsFeatureChromatogramBundle msfCb = 
+					chromatogramMap.get(bundle.getMsFeature().getId());			
+			if(msfCb != null)			
+				featureChromatogramMap.put(feature.getId(), msfCb);
 			
 			//	MS-RT library match
 //			for(MsFeatureIdentity identification : feature.getIdentifications()) {
@@ -403,6 +423,10 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 					
 					withStdAnnotations.clear();
 				}
+				if(!featureChromatogramMap.isEmpty()) {
+					insertFeatureChromatograms(featureChromatogramMap, chromPs);
+					featureChromatogramMap.clear();
+				}
 			}
 		}
 		//	Execute last batch
@@ -418,23 +442,21 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 			
 			for(Entry<String, MsFeatureIdentity> entry : manualIds.entrySet())
 				IdentificationUtils.addMSMSFeatureManualId(entry.getKey(), entry.getValue(), conn);
-			
-			manualIds.clear();
 		}
 		if(!withStdAnnotations.isEmpty()) {
 			
 			for(MsFeatureInfoBundle b : withStdAnnotations)
 				StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(b, conn);
-			
-			withStdAnnotations.clear();
 		}
 		if(!withFollowups.isEmpty()) {
 			
 			for(MsFeatureInfoBundle b : withFollowups)
 				IdFollowupUtils.setIdFollowupStepsForMSMSFeature(b, conn);
-			
-			withStdAnnotations.clear();
 		}
+		if(!featureChromatogramMap.isEmpty())
+			insertFeatureChromatograms(featureChromatogramMap, chromPs);
+		
+		
 		//	Close all statements
 		parentFeaturePs.close();
 		msOnePs.close();
@@ -443,7 +465,70 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		precursorPs.close();
 		scanMapPs.close();
 		libMatchPs.close();
+		chromPs.close();
 		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private void insertFeatureChromatograms(
+			Map<String,MsFeatureChromatogramBundle>featureChromatogramMap, 
+			PreparedStatement chromPs) throws Exception {
+		
+		for(Entry<String, MsFeatureChromatogramBundle> entry : featureChromatogramMap.entrySet()) {
+			
+			MsFeatureChromatogramBundle msfCb = entry.getValue();
+			ChromatogramDefinition cd = msfCb.getChromatogramDefinition();
+			
+			chromPs.setString(1, entry.getKey());			
+			chromPs.setInt(3, cd.getMsLevel());
+			chromPs.setDouble(5, cd.getMzWindowValue());
+			chromPs.setString(6, cd.getMassErrorType().name());
+			chromPs.setDouble(7, cd.getRtRange().getMin());
+			chromPs.setDouble(8, cd.getRtRange().getMax());
+			
+			for(Entry<DataFile, Collection<ExtractedIonData>> fileEntry : msfCb.getChromatograms().entrySet()) {
+				
+				chromPs.setString(2, fileEntry.getKey().getInjectionId());				
+				for(ExtractedIonData eid : fileEntry.getValue()) {
+					
+					chromPs.setDouble(4, eid.getExtractedMass());
+					chromPs.setString(9, eid.getName());
+
+					byte[] compressedTimeString = 
+							eid.getEncodedTimeString().getBytes(StandardCharsets.US_ASCII);
+					InputStream timeIs = null;
+					try {
+						timeIs = new ByteArrayInputStream(compressedTimeString);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					if(timeIs != null)
+						chromPs.setBinaryStream(10, timeIs, compressedTimeString.length);
+					else
+						chromPs.setBinaryStream(10, null, 0);
+
+					byte[] compressedIntensityString = 
+							eid.getEncodedIntensityString().getBytes(StandardCharsets.US_ASCII);
+					InputStream intensityIs = null;
+					try {
+						intensityIs = new ByteArrayInputStream(compressedIntensityString);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					if(intensityIs != null)
+						chromPs.setBinaryStream(11, intensityIs, compressedIntensityString.length);
+					else
+						chromPs.setBinaryStream(11, null, 0);
+					
+					chromPs.executeUpdate();
+					
+					if(timeIs != null)
+						timeIs.close();
+					
+					if(intensityIs != null)
+						intensityIs.close();				
+				}
+			}	
+		}
 	}
 	
 	private Collection<MsPoint>getTrimmedMsOne(MsFeature feature){

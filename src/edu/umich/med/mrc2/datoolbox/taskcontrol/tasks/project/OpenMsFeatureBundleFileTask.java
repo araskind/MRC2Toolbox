@@ -91,7 +91,7 @@ public class OpenMsFeatureBundleFileTask extends AbstractTask {
 				if(bundle.getSample() == null)
 					bundle.setSample(ps);
 				
-				if(bundle.getStockSample() == null)
+				if(bundle.getStockSample() == null && ps != null)
 					bundle.setStockSample(ps.getParentStockSample());
 				
 				features.add(bundle);

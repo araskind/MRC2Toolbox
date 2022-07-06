@@ -38,6 +38,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -61,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.IDTMsSummary;
+import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSBioSpecies;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSClient;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -2456,6 +2458,22 @@ public class IDTUtils {
 			is.close();
 
 		return newMethod;
+	}
+	
+	public static Collection<Injection>getInjectionsByIds(Collection<String>injectionIds) throws Exception {
+		
+		 Connection conn = ConnectionManager.getConnection();	 
+		 Collection<Injection>injections = getInjectionsByIds(injectionIds, conn);
+		 ConnectionManager.releaseConnection(conn);
+		 return injections;
+	}
+	
+	public static Collection<Injection>getInjectionsByIds(Collection<String>injectionIds, Connection conn) throws Exception {
+		
+		Collection<Injection>injections = new HashSet<Injection>();
+		
+		
+		return injections;
 	}
 }
 

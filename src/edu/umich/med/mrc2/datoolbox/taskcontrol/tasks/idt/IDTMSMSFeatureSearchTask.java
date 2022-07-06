@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,12 +47,14 @@ import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IChemModel;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
@@ -62,6 +65,7 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.SQLParameter;
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
+import edu.umich.med.mrc2.datoolbox.data.StoredExtractedIonData;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityIDLevelComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityMSMSScoreComparator;
@@ -80,6 +84,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
@@ -88,6 +93,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
@@ -99,6 +105,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import rtf.AdvancedRTFDocument;
 import rtf.AdvancedRTFEditorKit;
@@ -966,6 +973,88 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		}
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
+	}
+	
+	protected void attachChromatograms() throws Exception {
+		
+		
+		Connection conn = ConnectionManager.getConnection();
+		taskDescription = "Reading chromatograms ...";
+		total = features.size();
+		processed = 0;
+		Collection<StoredExtractedIonData>storedChroms = new ArrayList<StoredExtractedIonData>();		
+		String query = 
+				"SELECT INJECTION_ID, MS_LEVEL, EXTRACTED_MASS,  " +
+				"MASS_ERROR_VALUE, MASS_ERROR_TYPE, START_RT, END_RT,  " +
+				"TITLE, TIME_VALUES, INTENSITY_VALUES " +
+				"FROM MSMS_PARENT_FEATURE_CHROMATOGRAM  " +
+				"WHERE FEATURE_ID = ? ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = null;
+		for(MsFeatureInfoBundle fb : features) {
+			
+			ps.setString(1, fb.getMsFeatureId());
+			rs = ps.executeQuery();
+			while (rs.next()) {
+
+				double[] timeValues = new double[0];
+				double[] intensityValues = new double[0];
+				InputStream its = rs.getBinaryStream("TIME_VALUES");
+				if (its != null) {
+					BufferedInputStream itbis = new BufferedInputStream(its);
+					String encodedTime = new String(itbis.readAllBytes(), StandardCharsets.US_ASCII);
+					timeValues = NumberArrayUtils.decodeNumberArray(encodedTime);
+					its.close();
+				}
+				its = rs.getBinaryStream("INTENSITY_VALUES");
+				if (its != null) {
+					BufferedInputStream itbis = new BufferedInputStream(its);
+					String encodedIntensity = new String(itbis.readAllBytes(), StandardCharsets.US_ASCII);
+					intensityValues = NumberArrayUtils.decodeNumberArray(encodedIntensity);
+				}
+				StoredExtractedIonData seid = new StoredExtractedIonData(
+						rs.getString("TITLE"),
+						rs.getDouble("EXTRACTED_MASS"), 
+						timeValues, 
+						intensityValues, 
+						fb.getMsFeatureId(),
+						rs.getString("INJECTION_ID"), 
+						rs.getInt("MS_LEVEL"), 
+						rs.getDouble("MASS_ERROR_VALUE"),
+						MassErrorType.getTypeByName(rs.getString("MASS_ERROR_TYPE")), 
+						rs.getDouble("START_RT"),
+						rs.getDouble("END_RT"));
+				storedChroms.add(seid);
+				processed++;
+			}
+			rs.close();
+		}
+		ps.close();
+		if(storedChroms.isEmpty()) {
+			ConnectionManager.releaseConnection(conn);
+			return;
+		}
+		List<String> injectionIds = storedChroms.stream().
+				map(c -> c.getInjectionId()).distinct().
+				collect(Collectors.toList());
+		Collection<Injection>injections = 
+				 IDTUtils.getInjectionsByIds(injectionIds);
+		
+		Map<String, List<StoredExtractedIonData>> featureChromMap = 
+				storedChroms.stream().collect(Collectors.groupingBy(StoredExtractedIonData::getFeatureId));
+		taskDescription = "Creating chromatogram bundles ...";
+		total = featureChromMap.size();
+		processed = 0;
+		for(Entry<String, List<StoredExtractedIonData>>chrEntry : featureChromMap.entrySet()) {
+			
+			ChromatogramDefinition chromatogramDefinition = null;	//TODO
+			
+			MsFeatureChromatogramBundle fcb = 
+					new MsFeatureChromatogramBundle(chrEntry.getKey(), chromatogramDefinition);
+			
+			FeatureChromatogramUtils.putFeatureChromatogramBundleInCache(fcb);
+			processed++;
+		}
 	}
 	
 	protected void attachAnnotations() throws Exception {

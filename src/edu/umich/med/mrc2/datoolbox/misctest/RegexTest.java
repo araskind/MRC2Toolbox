@@ -154,6 +154,7 @@ import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDbConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.DocumentUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTMsDataUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
@@ -220,10 +221,14 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			addManufacturerIds();
+			testChrom();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void testChrom() throws Exception {
+		FeatureChromatogramUtils.getMsFeatureChromatogramBundleForFeature("MSF_000003733493");
 	}
 	
 	private static void addManufacturerIds() throws Exception {

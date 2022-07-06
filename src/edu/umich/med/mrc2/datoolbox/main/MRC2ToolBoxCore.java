@@ -100,6 +100,7 @@ public final class MRC2ToolBoxCore {
 	private static CompositeCacheManager compositeCacheManager;
 	private static Properties cacheProps;
 	public static CacheAccess<Object, Object> msmsFeatureCache;
+	public static CacheAccess<Object, Object> featureChromatogramCache;
 
 	@SuppressWarnings("rawtypes")
 	private static Map<DataFile, LCMSData>rawDataMap;
@@ -399,6 +400,7 @@ public final class MRC2ToolBoxCore {
 		compositeCacheManager.configure(cacheProps);
 		
 		msmsFeatureCache = JCS.getInstance("msmsFeatureCache");
+		featureChromatogramCache = JCS.getInstance("featureChromatogramCache");
 	}
 
 	public static RawDataAnalysisProject getActiveRawDataAnalysisProject() {
