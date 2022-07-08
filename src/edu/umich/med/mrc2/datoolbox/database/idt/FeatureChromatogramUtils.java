@@ -45,15 +45,15 @@ public class FeatureChromatogramUtils {
 		try {
 			MRC2ToolBoxCore.featureChromatogramCache.put(key, bundle);
 		} catch (CacheException e) {
-			System.out.println(String.format(
+			System.err.println(String.format(
 					"Problem putting feature chromatogram bundle in the cache, for key %s%n%s",
 					key, e.getMessage()));
 		}
 	}
 
-	public static MsFeatureChromatogramBundle retrieveFeatureChromatogramBundleFromCache(String msmsId) {
+	public static MsFeatureChromatogramBundle retrieveFeatureChromatogramBundleFromCache(String msId) {
 		return (MsFeatureChromatogramBundle) 
-				MRC2ToolBoxCore.featureChromatogramCache.get(msmsId);
+				MRC2ToolBoxCore.featureChromatogramCache.get(msId);
 	}
 	
 	public static MsFeatureChromatogramBundle getMsFeatureChromatogramBundleForFeature(

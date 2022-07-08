@@ -45,7 +45,6 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInjection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -67,7 +66,7 @@ public class IDTrackerSiriusMsExportTask extends AbstractTask {
 	private static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 	
 	private Collection<Injection>injections;
-	private TreeMap<String, LIMSInjection> injectionMap;
+	private TreeMap<String, Injection> injectionMap;
 	private Collection<SiriusMsMsCluster> msmsclusters;
 	private double rtError;
 	private double mzError;
@@ -143,7 +142,7 @@ public class IDTrackerSiriusMsExportTask extends AbstractTask {
 	
 	private void createInjectionMap(Collection<MsFeatureInfoBundle> msmsFeatures) {
 
-		injectionMap = new TreeMap<String,LIMSInjection>();
+		injectionMap = new TreeMap<String,Injection>();
 		List<String> injIds = msmsFeatures.stream().
 				map(f -> f.getInjectionId()).distinct().
 				filter(i -> !i.equals(null)).sorted().
@@ -155,7 +154,7 @@ public class IDTrackerSiriusMsExportTask extends AbstractTask {
 		for(String id : injIds) {
 
 			try {
-				LIMSInjection injection = IDTUtils.getInjectionById(id);
+				Injection injection = IDTUtils.getInjectionById(id);
 				if(injection != null)
 					injectionMap.put(id, injection);
 
@@ -188,10 +187,10 @@ public class IDTrackerSiriusMsExportTask extends AbstractTask {
 		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(bundle.getMsFeature().getRetentionTime()) + " min. | ";
 		String injId = bundle.getInjectionId();
 		if(injId != null) {
-			LIMSInjection injection = injectionMap.get(injId);
+			Injection injection = injectionMap.get(injId);
 			if(injection != null) {
-				comment += "Data file: " + injection.getDataFile() + "; ";
-				comment += "Timestamp: " + dateFormat.format(injection.getTimestamp()) + "; ";
+				comment += "Data file: " + injection.getDataFileName() + "; ";
+				comment += "Timestamp: " + dateFormat.format(injection.getTimeStamp()) + "; ";
 			}
 		}
 		comment += "Acq. method: " + bundle.getAcquisitionMethod().getName() + "; ";

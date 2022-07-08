@@ -155,6 +155,30 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 			smoothingFilter = new SavitzkyGolayFilter(filterWidth.getWidth());
 	}
 
+	public ChromatogramDefinition(
+			Polarity polarity, 
+			int msLevel, 
+			Collection<Double> mzList,
+			Double mzWindowValue, 
+			MassErrorType massErrorType, 
+			Range rtRange) {
+		super();
+		this.mode = ChromatogramPlotMode.XIC;
+		this.polarity = polarity;
+		this.msLevel = msLevel;
+		this.mzList = new TreeSet<Double>();
+		if(mzList != null)
+			this.mzList.addAll(mzList);
+		
+		this.sumAllMassChromatograms = false;
+		this.mzWindowValue = mzWindowValue;
+		this.massErrorType = massErrorType;
+		if(rtRange!= null)
+			this.rtRange = new Range(rtRange);
+		
+		this.doSmooth = false;
+	}
+	
 	public ChromatogramPlotMode getMode() {
 		return mode;
 	}
@@ -398,6 +422,10 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 
 	public void setMzList(Collection<Double> mzList) {
 		this.mzList = mzList;
+	}
+
+	public void setPolarity(Polarity polarity) {
+		this.polarity = polarity;
 	}
 }
 

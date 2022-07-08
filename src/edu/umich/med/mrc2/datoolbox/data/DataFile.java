@@ -75,62 +75,48 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 	public DataFile(String fileName) {
 
 		this.name = fileName;
-		enabled = true;
 		injectionTime = null;
 		acquisitionMethod = null;
-		scalingFactor = 1.0d;
-		batchNumber = 1;
-		chromatograms = new ArrayList<ExtractedChromatogram>();
-		userSpectra = new ArrayList<AverageMassSpectrum>();
-		color = Color.BLACK;
-		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();
+		initFields();
 	}
 	
 	public DataFile(File dataFile) {
 
 		this.name = dataFile.getName();
 		fullPath = dataFile.getAbsolutePath();
-		enabled = true;
 		injectionTime = null;
 		acquisitionMethod = null;
-		scalingFactor = 1.0d;
-		batchNumber = 1;
-		chromatograms = new ArrayList<ExtractedChromatogram>();
-		userSpectra = new ArrayList<AverageMassSpectrum>();
-		color = Color.BLACK;
-		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();
+		initFields();
 	}
 
 	public DataFile(String fileName, DataAcquisitionMethod method) {
 
 		this.name = fileName;
-		enabled = true;
 		injectionTime = null;
 		acquisitionMethod = method;
-		scalingFactor = 1.0d;
-		batchNumber = 1;
-		chromatograms = new ArrayList<ExtractedChromatogram>();
-		userSpectra = new ArrayList<AverageMassSpectrum>();
-		color = Color.BLACK;
-		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();
+		initFields();
 	}
 	
 	public DataFile(Injection injection) {
 
-		this.name = injection.getDataFileName();
-		enabled = true;
+		this.name = injection.getDataFileName();	
 		injectionId = injection.getId();
 		injectionTime = injection.getTimeStamp();
 		acquisitionMethod = 
 				IDTDataCash.getAcquisitionMethodById(injection.getAcquisitionMethodId());
-		scalingFactor = 1.0d;
-		batchNumber = 1;
 		prepItemId = injection.getPrepItemId();
+		initFields();
+	}
+	
+	private void initFields() {
+		
+		enabled = true;
+		scalingFactor = 1.0d;
+		batchNumber = 1;		
 		chromatograms = new ArrayList<ExtractedChromatogram>();
 		userSpectra = new ArrayList<AverageMassSpectrum>();
 		color = Color.BLACK;
 		resultFiles = new TreeMap<DataExtractionMethod,ResultsFile>();
-		
 	}
 
 	public void addResultFile(ResultsFile result) {

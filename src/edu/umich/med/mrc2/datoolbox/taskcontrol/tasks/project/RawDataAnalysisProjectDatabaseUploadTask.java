@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -260,6 +262,18 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 				processedFiles++;
 			}
 			if(processedFiles == project.getMSMSDataFiles().size()) {
+				
+				 Map<String, MsFeatureChromatogramBundle>newChromatogramMap = 
+						 new TreeMap<String, MsFeatureChromatogramBundle>();
+				 
+				 for(Entry<String, String> entry : featureIdMap.entrySet()) 				 
+					 newChromatogramMap.put(
+							 entry.getValue(), 
+							 project.getChromatogramMap().get(entry.getKey()));
+				 
+				 project.getChromatogramMap().clear();
+				 project.getChromatogramMap().putAll(newChromatogramMap);
+				
 				if(!project.getFeatureCollections().isEmpty())
 					uploadFeatureCollections();
 				else

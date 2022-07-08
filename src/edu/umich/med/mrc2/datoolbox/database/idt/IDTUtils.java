@@ -66,7 +66,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSBioSpecies;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSClient;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInjection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
@@ -528,10 +527,55 @@ public class IDTUtils {
 	public static void deleteExperiment(LIMSExperiment experiment) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();
-		String query = "DELETE FROM EXPERIMENT WHERE EXPERIMENT_ID = ?";
+		
+		//	Check preps
+		String query = 
+				"SELECT DISTINCT S.EXPERIMENT_ID  " +
+				"FROM PREPARED_SAMPLE P, SAMPLE S " +
+				"WHERE S.SAMPLE_ID = P.SAMPLE_ID " +
+				"AND P.SAMPLE_PREP_ID = ? ";
 		PreparedStatement ps = conn.prepareStatement(query);
+		
+		TreeSet<String>expIds = new TreeSet<String>();
+		Collection<LIMSSamplePreparation> preps = 
+				IDTDataCash.getExperimentSamplePrepMap().get(experiment);
+		
+		Collection<LIMSSamplePreparation>prepsToDelete = 
+				new HashSet<LIMSSamplePreparation>();
+		
+		if(preps != null) {
+			
+			for(LIMSSamplePreparation prep : preps) {
+				
+				expIds.clear();
+				ps.setString(1, prep.getId());
+				ResultSet rs = ps.executeQuery();
+				while(rs.next())
+					expIds.add(rs.getString("EXPERIMENT_ID"));
+				
+				rs.close();
+				
+				if(expIds.size() == 1 && expIds.iterator().next().equals(experiment.getId()))
+					prepsToDelete.add(prep);
+			}
+		}		
+		query = "DELETE FROM EXPERIMENT WHERE EXPERIMENT_ID = ?";
+		ps = conn.prepareStatement(query);		
 		ps.setString(1, experiment.getId());
 		ps.executeUpdate();
+		
+		//	Delete preps for this experiment only
+		if(!prepsToDelete.isEmpty()) {
+			
+			query = "DELETE FROM SAMPLE_PREPARATION WHERE SAMPLE_PREP_ID = ?";
+			ps = conn.prepareStatement(query);
+			
+			for(LIMSSamplePreparation prep : prepsToDelete) {
+				
+				ps.setString(1, prep.getId());
+				ps.executeUpdate();
+			}			
+		}
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
@@ -2315,33 +2359,33 @@ public class IDTUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	public static LIMSInjection getInjectionById(String injectionId) throws Exception{
+	public static Injection getInjectionById(String injectionId) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();
-		LIMSInjection injection = getInjectionById(injectionId, conn);
+		Injection injection = getInjectionById(injectionId, conn);
 		ConnectionManager.releaseConnection(conn);
 		return injection;
 	}
 
-	public static LIMSInjection getInjectionById(String injectionId, Connection conn) throws Exception{
+	public static Injection getInjectionById(String injectionId, Connection conn) throws Exception{
 
-		LIMSInjection injection = null;
-		String query =
-			"SELECT DATA_FILE_NAME, INJECTION_TIMESTAMP, "
-			+ "ACQUISITION_METHOD_ID, INJECTION_VOLUME, INJECTION_STATUS "
-			+ "FROM INJECTION WHERE INJECTION_ID = ?";
+		Injection injection = null;
+		String query = 
+				"SELECT DATA_FILE_NAME, PREP_ITEM_ID, INJECTION_TIMESTAMP, " +
+				"ACQUISITION_METHOD_ID, INJECTION_VOLUME " +
+				"FROM INJECTION WHERE INJECTION_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, injectionId);
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 
-			 injection = new LIMSInjection(
-					 injectionId,
-					 rs.getString("DATA_FILE_NAME"),
-					 new Date(rs.getDate("INJECTION_TIMESTAMP").getTime()),
-					 rs.getString("ACQUISITION_METHOD_ID"),
-					 rs.getDouble("INJECTION_VOLUME"),
-					 rs.getString("INJECTION_STATUS"));
+			injection = new Injection(
+					injectionId,
+					rs.getString("DATA_FILE_NAME"),
+					new Date(rs.getDate("INJECTION_TIMESTAMP").getTime()),
+					rs.getString("PREP_ITEM_ID"),
+					rs.getString("ACQUISITION_METHOD_ID"),
+					rs.getDouble("INJECTION_VOLUME"));
 		}
 		rs.close();
 		ps.close();
@@ -2471,8 +2515,28 @@ public class IDTUtils {
 	public static Collection<Injection>getInjectionsByIds(Collection<String>injectionIds, Connection conn) throws Exception {
 		
 		Collection<Injection>injections = new HashSet<Injection>();
-		
-		
+		String query = 
+				"SELECT DATA_FILE_NAME, PREP_ITEM_ID, INJECTION_TIMESTAMP, " +
+				"ACQUISITION_METHOD_ID, INJECTION_VOLUME " +
+				"FROM INJECTION WHERE INJECTION_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		for(String injectionId : injectionIds) {
+			
+			ps.setString(1, injectionId);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				Injection inj = new Injection(
+						injectionId,
+						rs.getString("DATA_FILE_NAME"),
+						new Date(rs.getDate("INJECTION_TIMESTAMP").getTime()),
+						rs.getString("PREP_ITEM_ID"),
+						rs.getString("ACQUISITION_METHOD_ID"),
+						rs.getDouble("INJECTION_VOLUME"));
+				injections.add(inj);
+			}
+			rs.close();			
+		}
+		ps.close();		
 		return injections;
 	}
 }

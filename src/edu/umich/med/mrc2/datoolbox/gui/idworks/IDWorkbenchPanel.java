@@ -92,6 +92,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdLevelUtils;
@@ -3380,15 +3381,18 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void showFeatureChromatogram(MsFeatureInfoBundle selectedBundle) {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
-			return;
+		MsFeatureChromatogramBundle msfCb = null;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getChromatogramMap() == null)
-			return;
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null 
+				&& MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getChromatogramMap() != null) {
 			
-		MsFeatureChromatogramBundle msfCb = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
-				getChromatogramMap().get(selectedBundle.getMsFeature().getId());
+			msfCb = MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+					getChromatogramMap().get(selectedBundle.getMsFeature().getId());
+		}
+		else {
+			msfCb = FeatureChromatogramUtils.retrieveFeatureChromatogramBundleFromCache(
+					selectedBundle.getMsFeatureId());
+		}
 		TandemMassSpectrum msms = null;	
 		if(selectedBundle.getMsFeature().getSpectrum() != null)
 			msms = selectedBundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();

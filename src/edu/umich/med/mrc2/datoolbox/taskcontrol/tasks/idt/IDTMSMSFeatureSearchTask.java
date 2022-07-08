@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.swing.text.BadLocationException;
@@ -49,6 +50,7 @@ import org.openscience.cdk.interfaces.IChemModel;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
@@ -98,6 +100,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
@@ -232,6 +235,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				attachAnnotations();
 				attachFollowupSteps();
 				putDataInCache();
+				attachChromatograms();
 			}
 			applyAdditionalFilters();
 			//	updateAutomaticDefaultIdsBasedOnScores();
@@ -1024,10 +1028,10 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						MassErrorType.getTypeByName(rs.getString("MASS_ERROR_TYPE")), 
 						rs.getDouble("START_RT"),
 						rs.getDouble("END_RT"));
-				storedChroms.add(seid);
-				processed++;
+				storedChroms.add(seid);				
 			}
 			rs.close();
+			processed++;
 		}
 		ps.close();
 		if(storedChroms.isEmpty()) {
@@ -1040,6 +1044,14 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		Collection<Injection>injections = 
 				 IDTUtils.getInjectionsByIds(injectionIds);
 		
+		Collection<DataFile>dataFiles = new TreeSet<DataFile>();
+		injections.stream().forEach(i -> dataFiles.add(new DataFile(i)));
+		
+		int fCount = 0;
+		for(DataFile df :dataFiles) {			
+			df.setColor(ColorUtils.getColor(fCount));
+			fCount++;
+		}		
 		Map<String, List<StoredExtractedIonData>> featureChromMap = 
 				storedChroms.stream().collect(Collectors.groupingBy(StoredExtractedIonData::getFeatureId));
 		taskDescription = "Creating chromatogram bundles ...";
@@ -1047,16 +1059,50 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		processed = 0;
 		for(Entry<String, List<StoredExtractedIonData>>chrEntry : featureChromMap.entrySet()) {
 			
-			ChromatogramDefinition chromatogramDefinition = null;	//TODO
+			ChromatogramDefinition chromatogramDefinition = 
+					createChromatogramDefinition(chrEntry.getValue());	//TODO
 			
-			MsFeatureChromatogramBundle fcb = 
+			MsFeatureChromatogramBundle chromatogramBundle = 
 					new MsFeatureChromatogramBundle(chrEntry.getKey(), chromatogramDefinition);
-			
-			FeatureChromatogramUtils.putFeatureChromatogramBundleInCache(fcb);
+			for(StoredExtractedIonData scd : chrEntry.getValue()) {
+				
+				String injId = scd.getInjectionId();
+				DataFile df = dataFiles.stream().
+						filter(f -> f.getInjectionId().equals(injId)).
+						findFirst().orElse(null);
+				if(df != null) {
+					if(chromatogramBundle.getChromatogramDefinition().getPolarity() == null)
+						chromatogramBundle.getChromatogramDefinition().setPolarity(df.getDataAcquisitionMethod().getPolarity());
+						
+					chromatogramBundle.addChromatogramForDataFile(df, scd);		
+				}
+			}			
+			FeatureChromatogramUtils.putFeatureChromatogramBundleInCache(chromatogramBundle);
 			processed++;
 		}
 	}
 	
+	private ChromatogramDefinition createChromatogramDefinition(List<StoredExtractedIonData>extractedIonDataList) {
+		
+		Collection<Double> mzList = extractedIonDataList.stream().
+				map(c -> c.getExtractedMass()).
+				collect(Collectors.toCollection(TreeSet::new));
+		Double mzWindowValue = extractedIonDataList.stream().mapToDouble(c -> c.getMassErrorValue()).max().getAsDouble();
+		Range rtRange = new Range(extractedIonDataList.get(0).getRtRange());
+		for(int i=1; i<extractedIonDataList.size(); i++)
+			rtRange.extendRange(extractedIonDataList.get(i).getRtRange());
+		
+		ChromatogramDefinition chromDef = new ChromatogramDefinition(
+				null, 
+				extractedIonDataList.get(0).getMsLevel(), 
+				mzList,
+				mzWindowValue, 
+				extractedIonDataList.get(0).getMassErrorType(), 
+				rtRange);
+
+		return chromDef;
+	}
+
 	protected void attachAnnotations() throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();

@@ -388,6 +388,17 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(activeProject == null)
 			return;
 		
+		if(activeProject.getIdTrackerExperiment() != null 
+				&& activeProject.getIdTrackerExperiment().getId() != null) {
+			
+			LIMSExperiment existingExperiment = IDTDataCash.getExperimentById(
+					activeProject.getIdTrackerExperiment().getId());
+			if(existingExperiment != null) {
+				MessageDialog.showErrorMsg("Current project already uploaded to database as\n"
+						+ "experiment " + existingExperiment.toString());
+				return;
+			}
+		}		
 		Map<LIMSExperiment, Collection<DataFile>> existingDataFiles = 
 				checkForExistingDataFiles();
 		if(!existingDataFiles.isEmpty()) {
@@ -1178,11 +1189,17 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		IDTrackerLimsManagerPanel limsPanel = 
 				(IDTrackerLimsManagerPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_TRACKER_LIMS);
 		limsPanel.refreshIdTrackerdata();
-		
-//		task.getProject().getIdTrackerExperiment().getId();
-//		MessageDialog.showInfoMsg("Data for project \"" 
-//				+ task.getProject().getName() + "\" uploaded to the MetIDTRacker database", 
-//				this.getContentPane());
+
+		//	Force project save
+		showNewProjectDialog = false;
+		saveOnCloseRequested = false;
+		saveOnExitRequested = false;
+		showOpenProjectDialog = false;
+		SaveStoredRawDataAnalysisProjectTask saveTask = 
+				new SaveStoredRawDataAnalysisProjectTask(
+						MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
+		saveTask.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(saveTask);
 	}
 
 	private void finalizeRawDataFileConversionTask() {

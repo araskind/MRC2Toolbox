@@ -60,6 +60,15 @@ public class ExtractedIonData {
 		this.intensityValues = intensityValues;
 		this.name = MRC2ToolBoxConfiguration.getMzFormat().format(extractedMass);
 	}
+	
+	public ExtractedIonData(StoredExtractedIonData stored) {
+		
+		super();
+		this.name = stored.getName();
+		this.extractedMass = stored.getExtractedMass();
+		this.timeValues = stored.getTimeValues();
+		this.intensityValues = stored.getIntensityValues();
+	}
 
 	public String getName() {
 		return name;

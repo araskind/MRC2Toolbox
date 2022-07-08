@@ -45,6 +45,7 @@ public class MsFeatureChromatogramBundle {
 			String featureId, 
 			ChromatogramDefinition chromatogramDefinition) {
 		super();
+		this.featureId = featureId;
 		this.chromatogramDefinition = chromatogramDefinition;
 		chromatograms = new TreeMap<DataFile, Collection<ExtractedIonData>>();
 	}
