@@ -32,7 +32,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
-import java.text.Format;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,7 +108,9 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	public static final String MINIMAL_COUNTS = "MINIMAL_COUNTS";
 	public static final String LEAVE_MAX_FRAGMENTS = "LEAVE_MAX_FRAGMENTS";
 	public static final String MAX_FRAGMENTS_COUNT = "MAX_FRAGMENTS_COUNT";
-	public static final String INTENSITY_MEASURE = "INTENSITY_MEASURE";
+	public static final String INTENSITY_MEASURE = "INTENSITY_MEASURE";	
+	public static final String MERGE_COLLISION_ENERGIES = "MERGE_COLLISION_ENERGIES";
+	public static final String SPECTRUM_SIMILARITY_CUTOFF = "SPECTRUM_SIMILARITY_CUTOFF";	
 	public static final String FLAG_MINOR_ISOTOPES_PRECURSORS = "FLAG_MINOR_ISOTOPES_PRECURSORS";
 	public static final String MAX_PRECURSOR_CHARGE = "MAX_PRECURSOR_CHARGE";
 	public static final String FILTER_WIDTH = "FILTER_WIDTH";
@@ -122,6 +123,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	private JCheckBox chckbxRemoveAllMassesBelowCounts;
 	private JCheckBox flagMinorIsotopesPrecursorsCheckBox;
 	private JCheckBox limitExtractionRtCheckBox;
+	private JCheckBox mergeCollisionsCheckBox;
 	private JComboBox filterWidthComboBox;
 	private JComboBox intensityMeasureComboBox;
 	private JComboBox polarityComboBox;
@@ -135,6 +137,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	private JFormattedTextField rtFromTextField;
 	private JFormattedTextField rtToTextField;
 	private JFormattedTextField xicWindowTextField;
+	private JFormattedTextField specSimCutoffTextField;
 	private JSpinner maxChargeSpinner;
 	private JSpinner maxFragmentsSpinner;
 	private JTextArea descriptionTextArea;
@@ -358,10 +361,10 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_panel_3.gridy = 10;
 		panel_1.add(panel_3, gbc_panel_3);
 		GridBagLayout gbl_panel_3 = new GridBagLayout();
-		gbl_panel_3.columnWidths = new int[]{0, 87, 0, 0};
-		gbl_panel_3.rowHeights = new int[]{0, 0, 0};
-		gbl_panel_3.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_3.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_3.columnWidths = new int[]{0, 87, 0, 0, 0};
+		gbl_panel_3.rowHeights = new int[]{0, 0, 0, 0};
+		gbl_panel_3.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_3.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_3.setLayout(gbl_panel_3);
 		
 		JLabel lblNewLabel = new JLabel("Group MSMS if within RT window of ");
@@ -372,7 +375,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblNewLabel.gridy = 0;
 		panel_3.add(lblNewLabel, gbc_lblNewLabel);
 		
-		msmsGroupRtWindowTextField = new JFormattedTextField((Format) null);
+		msmsGroupRtWindowTextField = 
+				new JFormattedTextField(MRC2ToolBoxConfiguration.getRtFormat());
 		msmsGroupRtWindowTextField.setText("0.0");
 		msmsGroupRtWindowTextField.setColumns(10);
 		GridBagConstraints gbc_msmsGroupRtWindowTextField = new GridBagConstraints();
@@ -385,7 +389,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		JLabel lblNewLabel_1 = new JLabel("min.");
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
 		gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_1.gridx = 2;
 		gbc_lblNewLabel_1.gridy = 0;
 		panel_3.add(lblNewLabel_1, gbc_lblNewLabel_1);
@@ -393,16 +397,15 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		JLabel lblNewLabel_2 = new JLabel("Precursor mass tolerance");
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_2.gridx = 0;
 		gbc_lblNewLabel_2.gridy = 1;
 		panel_3.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
-		precursorGroupingMassErrorTextField = new JFormattedTextField((Format) null);
-		precursorGroupingMassErrorTextField.setText("0.65");
+		precursorGroupingMassErrorTextField = new JFormattedTextField(twoDecFormat);
 		precursorGroupingMassErrorTextField.setColumns(10);
 		GridBagConstraints gbc_precursorMassToleranceTextField = new GridBagConstraints();
-		gbc_precursorMassToleranceTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_precursorMassToleranceTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_precursorMassToleranceTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_precursorMassToleranceTextField.gridx = 1;
 		gbc_precursorMassToleranceTextField.gridy = 1;
@@ -413,10 +416,34 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		precursorGroupingMassErrorTypeComboBox.setSize(new Dimension(80, 22));
 		precursorGroupingMassErrorTypeComboBox.setPreferredSize(new Dimension(80, 22));
 		GridBagConstraints gbc_precursorMassErrorTypeComboBox = new GridBagConstraints();
+		gbc_precursorMassErrorTypeComboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_precursorMassErrorTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_precursorMassErrorTypeComboBox.gridx = 2;
 		gbc_precursorMassErrorTypeComboBox.gridy = 1;
 		panel_3.add(precursorGroupingMassErrorTypeComboBox, gbc_precursorMassErrorTypeComboBox);
+		
+		JLabel lblNewLabel_15 = new JLabel("Spectrum similarity cutoff ");
+		GridBagConstraints gbc_lblNewLabel_15 = new GridBagConstraints();
+		gbc_lblNewLabel_15.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_15.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_15.gridx = 0;
+		gbc_lblNewLabel_15.gridy = 2;
+		panel_3.add(lblNewLabel_15, gbc_lblNewLabel_15);
+		
+		specSimCutoffTextField = new JFormattedTextField(twoDecFormat);
+		specSimCutoffTextField.setColumns(10);
+		GridBagConstraints gbc_specSimCutoffTextField = new GridBagConstraints();
+		gbc_specSimCutoffTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_specSimCutoffTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_specSimCutoffTextField.gridx = 1;
+		gbc_specSimCutoffTextField.gridy = 2;
+		panel_3.add(specSimCutoffTextField, gbc_specSimCutoffTextField);
+
+		mergeCollisionsCheckBox = new JCheckBox("Merge collision energies");
+		GridBagConstraints gbc_mergeCollisionsCheckBox = new GridBagConstraints();
+		gbc_mergeCollisionsCheckBox.gridx = 3;
+		gbc_mergeCollisionsCheckBox.gridy = 2;
+		panel_3.add(mergeCollisionsCheckBox, gbc_mergeCollisionsCheckBox);
 
 		//		MSMS filtering
 		JPanel panel = new JPanel();
@@ -727,6 +754,14 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		return (IntensityMeasure)intensityMeasureComboBox.getSelectedItem();
 	}
 	
+	public double getSpectrumSimilarityCutoff() {
+		return Double.parseDouble(specSimCutoffTextField.getText());
+	}
+	
+	public boolean mergeCollisionEnergies() {
+		return mergeCollisionsCheckBox.isSelected();
+	}
+	
 	public boolean flagMinorIsotopesPrecursors() {
 		return flagMinorIsotopesPrecursorsCheckBox.isSelected();
 	}
@@ -787,6 +822,10 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		intensityMeasureComboBox.setSelectedItem(
 				IntensityMeasure.geIntensityMeasureByName(
 						preferences.get(INTENSITY_MEASURE, IntensityMeasure.ABSOLUTE.name())));	
+		
+		mergeCollisionsCheckBox.setSelected(preferences.getBoolean(MERGE_COLLISION_ENERGIES, Boolean.FALSE));
+		specSimCutoffTextField.setText(Double.toString(preferences.getDouble(SPECTRUM_SIMILARITY_CUTOFF, 0.70d)));
+				
 		flagMinorIsotopesPrecursorsCheckBox.setSelected(preferences.getBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, true));	
 		maxChargeSpinner.setValue(preferences.getInt(MAX_PRECURSOR_CHARGE, 2));		
 		filterWidthComboBox.setSelectedItem(
@@ -816,7 +855,9 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		preferences.putDouble(MINIMAL_COUNTS, Double.parseDouble(minimalCountsTextField.getText()));
 		preferences.putBoolean(LEAVE_MAX_FRAGMENTS, chckbxLeaveOnly.isSelected());
 		preferences.putInt(MAX_FRAGMENTS_COUNT, (int) maxFragmentsSpinner.getValue());		
-		preferences.put(INTENSITY_MEASURE, getIntensityMeasure().name());		
+		preferences.put(INTENSITY_MEASURE, getIntensityMeasure().name());	
+		specSimCutoffTextField.setText(Double.toString(preferences.getDouble(SPECTRUM_SIMILARITY_CUTOFF, 0.70d)));
+		preferences.putDouble(SPECTRUM_SIMILARITY_CUTOFF, Double.parseDouble(specSimCutoffTextField.getText()));		
 		preferences.putBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, flagMinorIsotopesPrecursorsCheckBox.isSelected());		
 		preferences.putInt(MAX_PRECURSOR_CHARGE, (int) maxChargeSpinner.getValue());		
 		preferences.put(FILTER_WIDTH, ((SavitzkyGolayWidth)filterWidthComboBox.getSelectedItem()).name());		
@@ -888,6 +929,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		ps.setMsMsCountsCutoff(getMsMsCountsCutoff());
 		ps.setFilterIntensityMeasure(getFilterIntensityMeasure());
 		ps.setMaxFragmentsCutoff(getMaxFragmentsCutoff());	
+		ps.setMergeCollisionEnergies(mergeCollisionEnergies());
+		ps.setSpectrumSimilarityCutoffForMerging(getSpectrumSimilarityCutoff());
 		ps.setFlagMinorIsotopesPrecursors(flagMinorIsotopesPrecursors());
 		ps.setMaxPrecursorCharge(getMaxPrecursorCharge());
 		ps.setSmoothingFilterWidth(getSmoothingFilterWidth());		
@@ -936,6 +979,9 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		
 		maxFragmentsSpinner.setValue(ps.getMaxFragmentsCutoff());
 		chckbxLeaveOnly.setSelected(ps.getMaxFragmentsCutoff() > 0);
+		
+		mergeCollisionsCheckBox.setSelected(ps.isMergeCollisionEnergies());
+		specSimCutoffTextField.setText(Double.toString(ps.getSpectrumSimilarityCutoffForMerging()));
 		
 		flagMinorIsotopesPrecursorsCheckBox.setSelected(ps.isFlagMinorIsotopesPrecursors());
 		maxChargeSpinner.setValue(ps.getMaxPrecursorCharge());

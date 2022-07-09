@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -634,8 +635,21 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		DataExtractionMethod existingDeMethod = 
 				 IDTDataCash.getDataExtractionMethodByMd5(methodMd5);
 			 
-	    if(existingDeMethod == null) {  //	Upload new method
-
+	    if(existingDeMethod == null) {
+	    	
+	    	// Check for same name and update name and description if necessary	    	
+	    	DataExtractionMethod sameNameDeMethod = 
+					 IDTDataCash.getDataExtractionMethodByMd5(ps.getName());
+	    	if(sameNameDeMethod != null) {
+	    		
+	    		String version = " V-" + ProjectUtils.dateTimeFormat.format(new Date());
+	    		String newName = ps.getName() + version;
+	    		String newDescription = ps.getDescription() + "\n" + version + 
+	    				"("+ MRC2ToolBoxCore.getIdTrackerUser().getFullName() + ")";	    		
+	    		ps.setName(newName);
+	    		ps.setDescription(newDescription);
+	    	}	
+	    	//	Upload new method
 			try {
 				existingDeMethod = 
 						IDTUtils.insertNewTrackerDataExtractionMethod(ps);

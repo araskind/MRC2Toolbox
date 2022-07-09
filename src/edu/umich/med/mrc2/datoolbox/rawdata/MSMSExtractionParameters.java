@@ -44,5 +44,7 @@ public enum MSMSExtractionParameters {
 	SmoothingFilterWidth,
 	ChromatogramExtractionWindow,
 	MsFeatureChromatogramExtractionTarget,
+	MergeCollisionEnergies,
+	SpectrumSimilarityCutoffForMerging,
 	;
 }

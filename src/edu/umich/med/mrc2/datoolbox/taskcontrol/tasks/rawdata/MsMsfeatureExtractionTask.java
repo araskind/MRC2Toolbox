@@ -91,6 +91,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private double msmsGroupingRtWindow;
 	private double precursorGroupingMassError;
 	private MassErrorType precursorGroupingMassErrorType;
+	private boolean mergeCollisionEnergies;
+	private double spectrumSimilarityCutoff;
 	private boolean flagMinorIsotopesPrecursors;
 	private int maxPrecursorCharge;
 	private double chromatogramExtractionWindow;
@@ -120,6 +122,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		this.msmsGroupingRtWindow = ps.getMsmsGroupingRtWindow();
 		this.precursorGroupingMassError = ps.getPrecursorGroupingMassError();
 		this.precursorGroupingMassErrorType = ps.getPrecursorGroupingMassErrorType();
+		this.mergeCollisionEnergies = ps.isMergeCollisionEnergies();
+		this.spectrumSimilarityCutoff = ps.getSpectrumSimilarityCutoffForMerging();
 		this.flagMinorIsotopesPrecursors = ps.isFlagMinorIsotopesPrecursors();
 		this.maxPrecursorCharge = ps.getMaxPrecursorCharge();		
 		this.chromatogramExtractionWindow = ps.getChromatogramExtractionWindow();
@@ -567,7 +571,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		features = features.stream().
 				sorted(new MsFeatureComparator(SortProperty.RT)).
 				collect(Collectors.toList());
-		
+				
 		for (MsFeature cf : features) {
 			
 			if (isCanceled()) {
@@ -575,15 +579,27 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				return;
 			}
 			for (MsFeatureCluster fClust : clusters) {
-
-				if (fClust.matchesOnMSMSParentIon(cf,
+				
+				if (!fClust.matchesOnMSMSParentIon(cf,
 						precursorGroupingMassError, 
 						precursorGroupingMassErrorType, 
-						msmsGroupingRtWindow)) {
-					fClust.addFeature(cf, dataPipeline);
-					assigned.add(cf);
-					break;
+						msmsGroupingRtWindow))
+					continue;
+					
+				if(!mergeCollisionEnergies && !fClust.matchesOnCollisionEnergy(cf))	
+					continue;
+				
+				if(spectrumSimilarityCutoff > 0.0) {
+
+					double maxScore = fClust.getMaxMS2Similarity(
+							cf, precursorGroupingMassError, precursorGroupingMassErrorType);
+					if(maxScore < spectrumSimilarityCutoff)
+						continue;
 				}
+					
+				fClust.addFeature(cf, dataPipeline);
+				assigned.add(cf);
+				break;
 			}
 			if (!assigned.contains(cf)) {
 

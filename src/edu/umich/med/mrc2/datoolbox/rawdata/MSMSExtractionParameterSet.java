@@ -68,6 +68,8 @@ public class MSMSExtractionParameterSet {
 	private double chromatogramExtractionWindow;
 	private ChromatogramDefinition commonChromatogramDefinition;
 	private MsFeatureChromatogramExtractionTarget xicTarget;
+	private boolean mergeCollisionEnergies;
+	private double spectrumSimilarityCutoffForMerging;
 	
 	public MSMSExtractionParameterSet(
 			String name,
@@ -87,7 +89,9 @@ public class MSMSExtractionParameterSet {
 			boolean flagMinorIsotopesPrecursors, 
 			int maxPrecursorCharge,
 			int smoothingFilterWidth,
-			double chromatogramExtractionWindow) {
+			double chromatogramExtractionWindow,
+			boolean mergeCollisionEnergies,
+			double spectrumSimilarityCutoffForMerging) {
 		super();
 		this.id = DataPrefix.MSMS_EXTRACTION_PARAMETER_SET.getName() +
 				UUID.randomUUID().toString().substring(0, 12);
@@ -109,6 +113,8 @@ public class MSMSExtractionParameterSet {
 		this.maxPrecursorCharge = maxPrecursorCharge;
 		this.smoothingFilterWidth = smoothingFilterWidth;
 		this.chromatogramExtractionWindow = chromatogramExtractionWindow;
+		this.mergeCollisionEnergies = mergeCollisionEnergies;
+		this.spectrumSimilarityCutoffForMerging = spectrumSimilarityCutoffForMerging;
 	}
 
 	public MSMSExtractionParameterSet() {
@@ -277,6 +283,31 @@ public class MSMSExtractionParameterSet {
 		this.id = id;
 	}
 	
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public boolean isMergeCollisionEnergies() {
+		return mergeCollisionEnergies;
+	}
+
+	public void setMergeCollisionEnergies(boolean mergeCollisionEnergies) {
+		this.mergeCollisionEnergies = mergeCollisionEnergies;
+	}
+
+	public double getSpectrumSimilarityCutoffForMerging() {
+		return spectrumSimilarityCutoffForMerging;
+	}
+
+	public void setSpectrumSimilarityCutoffForMerging(double spectrumSimilarityCutoffForMerging) {
+		this.spectrumSimilarityCutoffForMerging = spectrumSimilarityCutoffForMerging;
+	}
+	
 	public Element getXmlElement() {
 		
 		Element parametersElement = 
@@ -305,6 +336,7 @@ public class MSMSExtractionParameterSet {
 		parametersElement.setAttribute(
 				MSMSExtractionParameters.MinPrecursorIntensity.name(), 
 				Double.toString(minPrecursorIntensity));
+		
 		if(dataExtractionRtRange != null)
 			parametersElement.setAttribute(
 					MSMSExtractionParameters.DataExtractionRtRange.name(), 
@@ -342,7 +374,13 @@ public class MSMSExtractionParameterSet {
 				Boolean.toString(flagMinorIsotopesPrecursors));
 		parametersElement.setAttribute(
 				MSMSExtractionParameters.MaxPrecursorCharge.name(), 
-				Integer.toString(maxPrecursorCharge));
+				Integer.toString(maxPrecursorCharge));		
+		parametersElement.setAttribute(
+				MSMSExtractionParameters.MergeCollisionEnergies.name(), 
+				Boolean.toString(mergeCollisionEnergies));		
+		parametersElement.setAttribute(
+				MSMSExtractionParameters.SpectrumSimilarityCutoffForMerging.name(), 
+				Double.toString(spectrumSimilarityCutoffForMerging));
 		
 		//	TODO smoothing filter for MS1 and/or other MS1 stuff
 		
@@ -387,10 +425,14 @@ public class MSMSExtractionParameterSet {
 		chunks.add(Boolean.toString(flagMinorIsotopesPrecursors));
 		chunks.add(Integer.toString(maxPrecursorCharge));
 		chunks.add(MsUtils.spectrumMzExportFormat.format(chromatogramExtractionWindow));
+		chunks.add(Boolean.toString(mergeCollisionEnergies));
+		chunks.add(MsUtils.spectrumMzExportFormat.format(spectrumSimilarityCutoffForMerging));
+		
 		if(commonChromatogramDefinition != null)
 			chunks.add(commonChromatogramDefinition.getChromatogramDefinitionHash());
 		
 		chunks.add(xicTarget.name());
+		
 	    try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(StringUtils.join(chunks).getBytes(Charset.forName("windows-1252")));
@@ -469,6 +511,20 @@ public class MSMSExtractionParameterSet {
 		this.maxPrecursorCharge = Integer.parseInt(
 				parametersElement.getAttributeValue(
 						MSMSExtractionParameters.MaxPrecursorCharge.name()));
+		
+		String mceString = parametersElement.getAttributeValue(
+				MSMSExtractionParameters.MergeCollisionEnergies.name());
+		if(mceString != null)
+			this.mergeCollisionEnergies = Boolean.parseBoolean(mceString);
+		else
+			this.mergeCollisionEnergies = false;
+				
+		String simCutoffString = parametersElement.getAttributeValue(
+				MSMSExtractionParameters.SpectrumSimilarityCutoffForMerging.name());
+		if(simCutoffString != null)
+			spectrumSimilarityCutoffForMerging = Double.parseDouble(simCutoffString);
+		else
+			spectrumSimilarityCutoffForMerging = 0.70d;
 				
 		String xicTargetName = parametersElement.getAttributeValue(
 				MSMSExtractionParameters.MsFeatureChromatogramExtractionTarget.name());
@@ -498,14 +554,6 @@ public class MSMSExtractionParameterSet {
 		
 		Document methodDocument = new Document(getXmlElement());
 		return new XMLOutputter().outputString(methodDocument);
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 }
 

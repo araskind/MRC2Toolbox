@@ -47,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.utils.ClusterUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -344,6 +345,20 @@ public class MsFeatureCluster implements Serializable {
 				filter(f -> MsUtils.matchesOnMSMSParentIon(f, cf, massAccuracy, massErrorType, rtWindow, true)).
 				findFirst().isPresent();
 	}
+	
+	public boolean matchesOnCollisionEnergy(MsFeature cf) {
+		
+		if(cf.getSpectrum().getExperimentalTandemSpectrum() == null)
+			return false;
+		
+		Set<Double> cidLevels = clusterFeatures.values().stream().
+				flatMap(c -> c.stream()).
+				filter(f -> f.getSpectrum().getExperimentalTandemSpectrum() != null).
+				map(f -> f.getSpectrum().getExperimentalTandemSpectrum().getCidLevel()).
+				collect(Collectors.toSet());
+				
+		return cidLevels.contains(cf.getSpectrum().getExperimentalTandemSpectrum().getCidLevel());		
+	}
 
 	private void recalculateClusterParameters() {
 
@@ -520,6 +535,32 @@ public class MsFeatureCluster implements Serializable {
 		averaged.setName(name);
 		averaged.setSpectrum(spectrum);
 		return averaged;
+	}
+
+	public double getMaxMS2Similarity(
+			MsFeature cf, 
+			double mzError, 
+			MassErrorType mzErrorType) {
+		
+		if(cf.getSpectrum().getExperimentalTandemSpectrum() == null)
+			return 0;
+		
+		List<Collection<MsPoint>> msmsList = clusterFeatures.values().stream().
+			flatMap(c -> c.stream()).
+			filter(f -> f.getSpectrum().getExperimentalTandemSpectrum() != null).
+			map(f -> f.getSpectrum().getExperimentalTandemSpectrum().getSpectrum()).
+			collect(Collectors.toList());
+		double maxScore = 0.0d;
+		
+		Collection<MsPoint>newMsms = cf.getSpectrum().getExperimentalTandemSpectrum().getSpectrum();
+		for(Collection<MsPoint>msms : msmsList) {
+			
+			double score = MSMSScoreCalculator.calculateEntropyBasedMatchScore(
+					msms, newMsms, mzError, mzErrorType, 0.0d);
+			if(score > maxScore)
+				maxScore = score;
+		}		
+		return maxScore;
 	}
 }
 

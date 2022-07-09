@@ -77,11 +77,18 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
+		boolean metadataUploaded = false;
 		try {
 			uploadExperimentMetadata();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+		}
+		if(!metadataUploaded) {
+			clearUploadedMetadata();
+			errorMessage = "Experiment upload failed due to database error.";
+			setStatus(TaskStatus.ERROR);
+			return;
 		}
 		try {
 			initFeatureDataUpload();
@@ -91,29 +98,46 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 		}
 	}
 	
-	private void uploadExperimentMetadata() {
+	private void clearUploadedMetadata() {
+
+		taskDescription = "Rolling back data upload due to error ...";
+		total = 100;
+		processed = 20;
+		
+		String expId = project.getIdTrackerExperiment().getId();
+		IDTDataCash.refreshExperimentList();
+		IDTDataCash.refreshExperimentSamplePrepMap();
+		if(IDTDataCash.getExperimentById(expId) != null) {
+			
+			try {
+				IDTUtils.deleteExperiment(project.getIdTrackerExperiment());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private boolean uploadExperimentMetadata() {
 		
 		taskDescription = "Uploading metadata ...";
 		total = 100;
 		processed = 20;
 		
 		//	Add experiment
-		if(!insertNewExperiment()) {
-			setStatus(TaskStatus.ERROR);
-			return;
-		}	
-		if(!insertSamples()) {
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
-		if(!insertSampleprep()) {
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
-		if(!insertWorklist()) {
-			setStatus(TaskStatus.ERROR);
-			return;
-		}
+		if(!insertNewExperiment())
+			return false;
+		
+		if(!insertSamples())
+			return false;
+		
+		if(!insertSampleprep())
+			return false;
+		
+		if(!insertWorklist())
+			return false;		
+		
+		return true;
 	}
 
 	private boolean insertWorklist() {
