@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.idtable.uni;
 
 import java.awt.Cursor;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.text.DecimalFormat;
@@ -33,13 +34,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.InputMap;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
@@ -57,8 +64,10 @@ import edu.umich.med.mrc2.datoolbox.data.format.CompoundIdentityFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.ReferenceMsMsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.ReferenceMsMsLibraryMatchTypeFormat;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
@@ -209,6 +218,8 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		thf.getParserModel().setComparator(ReferenceMsMsLibraryMatch.class, new ReferenceMsMsLibraryMatchTypeComparator());
 		
 		finalizeLayout();
+		
+		createIdLevelActions();
 	}
 
 	public MsFeatureIdentity getFeatureIdAtPopup() {
@@ -310,13 +321,13 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		return bestMatchList;
 	}
 	
-	private void removeModelListeners() {
+	public void removeModelListeners() {
 		
 		if(identificationTableModelListener != null)
 			model.removeTableModelListener(identificationTableModelListener);
 	}
 	
-	private void addModelListeners() {
+	public void addModelListeners() {
 		
 		if(identificationTableModelListener != null)
 			model.addTableModelListener(identificationTableModelListener);
@@ -341,7 +352,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		this.identificationTableModelListener = identificationTableModelListener;
 		model.addTableModelListener(this.identificationTableModelListener);
 	}
-
+	
 	public void selectPrimaryIdentity() {
 
 		clearSelection();
@@ -371,6 +382,56 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 	public MsFeature getParentFeature() {
 		return parentFeature;
 	}
+	
+	private void createIdLevelActions() {
+		
+		InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		
+	    Action idLevelAction = new AbstractAction() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+
+	        }
+	    };
+	    
+		for(MSFeatureIdentificationLevel level : IDTDataCash.getMsFeatureIdentificationLevelList()) {
+			
+			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
+			//	GuiUtils.addMenuItem(idLevelMenu, level.getName(), listener, level.getName(), levelIcon);
+		}
+	}
+	
+	/**
+
+
+    setLayout( new BorderLayout() );
+
+    display = new JTextField();
+    display.setEditable( false );
+    display.setHorizontalAlignment(JTextField.RIGHT);
+    add(display, BorderLayout.NORTH);
+
+    JPanel buttonPanel = new JPanel();
+    buttonPanel.setLayout( new GridLayout(0, 5) );
+    add(buttonPanel, BorderLayout.CENTER);
+
+    for (int i = 0; i < 10; i++)
+    {
+        String text = String.valueOf(i);
+        JButton button = new JButton( text );
+        button.addActionListener( numberAction );
+        button.setBorder( new LineBorder(Color.BLACK) );
+        button.setPreferredSize( new Dimension(30, 30) );
+        buttonPanel.add( button );
+
+        InputMap inputMap = buttonPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(KeyStroke.getKeyStroke(text), text);
+        inputMap.put(KeyStroke.getKeyStroke("NUMPAD" + text), text);
+        buttonPanel.getActionMap().put(text, numberAction);
+    }
+}
+*/
+	
 }
 
 

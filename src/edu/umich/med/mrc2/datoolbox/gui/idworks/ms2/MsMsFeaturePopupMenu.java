@@ -21,12 +21,15 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 
 import javax.swing.Icon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.KeyStroke;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
@@ -42,7 +45,9 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 	 *
 	 */
 	private static final long serialVersionUID = -6064748415801630180L;
-
+	private static final int MASK =
+		    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();	
+	
 	private static final Icon nistPepMsIcon = GuiUtils.getIcon("NISTMS-pep", 24);
 	private static final Icon manualIdentificationIcon = GuiUtils.getIcon("manualIdentification", 24);
 	private static final Icon copySelectedIcon = GuiUtils.getIcon("copy", 24);
@@ -183,9 +188,13 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 		for(MSFeatureIdentificationLevel level : IDTDataCash.getMsFeatureIdentificationLevelList()) {
 			
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
-			GuiUtils.addMenuItem(
+			JMenuItem levelItem = GuiUtils.addMenuItem(
 					idLevelMenu, level.getName(), listener, 
 					MSFeatureIdentificationLevel.SET_PRIMARY + level.getName(), levelIcon);
+			if(level.getShorcut() != null)
+				levelItem.setAccelerator(
+						KeyStroke.getKeyStroke(level.getShorcut().charAt(0), 
+								MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
 	}
 	

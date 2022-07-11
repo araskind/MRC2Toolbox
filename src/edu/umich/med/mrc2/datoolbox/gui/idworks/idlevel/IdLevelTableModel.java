@@ -38,6 +38,7 @@ public class IdLevelTableModel extends BasicTableModel {
 	public static final String LEVEL_COLUMN = "Name";
 	public static final String LEVEL_RANK_COLUMN = "Rank";
 	public static final String LEVEL_COLOR_CODE_COLUMN = "Color code";
+	public static final String SHORCUT_COLUMN = "Shortcut";
 	public static final String ALLOW_UPDATE_DEFAULT_ID_COLUMN = "Allow update default ID";
 
 	public IdLevelTableModel() {
@@ -48,6 +49,7 @@ public class IdLevelTableModel extends BasicTableModel {
 			new ColumnContext(LEVEL_COLUMN, MSFeatureIdentificationLevel.class, false),
 			new ColumnContext(LEVEL_RANK_COLUMN, Integer.class, false),
 			new ColumnContext(LEVEL_COLOR_CODE_COLUMN, MSFeatureIdentificationLevel.class, false),
+			new ColumnContext(SHORCUT_COLUMN, String.class, false),
 			new ColumnContext(ALLOW_UPDATE_DEFAULT_ID_COLUMN, Boolean.class, true),
 		};
 	}
@@ -66,6 +68,7 @@ public class IdLevelTableModel extends BasicTableModel {
 				level,
 				level.getRank(),
 				level,
+				level.getShorcut(),
 				level.isAllowToReplaceAsDefault()
 			};
 			super.addRow(obj);

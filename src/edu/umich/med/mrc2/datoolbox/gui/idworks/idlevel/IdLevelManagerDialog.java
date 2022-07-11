@@ -161,6 +161,7 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 		level.setName(idLevelEditorDialog.getLevelName());
 		level.setRank(idLevelEditorDialog.getLevelRank());
 		level.setColorCode(idLevelEditorDialog.getLevelColor());
+		level.setShorcut(idLevelEditorDialog.getLevelShorcut());
 		if(level != null) {
 			try {
 				IdLevelUtils.editMSFeatureIdentificationLevel(level);
@@ -186,7 +187,11 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 		if(name.isEmpty()) {
 			errors.add("Name can not be empty.");
 			return errors;
-		}		
+		}	
+		String shortcut = idLevelEditorDialog.getLevelShorcut();
+		if(shortcut != null && shortcut.length() > 1)
+			errors.add("Sortcut should be a single capital letter");
+		
 		//	New status
 		if(level == null) {
 			
@@ -203,6 +208,16 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 			
 			if(sameName != null)
 				errors.add("Level with the same name already exists.");
+			
+			if(shortcut != null) {
+				
+				MSFeatureIdentificationLevel sameShortcut = 
+						IDTDataCash.getMsFeatureIdentificationLevelList().stream().
+						filter(s -> s.getShorcut() != null).
+						filter(s -> s.getShorcut().equals(shortcut)).findFirst().orElse(null);		
+				if(sameShortcut != null)
+					errors.add("Shortcut \""+shortcut+"\" already exists.");
+			}
 		}
 		else {	//	Existing status
 			String currentId = level.getId();
@@ -221,6 +236,17 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 			
 			if(sameName != null)
 				errors.add("Different level with the same name already exists.");
+			
+			if(shortcut != null) {
+				
+				MSFeatureIdentificationLevel sameShortcut = 
+						IDTDataCash.getMsFeatureIdentificationLevelList().stream().
+						filter(s -> s.getShorcut() != null).
+						filter(s -> !s.getId().equals(currentId)).
+						filter(s -> s.getShorcut().equals(shortcut)).findFirst().orElse(null);		
+				if(sameShortcut != null)
+					errors.add("Shortcut \""+shortcut+"\" already assigned to different ID level.");
+			}
 		}		
 		return errors;		
 	}

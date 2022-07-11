@@ -51,7 +51,7 @@ public class IdLevelUtils {
 		Collection<MSFeatureIdentificationLevel>levelList = new TreeSet<MSFeatureIdentificationLevel>();
 		String query =
 				"SELECT IDENTIFICATION_LEVEL_ID, NAME, RANK_ORDER, "
-				+ "COLOR_CODE, ALLOW_TO_REPLACE_AS_DEFAULT "
+				+ "COLOR_CODE, ALLOW_TO_REPLACE_AS_DEFAULT, SHORTCUT "
 				+ "FROM IDENTIFICATION_LEVEL ORDER BY RANK_ORDER";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -63,7 +63,8 @@ public class IdLevelUtils {
 					rs.getInt("RANK_ORDER"),
 					rs.getString("COLOR_CODE"),
 					rs.getBoolean("ALLOW_TO_REPLACE_AS_DEFAULT"));
-
+			
+			level.setShorcut(rs.getString("SHORTCUT"));
 			levelList.add(level);
 		}
 		rs.close();
@@ -88,7 +89,7 @@ public class IdLevelUtils {
 		String query =
 			"INSERT INTO IDENTIFICATION_LEVEL " + 
 			"(IDENTIFICATION_LEVEL_ID, NAME, RANK_ORDER, COLOR_CODE, "
-			+ "ALLOW_TO_REPLACE_AS_DEFAULT) VALUES(?, ?, ?, ?, ?)";
+			+ "ALLOW_TO_REPLACE_AS_DEFAULT, SHORTCUT) VALUES(?, ?, ?, ?, ?, ?)";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, newLevel.getId());
@@ -101,6 +102,12 @@ public class IdLevelUtils {
 			allowRepDefault = "1";
 		
 		ps.setString(5, allowRepDefault);
+		
+		if(newLevel.getShorcut() != null && !newLevel.getShorcut().isEmpty())
+			ps.setString(6, newLevel.getShorcut());
+		else
+			ps.setNull(6, java.sql.Types.NULL);
+		
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
@@ -112,7 +119,7 @@ public class IdLevelUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 				"UPDATE IDENTIFICATION_LEVEL SET NAME = ?, RANK_ORDER = ?, "
-				+ "COLOR_CODE = ?, ALLOW_TO_REPLACE_AS_DEFAULT = ? "
+				+ "COLOR_CODE = ?, ALLOW_TO_REPLACE_AS_DEFAULT = ?, SHORTCUT = ? "
 				+ "WHERE IDENTIFICATION_LEVEL_ID = ?";
 
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -125,27 +132,16 @@ public class IdLevelUtils {
 		
 		ps.setString(4, allowRepDefault);
 		
-		ps.setString(5, levelToUpdate.getId());
+		if(levelToUpdate.getShorcut() != null && !levelToUpdate.getShorcut().isEmpty())
+			ps.setString(5, levelToUpdate.getShorcut());
+		else
+			ps.setNull(5, java.sql.Types.NULL);
+		
+		ps.setString(6, levelToUpdate.getId());
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
-
-//	private static String getNextMSFeatureIdentificationLevelId(Connection conn) throws SQLException {
-//
-//		String levelId = null;
-//		String query = "SELECT '" + DataPrefix.IDENTIFICATION_LEVEL.getName() +
-//				"' || LPAD(ID_STATUS_SEQ.NEXTVAL, 3, '0') AS LEVEL_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			levelId = rs.getString("LEVEL_ID");
-//			break;
-//		}
-//		rs.close();
-//		ps.close();
-//		return levelId;
-//	}
 	
 	private static Integer getNextMSFeatureIdentificationLevelRank(Connection conn) throws SQLException {
 

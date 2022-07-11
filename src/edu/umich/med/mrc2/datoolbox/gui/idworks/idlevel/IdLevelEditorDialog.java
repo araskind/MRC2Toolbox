@@ -75,6 +75,8 @@ public class IdLevelEditorDialog extends JDialog implements ActionListener{
 	private JButton btnChooseColor;
 	private ColorPickerDialog colorPicker;
 	private Color levelColor;
+	private JLabel lblNewLabel;
+	private JTextField shortcutTextField;
 
 	public IdLevelEditorDialog(MSFeatureIdentificationLevel level, ActionListener listener) {
 		super((JDialog)listener);
@@ -88,9 +90,9 @@ public class IdLevelEditorDialog extends JDialog implements ActionListener{
 		panel_1.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(panel_1, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel_1.rowHeights = new int[]{0, 0, 0};
-		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
+		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 
@@ -104,7 +106,7 @@ public class IdLevelEditorDialog extends JDialog implements ActionListener{
 
 		levelNameTextField = new JTextField();
 		GridBagConstraints gbc_statusNameTextField = new GridBagConstraints();
-		gbc_statusNameTextField.gridwidth = 4;
+		gbc_statusNameTextField.gridwidth = 6;
 		gbc_statusNameTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_statusNameTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_statusNameTextField.gridx = 1;
@@ -153,10 +155,27 @@ public class IdLevelEditorDialog extends JDialog implements ActionListener{
 		btnChooseColor.setActionCommand(MainActionCommands.SHOW_COLOR_PICKER_COMMAND.getName());
 		btnChooseColor.addActionListener(this);
 		GridBagConstraints gbc_btnChooseColor = new GridBagConstraints();
+		gbc_btnChooseColor.insets = new Insets(0, 0, 0, 5);
 		gbc_btnChooseColor.anchor = GridBagConstraints.WEST;
 		gbc_btnChooseColor.gridx = 4;
 		gbc_btnChooseColor.gridy = 1;
 		panel_1.add(btnChooseColor, gbc_btnChooseColor);
+		
+		lblNewLabel = new JLabel("Shortcut");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel.gridx = 5;
+		gbc_lblNewLabel.gridy = 1;
+		panel_1.add(lblNewLabel, gbc_lblNewLabel);
+		
+		shortcutTextField = new JTextField();
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField.gridx = 6;
+		gbc_textField.gridy = 1;
+		panel_1.add(shortcutTextField, gbc_textField);
+		shortcutTextField.setColumns(5);
 
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -204,6 +223,9 @@ public class IdLevelEditorDialog extends JDialog implements ActionListener{
 			levelColor = level.getColorCode();			
 			if(levelColor != null)
 				colorSampleLabel.setBackground(levelColor);
+			
+			if(level.getShorcut() != null)
+				shortcutTextField.setText(level.getShorcut());
 		}
 	}
 
@@ -243,6 +265,15 @@ public class IdLevelEditorDialog extends JDialog implements ActionListener{
 	 */
 	public Color getLevelColor() {
 		return levelColor;
+	}
+	
+	public String getLevelShorcut() {
+		
+		String sc = shortcutTextField.getText().trim();
+		if(sc.isEmpty())
+			return null;
+		else 
+			return sc.toUpperCase();
 	}
 }
 

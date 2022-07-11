@@ -21,12 +21,15 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtable.uni;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 
 import javax.swing.Icon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.KeyStroke;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
@@ -43,6 +46,9 @@ public class UniversalIdentificationResultsTablePopupMenu
 	 *
 	 */
 	private static final long serialVersionUID = -6064748415801630180L;
+	
+	private static final int MASK =
+		    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();	
 
 	private static final Icon deleteIdIcon = GuiUtils.getIcon("deleteFeature", 24);
 	private static final Icon deleteAllIdsIcon = GuiUtils.getIcon("clearIdentifications", 24);
@@ -122,7 +128,10 @@ public class UniversalIdentificationResultsTablePopupMenu
 		for(MSFeatureIdentificationLevel level : IDTDataCash.getMsFeatureIdentificationLevelList()) {
 			
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
-			GuiUtils.addMenuItem(idLevelMenu, level.getName(), listener, level.getName(), levelIcon);
+			JMenuItem levelItem = 
+					GuiUtils.addMenuItem(idLevelMenu, level.getName(), listener, level.getName(), levelIcon);
+			if(level.getShorcut() != null)
+				levelItem.setAccelerator(KeyStroke.getKeyStroke(level.getShorcut().charAt(0), MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
 	}
 	
@@ -136,6 +145,10 @@ public class UniversalIdentificationResultsTablePopupMenu
 	@Override
 	public void identificationLevelDefinitionChanged(IdentificationLevelEvent e) {
 		refreshIdLevelMenu();
+	}
+
+	public JMenu getIdLevelMenu() {
+		return idLevelMenu;
 	}
 }
 

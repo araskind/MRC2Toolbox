@@ -21,13 +21,16 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.main;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.util.HashMap;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -43,8 +46,8 @@ public class MainMenuBar extends CommonMenuBar {
 	 *
 	 */
 	private static final long serialVersionUID = -6288875491040382193L;
-
-	
+	private static final int MASK =
+		    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();	
 
 	// Icons
 	private static final Icon newProjectIcon = GuiUtils.getIcon("newProject", 24);
@@ -126,17 +129,23 @@ public class MainMenuBar extends CommonMenuBar {
 
 			newProjectMenuItem = addItem(projectMenu, 
 					MainActionCommands.NEW_PROJECT_COMMAND, newProjectIcon);
+			newProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
 		newIDProjectMenuItem = addItem(projectMenu, 
 				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND, newRdaProjectIcon);
+		newIDProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK));
 		
 		projectMenu.addSeparator();
 
-		openProjectMenuItem = addItem(projectMenu, 
-				MainActionCommands.OPEN_PROJECT_COMMAND, openProjectIcon);
-		
+		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
+			
+			openProjectMenuItem = addItem(projectMenu, 
+					MainActionCommands.OPEN_PROJECT_COMMAND, openProjectIcon);
+			openProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK | InputEvent.SHIFT_DOWN_MASK));
+		}
 		openRdaProjectMenuItem = addItem(projectMenu, 
 				MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND, openRdaProjectIcon);
+		openRdaProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK));
 		
 		projectMenu.addSeparator();
 		
@@ -146,6 +155,8 @@ public class MainMenuBar extends CommonMenuBar {
 		
 		saveProjectMenuItem = addItem(projectMenu, 
 				MainActionCommands.SAVE_PROJECT_COMMAND, saveProjectIcon);
+		saveProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('S', MASK));
+		
 		saveProjectAsMenuItem = addItem(projectMenu, 
 				MainActionCommands.SAVE_PROJECT_COPY_COMMAND, saveProjectCopyIcon);
 		saveProjectAsMenuItem.setEnabled(false);
@@ -154,10 +165,14 @@ public class MainMenuBar extends CommonMenuBar {
 		
 		closeProjectMenuItem = addItem(projectMenu, 
 				MainActionCommands.CLOSE_PROJECT_COMMAND, closeProjectIcon);
+		closeProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('W', MASK));
+		
 		projectMenu.addSeparator();
 		
 		exitMenuItem = addItem(projectMenu, 
 				MainActionCommands.EXIT_COMMAND, exitIcon);
+		exitMenuItem.setAccelerator(KeyStroke.getKeyStroke('Q', MASK));
+		
 		add(projectMenu);
 		
 		// Panels
@@ -170,10 +185,16 @@ public class MainMenuBar extends CommonMenuBar {
 //		toolsMenu.setPreferredSize(preferredSize);
 		msToolsMenuItem = addItem(toolsMenu, 
 				MainActionCommands.SHOW_MS_TOOLBOX_COMMAND, msToolboxIcon);
+		msToolsMenuItem.setAccelerator(KeyStroke.getKeyStroke('T', MASK));
+		
 		adductManagerMenuItem = addItem(toolsMenu, 
 				MainActionCommands.SHOW_CHEM_MOD_EDITOR_COMMAND, chemModIcon);
+		adductManagerMenuItem.setAccelerator(KeyStroke.getKeyStroke('M', MASK));	
+		
 		rawDataToolsMenuItem = addItem(toolsMenu, 
 				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND, dataFileToolsIcon);
+		rawDataToolsMenuItem.setAccelerator(KeyStroke.getKeyStroke('R', MASK));	
+		
 		add(toolsMenu);
 		
 		//	DB Access
@@ -196,6 +217,7 @@ public class MainMenuBar extends CommonMenuBar {
 //		preferencesMenu.setPreferredSize(preferredSize);
 		preferencesMenuItem = addItem(preferencesMenu, 
 				MainActionCommands.EDIT_PREFERENCES_COMMAND, preferencesIcon);
+		preferencesMenuItem.setAccelerator(KeyStroke.getKeyStroke('P', MASK | InputEvent.SHIFT_DOWN_MASK));
 		
 		add(preferencesMenu);
 		
@@ -208,6 +230,7 @@ public class MainMenuBar extends CommonMenuBar {
 		
 		aboutSoftwareMenuItem = addItem(helpMenu, 
 				MainActionCommands.ABOUT_BOX_COMMAND, aboutIcon);
+		aboutSoftwareMenuItem.setAccelerator(KeyStroke.getKeyStroke('I', MASK));	
 		
 		add(helpMenu);
 	}

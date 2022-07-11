@@ -27,6 +27,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,10 +43,15 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -200,7 +206,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private static final Icon componentIcon = GuiUtils.getIcon("missingIdentifications", 16);
 	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "IDWorkbenchPanel.layout");
-
+	private static final int MASK =
+		    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();	
+    
 	private DockableReferenceMsOneFeatureTable msOneFeatureTable;
 	private DockableMSMSFeatureTable msTwoFeatureTable;
 	private DockableMolStructurePanel molStructurePanel;
@@ -310,6 +318,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private static final Icon reassignTopHitsIcon = GuiUtils.getIcon("recalculateScores", 24);
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
 	private static final Icon entropyIcon = GuiUtils.getIcon("spectrumEntropy", 24);
+	
+	private IdentificationTableModelListener identificationTableModelListener;
 
 	public IDWorkbenchPanel() {
 
@@ -331,10 +341,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		identificationsTable = new DockableUniversalIdentificationResultsTable(
 				"IDWorkbenchPanelDockableUniversalIdentificationResultsTable", "Identifications");
 		identificationsTable.getTable().getSelectionModel().addListSelectionListener(this);
-		identificationsTable.getTable().setIdentificationTableModelListener(
-				new IdentificationTableModelListener(identificationsTable.getTable(), this));
+		identificationTableModelListener =
+				new IdentificationTableModelListener(identificationsTable.getTable(), this);
+		identificationsTable.getTable().setIdentificationTableModelListener(identificationTableModelListener);
+		
 		idTablePopupMenu = new UniversalIdentificationResultsTablePopupMenu(this);
 		identificationsTable.getTable().addTablePopupMenu(idTablePopupMenu);
+		
+		initIdTableActions();
 		
 		molStructurePanel = new DockableMolStructurePanel(
 				"IDWorkbenchPanelDockableMolStructurePanel");
@@ -678,14 +692,19 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		for(MSFeatureIdentificationLevel level : IDTDataCash.getMsFeatureIdentificationLevelList()) {
 			
-			if (command.equals(level.getName())) {
-				setIdLevelForIdentification(level.getName());
-				return;
+			if (command.equals(level.getName()) 
+					|| command.equals(MSFeatureIdentificationLevel.SET_PRIMARY + level.getName())) {
+				runIdLevelUpdate(command);
+				break;
 			}
-			if (command.equals(MSFeatureIdentificationLevel.SET_PRIMARY + level.getName())) {
-				setPrimaryIdLevelForMultipleSelectedFeatures(level.getName());
-				return;
-			}			
+//			if (command.equals(level.getName())) {
+//				setIdLevelForIdentification(level.getName());
+//				return;
+//			}
+//			if (command.equals(MSFeatureIdentificationLevel.SET_PRIMARY + level.getName())) {
+//				setPrimaryIdLevelForMultipleSelectedFeatures(level.getName());
+//				return;
+//			}			
 		}
 		if (command.equals(MainActionCommands.SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND.getName()))
 			showIdTrackerDataExportDialog();
@@ -1767,6 +1786,110 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				e.printStackTrace();
 			}
 			updateSelectedMSMSFeatures();			
+		}
+	}
+	
+	private void initIdTableActions() {
+		
+        InputMap identificationsTableInputMap = 
+        		identificationsTable.getTable().getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap identificationsTableActionMap = 
+        		identificationsTable.getTable().getActionMap();
+
+        InputMap msTwoFeatureTableInputMap = 
+        		msTwoFeatureTable.getTable().getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap msTwoFeatureTableActionMap = 
+        		msTwoFeatureTable.getTable().getActionMap();
+        
+        for(MSFeatureIdentificationLevel level : IDTDataCash.getMsFeatureIdentificationLevelList()) {
+        	
+        	if(level.getShorcut() != null) {
+        		
+        		identificationsTableInputMap.put(
+	        			KeyStroke.getKeyStroke(level.getShorcut().charAt(0), MASK | InputEvent.SHIFT_DOWN_MASK), 
+	        			level.getName()); 
+        		identificationsTableActionMap.put(level.getName(), new IdLevelAction(level.getName()));
+        		
+        		msTwoFeatureTableInputMap.put(
+	        			KeyStroke.getKeyStroke(level.getShorcut().charAt(0), MASK | InputEvent.SHIFT_DOWN_MASK), 
+	        			MSFeatureIdentificationLevel.SET_PRIMARY + level.getName());       		
+	        	msTwoFeatureTableActionMap.put(
+	        			MSFeatureIdentificationLevel.SET_PRIMARY + level.getName(), 
+	        			new IdLevelAction(MSFeatureIdentificationLevel.SET_PRIMARY + level.getName()));
+        	}
+        }
+ 	}
+	
+	private void runIdLevelUpdate(String idLevelCommand) {
+		
+    	UpdateIdLevelTask task = new UpdateIdLevelTask(idLevelCommand);
+    	idp = new IndeterminateProgressDialog(
+    			"Updating identification confidence level ...", 
+    			IDWorkbenchPanel.this.getContentPane(), task);
+    	idp.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
+    	idp.setVisible(true);
+	}
+	
+	private class IdLevelAction extends AbstractAction {
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 558489381332029108L;
+		private String idLevelCommand;
+		
+		public IdLevelAction(String idLevelCommand) {
+			super();
+			this.idLevelCommand = idLevelCommand;
+		}
+		
+        @Override
+        public void actionPerformed(ActionEvent e) {
+        	runIdLevelUpdate(idLevelCommand);			    			
+    	} 
+    }	
+	
+	class UpdateIdLevelTask extends LongUpdateTask {
+	
+		private String idLevelCommand;
+		
+		public UpdateIdLevelTask(String idLevelCommand) {
+			super();
+			this.idLevelCommand = idLevelCommand;
+		}
+	
+		@Override
+		public Void doInBackground() {
+			
+			//identificationsTable.getTable().removeModelListeners();
+			identificationsTable.getTable().getSelectionModel().
+						removeListSelectionListener(IDWorkbenchPanel.this);
+			msTwoFeatureTable.getTable().getSelectionModel().
+						removeListSelectionListener(IDWorkbenchPanel.this);
+	
+        	if(idLevelCommand.startsWith(MSFeatureIdentificationLevel.SET_PRIMARY)) {
+				try {
+					setPrimaryIdLevelForMultipleSelectedFeatures(
+							idLevelCommand.replace(MSFeatureIdentificationLevel.SET_PRIMARY, ""));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	}
+			else {
+        		try {
+					setIdLevelForIdentification(idLevelCommand);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}  
+			}    	
+        	//identificationsTable.getTable().addModelListeners();
+        	identificationsTable.getTable().getSelectionModel().
+        				addListSelectionListener(IDWorkbenchPanel.this);
+			msTwoFeatureTable.getTable().getSelectionModel().
+						addListSelectionListener(IDWorkbenchPanel.this);
+			return null;
 		}
 	}
 		
