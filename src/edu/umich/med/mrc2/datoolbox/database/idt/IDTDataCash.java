@@ -67,6 +67,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
+import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
 public class IDTDataCash {
 
@@ -136,7 +137,14 @@ public class IDTDataCash {
 	public static Collection<MSMSClusteringParameterSet>msmsClusteringParameters = 
 			new HashSet<MSMSClusteringParameterSet>();
 	public static Collection<MSMSClusterDataSet>msmsClusterDataSetList = 
-			new HashSet<MSMSClusterDataSet>();
+			new HashSet<MSMSClusterDataSet>();	
+	public static Collection<MSMSExtractionParameterSet>msmsExtractionParameters = 
+			new HashSet<MSMSExtractionParameterSet>();
+	
+	public static void refreshMSMSExtractionParameters() {
+		msmsExtractionParameters.clear();
+		getMsmsExtractionParameters();
+	}
 	
 	public static void refreshMSMSClusterDataSetList() {
 		msmsClusterDataSetList.clear();
@@ -193,6 +201,27 @@ public class IDTDataCash {
 		
 		return getMsmsClusteringParameters().stream().
 				filter(p -> p.getMd5().equals(md5)).findFirst().orElse(null);
+	}
+	
+	public static Collection<MSMSExtractionParameterSet> getMsmsExtractionParameters() {
+		
+		if(msmsExtractionParameters == null)
+			msmsExtractionParameters =  new HashSet<MSMSExtractionParameterSet>();
+		
+		if(msmsExtractionParameters.isEmpty()) {
+			try {
+				msmsExtractionParameters.addAll(IDTUtils.getMSMSExtractionParameters());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return msmsExtractionParameters;
+	}
+	
+	public static MSMSExtractionParameterSet getMSMSExtractionParameterSetById(String id) {
+		
+		return getMsmsExtractionParameters().stream().
+				filter(p -> p.getId().equals(id)).findFirst().orElse(null);
 	}
 
 	public static void refreshCollisionEnergies() {

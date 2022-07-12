@@ -82,7 +82,7 @@ public class AcquisitionMethodUtils {
 			"INSERT INTO DATA_ACQUISITION_METHOD (ACQ_METHOD_ID, METHOD_NAME, " +
 			"METHOD_DESCRIPTION, POLARITY, CREATED_BY, CREATED_ON, IONIZATION_TYPE, " +
 			"MASS_ANALYZER, MS_TYPE, COLUMN_ID, METHOD_CONTAINER, SEPARATION_TYPE, SOFTWARE_ID) " +
-			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, selectedMethod.getId());
@@ -134,27 +134,6 @@ public class AcquisitionMethodUtils {
 		}
 		return newId;
 	}
-	
-//	public static String getNextAcquisitionMethodId(Connection conn) throws Exception{
-//		
-//		String nextId = SQLUtils.getNextIdFromSequence(conn, 
-//				"ID_DATA_ACQ_METHOD_SEQ",
-//				DataPrefix.DATA_ACQUISITION_METHOD,
-//				"0",
-//				4);
-//		String query  =
-//				"SELECT '" + DataPrefix.DATA_ACQUISITION_METHOD.getName() + 
-//				"' || LPAD(ID_DATA_ACQ_METHOD_SEQ.NEXTVAL, 4, '0') AS NEXT_ID FROM DUAL";
-//		
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			nextId = rs.getString("NEXT_ID");
-//		}
-//		rs.close();
-//		ps.close();	
-//		return nextId;
-//	}
 
 	public static void updateAcquisitionMethod(DataAcquisitionMethod selectedMethod, File methodFile) throws Exception{
 

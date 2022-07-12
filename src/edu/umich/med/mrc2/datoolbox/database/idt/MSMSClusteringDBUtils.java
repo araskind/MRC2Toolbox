@@ -27,12 +27,17 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
@@ -197,11 +202,97 @@ public class MSMSClusteringDBUtils {
 		ps.executeUpdate();
 		
 		//	Add assays
+		Collection<String>injectionIds = newDataSet.getInjectionIds();		
+		Collection<String>methodIds = 
+				newDataSet.getDataExtractionMethods().stream().
+				map(m -> m.getId()).collect(Collectors.toSet());
 		
-		
+		Collection<String>daIds = new TreeSet<String>();
+		query = "SELECT DATA_ANALYSIS_ID FROM DATA_ANALYSIS_MAP " +
+				"WHERE EXTRACTION_METHOD_ID = ? AND INJECTION_ID = ?";
+		ps = conn.prepareStatement(query);
+		ResultSet rs = null;		
+		for(String methodId : methodIds) {
+			
+			for(String injectionId : injectionIds) {
+				
+				ps.setString(1, methodId);
+				ps.setString(2, injectionId);
+				rs = ps.executeQuery();
+				while(rs.next())
+					daIds.add(rs.getString("DATA_ANALYSIS_ID"));
+				
+				rs.close();
+			}
+		}
+		query = "INSERT INTO MSMS_CLUSTERED_DATA_SET_DA_COMPONENT "
+				+ "(CDS_ID, DATA_ANALYSIS_ID) VALUES (?, ?)";
+		ps = conn.prepareStatement(query);
+		ps.setString(1, newDataSet.getId());
+		for(String daId : daIds) {
+			ps.setString(2, daId);
+			ps.addBatch();
+		}
+		ps.executeBatch();
+					
 		//	Add clusters
+		query = "INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
+				+ "MZ, RT, COMPOUND_ID, IS_LOCKED) VALUES (?, ?, ?, ?, ?, ?)";
+		ps = conn.prepareStatement(query);
+		
+		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
+				+ "(CLUSTER_ID, MSMS_FEATURE_ID) VALUES (?, ?)";
+		PreparedStatement featurePs = conn.prepareStatement(featureQuery);
+		
+		for(MsFeatureInfoBundleCluster cluster : newDataSet.getClusters()) {
+			
+			String clusterId = SQLUtils.getNextIdFromSequence(conn, 
+					"MSMS_CLUSTER_SEQ",
+					DataPrefix.MSMS_CLUSTER,
+					"0",
+					12);
+			cluster.setId(clusterId);
+			ps.setString(1, clusterId);
+			ps.setString(2, parSet.getId());
+			ps.setDouble(3, cluster.getMz());
+			ps.setDouble(4, cluster.getRt());
+			CompoundIdentity cid = cluster.getPrimaryIdentity();
+			if(cid != null)
+				ps.setString(5, cid.getPrimaryDatabaseId());
+			else
+				ps.setNull(5, java.sql.Types.NULL);
+			
+			if(cluster.isLocked())
+				ps.setString(6, "Y");
+			else
+				ps.setNull(6, java.sql.Types.NULL);
+			
+			ps.executeUpdate();
+			
+			//	Add cluster features
+			featurePs.setString(1, clusterId);
+			for(MsFeatureInfoBundle feature : cluster.getComponents()) {				
+				featurePs.setString(2, feature.getMSMSFeatureId());
+				featurePs.addBatch();
+			}
+			featurePs.executeBatch();
+		}
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -45,7 +45,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class MSMSExtractionParameterSet {
+public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionParameterSet> {
 	
 	private String id;
 	private String name;
@@ -554,6 +554,39 @@ public class MSMSExtractionParameterSet {
 		
 		Document methodDocument = new Document(getXmlElement());
 		return new XMLOutputter().outputString(methodDocument);
+	}
+	
+    @Override
+    public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+        if (obj == null)
+            return false;
+
+        if (!MSMSExtractionParameterSet.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        final MSMSExtractionParameterSet other = (MSMSExtractionParameterSet) obj;
+
+        if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+            return false;
+
+        return true;
+    }
+    
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+        return hash;
+    }
+    
+	@Override
+	public int compareTo(MSMSExtractionParameterSet o) {
+		return id.compareTo(o.getId());
 	}
 }
 

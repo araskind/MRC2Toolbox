@@ -27,7 +27,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,6 +51,10 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
@@ -2538,6 +2544,69 @@ public class IDTUtils {
 		}
 		ps.close();		
 		return injections;
+	}
+	
+	public static Collection<MSMSExtractionParameterSet>getMSMSExtractionParameters() throws Exception {
+		
+		 Connection conn = ConnectionManager.getConnection();	 
+		 Collection<MSMSExtractionParameterSet>paramSets = getMSMSExtractionParameters(conn);
+		 ConnectionManager.releaseConnection(conn);
+		 return paramSets;
+	}
+	
+	public static Collection<MSMSExtractionParameterSet>getMSMSExtractionParameters(Connection conn) throws Exception{
+		
+		Collection<MSMSExtractionParameterSet>paramSets = 
+				new ArrayList<MSMSExtractionParameterSet>();
+		DataProcessingSoftware trackerSoft = 
+				IDTDataCash.getSoftwareByName(MRC2ToolBoxCore.trackerSoftwareName);
+		if(trackerSoft != null) {
+			
+			String query = 
+					"SELECT EXTRACTION_METHOD_ID, METHOD_CONTAINER "
+					+ "FROM DATA_EXTRACTION_METHOD WHERE SOFTWARE_ID = ?";
+			PreparedStatement ps = conn.prepareStatement(query);
+			ps.setString(1, trackerSoft.getId());
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				InputStream its = rs.getBinaryStream("METHOD_CONTAINER");
+				if (its != null) {
+					BufferedInputStream itbis = new BufferedInputStream(its);
+					String xmlString = 
+							CompressionUtils.decompressString(itbis.readAllBytes());
+					its.close();
+					
+					Element paramElement = null;
+			        SAXBuilder saxBuilder = new SAXBuilder();
+			        try {
+			            Document doc = saxBuilder.build(new StringReader(xmlString));
+			            paramElement = doc.getRootElement();
+			        } catch (JDOMException e) {
+			            // handle JDOMException
+			        } catch (IOException e) {
+			            // handle IOException
+			        }
+			        if(paramElement != null) {
+			        	
+			        	MSMSExtractionParameterSet parSet = null;
+			        	try {
+							parSet = new MSMSExtractionParameterSet(paramElement);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			        	if(parSet != null) {
+			        		parSet.setId(rs.getString("EXTRACTION_METHOD_ID"));
+			        		paramSets.add(parSet);
+			        	}
+			        }
+				}
+			}
+			rs.close();
+			ps.close();
+		}		
+		return paramSets;
 	}
 }
 

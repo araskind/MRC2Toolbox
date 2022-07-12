@@ -35,6 +35,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -91,30 +92,57 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	
 	private Preferences preferences;
 	
-	public static final String DESCRIPTION = "DESCRIPTION";
-	public static final String POLARITY = "POLARITY";
-	public static final String MIN_PRECURSOR_INTENSITY = "MIN_PRECURSOR_INTENSITY";
-	public static final String USE_RT_RANGE = "USE_RT_RANGE";
-	public static final String RT_BORDER_LEFT_MIN = "RT_BORDER_LEFT_MIN";
-	public static final String RT_BORDER_RIGHT_MIN = "RT_BORDER_RIGHT_MIN";
-	public static final String ISOLATION_BORDER_MAX = "PRECURSOR_MASS_WINDOW";
-	public static final String PRECURSOR_MASS_WINDOW_UNITS = "PRECURSOR_MASS_WINDOW_UNITS";
-	public static final String ISOLATION_BORDER_MIN = "PRECURSOR_RT_WINDOW_MIN";	
-	public static final String PRECURSOR_GROUPING_RT_WINDOW = "PRECURSOR_GROUPING_RT_WINDOW";
-	public static final String PRECURSOR_GROUPING_MASS_ERROR = "PRECURSOR_GROUPING_MASS_ERROR";
-	public static final String PRECURSOR_GROUPING_MASS_ERROR_TYPE = "PRECURSOR_GROUPING_MASS_ERROR_TYPE";	
-	public static final String REMOVE_MASSES_ABOVE_PARENT = "REMOVE_MASSES_ABOVE_PARENT";
-	public static final String REMOVE_MASSES_BELOW_COUNT = "REMOVE_MASSES_BELOW_COUNT";
-	public static final String MINIMAL_COUNTS = "MINIMAL_COUNTS";
-	public static final String LEAVE_MAX_FRAGMENTS = "LEAVE_MAX_FRAGMENTS";
-	public static final String MAX_FRAGMENTS_COUNT = "MAX_FRAGMENTS_COUNT";
-	public static final String INTENSITY_MEASURE = "INTENSITY_MEASURE";	
-	public static final String MERGE_COLLISION_ENERGIES = "MERGE_COLLISION_ENERGIES";
-	public static final String SPECTRUM_SIMILARITY_CUTOFF = "SPECTRUM_SIMILARITY_CUTOFF";	
-	public static final String FLAG_MINOR_ISOTOPES_PRECURSORS = "FLAG_MINOR_ISOTOPES_PRECURSORS";
-	public static final String MAX_PRECURSOR_CHARGE = "MAX_PRECURSOR_CHARGE";
-	public static final String FILTER_WIDTH = "FILTER_WIDTH";
-	public static final String CHROMATOGRAM_WIDTH = "CHROMATOGRAM_WIDTH";
+//	public static final String DESCRIPTION = "DESCRIPTION";
+//	public static final String POLARITY = "POLARITY";
+//	public static final String MIN_PRECURSOR_INTENSITY = "MIN_PRECURSOR_INTENSITY";
+//	public static final String USE_RT_RANGE = "USE_RT_RANGE";
+//	public static final String RT_BORDER_LEFT_MIN = "RT_BORDER_LEFT_MIN";
+//	public static final String RT_BORDER_RIGHT_MIN = "RT_BORDER_RIGHT_MIN";
+//	public static final String ISOLATION_BORDER_MAX = "PRECURSOR_MASS_WINDOW";
+////	public static final String PRECURSOR_MASS_WINDOW_UNITS = "PRECURSOR_MASS_WINDOW_UNITS";
+//	public static final String ISOLATION_BORDER_MIN = "PRECURSOR_RT_WINDOW_MIN";	
+//	public static final String PRECURSOR_GROUPING_RT_WINDOW = "PRECURSOR_GROUPING_RT_WINDOW";
+//	public static final String PRECURSOR_GROUPING_MASS_ERROR = "PRECURSOR_GROUPING_MASS_ERROR";
+//	public static final String PRECURSOR_GROUPING_MASS_ERROR_TYPE = "PRECURSOR_GROUPING_MASS_ERROR_TYPE";	
+//	public static final String REMOVE_MASSES_ABOVE_PARENT = "REMOVE_MASSES_ABOVE_PARENT";
+//	public static final String REMOVE_MASSES_BELOW_COUNT = "REMOVE_MASSES_BELOW_COUNT";
+//	public static final String MINIMAL_COUNTS = "MINIMAL_COUNTS";
+//	public static final String LEAVE_MAX_FRAGMENTS = "LEAVE_MAX_FRAGMENTS";
+//	public static final String MAX_FRAGMENTS_COUNT = "MAX_FRAGMENTS_COUNT";
+//	public static final String INTENSITY_MEASURE = "INTENSITY_MEASURE";	
+//	public static final String MERGE_COLLISION_ENERGIES = "MERGE_COLLISION_ENERGIES";
+//	public static final String SPECTRUM_SIMILARITY_CUTOFF = "SPECTRUM_SIMILARITY_CUTOFF";	
+//	public static final String FLAG_MINOR_ISOTOPES_PRECURSORS = "FLAG_MINOR_ISOTOPES_PRECURSORS";
+//	public static final String MAX_PRECURSOR_CHARGE = "MAX_PRECURSOR_CHARGE";
+//	public static final String FILTER_WIDTH = "FILTER_WIDTH";
+//	public static final String CHROMATOGRAM_WIDTH = "CHROMATOGRAM_WIDTH";
+	
+	public static final String LAST_USED_METHOD_ID = "LAST_USED_METHOD_ID";
+		
+	private static final String DESCRIPTION_DEFAULT = "MSMS extraction method " + 
+			MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date());
+	private static final Polarity POLARITY_DEFAULT = Polarity.Positive;
+	private static final double MIN_PRECURSOR_INTENSITY_DEFAULT = 0.0d;
+	private static final boolean USE_RT_RANGE_DEFAULT = false;
+	private static final double RT_BORDER_LEFT_DEFAULT = 0.0d;
+	private static final double RT_BORDER_RIGHT_DEFAULT = 0.0d;
+	private static final double ISOLATION_BORDER_MIN_DEFAULT = 0.65d;	
+	private static final double ISOLATION_BORDER_MAX_DEFAULT = 0.65d;	
+	private static final double PRECURSOR_GROUPING_RT_WINDOW_DEFAULT = 0.1d;
+	private static final double PRECURSOR_GROUPING_MASS_ERROR_DEFAULT = 15.0d;
+	private static final MassErrorType PRECURSOR_GROUPING_MASS_ERROR_TYPE_DEFAULT = MassErrorType.ppm;		
+	private static final boolean REMOVE_MASSES_ABOVE_PARENT_DEFAULT = true;
+	private static final boolean REMOVE_MASSES_BELOW_COUNT_DEFAULT = false;
+	private static final double MINIMAL_COUNTS_DEFAULT = 0.0d;
+	private static final boolean LEAVE_MAX_FRAGMENTS_DEFAULT = false;
+	private static final int MAX_FRAGMENTS_COUNT_DEFAULT = 30;	
+	private static final IntensityMeasure INTENSITY_MEASURE_DEFAULT = IntensityMeasure.ABSOLUTE;
+	private static final boolean MERGE_COLLISION_ENERGIES_DEFAULT = false;
+	private static final double SPECTRUM_SIMILARITY_CUTOFF_DEFAULT = 0.7d;	
+	private static final boolean FLAG_MINOR_ISOTOPES_PRECURSORS_DEFAULT = true;	
+	private static final int MAX_PRECURSOR_CHARGE_DEFAULT = 2;
+	private static final SavitzkyGolayWidth FILTER_WIDTH_DEFAULT = SavitzkyGolayWidth.NINE;
+	private static final double CHROMATOGRAM_WIDTH_DEFAULT = 0.3d;
 	
 //	private JButton cancelButton;
 //	private JButton importButton;
@@ -142,7 +170,9 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	private JSpinner maxFragmentsSpinner;
 	private JTextArea descriptionTextArea;
 	private JTextField nameTextField;
+	private JLabel methodIdLabel;
 	private DataExtractionMethod deMethod;
+	private MSMSExtractionParameterSet activePs;
 	
 	private MSMSFeatureExtractionSetupDialogToolbar toolbar;
 		
@@ -178,6 +208,21 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		gbc_lblNewLabel_14.gridx = 0;
 		gbc_lblNewLabel_14.gridy = 0;
 		panel_1.add(lblNewLabel_14, gbc_lblNewLabel_14);
+		
+		JLabel lblNewLabel_16 = new JLabel("Method ID");
+		GridBagConstraints gbc_lblNewLabel_16 = new GridBagConstraints();
+		gbc_lblNewLabel_16.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_16.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_16.gridx = 3;
+		gbc_lblNewLabel_16.gridy = 0;
+		panel_1.add(lblNewLabel_16, gbc_lblNewLabel_16);
+		
+		methodIdLabel = new JLabel("");
+		GridBagConstraints gbc_methodIdLabel = new GridBagConstraints();
+		gbc_methodIdLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_methodIdLabel.gridx = 4;
+		gbc_methodIdLabel.gridy = 0;
+		panel_1.add(methodIdLabel, gbc_methodIdLabel);
 		
 		nameTextField = new JTextField();
 		GridBagConstraints gbc_nameTextField = new GridBagConstraints();
@@ -647,13 +692,13 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		rootPane.setDefaultButton(extractButton);
 		loadPreferences();
 		
-		MSMSExtractionParameterSet activePs = createParameterSet();
-		deMethod = IDTDataCash.getDataExtractionMethodByMd5(
-				activePs.getParameterSetHash());
-		if(deMethod != null) {
-			nameTextField.setText(deMethod.getName());
-			descriptionTextArea.setText(deMethod.getDescription());
-		}
+//		MSMSExtractionParameterSet activePs = createParameterSet();
+//		deMethod = IDTDataCash.getDataExtractionMethodByMd5(
+//				activePs.getParameterSetHash());
+//		if(deMethod != null) {
+//			nameTextField.setText(deMethod.getName());
+//			descriptionTextArea.setText(deMethod.getDescription());
+//		}
 		pack();
 	}
 
@@ -800,68 +845,123 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 	public void loadPreferences(Preferences prefs) {
 
 		preferences = prefs;
-		polarityComboBox.setSelectedItem(
-				Polarity.getPolarityByCode(preferences.get(POLARITY, Polarity.Positive.getCode())));
-		minPrecursorIntensityTextField.setText(
-				Double.toString(preferences.getDouble(MIN_PRECURSOR_INTENSITY, 0.0d)));
-		limitExtractionRtCheckBox.setSelected(preferences.getBoolean(USE_RT_RANGE, false));
-		rtFromTextField.setText(Double.toString(preferences.getDouble(RT_BORDER_LEFT_MIN, 0.0d)));
-		rtToTextField.setText(Double.toString(preferences.getDouble(RT_BORDER_RIGHT_MIN, 0.0d)));
-		isolationWindowLowerTextField.setText(Double.toString(preferences.getDouble(ISOLATION_BORDER_MIN, 0.65d)));
-		isolationWindowUpperTextField.setText(Double.toString(preferences.getDouble(ISOLATION_BORDER_MAX, 0.65d)));		
-		msmsGroupRtWindowTextField.setText(Double.toString(preferences.getDouble(PRECURSOR_GROUPING_RT_WINDOW, 0.1d)));
-		precursorGroupingMassErrorTextField.setText(Double.toString(preferences.getDouble(PRECURSOR_GROUPING_MASS_ERROR, 15.0d)));
-		precursorGroupingMassErrorTypeComboBox.setSelectedItem(
-				MassErrorType.getTypeByName(
-						preferences.get(PRECURSOR_GROUPING_MASS_ERROR_TYPE, MassErrorType.ppm.name())));			
-		chckbxRemoveAllMassesAboveParent.setSelected(preferences.getBoolean(REMOVE_MASSES_ABOVE_PARENT, true));
-		chckbxRemoveAllMassesBelowCounts.setSelected(preferences.getBoolean(REMOVE_MASSES_BELOW_COUNT, false));
-		minimalCountsTextField.setText(Double.toString(preferences.getDouble(MINIMAL_COUNTS, 0.0d)));
-		chckbxLeaveOnly.setSelected(preferences.getBoolean(LEAVE_MAX_FRAGMENTS, false));
-		maxFragmentsSpinner.setValue(preferences.getInt(MAX_FRAGMENTS_COUNT, 30));
-		intensityMeasureComboBox.setSelectedItem(
-				IntensityMeasure.geIntensityMeasureByName(
-						preferences.get(INTENSITY_MEASURE, IntensityMeasure.ABSOLUTE.name())));	
 		
-		mergeCollisionsCheckBox.setSelected(preferences.getBoolean(MERGE_COLLISION_ENERGIES, Boolean.FALSE));
-		specSimCutoffTextField.setText(Double.toString(preferences.getDouble(SPECTRUM_SIMILARITY_CUTOFF, 0.70d)));
+		String paramSetId = preferences.get(LAST_USED_METHOD_ID, null);
+		if(paramSetId != null && !paramSetId.isEmpty()) {
+			
+			DataExtractionMethod cashedMethod = 
+					IDTDataCash.getDataExtractionMethodById(paramSetId);
+			
+			if(cashedMethod != null) {
 				
-		flagMinorIsotopesPrecursorsCheckBox.setSelected(preferences.getBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, true));	
-		maxChargeSpinner.setValue(preferences.getInt(MAX_PRECURSOR_CHARGE, 2));		
-		filterWidthComboBox.setSelectedItem(
-				SavitzkyGolayWidth.getSavitzkyGolayWidthByName(
-				preferences.get(FILTER_WIDTH, SavitzkyGolayWidth.NINE.name())));
+				activePs = IDTDataCash.getMSMSExtractionParameterSetById(cashedMethod.getId());
+				
+				if(activePs != null) {					
+					deMethod = cashedMethod;
+					loadParameters(activePs);
+					return;
+				}
+			}
+		}
+		//	Otherwise load default values
+//		polarityComboBox.setSelectedItem(
+//				Polarity.getPolarityByCode(preferences.get(POLARITY, Polarity.Positive.getCode())));
+//		minPrecursorIntensityTextField.setText(
+//				Double.toString(preferences.getDouble(MIN_PRECURSOR_INTENSITY, 0.0d)));
+//		limitExtractionRtCheckBox.setSelected(preferences.getBoolean(USE_RT_RANGE, false));
+//		rtFromTextField.setText(Double.toString(preferences.getDouble(RT_BORDER_LEFT_MIN, 0.0d)));
+//		rtToTextField.setText(Double.toString(preferences.getDouble(RT_BORDER_RIGHT_MIN, 0.0d)));
+//		isolationWindowLowerTextField.setText(Double.toString(preferences.getDouble(ISOLATION_BORDER_MIN, 0.65d)));
+//		isolationWindowUpperTextField.setText(Double.toString(preferences.getDouble(ISOLATION_BORDER_MAX, 0.65d)));		
+//		msmsGroupRtWindowTextField.setText(Double.toString(preferences.getDouble(PRECURSOR_GROUPING_RT_WINDOW, 0.1d)));
+//		precursorGroupingMassErrorTextField.setText(Double.toString(preferences.getDouble(PRECURSOR_GROUPING_MASS_ERROR, 15.0d)));
+//		precursorGroupingMassErrorTypeComboBox.setSelectedItem(
+//				MassErrorType.getTypeByName(
+//						preferences.get(PRECURSOR_GROUPING_MASS_ERROR_TYPE, MassErrorType.ppm.name())));			
+//		chckbxRemoveAllMassesAboveParent.setSelected(preferences.getBoolean(REMOVE_MASSES_ABOVE_PARENT, true));
+//		chckbxRemoveAllMassesBelowCounts.setSelected(preferences.getBoolean(REMOVE_MASSES_BELOW_COUNT, false));
+//		minimalCountsTextField.setText(Double.toString(preferences.getDouble(MINIMAL_COUNTS, 0.0d)));
+//		chckbxLeaveOnly.setSelected(preferences.getBoolean(LEAVE_MAX_FRAGMENTS, false));
+//		maxFragmentsSpinner.setValue(preferences.getInt(MAX_FRAGMENTS_COUNT, 30));
+//		intensityMeasureComboBox.setSelectedItem(
+//				IntensityMeasure.geIntensityMeasureByName(
+//						preferences.get(INTENSITY_MEASURE, IntensityMeasure.ABSOLUTE.name())));	
+//		
+//		mergeCollisionsCheckBox.setSelected(preferences.getBoolean(MERGE_COLLISION_ENERGIES, Boolean.FALSE));
+//		specSimCutoffTextField.setText(Double.toString(preferences.getDouble(SPECTRUM_SIMILARITY_CUTOFF, 0.70d)));
+//				
+//		flagMinorIsotopesPrecursorsCheckBox.setSelected(preferences.getBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, true));	
+//		maxChargeSpinner.setValue(preferences.getInt(MAX_PRECURSOR_CHARGE, 2));		
+//		filterWidthComboBox.setSelectedItem(
+//				SavitzkyGolayWidth.getSavitzkyGolayWidthByName(
+//				preferences.get(FILTER_WIDTH, SavitzkyGolayWidth.NINE.name())));
+//		
+//		xicWindowTextField.setText(Double.toString(preferences.getDouble(CHROMATOGRAM_WIDTH, 0.3d)));
 		
-		xicWindowTextField.setText(Double.toString(preferences.getDouble(CHROMATOGRAM_WIDTH, 0.3d)));
+		nameTextField.setText(DESCRIPTION_DEFAULT);
+		descriptionTextArea.setText(DESCRIPTION_DEFAULT);		
+		polarityComboBox.setSelectedItem(POLARITY_DEFAULT);
+		minPrecursorIntensityTextField.setText(
+				Double.toString(MIN_PRECURSOR_INTENSITY_DEFAULT));
+		limitExtractionRtCheckBox.setSelected(USE_RT_RANGE_DEFAULT);
+		rtFromTextField.setText(Double.toString(RT_BORDER_LEFT_DEFAULT));
+		rtToTextField.setText(Double.toString(RT_BORDER_RIGHT_DEFAULT));
+		isolationWindowLowerTextField.setText(Double.toString(ISOLATION_BORDER_MIN_DEFAULT));
+		isolationWindowUpperTextField.setText(Double.toString(ISOLATION_BORDER_MAX_DEFAULT));		
+		msmsGroupRtWindowTextField.setText(Double.toString(PRECURSOR_GROUPING_RT_WINDOW_DEFAULT));
+		
+		precursorGroupingMassErrorTextField.setText(Double.toString(PRECURSOR_GROUPING_MASS_ERROR_DEFAULT));
+		precursorGroupingMassErrorTypeComboBox.setSelectedItem(PRECURSOR_GROUPING_MASS_ERROR_TYPE_DEFAULT);	
+		
+		chckbxRemoveAllMassesAboveParent.setSelected(REMOVE_MASSES_ABOVE_PARENT_DEFAULT);
+		chckbxRemoveAllMassesBelowCounts.setSelected(REMOVE_MASSES_BELOW_COUNT_DEFAULT);
+		minimalCountsTextField.setText(Double.toString(MINIMAL_COUNTS_DEFAULT));
+		chckbxLeaveOnly.setSelected(LEAVE_MAX_FRAGMENTS_DEFAULT);
+		maxFragmentsSpinner.setValue(MAX_FRAGMENTS_COUNT_DEFAULT);		
+		intensityMeasureComboBox.setSelectedItem(INTENSITY_MEASURE_DEFAULT);		
+		mergeCollisionsCheckBox.setSelected(MERGE_COLLISION_ENERGIES_DEFAULT);		
+		specSimCutoffTextField.setText(Double.toString(SPECTRUM_SIMILARITY_CUTOFF_DEFAULT));			
+		flagMinorIsotopesPrecursorsCheckBox.setSelected(FLAG_MINOR_ISOTOPES_PRECURSORS_DEFAULT);	
+		maxChargeSpinner.setValue(MAX_PRECURSOR_CHARGE_DEFAULT);		
+		filterWidthComboBox.setSelectedItem(FILTER_WIDTH_DEFAULT);		
+		xicWindowTextField.setText(Double.toString(CHROMATOGRAM_WIDTH_DEFAULT));	
+		
+		activePs = createParameterSet();
 	}
+
 
 	@Override
 	public void savePreferences() {
 
-		preferences = Preferences.userNodeForPackage(this.getClass());		
-		preferences.put(POLARITY, ((Polarity)polarityComboBox.getSelectedItem()).getCode());
-		preferences.putDouble(MIN_PRECURSOR_INTENSITY, Double.valueOf(minPrecursorIntensityTextField.getText()));
-		preferences.putBoolean(USE_RT_RANGE, limitExtractionRtCheckBox.isSelected());
-		preferences.putDouble(RT_BORDER_LEFT_MIN, Double.valueOf(rtFromTextField.getText()));
-		preferences.putDouble(RT_BORDER_RIGHT_MIN, Double.valueOf(rtToTextField.getText()));
-		preferences.putDouble(ISOLATION_BORDER_MIN, getIsolationWindowLowerBorder());
-		preferences.putDouble(ISOLATION_BORDER_MAX, getIsolationWindowUpperBorder());		
-		preferences.putDouble(PRECURSOR_GROUPING_RT_WINDOW, getMsmsGroupingRtWindow());
-		preferences.putDouble(PRECURSOR_GROUPING_MASS_ERROR, getPrecursorGroupingMassError());
-		preferences.put(PRECURSOR_GROUPING_MASS_ERROR_TYPE, getPrecursorGroupingMassErrorType().name());		
-		preferences.put(PRECURSOR_MASS_WINDOW_UNITS, getFilterIntensityMeasure().name());
-		preferences.putBoolean(REMOVE_MASSES_ABOVE_PARENT, removeAllMassesAboveParent());
-		preferences.putBoolean(REMOVE_MASSES_BELOW_COUNT, chckbxRemoveAllMassesBelowCounts.isSelected());
-		preferences.putDouble(MINIMAL_COUNTS, Double.parseDouble(minimalCountsTextField.getText()));
-		preferences.putBoolean(LEAVE_MAX_FRAGMENTS, chckbxLeaveOnly.isSelected());
-		preferences.putInt(MAX_FRAGMENTS_COUNT, (int) maxFragmentsSpinner.getValue());		
-		preferences.put(INTENSITY_MEASURE, getIntensityMeasure().name());	
-		specSimCutoffTextField.setText(Double.toString(preferences.getDouble(SPECTRUM_SIMILARITY_CUTOFF, 0.70d)));
-		preferences.putDouble(SPECTRUM_SIMILARITY_CUTOFF, Double.parseDouble(specSimCutoffTextField.getText()));		
-		preferences.putBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, flagMinorIsotopesPrecursorsCheckBox.isSelected());		
-		preferences.putInt(MAX_PRECURSOR_CHARGE, (int) maxChargeSpinner.getValue());		
-		preferences.put(FILTER_WIDTH, ((SavitzkyGolayWidth)filterWidthComboBox.getSelectedItem()).name());		
-		preferences.putDouble(CHROMATOGRAM_WIDTH, getChromatogramExtractionWindow());
+		preferences = Preferences.userNodeForPackage(this.getClass());	
+		if(deMethod != null)
+			preferences.put(LAST_USED_METHOD_ID, deMethod.getId());
+		else
+			preferences.put(LAST_USED_METHOD_ID, "");
+			
+//		preferences.put(POLARITY, ((Polarity)polarityComboBox.getSelectedItem()).getCode());
+//		preferences.putDouble(MIN_PRECURSOR_INTENSITY, Double.valueOf(minPrecursorIntensityTextField.getText()));
+//		preferences.putBoolean(USE_RT_RANGE, limitExtractionRtCheckBox.isSelected());
+//		preferences.putDouble(RT_BORDER_LEFT_MIN, Double.valueOf(rtFromTextField.getText()));
+//		preferences.putDouble(RT_BORDER_RIGHT_MIN, Double.valueOf(rtToTextField.getText()));
+//		preferences.putDouble(ISOLATION_BORDER_MIN, getIsolationWindowLowerBorder());
+//		preferences.putDouble(ISOLATION_BORDER_MAX, getIsolationWindowUpperBorder());		
+//		preferences.putDouble(PRECURSOR_GROUPING_RT_WINDOW, getMsmsGroupingRtWindow());
+//		preferences.putDouble(PRECURSOR_GROUPING_MASS_ERROR, getPrecursorGroupingMassError());
+//		preferences.put(PRECURSOR_GROUPING_MASS_ERROR_TYPE, getPrecursorGroupingMassErrorType().name());		
+//		preferences.put(PRECURSOR_MASS_WINDOW_UNITS, getFilterIntensityMeasure().name());
+//		preferences.putBoolean(REMOVE_MASSES_ABOVE_PARENT, removeAllMassesAboveParent());
+//		preferences.putBoolean(REMOVE_MASSES_BELOW_COUNT, chckbxRemoveAllMassesBelowCounts.isSelected());
+//		preferences.putDouble(MINIMAL_COUNTS, Double.parseDouble(minimalCountsTextField.getText()));
+//		preferences.putBoolean(LEAVE_MAX_FRAGMENTS, chckbxLeaveOnly.isSelected());
+//		preferences.putInt(MAX_FRAGMENTS_COUNT, (int) maxFragmentsSpinner.getValue());		
+//		preferences.put(INTENSITY_MEASURE, getIntensityMeasure().name());	
+//		specSimCutoffTextField.setText(Double.toString(preferences.getDouble(SPECTRUM_SIMILARITY_CUTOFF, 0.70d)));
+//		preferences.putDouble(SPECTRUM_SIMILARITY_CUTOFF, Double.parseDouble(specSimCutoffTextField.getText()));		
+//		preferences.putBoolean(FLAG_MINOR_ISOTOPES_PRECURSORS, flagMinorIsotopesPrecursorsCheckBox.isSelected());		
+//		preferences.putInt(MAX_PRECURSOR_CHARGE, (int) maxChargeSpinner.getValue());		
+//		preferences.put(FILTER_WIDTH, ((SavitzkyGolayWidth)filterWidthComboBox.getSelectedItem()).name());		
+//		preferences.putDouble(CHROMATOGRAM_WIDTH, getChromatogramExtractionWindow());
 	}
 
 	@Override
@@ -909,7 +1009,8 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return null;
 		}
-		return createParameterSet();
+		MSMSExtractionParameterSet updatedPs = createParameterSet();
+		return updatedPs;
 	}
 	
 	private MSMSExtractionParameterSet createParameterSet() { 
@@ -946,6 +1047,9 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 			nameTextField.setText("");
 		else
 			nameTextField.setText(ps.getName());
+		
+		if(deMethod != null)
+			methodIdLabel.setText(deMethod.getId());
 		
 		if(ps.getDescription() == null)
 			descriptionTextArea.setText("");

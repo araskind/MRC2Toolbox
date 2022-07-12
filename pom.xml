@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.1.18</version>
+	<version>1.1.20</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>
@@ -36,6 +36,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.4.1</version>
 				<configuration>
 					<archive>
 						<manifest>

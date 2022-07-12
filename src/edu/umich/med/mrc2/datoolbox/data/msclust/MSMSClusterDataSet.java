@@ -21,12 +21,15 @@
 
 package edu.umich.med.mrc2.datoolbox.data.msclust;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 
 public class MSMSClusterDataSet {
@@ -151,4 +154,29 @@ public class MSMSClusterDataSet {
 	public void setParameters(MSMSClusteringParameterSet parameters) {
 		this.parameters = parameters;
 	}	
+	
+	public Collection<String>getInjectionIds(){
+		
+		return clusters.stream().flatMap(c -> c.getComponents().stream()).
+				filter(b -> b.getInjectionId() != null).
+				map(b -> b.getInjectionId()).
+				collect(Collectors.toSet());
+	}
+	
+	public Collection<DataExtractionMethod>getDataExtractionMethods(){
+		
+		return clusters.stream().flatMap(c -> c.getComponents().stream()).
+				filter(b -> b.getDataExtractionMethod() != null).
+				map(b -> b.getDataExtractionMethod()).
+				collect(Collectors.toSet());
+	}
 }
+
+
+
+
+
+
+
+
+

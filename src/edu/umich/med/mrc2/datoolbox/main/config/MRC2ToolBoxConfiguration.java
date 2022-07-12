@@ -229,6 +229,8 @@ public class MRC2ToolBoxConfiguration {
     private static double rtWindow;
 	private static double massAccuracy;
 	
+	public static final DateFormat defaultTimeStampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
 	public static void initConfiguration() {
 		
 		mzFormat = new DecimalFormat(prefs.get(MZ_FORMAT, MZ_FORMAT_DEFAULT));

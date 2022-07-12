@@ -221,10 +221,16 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			testChrom();
+			getMSMSparamsTest();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void getMSMSparamsTest() throws Exception {
+		
+		IDTDataCash.refreshSoftwareList();
+		IDTUtils.getMSMSExtractionParameters();
 	}
 	
 	private static void testChrom() throws Exception {
