@@ -607,9 +607,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		msmsFeatureExtractionSetupDialog = new MSMSFeatureExtractionSetupDialog(this);		
 		MSMSExtractionParameterSet ps = 
 				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMsmsExtractionParameterSet();
-		if(ps != null)
-			msmsFeatureExtractionSetupDialog.loadParameters(ps);
-		
+		if(ps != null) {
+			DataExtractionMethod deMethod = 
+					IDTDataCash.getDataExtractionMethodById(ps.getId());
+			msmsFeatureExtractionSetupDialog.loadParameters(ps, deMethod);
+		}		
 		msmsFeatureExtractionSetupDialog.setLocationRelativeTo(this.getContentPane());
 		msmsFeatureExtractionSetupDialog.setVisible(true);
 	}
@@ -624,22 +626,28 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			if(res != JOptionPane.YES_OPTION) 
 				return;
 		}
-		cleanupForReanalysis();
 		MSMSExtractionParameterSet ps = 
 				msmsFeatureExtractionSetupDialog.getMSMSExtractionParameterSet();
 		if(ps == null)
 			return;
+		
+		cleanupForReanalysis();
 
-		//	Get existing or create new data extraction method based on MSMSExtractionParameterSet
+		//	Get existing or create new data extraction 
+		//	method based on MSMSExtractionParameterSet
+		DataExtractionMethod projectDataExtractionMethod = null;		
 		String methodMd5 = ps.getParameterSetHash();
-		DataExtractionMethod existingDeMethod = 
-				 IDTDataCash.getDataExtractionMethodByMd5(methodMd5);
-			 
-	    if(existingDeMethod == null) {
-	    	
-	    	// Check for same name and update name and description if necessary	    	
+		
+		//	Check if existing method was changed
+		if(msmsFeatureExtractionSetupDialog.getInitialParameterSet() != null 
+				&& msmsFeatureExtractionSetupDialog.getDataExtractionMethod() != null
+				&& msmsFeatureExtractionSetupDialog.getInitialParameterSet().getParameterSetHash().equals(methodMd5)) {
+			projectDataExtractionMethod = msmsFeatureExtractionSetupDialog.getDataExtractionMethod();
+			ps = msmsFeatureExtractionSetupDialog.getInitialParameterSet();
+		}
+		else {
 	    	DataExtractionMethod sameNameDeMethod = 
-					 IDTDataCash.getDataExtractionMethodByMd5(ps.getName());
+					 IDTDataCash.getDataExtractionMethodByName(ps.getName());
 	    	if(sameNameDeMethod != null) {
 	    		
 	    		String version = " V-" + ProjectUtils.dateTimeFormat.format(new Date());
@@ -651,7 +659,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	    	}	
 	    	//	Upload new method
 			try {
-				existingDeMethod = 
+				projectDataExtractionMethod = 
 						IDTUtils.insertNewTrackerDataExtractionMethod(ps);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -660,12 +668,18 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 						 this.getContentPane());
 				return;
 			}
-	    }		
+			if(projectDataExtractionMethod != null) {
+				IDTDataCash.getDataExtractionMethods().add(projectDataExtractionMethod);
+				ps.setId(projectDataExtractionMethod.getId());
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+					setMsmsExtractionParameterSet(ps);
+			}
+		}		
 		MRC2ToolBoxCore.getActiveRawDataAnalysisProject().setMsmsExtractionParameterSet(ps);
 		MsMsfeatureBatchExtractionTask task = 
 				new MsMsfeatureBatchExtractionTask(
 						ps, 
-						existingDeMethod,
+						projectDataExtractionMethod,
 						MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMSMSDataFiles(), 
 						MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMSOneDataFiles());			
 		task.addTaskListener(this);
@@ -674,6 +688,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	private void cleanupForReanalysis() {
+		
 		MRC2ToolBoxCore.getActiveRawDataAnalysisProject().clearMSMSFeatures();
 		dataFileTreePanel.clearPanel();
 		chromatogramPanel.clearPanel();
@@ -683,6 +698,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		msmsTable.clearTable();
 		rawDataFilePropertiesTable.clearTable();
 		scanNavigationPanel.clearPanel();
+		
 		IDWorkbenchPanel workbench  = 
 				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
 		workbench.clearPanel();		

@@ -63,9 +63,11 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 
 	public static final String TOP_HIT_REASSIGNMENT_OPTION = "TOP_HIT_REASSIGNMENT_OPTION";
 	public static final String COMMIT_CHANGES = "COMMIT_CHANGES";
+	public static final String USE_ENTROPY_SCORE = "USE_ENTROPY_SCORE";
 	public static final String PREFERENCES_NODE = "edu.umich.med.mrc2.datoolbox.ReassignDefaultMSMSLibraryHitDialog";
 	
 	private JCheckBox commitChangesCheckBox;
+	private JCheckBox useEntropyScoreCheckBox;
 	private JComboBox topHitRuleComboBox;
 	
 	public ReassignDefaultMSMSLibraryHitDialog(ActionListener listener) {
@@ -86,9 +88,9 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 		getContentPane().add(setupPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_setupPanel = new GridBagLayout();
 		gbl_setupPanel.columnWidths = new int[]{0, 0};
-		gbl_setupPanel.rowHeights = new int[]{0, 0, 0, 0};
+		gbl_setupPanel.rowHeights = new int[]{0, 0, 0, 0, 0};
 		gbl_setupPanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gbl_setupPanel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_setupPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		setupPanel.setLayout(gbl_setupPanel);
 		
 		JLabel lblNewLabel = new JLabel("Top hit selection rule:");
@@ -109,12 +111,21 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 		gbc_topHitRuleComboBox.gridy = 1;
 		setupPanel.add(topHitRuleComboBox, gbc_topHitRuleComboBox);
 		
+		useEntropyScoreCheckBox = 
+				new JCheckBox("Use entropy-based score as quality measure");
+		GridBagConstraints gbc_useEntropyScoreCheckBox = new GridBagConstraints();
+		gbc_useEntropyScoreCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_useEntropyScoreCheckBox.insets = new Insets(0, 0, 5, 0);
+		gbc_useEntropyScoreCheckBox.gridx = 0;
+		gbc_useEntropyScoreCheckBox.gridy = 2;
+		setupPanel.add(useEntropyScoreCheckBox, gbc_useEntropyScoreCheckBox);
+		
 		commitChangesCheckBox = new JCheckBox("Commit changes to database");
-		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
-		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_chckbxNewCheckBox.gridx = 0;
-		gbc_chckbxNewCheckBox.gridy = 2;
-		setupPanel.add(commitChangesCheckBox, gbc_chckbxNewCheckBox);
+		GridBagConstraints gbc_commitChangesCheckBox = new GridBagConstraints();
+		gbc_commitChangesCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_commitChangesCheckBox.gridx = 0;
+		gbc_commitChangesCheckBox.gridy = 3;
+		setupPanel.add(commitChangesCheckBox, gbc_commitChangesCheckBox);
 
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -151,6 +162,10 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 		return commitChangesCheckBox.isSelected();
 	}
 	
+	public boolean useEntropyScore() {
+		return useEntropyScoreCheckBox.isSelected();
+	}
+	
 	public TopHitReassignmentOption getTopHitReassignmentOption() {
 		return (TopHitReassignmentOption)topHitRuleComboBox.getSelectedItem();
 	}
@@ -163,6 +178,7 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 	@Override
 	public void loadPreferences(Preferences preferences) {
 		
+		useEntropyScoreCheckBox.setSelected(preferences.getBoolean(USE_ENTROPY_SCORE, true));
 		commitChangesCheckBox.setSelected(preferences.getBoolean(COMMIT_CHANGES, true));
 		TopHitReassignmentOption top =TopHitReassignmentOption.getTopHitReassignmentOptionByName(
 				preferences.get(TOP_HIT_REASSIGNMENT_OPTION, 
@@ -176,6 +192,7 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 		Preferences preferences = Preferences.userRoot().node(PREFERENCES_NODE);
 		
 		preferences.putBoolean(COMMIT_CHANGES, commitChangesCheckBox.isSelected());
+		preferences.putBoolean(USE_ENTROPY_SCORE, useEntropyScoreCheckBox.isSelected());
 		preferences.put(TOP_HIT_REASSIGNMENT_OPTION, getTopHitReassignmentOption().name());
 	}
 

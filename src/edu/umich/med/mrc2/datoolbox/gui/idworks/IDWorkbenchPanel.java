@@ -1396,6 +1396,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				new DefaultMSMSLibraryHitReassignmentTask(
 						allFeatures, 
 						reassignDefaultMSMSLibraryHitDialog.getTopHitReassignmentOption(),
+						reassignDefaultMSMSLibraryHitDialog.useEntropyScore(),
 						reassignDefaultMSMSLibraryHitDialog.commitChangesTodatabase());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);

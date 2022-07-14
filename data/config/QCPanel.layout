@@ -106,7 +106,7 @@
 												</placeholders>
 											</leaf>
 											<node nodeId="1600213927553" orientation="HORIZONTAL" divider="0.6147378832838774">
-												<leaf id="2" nodeId="1600213793238">
+												<leaf id="1" nodeId="1600213793238">
 													<placeholders>
 														<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
 													</placeholders>
@@ -120,7 +120,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="1" nodeId="1600213927551">
+												<leaf id="2" nodeId="1600213927551">
 													<placeholders>
 														<placeholder>dock.single.QCPanelDockable3DChartPanel</placeholder>
 													</placeholders>
@@ -147,20 +147,20 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockable3DChartPanel">
-										<replacement id="dockablesingle QCPanelDockable3DChartPanel"/>
+									<layout factory="predefined" placeholder="dock.single.QCPanelDockable2DQCPanel">
+										<replacement id="dockablesingle QCPanelDockable2DQCPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockable3DChartPanel</id>
+											<id>QCPanelDockable2DQCPanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockable2DQCPanel">
-										<replacement id="dockablesingle QCPanelDockable2DQCPanel"/>
+									<layout factory="predefined" placeholder="dock.single.QCPanelDockable3DChartPanel">
+										<replacement id="dockablesingle QCPanelDockable3DChartPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockable2DQCPanel</id>
+											<id>QCPanelDockable3DChartPanel</id>
 											<area/>
 										</delegate>
 									</layout>

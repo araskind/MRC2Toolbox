@@ -72,7 +72,7 @@ public class IdProjectTree extends JTree {
 
 				getModel().clearModel();
 				IDTDataCash.getProjects().stream().sorted().forEach(p -> getModel().addProject(p));
-				expandTreeUpToLevel(2);				
+				expandTreeUpToLevel(1);				
 			}
 		};
 		try {

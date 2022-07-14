@@ -173,7 +173,7 @@
 															<placeholder>dock.single.DockableDatabaseCompoundTable</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="7" nodeId="1628554024679">
+													<leaf id="5" nodeId="1628554024679">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanelDockableMolStructurePanel</placeholder>
 														</placeholders>
@@ -225,7 +225,7 @@
 																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="0" nodeId="1600214310291">
+														<leaf id="6" nodeId="1600214310291">
 															<placeholders>
 																<placeholder>dock.single.DockableDatabaseLinksTable</placeholder>
 															</placeholders>
@@ -249,14 +249,14 @@
 															</placeholder-map>
 														</leaf>
 													</node>
-													<leaf id="5" nodeId="1600214095261">
+													<leaf id="7" nodeId="1600214095261">
 														<placeholders>
 															<placeholder>dock.single.DockableSpectraTable</placeholder>
 														</placeholders>
 													</leaf>
 												</node>
 												<node nodeId="1600214080591" orientation="VERTICAL" divider="0.6114072837047981">
-													<leaf id="6" nodeId="1600214064885">
+													<leaf id="4" nodeId="1600214064885">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanelDockableSpectumPlot</placeholder>
 															<placeholder>dock.single.CompoundDatabasePanelDockableMsMsTable</placeholder>
@@ -280,7 +280,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="4" nodeId="1600214080589">
+													<leaf id="0" nodeId="1600214080589">
 														<placeholders>
 															<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
 														</placeholders>
@@ -298,63 +298,14 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableDatabaseLinksTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableDatabaseLinksTable</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableSynonymsTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableSynonymsTable</item>
-											</entry>
-										</placeholders>
+									<layout factory="predefined" placeholder="dock.single.DockableMSMSLibraryEntryPropertiesTable">
+										<replacement id="dockablesingle DockableMSMSLibraryEntryPropertiesTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMSMSLibraryEntryPropertiesTable</id>
+											<area/>
+										</delegate>
 									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableDatabaseLinksTable">
-												<replacement id="dockablesingle DockableDatabaseLinksTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableDatabaseLinksTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableSynonymsTable">
-												<replacement id="dockablesingle DockableSynonymsTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableSynonymsTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
+									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="predefined" placeholder="dock.single.DockableDatabaseCompoundTable">
@@ -458,26 +409,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMSMSLibraryEntryPropertiesTable">
-										<replacement id="dockablesingle DockableMSMSLibraryEntryPropertiesTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMSMSLibraryEntryPropertiesTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableSpectraTable">
-										<replacement id="dockablesingle DockableSpectraTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableSpectraTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
@@ -596,6 +527,75 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableDatabaseLinksTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableDatabaseLinksTable</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableSynonymsTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableSynonymsTable</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableDatabaseLinksTable">
+												<replacement id="dockablesingle DockableDatabaseLinksTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableDatabaseLinksTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableSynonymsTable">
+												<replacement id="dockablesingle DockableSynonymsTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableSynonymsTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableSpectraTable">
+										<replacement id="dockablesingle DockableSpectraTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableSpectraTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

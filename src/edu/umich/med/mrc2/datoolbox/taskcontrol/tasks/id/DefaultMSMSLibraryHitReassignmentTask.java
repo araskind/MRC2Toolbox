@@ -46,15 +46,20 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 	
 	private Collection<MsFeatureInfoBundle>featuresToUpdate;
 	private TopHitReassignmentOption topHitReassignmentOption;
+	private boolean useEntropyScore;
 	private boolean commitChangesToDatabase;
+	private String metlinLibId;
+	private MSFeatureIdentificationLevel tentativeLevel;
 	
 	public DefaultMSMSLibraryHitReassignmentTask(
 			Collection<MsFeatureInfoBundle> featuresToExport,
 			TopHitReassignmentOption topHitReassignmentOption, 
+			boolean useEntropyScore,
 			boolean commitChangesToDatabase) {
 		super();
 		this.featuresToUpdate = featuresToExport;
 		this.topHitReassignmentOption = topHitReassignmentOption;
+		this.useEntropyScore = useEntropyScore;
 		this.commitChangesToDatabase = commitChangesToDatabase;
 	}
 
@@ -63,6 +68,10 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		
 		setStatus(TaskStatus.PROCESSING);
 		IDTDataCash.refreshNISTPepSearchParameters();
+		metlinLibId = 
+				IDTDataCash.getReferenceMsMsLibraryByName("Metlin_AMRT_PCDL").getUniqueId();	
+		tentativeLevel = 
+				IDTDataCash.getMSFeatureIdentificationLevelById("IDS002");
 		try {
 			featuresToUpdate = 
 				NISTPepSearchUtils.removeLockedFeatures(featuresToUpdate);
@@ -83,116 +92,165 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);
 			e1.printStackTrace();
 		}
+		if(commitChangesToDatabase) {
+			
+			try {
+				commitIDChangesToDatabase();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
-	
-	private void reassignDefaultHit() throws Exception {
+
+
+	private void reassignDefaultHit() {
 		
 		taskDescription = "Assigning default MSMS library hit";
 		total = featuresToUpdate.size();
 		processed = 0;	
-		Connection conn = ConnectionManager.getConnection();
 
 		Map<String,HiResSearchOption>searchTypeMap = 
-				NISTPepSearchUtils.getSearchTypeMap(featuresToUpdate);	
-		String metlinLibId = 
-				IDTDataCash.getReferenceMsMsLibraryByName("Metlin_AMRT_PCDL").getUniqueId();		
-		MSFeatureIdentificationLevel tentativeLevel = 
-				IDTDataCash.getMSFeatureIdentificationLevelById("IDS002");
-				
+				NISTPepSearchUtils.getSearchTypeMap(featuresToUpdate);			
+		
+		boolean assigned = false;
 		for(MsFeatureInfoBundle bundle : featuresToUpdate) {
-			
-			 List<MsFeatureIdentity>metlinHits = 
-						bundle.getMsFeature().getIdentifications().stream().
-						filter(id -> id.getReferenceMsMsLibraryMatch() != null).
-						filter(id -> id.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(metlinLibId)).
-						sorted(NISTPepSearchUtils.idScoreComparator).
-						collect(Collectors.toList());
 			 
-			if(topHitReassignmentOption.equals(TopHitReassignmentOption.PREFER_METLIN)  
-					&& !metlinHits.isEmpty()) {				
-				bundle.getMsFeature().setPrimaryIdentity(metlinHits.get(0));
+			assigned = false;			
+			if(topHitReassignmentOption.equals(TopHitReassignmentOption.PREFER_METLIN)) {				
+				if(assignMetlinTopHit(bundle))
+					continue;
+			}
+			Map<HiResSearchOption,Collection<MsFeatureIdentity>>hitTypeMap = 
+					NISTPepSearchUtils.getSearchTypeIdentityMap(bundle.getMsFeature(), searchTypeMap);				
+			if(useEntropyScore) {				
+				if(assignTopEntropyHit(bundle, searchTypeMap, hitTypeMap))
+					continue;			
+			}
+			else
+				assignNISTTopHit(bundle, searchTypeMap, hitTypeMap);
+	
+			processed++;
+		}	
+	}
+	
+	private boolean assignTopEntropyHit(
+			MsFeatureInfoBundle bundle,
+			Map<String,HiResSearchOption>searchTypeMap,
+			Map<HiResSearchOption, Collection<MsFeatureIdentity>> hitTypeMap) {
+		// TODO Auto-generated method stub
+		
+		
+		return false;
+	}
+
+	private void assignNISTTopHit(
+			MsFeatureInfoBundle bundle, 
+			Map<String,HiResSearchOption>searchTypeMap, 			
+			Map<HiResSearchOption,Collection<MsFeatureIdentity>>hitTypeMap) {		
+		
+		MsFeatureIdentity topNormalHit = null;
+		MsFeatureIdentity topInSourceHit = null;
+		MsFeatureIdentity topHybridHit = null;
+		
+		if(!hitTypeMap.get(HiResSearchOption.z).isEmpty())
+			topNormalHit = hitTypeMap.get(HiResSearchOption.z).iterator().next();
+		
+		if(!hitTypeMap.get(HiResSearchOption.u).isEmpty()) 
+			topInSourceHit = hitTypeMap.get(HiResSearchOption.u).iterator().next();
+		
+		if(!hitTypeMap.get(HiResSearchOption.y).isEmpty())
+			topHybridHit = hitTypeMap.get(HiResSearchOption.y).iterator().next();
+		
+		if(topHitReassignmentOption.equals(TopHitReassignmentOption.PREFER_NORMAL_HITS)) {
+			
+			if(topNormalHit != null) {
+				bundle.getMsFeature().setPrimaryIdentity(topNormalHit);
 			}
 			else {
-				Map<HiResSearchOption,Collection<MsFeatureIdentity>>hitTypeMap = 
-						NISTPepSearchUtils.getSearchTypeIdentityMap(bundle.getMsFeature(), searchTypeMap);
-				
-				MsFeatureIdentity topNormalHit = null;
-				MsFeatureIdentity topInSourceHit = null;
-				MsFeatureIdentity topHybridHit = null;
-				
-				if(!hitTypeMap.get(HiResSearchOption.z).isEmpty())
-					topNormalHit = hitTypeMap.get(HiResSearchOption.z).iterator().next();
-				
-				if(!hitTypeMap.get(HiResSearchOption.u).isEmpty()) 
-					topInSourceHit = hitTypeMap.get(HiResSearchOption.u).iterator().next();
-				
-				if(!hitTypeMap.get(HiResSearchOption.y).isEmpty())
-					topHybridHit = hitTypeMap.get(HiResSearchOption.y).iterator().next();
-				
-				if(topHitReassignmentOption.equals(TopHitReassignmentOption.PREFER_NORMAL_HITS)) {
-					
-					if(topNormalHit != null) {
-						bundle.getMsFeature().setPrimaryIdentity(topNormalHit);
-					}
-					else {
-						if(topInSourceHit != null) {
-							bundle.getMsFeature().setPrimaryIdentity(topInSourceHit);
-						}
-						else {
-							if(topHybridHit != null)
-								bundle.getMsFeature().setPrimaryIdentity(topHybridHit);
-						}
-					}
+				if(topInSourceHit != null) {
+					bundle.getMsFeature().setPrimaryIdentity(topInSourceHit);
 				}
-				if(topHitReassignmentOption.equals(TopHitReassignmentOption.ALLOW_IN_SOURCE_HITS)) {
-					
-					if(topNormalHit != null)
-						bundle.getMsFeature().setPrimaryIdentity(topNormalHit);
-					
-					if(topInSourceHit != null) {
-			
-						if(topNormalHit == null) {
-							bundle.getMsFeature().setPrimaryIdentity(topInSourceHit);
-						}
-						else {
-							if(topInSourceHit.getReferenceMsMsLibraryMatch().getScore() > 
-									topNormalHit.getReferenceMsMsLibraryMatch().getScore())
-								bundle.getMsFeature().setPrimaryIdentity(topInSourceHit);
-						}
-					}
-					if(topInSourceHit == null && topNormalHit == null && topHybridHit != null) 
-							bundle.getMsFeature().setPrimaryIdentity(topHybridHit);									
-				}
-				if(topHitReassignmentOption.equals(TopHitReassignmentOption.ALLOW_HYBRID_HITS)) {
-					
-					TreeSet<MsFeatureIdentity>topHits = 
-							new TreeSet<MsFeatureIdentity>(NISTPepSearchUtils.idScoreComparator);
-					if(topNormalHit != null)
-						topHits.add(topNormalHit);
-					
-					if(topInSourceHit != null)
-						topHits.add(topInSourceHit);
-					
+				else {
 					if(topHybridHit != null)
-						topHits.add(topHybridHit);
-					
-					bundle.getMsFeature().setPrimaryIdentity(topHits.iterator().next());
+						bundle.getMsFeature().setPrimaryIdentity(topHybridHit);
 				}
-			}	
+			}
+		}
+		if(topHitReassignmentOption.equals(TopHitReassignmentOption.ALLOW_IN_SOURCE_HITS)) {
+			
+			if(topNormalHit != null)
+				bundle.getMsFeature().setPrimaryIdentity(topNormalHit);
+			
+			if(topInSourceHit != null) {
+	
+				if(topNormalHit == null) {
+					bundle.getMsFeature().setPrimaryIdentity(topInSourceHit);
+				}
+				else {
+					if(topInSourceHit.getReferenceMsMsLibraryMatch().getScore() > 
+							topNormalHit.getReferenceMsMsLibraryMatch().getScore())
+						bundle.getMsFeature().setPrimaryIdentity(topInSourceHit);
+				}
+			}
+			if(topInSourceHit == null && topNormalHit == null && topHybridHit != null) 
+					bundle.getMsFeature().setPrimaryIdentity(topHybridHit);									
+		}
+		if(topHitReassignmentOption.equals(TopHitReassignmentOption.ALLOW_HYBRID_HITS)) {
+			
+			TreeSet<MsFeatureIdentity>topHits = 
+					new TreeSet<MsFeatureIdentity>(NISTPepSearchUtils.idScoreComparator);
+			if(topNormalHit != null)
+				topHits.add(topNormalHit);
+			
+			if(topInSourceHit != null)
+				topHits.add(topInSourceHit);
+			
+			if(topHybridHit != null)
+				topHits.add(topHybridHit);
+			
+			bundle.getMsFeature().setPrimaryIdentity(topHits.iterator().next());
+		}
+	}
+	
+	private boolean assignMetlinTopHit(MsFeatureInfoBundle bundle) {
+			
+		 List<MsFeatureIdentity>metlinHits = 
+					bundle.getMsFeature().getIdentifications().stream().
+					filter(id -> id.getReferenceMsMsLibraryMatch() != null).
+					filter(id -> id.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(metlinLibId)).
+					sorted(NISTPepSearchUtils.idScoreComparator).
+					collect(Collectors.toList());
+		 
+		if(!metlinHits.isEmpty()) {			
+			bundle.getMsFeature().setPrimaryIdentity(metlinHits.get(0));
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	private void commitIDChangesToDatabase() throws Exception {
+
+		taskDescription = "Writing changes to database ...";
+		total = featuresToUpdate.size();
+		processed = 0;	
+		Connection conn = ConnectionManager.getConnection();
+		
+		for(MsFeatureInfoBundle bundle : featuresToUpdate) {
+			
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
 			if(primaryId.getIdentificationLevel() == null)
 				primaryId.setIdentificationLevel(tentativeLevel);
 			
-			if(commitChangesToDatabase) {
-				TandemMassSpectrum msmsFeature = 
-						bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
-				try {
-					IdentificationUtils.setMSMSFeaturePrimaryIdentity(msmsFeature.getId(), primaryId, conn);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}	
+			TandemMassSpectrum msmsFeature = 
+					bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+			try {
+				IdentificationUtils.setMSMSFeaturePrimaryIdentity(msmsFeature.getId(), primaryId, conn);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			processed++;
 		}	
 		ConnectionManager.releaseConnection(conn);
@@ -204,6 +262,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		return new DefaultMSMSLibraryHitReassignmentTask(
 				 featuresToUpdate,
 				 topHitReassignmentOption,
+				 useEntropyScore,
 				 commitChangesToDatabase);
 	}
 }

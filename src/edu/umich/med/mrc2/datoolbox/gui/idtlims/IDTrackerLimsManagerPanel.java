@@ -508,10 +508,6 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		if (project == null)
 			return;
 
-		// Authenticate as superuser
-//		if (!IDTUtils.isSuperUser(this.getContentPane()))
-//			return;
-
 		int result = MessageDialog.showChoiceWithWarningMsg(
 				"Do you really want to delete project \"" + project.getName() + "\"?\n"
 						+ "All associated experiments and data will be purged from the database!",
@@ -520,17 +516,22 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		if (result == JOptionPane.YES_OPTION) {
 			
 //			TODO xx
-
-			try {
-				IDTUtils.deleteProject(project);
-				IDTDataCash.getProjects().remove(project);
-				IDTDataCash.getExperiments().removeAll(project.getExperiments());
-				projectTreePanel.removeObject(project);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			//	projectTreePanel.loadIdTrackerData();
+//			try {
+//				IDTUtils.deleteProject(project);
+//				IDTDataCash.getProjects().remove(project);
+//				IDTDataCash.getExperiments().removeAll(project.getExperiments());
+//				projectTreePanel.removeObject(project);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+			DeleteTrackerProjectTask task = 
+					new DeleteTrackerProjectTask(project);
+			idp = new IndeterminateProgressDialog(
+					"Deleting data for project "+ project.getName() + 
+					" ...", this.getContentPane(), task);
+			idp.setLocationRelativeTo(this.getContentPane());
+			idp.setVisible(true);
 		}
 	}
 
@@ -539,9 +540,6 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		LIMSExperiment experiment = getSelectedExperiment();
 		if (experiment == null)
 			return;
-//
-//		if (!IDTUtils.isSuperUser(this.getContentPane()))
-//			return;
 
 		int result = MessageDialog.showChoiceWithWarningMsg("Do you really want to delete experiment \""
 				+ experiment.getName() + "\"?\n" + "All associated data will be purged from the database!",
@@ -575,10 +573,36 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 
 			try {
 				IDTUtils.deleteExperiment(experiment);
-				experiment.getProject().getExperiments().remove(experiment);
-				IDTDataCash.getExperiments().remove(experiment);
-				//	projectTreePanel.removeObject(experiment);
-				projectTreePanel.loadIdTrackerData();
+//				experiment.getProject().getExperiments().remove(experiment);
+//				IDTDataCash.getExperiments().remove(experiment);
+//				//	projectTreePanel.removeObject(experiment);
+//				projectTreePanel.loadIdTrackerData();
+				refreshIdTrackerdata();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
+	
+	class DeleteTrackerProjectTask extends LongUpdateTask {
+		/*
+		 * Main task. Executed in background thread.
+		 */
+		private LIMSProject project;
+
+		public DeleteTrackerProjectTask(LIMSProject project) {
+			this.project = project;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Void doInBackground() {
+
+			try {
+				IDTUtils.deleteProject(project);
+				refreshIdTrackerdata();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

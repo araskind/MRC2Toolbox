@@ -70,8 +70,13 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 	public void run() {
 		// TODO Auto-generated method stub
 		setStatus(TaskStatus.PROCESSING);
-		String md5 = project.getMsmsExtractionParameterSet().getParameterSetHash();
-		deMethod = IDTDataCash.getDataExtractionMethodByMd5(md5);
+		taskDescription = "Refreshing method list ...";
+		total = 100;
+		processed = 20;
+		IDTDataCash.refreshDataExtractionMethodList();
+		//	String metodId = project.getMsmsExtractionParameterSet().getId();
+		deMethod = IDTDataCash.getDataExtractionMethodByMd5(
+				project.getMsmsExtractionParameterSet().getParameterSetHash());
 		if(deMethod == null) {
 			errorMessage = "Data extraction method not defined!";
 			setStatus(TaskStatus.ERROR);
@@ -79,7 +84,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 		}
 		boolean metadataUploaded = false;
 		try {
-			uploadExperimentMetadata();
+			metadataUploaded = uploadExperimentMetadata();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
@@ -90,6 +95,8 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
+		taskDescription = "Uploading MSMS analysis results ...";
+		processed = 50;
 		try {
 			initFeatureDataUpload();
 		} catch (Exception ex) {
@@ -122,7 +129,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 		
 		taskDescription = "Uploading metadata ...";
 		total = 100;
-		processed = 20;
+		processed = 35;
 		
 		//	Add experiment
 		if(!insertNewExperiment())
@@ -177,6 +184,12 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 			try {
 				IDTUtils.addNewSamplePrepWithSopsAndAnnotations(prep, samples);	
 				IDTDataCash.getSamplePreps().add(prep);
+				if(IDTDataCash.getExperimentSamplePrepMap().get(project.getIdTrackerExperiment()) == null)
+					IDTDataCash.getExperimentSamplePrepMap().
+						put(project.getIdTrackerExperiment(), new TreeSet<LIMSSamplePreparation>());
+				
+				IDTDataCash.getExperimentSamplePrepMap().get(project.getIdTrackerExperiment()).add(prep);
+					
 			}
 			catch (Exception e) {
 				e.printStackTrace();

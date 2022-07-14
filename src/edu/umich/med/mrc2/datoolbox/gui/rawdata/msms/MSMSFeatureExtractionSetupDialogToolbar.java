@@ -56,10 +56,10 @@ public class MSMSFeatureExtractionSetupDialogToolbar extends CommonToolbar {
 				MainActionCommands.SHOW_SAVED_MSMS_FEATURE_EXTRACTION_METHOD_LIST_COMMAND.getName(),
 				buttonDimension);
 
-		saveSearchQueryButton = GuiUtils.addButton(this, null, saveSearchQueryIcon, commandListener,
-				MainActionCommands.SHOW_SAVE_MSMS_FEATURE_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_SAVE_MSMS_FEATURE_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
-				buttonDimension);
+//		saveSearchQueryButton = GuiUtils.addButton(this, null, saveSearchQueryIcon, commandListener,
+//				MainActionCommands.SHOW_SAVE_MSMS_FEATURE_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
+//				MainActionCommands.SHOW_SAVE_MSMS_FEATURE_EXTRACTION_METHOD_DIALOG_COMMAND.getName(),
+//				buttonDimension);
 	}
 
 	@Override
