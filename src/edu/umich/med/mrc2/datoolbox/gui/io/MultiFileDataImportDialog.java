@@ -159,6 +159,7 @@ public class MultiFileDataImportDialog extends JDialog
 	private DataAnalysisProject currentProject;
 	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
 	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
+	private String followupCommand;
 	
 	private static final Icon importMultifileIcon = GuiUtils.getIcon("importMultifile", 32);
 
@@ -333,7 +334,6 @@ public class MultiFileDataImportDialog extends JDialog
 	public void actionPerformed(ActionEvent event) {
 				
 		String command = event.getActionCommand();
-		String followupCommand = null;
 		if(command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName())
 				|| command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName())
 				|| command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName())
@@ -353,7 +353,9 @@ public class MultiFileDataImportDialog extends JDialog
 				loadDesignFromFile();
 			
 			if (followupCommand.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
-				addResultsProFinderPfaFileToNewPipeline();			
+				addResultsProFinderPfaFileToNewPipeline();
+			
+			followupCommand = null;
 		}
 		else {
 			if (command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))

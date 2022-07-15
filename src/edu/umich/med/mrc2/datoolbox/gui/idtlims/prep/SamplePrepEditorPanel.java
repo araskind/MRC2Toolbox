@@ -41,12 +41,12 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.prefs.Preferences;
 
-import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
 import com.github.lgooddatepicker.components.DatePicker;
@@ -74,7 +74,6 @@ import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import javax.swing.border.EmptyBorder;
 
 public class SamplePrepEditorPanel extends JPanel 
 		implements ActionListener, PersistentLayout, BackedByPreferences {
