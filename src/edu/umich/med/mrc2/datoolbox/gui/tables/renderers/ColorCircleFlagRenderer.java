@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 
-public class ColorCircleFlagRenderer extends DefaultTableCellRenderer{
+public class ColorCircleFlagRenderer extends DefaultTableCellRenderer {
 
 	/**
 	 * 

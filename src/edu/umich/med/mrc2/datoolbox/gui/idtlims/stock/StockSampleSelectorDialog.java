@@ -27,6 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -71,6 +73,14 @@ public class StockSampleSelectorDialog extends JDialog {
 
 		stockSampleTable = new StockSampleTable();
 		stockSampleTable.setTableModelFromSamples(IDTDataCash.getStockSamples());
+		stockSampleTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							btnSave.doClick();
+						}
+					}
+				});
 		JScrollPane scrollPane = new JScrollPane(stockSampleTable);
 		dataPanel.add(scrollPane, BorderLayout.CENTER);
 

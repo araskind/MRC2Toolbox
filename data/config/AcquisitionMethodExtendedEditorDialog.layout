@@ -125,7 +125,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600794717898" orientation="VERTICAL" divider="0.4025069637883008">
-											<leaf id="2" nodeId="1600794711413">
+											<leaf id="0" nodeId="1600794711413">
 												<placeholders>
 													<placeholder>dock.single.DockableAcquisitionMethodDataPanel</placeholder>
 												</placeholders>
@@ -140,7 +140,7 @@
 												</placeholder-map>
 											</leaf>
 											<node nodeId="1600794782551" orientation="HORIZONTAL" divider="0.5657084188911704">
-												<leaf id="0" nodeId="1600794722848">
+												<leaf id="2" nodeId="1600794722848">
 													<placeholders>
 														<placeholder>dock.single.DockableChromatographicGradientTable</placeholder>
 														<placeholder>dock.single.DockableGradientChartPanel</placeholder>
@@ -180,6 +180,26 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableAcquisitionMethodDataPanel">
+										<replacement id="dockablesingle DockableAcquisitionMethodDataPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableAcquisitionMethodDataPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMobilePhaseAndParametersPanel">
+										<replacement id="dockablesingle DockableMobilePhaseAndParametersPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMobilePhaseAndParametersPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -239,26 +259,6 @@
 										</child>
 									</children>
 								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMobilePhaseAndParametersPanel">
-										<replacement id="dockablesingle DockableMobilePhaseAndParametersPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMobilePhaseAndParametersPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableAcquisitionMethodDataPanel">
-										<replacement id="dockablesingle DockableAcquisitionMethodDataPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableAcquisitionMethodDataPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
 							</children>
 						</root>
 						<root name="ccontrol west">
@@ -289,9 +289,18 @@
 					<dockables>
 						<entry id="single DockableAcquisitionMethodDataPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.maximized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.maximized">
+									<mode>dock.mode.maximized</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockFullScreenPropertyFactory"/>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -300,7 +309,7 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableAcquisitionMethodDataPanel</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.25" id="1600794717898"/>
+												<node location="TOP" size="0.4025069637883008" id="1600794717898"/>
 												<leaf id="1600794711413"/>
 											</backup-path>
 										</property>

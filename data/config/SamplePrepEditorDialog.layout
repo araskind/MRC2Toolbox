@@ -100,6 +100,11 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<leaf id="0" nodeId="1650666485003">
+											<placeholders>
+												<placeholder>dock.single.DockableDocumentsPanel</placeholder>
+												<placeholder>dock.single.DockableSopPanel</placeholder>
+												<placeholder>dock.single.DockablePrepSampleTable</placeholder>
+											</placeholders>
 											<placeholder-map>
 												<version>0</version>
 												<format>dock.PlaceholderList</format>
@@ -137,7 +142,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>2</selected>
+										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -247,16 +252,76 @@
 				<modes>
 					<dockables>
 						<entry id="single DockableDocumentsPanel" current="dock.mode.normal">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableDocumentsPanel</placeholder>
+											<backup-path>
+												<leaf id="1650666485003"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableDocumentsPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 						<entry id="single DockableSopPanel" current="dock.mode.normal">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableSopPanel</placeholder>
+											<backup-path>
+												<leaf id="1650666485003"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableSopPanel</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 						<entry id="single DockablePrepSampleTable" current="dock.mode.normal">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockablePrepSampleTable</placeholder>
+											<backup-path>
+												<leaf id="1650666485003"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>2</index>
+											<placeholder>dock.single.DockablePrepSampleTable</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 					</dockables>
 					<modes>

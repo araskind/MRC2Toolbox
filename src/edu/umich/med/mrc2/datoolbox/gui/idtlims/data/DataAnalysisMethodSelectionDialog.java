@@ -27,6 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -54,7 +56,7 @@ public class DataAnalysisMethodSelectionDialog extends JDialog {
 	private static final long serialVersionUID = -3962126555199879212L;
 	private static final Icon addMethodIcon = GuiUtils.getIcon("addDataProcessingMethod", 32);
 	private JButton btnSelect;
-	private DataExtractionMethodTable table;
+	private DataExtractionMethodTable dataExtractionMethodsTable;
 
 	public DataAnalysisMethodSelectionDialog(ActionListener actionListener) {
 
@@ -67,9 +69,17 @@ public class DataAnalysisMethodSelectionDialog extends JDialog {
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-		table = new DataExtractionMethodTable();
-		table.setTableModelFromMethods(IDTDataCash.getDataExtractionMethods());
-		getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
+		dataExtractionMethodsTable = new DataExtractionMethodTable();
+		dataExtractionMethodsTable.setTableModelFromMethods(IDTDataCash.getDataExtractionMethods());
+		dataExtractionMethodsTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							btnSelect.doClick();
+						}
+					}
+				});
+		getContentPane().add(new JScrollPane(dataExtractionMethodsTable), BorderLayout.CENTER);
 
 		JPanel panel_1 = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel_1.getLayout();
@@ -97,7 +107,7 @@ public class DataAnalysisMethodSelectionDialog extends JDialog {
 	}
 
 	public DataExtractionMethod getSelectedMethod() {
-		return table.getSelectedMethod();
+		return dataExtractionMethodsTable.getSelectedMethod();
 	}
 }
 

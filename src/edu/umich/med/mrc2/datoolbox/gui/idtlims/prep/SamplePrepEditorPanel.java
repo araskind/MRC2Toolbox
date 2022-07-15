@@ -41,6 +41,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.prefs.Preferences;
 
+import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -73,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import javax.swing.border.EmptyBorder;
 
 public class SamplePrepEditorPanel extends JPanel 
 		implements ActionListener, PersistentLayout, BackedByPreferences {
@@ -88,8 +90,8 @@ public class SamplePrepEditorPanel extends JPanel
 	private LIMSExperiment experiment;
 	private LIMSUser prepUser;
 	private JTextField nameTextField;
-	private JLabel idValueLabel;
 	private JLabel prepUserLabel;
+	private JLabel idValueLabel;
 	private JButton btnSelectUser;
 	private DatePicker datePicker;
 	private PrepSopSelectorDialog prepSopSelectorDialog;
@@ -143,16 +145,17 @@ public class SamplePrepEditorPanel extends JPanel
 	
 	public SamplePrepEditorPanel() {
 		super();
+		setBorder(new EmptyBorder(10, 10, 10, 10));
 		initGui();
 	}
 
 	private void initGui() {
 	
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
-		gbl_dataPanel.columnWidths = new int[]{50, 300, 50, 300, 200, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
-		gbl_dataPanel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_dataPanel.columnWidths = new int[]{10, 300, 50, 176, 201, 10};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, 0.0};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		setLayout(gbl_dataPanel);
 		
 		JButton selectPrepButton = new JButton(
@@ -160,12 +163,19 @@ public class SamplePrepEditorPanel extends JPanel
 		selectPrepButton.setActionCommand(
 				MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
 		selectPrepButton.addActionListener(this);
+		
+		JLabel lblNewLabel = new JLabel("   ");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 1;
+		gbc_lblNewLabel.gridy = 0;
+		add(lblNewLabel, gbc_lblNewLabel);
 		selectPrepButton.setEnabled(false);
 		GridBagConstraints gbc_selectPrepButton = new GridBagConstraints();
 		gbc_selectPrepButton.anchor = GridBagConstraints.WEST;
 		gbc_selectPrepButton.insets = new Insets(0, 0, 5, 5);
 		gbc_selectPrepButton.gridx = 1;
-		gbc_selectPrepButton.gridy = 0;
+		gbc_selectPrepButton.gridy = 1;
 		add(selectPrepButton, gbc_selectPrepButton);
 		
 		JButton clearPanelButton = new JButton(
@@ -174,10 +184,21 @@ public class SamplePrepEditorPanel extends JPanel
 				MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName());
 		clearPanelButton.addActionListener(this);
 		GridBagConstraints gbc_clearPanelButton = new GridBagConstraints();
-		gbc_clearPanelButton.insets = new Insets(0, 0, 5, 0);
+		gbc_clearPanelButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_clearPanelButton.insets = new Insets(0, 0, 5, 5);
 		gbc_clearPanelButton.gridx = 4;
-		gbc_clearPanelButton.gridy = 0;
+		gbc_clearPanelButton.gridy = 1;
 		add(clearPanelButton, gbc_clearPanelButton);
+		
+		JLabel lblName = new JLabel("Name");
+		lblName.setForeground(Color.BLACK);
+		lblName.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		GridBagConstraints gbc_lblName = new GridBagConstraints();
+		gbc_lblName.anchor = GridBagConstraints.WEST;
+		gbc_lblName.insets = new Insets(0, 0, 5, 5);
+		gbc_lblName.gridx = 1;
+		gbc_lblName.gridy = 2;
+		add(lblName, gbc_lblName);
 
 		JLabel lblId = new JLabel("ID");
 		lblId.setForeground(Color.BLUE);
@@ -185,47 +206,36 @@ public class SamplePrepEditorPanel extends JPanel
 		GridBagConstraints gbc_lblId = new GridBagConstraints();
 		gbc_lblId.anchor = GridBagConstraints.EAST;
 		gbc_lblId.insets = new Insets(0, 0, 5, 5);
-		gbc_lblId.gridx = 0;
-		gbc_lblId.gridy = 1;
+		gbc_lblId.gridx = 3;
+		gbc_lblId.gridy = 2;
 		add(lblId, gbc_lblId);
-
+		
 		idValueLabel = new JLabel("");
 		idValueLabel.setForeground(Color.BLACK);
 		idValueLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_idValueLabel = new GridBagConstraints();
-		gbc_idValueLabel.gridwidth = 3;
+		gbc_idValueLabel.anchor = GridBagConstraints.WEST;
 		gbc_idValueLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_idValueLabel.anchor = GridBagConstraints.SOUTHWEST;
-		gbc_idValueLabel.gridx = 1;
-		gbc_idValueLabel.gridy = 1;
+		gbc_idValueLabel.gridx = 4;
+		gbc_idValueLabel.gridy = 2;
 		add(idValueLabel, gbc_idValueLabel);
-
-		JLabel lblName = new JLabel("Name");
-		lblName.setForeground(Color.BLACK);
-		lblName.setFont(new Font("Tahoma", Font.PLAIN, 11));
-		GridBagConstraints gbc_lblName = new GridBagConstraints();
-		gbc_lblName.anchor = GridBagConstraints.EAST;
-		gbc_lblName.insets = new Insets(0, 0, 5, 5);
-		gbc_lblName.gridx = 0;
-		gbc_lblName.gridy = 2;
-		add(lblName, gbc_lblName);
 
 		nameTextField = new JTextField();
 		GridBagConstraints gbc_nameTextField = new GridBagConstraints();
 		gbc_nameTextField.gridwidth = 4;
-		gbc_nameTextField.insets = new Insets(0, 0, 5, 0);
+		gbc_nameTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_nameTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_nameTextField.gridx = 1;
-		gbc_nameTextField.gridy = 2;
+		gbc_nameTextField.gridy = 3;
 		add(nameTextField, gbc_nameTextField);
 		nameTextField.setColumns(10);
-
+		
 		JLabel lblType = new JLabel("Prepared by");
 		GridBagConstraints gbc_lblType = new GridBagConstraints();
-		gbc_lblType.anchor = GridBagConstraints.NORTHEAST;
+		gbc_lblType.anchor = GridBagConstraints.NORTHWEST;
 		gbc_lblType.insets = new Insets(0, 0, 5, 5);
-		gbc_lblType.gridx = 0;
-		gbc_lblType.gridy = 3;
+		gbc_lblType.gridx = 1;
+		gbc_lblType.gridy = 4;
 		add(lblType, gbc_lblType);
 
 		prepUserLabel = new JLabel("      ");
@@ -235,25 +245,26 @@ public class SamplePrepEditorPanel extends JPanel
 		gbc_prepUserLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_prepUserLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_prepUserLabel.gridx = 1;
-		gbc_prepUserLabel.gridy = 3;
+		gbc_prepUserLabel.gridy = 5;
 		add(prepUserLabel, gbc_prepUserLabel);
 		
 		btnSelectUser = new JButton("Select user");
 		btnSelectUser.setActionCommand(MainActionCommands.SELECT_USER_DIALOG_COMMAND.getName());
 		btnSelectUser.addActionListener(this);
 		GridBagConstraints gbc_btnSelectUser = new GridBagConstraints();
+		gbc_btnSelectUser.gridwidth = 2;
 		gbc_btnSelectUser.anchor = GridBagConstraints.WEST;
 		gbc_btnSelectUser.insets = new Insets(0, 0, 5, 5);
 		gbc_btnSelectUser.gridx = 3;
-		gbc_btnSelectUser.gridy = 3;
+		gbc_btnSelectUser.gridy = 5;
 		add(btnSelectUser, gbc_btnSelectUser);
-
+		
 		JLabel lblPreparedOn = new JLabel("Prepared on");
 		GridBagConstraints gbc_lblPreparedOn = new GridBagConstraints();
-		gbc_lblPreparedOn.anchor = GridBagConstraints.EAST;
+		gbc_lblPreparedOn.anchor = GridBagConstraints.WEST;
 		gbc_lblPreparedOn.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPreparedOn.gridx = 0;
-		gbc_lblPreparedOn.gridy = 4;
+		gbc_lblPreparedOn.gridx = 1;
+		gbc_lblPreparedOn.gridy = 6;
 		add(lblPreparedOn, gbc_lblPreparedOn);
 
 		datePicker = new DatePicker();
@@ -262,7 +273,7 @@ public class SamplePrepEditorPanel extends JPanel
 		gbc_datePicker.insets = new Insets(0, 0, 5, 5);
 		gbc_datePicker.fill = GridBagConstraints.BOTH;
 		gbc_datePicker.gridx = 1;
-		gbc_datePicker.gridy = 4;
+		gbc_datePicker.gridy = 7;
 		add(datePicker, gbc_datePicker);
 
 		JPanel panel_1 = new JPanel(new BorderLayout(0, 0));
@@ -278,10 +289,11 @@ public class SamplePrepEditorPanel extends JPanel
 		panel_1.add(control.getContentArea(), BorderLayout.CENTER);
 		
 		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.gridwidth = 5;
+		gbc_panel_1.insets = new Insets(0, 0, 0, 5);
+		gbc_panel_1.gridwidth = 4;
 		gbc_panel_1.fill = GridBagConstraints.BOTH;
-		gbc_panel_1.gridx = 0;
-		gbc_panel_1.gridy = 5;
+		gbc_panel_1.gridx = 1;
+		gbc_panel_1.gridy = 8;
 		add(panel_1, gbc_panel_1);
 		
 		loadLayout(layoutConfigFile);

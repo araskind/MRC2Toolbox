@@ -31,7 +31,9 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
@@ -50,6 +52,9 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 	private boolean commitChangesToDatabase;
 	private String metlinLibId;
 	private MSFeatureIdentificationLevel tentativeLevel;
+	
+	public static final MsFeatureIdentityComparator entropyScoreComparator = 
+			new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC);
 	
 	public DefaultMSMSLibraryHitReassignmentTask(
 			Collection<MsFeatureInfoBundle> featuresToExport,
@@ -103,7 +108,6 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		}
 	}
 
-
 	private void reassignDefaultHit() {
 		
 		taskDescription = "Assigning default MSMS library hit";
@@ -112,11 +116,9 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 
 		Map<String,HiResSearchOption>searchTypeMap = 
 				NISTPepSearchUtils.getSearchTypeMap(featuresToUpdate);			
-		
-		boolean assigned = false;
+
 		for(MsFeatureInfoBundle bundle : featuresToUpdate) {
-			 
-			assigned = false;			
+			 		
 			if(topHitReassignmentOption.equals(TopHitReassignmentOption.PREFER_METLIN)) {				
 				if(assignMetlinTopHit(bundle))
 					continue;
@@ -130,6 +132,10 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 			else
 				assignNISTTopHit(bundle, searchTypeMap, hitTypeMap);
 	
+			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
+			if(primaryId.getIdentificationLevel() == null)
+				primaryId.setIdentificationLevel(tentativeLevel);
+			
 			processed++;
 		}	
 	}
@@ -138,10 +144,27 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 			MsFeatureInfoBundle bundle,
 			Map<String,HiResSearchOption>searchTypeMap,
 			Map<HiResSearchOption, Collection<MsFeatureIdentity>> hitTypeMap) {
-		// TODO Auto-generated method stub
-		
-		
-		return false;
+
+		Collection<MsFeatureIdentity>idsToRank = 
+				new TreeSet<MsFeatureIdentity>(entropyScoreComparator);
+		idsToRank.addAll(hitTypeMap.get(HiResSearchOption.z));
+		idsToRank.addAll(hitTypeMap.get(HiResSearchOption.u));
+		List<MsFeatureIdentity> metlinHits = 
+				bundle.getMsFeature().getIdentifications().stream().
+				filter(id -> id.getReferenceMsMsLibraryMatch() != null).
+				filter(id -> id.getReferenceMsMsLibraryMatch()
+						.getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(metlinLibId)).
+				sorted(NISTPepSearchUtils.idScoreComparator).collect(Collectors.toList());		
+		idsToRank.addAll(metlinHits);
+		if(idsToRank.isEmpty()) {
+			assignNISTTopHit(bundle, searchTypeMap, hitTypeMap);
+			return true;
+		}
+		else {
+			MsFeatureIdentity topHit = idsToRank.stream().findFirst().orElse(null);
+			bundle.getMsFeature().setPrimaryIdentity(topHit);
+			return true;
+		}	
 	}
 
 	private void assignNISTTopHit(
@@ -239,14 +262,11 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		
 		for(MsFeatureInfoBundle bundle : featuresToUpdate) {
 			
-			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
-			if(primaryId.getIdentificationLevel() == null)
-				primaryId.setIdentificationLevel(tentativeLevel);
-			
-			TandemMassSpectrum msmsFeature = 
-					bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
 			try {
-				IdentificationUtils.setMSMSFeaturePrimaryIdentity(msmsFeature.getId(), primaryId, conn);
+				IdentificationUtils.setMSMSFeaturePrimaryIdentity(
+						bundle.getMSMSFeatureId(), 
+						bundle.getMsFeature().getPrimaryIdentity(), 
+						conn);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

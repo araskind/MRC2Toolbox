@@ -814,6 +814,7 @@ public class IDTUtils {
 				DataPrefix.DATA_EXTRACTION_METHOD,
 				"0",
 				4);
+		selectedMethod.setId(id);
 		String query  =
 			"INSERT INTO DATA_EXTRACTION_METHOD (EXTRACTION_METHOD_ID, METHOD_NAME, " +
 			"METHOD_DESCRIPTION, CREATED_BY, CREATED_ON, METHOD_CONTAINER, SOFTWARE_ID) " +

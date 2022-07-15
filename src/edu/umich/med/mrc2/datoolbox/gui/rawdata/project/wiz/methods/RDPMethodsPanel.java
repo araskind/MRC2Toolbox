@@ -396,14 +396,16 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 		selectedMethod.setIonizationType(methodData.getIonizationType());
 		selectedMethod.setMassAnalyzerType(methodData.getMassAnalyzerType());
 		selectedMethod.setSeparationType(methodData.getChromatographicSeparationType());
+		selectedMethod.setSoftware(methodData.getSoftware());
 		try {
-			AcquisitionMethodUtils.addNewAcquisitionMethod(selectedMethod, methodData.getMethodFile());
+			AcquisitionMethodUtils.addNewAcquisitionMethod(
+					selectedMethod, methodData.getMethodFile());
+			IDTDataCash.getAcquisitionMethods().add(selectedMethod);
+			dataAcquisitionMethods.add(selectedMethod);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		IDTDataCash.getAcquisitionMethods().add(selectedMethod);
-		dataAcquisitionMethods.add(selectedMethod);
 		reloadAcquisitionMethods();
 		acquisitionMethodEditorDialog.dispose();
 	}

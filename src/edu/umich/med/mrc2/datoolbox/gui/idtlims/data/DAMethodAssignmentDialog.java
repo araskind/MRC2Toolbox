@@ -93,7 +93,8 @@ public class DAMethodAssignmentDialog extends JDialog{
 
 		//	Instructions
 		JPanel instructionsPanel = new JPanel(new BorderLayout(10,10));
-		instructionsPanel.setBorder(new TitledBorder(null, "Instructions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		instructionsPanel.setBorder(
+				new TitledBorder(null, "Instructions", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagConstraints gbc_Instructions = new GridBagConstraints();
 		gbc_Instructions.fill = GridBagConstraints.HORIZONTAL;
 		gbc_Instructions.gridwidth = 2;

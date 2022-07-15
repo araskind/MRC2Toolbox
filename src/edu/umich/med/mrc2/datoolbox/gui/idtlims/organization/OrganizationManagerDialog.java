@@ -26,6 +26,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Collection;
 
 import javax.swing.Icon;
@@ -55,7 +57,7 @@ public class OrganizationManagerDialog extends JDialog implements ActionListener
 	 */
 	private static final long serialVersionUID = 5685218262277207511L;
 	private OrganizationManagerToolbar toolbar;
-	private OrganizationTable userTable;
+	private OrganizationTable organizationTable;
 	private OrganizationEditorDialog organizationEditorDialog;
 
 	private static final Icon organizationIcon = GuiUtils.getIcon("organization", 32);
@@ -76,9 +78,17 @@ public class OrganizationManagerDialog extends JDialog implements ActionListener
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		IDTDataCash.refreshOrganizationList();
-		userTable = new OrganizationTable();
-		userTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());
-		JScrollPane scrollPane = new JScrollPane(userTable);
+		organizationTable = new OrganizationTable();
+		organizationTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());
+		organizationTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							showEditOrganizationDialog();
+						}
+					}
+				});		
+		JScrollPane scrollPane = new JScrollPane(organizationTable);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
@@ -141,13 +151,13 @@ public class OrganizationManagerDialog extends JDialog implements ActionListener
 			e.printStackTrace();
 		}		
 		IDTDataCash.refreshOrganizationList();
-		userTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());			
+		organizationTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());			
 		organizationEditorDialog.dispose();
 	}
 
 	private void showEditOrganizationDialog() {
 
-		IdTrackerOrganization organization = userTable.getSelectedOrganization();
+		IdTrackerOrganization organization = organizationTable.getSelectedOrganization();
 		if(organization == null)
 			return;
 		
@@ -178,13 +188,13 @@ public class OrganizationManagerDialog extends JDialog implements ActionListener
 			e.printStackTrace();
 		}
 		IDTDataCash.refreshOrganizationList();
-		userTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());			
+		organizationTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());			
 		organizationEditorDialog.dispose();
 	}
 
 	private void deleteSelectedOrganization() {
 
-		IdTrackerOrganization organization = userTable.getSelectedOrganization();
+		IdTrackerOrganization organization = organizationTable.getSelectedOrganization();
 		if(organization == null)
 			return;
 		
@@ -199,7 +209,7 @@ public class OrganizationManagerDialog extends JDialog implements ActionListener
 			}
 			IDTDataCash.refreshOrganizationList();
 			try {			
-				userTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());
+				organizationTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

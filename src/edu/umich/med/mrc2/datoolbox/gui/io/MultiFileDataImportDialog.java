@@ -132,7 +132,6 @@ public class MultiFileDataImportDialog extends JDialog
 	private DataPipeline existingDataPipeline = null;
 	private DataPipeline newDataPipeline = null;
 	
-	private String command;
 	private JFileChooser chooser;
 	private File baseLibraryDirectory, 
 				libraryFile, 
@@ -262,12 +261,6 @@ public class MultiFileDataImportDialog extends JDialog
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-
-//				for(DataFile df : matchPanel.getAllDataFiles()) {
-//
-//					if(df.getParentSample() != null)
-//						df.getParentSample().removeDataFile(df);
-//				}
 				dispose();
 			}
 		};		
@@ -338,64 +331,72 @@ public class MultiFileDataImportDialog extends JDialog
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
+				
+		String command = event.getActionCommand();
+		String followupCommand = null;
+		if(command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName())
+				|| command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName())
+				|| command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName())
+				|| command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName())) {
+			followupCommand = command;
+		}		
+		if (event.getSource().equals(chooser) 
+				&& event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
 
-		if(!event.getSource().equals(chooser))
-			command = event.getActionCommand();
-
-		if (event.getSource().equals(chooser) && event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			if(command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
+			if(followupCommand.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
 				addSelectedLibraryFile();
 		
-			if(command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
+			if(followupCommand.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
 				addSelectedDataFiles();
 			
-			if (command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
+			if (followupCommand.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
 				loadDesignFromFile();
 			
+			if (followupCommand.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
+				addResultsProFinderPfaFileToNewPipeline();			
+		}
+		else {
+			if (command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
+				selectLibraryFile();
+
+			if (command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
+				selectDataFiles();
+			
 			if (command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
-				addResultsProFinderPfaFileToNewPipeline();
+				selectPfaFile();
+
+			if (command.equals(MainActionCommands.REMOVE_DATA_FILES_COMMAND.getName()))
+				removeDataFiles();
+
+			if (event.getActionCommand().equals(MainActionCommands.IMPORT_DATA_COMMAND.getName()))
+				importData();
+
+			if (command.equals(MainActionCommands.CLEAR_DATA_COMMAND.getName())) {
+
+				if (MessageDialog.showChoiceMsg("Clear input data?", this) == JOptionPane.YES_OPTION)
+					clearPanel();
+			}
+			if(command.equals(MainActionCommands.SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND.getName()))
+				showReferenceSamplesEditDialog();
+			
+			if(command.equals(MainActionCommands.EDIT_REFERENCE_SAMPLES_COMMAND.getName()))
+				editReferenceSamples();
+			
+			if (command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
+				chooseDesignFile();
+			
+			if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName()))
+				showAcquisitionMethodEditor();
+			
+			if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_COMMAND.getName()))
+				addAcquisitionMethod();
+			
+			if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName()))
+				showDataExtractionMethodEditor();
+			
+			if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
+				addDataExtractionMethod();
 		}
-		if (event.getActionCommand().equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
-			selectLibraryFile();
-
-		if (event.getActionCommand().equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
-			selectDataFiles();
-		
-		if (event.getActionCommand().equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
-			selectPfaFile();
-
-		if (event.getActionCommand().equals(MainActionCommands.REMOVE_DATA_FILES_COMMAND.getName()))
-			removeDataFiles();
-
-		if (event.getActionCommand().equals(MainActionCommands.IMPORT_DATA_COMMAND.getName()))
-			importData();
-
-		if (command.equals(MainActionCommands.CLEAR_DATA_COMMAND.getName())) {
-
-			if (MessageDialog.showChoiceMsg("Clear input data?", this) == JOptionPane.YES_OPTION)
-				clearPanel();
-		}
-		if(command.equals(MainActionCommands.SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND.getName()))
-			showReferenceSamplesEditDialog();
-		
-		if(command.equals(MainActionCommands.EDIT_REFERENCE_SAMPLES_COMMAND.getName()))
-			editReferenceSamples();
-		
-		if (command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
-			chooseDesignFile();
-		
-		if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName()))
-			showAcquisitionMethodEditor();
-		
-		if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_COMMAND.getName()))
-			addAcquisitionMethod();
-		
-		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName()))
-			showDataExtractionMethodEditor();
-		
-		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
-			addDataExtractionMethod();
 	}
 	
 	private void showDataExtractionMethodEditor() {
@@ -407,9 +408,11 @@ public class MultiFileDataImportDialog extends JDialog
 	
 	private void addDataExtractionMethod() {
 
-		Collection<String>errors = dataExtractionMethodEditorDialog.validateMethodData();
+		Collection<String>errors = 
+				dataExtractionMethodEditorDialog.validateMethodData();
 		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), dataExtractionMethodEditorDialog);
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), dataExtractionMethodEditorDialog);
 			return;
 		}
 		DataExtractionMethod selectedMethod = new DataExtractionMethod(
@@ -418,11 +421,10 @@ public class MultiFileDataImportDialog extends JDialog
 					dataExtractionMethodEditorDialog.getMethodDescription(),
 					MRC2ToolBoxCore.getIdTrackerUser(),
 					new Date());
-		String methodId = null;
+		selectedMethod.setSoftware(dataExtractionMethodEditorDialog.getSoftware());
 		try {
-			methodId = IDTUtils.addNewDataExtractionMethod(
+			IDTUtils.addNewDataExtractionMethod(
 					selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
-			selectedMethod.setId(methodId);
 			IDTDataCash.getDataExtractionMethods().add(selectedMethod);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -440,12 +442,15 @@ public class MultiFileDataImportDialog extends JDialog
 	
 	private void addAcquisitionMethod() {
 
-		Collection<String>errors = acquisitionMethodEditorDialog.validateMethodData();
+		Collection<String>errors = 
+				acquisitionMethodEditorDialog.validateMethodData();
 		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), acquisitionMethodEditorDialog);
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), acquisitionMethodEditorDialog);
 			return;
 		}
-		DockableAcquisitionMethodDataPanel methodData = acquisitionMethodEditorDialog.getDataPanel();
+		DockableAcquisitionMethodDataPanel methodData = 
+				acquisitionMethodEditorDialog.getDataPanel();
 		DataAcquisitionMethod newMethod = new DataAcquisitionMethod(
 					null,
 					methodData.getMethodName(),
@@ -459,13 +464,15 @@ public class MultiFileDataImportDialog extends JDialog
 		newMethod.setIonizationType(methodData.getIonizationType());
 		newMethod.setMassAnalyzerType(methodData.getMassAnalyzerType());
 		newMethod.setSeparationType(methodData.getChromatographicSeparationType());
+		newMethod.setSoftware(methodData.getSoftware());
 		try {
-			AcquisitionMethodUtils.addNewAcquisitionMethod(newMethod, methodData.getMethodFile());
+			AcquisitionMethodUtils.addNewAcquisitionMethod(
+					newMethod, methodData.getMethodFile());
+			IDTDataCash.getAcquisitionMethods().add(newMethod);		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		IDTDataCash.getAcquisitionMethods().add(newMethod);		
+		}		
 		acquisitionMethodEditorDialog.dispose();
 	}
 	

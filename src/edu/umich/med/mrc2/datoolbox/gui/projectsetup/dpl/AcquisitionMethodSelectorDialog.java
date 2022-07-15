@@ -27,6 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -67,6 +69,14 @@ public class AcquisitionMethodSelectorDialog extends JDialog {
 		getContentPane().setLayout(new BorderLayout(0,0));
 		
 		acquisitionMethodTable = new AcquisitionMethodTable();
+		acquisitionMethodTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							btnSave.doClick();
+						}
+					}
+				});
 		JScrollPane scrollPane = new JScrollPane(acquisitionMethodTable);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 		

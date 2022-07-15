@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.vendor;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Collection;
 import java.util.prefs.Preferences;
 
@@ -64,6 +66,14 @@ public class DockableVendorManagerPanel extends AbstractIDTrackerLimsPanel {
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		vendorTable =  new VendorTable();
+		vendorTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							loadVendorInEditor();
+						}
+					}
+				});
 		JScrollPane designScrollPane = new JScrollPane(vendorTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 		
@@ -102,17 +112,21 @@ public class DockableVendorManagerPanel extends AbstractIDTrackerLimsPanel {
 		if(command.equals(MainActionCommands.ADD_VENDOR_COMMAND.getName())) {
 			showVendorEditor(null);
 		}
-		if(command.equals(MainActionCommands.EDIT_VENDOR_COMMAND.getName())) {
-
-			Manufacturer vendor = vendorTable.getSelectedVendor();
-			if(vendor != null)
-				showVendorEditor(vendor);	
-		}		
+		if(command.equals(MainActionCommands.EDIT_VENDOR_COMMAND.getName()))
+			loadVendorInEditor();
+					
 		if(command.equals(MainActionCommands.SAVE_VENDOR_DETAILS_COMMAND.getName()))
 			saveVendorDetails();
 		
 		if(command.equals(MainActionCommands.DELETE_VENDOR_COMMAND.getName()))
 			deleteVendor();		
+	}
+	
+	private void loadVendorInEditor() {
+		
+		Manufacturer vendor = vendorTable.getSelectedVendor();
+		if(vendor != null)
+			showVendorEditor(vendor);
 	}
 
 	private void saveVendorDetails() {

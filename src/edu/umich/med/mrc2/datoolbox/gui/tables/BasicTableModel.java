@@ -34,6 +34,7 @@ public class BasicTableModel extends DefaultTableModel {
 	 */
 	private static final long serialVersionUID = -2434174808937948792L;
 
+
 	protected ColumnContext[] columnArray;
 
 	public BasicTableModel() {
@@ -85,6 +86,61 @@ public class BasicTableModel extends DefaultTableModel {
 		dataVector.addAll(vRowData);
 		fireTableRowsInserted(rowCount, getRowCount() - 1);
 	}
+	
+//    public void addRow(Object[]rowData) {
+//    	int row = dataList.size();
+//        dataList.add(rowData);
+//        fireTableRowsInserted(row, row);
+//    }
+//    
+//	public void addRows(List<Object[]> rowData) {
+//		int rowCount = dataList.size();
+//		dataList.addAll(rowData);
+//		fireTableRowsInserted(rowCount, dataList.size() - 1);
+//	}
+//	
+//    public void insertRow(int row, Object[]rowData) {
+//        dataList.add(row, rowData);
+//        fireTableRowsInserted(row, row);
+//    }
+//
+//	public void setRowCount(int rowCount) {
+//
+//		int old = getRowCount();
+//		if (old == rowCount) {
+//			return;
+//		}
+//		if (rowCount == 0) {
+//			dataList.clear();
+//			fireTableRowsInserted(old,0);
+//		}
+//		else {
+//			dataList = dataList.subList(0, rowCount);
+//			fireTableRowsInserted(old, rowCount - 1);
+//		}
+//	}
+//	
+//	@Override
+//	public int getRowCount() {
+//		return dataList.size();
+//	}
+//
+//	@Override
+//	public Object getValueAt(int rowIndex, int columnIndex) {
+//		
+//		if(dataList.isEmpty())
+//			return null;
+//		
+//		if(dataList.get(rowIndex) != null && columnIndex < dataList.get(rowIndex).length )
+//			return dataList.get(rowIndex)[columnIndex];
+//		else
+//			return null;
+//	}
+//	
+//    public void removeRow(int row) {
+//    	dataList.remove(row);
+//        fireTableRowsDeleted(row, row);
+//    }
 }
 
 

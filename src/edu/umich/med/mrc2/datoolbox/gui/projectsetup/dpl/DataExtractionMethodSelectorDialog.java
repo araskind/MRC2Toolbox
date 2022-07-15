@@ -27,6 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -67,6 +69,16 @@ public class DataExtractionMethodSelectorDialog extends JDialog {
 		getContentPane().setLayout(new BorderLayout(0,0));
 		
 		dataExtractionMethodTable = new DataExtractionMethodTable();
+		dataExtractionMethodTable.setTableModelFromMethods(
+				IDTDataCash.getDataExtractionMethods());
+		dataExtractionMethodTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							btnSave.doClick();
+						}
+					}
+				});
 		JScrollPane scrollPane = new JScrollPane(dataExtractionMethodTable);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 		
@@ -94,8 +106,7 @@ public class DataExtractionMethodSelectorDialog extends JDialog {
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 
-		dataExtractionMethodTable.setTableModelFromMethods(
-				IDTDataCash.getDataExtractionMethods());
+
 		pack();
 	}
 	

@@ -49,7 +49,6 @@ import javax.swing.RowSorter.SortKey;
 import javax.swing.SortOrder;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableColumnModelEvent;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -120,7 +119,7 @@ public class BasicTable extends JTable implements ActionListener{
 		initTable();
 	}
 
-	public BasicTable(DefaultTableModel tableModel) {
+	public BasicTable(BasicTableModel tableModel) {
 
 		columnModel  = new XTableColumnModel();
 		setColumnModel(columnModel);
@@ -129,19 +128,19 @@ public class BasicTable extends JTable implements ActionListener{
 		initTable();
 	}
 
-	/**
-	 * @param rowData
-	 * @param columnNames
-	 */
-	public BasicTable(Object[][] rowData, Object[] columnNames) {
-
-		columnModel  = new XTableColumnModel();
-		setColumnModel(columnModel);
-		DefaultTableModel tableModel = new DefaultTableModel(rowData, columnNames);
-		setModel(tableModel);
-		fixedWidthColumns = new ArrayList<Integer>();
-		initTable();
-	}
+//	/**
+//	 * @param rowData
+//	 * @param columnNames
+//	 */
+//	public BasicTable(Object[][] rowData, Object[] columnNames) {
+//
+//		columnModel  = new XTableColumnModel();
+//		setColumnModel(columnModel);
+//		BasicTableModel tableModel = new BasicTableModel(rowData, columnNames);
+//		setModel(tableModel);
+//		fixedWidthColumns = new ArrayList<Integer>();
+//		initTable();
+//	}
 
 	public BasicTable(TableModel model) {
 
@@ -163,7 +162,7 @@ public class BasicTable extends JTable implements ActionListener{
 
 	public synchronized void clearTable() {
 
-		((DefaultTableModel) this.getModel()).setRowCount(0);
+		((BasicTableModel)this.getModel()).setRowCount(0);
 		if (tca != null)
 			tca.adjustColumns();
 	}

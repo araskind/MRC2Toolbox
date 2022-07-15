@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.ObjectAnnotationTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class ObjectAnnotationFilePreviewRenderer extends DefaultTableCellRenderer implements MouseListener{
+public class ObjectAnnotationFilePreviewRenderer extends DefaultTableCellRenderer implements MouseListener {
 
 	/**
 	 *

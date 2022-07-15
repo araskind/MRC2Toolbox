@@ -27,6 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -56,6 +58,8 @@ public class AssaySelectorDialog extends JDialog  {
 
 	private AssayTable assayMethodsTable;
 	private static final Icon acqMethodIcon = GuiUtils.getIcon("acqMethod", 32);
+	
+	private JButton btnSave;
 
 	public AssaySelectorDialog(ActionListener actionListener) {
 
@@ -72,6 +76,14 @@ public class AssaySelectorDialog extends JDialog  {
 		LIMSDataCash.refreshAssayList();		
 		assayMethodsTable.setTableModelFromAssayCollection(
 					LIMSDataCash.getAssays());
+		assayMethodsTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							btnSave.doClick();
+						}
+					}
+				});
 		JScrollPane scrollPane = new JScrollPane(assayMethodsTable);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 		
@@ -90,7 +102,7 @@ public class AssaySelectorDialog extends JDialog  {
 		};
 		btnCancel.addActionListener(al);
 				
-		JButton btnSave = new JButton(MainActionCommands.SELECT_ASSAY_COMMAND.getName());
+		btnSave = new JButton(MainActionCommands.SELECT_ASSAY_COMMAND.getName());
 		btnSave.setActionCommand(MainActionCommands.SELECT_ASSAY_COMMAND.getName());
 		btnSave.addActionListener(actionListener);
 		panel.add(btnSave);

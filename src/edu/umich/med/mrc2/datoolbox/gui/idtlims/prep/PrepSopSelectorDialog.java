@@ -27,6 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Collection;
 
 import javax.swing.Icon;
@@ -72,6 +74,14 @@ public class PrepSopSelectorDialog extends JDialog {
 		protocolTable = new ProtocolTable();
 		protocolTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		protocolTable.setTableModelFromProtocols(IDTDataCash.getProtocols());
+		protocolTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							btnSave.doClick();
+						}
+					}
+				});
 		JScrollPane designScrollPane = new JScrollPane(protocolTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 

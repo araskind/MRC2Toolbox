@@ -27,6 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -57,6 +59,7 @@ public class VendorSelectorDialog extends JDialog {
 	private static final Icon vendorIcon = GuiUtils.getIcon("vendor", 32);
 	
 	private VendorTable vendorTable;
+	private JButton btnSave;
 	
 	public VendorSelectorDialog(ActionListener listener) {
 		
@@ -76,6 +79,14 @@ public class VendorSelectorDialog extends JDialog {
 		vendorTable = new VendorTable();
 		vendorTable.setTableModelFromManufacturers(
 				IDTDataCash.getManufacturers());
+		vendorTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							btnSave.doClick();
+						}
+					}
+				});
 		JScrollPane scroll = new JScrollPane(vendorTable);
 		dataPanel.add(scroll, BorderLayout.CENTER);
 
@@ -93,7 +104,7 @@ public class VendorSelectorDialog extends JDialog {
 			}
 		};
 		btnCancel.addActionListener(al);
-		JButton btnSave = new JButton(MainActionCommands.SELECT_SOFTWARE_VENDOR_COMMAND.getName());
+		btnSave = new JButton(MainActionCommands.SELECT_SOFTWARE_VENDOR_COMMAND.getName());
 		btnSave.setActionCommand(MainActionCommands.SELECT_SOFTWARE_VENDOR_COMMAND.getName());
 		btnSave.addActionListener(listener);
 		panel.add(btnSave);

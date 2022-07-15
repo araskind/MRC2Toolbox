@@ -72,9 +72,7 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 		
 		cromatographicColumnTable.addMouseListener(
-
 				new MouseAdapter() {
-
 					public void mouseClicked(MouseEvent e) {
 
 						if (e.getClickCount() == 2) 

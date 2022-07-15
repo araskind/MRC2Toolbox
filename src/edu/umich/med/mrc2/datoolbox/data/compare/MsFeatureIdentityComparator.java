@@ -101,6 +101,14 @@ public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIden
 				return result;
 			else
 				return -result;
+			
+		case msmsEntropyScore:
+			result = Double.compare(o1.getEntropyBasedScore(), o2.getEntropyBasedScore());
+
+			if (direction == SortDirection.ASC)
+				return result;
+			else
+				return -result;
 
 		default:
 			break;

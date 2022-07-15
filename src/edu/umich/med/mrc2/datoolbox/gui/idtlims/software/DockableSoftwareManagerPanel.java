@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.software;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Collection;
 import java.util.prefs.Preferences;
 
@@ -64,6 +66,14 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		softwareTable =  new SoftwareTable();
+		softwareTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							loadSoftwareIntoEditor();
+						}
+					}
+				});
 		JScrollPane designScrollPane = new JScrollPane(softwareTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 		
@@ -102,17 +112,21 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 		if(command.equals(MainActionCommands.ADD_SOFTWARE_COMMAND.getName()))
 			showSoftwareEditor(null);
 		
-		if(command.equals(MainActionCommands.EDIT_SOFTWARE_COMMAND.getName())) {
-
-			DataProcessingSoftware softwareItem = softwareTable.getSelectedSoftware();
-			if(softwareItem != null)
-				showSoftwareEditor(softwareItem);	
-		}		
+		if(command.equals(MainActionCommands.EDIT_SOFTWARE_COMMAND.getName())) 
+			loadSoftwareIntoEditor();
+		
 		if(command.equals(MainActionCommands.SAVE_SOFTWARE_DETAILS_COMMAND.getName()))
 			saveSoftwareDetails();
 		
 		if(command.equals(MainActionCommands.DELETE_SOFTWARE_COMMAND.getName()))
 			deleteSoftware();		
+	}
+	
+	private void loadSoftwareIntoEditor() {
+		
+		DataProcessingSoftware softwareItem = softwareTable.getSelectedSoftware();
+		if(softwareItem != null)
+			showSoftwareEditor(softwareItem);	
 	}
 
 	private void saveSoftwareDetails() {

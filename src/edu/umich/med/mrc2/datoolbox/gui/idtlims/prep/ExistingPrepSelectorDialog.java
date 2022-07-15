@@ -27,6 +27,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -54,6 +56,7 @@ public class ExistingPrepSelectorDialog extends JDialog {
 
 	private static final Icon addSamplePrepIcon = GuiUtils.getIcon("addSamplePrep", 32);
 	private SamplePrepTable samplePrepTable;
+	private JButton btnSave;
 	
 	public ExistingPrepSelectorDialog(ActionListener listener) {
 		
@@ -68,6 +71,14 @@ public class ExistingPrepSelectorDialog extends JDialog {
 
 		samplePrepTable = new SamplePrepTable();
 		samplePrepTable.setTableModelFromPreps(IDTDataCash.getSamplePreps());
+		samplePrepTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							btnSave.doClick();
+						}
+					}
+				});
 		JScrollPane designScrollPane = new JScrollPane(samplePrepTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 
@@ -85,7 +96,7 @@ public class ExistingPrepSelectorDialog extends JDialog {
 			}
 		};
 		btnCancel.addActionListener(al);
-		JButton btnSave = new JButton(MainActionCommands.LOAD_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
+		btnSave = new JButton(MainActionCommands.LOAD_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
 		btnSave.setActionCommand(MainActionCommands.LOAD_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
 		btnSave.addActionListener(listener);
 		panel.add(btnSave);

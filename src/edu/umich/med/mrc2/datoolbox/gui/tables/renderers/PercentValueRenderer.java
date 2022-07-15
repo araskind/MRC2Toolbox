@@ -27,7 +27,9 @@ import java.text.NumberFormat;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-public class PercentValueRenderer extends DecimalAlignRenderer {
+public class PercentValueRenderer extends DefaultTableCellRenderer {
+	
+		//	DecimalAlignRenderer {
 
 	/**
 	 * 
@@ -53,11 +55,11 @@ public class PercentValueRenderer extends DecimalAlignRenderer {
 		setFont(rendererComponent.getFont());
 
 		if(value == null || value.equals(Double.NaN)){
-			setText("\t");
+			setText("");
 			return this;
 		}
 		if (value instanceof Double) 
-			setText("\t" + defaultFormat.format(value));
+			setText(defaultFormat.format(value));
 		
 		return this;
 	}

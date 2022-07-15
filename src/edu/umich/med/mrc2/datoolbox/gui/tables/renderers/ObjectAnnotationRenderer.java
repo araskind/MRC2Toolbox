@@ -46,6 +46,8 @@ public class ObjectAnnotationRenderer extends JTextArea implements TableCellRend
 		super();
 		this.idField = idField;
 		this.maxLength = maxLength;
+        setLineWrap(true);
+        setWrapStyleWord(true);
 	}
 
 	@Override

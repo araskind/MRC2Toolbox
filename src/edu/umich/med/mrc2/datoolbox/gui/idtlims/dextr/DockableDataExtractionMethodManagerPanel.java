@@ -83,14 +83,11 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 		JScrollPane designScrollPane = new JScrollPane(dataExtractionMethodTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 		dataExtractionMethodTable.addMouseListener(
-
 				new MouseAdapter() {
-
 					public void mouseClicked(MouseEvent e) {
-
 						if (e.getClickCount() == 2) {
-
-							DataExtractionMethod selectedMethod = dataExtractionMethodTable.getSelectedMethod();
+							DataExtractionMethod selectedMethod = 
+									dataExtractionMethodTable.getSelectedMethod();
 							if(selectedMethod != null)
 								showDataExtractionMethodEditor(selectedMethod);
 						}											
@@ -225,11 +222,9 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 					new Date());
 			selectedMethod.setSoftware(
 					dataExtractionMethodEditorDialog.getSoftware());
-			String methodId = null;
 			try {
-				methodId = IDTUtils.addNewDataExtractionMethod(
+				IDTUtils.addNewDataExtractionMethod(
 						selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
-				selectedMethod.setId(methodId);
 				IDTDataCash.getDataExtractionMethods().add(selectedMethod);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

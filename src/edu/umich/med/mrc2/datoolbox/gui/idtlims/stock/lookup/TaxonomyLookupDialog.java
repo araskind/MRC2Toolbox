@@ -30,6 +30,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -66,7 +68,7 @@ public class TaxonomyLookupDialog extends JDialog implements ActionListener{
 	private static final Icon lookupIcon = GuiUtils.getIcon("searchDatabase", 32);
 	private JButton btnSelect;
 	private JTextField textField;
-	private SpeciesTable table;
+	private SpeciesTable speciesTable;
 
 	private IndeterminateProgressDialog idp;
 
@@ -111,8 +113,16 @@ public class TaxonomyLookupDialog extends JDialog implements ActionListener{
 		gbc_btnNewButton.gridy = 0;
 		panel_2.add(searchButton, gbc_btnNewButton);
 
-		table = new SpeciesTable();
-		JScrollPane scrollPane = new JScrollPane(table);
+		speciesTable = new SpeciesTable();
+		speciesTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							btnSelect.doClick();
+						}
+					}
+				});
+		JScrollPane scrollPane = new JScrollPane(speciesTable);
 		panel_1.add(scrollPane, BorderLayout.CENTER);
 
 		JPanel panel = new JPanel();
@@ -151,7 +161,7 @@ public class TaxonomyLookupDialog extends JDialog implements ActionListener{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		table.setModelFromSpeciesList(species);
+		speciesTable.setModelFromSpeciesList(species);
 	}
 
 	@Override
@@ -163,7 +173,7 @@ public class TaxonomyLookupDialog extends JDialog implements ActionListener{
 	}
 
 	public LIMSBioSpecies getSelectedSpecies() {
-		return table.getSelectedSpecies();
+		return speciesTable.getSelectedSpecies();
 	}
 
 	private void searchTaxonomyDatabase() {
@@ -198,7 +208,7 @@ public class TaxonomyLookupDialog extends JDialog implements ActionListener{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			table.setModelFromSpeciesList(species);
+			speciesTable.setModelFromSpeciesList(species);
 			return null;
 		}
 

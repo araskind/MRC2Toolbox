@@ -38,6 +38,7 @@ public enum SortProperty {
 	Version,
 	scanNumber,
 	msmsScore,
+	msmsEntropyScore,
 	NameAndId,
 	dotProduct,
 	reverseDotProduct,

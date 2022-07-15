@@ -272,11 +272,10 @@ public class WizardMethodsPanel extends IDTrackerDataLoadWizardPanel
 					dataExtractionMethodEditorDialog.getMethodDescription(),
 					MRC2ToolBoxCore.getIdTrackerUser(),
 					new Date());
-		String methodId = null;
+		selectedMethod.setSoftware(dataExtractionMethodEditorDialog.getSoftware());
 		try {
-			methodId = IDTUtils.addNewDataExtractionMethod(
+			IDTUtils.addNewDataExtractionMethod(
 					selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
-			selectedMethod.setId(methodId);
 			IDTDataCash.getDataExtractionMethods().add(selectedMethod);
 			dataExtractionMethods.add(selectedMethod);
 		} catch (Exception e) {
@@ -382,7 +381,8 @@ public class WizardMethodsPanel extends IDTrackerDataLoadWizardPanel
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), acquisitionMethodEditorDialog);
 			return;
 		}
-		DockableAcquisitionMethodDataPanel methodData = acquisitionMethodEditorDialog.getDataPanel();
+		DockableAcquisitionMethodDataPanel methodData = 
+				acquisitionMethodEditorDialog.getDataPanel();
 		DataAcquisitionMethod selectedMethod = new DataAcquisitionMethod(
 					null,
 					methodData.getMethodName(),
@@ -396,14 +396,16 @@ public class WizardMethodsPanel extends IDTrackerDataLoadWizardPanel
 		selectedMethod.setIonizationType(methodData.getIonizationType());
 		selectedMethod.setMassAnalyzerType(methodData.getMassAnalyzerType());
 		selectedMethod.setSeparationType(methodData.getChromatographicSeparationType());
+		selectedMethod.setSoftware(methodData.getSoftware());
 		try {
-			AcquisitionMethodUtils.addNewAcquisitionMethod(selectedMethod, methodData.getMethodFile());
+			AcquisitionMethodUtils.addNewAcquisitionMethod(
+					selectedMethod, methodData.getMethodFile());
+			IDTDataCash.getAcquisitionMethods().add(selectedMethod);
+			dataAcquisitionMethods.add(selectedMethod);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		IDTDataCash.getAcquisitionMethods().add(selectedMethod);
-		dataAcquisitionMethods.add(selectedMethod);
 		reloadAcquisitionMethods();
 		acquisitionMethodEditorDialog.dispose();
 	}
@@ -423,7 +425,8 @@ public class WizardMethodsPanel extends IDTrackerDataLoadWizardPanel
 	
 	private void reloadAcquisitionMethods() {
 		
-		Collection<String> methodNames = dataAcquisitionMethods.stream().map(m -> m.getName()).
+		Collection<String> methodNames = 
+				dataAcquisitionMethods.stream().map(m -> m.getName()).
 				collect(Collectors.toCollection(TreeSet::new));
 		
 		if(!missingMethodNameToFileMap.isEmpty())
