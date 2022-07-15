@@ -88,6 +88,8 @@ public class DataPipelinesTable extends BasicTable {
 	public void setTableModelFromDataPipelineCollection(Collection<DataPipeline>pipelines) {
 		model.setTableModelFromDataPipelineCollection(pipelines);
 		tca.adjustColumns();
+		columnModel.getColumnById(DataPipelinesTableModel.POLARITY_COLUMN).setMaxWidth(80);
+		columnModel.getColumnById(DataPipelinesTableModel.CODE_COLUMN).setMaxWidth(120);
 	}
 	
 	public Collection<DataPipeline> getSelectedDataPipelines() {

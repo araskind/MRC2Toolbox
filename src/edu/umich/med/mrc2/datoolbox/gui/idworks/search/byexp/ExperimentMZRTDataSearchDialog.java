@@ -40,6 +40,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
@@ -48,20 +49,26 @@ import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.commons.lang.StringUtils;
+
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
+import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.MSMSClusteringParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullWithFilteringTask;
 
 public class ExperimentMZRTDataSearchDialog extends JDialog
 		implements ActionListener, BackedByPreferences, ItemListener, ListSelectionListener, PersistentLayout {
@@ -84,6 +91,7 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 	private DockableExperimentsTable experimentsTable;
 	private DockableFeatureListPanel featureListPanel;
 	private DockableDataPipelinesTable dataPipelinesTable;
+	private MSMSClusteringParametersPanel msmsClusteringParametersPanel;
 	
 	public ExperimentMZRTDataSearchDialog(IDWorkbenchPanel parentPanel) {
 		super();
@@ -95,6 +103,9 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 		setTitle("Search ID tracker data by experiment");
 		setIconImage(((ImageIcon)searchIcon).getImage());
 		setPreferredSize(new Dimension(800, 800));	
+		
+		msmsClusteringParametersPanel = new MSMSClusteringParametersPanel();
+		getContentPane().add(msmsClusteringParametersPanel, BorderLayout.NORTH);
 		
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
@@ -178,10 +189,54 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 	}
 
 	private void searchIdTracker() {
-		// TODO Auto-generated method stub
+
+		Collection<LIMSExperiment>selectedExperiments =  
+				experimentsTable.getSelectedExperiments();
 		
+		if(selectedExperiments.isEmpty()) {
+			MessageDialog.showErrorMsg("Please select experiment(s)", 
+					this.getContentPane());
+			return;
+		}
+		Collection<MinimalMSOneFeature>mzrtFeatureList = 
+				featureListPanel.getAllFeatures();
+			
+		if(mzrtFeatureList.isEmpty()) {		
+			MessageDialog.showErrorMsg("M/Z-RT list is empty", 
+					this.getContentPane());
+			return;
+		}
 		
+		Collection<String>paramErrors = 
+				msmsClusteringParametersPanel.validateParameters();
+		if(!paramErrors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(paramErrors, "\n"), 
+					this.getContentPane());
+			return;
+		}
 		
+		Collection<DataPipeline> dataPipelines = 
+				dataPipelinesTable.getSelectedDataPipelines();
+		if(dataPipelines.isEmpty()) {
+			int res = MessageDialog.showChoiceMsg(
+					"Do you want to analyze the complete set of data for selected experiment?", 
+					this.getContentPane());
+			if(res != JOptionPane.YES_OPTION)
+				return;
+			else
+				dataPipelines = dataPipelinesTable.getAllDataPipelines();
+		}		
+		MSMSClusteringParameterSet clusteringParams = 
+				msmsClusteringParametersPanel.getParameters();
+		
+		IDTMSMSFeatureDataPullWithFilteringTask task = 
+				new IDTMSMSFeatureDataPullWithFilteringTask(
+						selectedExperiments, 
+						dataPipelines,
+						mzrtFeatureList,
+						clusteringParams);
+		task.addTaskListener(parentPanel);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
 		dispose();
 	}
 

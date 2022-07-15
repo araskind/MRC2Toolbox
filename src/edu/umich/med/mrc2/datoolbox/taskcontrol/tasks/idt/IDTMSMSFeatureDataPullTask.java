@@ -83,7 +83,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		}
 	}
 	
-	private void getMsMsFeatures() throws Exception {
+	protected void getMsMsFeatures() throws Exception {
 		
 		taskDescription = "Fetching MS2 features ...";
 		total = featureIds.size();

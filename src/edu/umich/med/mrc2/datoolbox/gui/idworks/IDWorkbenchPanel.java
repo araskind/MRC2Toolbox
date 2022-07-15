@@ -78,6 +78,8 @@ import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
@@ -187,6 +189,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.PercolatorFDREstimation
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMS1FeatureSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSDuplicateMSMSFeatureCleanupTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullWithFilteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerDataExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerProjectDataFetchTask;
@@ -2908,6 +2911,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if (e.getSource().getClass().equals(IDTMSMSFeatureDataPullTask.class))
 				finalizeIDTMSMSFeatureDataPullTask((IDTMSMSFeatureDataPullTask)e.getSource());	
 			
+			if (e.getSource().getClass().equals(IDTMSMSFeatureDataPullWithFilteringTask.class))
+				finalizeIDTMSMSFeatureDataPullWithFilteringTask((IDTMSMSFeatureDataPullWithFilteringTask)e.getSource());
+			
 			if (e.getSource().getClass().equals(PercolatorFDREstimationTask.class))
 				finalizePercolatorFDREstimationTask((PercolatorFDREstimationTask)e.getSource());
 			
@@ -2924,7 +2930,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeMSMSFeatureClusteringTask(MSMSFeatureClusteringTask source) {
 
-		msmsFeatureClusterTreePanel.loadFeatureClusters(source.getMsmsClusterDataSet().getClusters());
+		Set<MsFeatureInfoBundleCluster> clusters = 
+				source.getMsmsClusterDataSet().getClusters();
+		msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
 //		MessageDialog.showInfoMsg(
 //				"MSMS feature clustering completed", 
 //				this.getContentPane());
@@ -2962,6 +2970,24 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		activeFeatureCollection.addFeatures(task.getSelectedFeatures());
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+	}
+	
+	private void finalizeIDTMSMSFeatureDataPullWithFilteringTask(IDTMSMSFeatureDataPullWithFilteringTask task) {
+		
+		FeatureCollectionManager.msmsSearchResults.clearCollection();
+		activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
+		Set<MsFeatureInfoBundleCluster> clusters = 
+				task.getMsmsClusterDataSet().getClusters();
+		
+		List<MsFeatureInfoBundle> clusteredFeatures = clusters.stream().
+				flatMap(c -> c.getComponents().stream()).
+				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
+				collect(Collectors.toList());
+		
+		activeFeatureCollection.addFeatures(clusteredFeatures);		
+		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+		msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
 	}
 
 	private void finalizeCromatogramExtractionTask(ChromatogramExtractionTask task) {

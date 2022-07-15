@@ -87,7 +87,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		btnNewButton.setActionCommand(MainActionCommands.IMPORT_MS1_FEATURES_FROM_FILE_COMMAND.getName());
 		btnNewButton.addActionListener(this);
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnNewButton.anchor = GridBagConstraints.EAST;
 		gbc_btnNewButton.gridx = 0;
 		gbc_btnNewButton.gridy = 0;
 		fileImportPanel.add(btnNewButton, gbc_btnNewButton);
