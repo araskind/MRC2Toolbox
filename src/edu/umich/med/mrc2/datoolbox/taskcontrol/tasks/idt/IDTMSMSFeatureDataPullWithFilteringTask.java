@@ -131,12 +131,18 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
 		}
-		try {
-			clusterFilteredFeatures();
+		if(lookupFeatures != null && !lookupFeatures.isEmpty()) {
+			
+			try {
+				clusterFilteredFeatures();
+			}
+			catch (Exception e) {
+				setStatus(TaskStatus.ERROR);
+				e.printStackTrace();
+			}
 		}
-		catch (Exception e) {
-			setStatus(TaskStatus.ERROR);
-			e.printStackTrace();
+		else {
+			clusterAllFeatures();
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
@@ -290,6 +296,22 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 			}
 			processed++;
 		}
+	}
+
+	private void clusterAllFeatures() {
+		// TODO Auto-generated method stub
+		taskDescription = "Clustering all MSMS features ...";
+		total = features.size();
+		processed = 0;
+		filteredMsmsFeatures = new HashSet<MsFeatureInfoBundle>();
+		
+		for(MsFeatureInfoBundle feature : features) {
+			
+			for(MsFeatureInfoBundleCluster cluster : featureClusters) {
+				
+			}
+			processed++;
+		}		
 	}
 	
 	private MsFeatureInfoBundleCluster clusterBasedOnMSMSSimilarity(

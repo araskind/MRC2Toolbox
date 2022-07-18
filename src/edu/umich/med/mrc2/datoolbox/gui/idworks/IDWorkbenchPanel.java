@@ -291,6 +291,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private ActiveDataSetMZRTDataSearchDialog activeDataSetMZRTDataSearchDialog;
 	private DatasetSummaryDialog datasetSummaryDialog;
 	
+	private MsFeatureInfoBundleCluster activeCluster;
+	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
 	private static final Icon searchIdActiveDataSetIcon = GuiUtils.getIcon("searchIdActiveDataSet", 24);
@@ -2933,6 +2935,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		Set<MsFeatureInfoBundleCluster> clusters = 
 				source.getMsmsClusterDataSet().getClusters();
 		msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
+		activeCluster = null;
 //		MessageDialog.showInfoMsg(
 //				"MSMS feature clustering completed", 
 //				this.getContentPane());
@@ -3627,10 +3630,22 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 			MsFeatureInfoBundleCluster cluster = 
 					(MsFeatureInfoBundleCluster)tree.getClickedObject();
+			activeCluster = cluster;
 			safelyLoadMSMSFeatures(cluster.getComponents());
 		}
 		if (tree.getClickedObject() instanceof MsFeatureInfoBundle) {
-			//	TODO
+			
+			MsFeatureInfoBundleCluster cluster = 
+					(MsFeatureInfoBundleCluster)tree.getClusterForSelectedFeature();
+			if(cluster != null) {
+				
+				if(activeCluster != null && !activeCluster.equals(cluster)) {
+					
+					activeCluster = cluster;
+					safelyLoadMSMSFeatures(cluster.getComponents());
+				}			
+				msTwoFeatureTable.selectBundle((MsFeatureInfoBundle)tree.getClickedObject());
+			}
 		}
 	}
 

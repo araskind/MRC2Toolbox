@@ -25,11 +25,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 
 public class MsFeatureInfoBundleCluster {
 
@@ -38,7 +40,8 @@ public class MsFeatureInfoBundleCluster {
 	private Set<MsFeatureInfoBundle>components;
 	private double mz;
 	private double rt;
-	private CompoundIdentity primaryIdentity;
+	private double medianArea;
+	private MsFeatureIdentity primaryIdentity;
 	private boolean locked;
 	
 	public MsFeatureInfoBundleCluster() {
@@ -57,18 +60,26 @@ public class MsFeatureInfoBundleCluster {
 			String id, 
 			double mz, 
 			double rt, 
-			CompoundIdentity prinmaryIdentity) {
+			MsFeatureIdentity prinmaryIdentity) {
 		super();
 		this.id = id;
 		this.mz = mz;
 		this.rt = rt;
 		this.primaryIdentity = prinmaryIdentity;
 		components = new HashSet<MsFeatureInfoBundle>();
+		updateName();
+	}
+	
+	private void updateName() {
 		
 		String mzRtName = null;
 		if(mz > 0.0d && rt > 0.0d)
 			mzRtName = "MZ " + MRC2ToolBoxConfiguration.getMzFormat().format(mz) + 
 				" | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(rt);
+		
+		MsFeatureIdentity newId = MSMSClusteringUtils.getTopMSMSLibraryHit(this);
+		if(newId != null)
+			primaryIdentity = newId;
 		
 		if(primaryIdentity != null) {
 			name = primaryIdentity.getName();
@@ -81,14 +92,27 @@ public class MsFeatureInfoBundleCluster {
 			else
 				name = id;
 		}
+		if(components.size() > 1)
+			name += " [" + Integer.toString(components.size()) + "]";
 	}
 	
 	public void addComponent(MsFeatureInfoBundle newComponent) {
-		components.add(newComponent);
+		components.add(newComponent);		
+		updateStats();
+		updateName();
 	}
 
 	public void removeComponent(MsFeatureInfoBundle toRemove) {
 		components.remove(toRemove);
+		updateStats();
+		updateName();
+	}
+	
+	private void updateStats() {
+		
+		mz = MsFeatureStatsUtils.getMedianParentIonMzForFeatureCollection(components);
+		rt = MsFeatureStatsUtils.getMedianRtForFeatureCollection(components);
+		medianArea = MsFeatureStatsUtils.getMedianMSMSAreaForFeatureCollection(components);
 	}
 	
 	public String getId() {
@@ -115,12 +139,13 @@ public class MsFeatureInfoBundleCluster {
 		this.rt = rt;
 	}
 
-	public CompoundIdentity getPrimaryIdentity() {
+	public MsFeatureIdentity getPrimaryIdentity() {
 		return primaryIdentity;
 	}
 
-	public void setPrimaryIdentity(CompoundIdentity prinmaryIdentity) {
+	public void setPrimaryIdentity(MsFeatureIdentity prinmaryIdentity) {
 		this.primaryIdentity = prinmaryIdentity;
+		updateName();
 	}
 
 	public Set<MsFeatureInfoBundle> getComponents() {
@@ -159,9 +184,9 @@ public class MsFeatureInfoBundleCluster {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+//	public void setName(String name) {
+//		this.name = name;
+//	}
 	
 	@Override
 	public String toString() {
@@ -174,5 +199,9 @@ public class MsFeatureInfoBundleCluster {
 
 	public void setLocked(boolean locked) {
 		this.locked = locked;
+	}
+
+	public double getMedianArea() {
+		return medianArea;
 	}
 }

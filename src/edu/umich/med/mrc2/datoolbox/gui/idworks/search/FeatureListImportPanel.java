@@ -78,7 +78,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0};
 		gridBagLayout.rowHeights = new int[]{0, 0};
-		gridBagLayout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gridBagLayout.columnWeights = new double[]{0.0, Double.MIN_VALUE};
 		gridBagLayout.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		fileImportPanel.setLayout(gridBagLayout);
 		
@@ -87,7 +87,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		btnNewButton.setActionCommand(MainActionCommands.IMPORT_MS1_FEATURES_FROM_FILE_COMMAND.getName());
 		btnNewButton.addActionListener(this);
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.anchor = GridBagConstraints.EAST;
+		gbc_btnNewButton.anchor = GridBagConstraints.WEST;
 		gbc_btnNewButton.gridx = 0;
 		gbc_btnNewButton.gridy = 0;
 		fileImportPanel.add(btnNewButton, gbc_btnNewButton);

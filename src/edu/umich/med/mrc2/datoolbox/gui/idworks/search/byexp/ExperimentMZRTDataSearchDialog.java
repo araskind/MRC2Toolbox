@@ -202,19 +202,20 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 				featureListPanel.getAllFeatures();
 			
 		if(mzrtFeatureList.isEmpty()) {		
-			MessageDialog.showErrorMsg("M/Z-RT list is empty", 
+			int res = MessageDialog.showChoiceMsg(
+					"M/Z-RT list is empty, do you want to cluster "
+					+ "all the features in selected experiments?", 
 					this.getContentPane());
-			return;
-		}
-		
+			if(res != JOptionPane.YES_OPTION)
+				return;
+		}	
 		Collection<String>paramErrors = 
 				msmsClusteringParametersPanel.validateParameters();
 		if(!paramErrors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(paramErrors, "\n"), 
 					this.getContentPane());
 			return;
-		}
-		
+		}		
 		Collection<DataPipeline> dataPipelines = 
 				dataPipelinesTable.getSelectedDataPipelines();
 		if(dataPipelines.isEmpty()) {

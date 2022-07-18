@@ -30,8 +30,8 @@ import java.util.Date;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -237,7 +237,7 @@ public class MSMSClusteringDBUtils {
 					
 		//	Add clusters
 		query = "INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
-				+ "MZ, RT, COMPOUND_ID, IS_LOCKED) VALUES (?, ?, ?, ?, ?, ?)";
+				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, IS_LOCKED) VALUES (?, ?, ?, ?, ?, ?, ?)";
 		ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
@@ -252,20 +252,35 @@ public class MSMSClusteringDBUtils {
 					"0",
 					12);
 			cluster.setId(clusterId);
+			String msmsLibMatchId = null;
+			String altId = null;
+			if(cluster.getPrimaryIdentity() != null) {
+				
+				if(cluster.getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null)
+					msmsLibMatchId = cluster.getPrimaryIdentity().getUniqueId();
+				
+				if(cluster.getPrimaryIdentity().getIdSource().equals(CompoundIdSource.MANUAL))
+					altId = cluster.getPrimaryIdentity().getUniqueId();
+			}			
 			ps.setString(1, clusterId);
 			ps.setString(2, parSet.getId());
 			ps.setDouble(3, cluster.getMz());
 			ps.setDouble(4, cluster.getRt());
-			CompoundIdentity cid = cluster.getPrimaryIdentity();
-			if(cid != null)
-				ps.setString(5, cid.getPrimaryDatabaseId());
+
+			if(msmsLibMatchId != null)
+				ps.setString(5, msmsLibMatchId);
 			else
 				ps.setNull(5, java.sql.Types.NULL);
 			
-			if(cluster.isLocked())
-				ps.setString(6, "Y");
+			if(altId != null)
+				ps.setString(6, altId);
 			else
 				ps.setNull(6, java.sql.Types.NULL);
+			
+			if(cluster.isLocked())
+				ps.setString(7, "Y");
+			else
+				ps.setNull(7, java.sql.Types.NULL);
 			
 			ps.executeUpdate();
 			

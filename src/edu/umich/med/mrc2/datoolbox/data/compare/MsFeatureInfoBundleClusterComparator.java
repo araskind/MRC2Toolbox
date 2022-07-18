@@ -60,6 +60,14 @@ public class MsFeatureInfoBundleClusterComparator extends ObjectCompatrator<MsFe
 				return result;
 			else
 				return -result;
+			
+		case Area:
+			result = Double.compare(c1.getMedianArea(), c2.getMedianArea());
+
+			if (direction == SortDirection.ASC)
+				return result;
+			else
+				return -result;
 
 		case MZ:
 			result = Double.compare(c1.getMz(), c2.getMz());
