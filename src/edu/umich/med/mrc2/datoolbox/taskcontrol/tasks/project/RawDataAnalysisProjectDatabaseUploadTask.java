@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -55,6 +54,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 	private int processedFiles;
 	private Map<String,String>featureIdMap;
 	private DataExtractionMethod deMethod;
+	private Map<String, MsFeatureChromatogramBundle> newChromatogramMap;
 	
 	public RawDataAnalysisProjectDatabaseUploadTask(
 			RawDataAnalysisProject project,
@@ -64,6 +64,8 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 		this.msOneMZWindow = msOneMZWindow;
 		processedFiles = 0;
 		featureIdMap = new HashMap<String,String>();
+		newChromatogramMap = 
+				new HashMap<String, MsFeatureChromatogramBundle>();
 	}
 
 	@Override
@@ -296,18 +298,11 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 				RawDataAnalysisMSFeatureDatabaseUploadTask task = 
 						(RawDataAnalysisMSFeatureDatabaseUploadTask)e.getSource();
 				featureIdMap.putAll(task.getFeatureIdMap());
+				newChromatogramMap.putAll(task.getChromatogramMap());
 				processedFiles++;
 			}
 			if(processedFiles == project.getMSMSDataFiles().size()) {
-				
-				 Map<String, MsFeatureChromatogramBundle>newChromatogramMap = 
-						 new TreeMap<String, MsFeatureChromatogramBundle>();
-				 
-				 for(Entry<String, String> entry : featureIdMap.entrySet()) 				 
-					 newChromatogramMap.put(
-							 entry.getValue(), 
-							 project.getChromatogramMap().get(entry.getKey()));
-				 
+					 
 				 project.getChromatogramMap().clear();
 				 project.getChromatogramMap().putAll(newChromatogramMap);
 				

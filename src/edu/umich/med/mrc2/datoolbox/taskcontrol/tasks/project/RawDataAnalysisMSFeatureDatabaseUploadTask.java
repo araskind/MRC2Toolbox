@@ -71,6 +71,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 	private Map<String,String>featureIdMap;
 	private LIMSExperiment experiment;
 	private DataExtractionMethod deMethod;
+	private Map<String, MsFeatureChromatogramBundle> chromatogramMap;
 	
 	public RawDataAnalysisMSFeatureDatabaseUploadTask(
 			RawDataAnalysisProject project, 
@@ -91,8 +92,6 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 	public void run() {
 		
 		setStatus(TaskStatus.PROCESSING);
-
-		
 		try {
 			 uploadMSMSFeatureData();
 		} catch (Exception ex) {
@@ -109,14 +108,11 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 				project.getMsFeaturesForDataFile(dataFile);
 		total = bundles.size();
 		processed = 0;	
-		Map<String, MsFeatureChromatogramBundle> chromatogramMap = 
-				new HashMap<String, MsFeatureChromatogramBundle>();
-						
-		Connection conn = ConnectionManager.getConnection();
 		
-		String dataAnalysisId = IDTUtils.addNewDataAnalysis(
-				deMethod, dataFile.getInjectionId(), conn);
-			
+		Connection conn = ConnectionManager.getConnection();
+		String dataAnalysisId = 
+				IDTUtils.addNewDataAnalysis(deMethod, dataFile.getInjectionId(), conn);		
+							
 		String parentFeatureQuery =
 				"INSERT INTO MSMS_PARENT_FEATURE "
 				+ "(FEATURE_ID, DATA_ANALYSIS_ID, RETENTION_TIME, HEIGHT, "
@@ -171,202 +167,42 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 				"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 		PreparedStatement chromPs = conn.prepareStatement(chromatogramQuery);
 		
-		Map<String, MsFeatureIdentity>manualIds = new TreeMap<String, MsFeatureIdentity>();
-		ArrayList<MsFeatureInfoBundle>withStdAnnotations = new ArrayList<MsFeatureInfoBundle>();
-		ArrayList<MsFeatureInfoBundle>withFollowups = new ArrayList<MsFeatureInfoBundle>();
+		Map<String, MsFeatureIdentity>manualIds = 
+				new TreeMap<String, MsFeatureIdentity>();
+		ArrayList<MsFeatureInfoBundle>withStdAnnotations = 
+				new ArrayList<MsFeatureInfoBundle>();
+		ArrayList<MsFeatureInfoBundle>withFollowups = 
+				new ArrayList<MsFeatureInfoBundle>();
 		Map<String,MsFeatureChromatogramBundle>featureChromatogramMap = 
 				new TreeMap<String, MsFeatureChromatogramBundle>();
+		chromatogramMap = 
+				new HashMap<String, MsFeatureChromatogramBundle>();
 		
 		for(MsFeatureInfoBundle bundle : bundles) {
-			
-			//	Parent feature
-			MsFeature feature = bundle.getMsFeature();
-			String parentFeatureId = SQLUtils.getNextIdFromSequence(conn, 
-					"MSMS_PARENT_FEATURE_SEQ",
-					DataPrefix.MS_FEATURE,
-					"0",
-					12);	
-				
-			chromatogramMap.put(parentFeatureId, 
-					project.getChromatogramMap().get(feature.getId()));
-			featureIdMap.put(feature.getId(), parentFeatureId);
-			feature.setId(parentFeatureId);
-					
-			Collection<MsPoint>msOne = getTrimmedMsOne(feature);
-			double bpMz = 0.0d;
-			if(msOne != null) {
-				MsPoint bp = msOne.stream().
-						sorted(MsUtils.reverseIntensitySorter).
-						findFirst().orElse(null);
-				if(bp != null)
-					bpMz = bp.getMz();
-			}
-			parentFeaturePs.setString(1, parentFeatureId);
-			parentFeaturePs.setString(2, dataAnalysisId);
-			parentFeaturePs.setDouble(3, feature.getRetentionTime());
-			parentFeaturePs.setDouble(4, feature.getSpectrum().getTotalArea());
-			parentFeaturePs.setDouble(5, feature.getSpectrum().getTotalArea());
-			
-			// Set null for now
-			parentFeaturePs.setNull(6, java.sql.Types.NULL);
-			if(msOne == null)
-				parentFeaturePs.setNull(7, java.sql.Types.NULL);
-			else
-				parentFeaturePs.setDouble(7, bpMz);
 
-			parentFeaturePs.setString(8, feature.getPolarity().getCode());
-			parentFeaturePs.addBatch();
-			
-			//	MS1
-			msOnePs.setString(1, parentFeatureId);
-			for(MsPoint point : msOne) {
-				
-				msOnePs.setDouble(2, point.getMz());
-				msOnePs.setDouble(3, point.getIntensity());
-				msOnePs.addBatch();
-			}
-			//	MS2
+			insertParentMsFeature(
+					bundle,
+					dataAnalysisId,
+					parentFeaturePs,
+					msOnePs,
+					conn);
+			MsFeature feature = bundle.getMsFeature();
 			TandemMassSpectrum instrumentMsms =
 					feature.getSpectrum().getExperimentalTandemSpectrum();				
 
 			if(instrumentMsms != null) {
-				
-				//	MSMS feature
-				String msmsId = SQLUtils.getNextIdFromSequence(conn, 
-						"MSMS_FEATURE_SEQ",
-						DataPrefix.MSMS_SPECTRUM,
-						"0",
-						12);	
-				instrumentMsms.setId(msmsId);
-				
-				msmsFeaturePs.setString(1, parentFeatureId);
-				msmsFeaturePs.setString(2, msmsId);
-				msmsFeaturePs.setString(3, dataAnalysisId);
-				msmsFeaturePs.setDouble(4, feature.getRetentionTime());
-				msmsFeaturePs.setDouble(5, instrumentMsms.getParent().getMz());
-				msmsFeaturePs.setDouble(6, instrumentMsms.getFragmenterVoltage());
-				msmsFeaturePs.setDouble(7, instrumentMsms.getCidLevel());
-				msmsFeaturePs.setString(8, feature.getPolarity().getCode());
-				
-				Range isolationWindow = instrumentMsms.getIsolationWindow();
-				if(isolationWindow != null && isolationWindow.getAverage() > 0.0) {
-					msmsFeaturePs.setDouble(9, isolationWindow.getMin());
-					msmsFeaturePs.setDouble(10, isolationWindow.getMax());
-				}
-				else {
-					msmsFeaturePs.setNull(9, java.sql.Types.NULL);
-					msmsFeaturePs.setNull(10, java.sql.Types.NULL);
-				}
-				msmsFeaturePs.addBatch();
-				
-				//	MS2 points
-				msTwoPs.setString(1, msmsId);
-				for(MsPoint point : instrumentMsms.getSpectrum()) {
+			
+				insertMsms(
+						feature,
+						instrumentMsms, 
+						dataAnalysisId,
+						msmsFeaturePs, 
+						msTwoPs,
+						precursorPs,
+						scanMapPs,
+						conn);
 
-					msTwoPs.setDouble(2, point.getMz());
-					msTwoPs.setDouble(3, point.getIntensity());
-					msTwoPs.addBatch();
-				}				
-				//	Precursor
-				precursorPs.setDouble(1, instrumentMsms.getParent().getMz());
-				precursorPs.setString(2, parentFeatureId);
-				precursorPs.addBatch();
-				
-				// Scan map
-				if(instrumentMsms.getAveragedScanNumbers() != null 
-						&& !instrumentMsms.getAveragedScanNumbers().isEmpty()) {
-					scanMapPs.setString(1, msmsId);		
-					Map<Integer, Double> srtMap = instrumentMsms.getScanRtMap();
-					for(Entry<Integer, Integer> entry : instrumentMsms.getAveragedScanNumbers().entrySet()){
-						
-						scanMapPs.setInt(2, entry.getKey());
-						scanMapPs.setInt(3, entry.getValue());	
-						scanMapPs.setInt(4, 2);	//	TODO may need update if going above MS2
-						scanMapPs.setDouble(5, srtMap.get(entry.getKey()));
-						scanMapPs.setInt(6, 1);	//	TODO may need update if going above MS2
-						scanMapPs.setDouble(7, srtMap.get(entry.getValue()));
-						scanMapPs.addBatch();
-					}
-				}
-				//	MSMS Identifications
-				for(MsFeatureIdentity identification : feature.getIdentifications()) {
-					
-					//	MSMS library match
-					ReferenceMsMsLibraryMatch refMatch = 
-							identification.getReferenceMsMsLibraryMatch();
-					if(refMatch != null) {
-						
-						String msmsMatchId = SQLUtils.getNextIdFromSequence(conn, 
-								"MSMS_LIB_MATCH_SEQ",
-								DataPrefix.MSMS_LIBRARY_MATCH,
-								"0",
-								15);				
-						libMatchPs.setString(1, msmsMatchId);
-						libMatchPs.setString(2, msmsId);
-						libMatchPs.setString(3, refMatch.getMatchedLibraryFeature().getUniqueId());
-						libMatchPs.setDouble(4, refMatch.getScore());
-						
-						if(identification.isPrimary())
-							libMatchPs.setString(5,"Y");
-						else
-							libMatchPs.setNull(5,java.sql.Types.NULL);
-						
-						if(refMatch.getMatchType() != null)
-							libMatchPs.setString(6, refMatch.getMatchType().name());
-						else
-							libMatchPs.setNull(6,java.sql.Types.NULL);
-						
-						if(refMatch.getForwardScore() > 0.0d)
-							libMatchPs.setDouble(7, refMatch.getForwardScore());
-						else
-							libMatchPs.setNull(7,java.sql.Types.NULL);
-
-						if(refMatch.getReverseScore() > 0.0d)
-							libMatchPs.setDouble(8, refMatch.getReverseScore());
-						else
-							libMatchPs.setNull(8,java.sql.Types.NULL);
-						
-						if(refMatch.getProbability() > 0.0d)
-							libMatchPs.setDouble(9, refMatch.getProbability());
-						else
-							libMatchPs.setNull(9,java.sql.Types.NULL);
-						
-						if(refMatch.getDotProduct() > 0.0d)
-							libMatchPs.setDouble(10, refMatch.getDotProduct());
-						else
-							libMatchPs.setNull(10,java.sql.Types.NULL);
-												
-						if(refMatch.getSearchParameterSetId() != null)
-							libMatchPs.setString(11, refMatch.getSearchParameterSetId());
-						else
-							libMatchPs.setNull(11,java.sql.Types.NULL);
-						
-						if(identification.getIdentificationLevel() != null)
-							libMatchPs.setString(12, identification.getIdentificationLevel().getId());
-						else
-							libMatchPs.setNull(12,java.sql.Types.NULL);
-						
-						if(refMatch.getReverseDotProduct() > 0.0d)
-							libMatchPs.setDouble(13, refMatch.getReverseDotProduct());
-						else
-							libMatchPs.setNull(13,java.sql.Types.NULL);
-						
-						if(refMatch.getMatchType().equals(MSMSMatchType.Hybrid)) {
-							
-							libMatchPs.setDouble(14, refMatch.getHybridDotProduct());
-							libMatchPs.setDouble(15, refMatch.getHybridScore());
-							libMatchPs.setDouble(16, refMatch.getHybridDeltaMz());
-						}
-						else {
-							libMatchPs.setNull(14,java.sql.Types.NULL);
-							libMatchPs.setNull(15,java.sql.Types.NULL);
-							libMatchPs.setNull(16,java.sql.Types.NULL);
-						}					
-						libMatchPs.addBatch();
-					}
-					if(identification.getIdSource().equals(CompoundIdSource.MANUAL))
-						manualIds.put(msmsId, identification);			
-				}
+				insertIdentifications(feature, manualIds, libMatchPs, conn);
 			}
 			//	Insert standard annotations
 			if(!bundle.getStandadAnnotations().isEmpty())
@@ -383,53 +219,191 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 				featureChromatogramMap.put(feature.getId(), msfCb);
 			
 			//	MS-RT library match
-//			for(MsFeatureIdentity identification : feature.getIdentifications()) {
-//							
-//				MsRtLibraryMatch msRtLibMatch = 
-//						identification.getMsRtLibraryMatch();
-//				if(msRtLibMatch != null) {
-//					//	TODO
-//				}	
-//			}
+			//	TODO
+
 			processed++;
 			if(processed % BATCH_SIZE == 0) {
 
-				parentFeaturePs.executeBatch();
-				msOnePs.executeBatch();
-				msmsFeaturePs.executeBatch();
-				msTwoPs.executeBatch();
-				precursorPs.executeBatch();
-				scanMapPs.executeBatch();
-				libMatchPs.executeBatch();
-				
-				if(!manualIds.isEmpty()) {
-					
-					for(Entry<String, MsFeatureIdentity> entry : manualIds.entrySet())
-						IdentificationUtils.addMSMSFeatureManualId(entry.getKey(), entry.getValue(), conn);
-					
-					manualIds.clear();
-				}
-				if(!withStdAnnotations.isEmpty()) {
-					
-					for(MsFeatureInfoBundle b : withStdAnnotations)
-						StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(b, conn);
-					
-					withStdAnnotations.clear();
-				}
-				if(!withFollowups.isEmpty()) {
-					
-					for(MsFeatureInfoBundle b : withFollowups)
-						IdFollowupUtils.setIdFollowupStepsForMSMSFeature(b, conn);
-					
-					withStdAnnotations.clear();
-				}
-				if(!featureChromatogramMap.isEmpty()) {
-					insertFeatureChromatograms(featureChromatogramMap, chromPs);
-					featureChromatogramMap.clear();
-				}
+				uploadBatch(
+						parentFeaturePs,
+						msOnePs,
+						msmsFeaturePs,
+						msTwoPs,
+						precursorPs,
+						scanMapPs,
+						libMatchPs,
+						chromPs,
+						manualIds,
+						withStdAnnotations,
+						withFollowups,
+						featureChromatogramMap,
+						conn);
 			}
 		}
 		//	Execute last batch
+		uploadBatch(
+				parentFeaturePs,
+				msOnePs,
+				msmsFeaturePs,
+				msTwoPs,
+				precursorPs,
+				scanMapPs,
+				libMatchPs,
+				chromPs,
+				manualIds,
+				withStdAnnotations,
+				withFollowups,
+				featureChromatogramMap,
+				conn);
+		
+		//	Close all statements
+		parentFeaturePs.close();
+		msOnePs.close();
+		msmsFeaturePs.close();
+		msTwoPs.close();
+		precursorPs.close();
+		scanMapPs.close();
+		libMatchPs.close();
+		chromPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private void insertParentMsFeature(
+			MsFeatureInfoBundle bundle,
+			String dataAnalysisId,
+			PreparedStatement parentFeaturePs,
+			PreparedStatement msOnePs,
+			Connection conn) throws Exception {
+		
+		MsFeature feature = bundle.getMsFeature();
+		String parentFeatureId = SQLUtils.getNextIdFromSequence(conn, 
+				"MSMS_PARENT_FEATURE_SEQ",
+				DataPrefix.MS_FEATURE,
+				"0",
+				12);			
+		chromatogramMap.put(parentFeatureId, 
+				project.getChromatogramMap().get(feature.getId()));
+		featureIdMap.put(feature.getId(), parentFeatureId);
+		feature.setId(parentFeatureId);
+				
+		Collection<MsPoint>msOne = getTrimmedMsOne(feature);
+		double bpMz = 0.0d;
+		if(msOne != null) {
+			MsPoint bp = msOne.stream().
+					sorted(MsUtils.reverseIntensitySorter).
+					findFirst().orElse(null);
+			if(bp != null)
+				bpMz = bp.getMz();
+		}
+		parentFeaturePs.setString(1, parentFeatureId);
+		parentFeaturePs.setString(2, dataAnalysisId);
+		parentFeaturePs.setDouble(3, feature.getRetentionTime());
+		parentFeaturePs.setDouble(4, feature.getSpectrum().getTotalArea());
+		parentFeaturePs.setDouble(5, feature.getSpectrum().getTotalArea());
+		
+		// Set null for now
+		parentFeaturePs.setNull(6, java.sql.Types.NULL);
+		if(msOne == null)
+			parentFeaturePs.setNull(7, java.sql.Types.NULL);
+		else
+			parentFeaturePs.setDouble(7, bpMz);
+
+		parentFeaturePs.setString(8, feature.getPolarity().getCode());
+		parentFeaturePs.addBatch();
+		
+		//	MS1
+		msOnePs.setString(1, parentFeatureId);
+		for(MsPoint point : msOne) {
+			
+			msOnePs.setDouble(2, point.getMz());
+			msOnePs.setDouble(3, point.getIntensity());
+			msOnePs.addBatch();
+		}
+	}
+	
+	private void insertMsms(
+			MsFeature feature,
+			TandemMassSpectrum instrumentMsms, 
+			String dataAnalysisId,
+			PreparedStatement msmsFeaturePs, 
+			PreparedStatement msTwoPs,
+			PreparedStatement precursorPs,
+			PreparedStatement scanMapPs,
+			Connection conn) throws Exception {
+		
+		String msmsId = SQLUtils.getNextIdFromSequence(conn, 
+				"MSMS_FEATURE_SEQ",
+				DataPrefix.MSMS_SPECTRUM,
+				"0",
+				12);	
+		instrumentMsms.setId(msmsId);
+		
+		msmsFeaturePs.setString(1, feature.getId());
+		msmsFeaturePs.setString(2, msmsId);
+		msmsFeaturePs.setString(3, dataAnalysisId);
+		msmsFeaturePs.setDouble(4, feature.getRetentionTime());
+		msmsFeaturePs.setDouble(5, instrumentMsms.getParent().getMz());
+		msmsFeaturePs.setDouble(6, instrumentMsms.getFragmenterVoltage());
+		msmsFeaturePs.setDouble(7, instrumentMsms.getCidLevel());
+		msmsFeaturePs.setString(8, feature.getPolarity().getCode());
+		
+		Range isolationWindow = instrumentMsms.getIsolationWindow();
+		if(isolationWindow != null && isolationWindow.getAverage() > 0.0) {
+			msmsFeaturePs.setDouble(9, isolationWindow.getMin());
+			msmsFeaturePs.setDouble(10, isolationWindow.getMax());
+		}
+		else {
+			msmsFeaturePs.setNull(9, java.sql.Types.NULL);
+			msmsFeaturePs.setNull(10, java.sql.Types.NULL);
+		}
+		msmsFeaturePs.addBatch();
+		
+		//	MS2 points
+		msTwoPs.setString(1, msmsId);
+		for(MsPoint point : instrumentMsms.getSpectrum()) {
+
+			msTwoPs.setDouble(2, point.getMz());
+			msTwoPs.setDouble(3, point.getIntensity());
+			msTwoPs.addBatch();
+		}				
+		//	Precursor
+		precursorPs.setDouble(1, instrumentMsms.getParent().getMz());
+		precursorPs.setString(2, feature.getId());
+		precursorPs.addBatch();
+		
+		// Scan map
+		if(instrumentMsms.getAveragedScanNumbers() != null 
+				&& !instrumentMsms.getAveragedScanNumbers().isEmpty()) {
+			scanMapPs.setString(1, msmsId);		
+			Map<Integer, Double> srtMap = instrumentMsms.getScanRtMap();
+			for(Entry<Integer, Integer> entry : instrumentMsms.getAveragedScanNumbers().entrySet()){
+				
+				scanMapPs.setInt(2, entry.getKey());
+				scanMapPs.setInt(3, entry.getValue());	
+				scanMapPs.setInt(4, 2);	//	TODO may need update if going above MS2
+				scanMapPs.setDouble(5, srtMap.get(entry.getKey()));
+				scanMapPs.setInt(6, 1);	//	TODO may need update if going above MS2
+				scanMapPs.setDouble(7, srtMap.get(entry.getValue()));
+				scanMapPs.addBatch();
+			}
+		}
+	}
+	
+	private void uploadBatch(
+			PreparedStatement parentFeaturePs,
+			PreparedStatement msOnePs,
+			PreparedStatement msmsFeaturePs,
+			PreparedStatement msTwoPs,
+			PreparedStatement precursorPs,
+			PreparedStatement scanMapPs,
+			PreparedStatement libMatchPs,
+			PreparedStatement chromPs,
+			Map<String, MsFeatureIdentity>manualIds,
+			Collection<MsFeatureInfoBundle>withStdAnnotations,
+			Collection<MsFeatureInfoBundle>withFollowups,
+			Map<String,MsFeatureChromatogramBundle>featureChromatogramMap,
+			Connection conn) throws Exception {
+		
 		parentFeaturePs.executeBatch();
 		msOnePs.executeBatch();
 		msmsFeaturePs.executeBatch();
@@ -442,31 +416,122 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 			
 			for(Entry<String, MsFeatureIdentity> entry : manualIds.entrySet())
 				IdentificationUtils.addMSMSFeatureManualId(entry.getKey(), entry.getValue(), conn);
+			
+			manualIds.clear();
 		}
 		if(!withStdAnnotations.isEmpty()) {
 			
 			for(MsFeatureInfoBundle b : withStdAnnotations)
 				StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(b, conn);
+			
+			withStdAnnotations.clear();
 		}
 		if(!withFollowups.isEmpty()) {
 			
 			for(MsFeatureInfoBundle b : withFollowups)
 				IdFollowupUtils.setIdFollowupStepsForMSMSFeature(b, conn);
+			
+			withStdAnnotations.clear();
 		}
-		if(!featureChromatogramMap.isEmpty())
+		if(!featureChromatogramMap.isEmpty()) {
 			insertFeatureChromatograms(featureChromatogramMap, chromPs);
+			featureChromatogramMap.clear();
+		}
+	}
+	
+	private void insertIdentifications(
+			MsFeature feature, 
+			Map<String, MsFeatureIdentity>manualIds,
+			PreparedStatement libMatchPs, 
+			Connection conn) throws Exception {
 		
-		
-		//	Close all statements
-		parentFeaturePs.close();
-		msOnePs.close();
-		msmsFeaturePs.close();
-		msTwoPs.close();
-		precursorPs.close();
-		scanMapPs.close();
-		libMatchPs.close();
-		chromPs.close();
-		ConnectionManager.releaseConnection(conn);
+		for(MsFeatureIdentity identification : feature.getIdentifications()) {
+			
+			String msmsId = 
+					feature.getSpectrum().getExperimentalTandemSpectrum().getId();
+			
+			//	MSMS library match
+			ReferenceMsMsLibraryMatch refMatch = 
+					identification.getReferenceMsMsLibraryMatch();
+			if(refMatch != null) {
+				
+				String msmsMatchId = SQLUtils.getNextIdFromSequence(conn, 
+						"MSMS_LIB_MATCH_SEQ",
+						DataPrefix.MSMS_LIBRARY_MATCH,
+						"0",
+						15);				
+				libMatchPs.setString(1, msmsMatchId);
+				libMatchPs.setString(2, msmsId);
+				libMatchPs.setString(3, refMatch.getMatchedLibraryFeature().getUniqueId());
+				libMatchPs.setDouble(4, refMatch.getScore());
+				
+				if(identification.isPrimary())
+					libMatchPs.setString(5,"Y");
+				else
+					libMatchPs.setNull(5,java.sql.Types.NULL);
+				
+				if(refMatch.getMatchType() != null)
+					libMatchPs.setString(6, refMatch.getMatchType().name());
+				else
+					libMatchPs.setNull(6,java.sql.Types.NULL);
+				
+				if(refMatch.getForwardScore() > 0.0d)
+					libMatchPs.setDouble(7, refMatch.getForwardScore());
+				else
+					libMatchPs.setNull(7,java.sql.Types.NULL);
+
+				if(refMatch.getReverseScore() > 0.0d)
+					libMatchPs.setDouble(8, refMatch.getReverseScore());
+				else
+					libMatchPs.setNull(8,java.sql.Types.NULL);
+				
+				if(refMatch.getProbability() > 0.0d)
+					libMatchPs.setDouble(9, refMatch.getProbability());
+				else
+					libMatchPs.setNull(9,java.sql.Types.NULL);
+				
+				if(refMatch.getDotProduct() > 0.0d)
+					libMatchPs.setDouble(10, refMatch.getDotProduct());
+				else
+					libMatchPs.setNull(10,java.sql.Types.NULL);
+										
+				if(refMatch.getSearchParameterSetId() != null)
+					libMatchPs.setString(11, refMatch.getSearchParameterSetId());
+				else
+					libMatchPs.setNull(11,java.sql.Types.NULL);
+				
+				if(identification.getIdentificationLevel() != null)
+					libMatchPs.setString(12, identification.getIdentificationLevel().getId());
+				else
+					libMatchPs.setNull(12,java.sql.Types.NULL);
+				
+				if(refMatch.getReverseDotProduct() > 0.0d)
+					libMatchPs.setDouble(13, refMatch.getReverseDotProduct());
+				else
+					libMatchPs.setNull(13,java.sql.Types.NULL);
+				
+				if(refMatch.getMatchType().equals(MSMSMatchType.Hybrid)) {
+					
+					libMatchPs.setDouble(14, refMatch.getHybridDotProduct());
+					libMatchPs.setDouble(15, refMatch.getHybridScore());
+					libMatchPs.setDouble(16, refMatch.getHybridDeltaMz());
+				}
+				else {
+					libMatchPs.setNull(14,java.sql.Types.NULL);
+					libMatchPs.setNull(15,java.sql.Types.NULL);
+					libMatchPs.setNull(16,java.sql.Types.NULL);
+				}					
+				libMatchPs.addBatch();
+			}
+			if(identification.getIdSource().equals(CompoundIdSource.MANUAL))
+				manualIds.put(msmsId, identification);	
+			
+			//	TODO
+//			MsRtLibraryMatch msRtLibMatch = identification.getMsRtLibraryMatch();
+//			if(msRtLibMatch != null) {
+//				
+//			}
+		}
 	}
 	
 	private void insertFeatureChromatograms(
@@ -555,5 +620,9 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 
 	public Map<String, String> getFeatureIdMap() {
 		return featureIdMap;
+	}
+
+	public Map<String, MsFeatureChromatogramBundle> getChromatogramMap() {
+		return chromatogramMap;
 	}
 }
