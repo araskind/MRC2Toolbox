@@ -1547,7 +1547,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void searchActiveDataSetBMzRt(){
-		//		TODO
+
 		Collection<String>errors = 
 				activeDataSetMZRTDataSearchDialog.validateParameters();
 		if(!errors.isEmpty()) {
@@ -1562,7 +1562,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				activeDataSetMZRTDataSearchDialog.getParameters();
 		Collection<MinimalMSOneFeature> lookupFeatures = 
 				activeDataSetMZRTDataSearchDialog.getAllFeatures();
-
+		
+		if(lookupFeatures == null || lookupFeatures.isEmpty()) {
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Do you want to cluster all the features in the active data set?", 
+					activeDataSetMZRTDataSearchDialog);
+			if(res != JOptionPane.YES_OPTION)
+				return;
+		}
 		MSMSFeatureClusteringTask task = 
 				new MSMSFeatureClusteringTask(msmsFeatures, params, lookupFeatures);
 		task.addTaskListener(this);
@@ -3564,6 +3571,37 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}		
 	}
 	
+	private void showMultipleFeatureChromatograms(Collection<MsFeatureInfoBundle> selectedBundles) {
+		
+		Collection<MsFeatureChromatogramBundle> chromatograms = 
+				new ArrayList<MsFeatureChromatogramBundle>();
+		Collection<Double>markers = new TreeSet<Double>();
+		for(MsFeatureInfoBundle bundle : selectedBundles) {
+			
+			MsFeatureChromatogramBundle msfCb = null;			
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null 
+					&& MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getChromatogramMap() != null) {				
+				msfCb = MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+						getChromatogramMap().get(bundle.getMsFeature().getId());
+			}
+			else {
+				msfCb = FeatureChromatogramUtils.retrieveFeatureChromatogramBundleFromCache(
+						bundle.getMsFeatureId());
+			}
+			if(msfCb != null)
+				chromatograms.add(msfCb);
+			
+			if(bundle.getMsFeature().getSpectrum() != null) {
+				
+				TandemMassSpectrum msms = 
+						bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();		
+				if(msms != null)
+					markers.addAll(msms.getMSMSScanRtList());
+			}	
+		}
+		chromatogramPanel.showMultipleMsFeatureChromatogramBundles(chromatograms, markers);
+	}
+	
 	private void loadPepSearchParameters(MsFeatureIdentity featureId) {
 			
 		if(featureId.getReferenceMsMsLibraryMatch() == null)
@@ -3632,6 +3670,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					(MsFeatureInfoBundleCluster)tree.getClickedObject();
 			activeCluster = cluster;
 			safelyLoadMSMSFeatures(cluster.getComponents());
+			showMultipleFeatureChromatograms(cluster.getComponents());
 		}
 		if (tree.getClickedObject() instanceof MsFeatureInfoBundle) {
 			

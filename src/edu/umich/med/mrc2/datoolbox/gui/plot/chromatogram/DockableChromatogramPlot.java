@@ -25,6 +25,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.swing.Icon;
 
@@ -92,7 +93,15 @@ public class DockableChromatogramPlot extends DefaultSingleCDockable implements 
 			MsFeatureChromatogramBundle xicBundle, Collection<Double>markers) {
 		
 		chromatogramPlot.removeAllDataSets();
-		chromatogramPlot.showMsFeatureChromatogramBundle(xicBundle, markers,
+		chromatogramPlot.showMsFeatureChromatogramBundles(Collections.singleton(xicBundle), markers,
+				chromatogramToolbar.getChromatogramRenderingType());
+	}
+	
+	public void showMultipleMsFeatureChromatogramBundles(
+			Collection<MsFeatureChromatogramBundle> xicBundles, Collection<Double>markers) {
+		
+		chromatogramPlot.removeAllDataSets();
+		chromatogramPlot.showMsFeatureChromatogramBundles(xicBundles, markers,
 				chromatogramToolbar.getChromatogramRenderingType());
 	}
 }

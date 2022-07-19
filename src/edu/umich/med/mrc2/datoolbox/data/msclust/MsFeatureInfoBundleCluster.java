@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.data.msclust;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -28,10 +29,15 @@ import java.util.UUID;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MsFeatureInfoBundleCluster {
 
@@ -70,6 +76,11 @@ public class MsFeatureInfoBundleCluster {
 		updateName();
 	}
 	
+	public MsFeatureInfoBundleCluster(MsFeatureInfoBundle b) {
+		this();
+		addComponent(b);
+	}
+
 	private void updateName() {
 		
 		String mzRtName = null;
@@ -204,4 +215,57 @@ public class MsFeatureInfoBundleCluster {
 	public double getMedianArea() {
 		return medianArea;
 	}
+
+	public boolean addNewBundle(
+			MsFeatureInfoBundle b, 
+			MSMSClusteringParameterSet params) {
+		
+		TandemMassSpectrum msms = 
+				b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+		if(msms == null || msms.getParent() == null)
+			return false;
+		
+		if(components.isEmpty()) {
+			addComponent(b);
+			return true;
+		}
+		Range rtRange = new Range(
+				rt - params.getRtErrorValue(), 
+				rt + params.getRtErrorValue());
+		if(!rtRange.contains(b.getRetentionTime()))
+			return false;
+		
+		Range mzRange = MsUtils.createMassRange(
+				mz, params.getMzErrorValue(), params.getMassErrorType());
+		if(!mzRange.contains(msms.getParent().getMz()))
+			return false;
+		
+		boolean spectrumMatches = false;
+		for(MsFeatureInfoBundle component : components) {
+			
+			Collection<MsPoint>refMsMs = component.getMsFeature().getSpectrum().
+					getExperimentalTandemSpectrum().getSpectrum();		
+			double score = MSMSScoreCalculator.calculateEntropyBasedMatchScore(
+					msms.getSpectrum(), refMsMs, params.getMzErrorValue(), params.getMassErrorType(), 
+					MSMSScoreCalculator.DEFAULT_MS_REL_INT_NOISE_CUTOFF);
+			if(score > params.getMsmsSimilarityCutoff()) {
+				addComponent(b);
+				spectrumMatches = true;
+				break;
+			}
+		}
+		return spectrumMatches;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

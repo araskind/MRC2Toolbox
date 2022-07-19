@@ -192,12 +192,25 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	private void clusterAllFeatures() {
 		
 		taskDescription = "Clustering MSMS features ...";
-		total = filteredMsmsFeatures.size();
+		total = msmsFeatures.size();
 		processed = 0;
-		
-		for(MsFeatureInfoBundle b : filteredMsmsFeatures) {
+		params = msmsClusterDataSet.getParameters();
+		boolean added = false;
+		for(MsFeatureInfoBundle b : msmsFeatures) {
 			
-			
+			added = false;
+			for(MsFeatureInfoBundleCluster cluster : featureClusters) {
+				
+				if(cluster.addNewBundle(b, params)) {
+					added = true;
+					break;
+				}
+			}	
+			if(!added) {
+				MsFeatureInfoBundleCluster newCluster = 
+						new MsFeatureInfoBundleCluster(b);
+				featureClusters.add(newCluster);
+			}
 			processed++;
 		}
 	}

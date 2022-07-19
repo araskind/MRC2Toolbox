@@ -120,7 +120,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	
 	protected Collection<ExtractedChromatogram> chromatograms;
 	protected RawDataExaminerPanel rawDataExaminerPanel;
-	protected MsFeatureChromatogramBundle xicBundle;
+	//	protected MsFeatureChromatogramBundle xicBundle;
+	protected Collection<MsFeatureChromatogramBundle> xicBundles;
 	protected Collection<Double>precursorMarkers;
 	
 	protected ChromatogramRenderingType chromatogramRenderingType;
@@ -582,7 +583,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		if(chromatograms != null)
 			chromatograms.clear();
 		
-		xicBundle = null;
+		xicBundles = null;
 		
 		if(precursorMarkers != null)
 			precursorMarkers.clear();
@@ -794,13 +795,96 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		((XYPlot) this.getPlot()).setRenderer(renderer);
 	}
 
-	public void showMsFeatureChromatogramBundle(
-			MsFeatureChromatogramBundle xicBundle,
+//	public void showMsFeatureChromatogramBundle(
+//			MsFeatureChromatogramBundle xicBundle,
+//			Collection<Double>markers,
+//			ChromatogramRenderingType rType) {
+//		
+//		chromatogramRenderingType = rType;
+//		this.xicBundle = xicBundle;	
+//		XYItemRenderer renderer = null;
+//		if(rType.equals(ChromatogramRenderingType.Spline))
+//			renderer = splineRenderer;
+//		
+//		if(rType.equals(ChromatogramRenderingType.Lines))
+//			renderer = linesChromatogramRenderer;
+//		
+//		if(rType.equals(ChromatogramRenderingType.Filled))
+//			renderer = filledChromatogramRenderer;
+//		
+//		final XYToolTipGenerator toolTipGenerator = 				
+//				new ChromatogramToolTipGenerator();		
+//		renderer.setDefaultToolTipGenerator(toolTipGenerator);	
+//		renderer.setDefaultShape(FilledChromatogramRenderer.dataPointsShape);
+//		if(XYLineAndShapeRenderer.class.isAssignableFrom(renderer.getClass()))		
+//			((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);
+//								
+//		XYSeriesCollection dataSet = new XYSeriesCollection();
+//		int seriesCount = 0;
+//		int fileChromCount = 0;
+//		for(Entry<DataFile, Collection<ExtractedIonData>> ce : xicBundle.getChromatograms().entrySet()) {
+//			
+//			DataFile dataFile = ce.getKey();
+//            List<Color> lineColorListList = 
+//            		ColorUtils.getColorBands(dataFile.getColor(), ce.getValue().size(), SortDirection.ASC);
+//			for(ExtractedIonData eid : ce.getValue()) {
+//				
+//				fileChromCount = 0;
+//				XYSeries series = new XYSeries(dataFile.getName() + " " + eid.toString());
+//				double[] times = eid.getTimeValues();
+//				double[] intensities = eid.getIntensityValues();	
+//				if(smoothChromatogram && smoothingFilter != null) {			
+//					try {
+//						intensities = smoothingFilter.filter(times, eid.getIntensityValues());
+//					} catch (IllegalArgumentException e) {					
+//						//e.printStackTrace();
+//						MessageDialog.showErrorMsg("Bad filter parameters", this);
+//					}
+//				}
+//				for(int i=0; i<times.length; i++)
+//					series.add(times[i], intensities[i]);	
+//				
+//				dataSet.addSeries(series);
+//				
+//				Color seriesColor = lineColorListList.get(fileChromCount);		
+//				if(rType.equals(ChromatogramRenderingType.Lines)) {
+//					renderer.setSeriesFillPaint(seriesCount, seriesColor);
+//					renderer.setSeriesPaint(seriesCount, seriesColor);
+//				}
+//				else {
+//					Paint seriesColorTp = new Color(
+//							seriesColor.getRed()/255.0f, 
+//							seriesColor.getGreen()/255.0f, 
+//							seriesColor.getBlue()/255.0f, 
+//							0.3f);
+//					renderer.setSeriesFillPaint(seriesCount, seriesColorTp);
+//					renderer.setSeriesPaint(seriesCount, seriesColorTp);
+//				}
+//				fileChromCount++;
+//				seriesCount++;
+//			}		
+//		}
+//		((XYPlot) this.getPlot()).setDataset(dataSet);	
+//		((XYPlot) this.getPlot()).setRenderer(renderer);
+//		precursorMarkers.addAll(markers);
+//		if(markers != null && !markers.isEmpty()) {
+//			
+//			for(double markerPosition : markers) {
+//				
+//				ValueMarker marker = new ValueMarker(markerPosition);
+//				marker.setPaint(Color.RED);
+//				((XYPlot) this.getPlot()).addDomainMarker(marker);
+//			}
+//		}	
+//	}
+	
+	public void showMsFeatureChromatogramBundles(
+			Collection<MsFeatureChromatogramBundle> xicBundles,
 			Collection<Double>markers,
 			ChromatogramRenderingType rType) {
 		
 		chromatogramRenderingType = rType;
-		this.xicBundle = xicBundle;	
+		this.xicBundles = xicBundles;	
 		XYItemRenderer renderer = null;
 		if(rType.equals(ChromatogramRenderingType.Spline))
 			renderer = splineRenderer;
@@ -821,50 +905,56 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		XYSeriesCollection dataSet = new XYSeriesCollection();
 		int seriesCount = 0;
 		int fileChromCount = 0;
-		for(Entry<DataFile, Collection<ExtractedIonData>> ce : xicBundle.getChromatograms().entrySet()) {
+		
+		for(MsFeatureChromatogramBundle xicBundle : xicBundles) {
 			
-			DataFile dataFile = ce.getKey();
-            List<Color> lineColorListList = 
-            		ColorUtils.getColorBands(dataFile.getColor(), ce.getValue().size(), SortDirection.ASC);
-			for(ExtractedIonData eid : ce.getValue()) {
+			for(Entry<DataFile, Collection<ExtractedIonData>> ce : xicBundle.getChromatograms().entrySet()) {
 				
-				fileChromCount = 0;
-				XYSeries series = new XYSeries(dataFile.getName() + " " + eid.toString());
-				double[] times = eid.getTimeValues();
-				double[] intensities = eid.getIntensityValues();	
-				if(smoothChromatogram && smoothingFilter != null) {			
-					try {
-						intensities = smoothingFilter.filter(times, eid.getIntensityValues());
-					} catch (IllegalArgumentException e) {					
-						//e.printStackTrace();
-						MessageDialog.showErrorMsg("Bad filter parameters", this);
+				DataFile dataFile = ce.getKey();
+	            List<Color> lineColorListList = 
+	            		ColorUtils.getColorBands(dataFile.getColor(), ce.getValue().size(), SortDirection.ASC);
+				for(ExtractedIonData eid : ce.getValue()) {
+				
+					fileChromCount = 0;
+					XYSeries series = 
+							new XYSeries(dataFile.getName() + " " + 
+								eid.toString() + " [" + xicBundle.getFeatureId() +"]");
+					double[] times = eid.getTimeValues();
+					double[] intensities = eid.getIntensityValues();	
+					if(smoothChromatogram && smoothingFilter != null) {			
+						try {
+							intensities = smoothingFilter.filter(times, eid.getIntensityValues());
+						} catch (IllegalArgumentException e) {					
+							//e.printStackTrace();
+							MessageDialog.showErrorMsg("Bad filter parameters", this);
+						}
 					}
-				}
-				for(int i=0; i<times.length; i++)
-					series.add(times[i], intensities[i]);	
-				
-				dataSet.addSeries(series);
-				
-				Color seriesColor = lineColorListList.get(fileChromCount);		
-				if(rType.equals(ChromatogramRenderingType.Lines)) {
-					renderer.setSeriesFillPaint(seriesCount, seriesColor);
-					renderer.setSeriesPaint(seriesCount, seriesColor);
-				}
-				else {
-					Paint seriesColorTp = new Color(
-							seriesColor.getRed()/255.0f, 
-							seriesColor.getGreen()/255.0f, 
-							seriesColor.getBlue()/255.0f, 
-							0.3f);
-					renderer.setSeriesFillPaint(seriesCount, seriesColorTp);
-					renderer.setSeriesPaint(seriesCount, seriesColorTp);
-				}
-				fileChromCount++;
-				seriesCount++;
-			}		
+					for(int i=0; i<times.length; i++)
+						series.add(times[i], intensities[i]);	
+					
+					dataSet.addSeries(series);
+					
+					Color seriesColor = lineColorListList.get(fileChromCount);		
+					if(rType.equals(ChromatogramRenderingType.Lines)) {
+						renderer.setSeriesFillPaint(seriesCount, seriesColor);
+						renderer.setSeriesPaint(seriesCount, seriesColor);
+					}
+					else {
+						Paint seriesColorTp = new Color(
+								seriesColor.getRed()/255.0f, 
+								seriesColor.getGreen()/255.0f, 
+								seriesColor.getBlue()/255.0f, 
+								0.3f);
+						renderer.setSeriesFillPaint(seriesCount, seriesColorTp);
+						renderer.setSeriesPaint(seriesCount, seriesColorTp);
+					}
+					fileChromCount++;
+					seriesCount++;
+				}		
+			}
 		}
 		((XYPlot) this.getPlot()).setDataset(dataSet);	
-		((XYPlot) this.getPlot()).setRenderer(renderer);
+		((XYPlot) this.getPlot()).setRenderer(renderer);		
 		precursorMarkers.addAll(markers);
 		if(markers != null && !markers.isEmpty()) {
 			
@@ -907,13 +997,13 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			if(chromatograms != null && !chromatograms.isEmpty())
 				showExtractedChromatogramCollection(chromatograms, newRtype);
 			
-			if(xicBundle != null)
-				showMsFeatureChromatogramBundle(xicBundle, precursorMarkers, newRtype);
+			if(xicBundles != null)
+				showMsFeatureChromatogramBundles(xicBundles, precursorMarkers, newRtype);
 		}
 	}
 
-	public MsFeatureChromatogramBundle getXicBundle() {
-		return xicBundle;
+	public Collection<MsFeatureChromatogramBundle> getXicBundles() {
+		return xicBundles;
 	}
 
 	public String getFilterId() {

@@ -144,8 +144,9 @@ public class ActiveDataSetMZRTDataSearchDialog extends JDialog implements Action
 		
 		Collection<String>errors = 
 				msmsClusteringParametersPanel.validateParameters();
-		if(getAllFeatures().isEmpty())
-			errors.add("Search list is empty.");
+		
+//		if(getAllFeatures().isEmpty())
+//			errors.add("Search list is empty.");
 		
 		return errors;
 	}
