@@ -19,94 +19,64 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import javax.swing.WindowConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.JScrollPane;
 
 import org.apache.commons.lang.StringUtils;
 
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CGrid;
-import bibliothek.gui.dock.common.intern.CDockable;
-import bibliothek.gui.dock.common.theme.ThemeMap;
+import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
-import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 
-public class FeatureCollectionManagerDialog extends JDialog 
-		implements ActionListener, ListSelectionListener, PersistentLayout {
+public class DockableFeatureCollectionsManager extends DefaultSingleCDockable implements ActionListener {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6227984367485372521L;
-	private static final Icon stIcon = GuiUtils.getIcon("editSop", 32);
-	private static final File layoutConfigFile = 
-			new File(MRC2ToolBoxCore.configDir + "FeatureCollectionManagerDialog.layout");
-	
-	protected CControl control;
-	protected CGrid grid;
+	private static final Icon componentIcon = GuiUtils.getIcon("editCollection", 16);
 	
 	private FeatureCollectionsManagerToolbar toolbar;
-	private DockableFeatureCollectionsTable featureCollectionsTable;
-	private DockableCollectionFeatureTable featuresTable;
-	private MsFeatureCollectionEditorDialog msFeatureCollectionEditorDialog;
+	private FeatureCollectionsTable featureCollectionsTable;
+	private FeatureAndClusterCollectionManagerDialog parent;
+	
+	private FeatureCollectionEditorDialog msFeatureCollectionEditorDialog;
 	private Collection<MsFeatureInfoBundle> featuresToAdd;
 	
-	public FeatureCollectionManagerDialog() {
-		super();
-		setTitle("Feature collection manager");
-		setIconImage(((ImageIcon) stIcon).getImage());
-		setPreferredSize(new Dimension(1000, 500));
-		setSize(new Dimension(1000, 500));
-		setModalityType(ModalityType.APPLICATION_MODAL);
-		setResizable(true);
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		getContentPane().setLayout(new BorderLayout(0, 0));	
+	public DockableFeatureCollectionsManager(FeatureAndClusterCollectionManagerDialog parent)  {
+
+		super("DockableFeatureCollectionsManager", componentIcon, "Feature collections", null, Permissions.MIN_MAX_STACK);
+		setCloseable(false);
+		this.parent = parent;
 		
 		toolbar = new FeatureCollectionsManagerToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 		
-		control = new CControl(MRC2ToolBoxCore.getMainWindow());
-		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
-		add(control.getContentArea(), BorderLayout.CENTER);
-		grid = new CGrid(control);
-			
-		featureCollectionsTable = new DockableFeatureCollectionsTable(this);
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
-			featureCollectionsTable.loadDatabaseStoredCollections();
-		else
-			featureCollectionsTable.loadCollectionsForActiveProject();
-
-		featureCollectionsTable.getTable().addMouseListener(
+		featureCollectionsTable = new FeatureCollectionsTable();
+		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
+		featureCollectionsTable.setTableModelFromFeatureCollectionList(
+				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
+		
+		featureCollectionsTable.addMouseListener(
 
 				new MouseAdapter() {
 
@@ -123,24 +93,9 @@ public class FeatureCollectionManagerDialog extends JDialog
 						}
 					}
 				});
-		//featuresTable = new DockableCollectionFeatureTable();
-
-		grid.add(0, 0, 1, 1, featureCollectionsTable
-				//, featuresTable
-				);
-		control.getContentArea().deploy(grid);
-				
-		loadLayout(layoutConfigFile);
-		pack();
+		add(new JScrollPane(featureCollectionsTable));
 	}
 	
-	@Override
-	public void dispose() {
-		
-		saveLayout(layoutConfigFile);
-		super.dispose();
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
@@ -167,8 +122,8 @@ public class FeatureCollectionManagerDialog extends JDialog
 	
 	public void showMsFeatureCollectionEditorDialog (MsFeatureInfoBundleCollection collection) {
 		
-		msFeatureCollectionEditorDialog = new MsFeatureCollectionEditorDialog(collection, featuresToAdd, this);
-		msFeatureCollectionEditorDialog.setLocationRelativeTo(this);
+		msFeatureCollectionEditorDialog = new FeatureCollectionEditorDialog(collection, featuresToAdd, this);
+		msFeatureCollectionEditorDialog.setLocationRelativeTo(this.getContentPane());
 		msFeatureCollectionEditorDialog.setVisible(true);
 	}
 
@@ -197,10 +152,10 @@ public class FeatureCollectionManagerDialog extends JDialog
 		msFeatureCollectionEditorDialog.dispose();	
 		if(loadCollection) {
 			loadCollectionIntoWorkBench(edited);
-			dispose();
+			parent.dispose();
 		}
 		else {				
-			featureCollectionsTable.getTable().updateCollectionData(edited);
+			featureCollectionsTable.updateCollectionData(edited);
 			featureCollectionsTable.selectCollection(edited);
 		}
 	}
@@ -229,11 +184,11 @@ public class FeatureCollectionManagerDialog extends JDialog
 		msFeatureCollectionEditorDialog.dispose();	
 		if(loadCollection) {
 			loadCollectionIntoWorkBench(edited);
-			dispose();
+			parent.dispose();
 		}
 		else {
 			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().put(edited, featureIds);					
-			featureCollectionsTable.getTable().updateCollectionData(edited);
+			featureCollectionsTable.updateCollectionData(edited);
 			featureCollectionsTable.selectCollection(edited);
 		}
 	}
@@ -273,7 +228,7 @@ public class FeatureCollectionManagerDialog extends JDialog
 		msFeatureCollectionEditorDialog.dispose();	
 		if(loadCollection) {
 			loadCollectionIntoWorkBench(newCollection);
-			dispose();
+			parent.dispose();
 		}
 		else {
 			featureCollectionsTable.setTableModelFromFeatureCollectionList(
@@ -312,7 +267,7 @@ public class FeatureCollectionManagerDialog extends JDialog
 			msFeatureCollectionEditorDialog.dispose();	
 			if(loadCollection) {
 				loadCollectionIntoWorkBench(newCollection);
-				dispose();
+				parent.dispose();
 			}
 			else {
 				featureCollectionsTable.setTableModelFromFeatureCollectionList(
@@ -331,7 +286,7 @@ public class FeatureCollectionManagerDialog extends JDialog
 		
 		if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
 			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-					"\" is locked and can not be edited.", this);
+					"\" is locked and can not be edited.", this.getContentPane());
 			return;
 		}
 //		if(selected.equals(FeatureCollectionManager.msmsSearchResults) 
@@ -369,11 +324,12 @@ public class FeatureCollectionManagerDialog extends JDialog
 		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();	
 		if(!project.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
 			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-					"\" is locked and can not be deleted.", this);
+					"\" is locked and can not be deleted.", this.getContentPane());
 			return;
 		}	
 		int res = MessageDialog.showChoiceWithWarningMsg(
-				"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", this);
+				"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", 
+				this.getContentPane());
 		if(res == JOptionPane.YES_OPTION) {
 			
 			project.removeMsFeatureInfoBundleCollection(selected);
@@ -391,13 +347,14 @@ public class FeatureCollectionManagerDialog extends JDialog
 		
 		if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
 			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-					"\" is locked and can not be deleted.", this);
+					"\" is locked and can not be deleted.", this.getContentPane());
 			return;
 		}		
 		if(MRC2ToolBoxCore.getIdTrackerUser().isSuperUser() || 
 				(selected.getOwner() != null && selected.getOwner().equals(MRC2ToolBoxCore.getIdTrackerUser()))) {
 			int res = MessageDialog.showChoiceWithWarningMsg(
-					"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", this);
+					"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", 
+					this.getContentPane());
 			if(res == JOptionPane.YES_OPTION) {
 				try {
 					FeatureCollectionUtils.deleteMsFeatureInformationBundleCollection(selected);
@@ -416,7 +373,9 @@ public class FeatureCollectionManagerDialog extends JDialog
 			}
 		}
 		else {
-			MessageDialog.showErrorMsg("You are not authorized to delete this feature collection", this);
+			MessageDialog.showErrorMsg(
+					"You are not authorized to delete this feature collection", 
+					this.getContentPane());
 			return;
 		}
 	}
@@ -441,71 +400,42 @@ public class FeatureCollectionManagerDialog extends JDialog
 	
 	public void loadCollectionIntoWorkBench(MsFeatureInfoBundleCollection selectedCollection) {
 		
-		IDWorkbenchPanel panel = (IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);		
-		panel.loadMSMSFeatureInformationBundleCollection(selectedCollection);	
-		dispose();
+		IDWorkbenchPanel panel = 
+				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);		
+		panel.loadMSMSFeatureInformationBundleCollection(selectedCollection);
+		parent.dispose();
 	}
 	
-	@Override
-	public void valueChanged(ListSelectionEvent e) {
-		// TODO Auto-generated method stub
+	public void loadDatabaseStoredCollections() {
+
+		featureCollectionsTable.setTableModelFromFeatureCollectionList(
+				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
+	}
+	
+	public void loadCollectionsForActiveProject() {
 		
+		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
+		if(project == null)
+			return;
+		
+		featureCollectionsTable.setTableModelFromFeatureCollectionList(
+				project.getFeatureCollections());
 	}
 	
-	@Override
-	public void loadLayout(File layoutFile) {
-
-		if(control != null) {
-
-			if(layoutFile.exists()) {
-				try {
-					control.readXML(layoutFile);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			else {
-				try {
-					control.writeXML(layoutFile);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	@Override
-	public void saveLayout(File layoutFile) {
-
-		if(control != null) {
-
-			for(int i=0; i<control.getCDockableCount(); i++) {
-
-				CDockable uiObject = control.getCDockable(i);
-				if(uiObject instanceof PersistentLayout)
-					((PersistentLayout)uiObject).saveLayout(((PersistentLayout)uiObject).getLayoutFile());
-			}
-			try {
-				control.writeXML(layoutFile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+	public void setTableModelFromFeatureCollectionList(
+			Collection<MsFeatureInfoBundleCollection>featureCollections) {
+		featureCollectionsTable.setTableModelFromFeatureCollectionList(featureCollections);
 	}
 	
-	@Override
-	public File getLayoutFile() {
-		return layoutConfigFile;
+	public MsFeatureInfoBundleCollection getSelectedCollection() {	
+		return featureCollectionsTable.getSelectedCollection();
+	}
+	
+	public void selectCollection(MsFeatureInfoBundleCollection toSelect) {		
+		featureCollectionsTable.selectCollection(toSelect);
+	}
+	
+	public FeatureCollectionsTable getTable() {
+		return featureCollectionsTable;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-

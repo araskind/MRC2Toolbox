@@ -99,34 +99,30 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600213793228" orientation="VERTICAL" divider="0.5">
-											<leaf id="0" nodeId="1600213793230">
-												<placeholders>
-													<placeholder>dock.single.QCPanelDockableDataSetStatsTable</placeholder>
-												</placeholders>
-											</leaf>
-											<node nodeId="1600213927553" orientation="HORIZONTAL" divider="0.6147378832838774">
-												<leaf id="1" nodeId="1600213793238">
-													<placeholders>
-														<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
-													</placeholders>
-													<placeholder-map>
-														<version>0</version>
-														<format>dock.PlaceholderList</format>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
-															</key>
-														</entry>
-													</placeholder-map>
-												</leaf>
-												<leaf id="2" nodeId="1600213927551">
-													<placeholders>
-														<placeholder>dock.single.QCPanelDockable3DChartPanel</placeholder>
-													</placeholders>
-												</leaf>
-											</node>
-										</node>
+										<leaf id="0" nodeId="1658433648089">
+											<placeholders>
+												<placeholder>dock.single.DockableFeatureCollectionsManager</placeholder>
+												<placeholder>dock.single.DockableFeatureClusterCollectionsManager</placeholder>
+											</placeholders>
+											<placeholder-map>
+												<version>0</version>
+												<format>dock.PlaceholderList</format>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.DockableFeatureCollectionsManager</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.DockableFeatureClusterCollectionsManager</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+											</placeholder-map>
+										</leaf>
 									</content>
 								</delegate>
 							</layout>
@@ -137,34 +133,63 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockableDataSetStatsTable">
-										<replacement id="dockablesingle QCPanelDockableDataSetStatsTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockableDataSetStatsTable</id>
-											<area/>
-										</delegate>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableFeatureCollectionsManager</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableFeatureCollectionsManager</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableFeatureClusterCollectionsManager</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableFeatureClusterCollectionsManager</item>
+											</entry>
+										</placeholders>
 									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockable2DQCPanel">
-										<replacement id="dockablesingle QCPanelDockable2DQCPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockable2DQCPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockable3DChartPanel">
-										<replacement id="dockablesingle QCPanelDockable3DChartPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockable3DChartPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableFeatureCollectionsManager">
+												<replacement id="dockablesingle DockableFeatureCollectionsManager"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableFeatureCollectionsManager</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableFeatureClusterCollectionsManager">
+												<replacement id="dockablesingle DockableFeatureClusterCollectionsManager"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableFeatureClusterCollectionsManager</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
 								</child>
 							</children>
 						</root>
@@ -194,7 +219,7 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single QCPanelDockableDataSetStatsTable" current="dock.mode.normal">
+						<entry id="single DockableFeatureCollectionsManager" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -205,17 +230,20 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.QCPanelDockableDataSetStatsTable</placeholder>
+											<placeholder>dock.single.DockableFeatureCollectionsManager</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.5" id="1600213793228"/>
-												<leaf id="1600213793230"/>
+												<leaf id="1658433648089"/>
 											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableFeatureCollectionsManager</placeholder>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single QCPanelDockable2DQCPanel" current="dock.mode.normal">
+						<entry id="single DockableFeatureClusterCollectionsManager" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -226,34 +254,14 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
+											<placeholder>dock.single.DockableFeatureClusterCollectionsManager</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.5" id="1600213793228"/>
-												<node location="LEFT" size="0.6147378832838774" id="1600213927553"/>
-												<leaf id="1600213793238"/>
+												<leaf id="1658433648089"/>
 											</backup-path>
 										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single QCPanelDockable3DChartPanel" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.QCPanelDockable3DChartPanel</placeholder>
-											<backup-path>
-												<node location="BOTTOM" size="0.5" id="1600213793228"/>
-												<node location="RIGHT" size="0.38526211671612265" id="1600213927553"/>
-												<leaf id="1600213927551"/>
-											</backup-path>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableFeatureClusterCollectionsManager</placeholder>
 										</property>
 									</location>
 								</property>

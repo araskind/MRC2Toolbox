@@ -119,8 +119,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.AddFeaturesToCollectionDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureCollectionManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.AddFeaturesToCollectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fdr.FDREstimationSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idfus.DockableFollowupStepTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idfus.FollowupStepAssignmentDialog;
@@ -278,7 +278,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private PepserchResultsImportDialog pepSearchResultVerifierDialog;	
 	private IDTrackerDataExplorerPlotFrame idTrackerDataExplorerPlotDialog;
 	
-	private FeatureCollectionManagerDialog featureCollectionManagerDialog;
+	private FeatureAndClusterCollectionManagerDialog featureCollectionManagerDialog;
 	private AddFeaturesToCollectionDialog addFeaturesToCollectionDialog;
 	private MsFeatureInfoBundleCollection activeFeatureCollection;
 	private FDREstimationSetupDialog fdrEstimationSetupDialog;
@@ -1483,10 +1483,33 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	private void showFeatureCollectionManager() { 
-		
-		featureCollectionManagerDialog = new FeatureCollectionManagerDialog();
-		featureCollectionManagerDialog.setLocationRelativeTo(this.getContentPane());
-		featureCollectionManagerDialog.setVisible(true);
+
+		ShowFeatureAndClusterCollectionManagerTask task = 
+			new ShowFeatureAndClusterCollectionManagerTask();
+		idp = new IndeterminateProgressDialog(
+				"Refreshing data for feature and cluster collections  ...", 
+				this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
+	class ShowFeatureAndClusterCollectionManagerTask extends LongUpdateTask {
+
+		public ShowFeatureAndClusterCollectionManagerTask() {
+
+		}
+
+		@Override
+		public Void doInBackground() {
+			
+			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
+			//	TODO same for clusters
+			
+			featureCollectionManagerDialog = new FeatureAndClusterCollectionManagerDialog();
+			featureCollectionManagerDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
+			featureCollectionManagerDialog.setVisible(true);
+			return null;
+		}
 	}
 	
 	private void showIDTrackerDataExplorerDialog() {		
@@ -2148,7 +2171,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(featuresToAdd.isEmpty())
 			return;
 		
-		featureCollectionManagerDialog = new FeatureCollectionManagerDialog();
+		featureCollectionManagerDialog = new FeatureAndClusterCollectionManagerDialog();
 		featureCollectionManagerDialog.setFeaturesToAdd(featuresToAdd);
 		featureCollectionManagerDialog.setLocationRelativeTo(this.getContentPane());
 		featureCollectionManagerDialog.showMsFeatureCollectionEditorDialog(null);

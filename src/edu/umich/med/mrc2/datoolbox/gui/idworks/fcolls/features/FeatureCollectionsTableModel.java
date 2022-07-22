@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features;
 
 import java.util.Collection;
 import java.util.Date;
@@ -75,7 +75,7 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 			Object[] obj = {
 				collection,
 				collection.getDescription(),
-				collection.getFeatures().size(),
+				FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(collection),
 				collection.getOwner(),
 				collection.getDateCreated(),
 				collection.getLastModified(),

@@ -26,7 +26,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -93,8 +92,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		msmsClusterDataSet = new MSMSClusterDataSet(
 				"Active data set", 
 				"", 
-				MRC2ToolBoxCore.getIdTrackerUser(), 
-				new Date());
+				MRC2ToolBoxCore.getIdTrackerUser());
 		msmsClusterDataSet.setParameters(clusteringParams);	
 		featureClusters = msmsClusterDataSet.getClusters();
 		rtError = clusteringParams.getRtErrorValue();

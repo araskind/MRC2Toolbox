@@ -140,7 +140,8 @@ public class MSMSClusteringDBUtils {
 		Collection<MSMSClusterDataSet> dataSets = new ArrayList<MSMSClusterDataSet>();
 		String query = 
 			"SELECT CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
-			"DATE_CREATED, PAR_SET_ID FROM MSMS_CLUSTERED_DATA_SET " +
+			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID " + 
+			"FROM MSMS_CLUSTERED_DATA_SET " +
 			"ORDER BY NAME";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -152,7 +153,8 @@ public class MSMSClusteringDBUtils {
 					rs.getString("NAME"), 
 					rs.getString("DESCRIPTION"), 
 					createdBy, 
-					new Date(rs.getDate("DATE_CREATED").getTime()));
+					new Date(rs.getDate("DATE_CREATED").getTime()),
+					new Date(rs.getDate("LAST_MODIFIED").getTime()));
 			
 			MSMSClusteringParameterSet parSet = 
 					IDTDataCash.getMsmsClusteringParameterSetById(rs.getString("PAR_SET_ID"));
@@ -187,8 +189,9 @@ public class MSMSClusteringDBUtils {
 		String query = 
 			"INSERT INTO MSMS_CLUSTERED_DATA_SET " +
 			"(CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
-			"DATE_CREATED, PAR_SET_ID) VALUES (?, ?, ?, ?, ?, ?)";
+			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
+		
 		ps.setString(1, newDataSet.getId());
 		ps.setString(2, newDataSet.getName());
 		if(newDataSet.getDescription() != null)
@@ -197,8 +200,9 @@ public class MSMSClusteringDBUtils {
 			ps.setNull(3, java.sql.Types.NULL);
 		
 		ps.setString(4, newDataSet.getCreatedBy().getId());
-		ps.setDate(5, new java.sql.Date(newDataSet.getDateCreated().getTime()));	
-		ps.setString(6, newDataSet.getParameters().getId());
+		ps.setDate(5, new java.sql.Date(newDataSet.getDateCreated().getTime()));
+		ps.setDate(6, new java.sql.Date(newDataSet.getLastModified().getTime()));	
+		ps.setString(7, newDataSet.getParameters().getId());
 		ps.executeUpdate();
 		
 		//	Add assays

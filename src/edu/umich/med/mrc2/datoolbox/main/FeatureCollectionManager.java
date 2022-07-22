@@ -181,7 +181,7 @@ public class FeatureCollectionManager {
 				filter(id -> existingIds.contains(id)).
 				collect(Collectors.toSet());
 
-		if(featuresToRemove.isEmpty())
+		if(featureIdsToRemove.isEmpty())
 			return;
 		
 		try {

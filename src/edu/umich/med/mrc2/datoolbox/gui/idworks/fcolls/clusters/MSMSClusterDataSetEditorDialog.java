@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -65,9 +65,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -76,27 +76,25 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
-import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class MsFeatureCollectionEditorDialog extends JDialog 
+public class MSMSClusterDataSetEditorDialog extends JDialog 
 		implements ActionListener, BackedByPreferences{
 
 	/**
-	 *
+	 * 
 	 */
-	private static final long serialVersionUID = 7684989595475342241L;
-
+	private static final long serialVersionUID = -3062896101017122798L;
 	private Preferences preferences;
-	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.MsFeatureCollectionEditorDialog";
+	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.MSMSClusterDataSetEditorDialog";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	private static final String BROWSE_COMMAND = "BROWSE_COMMAND";
 	
 	private static final Icon addFeatureCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 32);
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("editCollection", 32);
 	
-	private MsFeatureInfoBundleCollection featureCollection;
+	private MSMSClusterDataSet dataSet;
 	private JButton btnSave;
 	private JLabel dateCreatedLabel, lastModifiedLabel;
 	private JTextArea descriptionTextArea;	
@@ -105,16 +103,16 @@ public class MsFeatureCollectionEditorDialog extends JDialog
 	private JTextField methodNameTextField;
 	private JLabel idValueLabel;
 	private JLabel methodAuthorLabel;
-	private Collection<MsFeatureInfoBundle> featuresToAdd;
+	private Collection<MsFeatureInfoBundleCluster> clustersToAdd;
 	private Set<String> featureIdsToAdd;
 	private JTextField featureFileTextField;
 	private JCheckBox loadCollectionCheckBox;
 
 	private IndeterminateProgressDialog idp;
 
-	public MsFeatureCollectionEditorDialog(
-			MsFeatureInfoBundleCollection collection, 
-			Collection<MsFeatureInfoBundle> featuresToAdd,
+	public MSMSClusterDataSetEditorDialog(
+			MSMSClusterDataSet dataSet, 
+			Collection<MsFeatureInfoBundleCluster> clustersToAdd,
 			ActionListener actionListener) {
 		super();
 		setPreferredSize(new Dimension(700, 300));
@@ -122,8 +120,8 @@ public class MsFeatureCollectionEditorDialog extends JDialog
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
-		this.featureCollection = collection;
-		this.featuresToAdd = featuresToAdd;
+		this.dataSet = dataSet;
+		this.clustersToAdd = clustersToAdd;
 		featureIdsToAdd = new TreeSet<String>();
 		
 		JPanel dataPanel = new JPanel();
@@ -304,40 +302,39 @@ public class MsFeatureCollectionEditorDialog extends JDialog
 
 	private void loadCollectionData() {
 
-		if(featureCollection == null) {
+		if(dataSet == null) {
 
-			setTitle("Create new feature collection");
+			setTitle("Create new MSMS cluster data set");
 			setIconImage(((ImageIcon) addFeatureCollectionIcon).getImage());
 			
-			if(featuresToAdd == null) 
-				btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_COMMAND.getName());
+			if(clustersToAdd == null) 
+				btnSave.setText(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName());
 			else 
-				btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND.getName());
+				btnSave.setText(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName());
 			
-			btnSave.setActionCommand(MainActionCommands.ADD_FEATURE_COLLECTION_COMMAND.getName());
 			dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
 			lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));			
 			methodAuthorLabel.setText(MRC2ToolBoxCore.getIdTrackerUser().getInfo());
 		}
 		else {
-			setTitle("Edit information for " + featureCollection.getName());
+			setTitle("Edit information for " + dataSet.getName());
 			setIconImage(((ImageIcon) editFeatureCollectionIcon).getImage());
-			btnSave.setActionCommand(MainActionCommands.EDIT_FEATURE_COLLECTION_COMMAND.getName());
-			idValueLabel.setText(featureCollection.getId());
+			btnSave.setActionCommand(MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_COMMAND.getName());
+			idValueLabel.setText(dataSet.getId());
 
-			if (featureCollection.getDateCreated() != null)
+			if (dataSet.getDateCreated() != null)
 				dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(
-						featureCollection.getDateCreated()));
+						dataSet.getDateCreated()));
 
-			if (featureCollection.getLastModified() != null)
+			if (dataSet.getLastModified() != null)
 				lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(
-						featureCollection.getLastModified()));
+						dataSet.getLastModified()));
 			
-			methodNameTextField.setText(featureCollection.getName());
-			descriptionTextArea.setText(featureCollection.getDescription());
+			methodNameTextField.setText(dataSet.getName());
+			descriptionTextArea.setText(dataSet.getDescription());
 
-			if(featureCollection.getOwner() != null)
-				methodAuthorLabel.setText(featureCollection.getOwner().getInfo());
+			if(dataSet.getCreatedBy() != null)
+				methodAuthorLabel.setText(dataSet.getCreatedBy().getInfo());
 		}
 		loadPreferences();
 		initChooser();
@@ -347,7 +344,7 @@ public class MsFeatureCollectionEditorDialog extends JDialog
 	public Collection<String>validateCollectionData() {
 		
 		Collection<String>errors = new ArrayList<String>();
-		String newName = getFeatureCollectionName();
+		String newName = getMSMSClusterDataSetName();
 		if(newName.isEmpty())
 			errors.add("Name can not be empty.");
 		
@@ -363,48 +360,50 @@ public class MsFeatureCollectionEditorDialog extends JDialog
 		return errors;
 	}
 	
+	//	TODO
 	private String validateNameAgainstDatabase(String newName) {
 				
-		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
-		MsFeatureInfoBundleCollection existing = null;
-		if(this.featureCollection == null) {
-			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
-				filter(f -> f.getName().equalsIgnoreCase(newName)).
-				findFirst().orElse(null);
-		}
-		else {
-			String id = featureCollection.getId();
-			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
-					filter(f -> !f.getId().equals(id)).
-					filter(f -> f.getName().equalsIgnoreCase(newName)).
-					findFirst().orElse(null);
-		}
-		if(existing != null)
-			return "Collection \"" + newName + "\" already exists.";
-		else
+//		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
+//		MsFeatureInfoBundleCollection existing = null;
+//		if(this.dataSet == null) {
+//			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
+//				filter(f -> f.getName().equalsIgnoreCase(newName)).
+//				findFirst().orElse(null);
+//		}
+//		else {
+//			String id = dataSet.getId();
+//			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
+//					filter(f -> !f.getId().equals(id)).
+//					filter(f -> f.getName().equalsIgnoreCase(newName)).
+//					findFirst().orElse(null);
+//		}
+//		if(existing != null)
+//			return "Collection \"" + newName + "\" already exists.";
+//		else
 			return null;
 	}
 	
+	//	TODO
 	private String validateNameAgainstProject(String newName) {
 		
-		MsFeatureInfoBundleCollection existing = null;
-		Set<MsFeatureInfoBundleCollection> projectCollections = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getFeatureCollections();
-		if(this.featureCollection == null) {
-			existing = projectCollections.stream().
-					filter(f -> f.getName().equalsIgnoreCase(newName)).
-					findFirst().orElse(null);
-		}
-		else {
-			String id = featureCollection.getId();
-			existing = projectCollections.stream().
-					filter(f -> !f.getId().equals(id)).
-					filter(f -> f.getName().equalsIgnoreCase(newName)).
-					findFirst().orElse(null);
-		}
-		if(existing != null)
-			return "Collection \"" + newName + "\" already exists.";
-		else
+//		MsFeatureInfoBundleCollection existing = null;
+//		Set<MsFeatureInfoBundleCollection> projectCollections = 
+//				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getFeatureCollections();
+//		if(this.dataSet == null) {
+//			existing = projectCollections.stream().
+//					filter(f -> f.getName().equalsIgnoreCase(newName)).
+//					findFirst().orElse(null);
+//		}
+//		else {
+//			String id = dataSet.getId();
+//			existing = projectCollections.stream().
+//					filter(f -> !f.getId().equals(id)).
+//					filter(f -> f.getName().equalsIgnoreCase(newName)).
+//					findFirst().orElse(null);
+//		}
+//		if(existing != null)
+//			return "Collection \"" + newName + "\" already exists.";
+//		else
 			return null;
 	}
 	
@@ -517,15 +516,15 @@ public class MsFeatureCollectionEditorDialog extends JDialog
 		}
 	}
 
-	public MsFeatureInfoBundleCollection getFeatureCollection() {
-		return featureCollection;
+	public MSMSClusterDataSet getMSMSClusterDataSet() {
+		return dataSet;
 	}
 
-	public String getFeatureCollectionName() {
+	public String getMSMSClusterDataSetName() {
 		return methodNameTextField.getText().trim();
 	}
 
-	public String getFeatureCollectionDescription() {
+	public String getMSMSClusterDataSetDescription() {
 		return descriptionTextArea.getText().trim();
 	}
 
@@ -558,11 +557,11 @@ public class MsFeatureCollectionEditorDialog extends JDialog
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
 
-	public Collection<MsFeatureInfoBundle> getFeaturesToAdd() {
-		return featuresToAdd;
+	public Collection<MsFeatureInfoBundleCluster>getClustersToAdd() {
+		return clustersToAdd;
 	}
 
-	public Set<String> getFeatureIdsToAdd() {
+	public Set<String> getClusterIdsToAdd() {
 		return featureIdsToAdd;
 	}
 	

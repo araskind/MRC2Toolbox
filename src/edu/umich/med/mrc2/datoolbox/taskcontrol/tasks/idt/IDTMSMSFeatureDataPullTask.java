@@ -92,7 +92,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		String query = 
 				"SELECT F.FEATURE_ID, F.POLARITY, F.MZ_OF_INTEREST, F.RETENTION_TIME, " +
 				"I.ACQUISITION_METHOD_ID, M.EXTRACTION_METHOD_ID, S.EXPERIMENT_ID, S.SAMPLE_ID, " +
-				"T.STOCK_SAMPLE_ID, I.INJECTION_ID, F2.COLLISION_ENERGY, " +
+				"T.STOCK_SAMPLE_ID, I.INJECTION_ID, F2.COLLISION_ENERGY " +
 				"FROM MSMS_PARENT_FEATURE F, " +
 				"DATA_ANALYSIS_MAP M, " +
 				"DATA_ACQUISITION_METHOD A, " +
@@ -181,6 +181,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 				features.add(bundle);
 			}			
 			rs.close();
+			processed++;
 		}		
 		ps.close();
 		msOnePs.close();

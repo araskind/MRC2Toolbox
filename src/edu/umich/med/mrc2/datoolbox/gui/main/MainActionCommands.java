@@ -1119,6 +1119,17 @@ public enum MainActionCommands {
 	DELETE_FEATURE_COLLECTION_COMMAND("Delete selected feature collection"),
 	LOAD_FEATURE_COLLECTION_COMMAND("Load selected feature collection for analysis"),
 	
+	//	MSMS cluster data sets
+	SHOW_MSMS_CLUSTER_DATASET_MANAGER_DIALOG_COMMAND("Show MSMS cluster data set manager"),
+	ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("\"Create new MSMS cluster data set\" dialog"),
+	ADD_MSMS_CLUSTER_DATASET_COMMAND("Create new empty MSMS cluster data set"),
+	ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND("Create new MSMS cluster data set with selected clusters"),
+	ADD_MSMS_CLUSTERS_TO_SELECTED_DATASET_COMMAND("Add clusters to selected MSMS cluster data set"),
+	EDIT_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("\"Edit selected MSMS cluster data set\" dialog"),
+	EDIT_MSMS_CLUSTER_DATASET_COMMAND("Edit selected MSMS cluster data set"),
+	DELETE_MSMS_CLUSTER_DATASET_COMMAND("Delete selected MSMS cluster data set"),
+	LOAD_MSMS_CLUSTER_DATASET_COMMAND("Load selected MSMS cluster data set for analysis"),
+	
 	//	Chromatogram smoothing 
 	SMOOTH_CHROMATOGRAM_COMMAND("Smooth chromatogram"),
 	SHOW_RAW_CHROMATOGRAM_COMMAND("Show raw chromatogram"),

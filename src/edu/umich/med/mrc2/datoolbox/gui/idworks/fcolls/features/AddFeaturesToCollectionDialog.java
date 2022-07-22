@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

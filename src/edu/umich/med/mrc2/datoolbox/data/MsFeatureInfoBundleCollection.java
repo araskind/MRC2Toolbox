@@ -100,7 +100,11 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	}
 	
 	public int getCollectionSize() {
-		return features.size();
+		
+		if(!features.isEmpty())
+			return features.size();
+		else
+			return featureIds.size();
 	}
 	
 	public int getLoadedMSMSFeatureCount() {

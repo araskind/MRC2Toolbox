@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,8 +68,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 		msmsClusterDataSet = new MSMSClusterDataSet(
 				"Active data set", 
 				"", 
-				MRC2ToolBoxCore.getIdTrackerUser(), 
-				new Date());
+				MRC2ToolBoxCore.getIdTrackerUser());
 		msmsClusterDataSet.setParameters(params);	
 		featureClusters = msmsClusterDataSet.getClusters();
 		rtError = params.getRtErrorValue();

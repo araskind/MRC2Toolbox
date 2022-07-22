@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class MSMSClusterDataSet {
 	
@@ -39,16 +40,29 @@ public class MSMSClusterDataSet {
 	private String description;
 	private LIMSUser createdBy;
 	private Date dateCreated;
+	private Date lastModified;
 	private MSMSClusteringParameterSet parameters;
 	private Set<MsFeatureInfoBundleCluster>clusters;
+	
+	public MSMSClusterDataSet(
+			String name, 
+			String description, 
+			LIMSUser createdBy) {
+		this(name, description, createdBy, new Date(), new Date());
+	}
+	
+	public MSMSClusterDataSet(String name) {
+		this(name, name, MRC2ToolBoxCore.getIdTrackerUser(), new Date(), new Date());
+	}
 	
 	public MSMSClusterDataSet(
 			String id, 
 			String name, 
 			String description, 
 			LIMSUser createdBy, 
-			Date dateCreated) {
-		this(name, description, createdBy, dateCreated);
+			Date dateCreated,
+			Date lastModified) {
+		this(name, description, createdBy, dateCreated, lastModified);
 		this.id = id;
 	}
 
@@ -56,7 +70,8 @@ public class MSMSClusterDataSet {
 			String name, 
 			String description, 
 			LIMSUser createdBy, 
-			Date dateCreated) {
+			Date dateCreated,
+			Date lastModified) {
 		super();
 		this.id = DataPrefix.MSMS_CLUSTER_DATA_SET.getName() + 
 				UUID.randomUUID().toString().substring(0, 12);
@@ -64,6 +79,7 @@ public class MSMSClusterDataSet {
 		this.description = description;
 		this.createdBy = createdBy;
 		this.dateCreated = dateCreated;
+		this.lastModified = lastModified;
 		clusters = new HashSet<MsFeatureInfoBundleCluster>();
 	}
 	
@@ -91,6 +107,11 @@ public class MSMSClusterDataSet {
 		return name;
 	}
 
+	@Override
+	public String toString() {
+		return name;
+	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -169,6 +190,18 @@ public class MSMSClusterDataSet {
 				filter(b -> b.getDataExtractionMethod() != null).
 				map(b -> b.getDataExtractionMethod()).
 				collect(Collectors.toSet());
+	}
+
+	public Date getLastModified() {
+		return lastModified;
+	}
+
+	public void setLastModified(Date lastModified) {
+		this.lastModified = lastModified;
+	}
+	
+	public void clearDataSet() {
+		clusters.clear();
 	}
 }
 
