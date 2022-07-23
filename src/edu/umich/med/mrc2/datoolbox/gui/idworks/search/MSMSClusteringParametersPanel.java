@@ -42,9 +42,9 @@ import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 
@@ -222,7 +222,8 @@ public class MSMSClusteringParametersPanel extends JPanel implements BackedByPre
 							getRTError(), 
 							getMsmsSimilarityCutoff());
 			String md5 = MSMSClusteringUtils.calculateCLusteringParametersMd5(newParams);
-			MSMSClusteringParameterSet existing = IDTDataCash.getMsmsClusteringParameterSetByMd5(md5);
+			MSMSClusteringParameterSet existing = 
+					MSMSClusterDataSetManager.getMsmsClusteringParameterSetByMd5(md5);
 			if(existing == null) {
 				try {
 					MSMSClusteringDBUtils.addMSMSClusteringParameterSet(newParams);
@@ -230,7 +231,7 @@ public class MSMSClusteringParametersPanel extends JPanel implements BackedByPre
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				IDTDataCash.getMsmsClusteringParameters().add(newParams);
+				MSMSClusterDataSetManager.getMsmsClusteringParameters().add(newParams);
 				parameters = newParams;
 			}
 			else {

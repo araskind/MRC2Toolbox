@@ -27,6 +27,9 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -39,6 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
@@ -128,22 +132,29 @@ public class MSMSClusteringDBUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static Collection<MSMSClusterDataSet> getMSMSClusterDataSets() throws Exception {
+	public static Map<MSMSClusterDataSet, Set<String>> getMSMSClusterDataSets() throws Exception {
 		Connection conn = ConnectionManager.getConnection();
-		Collection<MSMSClusterDataSet> dataSets = getMSMSClusterDataSets(conn);
+		Map<MSMSClusterDataSet, Set<String>> dataSets = getMSMSClusterDataSets(conn);
 		ConnectionManager.releaseConnection(conn);
 		return dataSets;
 	}
 	
-	public static Collection<MSMSClusterDataSet>getMSMSClusterDataSets(Connection conn) throws Exception {
+	public static Map<MSMSClusterDataSet, Set<String>>getMSMSClusterDataSets(Connection conn) throws Exception {
 		
-		Collection<MSMSClusterDataSet> dataSets = new ArrayList<MSMSClusterDataSet>();
+		Map<MSMSClusterDataSet, Set<String>> dataSets = 
+				new HashMap<MSMSClusterDataSet, Set<String>>();
 		String query = 
 			"SELECT CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
 			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID " + 
 			"FROM MSMS_CLUSTERED_DATA_SET " +
 			"ORDER BY NAME";
 		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String clusterIdQuery = 
+				"SELECT CLUSTER_ID FROM MSMS_CLUSTERED_DATA_SET_CLUSTERS "
+				+ "WHERE CDS_ID = ?";
+		PreparedStatement csidPs = conn.prepareStatement(clusterIdQuery);
+		
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			
@@ -157,12 +168,21 @@ public class MSMSClusteringDBUtils {
 					new Date(rs.getDate("LAST_MODIFIED").getTime()));
 			
 			MSMSClusteringParameterSet parSet = 
-					IDTDataCash.getMsmsClusteringParameterSetById(rs.getString("PAR_SET_ID"));
+					MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(rs.getString("PAR_SET_ID"));
 			ds.setParameters(parSet);
-			dataSets.add(ds);
+			
+			Set<String>clusterIds = new TreeSet<String>();
+			csidPs.setString(1, ds.getId());
+			ResultSet csidrs = csidPs.executeQuery();
+			while(csidrs.next())
+				clusterIds.add(csidrs.getString(1));
+			
+			csidrs.close();
+			dataSets.put(ds, clusterIds);
 		}
 		rs.close();		
 		ps.close();
+		csidPs.close();
 		return dataSets;
 	}
 	
@@ -175,10 +195,10 @@ public class MSMSClusteringDBUtils {
 	public static void insertMSMSClusterDataSet(MSMSClusterDataSet newDataSet, Connection conn) throws Exception {
 		
 		MSMSClusteringParameterSet parSet = 
-				IDTDataCash.getMsmsClusteringParameterSetById(newDataSet.getParameters().getId());
+				MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(newDataSet.getParameters().getId());
 		if(parSet == null) {
 			addMSMSClusteringParameterSet(parSet, conn);
-			IDTDataCash.getMsmsClusteringParameters().add(parSet);
+			MSMSClusterDataSetManager.getMsmsClusteringParameters().add(parSet);
 		}
 		String newId = SQLUtils.getNextIdFromSequence(conn, 
 				"MSMS_CLUSTERS_DATA_SET_SEQ",
@@ -205,30 +225,10 @@ public class MSMSClusteringDBUtils {
 		ps.setString(7, newDataSet.getParameters().getId());
 		ps.executeUpdate();
 		
-		//	Add assays
-		Collection<String>injectionIds = newDataSet.getInjectionIds();		
-		Collection<String>methodIds = 
-				newDataSet.getDataExtractionMethods().stream().
-				map(m -> m.getId()).collect(Collectors.toSet());
+		//	Add assays		
+		Collection<String>daIds = 
+				getAnalysisIdsForClusterCollection(newDataSet.getClusters(), conn);
 		
-		Collection<String>daIds = new TreeSet<String>();
-		query = "SELECT DATA_ANALYSIS_ID FROM DATA_ANALYSIS_MAP " +
-				"WHERE EXTRACTION_METHOD_ID = ? AND INJECTION_ID = ?";
-		ps = conn.prepareStatement(query);
-		ResultSet rs = null;		
-		for(String methodId : methodIds) {
-			
-			for(String injectionId : injectionIds) {
-				
-				ps.setString(1, methodId);
-				ps.setString(2, injectionId);
-				rs = ps.executeQuery();
-				while(rs.next())
-					daIds.add(rs.getString("DATA_ANALYSIS_ID"));
-				
-				rs.close();
-			}
-		}
 		query = "INSERT INTO MSMS_CLUSTERED_DATA_SET_DA_COMPONENT "
 				+ "(CDS_ID, DATA_ANALYSIS_ID) VALUES (?, ?)";
 		ps = conn.prepareStatement(query);
@@ -238,11 +238,19 @@ public class MSMSClusteringDBUtils {
 			ps.addBatch();
 		}
 		ps.executeBatch();
-					
-		//	Add clusters
-		query = "INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
+		ps.close();
+
+		addClustersForDataSet(newDataSet, parSet, conn);
+	}
+	
+	public static void addClustersForDataSet(
+			MSMSClusterDataSet newDataSet, 
+			MSMSClusteringParameterSet parSet,
+			Connection conn) throws Exception {
+		
+		String query = "INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
 				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, IS_LOCKED) VALUES (?, ?, ?, ?, ?, ?, ?)";
-		ps = conn.prepareStatement(query);
+		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
 				+ "(CLUSTER_ID, MSMS_FEATURE_ID) VALUES (?, ?)";
@@ -295,7 +303,46 @@ public class MSMSClusteringDBUtils {
 				featurePs.addBatch();
 			}
 			featurePs.executeBatch();
+		}		
+		ps.close();
+		featurePs.close();
+	}
+	
+	public static Set<String>getAnalysisIdsForClusterCollection(
+			Collection<MsFeatureInfoBundleCluster>clusterCollection, Connection conn) throws Exception {
+		
+		Set<String>analysisIds = new TreeSet<String>();
+		
+		Set<String>injectionIds = 
+				clusterCollection.stream().flatMap(c -> c.getComponents().stream()).
+				filter(b -> b.getInjectionId() != null).
+				map(b -> b.getInjectionId()).
+				collect(Collectors.toSet());
+		Set<String>dataExtractionMethodIds = 
+			clusterCollection.stream().flatMap(c -> c.getComponents().stream()).
+				filter(b -> b.getDataExtractionMethod() != null).
+				map(b -> b.getDataExtractionMethod().getId()).
+				collect(Collectors.toSet());
+		
+		String query = "SELECT DATA_ANALYSIS_ID FROM DATA_ANALYSIS_MAP " +
+				"WHERE EXTRACTION_METHOD_ID = ? AND INJECTION_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = null;		
+		for(String methodId : dataExtractionMethodIds) {
+			
+			for(String injectionId : injectionIds) {
+				
+				ps.setString(1, methodId);
+				ps.setString(2, injectionId);
+				rs = ps.executeQuery();
+				while(rs.next())
+					analysisIds.add(rs.getString("DATA_ANALYSIS_ID"));
+				
+				rs.close();
+			}
 		}
+		ps.close();		
+		return analysisIds;
 	}
 }
 

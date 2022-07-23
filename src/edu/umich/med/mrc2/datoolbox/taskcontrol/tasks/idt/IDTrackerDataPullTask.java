@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -178,11 +179,11 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing MSMS clustering parameters list";
-			IDTDataCash.refreshMsmsClusteringParameters();
+			MSMSClusterDataSetManager.refreshMsmsClusteringParameters();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing the list of clustered MSMS sets ";
-			IDTDataCash.refreshMSMSClusterDataSetList();
+			MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing MSMS extraction parameters ";

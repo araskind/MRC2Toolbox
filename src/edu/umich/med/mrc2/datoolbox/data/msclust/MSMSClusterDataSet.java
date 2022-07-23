@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,7 @@ public class MSMSClusterDataSet {
 	private Date lastModified;
 	private MSMSClusteringParameterSet parameters;
 	private Set<MsFeatureInfoBundleCluster>clusters;
+	private Set<String>clusterIds;
 	
 	public MSMSClusterDataSet(
 			String name, 
@@ -81,6 +83,7 @@ public class MSMSClusterDataSet {
 		this.dateCreated = dateCreated;
 		this.lastModified = lastModified;
 		clusters = new HashSet<MsFeatureInfoBundleCluster>();
+		clusterIds = new TreeSet<String>();
 	}
 	
 	public Set<MsFeatureInfoBundleCluster> getClusters() {
@@ -202,6 +205,10 @@ public class MSMSClusterDataSet {
 	
 	public void clearDataSet() {
 		clusters.clear();
+	}
+
+	public Set<String> getClusterIds() {
+		return clusterIds;
 	}
 }
 

@@ -35,16 +35,20 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 
 public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable implements ActionListener {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("clusterFeatureTable", 16);
 	
 	private MSMSClusterDataSetsManagerToolbar toolbar;
-	private MSMSClusterDataSetsTable featureClusterCollectionsTable;
+	private MSMSClusterDataSetsTable msmsClusterDataSetTable;
 	private FeatureAndClusterCollectionManagerDialog parent;
 	
 	private MSMSClusterDataSetEditorDialog msmsClusterDataSetEditorDialog;
@@ -53,36 +57,36 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	public DockableMSMSClusterDataSetsManager(FeatureAndClusterCollectionManagerDialog parent)  {
 
 		super("DockableFeatureClusterCollectionsManager", componentIcon, 
-				"Feature cluster collections", null, Permissions.MIN_MAX_STACK);
+				"MSMS feature cluster data sets", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		this.parent = parent;
 		
 		toolbar = new MSMSClusterDataSetsManagerToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 		
-		featureClusterCollectionsTable = new MSMSClusterDataSetsTable();
-//		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
-//		featureCollectionsTable.setTableModelFromFeatureCollectionList(
-//				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
+		msmsClusterDataSetTable = new MSMSClusterDataSetsTable();	
+		MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();		
+		msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(
+				MSMSClusterDataSetManager.getMSMSClusterDataSets());
 		
-		featureClusterCollectionsTable.addMouseListener(
+		msmsClusterDataSetTable.addMouseListener(
 
 				new MouseAdapter() {
 
 					public void mouseClicked(MouseEvent e) {
 
 						if (e.getClickCount() == 2) {
-
-//							MsFeatureInfoBundleCollection selected = 
-//									featureCollectionsTable.getSelectedCollection();
-//							if(selected == null)
-//								return;
-//							
-//							loadFeatureCollection();
+							
+							MSMSClusterDataSet selected = 
+									msmsClusterDataSetTable.getSelectedDataSet();
+							if(selected == null)
+								return;
+							
+							loadMSMSClusterDataSet();
 						}
 					}
 				});
-		add(new JScrollPane(featureClusterCollectionsTable));
+		add(new JScrollPane(msmsClusterDataSetTable));
 	}
 	
 	@Override
@@ -106,7 +110,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 			 deleteFeatureCollection();
 		
 		if(command.equals(MainActionCommands.LOAD_MSMS_CLUSTER_DATASET_COMMAND.getName()))
-			 loadFeatureCollection() ;
+			loadMSMSClusterDataSet() ;
 	}
 	
 	public void showMsFeatureCollectionEditorDialog (MSMSClusterDataSet dataSet) {
@@ -380,22 +384,22 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		this.clustersToAdd = clustersToAdd;
 	}
 	
-	private void loadFeatureCollection() {
+	private void loadMSMSClusterDataSet() {
 		
-//		MsFeatureInfoBundleCollection selectedCollection = 
-//				featureClusterCollectionsTable.getSelectedDataSet();
-//		if(selectedCollection == null)
-//			return;
-//		
-//		loadCollectionIntoWorkBench(selectedCollection);		
+		MSMSClusterDataSet selectedDataSet = 
+				msmsClusterDataSetTable.getSelectedDataSet();
+		if(selectedDataSet == null)
+			return;	
+		
+		loadMSMSClusterDataSetIntoWorkBench(selectedDataSet);		
 	}
 	
-	public void loadCollectionIntoWorkBench(MsFeatureInfoBundleCollection selectedCollection) {
+	public void loadMSMSClusterDataSetIntoWorkBench(MSMSClusterDataSet selectedDataSet) {
 		
-//		IDWorkbenchPanel panel = 
-//				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);		
-//		panel.loadMSMSFeatureInformationBundleCollection(selectedCollection);
-//		parent.dispose();
+		IDWorkbenchPanel panel = 
+				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);		
+		panel.loadMSMSClusterDataSet(selectedDataSet);
+		parent.dispose();
 	}
 	
 	public void loadDatabaseStoredCollections() {
@@ -425,10 +429,10 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	}
 	
 	public void selectCollection(MsFeatureInfoBundleCollection toSelect) {		
-		featureClusterCollectionsTable.selectCollection(toSelect);
+		msmsClusterDataSetTable.selectCollection(toSelect);
 	}
 	
 	public MSMSClusterDataSetsTable getTable() {
-		return featureClusterCollectionsTable;
+		return msmsClusterDataSetTable;
 	}
 }

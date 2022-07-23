@@ -77,6 +77,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class MSMSClusterDataSetEditorDialog extends JDialog 
@@ -297,10 +298,10 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
 
-		loadCollectionData();
+		loadClusterDataSetParameters();
 	}
 
-	private void loadCollectionData() {
+	private void loadClusterDataSetParameters() {
 
 		if(dataSet == null) {
 
@@ -308,9 +309,9 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 			setIconImage(((ImageIcon) addFeatureCollectionIcon).getImage());
 			
 			if(clustersToAdd == null) 
-				btnSave.setText(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName());
+				btnSave.setActionCommand(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName());
 			else 
-				btnSave.setText(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName());
+				btnSave.setActionCommand(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName());
 			
 			dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
 			lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));			
@@ -362,24 +363,21 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 	
 	//	TODO
 	private String validateNameAgainstDatabase(String newName) {
-				
-//		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
-//		MsFeatureInfoBundleCollection existing = null;
-//		if(this.dataSet == null) {
-//			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
-//				filter(f -> f.getName().equalsIgnoreCase(newName)).
-//				findFirst().orElse(null);
-//		}
-//		else {
-//			String id = dataSet.getId();
-//			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
-//					filter(f -> !f.getId().equals(id)).
-//					filter(f -> f.getName().equalsIgnoreCase(newName)).
-//					findFirst().orElse(null);
-//		}
-//		if(existing != null)
-//			return "Collection \"" + newName + "\" already exists.";
-//		else
+		
+		MSMSClusterDataSet existing = null;
+		if(this.dataSet == null) {
+			existing = MSMSClusterDataSetManager.getMSMSClusterDataSetByName(newName);
+		}
+		else {
+			String id = dataSet.getId();
+			existing = MSMSClusterDataSetManager.getMSMSClusterDataSets().stream().
+					filter(f -> !f.getId().equals(id)).
+					filter(f -> f.getName().equalsIgnoreCase(newName)).
+					findFirst().orElse(null);
+		}
+		if(existing != null)
+			return "Collection \"" + newName + "\" already exists.";
+		else
 			return null;
 	}
 	

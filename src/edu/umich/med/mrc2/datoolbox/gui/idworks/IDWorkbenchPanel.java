@@ -98,6 +98,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
@@ -120,6 +121,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClus
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.MSMSClusterDataSetEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.AddFeaturesToCollectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fdr.FDREstimationSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idfus.DockableFollowupStepTable;
@@ -175,6 +177,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
@@ -187,6 +190,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.NISTMsSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.NISTMspepSearchOfflineTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.id.PercolatorFDREstimationTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMS1FeatureSearchTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSClusterDataPullTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSDuplicateMSMSFeatureCleanupTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullWithFilteringTask;
@@ -194,6 +198,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureSearchTa
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerDataExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerProjectDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSClusterDataSetUploadTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSFeatureClusteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.SpectrumEntropyRecalculationTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ExtendedMSPExportTask;
@@ -281,6 +286,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private FeatureAndClusterCollectionManagerDialog featureCollectionManagerDialog;
 	private AddFeaturesToCollectionDialog addFeaturesToCollectionDialog;
 	private MsFeatureInfoBundleCollection activeFeatureCollection;
+	private MSMSClusterDataSet activeMSMSClusterDataSet;
+	private MsFeatureInfoBundleCluster activeCluster;
 	private FDREstimationSetupDialog fdrEstimationSetupDialog;
 	private ReassignDefaultMSMSLibraryHitDialog reassignDefaultMSMSLibraryHitDialog;
 	private IndeterminateProgressDialog idp;
@@ -291,7 +298,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private ActiveDataSetMZRTDataSearchDialog activeDataSetMZRTDataSearchDialog;
 	private DatasetSummaryDialog datasetSummaryDialog;
 	
-	private MsFeatureInfoBundleCluster activeCluster;
+	private MSMSClusterDataSetEditorDialog msmsClusterDataSetEditorDialog;	
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -793,9 +800,63 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			recalculateSpectrumEntropyScores();		
 		
 		if (command.equals(MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND.getName()))
-			showActiveDataSetSummary();			
+			showActiveDataSetSummary();		
+		
+		if (command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName()))
+			showAddNewMSMSClusterDataSetDialog();
+		
+		if (command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName()) 
+				|| command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName()))
+			insertNewMSMSClusterDataSet();
+				
+		if (command.equals(MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_COMMAND.getName()))
+			editMSMSClusterDataSet();		
 	}
 	
+	private void editMSMSClusterDataSet() {
+		
+		Collection<String>errors = 
+				msmsClusterDataSetEditorDialog.validateCollectionData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), this.getContentPane());
+			return;
+		}	
+		// TODO save edits
+	}
+
+	private void insertNewMSMSClusterDataSet() {
+
+		Collection<String>errors = 
+				msmsClusterDataSetEditorDialog.validateCollectionData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), msmsClusterDataSetEditorDialog);
+			return;
+		}	
+		MSMSClusterDataSet dataSet = new MSMSClusterDataSet(
+				msmsClusterDataSetEditorDialog.getMSMSClusterDataSetName(), 
+				msmsClusterDataSetEditorDialog.getMSMSClusterDataSetDescription(), 
+				MRC2ToolBoxCore.getIdTrackerUser());
+		MSMSClusterDataSetUploadTask task = 
+				new MSMSClusterDataSetUploadTask(dataSet);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+		msmsClusterDataSetEditorDialog.dispose();		
+	}
+
+	private void showAddNewMSMSClusterDataSetDialog() {
+
+		if(activeMSMSClusterDataSet == null)
+			return;
+		
+		msmsClusterDataSetEditorDialog = 
+				new MSMSClusterDataSetEditorDialog(
+						null, activeMSMSClusterDataSet.getClusters(), this);
+		msmsClusterDataSetEditorDialog.setLocationRelativeTo(this.getContentPane());
+		msmsClusterDataSetEditorDialog.setVisible(true);
+	}
+
 	private void showActiveDataSetSummary() {
 		
 		// TODO - deal with MS1 stuff later 
@@ -2956,19 +3017,39 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				finalizeSpectrumEntropyRecalculation();
 			
 			if (e.getSource().getClass().equals(MSMSFeatureClusteringTask.class))
-				finalizeMSMSFeatureClusteringTask((MSMSFeatureClusteringTask)e.getSource());			
+				finalizeMSMSFeatureClusteringTask((MSMSFeatureClusteringTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(IDTMSMSClusterDataPullTask.class))
+				finalizeIDTMSMSClusterDataPullTask((IDTMSMSClusterDataPullTask)e.getSource());	
+			
+			if (e.getSource().getClass().equals(MSMSClusterDataSetUploadTask.class))
+				finalizeMSMSClusterDataSetUploadTask((MSMSClusterDataSetUploadTask)e.getSource());				
 		}
 	}		
 
+	private void finalizeMSMSClusterDataSetUploadTask(MSMSClusterDataSetUploadTask task) {
+		
+		activeMSMSClusterDataSet = task.getDataSet();
+		MessageDialog.showInfoMsg("MSMS cluster data set \"" + task.getDataSet().getName() + 
+				"\" was saved to the database", this.getContentPane());		
+	}
+
+	private void finalizeIDTMSMSClusterDataPullTask(IDTMSMSClusterDataPullTask source) {
+
+		activeMSMSClusterDataSet = source.getDataSet();
+		Set<MsFeatureInfoBundleCluster> clusters = 
+				source.getDataSet().getClusters();
+		msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
+		activeCluster = null;
+	}
+
 	private void finalizeMSMSFeatureClusteringTask(MSMSFeatureClusteringTask source) {
 
+		activeMSMSClusterDataSet = source.getMsmsClusterDataSet();
 		Set<MsFeatureInfoBundleCluster> clusters = 
 				source.getMsmsClusterDataSet().getClusters();
 		msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
 		activeCluster = null;
-//		MessageDialog.showInfoMsg(
-//				"MSMS feature clustering completed", 
-//				this.getContentPane());
 	}
 
 	private void finalizeSpectrumEntropyRecalculation() {
@@ -3121,6 +3202,49 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
+	public void loadMSMSClusterDataSet(MSMSClusterDataSet selectedDataSet) {
+		
+		if(selectedDataSet.equals(MSMSClusterDataSetManager.msmsClusterSearchResults)) {
+			reloadCompleteActiveMSMSClusterDataSet();
+			return;
+		}
+		if(selectedDataSet.equals(MSMSClusterDataSetManager.msOneClusterSearchResults)) {
+			reloadCompleteActiveMSOneClusterDataSet();
+			return;
+		}
+		activeMSMSClusterDataSet = selectedDataSet;
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			
+			IDTMSMSClusterDataPullTask task = 
+					MSMSClusterDataSetManager.getMSMSClusterDataSetData(selectedDataSet);
+			if(task == null) {
+				 reloadActiveMSMSClusterDataSet();
+			}
+			else {
+				task.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(task);
+			}
+		}
+		else {
+			 reloadActiveMSMSClusterDataSet();
+		}
+	}	
+	
+	private void reloadActiveMSMSClusterDataSet() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void reloadCompleteActiveMSOneClusterDataSet() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void reloadCompleteActiveMSMSClusterDataSet() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public void loadMSMSFeatureInformationBundleCollection(
 			MsFeatureInfoBundleCollection selectedCollection) {
 		
@@ -3715,5 +3839,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	protected void executeAdminCommand(String command) {
 		// TODO Auto-generated method stub
 		
-	}	
+	}
+
 }

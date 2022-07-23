@@ -22,25 +22,24 @@
 package edu.umich.med.mrc2.datoolbox.main;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.compare.MSMSClusterDataSetComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
-import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullTask;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSClusterDataPullTask;
 
 public class MSMSClusterDataSetManager {
 	
 	public static final String CURRENT_MSMS_CLUSTER_SEARCH_RESULT = "Current MSMS cluster search";
-	public static final String CURRENT_MS1_CLUSTER_SEARCH_RESULT = "Current MS1 clister search";
+	public static final String CURRENT_MS1_CLUSTER_SEARCH_RESULT = "Current MS1 cluster search";
 	public static final String ACTIVE_PROJECT_DEFAULT_CLUSTER_DATA_SET = "Active project default cluster data set";
 	
 	public static final MSMSClusterDataSet msmsClusterSearchResults = 
@@ -53,6 +52,9 @@ public class MSMSClusterDataSetManager {
 	public static final Map<MSMSClusterDataSet, Set<String>>clusterDataSetsToClusterIdsMap = 
 			new TreeMap<MSMSClusterDataSet, Set<String>>(
 					new MSMSClusterDataSetComparator(SortProperty.Name));
+	
+	public static Collection<MSMSClusteringParameterSet>msmsClusteringParameters = 
+			new HashSet<MSMSClusteringParameterSet>();
 
 	public static void clearDefaultCollections() {		
 		msmsClusterSearchResults.clearDataSet();
@@ -60,16 +62,13 @@ public class MSMSClusterDataSetManager {
 		activeProjectDefaultClusterDataSet.clearDataSet();
 	}
 		
-	public static void refreshMsFeatureInfoBundleCollections() {
+	public static void refreshMSMSClusterDataSetList() {
 		clusterDataSetsToClusterIdsMap.clear();
 		clusterDataSetsToClusterIdsMap.put(msmsClusterSearchResults, new TreeSet<String>());
 		clusterDataSetsToClusterIdsMap.put(msOneClusterSearchResults, new TreeSet<String>());
 		clusterDataSetsToClusterIdsMap.put(activeProjectDefaultClusterDataSet, new TreeSet<String>());
 		try {
-			
-			//	TODO
-//			featureCollectionsMSMSIDMap.putAll(
-//					FeatureCollectionUtils.getMsFeatureInformationBundleCollections());
+			clusterDataSetsToClusterIdsMap.putAll(MSMSClusteringDBUtils.getMSMSClusterDataSets());		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -77,12 +76,9 @@ public class MSMSClusterDataSetManager {
 	
 	public static Collection<MSMSClusterDataSet>getMSMSClusterDataSets() {
 
-//		try {
-//			featureCollectionsMSMSIDMap.putAll(
-//					FeatureCollectionUtils.getMsFeatureInformationBundleCollections());
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}		
+		if(clusterDataSetsToClusterIdsMap.isEmpty())
+			refreshMSMSClusterDataSetList();
+		
 		return clusterDataSetsToClusterIdsMap.keySet();
 	}
 	
@@ -102,105 +98,62 @@ public class MSMSClusterDataSetManager {
 				filter(c -> c.getId().equals(id)).findFirst().orElse(null);
 	}
 	
-	public static IDTMSMSFeatureDataPullTask getMSMSClusterDataSetData(
-			MSMSClusterDataSet mbColl) {
+	public static MSMSClusterDataSet getMSMSClusterDataSetByName(String name) {
+		
+		return clusterDataSetsToClusterIdsMap.keySet().stream().
+				filter(c -> c.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+	}
 	
-		//	TODO
-//		if(!featureCollectionsMSMSIDMap.containsKey(mbColl))
-//			return null;
-//		
-//		Set<String> idList = featureCollectionsMSMSIDMap.get(mbColl);
-//		Collection<String> attachedIdList = mbColl.getMSMSFeatureIds();
-//		Set<String> unAttachedIdList = idList.stream().
-//				filter(i -> !attachedIdList.contains(i)).collect(Collectors.toSet());
-//		
-//		//	Check cash data
-//		Set<String>missingIds = new TreeSet<String>();
-//		for(String id : unAttachedIdList) {
-//			MsFeatureInfoBundle cachedFeature = 
-//					FeatureCollectionUtils.retrieveMSMSFetureInfoBundleFromCache(id);
-//			if(cachedFeature == null)
-//				missingIds.add(id);
-//			else
-//				mbColl.addFeature(cachedFeature);
-//		}
-//		if(!missingIds.isEmpty()) {
-//			IDTMSMSFeatureDataPullTask task = new IDTMSMSFeatureDataPullTask(missingIds);
-//			return task;
-//		}
-//		else	
-			return null;
+	public static IDTMSMSClusterDataPullTask getMSMSClusterDataSetData(MSMSClusterDataSet dataSet) {
+		return new IDTMSMSClusterDataPullTask(dataSet);
 	}	
 	
-	public static int getMSMSClusterDataSetSize(MSMSClusterDataSet mbColl) {
+	public static int getMSMSClusterDataSetSize(MSMSClusterDataSet cds) {
 		
-		if(!clusterDataSetsToClusterIdsMap.containsKey(mbColl))
+		if(!clusterDataSetsToClusterIdsMap.containsKey(cds))
 			return 0;
 		
-		return clusterDataSetsToClusterIdsMap.get(mbColl).size();
+		return clusterDataSetsToClusterIdsMap.get(cds).size();
 	}
 	
-	public static Collection<MsFeatureInfoBundle>getLoadedMSMSFeaturesByIds(Collection<String>msmsIds){
-		return msmsIds.stream().
-				map(id -> FeatureCollectionUtils.retrieveMSMSFetureInfoBundleFromCache(id)).
-				filter(f -> f != null).collect(Collectors.toSet());
+	public static MSMSClusterDataSet getMsmsMSMSClusterDataSetById(String id) {		
+		return getMSMSClusterDataSets().stream().
+				filter(s -> s.getId().equals(id)).findFirst().orElse(null);
 	}
 	
-	public static void addFeaturesToCollection(
-			MsFeatureInfoBundleCollection collection, 
-			Collection<MsFeatureInfoBundle>featuresToAdd)  {
+	public static void refreshMsmsClusteringParameters() {
+		msmsClusteringParameters.clear();
+		getMsmsClusteringParameters();
+	}
 
-		if(!clusterDataSetsToClusterIdsMap.containsKey(collection) || featuresToAdd.isEmpty())
-			return;
-		
-		Set<String>existingIds = clusterDataSetsToClusterIdsMap.get(collection);
-		Set<String>featureIdsToAdd = featuresToAdd.stream().
-				map(f -> f.getMSMSFeatureId()).
-				filter(id -> !existingIds.contains(id)).
-				collect(Collectors.toSet());
+	public static Collection<MSMSClusteringParameterSet> getMsmsClusteringParameters() {
 
-		if(featureIdsToAdd.isEmpty())
-			return;
+		if(msmsClusteringParameters == null)
+			msmsClusteringParameters = new HashSet<MSMSClusteringParameterSet>();
 		
-		try {
-			FeatureCollectionUtils.addFeaturesToCollection(collection.getId(), featureIdsToAdd);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(msmsClusteringParameters.isEmpty()) {
+			try {
+				msmsClusteringParameters.addAll(MSMSClusteringDBUtils.getMSMSClusteringParameterSets());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		clusterDataSetsToClusterIdsMap.get(collection).addAll(featureIdsToAdd);
+		return msmsClusteringParameters;
 	}
 	
-	public static void removeFeaturesFromCollection(
-			MSMSClusterDataSet dataSet, 
-			Collection<MsFeatureInfoBundleCluster>clustersToRemove) {
+	public static MSMSClusteringParameterSet getMsmsClusteringParameterSetById(String id) {
 		
-		if(!clusterDataSetsToClusterIdsMap.containsKey(dataSet) || clustersToRemove.isEmpty())
-			return;
-		
-		Set<String>existingIds = clusterDataSetsToClusterIdsMap.get(dataSet);
-		Set<String>clusterIdsToRemove = clustersToRemove.stream().
-				map(f -> f.getId()).
-				filter(id -> existingIds.contains(id)).
-				collect(Collectors.toSet());
-
-		if(clusterIdsToRemove.isEmpty())
-			return;
-		
-		//	TODO
-//		try {
-//			FeatureCollectionUtils.removeFeaturesFromCollection(collection.getId(), featureIdsToRemove);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		clusterDataSetsToClusterIdsMap.get(dataSet).removeAll(clusterIdsToRemove);
+		return getMsmsClusteringParameters().stream().
+				filter(p -> p.getId().equals(id)).findFirst().orElse(null);
 	}
-
-	public static Map<MSMSClusterDataSet, Set<String>> getFeatureCollectionsMsmsIdMap() {
-		return clusterDataSetsToClusterIdsMap;
+	
+	public static MSMSClusteringParameterSet getMsmsClusteringParameterSetByMd5(String md5) {
+		
+		return getMsmsClusteringParameters().stream().
+				filter(p -> p.getMd5().equals(md5)).findFirst().orElse(null);
 	}
 }
+
 
 
 
