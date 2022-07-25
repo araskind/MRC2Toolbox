@@ -45,7 +45,7 @@ public class InstrumentFormat extends Format {
 	@Override
 	public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
 
-		if(obj instanceof ExperimentalSample) {
+		if(obj instanceof LIMSInstrument) {
 
 			instrument = (LIMSInstrument)obj;
 			if(field.equals(SortProperty.Name))

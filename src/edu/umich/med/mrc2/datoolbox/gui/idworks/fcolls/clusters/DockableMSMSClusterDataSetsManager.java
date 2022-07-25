@@ -104,7 +104,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 			etitSelectedFeatureCollection();
 		
 		if(command.equals(MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_COMMAND.getName()))
-			saveEditedFeatureCollectionData();
+			saveEditedMSMSClusterDataSet();
 		
 		if(command.equals(MainActionCommands.DELETE_MSMS_CLUSTER_DATASET_COMMAND.getName()))
 			 deleteFeatureCollection();
@@ -121,7 +121,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		msmsClusterDataSetEditorDialog.setVisible(true);
 	}
 
-	private void saveEditedFeatureCollectionData() {
+	private void saveEditedMSMSClusterDataSet() {
 		
 //		Collection<String>errors = msFeatureCollectionEditorDialog.validateCollectionData();
 //		if(!errors.isEmpty()) {
