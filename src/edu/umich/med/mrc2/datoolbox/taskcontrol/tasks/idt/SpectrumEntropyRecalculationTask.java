@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
@@ -61,12 +62,15 @@ public class SpectrumEntropyRecalculationTask extends AbstractTask {
 				TandemMassSpectrum msms = 
 						b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
 				if(msms != null) {
-					double entropy = MsUtils.calculateCleanedSpectrumEntropyNatLog(msms.getSpectrum());
+					double entropy = 
+							MsUtils.calculateCleanedSpectrumEntropyNatLog(msms.getSpectrum());
 					msms.setEntropy(entropy);
 					
-					List<ReferenceMsMsLibraryMatch> matches = b.getMsFeature().getIdentifications().stream().
-						filter(id -> id.getReferenceMsMsLibraryMatch() != null).
-						map(id -> id.getReferenceMsMsLibraryMatch()).collect(Collectors.toList());
+					List<ReferenceMsMsLibraryMatch> matches = 
+						b.getMsFeature().getIdentifications().stream().
+							filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+							map(id -> id.getReferenceMsMsLibraryMatch()).
+							collect(Collectors.toList());
 					
 					if(!matches.isEmpty()) {
 						

@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.jfree.data.general.DatasetChangeEvent;
@@ -62,8 +63,9 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 	private void populateSeries(Collection<MsFeatureInfoBundle> featureBundles) {
 
 		List<MsFeatureInfoBundle> identified = featureBundles.stream().
-				filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-				filter(f -> f.getMsFeature().getPrimaryIdentity().getIdentificationLevel() != null).
+				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+				filter(f -> Objects.nonNull(f.getMsFeature().
+						getPrimaryIdentity().getIdentificationLevel())).
 				collect(Collectors.toList());
 		List<MSFeatureIdentificationLevel> idLevels = identified.stream().
 			map(f -> f.getMsFeature().getPrimaryIdentity().getIdentificationLevel()).
@@ -72,20 +74,22 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 		for(MSFeatureIdentificationLevel level : idLevels) {
 			
 			MsFeatureInfoBundle[] levelFeatures = identified.stream().
-					filter(f -> f.getMsFeature().getPrimaryIdentity().getIdentificationLevel().equals(level)).
+					filter(f -> f.getMsFeature().getPrimaryIdentity().
+							getIdentificationLevel().equals(level)).
 					toArray(size -> new MsFeatureInfoBundle[size]);
 			if(levelFeatures.length > 0)
 				seriesMap.put(level.getName(), levelFeatures);			
 		}
 		MsFeatureInfoBundle[] missingIdLevel = featureBundles.stream().
-				filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-				filter(f -> f.getMsFeature().getPrimaryIdentity().getIdentificationLevel() == null).
+				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+				filter(f -> Objects.isNull(f.getMsFeature().
+						getPrimaryIdentity().getIdentificationLevel())).
 				toArray(size -> new MsFeatureInfoBundle[size]);		
 		if(missingIdLevel.length > 0)
 			seriesMap.put(IDENTIFIED_WITHOUT_LEVEL_SERIES_NAME, missingIdLevel);
 		
 		MsFeatureInfoBundle[] unknowns = featureBundles.stream().
-				filter(f -> f.getMsFeature().getPrimaryIdentity() == null).
+				filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity())).
 				toArray(size -> new MsFeatureInfoBundle[size]);		
 		if(unknowns.length > 0)
 			seriesMap.put(UNKNOWN_SERIES_NAME, unknowns);

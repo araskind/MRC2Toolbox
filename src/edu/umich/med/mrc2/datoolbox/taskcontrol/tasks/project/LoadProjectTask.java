@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -201,11 +202,12 @@ public class LoadProjectTask extends AbstractTask {
 		design.replaceSampleTypeFactor(sampleTypeFactor);
 		
 		//	Check samples and replace IDs/Names for reference samples where necessary
-		Collection<ExperimentalSample> dbRefSamples = ReferenceSamplesManager.getReferenceSamples();
+		Collection<ExperimentalSample> dbRefSamples = 
+				ReferenceSamplesManager.getReferenceSamples();
 		for(ExperimentalSample sample : design.getReferenceSamples()) {
 			
 			ExperimentalSample match = dbRefSamples.stream().
-					filter(s -> s.getSampleIdDeprecated() != null).
+					filter(s -> Objects.nonNull(s.getSampleIdDeprecated())).
 					filter(s -> s.getSampleIdDeprecated().equals(sample.getId())).
 					findFirst().orElse(null);
 			

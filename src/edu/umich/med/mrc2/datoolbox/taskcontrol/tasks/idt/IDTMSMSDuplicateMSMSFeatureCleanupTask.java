@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -137,15 +138,19 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	private void setSingleDefaultId(String featureId, Collection<MsFeatureIdentity>dupIds, Connection conn) throws Exception {
+	private void setSingleDefaultId(
+			String featureId, 
+			Collection<MsFeatureIdentity>dupIds, 
+			Connection conn) throws Exception {
 		
 		Collection<MsFeatureIdentity>curated = dupIds.stream().
-			filter(i -> i.getIdentificationLevel() != null).
+			filter(i -> Objects.nonNull(i.getIdentificationLevel())).
 			filter(i -> !i.getIdentificationLevel().getId().equals("IDS002")).
 			collect(Collectors.toList());
 		if(curated.isEmpty()) {
 			MsFeatureIdentity primary = dupIds.stream().
-					sorted(new MsFeatureIdentityComparator(SortProperty.Quality)).findFirst().orElse(null);
+					sorted(new MsFeatureIdentityComparator(
+							SortProperty.Quality)).findFirst().orElse(null);
 			IdentificationUtils.setMSMSFeaturePrimaryIdentity(featureId, primary, conn);
 		}
 		else {
@@ -212,7 +217,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 			
 			//	Check for manually curated
 			Collection<String>curatedIds = dupIds.stream().
-					filter(i -> i.getIdentificationLevel() != null).
+					filter(i -> Objects.nonNull(i.getIdentificationLevel())).
 					filter(i -> !i.getIdentificationLevel().getId().equals("IDS002")).
 					map(i -> i.getUniqueId()).
 					collect(Collectors.toList());
@@ -481,7 +486,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 //					filter(f -> f.getDataFile().getName().equals(df)).
 //					filter(f -> f.getDataExtractionMethod().equals(method)).
 					filter(f -> f.getRetentionTime() == rt).
-					filter(f -> f.getPrecursorMz() != null).
+					filter(f -> Objects.nonNull(f.getPrecursorMz())).
 					filter(f -> f.getPrecursorMz() == mz).
 					toArray(size -> new MsFeatureInfoBundle[size]) ;
 			

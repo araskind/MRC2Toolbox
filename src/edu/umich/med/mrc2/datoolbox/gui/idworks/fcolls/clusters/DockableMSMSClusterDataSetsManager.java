@@ -27,23 +27,35 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
+import org.apache.commons.lang3.StringUtils;
+
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSClusterDataSetUploadTask;
 
-public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable implements ActionListener {
+public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable implements ActionListener, TaskListener {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("clusterFeatureTable", 16);
 	
@@ -98,19 +110,34 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		
 		if(command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName())
 				|| command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName()))
-			createNewFeatureCollection();
+			createNewMSMSClusterDataSet();
 		
 		if(command.equals(MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName()))
-			etitSelectedFeatureCollection();
+			editSelectedMSMSClusterDataSet();
 		
 		if(command.equals(MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_COMMAND.getName()))
 			saveEditedMSMSClusterDataSet();
 		
 		if(command.equals(MainActionCommands.DELETE_MSMS_CLUSTER_DATASET_COMMAND.getName()))
-			 deleteFeatureCollection();
+			 deleteMSMSClusterDataSet();
 		
 		if(command.equals(MainActionCommands.LOAD_MSMS_CLUSTER_DATASET_COMMAND.getName()))
 			loadMSMSClusterDataSet() ;
+	}
+	
+	private void editSelectedMSMSClusterDataSet() {
+		
+		MSMSClusterDataSet selected = 
+				msmsClusterDataSetTable.getSelectedDataSet();
+		if(selected == null)
+			return;
+		
+		if(!MSMSClusterDataSetManager.getEditableMSMSClusterDataSets().contains(selected)) {
+			MessageDialog.showWarningMsg("Data set \"" + selected.getName() + 
+					"\" is locked and can not be edited.", this.getContentPane());
+			return;
+		}	
+		showMsFeatureCollectionEditorDialog(selected);
 	}
 	
 	public void showMsFeatureCollectionEditorDialog (MSMSClusterDataSet dataSet) {
@@ -123,178 +150,131 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 
 	private void saveEditedMSMSClusterDataSet() {
 		
-//		Collection<String>errors = msFeatureCollectionEditorDialog.validateCollectionData();
-//		if(!errors.isEmpty()) {
-//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msFeatureCollectionEditorDialog);
-//			return;
-//		}
-//		MsFeatureInfoBundleCollection edited = 
-//				msFeatureCollectionEditorDialog.getFeatureCollection();
-//		edited.setName(msFeatureCollectionEditorDialog.getFeatureCollectionName());
-//		edited.setDescription(msFeatureCollectionEditorDialog.getFeatureCollectionDescription());
-//		edited.setLastModified(new Date());
-//		
-//		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
-//			saveFeatureCollectionChangesToDatabase(edited);
-//		else
-//			saveFeatureCollectionChangesToProject(edited);
+		Collection<String>errors = 
+				msmsClusterDataSetEditorDialog.validateCollectionData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), 
+					msmsClusterDataSetEditorDialog);
+			return;
+		}
+		MSMSClusterDataSet edited = 
+				msmsClusterDataSetEditorDialog.getMSMSClusterDataSet();
+
+		edited.setName(msmsClusterDataSetEditorDialog.getMSMSClusterDataSetName());
+		edited.setDescription(msmsClusterDataSetEditorDialog.getMSMSClusterDataSetDescription());
+		edited.setLastModified(new Date());
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			saveMSMSClusterDataSetChangesToProject(edited);
+		else
+			saveMSMSClusterDataSetChangesToDatabase(edited);
+		
+		clustersToAdd = null;
 	}
 	
-	private void saveFeatureCollectionChangesToProject(MsFeatureInfoBundleCollection edited) {
+	private void saveMSMSClusterDataSetChangesToProject(MSMSClusterDataSet edited) {
 		
-//		edited.addFeatures(msFeatureCollectionEditorDialog.getFeaturesToAdd());
-//		boolean loadCollection = msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
-//		msFeatureCollectionEditorDialog.dispose();	
-//		if(loadCollection) {
-//			loadCollectionIntoWorkBench(edited);
-//			parent.dispose();
-//		}
-//		else {				
-//			featureClusterCollectionsTable.updateCollectionData(edited);
-//			featureClusterCollectionsTable.selectCollection(edited);
-//		}
+		if(msmsClusterDataSetEditorDialog.getClustersToAdd() != null)
+			edited.getClusters().addAll(msmsClusterDataSetEditorDialog.getClustersToAdd());
+		
+		if(msmsClusterDataSetEditorDialog.loadMSMSClusterDataSetIntoWorkBench()) {
+			loadMSMSClusterDataSetIntoWorkBench(edited);
+			msmsClusterDataSetEditorDialog.dispose();
+			parent.dispose();
+		}
+		else {		
+			msmsClusterDataSetEditorDialog.dispose();
+			msmsClusterDataSetTable.updateMSMSClusterDataSetData(edited);
+			msmsClusterDataSetTable.selectDataSet(edited);
+		}		
 	}
 	
-	private void saveFeatureCollectionChangesToDatabase(MsFeatureInfoBundleCollection edited) { 
+	private void saveMSMSClusterDataSetChangesToDatabase(MSMSClusterDataSet edited) { 
 		
-//		try {
-//			FeatureCollectionUtils.updateMsFeatureInformationBundleCollectionMetadata(edited);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}	
-//		Set<String>featureIds = new TreeSet<String>();
-//		featureIds.addAll(FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().get(edited));
-//		Set<String> featureIdsToAdd = msFeatureCollectionEditorDialog.getFeatureIdsToAdd();
-//		if(featureIdsToAdd != null && !featureIdsToAdd.isEmpty()) {
-//			featureIds.addAll(featureIdsToAdd);				
-//			try {
-//				FeatureCollectionUtils.addFeaturesToCollection(edited.getId(), featureIdsToAdd);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
-//		boolean loadCollection = msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
-//		msFeatureCollectionEditorDialog.dispose();	
-//		if(loadCollection) {
-//			loadCollectionIntoWorkBench(edited);
-//			parent.dispose();
-//		}
-//		else {
-//			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().put(edited, featureIds);					
-//			featureClusterCollectionsTable.updateCollectionData(edited);
-//			featureClusterCollectionsTable.selectCollection(edited);
-//		}
+		try {
+			MSMSClusteringDBUtils.updateMSMSClusterDataSetMetadata(edited);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		if(clustersToAdd != null && !clustersToAdd.isEmpty()) {			
+			try {
+				//	Assign DB cluster ids first
+				MSMSClusteringDBUtils.addClustersToDataSet(edited.getId(), clustersToAdd);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}	
+		Set<String>cids = clustersToAdd.stream().map(c -> c.getId()).collect(Collectors.toSet());
+		MSMSClusterDataSetManager.clusterDataSetsToClusterIdsMap.get(edited).addAll(cids);
+		
+		if(msmsClusterDataSetEditorDialog.loadMSMSClusterDataSetIntoWorkBench()) {
+			loadMSMSClusterDataSetIntoWorkBench(edited);
+			msmsClusterDataSetEditorDialog.dispose();
+			parent.dispose();
+		}
+		else {		
+			msmsClusterDataSetEditorDialog.dispose();
+			msmsClusterDataSetTable.updateMSMSClusterDataSetData(edited);
+			msmsClusterDataSetTable.selectDataSet(edited);
+		}
 	}
 
-	private void createNewFeatureCollection() {
+	private void createNewMSMSClusterDataSet() {
 
-//		Collection<String>errors = msFeatureCollectionEditorDialog.validateCollectionData();
-//		if(!errors.isEmpty()) {
-//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msFeatureCollectionEditorDialog);
-//			return;
-//		}
-//		MsFeatureInfoBundleCollection newCollection = 
-//				new MsFeatureInfoBundleCollection(
-//						null, 
-//						msFeatureCollectionEditorDialog.getFeatureCollectionName(),
-//						msFeatureCollectionEditorDialog.getFeatureCollectionDescription(),
-//						new Date(), 
-//						new Date(),
-//						MRC2ToolBoxCore.getIdTrackerUser());
-//		
-//		if(msFeatureCollectionEditorDialog.getFeaturesToAdd() != null)
-//			newCollection.addFeatures(msFeatureCollectionEditorDialog.getFeaturesToAdd());
-//		
-//		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
-//			createNewFeatureCollectionInDatabase(newCollection);
-//		else
-//			createNewFeatureCollectionInProject(newCollection);
+		Collection<String>errors = 
+				msmsClusterDataSetEditorDialog.validateCollectionData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), 
+					msmsClusterDataSetEditorDialog);
+			return;
+		}
+		MSMSClusterDataSet newDataSet = 
+				new MSMSClusterDataSet(
+						msmsClusterDataSetEditorDialog.getMSMSClusterDataSetName(),
+						msmsClusterDataSetEditorDialog.getMSMSClusterDataSetDescription(),
+						MRC2ToolBoxCore.getIdTrackerUser());
+		
+		if(clustersToAdd != null && !clustersToAdd.isEmpty())
+			newDataSet.getClusters().addAll(clustersToAdd);
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			createNewMSMSClusterDataSetInProject(newDataSet);
+		else
+			createNewMSMSClusterDataSetInDatabase(newDataSet);
+		
+		clustersToAdd = null;
 	}
 	
-	private void createNewFeatureCollectionInProject(MsFeatureInfoBundleCollection newCollection) {
+	private void createNewMSMSClusterDataSetInProject(MSMSClusterDataSet newDataSet) {
 		
-//		RawDataAnalysisProject project = 
-//				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();		
-//		project.addMsFeatureInfoBundleCollection(newCollection);
-//		boolean loadCollection = 
-//				msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
-//		msFeatureCollectionEditorDialog.dispose();	
-//		if(loadCollection) {
-//			loadCollectionIntoWorkBench(newCollection);
-//			parent.dispose();
-//		}
-//		else {
-//			featureClusterCollectionsTable.setTableModelFromFeatureCollectionList(
-//					project.getFeatureCollections());	
-//			featuresToAdd = null;
-//		}
+		RawDataAnalysisProject project = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();		
+		project.getMsmsClusterDataSets().add(newDataSet);
+		if(msmsClusterDataSetEditorDialog.loadMSMSClusterDataSetIntoWorkBench()) {
+			loadMSMSClusterDataSetIntoWorkBench(newDataSet);
+			msmsClusterDataSetEditorDialog.dispose();
+			parent.dispose();
+		}
+		else {
+			msmsClusterDataSetEditorDialog.dispose();	
+			msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(project.getMsmsClusterDataSets());
+			msmsClusterDataSetTable.selectDataSet(newDataSet);		
+		}
 	}
 		
-	private void createNewFeatureCollectionInDatabase(MsFeatureInfoBundleCollection newCollection) {
-
-//		String newId = null;
-//		try {
-//			newId = FeatureCollectionUtils.addNewMsFeatureInformationBundleCollection(newCollection);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		boolean loadCollection = false;
-//		if(newId != null) {
-//			
-//			newCollection.setId(newId);
-//			Set<String>featureIds = new TreeSet<String>();
-//			featureIds.addAll(newCollection.getMSMSFeatureIds());
-//			Set<String> featureIdsToAdd = msFeatureCollectionEditorDialog.getFeatureIdsToAdd();
-//			if(featureIdsToAdd != null && !featureIdsToAdd.isEmpty()) {
-//				featureIds.addAll(featureIdsToAdd);				
-//				try {
-//					FeatureCollectionUtils.addFeaturesToCollection(newId, featureIdsToAdd);
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().put(newCollection, featureIds);	
-//			loadCollection = msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
-//			msFeatureCollectionEditorDialog.dispose();	
-//			if(loadCollection) {
-//				loadCollectionIntoWorkBench(newCollection);
-//				parent.dispose();
-//			}
-//			else {
-//				featureClusterCollectionsTable.setTableModelFromFeatureCollectionList(
-//						FeatureCollectionManager.getMsFeatureInfoBundleCollections());	
-//				featuresToAdd = null;
-//			}
-//		}	
-//		featuresToAdd = null;
-	}
-	
-	private void etitSelectedFeatureCollection() {
-
-//		MsFeatureInfoBundleCollection selected = featureClusterCollectionsTable.getSelectedDataSet();
-//		if(selected == null)
-//			return;
-//		
-//		if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
-//			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-//					"\" is locked and can not be edited.", this.getContentPane());
-//			return;
-//		}
-////		if(selected.equals(FeatureCollectionManager.msmsSearchResults) 
-////				|| selected.equals(FeatureCollectionManager.msOneSearchResults)) {
-////			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-////					"\" is locked and can not be edited.", this);
-////			return;
-////		}		
-//		showMsFeatureCollectionEditorDialog(selected);
+	private void createNewMSMSClusterDataSetInDatabase(MSMSClusterDataSet newDataSet) {
+		
+		MSMSClusterDataSetUploadTask task = 
+				new MSMSClusterDataSetUploadTask(newDataSet);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);	
 	}
 
-
-	private void deleteFeatureCollection() {
+	private void deleteMSMSClusterDataSet() {
 		
 //		MsFeatureInfoBundleCollection selected = featureCollectionsTable.getSelectedCollection();
 //		if(selected.equals(FeatureCollectionManager.msmsSearchResults) 
@@ -315,7 +295,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 //			deleteFeatureCollectionFromProject(selected);
 	}
 	
-	private void deleteFeatureCollectionFromProject(MsFeatureInfoBundleCollection selected) {
+	private void deleteMSMSClusterDataSetFromProject(MSMSClusterDataSet selected) {
 
 //		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();	
 //		if(!project.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
@@ -339,7 +319,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 //		}
 	}
 
-	private void deleteFeatureCollectionFromDatabase(MsFeatureInfoBundleCollection selected) {
+	private void deleteMSMSClusterDataSetFromDatabase(MSMSClusterDataSet selected) {
 		
 //		if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
 //			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
@@ -402,37 +382,84 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		parent.dispose();
 	}
 	
-	public void loadDatabaseStoredCollections() {
-//		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
-//		featureClusterCollectionsTable.setTableModelFromFeatureCollectionList(
-//				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
+	public void loadDatabaseStoredMSMSClusterDataSets() {
+		msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(
+				MSMSClusterDataSetManager.getMSMSClusterDataSets());
 	}
 	
-	public void loadCollectionsForActiveProject() {
+	public void loadMSMSClusterDataSetsForActiveProject() {
 		
-//		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
-//		if(project == null)
-//			return;
-//		
-//		featureClusterCollectionsTable.setTableModelFromFeatureCollectionList(
-//				project.getFeatureCollections());
+		RawDataAnalysisProject project = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
+		if(project == null)
+			return;
+		
+		msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(
+				project.getMsmsClusterDataSets());
 	}
 	
-	public void setTableModelFromFeatureCollectionList(
-			Collection<MsFeatureInfoBundleCollection>featureCollections) {
-//		featureClusterCollectionsTable.setTableModelFromFeatureCollectionList(featureCollections);
+	public void setTableModelFromMSMSClusterDataSetList(
+			Collection<MSMSClusterDataSet> dataSetList) {
+		msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(dataSetList);
 	}
 	
-	public MsFeatureInfoBundleCollection getSelectedCollection() {	
-//		return featureClusterCollectionsTable.getSelectedDataSet();
-		return null;
+	public MSMSClusterDataSet getSelectedMSMSClusterDataSet() {	
+		return msmsClusterDataSetTable.getSelectedDataSet();
 	}
 	
-	public void selectCollection(MsFeatureInfoBundleCollection toSelect) {		
-		msmsClusterDataSetTable.selectCollection(toSelect);
+	public void selectDataSet(MSMSClusterDataSet toSelect) {		
+		msmsClusterDataSetTable.selectDataSet(toSelect);
 	}
 	
 	public MSMSClusterDataSetsTable getTable() {
 		return msmsClusterDataSetTable;
 	}
+
+	@Override
+	public void statusChanged(TaskEvent e) {
+		// TODO Auto-generated method stub
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask) e.getSource()).removeTaskListener(this);
+
+			if (e.getSource().getClass().equals(MSMSClusterDataSetUploadTask.class)) {
+				finalizeMSMSClusterDataSetUploadTask((MSMSClusterDataSetUploadTask)e.getSource());
+			}
+		}
+	}
+
+	private void finalizeMSMSClusterDataSetUploadTask(MSMSClusterDataSetUploadTask task) {
+
+		MSMSClusterDataSet newDataSet = task.getDataSet();
+		if(msmsClusterDataSetEditorDialog.loadMSMSClusterDataSetIntoWorkBench()) {
+			loadMSMSClusterDataSetIntoWorkBench(newDataSet);
+			msmsClusterDataSetEditorDialog.dispose();
+			parent.dispose();
+		}
+		else {
+			msmsClusterDataSetEditorDialog.dispose();	
+			msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(
+					MSMSClusterDataSetManager.getMSMSClusterDataSets());
+			msmsClusterDataSetTable.selectDataSet(newDataSet);		
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

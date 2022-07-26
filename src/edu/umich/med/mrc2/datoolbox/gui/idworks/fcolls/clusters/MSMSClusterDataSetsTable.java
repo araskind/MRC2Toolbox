@@ -138,7 +138,7 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 				model.getColumnIndex(MSMSClusterDataSetsTableModel.CLUSTER_DATA_SET_COLUMN));
 	}
 	
-	public void selectCollection(MsFeatureInfoBundleCollection toSelect) {
+	public void selectDataSet(MSMSClusterDataSet toSelect) {
 		
 		int col = getColumnIndex(MSMSClusterDataSetsTableModel.CLUSTER_DATA_SET_COLUMN);
 		for(int i=0; i<getRowCount(); i++) {

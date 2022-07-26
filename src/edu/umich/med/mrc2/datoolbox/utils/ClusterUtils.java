@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -55,8 +56,8 @@ public class ClusterUtils {
 			return fcluster.getFeatures().iterator().next();
 		else
 			return fcluster.getFeatures().stream().
-				filter(f -> f.getSpectrum() != null).
-				filter(f -> f.getSpectrum().getExperimentalTandemSpectrum() != null).
+				filter(f -> Objects.nonNull(f.getSpectrum())).
+				filter(f -> Objects.nonNull(f.getSpectrum().getExperimentalTandemSpectrum())).
 				sorted(new MsFeatureComparator(SortProperty.msmsIntensity, SortDirection.DESC)).
 				findFirst().orElse(null);
 	}

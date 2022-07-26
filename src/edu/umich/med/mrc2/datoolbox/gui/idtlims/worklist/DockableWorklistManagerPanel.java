@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
@@ -208,14 +209,18 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 
 		//	Verify worklist
 		ArrayList<String>errors = new ArrayList<String>();
-		if(items.stream().filter(i -> i.getSample() == null).count() > 0)
+		if(items.stream().
+				filter(i -> Objects.isNull(i.getSample())).count() > 0)
 			errors.add("Some data files not linked to samples.");
 
-		if(items.stream().filter(i -> i.getPrepItemId() == null).count() > 0)
+		if(items.stream().
+				filter(i -> Objects.isNull(i.getPrepItemId())).count() > 0)
 			errors.add("Some data files not linked to sample prep items.");
 
 		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), instrumentSequenceImportDialog);
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), 
+					instrumentSequenceImportDialog);
 			return;
 		}
 		//	Upload data
@@ -234,7 +239,8 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 	public void loadLimsWorklist(Worklist wkl) {
 
 		this.wkl = wkl;
-		worklistTable.populateTableFromWorklistExperimentAndSamplePrep(wkl, experiment, activeSamplePrep);
+		worklistTable.populateTableFromWorklistExperimentAndSamplePrep(
+				wkl, experiment, activeSamplePrep);
 	}
 
 	private void copyWorklistToClipboard() {

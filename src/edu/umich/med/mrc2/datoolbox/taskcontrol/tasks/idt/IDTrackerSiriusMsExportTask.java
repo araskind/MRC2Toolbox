@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,6 @@ import edu.umich.med.mrc2.datoolbox.data.SiriusMsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
-import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -109,7 +109,8 @@ public class IDTrackerSiriusMsExportTask extends AbstractTask {
 		msmsclusters = new ArrayList<SiriusMsMsCluster>();
 		MsFeatureInfoBundle[] msmsFeatures = 
 				featuresToExport.stream().
-				filter(f -> f.getMsFeature().getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL) != null).
+				filter(f -> Objects.nonNull(f.getMsFeature().
+						getSpectrum().getExperimentalTandemSpectrum())).
 				filter(f -> Math.abs(f.getMsFeature().getCharge()) == 1).
 				toArray(size -> new MsFeatureInfoBundle[size]);
 		

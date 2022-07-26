@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -754,9 +755,11 @@ public class NISTPepSearchUtils {
 		
 		Set<String> searchParamSet = bundles.stream().
 				flatMap(f -> f.getMsFeature().getIdentifications().stream()).
-				filter(i -> i.getReferenceMsMsLibraryMatch() != null).
-				filter(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId() != null).
-				map(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId()).collect(Collectors.toSet());
+				filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
+				filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch().
+						getSearchParameterSetId())).
+				map(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId()).
+				collect(Collectors.toSet());
 			
 		Map<String,HiResSearchOption>searchTypeMap = 
 					new TreeMap<String,HiResSearchOption>();
@@ -778,8 +781,8 @@ public class NISTPepSearchUtils {
 			typeMap.put(o, new TreeSet<MsFeatureIdentity>(idScoreComparator));
 		
 		List<MsFeatureIdentity> nistSearchHits = feature.getIdentifications().stream().
-			filter(i -> i.getReferenceMsMsLibraryMatch() != null).
-			filter(i -> i.getReferenceMsMsLibraryMatch().getSearchParameterSetId() != null).
+			filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
+			filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch().getSearchParameterSetId())).
 			collect(Collectors.toList());
 		
 		for(MsFeatureIdentity hit : nistSearchHits) {
@@ -794,21 +797,61 @@ public class NISTPepSearchUtils {
 			Collection<MsFeatureInfoBundle>featuresToFilter) {
 		
 		Collection<MsFeatureInfoBundle> filteredFeatures = featuresToFilter.stream().
-			filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-			filter(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null).			
+			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+			filter(f -> Objects.nonNull(f.getMsFeature().
+					getPrimaryIdentity().getReferenceMsMsLibraryMatch())).			
 			filter(f -> f.getMsFeature().getMSMSLibraryMatchCount() > 1).
 			filter(f -> f.getIdFollowupSteps().isEmpty()).
 			filter(f -> f.getStandadAnnotations().isEmpty()).
 			filter(f -> f.getMsFeature().getAnnotations().isEmpty()).
-			filter(f -> f.getMsFeature().getPrimaryIdentity().getAssignedBy() == null).
-			filter(f -> (f.getMsFeature().getPrimaryIdentity().getIdentificationLevel() == null 
+			filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity().getAssignedBy())).
+			filter(f -> (Objects.isNull(f.getMsFeature().getPrimaryIdentity().getIdentificationLevel()) 
 				|| f.getMsFeature().getPrimaryIdentity().getIdentificationLevel().getId().equals("IDS002"))).
 			collect(Collectors.toList());
 		
 		return filteredFeatures;
 	}
-
+		
+	public static Map<NISTPepSearchParameterObject, Long> getPepSearchParameterSetCountsForDataSet(
+			Collection<MsFeatureInfoBundle> msmsFeatures) {
+		
+		Map<NISTPepSearchParameterObject, Long> paramCounts = msmsFeatures.stream().
+			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+			map(f -> f.getMsFeature().getPrimaryIdentity()).
+			filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+			map(id -> IDTDataCash.getNISTPepSearchParameterObjectById(
+					id.getReferenceMsMsLibraryMatch().getSearchParameterSetId())).
+						filter(o -> Objects.nonNull(o)).
+//			filter(o -> o.getHiResSearchOption().equals(HiResSearchOption.z)).
+			collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+				
+		return paramCounts;
+	}
+	
+	public static Collection<MsFeatureInfoBundle>fiterMSMSFeaturesByPepSearchParameterSet(
+			Collection<MsFeatureInfoBundle> featuresToFilter,
+			String paramSetId) {
+		
+		 return featuresToFilter.stream().
+				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+				filter(f -> Objects.nonNull(f.getMsFeature().
+						getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().
+						getReferenceMsMsLibraryMatch().getSearchParameterSetId())).
+				filter(f -> f.getMsFeature().getPrimaryIdentity().
+						getReferenceMsMsLibraryMatch().getSearchParameterSetId().equals(paramSetId)).
+				collect(Collectors.toList());
+	}
 }
+
+
+
+
+
+
+
+
+
 
 
 

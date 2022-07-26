@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -880,7 +881,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			return 0;
 		
 		List<MsFeatureIdentity> msmsHits = identifications.stream().
-				filter(id -> id.getReferenceMsMsLibraryMatch() != null).
+				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
 				collect(Collectors.toList());
 		
 		if(msmsHits.isEmpty())

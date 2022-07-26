@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -151,7 +152,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		idsToRank.addAll(hitTypeMap.get(HiResSearchOption.u));
 		List<MsFeatureIdentity> metlinHits = 
 				bundle.getMsFeature().getIdentifications().stream().
-				filter(id -> id.getReferenceMsMsLibraryMatch() != null).
+				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
 				filter(id -> id.getReferenceMsMsLibraryMatch()
 						.getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(metlinLibId)).
 				sorted(NISTPepSearchUtils.idScoreComparator).collect(Collectors.toList());		
@@ -240,8 +241,9 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 			
 		 List<MsFeatureIdentity>metlinHits = 
 					bundle.getMsFeature().getIdentifications().stream().
-					filter(id -> id.getReferenceMsMsLibraryMatch() != null).
-					filter(id -> id.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(metlinLibId)).
+					filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+					filter(id -> id.getReferenceMsMsLibraryMatch().
+							getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(metlinLibId)).
 					sorted(NISTPepSearchUtils.idScoreComparator).
 					collect(Collectors.toList());
 		 

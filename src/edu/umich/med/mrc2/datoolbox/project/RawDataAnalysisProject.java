@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -45,6 +46,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
+import edu.umich.med.mrc2.datoolbox.data.compare.MSMSClusterDataSetComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -55,6 +57,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -72,6 +75,7 @@ public class RawDataAnalysisProject extends Project {
 	protected Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;	
 	protected Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 	protected Set<MsFeatureInfoBundleCollection>featureCollections;
+	protected Collection<MSMSClusterDataSet> msmsClusterDataSets;
 	protected MSMSExtractionParameterSet msmsExtractionParameterSet;
 //	protected Set<Injection>injections;
 	protected LIMSUser createdBy;
@@ -188,7 +192,10 @@ public class RawDataAnalysisProject extends Project {
 		chromatogramMap = new HashMap<String, MsFeatureChromatogramBundle>();
 		featureCollections = 
 				new TreeSet<MsFeatureInfoBundleCollection>(
-						new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));
+						new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));		
+		msmsClusterDataSets = 
+				new TreeSet<MSMSClusterDataSet>(
+						new MSMSClusterDataSetComparator(SortProperty.Name));
 		//	TODO
 	}
 
@@ -352,10 +359,10 @@ public class RawDataAnalysisProject extends Project {
 		
 		Collection<ExperimentalSample>samples = new TreeSet<ExperimentalSample>();
 		msmsDataFiles.stream().
-			filter(f -> f.getParentSample() != null).
+			filter(f -> Objects.nonNull(f.getParentSample())).
 			forEach(f -> samples.add(f.getParentSample()));
 		msOneDataFiles.stream().
-			filter(f -> f.getParentSample() != null).
+			filter(f -> Objects.nonNull(f.getParentSample())).
 			forEach(f -> samples.add(f.getParentSample()));
 		return samples;
 	}
@@ -364,8 +371,8 @@ public class RawDataAnalysisProject extends Project {
 		
 		return msFeatureMap.values().stream().
 				flatMap(v -> v.stream()).
-				filter(f -> f.getMsFeature().getSpectrum() != null).
-				filter(f -> f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null).
+				filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum())).
+				filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
 				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
 				collect(Collectors.toList());
 	}
@@ -527,7 +534,7 @@ public class RawDataAnalysisProject extends Project {
 	
 	public Collection<DataAcquisitionMethod>getDataAcquisitionMethods(){
 		return getDataFiles().stream().
-				filter(df -> df.getDataAcquisitionMethod() != null).
+				filter(df -> Objects.nonNull(df.getDataAcquisitionMethod())).
 				map(df -> df.getDataAcquisitionMethod()).collect(Collectors.toSet());
 	}
 
@@ -559,6 +566,10 @@ public class RawDataAnalysisProject extends Project {
 				}
 			}
 		}	
+	}
+
+	public Collection<MSMSClusterDataSet> getMsmsClusterDataSets() {
+		return msmsClusterDataSets;
 	}
 }
 

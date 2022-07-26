@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.data.msclust;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -182,7 +183,7 @@ public class MSMSClusterDataSet {
 	public Collection<String>getInjectionIds(){
 		
 		return clusters.stream().flatMap(c -> c.getComponents().stream()).
-				filter(b -> b.getInjectionId() != null).
+				filter(b -> Objects.nonNull(b.getInjectionId())).
 				map(b -> b.getInjectionId()).
 				collect(Collectors.toSet());
 	}
@@ -190,7 +191,7 @@ public class MSMSClusterDataSet {
 	public Collection<DataExtractionMethod>getDataExtractionMethods(){
 		
 		return clusters.stream().flatMap(c -> c.getComponents().stream()).
-				filter(b -> b.getDataExtractionMethod() != null).
+				filter(b -> Objects.nonNull(b.getDataExtractionMethod())).
 				map(b -> b.getDataExtractionMethod()).
 				collect(Collectors.toSet());
 	}

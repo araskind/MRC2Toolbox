@@ -27,6 +27,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -213,8 +214,9 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 				
 				MSFeatureIdentificationLevel sameShortcut = 
 						IDTDataCash.getMsFeatureIdentificationLevelList().stream().
-						filter(s -> s.getShorcut() != null).
-						filter(s -> s.getShorcut().equals(shortcut)).findFirst().orElse(null);		
+						filter(s -> Objects.nonNull(s.getShorcut())).
+						filter(s -> s.getShorcut().equals(shortcut)).
+						findFirst().orElse(null);		
 				if(sameShortcut != null)
 					errors.add("Shortcut \""+shortcut+"\" already exists.");
 			}
@@ -241,11 +243,13 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 				
 				MSFeatureIdentificationLevel sameShortcut = 
 						IDTDataCash.getMsFeatureIdentificationLevelList().stream().
-						filter(s -> s.getShorcut() != null).
+						filter(s -> Objects.nonNull(s.getShorcut())).
 						filter(s -> !s.getId().equals(currentId)).
-						filter(s -> s.getShorcut().equals(shortcut)).findFirst().orElse(null);		
+						filter(s -> s.getShorcut().equals(shortcut)).
+						findFirst().orElse(null);		
 				if(sameShortcut != null)
-					errors.add("Shortcut \""+shortcut+"\" already assigned to different ID level.");
+					errors.add("Shortcut \"" + shortcut + 
+							"\" already assigned to different ID level.");
 			}
 		}		
 		return errors;		

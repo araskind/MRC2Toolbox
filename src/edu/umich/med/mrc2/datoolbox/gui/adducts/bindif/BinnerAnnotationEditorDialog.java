@@ -32,6 +32,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -183,7 +184,7 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 				//	Filter out used adducts
 				Set<Adduct> usedAdducts = 
 						AdductManager.getBinnerAdductList().stream().
-						filter(a -> a.getChargeCarrier() != null).
+						filter(a -> Objects.nonNull(a.getChargeCarrier())).
 						map(a -> a.getChargeCarrier()).distinct().
 						collect(Collectors.toSet());
 				availableAdducts = AdductManager.getChargedAdductList().stream().
@@ -203,7 +204,7 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 				//	Filter out used exchanges
 				Set<AdductExchange> usedAdductExchanges = 
 						AdductManager.getBinnerAdductList().stream().
-						filter(a -> a.getAdductExchange() != null).
+						filter(a -> Objects.nonNull(a.getAdductExchange())).
 						map(a -> a.getAdductExchange()).distinct().
 						collect(Collectors.toSet());
 				availableAdductExchanges = 
@@ -224,7 +225,7 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 				//	Filter out used exchanges
 				Set<BinnerNeutralMassDifference> usedBinnerNeutralMassDifferences = 
 						AdductManager.getBinnerAdductList().stream().
-						filter(a -> a.getBinnerNeutralMassDifference() != null).
+						filter(a -> Objects.nonNull(a.getBinnerNeutralMassDifference())).
 						map(a -> a.getBinnerNeutralMassDifference()).distinct().
 						collect(Collectors.toSet());
 				availableBinnerNeutralMassDifferences = 
@@ -360,7 +361,7 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 			if(binAdduct == null) {
 				
 				existingAdduct  = AdductManager.getBinnerAdductList().stream().
-						filter(a -> a.getChargeCarrier() != null).
+						filter(a -> Objects.nonNull(a.getChargeCarrier())).
 						filter(a -> a.getChargeCarrier().equals(chargeCarrier)).
 						findFirst().orElse(null);
 				if(existingAdduct != null)
@@ -371,7 +372,7 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 				String id = binAdduct.getId();
 				existingAdduct  = AdductManager.getBinnerAdductList().stream().
 						filter(a -> !a.getId().equals(id)).
-						filter(a -> a.getChargeCarrier() != null).
+						filter(a -> Objects.nonNull(a.getChargeCarrier())).
 						filter(a -> a.getChargeCarrier().equals(chargeCarrier)).
 						findFirst().orElse(null);
 				if(existingAdduct != null)
@@ -389,7 +390,7 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 			if(binAdduct == null) {
 				
 				existingAdduct  = AdductManager.getBinnerAdductList().stream().
-						filter(a -> a.getAdductExchange() != null).
+						filter(a -> Objects.nonNull(a.getAdductExchange())).
 						filter(a -> a.getAdductExchange().equals(exchange)).
 						findFirst().orElse(null);
 				if(existingAdduct != null)
@@ -400,7 +401,7 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 				String id = binAdduct.getId();
 				existingAdduct  = AdductManager.getBinnerAdductList().stream().
 						filter(a -> !a.getId().equals(id)).
-						filter(a -> a.getAdductExchange() != null).
+						filter(a -> Objects.nonNull(a.getAdductExchange())).
 						filter(a -> a.getAdductExchange().equals(exchange)).
 						findFirst().orElse(null);
 				if(existingAdduct != null)
@@ -418,7 +419,7 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 			if(binAdduct == null) {
 				
 				existingAdduct  = AdductManager.getBinnerAdductList().stream().
-						filter(a -> a.getBinnerNeutralMassDifference() != null).
+						filter(a -> Objects.nonNull(a.getBinnerNeutralMassDifference())).
 						filter(a -> a.getBinnerNeutralMassDifference().equals(mDiff)).
 						findFirst().orElse(null);
 				if(existingAdduct != null)
@@ -429,7 +430,7 @@ public class BinnerAnnotationEditorDialog extends JDialog {
 				String id = binAdduct.getId();
 				existingAdduct  = AdductManager.getBinnerAdductList().stream().
 						filter(a -> !a.getId().equals(id)).
-						filter(a -> a.getBinnerNeutralMassDifference() != null).
+						filter(a -> Objects.nonNull(a.getBinnerNeutralMassDifference())).
 						filter(a -> a.getBinnerNeutralMassDifference().equals(mDiff)).
 						findFirst().orElse(null);
 				if(existingAdduct != null)

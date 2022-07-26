@@ -64,6 +64,10 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 		setRowCount(0);
 		for (MSMSClusterDataSet dataSet : msmsClusterDataSetCollections) {
 
+			if(!MSMSClusterDataSetManager.getEditableMSMSClusterDataSets().contains(dataSet)
+					&& MSMSClusterDataSetManager.getMSMSClusterDataSetSize(dataSet) == 0) {
+				continue;
+			}
 			Object[] obj = {
 				dataSet,
 				dataSet.getDescription(),

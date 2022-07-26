@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -733,15 +734,17 @@ public class DataExportTask extends AbstractTask {
 
 		taskDescription = "Writing data export file for R ...";
 		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
-		final Matrix dataMatrix = currentProject.getDataMatrixForDataPipeline(dataPipeline);
+		final Matrix dataMatrix = 
+				currentProject.getDataMatrixForDataPipeline(dataPipeline);
 		TreeSet<ExperimentDesignFactor>activeFactors =
 				experimentDesignSubset.getDesignMap().stream().
-				filter(l->l.getParentFactor() != null).
+				filter(l-> Objects.nonNull(l.getParentFactor())).
 				map(l->l.getParentFactor()).
 				collect(Collectors.toCollection(TreeSet::new));
 
 		HashMap<MsFeature, Long>matrixFeatureMap = new HashMap<MsFeature, Long>();
-		msFeatureSet4export.stream().forEach(f -> matrixFeatureMap.put(f, dataMatrix.getColumnForLabel(f)));
+		msFeatureSet4export.stream().forEach(
+				f -> matrixFeatureMap.put(f, dataMatrix.getColumnForLabel(f)));
 
 		//	Create header
 		//	TODO handle variable column # through Collection? 

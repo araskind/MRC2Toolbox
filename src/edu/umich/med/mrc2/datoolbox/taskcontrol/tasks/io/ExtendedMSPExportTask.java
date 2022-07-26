@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -110,9 +111,9 @@ public class ExtendedMSPExportTask extends AbstractTask {
 
 		injectionMap = new TreeMap<String,Injection>();
 		List<String> injIds = msmsFeatures.stream().
+				filter(f -> Objects.nonNull(f.getInjectionId())).
 				map(f -> f.getInjectionId()).distinct().
-				filter(i -> i != null).sorted().
-				collect(Collectors.toList());
+				sorted().collect(Collectors.toList());
 
 		if(injIds.isEmpty())
 			return;

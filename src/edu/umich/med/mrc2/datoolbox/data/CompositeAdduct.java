@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -223,11 +224,11 @@ public class CompositeAdduct implements Adduct, Comparable<CompositeAdduct>, Ser
 			addedParts.add(chargeCarrier.getAddedGroup());
 		
 		neutralLosses.stream().
-			filter(l -> l.getAddedGroup() != null).
+			filter(l -> Objects.nonNull(l.getAddedGroup())).
 			filter(l -> !l.getAddedGroup().isEmpty()).
 			forEach(l -> addedParts.add(l.getAddedGroup()));
 		neutralAdducts.stream().
-			filter(l -> l.getAddedGroup() != null).
+			filter(l -> Objects.nonNull(l.getAddedGroup())).
 			filter(l -> !l.getAddedGroup().isEmpty()).
 			forEach(l -> addedParts.add(l.getAddedGroup()));
 		return  StringUtils.join(addedParts, "");
@@ -271,11 +272,11 @@ public class CompositeAdduct implements Adduct, Comparable<CompositeAdduct>, Ser
 			removedParts.add(chargeCarrier.getRemovedGroup());
 		
 		neutralLosses.stream().
-			filter(l -> l.getRemovedGroup() != null).
+			filter(l -> Objects.nonNull(l.getRemovedGroup())).
 			filter(l -> !l.getRemovedGroup().isEmpty()).
 			forEach(l -> removedParts.add(l.getRemovedGroup()));
 		neutralAdducts.stream().
-			filter(l -> l.getRemovedGroup() != null).
+			filter(l -> Objects.nonNull(l.getRemovedGroup())).
 			filter(l -> !l.getRemovedGroup().isEmpty()).
 			forEach(l -> removedParts.add(l.getRemovedGroup()));
 		
@@ -372,8 +373,10 @@ public class CompositeAdduct implements Adduct, Comparable<CompositeAdduct>, Ser
 		
 		//	TODO create reaction SMILES to represent losses and repeats? or better on  actual compounds
 		ArrayList<String>smilesParts = new ArrayList<String>();
-		neutralLosses.stream().filter(l -> l.getSmiles() != null).forEach(l -> smilesParts.add(l.getSmiles()));
-		neutralAdducts.stream().filter(l -> l.getSmiles() != null).forEach(l -> smilesParts.add(l.getSmiles()));
+		neutralLosses.stream().filter(l -> Objects.nonNull(l.getSmiles())).
+			forEach(l -> smilesParts.add(l.getSmiles()));
+		neutralAdducts.stream().filter(l -> Objects.nonNull(l.getSmiles())).
+			forEach(l -> smilesParts.add(l.getSmiles()));
 		if(smilesParts.isEmpty())
 			return null;
 		else		

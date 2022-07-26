@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -433,8 +434,9 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		}
 		else {
 			Collection<String> injectionIds = featuresToExport.stream().
-					filter(f -> f.getInjectionId() != null).
-					map(f -> f.getInjectionId()).collect(Collectors.toCollection(TreeSet::new));
+					filter(f -> Objects.nonNull(f.getInjectionId())).
+					map(f -> f.getInjectionId()).
+					collect(Collectors.toCollection(TreeSet::new));
 			
 			total = injectionIds.size();
 			processed = 0;
@@ -916,28 +918,33 @@ public class IDTrackerDataExportTask extends AbstractTask {
 	
 	private Collection<String>getAccessions(Collection<MsFeatureInfoBundle>features){
 		
-//		List<MsFeatureInformationBundle> cidNull = features.stream().
-//			filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-//			filter(f -> f.getMsFeature().getPrimaryIdentity().getCompoundIdentity() == null).
+//		List<MsFeatureInfoBundle> cidNull = features.stream().
+//			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+//			filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity().getCompoundIdentity())).
 //			collect(Collectors.toList());
 //
 //		System.out.println(cidNull.size());
-//		for(MsFeatureInformationBundle bundle : cidNull) {
-//			System.out.println(bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getId());
+//		for(MsFeatureInfoBundle bundle : cidNull) {
+//			System.out.println(bundle.getMsFeature().
+//				getSpectrum().getExperimentalTandemSpectrum().getId());
 //		}
 //		
-//		List<MsFeatureInformationBundle> accessionNull = features.stream().
-//			filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-//			filter(f -> f.getMsFeature().getPrimaryIdentity().getCompoundIdentity() != null).
-//			filter(f -> f.getMsFeature().getPrimaryIdentity().getCompoundIdentity().getPrimaryDatabaseId() == null).
+//		List<MsFeatureInfoBundle> accessionNull = features.stream().
+//			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+//			filter(f -> Objects.nonNull(f.getMsFeature().
+//				getPrimaryIdentity().getCompoundIdentity())).
+//			filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity().
+//				getCompoundIdentity().getPrimaryDatabaseId())).
 //			collect(Collectors.toList());
 //		
 //		System.out.println(accessionNull.size());
 		
 		Collection<String>accessions = features.stream().
-				filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-				filter(f -> f.getMsFeature().getPrimaryIdentity().getCompoundIdentity() != null).
-				map(f -> f.getMsFeature().getPrimaryIdentity().getCompoundIdentity().getPrimaryDatabaseId()).
+				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+				filter(f -> Objects.nonNull(f.getMsFeature().
+						getPrimaryIdentity().getCompoundIdentity())).
+				map(f -> f.getMsFeature().getPrimaryIdentity().
+						getCompoundIdentity().getPrimaryDatabaseId()).
 				distinct().sorted().collect(Collectors.toList());
 		
 		return accessions;

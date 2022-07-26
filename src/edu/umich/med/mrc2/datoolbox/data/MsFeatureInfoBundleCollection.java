@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -162,13 +163,13 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	
 	public Collection<MsFeatureInfoBundle> getMSMSFeatures() {
 		return features.stream().
-				filter(f -> f.getMSMSFeatureId() != null).
+				filter(f -> Objects.nonNull(f.getMSMSFeatureId())).
 				collect(Collectors.toList());
 	}
 	
 	public Collection<MsFeatureInfoBundle> getM1Features() {
 		return features.stream().
-				filter(f -> f.getMSMSFeatureId() == null).
+				filter(f -> Objects.isNull(f.getMSMSFeatureId())).
 				collect(Collectors.toList());
 	}
 	
@@ -242,7 +243,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	
 	public Collection<String> getMSMSFeatureIds() {		
 		return features.stream().
-				filter(f -> f.getMSMSFeatureId() != null).
+				filter(f -> Objects.nonNull(f.getMSMSFeatureId())).
 				map(f -> f.getMSMSFeatureId()).
 				collect(Collectors.toSet());
 	}

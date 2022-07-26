@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -315,12 +316,12 @@ public class MSMSClusteringDBUtils {
 		
 		Set<String>injectionIds = 
 				clusterCollection.stream().flatMap(c -> c.getComponents().stream()).
-				filter(b -> b.getInjectionId() != null).
+				filter(b -> Objects.nonNull(b.getInjectionId())).
 				map(b -> b.getInjectionId()).
 				collect(Collectors.toSet());
 		Set<String>dataExtractionMethodIds = 
 			clusterCollection.stream().flatMap(c -> c.getComponents().stream()).
-				filter(b -> b.getDataExtractionMethod() != null).
+				filter(b -> Objects.nonNull(b.getDataExtractionMethod())).
 				map(b -> b.getDataExtractionMethod().getId()).
 				collect(Collectors.toSet());
 		
@@ -343,6 +344,17 @@ public class MSMSClusteringDBUtils {
 		}
 		ps.close();		
 		return analysisIds;
+	}
+	
+	public static void updateMSMSClusterDataSetMetadata(MSMSClusterDataSet edited) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public static void addClustersToDataSet(
+			String dataSetId, Collection<MsFeatureInfoBundleCluster> collection) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

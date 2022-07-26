@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -255,7 +256,7 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		taskDescription = "Collecting common database references ...";
 		processed = 10;		
 		List<MsFeatureIdentity> idList = projectToSave.getMsMsFeatureBundles().stream().
-			filter(p -> p.getMsFeature().getPrimaryIdentity() != null).
+			filter(p -> Objects.nonNull(p.getMsFeature().getPrimaryIdentity())).
 			flatMap(p -> p.getMsFeature().getIdentifications().stream()).
 			collect(Collectors.toList());
 			
@@ -264,12 +265,12 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				collect(Collectors.toCollection(TreeSet::new));
 		
 		uniqueMSMSLibraryIds = idList.stream().
-				filter(i -> i.getReferenceMsMsLibraryMatch() != null).
+				filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
 				map(i -> i.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId()).
 				collect(Collectors.toCollection(TreeSet::new));
 		
 		uniqueMSRTLibraryIds = idList.stream().
-				filter(i -> i.getMsRtLibraryMatch() != null).
+				filter(i -> Objects.nonNull(i.getMsRtLibraryMatch())).
 				map(i -> i.getMsRtLibraryMatch().getLibraryTargetId()).
 				collect(Collectors.toCollection(TreeSet::new));
 		

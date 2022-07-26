@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -353,7 +354,7 @@ public class MsFeatureCluster implements Serializable {
 		
 		Set<Double> cidLevels = clusterFeatures.values().stream().
 				flatMap(c -> c.stream()).
-				filter(f -> f.getSpectrum().getExperimentalTandemSpectrum() != null).
+				filter(f -> Objects.nonNull(f.getSpectrum().getExperimentalTandemSpectrum())).
 				map(f -> f.getSpectrum().getExperimentalTandemSpectrum().getCidLevel()).
 				collect(Collectors.toSet());
 				
@@ -466,7 +467,7 @@ public class MsFeatureCluster implements Serializable {
 		
 		//	MS1
 		Collection<MsPoint>inputPoints = getFeatures().stream().
-				filter(f -> f.getSpectrum() != null).
+				filter(f -> Objects.nonNull(f.getSpectrum())).
 				flatMap(f -> f.getSpectrum().getMsPoints().stream()).
 				collect(Collectors.toList());
 		Collection<MsPoint>averageMS1Spectrum = 
@@ -475,8 +476,8 @@ public class MsFeatureCluster implements Serializable {
 		
 		//	MS2
 		List<TandemMassSpectrum> msmsList = getFeatures().stream().
-			filter(f -> f.getSpectrum() != null).
-			filter(f -> f.getSpectrum().getExperimentalTandemSpectrum() != null).
+			filter(f -> Objects.nonNull(f.getSpectrum())).
+			filter(f -> Objects.nonNull(f.getSpectrum().getExperimentalTandemSpectrum())).
 			map(f -> f.getSpectrum().getExperimentalTandemSpectrum()).
 			collect(Collectors.toList());
 		Range isolationWindow = msmsList.get(0).getIsolationWindow();
@@ -547,7 +548,7 @@ public class MsFeatureCluster implements Serializable {
 		
 		List<Collection<MsPoint>> msmsList = clusterFeatures.values().stream().
 			flatMap(c -> c.stream()).
-			filter(f -> f.getSpectrum().getExperimentalTandemSpectrum() != null).
+			filter(f -> Objects.nonNull(f.getSpectrum().getExperimentalTandemSpectrum())).
 			map(f -> f.getSpectrum().getExperimentalTandemSpectrum().getSpectrum()).
 			collect(Collectors.toList());
 		double maxScore = 0.0d;

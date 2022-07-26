@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -310,8 +311,10 @@ public class ChemicalModificationsManager {
 					getAllModifications().stream().
 					collect(Collectors.toMap(Adduct::getName, Function.identity()));
 
-			adductNameMap.putAll(getAllModifications().stream().filter(mod -> mod.getCefNotation() != null).
-					  collect(Collectors.toMap(Adduct::getCefNotation, Function.identity())));
+			adductNameMap.putAll(
+					getAllModifications().stream().
+						filter(mod -> Objects.nonNull(mod.getCefNotation())).
+						collect(Collectors.toMap(Adduct::getCefNotation, Function.identity())));
 		}
 		return adductNameMap;
 	}
@@ -403,18 +406,24 @@ public class ChemicalModificationsManager {
 
 		if(activeOnly) {
 			return Stream.concat(
-					getAllModifications().stream().filter(mod -> mod.getModificationType().equals(ModificationType.REPEAT)),
-					getAllModifications().stream().filter(mod -> mod.getModificationType().equals(ModificationType.EXCHANGE))).
-				filter(mod -> (mod.getPolarity().equals(polarity) || mod.getPolarity().equals(Polarity.Neutral))).
+					getAllModifications().stream().
+						filter(mod -> mod.getModificationType().equals(ModificationType.REPEAT)),
+					getAllModifications().stream().
+						filter(mod -> mod.getModificationType().equals(ModificationType.EXCHANGE))).
+				filter(mod -> (mod.getPolarity().equals(polarity) 
+						|| mod.getPolarity().equals(Polarity.Neutral))).
 				filter(mod -> mod.isEnabled()).
 				sorted().
 				collect(Collectors.toList());
 		}
 		else {
 			return Stream.concat(
-					getAllModifications().stream().filter(mod -> mod.getModificationType().equals(ModificationType.REPEAT)),
-					getAllModifications().stream().filter(mod -> mod.getModificationType().equals(ModificationType.EXCHANGE))).
-				filter(mod -> (mod.getPolarity().equals(polarity) || mod.getPolarity().equals(Polarity.Neutral))).
+					getAllModifications().stream().
+						filter(mod -> mod.getModificationType().equals(ModificationType.REPEAT)),
+					getAllModifications().stream().
+						filter(mod -> mod.getModificationType().equals(ModificationType.EXCHANGE))).
+				filter(mod -> (mod.getPolarity().equals(polarity) 
+						|| mod.getPolarity().equals(Polarity.Neutral))).
 				sorted().
 				collect(Collectors.toList());
 		}
@@ -435,8 +444,10 @@ public class ChemicalModificationsManager {
 				getAllModifications().stream().
 				collect(Collectors.toMap(Adduct::getName, Function.identity()));
 
-		adductNameMap.putAll(getAllModifications().stream().filter(mod -> mod.getCefNotation() != null).
-				  collect(Collectors.toMap(Adduct::getCefNotation, Function.identity())));
+		adductNameMap.putAll(
+				getAllModifications().stream().
+					filter(mod -> Objects.nonNull(mod.getCefNotation())).
+					collect(Collectors.toMap(Adduct::getCefNotation, Function.identity())));
 	}
 
 	public static void removeChemicalModification(Adduct modToRemove) {
@@ -501,14 +512,16 @@ public class ChemicalModificationsManager {
 
 	public static void populateDataLists() throws Exception {
 
-		chemicalModifications = ChemicalModificationDatabaseUtils.getChemicalModificationList();
+		chemicalModifications = 
+				ChemicalModificationDatabaseUtils.getChemicalModificationList();
 
 		adductNameMap =
 				chemicalModifications.stream().
 				collect(Collectors.toMap(Adduct::getName, Function.identity()));
 
 		adductNameMap.putAll(chemicalModifications.stream().
-			filter(mod -> mod.getCefNotation() != null).filter(mod -> !mod.getCefNotation().trim().isEmpty()).
+			filter(mod -> Objects.nonNull(mod.getCefNotation())).
+			filter(mod -> !mod.getCefNotation().trim().isEmpty()).
 			collect(Collectors.toMap(Adduct::getCefNotation, Function.identity())));
 
 		adductExchangeList = ChemicalModificationDatabaseUtils.getAdductExchangeList();

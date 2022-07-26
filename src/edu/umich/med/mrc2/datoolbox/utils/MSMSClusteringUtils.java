@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -71,7 +72,8 @@ public class MSMSClusteringUtils {
 		
 		long numHits = cluster.getComponents().stream().
 			flatMap(f -> f.getMsFeature().getIdentifications().stream()).
-			filter(id -> id.getReferenceMsMsLibraryMatch() != null).count();
+			filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+			count();
 		if(numHits == 0)
 			return null;
 
@@ -98,7 +100,7 @@ public class MSMSClusteringUtils {
 		}
 		List<MsFeatureIdentity> metlinHits = 
 				msFeatures.stream().flatMap(f -> f.getIdentifications().stream()).
-				filter(id -> id.getReferenceMsMsLibraryMatch() != null).
+				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
 				filter(id -> id.getReferenceMsMsLibraryMatch()
 						.getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(metlinLibId)).
 				sorted(NISTPepSearchUtils.idScoreComparator).collect(Collectors.toList());		

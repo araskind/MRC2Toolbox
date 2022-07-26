@@ -27,6 +27,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
@@ -304,7 +305,8 @@ public class WizardWorklistPanel extends IDTrackerDataLoadWizardPanel
 		if(!task.getMissingMethods().isEmpty()) {
 			
 			String message = 
-					"Some acquisition methods used for this experiment are not yet in the database:\n" +
+					"Some acquisition methods used for this experiment "
+					+ "are not yet in the database:\n" +
 					StringUtils.join(task.getMissingMethods(), "\n") +
 					"\nDo you want to import the worklist excluding data files "
 					+ "with missing data acquisition methods?";
@@ -315,15 +317,18 @@ public class WizardWorklistPanel extends IDTrackerDataLoadWizardPanel
 		if(worklist == null || !appendWorklist) 
 			worklist = new Worklist();
 		
-		Collection<LIMSWorklistItem>completeItems = task.getWorklist().getWorklistItems().stream().
+		Collection<LIMSWorklistItem>completeItems = 
+				task.getWorklist().getWorklistItems().stream().
 			filter(LIMSWorklistItem.class::isInstance).
 			map(LIMSWorklistItem.class::cast).
-			filter(i -> i.getAcquisitionMethod() != null).collect(Collectors.toList());
+			filter(i -> Objects.nonNull(i.getAcquisitionMethod())).
+			collect(Collectors.toList());
 		
 		if(!completeItems.isEmpty())
 			worklist.getWorklistItems().addAll(completeItems);
 		
-		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(worklist, experiment, samplePrep);
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(
+				worklist, experiment, samplePrep);
 		appendWorklist = false;
 	}
 	
@@ -384,14 +389,15 @@ public class WizardWorklistPanel extends IDTrackerDataLoadWizardPanel
 				errors.add(item.getDataFile().getName() + "; Injection timestamp " + 
 						MRC2ToolBoxConfiguration.getDateTimeFormat().format(item.getTimeStamp()));
 			}
-			errors.add("Please use IDTracker LIMS panel tools to add MS/MSMS data for existing experiments.");
+			errors.add("Please use IDTracker LIMS panel tools "
+					+ "to add MS/MSMS data for existing experiments.");
 			return errors;
 		}	
 		//	Verify sample assignment
-		if(items.stream().filter(i -> i.getSample() == null).count() > 0)
+		if(items.stream().filter(i -> Objects.isNull(i.getSample())).count() > 0)
 			errors.add("Some data files not linked to samples.");
 
-		if(items.stream().filter(i -> i.getPrepItemId() == null).count() > 0)
+		if(items.stream().filter(i -> Objects.isNull(i.getPrepItemId())).count() > 0)
 			errors.add("Some data files not linked to sample prep items.");
 	
 		return errors;

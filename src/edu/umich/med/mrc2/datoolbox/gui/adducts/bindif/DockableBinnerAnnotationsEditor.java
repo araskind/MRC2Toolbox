@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -160,7 +161,7 @@ public class DockableBinnerAnnotationsEditor
 		if(base.equals(BinnerAnnotationBase.ADDUCT)) {
 			
 			Set<Adduct> usedAdducts = AdductManager.getBinnerAdductList().stream().
-					filter(a -> a.getChargeCarrier() != null).
+					filter(a -> Objects.nonNull(a.getChargeCarrier())).
 					map(a -> a.getChargeCarrier()).distinct().
 					collect(Collectors.toSet());
 			List<Adduct> availableAdducts = AdductManager.getAdductList().stream().
@@ -174,7 +175,7 @@ public class DockableBinnerAnnotationsEditor
 			
 			Set<AdductExchange> usedAdductExchanges = 
 					AdductManager.getBinnerAdductList().stream().
-					filter(a -> a.getAdductExchange() != null).
+					filter(a -> Objects.nonNull(a.getAdductExchange())).
 					map(a -> a.getAdductExchange()).distinct().
 					collect(Collectors.toSet());
 			List<AdductExchange> availableAdductExchanges = 
@@ -189,7 +190,7 @@ public class DockableBinnerAnnotationsEditor
 			
 			Set<BinnerNeutralMassDifference> usedBinnerNeutralMassDifferences = 
 					AdductManager.getBinnerAdductList().stream().
-					filter(a -> a.getBinnerNeutralMassDifference() != null).
+					filter(a -> Objects.nonNull(a.getBinnerNeutralMassDifference())).
 					map(a -> a.getBinnerNeutralMassDifference()).distinct().
 					collect(Collectors.toSet());
 			List<BinnerNeutralMassDifference> availableBinnerNeutralMassDifferences = 

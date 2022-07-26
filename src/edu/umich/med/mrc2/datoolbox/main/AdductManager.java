@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.main;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
@@ -290,7 +291,7 @@ public class AdductManager {
 	
 	public static Adduct getAdductByCefNotation(String cefNotation) {
 		return getAdductList().stream().
-				filter(f -> f.getCefNotation() != null).
+				filter(f -> Objects.nonNull(f.getCefNotation())).
 				filter(a -> a.getCefNotation().equals(cefNotation)).
 				findFirst().orElse(null);
 	}

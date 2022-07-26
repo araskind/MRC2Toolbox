@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.main;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -140,7 +141,7 @@ public class FeatureCollectionManager {
 	public static Collection<MsFeatureInfoBundle>getLoadedMSMSFeaturesByIds(Collection<String>msmsIds){
 		return msmsIds.stream().
 				map(id -> FeatureCollectionUtils.retrieveMSMSFetureInfoBundleFromCache(id)).
-				filter(f -> f != null).collect(Collectors.toSet());
+				filter(f -> Objects.nonNull(f)).collect(Collectors.toSet());
 	}
 	
 	public static void addFeaturesToCollection(

@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
@@ -825,7 +826,7 @@ public class MultiFileDataImportDialog extends JDialog
 				matchPanel.getSampleDataResultObjects(true);
 		List<String> unmatched = 
 				objectsToImport.stream().
-				filter(o -> o.getSample() == null).
+				filter(o -> Objects.isNull(o.getSample())).
 				map(o -> o.getDataFile().getName()).
 				collect(Collectors.toList());
 

@@ -33,17 +33,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.prefs.Preferences;
 
 import javax.swing.Box;
 import javax.swing.Icon;
@@ -52,7 +44,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -63,34 +54,22 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
-import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
-import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class MSMSClusterDataSetEditorDialog extends JDialog 
-		implements ActionListener, BackedByPreferences{
+public class MSMSClusterDataSetEditorDialog extends JDialog {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -3062896101017122798L;
-	private Preferences preferences;
-	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.MSMSClusterDataSetEditorDialog";
-	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
-	private static final String BROWSE_COMMAND = "BROWSE_COMMAND";
 	
 	private static final Icon addFeatureCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 32);
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("editCollection", 32);
@@ -99,18 +78,14 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 	private JButton btnSave;
 	private JLabel dateCreatedLabel, lastModifiedLabel;
 	private JTextArea descriptionTextArea;	
-	private ImprovedFileChooser chooser;
-	private File baseDirectory;
-	private JTextField methodNameTextField;
+	private JTextField nameTextField;
 	private JLabel idValueLabel;
-	private JLabel methodAuthorLabel;
+	private JLabel ownerLabel;
 	private Collection<MsFeatureInfoBundleCluster> clustersToAdd;
-	private Set<String> featureIdsToAdd;
-	private JTextField featureFileTextField;
-	private JCheckBox loadCollectionCheckBox;
+	private JCheckBox loadMSMSClusterDataSetCheckBox;
 
-	private IndeterminateProgressDialog idp;
-
+	private MSMSClusteringParameterSet msmsExtractionParameters;
+	
 	public MSMSClusterDataSetEditorDialog(
 			MSMSClusterDataSet dataSet, 
 			Collection<MsFeatureInfoBundleCluster> clustersToAdd,
@@ -123,7 +98,8 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 		
 		this.dataSet = dataSet;
 		this.clustersToAdd = clustersToAdd;
-		featureIdsToAdd = new TreeSet<String>();
+		if(dataSet!= null)
+			this.msmsExtractionParameters = dataSet.getParameters();
 		
 		JPanel dataPanel = new JPanel();
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -192,14 +168,14 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 		gbc_lblCreatedBy.gridy = 1;
 		dataPanel.add(lblCreatedBy, gbc_lblCreatedBy);
 
-		methodAuthorLabel = new JLabel("");
+		ownerLabel = new JLabel("");
 		GridBagConstraints gbc_methodAuthorLabel = new GridBagConstraints();
 		gbc_methodAuthorLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_methodAuthorLabel.gridwidth = 4;
 		gbc_methodAuthorLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_methodAuthorLabel.gridx = 1;
 		gbc_methodAuthorLabel.gridy = 1;
-		dataPanel.add(methodAuthorLabel, gbc_methodAuthorLabel);
+		dataPanel.add(ownerLabel, gbc_methodAuthorLabel);
 
 		JLabel lblName = new JLabel("Name");
 		GridBagConstraints gbc_lblName = new GridBagConstraints();
@@ -209,15 +185,15 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 		gbc_lblName.gridy = 2;
 		dataPanel.add(lblName, gbc_lblName);
 
-		methodNameTextField = new JTextField();
+		nameTextField = new JTextField();
 		GridBagConstraints gbc_methodNameTextField = new GridBagConstraints();
 		gbc_methodNameTextField.gridwidth = 6;
 		gbc_methodNameTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_methodNameTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_methodNameTextField.gridx = 1;
 		gbc_methodNameTextField.gridy = 2;
-		dataPanel.add(methodNameTextField, gbc_methodNameTextField);
-		methodNameTextField.setColumns(10);
+		dataPanel.add(nameTextField, gbc_methodNameTextField);
+		nameTextField.setColumns(10);
 
 		JLabel lblDescription = new JLabel("Description");
 		GridBagConstraints gbc_lblDescription = new GridBagConstraints();
@@ -239,44 +215,15 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 		gbc_textArea.gridx = 1;
 		gbc_textArea.gridy = 3;
 		dataPanel.add(descriptionTextArea, gbc_textArea);
-		
-		JLabel lblNewLabel_1 = new JLabel("Feature list from file");
-		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_1.gridwidth = 2;
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 0, 5);
-		gbc_lblNewLabel_1.gridx = 0;
-		gbc_lblNewLabel_1.gridy = 4;
-		dataPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
-		
-		featureFileTextField = new JTextField();
-		featureFileTextField.setEditable(false);
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.gridwidth = 4;
-		gbc_textField.insets = new Insets(0, 0, 0, 5);
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.gridx = 2;
-		gbc_textField.gridy = 4;
-		dataPanel.add(featureFileTextField, gbc_textField);
-		featureFileTextField.setColumns(10);
-		
-		JButton browseForFileButton = new JButton("Browse ...");
-		browseForFileButton.setActionCommand(BROWSE_COMMAND);
-		browseForFileButton.addActionListener(this);
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnNewButton.gridx = 6;
-		gbc_btnNewButton.gridy = 4;
-		dataPanel.add(browseForFileButton, gbc_btnNewButton);
 
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		getContentPane().add(panel, BorderLayout.SOUTH);
 		
-		loadCollectionCheckBox = 
-				new JCheckBox("Load collection in the workbench");
-		panel.add(loadCollectionCheckBox);
+		loadMSMSClusterDataSetCheckBox = 
+				new JCheckBox("Load MSMS cluster data set in the workbench");
+		panel.add(loadMSMSClusterDataSetCheckBox);
 		
 		Component horizontalStrut = Box.createHorizontalStrut(50);
 		panel.add(horizontalStrut);
@@ -315,7 +262,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 			
 			dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
 			lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));			
-			methodAuthorLabel.setText(MRC2ToolBoxCore.getIdTrackerUser().getInfo());
+			ownerLabel.setText(MRC2ToolBoxCore.getIdTrackerUser().getInfo());
 		}
 		else {
 			setTitle("Edit information for " + dataSet.getName());
@@ -331,14 +278,12 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 				lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(
 						dataSet.getLastModified()));
 			
-			methodNameTextField.setText(dataSet.getName());
+			nameTextField.setText(dataSet.getName());
 			descriptionTextArea.setText(dataSet.getDescription());
 
 			if(dataSet.getCreatedBy() != null)
-				methodAuthorLabel.setText(dataSet.getCreatedBy().getInfo());
+				ownerLabel.setText(dataSet.getCreatedBy().getInfo());
 		}
-		loadPreferences();
-		initChooser();
 		pack();
 	}
 	
@@ -360,8 +305,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 		
 		return errors;
 	}
-	
-	//	TODO
+
 	private String validateNameAgainstDatabase(String newName) {
 		
 		MSMSClusterDataSet existing = null;
@@ -376,142 +320,33 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 					findFirst().orElse(null);
 		}
 		if(existing != null)
-			return "Collection \"" + newName + "\" already exists.";
+			return "Data set \"" + newName + "\" already exists.";
 		else
 			return null;
 	}
-	
-	//	TODO
+
 	private String validateNameAgainstProject(String newName) {
 		
-//		MsFeatureInfoBundleCollection existing = null;
-//		Set<MsFeatureInfoBundleCollection> projectCollections = 
-//				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getFeatureCollections();
-//		if(this.dataSet == null) {
-//			existing = projectCollections.stream().
-//					filter(f -> f.getName().equalsIgnoreCase(newName)).
-//					findFirst().orElse(null);
-//		}
-//		else {
-//			String id = dataSet.getId();
-//			existing = projectCollections.stream().
-//					filter(f -> !f.getId().equals(id)).
-//					filter(f -> f.getName().equalsIgnoreCase(newName)).
-//					findFirst().orElse(null);
-//		}
-//		if(existing != null)
-//			return "Collection \"" + newName + "\" already exists.";
-//		else
-			return null;
-	}
-	
-	@Override
-	public void dispose() {
-		
-		savePreferences();
-		super.dispose();
-	}	
+		Collection<MSMSClusterDataSet> dataSets = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMsmsClusterDataSets();
+		MSMSClusterDataSet existing = null;
 
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);		
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setAcceptAllFileFilterUsed(false);
-		FileNameExtensionFilter txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv", "csv");
-		chooser.addChoosableFileFilter(txtFilter);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		if(e.getActionCommand().equals(BROWSE_COMMAND))
-			chooser.showOpenDialog(this);
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
-			validateFeatureListFile();
-	}
-	
-	private void validateFeatureListFile() {
-		
-		File inputFile = chooser.getSelectedFile();
-		if(inputFile.exists() && inputFile.canRead()) {
-			
-			List<String>lines = null;
-			try {
-				lines = Files.readAllLines(Paths.get(inputFile.getAbsolutePath()));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if(lines != null && !lines.isEmpty()) {
-				
-				for(String line : lines) {
-					
-					String trimmed = line.trim();
-					if(trimmed.startsWith(DataPrefix.MSMS_SPECTRUM.getName()) && trimmed.length() == 16)
-						featureIdsToAdd.add(trimmed);				
-				}
-			}
-			if(!featureIdsToAdd.isEmpty()) {
-				
-				ValidateMSMSIDlistTask task = new ValidateMSMSIDlistTask(featureIdsToAdd);
-				idp = new IndeterminateProgressDialog("Validating MSMS feature IDs ...", this, task);
-				idp.setLocationRelativeTo(this);
-				idp.setVisible(true);
-				
-				if(!featureIdsToAdd.isEmpty()) {
-					featureFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
-					btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND.getName());
-					MessageDialog.showInfoMsg("Extracted " + Integer.toString(featureIdsToAdd.size()) + 
-							" valid MSMS feature IDs", this);
-				}
-				else {
-					String message = "No valid MSMS feature IDs found in " + inputFile.getName() + "\n"
-							+ "Correct MSMS feature ID format is " + DataPrefix.MSMS_SPECTRUM.getName() + " followed by 12 digits.";
-					MessageDialog.showWarningMsg(message, this);
-					return;
-				}
-			}
-			else {
-				String message = "No valid MSMS feature IDs found in " + inputFile.getName() + "\n"
-						+ "Correct MSMS feature ID format is " + DataPrefix.MSMS_SPECTRUM.getName() + " followed by 12 digits.";
-				MessageDialog.showWarningMsg(message, this);
-				return;
-			}
+		if(this.dataSet == null) {
+			existing = dataSets.stream().
+					filter(s -> s.getName().equalsIgnoreCase(newName)).
+					findFirst().orElse(null);
 		}
 		else {
-			MessageDialog.showErrorMsg("Can not read input file", this);
+			String id = dataSet.getId();
+			existing = dataSets.stream().
+					filter(s -> !s.getId().equals(id)).
+					filter(s -> s.getName().equalsIgnoreCase(newName)).
+					findFirst().orElse(null);
 		}
-		baseDirectory = inputFile.getParentFile();		
-		savePreferences();	
-	}
-	
-	class ValidateMSMSIDlistTask extends LongUpdateTask {
-		/*
-		 * Main task. Executed in background thread.
-		 */
-		private Set<String>idsToValidate;
-
-		public ValidateMSMSIDlistTask(Set<String>idsToValidate) {
-			this.idsToValidate = idsToValidate;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public Void doInBackground() {
-
-			try {
-				featureIdsToAdd = FeatureCollectionUtils.validateMSMSIDlist(idsToValidate);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		if(existing != null)
+			return "Data set \"" + newName + "\" already exists.";
+		else
 			return null;
-		}
 	}
 
 	public MSMSClusterDataSet getMSMSClusterDataSet() {
@@ -519,52 +354,27 @@ public class MSMSClusterDataSetEditorDialog extends JDialog
 	}
 
 	public String getMSMSClusterDataSetName() {
-		return methodNameTextField.getText().trim();
+		return nameTextField.getText().trim();
 	}
 
 	public String getMSMSClusterDataSetDescription() {
 		return descriptionTextArea.getText().trim();
 	}
 
-	public File getMethodFile() {
-
-//		if(methodFileTextField.getText().trim().isEmpty())
-//			return null;
-//
-//		return new File(methodFileTextField.getText().trim());
-		
-		return null;
-	}
-
-	@Override
-	public void loadPreferences(Preferences prefs) {
-		preferences = prefs;
-		baseDirectory =
-			new File(preferences.get(BASE_DIRECTORY,
-				MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
-	}
-
-	@Override
-	public void loadPreferences() {
-		loadPreferences(Preferences.userRoot().node(PREFS_NODE));
-	}
-
-	@Override
-	public void savePreferences() {
-		preferences = Preferences.userRoot().node(PREFS_NODE);
-		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
-	}
-
 	public Collection<MsFeatureInfoBundleCluster>getClustersToAdd() {
 		return clustersToAdd;
 	}
-
-	public Set<String> getClusterIdsToAdd() {
-		return featureIdsToAdd;
-	}
 	
-	public boolean loadCollectionIntoWorkBench() {
-		return loadCollectionCheckBox.isSelected();
+	public boolean loadMSMSClusterDataSetIntoWorkBench() {
+		return loadMSMSClusterDataSetCheckBox.isSelected();
+	}
+
+	public MSMSClusteringParameterSet getMsmsExtractionParameters() {
+		return msmsExtractionParameters;
+	}
+
+	public void setMsmsExtractionParameters(MSMSClusteringParameterSet msmsExtractionParameters) {
+		this.msmsExtractionParameters = msmsExtractionParameters;
 	}
 }
 

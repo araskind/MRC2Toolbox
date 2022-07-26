@@ -31,6 +31,7 @@ import java.awt.event.ItemListener;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.swing.Icon;
@@ -265,8 +266,10 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 			
 			return msFeatureInfoBundles.stream().
 				filter(b -> rtRange.contains(b.getRetentionTime())).
-				filter(b -> b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null).
-				filter(b -> mzRange.contains(b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent().getMz())).
+				filter(b -> Objects.nonNull(b.getMsFeature().
+						getSpectrum().getExperimentalTandemSpectrum())).
+				filter(b -> mzRange.contains(b.getMsFeature().getSpectrum().
+						getExperimentalTandemSpectrum().getParent().getMz())).
 				collect(Collectors.toList());
 		}		
 		return selectedFeatures;
@@ -281,7 +284,8 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 			return;
 		}
 		if(parentPanel != null && parentPanel instanceof IDWorkbenchPanel) 		
-			((IDWorkbenchPanel)parentPanel).createNewMsmsFeatureCollectionFromSelectedFeatures(selected);
+			((IDWorkbenchPanel)parentPanel).
+				createNewMsmsFeatureCollectionFromSelectedFeatures(selected);
 		
 //		MessageDialog.showWarningMsg(Integer.toString(selected.size()) + 
 //				" features in highlighted region.", this.getContentPane());

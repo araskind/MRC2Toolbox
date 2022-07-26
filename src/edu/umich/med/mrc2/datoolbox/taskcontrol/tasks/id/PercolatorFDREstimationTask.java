@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -66,6 +67,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
+import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 
@@ -104,18 +106,23 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 	private void initDecoySearchTask() {
 		
 		Collection<MsFeatureInfoBundle> featuresToSearch = featureList.stream().
-				filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-				filter(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null).
+				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+				filter(f -> Objects.nonNull(f.getMsFeature().
+						getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
 				collect(Collectors.toList());
 		
 		//	Results file
-		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-		decoySearchResultFile = Paths.get(System.getProperty("user.dir"), "data", "mssearch",
-				"NIST_MSMS_PEPSEARCH_RESULTS_" + timestamp + ".TXT").toFile();
+		String timestamp = 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
+		decoySearchResultFile = 
+				Paths.get(System.getProperty("user.dir"), "data", "mssearch",
+					"NIST_MSMS_PEPSEARCH_RESULTS_" + timestamp + ".TXT").toFile();
 		
-		decoySearchInputFile = Paths.get(System.getProperty("user.dir"), "data", "mssearch",
+		decoySearchInputFile = 
+				Paths.get(System.getProperty("user.dir"), "data", "mssearch",
 					"NIST_MSMS_PEPSEARCH_INPUT_" + timestamp + ".MSP").toFile();
-		List<String> commandParts =  NISTPepSearchUtils.createPepsearchcommandFromParametersObject(
+		List<String> commandParts =  
+				NISTPepSearchUtils.createPepsearchcommandFromParametersObject(
 					searchParameters,
 					decoySearchInputFile,
 					decoySearchResultFile);
@@ -128,17 +135,17 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 
-	private Collection<PepSearchOutputObject>createPsoObjectsFromLibraryHits(Collection<MsFeatureInfoBundle> featureList){
+	private Collection<PepSearchOutputObject>createPsoObjectsFromLibraryHits(
+			Collection<MsFeatureInfoBundle> featureList){
 		
 		taskDescription = "Processing library hits ...";
-		Collection<MsFeatureInfoBundle> featuresToSearch = featureList.stream().
-				filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-				filter(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null).
-				collect(Collectors.toList());
+		Collection<MsFeatureInfoBundle> featuresToSearch = 
+				MsFeatureStatsUtils.getFeaturesWithMSMSLibMatch(featureList);		
 		total = featuresToSearch.size();
 		processed = 0;
 		
-		Collection<PepSearchOutputObject>psoCollection = new ArrayList<PepSearchOutputObject>();
+		Collection<PepSearchOutputObject>psoCollection = 
+				new ArrayList<PepSearchOutputObject>();
 		MSMSMatchType matchType = MSMSMatchType.Regular;
 		if(searchParameters.getHiResSearchOption().equals(HiResSearchOption.y))
 			matchType = MSMSMatchType.Hybrid;
@@ -154,13 +161,16 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 			PepSearchOutputObject poo = new PepSearchOutputObject(
 					feature.getSpectrum().getExperimentalTandemSpectrum().getId());
 			
-			ReferenceMsMsLibraryMatch libMatch = feature.getPrimaryIdentity().getReferenceMsMsLibraryMatch();
+			ReferenceMsMsLibraryMatch libMatch = 
+					feature.getPrimaryIdentity().getReferenceMsMsLibraryMatch();
 			String libName = libraryIdNameMap.get(
 					libMatch.getMatchedLibraryFeature().getMsmsLibraryIdentifier());
 
 			poo.setLibraryName(libName);
 			poo.setMrc2libid(libMatch.getMatchedLibraryFeature().getUniqueId());
-			double deltaMz = MsUtils.getMassErrorForIdentity(feature, feature.getPrimaryIdentity(), MassErrorType.Da);			
+			double deltaMz = 
+					MsUtils.getMassErrorForIdentity(
+							feature, feature.getPrimaryIdentity(), MassErrorType.Da);			
 			poo.setDeltaMz(deltaMz);		
 			poo.setScore(libMatch.getScore());
 			poo.setDotProduct(libMatch.getDotProduct());
@@ -432,11 +442,8 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 			messageLog.add(errorMessage);
 			setStatus(TaskStatus.ERROR);
 		}
-		Collection<MsFeatureInfoBundle> featuresToUpdate = featureList.stream().
-				filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-				filter(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null).
-				collect(Collectors.toList());
-		
+		Collection<MsFeatureInfoBundle> featuresToUpdate = 
+				MsFeatureStatsUtils.getFeaturesWithMSMSLibMatch(featureList);		
 		updateLibraryMatchesWithPercolatorResults(libResults, featuresToUpdate);
 		updateDecoyMatchesWithPercolatorResults(decoyResults, featuresToUpdate);		
 	}

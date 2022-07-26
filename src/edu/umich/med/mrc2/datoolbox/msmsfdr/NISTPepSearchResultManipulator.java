@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -410,40 +411,48 @@ public class NISTPepSearchResultManipulator {
 	private static void assignMrc2LibIds(Collection<PepSearchOutputObject> inputPooList) throws Exception {
 		
 		List<PepSearchOutputObject> pooList = inputPooList.stream().
-				filter(p -> p.getMrc2libid() == null).
+				filter(p -> Objects.isNull(p.getMrc2libid())).
 				collect(Collectors.toList());
 		
 		if(pooList.isEmpty())
 			return;
 		
-		Map<String, ReferenceMsMsLibrary> refLibMap = NISTPepSearchUtils.getMSMSLibraryNameMap(pooList);
+		Map<String, ReferenceMsMsLibrary> refLibMap = 			
+				NISTPepSearchUtils.getMSMSLibraryNameMap(pooList);
 		Map<String, String>refLibNameMap = new TreeMap<String, String>();		
-		refLibMap.entrySet().stream().forEach(l -> refLibNameMap.put(l.getKey(), l.getValue().getPrimaryLibraryId()));
+		refLibMap.entrySet().stream().
+			forEach(l -> refLibNameMap.put(l.getKey(), 
+					l.getValue().getPrimaryLibraryId()));
 		
 		Map<String, Boolean>decoyNameMap = new TreeMap<String, Boolean>();
-		refLibMap.entrySet().stream().forEach(l -> decoyNameMap.put(l.getKey(), l.getValue().isDecoy()));
+		refLibMap.entrySet().stream().
+			forEach(l -> decoyNameMap.put(l.getKey(), l.getValue().isDecoy()));
 		
-		pooList.stream().filter(p -> p.getLibraryName() != null).
+		pooList.stream().filter(p -> Objects.nonNull(p.getLibraryName())).
 			forEach(p -> setOrigLibIdForPepSearchOutputObject(
-					p, refLibNameMap.get(p.getLibraryName()), decoyNameMap.get(p.getLibraryName())));
+					p, refLibNameMap.get(
+							p.getLibraryName()), decoyNameMap.get(p.getLibraryName())));
 		
 		//	Filter out hits with MRC2 lib IDs present
 		Pattern libIdPattern = Pattern.compile("^MSL\\d{9}$");
 		Collection<PepSearchOutputObject> unssignedLibPooList =
-				pooList.stream().filter(p -> p.getOriginalLibid() != null).
+				pooList.stream().filter(p -> Objects.nonNull(p.getOriginalLibid())).
 				filter(p -> !libIdPattern.matcher(p.getOriginalLibid()).matches()).
 				collect(Collectors.toList());
 		
-		pooList.stream().filter(p -> p.getOriginalLibid() != null).
+		pooList.stream().filter(p -> Objects.nonNull(p.getOriginalLibid())).
 			filter(p -> libIdPattern.matcher(p.getOriginalLibid()).matches()).
 			forEach(p -> p.setMrc2libid(p.getOriginalLibid()));
 		
-		Map<String, Map<String,String>>refLibIdMap = new HashMap<String, Map<String,String>>();
-		refLibNameMap.entrySet().stream().forEach(m -> refLibIdMap.put(m.getValue(), new HashMap<String,String>()));
+		Map<String, Map<String,String>>refLibIdMap = 
+				new HashMap<String, Map<String,String>>();
+		refLibNameMap.entrySet().stream().
+			forEach(m -> refLibIdMap.put(m.getValue(), new HashMap<String,String>()));
 		unssignedLibPooList.stream().
-			filter(p -> p.getLibraryName() != null).
-			filter(p -> p.getOriginalLibid() != null).
-			forEach(p -> refLibIdMap.get(refLibNameMap.get(p.getLibraryName())).put(p.getOriginalLibid(), null));
+			filter(p -> Objects.nonNull(p.getLibraryName())).
+			filter(p -> Objects.nonNull(p.getOriginalLibid())).
+			forEach(p -> refLibIdMap.get(
+					refLibNameMap.get(p.getLibraryName())).put(p.getOriginalLibid(), null));
 		
 		Connection conn = ConnectionManager.getConnection();		
 		String query =
@@ -481,11 +490,11 @@ public class NISTPepSearchResultManipulator {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		unssignedLibPooList.stream().
-			filter(p -> p.getLibraryName() != null).
-			filter(p -> p.getOriginalLibid() != null).
+			filter(p -> Objects.nonNull(p.getLibraryName())).
+			filter(p -> Objects.nonNull(p.getOriginalLibid())).
 			forEach(p -> p.setMrc2libid(
-					refLibIdMap.get(refLibNameMap.get(p.getLibraryName())).get(p.getOriginalLibid())
-					));
+				refLibIdMap.get(
+					refLibNameMap.get(p.getLibraryName())).get(p.getOriginalLibid())));
 	}
 	
 	public static void writeMergedDataToFile(Collection<PepSearchOutputObject>merged, File outputFile) throws Exception {

@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -279,9 +280,11 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 			Range rtRange = new Range(b.getRt() - rtError, b.getRt() + rtError);
 			Range mzRange = MsUtils.createMassRange(b.getMz(), mzError, mzErrorType);
 			List<MsFeatureInfoBundle> clusterFeatures = features.stream().
-				filter(f -> f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null).
+				filter(f -> Objects.nonNull(f.getMsFeature().
+						getSpectrum().getExperimentalTandemSpectrum())).
 				filter(f -> rtRange.contains(f.getRetentionTime())).
-				filter(f -> mzRange.contains(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent().getMz())).
+				filter(f -> mzRange.contains(f.getMsFeature().getSpectrum().
+						getExperimentalTandemSpectrum().getParent().getMz())).
 				collect(Collectors.toList());
 			if(clusterFeatures.isEmpty()) {
 				processed++;

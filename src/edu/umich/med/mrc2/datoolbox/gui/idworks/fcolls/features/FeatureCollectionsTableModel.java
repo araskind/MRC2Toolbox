@@ -63,15 +63,11 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 
 		setRowCount(0);
 		for (MsFeatureInfoBundleCollection collection : featureCollections) {
-
-//			int collectionSize = 0;
-//			if(collection.equals(FeatureCollectionManager.msmsSearchResults) 
-//					|| collection.equals(FeatureCollectionManager.msOneSearchResults))
-//				collectionSize = collection.getCollectionSize();
-//			else
-//				collectionSize = 
-//						FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(collection);
 			
+			if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(collection)
+					&& FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(collection) == 0) {
+				continue;
+			}
 			Object[] obj = {
 				collection,
 				collection.getDescription(),

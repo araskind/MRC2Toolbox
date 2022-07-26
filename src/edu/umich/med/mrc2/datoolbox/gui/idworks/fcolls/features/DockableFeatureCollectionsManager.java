@@ -147,14 +147,15 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	}
 	
 	private void saveFeatureCollectionChangesToProject(MsFeatureInfoBundleCollection edited) {
+		
 		edited.addFeatures(msFeatureCollectionEditorDialog.getFeaturesToAdd());
-		boolean loadCollection = msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
-		msFeatureCollectionEditorDialog.dispose();	
-		if(loadCollection) {
+		if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 			loadCollectionIntoWorkBench(edited);
+			msFeatureCollectionEditorDialog.dispose();	
 			parent.dispose();
 		}
-		else {				
+		else {	
+			msFeatureCollectionEditorDialog.dispose();	
 			featureCollectionsTable.updateCollectionData(edited);
 			featureCollectionsTable.selectCollection(edited);
 		}
@@ -179,18 +180,18 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-		boolean loadCollection = msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
-		msFeatureCollectionEditorDialog.dispose();	
-		if(loadCollection) {
+			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().get(edited).addAll(featureIdsToAdd);
+		}			
+		if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 			loadCollectionIntoWorkBench(edited);
+			msFeatureCollectionEditorDialog.dispose();
 			parent.dispose();
 		}
-		else {
-			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().put(edited, featureIds);					
+		else {	
+			msFeatureCollectionEditorDialog.dispose();
 			featureCollectionsTable.updateCollectionData(edited);
 			featureCollectionsTable.selectCollection(edited);
-		}
+		}		
 	}
 
 	private void createNewFeatureCollection() {
@@ -223,14 +224,14 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 		RawDataAnalysisProject project = 
 				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();		
 		project.addMsFeatureInfoBundleCollection(newCollection);
-		boolean loadCollection = 
-				msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
-		msFeatureCollectionEditorDialog.dispose();	
-		if(loadCollection) {
+		
+		if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 			loadCollectionIntoWorkBench(newCollection);
+			msFeatureCollectionEditorDialog.dispose();	
 			parent.dispose();
 		}
 		else {
+			msFeatureCollectionEditorDialog.dispose();	
 			featureCollectionsTable.setTableModelFromFeatureCollectionList(
 					project.getFeatureCollections());	
 			featuresToAdd = null;
@@ -246,7 +247,6 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		boolean loadCollection = false;
 		if(newId != null) {
 			
 			newCollection.setId(newId);
@@ -262,14 +262,14 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 					e.printStackTrace();
 				}
 			}
-			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().put(newCollection, featureIds);	
-			loadCollection = msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench();
-			msFeatureCollectionEditorDialog.dispose();	
-			if(loadCollection) {
+			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().put(newCollection, featureIds);					
+			if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 				loadCollectionIntoWorkBench(newCollection);
+				msFeatureCollectionEditorDialog.dispose();
 				parent.dispose();
 			}
 			else {
+				msFeatureCollectionEditorDialog.dispose();
 				featureCollectionsTable.setTableModelFromFeatureCollectionList(
 						FeatureCollectionManager.getMsFeatureInfoBundleCollections());	
 				featuresToAdd = null;

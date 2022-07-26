@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -489,8 +490,10 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 
 				String compoundId = inputData[j][compoundIdColumn];
 				matches = libFeatures.stream().
-					filter(f -> f.getPrimaryIdentity().getCompoundIdentity().getPrimaryDatabaseId() != null).
-					filter(f -> f.getPrimaryIdentity().getCompoundIdentity().getPrimaryDatabaseId().equals(compoundId)).
+					filter(f -> Objects.nonNull(f.getPrimaryIdentity().
+							getCompoundIdentity().getPrimaryDatabaseId())).
+					filter(f -> f.getPrimaryIdentity().getCompoundIdentity().
+							getPrimaryDatabaseId().equals(compoundId)).
 					collect(Collectors.toList());
 
 				if(!matches.isEmpty()) {
@@ -509,8 +512,10 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 
 				String inchiKey = inputData[j][inchiColumn];
 				matches = libFeatures.stream().
-					filter(f -> f.getPrimaryIdentity().getCompoundIdentity().getInChiKey() != null).
-					filter(f -> f.getPrimaryIdentity().getCompoundIdentity().getInChiKey().equals(inchiKey)).
+					filter(f -> Objects.nonNull(f.getPrimaryIdentity().
+							getCompoundIdentity().getInChiKey())).
+					filter(f -> f.getPrimaryIdentity().getCompoundIdentity().
+							getInChiKey().equals(inchiKey)).
 					collect(Collectors.toList());
 
 				if(!matches.isEmpty()) {

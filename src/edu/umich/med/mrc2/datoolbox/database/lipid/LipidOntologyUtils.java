@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -91,10 +92,13 @@ public class LipidOntologyUtils {
 		return fpMap;
 	}
 	
-	public static Map<String, LipidMapsClassifier>findBestLipidMapsClassifiers(Map<String, Collection<LipidMapsClassifier>>classifiersMap) {
+	public static Map<String, LipidMapsClassifier>findBestLipidMapsClassifiers(
+			Map<String, Collection<LipidMapsClassifier>>classifiersMap) {
 		
-		Map<String, LipidMapsClassifier>bestClassMap = new TreeMap<String, LipidMapsClassifier>();
-		LipidMapsClassifierComparator lcComparator = new LipidMapsClassifierComparator(SortProperty.featureCount, SortDirection.DESC);
+		Map<String, LipidMapsClassifier>bestClassMap = 
+				new TreeMap<String, LipidMapsClassifier>();
+		LipidMapsClassifierComparator lcComparator = 
+				new LipidMapsClassifierComparator(SortProperty.featureCount, SortDirection.DESC);
 		for (Entry<String, Collection<LipidMapsClassifier>> entry : classifiersMap.entrySet()) {
 			
 			if(entry.getValue().size() == 1) {
@@ -112,14 +116,14 @@ public class LipidOntologyUtils {
 				continue;
 			}
 			LipidMapsClassifier[] lcListSc = entry.getValue().stream().
-					filter(c -> c.getSubClass() != null).
+					filter(c -> Objects.nonNull(c.getSubClass())).
 					sorted(lcComparator).toArray(size -> new LipidMapsClassifier[size]);
 			if(lcListSc.length > 0) {
 				bestClassMap.put(entry.getKey(), lcList[0]);
 				continue;
 			}	
 			LipidMapsClassifier[] mcListSc = entry.getValue().stream().
-					filter(c -> c.getMainClass() != null).
+					filter(c -> Objects.nonNull(c.getMainClass())).
 					sorted(lcComparator).toArray(size -> new LipidMapsClassifier[size]);
 			if(mcListSc.length > 0) {
 				bestClassMap.put(entry.getKey(), mcListSc[0]);

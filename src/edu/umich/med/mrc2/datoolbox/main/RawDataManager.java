@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -155,8 +156,10 @@ public class RawDataManager {
 	
 	public static DataFile getDataFileForInjectionId(String injectionId) {
 		
-		DataFile df = rawDataMap.keySet().stream().filter(f -> f.getInjectionId() != null).
-			filter(f -> f.getInjectionId().equals(injectionId)).findFirst().orElse(null);
+		DataFile df = rawDataMap.keySet().stream().
+				filter(f -> Objects.nonNull(f.getInjectionId())).
+				filter(f -> f.getInjectionId().equals(injectionId)).
+				findFirst().orElse(null);
 		if(df != null) {
 			return df;
 		}
@@ -170,7 +173,8 @@ public class RawDataManager {
 			}
 			if(inj != null) {
 				df = new DataFile(inj);
-				Collection<Path> paths = fileLocationMap.get(FileNameUtils.getBaseName(inj.getDataFileName()));
+				Collection<Path> paths = 
+						fileLocationMap.get(FileNameUtils.getBaseName(inj.getDataFileName()));
 				if(paths != null && !paths.isEmpty())
 					df.setFullPath(paths.iterator().next().toString());
 									
@@ -189,8 +193,10 @@ public class RawDataManager {
 	
 	public static LCMSData getRawDataForInjectionId(String injectionId) {
 		
-		DataFile df = rawDataMap.keySet().stream().filter(f -> f.getInjectionId() != null).
-				filter(f -> f.getInjectionId().equals(injectionId)).findFirst().orElse(null);
+		DataFile df = rawDataMap.keySet().stream().
+				filter(f -> Objects.nonNull(f.getInjectionId())).
+				filter(f -> f.getInjectionId().equals(injectionId)).
+				findFirst().orElse(null);
 		if(df != null)
 			return rawDataMap.get(df);
 		

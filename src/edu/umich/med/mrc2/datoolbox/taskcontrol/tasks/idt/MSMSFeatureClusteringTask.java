@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
@@ -115,9 +116,11 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 			Range rtRange = new Range(b.getRt() - rtError, b.getRt() + rtError);
 			Range mzRange = MsUtils.createMassRange(b.getMz(), mzError, mzErrorType);
 			List<MsFeatureInfoBundle> clusterFeatures = msmsFeatures.stream().
-				filter(f -> f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null).
+				filter(f -> Objects.nonNull(f.getMsFeature().
+						getSpectrum().getExperimentalTandemSpectrum())).
 				filter(f -> rtRange.contains(f.getRetentionTime())).
-				filter(f -> mzRange.contains(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getParent().getMz())).
+				filter(f -> mzRange.contains(f.getMsFeature().
+						getSpectrum().getExperimentalTandemSpectrum().getParent().getMz())).
 				collect(Collectors.toList());
 			if(clusterFeatures.isEmpty()) {
 				processed++;

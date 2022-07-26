@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -840,7 +841,7 @@ public class DataAnalysisProject implements Serializable {
 	public boolean allDataFilesForAcquisitionMethodEnabled(DataAcquisitionMethod method) {
 		
 		return experimentDesign.getSamples().stream().
-				filter(s -> s.getDataFilesForMethod(method) != null).
+				filter(s -> Objects.nonNull(s.getDataFilesForMethod(method))).
 				flatMap(s -> s.getDataFilesForMethod(method).stream()).
 				filter(s -> !s.isEnabled()).
 				collect(Collectors.toSet()).isEmpty();

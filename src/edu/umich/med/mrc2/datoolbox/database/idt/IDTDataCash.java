@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -934,7 +935,7 @@ public class IDTDataCash {
 	public static IdTrackerOrganization getOrganizationByMetlimsClientId(String metlimsClientId) {
 
 		return getOrganizations().stream().
-				filter(o -> o.getMetlimsClientId() != null).
+				filter(o -> Objects.nonNull(o.getMetlimsClientId())).
 				filter(o -> o.getMetlimsClientId().equals(metlimsClientId)).
 				findFirst().orElse(null);
 	}
@@ -968,7 +969,7 @@ public class IDTDataCash {
 	public static DataExtractionMethod getDataExtractionMethodByMd5(String md5) {
 
 		return getDataExtractionMethods().stream().
-				filter(e -> e.getMd5() != null).
+				filter(e -> Objects.nonNull(e.getMd5())).
 				filter(e -> e.getMd5().equals(md5)).findFirst().orElse(null);
 	}
 

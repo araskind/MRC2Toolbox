@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -512,34 +513,43 @@ public class FDRDataSetMatch {
 	
 	private static void assignMrc2LibIds(Collection<PepSearchOutputObject> pooList) throws Exception {
 		
-		Map<String, ReferenceMsMsLibrary> refLibMap = NISTPepSearchUtils.getMSMSLibraryNameMap(pooList);
+		Map<String, ReferenceMsMsLibrary> refLibMap = 
+				NISTPepSearchUtils.getMSMSLibraryNameMap(pooList);
 		Map<String, String>refLibNameMap = new TreeMap<String, String>();		
-		refLibMap.entrySet().stream().forEach(l -> refLibNameMap.put(l.getKey(), l.getValue().getPrimaryLibraryId()));
+		refLibMap.entrySet().stream().
+			forEach(l -> refLibNameMap.put(l.getKey(), 
+					l.getValue().getPrimaryLibraryId()));
 		
 		Map<String, Boolean>decoyNameMap = new TreeMap<String, Boolean>();
-		refLibMap.entrySet().stream().forEach(l -> decoyNameMap.put(l.getKey(), l.getValue().isDecoy()));
+		refLibMap.entrySet().stream().
+			forEach(l -> decoyNameMap.put(l.getKey(), 
+					l.getValue().isDecoy()));
 		
-		pooList.stream().filter(p -> p.getLibraryName() != null).
+		pooList.stream().filter(p -> Objects.nonNull(p.getLibraryName())).
 			forEach(p -> setOrigLibIdForPepSearchOutputObject(
-					p, refLibNameMap.get(p.getLibraryName()), decoyNameMap.get(p.getLibraryName())));
+					p, refLibNameMap.get(p.getLibraryName()), 
+					decoyNameMap.get(p.getLibraryName())));
 		
 		//	Filter out hits with MRC2 lib IDs present
 		Pattern libIdPattern = Pattern.compile("^MSL\\d{9}$");
 		Collection<PepSearchOutputObject> unssignedLibPooList =
-				pooList.stream().filter(p -> p.getOriginalLibid() != null).
+				pooList.stream().filter(p -> Objects.nonNull(p.getOriginalLibid())).
 				filter(p -> !libIdPattern.matcher(p.getOriginalLibid()).matches()).
 				collect(Collectors.toList());
 		
-		pooList.stream().filter(p -> p.getOriginalLibid() != null).
+		pooList.stream().filter(p -> Objects.nonNull(p.getOriginalLibid())).
 			filter(p -> libIdPattern.matcher(p.getOriginalLibid()).matches()).
 			forEach(p -> p.setMrc2libid(p.getOriginalLibid()));
 		
-		Map<String, Map<String,String>>refLibIdMap = new HashMap<String, Map<String,String>>();
-		refLibNameMap.entrySet().stream().forEach(m -> refLibIdMap.put(m.getValue(), new HashMap<String,String>()));
+		Map<String, Map<String,String>>refLibIdMap = 
+				new HashMap<String, Map<String,String>>();
+		refLibNameMap.entrySet().stream().
+			forEach(m -> refLibIdMap.put(m.getValue(),new HashMap<String,String>()));
 		unssignedLibPooList.stream().
-			filter(p -> p.getLibraryName() != null).
-			filter(p -> p.getOriginalLibid() != null).
-			forEach(p -> refLibIdMap.get(refLibNameMap.get(p.getLibraryName())).put(p.getOriginalLibid(), null));
+			filter(p -> Objects.nonNull(p.getLibraryName())).
+			filter(p -> Objects.nonNull(p.getOriginalLibid())).
+			forEach(p -> refLibIdMap.get(
+					refLibNameMap.get(p.getLibraryName())).put(p.getOriginalLibid(), null));
 		
 		Connection conn = ConnectionManager.getConnection();		
 		String query =
@@ -577,84 +587,10 @@ public class FDRDataSetMatch {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		unssignedLibPooList.stream().
-			filter(p -> p.getLibraryName() != null).
-			filter(p -> p.getOriginalLibid() != null).
+			filter(p -> Objects.nonNull(p.getLibraryName())).
+			filter(p -> Objects.nonNull(p.getOriginalLibid())).
 			forEach(p -> p.setMrc2libid(
-					refLibIdMap.get(refLibNameMap.get(p.getLibraryName())).get(p.getOriginalLibid())
-					));
+				refLibIdMap.get(
+					refLibNameMap.get(p.getLibraryName())).get(p.getOriginalLibid())));
 	}
-	
-	/*
-	 * Regular search
-	 * 
-	 * 		
-	 	String libFileDir = "I:\\Sasha\\LibAndDecoySearch\\NEG\\Results\\Library\\Normal";
-		String decoyFileDir = "I:\\Sasha\\LibAndDecoySearch\\NEG\\Results\\Decoy\\Normal";
-		String outFileDir = "I:\\Sasha\\LibAndDecoySearch\\NEG\\Results\\Merged\\Overall\\Regular";
-		String[]libFileList = new String[] {
-				"EX00663-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00884-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00930-MOTRPAC-liver-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00930-MOTRPAC-muscle-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00930-MOTRPAC-plasma-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00930-MOTRPAC-white-adipose-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00953-MOTRPAC-Hippocampus-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00953-MOTRPAC-Kidney-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00953-MOTRPAC-Lung-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00953-MOTRPAC-brown-adipose-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00953-MOTRPAC-heart-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-Hippocampus-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-Kidney-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-Liver-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-Lung-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-Muscle-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-brown-adipose-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-heart-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-white-adipose-NEG-test-20201218-090840_NIST_MSMS_PEPSEARCH_RESULTS.TXT"
-		};
-		String[]decoyFileList = new String[] {
-				"EX00663-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00884-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00930-MOTRPAC-liver-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00930-MOTRPAC-muscle-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00930-MOTRPAC-plasma-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00930-MOTRPAC-white-adipose-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00953-MOTRPAC-Hippocampus-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00953-MOTRPAC-Kidney-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00953-MOTRPAC-Lung-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00953-MOTRPAC-brown-adipose-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00953-MOTRPAC-heart-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-Hippocampus-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-Kidney-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-Liver-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-Lung-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-Muscle-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-brown-adipose-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-heart-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT",
-				"EX00979-MOTRPAC-white-adipose-NEG-test-20210111_NIST_MSMS_DECOY_PEPSEARCH_RESULTS.TXT"
-		};		
-		String[]outFileList = new String[] {
-				"EX00663-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00884-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00930-MOTRPAC-liver-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00930-MOTRPAC-muscle-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00930-MOTRPAC-plasma-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00930-MOTRPAC-white-adipose-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00953-MOTRPAC-Hippocampus-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00953-MOTRPAC-Kidney-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00953-MOTRPAC-Lung-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00953-MOTRPAC-brown-adipose-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00953-MOTRPAC-heart-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00979-MOTRPAC-Hippocampus-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00979-MOTRPAC-Kidney-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00979-MOTRPAC-Liver-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00979-MOTRPAC-Lung-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00979-MOTRPAC-Muscle-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00979-MOTRPAC-brown-adipose-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00979-MOTRPAC-heart-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT",
-				"EX00979-MOTRPAC-white-adipose-NEG-NIST-DECOY-BEST-OVERALL-NORMAL-RESULTS.TXT"
-		};
-		
-	 * */
-	
 }

@@ -145,9 +145,9 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		filterMSMSFeaturesMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND, 
 				filterIcon);
-		findMSMSFeaturesMenuItem = addItem(databaseSearchMenu, 
-				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND, 
-				findMSMSFeaturesIcon);
+//		findMSMSFeaturesMenuItem = addItem(databaseSearchMenu, 
+//				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND, 
+//				findMSMSFeaturesIcon);
 		
 		databaseSearchMenu.addSeparator();
 		

@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -107,6 +108,7 @@ import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -1258,34 +1260,25 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		total = 100;
 		processed = 80;
 		//	ID state
-		if(featureSubsetById.equals(FeatureSubsetByIdentification.IDENTIFIED_ONLY)) {
-			List<MsFeatureInfoBundle> identified = 
-					features.stream().filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-					collect(Collectors.toList());
-			features.clear();
-			features.addAll(identified);
-		}
-		if(featureSubsetById.equals(FeatureSubsetByIdentification.UNKNOWN_ONLY)) {
-			List<MsFeatureInfoBundle> unidentified = 
-					features.stream().filter(f -> f.getMsFeature().getPrimaryIdentity() == null).
-					collect(Collectors.toList());
-			features.clear();
-			features.addAll(unidentified);
-		}
+		Collection<MsFeatureInfoBundle>filteredByIdStatus = 
+				MsFeatureStatsUtils.filterFeaturesByIdSubset(features, featureSubsetById);
+		features.clear();
+		features.addAll(filteredByIdStatus);
+		
 		// Annotations
 		if(annotatedOnly) {
-			List<MsFeatureInfoBundle> annotated = 
-					features.stream().filter(f -> !f.getMsFeature().getAnnotations().isEmpty()).
+			List<MsFeatureInfoBundle> annotated = features.stream().
+					filter(f -> !f.getMsFeature().getAnnotations().isEmpty()).
 					collect(Collectors.toList());
 			features.clear();
 			features.addAll(annotated);
 		}
 		if(!idLevels.isEmpty()) {
 			
-			List<MsFeatureInfoBundle> byIdLevel = 
-					features.stream().
-					filter(f -> f.getMsFeature().getPrimaryIdentity() != null).
-					filter(f -> idLevels.contains(f.getMsFeature().getPrimaryIdentity().getIdentificationLevel())).
+			List<MsFeatureInfoBundle> byIdLevel = features.stream().
+					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+					filter(f -> idLevels.contains(
+							f.getMsFeature().getPrimaryIdentity().getIdentificationLevel())).
 					collect(Collectors.toList());
 			features.clear();
 			features.addAll(byIdLevel);
@@ -1294,7 +1287,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			
 			List<MsFeatureInfoBundle> byFollowup = 
 					features.stream().
-					filter(f -> !CollectionUtils.intersection(follwUpSteps, f.getIdFollowupSteps()).isEmpty()).
+					filter(f -> !CollectionUtils.intersection(
+							follwUpSteps, f.getIdFollowupSteps()).isEmpty()).
 					collect(Collectors.toList());
 			features.clear();
 			features.addAll(byFollowup);
@@ -1308,8 +1302,10 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		total = features.size();
 		processed = 0;
 		
-		MsFeatureIdentityMSMSScoreComparator idSorter = new MsFeatureIdentityMSMSScoreComparator();	
-		MsFeatureIdentityIDLevelComparator levelSorter = new MsFeatureIdentityIDLevelComparator();
+		MsFeatureIdentityMSMSScoreComparator idSorter = 
+				new MsFeatureIdentityMSMSScoreComparator();	
+		MsFeatureIdentityIDLevelComparator levelSorter = 
+				new MsFeatureIdentityIDLevelComparator();
 		for(MsFeatureInfoBundle bundle : features) {
 			
 			

@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -351,7 +352,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			double[] rtValues = new double[0];
 			try {
 				rtValues = rtCollection.getValue().stream().
-						filter(rt -> rt != null).
+						filter(rt -> Objects.nonNull(rt)).
 						mapToDouble(Double::doubleValue).toArray();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -365,7 +366,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			double[] mzValues = new double[0];
 			try {
 				mzValues = mzCollection.getValue().stream().
-						filter(mz -> mz != null).
+						filter(mz -> Objects.nonNull(mz)).
 						mapToDouble(Double::doubleValue).toArray();
 			} catch (Exception e) {
 				e.printStackTrace();

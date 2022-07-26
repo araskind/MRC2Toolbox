@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -198,7 +199,7 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 			MsFeature feature = msmsIdMap.get(poo.getMsmsFeatureId());		
 			String libId = poo.getMrc2libid();
 			MsFeatureIdentity existingHit = feature.getIdentifications().stream().
-				filter(i -> i.getReferenceMsMsLibraryMatch() != null).
+				filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
 				filter(i -> i.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().
 						getUniqueId().equals(libId)).findFirst().orElse(null);
 			if(existingHit == null)

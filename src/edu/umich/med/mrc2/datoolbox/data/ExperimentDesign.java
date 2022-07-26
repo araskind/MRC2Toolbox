@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -570,7 +571,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 		return sampleSet.stream().
 				filter(s -> s.isEnabled()).
 				filter(s -> CollectionUtils.containsAny(s.getDesignCell().values(), levels)).
-				filter(s -> s.getDataFilesMap().get(acqMethod) != null).
+				filter(s -> Objects.nonNull(s.getDataFilesMap().get(acqMethod))).
 				filter(s -> !s.getDataFilesMap().get(acqMethod).isEmpty()).
 				collect(Collectors.toCollection(TreeSet::new));
 	}

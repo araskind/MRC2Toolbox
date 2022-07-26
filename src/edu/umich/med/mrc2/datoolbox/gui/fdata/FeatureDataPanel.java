@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -613,7 +614,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			}
 			// Find and load libraries used to run identifications
 			Collection<String> targetIds = identifiedFeatures.stream().
-					filter(f -> f.getPrimaryIdentity().getMsRtLibraryMatch() != null).
+					filter(f -> Objects.nonNull(f.getPrimaryIdentity().getMsRtLibraryMatch())).
 					map(f -> f.getPrimaryIdentity().getMsRtLibraryMatch().getLibraryTargetId()).
 					distinct().collect(Collectors.toSet());
 
