@@ -394,6 +394,9 @@ public class MsFeatureStatsUtils {
 			Collection<MsFeatureInfoBundle>inputFeatures,
 			FeatureSubsetByIdentification idSubset) {
 		
+		if(idSubset.equals(FeatureSubsetByIdentification.ALL))
+			return new ArrayList<MsFeatureInfoBundle>(inputFeatures);
+			
 		if(idSubset.equals(FeatureSubsetByIdentification.IDENTIFIED_ONLY))
 			return inputFeatures.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
@@ -403,7 +406,7 @@ public class MsFeatureStatsUtils {
 			return inputFeatures.stream().
 				filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity())).
 				collect(Collectors.toList());
-
+		
 		return null;
 	}
 	

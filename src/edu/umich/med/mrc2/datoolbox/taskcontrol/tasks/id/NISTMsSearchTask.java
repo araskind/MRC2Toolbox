@@ -75,6 +75,8 @@ public class NISTMsSearchTask extends AbstractTask {
 
 		String command = "\"" + MRC2ToolBoxConfiguration.getrNistMsDir() + File.separator
 				+ MRC2ToolBoxConfiguration.NIST_EXECUTABLE_FILE + "\" /INSTRUMENT /PAR=2";
+		
+		processed = -5;
 		try {
 	        FileSystem fs = FileSystems.getDefault();
 	        WatchService ws = fs.newWatchService();
@@ -105,6 +107,7 @@ public class NISTMsSearchTask extends AbstractTask {
 	    					Files.copy(resultFile.toPath(), resultCopy.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
 	    					// Cleanup working directory
+	    					processed = 90;
 	    					cleanupWorkingDirectory();
 
 	    					setStatus(TaskStatus.FINISHED);
@@ -125,6 +128,7 @@ public class NISTMsSearchTask extends AbstractTask {
 
 	private void cleanupWorkingDirectory() {
 
+		taskDescription = "Cleaning up ...";
 		try {
 			Files.find(Paths.get(MRC2ToolBoxConfiguration.getrNistMsDir()), Integer.MAX_VALUE,
 				(filePath, fileAttr) -> filePath.toString().toLowerCase().endsWith(".hlm") && fileAttr.isRegularFile())
@@ -140,6 +144,7 @@ public class NISTMsSearchTask extends AbstractTask {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		processed = 100;
 	}
 	@Override
 	public Task cloneTask() {

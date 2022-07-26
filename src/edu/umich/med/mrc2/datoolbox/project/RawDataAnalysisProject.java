@@ -61,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
@@ -570,6 +571,13 @@ public class RawDataAnalysisProject extends Project {
 
 	public Collection<MSMSClusterDataSet> getMsmsClusterDataSets() {
 		return msmsClusterDataSets;
+	}
+	
+	public Collection<MSMSClusterDataSet> getEditableMsmsClusterDataSets(){
+		return msmsClusterDataSets.stream().
+				filter(c -> !c.equals(MSMSClusterDataSetManager.activeProjectDefaultClusterDataSet)).
+				sorted(new MSMSClusterDataSetComparator(SortProperty.Name)).
+				collect(Collectors.toList());
 	}
 }
 

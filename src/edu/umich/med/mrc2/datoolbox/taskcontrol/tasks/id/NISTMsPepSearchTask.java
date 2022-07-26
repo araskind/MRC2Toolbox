@@ -126,6 +126,10 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 	
 	protected void parseSearchResults() {
 		
+		taskDescription = "Parsing results file ...";
+		total = 100;
+		processed = 10;
+		
 		if(!resultFile.exists())
 			return;
 

@@ -431,6 +431,8 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 	protected void runPepSearch() {
 		
 		taskDescription = "Running NIST MS/MS pep-search";
+		total = 100;
+		processed = -5;
 		if(searchCommand != null) {
 			initLogFile();
 			try {

@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.swing.Icon;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 
 import org.apache.commons.lang3.StringUtils;
@@ -106,7 +107,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 
 		String command = e.getActionCommand();
 		if(command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName()))
-			showMsFeatureCollectionEditorDialog(null); 
+			showMsMSMSDataSetEditorDialog(null); 
 		
 		if(command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName())
 				|| command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName()))
@@ -137,10 +138,10 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 					"\" is locked and can not be edited.", this.getContentPane());
 			return;
 		}	
-		showMsFeatureCollectionEditorDialog(selected);
+		showMsMSMSDataSetEditorDialog(selected);
 	}
 	
-	public void showMsFeatureCollectionEditorDialog (MSMSClusterDataSet dataSet) {
+	public void showMsMSMSDataSetEditorDialog (MSMSClusterDataSet dataSet) {
 		
 		msmsClusterDataSetEditorDialog = 
 				new MSMSClusterDataSetEditorDialog(dataSet, clustersToAdd, this);
@@ -201,7 +202,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		if(clustersToAdd != null && !clustersToAdd.isEmpty()) {			
 			try {
 				//	Assign DB cluster ids first
-				MSMSClusteringDBUtils.addClustersToDataSet(edited.getId(), clustersToAdd);
+				MSMSClusteringDBUtils.addClustersToDataSet(edited, clustersToAdd);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -276,84 +277,85 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 
 	private void deleteMSMSClusterDataSet() {
 		
-//		MsFeatureInfoBundleCollection selected = featureCollectionsTable.getSelectedCollection();
-//		if(selected.equals(FeatureCollectionManager.msmsSearchResults) 
-//				|| selected.equals(FeatureCollectionManager.msOneSearchResults)) {
-//			MessageDialog.showErrorMsg("Collection \"" + selected.getName() + 
-//					"\" represents database search results and can not be deleted.", this);
-//			return;
-//		}
+		MSMSClusterDataSet selected = msmsClusterDataSetTable.getSelectedDataSet();
+		if(selected == null)
+			return;
 		
-//		MsFeatureInfoBundleCollection selected = 
-//				featureClusterCollectionsTable.getSelectedDataSet();
-//		if(selected == null)
-//			return;
-//		
-//		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
-//			deleteFeatureCollectionFromDatabase(selected);
-//		else
-//			deleteFeatureCollectionFromProject(selected);
+		if(!selected.getCreatedBy().equals(MRC2ToolBoxCore.getIdTrackerUser())
+				&& !MRC2ToolBoxCore.getIdTrackerUser().isSuperUser()) {
+			
+			MessageDialog.showErrorMsg(
+					"Data set \"" + selected.getName() + 
+					"\" was created by a different user, you can not delete it.", 
+					this.getContentPane());
+			return;
+		}
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			deleteMSMSClusterDataSetFromDatabase(selected);
+		else
+			deleteMSMSClusterDataSetFromProject(selected);
 	}
 	
 	private void deleteMSMSClusterDataSetFromProject(MSMSClusterDataSet selected) {
 
-//		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();	
-//		if(!project.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
-//			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-//					"\" is locked and can not be deleted.", this.getContentPane());
-//			return;
-//		}	
-//		int res = MessageDialog.showChoiceWithWarningMsg(
-//				"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", 
-//				this.getContentPane());
-//		if(res == JOptionPane.YES_OPTION) {
-//			
-//			project.removeMsFeatureInfoBundleCollection(selected);
-//			featureClusterCollectionsTable.setTableModelFromFeatureCollectionList(
-//					project.getFeatureCollections());	
-//			
-//			IDWorkbenchPanel panel = (IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
-//			if(panel.getActiveFeatureCollection() != null 
-//					&& panel.getActiveFeatureCollection().equals(selected))
-//				panel.clearMSMSFeatureData();
-//		}
+		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();	
+		if(!project.getEditableMsmsClusterDataSets().contains(selected)) {
+			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
+					"\" is locked and can not be deleted.", this.getContentPane());
+			return;
+		}	
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Are you sure you want to delete data set \"" + selected.getName() + "\"?", 
+				this.getContentPane());
+		if(res == JOptionPane.YES_OPTION) {
+			
+			project.getMsmsClusterDataSets().remove(selected);
+			msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(
+					project.getMsmsClusterDataSets());
+			
+			IDWorkbenchPanel panel = 
+					(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
+			if(panel.getActiveMSMSClusterDataSet() != null 
+					&& panel.getActiveMSMSClusterDataSet().equals(selected)) {
+				panel.clearMSMSFeatureData();
+				panel.clearMSMSClusterData();
+			}
+		}
 	}
 
 	private void deleteMSMSClusterDataSetFromDatabase(MSMSClusterDataSet selected) {
 		
-//		if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
-//			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-//					"\" is locked and can not be deleted.", this.getContentPane());
-//			return;
-//		}		
-//		if(MRC2ToolBoxCore.getIdTrackerUser().isSuperUser() || 
-//				(selected.getOwner() != null && selected.getOwner().equals(MRC2ToolBoxCore.getIdTrackerUser()))) {
-//			int res = MessageDialog.showChoiceWithWarningMsg(
-//					"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", 
-//					this.getContentPane());
-//			if(res == JOptionPane.YES_OPTION) {
-//				try {
-//					FeatureCollectionUtils.deleteMsFeatureInformationBundleCollection(selected);
-//				} catch (Exception e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-//				FeatureCollectionManager.getMsFeatureInfoBundleCollections().remove(selected);
-//				featureClusterCollectionsTable.setTableModelFromFeatureCollectionList(
-//						FeatureCollectionManager.getMsFeatureInfoBundleCollections());
-//				
-//				IDWorkbenchPanel panel = (IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
-//				if(panel.getActiveFeatureCollection() != null 
-//						&& panel.getActiveFeatureCollection().equals(selected))
-//					panel.clearMSMSFeatureData();
-//			}
-//		}
-//		else {
-//			MessageDialog.showErrorMsg(
-//					"You are not authorized to delete this feature collection", 
-//					this.getContentPane());
-//			return;
-//		}
+		if(!MSMSClusterDataSetManager.getEditableMSMSClusterDataSets().contains(selected)) {
+			
+			MessageDialog.showErrorMsg(
+					"Data set \"" + selected.getName() + 
+					"\" is locked and can not be deleted.", 
+					this.getContentPane());
+			return;
+		}				
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", 
+				this.getContentPane());
+		if(res != JOptionPane.YES_OPTION)
+			return;
+			
+		try {
+			MSMSClusteringDBUtils.deleteMSMSClusterDataSet(selected);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		MSMSClusterDataSetManager.getMSMSClusterDataSets().remove(selected);
+		msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(
+				MSMSClusterDataSetManager.getMSMSClusterDataSets());
+		
+		IDWorkbenchPanel panel = 
+				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
+		if(panel.getActiveMSMSClusterDataSet() != null 
+				&& panel.getActiveMSMSClusterDataSet().equals(selected)) {
+			panel.clearMSMSFeatureData();
+			panel.clearMSMSClusterData();
+		}
 	}
 
 	public Collection<MsFeatureInfoBundleCluster> getClustersToAdd() {

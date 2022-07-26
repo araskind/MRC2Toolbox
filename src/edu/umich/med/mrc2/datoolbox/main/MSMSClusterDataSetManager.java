@@ -104,7 +104,8 @@ public class MSMSClusterDataSetManager {
 				filter(c -> c.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
 	}
 	
-	public static IDTMSMSClusterDataPullTask getMSMSClusterDataSetData(MSMSClusterDataSet dataSet) {
+	public static IDTMSMSClusterDataPullTask 
+							getMSMSClusterDataSetData(MSMSClusterDataSet dataSet) {
 		return new IDTMSMSClusterDataPullTask(dataSet);
 	}	
 	

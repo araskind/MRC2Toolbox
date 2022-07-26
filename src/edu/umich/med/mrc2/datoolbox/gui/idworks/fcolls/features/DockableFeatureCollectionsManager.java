@@ -280,7 +280,8 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	
 	private void etitSelectedFeatureCollection() {
 
-		MsFeatureInfoBundleCollection selected = featureCollectionsTable.getSelectedCollection();
+		MsFeatureInfoBundleCollection selected = 
+				featureCollectionsTable.getSelectedCollection();
 		if(selected == null)
 			return;
 		
@@ -288,30 +289,26 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
 					"\" is locked and can not be edited.", this.getContentPane());
 			return;
-		}
-//		if(selected.equals(FeatureCollectionManager.msmsSearchResults) 
-//				|| selected.equals(FeatureCollectionManager.msOneSearchResults)) {
-//			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-//					"\" is locked and can not be edited.", this);
-//			return;
-//		}		
+		}	
 		showMsFeatureCollectionEditorDialog(selected);
 	}
 
-
 	private void deleteFeatureCollection() {
 		
-//		MsFeatureInfoBundleCollection selected = featureCollectionsTable.getSelectedCollection();
-//		if(selected.equals(FeatureCollectionManager.msmsSearchResults) 
-//				|| selected.equals(FeatureCollectionManager.msOneSearchResults)) {
-//			MessageDialog.showErrorMsg("Collection \"" + selected.getName() + 
-//					"\" represents database search results and can not be deleted.", this);
-//			return;
-//		}
 		MsFeatureInfoBundleCollection selected = 
 				featureCollectionsTable.getSelectedCollection();
 		if(selected == null)
 			return;
+		
+		if(!selected.getOwner().equals(MRC2ToolBoxCore.getIdTrackerUser())
+				&& !MRC2ToolBoxCore.getIdTrackerUser().isSuperUser()) {
+			
+			MessageDialog.showErrorMsg(
+					"Data set \"" + selected.getName() + 
+					"\" was created by a different user, you can not delete it.", 
+					this.getContentPane());
+			return;
+		}
 		
 		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
 			deleteFeatureCollectionFromDatabase(selected);
@@ -350,34 +347,27 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 					"\" is locked and can not be deleted.", this.getContentPane());
 			return;
 		}		
-		if(MRC2ToolBoxCore.getIdTrackerUser().isSuperUser() || 
-				(selected.getOwner() != null && selected.getOwner().equals(MRC2ToolBoxCore.getIdTrackerUser()))) {
-			int res = MessageDialog.showChoiceWithWarningMsg(
-					"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", 
-					this.getContentPane());
-			if(res == JOptionPane.YES_OPTION) {
-				try {
-					FeatureCollectionUtils.deleteMsFeatureInformationBundleCollection(selected);
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				FeatureCollectionManager.getMsFeatureInfoBundleCollections().remove(selected);
-				featureCollectionsTable.setTableModelFromFeatureCollectionList(
-						FeatureCollectionManager.getMsFeatureInfoBundleCollections());
-				
-				IDWorkbenchPanel panel = (IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
-				if(panel.getActiveFeatureCollection() != null 
-						&& panel.getActiveFeatureCollection().equals(selected))
-					panel.clearMSMSFeatureData();
-			}
-		}
-		else {
-			MessageDialog.showErrorMsg(
-					"You are not authorized to delete this feature collection", 
-					this.getContentPane());
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Are you sure you want to delete feature collection \"" + selected.getName() + "\"?", 
+				this.getContentPane());
+		if(res != JOptionPane.YES_OPTION)
 			return;
+		
+		try {
+			FeatureCollectionUtils.deleteMsFeatureInformationBundleCollection(selected);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		FeatureCollectionManager.getMsFeatureInfoBundleCollections().remove(selected);
+		featureCollectionsTable.setTableModelFromFeatureCollectionList(
+				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
+		
+		IDWorkbenchPanel panel = 
+				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
+		if(panel.getActiveFeatureCollection() != null 
+				&& panel.getActiveFeatureCollection().equals(selected))
+			panel.clearMSMSFeatureData();		
 	}
 
 	public Collection<MsFeatureInfoBundle> getFeaturesToAdd() {

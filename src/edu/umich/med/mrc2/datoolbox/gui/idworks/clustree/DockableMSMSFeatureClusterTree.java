@@ -213,6 +213,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		clusterTree.setSelectionPath(clusterPath);
 		clusterTree.scrollPathToVisible(clusterPath);
 	}
+
 }
 
 

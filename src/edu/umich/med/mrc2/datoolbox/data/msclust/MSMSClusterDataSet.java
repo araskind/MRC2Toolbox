@@ -209,7 +209,12 @@ public class MSMSClusterDataSet {
 	}
 
 	public Set<String> getClusterIds() {
-		return clusterIds;
+		
+		if(clusters == null || clusters.isEmpty())			
+			return clusterIds;
+		else
+			return clusters.stream().
+					map(c -> c.getId()).collect(Collectors.toSet());
 	}
 }
 

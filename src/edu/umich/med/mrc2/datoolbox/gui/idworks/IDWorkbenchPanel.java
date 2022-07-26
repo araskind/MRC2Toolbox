@@ -3078,6 +3078,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		msTwoFeatureTable.getTable().clearTable();
 		clearFeatureData();
 		clearDataMaps();
+		clearMSMSClusterData();
 		idTrackerDataExplorerPlotDialog.clearPanels();
 		FeatureCollectionManager.clearDefaultCollections();
 		MSMSClusterDataSetManager.clearDefaultCollections();
@@ -3494,11 +3495,19 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			}
 		}
 	}
+	
+	public void clearMSMSClusterData() {
+		msmsFeatureClusterTreePanel.resetTree();
+	}
 
 	@Override
 	protected void executeAdminCommand(String command) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public MSMSClusterDataSet getActiveMSMSClusterDataSet() {
+		return activeMSMSClusterDataSet;
 	}
 
 }

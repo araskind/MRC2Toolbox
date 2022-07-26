@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -229,10 +230,18 @@ public class MSMSClusteringDBUtils {
 		//	Add assays		
 		Collection<String>daIds = 
 				getAnalysisIdsForClusterCollection(newDataSet.getClusters(), conn);
+		insertDataAnalysisIdsForDataSet(newDataSet, daIds, conn);
+		insertClustersForDataSet(newDataSet, parSet, conn);
+	}
+	
+	public static void insertDataAnalysisIdsForDataSet(
+			MSMSClusterDataSet newDataSet, 
+			Collection<String>daIds, 
+			Connection conn) throws Exception {
 		
-		query = "INSERT INTO MSMS_CLUSTERED_DATA_SET_DA_COMPONENT "
+		String query = "INSERT INTO MSMS_CLUSTERED_DATA_SET_DA_COMPONENT "
 				+ "(CDS_ID, DATA_ANALYSIS_ID) VALUES (?, ?)";
-		ps = conn.prepareStatement(query);
+		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, newDataSet.getId());
 		for(String daId : daIds) {
 			ps.setString(2, daId);
@@ -240,11 +249,9 @@ public class MSMSClusteringDBUtils {
 		}
 		ps.executeBatch();
 		ps.close();
-
-		addClustersForDataSet(newDataSet, parSet, conn);
 	}
 	
-	public static void addClustersForDataSet(
+	public static void insertClustersForDataSet(
 			MSMSClusterDataSet newDataSet, 
 			MSMSClusteringParameterSet parSet,
 			Connection conn) throws Exception {
@@ -347,14 +354,104 @@ public class MSMSClusteringDBUtils {
 	}
 	
 	public static void updateMSMSClusterDataSetMetadata(MSMSClusterDataSet edited) throws Exception {
-		// TODO Auto-generated method stub
-		
+		Connection conn = ConnectionManager.getConnection();
+		updateMSMSClusterDataSetMetadata(edited, conn);
+		ConnectionManager.releaseConnection(conn);		
+	}
+	
+	private static void updateMSMSClusterDataSetMetadata(MSMSClusterDataSet edited, Connection conn) throws Exception {
+
+		String query = 
+				"UPDATE MSMS_CLUSTERED_DATA_SET SET NAME = ?, "
+				+ "DESCRIPTION = ?, LAST_MODIFIED = ? WHERE CDS_ID = ?";
+		edited.setLastModified(new Date());
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, edited.getName());
+		ps.setString(2, edited.getDescription());
+		ps.setDate(3, new java.sql.Date(edited.getLastModified().getTime()));
+		ps.setString(4, edited.getId());
+		ps.executeUpdate();
+		ps.close();
 	}
 
 	public static void addClustersToDataSet(
-			String dataSetId, Collection<MsFeatureInfoBundleCluster> collection) throws Exception {
-		// TODO Auto-generated method stub
+			MSMSClusterDataSet dataSet, 
+			Collection<MsFeatureInfoBundleCluster> newClusters) throws Exception {
+		Connection conn = ConnectionManager.getConnection();
+		addClustersToDataSet(dataSet, newClusters, conn);
+		ConnectionManager.releaseConnection(conn);		
+	}
+
+	public static void addClustersToDataSet(
+			MSMSClusterDataSet dataSet, 
+			Collection<MsFeatureInfoBundleCluster> newClusters, 
+			Connection conn) throws Exception{
+		Set<String> existingIds = dataSet.getClusterIds();
+		List<MsFeatureInfoBundleCluster> clustersToAdd = newClusters.stream().
+				filter(c -> !existingIds.contains(c.getId())).
+				collect(Collectors.toList());
+		if(clustersToAdd.isEmpty())
+			return;		
+		 
+		insertClustersForDataSet(dataSet, dataSet.getParameters(), conn);
 		
+		Collection<String>daIds = 
+				getAnalysisIdsForClusterCollection(newClusters, conn);
+		Collection<String>existingDaIds = 
+				getDataAnalysisIdsForMSMSClusterDataSet(dataSet, conn);
+		
+		Set<String> daIdsToInsert = daIds.stream().
+				filter(i -> !existingDaIds.contains(i)).
+				collect(Collectors.toSet());
+		
+		if(!daIdsToInsert.isEmpty())
+			insertDataAnalysisIdsForDataSet(dataSet, daIdsToInsert, conn);		
+	}
+	
+	public static Collection<String>getDataAnalysisIdsForMSMSClusterDataSet(
+			MSMSClusterDataSet dataSet, 
+			Connection conn) throws Exception {
+		
+		Collection<String>daIds = new TreeSet<String>();
+		String query = 
+				"SELECT DATA_ANALYSIS_ID FROM "
+				+ "MSMS_CLUSTERED_DATA_SET_DA_COMPONENT WHERE CDS_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, dataSet.getId());
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			daIds.add(rs.getString(1));
+		
+		rs.close();
+		ps.close();
+		return daIds;
+	}
+
+	public static void deleteMSMSClusterDataSet(MSMSClusterDataSet toDelete) throws Exception {
+		Connection conn = ConnectionManager.getConnection();
+		deleteMSMSClusterDataSet(toDelete, conn);
+		ConnectionManager.releaseConnection(conn);
+	}
+
+	public static void deleteMSMSClusterDataSet(MSMSClusterDataSet toDelete, Connection conn) throws Exception {
+
+		String query = "DELETE FROM MSMS_CLUSTER WHERE CLUSTER_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		int counter = 0;
+		for(String clusterId : toDelete.getClusterIds()) {
+			ps.setString(1, clusterId);
+			ps.addBatch();
+			counter++;
+			if(counter % 200 == 0)
+				ps.executeBatch();
+		}
+		ps.executeBatch();
+		
+		query = "DELETE FROM MSMS_CLUSTERED_DATA_SET WHERE CDS_ID = ?";
+		ps = conn.prepareStatement(query);
+		ps.setString(1, toDelete.getId());
+		ps.executeUpdate();
+		ps.close();		
 	}
 }
 

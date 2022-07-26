@@ -69,7 +69,6 @@ public class EntropyScoringSetupDialog extends JDialog implements BackedByPrefer
 	private JComboBox massErrorTypeComboBox;
 	private JFormattedTextField noiseCutoffTextField;
 		
-	@SuppressWarnings("rawtypes")
 	public EntropyScoringSetupDialog(ActionListener actionListener) {
 		super();
 		setTitle("Entropy-based MSMS score calculation parameters");
