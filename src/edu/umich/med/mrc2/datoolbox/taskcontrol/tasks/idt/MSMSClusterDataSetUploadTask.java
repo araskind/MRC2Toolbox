@@ -153,19 +153,15 @@ public class MSMSClusterDataSetUploadTask extends AbstractTask {
 		total = dataSet.getClusters().size();
 		processed = 0;
 		
-		String query = "INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
-				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, IS_LOCKED) VALUES (?, ?, ?, ?, ?, ?, ?)";
+		String query = 
+				"INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
+				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, IS_LOCKED, CDS_ID) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
 				+ "(CLUSTER_ID, MSMS_FEATURE_ID) VALUES (?, ?)";
 		PreparedStatement featurePs = conn.prepareStatement(featureQuery);
-		
-		String clustCompQuery = 
-				"INSERT INTO MSMS_CLUSTERED_DATA_SET_CLUSTERS ("
-				+ "CDS_ID, CLUSTER_ID) VALUES (?,?)";
-		PreparedStatement clustCompPs = conn.prepareStatement(clustCompQuery);
-		clustCompPs.setString(1, dataSet.getId());
 				
 		for(MsFeatureInfoBundleCluster cluster : dataSet.getClusters()) {
 			
@@ -205,10 +201,8 @@ public class MSMSClusterDataSetUploadTask extends AbstractTask {
 			else
 				ps.setNull(7, java.sql.Types.NULL);
 			
+			ps.setString(8, dataSet.getId());
 			ps.executeUpdate();
-			
-			clustCompPs.setString(2, clusterId);
-			clustCompPs.executeUpdate();
 			
 			//	Add cluster features
 			featurePs.setString(1, clusterId);
@@ -221,7 +215,6 @@ public class MSMSClusterDataSetUploadTask extends AbstractTask {
 		}		
 		ps.close();
 		featurePs.close();
-		clustCompPs.close();
 	}
 	
 	@Override

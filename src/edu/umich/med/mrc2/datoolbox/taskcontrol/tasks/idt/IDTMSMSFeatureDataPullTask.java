@@ -26,7 +26,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -41,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
@@ -50,18 +53,29 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 
-	private Collection<String>featureIds;
+	protected Collection<String>featureIds;
 
 	public IDTMSMSFeatureDataPullTask(Collection<String> featureIds) {
 		super();
 		this.featureIds = featureIds;
-		features = new ArrayList<MsFeatureInfoBundle>();
 	}
 
 	@Override
 	public void run() {
-		taskDescription = "Getting feature data from IDTracker database";
-		setStatus(TaskStatus.PROCESSING);
+		
+		setStatus(TaskStatus.PROCESSING);		
+		try {
+			getChashedFeatures();
+		}
+		catch (Exception e) {
+			setStatus(TaskStatus.ERROR);
+			e.printStackTrace();
+		}
+		if(featureIds.isEmpty()) {
+			features.addAll(cashedFeatures);
+			setStatus(TaskStatus.FINISHED);
+			return;
+		}
 		try {
 			getMsMsFeatures();
 			if(!features.isEmpty()) {
@@ -75,17 +89,38 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 				putDataInCache();
 				attachChromatograms();
 			}
+			finalizeFeatureList();
 			setStatus(TaskStatus.FINISHED);
-		}
+		}		
 		catch (Exception e) {
 			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
 		}
 	}
 	
+	protected void getChashedFeatures() {
+
+		taskDescription = "Getting feature data from IDTracker database";
+		total = featureIds.size();
+		processed = 0;
+		Set<String>cashedIds = new HashSet<String>();
+		for(String msmsId : featureIds) {
+			
+			MsFeatureInfoBundle fInCash = 
+					FeatureCollectionUtils.retrieveMSMSFetureInfoBundleFromCache(msmsId);
+			if(fInCash != null) {
+				cashedFeatures.add(fInCash);
+				cashedIds.add(msmsId);					
+			}
+			processed++;
+		}
+		if(!cashedIds.isEmpty())
+			featureIds.removeAll(cashedIds);
+	}
+
 	protected void getMsMsFeatures() throws Exception {
 		
-		taskDescription = "Fetching MS2 features ...";
+		taskDescription = "Fetching MS2 features from database ...";
 		total = featureIds.size();
 		processed = 0;	
 		Connection conn = ConnectionManager.getConnection();

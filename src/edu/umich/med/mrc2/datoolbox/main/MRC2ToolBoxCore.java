@@ -176,7 +176,8 @@ public final class MRC2ToolBoxCore {
 			//	e1.printStackTrace();
 		}
 		if(conn == null) {
-			MessageDialog.showErrorMsg("Database connection can not be established, exiting the program");
+			MessageDialog.showErrorMsg(
+					"Database connection can not be established, exiting the program");
 			System.exit(1);
 		} else {
 			try {

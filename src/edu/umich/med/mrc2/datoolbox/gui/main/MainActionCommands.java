@@ -932,6 +932,7 @@ public enum MainActionCommands {
 	
 	RELOAD_ACTIVE_MSMS_FEATURES("Reload complete active MSMS feature set"),
 	RELOAD_ACTIVE_MS_ONE_FEATURES("Reload complete active MS1 feature set"),
+	CLEAR_IDTRACKER_WORKBENCH_PANEL("Clear workbench"),
 	
 	//	NIST-MS / PEP-search / Sirius commands
 	NIST_MS_PEPSEARCH_SETUP_COMMAND("Set up NIST MSMS pepsearch"),

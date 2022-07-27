@@ -70,6 +70,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon entropyIcon = GuiUtils.getIcon("spectrumEntropy", 24);
 	private static final Icon dsSummaryIcon = GuiUtils.getIcon("infoGreen", 24);
 	private static final Icon saveClusterDataSetIcon = GuiUtils.getIcon("saveCluster", 24);
+	private static final Icon clearWorkbenchIcon = GuiUtils.getIcon("clearWorklist", 24);
 
 	// Menus
 	private JMenu
@@ -87,7 +88,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		activeDataSetSearchMenuItem,
 		findMSMSFeaturesMenuItem,
 		filterMSMSFeaturesMenuItem,
-		resetFeatureFiltersMenuItem;
+		resetFeatureFiltersMenuItem,
+		clearWorkbenchMenuItem;
 
 	// Library search
 	private JMenuItem
@@ -154,6 +156,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		resetFeatureFiltersMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES, 
 				reloadIcon);
+		
+		clearWorkbenchMenuItem = addItem(databaseSearchMenu, 
+				MainActionCommands.CLEAR_IDTRACKER_WORKBENCH_PANEL, 
+				clearWorkbenchIcon);
 
 		add(databaseSearchMenu);
 

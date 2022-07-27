@@ -106,18 +106,18 @@
 												</placeholders>
 											</leaf>
 											<node nodeId="1600213801967" orientation="VERTICAL" divider="0.5">
-												<leaf id="0" nodeId="1600213801969">
+												<leaf id="2" nodeId="1600213801969">
 													<placeholders>
 														<placeholder>dock.single.DockableMsMsClusterTable</placeholder>
 													</placeholders>
 												</leaf>
 												<node nodeId="1600213801971" orientation="HORIZONTAL" divider="0.5">
-													<leaf id="3" nodeId="1600213801973">
+													<leaf id="0" nodeId="1600213801973">
 														<placeholders>
 															<placeholder>dock.single.MgfPanelDockableSpectumPlot</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="2" nodeId="1600213801975">
+													<leaf id="3" nodeId="1600213801975">
 														<placeholders>
 															<placeholder>dock.single.DockableMsMsTable</placeholder>
 														</placeholders>
@@ -135,10 +135,10 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMsMsClusterTable">
-										<replacement id="dockablesingle DockableMsMsClusterTable"/>
+									<layout factory="predefined" placeholder="dock.single.MgfPanelDockableSpectumPlot">
+										<replacement id="dockablesingle MgfPanelDockableSpectumPlot"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMsMsClusterTable</id>
+											<id>MgfPanelDockableSpectumPlot</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -155,20 +155,20 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMsMsTable">
-										<replacement id="dockablesingle DockableMsMsTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableMsMsClusterTable">
+										<replacement id="dockablesingle DockableMsMsClusterTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMsMsTable</id>
+											<id>DockableMsMsClusterTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.MgfPanelDockableSpectumPlot">
-										<replacement id="dockablesingle MgfPanelDockableSpectumPlot"/>
+									<layout factory="predefined" placeholder="dock.single.DockableMsMsTable">
+										<replacement id="dockablesingle DockableMsMsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>MgfPanelDockableSpectumPlot</id>
+											<id>DockableMsMsTable</id>
 											<area/>
 										</delegate>
 									</layout>

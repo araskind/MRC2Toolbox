@@ -153,8 +153,7 @@ public class MSMSClusteringDBUtils {
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String clusterIdQuery = 
-				"SELECT CLUSTER_ID FROM MSMS_CLUSTERED_DATA_SET_CLUSTERS "
-				+ "WHERE CDS_ID = ?";
+				"SELECT CLUSTER_ID FROM MSMS_CLUSTER WHERE CDS_ID = ?";
 		PreparedStatement csidPs = conn.prepareStatement(clusterIdQuery);
 		
 		ResultSet rs = ps.executeQuery();

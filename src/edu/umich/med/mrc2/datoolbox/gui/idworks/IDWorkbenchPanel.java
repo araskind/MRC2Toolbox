@@ -784,7 +784,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			insertNewMSMSClusterDataSet();
 				
 //		if (command.equals(MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_COMMAND.getName()))
-//			editMSMSClusterDataSet();		
+//			editMSMSClusterDataSet();	
+		
+		if (command.equals(MainActionCommands.CLEAR_IDTRACKER_WORKBENCH_PANEL.getName()))
+			clearWorkbench();	
 	}
 	
 //	private void editMSMSClusterDataSet() {
@@ -809,10 +812,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		}	
 		MSMSClusterDataSet dataSet = new MSMSClusterDataSet(
-				msmsClusterDataSetEditorDialog.getMSMSClusterDataSetName(), 
-				msmsClusterDataSetEditorDialog.getMSMSClusterDataSetDescription(), 
-				MRC2ToolBoxCore.getIdTrackerUser());
-		dataSet.setParameters(msmsClusterDataSetEditorDialog.getMsmsExtractionParameters());
+			msmsClusterDataSetEditorDialog.getMSMSClusterDataSetName(), 
+			msmsClusterDataSetEditorDialog.getMSMSClusterDataSetDescription(), 
+			MRC2ToolBoxCore.getIdTrackerUser());
+		dataSet.setParameters(
+				msmsClusterDataSetEditorDialog.getMsmsExtractionParameters());
+		dataSet.getClusters().addAll(msmsClusterDataSetEditorDialog.getClustersToAdd());
+		
 		MSMSClusterDataSetUploadTask task = 
 				new MSMSClusterDataSetUploadTask(dataSet);
 		task.addTaskListener(this);
@@ -3070,16 +3076,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		// TODO Auto-generated method stub
 
 	}
-
+	
 	@Override
 	public synchronized void clearPanel() {
 
-		msOneFeatureTable.getTable().clearTable();
-		msTwoFeatureTable.getTable().clearTable();
-		clearFeatureData();
-		clearDataMaps();
-		clearMSMSClusterData();
-		idTrackerDataExplorerPlotDialog.clearPanels();
+		clearWorkbench();
 		FeatureCollectionManager.clearDefaultCollections();
 		MSMSClusterDataSetManager.clearDefaultCollections();
 		
@@ -3091,6 +3092,16 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(activeMSMSClusterDataSet != null 
 				&& MSMSClusterDataSetManager.getEditableMSMSClusterDataSets().contains(activeMSMSClusterDataSet))
 			activeMSMSClusterDataSet = null;
+	}
+	
+	public void clearWorkbench() { 
+		
+		msOneFeatureTable.getTable().clearTable();
+		msTwoFeatureTable.getTable().clearTable();
+		clearFeatureData();
+		clearDataMaps();
+		clearMSMSClusterData();
+		idTrackerDataExplorerPlotDialog.clearPanels();
 	}
 	
 	public void clearMSMSFeatureData() {

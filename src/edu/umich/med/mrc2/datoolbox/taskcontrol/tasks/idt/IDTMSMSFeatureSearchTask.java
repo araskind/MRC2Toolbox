@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -148,6 +149,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	protected boolean lookupSecondaryIds;
 	protected boolean lookupSecondaryLibMatches;
 	protected Collection<MsFeatureInfoBundle>features;
+	protected Collection<MsFeatureInfoBundle>cashedFeatures;
 	
 	public IDTMSMSFeatureSearchTask(
 			Polarity polarity, 
@@ -178,7 +180,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			String mrc2libraryId, 
 			boolean searchAllLibIds,
 			Collection<ReferenceMsMsLibrary> msmsLibs) {
-		super();
+		this();
 		this.polarity = polarity;
 		this.precursorMz = basePeakMz;
 		this.fragments = fragments;
@@ -207,8 +209,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		this.mrc2libraryId = mrc2libraryId;
 		this.searchAllLibIds = searchAllLibIds;
 		this.msmsLibs = msmsLibs;
-		
-		features = new ArrayList<MsFeatureInfoBundle>();
+
 		lookupSecondaryIds = false;
 		if(searchAllIds && (!formula.isEmpty() || !inchiKey.isEmpty() || (!compoundNameOrId.isEmpty() && idOpt != null)))
 			lookupSecondaryIds = true;
@@ -219,7 +220,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	}
 
 	public IDTMSMSFeatureSearchTask() {
-		// TODO Auto-generated constructor stub
+		features = new ArrayList<MsFeatureInfoBundle>();
+		cashedFeatures = new HashSet<MsFeatureInfoBundle>();
 	}
 
 	@Override
@@ -239,7 +241,9 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				putDataInCache();
 				attachChromatograms();
 			}
+			finalizeFeatureList();
 			applyAdditionalFilters();
+			
 			//	updateAutomaticDefaultIdsBasedOnScores();
 			setStatus(TaskStatus.FINISHED);
 		}
@@ -261,11 +265,11 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		int paramCount = 1;
 		
 		String query = 
-			"SELECT DISTINCT FEATURE_ID, RETENTION_TIME, MZ_OF_INTEREST, ACQUISITION_METHOD_ID, " + 
+			"SELECT DISTINCT FEATURE_ID, MSMS_FEATURE_ID, RETENTION_TIME, MZ_OF_INTEREST, ACQUISITION_METHOD_ID, " + 
 			"EXTRACTION_METHOD_ID, EXPERIMENT_ID, STOCK_SAMPLE_ID, SAMPLE_ID, INJECTION_ID, POLARITY FROM (" + 
 			"SELECT F.FEATURE_ID, F.POLARITY, F.MZ_OF_INTEREST, F.RETENTION_TIME, " +
 			"I.ACQUISITION_METHOD_ID, M.EXTRACTION_METHOD_ID, S.EXPERIMENT_ID, S.SAMPLE_ID, " +
-			"T.STOCK_SAMPLE_ID, I.INJECTION_ID, R.ACCESSION, F2.COLLISION_ENERGY " + 
+			"T.STOCK_SAMPLE_ID, I.INJECTION_ID, R.ACCESSION, F2.MSMS_FEATURE_ID, F2.COLLISION_ENERGY " + 
 			"FROM MSMS_PARENT_FEATURE F, " +
 			"DATA_ANALYSIS_MAP M, " +
 			"DATA_ACQUISITION_METHOD A, " +
@@ -511,6 +515,13 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		}
 		while (rs.next()) {
 
+			MsFeatureInfoBundle fInCash = 
+					FeatureCollectionUtils.retrieveMSMSFetureInfoBundleFromCache(rs.getString("MSMS_FEATURE_ID"));
+			if(fInCash != null) {
+				cashedFeatures.add(fInCash);
+				processed++;
+				continue;				
+			}
 			String id = rs.getString("FEATURE_ID");
 			double rt = rs.getDouble("RETENTION_TIME");
 			double mz = rs.getDouble("MZ_OF_INTEREST");
@@ -982,13 +993,13 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	}
 	
 	protected void attachChromatograms() throws Exception {
-		
-		
+			
 		Connection conn = ConnectionManager.getConnection();
 		taskDescription = "Reading chromatograms ...";
 		total = features.size();
 		processed = 0;
-		Collection<StoredExtractedIonData>storedChroms = new ArrayList<StoredExtractedIonData>();		
+		Collection<StoredExtractedIonData>storedChroms = 
+				new ArrayList<StoredExtractedIonData>();		
 		String query = 
 				"SELECT INJECTION_ID, MS_LEVEL, EXTRACTED_MASS,  " +
 				"MASS_ERROR_VALUE, MASS_ERROR_TYPE, START_RT, END_RT,  " +
@@ -1292,6 +1303,14 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					collect(Collectors.toList());
 			features.clear();
 			features.addAll(byFollowup);
+		}
+	}
+	
+	protected void finalizeFeatureList() {
+		
+		if(!cashedFeatures.isEmpty()) {
+			features.addAll(cashedFeatures);
+			features = features.stream().distinct().collect(Collectors.toSet());
 		}
 	}
 	

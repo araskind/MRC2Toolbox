@@ -224,6 +224,8 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 		loadMSMSClusterDataSetCheckBox = 
 				new JCheckBox("Load MSMS cluster data set in the workbench");
 		panel.add(loadMSMSClusterDataSetCheckBox);
+		loadMSMSClusterDataSetCheckBox.setSelected(true);
+		loadMSMSClusterDataSetCheckBox.setEnabled(false);
 		
 		Component horizontalStrut = Box.createHorizontalStrut(50);
 		panel.add(horizontalStrut);

@@ -51,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
@@ -88,8 +89,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		this.dataPipelines = dataPipelines;
 		this.lookupFeatures = mzrtFeatureList;
 		this.clusteringParams = clusteringParams;
-		
-		features = new ArrayList<MsFeatureInfoBundle>();
+
 		msmsClusterDataSet = new MSMSClusterDataSet(
 				"Active data set", 
 				"", 
@@ -130,6 +130,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
 		}
+		finalizeFeatureList();
 		if(lookupFeatures != null && !lookupFeatures.isEmpty()) {
 			
 			try {
@@ -199,7 +200,14 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 				  rs.beforeFirst();
 				}
 				while (rs.next()) {
-	
+					
+					MsFeatureInfoBundle fInCash = 
+							FeatureCollectionUtils.retrieveMSMSFetureInfoBundleFromCache(rs.getString("MSMS_FEATURE_ID"));
+					if(fInCash != null) {
+						cashedFeatures.add(fInCash);
+						processed++;
+						continue;				
+					}	
 					String id = rs.getString("FEATURE_ID");
 					double rt = rs.getDouble("RETENTION_TIME");
 					double mz = rs.getDouble("MZ_OF_INTEREST");
