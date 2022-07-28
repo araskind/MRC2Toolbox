@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
@@ -45,8 +45,8 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MSMSFeatureClusteringTask extends AbstractTask {
 	
-	private Collection<MsFeatureInfoBundle> msmsFeatures;
-	private Collection<MsFeatureInfoBundle> filteredMsmsFeatures;
+	private Collection<MSFeatureInfoBundle> msmsFeatures;
+	private Collection<MSFeatureInfoBundle> filteredMsmsFeatures;
 	private MSMSClusteringParameterSet params;
 	private Collection<MinimalMSOneFeature> lookupFeatures;
 	private Collection<MsFeatureInfoBundleCluster>featureClusters;
@@ -58,7 +58,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	private static final double SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT = 0.01d;
 	
 	public MSMSFeatureClusteringTask(
-			Collection<MsFeatureInfoBundle> msmsFeatures, 
+			Collection<MSFeatureInfoBundle> msmsFeatures, 
 			MSMSClusteringParameterSet params,
 			Collection<MinimalMSOneFeature> lookupFeatures) {
 		super();
@@ -109,13 +109,13 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 		taskDescription = "Clustering MSMS features based on filter list ...";
 		total = lookupFeatures.size();
 		processed = 0;
-		filteredMsmsFeatures = new HashSet<MsFeatureInfoBundle>();
+		filteredMsmsFeatures = new HashSet<MSFeatureInfoBundle>();
 		
 		for(MinimalMSOneFeature b : lookupFeatures) {
 			
 			Range rtRange = new Range(b.getRt() - rtError, b.getRt() + rtError);
 			Range mzRange = MsUtils.createMassRange(b.getMz(), mzError, mzErrorType);
-			List<MsFeatureInfoBundle> clusterFeatures = msmsFeatures.stream().
+			List<MSFeatureInfoBundle> clusterFeatures = msmsFeatures.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().
 						getSpectrum().getExperimentalTandemSpectrum())).
 				filter(f -> rtRange.contains(f.getRetentionTime())).
@@ -137,7 +137,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	
 	private MsFeatureInfoBundleCluster clusterBasedOnMSMSSimilarity(
 			MinimalMSOneFeature b,
-			List<MsFeatureInfoBundle> featuresToCluster) {
+			List<MSFeatureInfoBundle> featuresToCluster) {
 		
 		if(featuresToCluster.isEmpty())
 			return null;
@@ -150,10 +150,10 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 		}
 		if(featuresToCluster.size() > 1) {
 			
-			List<MsFeatureInfoBundle> featuresToRemove = 
-					new ArrayList<MsFeatureInfoBundle>();
+			List<MSFeatureInfoBundle> featuresToRemove = 
+					new ArrayList<MSFeatureInfoBundle>();
 			MsFeatureInfoBundleCluster newCluster = new MsFeatureInfoBundleCluster(b);
-			MsFeatureInfoBundle maxInt = featuresToCluster.get(0);
+			MSFeatureInfoBundle maxInt = featuresToCluster.get(0);
 			double maxArea = maxInt.getMsFeature().getSpectrum().
 					getExperimentalTandemSpectrum().getTotalIntensity();
 			for(int i=1; i<featuresToCluster.size(); i++) {
@@ -170,7 +170,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 			featuresToRemove.add(maxInt);
 			for(int i=0; i<featuresToCluster.size(); i++) {
 				
-				MsFeatureInfoBundle f = featuresToCluster.get(i);
+				MSFeatureInfoBundle f = featuresToCluster.get(i);
 				if(f.equals(maxInt))
 					continue;
 				
@@ -197,7 +197,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 		processed = 0;
 		params = msmsClusterDataSet.getParameters();
 		boolean added = false;
-		for(MsFeatureInfoBundle b : msmsFeatures) {
+		for(MSFeatureInfoBundle b : msmsFeatures) {
 			
 			added = false;
 			for(MsFeatureInfoBundleCluster cluster : featureClusters) {

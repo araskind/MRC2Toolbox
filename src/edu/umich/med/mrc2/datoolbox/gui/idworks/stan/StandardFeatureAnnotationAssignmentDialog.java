@@ -50,7 +50,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -76,7 +76,7 @@ public class StandardFeatureAnnotationAssignmentDialog extends JDialog implement
 	private ActionListener listener;
 
 	public StandardFeatureAnnotationAssignmentDialog(
-			ActionListener parent, MsFeatureInfoBundle bundle) {
+			ActionListener parent, MSFeatureInfoBundle bundle) {
 
 		super();
 		this.listener = parent;
@@ -199,7 +199,7 @@ public class StandardFeatureAnnotationAssignmentDialog extends JDialog implement
 	
 
 	@SuppressWarnings("unchecked")
-	private void populateAnnotationListsFromFeatureInfoBundle(MsFeatureInfoBundle bundle) {
+	private void populateAnnotationListsFromFeatureInfoBundle(MSFeatureInfoBundle bundle) {
 
 		Collection<StandardFeatureAnnotation> usedSteps = bundle.getStandadAnnotations();
 		Collection<StandardFeatureAnnotation> availableSteps =  

@@ -31,9 +31,9 @@ import java.util.TreeSet;
 import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedIonData;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsFeatureChromatogramExtractionTarget;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -46,17 +46,17 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask implements TaskListener {
 	
 	private Collection<DataFile>rawDataFiles;
-	private Collection<MsFeatureInfoBundle>features;
+	private Collection<MSFeatureInfoBundle>features;
 	private ChromatogramDefinition commonDefinition;
 	private MsFeatureChromatogramExtractionTarget xicTarget;	
-	private Map<MsFeatureInfoBundle, ChromatogramDefinition>featureChromatogramDefinitions;
+	private Map<MSFeatureInfoBundle, ChromatogramDefinition>featureChromatogramDefinitions;
 	private Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 	private int processedFilesCount;	
-	private Map<DataFile, Map<MsFeatureInfoBundle, Collection<ExtractedIonData>>>fileChromatogramMap;
+	private Map<DataFile, Map<MSFeatureInfoBundle, Collection<ExtractedIonData>>>fileChromatogramMap;
 
 	public MsFeatureChromatogramBatchExtractionTask(
 			Collection<DataFile> rawDataFiles,
-			Collection<MsFeatureInfoBundle> features, 
+			Collection<MSFeatureInfoBundle> features, 
 			ChromatogramDefinition commonDefinition,
 			MsFeatureChromatogramExtractionTarget xicTarget) {
 		super();
@@ -67,7 +67,7 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 		chromatogramMap = 
 				new HashMap<String, MsFeatureChromatogramBundle>();
 		fileChromatogramMap = 
-				new TreeMap<DataFile, Map<MsFeatureInfoBundle, Collection<ExtractedIonData>>>();
+				new TreeMap<DataFile, Map<MSFeatureInfoBundle, Collection<ExtractedIonData>>>();
 	}
 
 	@Override
@@ -92,9 +92,9 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 		total = features.size();
 		processed = 0;
 		featureChromatogramDefinitions = 
-				new HashMap<MsFeatureInfoBundle, ChromatogramDefinition>();
+				new HashMap<MSFeatureInfoBundle, ChromatogramDefinition>();
 		
-		for(MsFeatureInfoBundle mfb : features) {
+		for(MSFeatureInfoBundle mfb : features) {
 			Collection<Double>mzList = new TreeSet<Double>();			
 			MassSpectrum spectrum = mfb.getMsFeature().getSpectrum();
 			if(spectrum == null) {
@@ -148,11 +148,11 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 
 	private void createMsFeatureChromatogramBundles() {
 		
-		for(Entry<DataFile, Map<MsFeatureInfoBundle, Collection<ExtractedIonData>>> e : fileChromatogramMap.entrySet()) {
+		for(Entry<DataFile, Map<MSFeatureInfoBundle, Collection<ExtractedIonData>>> e : fileChromatogramMap.entrySet()) {
 			
-			Map<MsFeatureInfoBundle, Collection<ExtractedIonData>> fileChromatograms = e.getValue();
+			Map<MSFeatureInfoBundle, Collection<ExtractedIonData>> fileChromatograms = e.getValue();
 			DataFile df = e.getKey();
-			for(Entry<MsFeatureInfoBundle, Collection<ExtractedIonData>> entry : fileChromatograms.entrySet()) {
+			for(Entry<MSFeatureInfoBundle, Collection<ExtractedIonData>> entry : fileChromatograms.entrySet()) {
 				
 				String featureId = entry.getKey().getMsFeature().getId();
 				if(chromatogramMap.get(featureId) == null) {

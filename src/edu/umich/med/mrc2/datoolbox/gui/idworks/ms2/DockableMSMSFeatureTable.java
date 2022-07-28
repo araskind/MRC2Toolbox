@@ -32,8 +32,8 @@ import bibliothek.gui.dock.action.DefaultDockActionSource;
 import bibliothek.gui.dock.action.LocationHint;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -95,15 +95,15 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 		return featureTable;
 	}
 
-	public MsFeatureInfoBundle getSelectedBundle() {
+	public MSFeatureInfoBundle getSelectedBundle() {
 		return featureTable.getSelectedBundle();
 	}
 
-	public void selectBundle(MsFeatureInfoBundle toSelect) {
+	public void selectBundle(MSFeatureInfoBundle toSelect) {
 		featureTable.selectBundle(toSelect);
 	}
 
-	public Collection<MsFeatureInfoBundle>getBundles(TableRowSubset subset){
+	public Collection<MSFeatureInfoBundle>getBundles(TableRowSubset subset){
 
 		if(subset.equals(TableRowSubset.SELECTED))
 			return featureTable.getMultipleSelectedBundles();
@@ -115,7 +115,7 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 
 	public Collection<MsFeature>getTableFeatures(TableRowSubset subset){
 		
-		Collection<MsFeatureInfoBundle>bundles = getBundles(subset);
+		Collection<MSFeatureInfoBundle>bundles = getBundles(subset);
 		return bundles.stream().
 				map(b -> b.getMsFeature()).collect(Collectors.toList());
 	}

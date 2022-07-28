@@ -27,7 +27,7 @@ import java.sql.ResultSet;
 import java.util.Collection;
 import java.util.TreeSet;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
@@ -139,7 +139,7 @@ public class StandardAnnotationUtils {
 	}
 
 	public static void attachStandardFeatureAnnotationToMSMSFeature(
-				MsFeatureInfoBundle fib) throws Exception {
+				MSFeatureInfoBundle fib) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		attachStandardFeatureAnnotationToMSMSFeature(fib, conn);
@@ -147,7 +147,7 @@ public class StandardAnnotationUtils {
 	}
 	
 	public static void attachStandardFeatureAnnotationToMSMSFeature(
-			MsFeatureInfoBundle fib, Connection conn) throws Exception {
+			MSFeatureInfoBundle fib, Connection conn) throws Exception {
 
 		String query =
 				"SELECT STANDARD_ANNOTATION_ID FROM MSMS_FEATURE_STANDARD_ANNOTATIONS " +
@@ -167,7 +167,7 @@ public class StandardAnnotationUtils {
 	}
 	
 	public static void setStandardFeatureAnnotationsForMSMSFeature(
-			MsFeatureInfoBundle fib) throws Exception {
+			MSFeatureInfoBundle fib) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		setStandardFeatureAnnotationsForMSMSFeature(fib, conn);
@@ -175,7 +175,7 @@ public class StandardAnnotationUtils {
 	}
 	
 	public static void setStandardFeatureAnnotationsForMSMSFeature(
-			MsFeatureInfoBundle fib, Connection conn) throws Exception {
+			MSFeatureInfoBundle fib, Connection conn) throws Exception {
 
 		String query =
 				"DELETE FROM MSMS_FEATURE_STANDARD_ANNOTATIONS " +
@@ -201,7 +201,7 @@ public class StandardAnnotationUtils {
 	}
 		
 	public static void attachStandardFeatureAnnotationsToMS1Feature(
-			MsFeatureInfoBundle fib) throws Exception {
+			MSFeatureInfoBundle fib) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		attachStandardFeatureAnnotationsToMS1Feature(fib, conn);
@@ -209,7 +209,7 @@ public class StandardAnnotationUtils {
 	}
 	
 	public static void attachStandardFeatureAnnotationsToMS1Feature(
-			MsFeatureInfoBundle fib, Connection conn) throws Exception {
+			MSFeatureInfoBundle fib, Connection conn) throws Exception {
 
 		String query =
 			"SELECT STANDARD_ANNOTATION_ID FROM POOLED_MS1_FEATURE_STANDARD_ANNOTATIONS " +
@@ -229,7 +229,7 @@ public class StandardAnnotationUtils {
 	}
 	
 	public static void setStandardFeatureAnnotationsForMS1Feature(
-			MsFeatureInfoBundle fib) throws Exception {
+			MSFeatureInfoBundle fib) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		setStandardFeatureAnnotationsForMS1Feature(fib, conn);
@@ -237,7 +237,7 @@ public class StandardAnnotationUtils {
 	}	
 
 	public static void setStandardFeatureAnnotationsForMS1Feature(
-			MsFeatureInfoBundle fib, Connection conn) throws Exception {
+			MSFeatureInfoBundle fib, Connection conn) throws Exception {
 
 		String query =
 				"DELETE FROM POOLED_MS1_FEATURE_STANDARD_ANNOTATIONS " +

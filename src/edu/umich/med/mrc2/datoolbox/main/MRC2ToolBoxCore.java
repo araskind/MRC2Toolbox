@@ -99,7 +99,7 @@ public final class MRC2ToolBoxCore {
 	
 	private static CompositeCacheManager compositeCacheManager;
 	private static Properties cacheProps;
-	public static CacheAccess<Object, Object> msmsFeatureCache;
+	public static CacheAccess<Object, Object> msFeatureCache;
 	public static CacheAccess<Object, Object> featureChromatogramCache;
 
 	@SuppressWarnings("rawtypes")
@@ -246,7 +246,9 @@ public final class MRC2ToolBoxCore {
 
 	public static void shutDown() {
 
-		RawDataManager.releaseAllDataSources();
+		RawDataManager.releaseAllDataSources();		
+		msFeatureCache.clear();
+		featureChromatogramCache.clear();
 		try {
 			JCS.shutdown();
 		} catch (Exception e) {
@@ -400,8 +402,10 @@ public final class MRC2ToolBoxCore {
 		}
 		compositeCacheManager.configure(cacheProps);
 		
-		msmsFeatureCache = JCS.getInstance("msmsFeatureCache");
+		msFeatureCache = JCS.getInstance("msmsFeatureCache");
+		msFeatureCache.clear();
 		featureChromatogramCache = JCS.getInstance("featureChromatogramCache");
+		featureChromatogramCache.clear();
 	}
 
 	public static RawDataAnalysisProject getActiveRawDataAnalysisProject() {

@@ -36,8 +36,8 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
@@ -55,7 +55,7 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class ExtendedMSPExportTask extends AbstractTask {
 
-	private Collection<MsFeatureInfoBundle>featuresToExport;
+	private Collection<MSFeatureInfoBundle>featuresToExport;
 	private File exportFile;
 	private boolean instrumentOnly;
 	private static final DateFormat dateFormat = 
@@ -63,7 +63,7 @@ public class ExtendedMSPExportTask extends AbstractTask {
 	private Map<String,Injection>injectionMap;
 
 	public ExtendedMSPExportTask(
-			Collection<MsFeatureInfoBundle> featuresToExport,
+			Collection<MSFeatureInfoBundle> featuresToExport,
 			File exportFile,
 			boolean instrumentOnly) {
 		super();
@@ -80,7 +80,7 @@ public class ExtendedMSPExportTask extends AbstractTask {
 		setStatus(TaskStatus.PROCESSING);
 		try {
 			//	Filter features that have MSMS
-			List<MsFeatureInfoBundle> msmsFeatures = featuresToExport.stream().
+			List<MSFeatureInfoBundle> msmsFeatures = featuresToExport.stream().
 				filter(f -> !f.getMsFeature().getSpectrum().getTandemSpectra().isEmpty()).
 				collect(Collectors.toList());
 			if(msmsFeatures.isEmpty()) {
@@ -107,7 +107,7 @@ public class ExtendedMSPExportTask extends AbstractTask {
 		}
 	}
 
-	private void createInjectionMap(List<MsFeatureInfoBundle> msmsFeatures) {
+	private void createInjectionMap(List<MSFeatureInfoBundle> msmsFeatures) {
 
 		injectionMap = new TreeMap<String,Injection>();
 		List<String> injIds = msmsFeatures.stream().
@@ -132,13 +132,13 @@ public class ExtendedMSPExportTask extends AbstractTask {
 		}
 	}
 
-	private void writeMspFile(List<MsFeatureInfoBundle> msmsFeatures) throws IOException {
+	private void writeMspFile(List<MSFeatureInfoBundle> msmsFeatures) throws IOException {
 
 		taskDescription = "Wtiting MSP output";
 		total = msmsFeatures.size();
 		processed = 0;
 		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
-		for(MsFeatureInfoBundle bundle : msmsFeatures) {
+		for(MSFeatureInfoBundle bundle : msmsFeatures) {
 
 			MsFeature msf = bundle.getMsFeature();
 			Collection<TandemMassSpectrum> tandemSpectra = msf.getSpectrum().getTandemSpectra();
@@ -203,7 +203,7 @@ public class ExtendedMSPExportTask extends AbstractTask {
 		writer.close();
 	}
 
-	private String createComment(MsFeatureInfoBundle bundle) {
+	private String createComment(MSFeatureInfoBundle bundle) {
 
 		String comment = MSPField.COMMENT.getName() + ": ";
 		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(bundle.getMsFeature().getRetentionTime()) + " min; ";

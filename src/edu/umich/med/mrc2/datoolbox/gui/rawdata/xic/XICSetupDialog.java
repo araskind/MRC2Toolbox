@@ -50,8 +50,8 @@ import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
@@ -90,7 +90,7 @@ public class XICSetupDialog extends JDialog
 	protected CControl control;
 	protected CGrid grid;
 	
-	public XICSetupDialog(ActionListener listener, MsFeatureInfoBundle bundle) {
+	public XICSetupDialog(ActionListener listener, MSFeatureInfoBundle bundle) {
 		
 		super();
 		setTitle("Set up XIC for the feature");
@@ -157,7 +157,7 @@ public class XICSetupDialog extends JDialog
 		preferences.putInt(HEIGTH, getHeight());	
 	}
 	
-	private void populateMassSelector(MsFeatureInfoBundle bundle) {
+	private void populateMassSelector(MSFeatureInfoBundle bundle) {
 		
 		MassSpectrum spectrum = bundle.getMsFeature().getSpectrum();
 		TandemMassSpectrum msms = spectrum.getTandemSpectrum(SpectrumSource.EXPERIMENTAL);

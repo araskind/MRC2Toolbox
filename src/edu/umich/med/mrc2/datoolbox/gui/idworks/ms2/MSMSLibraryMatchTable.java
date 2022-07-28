@@ -34,8 +34,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.compare.CompoundIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
@@ -63,7 +63,7 @@ public class MSMSLibraryMatchTable extends BasicTable {
 	private static final long serialVersionUID = -8853294038580302429L;
 	private MSMSLibraryMatchTableModel model;
 	private MouseMotionAdapter mma;
-	private MsFeatureInfoBundle selectedMsMsFeatureBundle;
+	private MSFeatureInfoBundle selectedMsMsFeatureBundle;
 	private MSMSLibMatchTableModelListener msmsMatchModelListener;
 
 	public MSMSLibraryMatchTable() {
@@ -145,7 +145,7 @@ public class MSMSLibraryMatchTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromFeatureBundle(MsFeatureInfoBundle selectedMsMsFeatureBundle) {
+	public void setTableModelFromFeatureBundle(MSFeatureInfoBundle selectedMsMsFeatureBundle) {
 
 		if(msmsMatchModelListener != null)
 			model.removeTableModelListener(msmsMatchModelListener);

@@ -65,7 +65,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
@@ -105,8 +105,9 @@ public class FeatureCollectionEditorDialog extends JDialog
 	private JTextField methodNameTextField;
 	private JLabel idValueLabel;
 	private JLabel methodAuthorLabel;
-	private Collection<MsFeatureInfoBundle> featuresToAdd;
-	private Set<String> featureIdsToAdd;
+	private Collection<MSFeatureInfoBundle> featuresToAdd;
+	private Set<String> msmsFeatureIdsToAdd;
+	private Set<String> msFeatureIdsToAdd;
 	private JTextField featureFileTextField;
 	private JCheckBox loadCollectionCheckBox;
 
@@ -114,7 +115,7 @@ public class FeatureCollectionEditorDialog extends JDialog
 
 	public FeatureCollectionEditorDialog(
 			MsFeatureInfoBundleCollection collection, 
-			Collection<MsFeatureInfoBundle> featuresToAdd,
+			Collection<MSFeatureInfoBundle> featuresToAdd,
 			ActionListener actionListener) {
 		super();
 		setPreferredSize(new Dimension(700, 300));
@@ -124,7 +125,7 @@ public class FeatureCollectionEditorDialog extends JDialog
 		
 		this.featureCollection = collection;
 		this.featuresToAdd = featuresToAdd;
-		featureIdsToAdd = new TreeSet<String>();
+		msmsFeatureIdsToAdd = new TreeSet<String>();
 		
 		JPanel dataPanel = new JPanel();
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -455,20 +456,20 @@ public class FeatureCollectionEditorDialog extends JDialog
 					
 					String trimmed = line.trim();
 					if(trimmed.startsWith(DataPrefix.MSMS_SPECTRUM.getName()) && trimmed.length() == 16)
-						featureIdsToAdd.add(trimmed);				
+						msmsFeatureIdsToAdd.add(trimmed);				
 				}
 			}
-			if(!featureIdsToAdd.isEmpty()) {
+			if(!msmsFeatureIdsToAdd.isEmpty()) {
 				
-				ValidateMSMSIDlistTask task = new ValidateMSMSIDlistTask(featureIdsToAdd);
+				ValidateMSMSIDlistTask task = new ValidateMSMSIDlistTask(msmsFeatureIdsToAdd);
 				idp = new IndeterminateProgressDialog("Validating MSMS feature IDs ...", this, task);
 				idp.setLocationRelativeTo(this);
 				idp.setVisible(true);
 				
-				if(!featureIdsToAdd.isEmpty()) {
+				if(!msmsFeatureIdsToAdd.isEmpty()) {
 					featureFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
 					btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND.getName());
-					MessageDialog.showInfoMsg("Extracted " + Integer.toString(featureIdsToAdd.size()) + 
+					MessageDialog.showInfoMsg("Extracted " + Integer.toString(msmsFeatureIdsToAdd.size()) + 
 							" valid MSMS feature IDs", this);
 				}
 				else {
@@ -507,7 +508,7 @@ public class FeatureCollectionEditorDialog extends JDialog
 		public Void doInBackground() {
 
 			try {
-				featureIdsToAdd = FeatureCollectionUtils.validateMSMSIDlist(idsToValidate);
+				msFeatureIdsToAdd = FeatureCollectionUtils.validateMSMSIDlist(idsToValidate);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -557,12 +558,12 @@ public class FeatureCollectionEditorDialog extends JDialog
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
 
-	public Collection<MsFeatureInfoBundle> getFeaturesToAdd() {
+	public Collection<MSFeatureInfoBundle> getFeaturesToAdd() {
 		return featuresToAdd;
 	}
 
-	public Set<String> getFeatureIdsToAdd() {
-		return featureIdsToAdd;
+	public Set<String> getMsFeatureIdsToAdd() {
+		return msFeatureIdsToAdd;
 	}
 	
 	public boolean loadCollectionIntoWorkBench() {

@@ -25,7 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Collection;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
@@ -160,7 +160,7 @@ public class MSMSClusterDataSetUploadTask extends AbstractTask {
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
-				+ "(CLUSTER_ID, MSMS_FEATURE_ID) VALUES (?, ?)";
+				+ "(CLUSTER_ID, MS_FEATURE_ID) VALUES (?, ?)";
 		PreparedStatement featurePs = conn.prepareStatement(featureQuery);
 				
 		for(MsFeatureInfoBundleCluster cluster : dataSet.getClusters()) {
@@ -206,8 +206,8 @@ public class MSMSClusterDataSetUploadTask extends AbstractTask {
 			
 			//	Add cluster features
 			featurePs.setString(1, clusterId);
-			for(MsFeatureInfoBundle feature : cluster.getComponents()) {				
-				featurePs.setString(2, feature.getMSMSFeatureId());
+			for(MSFeatureInfoBundle feature : cluster.getComponents()) {				
+				featurePs.setString(2, feature.getMSFeatureId());
 				featurePs.addBatch();
 			}
 			featurePs.executeBatch();

@@ -29,7 +29,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleCollectionComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -49,7 +49,7 @@ public class FeatureCollectionManager {
 	public static final MsFeatureInfoBundleCollection activeProjectFeatureSet = 
 			new MsFeatureInfoBundleCollection(ACTIVE_PROJECT_FEATURE_SET);
 	
-	public static final Map<MsFeatureInfoBundleCollection, Set<String>>featureCollectionsMSMSIDMap = 
+	public static final Map<MsFeatureInfoBundleCollection, Set<String>>featureCollectionsMSIDMap = 
 			new TreeMap<MsFeatureInfoBundleCollection, Set<String>>(
 					new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));
 
@@ -60,12 +60,12 @@ public class FeatureCollectionManager {
 	}
 		
 	public static void refreshMsFeatureInfoBundleCollections() {
-		featureCollectionsMSMSIDMap.clear();
-		featureCollectionsMSMSIDMap.put(msmsSearchResults, new TreeSet<String>());
-		featureCollectionsMSMSIDMap.put(msOneSearchResults, new TreeSet<String>());
-		featureCollectionsMSMSIDMap.put(activeProjectFeatureSet, new TreeSet<String>());
+		featureCollectionsMSIDMap.clear();
+		featureCollectionsMSIDMap.put(msmsSearchResults, new TreeSet<String>());
+		featureCollectionsMSIDMap.put(msOneSearchResults, new TreeSet<String>());
+		featureCollectionsMSIDMap.put(activeProjectFeatureSet, new TreeSet<String>());
 		try {
-			featureCollectionsMSMSIDMap.putAll(
+			featureCollectionsMSIDMap.putAll(
 					FeatureCollectionUtils.getMsFeatureInformationBundleCollections());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -80,12 +80,12 @@ public class FeatureCollectionManager {
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}		
-		return featureCollectionsMSMSIDMap.keySet();
+		return featureCollectionsMSIDMap.keySet();
 	}
 	
 	public static Collection<MsFeatureInfoBundleCollection>getEditableMsFeatureInfoBundleCollections() {
 		
-		return featureCollectionsMSMSIDMap.keySet().stream().
+		return featureCollectionsMSIDMap.keySet().stream().
 			filter(c -> !c.equals(msmsSearchResults)).
 			filter(c -> !c.equals(msOneSearchResults)).
 			filter(c -> !c.equals(activeProjectFeatureSet)).
@@ -93,20 +93,18 @@ public class FeatureCollectionManager {
 			collect(Collectors.toList());
 	}
 	
-	public static MsFeatureInfoBundleCollection getMsFeatureInfoBundleCollectionById(String id) {
-		
-		return featureCollectionsMSMSIDMap.keySet().stream().
+	public static MsFeatureInfoBundleCollection getMsFeatureInfoBundleCollectionById(String id) {		
+		return featureCollectionsMSIDMap.keySet().stream().
 				filter(c -> c.getId().equals(id)).findFirst().orElse(null);
-	}
-	
+	}	
 	
 	public static IDTMSMSFeatureDataPullTask getMsFeatureInfoBundleCollectionData(
 			MsFeatureInfoBundleCollection mbColl) {
 		
-		if(!featureCollectionsMSMSIDMap.containsKey(mbColl))
+		if(!featureCollectionsMSIDMap.containsKey(mbColl))
 			return null;
 		
-		Set<String> idList = featureCollectionsMSMSIDMap.get(mbColl);
+		Set<String> idList = featureCollectionsMSIDMap.get(mbColl);
 		Collection<String> attachedIdList = mbColl.getMSMSFeatureIds();
 		Set<String> unAttachedIdList = idList.stream().
 				filter(i -> !attachedIdList.contains(i)).collect(Collectors.toSet());
@@ -114,8 +112,8 @@ public class FeatureCollectionManager {
 		//	Check cash data
 		Set<String>missingIds = new TreeSet<String>();
 		for(String id : unAttachedIdList) {
-			MsFeatureInfoBundle cachedFeature = 
-					FeatureCollectionUtils.retrieveMSMSFetureInfoBundleFromCache(id);
+			MSFeatureInfoBundle cachedFeature = 
+					FeatureCollectionUtils.retrieveMSFeatureInfoBundleFromCache(id);
 			if(cachedFeature == null)
 				missingIds.add(id);
 			else
@@ -132,28 +130,28 @@ public class FeatureCollectionManager {
 	public static int getMsFeatureInfoBundleCollectionSize(
 			MsFeatureInfoBundleCollection mbColl) {
 		
-		if(!featureCollectionsMSMSIDMap.containsKey(mbColl))
+		if(!featureCollectionsMSIDMap.containsKey(mbColl))
 			return 0;
 		
-		return featureCollectionsMSMSIDMap.get(mbColl).size();
+		return featureCollectionsMSIDMap.get(mbColl).size();
 	}
 	
-	public static Collection<MsFeatureInfoBundle>getLoadedMSMSFeaturesByIds(Collection<String>msmsIds){
+	public static Collection<MSFeatureInfoBundle>getLoadedMSMSFeaturesByIds(Collection<String>msmsIds){
 		return msmsIds.stream().
-				map(id -> FeatureCollectionUtils.retrieveMSMSFetureInfoBundleFromCache(id)).
+				map(id -> FeatureCollectionUtils.retrieveMSFeatureInfoBundleFromCache(id)).
 				filter(f -> Objects.nonNull(f)).collect(Collectors.toSet());
 	}
 	
 	public static void addFeaturesToCollection(
 			MsFeatureInfoBundleCollection collection, 
-			Collection<MsFeatureInfoBundle>featuresToAdd)  {
+			Collection<MSFeatureInfoBundle>featuresToAdd)  {
 
-		if(!featureCollectionsMSMSIDMap.containsKey(collection) || featuresToAdd.isEmpty())
+		if(!featureCollectionsMSIDMap.containsKey(collection) || featuresToAdd.isEmpty())
 			return;
 		
-		Set<String>existingIds = featureCollectionsMSMSIDMap.get(collection);
+		Set<String>existingIds = featureCollectionsMSIDMap.get(collection);
 		Set<String>featureIdsToAdd = featuresToAdd.stream().
-				map(f -> f.getMSMSFeatureId()).
+				map(f -> f.getMSFeatureId()).
 				filter(id -> !existingIds.contains(id)).
 				collect(Collectors.toSet());
 
@@ -166,19 +164,19 @@ public class FeatureCollectionManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		featureCollectionsMSMSIDMap.get(collection).addAll(featureIdsToAdd);
+		featureCollectionsMSIDMap.get(collection).addAll(featureIdsToAdd);
 	}
 	
 	public static void removeFeaturesFromCollection(
 			MsFeatureInfoBundleCollection collection, 
-			Collection<MsFeatureInfoBundle>featuresToRemove) {
+			Collection<MSFeatureInfoBundle>featuresToRemove) {
 		
-		if(!featureCollectionsMSMSIDMap.containsKey(collection) || featuresToRemove.isEmpty())
+		if(!featureCollectionsMSIDMap.containsKey(collection) || featuresToRemove.isEmpty())
 			return;
 		
-		Set<String>existingIds = featureCollectionsMSMSIDMap.get(collection);
+		Set<String>existingIds = featureCollectionsMSIDMap.get(collection);
 		Set<String>featureIdsToRemove = featuresToRemove.stream().
-				map(f -> f.getMSMSFeatureId()).
+				map(f -> f.getMSFeatureId()).
 				filter(id -> existingIds.contains(id)).
 				collect(Collectors.toSet());
 
@@ -191,11 +189,11 @@ public class FeatureCollectionManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		featureCollectionsMSMSIDMap.get(collection).removeAll(featureIdsToRemove);
+		featureCollectionsMSIDMap.get(collection).removeAll(featureIdsToRemove);
 	}
 
-	public static Map<MsFeatureInfoBundleCollection, Set<String>> getFeatureCollectionsMsmsIdMap() {
-		return featureCollectionsMSMSIDMap;
+	public static Map<MsFeatureInfoBundleCollection, Set<String>> getFeatureCollectionsMsIdMap() {
+		return featureCollectionsMSIDMap;
 	}
 }
 

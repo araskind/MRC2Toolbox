@@ -42,8 +42,8 @@ import org.apache.commons.compress.utils.FileNameUtils;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.compare.MSMSClusterDataSetComparator;
@@ -73,7 +73,7 @@ public class RawDataAnalysisProject extends Project {
 	protected Collection<DataFile>msmsDataFiles;
 	protected Collection<DataFile>msOneDataFiles;
 	protected Collection<Injection>injections;
-	protected Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;	
+	protected Map<DataFile, Collection<MSFeatureInfoBundle>>msFeatureMap;	
 	protected Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 	protected Set<MsFeatureInfoBundleCollection>featureCollections;
 	protected Collection<MSMSClusterDataSet> msmsClusterDataSets;
@@ -189,7 +189,7 @@ public class RawDataAnalysisProject extends Project {
 		msmsDataFiles = new TreeSet<DataFile>();
 		msOneDataFiles = new TreeSet<DataFile>();
 		injections = new HashSet<Injection>();
-		msFeatureMap = new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
+		msFeatureMap = new TreeMap<DataFile, Collection<MSFeatureInfoBundle>>();
 		chromatogramMap = new HashMap<String, MsFeatureChromatogramBundle>();
 		featureCollections = 
 				new TreeSet<MsFeatureInfoBundleCollection>(
@@ -202,7 +202,7 @@ public class RawDataAnalysisProject extends Project {
 
 	public void addMSMSDataFile(DataFile fileToAdd) {
 		msmsDataFiles.add(fileToAdd);
-		msFeatureMap.put(fileToAdd, new HashSet<MsFeatureInfoBundle>());
+		msFeatureMap.put(fileToAdd, new HashSet<MSFeatureInfoBundle>());
 		if(fileToAdd.getInjectionId() == null)		
 			injections.add(fileToAdd.generateInjectionFromFileData());
 		//	TODO
@@ -212,7 +212,7 @@ public class RawDataAnalysisProject extends Project {
 		
 		msmsDataFiles.addAll(filesToAdd);		
 		for(DataFile df : filesToAdd) {
-			msFeatureMap.put(df, new HashSet<MsFeatureInfoBundle>());
+			msFeatureMap.put(df, new HashSet<MSFeatureInfoBundle>());
 			if(df.getInjectionId() == null)
 				injections.add(df.generateInjectionFromFileData());
 		}
@@ -221,7 +221,7 @@ public class RawDataAnalysisProject extends Project {
 
 	public void addMSOneDataFile(DataFile fileToAdd) {
 		msOneDataFiles.add(fileToAdd);
-		msFeatureMap.put(fileToAdd, new HashSet<MsFeatureInfoBundle>());
+		msFeatureMap.put(fileToAdd, new HashSet<MSFeatureInfoBundle>());
 		if(fileToAdd.getInjectionId() == null)
 			injections.add(fileToAdd.generateInjectionFromFileData());
 		
@@ -232,7 +232,7 @@ public class RawDataAnalysisProject extends Project {
 		
 		msOneDataFiles.addAll(filesToAdd);		
 		for(DataFile df : filesToAdd) {
-			msFeatureMap.put(df, new HashSet<MsFeatureInfoBundle>());
+			msFeatureMap.put(df, new HashSet<MSFeatureInfoBundle>());
 			if(df.getInjectionId() == null)
 				injections.add(df.generateInjectionFromFileData());
 		}
@@ -265,15 +265,15 @@ public class RawDataAnalysisProject extends Project {
 		//	TODO
 	}
 	
-	public Collection<MsFeatureInfoBundle>getMsFeaturesForDataFile(DataFile df){
+	public Collection<MSFeatureInfoBundle>getMsFeaturesForDataFile(DataFile df){
 		return msFeatureMap.get(df);
 	}
 	
-	public void addMsFeaturesForDataFile(DataFile df, Collection<MsFeatureInfoBundle>features){
+	public void addMsFeaturesForDataFile(DataFile df, Collection<MSFeatureInfoBundle>features){
 		msFeatureMap.get(df).addAll(features);
 	}
 	
-	public void setMsFeaturesForDataFile(DataFile df, Collection<MsFeatureInfoBundle>features){
+	public void setMsFeaturesForDataFile(DataFile df, Collection<MSFeatureInfoBundle>features){
 		msFeatureMap.put(df, features);
 	}
 	
@@ -368,7 +368,7 @@ public class RawDataAnalysisProject extends Project {
 		return samples;
 	}
 	
-	public Collection<MsFeatureInfoBundle>getMsMsFeatureBundles(){
+	public Collection<MSFeatureInfoBundle>getMsMsFeatureBundles(){
 		
 		return msFeatureMap.values().stream().
 				flatMap(v -> v.stream()).
@@ -378,7 +378,7 @@ public class RawDataAnalysisProject extends Project {
 				collect(Collectors.toList());
 	}
 	
-	public Collection<MsFeatureInfoBundle>getFeatureBundlesForIds(Collection<String>idList){
+	public Collection<MSFeatureInfoBundle>getFeatureBundlesForIds(Collection<String>idList){
 		
 		return msFeatureMap.values().stream().
 				flatMap(v -> v.stream()).
@@ -401,7 +401,7 @@ public class RawDataAnalysisProject extends Project {
 
 	public void clearMSMSFeatures() {
 		
-		for(Entry<DataFile, Collection<MsFeatureInfoBundle>> e : msFeatureMap.entrySet())
+		for(Entry<DataFile, Collection<MSFeatureInfoBundle>> e : msFeatureMap.entrySet())
 			e.getValue().clear();
 		
 		chromatogramMap.clear();

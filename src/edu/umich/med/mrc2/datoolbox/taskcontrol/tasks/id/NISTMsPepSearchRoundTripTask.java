@@ -47,9 +47,9 @@ import org.apache.commons.io.FilenameUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
@@ -75,7 +75,7 @@ import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 
 public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 
-	protected Collection<MsFeatureInfoBundle>featuresToSearch;	
+	protected Collection<MSFeatureInfoBundle>featuresToSearch;	
 	protected File inputFile;	
 	private Semaphore outputSem;
 	private Semaphore errorSem;
@@ -86,7 +86,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 	
 	public NISTMsPepSearchRoundTripTask(
 			String searchCommand,
-			Collection<MsFeatureInfoBundle> featuresToSearch,
+			Collection<MSFeatureInfoBundle> featuresToSearch,
 			File inputFile,
 			File resultFile) {
 		super();
@@ -102,7 +102,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 	
 	public NISTMsPepSearchRoundTripTask(
 			List<String>commandParts,
-			Collection<MsFeatureInfoBundle> featuresToSearch,
+			Collection<MSFeatureInfoBundle> featuresToSearch,
 			File inputFile,
 			File resultFile) {
 		super();
@@ -222,7 +222,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 	}
 	
 	private String getFeaturePolarityCode(String msmsFeatureId) {
-		MsFeatureInfoBundle fb = featuresToSearch.stream().
+		MSFeatureInfoBundle fb = featuresToSearch.stream().
 				filter(f -> f.getMSMSFeatureId().equals(msmsFeatureId)).
 				findFirst().orElse(null);
 		if(fb == null)
@@ -242,7 +242,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		MSFeatureIdentificationLevel tentativeLevel = 
 				IDTDataCash.getMSFeatureIdentificationLevelById("IDS002");
 				
-		for(MsFeatureInfoBundle bundle : featuresToSearch) {
+		for(MSFeatureInfoBundle bundle : featuresToSearch) {
 			
 			if(bundle.getMsFeature().getIdentifications().isEmpty()) {
 				processed++;
@@ -353,14 +353,14 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		total = featuresToSearch.size();
 		processed = 0;
 		
-		List<MsFeatureInfoBundle> msmsFeatures = featuresToSearch.stream().
+		List<MSFeatureInfoBundle> msmsFeatures = featuresToSearch.stream().
 			filter(f -> f.getMsFeature().hasInstrumentMsMs()).
 			collect(Collectors.toList());
 		featuresToSearch.clear();
 		featuresToSearch.addAll(msmsFeatures);		
 
 		final Writer writer = new BufferedWriter(new FileWriter(inputFile));
-		for(MsFeatureInfoBundle bundle : featuresToSearch) {
+		for(MSFeatureInfoBundle bundle : featuresToSearch) {
 
 			MsFeature msf = bundle.getMsFeature();
 			TandemMassSpectrum tandemMs = 

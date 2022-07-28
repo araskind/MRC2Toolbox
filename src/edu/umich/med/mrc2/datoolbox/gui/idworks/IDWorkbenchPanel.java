@@ -50,7 +50,6 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -64,11 +63,11 @@ import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
@@ -99,6 +98,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdLevelUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.StandardAnnotationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.DockableObjectAnnotationPanel;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -788,6 +788,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if (command.equals(MainActionCommands.CLEAR_IDTRACKER_WORKBENCH_PANEL.getName()))
 			clearWorkbench();	
+		
+		if (command.equals(MainActionCommands.SET_AS_PRIMARY_ID_FOR_CLUSTER.getName()))
+			setSelectedIDAsPrimaryForFetureCluster();
 	}
 	
 //	private void editMSMSClusterDataSet() {
@@ -801,6 +804,39 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 //		}	
 //		// TODO save edits
 //	}
+
+	private void setSelectedIDAsPrimaryForFetureCluster() {
+
+//		MsFeatureInfoBundleCluster[] selectedClusters = 
+//				msmsFeatureClusterTreePanel.getSelectedClusters();
+//		MsFeatureInfoBundleCluster selectedCluster = null;
+//		if(selectedClusters.length > 0)
+//			selectedCluster = selectedClusters[0];
+//			
+//		if(selectedCluster == null)		
+//			selectedCluster = 
+//				(MsFeatureInfoBundleCluster) msmsFeatureClusterTreePanel.getClusterForSelectedFeature();
+		
+		if(activeCluster == null)
+			return;
+		
+		MsFeatureIdentity newId = 
+				identificationsTable.getSelectedIdentity();
+		if(newId == null)
+			return;
+		
+		activeCluster.setPrimaryIdentity(newId);		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			
+			try {
+				MSMSClusteringDBUtils.updateMSMSClusterPrimaryIdentity(activeCluster);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		msmsFeatureClusterTreePanel.getTree().updateElement(activeCluster);
+	}
 
 	private void insertNewMSMSClusterDataSet() {
 
@@ -849,9 +885,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private void showActiveDataSetSummary() {
 		
 		// TODO - deal with MS1 stuff later 
-		Collection<MsFeatureInfoBundle> allMSOneFeatures = 
+		Collection<MSFeatureInfoBundle> allMSOneFeatures = 
 				msOneFeatureTable.getBundles(TableRowSubset.ALL);
-		Collection<MsFeatureInfoBundle> allMSMSFeatures = 
+		Collection<MSFeatureInfoBundle> allMSMSFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		if(allMSOneFeatures.isEmpty() && allMSMSFeatures.isEmpty())
 			return;
@@ -864,7 +900,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void setupSpectrumEntropyScoringParameters() {
 		
-		Collection<MsFeatureInfoBundle> bundles = 
+		Collection<MSFeatureInfoBundle> bundles = 
 				getMsMsFeatureBundles(TableRowSubset.ALL);
 		if(bundles == null || bundles.isEmpty())
 			return;
@@ -887,7 +923,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		entropyScoringSetupDialog.dispose();
 		
 		//	Recalculate entropies/scores
-		Collection<MsFeatureInfoBundle> bundles = 
+		Collection<MSFeatureInfoBundle> bundles = 
 				getMsMsFeatureBundles(TableRowSubset.ALL);
 		if(bundles == null || bundles.isEmpty())
 			return;
@@ -1001,13 +1037,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void copySelectedMSMSFeatureSpectrumAsArray(){
 		
-		Collection<MsFeatureInfoBundle> selected = 
+		Collection<MSFeatureInfoBundle> selected = 
 				msTwoFeatureTable.getBundles(TableRowSubset.SELECTED);
 		if(selected.isEmpty())
 			return;
 		
 		ArrayList<String>contents = new ArrayList<String>();
-		for(MsFeatureInfoBundle bundle : selected) {
+		for(MSFeatureInfoBundle bundle : selected) {
 			
 			MsFeature msf = bundle.getMsFeature();
 			Collection<TandemMassSpectrum> tandemSpectra = msf.getSpectrum().getTandemSpectra().stream().
@@ -1028,13 +1064,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void copySelectedMSMSFeatureSpectrumAsMSP() {
 
-		Collection<MsFeatureInfoBundle> selected = 
+		Collection<MSFeatureInfoBundle> selected = 
 				msTwoFeatureTable.getBundles(TableRowSubset.SELECTED);
 		if(selected.isEmpty())
 			return;
 		
 		ArrayList<String>contents = new ArrayList<String>();
-		for(MsFeatureInfoBundle bundle : selected) {
+		for(MSFeatureInfoBundle bundle : selected) {
 
 			MsFeature msf = bundle.getMsFeature();
 			Collection<TandemMassSpectrum> tandemSpectra = msf.getSpectrum().getTandemSpectra().stream().
@@ -1110,7 +1146,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void showFeatureFilter() {
 		
-		Collection<MsFeatureInfoBundle> allFeatures = 
+		Collection<MSFeatureInfoBundle> allFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		if(allFeatures.isEmpty())
 			return;
@@ -1148,7 +1184,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					filterTrackerFeaturesDialog.getMSMSFilterParameters();
 			filterTrackerFeaturesDialog.dispose();
 
-			Collection<MsFeatureInfoBundle>filtered = 
+			Collection<MSFeatureInfoBundle>filtered = 
 					MsFeatureStatsUtils.filterMSMSFeatureTable(
 							msTwoFeatureTable.getBundles(TableRowSubset.ALL), 
 							filterParameters);
@@ -1159,7 +1195,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void setupTopMSMSHitsReassignment() {
 		
-		Collection<MsFeatureInfoBundle> allFeatures = 
+		Collection<MSFeatureInfoBundle> allFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		if(allFeatures.isEmpty())
 			return;
@@ -1175,7 +1211,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 	private void reassignTopMSMSHits() {
 		
-		Collection<MsFeatureInfoBundle> allFeatures = 
+		Collection<MSFeatureInfoBundle> allFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		if(allFeatures.isEmpty())
 			return;
@@ -1193,7 +1229,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void setupFDRforMSMSlibraryIdentifications() {
 		
-		Collection<MsFeatureInfoBundle> allFeatures = 
+		Collection<MSFeatureInfoBundle> allFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		if(allFeatures.isEmpty())
 			return;
@@ -1225,7 +1261,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		Collection<File> decoys = fdrEstimationSetupDialog.getSelectedDecoyLibraries();
 		paramSet.getLibraryFiles().clear();
 		paramSet.getLibraryFiles().addAll(decoys);
-		Collection<MsFeatureInfoBundle> featuresToSearch = 
+		Collection<MSFeatureInfoBundle> featuresToSearch = 
 				NISTPepSearchUtils.fiterMSMSFeaturesByPepSearchParameterSet(
 						msTwoFeatureTable.getBundles(TableRowSubset.ALL), 
 						paramSet.getId());
@@ -1319,7 +1355,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void showTrackerSearchActiveDataSetBMzRtDialog(){
 
-		Collection<MsFeatureInfoBundle> allFeatures = 
+		Collection<MSFeatureInfoBundle> allFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		if(allFeatures.isEmpty())
 			return;
@@ -1339,7 +1375,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					activeDataSetMZRTDataSearchDialog);
 			return;
 		}
-		Collection<MsFeatureInfoBundle> msmsFeatures = 
+		Collection<MSFeatureInfoBundle> msmsFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		MSMSClusteringParameterSet params = 
 				activeDataSetMZRTDataSearchDialog.getParameters();
@@ -1394,7 +1430,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					this.getContentPane());
 			return;
 		}	
-		Collection<MsFeatureInfoBundle> featureSet = 
+		Collection<MSFeatureInfoBundle> featureSet = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
 		if(featureSet.isEmpty()) {
 			MessageDialog.showWarningMsg("No MSMS features loaded", this.getContentPane());
@@ -1428,7 +1464,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void showXicSetupDialog() {
 		
-		MsFeatureInfoBundle bundle = null;
+		MSFeatureInfoBundle bundle = null;
 		if(msOneFeatureTable.getSelectedBundle() != null)
 			bundle = msOneFeatureTable.getSelectedBundle();
 		
@@ -1481,7 +1517,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		FeatureSubsetByIdentification idSubset = 
 				idTrackerDataExportDialog.getFeatureSubsetByIdentification();
 		
-		Collection<MsFeatureInfoBundle>featuresToExport = null;	
+		Collection<MSFeatureInfoBundle>featuresToExport = null;	
 		if(msLevel.equals(MsDepth.MS1))
 			featuresToExport = msOneFeatureTable.getBundles(featureSubset);
 		
@@ -1664,7 +1700,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(!msOneFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
 			
 			
-			for(MsFeatureInfoBundle fib : msOneFeatureTable.getBundles(TableRowSubset.SELECTED)) {
+			for(MSFeatureInfoBundle fib : msOneFeatureTable.getBundles(TableRowSubset.SELECTED)) {
 				
 				MsFeatureIdentity identity = fib.getMsFeature().getPrimaryIdentity();
 				if(identity == null)
@@ -1692,7 +1728,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		if(!msTwoFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
 			
-			for(MsFeatureInfoBundle fib : msTwoFeatureTable.getBundles(TableRowSubset.SELECTED)) {
+			for(MSFeatureInfoBundle fib : msTwoFeatureTable.getBundles(TableRowSubset.SELECTED)) {
 				
 				MsFeatureIdentity identity = fib.getMsFeature().getPrimaryIdentity();
 				if(identity == null)
@@ -1793,7 +1829,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if(!msOneFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
 			
-			for(MsFeatureInfoBundle fib : msOneFeatureTable.getBundles(TableRowSubset.SELECTED)) {
+			for(MSFeatureInfoBundle fib : msOneFeatureTable.getBundles(TableRowSubset.SELECTED)) {
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
@@ -1812,7 +1848,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		if(!msTwoFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
 			
-			for(MsFeatureInfoBundle fib : msTwoFeatureTable.getBundles(TableRowSubset.SELECTED)) {
+			for(MSFeatureInfoBundle fib : msTwoFeatureTable.getBundles(TableRowSubset.SELECTED)) {
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
@@ -1854,7 +1890,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if(!msOneFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
 			
-			for(MsFeatureInfoBundle fib : msOneFeatureTable.getBundles(TableRowSubset.SELECTED)) {
+			for(MSFeatureInfoBundle fib : msOneFeatureTable.getBundles(TableRowSubset.SELECTED)) {
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
@@ -1873,7 +1909,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		if(!msTwoFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
 			
-			for(MsFeatureInfoBundle fib : msTwoFeatureTable.getBundles(TableRowSubset.SELECTED)) {
+			for(MSFeatureInfoBundle fib : msTwoFeatureTable.getBundles(TableRowSubset.SELECTED)) {
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
@@ -1893,7 +1929,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 		
 	public void createNewMsmsFeatureCollectionFromSelectedFeatures(
-			Collection<MsFeatureInfoBundle> featuresToAdd) {
+			Collection<MSFeatureInfoBundle> featuresToAdd) {
 		
 		if(featuresToAdd.isEmpty())
 			return;
@@ -1905,7 +1941,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	public void addSelectedFeaturesToExistingMsMsFeatureCollection(
-			Collection<MsFeatureInfoBundle> featuresToAdd) {
+			Collection<MSFeatureInfoBundle> featuresToAdd) {
 		
 		if(featuresToAdd.isEmpty())
 			return;
@@ -1931,7 +1967,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	public void removeSelectedFeaturesFromActiveMsMsFeatureCollection(
-			Collection<MsFeatureInfoBundle> featuresToRemove) {
+			Collection<MSFeatureInfoBundle> featuresToRemove) {
 		
 		if(activeFeatureCollection == null || activeFeatureCollection.getFeatures().isEmpty())
 			return;
@@ -2063,9 +2099,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void disablePrimaryIdentificationForSelectedFeatures() {
 
-		Collection<MsFeatureInfoBundle> msOneSelectedBundles = 
+		Collection<MSFeatureInfoBundle> msOneSelectedBundles = 
 				msOneFeatureTable.getBundles(TableRowSubset.SELECTED);
-		Collection<MsFeatureInfoBundle> msTwoSelectedBundles = 
+		Collection<MSFeatureInfoBundle> msTwoSelectedBundles = 
 				msTwoFeatureTable.getBundles(TableRowSubset.SELECTED);
 		
 		if(msOneSelectedBundles.isEmpty() && msTwoSelectedBundles.isEmpty())
@@ -2073,7 +2109,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if(!msOneSelectedBundles.isEmpty()) {
 			
-			for(MsFeatureInfoBundle bundle : msOneSelectedBundles) {
+			for(MSFeatureInfoBundle bundle : msOneSelectedBundles) {
 					
 				MsFeature msOneFeature = bundle.getMsFeature();
 				msOneFeature.disablePrimaryIdentity();
@@ -2089,7 +2125,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		if(!msTwoSelectedBundles.isEmpty()) {
 			
-			for(MsFeatureInfoBundle bundle : msTwoSelectedBundles) {
+			for(MSFeatureInfoBundle bundle : msTwoSelectedBundles) {
 				
 				MsFeature msTwoFeature = bundle.getMsFeature();
 				msTwoFeature.disablePrimaryIdentity();
@@ -2284,10 +2320,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(msOneFeatureTable.getSelectedBundle() != null) {
 			
 			MsFeature feature = msOneFeatureTable.getSelectedBundle().getMsFeature();		
-//			MsFeatureIdentity manualId = 
-//					new MsFeatureIdentity(compoundIdentity, CompoundIdentificationConfidence.ACCURATE_MASS);
-//			manualId.setIdSource(CompoundIdSource.MANUAL);
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 				try {
 					IdentificationUtils.addReferenceMS1FeatureManualId(feature.getId(), manualId);
 				} catch (Exception e) {
@@ -2302,12 +2335,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		if(msTwoFeatureTable.getSelectedBundle() != null) {
 			
-			MsFeature feature = msTwoFeatureTable.getSelectedBundle().getMsFeature();			
-//			MsFeatureIdentity manualId = 
-//			new MsFeatureIdentity(compoundIdentity, CompoundIdentificationConfidence.ACCURATE_MASS);
-//			manualId.setIdSource(CompoundIdSource.MANUAL);			
+			MsFeature feature = msTwoFeatureTable.getSelectedBundle().getMsFeature();					
 			TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 				try {
 					IdentificationUtils.addMSMSFeatureManualId(msms.getId(), manualId);
 				} catch (Exception e) {
@@ -2334,10 +2364,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void exportMsMsfeaturesToMspFile() {
 
-		Collection<MsFeatureInfoBundle> toExport = null;
-		Collection<MsFeatureInfoBundle> allFeatures = 
+		Collection<MSFeatureInfoBundle> toExport = null;
+		Collection<MSFeatureInfoBundle> allFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
-		Collection<MsFeatureInfoBundle> selectedFeatures = 
+		Collection<MSFeatureInfoBundle> selectedFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.SELECTED);
 		if(allFeatures.isEmpty())
 			return;
@@ -2391,7 +2421,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void exportMsMsfeaturesToSiriusMsFile() {
 		
-		Collection<MsFeatureInfoBundle>featuresToExport = 
+		Collection<MSFeatureInfoBundle>featuresToExport = 
 				MsFeatureStatsUtils.filterFeaturesByIdSubset(
 						msTwoFeatureTable.getBundles(siriusDataExportDialog.getFeatureSubset()), 
 						siriusDataExportDialog.getFeatureSubsetByIdentification());
@@ -2430,7 +2460,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		List<String>commandParts = pepSearchSetupDialog.getSearchCommandParts();
 		if(pepSearchSetupDialog.getFeaturesFromDatabase()) {
 
-			Collection<MsFeatureInfoBundle> fToSearch = 
+			Collection<MSFeatureInfoBundle> fToSearch = 
 					msTwoFeatureTable.getBundles(pepSearchSetupDialog.getFeatureSubset());
 			if(fToSearch.isEmpty()) {
 				MessageDialog.showErrorMsg("No features to search using \"" +
@@ -2483,7 +2513,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		List<String>commandParts = pepSearchSetupDialog.getSearchCommandParts();
 		if(pepSearchSetupDialog.getFeaturesFromDatabase()) {
 			
-			Collection<MsFeatureInfoBundle> fToSearch = 
+			Collection<MSFeatureInfoBundle> fToSearch = 
 					msTwoFeatureTable.getBundles(pepSearchSetupDialog.getFeatureSubset());
 			if(fToSearch.isEmpty()) {
 				MessageDialog.showErrorMsg("No features to search using \"" +
@@ -2691,26 +2721,37 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void finalizeIDTMSMSClusterDataPullTask(IDTMSMSClusterDataPullTask source) {
-
-		activeMSMSClusterDataSet = source.getDataSet();
-		Set<MsFeatureInfoBundleCluster> clusters = 
-				source.getDataSet().getClusters();
-		msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
-		activeCluster = null;
+		loadMSMSClusterDataSetInGUI(source.getDataSet());
 	}
 
 	private void finalizeMSMSFeatureClusteringTask(MSMSFeatureClusteringTask source) {
-
-		activeMSMSClusterDataSet = source.getMsmsClusterDataSet();
-		Set<MsFeatureInfoBundleCluster> clusters = 
-				source.getMsmsClusterDataSet().getClusters();
+		loadMSMSClusterDataSetInGUI(source.getMsmsClusterDataSet());
+	}
+	
+	private void loadMSMSClusterDataSetInGUI(MSMSClusterDataSet dataSet) {
+		
+		clearMSMSFeatureData();
+		clearMSMSClusterData();
+		activeMSMSClusterDataSet = dataSet;
+		Set<MsFeatureInfoBundleCluster> clusters = dataSet.getClusters();
 		msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
 		activeCluster = null;
+		
+		List<MSFeatureInfoBundle> clusteredFeatures = clusters.stream().
+				flatMap(c -> c.getComponents().stream()).
+				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
+				collect(Collectors.toList());
+		
+		activeFeatureCollection = new MsFeatureInfoBundleCollection(
+				"Features for \"" + activeMSMSClusterDataSet.getName() + "\" data set");		
+		activeFeatureCollection.addFeatures(clusteredFeatures);
+		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 	}
 
 	private void finalizeSpectrumEntropyRecalculation() {
 		
-		MsFeatureInfoBundle selected = msTwoFeatureTable.getSelectedBundle();
+		MSFeatureInfoBundle selected = msTwoFeatureTable.getSelectedBundle();
 		reloadActiveMSMSFeatureCollection();			
 		if(selected != null)
 			msTwoFeatureTable.selectBundle(selected);
@@ -2719,7 +2760,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private void finalizeDefaultMSMSLibraryHitReassignmentTask(
 			DefaultMSMSLibraryHitReassignmentTask source) {
 
-		MsFeatureInfoBundle selected = msTwoFeatureTable.getSelectedBundle();
+		MSFeatureInfoBundle selected = msTwoFeatureTable.getSelectedBundle();
 		reloadActiveMSMSFeatureCollection();			
 		if(selected != null)
 			msTwoFeatureTable.selectBundle(selected);
@@ -2736,28 +2777,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void finalizeIDTMSMSFeatureDataPullTask(IDTMSMSFeatureDataPullTask task) {
-				
+			
+		activeFeatureCollection.clearCollection();
 		activeFeatureCollection.addFeatures(task.getSelectedFeatures());
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+		activeMSMSClusterDataSet = null;
+		activeCluster = null;
 	}
 	
 	private void finalizeIDTMSMSFeatureDataPullWithFilteringTask(IDTMSMSFeatureDataPullWithFilteringTask task) {
-		
-		FeatureCollectionManager.msmsSearchResults.clearCollection();
-		activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
-		Set<MsFeatureInfoBundleCluster> clusters = 
-				task.getMsmsClusterDataSet().getClusters();
-		
-		List<MsFeatureInfoBundle> clusteredFeatures = clusters.stream().
-				flatMap(c -> c.getComponents().stream()).
-				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
-				collect(Collectors.toList());
-		
-		activeFeatureCollection.addFeatures(clusteredFeatures);		
-		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
-		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
-		msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
+		loadMSMSClusterDataSetInGUI(task.getMsmsClusterDataSet());
 	}
 
 	private void finalizeCromatogramExtractionTask(ChromatogramExtractionTask task) {
@@ -2805,8 +2835,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeNISTMspepSearchRoundTripTask(NISTMsPepSearchRoundTripTask task) {
 
-		Collection<MsFeatureInfoBundle> bundles = msTwoFeatureTable.getTable().getFilteredBundles();
-		MsFeatureInfoBundle selected = msTwoFeatureTable.getSelectedBundle();
+		Collection<MSFeatureInfoBundle> bundles = msTwoFeatureTable.getTable().getFilteredBundles();
+		MSFeatureInfoBundle selected = msTwoFeatureTable.getSelectedBundle();
 		File results = task.getResultsFile();
 		File logFile = task.getLogFile();
 		if(results.exists()) {
@@ -2904,6 +2934,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	public void loadMSMSFeatureInformationBundleCollection(
 			MsFeatureInfoBundleCollection selectedCollection) {
 		
+		clearMSMSFeatureData();
+		clearMSMSClusterData();
+		
 		if(selectedCollection.equals(FeatureCollectionManager.msmsSearchResults)) {
 			reloadCompleteActiveMSMSFeatureSet();
 			return;
@@ -2937,44 +2970,23 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());			
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 	}
-	
-	private void closeFeatureCollectionManager() {
-		
-		Runnable swingCode = new Runnable() {
-			public void run() {
-				if(featureCollectionManagerDialog != null) {
-					try {
-						featureCollectionManagerDialog.dispose();
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-		try {
-			if (SwingUtilities.isEventDispatchThread())
-				swingCode.run();
-			else
-				SwingUtilities.invokeAndWait(swingCode);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
-	private void loadMsMsSearchData(Collection<MsFeatureInfoBundle> features) {
+	private void loadMsMsSearchData(Collection<MSFeatureInfoBundle> features) {
 		
 		FeatureCollectionManager.msmsSearchResults.clearCollection();
 		FeatureCollectionManager.msmsSearchResults.addFeatures(features);
-		idTrackerDataExplorerPlotDialog.clearPanels();
+		clearMSMSFeatureData();
+		clearMSMSClusterData();
 		activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 		safelyLoadMSMSFeatures(FeatureCollectionManager.msmsSearchResults.getFeatures());
+		activeMSMSClusterDataSet = null;
+		activeCluster = null;
 	}
 
-	public void filterMSMSFeatures(Collection<MsFeatureInfoBundle>featuresToInclude) {
+	public void filterMSMSFeatures(Collection<MSFeatureInfoBundle>featuresToInclude) {
 		
-		Collection<MsFeatureInfoBundle>filtered = 
+		Collection<MSFeatureInfoBundle>filtered = 
 				FeatureCollectionManager.msmsSearchResults.getFeatures().stream().
 				filter(f -> featuresToInclude.contains(f)).collect(Collectors.toSet());
 		
@@ -2996,7 +3008,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	public void safelyLoadMSMSFeatures(
-			Collection<MsFeatureInfoBundle>featuresToLoad) {
+			Collection<MSFeatureInfoBundle>featuresToLoad) {
 		
 		clearFeatureData();
 		msTwoFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
@@ -3005,7 +3017,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		msTwoFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
 	}
 
-	private void loadMsOneSearchData(Collection<MsFeatureInfoBundle> features) {
+	private void loadMsOneSearchData(Collection<MSFeatureInfoBundle> features) {
 		
 		FeatureCollectionManager.msOneSearchResults.clearCollection();
 		FeatureCollectionManager.msOneSearchResults.addFeatures(features);
@@ -3013,9 +3025,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 
 	public void filterMsOneFeatures(
-			Collection<MsFeatureInfoBundle>featuresToInclude) {
+			Collection<MSFeatureInfoBundle>featuresToInclude) {
 
-		Collection<MsFeatureInfoBundle>filtered = 
+		Collection<MSFeatureInfoBundle>filtered = 
 				FeatureCollectionManager.msOneSearchResults.getFeatures().stream().
 				filter(f -> featuresToInclude.contains(f)).collect(Collectors.toSet());
 	
@@ -3027,7 +3039,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	public void safelyLoadMSOneFeatures(
-			Collection<MsFeatureInfoBundle>featuresToLoad) {
+			Collection<MSFeatureInfoBundle>featuresToLoad) {
 		
 		msOneFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
 		msOneFeatureTable.getTable().
@@ -3191,17 +3203,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 	}
 
-	public MsFeatureInfoBundle getSelectedMSMSFeatureBundle() {
+	public MSFeatureInfoBundle getSelectedMSMSFeatureBundle() {
 		return msTwoFeatureTable.getSelectedBundle();
 	}
 
-	public MsFeatureInfoBundle getSelectedMSFeatureBundle() {
+	public MSFeatureInfoBundle getSelectedMSFeatureBundle() {
 		return msOneFeatureTable.getSelectedBundle();
 	}
 	
 	public void updateSelectedMSFeatures() {
 		
-		Collection<MsFeatureInfoBundle> selectedBundles = 
+		Collection<MSFeatureInfoBundle> selectedBundles = 
 				msOneFeatureTable.getBundles(TableRowSubset.SELECTED);
 		if(selectedBundles.isEmpty())
 			return;
@@ -3211,9 +3223,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		msOneFeatureTable.getTable().scrollToSelected();
 	}
 	
-	private void updateMSFeatures(Collection<MsFeatureInfoBundle> selectedBundles) {
+	private void updateMSFeatures(Collection<MSFeatureInfoBundle> selectedBundles) {
 		
-		for(MsFeatureInfoBundle bundle : selectedBundles) {
+		for(MSFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
 			if(primaryId != null && MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
@@ -3232,7 +3244,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	public void updateSelectedMSMSFeatures() {
 
-		Collection<MsFeatureInfoBundle> selectedBundles = 
+		Collection<MSFeatureInfoBundle> selectedBundles = 
 				msTwoFeatureTable.getBundles(TableRowSubset.SELECTED);
 		if(selectedBundles.isEmpty())
 			return;
@@ -3242,9 +3254,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		msTwoFeatureTable.getTable().scrollToSelected();
 	}
 	
-	private void updateMSMSFeature(Collection<MsFeatureInfoBundle> selectedBundles) {
+	private void updateMSMSFeature(Collection<MSFeatureInfoBundle> selectedBundles) {
 		
-		for(MsFeatureInfoBundle bundle : selectedBundles) {
+		for(MSFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
 			TandemMassSpectrum msmsFeature = 
@@ -3304,7 +3316,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		//	TODO show other compound info
 	}
 
-	private void showMsFeatureInfoBundle(MsFeatureInfoBundle selectedBundle) {
+	private void showMsFeatureInfoBundle(MSFeatureInfoBundle selectedBundle) {
 		
 		clearFeatureData();
 		if(selectedBundle == null)
@@ -3358,7 +3370,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		showFeatureChromatogram(selectedBundle);
 	}
 	
-	private void showFeatureChromatogram(MsFeatureInfoBundle selectedBundle) {
+	private void showFeatureChromatogram(MSFeatureInfoBundle selectedBundle) {
 		
 		MsFeatureChromatogramBundle msfCb = null;
 		
@@ -3370,7 +3382,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		else {
 			msfCb = FeatureChromatogramUtils.retrieveFeatureChromatogramBundleFromCache(
-					selectedBundle.getMsFeatureId());
+					selectedBundle.getMSFeatureId());
 		}
 		TandemMassSpectrum msms = null;	
 		if(selectedBundle.getMsFeature().getSpectrum() != null)
@@ -3390,12 +3402,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}		
 	}
 	
-	private void showMultipleFeatureChromatograms(Collection<MsFeatureInfoBundle> selectedBundles) {
+	private void showMultipleFeatureChromatograms(Collection<MSFeatureInfoBundle> selectedBundles) {
 		
 		Collection<MsFeatureChromatogramBundle> chromatograms = 
 				new ArrayList<MsFeatureChromatogramBundle>();
 		Collection<Double>markers = new TreeSet<Double>();
-		for(MsFeatureInfoBundle bundle : selectedBundles) {
+		for(MSFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureChromatogramBundle msfCb = null;			
 			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null 
@@ -3405,7 +3417,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			}
 			else {
 				msfCb = FeatureChromatogramUtils.retrieveFeatureChromatogramBundleFromCache(
-						bundle.getMsFeatureId());
+						bundle.getMSFeatureId());
 			}
 			if(msfCb != null)
 				chromatograms.add(msfCb);
@@ -3434,7 +3446,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		pepSearchParameterListingPanel.loadNISTPepSearchParameterObject(pepSearchParams);
 	}
 
-	public Collection<MsFeatureInfoBundle>getMsMsFeatureBundles(TableRowSubset subset){
+	public Collection<MSFeatureInfoBundle>getMsMsFeatureBundles(TableRowSubset subset){
 		return msTwoFeatureTable.getBundles(subset);
 	}
 
@@ -3449,7 +3461,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 	}
 	
-	public void selectMSMSFeature(MsFeatureInfoBundle toSelect) {
+	public void selectMSMSFeature(MSFeatureInfoBundle toSelect) {
 		
 		if(toSelect != null)
 			msTwoFeatureTable.selectBundle(toSelect);
@@ -3491,7 +3503,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			safelyLoadMSMSFeatures(cluster.getComponents());
 			showMultipleFeatureChromatograms(cluster.getComponents());
 		}
-		if (tree.getClickedObject() instanceof MsFeatureInfoBundle) {
+		if (tree.getClickedObject() instanceof MSFeatureInfoBundle) {
 			
 			MsFeatureInfoBundleCluster cluster = 
 					(MsFeatureInfoBundleCluster)tree.getClusterForSelectedFeature();
@@ -3502,7 +3514,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					activeCluster = cluster;
 					safelyLoadMSMSFeatures(cluster.getComponents());
 				}			
-				msTwoFeatureTable.selectBundle((MsFeatureInfoBundle)tree.getClickedObject());
+				msTwoFeatureTable.selectBundle((MSFeatureInfoBundle)tree.getClickedObject());
 			}
 		}
 	}

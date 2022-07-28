@@ -36,10 +36,10 @@ import java.util.TreeMap;
 import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedIonData;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
@@ -104,7 +104,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 	private void uploadMSMSFeatureData() throws Exception {
 		
 		taskDescription = "Uploading results for " + dataFile.getName();
-		Collection<MsFeatureInfoBundle> bundles = 
+		Collection<MSFeatureInfoBundle> bundles = 
 				project.getMsFeaturesForDataFile(dataFile);
 		total = bundles.size();
 		processed = 0;	
@@ -169,16 +169,16 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		
 		Map<String, MsFeatureIdentity>manualIds = 
 				new TreeMap<String, MsFeatureIdentity>();
-		ArrayList<MsFeatureInfoBundle>withStdAnnotations = 
-				new ArrayList<MsFeatureInfoBundle>();
-		ArrayList<MsFeatureInfoBundle>withFollowups = 
-				new ArrayList<MsFeatureInfoBundle>();
+		ArrayList<MSFeatureInfoBundle>withStdAnnotations = 
+				new ArrayList<MSFeatureInfoBundle>();
+		ArrayList<MSFeatureInfoBundle>withFollowups = 
+				new ArrayList<MSFeatureInfoBundle>();
 		Map<String,MsFeatureChromatogramBundle>featureChromatogramMap = 
 				new TreeMap<String, MsFeatureChromatogramBundle>();
 		chromatogramMap = 
 				new HashMap<String, MsFeatureChromatogramBundle>();
 		
-		for(MsFeatureInfoBundle bundle : bundles) {
+		for(MSFeatureInfoBundle bundle : bundles) {
 
 			insertParentMsFeature(
 					bundle,
@@ -269,7 +269,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 	}
 	
 	private void insertParentMsFeature(
-			MsFeatureInfoBundle bundle,
+			MSFeatureInfoBundle bundle,
 			String dataAnalysisId,
 			PreparedStatement parentFeaturePs,
 			PreparedStatement msOnePs,
@@ -399,8 +399,8 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 			PreparedStatement libMatchPs,
 			PreparedStatement chromPs,
 			Map<String, MsFeatureIdentity>manualIds,
-			Collection<MsFeatureInfoBundle>withStdAnnotations,
-			Collection<MsFeatureInfoBundle>withFollowups,
+			Collection<MSFeatureInfoBundle>withStdAnnotations,
+			Collection<MSFeatureInfoBundle>withFollowups,
 			Map<String,MsFeatureChromatogramBundle>featureChromatogramMap,
 			Connection conn) throws Exception {
 		
@@ -421,14 +421,14 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		}
 		if(!withStdAnnotations.isEmpty()) {
 			
-			for(MsFeatureInfoBundle b : withStdAnnotations)
+			for(MSFeatureInfoBundle b : withStdAnnotations)
 				StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(b, conn);
 			
 			withStdAnnotations.clear();
 		}
 		if(!withFollowups.isEmpty()) {
 			
-			for(MsFeatureInfoBundle b : withFollowups)
+			for(MSFeatureInfoBundle b : withFollowups)
 				IdFollowupUtils.setIdFollowupStepsForMSMSFeature(b, conn);
 			
 			withStdAnnotations.clear();

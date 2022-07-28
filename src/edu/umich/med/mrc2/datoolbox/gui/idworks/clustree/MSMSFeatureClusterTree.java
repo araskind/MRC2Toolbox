@@ -34,12 +34,11 @@ import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleClusterComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -93,6 +92,8 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 
 		sortByProperty = SortProperty.RT;
 		sortDirection = SortDirection.ASC;
+		
+		
 	}
 
 	public void setFeaturePopupMenu(JPopupMenu featurePopupMenu) {
@@ -251,7 +252,7 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 
 		Object selectedObject = selectedNode.getUserObject();
 
-		if (selectedObject instanceof MsFeatureInfoBundle) {
+		if (selectedObject instanceof MSFeatureInfoBundle) {
 
 			DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
 
@@ -287,9 +288,9 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 		return selectedObjects.toArray(new MsFeatureInfoBundleCluster[selectedObjects.size()]);
 	}
 
-	public Collection<MsFeatureInfoBundle> getSelectedFeatures() {
+	public Collection<MSFeatureInfoBundle> getSelectedFeatures() {
 
-		ArrayList<MsFeatureInfoBundle> selectedObjects = new ArrayList<MsFeatureInfoBundle>();
+		ArrayList<MSFeatureInfoBundle> selectedObjects = new ArrayList<MSFeatureInfoBundle>();
 		int selectedRows[] = getSelectionRows();
 
 		if ((selectedRows == null) || (selectedRows.length == 0))
@@ -303,8 +304,8 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 
 			Object selectedObject = selectedNode.getUserObject();
 
-			if (selectedObject instanceof MsFeatureInfoBundle)
-				selectedObjects.add((MsFeatureInfoBundle) selectedObject);
+			if (selectedObject instanceof MSFeatureInfoBundle)
+				selectedObjects.add((MSFeatureInfoBundle) selectedObject);
 		}
 		return selectedObjects;
 	}
@@ -358,7 +359,7 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 		return;
 	}
 
-	public void removeFeature(MsFeatureInfoBundle feature) {
+	public void removeFeature(MSFeatureInfoBundle feature) {
 
 		TreePath clusterPath = findPath(feature);
 
@@ -462,18 +463,22 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 	 */
 	public void updateElement(Object element){
 
-		Enumeration<TreeNode> e = ((DefaultMutableTreeNode) treeModel.getRoot()).depthFirstEnumeration();
-
-		while (e.hasMoreElements()) {
-
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
-
-			if (node.getUserObject().equals(element))
-				((DefaultTreeModel)this.getModel()).nodeChanged(node);
-		}
+//		Enumeration<TreeNode> e = ((DefaultMutableTreeNode) treeModel.getRoot()).depthFirstEnumeration();
+//
+//		while (e.hasMoreElements()) {
+//
+//			DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
+//
+//			if (node.getUserObject().equals(element))
+//				((DefaultTreeModel)this.getModel()).nodeChanged(node);
+//		}
+		
+		DefaultMutableTreeNode node = treeModel.getNodeForObject(element);
+		if(node != null)
+			treeModel.nodeChanged(node);		
 	}
 
-	public TreePath findfeaturePath(MsFeatureInfoBundle cf) {
+	public TreePath findfeaturePath(MSFeatureInfoBundle cf) {
 
 		DefaultMutableTreeNode root = treeModel.clustersNode;
 

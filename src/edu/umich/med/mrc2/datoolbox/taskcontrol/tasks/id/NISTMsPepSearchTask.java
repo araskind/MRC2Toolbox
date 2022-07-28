@@ -46,9 +46,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
@@ -643,7 +643,7 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	protected Boolean allowDefaultIdUpdate(MsFeatureInfoBundle bundle) {
+	protected Boolean allowDefaultIdUpdate(MSFeatureInfoBundle bundle) {
 		
 		if(bundle.getMsFeature().getIdentifications().isEmpty())
 			return true;

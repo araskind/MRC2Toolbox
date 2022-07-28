@@ -55,9 +55,9 @@ import org.apache.commons.lang3.StringUtils;
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -585,7 +585,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		
 		int fCount = 0;
 		for(DataFile df : files) {
-			 Collection<MsFeatureInfoBundle> fileFeatures = 
+			 Collection<MSFeatureInfoBundle> fileFeatures = 
 					 MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMsFeaturesForDataFile(df);
 			 if(fileFeatures != null && !fileFeatures.isEmpty())
 				 fCount += fileFeatures.size();
@@ -1251,9 +1251,9 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 		MainWindow.hideProgressDialog();
-		Map<DataFile, Collection<MsFeatureInfoBundle>> featureMap = task.getMsFeatureMap();	
+		Map<DataFile, Collection<MSFeatureInfoBundle>> featureMap = task.getMsFeatureMap();	
 		Collection<String>log = new ArrayList<String>();
-		for(Entry<DataFile, Collection<MsFeatureInfoBundle>>e : featureMap.entrySet()) {
+		for(Entry<DataFile, Collection<MSFeatureInfoBundle>>e : featureMap.entrySet()) {
 			MRC2ToolBoxCore.getActiveRawDataAnalysisProject().setMsFeaturesForDataFile(e.getKey(), e.getValue());
 			log.add(e.getKey().getName() + " -> " + Integer.toString(e.getValue().size()) + " features");
 		}
@@ -1459,8 +1459,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			showAverageMassSpectrum((AverageMassSpectrum)selected.stream().findFirst().get());
 		
 		//	Show first selected MSMS feature
-		if(selected.stream().findFirst().get() instanceof MsFeatureInfoBundle)
-			showMsFeatureInfoBundle(((MsFeatureInfoBundle)selected.stream().findFirst().get()));
+		if(selected.stream().findFirst().get() instanceof MSFeatureInfoBundle)
+			showMsFeatureInfoBundle(((MSFeatureInfoBundle)selected.stream().findFirst().get()));
 		
 		//	Show selected chromatograms
 		List<ExtractedChromatogram> chroms = 
@@ -1478,7 +1478,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			showFiles(files);
 	}
 
-	private void showMsFeatureInfoBundle(MsFeatureInfoBundle msFeatureInfoBundle) {
+	private void showMsFeatureInfoBundle(MSFeatureInfoBundle msFeatureInfoBundle) {
 
 		MsFeature msFeature = msFeatureInfoBundle.getMsFeature();
 		msPlotPanel.showMsForFeature(msFeature, false);

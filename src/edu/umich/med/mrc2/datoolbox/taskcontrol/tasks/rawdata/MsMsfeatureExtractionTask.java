@@ -36,10 +36,10 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.XicDataBundle;
@@ -102,7 +102,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private LCMSData data;
 	private Set<Integer> msLvls;
 	private Collection<MsFeature>features;
-	private Collection<MsFeatureInfoBundle>featureBundles;
+	private Collection<MSFeatureInfoBundle>featureBundles;
 
 	public MsMsfeatureExtractionTask(
 			DataFile rawDataFile,
@@ -906,14 +906,14 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	
 	private void createFeatureInfoBundles() {
 
-		featureBundles = new ArrayList<MsFeatureInfoBundle>();
+		featureBundles = new ArrayList<MSFeatureInfoBundle>();
 		for(MsFeature f : features) {
 			
 			if (isCanceled()) {
 				RawDataManager.removeDataSource(rawDataFile);
 				return;
 			}			
-			MsFeatureInfoBundle bundle = new MsFeatureInfoBundle(f);
+			MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 			bundle.setAcquisitionMethod(rawDataFile.getDataAcquisitionMethod());
 			bundle.setSample((IDTExperimentalSample) rawDataFile.getParentSample());
 			bundle.setInjectionId(rawDataFile.getInjectionId());
@@ -936,7 +936,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		return rawDataFile;
 	}
 	
-	public Collection<MsFeatureInfoBundle> getMsFeatureInfoBundles() {
+	public Collection<MSFeatureInfoBundle> getMsFeatureInfoBundles() {
 		return featureBundles;
 	}
 	

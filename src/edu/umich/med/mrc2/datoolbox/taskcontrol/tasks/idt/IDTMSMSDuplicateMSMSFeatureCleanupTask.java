@@ -37,9 +37,9 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
@@ -68,11 +68,11 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 	
 	private Polarity polarity;
 	private LIMSExperiment experiment;
-	private Collection<MsFeatureInfoBundle>features;
-	private Collection<MsFeatureInfoBundle>featuresToDelete;
-	private Collection<MsFeatureInfoBundle>featuresToUpdateFollowups;
-	private Collection<MsFeatureInfoBundle>featuresToUpdateIds;
-	private Collection<MsFeatureInfoBundle>featuresToUpdateAnnotations;
+	private Collection<MSFeatureInfoBundle>features;
+	private Collection<MSFeatureInfoBundle>featuresToDelete;
+	private Collection<MSFeatureInfoBundle>featuresToUpdateFollowups;
+	private Collection<MSFeatureInfoBundle>featuresToUpdateIds;
+	private Collection<MSFeatureInfoBundle>featuresToUpdateAnnotations;
 	private Map<String,String>duplicateIdMap;
 	
 	public IDTMSMSDuplicateMSMSFeatureCleanupTask(
@@ -322,7 +322,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 			f.setPolarity(polarity);
 			f.setAnnotatedObjectType(AnnotatedObjectType.MSMS_FEATURE);
 			IDTMsDataUtils.attachMS1SpectrumForMsMs(f, conn);
-			MsFeatureInfoBundle bundle = new MsFeatureInfoBundle(f);
+			MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 			bundle.setAcquisitionMethod(
 				IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
 			bundle.setDataExtractionMethod(
@@ -364,7 +364,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		taskDescription = "Adding MSMS data ...";
 		total = features.size();
 		processed = 0;
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			try {
 				IDTMsDataUtils.attachExperimentalTandemSpectra(fb.getMsFeature(), conn);
 			} catch (SQLException e) {
@@ -382,7 +382,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		taskDescription = "Adding MSMS library identifications ...";
 		total = features.size();
 		processed = 0;
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			try {
 				IDTMsDataUtils.attachMsMsLibraryIdentifications(fb.getMsFeature(), conn);
 			} catch (Exception e) {
@@ -414,7 +414,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		taskDescription = "Adding manual identifications ...";
 		total = features.size();
 		processed = 0;
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			try {
 				IDTMsDataUtils.attachMsMsManualIdentifications(fb.getMsFeature(), conn);
 			} catch (Exception e) {
@@ -431,7 +431,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		taskDescription = "Adding annotations ...";
 		total = features.size();
 		processed = 0;
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			
 			Collection<ObjectAnnotation>featureAnnotations = new ArrayList<ObjectAnnotation>();
 			try {
@@ -456,7 +456,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		taskDescription = "Adding follow-up steps ...";
 		total = features.size();
 		processed = 0;
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			
 			IdFollowupUtils.attachIdFollowupStepsToMSMSFeature(fb, conn);			
 			processed++;
@@ -470,7 +470,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		total = features.size();
 		processed = 0;
 		
-		for(MsFeatureInfoBundle feature : features) {
+		for(MSFeatureInfoBundle feature : features) {
 			
 			if(featuresToDelete.contains(feature) || feature.getPrecursorMz() == null) {
 				processed++;
@@ -480,7 +480,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 			double rt = feature.getMsFeature().getRetentionTime();
 			double mz = feature.getPrecursorMz();	
 			DataExtractionMethod method = feature.getDataExtractionMethod();
-			MsFeatureInfoBundle[] duplicates = 
+			MSFeatureInfoBundle[] duplicates = 
 					features.stream().
 					filter(f -> !featuresToDelete.contains(f)).
 //					filter(f -> f.getDataFile().getName().equals(df)).
@@ -488,13 +488,13 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 					filter(f -> f.getRetentionTime() == rt).
 					filter(f -> Objects.nonNull(f.getPrecursorMz())).
 					filter(f -> f.getPrecursorMz() == mz).
-					toArray(size -> new MsFeatureInfoBundle[size]) ;
+					toArray(size -> new MSFeatureInfoBundle[size]) ;
 			
 			if(duplicates.length <= 1) {
 				processed++;
 				continue;
 			}
-			MsFeatureInfoBundle toLeave = duplicates[0];
+			MSFeatureInfoBundle toLeave = duplicates[0];
 			boolean updateFollowups = false;
 			boolean updateIds = false;
 			boolean updateAnnotations = false;
@@ -568,7 +568,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 			sql2 = "INSERT INTO MSMS_FEATURE_FOLLOWUP_STEPS (MSMS_PARENT_FEATURE_ID, FOLLOWUP_STEP_ID) VALUES (?, ?)";
 			ps2 = conn.prepareStatement(sql2);
 			
-			for(MsFeatureInfoBundle feature : featuresToUpdateFollowups) {
+			for(MSFeatureInfoBundle feature : featuresToUpdateFollowups) {
 				ps.setString(1, feature.getMsFeature().getId());
 				ps.executeUpdate();
 				
@@ -590,7 +590,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 			ps = conn.prepareStatement(sql);		
 			total = featuresToUpdateIds.size();
 			processed = 0;
-			for(MsFeatureInfoBundle feature : featuresToUpdateIds) {
+			for(MSFeatureInfoBundle feature : featuresToUpdateIds) {
 				
 				ps.setString(1, feature.getMsFeature().getId());
 				for(MsFeatureIdentity cid : feature.getMsFeature().getIdentifications()) {
@@ -610,7 +610,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 			processed = 0;
 			sql = "UPDATE OBJECT_ANNOTATIONS SET OBJECT_ID = ? WHERE ANNOTATION_ID = ?";
 			ps = conn.prepareStatement(sql);
-			for(MsFeatureInfoBundle feature : featuresToUpdateAnnotations) {
+			for(MSFeatureInfoBundle feature : featuresToUpdateAnnotations) {
 				
 				ps.setString(1, feature.getMsFeature().getId());
 				for(ObjectAnnotation annotation : feature.getMsFeature().getAnnotations()) {
@@ -637,7 +637,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 		String sql = "DELETE FROM MSMS_PARENT_FEATURE WHERE FEATURE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(sql);
 		int count = 0;
-		for(MsFeatureInfoBundle feature : featuresToDelete) {
+		for(MSFeatureInfoBundle feature : featuresToDelete) {
 						
 			ps.setString(1, feature.getMsFeature().getId());
 			ps.addBatch();
@@ -658,7 +658,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 				 experiment);
 	}
 	
-	public Collection<MsFeatureInfoBundle> getSelectedFeatures() {
+	public Collection<MSFeatureInfoBundle> getSelectedFeatures() {
 		return features;
 	}
 }

@@ -35,7 +35,7 @@ import javax.swing.tree.TreeNode;
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -214,7 +214,7 @@ public class RawDataTreeModel extends DefaultTreeModel {
 			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
 				DefaultMutableTreeNode ms2featuresNode = new DefaultMutableTreeNode(ms2featuresNodeName);
 				insertNodeInto(ms2featuresNode, newNode, getChildCount(newNode));
-				Collection<MsFeatureInfoBundle> msmsFeatures = 
+				Collection<MSFeatureInfoBundle> msmsFeatures = 
 						MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMsFeaturesForDataFile(dataFile);
 				if(msmsFeatures != null && !msmsFeatures.isEmpty()) {
 					

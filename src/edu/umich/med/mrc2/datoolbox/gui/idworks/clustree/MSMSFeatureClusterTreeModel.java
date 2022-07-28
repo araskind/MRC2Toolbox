@@ -28,7 +28,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 
 public class MSMSFeatureClusterTreeModel extends DefaultTreeModel {
@@ -66,19 +66,19 @@ public class MSMSFeatureClusterTreeModel extends DefaultTreeModel {
 			int childCount = getChildCount(clustersNode);
 			insertNodeInto(newNode, clustersNode, childCount);
 
-			for (MsFeatureInfoBundle cf : ((MsFeatureInfoBundleCluster) object).getComponents()) {
+			for (MSFeatureInfoBundle cf : ((MsFeatureInfoBundleCluster) object).getComponents()) {
 
 				final DefaultMutableTreeNode newFeatureNode = new DefaultMutableTreeNode(cf);
 				treeObjects.put(cf, newFeatureNode);
 				insertNodeInto(newFeatureNode, newNode, getChildCount(newNode));
 			}
 		}
-		if (object instanceof MsFeatureInfoBundle) {
+		if (object instanceof MSFeatureInfoBundle) {
 			//	TODO
 		}
 	}
 
-	public MsFeatureInfoBundleCluster getParentCluster(MsFeatureInfoBundle feature) {
+	public MsFeatureInfoBundleCluster getParentCluster(MSFeatureInfoBundle feature) {
 
 		DefaultMutableTreeNode featureNode = treeObjects.get(feature);
 		if(featureNode!= null) {
@@ -149,4 +149,21 @@ public class MSMSFeatureClusterTreeModel extends DefaultTreeModel {
 			treeObjects.remove(object);
 		}
 	}
+	
+	public void refreshNodeForObject(Object object) {
+		
+		DefaultMutableTreeNode node = treeObjects.get(object);
+		if(node != null)
+			reload(node);
+	}
+	
+	public DefaultMutableTreeNode getNodeForObject(Object object) {
+		return treeObjects.get(object);
+	}
 }
+
+
+
+
+
+

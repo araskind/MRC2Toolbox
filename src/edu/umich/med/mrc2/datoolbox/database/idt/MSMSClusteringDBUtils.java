@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
@@ -260,7 +260,7 @@ public class MSMSClusteringDBUtils {
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
-				+ "(CLUSTER_ID, MSMS_FEATURE_ID) VALUES (?, ?)";
+				+ "(CLUSTER_ID, MS_FEATURE_ID) VALUES (?, ?)";
 		PreparedStatement featurePs = conn.prepareStatement(featureQuery);
 		
 		for(MsFeatureInfoBundleCluster cluster : newDataSet.getClusters()) {
@@ -305,8 +305,8 @@ public class MSMSClusteringDBUtils {
 			
 			//	Add cluster features
 			featurePs.setString(1, clusterId);
-			for(MsFeatureInfoBundle feature : cluster.getComponents()) {				
-				featurePs.setString(2, feature.getMSMSFeatureId());
+			for(MSFeatureInfoBundle feature : cluster.getComponents()) {				
+				featurePs.setString(2, feature.getMSFeatureId());
 				featurePs.addBatch();
 			}
 			featurePs.executeBatch();
@@ -358,7 +358,7 @@ public class MSMSClusteringDBUtils {
 		ConnectionManager.releaseConnection(conn);		
 	}
 	
-	private static void updateMSMSClusterDataSetMetadata(MSMSClusterDataSet edited, Connection conn) throws Exception {
+	public static void updateMSMSClusterDataSetMetadata(MSMSClusterDataSet edited, Connection conn) throws Exception {
 
 		String query = 
 				"UPDATE MSMS_CLUSTERED_DATA_SET SET NAME = ?, "
@@ -451,6 +451,48 @@ public class MSMSClusteringDBUtils {
 		ps.setString(1, toDelete.getId());
 		ps.executeUpdate();
 		ps.close();		
+	}
+	
+	public static void updateMSMSClusterPrimaryIdentity(
+			MsFeatureInfoBundleCluster edited) throws Exception {
+		Connection conn = ConnectionManager.getConnection();
+		updateMSMSClusterPrimaryIdentity(edited, conn);
+		ConnectionManager.releaseConnection(conn);		
+	}
+	
+	public static void updateMSMSClusterPrimaryIdentity(
+			MsFeatureInfoBundleCluster edited, 
+			Connection conn) throws Exception {
+
+		String query = 
+				"UPDATE MSMS_CLUSTER SET MSMS_LIB_MATCH_ID =?,"
+				+ "MSMS_ALT_ID = ? WHERE CLUSTER_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String libMatchId = null;
+		String libAltId = null;
+		if(edited.getPrimaryIdentity() != null) {
+			
+			if(edited.getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null)
+				libMatchId = edited.getPrimaryIdentity().getUniqueId();
+			else {
+				if(edited.getPrimaryIdentity().getIdSource().equals(CompoundIdSource.MANUAL))
+					libAltId = edited.getPrimaryIdentity().getUniqueId();
+			}
+		}		
+		if(libMatchId != null)
+			ps.setString(1, libMatchId);
+		else
+			ps.setNull(1, java.sql.Types.NULL);
+		
+		if(libAltId != null)
+			ps.setString(2, libAltId);
+		else
+			ps.setNull(2, java.sql.Types.NULL);
+		
+		ps.setString(3, edited.getId());
+		ps.executeUpdate();
+		ps.close();
 	}
 }
 

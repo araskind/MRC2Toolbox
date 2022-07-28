@@ -50,10 +50,10 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.MsRtLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.SQLParameter;
@@ -116,7 +116,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 	private Collection<DataAcquisitionMethod> acquisitionMethods;
 	private Collection<DataExtractionMethod> dataExtractionMethods;
 	
-	protected Collection<MsFeatureInfoBundle>features;
+	protected Collection<MSFeatureInfoBundle>features;
 	private boolean lookupSecondaryIds;
 	private boolean lookupSecondaryLibMatches;
 	private boolean lookupIds;
@@ -166,7 +166,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 		this.acquisitionMethods = acquisitionMethods;
 		this.dataExtractionMethods = dataExtractionMethods;
 		
-		features = new ArrayList<MsFeatureInfoBundle>();
+		features = new ArrayList<MSFeatureInfoBundle>();
 		
 		lookupIds =  false;
 		if(!formula.isEmpty() || !inchiKey.isEmpty() || (!compoundNameOrId.isEmpty() && idOpt != null))
@@ -392,7 +392,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 			f.setAnnotatedObjectType(AnnotatedObjectType.MS_FEATURE_POOLED);
 			f.setIdDisabled(rs.getString("ID_DISABLED") != null);
 			
-			MsFeatureInfoBundle bundle = new MsFeatureInfoBundle(f);
+			MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 			bundle.setAcquisitionMethod(
 				IDTDataCash.getAcquisitionMethodById(rs.getString("ACQ_METHOD_ID")));
 			bundle.setDataExtractionMethod(
@@ -427,7 +427,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				"SELECT MZ, RT, HEIGHT, ADDUCT_ID, COMPOSITE_ADDUCT_ID "
 				+ "FROM POOLED_MS1_FEATURE_PEAK WHERE POOLED_MS_FEATURE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);		
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			
 			MassSpectrum spectrum = new MassSpectrum();
 			Map<Adduct, Collection<MsPoint>> adductMap =
@@ -477,7 +477,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				"WHERE I.POOLED_MS_FEATURE_ID = ? ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = null;	
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			
 			ps.setString(1, fb.getMsFeature().getId());
 			rs = ps.executeQuery();
@@ -555,7 +555,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = null;
 		
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			
 			ps.setString(1, fb.getMsFeature().getId());
 			rs = ps.executeQuery();
@@ -639,7 +639,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 		PreparedStatement mdps = conn.prepareStatement(mdQuery);
 		ResultSet mdrs = null;
 		
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			
 			stAnPs.setString(1, fb.getMsFeature().getId());
 			stAnRs = stAnPs.executeQuery();
@@ -736,7 +736,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 		
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = null;		
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			
 			try {
 				ps.setString(1, fb.getMsFeature().getId());
@@ -764,14 +764,14 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 		processed = 80;
 		
 		//	ID state		
-		Collection<MsFeatureInfoBundle> filteredByIdStatus = 
+		Collection<MSFeatureInfoBundle> filteredByIdStatus = 
 				MsFeatureStatsUtils.filterFeaturesByIdSubset(features,featureSubsetById);
 		features.clear();
 		features.addAll(filteredByIdStatus);
 
 		// Annotations
 		if(annotatedOnly) {
-			List<MsFeatureInfoBundle> annotated = features.stream().
+			List<MSFeatureInfoBundle> annotated = features.stream().
 					filter(f -> !f.getMsFeature().getAnnotations().isEmpty()).
 					collect(Collectors.toList());
 			features.clear();
@@ -779,7 +779,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 		}
 		if(!idLevels.isEmpty()) {
 			
-			List<MsFeatureInfoBundle> byIdLevel = features.stream().
+			List<MSFeatureInfoBundle> byIdLevel = features.stream().
 					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 					filter(f -> idLevels.contains(f.getMsFeature().
 							getPrimaryIdentity().getIdentificationLevel())).
@@ -789,7 +789,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 		}
 		if(!follwUpSteps.isEmpty()) {
 			
-			List<MsFeatureInfoBundle> byFollowup = features.stream().
+			List<MSFeatureInfoBundle> byFollowup = features.stream().
 					filter(f -> !CollectionUtils.intersection(
 							follwUpSteps, f.getIdFollowupSteps()).isEmpty()).
 					collect(Collectors.toList());
@@ -829,7 +829,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				dataExtractionMethods);
 	}
 	
-	public Collection<MsFeatureInfoBundle> getSelectedFeatures() {
+	public Collection<MSFeatureInfoBundle> getSelectedFeatures() {
 		return features;
 	}
 }

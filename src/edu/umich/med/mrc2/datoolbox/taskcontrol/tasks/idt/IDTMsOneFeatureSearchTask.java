@@ -36,9 +36,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureDataSource;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.data.SQLParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
@@ -189,7 +189,7 @@ public class IDTMsOneFeatureSearchTask extends IDTFeatureSearchTask {
 			f.setPolarity(polarity);
 			f.setAnnotatedObjectType(AnnotatedObjectType.MS_FEATURE_POOLED);
 			IDTMsDataUtils.attachPooledMS1Spectrum(f, conn);
-			MsFeatureInfoBundle bundle = new MsFeatureInfoBundle(f);
+			MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 			String soId = rs.getString("SOURCE_DATA_BUNDLE_ID");
 			MsFeatureDataSource so = sources.stream().
 					filter(s -> s.getDataSourceId().equals(soId)).findFirst().get();
@@ -213,7 +213,7 @@ public class IDTMsOneFeatureSearchTask extends IDTFeatureSearchTask {
 		taskDescription = "Adding MS/RT library identifications ...";
 		total = features.size();
 		processed = 0;
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			try {
 				IDTMsDataUtils.attachMS1LibraryIdentifications(fb.getMsFeature(), conn);
 			} catch (Exception e) {
@@ -230,7 +230,7 @@ public class IDTMsOneFeatureSearchTask extends IDTFeatureSearchTask {
 		taskDescription = "Adding manual identifications ...";
 		total = features.size();
 		processed = 0;
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			try {
 				IDTMsDataUtils.attachMS1ManualIdentifications(fb.getMsFeature(), conn);
 			} catch (Exception e) {
@@ -247,7 +247,7 @@ public class IDTMsOneFeatureSearchTask extends IDTFeatureSearchTask {
 		taskDescription = "Adding annotations ...";
 		total = features.size();
 		processed = 0;
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			Collection<ObjectAnnotation>featureAnnotations = new ArrayList<ObjectAnnotation>();
 			try {
 				 featureAnnotations = AnnotationUtils.getObjectAnnotations(
@@ -272,7 +272,7 @@ public class IDTMsOneFeatureSearchTask extends IDTFeatureSearchTask {
 		taskDescription = "Adding follow-up steps ...";
 		total = features.size();
 		processed = 0;
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			
 			IdFollowupUtils.attachIdFollowupStepsToMSMSFeature(fb, conn);			
 			processed++;

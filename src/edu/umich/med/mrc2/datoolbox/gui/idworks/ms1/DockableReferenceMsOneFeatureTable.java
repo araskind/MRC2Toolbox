@@ -28,8 +28,8 @@ import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -57,11 +57,11 @@ public class DockableReferenceMsOneFeatureTable extends DefaultSingleCDockable {
 		return featureTable;
 	}
 
-	public MsFeatureInfoBundle getSelectedBundle() {
+	public MSFeatureInfoBundle getSelectedBundle() {
 		return featureTable.getSelectedBundle();
 	}
 	
-	public Collection<MsFeatureInfoBundle>getBundles(TableRowSubset subset){
+	public Collection<MSFeatureInfoBundle>getBundles(TableRowSubset subset){
 
 		if(subset.equals(TableRowSubset.SELECTED))
 			return featureTable.getMultipleSelectedBundles();
@@ -73,7 +73,7 @@ public class DockableReferenceMsOneFeatureTable extends DefaultSingleCDockable {
 
 	public Collection<MsFeature>getTableFeatures(TableRowSubset subset){
 		
-		Collection<MsFeatureInfoBundle>bundles = getBundles(subset);
+		Collection<MSFeatureInfoBundle>bundles = getBundles(subset);
 		return bundles.stream().
 				map(b -> b.getMsFeature()).collect(Collectors.toList());
 	}

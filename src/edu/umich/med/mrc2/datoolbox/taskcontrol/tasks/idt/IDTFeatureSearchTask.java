@@ -24,7 +24,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.data.enums.IdentifierSearchOptions;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
@@ -50,7 +50,7 @@ public abstract class IDTFeatureSearchTask extends AbstractTask {
 	protected Double collisionEnergy;
 	protected Polarity polarity;
 	protected LIMSExperiment experiment;
-	protected Collection<MsFeatureInfoBundle>features;
+	protected Collection<MSFeatureInfoBundle>features;
 
 	public IDTFeatureSearchTask(
 			Double basePeakMz,
@@ -82,7 +82,7 @@ public abstract class IDTFeatureSearchTask extends AbstractTask {
 		this.polarity = polarity;
 		this.experiment = experiment;
 
-		features = new ArrayList<MsFeatureInfoBundle>();
+		features = new ArrayList<MSFeatureInfoBundle>();
 	}
 
 	protected String createIdQuery() {
@@ -99,7 +99,7 @@ public abstract class IDTFeatureSearchTask extends AbstractTask {
 	/**
 	 * @return the selectedFeatures
 	 */
-	public Collection<MsFeatureInfoBundle> getSelectedFeatures() {
+	public Collection<MSFeatureInfoBundle> getSelectedFeatures() {
 		return features;
 	}
 }

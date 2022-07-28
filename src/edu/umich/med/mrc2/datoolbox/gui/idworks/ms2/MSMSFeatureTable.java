@@ -36,9 +36,9 @@ import javax.swing.table.TableRowSorter;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
@@ -128,7 +128,7 @@ public class MSMSFeatureTable extends BasicTable {
 				new ReferenceMsMsLibraryMatchTypeComparator());	
 		
 		//	Renderers
-		setDefaultRenderer(MsFeatureInfoBundle.class, new MsFeatureInfoBundleRenderer(SortProperty.Name));
+		setDefaultRenderer(MSFeatureInfoBundle.class, new MsFeatureInfoBundleRenderer(SortProperty.Name));
 		setDefaultRenderer(DataAcquisitionMethod.class, new AnalysisMethodRenderer());
 		setDefaultRenderer(DataExtractionMethod.class, new AnalysisMethodRenderer());
 		setDefaultRenderer(LIMSExperiment.class, new LIMSExperimentRenderer());
@@ -201,8 +201,8 @@ public class MSMSFeatureTable extends BasicTable {
 
 		//	Table header filter
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		thf.getParserModel().setFormat(MsFeatureInfoBundle.class, new MsFeatureInfoBundleFormat(SortProperty.Name));
-		thf.getParserModel().setComparator(MsFeatureInfoBundle.class, new MsFeatureInfoBundleComparator(SortProperty.Name));
+		thf.getParserModel().setFormat(MSFeatureInfoBundle.class, new MsFeatureInfoBundleFormat(SortProperty.Name));
+		thf.getParserModel().setComparator(MSFeatureInfoBundle.class, new MsFeatureInfoBundleComparator(SortProperty.Name));
 		thf.getParserModel().setFormat(MsFeatureIdentity.class, new MsFeatureIdentityFormat(CompoundIdentityField.DB_ID));
 		thf.getParserModel().setComparator(MsFeatureIdentity.class, new MsFeatureIdentityComparator(SortProperty.ID));
 		thf.getParserModel().setComparator(DataAcquisitionMethod.class, new AnalysisMethodComparator(SortProperty.ID));
@@ -224,7 +224,7 @@ public class MSMSFeatureTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromFeatureListOld(Collection<MsFeatureInfoBundle> featureList) {
+	public void setTableModelFromFeatureListOld(Collection<MSFeatureInfoBundle> featureList) {
 
 		thf.setTable(null);
 		model.setTableModelFromFeatureList(featureList);
@@ -244,7 +244,7 @@ public class MSMSFeatureTable extends BasicTable {
 		columnModel.getColumnById(MSMSFeatureTableModel.COMPOUND_NAME_COLUMN).setMinWidth(200);
 	}
 	
-	public void setTableModelFromFeatureList(Collection<MsFeatureInfoBundle> featureList) {
+	public void setTableModelFromFeatureList(Collection<MSFeatureInfoBundle> featureList) {
 
 		thf.setTable(null);
 		List<Object[]> modelData = createModelData(featureList);
@@ -260,10 +260,10 @@ public class MSMSFeatureTable extends BasicTable {
 		idp.setVisible(true);
 	}
 	
-	private List<Object[]> createModelData(Collection<MsFeatureInfoBundle> featureList) {
+	private List<Object[]> createModelData(Collection<MSFeatureInfoBundle> featureList) {
 		
 		List<Object[]> modelData = new ArrayList<Object[]>();
-		for (MsFeatureInfoBundle bundle : featureList) {
+		for (MSFeatureInfoBundle bundle : featureList) {
 
 			MsFeature cf = bundle.getMsFeature();
 			TandemMassSpectrum instrumentMsMs = 
@@ -397,60 +397,60 @@ public class MSMSFeatureTable extends BasicTable {
 	    }
 	}
 
-	public MsFeatureInfoBundle getSelectedBundle() {
+	public MSFeatureInfoBundle getSelectedBundle() {
 
 		int row = getSelectedRow();
 		if(row == -1)
 			return null;
 
-		return (MsFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row),
+		return (MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row),
 				model.getColumnIndex(MSMSFeatureTableModel.MS_FEATURE_COLUMN));
 	}
 
-	public Collection<MsFeatureInfoBundle> getMultipleSelectedBundles() {
+	public Collection<MSFeatureInfoBundle> getMultipleSelectedBundles() {
 
-		Collection<MsFeatureInfoBundle>bundles = new ArrayList<MsFeatureInfoBundle>();
+		Collection<MSFeatureInfoBundle>bundles = new ArrayList<MSFeatureInfoBundle>();
 		if(getSelectedRowCount() == 0)
 			return bundles;
 
 		int colIdx = model.getColumnIndex(MSMSFeatureTableModel.MS_FEATURE_COLUMN);
 		for(int row : getSelectedRows())
-			 bundles.add((MsFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row), colIdx));
+			 bundles.add((MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row), colIdx));
 
 		return bundles;
 	}
 
-	public Collection<MsFeatureInfoBundle> getFilteredBundles() {
+	public Collection<MSFeatureInfoBundle> getFilteredBundles() {
 
-		Collection<MsFeatureInfoBundle>bundles = new ArrayList<MsFeatureInfoBundle>();
+		Collection<MSFeatureInfoBundle>bundles = new ArrayList<MSFeatureInfoBundle>();
 		int colIdx = model.getColumnIndex(MSMSFeatureTableModel.MS_FEATURE_COLUMN);
 		for(int row=0; row<getRowCount(); row++)
-			 bundles.add((MsFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row), colIdx));
+			 bundles.add((MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row), colIdx));
 
 		return bundles;
 	}
 	
-	public Collection<MsFeatureInfoBundle> getAllBundles() {
+	public Collection<MSFeatureInfoBundle> getAllBundles() {
 
-		Collection<MsFeatureInfoBundle>bundles = new ArrayList<MsFeatureInfoBundle>();
+		Collection<MSFeatureInfoBundle>bundles = new ArrayList<MSFeatureInfoBundle>();
 		int colIdx = model.getColumnIndex(MSMSFeatureTableModel.MS_FEATURE_COLUMN);
 		for(int row=0; row<model.getRowCount(); row++)
-			 bundles.add((MsFeatureInfoBundle)model.getValueAt(row, colIdx));
+			 bundles.add((MSFeatureInfoBundle)model.getValueAt(row, colIdx));
 
 		return bundles;
 	}
 
-	public void updateFeatureData(MsFeatureInfoBundle bundle) {
+	public void updateFeatureData(MSFeatureInfoBundle bundle) {
 		model.updateFeatureData(bundle);
 	}
 
-	public void selectBundle(MsFeatureInfoBundle toSelect) {
+	public void selectBundle(MSFeatureInfoBundle toSelect) {
 
 		int colIdx = model.getColumnIndex(MSMSFeatureTableModel.MS_FEATURE_COLUMN);
 		
 		for(int i=0; i<getRowCount(); i++) {
 
-			if(((MsFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(i), colIdx)).equals(toSelect)) {
+			if(((MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(i), colIdx)).equals(toSelect)) {
 				setRowSelectionInterval(i, i);
 				scrollToSelected();
 				break;

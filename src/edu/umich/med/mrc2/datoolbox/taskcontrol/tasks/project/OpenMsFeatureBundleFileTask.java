@@ -32,7 +32,7 @@ import org.jdom2.input.SAXBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -43,13 +43,13 @@ public class OpenMsFeatureBundleFileTask extends AbstractTask {
 	
 	private DataFile dataFile;
 	private File featureFile;
-	private Collection<MsFeatureInfoBundle>features;
+	private Collection<MSFeatureInfoBundle>features;
 
 	public OpenMsFeatureBundleFileTask(DataFile dataFile, File featureFile) {
 		super();
 		this.dataFile = dataFile;
 		this.featureFile = featureFile;
-		features = new ArrayList<MsFeatureInfoBundle>();
+		features = new ArrayList<MSFeatureInfoBundle>();
 	}
 
 	@Override
@@ -81,8 +81,8 @@ public class OpenMsFeatureBundleFileTask extends AbstractTask {
 			processed = 0;
 			for (Element featureElement : list) {
 
-				MsFeatureInfoBundle bundle = 
-						new MsFeatureInfoBundle(featureElement);
+				MSFeatureInfoBundle bundle = 
+						new MSFeatureInfoBundle(featureElement);
 				bundle.setDataFile(dataFile);
 				if(bundle.getAcquisitionMethod() == null)
 					bundle.setAcquisitionMethod(dataFile.getDataAcquisitionMethod());
@@ -106,7 +106,7 @@ public class OpenMsFeatureBundleFileTask extends AbstractTask {
 		return dataFile;
 	}
 
-	public Collection<MsFeatureInfoBundle> getFeatures() {
+	public Collection<MSFeatureInfoBundle> getFeatures() {
 		return features;
 	}
 	

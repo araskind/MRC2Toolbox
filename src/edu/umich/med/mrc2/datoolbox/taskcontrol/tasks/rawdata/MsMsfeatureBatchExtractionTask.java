@@ -27,8 +27,8 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
@@ -47,7 +47,7 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 	private Collection<DataFile> msmsDataFiles;	
 	private Collection<DataFile> msOneDataFiles;	
 	
-	private Map<DataFile, Collection<MsFeatureInfoBundle>>msFeatureMap;
+	private Map<DataFile, Collection<MSFeatureInfoBundle>>msFeatureMap;
 	private Map<String, MsFeatureChromatogramBundle>chromatogramMap;
 
 	public MsMsfeatureBatchExtractionTask(
@@ -61,7 +61,7 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 		this.msmsDataFiles = msmsDataFiles;
 		this.msOneDataFiles = msOneDataFiles;		
 		msFeatureMap = 
-				new TreeMap<DataFile, Collection<MsFeatureInfoBundle>>();
+				new TreeMap<DataFile, Collection<MSFeatureInfoBundle>>();
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 
 	private void initChromatogramExtraction() {
 
-		Collection<MsFeatureInfoBundle> features = msFeatureMap.entrySet().stream().
+		Collection<MSFeatureInfoBundle> features = msFeatureMap.entrySet().stream().
 					flatMap(e -> e.getValue().stream()).
 					sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
 					collect(Collectors.toList());
@@ -151,7 +151,7 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 
-	public Map<DataFile, Collection<MsFeatureInfoBundle>> getMsFeatureMap() {
+	public Map<DataFile, Collection<MSFeatureInfoBundle>> getMsFeatureMap() {
 		return msFeatureMap;
 	}
 

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedIonData;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -49,18 +49,18 @@ import umich.ms.fileio.exceptions.FileParsingException;
 public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 	
 	private DataFile rawDataFile;
-	private Map<MsFeatureInfoBundle, ChromatogramDefinition>featureChromatogramDefinitions;
-	private Map<MsFeatureInfoBundle, Collection<ExtractedIonData>>chromatogramMap;
+	private Map<MSFeatureInfoBundle, ChromatogramDefinition>featureChromatogramDefinitions;
+	private Map<MSFeatureInfoBundle, Collection<ExtractedIonData>>chromatogramMap;
 	private TreeMap<Integer, ScanIndex>msLevel2index;
 	
 	public MsFeatureChromatogramExtractionTask(
 			DataFile rawDataFile,
-			Map<MsFeatureInfoBundle, ChromatogramDefinition> featureChromatogramDefinitions) {
+			Map<MSFeatureInfoBundle, ChromatogramDefinition> featureChromatogramDefinitions) {
 		super();
 		this.rawDataFile = rawDataFile;
 		this.featureChromatogramDefinitions = featureChromatogramDefinitions;
 		chromatogramMap = 
-				new HashMap<MsFeatureInfoBundle, Collection<ExtractedIonData>>();
+				new HashMap<MSFeatureInfoBundle, Collection<ExtractedIonData>>();
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 	private void extractCromatograms() {
 		total = featureChromatogramDefinitions.size();
 		processed = 0;
-		for(Entry<MsFeatureInfoBundle, ChromatogramDefinition> entry : featureChromatogramDefinitions.entrySet()) {
+		for(Entry<MSFeatureInfoBundle, ChromatogramDefinition> entry : featureChromatogramDefinitions.entrySet()) {
 			
 			if (isCanceled()) {
 				RawDataManager.removeDataSource(rawDataFile);
@@ -239,7 +239,7 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 		return rawDataFile;
 	}
 
-	public Map<MsFeatureInfoBundle, Collection<ExtractedIonData>> getChromatogramMap() {
+	public Map<MSFeatureInfoBundle, Collection<ExtractedIonData>> getChromatogramMap() {
 		return chromatogramMap;
 	}
 }

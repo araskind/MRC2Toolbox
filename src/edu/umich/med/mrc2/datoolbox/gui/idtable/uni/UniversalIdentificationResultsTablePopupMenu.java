@@ -58,8 +58,10 @@ public class UniversalIdentificationResultsTablePopupMenu
 	private static final Icon goToDatabaseIcon = GuiUtils.getIcon("goToDatabase", 24);
 	private static final Icon exportMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
 	private static final Icon copyAsArrayIcon = GuiUtils.getIcon("copyAsArray", 24);
+	private static final Icon setPrimaryIdForCluster = GuiUtils.getIcon("setPrimaryIDForCluster", 24);
 	
 	private JMenuItem
+		setPrimaryIdForClusterMenuItem,
 		deleteIdMenuItem,
 		deleteAllIdsMenuItem,
 		disablePrimaryIdMenuItem,
@@ -83,6 +85,14 @@ public class UniversalIdentificationResultsTablePopupMenu
 		
 		addSeparator();
 		
+		setPrimaryIdForClusterMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.SET_AS_PRIMARY_ID_FOR_CLUSTER.getName(), listener,
+				MainActionCommands.SET_AS_PRIMARY_ID_FOR_CLUSTER.getName());
+		setPrimaryIdForClusterMenuItem.setIcon(setPrimaryIdForCluster);
+		
+		addSeparator();
+		
+	
 		disablePrimaryIdMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.DISABLE_PRIMARY_IDENTIFICATION_COMMAND.getName(), listener,
 				MainActionCommands.DISABLE_PRIMARY_IDENTIFICATION_COMMAND.getName());

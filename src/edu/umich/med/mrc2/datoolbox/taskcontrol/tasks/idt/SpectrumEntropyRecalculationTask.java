@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
@@ -37,9 +37,9 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class SpectrumEntropyRecalculationTask extends AbstractTask {
 
-	private Collection<MsFeatureInfoBundle>msmsFeatureBundles;
+	private Collection<MSFeatureInfoBundle>msmsFeatureBundles;
 	
-	public SpectrumEntropyRecalculationTask(Collection<MsFeatureInfoBundle> msmsFeatureBundles) {
+	public SpectrumEntropyRecalculationTask(Collection<MSFeatureInfoBundle> msmsFeatureBundles) {
 		super();
 		this.msmsFeatureBundles = msmsFeatureBundles;
 	}
@@ -53,7 +53,7 @@ public class SpectrumEntropyRecalculationTask extends AbstractTask {
 		processed = 0;
 
 		try {
-			for(MsFeatureInfoBundle b :  msmsFeatureBundles) {
+			for(MSFeatureInfoBundle b :  msmsFeatureBundles) {
 				
 				processed++;
 				if(b.getMsFeature().getSpectrum()  == null) 

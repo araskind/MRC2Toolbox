@@ -22,9 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
@@ -72,7 +72,7 @@ public class MSMSLibraryMatchTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromFeatureBundle(MsFeatureInfoBundle feature) {
+	public void setTableModelFromFeatureBundle(MSFeatureInfoBundle feature) {
 
 		setRowCount(0);
 		MsFeature cf = feature.getMsFeature();

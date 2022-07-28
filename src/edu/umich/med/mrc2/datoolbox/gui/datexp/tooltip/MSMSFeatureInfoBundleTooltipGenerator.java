@@ -25,8 +25,8 @@ import org.jfree.chart.labels.XYZToolTipGenerator;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MSMSFeatureInfoBundleDataSet;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -35,7 +35,7 @@ public class MSMSFeatureInfoBundleTooltipGenerator implements XYZToolTipGenerato
 	@Override
 	public String generateToolTip(XYDataset dataset, int series, int item) {
 		
-		MsFeatureInfoBundle b = null;
+		MSFeatureInfoBundle b = null;
 		if(dataset instanceof MSMSFeatureInfoBundleDataSet) { 			
 			b = ((MSMSFeatureInfoBundleDataSet)dataset).getMsFeatureInfoBundle(series, item);
 			return getTooltipForFeatureBundle(b);
@@ -48,7 +48,7 @@ public class MSMSFeatureInfoBundleTooltipGenerator implements XYZToolTipGenerato
 		return generateToolTip((XYDataset)dataset, series, item) ;
 	}
 	
-	protected String getTooltipForFeatureBundle(MsFeatureInfoBundle b) {
+	protected String getTooltipForFeatureBundle(MSFeatureInfoBundle b) {
 		
 		if(b == null)
 			return null;

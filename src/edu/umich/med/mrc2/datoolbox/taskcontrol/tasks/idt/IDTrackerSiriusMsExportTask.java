@@ -38,7 +38,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.SiriusMsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
@@ -53,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class IDTrackerSiriusMsExportTask extends AbstractTask {
 	
-	private Collection<MsFeatureInfoBundle>featuresToExport;
+	private Collection<MSFeatureInfoBundle>featuresToExport;
 	private File outputFile;
 	
 	private static final String lineSeparator = System.getProperty("line.separator");
@@ -72,7 +72,7 @@ public class IDTrackerSiriusMsExportTask extends AbstractTask {
 	private double mzError;
 
 	public IDTrackerSiriusMsExportTask(
-			Collection<MsFeatureInfoBundle> featuresToExport,
+			Collection<MSFeatureInfoBundle> featuresToExport,
 			double rtError, 
 			double mzError, 
 			File outputFile) {
@@ -107,12 +107,12 @@ public class IDTrackerSiriusMsExportTask extends AbstractTask {
 	private void createFeatureGroups() {
 		
 		msmsclusters = new ArrayList<SiriusMsMsCluster>();
-		MsFeatureInfoBundle[] msmsFeatures = 
+		MSFeatureInfoBundle[] msmsFeatures = 
 				featuresToExport.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().
 						getSpectrum().getExperimentalTandemSpectrum())).
 				filter(f -> Math.abs(f.getMsFeature().getCharge()) == 1).
-				toArray(size -> new MsFeatureInfoBundle[size]);
+				toArray(size -> new MSFeatureInfoBundle[size]);
 		
 		if(msmsFeatures.length == 0)
 			return;
@@ -141,7 +141,7 @@ public class IDTrackerSiriusMsExportTask extends AbstractTask {
 		}
 	}
 	
-	private void createInjectionMap(Collection<MsFeatureInfoBundle> msmsFeatures) {
+	private void createInjectionMap(Collection<MSFeatureInfoBundle> msmsFeatures) {
 
 		injectionMap = new TreeMap<String,Injection>();
 		List<String> injIds = msmsFeatures.stream().
@@ -182,7 +182,7 @@ public class IDTrackerSiriusMsExportTask extends AbstractTask {
 		writer.close();
 	}
 
-	private String createComment(MsFeatureInfoBundle bundle) {
+	private String createComment(MSFeatureInfoBundle bundle) {
 
 		String comment = MSPField.COMMENT.getName() + ": ";
 		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(bundle.getMsFeature().getRetentionTime()) + " min. | ";

@@ -44,9 +44,9 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
@@ -751,7 +751,7 @@ public class NISTPepSearchUtils {
 		return parsePepSearchOutputToObjects(searchData, pepSearchParameterObject);
 	}
 	
-	public static Map<String,HiResSearchOption>getSearchTypeMap(Collection<MsFeatureInfoBundle>bundles){
+	public static Map<String,HiResSearchOption>getSearchTypeMap(Collection<MSFeatureInfoBundle>bundles){
 		
 		Set<String> searchParamSet = bundles.stream().
 				flatMap(f -> f.getMsFeature().getIdentifications().stream()).
@@ -793,10 +793,10 @@ public class NISTPepSearchUtils {
 		return typeMap;
 	}
 	
-	public static Collection<MsFeatureInfoBundle> removeLockedFeatures(
-			Collection<MsFeatureInfoBundle>featuresToFilter) {
+	public static Collection<MSFeatureInfoBundle> removeLockedFeatures(
+			Collection<MSFeatureInfoBundle>featuresToFilter) {
 		
-		Collection<MsFeatureInfoBundle> filteredFeatures = featuresToFilter.stream().
+		Collection<MSFeatureInfoBundle> filteredFeatures = featuresToFilter.stream().
 			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 			filter(f -> Objects.nonNull(f.getMsFeature().
 					getPrimaryIdentity().getReferenceMsMsLibraryMatch())).			
@@ -813,7 +813,7 @@ public class NISTPepSearchUtils {
 	}
 		
 	public static Map<NISTPepSearchParameterObject, Long> getPepSearchParameterSetCountsForDataSet(
-			Collection<MsFeatureInfoBundle> msmsFeatures) {
+			Collection<MSFeatureInfoBundle> msmsFeatures) {
 		
 		Map<NISTPepSearchParameterObject, Long> paramCounts = msmsFeatures.stream().
 			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
@@ -828,8 +828,8 @@ public class NISTPepSearchUtils {
 		return paramCounts;
 	}
 	
-	public static Collection<MsFeatureInfoBundle>fiterMSMSFeaturesByPepSearchParameterSet(
-			Collection<MsFeatureInfoBundle> featuresToFilter,
+	public static Collection<MSFeatureInfoBundle>fiterMSMSFeaturesByPepSearchParameterSet(
+			Collection<MSFeatureInfoBundle> featuresToFilter,
 			String paramSetId) {
 		
 		 return featuresToFilter.stream().

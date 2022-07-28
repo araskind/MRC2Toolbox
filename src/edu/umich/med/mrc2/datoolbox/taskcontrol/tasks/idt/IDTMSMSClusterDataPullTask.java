@@ -38,10 +38,10 @@ import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
@@ -133,7 +133,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 			
 			Collection<String> fids = clusterFeatureIdMap.get(cluster.getId());
 			features.stream().
-				filter(f -> fids.contains(f.getMSMSFeatureId())).
+				filter(f -> fids.contains(f.getMSFeatureId())).
 				forEach(f -> cluster.addComponent(f));
 			processed++;
 		}
@@ -184,7 +184,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		         ResultSet.CONCUR_UPDATABLE);
 		
 		String featureQuery = 
-				"SELECT MSMS_FEATURE_ID FROM MSMS_CLUSTER_COMPONENT WHERE CLUSTER_ID = ?";
+				"SELECT MS_FEATURE_ID FROM MSMS_CLUSTER_COMPONENT WHERE CLUSTER_ID = ?";
 		PreparedStatement fps = conn.prepareStatement(featureQuery);
 
 		ps.setString(1, dataSet.getId());
@@ -250,7 +250,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 				"SAMPLE S, " +
 				"STOCK_SAMPLE T, " +
 				"MSMS_FEATURE F2 " +
-				"WHERE F2.MSMS_FEATURE_ID = ? " +
+				"WHERE F.FEATURE_ID = ? " +
 				"AND F.DATA_ANALYSIS_ID = M.DATA_ANALYSIS_ID " +
 				"AND  F2.PARENT_FEATURE_ID = F.FEATURE_ID " +
 				"AND M.INJECTION_ID = I.INJECTION_ID " +
@@ -313,7 +313,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 
 				f.setSpectrum(spectrum);
 				
-				MsFeatureInfoBundle bundle = new MsFeatureInfoBundle(f);
+				MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 				bundle.setAcquisitionMethod(
 					IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
 				bundle.setDataExtractionMethod(

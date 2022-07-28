@@ -51,7 +51,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
@@ -75,7 +75,7 @@ public class FollowupStepAssignmentDialog extends JDialog implements ActionListe
 	private JButton btnSaveChanges;
 	ActionListener listener;
 
-	public FollowupStepAssignmentDialog(ActionListener parent, MsFeatureInfoBundle bundle) {
+	public FollowupStepAssignmentDialog(ActionListener parent, MSFeatureInfoBundle bundle) {
 
 		super();
 		this.listener = parent;
@@ -195,7 +195,7 @@ public class FollowupStepAssignmentDialog extends JDialog implements ActionListe
 	
 
 	@SuppressWarnings("unchecked")
-	private void populateStepListsFromFeatureInfoBundle(MsFeatureInfoBundle bundle) {
+	private void populateStepListsFromFeatureInfoBundle(MSFeatureInfoBundle bundle) {
 
 		Collection<MSFeatureIdentificationFollowupStep> usedSteps = bundle.getIdFollowupSteps();
 		Collection<MSFeatureIdentificationFollowupStep> availableSteps =  

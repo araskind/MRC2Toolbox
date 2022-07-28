@@ -33,7 +33,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -43,12 +43,12 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
 
 	private DataFile file;
 	private File xmlTmpDir;	
-	private Collection<MsFeatureInfoBundle>features;
+	private Collection<MSFeatureInfoBundle>features;
 
 	public SaveFileMsFeaturesTask(
 			DataFile file, 
 			File xmlTmpDir, 
-			Collection<MsFeatureInfoBundle> features) {
+			Collection<MSFeatureInfoBundle> features) {
 		super();
 		this.file = file;
 		this.xmlTmpDir = xmlTmpDir;
@@ -83,7 +83,7 @@ public class SaveFileMsFeaturesTask extends AbstractTask {
 		Element featureListElement =  
 				 new Element(DataFileFields.FeatureList.name());
 
-		for(MsFeatureInfoBundle msf : features) {
+		for(MSFeatureInfoBundle msf : features) {
 			featureListElement.addContent(msf.getXmlElement());
 			processed++;
 		}

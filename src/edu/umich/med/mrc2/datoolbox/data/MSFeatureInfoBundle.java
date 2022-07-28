@@ -39,7 +39,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
 
-public class MsFeatureInfoBundle implements Serializable {
+public class MSFeatureInfoBundle implements Serializable {
 
 	/**
 	 * 
@@ -58,7 +58,7 @@ public class MsFeatureInfoBundle implements Serializable {
 	
 	private DataFile dataFile;
 
-	public MsFeatureInfoBundle(MsFeature msFeature) {
+	public MSFeatureInfoBundle(MsFeature msFeature) {
 		super();
 		this.msFeature = msFeature;
 		idFollowupSteps =  
@@ -74,7 +74,7 @@ public class MsFeatureInfoBundle implements Serializable {
 		return msFeature;
 	}
 	
-	public String getMsFeatureId() {
+	public String getMSFeatureId() {
 		return msFeature.getId();
 	}
 
@@ -236,10 +236,10 @@ public class MsFeatureInfoBundle implements Serializable {
         if (obj == null)
             return false;
 
-        if (!MsFeatureInfoBundle.class.isAssignableFrom(obj.getClass()))
+        if (!MSFeatureInfoBundle.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        final MsFeatureInfoBundle other = (MsFeatureInfoBundle) obj;
+        final MSFeatureInfoBundle other = (MSFeatureInfoBundle) obj;
 
         if ((this.msFeature == null) ? (other.getMsFeature() != null) : !this.msFeature.equals(other.getMsFeature()))
             return false;
@@ -325,7 +325,7 @@ public class MsFeatureInfoBundle implements Serializable {
 		return msFeatureInfoBundleElement;
 	}
 	
-	public MsFeatureInfoBundle(Element featureElement) {
+	public MSFeatureInfoBundle(Element featureElement) {
 		
 		msFeature = new MsFeature(
 				featureElement.getChild(MsFeatureFields.MsFeature.name()));

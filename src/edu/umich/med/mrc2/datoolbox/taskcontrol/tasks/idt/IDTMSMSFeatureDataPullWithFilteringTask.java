@@ -35,10 +35,10 @@ import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
@@ -70,7 +70,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 	private Collection<MinimalMSOneFeature>lookupFeatures;
 	private MSMSClusteringParameterSet clusteringParams;
 	
-	private Collection<MsFeatureInfoBundle> filteredMsmsFeatures;
+	private Collection<MSFeatureInfoBundle> filteredMsmsFeatures;
 	private Collection<MsFeatureInfoBundleCluster>featureClusters;
 	private MSMSClusterDataSet msmsClusterDataSet;
 	private double rtError;
@@ -91,7 +91,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		this.clusteringParams = clusteringParams;
 
 		msmsClusterDataSet = new MSMSClusterDataSet(
-				"Active data set", 
+				"MSMS clusters data set", 
 				"", 
 				MRC2ToolBoxCore.getIdTrackerUser());
 		msmsClusterDataSet.setParameters(clusteringParams);	
@@ -201,8 +201,8 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 				}
 				while (rs.next()) {
 					
-					MsFeatureInfoBundle fInCash = 
-							FeatureCollectionUtils.retrieveMSMSFetureInfoBundleFromCache(rs.getString("MSMS_FEATURE_ID"));
+					MSFeatureInfoBundle fInCash = 
+							FeatureCollectionUtils.retrieveMSFeatureInfoBundleFromCache(rs.getString("MSMS_FEATURE_ID"));
 					if(fInCash != null) {
 						cashedFeatures.add(fInCash);
 						processed++;
@@ -250,7 +250,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 	
 					f.setSpectrum(spectrum);
 					
-					MsFeatureInfoBundle bundle = new MsFeatureInfoBundle(f);
+					MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 					bundle.setAcquisitionMethod(pipeline.getAcquisitionMethod());
 					bundle.setDataExtractionMethod(pipeline.getDataExtractionMethod());
 					bundle.setExperiment(experiment);
@@ -281,13 +281,13 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		taskDescription = "Clustering MSMS features based on filter list ...";
 		total = lookupFeatures.size();
 		processed = 0;
-		filteredMsmsFeatures = new HashSet<MsFeatureInfoBundle>();
+		filteredMsmsFeatures = new HashSet<MSFeatureInfoBundle>();
 		
 		for(MinimalMSOneFeature b : lookupFeatures) {
 			
 			Range rtRange = new Range(b.getRt() - rtError, b.getRt() + rtError);
 			Range mzRange = MsUtils.createMassRange(b.getMz(), mzError, mzErrorType);
-			List<MsFeatureInfoBundle> clusterFeatures = features.stream().
+			List<MSFeatureInfoBundle> clusterFeatures = features.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().
 						getSpectrum().getExperimentalTandemSpectrum())).
 				filter(f -> rtRange.contains(f.getRetentionTime())).
@@ -312,9 +312,9 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		taskDescription = "Clustering all MSMS features ...";
 		total = features.size();
 		processed = 0;
-		filteredMsmsFeatures = new HashSet<MsFeatureInfoBundle>();
+		filteredMsmsFeatures = new HashSet<MSFeatureInfoBundle>();
 		
-		for(MsFeatureInfoBundle feature : features) {
+		for(MSFeatureInfoBundle feature : features) {
 			
 			for(MsFeatureInfoBundleCluster cluster : featureClusters) {
 				
@@ -325,7 +325,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 	
 	private MsFeatureInfoBundleCluster clusterBasedOnMSMSSimilarity(
 			MinimalMSOneFeature b,
-			List<MsFeatureInfoBundle> featuresToCluster) {
+			List<MSFeatureInfoBundle> featuresToCluster) {
 		
 		if(featuresToCluster.isEmpty())
 			return null;
@@ -338,10 +338,10 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		}
 		if(featuresToCluster.size() > 1) {
 			
-			List<MsFeatureInfoBundle> featuresToRemove = 
-					new ArrayList<MsFeatureInfoBundle>();
+			List<MSFeatureInfoBundle> featuresToRemove = 
+					new ArrayList<MSFeatureInfoBundle>();
 			MsFeatureInfoBundleCluster newCluster = new MsFeatureInfoBundleCluster(b);
-			MsFeatureInfoBundle maxInt = featuresToCluster.get(0);
+			MSFeatureInfoBundle maxInt = featuresToCluster.get(0);
 			double maxArea = maxInt.getMsFeature().getSpectrum().
 					getExperimentalTandemSpectrum().getTotalIntensity();
 			for(int i=1; i<featuresToCluster.size(); i++) {
@@ -358,7 +358,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 			featuresToRemove.add(maxInt);
 			for(int i=0; i<featuresToCluster.size(); i++) {
 				
-				MsFeatureInfoBundle f = featuresToCluster.get(i);
+				MSFeatureInfoBundle f = featuresToCluster.get(i);
 				if(f.equals(maxInt))
 					continue;
 				

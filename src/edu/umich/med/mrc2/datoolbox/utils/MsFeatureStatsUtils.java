@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
@@ -44,7 +44,7 @@ public class MsFeatureStatsUtils {
 	
 	private static final DescriptiveStatistics descStats = new DescriptiveStatistics();
 
-	public static double getMedianRtForFeatureCollection(Collection<MsFeatureInfoBundle>features) {
+	public static double getMedianRtForFeatureCollection(Collection<MSFeatureInfoBundle>features) {
 		
 		if(features.isEmpty())
 			return 0.0d;
@@ -57,7 +57,7 @@ public class MsFeatureStatsUtils {
 		return descStats.getPercentile(50.0d);
 	}
 	
-	public static double getMedianParentIonMzForFeatureCollection(Collection<MsFeatureInfoBundle>features) {
+	public static double getMedianParentIonMzForFeatureCollection(Collection<MSFeatureInfoBundle>features) {
 		
 		if(features.isEmpty())
 			return 0.0d;
@@ -78,7 +78,7 @@ public class MsFeatureStatsUtils {
 		return descStats.getPercentile(50.0d);
 	}
 	
-	public static double getMedianMSMSAreaForFeatureCollection(Collection<MsFeatureInfoBundle>features) {
+	public static double getMedianMSMSAreaForFeatureCollection(Collection<MSFeatureInfoBundle>features) {
 		
 		if(features.isEmpty())
 			return 0.0d;
@@ -99,8 +99,8 @@ public class MsFeatureStatsUtils {
 		return descStats.getPercentile(50.0d);
 	}
 	
-	public static Collection<MsFeatureInfoBundle>getMSMSFeaturesOnly(
-			Collection<MsFeatureInfoBundle>inputFeatures){
+	public static Collection<MSFeatureInfoBundle>getMSMSFeaturesOnly(
+			Collection<MSFeatureInfoBundle>inputFeatures){
 	
 		return inputFeatures.stream().
 				filter(b -> Objects.nonNull(b.getMsFeature().getSpectrum())).
@@ -109,17 +109,17 @@ public class MsFeatureStatsUtils {
 				collect(Collectors.toList());
 	}
 	
-	public static Collection<MsFeatureInfoBundle>filterFeaturesByMSMSFragmentMassDifferences(
-			Collection<MsFeatureInfoBundle>inputFeatures,
+	public static Collection<MSFeatureInfoBundle>filterFeaturesByMSMSFragmentMassDifferences(
+			Collection<MSFeatureInfoBundle>inputFeatures,
 			Collection<Range> massDiffRanges,
 			IncludeSubset massDiffIncludeSubset,
 			double massDiffIntensityCutoff,
 			boolean neutralLossesOnly){
 		
-		Collection<MsFeatureInfoBundle> msmsFeatures = getMSMSFeaturesOnly(inputFeatures);
-		Collection<MsFeatureInfoBundle>filtered = new ArrayList<MsFeatureInfoBundle>();
+		Collection<MSFeatureInfoBundle> msmsFeatures = getMSMSFeaturesOnly(inputFeatures);
+		Collection<MSFeatureInfoBundle>filtered = new ArrayList<MSFeatureInfoBundle>();
 		Map<Range,Boolean>foundRanges = new HashMap<Range,Boolean>();
-		for(MsFeatureInfoBundle b : msmsFeatures) {
+		for(MSFeatureInfoBundle b : msmsFeatures) {
 			
 			TandemMassSpectrum msms = 
 					b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
@@ -172,12 +172,12 @@ public class MsFeatureStatsUtils {
 		return filtered;		
 	}
 	
-	public static Collection<MsFeatureInfoBundle> filterMSMSFeatureTable(
-			Collection<MsFeatureInfoBundle>inputFeatures, 
+	public static Collection<MSFeatureInfoBundle> filterMSMSFeatureTable(
+			Collection<MSFeatureInfoBundle>inputFeatures, 
 			MSMSFilterParameters filterParameters) {
 		
-		Collection<MsFeatureInfoBundle> features = getMSMSFeaturesOnly(inputFeatures);
-		Collection<MsFeatureInfoBundle> msmsLibMatched = features.stream().
+		Collection<MSFeatureInfoBundle> features = getMSMSFeaturesOnly(inputFeatures);
+		Collection<MSFeatureInfoBundle> msmsLibMatched = features.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 				filter(f -> Objects.nonNull(f.getMsFeature().
 						getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
@@ -333,19 +333,19 @@ public class MsFeatureStatsUtils {
 		return features;
 	}
 	
-	public static Collection<MsFeatureInfoBundle>filterFeaturesByMSMSFragments(
-			Collection<MsFeatureInfoBundle>inputFeatures,
+	public static Collection<MSFeatureInfoBundle>filterFeaturesByMSMSFragments(
+			Collection<MSFeatureInfoBundle>inputFeatures,
 			Collection<Range> fragMzRanges,
 			IncludeSubset fragmentsIncludeSubset,
 			double fragIntensityCutoff){
 		
-		List<MsFeatureInfoBundle> msmsFeatures = inputFeatures.stream().
+		List<MSFeatureInfoBundle> msmsFeatures = inputFeatures.stream().
 			filter(b -> Objects.nonNull(b.getMsFeature().getSpectrum())).
 			filter(b -> Objects.nonNull(b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
 			collect(Collectors.toList());
-		Collection<MsFeatureInfoBundle>filtered = new ArrayList<MsFeatureInfoBundle>();
+		Collection<MSFeatureInfoBundle>filtered = new ArrayList<MSFeatureInfoBundle>();
 		Map<Range,Boolean>foundRanges = new HashMap<Range,Boolean>();
-		for(MsFeatureInfoBundle b : msmsFeatures) {
+		for(MSFeatureInfoBundle b : msmsFeatures) {
 			
 			Collection<MsPoint> msms = 
 					b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum().getSpectrum();
@@ -390,12 +390,12 @@ public class MsFeatureStatsUtils {
 		return filtered;	
 	}
 	
-	public static Collection<MsFeatureInfoBundle>filterFeaturesByIdSubset(
-			Collection<MsFeatureInfoBundle>inputFeatures,
+	public static Collection<MSFeatureInfoBundle>filterFeaturesByIdSubset(
+			Collection<MSFeatureInfoBundle>inputFeatures,
 			FeatureSubsetByIdentification idSubset) {
 		
 		if(idSubset.equals(FeatureSubsetByIdentification.ALL))
-			return new ArrayList<MsFeatureInfoBundle>(inputFeatures);
+			return new ArrayList<MSFeatureInfoBundle>(inputFeatures);
 			
 		if(idSubset.equals(FeatureSubsetByIdentification.IDENTIFIED_ONLY))
 			return inputFeatures.stream().
@@ -410,8 +410,8 @@ public class MsFeatureStatsUtils {
 		return null;
 	}
 	
-	public static Collection<MsFeatureInfoBundle>getFeaturesWithMSMSLibMatch(
-			Collection<MsFeatureInfoBundle>toFilter){
+	public static Collection<MSFeatureInfoBundle>getFeaturesWithMSMSLibMatch(
+			Collection<MSFeatureInfoBundle>toFilter){
 		
 		return toFilter.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
@@ -420,8 +420,8 @@ public class MsFeatureStatsUtils {
 				collect(Collectors.toList());
 	}
 	
-	public static Collection<MsFeatureInfoBundle>getFeaturesWithMSRTLibMatch(
-			Collection<MsFeatureInfoBundle>toFilter){
+	public static Collection<MSFeatureInfoBundle>getFeaturesWithMSRTLibMatch(
+			Collection<MSFeatureInfoBundle>toFilter){
 		
 		return toFilter.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).

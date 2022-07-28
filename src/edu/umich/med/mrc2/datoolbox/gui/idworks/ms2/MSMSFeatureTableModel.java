@@ -26,9 +26,9 @@ import java.util.Collection;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
@@ -79,7 +79,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(MS_FEATURE_COLUMN, MsFeatureInfoBundle.class, false),
+			new ColumnContext(MS_FEATURE_COLUMN, MSFeatureInfoBundle.class, false),
 			new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
 			new ColumnContext(DATABASE_LINK_COLUMN, MsFeatureIdentity.class, false),
 			new ColumnContext(AMBIGUITY_COLUMN, FeatureIdentificationState.class, false),
@@ -109,10 +109,10 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromFeatureList(Collection<MsFeatureInfoBundle> featureList) {
+	public void setTableModelFromFeatureList(Collection<MSFeatureInfoBundle> featureList) {
 
 		setRowCount(0);
-		for (MsFeatureInfoBundle bundle : featureList) {
+		for (MSFeatureInfoBundle bundle : featureList) {
 
 			MsFeature cf = bundle.getMsFeature();
 			TandemMassSpectrum instrumentMsMs = 
@@ -195,7 +195,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		}
 	}
 
-	public void updateFeatureData(MsFeatureInfoBundle bundle) {
+	public void updateFeatureData(MSFeatureInfoBundle bundle) {
 
 		int row = getFeatureInfoBundleRow(bundle);
 		if(row == -1)
@@ -303,7 +303,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		setValueAt(instrumentMsMs.getTotalIntensity(), row, getColumnIndex(SPECTRUM_TOTAL_INTENSITY_COLUMN));
 	}
 
-	public int getFeatureInfoBundleRow(MsFeatureInfoBundle bundle) {
+	public int getFeatureInfoBundleRow(MSFeatureInfoBundle bundle) {
 
 		int col = getColumnIndex(MS_FEATURE_COLUMN);
 		for (int i = 0; i < getRowCount(); i++) {
@@ -319,7 +319,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		int col = getColumnIndex(MS_FEATURE_COLUMN);
 		for (int i = 0; i < getRowCount(); i++) {
 
-			if (feature.equals(((MsFeatureInfoBundle)getValueAt(i, col)).getMsFeature()))
+			if (feature.equals(((MSFeatureInfoBundle)getValueAt(i, col)).getMsFeature()))
 				return i;
 		}
 		return -1;

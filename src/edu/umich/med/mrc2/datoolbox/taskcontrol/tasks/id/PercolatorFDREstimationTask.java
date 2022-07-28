@@ -39,9 +39,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
@@ -73,7 +73,7 @@ import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 
 public class PercolatorFDREstimationTask extends AbstractTask implements TaskListener {
 	
-	private Collection<MsFeatureInfoBundle>featureList;
+	private Collection<MSFeatureInfoBundle>featureList;
 	private NISTPepSearchParameterObject searchParameters;
 	private File decoySearchInputFile;
 	private File decoySearchResultFile;
@@ -85,7 +85,7 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 	private Map<String,MsFeatureIdentity>decoyHitMap;
 
 	public PercolatorFDREstimationTask(
-			Collection<MsFeatureInfoBundle> featureList,
+			Collection<MSFeatureInfoBundle> featureList,
 			NISTPepSearchParameterObject searchParameters) {
 		super();
 		this.featureList = featureList;
@@ -105,7 +105,7 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 	
 	private void initDecoySearchTask() {
 		
-		Collection<MsFeatureInfoBundle> featuresToSearch = featureList.stream().
+		Collection<MSFeatureInfoBundle> featuresToSearch = featureList.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 				filter(f -> Objects.nonNull(f.getMsFeature().
 						getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
@@ -136,10 +136,10 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 	}
 
 	private Collection<PepSearchOutputObject>createPsoObjectsFromLibraryHits(
-			Collection<MsFeatureInfoBundle> featureList){
+			Collection<MSFeatureInfoBundle> featureList){
 		
 		taskDescription = "Processing library hits ...";
-		Collection<MsFeatureInfoBundle> featuresToSearch = 
+		Collection<MSFeatureInfoBundle> featuresToSearch = 
 				MsFeatureStatsUtils.getFeaturesWithMSMSLibMatch(featureList);		
 		total = featuresToSearch.size();
 		processed = 0;
@@ -155,7 +155,7 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 
 		Map<String,String>libraryIdNameMap = createLibraryIdNameMap(featuresToSearch);
 		
-		for(MsFeatureInfoBundle bundle : featuresToSearch) {
+		for(MSFeatureInfoBundle bundle : featuresToSearch) {
 				
 			MsFeature feature = bundle.getMsFeature();
 			PepSearchOutputObject poo = new PepSearchOutputObject(
@@ -187,7 +187,7 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 		return psoCollection;
 	}
 	
-	private Map<String,String>createLibraryIdNameMap(Collection<MsFeatureInfoBundle> featuresToSearch){
+	private Map<String,String>createLibraryIdNameMap(Collection<MSFeatureInfoBundle> featuresToSearch){
 		
 		Set<String> libIds = featuresToSearch.stream().
 				map(b -> b.getMsFeature()).
@@ -442,7 +442,7 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 			messageLog.add(errorMessage);
 			setStatus(TaskStatus.ERROR);
 		}
-		Collection<MsFeatureInfoBundle> featuresToUpdate = 
+		Collection<MSFeatureInfoBundle> featuresToUpdate = 
 				MsFeatureStatsUtils.getFeaturesWithMSMSLibMatch(featureList);		
 		updateLibraryMatchesWithPercolatorResults(libResults, featuresToUpdate);
 		updateDecoyMatchesWithPercolatorResults(decoyResults, featuresToUpdate);		
@@ -450,7 +450,7 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 	
 	private void updateDecoyMatchesWithPercolatorResults(
 			Collection<PercolatorOutputObject>decoyResults,
-			Collection<MsFeatureInfoBundle> featuresToUpdate) {
+			Collection<MSFeatureInfoBundle> featuresToUpdate) {
 		
 		taskDescription = "Updating decoy matches with Percolator results ...";
 		total = decoyResults.size();
@@ -467,7 +467,7 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 			}
 			processed++;
 		}
-		for(MsFeatureInfoBundle b : featuresToUpdate) {
+		for(MSFeatureInfoBundle b : featuresToUpdate) {
 						
 			MsFeatureIdentity id = 
 					decoyHitMap.get(b.getMsFeature().getSpectrum().
@@ -479,12 +479,12 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 	
 	private void updateLibraryMatchesWithPercolatorResults(
 			Collection<PercolatorOutputObject>libResults,
-			Collection<MsFeatureInfoBundle> featuresToUpdate) {
+			Collection<MSFeatureInfoBundle> featuresToUpdate) {
 		
 		taskDescription = "Updating library matches with Percolator results ...";
 		total = featuresToUpdate.size();
 		processed = 0;
-		for(MsFeatureInfoBundle b : featuresToUpdate) {
+		for(MSFeatureInfoBundle b : featuresToUpdate) {
 			
 			String msmsId = b.getMsFeature().getSpectrum().
 					getExperimentalTandemSpectrum().getId();
@@ -513,7 +513,7 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 				featureList, searchParameters);
 	}
 
-	public Collection<MsFeatureInfoBundle> getFeatureList() {
+	public Collection<MSFeatureInfoBundle> getFeatureList() {
 		return featureList;
 	}
 

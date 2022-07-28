@@ -31,7 +31,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -175,7 +175,7 @@ public class MSMSFeatureClusterTreeMouseHandler extends MouseAdapter {
 
 		}
 
-		if (clickedObject instanceof MsFeatureInfoBundle) {
+		if (clickedObject instanceof MSFeatureInfoBundle) {
 
 		}
 	}
@@ -194,7 +194,7 @@ public class MSMSFeatureClusterTreeMouseHandler extends MouseAdapter {
 		if (clickedObject instanceof MsFeatureInfoBundleCluster)
 			clusterPopupMenu.show(e.getComponent(), e.getX(), e.getY());
 
-		if (clickedObject instanceof MsFeatureInfoBundle && featurePopupMenu != null)
+		if (clickedObject instanceof MSFeatureInfoBundle && featurePopupMenu != null)
 			featurePopupMenu.show(e.getComponent(), e.getX(), e.getY());
 
 		if (node.equals(tree.getModel().getClustersNode()))

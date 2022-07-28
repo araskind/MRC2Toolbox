@@ -38,7 +38,7 @@ import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.DockableMSMSClusterDataSetsManager;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.DockableFeatureCollectionsManager;
@@ -115,7 +115,7 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 		featureCollectionsManager.showMsFeatureCollectionEditorDialog(collection);
 	}
 
-	public void setFeaturesToAdd(Collection<MsFeatureInfoBundle> featuresToAdd) {
+	public void setFeaturesToAdd(Collection<MSFeatureInfoBundle> featuresToAdd) {
 		//	this.featuresToAdd = featuresToAdd;
 		featureCollectionsManager.setFeaturesToAdd(featuresToAdd);
 	}

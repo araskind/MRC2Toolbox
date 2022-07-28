@@ -25,7 +25,7 @@ import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableFollowupStepTable extends DefaultSingleCDockable {
@@ -46,7 +46,7 @@ public class DockableFollowupStepTable extends DefaultSingleCDockable {
 		followupStepTable.clearTable();
 	}
 	
-	public void loadFeatureData(MsFeatureInfoBundle bundle) {
+	public void loadFeatureData(MSFeatureInfoBundle bundle) {
 		followupStepTable.setTableModelFromFollowupStepList(bundle.getIdFollowupSteps());
 	}
 

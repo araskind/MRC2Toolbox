@@ -32,8 +32,8 @@ import org.jfree.data.general.DatasetChangeEvent;
 import org.jfree.data.xy.AbstractXYDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 
 public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
@@ -42,7 +42,7 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 	 * 
 	 */
 	private static final long serialVersionUID = 4892175963127546985L;
-	private Map<String, MsFeatureInfoBundle[]>seriesMap;
+	private Map<String, MSFeatureInfoBundle[]>seriesMap;
 	private String[] keySet;
 	
 	public static final String UNKNOWN_SERIES_NAME = "Unknowns";
@@ -50,19 +50,19 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 
 	public MSMSFeatureInfoBundleDataSet() {
 		super();
-		seriesMap = new LinkedHashMap<String, MsFeatureInfoBundle[]>();
+		seriesMap = new LinkedHashMap<String, MSFeatureInfoBundle[]>();
 	}
 
-	public MSMSFeatureInfoBundleDataSet(Collection<MsFeatureInfoBundle> featureBundles) {
+	public MSMSFeatureInfoBundleDataSet(Collection<MSFeatureInfoBundle> featureBundles) {
 
 		super();
-		seriesMap = new LinkedHashMap<String, MsFeatureInfoBundle[]>();
+		seriesMap = new LinkedHashMap<String, MSFeatureInfoBundle[]>();
 		populateSeries(featureBundles);
 	}
 	
-	private void populateSeries(Collection<MsFeatureInfoBundle> featureBundles) {
+	private void populateSeries(Collection<MSFeatureInfoBundle> featureBundles) {
 
-		List<MsFeatureInfoBundle> identified = featureBundles.stream().
+		List<MSFeatureInfoBundle> identified = featureBundles.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 				filter(f -> Objects.nonNull(f.getMsFeature().
 						getPrimaryIdentity().getIdentificationLevel())).
@@ -73,33 +73,33 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
 		
 		for(MSFeatureIdentificationLevel level : idLevels) {
 			
-			MsFeatureInfoBundle[] levelFeatures = identified.stream().
+			MSFeatureInfoBundle[] levelFeatures = identified.stream().
 					filter(f -> f.getMsFeature().getPrimaryIdentity().
 							getIdentificationLevel().equals(level)).
-					toArray(size -> new MsFeatureInfoBundle[size]);
+					toArray(size -> new MSFeatureInfoBundle[size]);
 			if(levelFeatures.length > 0)
 				seriesMap.put(level.getName(), levelFeatures);			
 		}
-		MsFeatureInfoBundle[] missingIdLevel = featureBundles.stream().
+		MSFeatureInfoBundle[] missingIdLevel = featureBundles.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 				filter(f -> Objects.isNull(f.getMsFeature().
 						getPrimaryIdentity().getIdentificationLevel())).
-				toArray(size -> new MsFeatureInfoBundle[size]);		
+				toArray(size -> new MSFeatureInfoBundle[size]);		
 		if(missingIdLevel.length > 0)
 			seriesMap.put(IDENTIFIED_WITHOUT_LEVEL_SERIES_NAME, missingIdLevel);
 		
-		MsFeatureInfoBundle[] unknowns = featureBundles.stream().
+		MSFeatureInfoBundle[] unknowns = featureBundles.stream().
 				filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity())).
-				toArray(size -> new MsFeatureInfoBundle[size]);		
+				toArray(size -> new MSFeatureInfoBundle[size]);		
 		if(unknowns.length > 0)
 			seriesMap.put(UNKNOWN_SERIES_NAME, unknowns);
 		
 		keySet = seriesMap.keySet().toArray(new String[seriesMap.size()]);
 	}
 
-	public void addSeries(String seriesName, Collection<MsFeatureInfoBundle> featureBundles) {
+	public void addSeries(String seriesName, Collection<MSFeatureInfoBundle> featureBundles) {
 				
-		seriesMap.put(seriesName, featureBundles.toArray(new MsFeatureInfoBundle[featureBundles.size()]));
+		seriesMap.put(seriesName, featureBundles.toArray(new MSFeatureInfoBundle[featureBundles.size()]));
 		keySet = seriesMap.keySet().toArray(new String[seriesMap.size()]);
 		notifyListeners(new DatasetChangeEvent(this, this));
 	}
@@ -180,7 +180,7 @@ public class MSMSFeatureInfoBundleDataSet extends AbstractXYDataset{
         return 0;
 	}
 		
-	public MsFeatureInfoBundle getMsFeatureInfoBundle(int series, int item) {
-		return (MsFeatureInfoBundle) seriesMap.get(keySet[series])[item];
+	public MSFeatureInfoBundle getMsFeatureInfoBundle(int series, int item) {
+		return (MSFeatureInfoBundle) seriesMap.get(keySet[series])[item];
 	}
 }

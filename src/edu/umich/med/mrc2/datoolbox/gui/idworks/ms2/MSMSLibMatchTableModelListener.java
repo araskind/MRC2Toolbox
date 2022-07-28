@@ -24,8 +24,8 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 
 public class MSMSLibMatchTableModelListener  implements TableModelListener {
@@ -43,7 +43,7 @@ public class MSMSLibMatchTableModelListener  implements TableModelListener {
 
 		int row = table.convertRowIndexToView(e.getFirstRow());
 		int col = table.convertColumnIndexToView(e.getColumn());
-		MsFeatureInfoBundle selectedMsMsFeatureBundle = parentPanel.getSelectedMSMSFeatureBundle();
+		MSFeatureInfoBundle selectedMsMsFeatureBundle = parentPanel.getSelectedMSMSFeatureBundle();
 		if(selectedMsMsFeatureBundle == null)
 			return;
 

@@ -33,8 +33,8 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.AdductComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.AnalysisMethodComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.ExperimentalSampleComparator;
@@ -108,7 +108,7 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		//	Renderers
-		setDefaultRenderer(MsFeatureInfoBundle.class, new MsFeatureInfoBundleRenderer(SortProperty.Name));
+		setDefaultRenderer(MSFeatureInfoBundle.class, new MsFeatureInfoBundleRenderer(SortProperty.Name));
 		setDefaultRenderer(DataAcquisitionMethod.class, new AnalysisMethodRenderer());
 		setDefaultRenderer(DataExtractionMethod.class, new AnalysisMethodRenderer());
 		setDefaultRenderer(LIMSExperiment.class, new LIMSExperimentRenderer());
@@ -165,8 +165,8 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 		
 		//	Table header filter
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		thf.getParserModel().setFormat(MsFeatureInfoBundle.class, new MsFeatureInfoBundleFormat(SortProperty.Name));
-		thf.getParserModel().setComparator(MsFeatureInfoBundle.class, new MsFeatureInfoBundleComparator(SortProperty.Name));
+		thf.getParserModel().setFormat(MSFeatureInfoBundle.class, new MsFeatureInfoBundleFormat(SortProperty.Name));
+		thf.getParserModel().setComparator(MSFeatureInfoBundle.class, new MsFeatureInfoBundleComparator(SortProperty.Name));
 		thf.getParserModel().setFormat(MsFeatureIdentity.class, new MsFeatureIdentityFormat(CompoundIdentityField.DB_ID));
 		thf.getParserModel().setComparator(MsFeatureIdentity.class, new MsFeatureIdentityComparator(SortProperty.ID));
 		thf.getParserModel().setComparator(DataAcquisitionMethod.class, new AnalysisMethodComparator(SortProperty.ID));
@@ -186,7 +186,7 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromFeatureList(Collection<MsFeatureInfoBundle> selectedMsOneFeatures) {
+	public void setTableModelFromFeatureList(Collection<MSFeatureInfoBundle> selectedMsOneFeatures) {
 
 		thf.setTable(null);
 		model.setTableModelFromFeatureList(selectedMsOneFeatures);
@@ -206,47 +206,47 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.COMPOUND_NAME_COLUMN).setMinWidth(200);
 	}
 
-	public MsFeatureInfoBundle getSelectedBundle() {
+	public MSFeatureInfoBundle getSelectedBundle() {
 
 		int row = getSelectedRow();
 		if(row == -1)
 			return null;
 
-		return (MsFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row),
+		return (MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row),
 				model.getColumnIndex(ReferenceMsOneFeatureTableModel.MS_FEATURE_COLUMN));
 	}
 	
-	public Collection<MsFeatureInfoBundle>getMultipleSelectedBundles() {
+	public Collection<MSFeatureInfoBundle>getMultipleSelectedBundles() {
 
-		Collection<MsFeatureInfoBundle>selected = new ArrayList<MsFeatureInfoBundle>();
+		Collection<MSFeatureInfoBundle>selected = new ArrayList<MSFeatureInfoBundle>();
 		int col = model.getColumnIndex(ReferenceMsOneFeatureTableModel.MS_FEATURE_COLUMN);
 		for(int row : getSelectedRows())
-			selected.add((MsFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row), col));
+			selected.add((MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row), col));
 		
 		return selected;
 	}
 	
-	public Collection<MsFeatureInfoBundle> getFilteredBundles() {
+	public Collection<MSFeatureInfoBundle> getFilteredBundles() {
 
-		Collection<MsFeatureInfoBundle>bundles = new ArrayList<MsFeatureInfoBundle>();
+		Collection<MSFeatureInfoBundle>bundles = new ArrayList<MSFeatureInfoBundle>();
 		int colIdx = model.getColumnIndex(ReferenceMsOneFeatureTableModel.MS_FEATURE_COLUMN);
 		for(int row=0; row<getRowCount(); row++)
-			 bundles.add((MsFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row), colIdx));
+			 bundles.add((MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row), colIdx));
 
 		return bundles;
 	}
 	
-	public Collection<MsFeatureInfoBundle> getAllBundles() {
+	public Collection<MSFeatureInfoBundle> getAllBundles() {
 
-		Collection<MsFeatureInfoBundle>bundles = new ArrayList<MsFeatureInfoBundle>();
+		Collection<MSFeatureInfoBundle>bundles = new ArrayList<MSFeatureInfoBundle>();
 		int colIdx = model.getColumnIndex(ReferenceMsOneFeatureTableModel.MS_FEATURE_COLUMN);
 		for(int row=0; row<model.getRowCount(); row++)
-			 bundles.add((MsFeatureInfoBundle)model.getValueAt(row, colIdx));
+			 bundles.add((MSFeatureInfoBundle)model.getValueAt(row, colIdx));
 
 		return bundles;
 	}
 
-	public void updateFeatureData(MsFeatureInfoBundle selectedBundle) {
+	public void updateFeatureData(MSFeatureInfoBundle selectedBundle) {
 		model.updateFeatureData(selectedBundle);
 	}
 }

@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
@@ -140,7 +140,7 @@ public class IdFollowupUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	public static void attachIdFollowupStepsToMSMSFeature(MsFeatureInfoBundle fib) throws Exception {
+	public static void attachIdFollowupStepsToMSMSFeature(MSFeatureInfoBundle fib) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		attachIdFollowupStepsToMSMSFeature(fib, conn);
@@ -148,7 +148,7 @@ public class IdFollowupUtils {
 	}
 	
 	public static void attachIdFollowupStepsToMSMSFeature(
-			MsFeatureInfoBundle fib, Connection conn) throws Exception {
+			MSFeatureInfoBundle fib, Connection conn) throws Exception {
 
 		String query =
 				"SELECT FOLLOWUP_STEP_ID FROM MSMS_FEATURE_FOLLOWUP_STEPS " +
@@ -167,14 +167,14 @@ public class IdFollowupUtils {
 		ps.close();
 	}
 	
-	public static void setIdFollowupStepsForMSMSFeature(MsFeatureInfoBundle fib) throws Exception {
+	public static void setIdFollowupStepsForMSMSFeature(MSFeatureInfoBundle fib) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		setIdFollowupStepsForMSMSFeature(fib, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void setIdFollowupStepsForMSMSFeature(MsFeatureInfoBundle fib, Connection conn) throws Exception {
+	public static void setIdFollowupStepsForMSMSFeature(MSFeatureInfoBundle fib, Connection conn) throws Exception {
 
 		String query =
 				"DELETE FROM MSMS_FEATURE_FOLLOWUP_STEPS " +
@@ -200,14 +200,14 @@ public class IdFollowupUtils {
 	}
 	
 	
-	public static void attachIdFollowupStepsToMS1Feature(MsFeatureInfoBundle fib) throws Exception {
+	public static void attachIdFollowupStepsToMS1Feature(MSFeatureInfoBundle fib) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		attachIdFollowupStepsToMS1Feature(fib, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void attachIdFollowupStepsToMS1Feature(MsFeatureInfoBundle fib, Connection conn) throws Exception {
+	public static void attachIdFollowupStepsToMS1Feature(MSFeatureInfoBundle fib, Connection conn) throws Exception {
 
 		String query =
 			"SELECT FOLLOWUP_STEP_ID FROM POOLED_MS1_FEATURE_FOLLOWUP_STEPS " +
@@ -226,14 +226,14 @@ public class IdFollowupUtils {
 		ps.close();
 	}
 	
-	public static void setIdFollowupStepsForMS1Feature(MsFeatureInfoBundle fib) throws Exception {
+	public static void setIdFollowupStepsForMS1Feature(MSFeatureInfoBundle fib) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		setIdFollowupStepsForMS1Feature(fib, conn);
 		ConnectionManager.releaseConnection(conn);
 	}	
 
-	public static void setIdFollowupStepsForMS1Feature(MsFeatureInfoBundle fib, Connection conn) throws Exception {
+	public static void setIdFollowupStepsForMS1Feature(MSFeatureInfoBundle fib, Connection conn) throws Exception {
 
 		String query =
 				"DELETE FROM POOLED_MS1_FEATURE_FOLLOWUP_STEPS " +

@@ -25,7 +25,7 @@ import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 
 public class MsFeatureInfoBundleFormat  extends Format {
@@ -36,7 +36,7 @@ public class MsFeatureInfoBundleFormat  extends Format {
 	private static final long serialVersionUID = 5953060305049806216L;
 
 	private SortProperty idField;
-	private MsFeatureInfoBundle msf;
+	private MSFeatureInfoBundle msf;
 
 	public MsFeatureInfoBundleFormat(SortProperty idField) {
 
@@ -47,9 +47,9 @@ public class MsFeatureInfoBundleFormat  extends Format {
 	@Override
 	public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
 
-		if(obj instanceof MsFeatureInfoBundle) {
+		if(obj instanceof MSFeatureInfoBundle) {
 
-			msf = (MsFeatureInfoBundle)obj;
+			msf = (MSFeatureInfoBundle)obj;
 
 			String text = "";
 

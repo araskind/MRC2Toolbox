@@ -44,7 +44,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -61,12 +61,12 @@ public class AddFeaturesToCollectionDialog extends JDialog implements ActionList
 	private static final long serialVersionUID = -7638441884088309136L;
 	private static final Icon addFeatureCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 32);
 	private FeatureCollectionsTable featureCollectionsTable;
-	private Collection<MsFeatureInfoBundle> featuresToAdd;
+	private Collection<MSFeatureInfoBundle> featuresToAdd;
 	private JCheckBox loadCollectionCheckBox;
 	private IDWorkbenchPanel parentPanel;
 	
 	public AddFeaturesToCollectionDialog(
-			Collection<MsFeatureInfoBundle> featuresToAdd,
+			Collection<MSFeatureInfoBundle> featuresToAdd,
 			IDWorkbenchPanel parentPanel) {
 		super();
 		

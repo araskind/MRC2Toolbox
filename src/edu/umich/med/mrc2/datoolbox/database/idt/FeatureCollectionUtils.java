@@ -33,7 +33,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.jcs3.access.exception.CacheException;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -65,7 +65,7 @@ public class FeatureCollectionUtils {
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String compQuery = 
-				"SELECT MSMS_FEATURE_ID FROM MSMS_FEATURE_COLLECTION_COMPONENT "
+				"SELECT MS_FEATURE_ID FROM MSMS_FEATURE_COLLECTION_COMPONENT "
 				+ "WHERE COLLECTION_ID = ?";
 		
 		PreparedStatement compPs = conn.prepareStatement(compQuery);
@@ -89,7 +89,7 @@ public class FeatureCollectionUtils {
 			ResultSet compRs = compPs.executeQuery();
 			Set<String>componetFeatureIds = new TreeSet<String>();
 			while(compRs.next())
-				componetFeatureIds.add(compRs.getString("MSMS_FEATURE_ID"));
+				componetFeatureIds.add(compRs.getString("MS_FEATURE_ID"));
 			
 			compRs.close();			
 			featureCollectionsMap.put(newCollection, componetFeatureIds);
@@ -138,12 +138,12 @@ public class FeatureCollectionUtils {
 			
 			query =
 					"INSERT INTO MSMS_FEATURE_COLLECTION_COMPONENT ("
-					+ "COLLECTION_ID, MSMS_FEATURE_ID) "
+					+ "COLLECTION_ID, MS_FEATURE_ID) "
 					+ "VALUES (?,?)";
 			ps = conn.prepareStatement(query);
 			ps.setString(1, nextId);
-			for(MsFeatureInfoBundle feature : newCollection.getFeatures()) {
-				ps.setString(2, feature.getMSMSFeatureId());
+			for(MSFeatureInfoBundle feature : newCollection.getFeatures()) {
+				ps.setString(2, feature.getMSFeatureId());
 				ps.addBatch();
 			}
 			ps.executeBatch();
@@ -199,7 +199,7 @@ public class FeatureCollectionUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String 	query = 
 				"INSERT INTO MSMS_FEATURE_COLLECTION_COMPONENT "
-				+ "(COLLECTION_ID, MSMS_FEATURE_ID) VALUES (?,?)";		
+				+ "(COLLECTION_ID, MS_FEATURE_ID) VALUES (?,?)";		
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, collectionId);		
 		for(String id : featureIdsToAdd) {
@@ -229,7 +229,7 @@ public class FeatureCollectionUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String 	query = 
 				"DELETE FROM MSMS_FEATURE_COLLECTION_COMPONENT "
-				+ "WHERE COLLECTION_ID = ? AND MSMS_FEATURE_ID = ?";		
+				+ "WHERE COLLECTION_ID = ? AND MS_FEATURE_ID = ?";		
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, collectionId);		
 		for(String id : featureIdsToRemove) {
@@ -248,43 +248,27 @@ public class FeatureCollectionUtils {
 		ps.close();		
 		ConnectionManager.releaseConnection(conn);
 	}
-	
-//	private static String getNextCollectionId(Connection conn) throws Exception {
-//		
-//		String collectionId = null;
-//		String query = "SELECT '" + DataPrefix.MSMS_FEATURE_COLLECTION.getName() +
-//				"' || LPAD(MSMS_FEATURE_COLLECTION_SEQ.NEXTVAL, 6, '0') AS COLLECTION_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next()) {
-//			collectionId = rs.getString("COLLECTION_ID");
-//			break;
-//		}
-//		rs.close();
-//		ps.close();
-//		return collectionId;
-//	}
-	
-    public static void putMSMSFetureInfoBundleInCache( MsFeatureInfoBundle bundle ) {
-        String key = bundle.getMSMSFeatureId();
+
+    public static void putMSFeatureInfoBundleInCache( MSFeatureInfoBundle bundle ) {
+        String key = bundle.getMSFeatureId();
         try {
-        	MRC2ToolBoxCore.msmsFeatureCache.put( key, bundle );
+        	MRC2ToolBoxCore.msFeatureCache.put(key, bundle );
         }
         catch ( CacheException e ) {
-            System.out.println( String.format( "Problem putting feature info bundle %s in the cache, for key %s%n%s",
+            System.err.println( String.format( "Problem putting feature info bundle %s in the cache, for key %s%n%s",
             		bundle.getMsFeature().getName(), key, e.getMessage() ) );
         }
     }
 
-    public static MsFeatureInfoBundle retrieveMSMSFetureInfoBundleFromCache( String msmsId ) {
-        return (MsFeatureInfoBundle)MRC2ToolBoxCore.msmsFeatureCache.get( msmsId );
+    public static MSFeatureInfoBundle retrieveMSFeatureInfoBundleFromCache( String msId ) {
+        return (MSFeatureInfoBundle)MRC2ToolBoxCore.msFeatureCache.get( msId );
     }	
     
 	public static Set<String>validateMSMSIDlist(Set<String>idsToValidate) throws Exception {
 
 		Set<String>validIds = new TreeSet<String>();
 		Connection conn = ConnectionManager.getConnection();
-		String query = "SELECT DATA_ANALYSIS_ID FROM MSMS_FEATURE WHERE MSMS_FEATURE_ID = ?";
+		String query = "SELECT PARENT_FEATURE_ID FROM MSMS_FEATURE WHERE MSMS_FEATURE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		for(String id : idsToValidate) {
 			

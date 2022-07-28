@@ -49,10 +49,10 @@ import org.apache.commons.lang3.StringUtils;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
@@ -84,7 +84,7 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 public class IDTrackerDataExportTask extends AbstractTask {
 	
 	private MsDepth msLevel;
-	private Collection<MsFeatureInfoBundle>featuresToExport;
+	private Collection<MSFeatureInfoBundle>featuresToExport;
 	private Collection<IDTrackerMsFeatureProperties> featurePropertyList;
 	private Collection<IDTrackerFeatureIdentificationProperties>identificationDetailsList;
 	private File outputFile;
@@ -114,7 +114,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 
 	public IDTrackerDataExportTask(
 			MsDepth msLevel, 
-			Collection<MsFeatureInfoBundle> featuresToExport,
+			Collection<MSFeatureInfoBundle> featuresToExport,
 			Collection<IDTrackerMsFeatureProperties> featurePropertyList,
 			Collection<IDTrackerFeatureIdentificationProperties> identificationDetailsList, 
 			boolean removeRedundant,
@@ -198,7 +198,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		total = featuresToExport.size();
 		processed = 0;
 			
-		MsFeatureInfoBundle fb = featuresToExport.iterator().next();
+		MSFeatureInfoBundle fb = featuresToExport.iterator().next();
 		DataPipeline exportDataPipeline = new DataPipeline(
 				fb.getAcquisitionMethod(), fb.getDataExtractionMethod());
 		HashSet<MsFeature>assigned = new HashSet<MsFeature>();
@@ -206,7 +206,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		
 		if(msLevel.equals(MsDepth.MS1)) {
 			
-			for (MsFeatureInfoBundle cf : featuresToExport) {
+			for (MSFeatureInfoBundle cf : featuresToExport) {
 	
 				for (MsFeatureCluster fClust : clusters) {
 					
@@ -229,7 +229,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		}
 		if(msLevel.equals(MsDepth.MS2)) {
 			
-			for (MsFeatureInfoBundle cf : featuresToExport) {
+			for (MSFeatureInfoBundle cf : featuresToExport) {
 	
 				for (MsFeatureCluster fClust : clusters) {
 					
@@ -483,11 +483,11 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		writer.append(StringUtils.join(header, columnSeparator));
 		writer.append(lineSeparator);
 		
-		List<MsFeatureInfoBundle> toExport = featuresToExport.stream().
+		List<MSFeatureInfoBundle> toExport = featuresToExport.stream().
 				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
 				collect(Collectors.toList());
 		ArrayList<String>line;
-		for(MsFeatureInfoBundle bundle : toExport) {
+		for(MSFeatureInfoBundle bundle : toExport) {
 
 			line = new ArrayList<String>();
 			for(IDTrackerMsFeatureProperties property : featurePropertyList)
@@ -546,7 +546,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		writer.close();
 	}
 	
-	private String getFeatureProperty(MsFeatureInfoBundle bundle, 
+	private String getFeatureProperty(MSFeatureInfoBundle bundle, 
 			IDTrackerMsFeatureProperties property) {
 
 		MsFeature feature =  bundle.getMsFeature();		
@@ -652,7 +652,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		return "";
 	}
 
-	private String getFeatureIdentificationProperty(MsFeatureInfoBundle bundle,
+	private String getFeatureIdentificationProperty(MSFeatureInfoBundle bundle,
 			IDTrackerFeatureIdentificationProperties property) {
 		
 		MsFeature feature =  bundle.getMsFeature();	
@@ -916,7 +916,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		}
 	}
 	
-	private Collection<String>getAccessions(Collection<MsFeatureInfoBundle>features){
+	private Collection<String>getAccessions(Collection<MSFeatureInfoBundle>features){
 		
 //		List<MsFeatureInfoBundle> cidNull = features.stream().
 //			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).

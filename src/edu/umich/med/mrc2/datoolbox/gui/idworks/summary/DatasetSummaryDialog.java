@@ -52,7 +52,7 @@ import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
@@ -250,8 +250,8 @@ public class DatasetSummaryDialog extends JDialog
 	}
 
 	public void generateDataSetStats(
-			Collection<MsFeatureInfoBundle> allMSOneFeatures,
-			Collection<MsFeatureInfoBundle> allMSMSFeatures) {
+			Collection<MSFeatureInfoBundle> allMSOneFeatures,
+			Collection<MSFeatureInfoBundle> allMSMSFeatures) {
 
 		CreateDataSetSummaryTask task = 
 				new CreateDataSetSummaryTask(allMSOneFeatures, allMSMSFeatures);
@@ -265,12 +265,12 @@ public class DatasetSummaryDialog extends JDialog
 		/*
 		 * Main task. Executed in background thread.
 		 */	
-		private Collection<MsFeatureInfoBundle> allMSOneFeatures;
-		private Collection<MsFeatureInfoBundle> allMSMSFeatures;
+		private Collection<MSFeatureInfoBundle> allMSOneFeatures;
+		private Collection<MSFeatureInfoBundle> allMSMSFeatures;
 		
 		public CreateDataSetSummaryTask(
-				Collection<MsFeatureInfoBundle> allMSOneFeatures,
-				Collection<MsFeatureInfoBundle> allMSMSFeatures) {
+				Collection<MSFeatureInfoBundle> allMSOneFeatures,
+				Collection<MSFeatureInfoBundle> allMSMSFeatures) {
 			
 			this.allMSOneFeatures = allMSOneFeatures;
 			this.allMSMSFeatures = allMSMSFeatures;
@@ -291,8 +291,8 @@ public class DatasetSummaryDialog extends JDialog
 	}
 	
 	private void createDataSetSummary(
-			Collection<MsFeatureInfoBundle> allMSOneFeatures,
-			Collection<MsFeatureInfoBundle> allMSMSFeatures) {
+			Collection<MSFeatureInfoBundle> allMSOneFeatures,
+			Collection<MSFeatureInfoBundle> allMSMSFeatures) {
 		// TODO Auto-generated method stub
 		
 	}

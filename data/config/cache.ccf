@@ -24,6 +24,19 @@ jcs.msmsFeatureCache.cacheattributes.MaxSpoolPerRun=500
 jcs.msmsFeatureCache.elementattributes=org.apache.commons.jcs3.engine.ElementAttributes
 jcs.msmsFeatureCache.elementattributes.IsEternal=false
 
+# CHROMATOGRAM CACHE REGION
+
+jcs.featureChromatogramCache=DC
+jcs.featureChromatogramCache.cacheattributes= org.apache.commons.jcs3.engine.CompositeCacheAttributes
+jcs.featureChromatogramCache.cacheattributes.MaxObjects=30000
+jcs.featureChromatogramCache.cacheattributes.MemoryCacheName= org.apache.commons.jcs3.engine.memory.lru.LRUMemoryCache
+jcs.featureChromatogramCache.cacheattributes.UseMemoryShrinker=true
+jcs.featureChromatogramCache.cacheattributes.MaxMemoryIdleTimeSeconds=3600
+jcs.featureChromatogramCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.featureChromatogramCache.cacheattributes.MaxSpoolPerRun=500
+jcs.featureChromatogramCache.elementattributes=org.apache.commons.jcs3.engine.ElementAttributes
+jcs.featureChromatogramCache.elementattributes.IsEternal=false
+
 # AVAILABLE AUXILIARY CACHES
 jcs.auxiliary.DC= org.apache.commons.jcs3.auxiliary.disk.indexed.IndexedDiskCacheFactory
 jcs.auxiliary.DC.attributes=org.apache.commons.jcs3.auxiliary.disk.indexed.IndexedDiskCacheAttributes

@@ -21,9 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.data.compare;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 
-public class MsFeatureInfoBundleComparator extends ObjectCompatrator<MsFeatureInfoBundle> {
+public class MsFeatureInfoBundleComparator extends ObjectCompatrator<MSFeatureInfoBundle> {
 
 	/**
 	 *
@@ -39,7 +39,7 @@ public class MsFeatureInfoBundleComparator extends ObjectCompatrator<MsFeatureIn
 	}
 
 	@Override
-	public int compare(MsFeatureInfoBundle o1, MsFeatureInfoBundle o2) {
+	public int compare(MSFeatureInfoBundle o1, MSFeatureInfoBundle o2) {
 
 		int result = 0;
 

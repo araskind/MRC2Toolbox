@@ -571,6 +571,7 @@ public enum MainActionCommands {
 	ASSIGN_ID_LEVEL_COMMAND("Assign ID level"),
 	COPY_LIBRARY_SPECTRUM_AS_MSP_COMMAND("Copy library spectrum to MSP"),
 	COPY_LIBRARY_SPECTRUM_AS_ARRAY_COMMAND("Copy library spectrum to array"),
+	SET_AS_PRIMARY_ID_FOR_CLUSTER("Set as primary ID for feature cluster"),
 
 	//	Reordering toolbar commands
 	MOVE_TO_TOP_COMMAND("Move to the top"),

@@ -34,7 +34,7 @@ import bibliothek.gui.dock.action.DefaultDockActionSource;
 import bibliothek.gui.dock.action.LocationHint;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
@@ -144,7 +144,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		return clusterTree.getSelectedClusters();
 	}
 
-	public Collection<MsFeatureInfoBundle> getSelectedFeatures() {
+	public Collection<MSFeatureInfoBundle> getSelectedFeatures() {
 		return clusterTree.getSelectedFeatures();
 	}
 
@@ -164,7 +164,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		clusterTree.removeClickedObject();
 	}
 
-	public void removeFeature(MsFeatureInfoBundle feature) {
+	public void removeFeature(MSFeatureInfoBundle feature) {
 		clusterTree.removeFeature(feature);
 	}
 
@@ -204,7 +204,7 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		clusterTree.updateElement(element);
 	}
 
-	public TreePath findfeaturePath(MsFeatureInfoBundle cf) {
+	public TreePath findfeaturePath(MSFeatureInfoBundle cf) {
 		return clusterTree.findfeaturePath(cf);
 	}
 

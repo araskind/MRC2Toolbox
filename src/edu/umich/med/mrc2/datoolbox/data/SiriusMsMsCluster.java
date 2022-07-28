@@ -45,7 +45,7 @@ public class SiriusMsMsCluster implements Serializable {
 	 */
 	private static final long serialVersionUID = -5308020706362132359L;
 	private MsPoint parentIon;
-	private Collection<MsFeatureInfoBundle>msmsComponents;
+	private Collection<MSFeatureInfoBundle>msmsComponents;
 	private Collection<MsPoint>msOneSpectrum;
 	private Adduct adduct;
 	private Range rtRange;
@@ -57,9 +57,9 @@ public class SiriusMsMsCluster implements Serializable {
 	private static final DecimalFormat ceFormat = new DecimalFormat("###.#");
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###.##");
 		
-	public SiriusMsMsCluster(MsFeatureInfoBundle firstBundle, double rtError, double mzError) {
+	public SiriusMsMsCluster(MSFeatureInfoBundle firstBundle, double rtError, double mzError) {
 		super();
-		msmsComponents = new HashSet<MsFeatureInfoBundle>();
+		msmsComponents = new HashSet<MSFeatureInfoBundle>();
 		this.rtError = rtError;
 		this.mzError = mzError;	
 		msmsComponents.add(firstBundle);		
@@ -83,7 +83,7 @@ public class SiriusMsMsCluster implements Serializable {
 		//	TODO check for compatible acquisition methods
 	}
 	
-	public boolean addFeatureBundle(MsFeatureInfoBundle newBundle) {
+	public boolean addFeatureBundle(MSFeatureInfoBundle newBundle) {
 		
 		MsFeature feature = newBundle.getMsFeature();
 		if(feature.getCharge() != adduct.getCharge())
@@ -149,7 +149,7 @@ public class SiriusMsMsCluster implements Serializable {
 		Collection<String>msBlock = new ArrayList<String>();
 		if(msmsComponents.size() == 1) {
 			
-			MsFeatureInfoBundle bundle = msmsComponents.iterator().next();
+			MSFeatureInfoBundle bundle = msmsComponents.iterator().next();
 			msBlock.add(">compound " + bundle.getMSMSFeatureId());
 			msBlock.add(">parentmass " + MRC2ToolBoxConfiguration.getMzFormat().format(mzRange.getAverage()));
 			msBlock.add(">ionization " + adduct.getName());

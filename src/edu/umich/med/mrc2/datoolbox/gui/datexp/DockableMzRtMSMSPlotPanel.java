@@ -45,7 +45,7 @@ import org.jfree.data.xy.XYDataset;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MSMSFeatureInfoBundleDataSet;
@@ -68,7 +68,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	private MSMSExplorerPlotSettingsToolbar settingsToolbar;
 	private MSMSFeatureInfoBundleTooltipGenerator msmsFeatureInfoBundleTooltipGenerator;
 	private DockableMRC2ToolboxPanel parentPanel;
-	private Collection<MsFeatureInfoBundle>msFeatureInfoBundles;
+	private Collection<MSFeatureInfoBundle>msFeatureInfoBundles;
 	private TableRowSubset activeTableRowSubset;
 	private Range rtRange;
 	private IndeterminateProgressDialog idp;
@@ -123,7 +123,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 			return;
 		}
 		rtRange = settingsToolbar.getRtRange();
-		Collection<MsFeatureInfoBundle>rtFilteredMsFeatureInfoBundles = msFeatureInfoBundles;
+		Collection<MSFeatureInfoBundle>rtFilteredMsFeatureInfoBundles = msFeatureInfoBundles;
 		if(rtRange != null && rtRange.getAverage() > 0) {
 			rtFilteredMsFeatureInfoBundles = 
 					msFeatureInfoBundles.stream().
@@ -143,10 +143,10 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	
 	class CreateMSMSFeatureInfoBundleDataSetTask extends LongUpdateTask {
 		
-		private Collection<MsFeatureInfoBundle>featurBundles;
+		private Collection<MSFeatureInfoBundle>featurBundles;
 		
 		public CreateMSMSFeatureInfoBundleDataSetTask(
-				Collection<MsFeatureInfoBundle>featurBundles) {
+				Collection<MSFeatureInfoBundle>featurBundles) {
 			this.featurBundles = featurBundles;
 		}
 
@@ -192,7 +192,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 			
 			XYItemEntity xyitem=(XYItemEntity) event.getEntity();
 			XYDataset dataset = (XYDataset)xyitem.getDataset();
-			MsFeatureInfoBundle f = null;
+			MSFeatureInfoBundle f = null;
 			if(dataset instanceof MSMSFeatureInfoBundleDataSet) 		
 				f = ((MSMSFeatureInfoBundleDataSet)dataset).getMsFeatureInfoBundle(
 						xyitem.getSeriesIndex(), xyitem.getItem());
@@ -251,10 +251,10 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 		settingsToolbar.setRtRange(this.rtRange);
 	}
 	
-	public Collection<MsFeatureInfoBundle>getSelectedFeatures(){
+	public Collection<MSFeatureInfoBundle>getSelectedFeatures(){
 		
-		Collection<MsFeatureInfoBundle>selectedFeatures = 
-				new ArrayList<MsFeatureInfoBundle>();
+		Collection<MSFeatureInfoBundle>selectedFeatures = 
+				new ArrayList<MSFeatureInfoBundle>();
 		
 		if(msFeatureInfoBundles == null || msFeatureInfoBundles .isEmpty())
 			return selectedFeatures;
@@ -277,7 +277,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	
 	private void createNewMsmsFeatureCollectionFromSelected() {
 		
-		Collection<MsFeatureInfoBundle>selected = getSelectedFeatures();
+		Collection<MSFeatureInfoBundle>selected = getSelectedFeatures();
 		if(selected.isEmpty()) {
 			MessageDialog.showWarningMsg(
 					"No features in highlighted region.", this.getContentPane());
@@ -293,7 +293,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	
 	private void addSelectedFeaturesToExistingMsMsFeatureCollection() {
 		
-		Collection<MsFeatureInfoBundle>selected = getSelectedFeatures();
+		Collection<MSFeatureInfoBundle>selected = getSelectedFeatures();
 		if(selected.isEmpty()) {
 			MessageDialog.showWarningMsg(
 					"No features in highlighted region.", this.getContentPane());
@@ -308,7 +308,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 	
 	private void filterSelectedFeaturesInTable() {
 		
-		Collection<MsFeatureInfoBundle>selected = getSelectedFeatures();
+		Collection<MSFeatureInfoBundle>selected = getSelectedFeatures();
 		if(selected.isEmpty()) {
 			MessageDialog.showWarningMsg(
 					"No features in highlighted region.", this.getContentPane());

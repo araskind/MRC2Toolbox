@@ -56,11 +56,11 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.MsType;
@@ -148,8 +148,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	protected Collection<ReferenceMsMsLibrary>msmsLibs;
 	protected boolean lookupSecondaryIds;
 	protected boolean lookupSecondaryLibMatches;
-	protected Collection<MsFeatureInfoBundle>features;
-	protected Collection<MsFeatureInfoBundle>cashedFeatures;
+	protected Collection<MSFeatureInfoBundle>features;
+	protected Collection<MSFeatureInfoBundle>cashedFeatures;
 	
 	public IDTMSMSFeatureSearchTask(
 			Polarity polarity, 
@@ -220,8 +220,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	}
 
 	public IDTMSMSFeatureSearchTask() {
-		features = new ArrayList<MsFeatureInfoBundle>();
-		cashedFeatures = new HashSet<MsFeatureInfoBundle>();
+		features = new ArrayList<MSFeatureInfoBundle>();
+		cashedFeatures = new HashSet<MSFeatureInfoBundle>();
 	}
 
 	@Override
@@ -515,8 +515,9 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		}
 		while (rs.next()) {
 
-			MsFeatureInfoBundle fInCash = 
-					FeatureCollectionUtils.retrieveMSMSFetureInfoBundleFromCache(rs.getString("MSMS_FEATURE_ID"));
+			MSFeatureInfoBundle fInCash = 
+					FeatureCollectionUtils.retrieveMSFeatureInfoBundleFromCache(
+							rs.getString("FEATURE_ID"));
 			if(fInCash != null) {
 				cashedFeatures.add(fInCash);
 				processed++;
@@ -566,7 +567,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 
 			f.setSpectrum(spectrum);
 			
-			MsFeatureInfoBundle bundle = new MsFeatureInfoBundle(f);
+			MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 			bundle.setAcquisitionMethod(
 				IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
 			bundle.setDataExtractionMethod(
@@ -650,7 +651,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		PreparedStatement scanMapPs = conn.prepareStatement(scanMapQuery);
 		ResultSet scanMapRs = null;
 		
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 
 			try {
 				ps.setString(1, fb.getMsFeature().getId());	
@@ -780,7 +781,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		PreparedStatement msmsps = conn.prepareStatement(msmsQuery);
 		ResultSet msmsrs = null;
 		
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			try {
 				TandemMassSpectrum msms = 
 						fb.getMsFeature().getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
@@ -934,7 +935,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				"FROM MSMS_FEATURE_ALTERNATIVE_ID WHERE MSMS_FEATURE_ID = ?";			
 		PreparedStatement ps = conn.prepareStatement(query);		
 		ResultSet rs = null;			
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 //			try {
 //				IDTMsDataUtils.attachMsMsManualIdentifications(fb.getMsFeature(), conn);
 //			} catch (Exception e) {
@@ -1008,9 +1009,9 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				"WHERE FEATURE_ID = ? ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = null;
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			
-			ps.setString(1, fb.getMsFeatureId());
+			ps.setString(1, fb.getMSFeatureId());
 			rs = ps.executeQuery();
 			while (rs.next()) {
 
@@ -1034,7 +1035,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						rs.getDouble("EXTRACTED_MASS"), 
 						timeValues, 
 						intensityValues, 
-						fb.getMsFeatureId(),
+						fb.getMSFeatureId(),
 						rs.getString("INJECTION_ID"), 
 						rs.getInt("MS_LEVEL"), 
 						rs.getDouble("MASS_ERROR_VALUE"),
@@ -1143,7 +1144,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		PreparedStatement mdps = conn.prepareStatement(mdQuery);
 		ResultSet mdrs = null;
 		
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 			
 			stAnPs.setString(1, fb.getMsFeature().getId());
 			stAnRs = stAnPs.executeQuery();
@@ -1239,7 +1240,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = null;		
-		for(MsFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : features) {
 
 			try {
 				ps.setString(1, fb.getMsFeature().getId());
@@ -1262,7 +1263,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	
 	protected void putDataInCache() {		
 		features.stream().
-			forEach(f -> FeatureCollectionUtils.putMSMSFetureInfoBundleInCache(f));
+			forEach(f -> FeatureCollectionUtils.putMSFeatureInfoBundleInCache(f));
 	}
 	
 	protected void applyAdditionalFilters() {
@@ -1271,14 +1272,14 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		total = 100;
 		processed = 80;
 		//	ID state
-		Collection<MsFeatureInfoBundle>filteredByIdStatus = 
+		Collection<MSFeatureInfoBundle>filteredByIdStatus = 
 				MsFeatureStatsUtils.filterFeaturesByIdSubset(features, featureSubsetById);
 		features.clear();
 		features.addAll(filteredByIdStatus);
 		
 		// Annotations
 		if(annotatedOnly) {
-			List<MsFeatureInfoBundle> annotated = features.stream().
+			List<MSFeatureInfoBundle> annotated = features.stream().
 					filter(f -> !f.getMsFeature().getAnnotations().isEmpty()).
 					collect(Collectors.toList());
 			features.clear();
@@ -1286,7 +1287,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		}
 		if(!idLevels.isEmpty()) {
 			
-			List<MsFeatureInfoBundle> byIdLevel = features.stream().
+			List<MSFeatureInfoBundle> byIdLevel = features.stream().
 					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 					filter(f -> idLevels.contains(
 							f.getMsFeature().getPrimaryIdentity().getIdentificationLevel())).
@@ -1296,7 +1297,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		}
 		if(!follwUpSteps.isEmpty()) {
 			
-			List<MsFeatureInfoBundle> byFollowup = 
+			List<MSFeatureInfoBundle> byFollowup = 
 					features.stream().
 					filter(f -> !CollectionUtils.intersection(
 							follwUpSteps, f.getIdFollowupSteps()).isEmpty()).
@@ -1325,7 +1326,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				new MsFeatureIdentityMSMSScoreComparator();	
 		MsFeatureIdentityIDLevelComparator levelSorter = 
 				new MsFeatureIdentityIDLevelComparator();
-		for(MsFeatureInfoBundle bundle : features) {
+		for(MSFeatureInfoBundle bundle : features) {
 			
 			
 			MsFeature feature = bundle.getMsFeature();
@@ -1364,7 +1365,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		}
 	}
 
-	protected boolean allowDefaultIdUpdate(MsFeatureInfoBundle bundle) {
+	protected boolean allowDefaultIdUpdate(MSFeatureInfoBundle bundle) {
 		
 		MsFeature feature = bundle.getMsFeature();
 		if(feature.getIdentifications().isEmpty())
@@ -1430,7 +1431,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				 msmsLibs);
 	}
 	
-	public Collection<MsFeatureInfoBundle> getSelectedFeatures() {
+	public Collection<MSFeatureInfoBundle> getSelectedFeatures() {
 		return features;
 	}
 }

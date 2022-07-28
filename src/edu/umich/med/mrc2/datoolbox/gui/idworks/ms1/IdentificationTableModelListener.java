@@ -24,8 +24,8 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.ms1;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.UniversalIdentificationResultsTable;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.UniversalIdentificationResultsTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
@@ -45,8 +45,8 @@ public class IdentificationTableModelListener  implements TableModelListener {
 
 		int row = table.convertRowIndexToView(e.getFirstRow());
 		int col = table.convertColumnIndexToView(e.getColumn());
-		MsFeatureInfoBundle selectedMS1FeatureBundle = parentPanel.getSelectedMSFeatureBundle();		
-		MsFeatureInfoBundle selectedMsMsFeatureBundle = parentPanel.getSelectedMSMSFeatureBundle();
+		MSFeatureInfoBundle selectedMS1FeatureBundle = parentPanel.getSelectedMSFeatureBundle();		
+		MSFeatureInfoBundle selectedMsMsFeatureBundle = parentPanel.getSelectedMSMSFeatureBundle();
 		if(selectedMsMsFeatureBundle == null && selectedMS1FeatureBundle == null)
 			return;
 

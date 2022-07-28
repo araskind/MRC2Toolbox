@@ -26,9 +26,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -43,7 +43,7 @@ public class MsFeatureInfoBundleCluster {
 
 	private String id;
 	private String name;
-	private Set<MsFeatureInfoBundle>components;
+	private Set<MSFeatureInfoBundle>components;
 	private double mz;
 	private double rt;
 	private double medianArea;
@@ -72,11 +72,11 @@ public class MsFeatureInfoBundleCluster {
 		this.mz = mz;
 		this.rt = rt;
 		this.primaryIdentity = prinmaryIdentity;
-		components = new HashSet<MsFeatureInfoBundle>();
+		components = new HashSet<MSFeatureInfoBundle>();
 		updateName();
 	}
 	
-	public MsFeatureInfoBundleCluster(MsFeatureInfoBundle b) {
+	public MsFeatureInfoBundleCluster(MSFeatureInfoBundle b) {
 		this();
 		addComponent(b);
 	}
@@ -107,13 +107,35 @@ public class MsFeatureInfoBundleCluster {
 			name += " [" + Integer.toString(components.size()) + "]";
 	}
 	
-	public void addComponent(MsFeatureInfoBundle newComponent) {
+	private void updateNameFromPrimaryIdentity() {
+		
+		String mzRtName = null;
+		if(mz > 0.0d && rt > 0.0d)
+			mzRtName = "MZ " + MRC2ToolBoxConfiguration.getMzFormat().format(mz) + 
+				" | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(rt);
+		
+		if(primaryIdentity != null) {
+			name = primaryIdentity.getName();
+			if(mzRtName != null)
+				name += " | " + mzRtName;
+		}
+		else {
+			if(mzRtName != null)
+				name = mzRtName;
+			else
+				name = id;
+		}
+		if(components.size() > 1)
+			name += " [" + Integer.toString(components.size()) + "]";
+	}
+	
+	public void addComponent(MSFeatureInfoBundle newComponent) {
 		components.add(newComponent);		
 		updateStats();
 		updateName();
 	}
 
-	public void removeComponent(MsFeatureInfoBundle toRemove) {
+	public void removeComponent(MSFeatureInfoBundle toRemove) {
 		components.remove(toRemove);
 		updateStats();
 		updateName();
@@ -154,12 +176,12 @@ public class MsFeatureInfoBundleCluster {
 		return primaryIdentity;
 	}
 
-	public void setPrimaryIdentity(MsFeatureIdentity prinmaryIdentity) {
-		this.primaryIdentity = prinmaryIdentity;
-		updateName();
+	public void setPrimaryIdentity(MsFeatureIdentity primaryIdentity) {
+		this.primaryIdentity = primaryIdentity;
+		updateNameFromPrimaryIdentity();
 	}
 
-	public Set<MsFeatureInfoBundle> getComponents() {
+	public Set<MSFeatureInfoBundle> getComponents() {
 		return components;
 	}
 	
@@ -217,7 +239,7 @@ public class MsFeatureInfoBundleCluster {
 	}
 
 	public boolean addNewBundle(
-			MsFeatureInfoBundle b, 
+			MSFeatureInfoBundle b, 
 			MSMSClusteringParameterSet params) {
 		
 		TandemMassSpectrum msms = 
@@ -241,7 +263,7 @@ public class MsFeatureInfoBundleCluster {
 			return false;
 		
 		boolean spectrumMatches = false;
-		for(MsFeatureInfoBundle component : components) {
+		for(MSFeatureInfoBundle component : components) {
 			
 			Collection<MsPoint>refMsMs = component.getMsFeature().getSpectrum().
 					getExperimentalTandemSpectrum().getSpectrum();		

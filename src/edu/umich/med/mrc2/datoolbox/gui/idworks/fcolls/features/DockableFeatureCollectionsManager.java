@@ -38,7 +38,7 @@ import javax.swing.JScrollPane;
 import org.apache.commons.lang.StringUtils;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
@@ -60,7 +60,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	private FeatureAndClusterCollectionManagerDialog parent;
 	
 	private FeatureCollectionEditorDialog msFeatureCollectionEditorDialog;
-	private Collection<MsFeatureInfoBundle> featuresToAdd;
+	private Collection<MSFeatureInfoBundle> featuresToAdd;
 	
 	public DockableFeatureCollectionsManager(FeatureAndClusterCollectionManagerDialog parent)  {
 
@@ -170,8 +170,9 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 			e.printStackTrace();
 		}	
 		Set<String>featureIds = new TreeSet<String>();
-		featureIds.addAll(FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().get(edited));
-		Set<String> featureIdsToAdd = msFeatureCollectionEditorDialog.getFeatureIdsToAdd();
+		featureIds.addAll(FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(edited));
+		Set<String> featureIdsToAdd = 
+				msFeatureCollectionEditorDialog.getMsFeatureIdsToAdd();
 		if(featureIdsToAdd != null && !featureIdsToAdd.isEmpty()) {
 			featureIds.addAll(featureIdsToAdd);				
 			try {
@@ -180,7 +181,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().get(edited).addAll(featureIdsToAdd);
+			FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(edited).addAll(featureIdsToAdd);
 		}			
 		if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 			loadCollectionIntoWorkBench(edited);
@@ -251,8 +252,9 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 			
 			newCollection.setId(newId);
 			Set<String>featureIds = new TreeSet<String>();
-			featureIds.addAll(newCollection.getMSMSFeatureIds());
-			Set<String> featureIdsToAdd = msFeatureCollectionEditorDialog.getFeatureIdsToAdd();
+			featureIds.addAll(newCollection.getMsFeatureIds());
+			Set<String> featureIdsToAdd = 
+					msFeatureCollectionEditorDialog.getMsFeatureIdsToAdd();
 			if(featureIdsToAdd != null && !featureIdsToAdd.isEmpty()) {
 				featureIds.addAll(featureIdsToAdd);				
 				try {
@@ -262,7 +264,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 					e.printStackTrace();
 				}
 			}
-			FeatureCollectionManager.getFeatureCollectionsMsmsIdMap().put(newCollection, featureIds);					
+			FeatureCollectionManager.getFeatureCollectionsMsIdMap().put(newCollection, featureIds);					
 			if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
 				loadCollectionIntoWorkBench(newCollection);
 				msFeatureCollectionEditorDialog.dispose();
@@ -370,11 +372,11 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 			panel.clearMSMSFeatureData();		
 	}
 
-	public Collection<MsFeatureInfoBundle> getFeaturesToAdd() {
+	public Collection<MSFeatureInfoBundle> getFeaturesToAdd() {
 		return featuresToAdd;
 	}
 
-	public void setFeaturesToAdd(Collection<MsFeatureInfoBundle> featuresToAdd) {
+	public void setFeaturesToAdd(Collection<MSFeatureInfoBundle> featuresToAdd) {
 		this.featuresToAdd = featuresToAdd;
 	}
 	

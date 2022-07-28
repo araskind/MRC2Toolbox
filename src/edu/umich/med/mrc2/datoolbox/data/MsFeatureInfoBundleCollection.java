@@ -58,7 +58,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	private Date dateCreated;
 	private Date lastModified;
 	private LIMSUser owner;
-	private Collection<MsFeatureInfoBundle>features;
+	private Collection<MSFeatureInfoBundle>features;
 	private Collection<String>featureIds;
 	private TreeSet<ObjectAnnotation> annotations;
 	
@@ -68,7 +68,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		this.id = DataPrefix.MSMS_FEATURE_COLLECTION.getName() + UUID.randomUUID().toString();
 		dateCreated = new Date();
 		lastModified = new Date();
-		features = new TreeSet<MsFeatureInfoBundle>(
+		features = new TreeSet<MSFeatureInfoBundle>(
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
 		annotations = new TreeSet<ObjectAnnotation>();
 		owner = MRC2ToolBoxCore.getIdTrackerUser();
@@ -91,7 +91,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		this.dateCreated = dateCreated;
 		this.lastModified = lastModified;
 		this.owner = owner;
-		features = new TreeSet<MsFeatureInfoBundle>(
+		features = new TreeSet<MSFeatureInfoBundle>(
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
 		annotations = new TreeSet<ObjectAnnotation>();
 	}
@@ -157,35 +157,35 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		this.owner = owner;
 	}
 
-	public Collection<MsFeatureInfoBundle> getFeatures() {
+	public Collection<MSFeatureInfoBundle> getFeatures() {
 		return features;
 	}
 	
-	public Collection<MsFeatureInfoBundle> getMSMSFeatures() {
+	public Collection<MSFeatureInfoBundle> getMSMSFeatures() {
 		return features.stream().
 				filter(f -> Objects.nonNull(f.getMSMSFeatureId())).
 				collect(Collectors.toList());
 	}
 	
-	public Collection<MsFeatureInfoBundle> getM1Features() {
+	public Collection<MSFeatureInfoBundle> getM1Features() {
 		return features.stream().
 				filter(f -> Objects.isNull(f.getMSMSFeatureId())).
 				collect(Collectors.toList());
 	}
 	
-	public void addFeature(MsFeatureInfoBundle featureToAdd) {
+	public void addFeature(MSFeatureInfoBundle featureToAdd) {
 		features.add(featureToAdd);
 	}
 	
-	public void removeFeature(MsFeatureInfoBundle toRemove) {
+	public void removeFeature(MSFeatureInfoBundle toRemove) {
 		features.remove(toRemove);
 	}
 
-	public void addFeatures(Collection<MsFeatureInfoBundle> featuresToAdd) {
+	public void addFeatures(Collection<MSFeatureInfoBundle> featuresToAdd) {
 		features.addAll(featuresToAdd);
 	}
 	
-	public void removeFeatures(Collection<MsFeatureInfoBundle> featuresToremove) {
+	public void removeFeatures(Collection<MSFeatureInfoBundle> featuresToremove) {
 		features.removeAll(featuresToremove);
 	}
 
@@ -245,6 +245,13 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		return features.stream().
 				filter(f -> Objects.nonNull(f.getMSMSFeatureId())).
 				map(f -> f.getMSMSFeatureId()).
+				collect(Collectors.toSet());
+	}
+	
+	public Collection<String> getMsFeatureIds() {		
+		return features.stream().
+				filter(f -> Objects.nonNull(f.getMSFeatureId())).
+				map(f -> f.getMSFeatureId()).
 				collect(Collectors.toSet());
 	}
 	
@@ -308,7 +315,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		if(userId != null)
 			this.owner = IDTDataCash.getUserById(userId);
 		
-		features = new TreeSet<MsFeatureInfoBundle>(
+		features = new TreeSet<MSFeatureInfoBundle>(
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
 		
 		String featureIdIdList = 

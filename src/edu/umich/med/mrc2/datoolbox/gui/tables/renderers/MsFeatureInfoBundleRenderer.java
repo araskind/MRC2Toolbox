@@ -28,8 +28,8 @@ import java.awt.Font;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 
 public class MsFeatureInfoBundleRenderer extends DefaultTableCellRenderer {
@@ -60,9 +60,9 @@ public class MsFeatureInfoBundleRenderer extends DefaultTableCellRenderer {
 			setText("");
 			return this;
 		}
-		if (value instanceof MsFeatureInfoBundle) {
+		if (value instanceof MSFeatureInfoBundle) {
 
-			MsFeature msf = ((MsFeatureInfoBundle) value).getMsFeature();
+			MsFeature msf = ((MSFeatureInfoBundle) value).getMsFeature();
 			int fontSize = getFont().getSize();
 			if(msf.isQcStandard()) {
 				setFont(new Font("Default", Font.BOLD, fontSize));

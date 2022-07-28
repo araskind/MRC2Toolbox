@@ -39,8 +39,8 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -186,7 +186,7 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
         for(DataFile ms2dataFile : projectToSave.getMSMSDataFiles()) {
         	
         	msTwoFileListElement.addContent(ms2dataFile.getXmlElement());
-			Collection<MsFeatureInfoBundle>fileFeatures = 
+			Collection<MSFeatureInfoBundle>fileFeatures = 
 					projectToSave.getMsFeaturesForDataFile(ms2dataFile);
 			if(fileFeatures.size() > 0) {
 				SaveFileMsFeaturesTask task = 
@@ -205,7 +205,7 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
         for(DataFile msOnedataFile : projectToSave.getMSOneDataFiles()) {
         	
         	msOneFileListElement.addContent(msOnedataFile.getXmlElement());
-			Collection<MsFeatureInfoBundle>fileFeatures = 
+			Collection<MSFeatureInfoBundle>fileFeatures = 
 					projectToSave.getMsFeaturesForDataFile(msOnedataFile);
 			if(fileFeatures.size() > 0) {
 				SaveFileMsFeaturesTask task = 

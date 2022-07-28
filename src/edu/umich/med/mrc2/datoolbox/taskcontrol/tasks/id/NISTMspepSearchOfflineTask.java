@@ -25,14 +25,14 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class NISTMspepSearchOfflineTask extends NISTMsPepSearchRoundTripTask {
 
 	public NISTMspepSearchOfflineTask(
 			String searchCommand, 
-			Collection<MsFeatureInfoBundle> featuresToSearch,
+			Collection<MSFeatureInfoBundle> featuresToSearch,
 			File inputFile, 
 			File resultFile) {
 		super(searchCommand, featuresToSearch, inputFile, resultFile);
@@ -40,7 +40,7 @@ public class NISTMspepSearchOfflineTask extends NISTMsPepSearchRoundTripTask {
 	
 	public NISTMspepSearchOfflineTask(
 			List<String> commandParts, 
-			Collection<MsFeatureInfoBundle> featuresToSearch,
+			Collection<MSFeatureInfoBundle> featuresToSearch,
 			File inputFile, 
 			File resultFile) {
 		super(commandParts, featuresToSearch, inputFile, resultFile);

@@ -30,8 +30,8 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -47,7 +47,7 @@ import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 
 public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 	
-	private Collection<MsFeatureInfoBundle>featuresToUpdate;
+	private Collection<MSFeatureInfoBundle>featuresToUpdate;
 	private TopHitReassignmentOption topHitReassignmentOption;
 	private boolean useEntropyScore;
 	private boolean commitChangesToDatabase;
@@ -58,7 +58,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 			new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC);
 	
 	public DefaultMSMSLibraryHitReassignmentTask(
-			Collection<MsFeatureInfoBundle> featuresToExport,
+			Collection<MSFeatureInfoBundle> featuresToExport,
 			TopHitReassignmentOption topHitReassignmentOption, 
 			boolean useEntropyScore,
 			boolean commitChangesToDatabase) {
@@ -118,7 +118,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		Map<String,HiResSearchOption>searchTypeMap = 
 				NISTPepSearchUtils.getSearchTypeMap(featuresToUpdate);			
 
-		for(MsFeatureInfoBundle bundle : featuresToUpdate) {
+		for(MSFeatureInfoBundle bundle : featuresToUpdate) {
 			 		
 			if(topHitReassignmentOption.equals(TopHitReassignmentOption.PREFER_METLIN)) {				
 				if(assignMetlinTopHit(bundle))
@@ -142,7 +142,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 	}
 	
 	private boolean assignTopEntropyHit(
-			MsFeatureInfoBundle bundle,
+			MSFeatureInfoBundle bundle,
 			Map<String,HiResSearchOption>searchTypeMap,
 			Map<HiResSearchOption, Collection<MsFeatureIdentity>> hitTypeMap) {
 
@@ -169,7 +169,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 	}
 
 	private void assignNISTTopHit(
-			MsFeatureInfoBundle bundle, 
+			MSFeatureInfoBundle bundle, 
 			Map<String,HiResSearchOption>searchTypeMap, 			
 			Map<HiResSearchOption,Collection<MsFeatureIdentity>>hitTypeMap) {		
 		
@@ -237,7 +237,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		}
 	}
 	
-	private boolean assignMetlinTopHit(MsFeatureInfoBundle bundle) {
+	private boolean assignMetlinTopHit(MSFeatureInfoBundle bundle) {
 			
 		 List<MsFeatureIdentity>metlinHits = 
 					bundle.getMsFeature().getIdentifications().stream().
@@ -262,7 +262,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		processed = 0;	
 		Connection conn = ConnectionManager.getConnection();
 		
-		for(MsFeatureInfoBundle bundle : featuresToUpdate) {
+		for(MSFeatureInfoBundle bundle : featuresToUpdate) {
 			
 			try {
 				IdentificationUtils.setMSMSFeaturePrimaryIdentity(
