@@ -782,9 +782,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName()) 
 				|| command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName()))
 			insertNewMSMSClusterDataSet();
-				
-//		if (command.equals(MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_COMMAND.getName()))
-//			editMSMSClusterDataSet();	
 		
 		if (command.equals(MainActionCommands.CLEAR_IDTRACKER_WORKBENCH_PANEL.getName()))
 			clearWorkbench();	
@@ -792,30 +789,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.SET_AS_PRIMARY_ID_FOR_CLUSTER.getName()))
 			setSelectedIDAsPrimaryForFetureCluster();
 	}
-	
-//	private void editMSMSClusterDataSet() {
-//		
-//		Collection<String>errors = 
-//				msmsClusterDataSetEditorDialog.validateCollectionData();
-//		if(!errors.isEmpty()) {
-//			MessageDialog.showErrorMsg(
-//					StringUtils.join(errors, "\n"), this.getContentPane());
-//			return;
-//		}	
-//		// TODO save edits
-//	}
 
 	private void setSelectedIDAsPrimaryForFetureCluster() {
-
-//		MsFeatureInfoBundleCluster[] selectedClusters = 
-//				msmsFeatureClusterTreePanel.getSelectedClusters();
-//		MsFeatureInfoBundleCluster selectedCluster = null;
-//		if(selectedClusters.length > 0)
-//			selectedCluster = selectedClusters[0];
-//			
-//		if(selectedCluster == null)		
-//			selectedCluster = 
-//				(MsFeatureInfoBundleCluster) msmsFeatureClusterTreePanel.getClusterForSelectedFeature();
 		
 		if(activeCluster == null)
 			return;
@@ -855,10 +830,18 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				msmsClusterDataSetEditorDialog.getMsmsExtractionParameters());
 		dataSet.getClusters().addAll(msmsClusterDataSetEditorDialog.getClustersToAdd());
 		
-		MSMSClusterDataSetUploadTask task = 
-				new MSMSClusterDataSetUploadTask(dataSet);
-		task.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(task);
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			
+			MSMSClusterDataSetUploadTask task = 
+					new MSMSClusterDataSetUploadTask(dataSet);
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);
+		}
+		else {
+			MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+				getMsmsClusterDataSets().add(dataSet);
+			loadMSMSClusterDataSetInGUI(dataSet);
+		}
 		msmsClusterDataSetEditorDialog.dispose();		
 	}
 
@@ -867,13 +850,27 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(activeMSMSClusterDataSet == null)
 			return;
 		
-		if(MSMSClusterDataSetManager.getMSMSClusterDataSetById(activeMSMSClusterDataSet.getId()) != null){
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 			
-			MessageDialog.showErrorMsg(
-					"Data set \"" + activeMSMSClusterDataSet.getName() + 
-					"\" is already uploaded into the database", this.getContentPane());
-			return;
-		}	
+			if(MSMSClusterDataSetManager.getMSMSClusterDataSetById(activeMSMSClusterDataSet.getId()) != null){
+				
+				MessageDialog.showErrorMsg(
+						"Data set \"" + activeMSMSClusterDataSet.getName() + 
+						"\" is already uploaded into the database", this.getContentPane());
+				return;
+			}	
+		}
+		else {
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+				getMsmsClusterDataSets().stream().
+				filter(s -> s.getName().equals(activeMSMSClusterDataSet.getName())).
+				findFirst().orElse(null) != null) {
+				MessageDialog.showErrorMsg(
+						"Data set \"" + activeMSMSClusterDataSet.getName() + 
+						"\" already exists in the project", this.getContentPane());
+				return;
+			}
+		}
 		msmsClusterDataSetEditorDialog = 
 				new MSMSClusterDataSetEditorDialog(
 						null, activeMSMSClusterDataSet.getClusters(), this);
@@ -2714,8 +2711,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}		
 
 	private void finalizeMSMSClusterDataSetUploadTask(MSMSClusterDataSetUploadTask task) {
-		
-		activeMSMSClusterDataSet = task.getDataSet();
+
+		loadMSMSClusterDataSetInGUI(task.getDataSet());
 		MessageDialog.showInfoMsg("MSMS cluster data set \"" + task.getDataSet().getName() + 
 				"\" was saved to the database", this.getContentPane());		
 	}
@@ -2747,6 +2744,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		activeFeatureCollection.addFeatures(clusteredFeatures);
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+		StatusBar.setActiveMSMSClusterDataSet(activeMSMSClusterDataSet);
 	}
 
 	private void finalizeSpectrumEntropyRecalculation() {

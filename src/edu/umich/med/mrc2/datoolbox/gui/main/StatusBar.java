@@ -42,6 +42,7 @@ import javax.swing.border.EtchedBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
@@ -66,7 +67,7 @@ public class StatusBar extends JPanel implements
 	private JLabel statusTextLabel;
 	private LabeledProgressBar memoryLabel;
 	private JButton gcButton;
-	private static JLabel projectNameLabel, featureCollectionLabel;
+	private static JLabel projectNameLabel, featureCollectionLabel, msmsClusterLabel;
 
 	public StatusBar() {
 
@@ -76,9 +77,9 @@ public class StatusBar extends JPanel implements
 		statusTextPanel = new JPanel();
 		statusTextPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED));
 		GridBagLayout gbl_statusTextPanel = new GridBagLayout();
-		gbl_statusTextPanel.columnWidths = new int[]{0, 0, 74, 0, 0, 0, 0, 0, 0, 0};
+		gbl_statusTextPanel.columnWidths = new int[]{0, 0, 74, 0, 0, 0, 0};
 		gbl_statusTextPanel.rowHeights = new int[]{14, 0, 0};
-		gbl_statusTextPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0};
+		gbl_statusTextPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0};
 		gbl_statusTextPanel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		statusTextPanel.setLayout(gbl_statusTextPanel);
 		add(statusTextPanel);
@@ -107,9 +108,8 @@ public class StatusBar extends JPanel implements
 		statusTextPanel.add(projectNameLabel, gbc_projectNameLabel);
 		
 		fieldCount++;
-		fieldCount++;
 		
-		JLabel lblFeatureCollection = new JLabel("Feature collection");
+		JLabel lblFeatureCollection = new JLabel("Feature collection:");
 		lblFeatureCollection.setForeground(Color.BLUE);
 		lblFeatureCollection.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_lblFeatureCollection = new GridBagConstraints();
@@ -130,6 +130,29 @@ public class StatusBar extends JPanel implements
 		gbc_featureCollectionLabel.gridy = 0;
 		statusTextPanel.add(featureCollectionLabel, gbc_featureCollectionLabel);
 		
+		fieldCount++;
+		
+		JLabel lblNewLabel_1 = new JLabel("MSMS cluster data set:");
+		lblNewLabel_1.setForeground(Color.BLUE);
+		lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 11));
+		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_1.gridx = fieldCount;
+		gbc_lblNewLabel_1.gridy = 0;
+		statusTextPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
+		
+		fieldCount++;
+		
+		msmsClusterLabel = new JLabel("");
+		msmsClusterLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+		GridBagConstraints gbc_msmsClusterLabel = new GridBagConstraints();
+		gbc_msmsClusterLabel.anchor = GridBagConstraints.WEST;
+		gbc_msmsClusterLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_msmsClusterLabel.gridx = fieldCount;
+		gbc_msmsClusterLabel.gridy = 0;
+		statusTextPanel.add(msmsClusterLabel, gbc_msmsClusterLabel);
+				
 		memoryLabel = new LabeledProgressBar();
 		memoryPanel = new JPanel();
 		memoryPanel.setLayout(new BoxLayout(memoryPanel, BoxLayout.X_AXIS));
@@ -175,9 +198,18 @@ public class StatusBar extends JPanel implements
 			featureCollectionLabel.setText(newCollection.getName());
 	}
 
+	public static void setActiveMSMSClusterDataSet(MSMSClusterDataSet dataSet) {
+		
+		if(dataSet == null)
+			msmsClusterLabel.setText("");
+		else
+			msmsClusterLabel.setText(msmsClusterLabel.getName());
+	}
+	
 	public static void clearProjectData() {	
 		projectNameLabel.setText("");	
 		featureCollectionLabel.setText("");
+		msmsClusterLabel.setText("");
 	}
 	
 	public static void setProjectName(String projectName) {
