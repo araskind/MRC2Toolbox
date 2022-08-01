@@ -25,7 +25,6 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -47,6 +46,8 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
@@ -60,6 +61,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
 import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
 import edu.umich.med.mrc2.datoolbox.project.store.InjectionFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameters;
@@ -224,19 +226,19 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		
 		String compoundIdList = 
 				projectElement.getChild(ProjectFields.UniqueCIDList.name()).getText();
-		uniqueCompoundIds.addAll(getIdList(compoundIdList));
+		uniqueCompoundIds.addAll(ProjectUtils.getIdList(compoundIdList));
 		
 		String msmsLibIdIdList = 
 				projectElement.getChild(ProjectFields.UniqueMSMSLibIdList.name()).getText();
-		uniqueMSMSLibraryIds.addAll(getIdList(msmsLibIdIdList));
+		uniqueMSMSLibraryIds.addAll(ProjectUtils.getIdList(msmsLibIdIdList));
 
 		String msRtLibIdIdList = 
 				projectElement.getChild(ProjectFields.UniqueMSRTLibIdList.name()).getText();
-		uniqueMSRTLibraryIds.addAll(getIdList(msRtLibIdIdList));
+		uniqueMSRTLibraryIds.addAll(ProjectUtils.getIdList(msRtLibIdIdList));
 
 		String sampleIdIdList = 
 				projectElement.getChild(ProjectFields.UniqueSampleIdList.name()).getText();
-		uniqueSampleIds.addAll(getIdList(sampleIdIdList));
+		uniqueSampleIds.addAll(ProjectUtils.getIdList(sampleIdIdList));
 				
 		try {
 			populateDatabaseCashData();
@@ -293,7 +295,14 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				project.addMsFeatureInfoBundleCollection(
 						new MsFeatureInfoBundleCollection(fce));
 		}
-
+		Element msmsClusterListElement = 
+				projectElement.getChild(ProjectFields.MSMSClusterDataSetList.name());
+		if(msmsClusterListElement != null) {
+			List<Element> msmsClusterDataSetList = msmsClusterListElement.
+					getChildren(MSMSClusterDataSetFields.MSMSClusterDataSet.name());
+			for (Element mcds : msmsClusterDataSetList)
+				project.getMsmsClusterDataSets().add(new MSMSClusterDataSet(mcds));
+		}
 	}
 	
 	private void populateDatabaseCashData() throws Exception {
@@ -391,24 +400,6 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		for(IDTExperimentalSample sample :samples)
 			OfflineProjectLoadCash.addExperimentalSample(sample);		
 	}
-	
-	private Collection<String>getIdList(Element idListElement){
-		
-		if(idListElement.getText().isEmpty())
-			return Arrays.asList(new String[0]);
-		else {
-			return Arrays.asList(idListElement.getText().split(","));
-		}
-	}
-	
-	private Collection<String>getIdList(String idListString){
-		
-		if(idListString == null || idListString.isEmpty())
-			return Arrays.asList(new String[0]);
-		else {
-			return Arrays.asList(idListString.split(","));
-		}
-	}
 
 	private void extractProject() throws Exception {
 		taskDescription = "Extracting project files ...";
@@ -442,6 +433,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 				project.addMsFeaturesForDataFile(task.getDataFile(), task.getFeatures());
 				if(processedFiles == featureFileCount) {
 					populateFeatureCollections();
+					populateMSMSClusters();
 					featureReadCompleted = true;	
 				}
 			}	
@@ -462,6 +454,18 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		
 		for(MsFeatureInfoBundleCollection fc : project.getEditableMsFeatureInfoBundleCollections())	
 			fc.addFeatures(project.getFeatureBundlesForIds(fc.getFeatureIds()));	
+	}
+	
+	private void populateMSMSClusters() {
+
+		if(project.getEditableMsmsClusterDataSets().isEmpty())
+			return;
+		
+		for(MSMSClusterDataSet ds : project.getEditableMsmsClusterDataSets()) {	
+			
+			for(MsFeatureInfoBundleCluster cluster : ds.getClusters())
+				cluster.setFeatures(project.getFeatureBundlesForIds(cluster.getFeatureIds()));	
+		}		
 	}
 
 	private void cleanup() {

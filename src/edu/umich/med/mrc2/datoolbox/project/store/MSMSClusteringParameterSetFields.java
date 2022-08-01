@@ -21,27 +21,14 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum ProjectFields {
+public enum MSMSClusteringParameterSetFields {
 
-	IDTrackerRawDataProject,
+	MSMSClusteringParameterSet,
 	Id,
 	Name,
-	Description,
-	ProjectFile,
-	ProjectDir,
-	DateCreated,
-	DateModified,
-	MsOneFiles,
-	MsTwoFiles,
-	Injections,
-	UniqueCIDList,
-	UniqueMSMSLibIdList,
-	UniqueMSRTLibIdList,
-	UniqueSampleIdList,
-	FeatureChromatogramList,	
-	FeatureCollectionList,
-	MSMSClusterDataSetList,
-	Instrument,
-	UserId,
+	MZErrorValue,
+	MassErrorType,
+	RTErrorValue,
+	MSMSSimilarityCutoff,
 	;
 }

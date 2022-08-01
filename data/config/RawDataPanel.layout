@@ -101,7 +101,7 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1648658649940" orientation="HORIZONTAL" divider="0.25">
 											<node nodeId="1648659078148" orientation="VERTICAL" divider="0.56187624750499">
-												<leaf id="4" nodeId="1648658649946">
+												<leaf id="6" nodeId="1648658649946">
 													<placeholders>
 														<placeholder>dock.single.DockableDataTreePanel</placeholder>
 													</placeholders>
@@ -149,7 +149,7 @@
 												<node nodeId="1648658649951" orientation="HORIZONTAL" divider="0.6666666666666666">
 													<node nodeId="1648659691901" orientation="VERTICAL" divider="0.5105263157894737">
 														<node nodeId="1648744205808" orientation="HORIZONTAL" divider="0.7283609576427257">
-															<leaf id="6" nodeId="1648658649953">
+															<leaf id="2" nodeId="1648658649953">
 																<placeholders>
 																	<placeholder>dock.single.RawDataExaminerPanelDockableSpectumPlotMS1</placeholder>
 																</placeholders>
@@ -163,7 +163,7 @@
 																	</entry>
 																</placeholder-map>
 															</leaf>
-															<leaf id="2" nodeId="1648744205806">
+															<leaf id="4" nodeId="1648744205806">
 																<placeholders>
 																	<placeholder>dock.single.RawDataExaminerPanelDockableMsTableMS1</placeholder>
 																</placeholders>
@@ -248,10 +248,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableMsTableMS1">
-										<replacement id="dockablesingle RawDataExaminerPanelDockableMsTableMS1"/>
+									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableSpectumPlotMS1">
+										<replacement id="dockablesingle RawDataExaminerPanelDockableSpectumPlotMS1"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>RawDataExaminerPanelDockableMsTableMS1</id>
+											<id>RawDataExaminerPanelDockableSpectumPlotMS1</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -268,10 +268,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDataTreePanel">
-										<replacement id="dockablesingle DockableDataTreePanel"/>
+									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableMsTableMS1">
+										<replacement id="dockablesingle RawDataExaminerPanelDockableMsTableMS1"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDataTreePanel</id>
+											<id>RawDataExaminerPanelDockableMsTableMS1</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -337,10 +337,10 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.RawDataExaminerPanelDockableSpectumPlotMS1">
-										<replacement id="dockablesingle RawDataExaminerPanelDockableSpectumPlotMS1"/>
+									<layout factory="predefined" placeholder="dock.single.DockableDataTreePanel">
+										<replacement id="dockablesingle DockableDataTreePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>RawDataExaminerPanelDockableSpectumPlotMS1</id>
+											<id>DockableDataTreePanel</id>
 											<area/>
 										</delegate>
 									</layout>

@@ -382,7 +382,7 @@ public class RawDataAnalysisProject extends Project {
 		
 		return msFeatureMap.values().stream().
 				flatMap(v -> v.stream()).
-				filter(f -> idList.contains(f.getMsFeature().getId())).
+				filter(f -> idList.contains(f.getMSFeatureId())).
 				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
 				collect(Collectors.toList());
 	}
@@ -408,22 +408,29 @@ public class RawDataAnalysisProject extends Project {
 	}
 
 	public Set<MsFeatureInfoBundleCollection> getFeatureCollections() {
+		
+		if(featureCollections == null)
+			featureCollections = 
+					new TreeSet<MsFeatureInfoBundleCollection>(
+							new MsFeatureInformationBundleCollectionComparator(SortProperty.Name));
+		
 		return featureCollections;
 	}
 	
 	public Collection<MsFeatureInfoBundleCollection> getEditableMsFeatureInfoBundleCollections(){
-		return featureCollections.stream().
+		
+		return getFeatureCollections().stream().
 				filter(c -> !c.equals(FeatureCollectionManager.activeProjectFeatureSet)).
 				sorted(new MsFeatureInformationBundleCollectionComparator(SortProperty.Name)).
 				collect(Collectors.toList());
 	}
 	
 	public void addMsFeatureInfoBundleCollection(MsFeatureInfoBundleCollection fbCollection) {
-			featureCollections.add(fbCollection);
+		getFeatureCollections().add(fbCollection);
 	}
 	
 	public void removeMsFeatureInfoBundleCollection(MsFeatureInfoBundleCollection fbCollection) {
-		featureCollections.remove(fbCollection);
+		getFeatureCollections().remove(fbCollection);
 	}
 
 	public LIMSInstrument getInstrument() {
@@ -568,13 +575,20 @@ public class RawDataAnalysisProject extends Project {
 			}
 		}	
 	}
-
+	
 	public Collection<MSMSClusterDataSet> getMsmsClusterDataSets() {
+		
+		if(msmsClusterDataSets == null)
+			msmsClusterDataSets = 
+			new TreeSet<MSMSClusterDataSet>(
+					new MSMSClusterDataSetComparator(SortProperty.Name));
+		
 		return msmsClusterDataSets;
 	}
 	
 	public Collection<MSMSClusterDataSet> getEditableMsmsClusterDataSets(){
-		return msmsClusterDataSets.stream().
+		
+		return getMsmsClusterDataSets().stream().
 				filter(c -> !c.equals(MSMSClusterDataSetManager.activeProjectDefaultClusterDataSet)).
 				sorted(new MSMSClusterDataSetComparator(SortProperty.Name)).
 				collect(Collectors.toList());

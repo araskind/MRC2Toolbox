@@ -44,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
@@ -175,9 +176,8 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
         if(!projectToSave.getEditableMsFeatureInfoBundleCollections().isEmpty()) {
         	
         	for(MsFeatureInfoBundleCollection fbc : 
-        		projectToSave.getEditableMsFeatureInfoBundleCollections()) {
-        		msFeatureCollectionListElement.addContent(fbc.getXmlElement());
-        	}
+        				projectToSave.getEditableMsFeatureInfoBundleCollections())
+        		msFeatureCollectionListElement.addContent(fbc.getXmlElement());      	
         }       
         projectRoot.addContent(msFeatureCollectionListElement);
 		//	MS2 file list
@@ -227,6 +227,17 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
         	injectionListElement.addContent(injection.getXmlElement());
              
         projectRoot.addContent(injectionListElement); 
+               
+        //	MSMS cluster collections
+        Element msmsClusterListElement = 
+        		new Element(ProjectFields.MSMSClusterDataSetList.name());
+        if(!projectToSave.getMsmsClusterDataSets().isEmpty()) {
+        	
+        	for(MSMSClusterDataSet fbc : projectToSave.getEditableMsmsClusterDataSets())
+        		msmsClusterListElement.addContent(fbc.getXmlElement());       	
+        }
+        projectRoot.addContent(msmsClusterListElement);
+        
 		//	Save XML document
 		xmlFile = Paths.get(
 				projectToSave.getUncompressedProjectFilesDirectory().getAbsolutePath(), 

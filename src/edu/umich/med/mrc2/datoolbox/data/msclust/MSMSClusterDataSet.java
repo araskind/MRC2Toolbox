@@ -21,19 +21,28 @@
 
 package edu.umich.med.mrc2.datoolbox.data.msclust;
 
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class MSMSClusterDataSet {
 	
@@ -216,8 +225,97 @@ public class MSMSClusterDataSet {
 			return clusters.stream().
 					map(c -> c.getId()).collect(Collectors.toSet());
 	}
+
+	public Element getXmlElement() {
+
+		Element msmsClusterDataSetElement = 
+				new Element(MSMSClusterDataSetFields.MSMSClusterDataSet.name());
+		msmsClusterDataSetElement.setAttribute(
+				MSMSClusterDataSetFields.Id.name(), id);	
+		msmsClusterDataSetElement.setAttribute(
+				MSMSClusterDataSetFields.Name.name(), name);
+		String descString = description;
+		if(descString == null)
+			descString = "";
+		
+		msmsClusterDataSetElement.setAttribute(
+				MSMSClusterDataSetFields.Description.name(), descString);
+		msmsClusterDataSetElement.setAttribute(
+				MSMSClusterDataSetFields.UserId.name(), createdBy.getId());	
+		msmsClusterDataSetElement.setAttribute(
+				MSMSClusterDataSetFields.DateCreated.name(), 
+				ProjectUtils.dateTimeFormat.format(dateCreated));
+		msmsClusterDataSetElement.setAttribute(
+				MSMSClusterDataSetFields.LastModified.name(), 
+				ProjectUtils.dateTimeFormat.format(lastModified));		
+
+		msmsClusterDataSetElement.addContent(parameters.getXmlElement());
+		
+        Element clusterListElement = 
+        		new Element(MSMSClusterDataSetFields.ClusterList.name());
+        if(!clusters.isEmpty()) {
+        	
+        	for(MsFeatureInfoBundleCluster fbc : clusters)
+        		clusterListElement.addContent(fbc.getXmlElement());      	
+        }       
+        msmsClusterDataSetElement.addContent(clusterListElement);
+	
+		return msmsClusterDataSetElement;
+	}
+	
+	public MSMSClusterDataSet(Element xmlElement) {
+		
+		this.id = xmlElement.getAttributeValue(MSMSClusterDataSetFields.Id.name());
+		if(id == null)
+			this.id = DataPrefix.MSMS_CLUSTER_DATA_SET.getName() + 
+					UUID.randomUUID().toString().substring(0, 12);
+		
+		this.name = xmlElement.getAttributeValue(MSMSClusterDataSetFields.Name.name());
+		this.description = xmlElement.getAttributeValue(MSMSClusterDataSetFields.Description.name());
+		try {
+			this.dateCreated = ProjectUtils.dateTimeFormat.parse(
+					xmlElement.getAttributeValue(MSMSClusterDataSetFields.DateCreated.name()));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			this.lastModified = ProjectUtils.dateTimeFormat.parse(
+					xmlElement.getAttributeValue(MSMSClusterDataSetFields.LastModified.name()));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		String userId =  xmlElement.getAttributeValue(MSMSClusterDataSetFields.UserId.name());
+		if(userId != null)
+			this.createdBy = IDTDataCash.getUserById(userId);
+		else
+			this.createdBy = MRC2ToolBoxCore.getIdTrackerUser();
+
+		parameters = new MSMSClusteringParameterSet(
+				xmlElement.getChild(MSMSClusteringParameterSetFields.MSMSClusteringParameterSet.name()));
+		
+		clusters = new HashSet<MsFeatureInfoBundleCluster>();
+		clusterIds = new TreeSet<String>();
+		
+		List<Element> clusterListElements = 
+				xmlElement.getChildren(MSMSClusterDataSetFields.ClusterList.name());
+		if(clusterListElements.size() > 0) {
+			
+			List<Element> clusterList = 
+					clusterListElements.get(0).getChildren(MsFeatureInfoBundleClusterFields.MsFeatureInfoBundleCluster.name());
+			for(Element clusterElement : clusterList) {
+				
+				MsFeatureInfoBundleCluster newCluster = 
+						new MsFeatureInfoBundleCluster(clusterElement);
+				if(newCluster != null)
+					clusters.add(newCluster);
+			}
+		}
+	}
 }
 
+		
 
 
 

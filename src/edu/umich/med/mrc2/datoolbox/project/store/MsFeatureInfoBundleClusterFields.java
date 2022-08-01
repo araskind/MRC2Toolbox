@@ -21,27 +21,15 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum ProjectFields {
+public enum MsFeatureInfoBundleClusterFields {
 
-	IDTrackerRawDataProject,
+	MsFeatureInfoBundleCluster,
 	Id,
 	Name,
-	Description,
-	ProjectFile,
-	ProjectDir,
-	DateCreated,
-	DateModified,
-	MsOneFiles,
-	MsTwoFiles,
-	Injections,
-	UniqueCIDList,
-	UniqueMSMSLibIdList,
-	UniqueMSRTLibIdList,
-	UniqueSampleIdList,
-	FeatureChromatogramList,	
-	FeatureCollectionList,
-	MSMSClusterDataSetList,
-	Instrument,
-	UserId,
+	MZ,
+	RT,
+	MedianArea,
+	IsLocked,
+	FeatureIdList,
 	;
 }

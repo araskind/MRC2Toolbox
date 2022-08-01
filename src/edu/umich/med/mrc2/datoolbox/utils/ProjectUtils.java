@@ -33,6 +33,8 @@ import java.io.RandomAccessFile;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 
 import org.apache.commons.compress.archivers.ArchiveException;
@@ -217,6 +219,15 @@ public class ProjectUtils {
 		} catch (ArchiveException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	public static Collection<String>getIdList(String idListString){
+		
+		if(idListString == null || idListString.isEmpty())
+			return Arrays.asList(new String[0]);
+		else {
+			return Arrays.asList(idListString.split(","));
 		}
 	}
 }

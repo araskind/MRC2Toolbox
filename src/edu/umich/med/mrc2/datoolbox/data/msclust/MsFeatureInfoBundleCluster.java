@@ -24,7 +24,12 @@ package edu.umich.med.mrc2.datoolbox.data.msclust;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
@@ -34,9 +39,12 @@ import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MsFeatureInfoBundleCluster {
@@ -49,6 +57,7 @@ public class MsFeatureInfoBundleCluster {
 	private double medianArea;
 	private MsFeatureIdentity primaryIdentity;
 	private boolean locked;
+	private Collection<String>featureIds;
 	
 	public MsFeatureInfoBundleCluster() {
 		this(null, 0.0d, 0.0d, null);
@@ -277,6 +286,68 @@ public class MsFeatureInfoBundleCluster {
 			}
 		}
 		return spectrumMatches;
+	}
+
+	public Element getXmlElement() {
+
+		Element msmsClusterElement = 
+				new Element(MsFeatureInfoBundleClusterFields.MsFeatureInfoBundleCluster.name());
+		msmsClusterElement.setAttribute(
+				MsFeatureInfoBundleClusterFields.Id.name(), id);	
+		msmsClusterElement.setAttribute(
+				MsFeatureInfoBundleClusterFields.Name.name(), name);
+		msmsClusterElement.setAttribute(
+				MsFeatureInfoBundleClusterFields.MZ.name(), Double.toString(mz));
+		msmsClusterElement.setAttribute(
+				MsFeatureInfoBundleClusterFields.RT.name(), Double.toString(rt));
+		msmsClusterElement.setAttribute(
+				MsFeatureInfoBundleClusterFields.MedianArea.name(), Double.toString(medianArea));
+		msmsClusterElement.setAttribute(
+				MsFeatureInfoBundleClusterFields.IsLocked.name(), Boolean.toString(locked));
+		
+		Collection<String>componentFeatureIds = components.stream().
+				map(c -> c.getMSFeatureId()).collect(Collectors.toSet());
+		msmsClusterElement.addContent(       		
+        		new Element(MsFeatureInfoBundleClusterFields.FeatureIdList.name()).
+        		setText(StringUtils.join(componentFeatureIds, ",")));
+		
+		if(primaryIdentity != null)
+			msmsClusterElement.addContent(primaryIdentity.getXmlElement());
+		
+		return msmsClusterElement;
+	}
+	
+	public MsFeatureInfoBundleCluster(Element clusterElement) {
+		
+		id = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Id.name());
+		name = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Name.name());
+		mz = Double.parseDouble(
+				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.MZ.name()));
+		rt = Double.parseDouble(
+				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.RT.name()));
+		medianArea = Double.parseDouble(
+				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.MedianArea.name()));
+		locked = Boolean.parseBoolean(
+				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.IsLocked.name()));
+		
+		featureIds = new TreeSet<String>();
+		String compoundIdList = 
+				clusterElement.getChild(
+						MsFeatureInfoBundleClusterFields.FeatureIdList.name()).getText();
+		featureIds.addAll(ProjectUtils.getIdList(compoundIdList));
+		Element primaryIdElement = 
+				clusterElement.getChild(MsFeatureIdentityFields.MSFID.name());
+		if(primaryIdElement != null)
+			primaryIdentity = new MsFeatureIdentity(primaryIdElement);
+	}
+
+	public Collection<String> getFeatureIds() {
+		return featureIds;
+	}
+	
+	public void setFeatures(Collection<MSFeatureInfoBundle> featureBundles) {
+		components = new HashSet<MSFeatureInfoBundle>();
+		components.addAll(featureBundles);
 	}
 }
 
