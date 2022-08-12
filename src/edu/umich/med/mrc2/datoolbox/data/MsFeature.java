@@ -98,12 +98,13 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		neutralMass = source.getNeutralMass();
 		active = source.isActive();
 		qualityScore = source.getQualityScore();
-		identifications = new HashSet<MsFeatureIdentity>();
-		identifications.addAll(source.getIdentifications());
+		identifications = 
+				new HashSet<MsFeatureIdentity>(source.getIdentifications());
 		primaryIdentity = source.getPrimaryIdentity();
 		annotatedObjectType = source.getAnnotatedObjectType();
-		annotations = new TreeSet<ObjectAnnotation>();
-		annotations.addAll(source.getAnnotations());
+		annotations = 
+				new TreeSet<ObjectAnnotation>(source.getAnnotations());
+
 		defaultModification = source.getDefaultChemicalModification();
 		suggestedModification = null;
 		binnerAnnotation = source.getBinnerAnnotation();
@@ -157,8 +158,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		this.id = id;
 		this.name = name;
 		this.retentionTime = retentionTime;
-
 		rtRange = new Range(retentionTime);
+		
 		spectrum = null;
 		neutralMass = 0.0d;
 		active = true;
@@ -248,18 +249,18 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		if(cid.getCompoundIdentity() == null)
 			return false;
 
-		if(cid.getCompoundIdentity().getName() == null)
-			return false;
+//		if(cid.getCompoundIdentity().getName() == null)
+//			return false;
+//
+//		if(cid.getCompoundIdentity().getName().trim().isEmpty())
+//			return false;
 
-		if(cid.getCompoundIdentity().getName().trim().isEmpty())
-			return false;
-
-		if(identifications.contains(cid))
-			return true;
-		else {
+//		if(identifications.contains(cid))
+//			return true;
+//		else {
 			identifications.add(cid);
 			return true;
-		}
+//		}
 	}
 
 	public void removeIdentity(MsFeatureIdentity cid) {
@@ -908,6 +909,9 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			msFeatureElement.addContent(spectrum.getXmlElement());
 		
 		//	Identifications
+		if(primaryIdentity != null)
+			primaryIdentity.setPrimary(true);
+			
 		if(!identifications.isEmpty()) {
 			
 			Element cidListElement = 
@@ -918,6 +922,9 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			
 			msFeatureElement.addContent(cidListElement);
 		}	
+		msFeatureElement.setAttribute(
+				MsFeatureFields.IdDisabled.name(), Boolean.toString(idDisabled));	
+				
 		if(qualityScore > 0)
 			msFeatureElement.setAttribute(
 					MsFeatureFields.QS.name(), Double.toString(qualityScore));
@@ -969,10 +976,17 @@ public class MsFeature implements AnnotatedObject, Serializable {
 									spectrum.getExperimentalTandemSpectrum(), 
 									msfId.getReferenceMsMsLibraryMatch()));
 				}
-				identifications.add(msfId);
 				if(msfId.isPrimary())
-					primaryIdentity = msfId;
+					setPrimaryIdentity(msfId);
+				else
+					addIdentity(msfId);
 			}
+			String idDisabledString  = 
+					featureElement.getAttributeValue(MsFeatureFields.IdDisabled.name());
+			if(idDisabledString != null)
+				idDisabled = Boolean.parseBoolean(idDisabledString);
+			else
+				idDisabled = false;
 		}
 	}
 }

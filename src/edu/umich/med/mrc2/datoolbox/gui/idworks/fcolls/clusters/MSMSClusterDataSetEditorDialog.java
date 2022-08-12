@@ -257,10 +257,10 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 			setTitle("Create new MSMS cluster data set");
 			setIconImage(((ImageIcon) addFeatureCollectionIcon).getImage());
 			
-			if(clustersToAdd == null) 
+//			if(clustersToAdd == null) 
 				btnSave.setActionCommand(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName());
-			else 
-				btnSave.setActionCommand(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName());
+//			else 
+//				btnSave.setActionCommand(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName());
 			
 			dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
 			lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));			

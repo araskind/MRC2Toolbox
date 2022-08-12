@@ -57,13 +57,13 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalSampleListCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedListModel;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class ReferenceSampleDialog extends JDialog implements ActionListener{

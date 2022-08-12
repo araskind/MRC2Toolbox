@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
@@ -144,6 +146,10 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			return;
 		}
 		if(featureFileCount > 0) {
+			
+			taskDescription = "Loading feature data ...";
+			total = 100;
+			processed = 20;
 			for(File ff : featureFiles) {
 				
 				DataFile dataFile = getDataFileForFeatureFile(ff);
@@ -154,6 +160,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			}
 		}
 		if(chromatogramsFile != null) {
+			
 			OpenChromatogramFileTask task = 
 					new OpenChromatogramFileTask(chromatogramsFile, project.getDataFiles());
 			task.addTaskListener(this);
@@ -188,7 +195,19 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		uniqueSampleIds = new TreeSet<String>();
 		
 		SAXBuilder sax = new SAXBuilder();
-		Document doc = sax.build(projectXmlFile);
+		Document doc = null;
+		try {
+			doc = sax.build(projectXmlFile);
+		} catch (JDOMException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			errorMessage = e1.getMessage();
+			setStatus(TaskStatus.ERROR);
+			return;						
+		}
 		Element projectElement = doc.getRootElement();
 		
 		String id = projectElement.getAttributeValue(ProjectFields.Id.name()); 
@@ -452,19 +471,31 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		if(project.getEditableMsFeatureInfoBundleCollections().isEmpty())
 			return;
 		
-		for(MsFeatureInfoBundleCollection fc : project.getEditableMsFeatureInfoBundleCollections())	
+		taskDescription = "Populating feature collections ... ";
+		total = project.getEditableMsFeatureInfoBundleCollections().size();
+		processed = 0;
+		for(MsFeatureInfoBundleCollection fc : project.getEditableMsFeatureInfoBundleCollections())	{
 			fc.addFeatures(project.getFeatureBundlesForIds(fc.getFeatureIds()));	
+			processed++;
+		}
 	}
 	
 	private void populateMSMSClusters() {
 
-		if(project.getEditableMsmsClusterDataSets().isEmpty())
+		if(project.getMsmsClusterDataSets().isEmpty())
 			return;
 		
-		for(MSMSClusterDataSet ds : project.getEditableMsmsClusterDataSets()) {	
+		taskDescription = "Populating MSMS feature clusters ... ";
+		for(MSMSClusterDataSet ds : project.getMsmsClusterDataSets()) {	
 			
-			for(MsFeatureInfoBundleCluster cluster : ds.getClusters())
+			total = ds.getClusters().size();
+			processed = 0;
+			for(MsFeatureInfoBundleCluster cluster : ds.getClusters()) {
+				
 				cluster.setFeatures(project.getFeatureBundlesForIds(cluster.getFeatureIds()));	
+				cluster.updateNameFromPrimaryIdentity();
+				processed++;
+			}		
 		}		
 	}
 

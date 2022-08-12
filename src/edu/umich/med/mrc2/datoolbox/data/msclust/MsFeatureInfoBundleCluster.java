@@ -58,6 +58,7 @@ public class MsFeatureInfoBundleCluster {
 	private MsFeatureIdentity primaryIdentity;
 	private boolean locked;
 	private Collection<String>featureIds;
+	private MinimalMSOneFeature lookupFeature;
 	
 	public MsFeatureInfoBundleCluster() {
 		this(null, 0.0d, 0.0d, null);
@@ -116,7 +117,7 @@ public class MsFeatureInfoBundleCluster {
 			name += " [" + Integer.toString(components.size()) + "]";
 	}
 	
-	private void updateNameFromPrimaryIdentity() {
+	public void updateNameFromPrimaryIdentity() {
 		
 		String mzRtName = null;
 		if(mz > 0.0d && rt > 0.0d)
@@ -294,8 +295,8 @@ public class MsFeatureInfoBundleCluster {
 				new Element(MsFeatureInfoBundleClusterFields.MsFeatureInfoBundleCluster.name());
 		msmsClusterElement.setAttribute(
 				MsFeatureInfoBundleClusterFields.Id.name(), id);	
-		msmsClusterElement.setAttribute(
-				MsFeatureInfoBundleClusterFields.Name.name(), name);
+//		msmsClusterElement.setAttribute(
+//				MsFeatureInfoBundleClusterFields.Name.name(), name);
 		msmsClusterElement.setAttribute(
 				MsFeatureInfoBundleClusterFields.MZ.name(), Double.toString(mz));
 		msmsClusterElement.setAttribute(
@@ -320,7 +321,7 @@ public class MsFeatureInfoBundleCluster {
 	public MsFeatureInfoBundleCluster(Element clusterElement) {
 		
 		id = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Id.name());
-		name = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Name.name());
+		//	name = clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.Name.name());
 		mz = Double.parseDouble(
 				clusterElement.getAttributeValue(MsFeatureInfoBundleClusterFields.MZ.name()));
 		rt = Double.parseDouble(
@@ -348,6 +349,14 @@ public class MsFeatureInfoBundleCluster {
 	public void setFeatures(Collection<MSFeatureInfoBundle> featureBundles) {
 		components = new HashSet<MSFeatureInfoBundle>();
 		components.addAll(featureBundles);
+	}
+
+	public MinimalMSOneFeature getLookupFeature() {
+		return lookupFeature;
+	}
+
+	public void setLookupFeature(MinimalMSOneFeature lookupFeature) {
+		this.lookupFeature = lookupFeature;
 	}
 }
 

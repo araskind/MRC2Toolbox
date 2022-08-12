@@ -86,10 +86,10 @@ public class MsFeatureStatsUtils {
 		if(features.size() == 1) {
 			TandemMassSpectrum msms = features.iterator().next().getMsFeature().
 					getSpectrum().getExperimentalTandemSpectrum();
-			if(msms == null || msms.getParent() == null)
+			if(msms == null || msms.getSpectrum() == null)
 				return 0.0d;
 			else
-				return msms.getParent().getMz();
+				return msms.getTotalIntensity();
 		}		
 		descStats.clear();		
 		getMSMSFeaturesOnly(features).

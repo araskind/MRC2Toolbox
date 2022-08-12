@@ -33,5 +33,6 @@ public enum MsFeatureFields {
 	Spectrum,
 	CIDs,
 	QS,
+	IdDisabled,
 	;
 }

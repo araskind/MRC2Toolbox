@@ -189,7 +189,11 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			taskDescription = "Refreshing MSMS extraction parameters ";
 			IDTDataCash.refreshMSMSExtractionParameters();
 			processed = processed + 3;
-
+			
+			taskDescription = "Refreshing fetaure collection data ";
+			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
+			processed = processed + 3;
+			
 			setStatus(TaskStatus.FINISHED);
 		}
 		catch (Exception e) {

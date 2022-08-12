@@ -57,11 +57,11 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
-import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 
 public class EditFactorDialog extends JDialog implements ActionListener, ItemListener {
 

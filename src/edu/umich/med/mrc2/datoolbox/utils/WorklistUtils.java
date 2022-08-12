@@ -45,9 +45,9 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACRawDataManifestFields;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 

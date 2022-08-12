@@ -281,7 +281,8 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 	public void loadPreferences(Preferences prefs) {
 		
 		this.preferences = prefs;
-		// TODO Auto-generated method stub
+		msmsClusteringParametersPanel.loadPreferences();
+		featureListPanel.loadPreferences();
 	}
 
 	@Override
@@ -292,7 +293,8 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 	@Override
 	public void savePreferences() {
 		preferences = Preferences.userRoot().node(PREFS_NODE);
-		// TODO Auto-generated method stub
+		msmsClusteringParametersPanel.savePreferences();
+		featureListPanel.savePreferences();
 	}
 	
 	@Override

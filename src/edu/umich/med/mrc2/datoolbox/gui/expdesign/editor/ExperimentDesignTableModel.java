@@ -29,7 +29,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
-import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class ExperimentDesignTableModel extends DefaultTableModel {

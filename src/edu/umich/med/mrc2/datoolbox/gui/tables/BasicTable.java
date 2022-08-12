@@ -159,10 +159,30 @@ public class BasicTable extends JTable implements ActionListener{
 			// e.printStackTrace();
 		}
 	}
+	
+	public void clearTable() {
+		
+		if(thf != null) {
+			try {
+				thf.setTable(null);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			}
+		}
+		if(getModel().getRowCount() == 0)
+			return;
 
-	public synchronized void clearTable() {
-
-		((BasicTableModel)this.getModel()).setRowCount(0);
+		((BasicTableModel) this.getModel()).setRowCount(0);
+		
+		if(thf != null) {
+			try {
+				thf.setTable(this);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			}
+		}
 		if (tca != null)
 			tca.adjustColumns();
 	}

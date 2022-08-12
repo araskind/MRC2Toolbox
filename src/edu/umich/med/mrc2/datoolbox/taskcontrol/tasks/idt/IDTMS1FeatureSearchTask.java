@@ -515,9 +515,11 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				if(adductId != null)
 					id.setPrimaryAdduct(AdductManager.getAdductById(adductId));
 				
-				fb.getMsFeature().addIdentity(id);
 				if(id.isPrimary())
 					fb.getMsFeature().setPrimaryIdentity(id);
+				else
+					fb.getMsFeature().addIdentity(id);
+
 			}
 			rs.close();
 			
@@ -585,9 +587,10 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				if(adductId != null)
 					id.setPrimaryAdduct(AdductManager.getAdductById(adductId));
 				
-				fb.getMsFeature().addIdentity(id);
 				if(id.isPrimary())
 					fb.getMsFeature().setPrimaryIdentity(id);
+				else
+					fb.getMsFeature().addIdentity(id);
 			}
 			rs.close();			
 			

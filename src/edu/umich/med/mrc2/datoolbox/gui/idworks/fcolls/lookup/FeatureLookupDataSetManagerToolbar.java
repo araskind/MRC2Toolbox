@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.lookup;
 
 import java.awt.event.ActionListener;
 
@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class MSMSClusterDataSetsManagerToolbar extends CommonToolbar {
+public class FeatureLookupDataSetManagerToolbar extends CommonToolbar {
 
 	/**
 	 * 
@@ -50,29 +50,29 @@ public class MSMSClusterDataSetsManagerToolbar extends CommonToolbar {
 		deleteFeatureCollectionButton,
 		loadFeatureCollectionButton;
 
-	public MSMSClusterDataSetsManagerToolbar(ActionListener commandListener) {
+	public FeatureLookupDataSetManagerToolbar(ActionListener commandListener) {
 		super(commandListener);
 
 		addFeatureCollectionButton = GuiUtils.addButton(this, null, addFeatureCollectionIcon, commandListener,
-				MainActionCommands.ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName(),
-				MainActionCommands.ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_FEATURE_COLLECTION_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_FEATURE_COLLECTION_DIALOG_COMMAND.getName(),
 				buttonDimension);
 
 		editFeatureCollectionButton = GuiUtils.addButton(this, null, editFeatureCollectionIcon, commandListener,
-				MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName(),
-				MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_FEATURE_COLLECTION_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_FEATURE_COLLECTION_DIALOG_COMMAND.getName(),
 				buttonDimension);
 
 		deleteFeatureCollectionButton = GuiUtils.addButton(this, null, deleteFeatureCollectionIcon, commandListener,
-				MainActionCommands.DELETE_MSMS_CLUSTER_DATASET_COMMAND.getName(),
-				MainActionCommands.DELETE_MSMS_CLUSTER_DATASET_COMMAND.getName(),
+				MainActionCommands.DELETE_FEATURE_COLLECTION_COMMAND.getName(),
+				MainActionCommands.DELETE_FEATURE_COLLECTION_COMMAND.getName(),
 				buttonDimension);
 		
 		addSeparator(buttonDimension);
 		
 		loadFeatureCollectionButton = GuiUtils.addButton(this, null, loadFeatureCollectionIcon, commandListener,
-				MainActionCommands.LOAD_MSMS_CLUSTER_DATASET_COMMAND.getName(),
-				MainActionCommands.LOAD_MSMS_CLUSTER_DATASET_COMMAND.getName(),
+				MainActionCommands.LOAD_FEATURE_COLLECTION_COMMAND.getName(),
+				MainActionCommands.LOAD_FEATURE_COLLECTION_COMMAND.getName(),
 				buttonDimension);
 	}
 

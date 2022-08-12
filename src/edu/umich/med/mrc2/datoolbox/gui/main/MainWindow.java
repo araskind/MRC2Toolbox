@@ -1391,8 +1391,10 @@ public class MainWindow extends JFrame
 			if(e.getSource().getClass().equals(ProjectRawDataFileOpenTask.class))
 				finalizeProjectRawDataLoad((ProjectRawDataFileOpenTask)e.getSource());
 		}
-		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED)
+		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED) {
+			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			hideProgressDialog();
+		}
 	}
 	
 	private void finalizeProjectRawDataLoad(ProjectRawDataFileOpenTask task) {

@@ -63,7 +63,8 @@ public class MSMSClusterDataSetUploadTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);
 		}
 		try {
-			parSet = insertMSMSClusterDataSet(conn);
+			//	parSet = insertMSMSClusterDataSet(conn);
+			parSet = MSMSClusteringDBUtils.insertMSMSClusterDataSet(dataSet, conn);
 		} catch (Exception e1) {
 			errorMessage = e1.getMessage();
 			e1.printStackTrace();

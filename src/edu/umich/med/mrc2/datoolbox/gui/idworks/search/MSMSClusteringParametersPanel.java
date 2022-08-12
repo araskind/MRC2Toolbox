@@ -181,7 +181,7 @@ public class MSMSClusteringParametersPanel extends JPanel implements BackedByPre
 		rtWindowTextField.setText(
 				Double.toString(preferences.getDouble(RT_ERROR_VALUE, 0.1d)));
 		msmsSimilarityCutoffTextField.setText(
-				Double.toString(preferences.getDouble(MSMS_SIMILARITY_CUTOFF, 0.8d)));
+				Double.toString(preferences.getDouble(MSMS_SIMILARITY_CUTOFF, 0.5d)));
 	}
 
 	@Override
@@ -286,11 +286,6 @@ public class MSMSClusteringParametersPanel extends JPanel implements BackedByPre
 	public double getMsmsSimilarityCutoff() {	
 		return Double.parseDouble(msmsSimilarityCutoffTextField.getText().trim());
 	}
-	
-//	mzErrorValueTextField.setText(Double.toString(parameters.getMzErrorValue()));
-//	massErrorTypeComboBox.setSelectedItem(parameters.getMassErrorType());
-//	rtWindowTextField.setText(Double.toString(parameters.getRtErrorValue()));
-//	msmsSimilarityCutoffTextField.setText(Double.toString(parameters.getMsmsSimilarityCutoff()));
 }
 
 

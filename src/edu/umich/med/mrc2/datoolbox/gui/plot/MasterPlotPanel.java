@@ -35,6 +35,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
+import java.util.Collection;
 
 import org.geotools.brewer.color.ColorBrewer;
 import org.jfree.chart.ChartColor;
@@ -44,10 +45,12 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.plot.DefaultDrawingSupplier;
+import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
 
@@ -370,6 +373,24 @@ public abstract class MasterPlotPanel extends ChartPanel{
 		Point p = new Point();
 		p.setLocation(chartX, chartY);		
 		return translateScreenToJava2D(p);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public synchronized void removeMarkers() {
+		
+		Collection domainMarkers = plot.getDomainMarkers(Layer.FOREGROUND);			
+		if(domainMarkers != null && !domainMarkers.isEmpty()) {
+			
+			for (Object m : domainMarkers) 
+				 plot.removeDomainMarker((Marker) m, Layer.FOREGROUND);	
+		}
+		
+		Collection rangeMarkers = plot.getRangeMarkers(Layer.FOREGROUND);		
+		if(rangeMarkers != null && !rangeMarkers.isEmpty()) {
+			
+			for (Object m : rangeMarkers) 
+				 plot.removeRangeMarker((Marker) m, Layer.FOREGROUND);	
+		}	
 	}
 }
 

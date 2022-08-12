@@ -125,7 +125,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600794717898" orientation="VERTICAL" divider="0.4025069637883008">
-											<leaf id="2" nodeId="1600794711413">
+											<leaf id="1" nodeId="1600794711413">
 												<placeholders>
 													<placeholder>dock.single.DockableAcquisitionMethodDataPanel</placeholder>
 												</placeholders>
@@ -164,7 +164,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="1" nodeId="1600794717896">
+												<leaf id="2" nodeId="1600794717896">
 													<placeholders>
 														<placeholder>dock.single.DockableMobilePhaseAndParametersPanel</placeholder>
 													</placeholders>
@@ -240,20 +240,20 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMobilePhaseAndParametersPanel">
-										<replacement id="dockablesingle DockableMobilePhaseAndParametersPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableAcquisitionMethodDataPanel">
+										<replacement id="dockablesingle DockableAcquisitionMethodDataPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMobilePhaseAndParametersPanel</id>
+											<id>DockableAcquisitionMethodDataPanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableAcquisitionMethodDataPanel">
-										<replacement id="dockablesingle DockableAcquisitionMethodDataPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableMobilePhaseAndParametersPanel">
+										<replacement id="dockablesingle DockableMobilePhaseAndParametersPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableAcquisitionMethodDataPanel</id>
+											<id>DockableMobilePhaseAndParametersPanel</id>
 											<area/>
 										</delegate>
 									</layout>

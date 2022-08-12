@@ -90,6 +90,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
@@ -779,8 +780,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName()))
 			showAddNewMSMSClusterDataSetDialog();
 		
-		if (command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName()) 
-				|| command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName()))
+		if (command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName())) 
+//				|| command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName()))
 			insertNewMSMSClusterDataSet();
 		
 		if (command.equals(MainActionCommands.CLEAR_IDTRACKER_WORKBENCH_PANEL.getName()))
@@ -828,7 +829,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MRC2ToolBoxCore.getIdTrackerUser());
 		dataSet.setParameters(
 				msmsClusterDataSetEditorDialog.getMsmsExtractionParameters());
-		dataSet.getClusters().addAll(msmsClusterDataSetEditorDialog.getClustersToAdd());
+		if(msmsClusterDataSetEditorDialog.getClustersToAdd() != null)
+			dataSet.getClusters().addAll(msmsClusterDataSetEditorDialog.getClustersToAdd());
 		
 		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 			
@@ -861,14 +863,26 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			}	
 		}
 		else {
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
-				getMsmsClusterDataSets().stream().
-				filter(s -> s.getName().equals(activeMSMSClusterDataSet.getName())).
-				findFirst().orElse(null) != null) {
-				MessageDialog.showErrorMsg(
-						"Data set \"" + activeMSMSClusterDataSet.getName() + 
-						"\" already exists in the project", this.getContentPane());
-				return;
+			MSMSClusterDataSet existingSameNameSet = 
+					MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+							getMsmsClusterDataSets().stream().
+							filter(s -> s.getName().equals(activeMSMSClusterDataSet.getName())).
+							findFirst().orElse(null);
+			if(existingSameNameSet != null) {
+				
+				if(activeMSMSClusterDataSet.equals(existingSameNameSet)) {
+					
+					MessageDialog.showWarningMsg(
+							"Data set \"" + activeMSMSClusterDataSet.getName() + 
+							"\" already exists in the project", this.getContentPane());
+					return;
+				}
+				else {
+					MessageDialog.showErrorMsg(
+							"A different data set \"" + existingSameNameSet.getName() + 
+							"\" already exists in the project", this.getContentPane());
+					return;
+				}				
 			}
 		}
 		msmsClusterDataSetEditorDialog = 
@@ -1277,13 +1291,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void showFeatureCollectionManager() { 
 
-		ShowFeatureAndClusterCollectionManagerTask task = 
-			new ShowFeatureAndClusterCollectionManagerTask();
-		idp = new IndeterminateProgressDialog(
-				"Refreshing data for feature and cluster collections  ...", 
-				this.getContentPane(), task);
-		idp.setLocationRelativeTo(this.getContentPane());
-		idp.setVisible(true);
+		featureCollectionManagerDialog = new FeatureAndClusterCollectionManagerDialog();
+		featureCollectionManagerDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
+		featureCollectionManagerDialog.setVisible(true);
+		
+//		ShowFeatureAndClusterCollectionManagerTask task = 
+//			new ShowFeatureAndClusterCollectionManagerTask();
+//		idp = new IndeterminateProgressDialog(
+//				"Refreshing data for feature and cluster collections  ...", 
+//				this.getContentPane(), task);
+//		idp.setLocationRelativeTo(this.getContentPane());
+//		idp.setVisible(true);
 	}
 	
 	class ShowFeatureAndClusterCollectionManagerTask extends LongUpdateTask {
@@ -1374,11 +1392,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		Collection<MSFeatureInfoBundle> msmsFeatures = 
 				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
-		MSMSClusteringParameterSet params = 
-				activeDataSetMZRTDataSearchDialog.getParameters();
+		
 		Collection<MinimalMSOneFeature> lookupFeatures = 
 				activeDataSetMZRTDataSearchDialog.getAllFeatures();
-		
 		if(lookupFeatures == null || lookupFeatures.isEmpty()) {
 			int res = MessageDialog.showChoiceWithWarningMsg(
 					"Do you want to cluster all the features in the active data set?", 
@@ -1386,8 +1402,15 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(res != JOptionPane.YES_OPTION)
 				return;
 		}
+		FeatureLookupDataSet flds = new FeatureLookupDataSet(
+				activeDataSetMZRTDataSearchDialog.getFeatureSetName(), 
+				activeDataSetMZRTDataSearchDialog.getFeatureSetDescription(), 
+				lookupFeatures);		
+		MSMSClusteringParameterSet params = 
+				activeDataSetMZRTDataSearchDialog.getParameters();
+
 		MSMSFeatureClusteringTask task = 
-				new MSMSFeatureClusteringTask(msmsFeatures, params, lookupFeatures);
+				new MSMSFeatureClusteringTask(msmsFeatures, params, flds);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 		activeDataSetMZRTDataSearchDialog.dispose();
@@ -2708,6 +2731,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if (e.getSource().getClass().equals(MSMSClusterDataSetUploadTask.class))
 				finalizeMSMSClusterDataSetUploadTask((MSMSClusterDataSetUploadTask)e.getSource());				
 		}
+		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
+			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+			MainWindow.hideProgressDialog();
+		}
 	}		
 
 	private void finalizeMSMSClusterDataSetUploadTask(MSMSClusterDataSetUploadTask task) {
@@ -2910,13 +2937,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			}
 		}
 		else {
-			 reloadActiveMSMSClusterDataSet();
+			 loadMSMSClusterDataSetInGUI(activeMSMSClusterDataSet);
 		}
 	}	
 	
 	private void reloadActiveMSMSClusterDataSet() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	private void reloadCompleteActiveMSOneClusterDataSet() {
@@ -3519,6 +3545,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	public void clearMSMSClusterData() {
 		msmsFeatureClusterTreePanel.resetTree();
+		activeMSMSClusterDataSet = null;
 	}
 
 	@Override

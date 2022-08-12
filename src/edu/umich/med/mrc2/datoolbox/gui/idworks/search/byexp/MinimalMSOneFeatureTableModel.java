@@ -37,6 +37,7 @@ public class MinimalMSOneFeatureTableModel extends BasicTableModel {
 	public static final String FEATURE_COLUMN = "Name";
 	public static final String MZ_COLUMN = "M/Z";
 	public static final String RT_COLUMN = "RT";
+	public static final String RANK_COLUMN = "Rank";
 
 	public MinimalMSOneFeatureTableModel() {
 		super();
@@ -44,6 +45,7 @@ public class MinimalMSOneFeatureTableModel extends BasicTableModel {
 			new ColumnContext(FEATURE_COLUMN, MinimalMSOneFeature.class, false),
 			new ColumnContext(MZ_COLUMN, Double.class, false),
 			new ColumnContext(RT_COLUMN, Double.class, false),
+			new ColumnContext(RANK_COLUMN, Double.class, false),
 		};
 	}
 
@@ -57,6 +59,7 @@ public class MinimalMSOneFeatureTableModel extends BasicTableModel {
 					feature,
 					feature.getMz(),
 					feature.getRt(),
+					feature.getRank(),
 				};
 			super.addRow(obj);
 		}

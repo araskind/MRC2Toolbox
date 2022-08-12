@@ -77,11 +77,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		toolbar = new MSMSClusterDataSetsManagerToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 		
-		msmsClusterDataSetTable = new MSMSClusterDataSetsTable();	
-		MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();		
-		msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(
-				MSMSClusterDataSetManager.getMSMSClusterDataSets());
-		
+		msmsClusterDataSetTable = new MSMSClusterDataSetsTable();		
 		msmsClusterDataSetTable.addMouseListener(
 
 				new MouseAdapter() {
@@ -109,8 +105,8 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		if(command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName()))
 			showMsMSMSDataSetEditorDialog(null); 
 		
-		if(command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName())
-				|| command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName()))
+		if(command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_COMMAND.getName()))
+//				|| command.equals(MainActionCommands.ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND.getName()))
 			createNewMSMSClusterDataSet();
 		
 		if(command.equals(MainActionCommands.EDIT_MSMS_CLUSTER_DATASET_DIALOG_COMMAND.getName()))
@@ -299,11 +295,11 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	private void deleteMSMSClusterDataSetFromProject(MSMSClusterDataSet selected) {
 
 		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();	
-		if(!project.getEditableMsmsClusterDataSets().contains(selected)) {
-			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-					"\" is locked and can not be deleted.", this.getContentPane());
-			return;
-		}	
+//		if(!project.getMsmsClusterDataSets().contains(selected)) {
+//			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
+//					"\" is locked and can not be deleted.", this.getContentPane());
+//			return;
+//		}	
 		int res = MessageDialog.showChoiceWithWarningMsg(
 				"Are you sure you want to delete data set \"" + selected.getName() + "\"?", 
 				this.getContentPane());
@@ -385,6 +381,8 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	}
 	
 	public void loadDatabaseStoredMSMSClusterDataSets() {
+		
+		MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();		
 		msmsClusterDataSetTable.setTableModelFromMSMSClusterDataSetList(
 				MSMSClusterDataSetManager.getMSMSClusterDataSets());
 	}

@@ -66,7 +66,8 @@ public class MsFeatureIdentity implements Serializable {
 			CompoundIdentity compoundIdentity,
 			CompoundIdentificationConfidence confidenceLevel) {
 
-		this.uniqueId = DataPrefix.MS_FEATURE_IDENTITY.getName() + UUID.randomUUID().toString();
+		this.uniqueId = 
+				DataPrefix.MS_FEATURE_IDENTITY.getName() + UUID.randomUUID().toString();
 		this.compoundIdentity = compoundIdentity;
 		this.confidenceLevel = confidenceLevel;
 
@@ -179,27 +180,29 @@ public class MsFeatureIdentity implements Serializable {
         if (!MsFeatureIdentity.class.isAssignableFrom(cpdId.getClass()))
             return false;
 
-        MsFeatureIdentity cid = (MsFeatureIdentity)cpdId;
+        MsFeatureIdentity other = (MsFeatureIdentity)cpdId;
+        if ((this.uniqueId == null) ? (other.getUniqueId() != null) : !this.uniqueId.equals(other.getUniqueId()))
+            return false;
 
-        if ((this.compoundIdentity == null) ? (cid.getCompoundIdentity() != null) :
-        	!this.compoundIdentity.equals(cid.getCompoundIdentity()))
-        	return false;
-
-        if ((this.confidenceLevel == null) ? (cid.getConfidenceLevel() != null) :
-        	!this.confidenceLevel.equals(cid.getConfidenceLevel()))
-         	return false;
-
-        if ((this.idSource == null) ? (cid.getIdSource() != null) :
-        	!this.idSource.equals(cid.getIdSource()))
-        	return false;
-
-        if ((this.referenceMsMsLibraryMatch == null) ? (cid.getReferenceMsMsLibraryMatch() != null) :
-        	!this.referenceMsMsLibraryMatch.equals(cid.getReferenceMsMsLibraryMatch()))
-        	return false;
-
-        if ((this.msRtLibraryMatch == null) ? (cid.getMsRtLibraryMatch() != null) :
-        	!this.msRtLibraryMatch.equals(cid.getMsRtLibraryMatch()))
-        	return false;
+//        if ((this.compoundIdentity == null) ? (cid.getCompoundIdentity() != null) :
+//        	!this.compoundIdentity.equals(cid.getCompoundIdentity()))
+//        	return false;
+//
+//        if ((this.confidenceLevel == null) ? (cid.getConfidenceLevel() != null) :
+//        	!this.confidenceLevel.equals(cid.getConfidenceLevel()))
+//         	return false;
+//
+//        if ((this.idSource == null) ? (cid.getIdSource() != null) :
+//        	!this.idSource.equals(cid.getIdSource()))
+//        	return false;
+//
+//        if ((this.referenceMsMsLibraryMatch == null) ? (cid.getReferenceMsMsLibraryMatch() != null) :
+//        	!this.referenceMsMsLibraryMatch.equals(cid.getReferenceMsMsLibraryMatch()))
+//        	return false;
+//
+//        if ((this.msRtLibraryMatch == null) ? (cid.getMsRtLibraryMatch() != null) :
+//        	!this.msRtLibraryMatch.equals(cid.getMsRtLibraryMatch()))
+//        	return false;
 
         return true;
 	}
@@ -208,12 +211,7 @@ public class MsFeatureIdentity implements Serializable {
     public int hashCode() {
 
         int hash = 3;
-        hash = 53 * hash +
-    		+ (this.compoundIdentity != null ? this.compoundIdentity.hashCode() : 0)
-    		+ (this.confidenceLevel != null ? this.confidenceLevel.name().hashCode() : 0)
-    		+ (this.referenceMsMsLibraryMatch != null ? this.referenceMsMsLibraryMatch.hashCode() : 0)
-    		+ (this.msRtLibraryMatch != null ? this.msRtLibraryMatch.hashCode() : 0)
-    		+ (this.idSource != null ? this.idSource.name().hashCode() : 0);
+        hash = 53 * hash + (this.uniqueId != null ? this.uniqueId.hashCode() : 0);
         return hash;
     }
 
@@ -406,7 +404,8 @@ public class MsFeatureIdentity implements Serializable {
 	
 	public MsFeatureIdentity(Element msfIdElement) {
 
-		uniqueId = msfIdElement.getAttributeValue(MsFeatureIdentityFields.Id.name());		
+		uniqueId = 
+				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Id.name());		
 		String cid = msfIdElement.getAttributeValue(MsFeatureIdentityFields.CID.name());
 		if(cid != null)
 			compoundIdentity = OfflineProjectLoadCash.getCompoundIdentityByAccession(cid);

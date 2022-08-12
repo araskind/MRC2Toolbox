@@ -140,13 +140,21 @@ public class ActiveDataSetMZRTDataSearchDialog extends JDialog implements Action
 		return msmsClusteringParametersPanel.getParameters();
 	}
 	
+	public String getFeatureSetName() {
+		return featureListImportPanel.getFeatureSetName();
+	}
+	
+	public String getFeatureSetDescription() {
+		return featureListImportPanel.getFeatureSetDescription();
+	}
+	
 	public Collection<String>validateParameters(){
 		
 		Collection<String>errors = 
 				msmsClusteringParametersPanel.validateParameters();
 		
-//		if(getAllFeatures().isEmpty())
-//			errors.add("Search list is empty.");
+		if(!getAllFeatures().isEmpty() && getFeatureSetName().isEmpty())
+			errors.add("Please name the lookup feature set.");
 		
 		return errors;
 	}
@@ -157,6 +165,7 @@ public class ActiveDataSetMZRTDataSearchDialog extends JDialog implements Action
 		baseDirectory =  new File(preferences.get(
 				BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
 		featureListImportPanel.setBaseDirectory(baseDirectory);
+		msmsClusteringParametersPanel.loadPreferences();
 	}
 
 	@Override
@@ -169,5 +178,6 @@ public class ActiveDataSetMZRTDataSearchDialog extends JDialog implements Action
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		baseDirectory = featureListImportPanel.getBaseDirectory();
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
+		msmsClusteringParametersPanel.savePreferences();
 	}
 }

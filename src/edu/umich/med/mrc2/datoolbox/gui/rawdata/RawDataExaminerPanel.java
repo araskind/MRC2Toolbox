@@ -597,6 +597,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
 		workbench.loadFeaturesFromRawDataProject(MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
 		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.ID_WORKBENCH);
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMsmsClusterDataSets().size() == 1) {
+			workbench.loadMSMSClusterDataSet(
+					MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMsmsClusterDataSets().iterator().next());
+		}
 	}
 	
 	private void setupMSMSFeatureExtraction() {

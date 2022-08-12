@@ -883,9 +883,10 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					if(statusId != null) 
 						id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
 					
-					fb.getMsFeature().addIdentity(id);
 					if(id.isPrimary() && !fb.getMsFeature().isIdDisabled())
 						fb.getMsFeature().setPrimaryIdentity(id);
+					else
+						fb.getMsFeature().addIdentity(id);
 					
 					match.setEntropyBasedScore(
 							MSMSScoreCalculator.calculateDefaultEntropyMatchScore(msms, match));
@@ -975,9 +976,10 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					if(adductId != null)
 						id.setPrimaryAdduct(AdductManager.getAdductById(adductId));
 					
-					fb.getMsFeature().addIdentity(id);
-					if(id.isPrimary())
+					if(id.isPrimary() && !fb.getMsFeature().isIdDisabled())
 						fb.getMsFeature().setPrimaryIdentity(id);
+					else
+						fb.getMsFeature().addIdentity(id);
 				}
 				rs.close();
 			} catch (SQLException e) {

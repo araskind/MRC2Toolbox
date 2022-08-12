@@ -42,9 +42,14 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.DockableMSMSClusterDataSetsManager;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.DockableFeatureCollectionsManager;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
+import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 
 public class FeatureAndClusterCollectionManagerDialog extends JDialog 
 		implements ActionListener, PersistentLayout {
@@ -57,11 +62,13 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "FeatureAndClusterCollectionManagerDialog.layout");
 	
-	protected CControl control;
-	protected CGrid grid;
+	private CControl control;
+	private CGrid grid;
 	
+	private CollectionManagerToolbar toolbar;
 	private DockableFeatureCollectionsManager featureCollectionsManager;
 	private DockableMSMSClusterDataSetsManager featureClusterCollectionsManager;
+	private IndeterminateProgressDialog idp;
 	
 	public FeatureAndClusterCollectionManagerDialog() {
 		super();
@@ -74,20 +81,18 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));	
 		
+		toolbar = new CollectionManagerToolbar(this);
+		getContentPane().add(toolbar, BorderLayout.NORTH);	
+		
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		add(control.getContentArea(), BorderLayout.CENTER);
 		grid = new CGrid(control);
 			
-		featureCollectionsManager = new DockableFeatureCollectionsManager(this);
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
-			featureCollectionsManager.loadDatabaseStoredCollections();
-		else
-			featureCollectionsManager.loadCollectionsForActiveProject();
-		
+		featureCollectionsManager = 
+				new DockableFeatureCollectionsManager(this);
 		featureClusterCollectionsManager = 
 				new DockableMSMSClusterDataSetsManager(this);
-		//	TODO load clusters from database
 
 		grid.add(0, 0, 1, 1, featureCollectionsManager, 
 				featureClusterCollectionsManager				
@@ -95,7 +100,53 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 		control.getContentArea().deploy(grid);
 				
 		loadLayout(layoutConfigFile);
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			featureCollectionsManager.loadDatabaseStoredCollections();
+			featureClusterCollectionsManager.loadDatabaseStoredMSMSClusterDataSets();
+		}
+		else {
+			featureCollectionsManager.loadCollectionsForActiveProject();
+			featureClusterCollectionsManager.loadMSMSClusterDataSetsForActiveProject();
+		}
 		pack();
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		if(command.equals(MainActionCommands.REFRESH_FEATURE_AND_CLUSTER_COLLECTIONS_COMMAND.getName()))
+			refreshFeatureCollections();
+	}
+	
+	private void refreshFeatureCollections() { 
+
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
+			return;
+		
+		RefreshCollectionsTask task = 
+			new RefreshCollectionsTask();
+		idp = new IndeterminateProgressDialog(
+				"Refreshing data for feature and cluster collections  ...", 
+				this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
+	class RefreshCollectionsTask extends LongUpdateTask {
+
+		public RefreshCollectionsTask() {
+
+		}
+
+		@Override
+		public Void doInBackground() {
+			
+			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
+			MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();
+			return null;
+		}
 	}
 	
 	@Override
@@ -103,12 +154,6 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 		
 		saveLayout(layoutConfigFile);
 		super.dispose();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		String command = e.getActionCommand();
 	}
 	
 	public void showMsFeatureCollectionEditorDialog (MsFeatureInfoBundleCollection collection) {		

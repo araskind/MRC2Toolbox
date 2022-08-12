@@ -459,7 +459,9 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 						"MSMS_LIB_MATCH_SEQ",
 						DataPrefix.MSMS_LIBRARY_MATCH,
 						"0",
-						15);				
+						15);	
+				identification.setUniqueId(msmsMatchId);
+				
 				libMatchPs.setString(1, msmsMatchId);
 				libMatchPs.setString(2, msmsId);
 				libMatchPs.setString(3, refMatch.getMatchedLibraryFeature().getUniqueId());

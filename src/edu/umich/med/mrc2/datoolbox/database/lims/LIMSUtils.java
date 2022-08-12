@@ -56,8 +56,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class LIMSUtils {

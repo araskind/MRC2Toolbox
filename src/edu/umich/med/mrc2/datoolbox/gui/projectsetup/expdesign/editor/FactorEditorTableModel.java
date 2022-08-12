@@ -25,10 +25,10 @@ import java.util.Set;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
-import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 
 public class FactorEditorTableModel extends BasicTableModel {
 

@@ -642,9 +642,10 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 				if(statusId != null) 
 					id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
 				
-				msf.addIdentity(id);
 				if(id.isPrimary())
 					msf.setPrimaryIdentity(id);
+				else
+					msf.addIdentity(id);
 			}
 			rs.close();
 			processed++;

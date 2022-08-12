@@ -55,6 +55,7 @@ public class MSMSClusterDataSet {
 	private MSMSClusteringParameterSet parameters;
 	private Set<MsFeatureInfoBundleCluster>clusters;
 	private Set<String>clusterIds;
+	private FeatureLookupDataSet featureLookupDataSet;
 	
 	public MSMSClusterDataSet(
 			String name, 
@@ -312,6 +313,14 @@ public class MSMSClusterDataSet {
 					clusters.add(newCluster);
 			}
 		}
+	}
+
+	public FeatureLookupDataSet getFeatureLookupDataSet() {
+		return featureLookupDataSet;
+	}
+
+	public void setFeatureLookupDataSet(FeatureLookupDataSet featureLookupDataSet) {
+		this.featureLookupDataSet = featureLookupDataSet;
 	}
 }
 

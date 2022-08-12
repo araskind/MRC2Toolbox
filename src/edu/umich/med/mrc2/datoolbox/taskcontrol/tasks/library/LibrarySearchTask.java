@@ -120,7 +120,7 @@ public class LibrarySearchTask  extends AbstractTask {
 			boolean addToList = false;
 			if(!ids.isEmpty()) {
 				for(MsFeatureIdentity fid : ids) {
-
+					//	TODO ???
 					if(f.addIdentity(fid)) {
 
 						f.setPrimaryIdentity(fid);

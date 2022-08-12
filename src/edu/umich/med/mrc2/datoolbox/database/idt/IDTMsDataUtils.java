@@ -584,9 +584,11 @@ public class IDTMsDataUtils {
 				IdentificationUtils.getMSMSFeatureLibraryMatches(msms.getId(), conn);
 
 		for(MsFeatureIdentity cid : msmsIds) {
-			newTarget.addIdentity(cid);
+			
 			if(cid.isPrimary())
 				newTarget.setPrimaryIdentity(cid);
+			else
+				newTarget.addIdentity(cid);
 		}		
 	}
 	
@@ -602,9 +604,11 @@ public class IDTMsDataUtils {
 				IdentificationUtils.getMSMSFeatureManualIds(msms.getId(), conn);
 		
 		for(MsFeatureIdentity cid : altIds) {
-			newTarget.addIdentity(cid);
+			
 			if(cid.isPrimary())
 				newTarget.setPrimaryIdentity(cid);
+			else
+				newTarget.addIdentity(cid);
 		}
 	}
 
@@ -728,9 +732,11 @@ public class IDTMsDataUtils {
 						newTarget.getId(), conn);
 
 		for(MsFeatureIdentity cid : msmsIds) {
-			newTarget.addIdentity(cid);
+			
 			if(cid.isPrimary())
 				newTarget.setPrimaryIdentity(cid);
+			else
+				newTarget.addIdentity(cid);
 		}		
 	}
 	
@@ -743,9 +749,11 @@ public class IDTMsDataUtils {
 						newTarget.getId(), conn);
 		
 		for(MsFeatureIdentity cid : altIds) {
-			newTarget.addIdentity(cid);
+			
 			if(cid.isPrimary())
 				newTarget.setPrimaryIdentity(cid);
+			else
+				newTarget.addIdentity(cid);
 		}
 	}
 }

@@ -26,12 +26,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
@@ -48,7 +50,7 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	private Collection<MSFeatureInfoBundle> msmsFeatures;
 	private Collection<MSFeatureInfoBundle> filteredMsmsFeatures;
 	private MSMSClusteringParameterSet params;
-	private Collection<MinimalMSOneFeature> lookupFeatures;
+	private FeatureLookupDataSet featureLookupDataSet;
 	private Collection<MsFeatureInfoBundleCluster>featureClusters;
 	private MSMSClusterDataSet msmsClusterDataSet;
 	private double rtError;
@@ -60,11 +62,11 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	public MSMSFeatureClusteringTask(
 			Collection<MSFeatureInfoBundle> msmsFeatures, 
 			MSMSClusteringParameterSet params,
-			Collection<MinimalMSOneFeature> lookupFeatures) {
+			FeatureLookupDataSet flds) {
 		super();
 		this.msmsFeatures = msmsFeatures;
 		this.params = params;
-		this.lookupFeatures = lookupFeatures;
+		this.featureLookupDataSet = flds;
 		
 		msmsClusterDataSet = new MSMSClusterDataSet(
 				"Active data set", 
@@ -82,9 +84,10 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	public void run() {
 		taskDescription = "Clustering selected MSMS features";
 		setStatus(TaskStatus.PROCESSING);
-		if(lookupFeatures != null && !lookupFeatures.isEmpty()) {
+		if(featureLookupDataSet.getFeatures() != null && !featureLookupDataSet.getFeatures().isEmpty()) {
 			try {
 				clusterFilteredFeatures();
+				msmsClusterDataSet.setFeatureLookupDataSet(featureLookupDataSet);
 			}
 			catch (Exception e) {
 				setStatus(TaskStatus.ERROR);
@@ -107,14 +110,15 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	private void clusterFilteredFeatures() {
 
 		taskDescription = "Clustering MSMS features based on filter list ...";
+		Set<MinimalMSOneFeature> lookupFeatures = featureLookupDataSet.getFeatures();
 		total = lookupFeatures.size();
 		processed = 0;
 		filteredMsmsFeatures = new HashSet<MSFeatureInfoBundle>();
 		
-		for(MinimalMSOneFeature b : lookupFeatures) {
+		for(MinimalMSOneFeature lookupFeature : lookupFeatures) {
 			
-			Range rtRange = new Range(b.getRt() - rtError, b.getRt() + rtError);
-			Range mzRange = MsUtils.createMassRange(b.getMz(), mzError, mzErrorType);
+			Range rtRange = new Range(lookupFeature.getRt() - rtError, lookupFeature.getRt() + rtError);
+			Range mzRange = MsUtils.createMassRange(lookupFeature.getMz(), mzError, mzErrorType);
 			List<MSFeatureInfoBundle> clusterFeatures = msmsFeatures.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().
 						getSpectrum().getExperimentalTandemSpectrum())).
@@ -128,7 +132,8 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 			}	
 			while(!clusterFeatures.isEmpty()) {
 				MsFeatureInfoBundleCluster newCluster = 
-						clusterBasedOnMSMSSimilarity(b, clusterFeatures);
+						clusterBasedOnMSMSSimilarity(lookupFeature, clusterFeatures);
+				newCluster.setLookupFeature(lookupFeature);
 				featureClusters.add(newCluster);				
 			}
 			processed++;
@@ -220,15 +225,15 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 	public Task cloneTask() {
 		
 		return new MSMSFeatureClusteringTask(
-				msmsFeatures, params, lookupFeatures);
-	}
-
-	public Collection<MinimalMSOneFeature> getLookupFeatures() {
-		return lookupFeatures;
+				msmsFeatures, params, featureLookupDataSet);
 	}
 
 	public MSMSClusterDataSet getMsmsClusterDataSet() {
 		return msmsClusterDataSet;
+	}
+
+	public FeatureLookupDataSet getFeatureLookupDataSet() {
+		return featureLookupDataSet;
 	}
 }
 

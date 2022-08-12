@@ -233,7 +233,7 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
         		new Element(ProjectFields.MSMSClusterDataSetList.name());
         if(!projectToSave.getMsmsClusterDataSets().isEmpty()) {
         	
-        	for(MSMSClusterDataSet fbc : projectToSave.getEditableMsmsClusterDataSets())
+        	for(MSMSClusterDataSet fbc : projectToSave.getMsmsClusterDataSets())
         		msmsClusterListElement.addContent(fbc.getXmlElement());       	
         }
         projectRoot.addContent(msmsClusterListElement);

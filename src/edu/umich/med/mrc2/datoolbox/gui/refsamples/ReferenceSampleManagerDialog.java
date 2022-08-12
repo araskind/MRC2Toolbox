@@ -41,11 +41,11 @@ import org.apache.commons.lang3.StringUtils;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
-import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 
 public class ReferenceSampleManagerDialog extends JDialog implements ActionListener {
 

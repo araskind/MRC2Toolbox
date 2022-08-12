@@ -1125,12 +1125,13 @@ public enum MainActionCommands {
 	SHOW_MSMS_CLUSTER_DATASET_MANAGER_DIALOG_COMMAND("Show MSMS cluster data set manager"),
 	ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("\"Create new MSMS cluster data set\" dialog"),
 	ADD_MSMS_CLUSTER_DATASET_COMMAND("Create new empty MSMS cluster data set"),
-	ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND("Create new MSMS cluster data set with selected clusters"),
+	//	ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND("Create new MSMS cluster data set with selected clusters"),
 	ADD_MSMS_CLUSTERS_TO_SELECTED_DATASET_COMMAND("Add clusters to selected MSMS cluster data set"),
 	EDIT_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("\"Edit selected MSMS cluster data set\" dialog"),
 	EDIT_MSMS_CLUSTER_DATASET_COMMAND("Edit selected MSMS cluster data set"),
 	DELETE_MSMS_CLUSTER_DATASET_COMMAND("Delete selected MSMS cluster data set"),
 	LOAD_MSMS_CLUSTER_DATASET_COMMAND("Load selected MSMS cluster data set for analysis"),
+	REFRESH_FEATURE_AND_CLUSTER_COLLECTIONS_COMMAND("Refresh feature and MSMS cluster collection data"),
 	
 	//	Chromatogram smoothing 
 	SMOOTH_CHROMATOGRAM_COMMAND("Smooth chromatogram"),
@@ -1139,7 +1140,9 @@ public enum MainActionCommands {
 	SAVE_SMOOTHING_PREFERENCES_COMMAND("Save smoothing preferences"),
 	
 	//	Feature filter
-	IMPORT_MS1_FEATURES_FROM_FILE_COMMAND("Import MS1 features from file"),
+	IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND("Import lookup feature list from file"),
+	SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND("Select lookup features list from database"),
+	LOAD_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND("Load lookup features list from database"),
 	;
 
 	private final String name;

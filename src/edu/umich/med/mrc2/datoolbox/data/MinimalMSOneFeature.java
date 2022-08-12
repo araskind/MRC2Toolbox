@@ -22,7 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
+import java.util.UUID;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOneFeature> {
@@ -32,12 +34,16 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 	 */
 	private static final long serialVersionUID = -3016172144844330033L;
 	
+	private String id;
 	private String name;
 	private double mz;
 	private double rt;
+	private double rank;
 
 	public MinimalMSOneFeature(double mz, double rt) {
 		super();
+		this.id = DataPrefix.LOOKUP_FEATURE.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);
 		this.mz = mz;
 		this.rt = rt;
 		this.name = MRC2ToolBoxConfiguration.getMzFormat().format(mz) + "_"
@@ -46,9 +52,30 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 
 	public MinimalMSOneFeature(String name, double mz, double rt) {
 		super();
+		this.id = DataPrefix.LOOKUP_FEATURE.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);
 		this.name = name;
 		this.mz = mz;
 		this.rt = rt;
+	}
+
+	public MinimalMSOneFeature(String name, double mz, double rt, double rank) {
+		super();
+		this.id = DataPrefix.LOOKUP_FEATURE.getName() + 
+				UUID.randomUUID().toString().substring(0, 12);
+		this.name = name;
+		this.mz = mz;
+		this.rt = rt;
+		this.rank = rank;
+	}
+
+	public MinimalMSOneFeature(String id, String name, double mz, double rt, double rank) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.mz = mz;
+		this.rt = rt;
+		this.rank = rank;
 	}
 
 	public String getName() {
@@ -108,5 +135,21 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public double getRank() {
+		return rank;
+	}
+
+	public void setRank(double rank) {
+		this.rank = rank;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 }

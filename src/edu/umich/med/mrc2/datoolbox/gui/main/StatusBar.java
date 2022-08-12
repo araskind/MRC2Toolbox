@@ -203,7 +203,7 @@ public class StatusBar extends JPanel implements
 		if(dataSet == null)
 			msmsClusterLabel.setText("");
 		else
-			msmsClusterLabel.setText(msmsClusterLabel.getName());
+			msmsClusterLabel.setText(dataSet.getName());
 	}
 	
 	public static void clearProjectData() {	

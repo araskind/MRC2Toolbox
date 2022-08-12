@@ -35,7 +35,7 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentalSampleFields;
 

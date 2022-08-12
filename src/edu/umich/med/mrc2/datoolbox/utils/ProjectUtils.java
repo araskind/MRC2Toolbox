@@ -60,7 +60,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.database.idt.ReferenceSamplesManager;
+import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;

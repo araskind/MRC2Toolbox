@@ -507,8 +507,10 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 					scatterPlot.getRenderer().setSeriesShape(i, getSeriesShape(i));
 				}
 				scatterPlot.setDataset(tscs);
-				double upperBound = tscs.getRangeBounds(true).getUpperBound() + Math.abs(tscs.getRangeBounds(true).getUpperBound()) * 0.05;
-				double lowerBound = tscs.getRangeBounds(true).getLowerBound() - Math.abs(tscs.getRangeBounds(true).getLowerBound()) * 0.05;
+				double upperBound = tscs.getRangeBounds(true).getUpperBound() + 
+						Math.abs(tscs.getRangeBounds(true).getUpperBound()) * 0.05;
+				double lowerBound = tscs.getRangeBounds(true).getLowerBound() - 
+						Math.abs(tscs.getRangeBounds(true).getLowerBound()) * 0.05;
 				scatterPlot.getRangeAxis().setRange(new Range(lowerBound, upperBound));
 				valuePlot.add(scatterPlot);
 				valuePlot.getRangeAxis().setRange(new Range(lowerBound, upperBound));

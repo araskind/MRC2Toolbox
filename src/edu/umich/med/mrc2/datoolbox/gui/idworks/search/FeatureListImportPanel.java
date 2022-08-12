@@ -22,8 +22,11 @@
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -32,9 +35,15 @@ import java.util.TreeSet;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FilenameUtils;
@@ -65,6 +74,8 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	private MinimalMSOneFeatureTable featureTable;
 	private ImprovedFileChooser chooser;
 	private File baseDirectory;
+	private JTextField dataSetNameTextField;
+	private JTextArea descriptionTextArea;
 	
 	public FeatureListImportPanel() {
 		
@@ -74,24 +85,73 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		add(new JScrollPane(featureTable), BorderLayout.CENTER);
 		
 		JPanel fileImportPanel = new JPanel();
-		fileImportPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, Double.MIN_VALUE};
-		fileImportPanel.setLayout(gridBagLayout);
+		fileImportPanel.setBorder(null);
 		
 		JButton btnNewButton = new JButton(
-				MainActionCommands.IMPORT_MS1_FEATURES_FROM_FILE_COMMAND.getName());
-		btnNewButton.setActionCommand(MainActionCommands.IMPORT_MS1_FEATURES_FROM_FILE_COMMAND.getName());
+				MainActionCommands.IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND.getName());
+		btnNewButton.setActionCommand(MainActionCommands.IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND.getName());
 		btnNewButton.addActionListener(this);
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.anchor = GridBagConstraints.WEST;
-		gbc_btnNewButton.gridx = 0;
-		gbc_btnNewButton.gridy = 0;
-		fileImportPanel.add(btnNewButton, gbc_btnNewButton);
+		fileImportPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+		
+		JButton dbOpenButton = 
+				new JButton(MainActionCommands.SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName());
+		dbOpenButton.setActionCommand(MainActionCommands.SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName());
+		dbOpenButton.addActionListener(this);
+		fileImportPanel.add(dbOpenButton);
+		fileImportPanel.add(btnNewButton);
 		add(fileImportPanel, BorderLayout.SOUTH);
+		
+		JPanel panel = new JPanel();
+		panel.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), 
+				new CompoundBorder(new TitledBorder(
+						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), 
+						"Feature set properties", TitledBorder.LEADING, 
+						TitledBorder.TOP, null, new Color(0, 0, 0)), 
+						new EmptyBorder(10, 10, 10, 10))));
+		add(panel, BorderLayout.NORTH);
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[]{0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0, 0, 0};
+		gbl_panel.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
+		panel.setLayout(gbl_panel);
+		
+		JLabel lblNewLabel = new JLabel("Name ");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 0;
+		panel.add(lblNewLabel, gbc_lblNewLabel);
+		
+		dataSetNameTextField = new JTextField();
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.insets = new Insets(0, 0, 5, 0);
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField.gridx = 1;
+		gbc_textField.gridy = 0;
+		panel.add(dataSetNameTextField, gbc_textField);
+		dataSetNameTextField.setColumns(10);
+		
+		JLabel lblNewLabel_1 = new JLabel("Description");
+		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_1.gridwidth = 2;
+		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel_1.gridx = 0;
+		gbc_lblNewLabel_1.gridy = 1;
+		panel.add(lblNewLabel_1, gbc_lblNewLabel_1);
+		
+		descriptionTextArea = new JTextArea();
+		descriptionTextArea.setLineWrap(true);
+		descriptionTextArea.setRows(2);
+		descriptionTextArea.setWrapStyleWord(true);
+		GridBagConstraints gbc_textArea = new GridBagConstraints();
+		gbc_textArea.gridwidth = 2;
+		gbc_textArea.fill = GridBagConstraints.BOTH;
+		gbc_textArea.gridx = 0;
+		gbc_textArea.gridy = 2;
+		panel.add(descriptionTextArea, gbc_textArea);
 		
 		initChooser();
 	}
@@ -112,6 +172,14 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 				new FileNameExtensionFilter("Comma-separated text files", "csv", "CSV"));
 		chooser.addChoosableFileFilter(
 				new FileNameExtensionFilter("CEF files", "cef", "CEF"));
+	}
+	
+	public String getFeatureSetName() {
+		return dataSetNameTextField.getText().trim();
+	}
+	
+	public String getFeatureSetDescription() {
+		return descriptionTextArea.getText().trim();
 	}
 	
 	public void setBaseDirectory(File baseDirectory) {
@@ -145,7 +213,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getActionCommand().equals(MainActionCommands.IMPORT_MS1_FEATURES_FROM_FILE_COMMAND.getName())) 			
+		if(e.getActionCommand().equals(MainActionCommands.IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND.getName())) 			
 			chooser.showOpenDialog(this);
 
 		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
@@ -154,6 +222,21 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 			baseDirectory = inputFile.getParentFile();
 			readFeaturesFromInputFile(inputFile);
 		}
+		if(e.getActionCommand().equals(MainActionCommands.SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName()))
+			selectLookupFeatureListFromDatabase();
+		
+		if(e.getActionCommand().equals(MainActionCommands.LOAD_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName()))
+			loadLookupFeatureListFromDatabase();
+	}
+
+	private void loadLookupFeatureListFromDatabase() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void selectLookupFeatureListFromDatabase() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void readFeaturesFromInputFile(File inputFile) {
@@ -187,6 +270,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		int mzIndex = -1;
 		int rtIndex = -1;
 		int nameIndex = -1;
+		int rankIndex = -1;
 		for(int i=0; i<featureData[0].length; i++) {
 			
 			if(featureData[0][i].toLowerCase().equals("mz") 
@@ -198,10 +282,14 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 			
 			if(featureData[0][i].toLowerCase().equals("name"))
 				nameIndex = i;
+			
+			if(featureData[0][i].toLowerCase().equals("rank"))
+				rankIndex = i;
 		}
 		if(mzIndex == -1 && rtIndex == -1 && nameIndex == -1) {
 			MessageDialog.showErrorMsg("Invalid file format.\n"
-					+ "First line must include \"MZ\", \"RT\" and/or \"Name\" columns", 
+					+ "First line must include \"MZ\", \"RT\" and/or "
+					+ "\"Name\" columns, \"Rank\" column is optional", 
 					this);
 			return;
 		}
@@ -215,6 +303,9 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 					MinimalMSOneFeature f = new MinimalMSOneFeature(mz, rt);
 					if(nameIndex >= 0)
 						f.setName(featureData[i][nameIndex]);
+					
+					if(rankIndex >= 0)
+						f.setRank(Double.parseDouble(featureData[i][rankIndex]));
 					
 					features.add(f);
 				} catch (NumberFormatException e) {
@@ -235,6 +326,10 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 							double mz = Double.parseDouble(mzrt[0]);
 							double rt = Double.parseDouble(mzrt[1]);
 							MinimalMSOneFeature f = new MinimalMSOneFeature(name, mz, rt);
+							
+							if(rankIndex >= 0)
+								f.setRank(Double.parseDouble(featureData[i][rankIndex]));
+							
 							features.add(f);
 						} catch (NumberFormatException e) {
 							// TODO Auto-generated catch block
@@ -244,7 +339,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 				}
 			}
 		}
-		if(features != null)
+		if(features != null) 
 			featureTable.setTableModelFromFeatureCollection(features);		
 	}
 	

@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.database.idt;
+package edu.umich.med.mrc2.datoolbox.main;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -200,7 +200,7 @@ public class ReferenceSamplesManager {
 		else
 			return null;
 	}
-}
+}	
 
 
 
