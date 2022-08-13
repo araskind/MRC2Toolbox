@@ -64,11 +64,14 @@ public class MSMSClusterDataSetManager {
 		
 	public static void refreshMSMSClusterDataSetList() {
 		clusterDataSetsToClusterIdsMap.clear();
-		clusterDataSetsToClusterIdsMap.put(msmsClusterSearchResults, new TreeSet<String>());
-		clusterDataSetsToClusterIdsMap.put(msOneClusterSearchResults, new TreeSet<String>());
+		clusterDataSetsToClusterIdsMap.put(
+				msmsClusterSearchResults, new TreeSet<String>());
+		clusterDataSetsToClusterIdsMap.put(
+				msOneClusterSearchResults, new TreeSet<String>());
 //		clusterDataSetsToClusterIdsMap.put(activeProjectDefaultClusterDataSet, new TreeSet<String>());
 		try {
-			clusterDataSetsToClusterIdsMap.putAll(MSMSClusteringDBUtils.getMSMSClusterDataSets());		
+			clusterDataSetsToClusterIdsMap.putAll(
+					MSMSClusteringDBUtils.getMSMSClusterDataSets());		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

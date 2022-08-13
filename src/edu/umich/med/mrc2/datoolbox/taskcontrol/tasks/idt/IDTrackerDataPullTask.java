@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -46,7 +47,7 @@ public class IDTrackerDataPullTask extends AbstractTask {
 
 		taskDescription = "Retrieving data from database ...";
 		setStatus(TaskStatus.PROCESSING);
-		total = 100;
+		total = 105;
 		processed = 1;
 
 		try {
@@ -192,6 +193,10 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			
 			taskDescription = "Refreshing fetaure collection data ";
 			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
+			processed = processed + 3;
+			
+			taskDescription = "Refreshing featue lookup data sets ";
+			FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
 			processed = processed + 3;
 			
 			setStatus(TaskStatus.FINISHED);

@@ -28,28 +28,21 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.swing.Icon;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 
 import org.apache.commons.lang.StringUtils;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
-import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 
 public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable implements ActionListener {
 
@@ -58,7 +51,7 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 	private FeatureLookupDataSetManagerToolbar toolbar;
 	private FeatureLookupDataSetListTable featureCollectionsTable;
 	private FeatureAndClusterCollectionManagerDialog parent;	
-	private FeatureLookupDataSetEditorDialog msFeatureCollectionEditorDialog;
+	private FeatureLookupDataSetEditorDialog featureLookupDataSetEditorDialog;
 
 	public DockableFeatureLookupDataSetManager(FeatureAndClusterCollectionManagerDialog parent)  {
 
@@ -70,10 +63,8 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 		
 		featureCollectionsTable = new FeatureLookupDataSetListTable();
-		
-		//	TODO
-		featureCollectionsTable.setTableModelFromFeatureLookupDataSetList(null);
-		
+		featureCollectionsTable.setTableModelFromFeatureLookupDataSetList(
+				FeatureLookupDataSetManager.getFeatureLookupDataSetList());		
 		featureCollectionsTable.addMouseListener(
 
 				new MouseAdapter() {
@@ -97,70 +88,68 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-//		String command = e.getActionCommand();
-//		if(command.equals(MainActionCommands.ADD_FEATURE_COLLECTION_DIALOG_COMMAND.getName()))
-//			showMsFeatureCollectionEditorDialog(null); 
-//		
-//		if(command.equals(MainActionCommands.ADD_FEATURE_COLLECTION_COMMAND.getName())
-//				|| command.equals(MainActionCommands.ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND.getName()))
-//			createNewFeatureCollection();
-//		
-//		if(command.equals(MainActionCommands.EDIT_FEATURE_COLLECTION_DIALOG_COMMAND.getName()))
-//			etitSelectedFeatureCollection();
-//		
-//		if(command.equals(MainActionCommands.EDIT_FEATURE_COLLECTION_COMMAND.getName()))
-//			saveEditedFeatureCollectionData();
-//		
-//		if(command.equals(MainActionCommands.DELETE_FEATURE_COLLECTION_COMMAND.getName()))
-//			 deleteFeatureCollection();
-//		
-//		if(command.equals(MainActionCommands.LOAD_FEATURE_COLLECTION_COMMAND.getName()))
-//			 loadFeatureCollection() ;
+		String command = e.getActionCommand();
+		if(command.equals(MainActionCommands.ADD_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName()))
+			showFeatureLookupDataSetEditorDialog(null); 
+		
+		if(command.equals(MainActionCommands.ADD_FEATURE_LOOKUP_DATA_SET_COMMAND.getName()))
+			createNewFeatureLookupDataSet();
+		
+		if(command.equals(MainActionCommands.EDIT_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName()))
+			etitSelectedFeatureLookupDataSet();
+		
+		if(command.equals(MainActionCommands.EDIT_FEATURE_LOOKUP_DATA_SET_COMMAND.getName()))
+			saveEditedFeatureLookupDataSet();
+		
+		if(command.equals(MainActionCommands.DELETE_FEATURE_LOOKUP_DATA_SET_COMMAND.getName()))
+			 deleteFeatureLookupDataSet();
 	}
-//	
-//	public void showMsFeatureCollectionEditorDialog (MsFeatureInfoBundleCollection collection) {
-//		
-//		msFeatureCollectionEditorDialog = new FeatureLookupDataSetEditorDialog(collection, featuresToAdd, this);
-//		msFeatureCollectionEditorDialog.setLocationRelativeTo(this.getContentPane());
-//		msFeatureCollectionEditorDialog.setVisible(true);
-//	}
-//
-//	private void saveEditedFeatureCollectionData() {
-//		
-//		Collection<String>errors = msFeatureCollectionEditorDialog.validateCollectionData();
-//		if(!errors.isEmpty()) {
-//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msFeatureCollectionEditorDialog);
-//			return;
-//		}
-//		MsFeatureInfoBundleCollection edited = 
-//				msFeatureCollectionEditorDialog.getFeatureCollection();
-//		edited.setName(msFeatureCollectionEditorDialog.getFeatureCollectionName());
-//		edited.setDescription(msFeatureCollectionEditorDialog.getFeatureCollectionDescription());
-//		edited.setLastModified(new Date());
-//		
-//		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
-//			saveFeatureCollectionChangesToDatabase(edited);
-//		else
-//			saveFeatureCollectionChangesToProject(edited);
-//	}
-//	
-//	private void saveFeatureCollectionChangesToProject(MsFeatureInfoBundleCollection edited) {
-//		
-//		edited.addFeatures(msFeatureCollectionEditorDialog.getFeaturesToAdd());
-//		if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
+	
+	public void showFeatureLookupDataSetEditorDialog (FeatureLookupDataSet datSet) {
+		
+		featureLookupDataSetEditorDialog = new FeatureLookupDataSetEditorDialog(datSet, this);
+		featureLookupDataSetEditorDialog.setLocationRelativeTo(this.getContentPane());
+		featureLookupDataSetEditorDialog.setVisible(true);
+	}
+
+	private void saveEditedFeatureLookupDataSet() {
+		
+		Collection<String>errors = featureLookupDataSetEditorDialog.validateDataSet();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), 
+					featureLookupDataSetEditorDialog);
+			return;
+		}	
+		FeatureLookupDataSet edited = featureLookupDataSetEditorDialog.getFeatureLookupDataSet();
+
+		edited.setName(featureLookupDataSetEditorDialog.getDataSetName());
+		edited.setDescription(featureLookupDataSetEditorDialog.getDataSetDescription());
+		edited.setLastModified(new Date());
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+			saveFeatureCollectionChangesToDatabase(edited);
+		else
+			saveFeatureCollectionChangesToProject(edited);
+	}
+	
+	private void saveFeatureCollectionChangesToProject(FeatureLookupDataSet edited) {
+		
+//		edited.addFeatures(featureLookupDataSetEditorDialog.getFeaturesToAdd());
+//		if(featureLookupDataSetEditorDialog.loadCollectionIntoWorkBench()) {
 //			loadCollectionIntoWorkBench(edited);
-//			msFeatureCollectionEditorDialog.dispose();	
+//			featureLookupDataSetEditorDialog.dispose();	
 //			parent.dispose();
 //		}
 //		else {	
-//			msFeatureCollectionEditorDialog.dispose();	
+//			featureLookupDataSetEditorDialog.dispose();	
 //			featureCollectionsTable.updateCollectionData(edited);
 //			featureCollectionsTable.selectCollection(edited);
 //		}
-//	}
-//	
-//	private void saveFeatureCollectionChangesToDatabase(MsFeatureInfoBundleCollection edited) { 
-//		
+	}
+	
+	private void saveFeatureCollectionChangesToDatabase(FeatureLookupDataSet edited) { 
+		
 //		try {
 //			FeatureCollectionUtils.updateMsFeatureInformationBundleCollectionMetadata(edited);
 //		} catch (Exception e) {
@@ -170,7 +159,7 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 //		Set<String>featureIds = new TreeSet<String>();
 //		featureIds.addAll(FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(edited));
 //		Set<String> featureIdsToAdd = 
-//				msFeatureCollectionEditorDialog.getMsFeatureIdsToAdd();
+//				featureLookupDataSetEditorDialog.getMsFeatureIdsToAdd();
 //		if(featureIdsToAdd != null && !featureIdsToAdd.isEmpty()) {
 //			featureIds.addAll(featureIdsToAdd);				
 //			try {
@@ -181,64 +170,67 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 //			}
 //			FeatureCollectionManager.getFeatureCollectionsMsIdMap().get(edited).addAll(featureIdsToAdd);
 //		}			
-//		if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
+//		if(featureLookupDataSetEditorDialog.loadCollectionIntoWorkBench()) {
 //			loadCollectionIntoWorkBench(edited);
-//			msFeatureCollectionEditorDialog.dispose();
+//			featureLookupDataSetEditorDialog.dispose();
 //			parent.dispose();
 //		}
 //		else {	
-//			msFeatureCollectionEditorDialog.dispose();
+//			featureLookupDataSetEditorDialog.dispose();
 //			featureCollectionsTable.updateCollectionData(edited);
 //			featureCollectionsTable.selectCollection(edited);
 //		}		
-//	}
-//
-//	private void createNewFeatureCollection() {
-//
-//		Collection<String>errors = msFeatureCollectionEditorDialog.validateCollectionData();
-//		if(!errors.isEmpty()) {
-//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msFeatureCollectionEditorDialog);
-//			return;
-//		}
+	}
+
+	private void createNewFeatureLookupDataSet() {
+
+		Collection<String>errors = 
+				featureLookupDataSetEditorDialog.validateDataSet();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), 
+					featureLookupDataSetEditorDialog);
+			return;
+		}
 //		MsFeatureInfoBundleCollection newCollection = 
 //				new MsFeatureInfoBundleCollection(
 //						null, 
-//						msFeatureCollectionEditorDialog.getFeatureCollectionName(),
-//						msFeatureCollectionEditorDialog.getFeatureCollectionDescription(),
+//						featureLookupDataSetEditorDialog.getFeatureCollectionName(),
+//						featureLookupDataSetEditorDialog.getFeatureCollectionDescription(),
 //						new Date(), 
 //						new Date(),
 //						MRC2ToolBoxCore.getIdTrackerUser());
 //		
-//		if(msFeatureCollectionEditorDialog.getFeaturesToAdd() != null)
-//			newCollection.addFeatures(msFeatureCollectionEditorDialog.getFeaturesToAdd());
+//		if(featureLookupDataSetEditorDialog.getFeaturesToAdd() != null)
+//			newCollection.addFeatures(featureLookupDataSetEditorDialog.getFeaturesToAdd());
 //		
 //		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
 //			createNewFeatureCollectionInDatabase(newCollection);
 //		else
 //			createNewFeatureCollectionInProject(newCollection);
-//	}
-//	
-//	private void createNewFeatureCollectionInProject(MsFeatureInfoBundleCollection newCollection) {
-//		
+	}
+	
+	private void createNewFeatureCollectionInProject(MsFeatureInfoBundleCollection newCollection) {
+		
 //		RawDataAnalysisProject project = 
 //				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();		
 //		project.addMsFeatureInfoBundleCollection(newCollection);
 //		
-//		if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
+//		if(featureLookupDataSetEditorDialog.loadCollectionIntoWorkBench()) {
 //			loadCollectionIntoWorkBench(newCollection);
-//			msFeatureCollectionEditorDialog.dispose();	
+//			featureLookupDataSetEditorDialog.dispose();	
 //			parent.dispose();
 //		}
 //		else {
-//			msFeatureCollectionEditorDialog.dispose();	
+//			featureLookupDataSetEditorDialog.dispose();	
 //			featureCollectionsTable.setTableModelFromFeatureCollectionList(
 //					project.getFeatureCollections());	
 //			featuresToAdd = null;
 //		}
-//	}
-//		
-//	private void createNewFeatureCollectionInDatabase(MsFeatureInfoBundleCollection newCollection) {
-//
+	}
+		
+	private void createNewFeatureCollectionInDatabase(MsFeatureInfoBundleCollection newCollection) {
+
 //		String newId = null;
 //		try {
 //			newId = FeatureCollectionUtils.addNewMsFeatureInformationBundleCollection(newCollection);
@@ -252,7 +244,7 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 //			Set<String>featureIds = new TreeSet<String>();
 //			featureIds.addAll(newCollection.getMsFeatureIds());
 //			Set<String> featureIdsToAdd = 
-//					msFeatureCollectionEditorDialog.getMsFeatureIdsToAdd();
+//					featureLookupDataSetEditorDialog.getMsFeatureIdsToAdd();
 //			if(featureIdsToAdd != null && !featureIdsToAdd.isEmpty()) {
 //				featureIds.addAll(featureIdsToAdd);				
 //				try {
@@ -263,23 +255,23 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 //				}
 //			}
 //			FeatureCollectionManager.getFeatureCollectionsMsIdMap().put(newCollection, featureIds);					
-//			if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
+//			if(featureLookupDataSetEditorDialog.loadCollectionIntoWorkBench()) {
 //				loadCollectionIntoWorkBench(newCollection);
-//				msFeatureCollectionEditorDialog.dispose();
+//				featureLookupDataSetEditorDialog.dispose();
 //				parent.dispose();
 //			}
 //			else {
-//				msFeatureCollectionEditorDialog.dispose();
+//				featureLookupDataSetEditorDialog.dispose();
 //				featureCollectionsTable.setTableModelFromFeatureCollectionList(
 //						FeatureCollectionManager.getMsFeatureInfoBundleCollections());	
 //				featuresToAdd = null;
 //			}
 //		}	
 //		featuresToAdd = null;
-//	}
-//	
-//	private void etitSelectedFeatureCollection() {
-//
+	}
+	
+	private void etitSelectedFeatureLookupDataSet() {
+
 //		MsFeatureInfoBundleCollection selected = 
 //				featureCollectionsTable.getSelectedCollection();
 //		if(selected == null)
@@ -291,10 +283,10 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 //			return;
 //		}	
 //		showMsFeatureCollectionEditorDialog(selected);
-//	}
-//
-//	private void deleteFeatureCollection() {
-//		
+	}
+
+	private void deleteFeatureLookupDataSet() {
+		
 //		MsFeatureInfoBundleCollection selected = 
 //				featureCollectionsTable.getSelectedCollection();
 //		if(selected == null)
@@ -314,10 +306,10 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 //			deleteFeatureCollectionFromDatabase(selected);
 //		else
 //			deleteFeatureCollectionFromProject(selected);
-//	}
-//	
-//	private void deleteFeatureCollectionFromProject(MsFeatureInfoBundleCollection selected) {
-//
+	}
+	
+	private void deleteFeatureCollectionFromProject(MsFeatureInfoBundleCollection selected) {
+
 //		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();	
 //		if(!project.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
 //			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
@@ -338,10 +330,10 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 //					&& panel.getActiveFeatureCollection().equals(selected))
 //				panel.clearMSMSFeatureData();
 //		}
-//	}
-//
-//	private void deleteFeatureCollectionFromDatabase(MsFeatureInfoBundleCollection selected) {
-//		
+	}
+
+	private void deleteFeatureCollectionFromDatabase(MsFeatureInfoBundleCollection selected) {
+		
 //		if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
 //			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
 //					"\" is locked and can not be deleted.", this.getContentPane());
@@ -368,64 +360,25 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 //		if(panel.getActiveFeatureCollection() != null 
 //				&& panel.getActiveFeatureCollection().equals(selected))
 //			panel.clearMSMSFeatureData();		
-//	}
-//
-//	public Collection<MSFeatureInfoBundle> getFeaturesToAdd() {
-//		return featuresToAdd;
-//	}
-//
-//	public void setFeaturesToAdd(Collection<MSFeatureInfoBundle> featuresToAdd) {
-//		this.featuresToAdd = featuresToAdd;
-//	}
-//	
-//	private void loadFeatureCollection() {
-//		
-//		MsFeatureInfoBundleCollection selectedCollection = 
-//				featureCollectionsTable.getSelectedCollection();
-//		if(selectedCollection == null)
-//			return;
-//		
-//		loadCollectionIntoWorkBench(selectedCollection);		
-//	}
-//	
-//	public void loadCollectionIntoWorkBench(MsFeatureInfoBundleCollection selectedCollection) {
-//		
-//		IDWorkbenchPanel panel = 
-//				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);		
-//		panel.loadMSMSFeatureInformationBundleCollection(selectedCollection);
-//		parent.dispose();
-//	}
-//	
-//	public void loadDatabaseStoredCollections() {
+	}
+	
+	public void loadDatabaseStoredCollections() {
 //
 //		featureCollectionsTable.setTableModelFromFeatureCollectionList(
 //				FeatureCollectionManager.getMsFeatureInfoBundleCollections());
-//	}
-//	
-//	public void loadCollectionsForActiveProject() {
-//		
+	}
+	
+	public void loadCollectionsForActiveProject() {
+		
 //		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
 //		if(project == null)
 //			return;
 //		
 //		featureCollectionsTable.setTableModelFromFeatureCollectionList(
 //				project.getFeatureCollections());
-//	}
-//	
-//	public void setTableModelFromFeatureCollectionList(
-//			Collection<MsFeatureInfoBundleCollection>featureCollections) {
-//		featureCollectionsTable.setTableModelFromFeatureCollectionList(featureCollections);
-//	}
-//	
-//	public MsFeatureInfoBundleCollection getSelectedCollection() {	
-//		return featureCollectionsTable.getSelectedCollection();
-//	}
-//	
-//	public void selectCollection(MsFeatureInfoBundleCollection toSelect) {		
-//		featureCollectionsTable.selectCollection(toSelect);
-//	}
-//	
-//	public FeatureLookupDataSetListTable getTable() {
-//		return featureCollectionsTable;
-//	}
+	}
+
+	public FeatureLookupDataSetListTable getTable() {
+		return featureCollectionsTable;
+	}
 }

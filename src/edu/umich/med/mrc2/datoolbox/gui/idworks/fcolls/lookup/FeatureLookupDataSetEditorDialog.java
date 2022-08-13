@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.lookup;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -34,25 +33,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
-import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -63,20 +55,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
-import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.FeatureListImportPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
-import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
-import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -89,33 +74,25 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 	private static final long serialVersionUID = 7684989595475342241L;
 
 	private Preferences preferences;
-	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.MsFeatureCollectionEditorDialog";
+	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.FeatureLookupDataSetEditorDialog";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
-	private static final String BROWSE_COMMAND = "BROWSE_COMMAND";
 	
 	private static final Icon addFeatureCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 32);
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("editCollection", 32);
 	
-	private MsFeatureInfoBundleCollection featureCollection;
+	private FeatureLookupDataSet dataSet;
 	private JButton btnSave;
 	private JLabel dateCreatedLabel, lastModifiedLabel;
 	private JTextArea descriptionTextArea;	
-	private ImprovedFileChooser chooser;
 	private File baseDirectory;
-	private JTextField methodNameTextField;
+	private JTextField dataSetNameTextField;
 	private JLabel idValueLabel;
 	private JLabel methodAuthorLabel;
-	private Collection<MSFeatureInfoBundle> featuresToAdd;
-	private Set<String> msmsFeatureIdsToAdd;
-	private Set<String> msFeatureIdsToAdd;
-	private JTextField featureFileTextField;
-	private JCheckBox loadCollectionCheckBox;
 
-	private IndeterminateProgressDialog idp;
-
+	private FeatureListImportPanel featureListImportPanel;
+	
 	public FeatureLookupDataSetEditorDialog(
-			MsFeatureInfoBundleCollection collection, 
-			Collection<MSFeatureInfoBundle> featuresToAdd,
+			FeatureLookupDataSet datSet,
 			ActionListener actionListener) {
 		super();
 		setPreferredSize(new Dimension(700, 300));
@@ -123,18 +100,16 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
-		this.featureCollection = collection;
-		this.featuresToAdd = featuresToAdd;
-		msmsFeatureIdsToAdd = new TreeSet<String>();
-		
+		this.dataSet = datSet;
+	
 		JPanel dataPanel = new JPanel();
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{0, 83, 114, 77, 100, 78, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 
 		JLabel lblId = new JLabel("ID");
@@ -211,16 +186,16 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		gbc_lblName.gridy = 2;
 		dataPanel.add(lblName, gbc_lblName);
 
-		methodNameTextField = new JTextField();
+		dataSetNameTextField = new JTextField();
 		GridBagConstraints gbc_methodNameTextField = new GridBagConstraints();
 		gbc_methodNameTextField.gridwidth = 6;
 		gbc_methodNameTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_methodNameTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_methodNameTextField.gridx = 1;
 		gbc_methodNameTextField.gridy = 2;
-		dataPanel.add(methodNameTextField, gbc_methodNameTextField);
-		methodNameTextField.setColumns(10);
-
+		dataPanel.add(dataSetNameTextField, gbc_methodNameTextField);
+		dataSetNameTextField.setColumns(10);
+		
 		JLabel lblDescription = new JLabel("Description");
 		GridBagConstraints gbc_lblDescription = new GridBagConstraints();
 		gbc_lblDescription.anchor = GridBagConstraints.NORTH;
@@ -236,52 +211,24 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		descriptionTextArea.setLineWrap(true);
 		GridBagConstraints gbc_textArea = new GridBagConstraints();
 		gbc_textArea.insets = new Insets(0, 0, 5, 0);
-		gbc_textArea.gridwidth = 6;
+		gbc_textArea.gridwidth = 7;
 		gbc_textArea.fill = GridBagConstraints.BOTH;
-		gbc_textArea.gridx = 1;
-		gbc_textArea.gridy = 3;
-		dataPanel.add(descriptionTextArea, gbc_textArea);
+		gbc_textArea.gridx = 0;
+		gbc_textArea.gridy = 4;
+		dataPanel.add(descriptionTextArea, gbc_textArea);		
 		
-		JLabel lblNewLabel_1 = new JLabel("Feature list from file");
-		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_1.gridwidth = 2;
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 0, 5);
-		gbc_lblNewLabel_1.gridx = 0;
-		gbc_lblNewLabel_1.gridy = 4;
-		dataPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
-		
-		featureFileTextField = new JTextField();
-		featureFileTextField.setEditable(false);
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.gridwidth = 4;
-		gbc_textField.insets = new Insets(0, 0, 0, 5);
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.gridx = 2;
-		gbc_textField.gridy = 4;
-		dataPanel.add(featureFileTextField, gbc_textField);
-		featureFileTextField.setColumns(10);
-		
-		JButton browseForFileButton = new JButton("Browse ...");
-		browseForFileButton.setActionCommand(BROWSE_COMMAND);
-		browseForFileButton.addActionListener(this);
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnNewButton.gridx = 6;
-		gbc_btnNewButton.gridy = 4;
-		dataPanel.add(browseForFileButton, gbc_btnNewButton);
+		featureListImportPanel = new FeatureListImportPanel();
+		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+		gbc_panel_1.gridwidth = 7;
+		gbc_panel_1.fill = GridBagConstraints.BOTH;
+		gbc_panel_1.gridx = 0;
+		gbc_panel_1.gridy = 5;
+		dataPanel.add(featureListImportPanel, gbc_panel_1);
 
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		getContentPane().add(panel, BorderLayout.SOUTH);
-		
-		loadCollectionCheckBox = 
-				new JCheckBox("Load collection in the workbench");
-		panel.add(loadCollectionCheckBox);
-		
-		Component horizontalStrut = Box.createHorizontalStrut(50);
-		panel.add(horizontalStrut);
 
 		JButton btnCancel = new JButton("Cancel");
 		panel.add(btnCancel);
@@ -299,55 +246,50 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
-
-		loadCollectionData();
+		loadDataSet();
 	}
 
-	private void loadCollectionData() {
+	private void loadDataSet() {
 
-		if(featureCollection == null) {
+		if(dataSet == null) {
 
-			setTitle("Create new feature collection");
+			setTitle("Create new feature lookup data set");
 			setIconImage(((ImageIcon) addFeatureCollectionIcon).getImage());
-			
-			if(featuresToAdd == null) 
-				btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_COMMAND.getName());
-			else 
-				btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND.getName());
-			
+			btnSave.setText(MainActionCommands.ADD_FEATURE_LOOKUP_DATA_SET_COMMAND.getName());			
 			dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
 			lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));			
 			methodAuthorLabel.setText(MRC2ToolBoxCore.getIdTrackerUser().getInfo());
 		}
 		else {
-			setTitle("Edit information for " + featureCollection.getName());
+			setTitle("Edit information for " + dataSet.getName());
 			setIconImage(((ImageIcon) editFeatureCollectionIcon).getImage());
-			btnSave.setActionCommand(MainActionCommands.EDIT_FEATURE_COLLECTION_COMMAND.getName());
-			idValueLabel.setText(featureCollection.getId());
+			btnSave.setActionCommand(MainActionCommands.EDIT_FEATURE_LOOKUP_DATA_SET_COMMAND.getName());
+			idValueLabel.setText(dataSet.getId());
 
-			if (featureCollection.getDateCreated() != null)
+			if (dataSet.getDateCreated() != null)
 				dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(
-						featureCollection.getDateCreated()));
+						dataSet.getDateCreated()));
 
-			if (featureCollection.getLastModified() != null)
+			if (dataSet.getLastModified() != null)
 				lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(
-						featureCollection.getLastModified()));
+						dataSet.getLastModified()));
 			
-			methodNameTextField.setText(featureCollection.getName());
-			descriptionTextArea.setText(featureCollection.getDescription());
+			dataSetNameTextField.setText(dataSet.getName());
+			descriptionTextArea.setText(dataSet.getDescription());
 
-			if(featureCollection.getOwner() != null)
-				methodAuthorLabel.setText(featureCollection.getOwner().getInfo());
+			if(dataSet.getCreatedBy() != null)
+				methodAuthorLabel.setText(dataSet.getCreatedBy().getInfo());
+			
+			featureListImportPanel.loadDataSet(dataSet);
 		}
 		loadPreferences();
-		initChooser();
 		pack();
 	}
 	
-	public Collection<String>validateCollectionData() {
+	public Collection<String>validateDataSet() {
 		
 		Collection<String>errors = new ArrayList<String>();
-		String newName = getFeatureCollectionName();
+		String newName = getDataSetName();
 		if(newName.isEmpty())
 			errors.add("Name can not be empty.");
 		
@@ -360,21 +302,22 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		if(nameError != null)
 			errors.add(nameError);
 		
+		if(dataSet == null && featureListImportPanel.getAllFeatures().isEmpty())
+			errors.add("Feature list not specified");
+				
 		return errors;
 	}
 	
 	private String validateNameAgainstDatabase(String newName) {
-				
-		FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
-		MsFeatureInfoBundleCollection existing = null;
-		if(this.featureCollection == null) {
-			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
-				filter(f -> f.getName().equalsIgnoreCase(newName)).
-				findFirst().orElse(null);
+		
+		FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
+		FeatureLookupDataSet existing = null;
+		if(this.dataSet == null) {
+			existing = FeatureLookupDataSetManager.getFeatureLookupDataSetByName(newName);
 		}
 		else {
-			String id = featureCollection.getId();
-			existing = FeatureCollectionManager.getMsFeatureInfoBundleCollections().stream().
+			String id = dataSet.getId();
+			existing = FeatureLookupDataSetManager.getFeatureLookupDataSetList().stream().
 					filter(f -> !f.getId().equals(id)).
 					filter(f -> f.getName().equalsIgnoreCase(newName)).
 					findFirst().orElse(null);
@@ -387,17 +330,23 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 	
 	private String validateNameAgainstProject(String newName) {
 		
-		MsFeatureInfoBundleCollection existing = null;
-		Set<MsFeatureInfoBundleCollection> projectCollections = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getFeatureCollections();
-		if(this.featureCollection == null) {
-			existing = projectCollections.stream().
-					filter(f -> f.getName().equalsIgnoreCase(newName)).
+		FeatureLookupDataSet existing = null;
+		Set<FeatureLookupDataSet> projectFeatureLookupDataSets = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+					getMsmsClusterDataSets().stream().
+					filter(d -> d.getFeatureLookupDataSet() != null).
+					map(d -> d.getFeatureLookupDataSet()).collect(Collectors.toSet());
+		if(projectFeatureLookupDataSets.isEmpty())
+			return null;
+		
+		if(this.dataSet == null) {
+			existing = projectFeatureLookupDataSets.stream().
+					filter(d -> d.getName().equals(newName)).
 					findFirst().orElse(null);
 		}
 		else {
-			String id = featureCollection.getId();
-			existing = projectCollections.stream().
+			String id = dataSet.getId();
+			existing = projectFeatureLookupDataSets.stream().
 					filter(f -> !f.getId().equals(id)).
 					filter(f -> f.getName().equalsIgnoreCase(newName)).
 					findFirst().orElse(null);
@@ -414,129 +363,24 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		savePreferences();
 		super.dispose();
 	}	
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);		
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setAcceptAllFileFilterUsed(false);
-		FileNameExtensionFilter txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv", "csv");
-		chooser.addChoosableFileFilter(txtFilter);
-	}
-
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getActionCommand().equals(BROWSE_COMMAND))
-			chooser.showOpenDialog(this);
+		//if(e.getActionCommand().equals(BROWSE_COMMAND))
 
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
-			validateFeatureListFile();
 	}
 	
-	private void validateFeatureListFile() {
-		
-		File inputFile = chooser.getSelectedFile();
-		if(inputFile.exists() && inputFile.canRead()) {
-			
-			List<String>lines = null;
-			try {
-				lines = Files.readAllLines(Paths.get(inputFile.getAbsolutePath()));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if(lines != null && !lines.isEmpty()) {
-				
-				for(String line : lines) {
-					
-					String trimmed = line.trim();
-					if(trimmed.startsWith(DataPrefix.MSMS_SPECTRUM.getName()) && trimmed.length() == 16)
-						msmsFeatureIdsToAdd.add(trimmed);				
-				}
-			}
-			if(!msmsFeatureIdsToAdd.isEmpty()) {
-				
-				ValidateMSMSIDlistTask task = new ValidateMSMSIDlistTask(msmsFeatureIdsToAdd);
-				idp = new IndeterminateProgressDialog("Validating MSMS feature IDs ...", this, task);
-				idp.setLocationRelativeTo(this);
-				idp.setVisible(true);
-				
-				if(!msmsFeatureIdsToAdd.isEmpty()) {
-					featureFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
-					btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND.getName());
-					MessageDialog.showInfoMsg("Extracted " + Integer.toString(msmsFeatureIdsToAdd.size()) + 
-							" valid MSMS feature IDs", this);
-				}
-				else {
-					String message = "No valid MSMS feature IDs found in " + inputFile.getName() + "\n"
-							+ "Correct MSMS feature ID format is " + DataPrefix.MSMS_SPECTRUM.getName() + " followed by 12 digits.";
-					MessageDialog.showWarningMsg(message, this);
-					return;
-				}
-			}
-			else {
-				String message = "No valid MSMS feature IDs found in " + inputFile.getName() + "\n"
-						+ "Correct MSMS feature ID format is " + DataPrefix.MSMS_SPECTRUM.getName() + " followed by 12 digits.";
-				MessageDialog.showWarningMsg(message, this);
-				return;
-			}
-		}
-		else {
-			MessageDialog.showErrorMsg("Can not read input file", this);
-		}
-		baseDirectory = inputFile.getParentFile();		
-		savePreferences();	
+	public FeatureLookupDataSet getFeatureLookupDataSet() {
+		return dataSet;
 	}
 	
-	class ValidateMSMSIDlistTask extends LongUpdateTask {
-		/*
-		 * Main task. Executed in background thread.
-		 */
-		private Set<String>idsToValidate;
-
-		public ValidateMSMSIDlistTask(Set<String>idsToValidate) {
-			this.idsToValidate = idsToValidate;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public Void doInBackground() {
-
-			try {
-				msFeatureIdsToAdd = FeatureCollectionUtils.validateMSMSIDlist(idsToValidate);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
-		}
+	public String getDataSetName() {
+		return dataSetNameTextField.getText().trim();
 	}
 
-	public MsFeatureInfoBundleCollection getFeatureCollection() {
-		return featureCollection;
-	}
-
-	public String getFeatureCollectionName() {
-		return methodNameTextField.getText().trim();
-	}
-
-	public String getFeatureCollectionDescription() {
+	public String getDataSetDescription() {
 		return descriptionTextArea.getText().trim();
-	}
-
-	public File getMethodFile() {
-
-//		if(methodFileTextField.getText().trim().isEmpty())
-//			return null;
-//
-//		return new File(methodFileTextField.getText().trim());
-		
-		return null;
 	}
 
 	@Override
@@ -545,6 +389,7 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		baseDirectory =
 			new File(preferences.get(BASE_DIRECTORY,
 				MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+		featureListImportPanel.setBaseDirectory(baseDirectory);
 	}
 
 	@Override
@@ -555,19 +400,8 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 	@Override
 	public void savePreferences() {
 		preferences = Preferences.userRoot().node(PREFS_NODE);
-		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
-	}
-
-	public Collection<MSFeatureInfoBundle> getFeaturesToAdd() {
-		return featuresToAdd;
-	}
-
-	public Set<String> getMsFeatureIdsToAdd() {
-		return msFeatureIdsToAdd;
-	}
-	
-	public boolean loadCollectionIntoWorkBench() {
-		return loadCollectionCheckBox.isSelected();
+		preferences.put(BASE_DIRECTORY, 
+				featureListImportPanel.getBaseDirectory().getAbsolutePath());
 	}
 }
 

@@ -42,6 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.DockableMSMSClusterDataSetsManager;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.DockableFeatureCollectionsManager;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.lookup.DockableFeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -68,6 +69,7 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 	private CollectionManagerToolbar toolbar;
 	private DockableFeatureCollectionsManager featureCollectionsManager;
 	private DockableMSMSClusterDataSetsManager featureClusterCollectionsManager;
+	private DockableFeatureLookupDataSetManager featureLookupDataSetManager;
 	private IndeterminateProgressDialog idp;
 	
 	public FeatureAndClusterCollectionManagerDialog() {
@@ -93,10 +95,13 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 				new DockableFeatureCollectionsManager(this);
 		featureClusterCollectionsManager = 
 				new DockableMSMSClusterDataSetsManager(this);
+		featureLookupDataSetManager = 
+				new DockableFeatureLookupDataSetManager(this);
 
-		grid.add(0, 0, 1, 1, featureCollectionsManager, 
-				featureClusterCollectionsManager				
-				);
+		grid.add(0, 0, 1, 1, 
+				featureCollectionsManager, 
+				featureClusterCollectionsManager,				
+				featureLookupDataSetManager);
 		control.getContentArea().deploy(grid);
 				
 		loadLayout(layoutConfigFile);

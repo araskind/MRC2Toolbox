@@ -50,6 +50,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.MinimalMSOneFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -237,6 +238,10 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	private void selectLookupFeatureListFromDatabase() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void loadDataSet(FeatureLookupDataSet datSet) {
+		featureTable.setTableModelFromFeatureCollection(datSet.getFeatures());
 	}
 
 	private void readFeaturesFromInputFile(File inputFile) {

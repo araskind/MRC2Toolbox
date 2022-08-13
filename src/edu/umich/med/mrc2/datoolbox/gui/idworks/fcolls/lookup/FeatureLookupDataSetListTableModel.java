@@ -38,7 +38,7 @@ public class FeatureLookupDataSetListTableModel extends BasicTableModel {
 
 	public static final String DATA_SET_COLUMN = "Name";
 	public static final String DESCRIPTION_COLUMN = "Description";
-	public static final String NUM_FEATURES_COLUMN = "# of features";
+//	public static final String NUM_FEATURES_COLUMN = "# of features";
 	public static final String OWNER_COLUMN = "Owner";
 	public static final String DATE_CREATED_COLUMN = "Date created";
 	public static final String LAST_MODIFIED_COLUMN = "Last modified";
@@ -50,7 +50,7 @@ public class FeatureLookupDataSetListTableModel extends BasicTableModel {
 
 			new ColumnContext(DATA_SET_COLUMN, FeatureLookupDataSet.class, false),
 			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(NUM_FEATURES_COLUMN, Integer.class, true),
+//			new ColumnContext(NUM_FEATURES_COLUMN, Integer.class, true),
 			new ColumnContext(OWNER_COLUMN, LIMSUser.class, false),
 			new ColumnContext(DATE_CREATED_COLUMN, Date.class, true),
 			new ColumnContext(LAST_MODIFIED_COLUMN, Date.class, true),
@@ -66,7 +66,7 @@ public class FeatureLookupDataSetListTableModel extends BasicTableModel {
 			Object[] obj = {
 				dataSet,
 				dataSet.getDescription(),
-				dataSet.getFeatures().size(),
+//				dataSet.getFeatures().size(),
 				dataSet.getCreatedBy(),
 				dataSet.getDateCreated(),
 				dataSet.getLastModified(),
@@ -94,7 +94,7 @@ public class FeatureLookupDataSetListTableModel extends BasicTableModel {
 		
 		setValueAt(edited, row, getColumnIndex(DATA_SET_COLUMN));
 		setValueAt(edited.getDescription(), row, getColumnIndex(DESCRIPTION_COLUMN));
-		setValueAt(edited.getFeatures().size(), row, getColumnIndex(NUM_FEATURES_COLUMN));
+//		setValueAt(edited.getFeatures().size(), row, getColumnIndex(NUM_FEATURES_COLUMN));
 		setValueAt(edited.getCreatedBy(), row, getColumnIndex(OWNER_COLUMN));
 		setValueAt(edited.getDateCreated(), row, getColumnIndex(DATE_CREATED_COLUMN));
 		setValueAt(edited.getLastModified(), row, getColumnIndex(LAST_MODIFIED_COLUMN));		

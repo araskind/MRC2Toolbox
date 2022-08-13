@@ -41,38 +41,29 @@ public class FeatureLookupDataSetManagerToolbar extends CommonToolbar {
 	private static final Icon addFeatureCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 32);
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("editCollection", 32);
 	private static final Icon deleteFeatureCollectionIcon = GuiUtils.getIcon("deleteCollection", 32);
-	private static final Icon loadFeatureCollectionIcon = GuiUtils.getIcon("openCollection", 32);
 	
 	@SuppressWarnings("unused")
 	private JButton
 		addFeatureCollectionButton,
 		editFeatureCollectionButton,
-		deleteFeatureCollectionButton,
-		loadFeatureCollectionButton;
+		deleteFeatureCollectionButton;
 
 	public FeatureLookupDataSetManagerToolbar(ActionListener commandListener) {
 		super(commandListener);
 
 		addFeatureCollectionButton = GuiUtils.addButton(this, null, addFeatureCollectionIcon, commandListener,
-				MainActionCommands.ADD_FEATURE_COLLECTION_DIALOG_COMMAND.getName(),
-				MainActionCommands.ADD_FEATURE_COLLECTION_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName(),
+				MainActionCommands.ADD_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName(),
 				buttonDimension);
 
 		editFeatureCollectionButton = GuiUtils.addButton(this, null, editFeatureCollectionIcon, commandListener,
-				MainActionCommands.EDIT_FEATURE_COLLECTION_DIALOG_COMMAND.getName(),
-				MainActionCommands.EDIT_FEATURE_COLLECTION_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName(),
+				MainActionCommands.EDIT_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND.getName(),
 				buttonDimension);
 
 		deleteFeatureCollectionButton = GuiUtils.addButton(this, null, deleteFeatureCollectionIcon, commandListener,
-				MainActionCommands.DELETE_FEATURE_COLLECTION_COMMAND.getName(),
-				MainActionCommands.DELETE_FEATURE_COLLECTION_COMMAND.getName(),
-				buttonDimension);
-		
-		addSeparator(buttonDimension);
-		
-		loadFeatureCollectionButton = GuiUtils.addButton(this, null, loadFeatureCollectionIcon, commandListener,
-				MainActionCommands.LOAD_FEATURE_COLLECTION_COMMAND.getName(),
-				MainActionCommands.LOAD_FEATURE_COLLECTION_COMMAND.getName(),
+				MainActionCommands.DELETE_FEATURE_LOOKUP_DATA_SET_COMMAND.getName(),
+				MainActionCommands.DELETE_FEATURE_LOOKUP_DATA_SET_COMMAND.getName(),
 				buttonDimension);
 	}
 

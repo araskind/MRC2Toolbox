@@ -1121,6 +1121,13 @@ public enum MainActionCommands {
 	DELETE_FEATURE_COLLECTION_COMMAND("Delete selected feature collection"),
 	LOAD_FEATURE_COLLECTION_COMMAND("Load selected feature collection for analysis"),
 	
+	//	Feature lookup data sets
+	ADD_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND("\"Create new feature lookup data set\" dialog"),
+	ADD_FEATURE_LOOKUP_DATA_SET_COMMAND("Create new feature lookup data set"),
+	EDIT_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND("\"Edit selected feature lookup data set\" dialog"),
+	EDIT_FEATURE_LOOKUP_DATA_SET_COMMAND("Edit selected feature lookup data set"),
+	DELETE_FEATURE_LOOKUP_DATA_SET_COMMAND("Delete selected feature lookup data set"),
+	
 	//	MSMS cluster data sets
 	SHOW_MSMS_CLUSTER_DATASET_MANAGER_DIALOG_COMMAND("Show MSMS cluster data set manager"),
 	ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("\"Create new MSMS cluster data set\" dialog"),
