@@ -48,14 +48,12 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.FeatureListImportPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -83,9 +81,7 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 	private FeatureLookupDataSet dataSet;
 	private JButton btnSave;
 	private JLabel dateCreatedLabel, lastModifiedLabel;
-	private JTextArea descriptionTextArea;	
 	private File baseDirectory;
-	private JTextField dataSetNameTextField;
 	private JLabel idValueLabel;
 	private JLabel methodAuthorLabel;
 
@@ -95,7 +91,7 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 			FeatureLookupDataSet datSet,
 			ActionListener actionListener) {
 		super();
-		setPreferredSize(new Dimension(700, 300));
+		setPreferredSize(new Dimension(700, 500));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -107,9 +103,9 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{0, 83, 114, 77, 100, 78, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 
 		JLabel lblId = new JLabel("ID");
@@ -177,52 +173,13 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		gbc_methodAuthorLabel.gridx = 1;
 		gbc_methodAuthorLabel.gridy = 1;
 		dataPanel.add(methodAuthorLabel, gbc_methodAuthorLabel);
-
-		JLabel lblName = new JLabel("Name");
-		GridBagConstraints gbc_lblName = new GridBagConstraints();
-		gbc_lblName.anchor = GridBagConstraints.EAST;
-		gbc_lblName.insets = new Insets(0, 0, 5, 5);
-		gbc_lblName.gridx = 0;
-		gbc_lblName.gridy = 2;
-		dataPanel.add(lblName, gbc_lblName);
-
-		dataSetNameTextField = new JTextField();
-		GridBagConstraints gbc_methodNameTextField = new GridBagConstraints();
-		gbc_methodNameTextField.gridwidth = 6;
-		gbc_methodNameTextField.insets = new Insets(0, 0, 5, 0);
-		gbc_methodNameTextField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_methodNameTextField.gridx = 1;
-		gbc_methodNameTextField.gridy = 2;
-		dataPanel.add(dataSetNameTextField, gbc_methodNameTextField);
-		dataSetNameTextField.setColumns(10);
-		
-		JLabel lblDescription = new JLabel("Description");
-		GridBagConstraints gbc_lblDescription = new GridBagConstraints();
-		gbc_lblDescription.anchor = GridBagConstraints.NORTH;
-		gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
-		gbc_lblDescription.gridx = 0;
-		gbc_lblDescription.gridy = 3;
-		dataPanel.add(lblDescription, gbc_lblDescription);
-
-		descriptionTextArea = new JTextArea();
-		descriptionTextArea.setBorder(new LineBorder(new Color(0, 0, 0)));
-		descriptionTextArea.setRows(3);
-		descriptionTextArea.setWrapStyleWord(true);
-		descriptionTextArea.setLineWrap(true);
-		GridBagConstraints gbc_textArea = new GridBagConstraints();
-		gbc_textArea.insets = new Insets(0, 0, 5, 0);
-		gbc_textArea.gridwidth = 7;
-		gbc_textArea.fill = GridBagConstraints.BOTH;
-		gbc_textArea.gridx = 0;
-		gbc_textArea.gridy = 4;
-		dataPanel.add(descriptionTextArea, gbc_textArea);		
 		
 		featureListImportPanel = new FeatureListImportPanel();
 		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
 		gbc_panel_1.gridwidth = 7;
 		gbc_panel_1.fill = GridBagConstraints.BOTH;
 		gbc_panel_1.gridx = 0;
-		gbc_panel_1.gridy = 5;
+		gbc_panel_1.gridy = 2;
 		dataPanel.add(featureListImportPanel, gbc_panel_1);
 
 		JPanel panel = new JPanel();
@@ -259,6 +216,7 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 			dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));
 			lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(new Date()));			
 			methodAuthorLabel.setText(MRC2ToolBoxCore.getIdTrackerUser().getInfo());
+			featureListImportPanel.disableLoadingFeaturesFromDatabase();
 		}
 		else {
 			setTitle("Edit information for " + dataSet.getName());
@@ -274,12 +232,10 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 				lastModifiedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(
 						dataSet.getLastModified()));
 			
-			dataSetNameTextField.setText(dataSet.getName());
-			descriptionTextArea.setText(dataSet.getDescription());
-
 			if(dataSet.getCreatedBy() != null)
 				methodAuthorLabel.setText(dataSet.getCreatedBy().getInfo());
 			
+			featureListImportPanel.disableLoadingFeatures();
 			featureListImportPanel.loadDataSet(dataSet);
 		}
 		loadPreferences();
@@ -376,11 +332,19 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 	}
 	
 	public String getDataSetName() {
-		return dataSetNameTextField.getText().trim();
+		return featureListImportPanel.getDataSetName();
 	}
 
 	public String getDataSetDescription() {
-		return descriptionTextArea.getText().trim();
+		return featureListImportPanel.getDataSetDescription();
+	}
+	
+	public Collection<MinimalMSOneFeature>getSelectedFeatures(){
+		return featureListImportPanel.getSelectedFeatures();
+	}
+	
+	public Collection<MinimalMSOneFeature>getAllFeatures(){
+		return featureListImportPanel.getAllFeatures();
 	}
 
 	@Override

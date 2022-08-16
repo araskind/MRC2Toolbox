@@ -41,9 +41,12 @@ public class WordWrapCellRenderer extends JTextArea implements TableCellRenderer
         setWrapStyleWord(true);
     }
 
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    public Component getTableCellRendererComponent(
+    		JTable table, Object value, boolean isSelected, 
+    		boolean hasFocus, int row, int column) {
 
-    	Component rendererComponent = table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+    	Component rendererComponent = 
+    			table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
 		setForeground(rendererComponent.getForeground());
 		setBackground(rendererComponent.getBackground());
 		setFont(rendererComponent.getFont());
@@ -56,7 +59,8 @@ public class WordWrapCellRenderer extends JTextArea implements TableCellRenderer
 		else
 			setText(value.toString());
 
-        setSize(table.getColumnModel().getColumn(column).getWidth(), getPreferredSize().height);
+        setSize(table.getColumnModel().getColumn(column).getWidth(), 
+        		getPreferredSize().height);
         if (table.getRowHeight(row) != getPreferredSize().height)
             table.setRowHeight(row, getPreferredSize().height);
 

@@ -51,8 +51,11 @@ import org.apache.commons.io.FilenameUtils;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.MinimalMSOneFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -77,6 +80,8 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	private File baseDirectory;
 	private JTextField dataSetNameTextField;
 	private JTextArea descriptionTextArea;
+	private FeatureLookupDataSet dataSet;
+	private JButton btnNewButton, dbOpenButton;
 	
 	public FeatureListImportPanel() {
 		
@@ -88,13 +93,13 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		JPanel fileImportPanel = new JPanel();
 		fileImportPanel.setBorder(null);
 		
-		JButton btnNewButton = new JButton(
+		btnNewButton = new JButton(
 				MainActionCommands.IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND.getName());
 		btnNewButton.setActionCommand(MainActionCommands.IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND.getName());
 		btnNewButton.addActionListener(this);
 		fileImportPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
 		
-		JButton dbOpenButton = 
+		dbOpenButton = 
 				new JButton(MainActionCommands.SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName());
 		dbOpenButton.setActionCommand(MainActionCommands.SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName());
 		dbOpenButton.addActionListener(this);
@@ -157,6 +162,15 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		initChooser();
 	}
 	
+	public void disableLoadingFeaturesFromDatabase() {
+		dbOpenButton.setEnabled(false);
+	}
+	
+	public void disableLoadingFeatures() {
+		btnNewButton.setEnabled(false);
+		dbOpenButton.setEnabled(false);
+	}
+	
 	private void initChooser() {
 
 		chooser = new ImprovedFileChooser();
@@ -175,12 +189,20 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 				new FileNameExtensionFilter("CEF files", "cef", "CEF"));
 	}
 	
-	public String getFeatureSetName() {
+	public String getDataSetName() {
 		return dataSetNameTextField.getText().trim();
 	}
 	
-	public String getFeatureSetDescription() {
+	public String getDataSetDescription() {
 		return descriptionTextArea.getText().trim();
+	}
+	
+	public void setDataSetName(String name) {
+		dataSetNameTextField.setText(name);
+	}
+	
+	public void setDataSetDescription(String description) {
+		descriptionTextArea.setText(description);
 	}
 	
 	public void setBaseDirectory(File baseDirectory) {
@@ -240,8 +262,53 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		
 	}
 	
-	public void loadDataSet(FeatureLookupDataSet datSet) {
-		featureTable.setTableModelFromFeatureCollection(datSet.getFeatures());
+	public void loadDataSet(FeatureLookupDataSet dataSet) {
+		
+		if(dataSet == null)
+			return;
+		
+		this.dataSet = dataSet;
+		setDataSetName(dataSet.getName());
+		setDataSetDescription(dataSet.getDescription());
+		
+		if(dataSet.getFeatures().isEmpty()) 
+			getFeaturesForFeatureLookupDataSet(dataSet);		
+		else
+			featureTable.setTableModelFromFeatureCollection(dataSet.getFeatures());
+	}
+	
+	private void getFeaturesForFeatureLookupDataSet(FeatureLookupDataSet dataSet) {
+
+		GetFeaturesForFeatureLookupDataSetTask task = 
+				new GetFeaturesForFeatureLookupDataSetTask(dataSet);
+		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+				"Getting features for lookup data set ...", this, task);
+		idp.setLocationRelativeTo(this);
+		idp.setVisible(true);
+	}
+	
+	class GetFeaturesForFeatureLookupDataSetTask extends LongUpdateTask {
+		/*
+		 * Main task. Executed in background thread.
+		 */
+		private FeatureLookupDataSet dataSet;
+
+		public GetFeaturesForFeatureLookupDataSetTask(FeatureLookupDataSet dataSet) {
+			this.dataSet = dataSet;
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			try {
+				FeatureLookupDataSetUtils.getFeaturesForFeatureLookupDataSet(dataSet);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			featureTable.setTableModelFromFeatureCollection(dataSet.getFeatures());;
+			return null;
+		}
 	}
 
 	private void readFeaturesFromInputFile(File inputFile) {
@@ -354,5 +421,9 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	
 	public Collection<MinimalMSOneFeature>getAllFeatures(){
 		return featureTable.getAllFeatures();
+	}
+
+	public FeatureLookupDataSet getDataSet() {
+		return dataSet;
 	}
 }

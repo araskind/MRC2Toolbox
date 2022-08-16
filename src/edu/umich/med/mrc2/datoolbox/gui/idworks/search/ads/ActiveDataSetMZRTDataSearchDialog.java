@@ -141,11 +141,11 @@ public class ActiveDataSetMZRTDataSearchDialog extends JDialog implements Action
 	}
 	
 	public String getFeatureSetName() {
-		return featureListImportPanel.getFeatureSetName();
+		return featureListImportPanel.getDataSetName();
 	}
 	
 	public String getFeatureSetDescription() {
-		return featureListImportPanel.getFeatureSetDescription();
+		return featureListImportPanel.getDataSetDescription();
 	}
 	
 	public Collection<String>validateParameters(){
