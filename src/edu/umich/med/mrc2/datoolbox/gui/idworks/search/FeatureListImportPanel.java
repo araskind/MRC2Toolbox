@@ -52,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.lookup.FeatureLookupListSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.MinimalMSOneFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
@@ -82,6 +83,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	private JTextArea descriptionTextArea;
 	private FeatureLookupDataSet dataSet;
 	private JButton btnNewButton, dbOpenButton;
+	private  FeatureLookupListSelectorDialog featureLookupListSelectorDialog;
 	
 	public FeatureListImportPanel() {
 		
@@ -253,13 +255,20 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	}
 
 	private void loadLookupFeatureListFromDatabase() {
-		// TODO Auto-generated method stub
 		
+		FeatureLookupDataSet dataSet = 
+				featureLookupListSelectorDialog.getSelectedDataSet();
+		if(dataSet == null)
+			return;				
+		featureLookupListSelectorDialog.dispose();		
+		loadDataSet(dataSet);
 	}
 
 	private void selectLookupFeatureListFromDatabase() {
-		// TODO Auto-generated method stub
-		
+
+		featureLookupListSelectorDialog = new FeatureLookupListSelectorDialog(this);
+		featureLookupListSelectorDialog.setLocationRelativeTo(this);
+		featureLookupListSelectorDialog.setVisible(true);
 	}
 	
 	public void loadDataSet(FeatureLookupDataSet dataSet) {

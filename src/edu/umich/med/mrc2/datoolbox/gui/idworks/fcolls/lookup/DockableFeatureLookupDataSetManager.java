@@ -28,6 +28,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -348,9 +350,13 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 		if(project == null)
 			return;
 		
-		//	TODO
-//		featureLookupDataSetListTable.setTableModelFromFeatureLookupDataSetList(
-//				FeatureLookupDataSetManager.getFeatureLookupDataSetList());
+		List<FeatureLookupDataSet> flListCollection = 
+				project.getMsmsClusterDataSets().stream().
+					filter(ds -> ds.getFeatureLookupDataSet() != null).
+					map(ds -> ds.getFeatureLookupDataSet()).distinct().
+					collect(Collectors.toList());
+
+		featureLookupDataSetListTable.setTableModelFromFeatureLookupDataSetList(flListCollection);
 	}
 
 	public FeatureLookupDataSetListTable getTable() {

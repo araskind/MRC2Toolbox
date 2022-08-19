@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +39,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -67,12 +69,17 @@ public class MSMSFeatureClusteringTask extends AbstractTask {
 		this.msmsFeatures = msmsFeatures;
 		this.params = params;
 		this.featureLookupDataSet = flds;
-		
+		String description  = "";
+		if(featureLookupDataSet.getFeatures() != null && !featureLookupDataSet.getFeatures().isEmpty())
+			description = "Based on feature lookup data set \"" + featureLookupDataSet.getName() +"\"";
+		 
 		msmsClusterDataSet = new MSMSClusterDataSet(
-				"Active data set", 
-				"", 
+				"MSMS clusters data set (" + 
+						MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date()) +")", 
+				description, 
 				MRC2ToolBoxCore.getIdTrackerUser());
 		msmsClusterDataSet.setParameters(params);	
+		msmsClusterDataSet.setFeatureLookupDataSet(featureLookupDataSet);
 		featureClusters = msmsClusterDataSet.getClusters();
 		rtError = params.getRtErrorValue();
 		mzError = params.getMzErrorValue();

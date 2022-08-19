@@ -139,6 +139,19 @@ public class MsFeatureInfoBundleCluster {
 			name += " [" + Integer.toString(components.size()) + "]";
 	}
 	
+	public void replaceStoredPrimaryIdentityFromFeatures() {
+		
+		if(primaryIdentity == null) {
+			updateNameFromPrimaryIdentity();
+			return;
+		}
+		String uniquePrimaryId = primaryIdentity.getUniqueId();		
+		primaryIdentity = components.stream().
+				flatMap(c -> c.getMsFeature().getIdentifications().stream()).
+				filter(i -> i.getUniqueId().equals(uniquePrimaryId)).findFirst().orElse(null);
+		updateNameFromPrimaryIdentity();
+	}
+	
 	public void addComponent(MSFeatureInfoBundle newComponent) {
 		components.add(newComponent);		
 		updateStats();
@@ -343,6 +356,10 @@ public class MsFeatureInfoBundleCluster {
 	}
 
 	public Collection<String> getFeatureIds() {
+		
+		if(featureIds == null)
+			featureIds = new TreeSet<String>();
+			
 		return featureIds;
 	}
 	

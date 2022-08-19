@@ -254,7 +254,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 
 		if(dataSet == null) {
 
-			setTitle("Create new MSMS cluster data set");
+			setTitle("Save new MSMS cluster data set to database");
 			setIconImage(((ImageIcon) addFeatureCollectionIcon).getImage());
 			
 //			if(clustersToAdd == null) 
@@ -289,7 +289,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 		pack();
 	}
 	
-	public Collection<String>validateCollectionData() {
+	public Collection<String>validateDataSet() {
 		
 		Collection<String>errors = new ArrayList<String>();
 		String newName = getMSMSClusterDataSetName();
@@ -358,10 +358,18 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 	public String getMSMSClusterDataSetName() {
 		return nameTextField.getText().trim();
 	}
+	
+	public void setMSMSClusterDataSetName(String name) {
+		nameTextField.setText(name);
+	}
 
 	public String getMSMSClusterDataSetDescription() {
 		return descriptionTextArea.getText().trim();
 	}
+	
+	public void setMSMSClusterDataSetDescription(String description) {
+		descriptionTextArea.setText(description);
+	}	
 
 	public Collection<MsFeatureInfoBundleCluster>getClustersToAdd() {
 		return clustersToAdd;

@@ -1130,8 +1130,8 @@ public enum MainActionCommands {
 	
 	//	MSMS cluster data sets
 	SHOW_MSMS_CLUSTER_DATASET_MANAGER_DIALOG_COMMAND("Show MSMS cluster data set manager"),
-	ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("\"Create new MSMS cluster data set\" dialog"),
-	ADD_MSMS_CLUSTER_DATASET_COMMAND("Create new empty MSMS cluster data set"),
+	ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("\"Save new MSMS cluster data set to database\" dialog"),
+	ADD_MSMS_CLUSTER_DATASET_COMMAND("Save new MSMS cluster data set to database"),
 	//	ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND("Create new MSMS cluster data set with selected clusters"),
 	ADD_MSMS_CLUSTERS_TO_SELECTED_DATASET_COMMAND("Add clusters to selected MSMS cluster data set"),
 	EDIT_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("\"Edit selected MSMS cluster data set\" dialog"),
@@ -1139,6 +1139,7 @@ public enum MainActionCommands {
 	DELETE_MSMS_CLUSTER_DATASET_COMMAND("Delete selected MSMS cluster data set"),
 	LOAD_MSMS_CLUSTER_DATASET_COMMAND("Load selected MSMS cluster data set for analysis"),
 	REFRESH_FEATURE_AND_CLUSTER_COLLECTIONS_COMMAND("Refresh feature and MSMS cluster collection data"),
+	SHOW_LOOKUP_FEATURE_LIST_FOR_CLUSTER_DATA_SET_COMMAND("Show lookup feature list for MSMS cluster data set"),
 	
 	//	Chromatogram smoothing 
 	SMOOTH_CHROMATOGRAM_COMMAND("Smooth chromatogram"),

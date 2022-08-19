@@ -114,10 +114,14 @@ public class MSMSClusterDataSetManager {
 	
 	public static int getMSMSClusterDataSetSize(MSMSClusterDataSet cds) {
 		
-		if(!clusterDataSetsToClusterIdsMap.containsKey(cds))
-			return 0;
-		
-		return clusterDataSetsToClusterIdsMap.get(cds).size();
+		if(cds.getClusters() != null && !cds.getClusters().isEmpty())
+			return cds.getClusters().size();
+		else {
+			if(!clusterDataSetsToClusterIdsMap.containsKey(cds))
+				return 0;
+			else
+				return clusterDataSetsToClusterIdsMap.get(cds).size();
+		}			
 	}
 	
 	public static MSMSClusterDataSet getMsmsMSMSClusterDataSetById(String id) {		

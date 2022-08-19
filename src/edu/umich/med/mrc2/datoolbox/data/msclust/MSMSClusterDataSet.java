@@ -39,6 +39,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
@@ -260,7 +261,10 @@ public class MSMSClusterDataSet {
         		clusterListElement.addContent(fbc.getXmlElement());      	
         }       
         msmsClusterDataSetElement.addContent(clusterListElement);
-	
+        
+        if(featureLookupDataSet != null )
+        	msmsClusterDataSetElement.addContent(featureLookupDataSet.getXmlElement());
+ 	
 		return msmsClusterDataSetElement;
 	}
 	
@@ -296,6 +300,11 @@ public class MSMSClusterDataSet {
 		parameters = new MSMSClusteringParameterSet(
 				xmlElement.getChild(MSMSClusteringParameterSetFields.MSMSClusteringParameterSet.name()));
 		
+		Element lookupListElement = 
+				xmlElement.getChild(FeatureLookupDataSetFields.FeatureLookupDataSet.name());
+        if(lookupListElement != null )
+        	featureLookupDataSet = new FeatureLookupDataSet(lookupListElement);
+        
 		clusters = new HashSet<MsFeatureInfoBundleCluster>();
 		clusterIds = new TreeSet<String>();
 		

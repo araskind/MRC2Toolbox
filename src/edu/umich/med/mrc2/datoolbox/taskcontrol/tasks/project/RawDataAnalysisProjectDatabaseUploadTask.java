@@ -411,10 +411,22 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 			cluster.setId(clusterId);
 			String msmsLibMatchId = null;
 			String altId = null;
+			
+			//	Debug only 
+//			Collection<String> matchIds = cluster.getComponents().stream().
+//					flatMap(c -> c.getMsFeature().getIdentifications().stream()).
+//					filter(i -> i.getReferenceMsMsLibraryMatch() != null).
+//					map(i -> i.getUniqueId()).collect(Collectors.toCollection(TreeSet::new));
+//			if(!matchIds.isEmpty())
+//				System.err.print(StringUtils.join(matchIds, "\n"));
+			
 			if(cluster.getPrimaryIdentity() != null) {
 				
-				if(cluster.getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null)
+				if(cluster.getPrimaryIdentity().getReferenceMsMsLibraryMatch() != null) {
 					msmsLibMatchId = cluster.getPrimaryIdentity().getUniqueId();
+					//	Debug only 
+					//	System.err.println(msmsLibMatchId);
+				}
 				
 				if(cluster.getPrimaryIdentity().getIdSource().equals(CompoundIdSource.MANUAL))
 					altId = cluster.getPrimaryIdentity().getUniqueId();

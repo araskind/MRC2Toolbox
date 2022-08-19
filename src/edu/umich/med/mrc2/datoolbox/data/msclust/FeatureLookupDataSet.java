@@ -21,16 +21,24 @@
 
 package edu.umich.med.mrc2.datoolbox.data.msclust;
 
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MinimalMSOneFeatureFields;
+import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 
 public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 
@@ -185,5 +193,87 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 
 	public void setFeatures(Set<MinimalMSOneFeature> features) {
 		this.features = features;
-	}	
+	}
+
+	public Element getXmlElement() {
+
+		Element featureLookupDataSetElement = 
+				new Element(FeatureLookupDataSetFields.FeatureLookupDataSet.name());
+		featureLookupDataSetElement.setAttribute(
+				FeatureLookupDataSetFields.Id.name(), id);	
+		featureLookupDataSetElement.setAttribute(
+				FeatureLookupDataSetFields.Name.name(), name);
+		String descString = description;
+		if(descString == null)
+			descString = "";
+		
+		featureLookupDataSetElement.setAttribute(
+				FeatureLookupDataSetFields.Description.name(), descString);
+		featureLookupDataSetElement.setAttribute(
+				FeatureLookupDataSetFields.CreatedBy.name(), createdBy.getId());	
+		featureLookupDataSetElement.setAttribute(
+				FeatureLookupDataSetFields.DateCreated.name(), 
+				ProjectUtils.dateTimeFormat.format(dateCreated));
+		featureLookupDataSetElement.setAttribute(
+				FeatureLookupDataSetFields.LastModified.name(), 
+				ProjectUtils.dateTimeFormat.format(lastModified));		
+
+        Element featureListElement = 
+        		new Element(FeatureLookupDataSetFields.FeatureList.name());
+        if(!features.isEmpty()) {
+        	
+        	for(MinimalMSOneFeature fbc : features)
+        		featureListElement.addContent(fbc.getXmlElement());      	
+        }       
+        featureLookupDataSetElement.addContent(featureListElement);
+ 	
+		return featureLookupDataSetElement;
+	}
+	
+	public FeatureLookupDataSet(Element xmlElement) {
+				
+		this.id = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Id.name());
+		if(id == null)
+			this.id = DataPrefix.LOOKUP_FEATURE_DATA_SET.getName() + 
+				UUID.randomUUID().toString().substring(0, 6);
+		
+		this.name = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Name.name());
+		this.description = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Description.name());
+		try {
+			this.dateCreated = ProjectUtils.dateTimeFormat.parse(
+					xmlElement.getAttributeValue(FeatureLookupDataSetFields.DateCreated.name()));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			this.lastModified = ProjectUtils.dateTimeFormat.parse(
+					xmlElement.getAttributeValue(FeatureLookupDataSetFields.LastModified.name()));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		String userId =  xmlElement.getAttributeValue(FeatureLookupDataSetFields.CreatedBy.name());
+		if(userId != null)
+			this.createdBy = IDTDataCash.getUserById(userId);
+		else
+			this.createdBy = MRC2ToolBoxCore.getIdTrackerUser();
+		
+		features = new HashSet<MinimalMSOneFeature>();
+		
+		List<Element> featureListElements = 
+				xmlElement.getChildren(FeatureLookupDataSetFields.FeatureList.name());
+		if(featureListElements.size() > 0) {
+			
+			List<Element> featureElementList = 
+					featureListElements.get(0).getChildren(MinimalMSOneFeatureFields.MinimalMSOneFeature.name());
+			for(Element featureElement : featureElementList) {
+				
+				MinimalMSOneFeature newFeature = 
+						new MinimalMSOneFeature(featureElement);
+				if(newFeature != null)
+					features.add(newFeature);
+			}
+		}
+	}
 }

@@ -493,7 +493,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			for(MsFeatureInfoBundleCluster cluster : ds.getClusters()) {
 				
 				cluster.setFeatures(project.getFeatureBundlesForIds(cluster.getFeatureIds()));	
-				cluster.updateNameFromPrimaryIdentity();
+				cluster.replaceStoredPrimaryIdentityFromFeatures();
 				processed++;
 			}		
 		}		

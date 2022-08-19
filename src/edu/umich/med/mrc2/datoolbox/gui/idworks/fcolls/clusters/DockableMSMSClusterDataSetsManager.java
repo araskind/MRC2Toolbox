@@ -95,6 +95,8 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 						}
 					}
 				});
+		msmsClusterDataSetTable.addTablePopupMenu(
+				new MSMSClusterDataSetsTablePopupMenu(this));	
 		add(new JScrollPane(msmsClusterDataSetTable));
 	}
 	
@@ -120,8 +122,30 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		
 		if(command.equals(MainActionCommands.LOAD_MSMS_CLUSTER_DATASET_COMMAND.getName()))
 			loadMSMSClusterDataSet() ;
+		
+		if(command.equals(MainActionCommands.SHOW_LOOKUP_FEATURE_LIST_FOR_CLUSTER_DATA_SET_COMMAND.getName()))
+			showLookupFeatureListForSelectedClusterDataSet();
 	}
 	
+	private void showLookupFeatureListForSelectedClusterDataSet() {
+
+		MSMSClusterDataSet selected = 
+				msmsClusterDataSetTable.getSelectedDataSet();
+		if(selected == null)
+			return;
+		
+		if(selected.getFeatureLookupDataSet() == null) {
+			MessageDialog.showWarningMsg(
+					"Selected MSMS cluster data set doesn't have associated feature lookup list", 
+					this.getContentPane());
+			return;
+		}
+		FeatureLookupListDisplayDialog dialog = 
+				new FeatureLookupListDisplayDialog(selected.getFeatureLookupDataSet());
+		dialog.setLocationRelativeTo(this.getContentPane());
+		dialog.setVisible(true);
+	}
+
 	private void editSelectedMSMSClusterDataSet() {
 		
 		MSMSClusterDataSet selected = 
@@ -129,6 +153,10 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		if(selected == null)
 			return;
 		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			showMsMSMSDataSetEditorDialog(selected);
+			return;
+		}		
 		if(!MSMSClusterDataSetManager.getEditableMSMSClusterDataSets().contains(selected)) {
 			MessageDialog.showWarningMsg("Data set \"" + selected.getName() + 
 					"\" is locked and can not be edited.", this.getContentPane());
@@ -148,7 +176,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	private void saveEditedMSMSClusterDataSet() {
 		
 		Collection<String>errors = 
-				msmsClusterDataSetEditorDialog.validateCollectionData();
+				msmsClusterDataSetEditorDialog.validateDataSet();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(
 					StringUtils.join(errors, "\n"), 
@@ -222,7 +250,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	private void createNewMSMSClusterDataSet() {
 
 		Collection<String>errors = 
-				msmsClusterDataSetEditorDialog.validateCollectionData();
+				msmsClusterDataSetEditorDialog.validateDataSet();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(
 					StringUtils.join(errors, "\n"), 
@@ -277,29 +305,28 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		if(selected == null)
 			return;
 		
-		if(!selected.getCreatedBy().equals(MRC2ToolBoxCore.getIdTrackerUser())
-				&& !MRC2ToolBoxCore.getIdTrackerUser().isSuperUser()) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 			
-			MessageDialog.showErrorMsg(
-					"Data set \"" + selected.getName() + 
-					"\" was created by a different user, you can not delete it.", 
-					this.getContentPane());
+			if(!selected.getCreatedBy().equals(MRC2ToolBoxCore.getIdTrackerUser())
+					&& !MRC2ToolBoxCore.getIdTrackerUser().isSuperUser()) {
+				
+				MessageDialog.showErrorMsg(
+						"Data set \"" + selected.getName() + 
+						"\" was created by a different user, you can not delete it.", 
+						this.getContentPane());
+				return;
+			}
+			deleteMSMSClusterDataSetFromDatabase(selected);
 			return;
 		}
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
-			deleteMSMSClusterDataSetFromDatabase(selected);
-		else
+		else {
 			deleteMSMSClusterDataSetFromProject(selected);
+		}
 	}
 	
 	private void deleteMSMSClusterDataSetFromProject(MSMSClusterDataSet selected) {
 
-		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();	
-//		if(!project.getMsmsClusterDataSets().contains(selected)) {
-//			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
-//					"\" is locked and can not be deleted.", this.getContentPane());
-//			return;
-//		}	
+		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisProject();		
 		int res = MessageDialog.showChoiceWithWarningMsg(
 				"Are you sure you want to delete data set \"" + selected.getName() + "\"?", 
 				this.getContentPane());

@@ -24,8 +24,11 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.io.Serializable;
 import java.util.UUID;
 
+import org.jdom2.Element;
+
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.store.MinimalMSOneFeatureFields;
 
 public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOneFeature> {
 
@@ -151,5 +154,35 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public Element getXmlElement() {
+
+		Element featureElement = 
+				new Element(MinimalMSOneFeatureFields.MinimalMSOneFeature.name());
+		featureElement.setAttribute(
+				MinimalMSOneFeatureFields.Id.name(), id);	
+		featureElement.setAttribute(
+				MinimalMSOneFeatureFields.Name.name(), name);
+		featureElement.setAttribute(
+				MinimalMSOneFeatureFields.MZ.name(), Double.toString(mz));
+		featureElement.setAttribute(
+				MinimalMSOneFeatureFields.RT.name(), Double.toString(rt));
+		featureElement.setAttribute(
+				MinimalMSOneFeatureFields.Rank.name(), Double.toString(rank));
+		
+		return featureElement;
+	}
+
+	public MinimalMSOneFeature(Element featureElement) {
+
+		id = featureElement.getAttributeValue(MinimalMSOneFeatureFields.Id.name());
+		name = featureElement.getAttributeValue(MinimalMSOneFeatureFields.Name.name());
+		mz = Double.parseDouble(
+				featureElement.getAttributeValue(MinimalMSOneFeatureFields.MZ.name()));
+		rt = Double.parseDouble(
+				featureElement.getAttributeValue(MinimalMSOneFeatureFields.RT.name()));
+		rank = Double.parseDouble(
+				featureElement.getAttributeValue(MinimalMSOneFeatureFields.Rank.name()));
 	}
 }
