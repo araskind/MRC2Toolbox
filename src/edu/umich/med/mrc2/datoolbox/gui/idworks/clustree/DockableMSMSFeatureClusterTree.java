@@ -47,9 +47,15 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 	private static final Icon componentIcon = GuiUtils.getIcon("cluster", 16);
 	private static final Icon expandTreeIcon = GuiUtils.getIcon("expand", 16);
 	private static final Icon collapseTreeIcon = GuiUtils.getIcon("collapse", 16);
+	private static final Icon filterIcon = GuiUtils.getIcon("filter", 16);
+	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 16);
+	private static final Icon summaryIcon = GuiUtils.getIcon("summary", 16);
 	
 	private SimpleButtonAction
-		expandCollapseTreeButton;
+		expandCollapseTreeButton,
+		filterClustersButton,
+		reloadClustersButton,
+		summaryButton;
 	
 	public DockableMSMSFeatureClusterTree(
 			String id, String title, ActionListener featurePopupListener, TreeSelectionListener tsl) {
@@ -60,20 +66,42 @@ public class DockableMSMSFeatureClusterTree extends DefaultSingleCDockable imple
 		clusterTree = new MSMSFeatureClusterTree(featurePopupListener);
 		clusterTree.addTreeSelectionListener(tsl);
 		add(new JScrollPane(clusterTree));
-		initButtons(this);
+		initButtons(this, featurePopupListener);
 	}
 	
-	private void initButtons(ActionListener l) {
+	private void initButtons(ActionListener alOne, ActionListener alTwo) {
 
 		DefaultDockActionSource actions = new DefaultDockActionSource(
 				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
+		
+		filterClustersButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_MSMS_CLUSTER_FILTER_COMMAND.getName(),
+				MainActionCommands.SHOW_MSMS_CLUSTER_FILTER_COMMAND.getName(), 
+				filterIcon, alTwo);
+		actions.add(filterClustersButton);	
+		
+		reloadClustersButton = GuiUtils.setupButtonAction(
+				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTERS_SET_COMMAND.getName(), 
+				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTERS_SET_COMMAND.getName(), 
+				reloadIcon, alTwo);
+		actions.add(reloadClustersButton);
+		
+		summaryButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND.getName(),
+				MainActionCommands.SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND.getName(), 
+				summaryIcon, alTwo);
+		actions.add(summaryButton);
 
+		actions.addSeparator();
+		
 		expandCollapseTreeButton = GuiUtils.setupButtonAction(
 				MainActionCommands.EXPAND_TREE.getName(),
 				MainActionCommands.EXPAND_TREE.getName(), 
-				expandTreeIcon, l);
-		actions.add(expandCollapseTreeButton);		
+				expandTreeIcon, alOne);
+		actions.add(expandCollapseTreeButton);	
+		
 		actions.addSeparator();
+		
 		intern().setActionOffers(actions);
 	}
 	

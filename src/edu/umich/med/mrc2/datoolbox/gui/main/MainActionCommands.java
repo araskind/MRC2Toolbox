@@ -365,6 +365,12 @@ public enum MainActionCommands {
 	EXPORT_RESULTS_TO_EXCEL_COMMAND("Export project report to Excel"),
 	EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND("Export results for metabolomics workbench"),
 	CHECK_FOR_DUPLICATE_NAMES_COMMAND("Check for duplicate names"),
+	
+	//	MSMS clusters
+	SHOW_MSMS_CLUSTER_FILTER_COMMAND("Show MSMS cluster filter"),
+	FILTER_MSMS_CLUSTERS_COMMAND("Filter MSMS clusters"),
+	RELOAD_ACTIVE_MSMS_CLUSTERS_SET_COMMAND("Reload active MSMS clusters data set"),
+	SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND("Show MSMS clusters summary"),
 
 	// Data integration
 	DATA_INTEGRATION_DIALOG_COMMAND("Show data integration setup dialog"),

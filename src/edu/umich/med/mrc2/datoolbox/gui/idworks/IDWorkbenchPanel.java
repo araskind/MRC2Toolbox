@@ -113,6 +113,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.UniversalIdentificationResul
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary.MSMSCLusterDataSetSummaryDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.MSMSClusterDataSetEditorDialog;
@@ -789,6 +790,45 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if (command.equals(MainActionCommands.SET_AS_PRIMARY_ID_FOR_CLUSTER.getName()))
 			setSelectedIDAsPrimaryForFetureCluster();
+			
+		if (command.equals(MainActionCommands.SHOW_MSMS_CLUSTER_FILTER_COMMAND.getName()))
+			showMSMSClusterFilter();
+		
+		if (command.equals(MainActionCommands.FILTER_MSMS_CLUSTERS_COMMAND.getName()))
+			filterMSMSClusters();
+		
+		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTERS_SET_COMMAND.getName()))
+			reloadActiveMSMSClustersDataSet();
+		
+		if (command.equals(MainActionCommands.SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND.getName()))
+			showMSMSClustersSummary();
+		
+	}
+
+	private void showMSMSClusterFilter() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void filterMSMSClusters() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void reloadActiveMSMSClustersDataSet() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void showMSMSClustersSummary() {
+
+		if(activeMSMSClusterDataSet == null)
+			return;
+		
+		MSMSCLusterDataSetSummaryDialog summaryDialog = 
+				new MSMSCLusterDataSetSummaryDialog(activeMSMSClusterDataSet);
+		summaryDialog.setLocationRelativeTo(this.getContentPane());
+		summaryDialog.setVisible(true);
 	}
 
 	private void setSelectedIDAsPrimaryForFetureCluster() {
