@@ -27,9 +27,11 @@ import java.util.Collection;
 import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class FoundLookupFeaturesTable extends BasicTable {
 
@@ -46,13 +48,44 @@ public class FoundLookupFeaturesTable extends BasicTable {
 		setModel(model);
 		rowSorter = new TableRowSorter<FoundLookupFeaturesTableModel>(model);
 		setRowSorter(rowSorter);
+		columnModel.getColumnById(
+				FoundLookupFeaturesTableModel.CLUSTER_COLUMN).setCellRenderer(
+						new WordWrapCellRenderer());
+		columnModel.getColumnById(
+				FoundLookupFeaturesTableModel.FEATURE_COLUMN).setCellRenderer(
+						new WordWrapCellRenderer());
+		columnModel.getColumnById(
+				FoundLookupFeaturesTableModel.MZ_COLUMN).setMaxWidth(80);
+		columnModel.getColumnById(
+				FoundLookupFeaturesTableModel.RT_COLUMN).setMaxWidth(80);
+		columnModel.getColumnById(
+				FoundLookupFeaturesTableModel.RANK_COLUMN).setMaxWidth(80);
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);	
 		finalizeLayout();
 	}
 	
-	public void setTableModelFromFeatureCollection(Collection<MinimalMSOneFeature>features) {
-		model.setTableModelFromFeatureCollection(features);
+	public void setTableModelFromMsFeatureInfoBundleClusterCollection(
+			Collection<MsFeatureInfoBundleCluster>clusters) {
+		model.setTableModelFromMsFeatureInfoBundleClusterCollection(clusters);
+		tca.adjustColumns();
+
+	}
+	
+	public Collection<MsFeatureInfoBundleCluster>getSelectedClusters(){
+		
+		Collection<MsFeatureInfoBundleCluster>selectedFeatures = 
+				new ArrayList<MsFeatureInfoBundleCluster>();
+		int[]selectedRows = getSelectedRows();
+		if(selectedRows.length == 0)
+			return selectedFeatures;
+		
+		int featureCol = model.getColumnIndex(FoundLookupFeaturesTableModel.CLUSTER_COLUMN);
+		for(int i : selectedRows)
+			selectedFeatures.add(
+					(MsFeatureInfoBundleCluster)model.getValueAt(convertRowIndexToModel(i), featureCol));
+		
+		return selectedFeatures;
 	}
 	
 	public Collection<MinimalMSOneFeature>getSelectedFeatures(){

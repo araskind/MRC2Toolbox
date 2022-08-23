@@ -43,14 +43,17 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -369,6 +372,17 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 				ConnectionManager.releaseConnection(conn);	
 				return;
 			}
+			if(dataSet.getFeatureLookupDataSet() != null) {
+					
+				FeatureLookupDataSet flds = FeatureLookupDataSetManager.getFeatureLookupDataSetById(
+						dataSet.getFeatureLookupDataSet().getId());
+				if(flds == null)
+					FeatureLookupDataSetUtils.addFeatureLookupDataSet(
+							dataSet.getFeatureLookupDataSet(), conn);
+				
+				FeatureLookupDataSetManager.getFeatureLookupDataSetList().add(
+						dataSet.getFeatureLookupDataSet());			
+			}
 			//	Insert cluster data
 			addClustersForDataSet(dataSet, conn);
 		}
@@ -385,8 +399,9 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 		
 		String query = 
 				"INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
-				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, IS_LOCKED, CDS_ID) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, "
+				+ "IS_LOCKED, CDS_ID, LOOKUP_FEATURE_ID) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
@@ -451,6 +466,12 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 				ps.setNull(7, java.sql.Types.NULL);
 			
 			ps.setString(8, dataSet.getId());
+			
+			if(cluster.getLookupFeature() != null)
+				ps.setString(9, cluster.getLookupFeature().getId());
+			else
+				ps.setNull(9, java.sql.Types.NULL);
+			
 			ps.executeUpdate();
 			
 			//	Add cluster features

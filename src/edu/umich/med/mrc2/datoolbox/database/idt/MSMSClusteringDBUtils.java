@@ -40,10 +40,12 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
@@ -147,7 +149,7 @@ public class MSMSClusteringDBUtils {
 				new HashMap<MSMSClusterDataSet, Set<String>>();
 		String query = 
 			"SELECT CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
-			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID " + 
+			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, FLDS_ID " + 
 			"FROM MSMS_CLUSTERED_DATA_SET " +
 			"ORDER BY NAME";
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -172,6 +174,12 @@ public class MSMSClusteringDBUtils {
 					MSMSClusterDataSetManager.getMsmsClusteringParameterSetById(rs.getString("PAR_SET_ID"));
 			ds.setParameters(parSet);
 			
+			String fldsId = rs.getString("FLDS_ID");
+			if(fldsId != null) {
+				FeatureLookupDataSet flds = 
+						FeatureLookupDataSetManager.getFeatureLookupDataSetById(fldsId);
+				ds.setFeatureLookupDataSet(flds);
+			}		
 			Set<String>clusterIds = new TreeSet<String>();
 			csidPs.setString(1, ds.getId());
 			ResultSet csidrs = csidPs.executeQuery();
@@ -212,7 +220,8 @@ public class MSMSClusteringDBUtils {
 		String query = 
 			"INSERT INTO MSMS_CLUSTERED_DATA_SET " +
 			"(CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
-			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
+			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, FLDS_ID) "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		ps.setString(1, newDataSet.getId());
@@ -226,6 +235,22 @@ public class MSMSClusteringDBUtils {
 		ps.setTimestamp(5, new java.sql.Timestamp(newDataSet.getDateCreated().getTime()));
 		ps.setTimestamp(6, new java.sql.Timestamp(newDataSet.getLastModified().getTime()));	
 		ps.setString(7, newDataSet.getParameters().getId());
+		if(newDataSet.getFeatureLookupDataSet() != null) {
+			
+			FeatureLookupDataSet flds = FeatureLookupDataSetManager.getFeatureLookupDataSetById(
+					newDataSet.getFeatureLookupDataSet().getId());
+			if(flds == null)
+				FeatureLookupDataSetUtils.addFeatureLookupDataSet(
+						newDataSet.getFeatureLookupDataSet(), conn);
+			
+			FeatureLookupDataSetManager.getFeatureLookupDataSetList().add(
+					newDataSet.getFeatureLookupDataSet());
+			ps.setString(8, newDataSet.getFeatureLookupDataSet().getId());
+		}
+		else {
+			ps.setNull(8, java.sql.Types.NULL);	
+		}
+		
 		ps.executeUpdate();
 		
 		//	Add assays		
@@ -258,7 +283,8 @@ public class MSMSClusteringDBUtils {
 			Connection conn) throws Exception {
 		
 		String query = "INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
-				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, IS_LOCKED) VALUES (?, ?, ?, ?, ?, ?, ?)";
+				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, IS_LOCKED, LOOKUP_FEATURE_ID) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
@@ -302,6 +328,11 @@ public class MSMSClusteringDBUtils {
 				ps.setString(7, "Y");
 			else
 				ps.setNull(7, java.sql.Types.NULL);
+			
+			if(cluster.getLookupFeature() != null)
+				ps.setString(8, cluster.getLookupFeature().getId());
+			else
+				ps.setNull(8, java.sql.Types.NULL);
 			
 			ps.executeUpdate();
 			
@@ -526,7 +557,8 @@ public class MSMSClusteringDBUtils {
 		String query = 
 			"INSERT INTO MSMS_CLUSTERED_DATA_SET " +
 			"(CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
-			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
+			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID, FLDS_ID) "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		ps.setString(1, dataSet.getId());
@@ -540,6 +572,22 @@ public class MSMSClusteringDBUtils {
 		ps.setTimestamp(5, new java.sql.Timestamp(dataSet.getDateCreated().getTime()));
 		ps.setTimestamp(6, new java.sql.Timestamp(dataSet.getLastModified().getTime()));	
 		ps.setString(7, dataSet.getParameters().getId());
+		if(dataSet.getFeatureLookupDataSet() != null) {
+			
+			FeatureLookupDataSet flds = FeatureLookupDataSetManager.getFeatureLookupDataSetById(
+					dataSet.getFeatureLookupDataSet().getId());
+			if(flds == null)
+				FeatureLookupDataSetUtils.addFeatureLookupDataSet(
+						dataSet.getFeatureLookupDataSet(), conn);
+			
+			FeatureLookupDataSetManager.getFeatureLookupDataSetList().add(
+					dataSet.getFeatureLookupDataSet());
+			ps.setString(8, dataSet.getFeatureLookupDataSet().getId());
+		}
+		else {
+			ps.setNull(8, java.sql.Types.NULL);	
+		}
+		
 		ps.executeUpdate();
 		
 		//	Add assays		

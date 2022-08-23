@@ -872,6 +872,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(msmsClusterDataSetEditorDialog.getClustersToAdd() != null)
 			dataSet.getClusters().addAll(msmsClusterDataSetEditorDialog.getClustersToAdd());
 		
+		dataSet.setFeatureLookupDataSet(
+				msmsClusterDataSetEditorDialog.getFeatureLookupDataSet());
+		
 		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 			
 			MSMSClusterDataSetUploadTask task = 
@@ -938,6 +941,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		msmsClusterDataSetEditorDialog.setMSMSClusterDataSetName(activeMSMSClusterDataSet.getName());
 		msmsClusterDataSetEditorDialog.setMSMSClusterDataSetDescription(activeMSMSClusterDataSet.getDescription());
 		msmsClusterDataSetEditorDialog.setMsmsExtractionParameters(activeMSMSClusterDataSet.getParameters());
+		msmsClusterDataSetEditorDialog.setFeatureLookupDataSet(activeMSMSClusterDataSet.getFeatureLookupDataSet());
 		msmsClusterDataSetEditorDialog.setLocationRelativeTo(this.getContentPane());
 		msmsClusterDataSetEditorDialog.setVisible(true);
 	}

@@ -40,6 +40,7 @@ import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
@@ -47,9 +48,11 @@ import edu.umich.med.mrc2.datoolbox.data.StockSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
@@ -83,7 +86,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 			setStatus(TaskStatus.ERROR);
 		}
 		try {
-			getChashedFeatures();
+			getCashedFeatures();
 		}
 		catch (Exception e) {
 			setStatus(TaskStatus.ERROR);
@@ -175,9 +178,18 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 		clusterFeatureIdMap = new TreeMap<String, Collection<String>>();
 		
 		Connection conn = ConnectionManager.getConnection();
+		FeatureLookupDataSet flDataSet = dataSet.getFeatureLookupDataSet();
+		if(flDataSet != null && flDataSet.getFeatures().isEmpty()) {
+			try {
+				FeatureLookupDataSetUtils.getFeaturesForFeatureLookupDataSet(flDataSet, conn);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}		
 		String clusterQuery = 
 				"SELECT CLUSTER_ID, PAR_SET_ID, MZ, RT, IS_LOCKED,  " +
-				"MSMS_LIB_MATCH_ID, MSMS_ALT_ID " +
+				"MSMS_LIB_MATCH_ID, MSMS_ALT_ID, LOOKUP_FEATURE_ID " +
 				"FROM MSMS_CLUSTER WHERE CDS_ID = ? ";
 		PreparedStatement ps = conn.prepareStatement(clusterQuery,
 		         ResultSet.TYPE_SCROLL_INSENSITIVE ,
@@ -212,6 +224,13 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 				defaultClusterAltIdMap.put(
 						cluster, rs.getString("MSMS_ALT_ID"));
 			
+			String lfId = rs.getString("LOOKUP_FEATURE_ID");
+			if(lfId != null) {
+				MinimalMSOneFeature lf = flDataSet.getFeatures().stream().
+						filter(f -> f.getId().equals(lfId)).
+						findFirst().orElse(null);
+				cluster.setLookupFeature(lf);
+			}		
 			Set<String>clusterFeatureIds = new TreeSet<String>();		
 			fps.setString(1, cluster.getId());
 			ResultSet frs = fps.executeQuery();

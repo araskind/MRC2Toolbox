@@ -32,6 +32,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -55,8 +56,11 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleClusterComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.MinimalMSOneFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -128,9 +132,9 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 						new EmptyBorder(5, 5, 5, 5))));
 		panel_1.add(panel_4, BorderLayout.NORTH);
 		GridBagLayout gbl_panel_4 = new GridBagLayout();
-		gbl_panel_4.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_4.columnWidths = new int[]{0, 0, 117, 117, 0, 0, 0, 0};
 		gbl_panel_4.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_4.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel_4.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		gbl_panel_4.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_4.setLayout(gbl_panel_4);
 		
@@ -145,7 +149,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		clusterSetNameTextField = new JTextField();
 		clusterSetNameTextField.setEditable(false);
 		GridBagConstraints gbc_clusterSetNameTextField = new GridBagConstraints();
-		gbc_clusterSetNameTextField.gridwidth = 5;
+		gbc_clusterSetNameTextField.gridwidth = 6;
 		gbc_clusterSetNameTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_clusterSetNameTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_clusterSetNameTextField.gridx = 1;
@@ -168,7 +172,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		clusterSetDescriptionTextArea.setWrapStyleWord(true);
 		clusterSetDescriptionTextArea.setLineWrap(true);
 		GridBagConstraints gbc_clusterSetDescriptionTextArea = new GridBagConstraints();
-		gbc_clusterSetDescriptionTextArea.gridwidth = 6;
+		gbc_clusterSetDescriptionTextArea.gridwidth = 7;
 		gbc_clusterSetDescriptionTextArea.insets = new Insets(0, 0, 5, 0);
 		gbc_clusterSetDescriptionTextArea.fill = GridBagConstraints.BOTH;
 		gbc_clusterSetDescriptionTextArea.gridx = 0;
@@ -177,7 +181,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		
 		JLabel lblNewLabel_1 = new JLabel("Created: ");
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_1.gridx = 0;
 		gbc_lblNewLabel_1.gridy = 3;
@@ -186,7 +190,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		dateCreatedLabel = new JLabel("");
 		dateCreatedLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_dateCreatedLabel = new GridBagConstraints();
-		gbc_dateCreatedLabel.anchor = GridBagConstraints.WEST;
+		gbc_dateCreatedLabel.anchor = GridBagConstraints.NORTHWEST;
 		gbc_dateCreatedLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_dateCreatedLabel.gridx = 1;
 		gbc_dateCreatedLabel.gridy = 3;
@@ -194,7 +198,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		
 		JLabel lblNewLabel_3 = new JLabel("Last modified: ");
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
-		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_3.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_3.gridx = 2;
 		gbc_lblNewLabel_3.gridy = 3;
@@ -203,7 +207,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		lastModifedLabel = new JLabel("");
 		lastModifedLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_lastModifedLabel = new GridBagConstraints();
-		gbc_lastModifedLabel.anchor = GridBagConstraints.WEST;
+		gbc_lastModifedLabel.anchor = GridBagConstraints.NORTHWEST;
 		gbc_lastModifedLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lastModifedLabel.gridx = 3;
 		gbc_lastModifedLabel.gridy = 3;
@@ -211,17 +215,17 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		
 		JLabel lblNewLabel_5 = new JLabel("Created by: ");
 		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
-		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_5.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_5.gridx = 4;
+		gbc_lblNewLabel_5.gridx = 5;
 		gbc_lblNewLabel_5.gridy = 3;
 		panel_4.add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
 		dataSetCreatedByLabel = new JLabel("");
 		GridBagConstraints gbc_dataSetCreatedByLabel = new GridBagConstraints();
 		gbc_dataSetCreatedByLabel.insets = new Insets(0, 0, 5, 0);
-		gbc_dataSetCreatedByLabel.anchor = GridBagConstraints.WEST;
-		gbc_dataSetCreatedByLabel.gridx = 5;
+		gbc_dataSetCreatedByLabel.anchor = GridBagConstraints.NORTHWEST;
+		gbc_dataSetCreatedByLabel.gridx = 6;
 		gbc_dataSetCreatedByLabel.gridy = 3;
 		panel_4.add(dataSetCreatedByLabel, gbc_dataSetCreatedByLabel);
 		
@@ -244,6 +248,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		
 		JLabel lblNewLabel_8 = new JLabel("# of features: ");
 		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
+		gbc_lblNewLabel_8.gridwidth = 2;
 		gbc_lblNewLabel_8.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_8.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_8.gridx = 2;
@@ -255,7 +260,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		GridBagConstraints gbc_numFeaturesLabel = new GridBagConstraints();
 		gbc_numFeaturesLabel.anchor = GridBagConstraints.WEST;
 		gbc_numFeaturesLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_numFeaturesLabel.gridx = 3;
+		gbc_numFeaturesLabel.gridx = 4;
 		gbc_numFeaturesLabel.gridy = 4;
 		panel_4.add(numFeaturesLabel, gbc_numFeaturesLabel);
 		
@@ -276,8 +281,9 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		gbc_numFoundLookupFesturesLabel.gridy = 5;
 		panel_4.add(numFoundLookupFesturesLabel, gbc_numFoundLookupFesturesLabel);
 		
-		JLabel lblNewLabel_4_1 = new JLabel("#Found lookup features: ");
+		JLabel lblNewLabel_4_1 = new JLabel("#NOT found lookup features: ");
 		GridBagConstraints gbc_lblNewLabel_4_1 = new GridBagConstraints();
+		gbc_lblNewLabel_4_1.gridwidth = 2;
 		gbc_lblNewLabel_4_1.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNewLabel_4_1.gridx = 2;
 		gbc_lblNewLabel_4_1.gridy = 5;
@@ -288,7 +294,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		GridBagConstraints gbc_numFoundLookupFesturesLabel_1 = new GridBagConstraints();
 		gbc_numFoundLookupFesturesLabel_1.anchor = GridBagConstraints.WEST;
 		gbc_numFoundLookupFesturesLabel_1.insets = new Insets(0, 0, 0, 5);
-		gbc_numFoundLookupFesturesLabel_1.gridx = 3;
+		gbc_numFoundLookupFesturesLabel_1.gridx = 4;
 		gbc_numFoundLookupFesturesLabel_1.gridy = 5;
 		panel_4.add(numNotFoundLookupFesturesLabel, gbc_numFoundLookupFesturesLabel_1);
 		
@@ -350,7 +356,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		
 		JLabel lblNewLabel_11 = new JLabel("Created: ");
 		GridBagConstraints gbc_lblNewLabel_11 = new GridBagConstraints();
-		gbc_lblNewLabel_11.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_11.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblNewLabel_11.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNewLabel_11.gridx = 0;
 		gbc_lblNewLabel_11.gridy = 3;
@@ -359,7 +365,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		flSetDateCreatedLabel = new JLabel("");
 		flSetDateCreatedLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_flSetDateCreatedLabel = new GridBagConstraints();
-		gbc_flSetDateCreatedLabel.anchor = GridBagConstraints.WEST;
+		gbc_flSetDateCreatedLabel.anchor = GridBagConstraints.NORTHWEST;
 		gbc_flSetDateCreatedLabel.insets = new Insets(0, 0, 0, 5);
 		gbc_flSetDateCreatedLabel.gridx = 1;
 		gbc_flSetDateCreatedLabel.gridy = 3;
@@ -367,7 +373,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		
 		JLabel lblNewLabel_12 = new JLabel("Last modified: ");
 		GridBagConstraints gbc_lblNewLabel_12 = new GridBagConstraints();
-		gbc_lblNewLabel_12.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_12.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblNewLabel_12.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNewLabel_12.gridx = 2;
 		gbc_lblNewLabel_12.gridy = 3;
@@ -376,7 +382,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		flSetLastModifiedLabel = new JLabel("");
 		flSetLastModifiedLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_flSetLastModifiedLabel = new GridBagConstraints();
-		gbc_flSetLastModifiedLabel.anchor = GridBagConstraints.WEST;
+		gbc_flSetLastModifiedLabel.anchor = GridBagConstraints.NORTHWEST;
 		gbc_flSetLastModifiedLabel.insets = new Insets(0, 0, 0, 5);
 		gbc_flSetLastModifiedLabel.gridx = 3;
 		gbc_flSetLastModifiedLabel.gridy = 3;
@@ -384,7 +390,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		
 		JLabel lblNewLabel_13 = new JLabel("Created by: ");
 		GridBagConstraints gbc_lblNewLabel_13 = new GridBagConstraints();
-		gbc_lblNewLabel_13.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_13.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblNewLabel_13.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNewLabel_13.gridx = 4;
 		gbc_lblNewLabel_13.gridy = 3;
@@ -392,7 +398,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		
 		flSetCreatedByLabel = new JLabel("");
 		GridBagConstraints gbc_flSetCreatedByLabel = new GridBagConstraints();
-		gbc_flSetCreatedByLabel.anchor = GridBagConstraints.WEST;
+		gbc_flSetCreatedByLabel.anchor = GridBagConstraints.NORTHWEST;
 		gbc_flSetCreatedByLabel.gridx = 5;
 		gbc_flSetCreatedByLabel.gridy = 3;
 		panel_5.add(flSetCreatedByLabel, gbc_flSetCreatedByLabel);
@@ -448,6 +454,16 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 					filter(c -> c.getLookupFeature() != null).
 					map(c -> c.getLookupFeature()).
 					collect(Collectors.toSet());
+			
+			Collection<MsFeatureInfoBundleCluster>foundClusters = 
+					dataSet.getClusters().stream().
+					filter(c -> c.getLookupFeature() != null).
+					sorted(new MsFeatureInfoBundleClusterComparator(SortProperty.Name)).
+					collect(Collectors.toList());
+			
+			foundLookupFeaturesTable.
+				setTableModelFromMsFeatureInfoBundleClusterCollection(foundClusters);			
+			
 			List<MinimalMSOneFeature> notFoundLookupFeatures = 
 					lookupSet.getFeatures().stream().
 					filter(f -> !foundLookupFeatures.contains(f)).

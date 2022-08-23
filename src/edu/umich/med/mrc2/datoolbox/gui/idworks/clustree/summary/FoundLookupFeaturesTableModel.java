@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary;
 import java.util.Collection;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -38,6 +39,7 @@ public class FoundLookupFeaturesTableModel extends BasicTableModel {
 	public static final String MZ_COLUMN = "M/Z";
 	public static final String RT_COLUMN = "RT";
 	public static final String RANK_COLUMN = "Rank";
+	public static final String CLUSTER_COLUMN = "Cluster";
 
 	public FoundLookupFeaturesTableModel() {
 		super();
@@ -46,20 +48,26 @@ public class FoundLookupFeaturesTableModel extends BasicTableModel {
 			new ColumnContext(MZ_COLUMN, Double.class, false),
 			new ColumnContext(RT_COLUMN, Double.class, false),
 			new ColumnContext(RANK_COLUMN, Double.class, false),
+			new ColumnContext(CLUSTER_COLUMN, MsFeatureInfoBundleCluster.class, false)
 		};
 	}
 
-	public void setTableModelFromFeatureCollection(Collection<MinimalMSOneFeature>features) {
+	public void setTableModelFromMsFeatureInfoBundleClusterCollection(Collection<MsFeatureInfoBundleCluster>clusters) {
 
 		setRowCount(0);
 
-		for (MinimalMSOneFeature feature : features) {
+		for (MsFeatureInfoBundleCluster cluster : clusters) {
 
+			MinimalMSOneFeature feature = cluster.getLookupFeature();
+			if(feature == null)
+				continue;
+			
 			Object[] obj = {
 					feature,
 					feature.getMz(),
 					feature.getRt(),
 					feature.getRank(),
+					cluster,
 				};
 			super.addRow(obj);
 		}

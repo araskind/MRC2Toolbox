@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,6 +30,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -41,11 +43,15 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.Inflater;
 
+import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 public class CompressionUtils {
 
@@ -92,7 +98,8 @@ public class CompressionUtils {
     		return;
 
         OutputStream archiveStream = new FileOutputStream(destination);
-        ArchiveOutputStream archive = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
+        ArchiveOutputStream archive = 
+        		new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
         Collection<File> fileList = FileUtils.listFiles(source, null, true);
 
         for (File file : fileList) {
@@ -104,13 +111,47 @@ public class CompressionUtils {
             ZipArchiveEntry entry = new ZipArchiveEntry(entryName);
             archive.putArchiveEntry(entry);
             BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
-            org.apache.commons.io.IOUtils.copy(input, archive);
+            IOUtils.copy(input, archive);
             input.close();
             archive.closeArchiveEntry();
         }
         archive.finish();
         archive.close();
         archiveStream.close();
+    }
+    
+    public void extractZip(String zipFilePath, String extractDirectory) {
+    	
+        InputStream inputStream = null;
+        try {
+            Path filePath = Paths.get(zipFilePath);
+            inputStream = Files.newInputStream(filePath);
+            ArchiveStreamFactory archiveStreamFactory = new ArchiveStreamFactory();
+            ArchiveInputStream archiveInputStream = 
+            		archiveStreamFactory.createArchiveInputStream(ArchiveStreamFactory.ZIP, inputStream);
+            ArchiveEntry archiveEntry = null;
+            while((archiveEntry = archiveInputStream.getNextEntry()) != null) {
+                Path path = Paths.get(extractDirectory, archiveEntry.getName());
+                File file = path.toFile();
+                if(archiveEntry.isDirectory()) {
+                    if(!file.isDirectory()) {
+                        file.mkdirs();
+                    }
+                } else {
+                    File parent = file.getParentFile();
+                    if(!parent.isDirectory()) {
+                        parent.mkdirs();
+                    }
+                    try (OutputStream outputStream = Files.newOutputStream(path)) {
+                        IOUtils.copy(archiveInputStream, outputStream);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ArchiveException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void zipFile(File source, File destination) 
@@ -130,7 +171,7 @@ public class CompressionUtils {
         ZipArchiveEntry entry = new ZipArchiveEntry(source.getName());
         archive.putArchiveEntry(entry);
         BufferedInputStream input = new BufferedInputStream(new FileInputStream(source));
-        org.apache.commons.io.IOUtils.copy(input, archive);
+        IOUtils.copy(input, archive);
         input.close();
         archive.closeArchiveEntry();
         archive.finish();
@@ -174,6 +215,55 @@ public class CompressionUtils {
 		bis.close();
 		return sb.toString();
 	}
+	 
+    public static void createZipFileFromFolder(String zipFileName, String fileOrDirectoryToZip) {
+    	
+        BufferedOutputStream bufferedOutputStream = null;
+        ZipArchiveOutputStream zipArchiveOutputStream = null;
+        OutputStream outputStream = null;
+        try {
+            Path zipFilePath = Paths.get(zipFileName);
+            outputStream = Files.newOutputStream(zipFilePath);
+            bufferedOutputStream = new BufferedOutputStream(outputStream);
+            zipArchiveOutputStream = new ZipArchiveOutputStream(bufferedOutputStream);
+            File fileToZip = new File(fileOrDirectoryToZip);
+
+            addFileToZipStream(zipArchiveOutputStream, fileToZip, "");
+
+            zipArchiveOutputStream.close();
+            bufferedOutputStream.close();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void addFileToZipStream(
+    		ZipArchiveOutputStream zipArchiveOutputStream, 
+    		File fileToZip, 
+    		String base) throws IOException {
+        String entryName = base + fileToZip.getName();
+        ZipArchiveEntry zipArchiveEntry = new ZipArchiveEntry(fileToZip, entryName);
+        zipArchiveOutputStream.putArchiveEntry(zipArchiveEntry);
+        if(fileToZip.isFile()) {
+            FileInputStream fileInputStream = null;
+            try {
+                fileInputStream = new FileInputStream(fileToZip);
+                IOUtils.copy(fileInputStream, zipArchiveOutputStream);
+                zipArchiveOutputStream.closeArchiveEntry();
+            } finally {
+                IOUtils.closeQuietly(fileInputStream);
+            }
+        } else {
+            zipArchiveOutputStream.closeArchiveEntry();
+            File[] files = fileToZip.listFiles();
+            if(files != null) {
+                for (File file: files) {
+                    addFileToZipStream(zipArchiveOutputStream, file, entryName + "/");
+                }
+            }
+        }
+    }
 }
 
 

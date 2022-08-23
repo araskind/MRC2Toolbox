@@ -28,11 +28,14 @@ import java.util.Collection;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
+import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -112,9 +115,10 @@ public class MSMSClusterDataSetUploadTask extends AbstractTask {
 		String query = 
 			"INSERT INTO MSMS_CLUSTERED_DATA_SET " +
 			"(CDS_ID, NAME, DESCRIPTION, CREATED_BY,  " +
-			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
+			"DATE_CREATED, LAST_MODIFIED, PAR_SET_ID) "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
-		
+			
 		ps.setString(1, dataSet.getId());
 		ps.setString(2, dataSet.getName());
 		if(dataSet.getDescription() != null)
@@ -126,6 +130,21 @@ public class MSMSClusterDataSetUploadTask extends AbstractTask {
 		ps.setDate(5, new java.sql.Date(dataSet.getDateCreated().getTime()));
 		ps.setDate(6, new java.sql.Date(dataSet.getLastModified().getTime()));	
 		ps.setString(7, dataSet.getParameters().getId());
+		if(dataSet.getFeatureLookupDataSet() != null) {
+			
+			FeatureLookupDataSet flds = FeatureLookupDataSetManager.getFeatureLookupDataSetById(
+					dataSet.getFeatureLookupDataSet().getId());
+			if(flds == null)
+				FeatureLookupDataSetUtils.addFeatureLookupDataSet(
+						dataSet.getFeatureLookupDataSet(), conn);
+			
+			FeatureLookupDataSetManager.getFeatureLookupDataSetList().add(
+					dataSet.getFeatureLookupDataSet());
+			ps.setString(8, dataSet.getFeatureLookupDataSet().getId());
+		}
+		else {
+			ps.setNull(8, java.sql.Types.NULL);	
+		}		
 		ps.executeUpdate();
 		
 		//	Add assays		
@@ -156,14 +175,25 @@ public class MSMSClusterDataSetUploadTask extends AbstractTask {
 		
 		String query = 
 				"INSERT INTO MSMS_CLUSTER (CLUSTER_ID, PAR_SET_ID, "
-				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, IS_LOCKED, CDS_ID) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "MZ, RT, MSMS_LIB_MATCH_ID, MSMS_ALT_ID, "
+				+ "IS_LOCKED, CDS_ID, LOOKUP_FEATURE_ID) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String featureQuery = "INSERT INTO MSMS_CLUSTER_COMPONENT "
 				+ "(CLUSTER_ID, MS_FEATURE_ID) VALUES (?, ?)";
 		PreparedStatement featurePs = conn.prepareStatement(featureQuery);
-				
+		
+		if(dataSet.getFeatureLookupDataSet() != null 
+				&& dataSet.getFeatureLookupDataSet().getFeatures().isEmpty()) {
+			try {
+				FeatureLookupDataSetUtils.getFeaturesForFeatureLookupDataSet(
+						dataSet.getFeatureLookupDataSet(), conn);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		for(MsFeatureInfoBundleCluster cluster : dataSet.getClusters()) {
 			
 			String clusterId = SQLUtils.getNextIdFromSequence(conn, 
@@ -203,6 +233,12 @@ public class MSMSClusterDataSetUploadTask extends AbstractTask {
 				ps.setNull(7, java.sql.Types.NULL);
 			
 			ps.setString(8, dataSet.getId());
+			
+			if(cluster.getLookupFeature() != null)
+				ps.setString(9, cluster.getLookupFeature().getId());
+			else
+				ps.setNull(9, java.sql.Types.NULL);
+			
 			ps.executeUpdate();
 			
 			//	Add cluster features

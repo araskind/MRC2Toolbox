@@ -100,13 +100,13 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213793228" orientation="VERTICAL" divider="0.5">
-											<leaf id="2" nodeId="1600213793230">
+											<leaf id="0" nodeId="1600213793230">
 												<placeholders>
 													<placeholder>dock.single.QCPanelDockableDataSetStatsTable</placeholder>
 												</placeholders>
 											</leaf>
 											<node nodeId="1600213927553" orientation="HORIZONTAL" divider="0.6147378832838774">
-												<leaf id="0" nodeId="1600213793238">
+												<leaf id="2" nodeId="1600213793238">
 													<placeholders>
 														<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
 													</placeholders>
@@ -137,10 +137,10 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockable2DQCPanel">
-										<replacement id="dockablesingle QCPanelDockable2DQCPanel"/>
+									<layout factory="predefined" placeholder="dock.single.QCPanelDockableDataSetStatsTable">
+										<replacement id="dockablesingle QCPanelDockableDataSetStatsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockable2DQCPanel</id>
+											<id>QCPanelDockableDataSetStatsTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -157,10 +157,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockableDataSetStatsTable">
-										<replacement id="dockablesingle QCPanelDockableDataSetStatsTable"/>
+									<layout factory="predefined" placeholder="dock.single.QCPanelDockable2DQCPanel">
+										<replacement id="dockablesingle QCPanelDockable2DQCPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockableDataSetStatsTable</id>
+											<id>QCPanelDockable2DQCPanel</id>
 											<area/>
 										</delegate>
 									</layout>

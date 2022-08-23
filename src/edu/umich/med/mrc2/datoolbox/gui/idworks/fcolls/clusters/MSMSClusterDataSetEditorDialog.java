@@ -55,6 +55,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
@@ -75,16 +76,17 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 	private static final Icon editFeatureCollectionIcon = GuiUtils.getIcon("editCollection", 32);
 	
 	private MSMSClusterDataSet dataSet;
+	private MSMSClusteringParameterSet msmsExtractionParameters;
+	private Collection<MsFeatureInfoBundleCluster> clustersToAdd;
+	private FeatureLookupDataSet featureLookupDataSet;
+	
 	private JButton btnSave;
 	private JLabel dateCreatedLabel, lastModifiedLabel;
 	private JTextArea descriptionTextArea;	
 	private JTextField nameTextField;
 	private JLabel idValueLabel;
 	private JLabel ownerLabel;
-	private Collection<MsFeatureInfoBundleCluster> clustersToAdd;
 	private JCheckBox loadMSMSClusterDataSetCheckBox;
-
-	private MSMSClusteringParameterSet msmsExtractionParameters;
 	
 	public MSMSClusterDataSetEditorDialog(
 			MSMSClusterDataSet dataSet, 
@@ -385,6 +387,14 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 
 	public void setMsmsExtractionParameters(MSMSClusteringParameterSet msmsExtractionParameters) {
 		this.msmsExtractionParameters = msmsExtractionParameters;
+	}
+
+	public FeatureLookupDataSet getFeatureLookupDataSet() {
+		return featureLookupDataSet;
+	}
+
+	public void setFeatureLookupDataSet(FeatureLookupDataSet featureLookupDataSet) {
+		this.featureLookupDataSet = featureLookupDataSet;
 	}
 }
 

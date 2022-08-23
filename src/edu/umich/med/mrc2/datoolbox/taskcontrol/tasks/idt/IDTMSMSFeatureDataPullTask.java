@@ -65,7 +65,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		
 		setStatus(TaskStatus.PROCESSING);		
 		try {
-			getChashedFeatures();
+			getCashedFeatures();
 		}
 		catch (Exception e) {
 			setStatus(TaskStatus.ERROR);
@@ -98,7 +98,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		}
 	}
 	
-	protected void getChashedFeatures() {
+	protected void getCashedFeatures() {
 
 		taskDescription = "Getting feature data from IDTracker database";
 		total = featureIds.size();

@@ -183,10 +183,6 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			MSMSClusterDataSetManager.refreshMsmsClusteringParameters();
 			processed = processed + 3;
 			
-			taskDescription = "Refreshing the list of clustered MSMS sets ";
-			MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();
-			processed = processed + 3;
-			
 			taskDescription = "Refreshing MSMS extraction parameters ";
 			IDTDataCash.refreshMSMSExtractionParameters();
 			processed = processed + 3;
@@ -197,6 +193,10 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			
 			taskDescription = "Refreshing featue lookup data sets ";
 			FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
+			processed = processed + 3;
+						
+			taskDescription = "Refreshing the list of clustered MSMS sets ";
+			MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();
 			processed = processed + 3;
 			
 			setStatus(TaskStatus.FINISHED);
