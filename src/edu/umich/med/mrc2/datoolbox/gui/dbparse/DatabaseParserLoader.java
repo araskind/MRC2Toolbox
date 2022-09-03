@@ -55,33 +55,23 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.stax.StAXSource;
 
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
-import org.w3c.dom.Node;
 
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDbConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.load.chebi.ChebiParser;
-import edu.umich.med.mrc2.datoolbox.database.load.drugbank.DrugBankParser;
-import edu.umich.med.mrc2.datoolbox.database.load.drugbank.DrugBankRecord;
 import edu.umich.med.mrc2.datoolbox.database.load.foodb.FooDbCompoundTableParser;
-import edu.umich.med.mrc2.datoolbox.database.load.hmdb.HMDBParser;
-import edu.umich.med.mrc2.datoolbox.database.load.hmdb.HMDBRecord;
 import edu.umich.med.mrc2.datoolbox.database.load.lipidblast.LipidBlastParser;
 import edu.umich.med.mrc2.datoolbox.database.load.lipidmaps.LipidMapsParser;
 import edu.umich.med.mrc2.datoolbox.database.load.mona.MonaParser;
 import edu.umich.med.mrc2.datoolbox.database.load.refmet.RefMetFields;
 import edu.umich.med.mrc2.datoolbox.database.load.refmet.RefMetParser;
-import edu.umich.med.mrc2.datoolbox.database.load.t3db.T3DBParser;
-import edu.umich.med.mrc2.datoolbox.database.load.t3db.T3DBRecord;
 import edu.umich.med.mrc2.datoolbox.gui.automator.TextAreaOutputStream;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
@@ -400,27 +390,28 @@ public class DatabaseParserLoader extends JFrame implements ActionListener, Wind
 
 			DocumentBuilderFactory dbactory = DocumentBuilderFactory.newInstance();
 			dbactory.setNamespaceAware(true);
-
-			Connection conn = CompoundDbConnectionManager.getConnection();
-
-			while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
-
-			    DOMResult result = new DOMResult();
-			    t.transform(new StAXSource(xsr), result);
-			    Node domNode = result.getNode();
-
-			    if(domNode.getFirstChild().getNodeName().equals("metabolite")){
-
-			    	HMDBRecord record = HMDBParser.parseRecord(domNode.getFirstChild());
-			    	try {
-			    		HMDBParser.insertRecord(record, conn);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			    }
-			}
-			CompoundDbConnectionManager.releaseConnection(conn);
+			
+			//	TODO with jdom2
+//			Connection conn = CompoundDbConnectionManager.getConnection();
+//
+//			while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
+//
+//			    DOMResult result = new DOMResult();
+//			    t.transform(new StAXSource(xsr), result);
+//			    Node domNode = result.getNode();
+//
+//			    if(domNode.getFirstChild().getNodeName().equals("metabolite")){
+//
+//			    	HMDBRecord record = HMDBParser.parseRecord(domNode.getFirstChild());
+//			    	try {
+//			    		HMDBParser.insertRecord(record, conn);
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//			    }
+//			}
+//			CompoundDbConnectionManager.releaseConnection(conn);
 			MessageDialog.showInfoMsg("HMDB data upload completed.", this);
 		}
         catch (Exception e) {
@@ -438,7 +429,8 @@ public class DatabaseParserLoader extends JFrame implements ActionListener, Wind
 			XMLStreamReader xsr = xif.createXMLStreamReader(new FileReader(inputFile));
 			xsr.nextTag(); // Advance to statements element
 
-			//	TransformerFactory tf = TransformerFactory.newInstance( "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl", null );
+			//	TransformerFactory tf = TransformerFactory.newInstance( 
+			//	"com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl", null );
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer t = tf.newTransformer();
 			t.setOutputProperty(OutputKeys.METHOD, "xml");
@@ -448,27 +440,27 @@ public class DatabaseParserLoader extends JFrame implements ActionListener, Wind
 
 			DocumentBuilderFactory dbactory = DocumentBuilderFactory.newInstance();
 			dbactory.setNamespaceAware(true);
-
-			Connection conn = CompoundDbConnectionManager.getConnection();
-
-			while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
-
-			    DOMResult result = new DOMResult();
-			    t.transform(new StAXSource(xsr), result);
-			    Node domNode = result.getNode();
-
-			    if(domNode.getFirstChild().getNodeName().equals("drug")){
-
-			    	DrugBankRecord record = DrugBankParser.parseRecord(domNode.getFirstChild());
-			    	try {
-						DrugBankParser.insertRecord(record, conn);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			    }
-			}
-			CompoundDbConnectionManager.releaseConnection(conn);
+			//	TODO with jdom2
+//			Connection conn = CompoundDbConnectionManager.getConnection();
+//
+//			while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
+//
+//			    DOMResult result = new DOMResult();
+//			    t.transform(new StAXSource(xsr), result);
+//			    Node domNode = result.getNode();
+//
+//			    if(domNode.getFirstChild().getNodeName().equals("drug")){
+//
+//			    	DrugBankRecord record = DrugBankParser.parseRecord(domNode.getFirstChild());
+//			    	try {
+//						DrugBankParser.insertRecord(record, conn);
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//			    }
+//			}
+//			CompoundDbConnectionManager.releaseConnection(conn);
 		}
         catch (Exception e) {
 			e.printStackTrace();
@@ -494,27 +486,27 @@ public class DatabaseParserLoader extends JFrame implements ActionListener, Wind
 
 			DocumentBuilderFactory dbactory = DocumentBuilderFactory.newInstance();
 			dbactory.setNamespaceAware(true);
-
-			Connection conn = CompoundDbConnectionManager.getConnection();
-
-			while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
-
-			    DOMResult result = new DOMResult();
-			    t.transform(new StAXSource(xsr), result);
-			    Node domNode = result.getNode();
-
-			    if(domNode.getFirstChild().getNodeName().equals("compound")){
-
-			    	T3DBRecord record = T3DBParser.parseRecord(domNode.getFirstChild());
-			    	try {
-			    		T3DBParser.insertRecord(record, conn);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			    }
-			}
-			CompoundDbConnectionManager.releaseConnection(conn);
+			//	TODO with jdom2
+//			Connection conn = CompoundDbConnectionManager.getConnection();
+//
+//			while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
+//
+//			    DOMResult result = new DOMResult();
+//			    t.transform(new StAXSource(xsr), result);
+//			    Node domNode = result.getNode();
+//
+//			    if(domNode.getFirstChild().getNodeName().equals("compound")){
+//
+//			    	T3DBRecord record = T3DBParser.parseRecord(domNode.getFirstChild());
+//			    	try {
+//			    		T3DBParser.insertRecord(record, conn);
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//			    }
+//			}
+//			CompoundDbConnectionManager.releaseConnection(conn);
 			MessageDialog.showInfoMsg("T3DB data upload completed.", this);
 		}
         catch (Exception e) {

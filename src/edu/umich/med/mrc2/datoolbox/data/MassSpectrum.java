@@ -164,8 +164,10 @@ public class MassSpectrum implements Serializable {
 
 		for (MsPoint dp : msPoints) {
 
-			adduct = dp.getAdductType().replaceAll("\\+[0-9]+$", "");
-			Adduct mod = AdductManager.getAdductByCefNotation(adduct);
+			Adduct mod = null;
+			if(dp.getAdductType() != null)
+				mod = AdductManager.getAdductByCefNotation(dp.getAdductType().replaceAll("\\+[0-9]+$", ""));
+			
 			if (mod != null) {
 
 				if (!adductMap.containsKey(mod))
@@ -181,7 +183,8 @@ public class MassSpectrum implements Serializable {
 					minMz = dp.getMz();
 			}
 			else {
-				unmatchedAdducts.add(adduct);
+				if(dp.getAdductType() != null)
+					unmatchedAdducts.add(dp.getAdductType());
 			}
 		}
 		// Sort points for each adduct

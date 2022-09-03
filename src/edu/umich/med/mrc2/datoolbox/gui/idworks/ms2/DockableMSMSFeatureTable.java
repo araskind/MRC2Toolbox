@@ -29,8 +29,10 @@ import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.action.DefaultDockActionSource;
+import bibliothek.gui.dock.action.DockAction;
 import bibliothek.gui.dock.action.LocationHint;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
+import bibliothek.gui.dock.action.actions.SimpleMenuAction;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -45,11 +47,7 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 	private static final Icon componentIcon = GuiUtils.getIcon("msTwo", 16);
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 16);
 	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 16);
-	private static final Icon findMSMSFeaturesIcon = GuiUtils.getIcon("findMSMSFeatures", 16);
-	private SimpleButtonAction 
-			reloadFeaturesButton, 
-			filterFeaturesButton,
-			findMSMSFeaturesButton;
+	private static final Icon reloadClusterSetFeaturesIcon = GuiUtils.getIcon("reloadClusterSetFeatures", 16);
 	
 	public DockableMSMSFeatureTable(DockableMRC2ToolboxPanel parentPanel) {
 
@@ -65,26 +63,40 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 
 		DefaultDockActionSource actions = new DefaultDockActionSource(
 				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
+		
+		SimpleButtonAction filterFeaturesButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(),
+				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(), 
+				filterIcon, l);
+		actions.add(filterFeaturesButton);
+		
+		DefaultDockActionSource menuActions = new DefaultDockActionSource();		
+		SimpleMenuAction actionMenu = new SimpleMenuAction(menuActions);
+		actionMenu.setIcon(reloadIcon);
+		actionMenu.setText("Reload");       
+		actions.add((DockAction)actionMenu);
+		intern().setActionOffers(actions);
 
 //		findMSMSFeaturesButton = GuiUtils.setupButtonAction(
 //				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND.getName(),
 //				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND.getName(), 
 //				findMSMSFeaturesIcon, l);	
 //		actions.add(findMSMSFeaturesButton);
-		
-		filterFeaturesButton = GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(),
-				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(), 
-				filterIcon, l);
-		actions.add(filterFeaturesButton);	
-		
-		reloadFeaturesButton = GuiUtils.setupButtonAction(
+				
+		SimpleButtonAction reloadFeaturesButton = GuiUtils.setupButtonAction(
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
 				reloadIcon, l);
-		actions.add(reloadFeaturesButton);
+		menuActions.add(reloadFeaturesButton);
 		
+		SimpleButtonAction reloadClusterSetFeaturesButton = GuiUtils.setupButtonAction(
+				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
+				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
+				reloadClusterSetFeaturesIcon, l);
+		menuActions.add(reloadClusterSetFeaturesButton);
+				
 		actions.addSeparator();
+		
 		intern().setActionOffers(actions);
 	}
 

@@ -35,9 +35,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.lang.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.jdom2.Document;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
@@ -53,16 +52,17 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
  */
 public class MsImportUtils {
 
+	@SuppressWarnings("unchecked")
 	public static TandemMassSpectrum parseAgilentMsMsExportFile(File xmInput) throws Exception {
 
 		TandemMassSpectrum msms = null;
 		Document msmsDocument = XmlUtils.readXmlFile(xmInput);
 		XPathExpression expr = null;
-		NodeList spectraNodes;
+		List<Element>spectraNodes;
 		XPathFactory factory = XPathFactory.newInstance();
 		XPath xpath = factory.newXPath();
 		expr = xpath.compile("//Report/SpecRawData");
-		spectraNodes = (NodeList) expr.evaluate(msmsDocument, XPathConstants.NODESET);
+		spectraNodes = (List<Element>) expr.evaluate(msmsDocument, XPathConstants.NODESET);
 
 		Pattern fragVoltagePattern = Pattern.compile("Frag=(\\d+\\.\\d+)V");
 		Pattern cidPattern = Pattern.compile("CID@(\\d+\\.\\d+)");
@@ -72,11 +72,14 @@ public class MsImportUtils {
 		double cid = 0.0d;
 		double parentMass = 0.0d;
 
-		for (int i = 0; i < spectraNodes.getLength(); i++) {
+		for (int i = 0; i < spectraNodes.size(); i++) {
 
 			//	Find first MSMS spectrum
-			Element cpdElement = (Element) spectraNodes.item(i);
-			String title = cpdElement.getElementsByTagName("Title").item(0).getFirstChild().getNodeValue();
+			Element cpdElement = spectraNodes.get(i);		
+			String title = cpdElement.getChild("Title").getText();
+			
+			//	String title = cpdElement.getElementsByTagName("Title").item(0).getFirstChild().getNodeValue();
+			
 			if(title.contains("Product Ion")) {
 
 				Polarity polarity = null;
@@ -108,13 +111,13 @@ public class MsImportUtils {
 
 				// Parse spectrum
 				ArrayList<MsPoint>points = new ArrayList<MsPoint>();
-				NodeList peaks = cpdElement.getElementsByTagName("d");
+				List<Element> peaks = cpdElement.getChildren("d");  //.getElementsByTagName("d");
 
-				for (int j = 0; j < peaks.getLength(); j++) {
+				for (int j = 0; j < peaks.size(); j++) {
 
-					Element peakElement = (Element) peaks.item(j);
-					double mz = Double.parseDouble(peakElement.getAttribute("x"));
-					double intensity = Double.parseDouble(peakElement.getAttribute("y"));
+					Element peakElement = (Element) peaks.get(j);
+					double mz = peakElement.getAttribute("x").getDoubleValue(); //	Double.parseDouble();
+					double intensity = peakElement.getAttribute("y").getDoubleValue(); //	Double.parseDouble(peakElement.getAttribute("y"));
 					points.add(new MsPoint(mz, intensity));
 				}
 				msms.setSpectrum(points);
@@ -123,7 +126,8 @@ public class MsImportUtils {
 		return msms;
 	}
 
-	public static TandemMassSpectrum parseMSPspectrum(File mspInput, LibraryMsFeature activeFeature) throws Exception {
+	public static TandemMassSpectrum parseMSPspectrum(
+			File mspInput, LibraryMsFeature activeFeature) throws Exception {
 
 		List<List<String>> mspChunks = parseMspInputFile(mspInput);
 

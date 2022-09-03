@@ -136,7 +136,7 @@ public class WorklistUtils {
 					manifestData.append(sample.getId());
 
 				else if(colName.equals(DataExportFields.INJECTION_TIME.getName()))
-					manifestData.append(MRC2ToolBoxConfiguration.getDateTimeFormat().format(item.getTimeStamp()));
+					manifestData.append(MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(item.getTimeStamp()));
 				else {
 					String value = item.getProperty(colName);
 					if(value == null)

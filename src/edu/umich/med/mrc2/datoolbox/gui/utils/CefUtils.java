@@ -23,35 +23,32 @@ package edu.umich.med.mrc2.datoolbox.gui.utils;
 
 import java.util.TreeSet;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import edu.umich.med.mrc2.datoolbox.main.AdductManager;
+import org.jdom2.Document;
 
 public class CefUtils {
 
+	//	TODO move functionality to where it is actually used
 	public static TreeSet<String> getUnmatchedAdducts(Document cefLibrary, int total, int processed) throws Exception{
 
 		TreeSet<String> allAdducts = new TreeSet<String>();
 		TreeSet<String> unmatchedAdducts = new TreeSet<String>();
-		NodeList peakNodes = cefLibrary.getElementsByTagName("p");
-
-		//	Collect all adducts
-		total = peakNodes.getLength();
-		processed = 0;
-		for (int i = 0; i < peakNodes.getLength(); i++) {
-
-			String adductName = ((Element) peakNodes.item(i)).getAttribute("s").replaceAll("\\+[0-9]+$", "").trim();
-			allAdducts.add(adductName);
-			processed++;
-		}
-		//	Check against existing database
-		for(String adduct : allAdducts){
-
-			if(AdductManager.getAdductByCefNotation(adduct) == null)
-				unmatchedAdducts.add(adduct);
-		}
+//		NodeList peakNodes = cefLibrary.get;
+//
+//		//	Collect all adducts
+//		total = peakNodes.getLength();
+//		processed = 0;
+//		for (int i = 0; i < peakNodes.getLength(); i++) {
+//
+//			String adductName = ((Element) peakNodes.item(i)).getAttribute("s").replaceAll("\\+[0-9]+$", "").trim();
+//			allAdducts.add(adductName);
+//			processed++;
+//		}
+//		//	Check against existing database
+//		for(String adduct : allAdducts){
+//
+//			if(AdductManager.getAdductByCefNotation(adduct) == null)
+//				unmatchedAdducts.add(adduct);
+//		}
 		return unmatchedAdducts;
 	}
 }

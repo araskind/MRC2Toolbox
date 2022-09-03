@@ -26,14 +26,13 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.text.StringEscapeUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.database.load.CompoundProperty;
@@ -43,70 +42,72 @@ public class DrugBankParser {
 
 	private static final NumberFormat mzFormat = new DecimalFormat("###.####");
 
-	public static DrugBankRecord parseRecord(Node recordDocument) throws XPathExpressionException {
+	public static DrugBankRecord parseRecord(Element drugElement) throws XPathExpressionException {
 
 		DrugBankRecord record = new DrugBankRecord();
-		Element drugElement = (Element)recordDocument;
 		record.setPrimaryId(getDrugBankId(drugElement));
 
 		//	Name
-		String name = drugElement.getElementsByTagName("name").item(0).getFirstChild().getNodeValue();
+		String name = drugElement.getChildText("name"); //.getElementsByTagName("name").item(0).getFirstChild().getNodeValue();
 		record.setName(name);
 		record.getDrugIdentity().setCommonName(name);
 
 		//	UNII
-		Node uniiNode = drugElement.getElementsByTagName("unii").item(0).getFirstChild();
-		if(uniiNode != null)
-			record.getDrugIdentity().addDbId(CompoundDatabaseEnum.UNII, uniiNode.getNodeValue());
+//		Node uniiNode = drugElement.getElementsByTagName("unii").item(0).getFirstChild();
+		String unii = drugElement.getChildText("unii");
+		if(unii != null)
+			record.getDrugIdentity().addDbId(CompoundDatabaseEnum.UNII, unii);
 
 		//	CAS ID
-		Node casNode = drugElement.getElementsByTagName("cas-number").item(0).getFirstChild();
-		if(casNode != null)
-			record.getDrugIdentity().addDbId(CompoundDatabaseEnum.CAS, casNode.getNodeValue());
+		//	Node casNode = drugElement.getElementsByTagName("cas-number").item(0).getFirstChild();
+		String cas = drugElement.getChildText("cas-number");
+		if(cas != null)
+			record.getDrugIdentity().addDbId(CompoundDatabaseEnum.CAS, cas);
 
 		for(DrugBankDescriptiveFields field : DrugBankDescriptiveFields.values()) {
 
-			Node fieldNode = drugElement.getElementsByTagName(field.getName()).item(0).getFirstChild();
-			if(fieldNode != null)
-				record.setDescriptiveField(field, StringEscapeUtils.unescapeHtml4(fieldNode.getNodeValue()));
+			String fieldText = drugElement.getChildText(field.getName()); //	.getElementsByTagName(field.getName()).item(0).getFirstChild();
+			if(fieldText != null)
+				record.setDescriptiveField(field, StringEscapeUtils.unescapeHtml4(fieldText));
 			else
 				record.setDescriptiveField(field, "");
 		}
-		//	Properties
-		NodeList expropNodes = drugElement.getElementsByTagName("property");
-		parseProperties(expropNodes, record);
+		//	Properties	
+		parseProperties(drugElement, record);
 
 		//	External IDs
-		NodeList externIdNodes = drugElement.getElementsByTagName("external-identifier");
+		List<Element>externIdNodes = drugElement.getChildren("external-identifier");
 		parseExternalIds(externIdNodes, record);
 
 		//	Categories
-		NodeList categoriesNodes = drugElement.getElementsByTagName("category");
+		List<Element>categoriesNodes = drugElement.getChildren("category");
 		parseCategories(categoriesNodes, record);
 
 		//	Synonyms
-		NodeList synonymsNodes = drugElement.getElementsByTagName("synonym");
-		for (int i = 0; i < synonymsNodes.getLength(); i++){
-
-			if (synonymsNodes.item(i).getParentNode().getNodeName().equals("synonyms"))
-				record.addSynonym(synonymsNodes.item(i).getFirstChild().getNodeValue());
+		Element synonymsNode = drugElement.getChild("synonyms");
+		List<Element>synonymNodes = null;
+		if(synonymsNode != null) {
+			
+			synonymNodes = synonymsNode.getChildren("synonym");	
+			for (int i = 0; i < synonymNodes.size(); i++)
+					record.addSynonym(synonymNodes.get(i).getText());			
 		}
 		return record;
 	}
 
-	private static void parseExternalIds(NodeList externIdNodes, DrugBankRecord record) {
+	private static void parseExternalIds(List<Element>externIdNodes, DrugBankRecord record) {
 
-		for (int i = 0; i < externIdNodes.getLength(); i++) {
+		for (int i = 0; i < externIdNodes.size(); i++) {
 
-			String eresource = ((Element)externIdNodes.item(i)).getElementsByTagName("resource").item(0).getFirstChild().getNodeValue();
-			String identifier = ((Element)externIdNodes.item(i)).getElementsByTagName("identifier").item(0).getFirstChild().getNodeValue();
+			String eresource = (externIdNodes.get(i)).getElementsByTagName("resource").item(0).getFirstChild().getNodeValue();
+			String identifier = (externIdNodes.item(i)).getElementsByTagName("identifier").item(0).getFirstChild().getNodeValue();
 			DrugbankCrossrefFields cf = DrugbankCrossrefFields.getByName(eresource);
 			if(cf != null)
 				record.getDrugIdentity().addDbId(cf.getDatabase(), identifier);
 		}
 	}
 
-	private static void parseCategories(NodeList categoriesNodes, DrugBankRecord record) {
+	private static void parseCategories(List<Element>categoriesNodes, DrugBankRecord record) {
 
 		for (int i = 0; i < categoriesNodes.getLength(); i++) {
 
@@ -126,25 +127,32 @@ public class DrugBankParser {
 		}
 	}
 
-	private static void parseProperties(NodeList expropNodes, DrugBankRecord record) {
-
-		for (int i = 0; i < expropNodes.getLength(); i++) {
-
-			String pkind = null;
-			String pvalue = null;
-			if (expropNodes.item(i).getParentNode().getNodeName().equals("experimental-properties")) {
-
-				pkind = ((Element)expropNodes.item(i)).getElementsByTagName("kind").item(0).getFirstChild().getNodeValue();
-				pvalue = ((Element)expropNodes.item(i)).getElementsByTagName("value").item(0).getFirstChild().getNodeValue();
-				CompoundProperty ep = new CompoundProperty(pkind, pvalue, CompoundPropertyType.EXPERIMENTAL);
-				record.addProperty(ep);
+	private static void parseProperties(Element drugElement, DrugBankRecord record) {
+		
+		Element expPropNode = drugElement.getChild("experimental-properties");	
+		if(expPropNode != null) {
+			
+			List<Element>expPropList = expPropNode.getChildren("property");
+			for(Element pe : expPropList) {
+				
+				CompoundProperty expProp = new CompoundProperty(
+						pe.getChildText("kind"), 
+						pe.getChildText("value"), 
+						CompoundPropertyType.EXPERIMENTAL);
+				record.addProperty(expProp);
 			}
-			if (expropNodes.item(i).getParentNode().getNodeName().equals("calculated-properties")) {
-
-				pkind = ((Element)expropNodes.item(i)).getElementsByTagName("kind").item(0).getFirstChild().getNodeValue();
-				pvalue = ((Element)expropNodes.item(i)).getElementsByTagName("value").item(0).getFirstChild().getNodeValue();
-				CompoundProperty ep = new CompoundProperty(pkind, pvalue, CompoundPropertyType.CALCULATED);
-				record.addProperty(ep);
+		}
+		Element calcPropNode = drugElement.getChild("calculated-properties");	
+		if(calcPropNode != null) {
+			
+			List<Element>calcPropList = calcPropNode.getChildren("property");			
+			for(Element pc : calcPropList) {
+				
+				CompoundProperty expProp = new CompoundProperty(
+						pc.getChildText("kind"), 
+						pc.getChildText("value"), 
+						CompoundPropertyType.CALCULATED);
+				record.addProperty(expProp);
 			}
 		}
 		for(CompoundProperty property : record.getCompoundProperties()){
@@ -173,15 +181,12 @@ public class DrugBankParser {
 	}
 
 	private static String getDrugBankId(Element drugElement) {
-
-		NodeList idNodes = drugElement.getElementsByTagName("drugbank-id");
-		for (int i = 0; i < idNodes.getLength(); i++) {
-
-			if (idNodes.item(i).getParentNode().getNodeName().equals("drug")
-					&& idNodes.item(i).getAttributes().getNamedItem("primary") != null) {
-
-				return idNodes.item(i).getFirstChild().getNodeValue();
-			}
+		
+		List<Element> idElements = drugElement.getChildren("drugbank-id");
+		for(Element ide : idElements) {
+			
+			if(ide.getAttribute("primary") != null)
+				return ide.getText();
 		}
 		return null;
 	}

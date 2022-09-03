@@ -718,6 +718,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName()))	
 			reloadCompleteActiveMSMSFeatureSet();
 		
+		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName()))	
+			reloadActiveMSMSClusterSetFeatures();
+		
 		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MS_ONE_FEATURES.getName()))	
 			reloadCompleteActiveMSOneFeatureSet();
 		
@@ -3108,6 +3111,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		}
+	}
+	
+	private void reloadActiveMSMSClusterSetFeatures() {
+		
+		if(activeMSMSClusterDataSet == null)
+			return;
+		else
+			loadMSMSClusterDataSetInGUI(activeMSMSClusterDataSet);
 	}
 	
 	public void safelyLoadMSMSFeatures(

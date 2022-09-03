@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,19 +33,10 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.jdom2.Document;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
@@ -65,40 +55,39 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.CefUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cef.CEFProcessingTask;
 import edu.umich.med.mrc2.datoolbox.utils.LibraryUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
-public class ConvertCefLibraryForRecursionTask extends AbstractTask {
+public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 
-	private File outputLibraryFile, sourceLibraryFile;
 	private Document exportedLibraryDocument;
 	private boolean combineAdducts;
 	private List<LibraryMsFeature> exportTargetList;
 	private TreeSet<String> unmatchedAdducts;
-
-	private static final String lineSeparator = System.getProperty("line.separator");
 
 	public ConvertCefLibraryForRecursionTask(			
 			File sourceLibraryFile,
 			File outputLibraryFile,
 			boolean combineAdducts) {
 
-		this.sourceLibraryFile = sourceLibraryFile;
-		this.outputLibraryFile = outputLibraryFile;
+		this.inputCefFile = sourceLibraryFile;
+		this.outputCefFile = outputLibraryFile;
 		this.combineAdducts = combineAdducts;
 		unmatchedAdducts = new TreeSet<String>();
+		exportTargetList = new ArrayList<LibraryMsFeature>();
 	}
 
 	@Override
 	public void run() {
 
-		taskDescription = "Creating library for recursion from " + sourceLibraryFile.getName();
+		taskDescription = 
+				"Creating library for recursion from " + inputCefFile.getName();
 		setStatus(TaskStatus.PROCESSING);
 		createTargetList();
 		if(!unmatchedAdducts.isEmpty()){
@@ -115,131 +104,12 @@ public class ConvertCefLibraryForRecursionTask extends AbstractTask {
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
-
-	@Override
-	public Task cloneTask() {
-
-		return new ConvertCefLibraryForRecursionTask(
-				sourceLibraryFile,
-				outputLibraryFile,
-				combineAdducts);
-	}
-
-	private Element createCefElement(LibraryMsFeature lt, Adduct adduct, boolean createNewId) {
-
-		Element compound = (Element) exportedLibraryDocument.createElement("Compound");
-
-		String mass = MRC2ToolBoxConfiguration.getMzFormat().format(lt.getNeutralMass());
-		String rt = MRC2ToolBoxConfiguration.getRtFormat().format(lt.getRetentionTime());
-		compound.setAttribute("mppid", mass + "_" + rt);
-		compound.setAttribute("algo", "FindByFormula");
-
-		//	Location
-		Element location = exportedLibraryDocument.createElement("Location");
-		location.setAttribute("m", mass);
-		location.setAttribute("rt", rt);
-		double area = 100.0d;
-		location.setAttribute("a", Double.toString(area));
-		compound.appendChild(location);
-
-		//	Identification
-		Element results = exportedLibraryDocument.createElement("Results");
-		Element molecule = exportedLibraryDocument.createElement("Molecule");
-
-		String compoundName = "";
-		if(lt.getPrimaryIdentity() != null)
-			compoundName = lt.getPrimaryIdentity().getName();
-		else
-			compoundName = lt.getName();
-
-		molecule.setAttribute("name", compoundName);
-		Element database = exportedLibraryDocument.createElement("Database");
-		Element libId = exportedLibraryDocument.createElement("Accession");
-		libId.setAttribute("db", "CAS ID");
-		if(createNewId)
-			libId.setAttribute("id", DataPrefix.MS_FEATURE.getName() + UUID.randomUUID().toString());
-		else
-			libId.setAttribute("id", lt.getId());
-		
-		database.appendChild(libId);
-
-		if(lt.getPrimaryIdentity() != null){
-
-			Element accession = exportedLibraryDocument.createElement("Accession");
-			accession.setAttribute("db", "KEGG ID");
-			accession.setAttribute("id", lt.getPrimaryIdentity().getPrimaryLinkLabel());
-			database.appendChild(accession);
-		}
-		molecule.appendChild(database);
-		results.appendChild(molecule);
-		compound.appendChild(results);
-
-		//	Spectrum
-		Element spectrum = exportedLibraryDocument.createElement("Spectrum");
-		spectrum.setAttribute("type", "FbF");
-		spectrum.setAttribute("cpdAlgo", "FindByFormula");
-
-		Element msDetails = exportedLibraryDocument.createElement("MSDetails");
-		String sign = (lt.getPolarity().equals(Polarity.Positive)) ? "+" : "-";
-		msDetails.setAttribute("p", sign);
-		spectrum.appendChild(msDetails);
-
-		Element msPeaks = exportedLibraryDocument.createElement("MSPeaks");
-
-		if(adduct != null){
-
-			String charge = Integer.toString(adduct.getCharge());
-			MsPoint[] adductMs = lt.getSpectrum().getMsForAdduct(adduct);
-
-			for(int i=0; i<adductMs.length; i++){
-
-				Element peak = exportedLibraryDocument.createElement("p");
-				peak.setAttribute("x", MRC2ToolBoxConfiguration.getMzFormat().format(adductMs[i].getMz()));
-				peak.setAttribute("y", Double.toString(adductMs[i].getIntensity()));
-				peak.setAttribute("z", charge);
-				
-				String aname = adduct.getCefNotation();
-				if(i>0)
-					aname = aname + "+" + i;
-
-				peak.setAttribute("s", aname);
-				msPeaks.appendChild(peak);
-			}
-		}
-		else{
-			for(Adduct ad : lt.getSpectrum().getAdducts()){
-
-				String charge = Integer.toString(ad.getCharge());
-				MsPoint[] adductMs = lt.getSpectrum().getMsForAdduct(ad);
-
-				for(int i=0; i<adductMs.length; i++){
-
-					Element peak = exportedLibraryDocument.createElement("p");
-					peak.setAttribute("x", MRC2ToolBoxConfiguration.getMzFormat().format(adductMs[i].getMz()));
-					peak.setAttribute("y", Double.toString(adductMs[i].getIntensity()));
-					peak.setAttribute("z", charge);
-
-					String aname = ad.getCefNotation();
-
-					if(i>0)
-						aname = aname + "+" + i;
-
-					peak.setAttribute("s", aname);
-					msPeaks.appendChild(peak);
-				}
-			}
-		}
-		spectrum.appendChild(msPeaks);
-		compound.appendChild(spectrum);
-		return compound;
-	}
-
+	
 	private void createTargetList() {
 
-		exportTargetList = new ArrayList<LibraryMsFeature>();
-		if(sourceLibraryFile != null){
+		if(inputCefFile != null){
 			try {
-				readTargetsFromFile();
+				parseInputCefFile(inputCefFile);
 			} catch (Exception e) {
 				setStatus(TaskStatus.ERROR);
 				e.printStackTrace();
@@ -257,36 +127,211 @@ public class ConvertCefLibraryForRecursionTask extends AbstractTask {
 				return;
 			}
 		}
+		inputFeatureList.stream().
+			forEach(f -> exportTargetList.add(new LibraryMsFeature(f)));
 		exportTargetList = exportTargetList.stream().
 				sorted(new MsFeatureComparator(SortProperty.RT)).
 				collect(Collectors.toList());
+	}
+	
+	private void writeCefLibrary() throws Exception {
+
+		total = exportTargetList.size();
+		processed = 0;
+		
+		exportedLibraryDocument = new Document();
+        Element cefRoot = new Element("CEF");
+        cefRoot.setAttribute("version", "1.0.0.0");
+		String libId = DataPrefix.MS_LIBRARY.getName() + UUID.randomUUID().toString();
+		cefRoot.setAttribute("library_id", libId);
+		exportedLibraryDocument.addContent(cefRoot);	
+		Element compoundListElement = new Element("CompoundList");
+		cefRoot.addContent(compoundListElement);
+
+		for(LibraryMsFeature lt : exportTargetList){
+			
+			if(lt.getSpectrum() == null) {
+				System.err.println(lt.getName() + " has no spectrum.");
+				continue;
+			}
+			if(combineAdducts){
+				Element compound = createCefElement(lt, null, false);
+				compoundListElement.addContent(compound);
+			}
+			else{
+				boolean createNewId = false;	//	Create new feature ID if more than 1 adduct is added as separate entry
+				for(Adduct adduct : lt.getSpectrum().getAdducts()){
+
+					//	TODO make this check optional
+					if(lt.getSpectrum().getMsForAdduct(adduct).length > 1){
+
+						Element compound = createCefElement(lt, adduct, createNewId);
+						compoundListElement.addContent(compound);
+					}
+					createNewId = true;
+				}
+			}
+			processed++;
+		}
+		String extension = FilenameUtils.getExtension(outputCefFile.getAbsolutePath());
+		if(!extension.equalsIgnoreCase(MsLibraryFormat.CEF.getFileExtension()))
+			outputCefFile = new File(FilenameUtils.removeExtension(outputCefFile.getAbsolutePath()) + "."
+					+ MsLibraryFormat.CEF.getFileExtension());
+
+		XmlUtils.writeXMLDocumentToFile(exportedLibraryDocument, outputCefFile);
+	}
+
+	private Element createCefElement(LibraryMsFeature lt, Adduct adduct, boolean createNewId) {
+
+		//Element compound = (Element) exportedLibraryDocument.createElement("Compound");
+		Element compound = new Element("Compound");
+
+		String mass = MRC2ToolBoxConfiguration.getMzFormat().format(lt.getNeutralMass());
+		String rt = MRC2ToolBoxConfiguration.getRtFormat().format(lt.getRetentionTime());
+		compound.setAttribute("mppid", mass + "_" + rt);
+		compound.setAttribute("algo", "FindByFormula");
+
+		//	Location
+		Element location = new Element("Location");
+		location.setAttribute("m", mass);
+		location.setAttribute("rt", rt);
+		double area = 100.0d;
+		location.setAttribute("a", Double.toString(area));
+		compound.addContent(location);
+
+		//	Identification
+		Element results = new Element("Results");
+		Element molecule = new Element("Molecule");
+
+		String compoundName = "";
+		String formula = "";
+		if(lt.getPrimaryIdentity() != null) {
+			compoundName = lt.getPrimaryIdentity().getName();
+			formula = lt.getPrimaryIdentity().getCompoundIdentity().getFormula();
+		}
+		else {
+			compoundName = lt.getName();
+		}
+		molecule.setAttribute("name", compoundName);
+		if(formula != null && !formula.isEmpty())
+			molecule.setAttribute("formula", compoundName);
+		
+		Element database = new Element("Database");
+		Element libId = new Element("Accession");
+		libId.setAttribute("db", "CAS ID");
+		if(createNewId)
+			libId.setAttribute("id", DataPrefix.MS_FEATURE.getName() + UUID.randomUUID().toString());
+		else
+			libId.setAttribute("id", lt.getId());
+		
+		database.addContent(libId);
+
+		if(lt.getPrimaryIdentity() != null 
+				&& lt.getPrimaryIdentity().getPrimaryLinkLabel() != null
+				&& !lt.getPrimaryIdentity().getPrimaryLinkLabel().isEmpty()){
+
+			Element accession = new Element("Accession");
+			accession.setAttribute("db", "KEGG ID");
+			accession.setAttribute("id", lt.getPrimaryIdentity().getPrimaryLinkLabel());
+			database.addContent(accession);
+		}
+		molecule.addContent(database);
+		results.addContent(molecule);
+		compound.addContent(results);
+
+		//	Spectrum
+		Element spectrum = new Element("Spectrum");
+		spectrum.setAttribute("type", "FbF");
+		spectrum.setAttribute("cpdAlgo", "FindByFormula");
+
+		Element msDetails = new Element("MSDetails");
+		String sign = (lt.getPolarity().equals(Polarity.Positive)) ? "+" : "-";
+		msDetails.setAttribute("p", sign);
+		spectrum.addContent(msDetails);
+
+		Element msPeaks = new Element("MSPeaks");
+		if(adduct != null){
+
+			String charge = Integer.toString(adduct.getCharge());
+			MsPoint[] adductMs = lt.getSpectrum().getMsForAdduct(adduct);
+
+			for(int i=0; i<adductMs.length; i++){
+
+				Element peak = new Element("p");
+				peak.setAttribute("x", MRC2ToolBoxConfiguration.getMzFormat().format(adductMs[i].getMz()));
+				peak.setAttribute("y", Double.toString(adductMs[i].getIntensity()));
+				peak.setAttribute("z", charge);
+				
+				String aname = adduct.getCefNotation();
+				if(i>0)
+					aname = aname + "+" + i;
+
+				peak.setAttribute("s", aname);
+				msPeaks.addContent(peak);
+			}
+		}
+		else{
+			for(Adduct ad : lt.getSpectrum().getAdducts()){
+
+				String charge = Integer.toString(ad.getCharge());
+				MsPoint[] adductMs = lt.getSpectrum().getMsForAdduct(ad);
+
+				for(int i=0; i<adductMs.length; i++){
+
+					Element peak = new Element("p");
+					peak.setAttribute("x", MRC2ToolBoxConfiguration.getMzFormat().format(adductMs[i].getMz()));
+					peak.setAttribute("y", Double.toString(adductMs[i].getIntensity()));
+					peak.setAttribute("z", charge);
+					String aname = ad.getCefNotation();
+
+					if(i>0)
+						aname = aname + "+" + i;
+
+					peak.setAttribute("s", aname);
+					msPeaks.addContent(peak);
+				}
+			}
+		}
+		spectrum.addContent(msPeaks);
+		compound.addContent(spectrum);
+		return compound;
 	}
 
 	private Set<LibraryMsFeature>parseCefLibrary(Document cefLibrary) throws Exception{
 
 		Set<LibraryMsFeature>targets = new HashSet<LibraryMsFeature>();
-
-		NodeList targetNodes = cefLibrary.getElementsByTagName("Compound");
-		total = targetNodes.getLength();
+		List<Element>targetNodes = 
+				cefLibrary.getRootElement().getChild("CompoundList").getChildren("Compound");
+		
+		total = targetNodes.size();
 		processed = 0;
 		Connection conn = ConnectionManager.getConnection();
 
-		for (int i = 0; i < targetNodes.getLength(); i++) {
+		for (Element cpdElement : targetNodes) {
 
-			Element cpdElement = (Element) targetNodes.item(i);
-			Element locationElement = (Element) cpdElement.getElementsByTagName("Location").item(0);
-			double rt = Double.parseDouble(locationElement.getAttribute("rt"));
-			double neutralMass = Double.parseDouble(locationElement.getAttribute("m"));
-			Element moleculeElement = (Element) cpdElement.getElementsByTagName("Molecule").item(0);
+			Element location = cpdElement.getChild("Location");
+			double rt = location.getAttribute("rt").getDoubleValue();
+			double neutralMass = location.getAttribute("m").getDoubleValue();
+					
 			String name = "";
-			Element msDetailsElement = (Element) cpdElement.getElementsByTagName("MSDetails").item(0);			
+			Element resultsElement = cpdElement.getChild("Results");
+			Element moleculeElement = null;
+			if(resultsElement != null) {
+				
+				moleculeElement = resultsElement.getChild("Molecule");						
+				if(moleculeElement != null){
+					
+					name = moleculeElement.getAttributeValue("name");
 
-			if(moleculeElement != null){
-				name = moleculeElement.getAttribute("name");
-
-				// Work-around for old data
-				if (name.isEmpty())
-					name = moleculeElement.getAttribute("formula");
+					// Work-around for old data
+					if (name.isEmpty())
+						name = moleculeElement.getAttributeValue("formula");
+				}
+				else{
+					name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+						MRC2ToolBoxConfiguration.getMzFormat().format(neutralMass) + "_" + 
+						MRC2ToolBoxConfiguration.getRtFormat().format(rt);
+				}
 			}
 			else{
 				name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
@@ -294,45 +339,56 @@ public class ConvertCefLibraryForRecursionTask extends AbstractTask {
 					MRC2ToolBoxConfiguration.getRtFormat().format(rt);
 			}
 			// Parse spectrum
+			Element spectrumElement = cpdElement.getChild("Spectrum");	
 			MassSpectrum spectrum = new MassSpectrum();
-			NodeList peaks = cpdElement.getElementsByTagName("p");
+			List<Element> peaks = spectrumElement.getChild("MSPeaks").getChildren("p");
+			for (Element peakElement : peaks) {
 
-			for (int j = 0; j < peaks.getLength(); j++) {
-
-				Element peakElement = (Element) peaks.item(j);
-				String adduct = peakElement.getAttribute("s");
-				double mz = Double.parseDouble(peakElement.getAttribute("x"));
-				double intensity = Double.parseDouble(peakElement.getAttribute("y"));
-				int charge = Integer.parseInt(peakElement.getAttribute("z"));
-
-				spectrum.addDataPoint(mz, intensity, adduct, charge);
+				String adduct = peakElement.getAttributeValue("s");
+				if(AdductManager.getAdductByCefNotation(adduct) == null) {
+					unmatchedAdducts.add(adduct);
+				}
+				else {
+					double mz = peakElement.getAttribute("x").getDoubleValue();
+					double intensity = peakElement.getAttribute("y").getDoubleValue();
+					int charge = peakElement.getAttribute("z").getIntValue();
+					spectrum.addDataPoint(mz, intensity, adduct, charge);
+				}
 			}
 			spectrum.finalizeCefImportSpectrum();
+			
+			//	In case of unusual adducts producing empty spectrum. Very unlikely to happen
+			if(spectrum.getMsPoints().isEmpty()) {
+				processed++;
+				continue;
+			}
+			
 			LibraryMsFeature lt = new LibraryMsFeature(name, spectrum, rt);
-			lt.setNeutralMass(neutralMass);		
+			lt.setNeutralMass(neutralMass);	
+			
 			Polarity pol = Polarity.Positive;
-			if(msDetailsElement.getAttribute("p").equals("-"))
+			if(spectrumElement.getChild("MSDetails").getAttributeValue("p").equals("-"))
 				pol = Polarity.Negative;
 			
 			lt.setPolarity(pol);
 
 			// Parse identifications
-			NodeList dbReference = cpdElement.getElementsByTagName("Accession");
-			if (dbReference.getLength() > 0) {
+			if(moleculeElement != null) {
+				
+				List<Element>dbReferenceList = 
+						moleculeElement.getChild("Database").getChildren("Accession");
+				for(Element idElement : dbReferenceList) {
+					
+					String dbName = idElement.getAttributeValue("db");
+					CompoundDatabaseEnum database = 
+							LibraryUtils.parseCompoundDatabaseName(dbName);
+					String accession = idElement.getAttributeValue("id");
 
-				for (int j = 0; j < dbReference.getLength(); j++) {
-
-					Element idElement = (Element) dbReference.item(j);
-					String dbName = idElement.getAttribute("db");
-					CompoundDatabaseEnum database = LibraryUtils.parseCompoundDatabaseName(dbName);
-					String accession = idElement.getAttribute("id");
-
-					if(database != null && !accession.isEmpty()){
+					if(database != null && accession != null && !accession.isEmpty()){
 
 						//	Check if library feature ID is embedded in CAS #
 						if(dbName.equals(AgilentDatabaseFields.CAS_ID.getName())
 								&& accession.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())){
-
 								lt.setId(accession);
 						}
 						else{
@@ -381,87 +437,34 @@ public class ConvertCefLibraryForRecursionTask extends AbstractTask {
 		return targets;
 	}
 
-	private void readTargetsFromFile() throws Exception {
+//	private void readTargetsFromFile() throws Exception {
+//
+//		taskDescription = "Reading library file...";
+//		Document cefLibrary = XmlUtils.readXmlFile(sourceLibraryFile);
+//		if(cefLibrary != null){
+//
+//			unmatchedAdducts = CefUtils.getUnmatchedAdducts(cefLibrary, total, processed);
+//			if(!unmatchedAdducts.isEmpty())
+//				return;
+//			else{
+//				Set<LibraryMsFeature> fileTargets = new HashSet<LibraryMsFeature>();
+//				try {
+//					fileTargets = parseCefLibrary(cefLibrary);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//				exportTargetList.addAll(fileTargets);
+//			}
+//		}
+//	}
+	
+	@Override
+	public Task cloneTask() {
 
-		taskDescription = "Reading library file...";
-		Document cefLibrary = XmlUtils.readXmlFile(sourceLibraryFile);
-		if(cefLibrary != null){
-
-			unmatchedAdducts = CefUtils.getUnmatchedAdducts(cefLibrary, total, processed);
-			if(!unmatchedAdducts.isEmpty())
-				return;
-			else{
-				Set<LibraryMsFeature> fileTargets = new HashSet<LibraryMsFeature>();
-				try {
-					fileTargets = parseCefLibrary(cefLibrary);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				exportTargetList.addAll(fileTargets);
-			}
-		}
-	}
-
-	private void writeCefLibrary() throws Exception {
-
-		total = exportTargetList.size();
-		processed = 0;
-
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-
-		exportedLibraryDocument = dBuilder.newDocument();
-		Element cefRoot = exportedLibraryDocument.createElement("CEF");
-		cefRoot.setAttribute("version", "1.0.0.0");
-
-		String libId = DataPrefix.MS_LIBRARY.getName() + UUID.randomUUID().toString();
-		cefRoot.setAttribute("library_id", libId);
-		exportedLibraryDocument.appendChild(cefRoot);
-		Element compoundListElement = exportedLibraryDocument.createElement("CompoundList");
-		cefRoot.appendChild(compoundListElement);
-
-		for(LibraryMsFeature lt : exportTargetList){
-			
-			if(lt.getSpectrum() == null) {
-				System.out.println(lt.getName() + " has no spectrum.");
-				continue;
-			}
-			if(combineAdducts){
-				Element compound = createCefElement(lt, null, false);
-				compoundListElement.appendChild(compound);
-			}
-			else{
-				boolean createNewId = false;	//	Create new feature ID if more than 1 adduct is added as separate entry
-				for(Adduct adduct : lt.getSpectrum().getAdducts()){
-
-					//	TODO make this check optional
-					if(lt.getSpectrum().getMsForAdduct(adduct).length > 1){
-
-						Element compound = createCefElement(lt, adduct, createNewId);
-						compoundListElement.appendChild(compound);
-					}
-					createNewId = true;
-				}
-			}
-			processed++;
-		}
-		TransformerFactory transfac = TransformerFactory.newInstance();
-		Transformer transformer = transfac.newTransformer();
-		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-
-		String extension = FilenameUtils.getExtension(outputLibraryFile.getAbsolutePath());
-
-		if(!extension.equalsIgnoreCase(MsLibraryFormat.CEF.getFileExtension()))
-			outputLibraryFile = new File(FilenameUtils.removeExtension(outputLibraryFile.getAbsolutePath()) + "."
-					+ MsLibraryFormat.CEF.getFileExtension());
-
-		StreamResult result = new StreamResult(new FileOutputStream(outputLibraryFile));
-		DOMSource source = new DOMSource(exportedLibraryDocument);
-		transformer.transform(source, result);
-		result.getOutputStream().close();
+		return new ConvertCefLibraryForRecursionTask(
+				inputCefFile,
+				outputCefFile,
+				combineAdducts);
 	}
 }
 

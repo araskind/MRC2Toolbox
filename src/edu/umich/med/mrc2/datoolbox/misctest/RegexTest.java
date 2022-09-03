@@ -67,15 +67,6 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
@@ -83,13 +74,14 @@ import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.jdom2.Document;
+import org.jdom2.Element;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -113,14 +105,8 @@ import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.ProteinBuilderTool;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import com.Ostermiller.util.CSVParser;
-//import com.gargoylesoftware.htmlunit.WebClient;
-//import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-//import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
@@ -130,7 +116,6 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
-import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescription;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
@@ -1955,61 +1940,52 @@ public class RegexTest {
 		}
 	}
 	
-	private static void verifyFileNames() throws Exception {
-		
-		IOFileFilter dotDfilter = 
-				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
-		File sourceDirectory = new File("Y:\\_QUALTMP\\EX01094\\RP\\POS\\BATCH2");
-		Collection<File> dotDfiles = FileUtils.listFilesAndDirs(
-				sourceDirectory,
-				DirectoryFileFilter.DIRECTORY,
-				dotDfilter);
-
-		if (!dotDfiles.isEmpty()) {
-
-			for(File rdf : dotDfiles) {
-				
-				String baseName = FilenameUtils.getBaseName(rdf.getName());
-				String sinfoBaseName = FilenameUtils.getBaseName(getFileNameFromSampleInfo(rdf));
-				
-				if(sinfoBaseName != null && !baseName.equals(sinfoBaseName)) {
-					System.out.println("name mismatch in " + baseName + " " + sinfoBaseName);					
-					renameFileInSampleInfo(rdf, sinfoBaseName, baseName);
-					System.out.println("Renamed.");
-				}
-			}
-		}
-	}
+//	private static void verifyFileNames() throws Exception {
+//		
+//		IOFileFilter dotDfilter = 
+//				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
+//		File sourceDirectory = new File("Y:\\_QUALTMP\\EX01094\\RP\\POS\\BATCH2");
+//		Collection<File> dotDfiles = FileUtils.listFilesAndDirs(
+//				sourceDirectory,
+//				DirectoryFileFilter.DIRECTORY,
+//				dotDfilter);
+//
+//		if (!dotDfiles.isEmpty()) {
+//
+//			for(File rdf : dotDfiles) {
+//				
+//				String baseName = FilenameUtils.getBaseName(rdf.getName());
+//				String sinfoBaseName = FilenameUtils.getBaseName(getFileNameFromSampleInfo(rdf));
+//				
+//				if(sinfoBaseName != null && !baseName.equals(sinfoBaseName)) {
+//					System.out.println("name mismatch in " + baseName + " " + sinfoBaseName);					
+//					renameFileInSampleInfo(rdf, sinfoBaseName, baseName);
+//					System.out.println("Renamed.");
+//				}
+//			}
+//		}
+//	}
 	
 	private static String getFileNameFromSampleInfo(File inputFile) throws Exception {
 		
-		File sampleInfoFile = Paths.get(inputFile.getAbsolutePath(), "AcqData", "sample_info.xml").toFile();
+		File sampleInfoFile = Paths.get(inputFile.getAbsolutePath(), 
+				"AcqData", "sample_info.xml").toFile();
 		if (sampleInfoFile.exists()) {
 
 			Document sampleInfo = XmlUtils.readXmlFile(sampleInfoFile);
 			if (sampleInfo != null) {
 				
-				XPathFactory factory = XPathFactory.newInstance();
-				XPath xpath = factory.newXPath();
-				XPathExpression expr = xpath.compile("//SampleInfo/Field");
-				NodeList fieldNodes = (NodeList) expr.evaluate(sampleInfo, XPathConstants.NODESET);
-				for (int i = 0; i < fieldNodes.getLength(); i++) {
+				List<Element> fieldNodes = 
+						sampleInfo.getRootElement().getChildren("Field");
+				for (Element fieldElement : fieldNodes) {
 
-					Element fieldElement = (Element) fieldNodes.item(i);
-					String name = fieldElement.getElementsByTagName("Name").
-							item(0).getFirstChild().getNodeValue().trim();
-					String value = fieldElement.getElementsByTagName("Value").
-							item(0).getFirstChild().getNodeValue().trim();
-
-					if (name != null && name.equals("Data File"))
-						return value;
+					if (fieldElement.getChildText("Name").equals("Data File"))
+						return fieldElement.getChildText("Value");
 				}
 			}
 		}
 		return null;
 	}
-
-
 	
 	private static void batchRenameCefs() {
 		
@@ -2051,93 +2027,93 @@ public class RegexTest {
 		System.out.println("***");
 	}
 	
-	private static void batchRename() {
-		//
-		File renameMapFile = new File("C:\\Users\\Sasha\\Downloads\\_2_rename\\EX01117-Gastroc-POS-rename-map.txt");
-		String[][] renameMapData = DelimitedTextParser.parseTextFile(renameMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
-		Map<String,String>renameMap = new TreeMap<String,String>();
-		for(int i=0; i<renameMapData.length; i++)
-			renameMap.put(renameMapData[i][0], renameMapData[i][1]);
-		
-		IOFileFilter dotDfilter = 
-				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
-		File sourceDirectory = new File("C:\\Users\\Sasha\\Downloads\\_2_rename\\POS");
-		String destinationDirName = "C:\\Users\\Sasha\\Downloads\\_2_rename\\POS\\Renamed";
-		Collection<File> dotDfiles = FileUtils.listFilesAndDirs(
-				sourceDirectory,
-				DirectoryFileFilter.DIRECTORY,
-				dotDfilter);
-
-		if (!dotDfiles.isEmpty()) {
-
-			for(File rdf : dotDfiles) {
-				
-				String baseName = FilenameUtils.getBaseName(rdf.getName());
-				String newName = renameMap.get(baseName);
-				if(newName == null) {
-					System.out.println("No new name for " + baseName);
-					continue;
-				}
-				File renamedFile = Paths.get(destinationDirName, newName + "." + FileNameUtils.getExtension(rdf.getName())).toFile();
-				try {
-					FileUtils.copyDirectory(rdf, renamedFile);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if(renamedFile.exists()) {
-					try {
-						renameFileInSampleInfo(renamedFile, baseName, newName);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					System.out.println("Renamed " + baseName + " to " + newName);
-				}
-			}
-		}
-	}
+//	private static void batchRename() {
+//		//
+//		File renameMapFile = new File("C:\\Users\\Sasha\\Downloads\\_2_rename\\EX01117-Gastroc-POS-rename-map.txt");
+//		String[][] renameMapData = DelimitedTextParser.parseTextFile(renameMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+//		Map<String,String>renameMap = new TreeMap<String,String>();
+//		for(int i=0; i<renameMapData.length; i++)
+//			renameMap.put(renameMapData[i][0], renameMapData[i][1]);
+//		
+//		IOFileFilter dotDfilter = 
+//				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
+//		File sourceDirectory = new File("C:\\Users\\Sasha\\Downloads\\_2_rename\\POS");
+//		String destinationDirName = "C:\\Users\\Sasha\\Downloads\\_2_rename\\POS\\Renamed";
+//		Collection<File> dotDfiles = FileUtils.listFilesAndDirs(
+//				sourceDirectory,
+//				DirectoryFileFilter.DIRECTORY,
+//				dotDfilter);
+//
+//		if (!dotDfiles.isEmpty()) {
+//
+//			for(File rdf : dotDfiles) {
+//				
+//				String baseName = FilenameUtils.getBaseName(rdf.getName());
+//				String newName = renameMap.get(baseName);
+//				if(newName == null) {
+//					System.out.println("No new name for " + baseName);
+//					continue;
+//				}
+//				File renamedFile = Paths.get(destinationDirName, newName + "." + FileNameUtils.getExtension(rdf.getName())).toFile();
+//				try {
+//					FileUtils.copyDirectory(rdf, renamedFile);
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				if(renamedFile.exists()) {
+//					try {
+//						renameFileInSampleInfo(renamedFile, baseName, newName);
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//					System.out.println("Renamed " + baseName + " to " + newName);
+//				}
+//			}
+//		}
+//	}
 	
-	private static void renameFileInSampleInfo(File inputFile, String oldName, String newName) throws Exception {
-		
-		File sampleInfoFile = Paths.get(inputFile.getAbsolutePath(), "AcqData", "sample_info.xml").toFile();
-		if(sampleInfoFile.setWritable(true)) {
-		    System.out.println("Re-enabled writing for " + inputFile.getName() + " sample_info.xml");
-		}
-		else {
-		    System.out.println("Failed to re-enable writing on file.");
-		}
-		if (sampleInfoFile.exists()) {
-
-			Document sampleInfo = XmlUtils.readXmlFile(sampleInfoFile);
-			if (sampleInfo != null) {
-				
-				XPathFactory factory = XPathFactory.newInstance();
-				XPath xpath = factory.newXPath();
-				XPathExpression expr = xpath.compile("//SampleInfo/Field");
-				NodeList fieldNodes = (NodeList) expr.evaluate(sampleInfo, XPathConstants.NODESET);
-				for (int i = 0; i < fieldNodes.getLength(); i++) {
-
-					Element fieldElement = (Element) fieldNodes.item(i);
-					String name = fieldElement.getElementsByTagName("Name").
-							item(0).getFirstChild().getNodeValue().trim();
-					String value = fieldElement.getElementsByTagName("Value").
-							item(0).getFirstChild().getNodeValue().trim();
-
-					if (name != null) {
-						if(name.equals("Data File")) {
-							String nvalue = value.replace(oldName, newName);
-							fieldElement.getElementsByTagName("Value").item(0).getFirstChild().setNodeValue(nvalue);
-							break;
-						}
-					}						
-				}
-			    Transformer xformer = TransformerFactory.newInstance().newTransformer();
-			    xformer.transform
-			        (new DOMSource(sampleInfo), new StreamResult(sampleInfoFile));
-			}
-		}
-	}
+//	private static void renameFileInSampleInfo(File inputFile, String oldName, String newName) throws Exception {
+//		
+//		File sampleInfoFile = Paths.get(inputFile.getAbsolutePath(), "AcqData", "sample_info.xml").toFile();
+//		if(sampleInfoFile.setWritable(true)) {
+//		    System.out.println("Re-enabled writing for " + inputFile.getName() + " sample_info.xml");
+//		}
+//		else {
+//		    System.out.println("Failed to re-enable writing on file.");
+//		}
+//		if (sampleInfoFile.exists()) {
+//
+//			Document sampleInfo = XmlUtils.readXmlFile(sampleInfoFile);
+//			if (sampleInfo != null) {
+//				
+//				XPathFactory factory = XPathFactory.newInstance();
+//				XPath xpath = factory.newXPath();
+//				XPathExpression expr = xpath.compile("//SampleInfo/Field");
+//				NodeList fieldNodes = (NodeList) expr.evaluate(sampleInfo, XPathConstants.NODESET);
+//				for (int i = 0; i < fieldNodes.getLength(); i++) {
+//
+//					Element fieldElement = (Element) fieldNodes.item(i);
+//					String name = fieldElement.getElementsByTagName("Name").
+//							item(0).getFirstChild().getNodeValue().trim();
+//					String value = fieldElement.getElementsByTagName("Value").
+//							item(0).getFirstChild().getNodeValue().trim();
+//
+//					if (name != null) {
+//						if(name.equals("Data File")) {
+//							String nvalue = value.replace(oldName, newName);
+//							fieldElement.getElementsByTagName("Value").item(0).getFirstChild().setNodeValue(nvalue);
+//							break;
+//						}
+//					}						
+//				}
+//			    Transformer xformer = TransformerFactory.newInstance().newTransformer();
+//			    xformer.transform
+//			        (new DOMSource(sampleInfo), new StreamResult(sampleInfoFile));
+//			}
+//		}
+//	}
 		
 	private static void removeUpdatedExperiments() {
 		
@@ -3532,32 +3508,35 @@ public class RegexTest {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
+	//	TODO convert to jdom2
 	private static PubChemCompoundDescriptionBundle getCompoundDescription(String cid) {
 		
-		InputStream descStream = null;
-		try {
-			descStream = WebUtils.getInputStreamFromURL(pubchemCidUrl + cid + "/description/XML");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		if(descStream == null)
-			return null;
-			
-		Document xmlDocument = XmlUtils.readXmlStream(descStream);		
-		String title = ((Element) xmlDocument.getElementsByTagName("Title").item(0)).getTextContent();
-		PubChemCompoundDescriptionBundle bundle = new PubChemCompoundDescriptionBundle(cid, title);
-		NodeList infoElements = xmlDocument.getElementsByTagName("Information");
-		for(int i=1; i<infoElements.getLength(); i++) {
-			
-			Element infoElement = (Element) infoElements.item(i);
-			String descriptionText = ((Element) infoElement.getElementsByTagName("Description").item(0)).getTextContent();
-			String sourceName = ((Element) infoElement.getElementsByTagName("DescriptionSourceName").item(0)).getTextContent();
-			String url = ((Element) infoElement.getElementsByTagName("DescriptionURL").item(0)).getTextContent();
-			
-			PubChemCompoundDescription desc = new PubChemCompoundDescription(descriptionText, sourceName, url);
-			bundle.addDescription(desc);
-		}
-		return bundle;
+//		InputStream descStream = null;
+//		try {
+//			descStream = WebUtils.getInputStreamFromURL(pubchemCidUrl + cid + "/description/XML");
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		if(descStream == null)
+//			return null;
+//			
+//		Document xmlDocument = XmlUtils.readXmlStream(descStream);		
+//		String title = ((Element) xmlDocument.getElementsByTagName("Title").item(0)).getTextContent();
+//		PubChemCompoundDescriptionBundle bundle = new PubChemCompoundDescriptionBundle(cid, title);
+//		NodeList infoElements = xmlDocument.getElementsByTagName("Information");
+//		for(int i=1; i<infoElements.getLength(); i++) {
+//			
+//			Element infoElement = (Element) infoElements.item(i);
+//			String descriptionText = ((Element) infoElement.getElementsByTagName("Description").item(0)).getTextContent();
+//			String sourceName = ((Element) infoElement.getElementsByTagName("DescriptionSourceName").item(0)).getTextContent();
+//			String url = ((Element) infoElement.getElementsByTagName("DescriptionURL").item(0)).getTextContent();
+//			
+//			PubChemCompoundDescription desc = new PubChemCompoundDescription(descriptionText, sourceName, url);
+//			bundle.addDescription(desc);
+//		}
+//		return bundle;
+		
+		return null;
 	}	
 	
 	private static void calculateEntropyForMsmsFeatures() throws Exception {

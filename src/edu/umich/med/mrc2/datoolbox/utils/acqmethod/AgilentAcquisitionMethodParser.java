@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.utils.acqmethod;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.TreeSet;
 
 import javax.xml.xpath.XPath;
@@ -31,9 +32,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.jdom2.Document;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradientStep;
@@ -81,6 +81,7 @@ public class AgilentAcquisitionMethodParser {
 		parseAutosamplerParameters();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public ChromatographicGradient extractGradientData() throws XPathExpressionException {
 		
 		//	Needs binary or quaternary pump. 
@@ -92,21 +93,22 @@ public class AgilentAcquisitionMethodParser {
 		XPathFactory factory = XPathFactory.newInstance();
 		XPath xpath = factory.newXPath();
 		XPathExpression expr = xpath.compile(TIMETABLE_ENTRY_NODE);
-		NodeList timetableNodes = (NodeList) expr.evaluate(gradientDoc, XPathConstants.NODESET);
+		List<Element>timetableNodes = 
+				(List<Element>)expr.evaluate(gradientDoc, XPathConstants.NODESET);
 		
 		double startingFlowRateFlow = getStartingFlowRate(gradientDoc, factory);
 		double stopTime = getStopTime(gradientDoc, factory);
 		
 		TreeSet<ChromatographicGradientStep> gradientSteps = new TreeSet<ChromatographicGradientStep>();
-		for (int i = 0; i < timetableNodes.getLength(); i++) {
+		for (int i = 0; i < timetableNodes.size(); i++) {
 
-			Element timetableElement = (Element) timetableNodes.item(i);
-			if(timetableElement.getAttribute("xsi:type").equals("ChangeSolventCompositionType")) {
+			Element timetableElement = (Element) timetableNodes.get(i);
+			if(timetableElement.getAttribute("xsi:type").getValue().equals("ChangeSolventCompositionType")) {
 				
 				
 			}
 			//	TODO ignore for now, see if required
-			if(timetableElement.getAttribute("xsi:type").equals("ChangeSolventCompositionType")) {
+			if(timetableElement.getAttribute("xsi:type").getValue().equals("ChangeSolventCompositionType")) {
 				
 			}
 //			double rt = Double.parseDouble(locationElement.getAttribute("rt"));
@@ -132,33 +134,35 @@ public class AgilentAcquisitionMethodParser {
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private double getStartingFlowRate(Document gradientDoc, XPathFactory factory) 
 			throws IllegalArgumentException, XPathExpressionException{
 		
 		double flow = 0.0;
 		XPath xpath = factory.newXPath();
 		XPathExpression expr = xpath.compile(GLOBAL_FLOW_NODE);
-		NodeList flowNodes = (NodeList) expr.evaluate(gradientDoc, XPathConstants.NODESET);
-		if(flowNodes.getLength() == 0)
+		List<Element>flowNodes = (List<Element>) expr.evaluate(gradientDoc, XPathConstants.NODESET);
+		if(flowNodes.size() == 0)
 			throw new IllegalArgumentException("Flow rate not specified");
 		
-		Element flowElement = (Element) flowNodes.item(0);
-		flow = Double.parseDouble(flowElement.getChildNodes().item(0).getNodeValue());
+		Element flowElement = flowNodes.get(0);
+		flow = Double.parseDouble(flowElement.getChildren().get(0).getText());
 		return flow;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private double getStopTime(Document gradientDoc, XPathFactory factory) 
 			throws IllegalArgumentException, XPathExpressionException{
 		
 		double stopTime = 0.0;
 		XPath xpath = factory.newXPath();
 		XPathExpression expr = xpath.compile(STOP_TIME_NODE);
-		NodeList flowNodes = (NodeList) expr.evaluate(gradientDoc, XPathConstants.NODESET);
-		if(flowNodes.getLength() == 0)
+		List<Element>flowNodes = (List<Element>) expr.evaluate(gradientDoc, XPathConstants.NODESET);
+		if(flowNodes.size() == 0)
 			throw new IllegalArgumentException("Stop time not specified");
 		
-		Element stopTimeElement = (Element) flowNodes.item(0);
-		stopTime = Double.parseDouble(stopTimeElement.getChildNodes().item(0).getNodeValue());
+		Element stopTimeElement = flowNodes.get(0);
+		stopTime = Double.parseDouble(stopTimeElement.getChildren().get(0).getText());
 		return stopTime;
 	}
 	

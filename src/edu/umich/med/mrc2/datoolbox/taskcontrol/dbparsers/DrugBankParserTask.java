@@ -24,23 +24,14 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.dbparsers;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.sql.Connection;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMResult;
-import javax.xml.transform.stax.StAXSource;
 
-import org.w3c.dom.Node;
-
-import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDbConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.load.drugbank.DrugBankParser;
-import edu.umich.med.mrc2.datoolbox.database.load.drugbank.DrugBankRecord;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -76,7 +67,8 @@ public class DrugBankParserTask extends AbstractTask {
 			XMLStreamReader xsr = xif.createXMLStreamReader(new FileReader(inputFile));
 			xsr.nextTag(); // Advance to statements element
 
-			//	TransformerFactory tf = TransformerFactory.newInstance( "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl", null );
+			//	TransformerFactory tf = TransformerFactory.newInstance( 
+			//	"com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl", null );
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer t = tf.newTransformer();
 			t.setOutputProperty(OutputKeys.METHOD, "xml");
@@ -87,27 +79,27 @@ public class DrugBankParserTask extends AbstractTask {
 			DocumentBuilderFactory dbactory = DocumentBuilderFactory.newInstance();
 			dbactory.setNamespaceAware(true);
 
-			Connection conn = CompoundDbConnectionManager.getConnection();
-
-			while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
-
-			    DOMResult result = new DOMResult();
-			    t.transform(new StAXSource(xsr), result);
-			    Node domNode = result.getNode();
-
-			    if(domNode.getFirstChild().getNodeName().equals("drug")){
-
-			    	DrugBankRecord record = DrugBankParser.parseRecord(domNode.getFirstChild());
-			    	try {
-						DrugBankParser.insertRecord(record, conn);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			    	processed++;
-			    }
-			}
-			CompoundDbConnectionManager.releaseConnection(conn);
+			//	TODO Convert to jdom2
+//			Connection conn = CompoundDbConnectionManager.getConnection();
+//			while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
+//
+//			    DOMResult result = new DOMResult();
+//			    t.transform(new StAXSource(xsr), result);
+//			    Node domNode = result.getNode();
+//
+//			    if(domNode.getFirstChild().getNodeName().equals("drug")){
+//
+//			    	DrugBankRecord record = DrugBankParser.parseRecord(domNode.getFirstChild());
+//			    	try {
+//						DrugBankParser.insertRecord(record, conn);
+//					} catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//			    	processed++;
+//			    }
+//			}
+//			CompoundDbConnectionManager.releaseConnection(conn);
 		}
         catch (FileNotFoundException e) {
 			setStatus(TaskStatus.ERROR);

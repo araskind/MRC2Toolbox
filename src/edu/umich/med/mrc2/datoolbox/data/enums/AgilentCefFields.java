@@ -29,6 +29,7 @@ public enum AgilentCefFields {
 	SURVEY_SCAN("Scan"),
 	PRODUCT_ION_SCAN("ProductIon"),
 	FBF_SPECTRUM("FbF"),
+	MFE_SPECTRUM("MFE"),
 	;
 
 	private final String name;

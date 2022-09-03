@@ -21,8 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom2.Document;
+import org.jdom2.Element;
 
 public interface XmlStorable {
 

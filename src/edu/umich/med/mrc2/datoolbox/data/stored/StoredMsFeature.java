@@ -21,8 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.data.stored;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+
+import org.jdom2.Document;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 

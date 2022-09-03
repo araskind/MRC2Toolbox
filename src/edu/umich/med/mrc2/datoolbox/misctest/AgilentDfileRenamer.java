@@ -32,10 +32,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
@@ -49,26 +51,17 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
+import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class AgilentDfileRenamer extends JFrame 
 		implements ActionListener, WindowListener, BackedByPreferences{
@@ -279,53 +272,34 @@ public class AgilentDfileRenamer extends JFrame
 	}
 
 	private void renameFileInSampleInfo(String oldName, String newName) throws Exception {
-		
+
 		File sampleInfoFile = Paths.get(inputFile.getAbsolutePath(), "AcqData", "sample_info.xml").toFile();
-		if(sampleInfoFile.setWritable(true)) {
-		    System.out.println("Re-enabled writing for " + inputFile.getName() + " sample_info.xml");
-		}
-		else {
-		    System.out.println("Failed to re-enable writing on file.");
+		if (sampleInfoFile.setWritable(true)) {
+			System.out.println("Re-enabled writing for " + inputFile.getName() + " sample_info.xml");
+		} else {
+			System.out.println("Failed to re-enable writing on file.");
 		}
 		if (sampleInfoFile.exists()) {
 
-			Document sampleInfo = readXmlFile(sampleInfoFile);
+			Document sampleInfo = XmlUtils.readXmlFile(sampleInfoFile);
 			if (sampleInfo != null) {
-				
-				XPathFactory factory = XPathFactory.newInstance();
-				XPath xpath = factory.newXPath();
-				XPathExpression expr = xpath.compile("//SampleInfo/Field");
-				NodeList fieldNodes = (NodeList) expr.evaluate(sampleInfo, XPathConstants.NODESET);
-				for (int i = 0; i < fieldNodes.getLength(); i++) {
 
-					Element fieldElement = (Element) fieldNodes.item(i);
-					String name = fieldElement.getElementsByTagName("Name").
-							item(0).getFirstChild().getNodeValue().trim();
-					String value = fieldElement.getElementsByTagName("Value").
-							item(0).getFirstChild().getNodeValue().trim();
+				List<Element> fieldNodes = sampleInfo.getRootElement().getChildren("Field");
+				for (Element fieldElement : fieldNodes) {
 
-					if (name != null) {
-						if(name.equals("Data File")) {
-							String nvalue = value.replace(oldName, newName);
-							fieldElement.getElementsByTagName("Value").item(0).getFirstChild().setNodeValue(nvalue);
-							break;
-						}
-					}						
+					if (fieldElement.getChildText("Name").trim().equals("Data File")) {
+						fieldElement.getChild("Value").setText(newName);
+						break;
+					}
 				}
-			    Transformer xformer = TransformerFactory.newInstance().newTransformer();
-			    xformer.transform
-			        (new DOMSource(sampleInfo), new StreamResult(sampleInfoFile));
+				XMLOutputter xmlOutputter = new XMLOutputter();
+				try (FileOutputStream fileOutputStream = new FileOutputStream(sampleInfoFile)) {
+					xmlOutputter.output(new Document(), fileOutputStream);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
-	}
-	
-	private Document readXmlFile(File file) throws Exception {
-
-		Document sampleInfo = null;
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		sampleInfo = dBuilder.parse(file);
-		return sampleInfo;
 	}
 	
 	@Override

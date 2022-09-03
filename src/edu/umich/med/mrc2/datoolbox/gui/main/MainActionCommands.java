@@ -938,6 +938,7 @@ public enum MainActionCommands {
 	IDTRACKER_EXPERIMENT_REFRESH_FORM_OPTIONS_COMMAND("Refresh IDTracker experiment search form options"),
 	
 	RELOAD_ACTIVE_MSMS_FEATURES("Reload complete active MSMS feature set"),
+	RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES("Reload features for active MSMS cluster set"),
 	RELOAD_ACTIVE_MS_ONE_FEATURES("Reload complete active MS1 feature set"),
 	CLEAR_IDTRACKER_WORKBENCH_PANEL("Clear workbench"),
 	

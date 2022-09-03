@@ -23,10 +23,10 @@ package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
@@ -35,8 +35,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXSource;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import org.jdom2.Document;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 
 public class XmlUtils {
 
@@ -44,22 +46,34 @@ public class XmlUtils {
 
 		Document xmlDocument = null;
 		try {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			xmlDocument = dBuilder.parse(file);
+			SAXBuilder sax = new SAXBuilder();
+
+			// https://rules.sonarsource.com/java/RSPEC-2755
+			// prevent xxe
+//			sax.setProperty("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
+//			sax.setProperty("http://javax.xml.XMLConstants/property/accessExternalSchema", "");		
+//	          sax.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+//	          sax.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
+			xmlDocument = sax.build(file);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return xmlDocument;
 	}
-	
+
 	public static Document readXmlStream(InputStream stream) {
 
 		Document xmlDocument = null;
 		try {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			xmlDocument = dBuilder.parse(stream);
+			SAXBuilder sax = new SAXBuilder();
+
+			// https://rules.sonarsource.com/java/RSPEC-2755
+			// prevent xxe
+//			sax.setProperty("http://javax.xml.XMLConstants/property/accessExternalDTD", "");
+//			sax.setProperty("http://javax.xml.XMLConstants/property/accessExternalSchema", "");
+
+			xmlDocument = sax.build(stream);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -81,14 +95,38 @@ public class XmlUtils {
 
 			    DOMResult result = new DOMResult();
 			    t.transform(new StAXSource(xsr), result);
-			    Node domNode = result.getNode();
-
-			    if(domNode.getFirstChild().getNodeName().equals(rootNodeName))
+			    if(result.getNode().getFirstChild().getNodeName().equals(rootNodeName))
 			    	recordNumber++;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
         return recordNumber;
+	}
+	
+	public static void writeXMLDocumentToFile(Document xmlDocument, File destinationFile) {
+		
+		XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
+		FileWriter fileWriter = null;
+		try {
+			fileWriter = new FileWriter(destinationFile);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	    try {
+			xmlOutputter.output(xmlDocument, fileWriter);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    if(fileWriter != null) {
+			try {
+				fileWriter.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
 	}
 }
