@@ -56,8 +56,12 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 
 		super(source);
 		dateCreated = new Date();
-		lastModified = new Date();
-		id = DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString();
+		lastModified = new Date();	
+		id = source.getTargetId();
+		
+		if(id == null)
+			id = DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString();
+		
 		if(spectrum == null && source.getSpectrum() != null)
 			spectrum = source.getSpectrum();
 

@@ -32,13 +32,13 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescription;
@@ -187,21 +187,44 @@ public class PubChemDataFetchTask extends AbstractTask {
 			e.printStackTrace();
 		}
 		if(descStream == null)
-			return null;
+			return null;		
+		
+		PubChemCompoundDescriptionBundle bundle = null;
+		String title = null;
+		String descriptionText = null;
+		String sourceName = null;
+		String url = null;
+		
+		Document xmlDocument = XmlUtils.readXmlStream(descStream);	
+		Namespace ns = Namespace.getNamespace("http://pubchem.ncbi.nlm.nih.gov/pug_rest");
+		List<Element> infoElements = 
+				xmlDocument.getRootElement().getChildren("Information", ns);
+		
+		for(Element infoElement : infoElements) {
+						
+			Element titleElement = infoElement.getChild("Title", ns);
+			if(titleElement != null) {
+				title = titleElement.getText();
+				bundle = new PubChemCompoundDescriptionBundle(cid, title);
+			}				
+			Element descElement = infoElement.getChild("Description", ns);
+			if(descElement != null)			
+				descriptionText = descElement.getText();
+				
+			Element descSourceElement = infoElement.getChild("DescriptionSourceName", ns);
+			if(descSourceElement != null)
+				sourceName = descSourceElement.getText();
 			
-		Document xmlDocument = XmlUtils.readXmlStream(descStream);		
-		String title = ((Element) xmlDocument.getElementsByTagName("Title").item(0)).getTextContent();
-		PubChemCompoundDescriptionBundle bundle = new PubChemCompoundDescriptionBundle(cid, title);
-		NodeList infoElements = xmlDocument.getElementsByTagName("Information");
-		for(int i=1; i<infoElements.getLength(); i++) {
+			Element descUrlElement = infoElement.getChild("DescriptionURL", ns);
+			if(descUrlElement != null)
+				url = descUrlElement.getText();
 			
-			Element infoElement = (Element) infoElements.item(i);
-			String descriptionText = ((Element) infoElement.getElementsByTagName("Description").item(0)).getTextContent();
-			String sourceName = ((Element) infoElement.getElementsByTagName("DescriptionSourceName").item(0)).getTextContent();
-			String url = ((Element) infoElement.getElementsByTagName("DescriptionURL").item(0)).getTextContent();
-			
-			PubChemCompoundDescription desc = new PubChemCompoundDescription(descriptionText, sourceName, url);
-			bundle.addDescription(desc);
+			if(descElement != null) {
+				
+				PubChemCompoundDescription desc = 
+						new PubChemCompoundDescription(descriptionText, sourceName, url);
+				bundle.addDescription(desc);
+			}
 		}
 		return bundle;
 	}

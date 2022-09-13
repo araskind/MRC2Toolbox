@@ -74,6 +74,7 @@ import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
@@ -82,6 +83,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.output.XMLOutputter;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -167,6 +169,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsfdr.NISTPepSearchResultManipulator;
 import edu.umich.med.mrc2.datoolbox.rawdata.PeakFinder;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cpdb.PubChemDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MGFUtils;
@@ -206,10 +209,99 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			getMSMSparamsTest();
+			batchUpdateDFileNames();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void batchUpdateDFileNames() {
+		
+		File sourceDirectory = new File("Y:\\_QUALTMP\\EX01235\\BATCH-05\\NEG");
+		IOFileFilter dotDfilter = 
+				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
+		Collection<File> dotDfiles = FileUtils.listFilesAndDirs(
+				sourceDirectory,
+				DirectoryFileFilter.DIRECTORY,
+				dotDfilter);
+		
+//		String find = "CS0000009-";
+//		String replace = "CS0000009-0";
+		
+//		String find = "CS0000009-010";
+//		String replace = "CS0000009-10";
+		
+		String find = "20220816";
+		String replace = "20220907";
+		
+		for(File ddf : dotDfiles) {
+			
+			if(ddf.getName().contains(find)) {
+				
+				String newName = ddf.getAbsolutePath().replace(find, replace);
+				boolean sInfoRenamed = false;
+				try {
+					sInfoRenamed = renameDFileInSampleInfo(ddf, ddf.getName(), newName);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(sInfoRenamed) {
+					
+					Path source = Paths.get(ddf.getAbsolutePath());
+					try {
+						Files.move(source, source.resolveSibling(newName));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+	
+	
+	private static boolean renameDFileInSampleInfo(File inputDFile, String oldName, String newName) throws Exception {
+
+		File sampleInfoFile = Paths.get(inputDFile.getAbsolutePath(), "AcqData", "sample_info.xml").toFile();
+//		if (sampleInfoFile.setWritable(true)) {
+//			System.err.println("Re-enabled writing for " + inputDFile.getName() + " sample_info.xml");
+//		} else {
+		if (!sampleInfoFile.setWritable(true)) {
+			System.err.println("Failed to re-enable writing on file.");
+			return false;
+		}
+//		}
+		if (sampleInfoFile.exists()) {
+
+			Document sampleInfo = XmlUtils.readXmlFile(sampleInfoFile);
+			if (sampleInfo != null) {
+
+				List<Element> fieldNodes = sampleInfo.getRootElement().getChildren("Field");
+				for (Element fieldElement : fieldNodes) {
+
+					if (fieldElement.getChildText("Name").trim().equals("Data File")) {
+						fieldElement.getChild("Value").setText(newName);
+						break;
+					}
+				}
+				XMLOutputter xmlOutputter = new XMLOutputter();
+				try (FileOutputStream fileOutputStream = new FileOutputStream(sampleInfoFile)) {
+					xmlOutputter.output(sampleInfo, fileOutputStream);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return false;
+				}
+				return true;
+			}			
+		}
+		return false;
+	}
+	
+	private static void testPubChemTitleGet() {
+		
+		PubChemCompoundDescriptionBundle desc = 
+				PubChemDataFetchTask.getCompoundDescription("12896");
+		System.err.println("12896");
 	}
 	
 	private static void getMSMSparamsTest() throws Exception {
@@ -220,6 +312,7 @@ public class RegexTest {
 	
 	private static void testChrom() throws Exception {
 		FeatureChromatogramUtils.getMsFeatureChromatogramBundleForFeature("MSF_000003733493");
+		
 	}
 	
 	private static void addManufacturerIds() throws Exception {

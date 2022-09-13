@@ -79,7 +79,7 @@ public class WorklistTable extends BasicTable {
 		setDefaultRenderer(Date.class, dtRenderer);
 
 		fileRenderer = new DataFileCellRenderer();
-		setDefaultRenderer(DataFile.class, dtRenderer);
+		setDefaultRenderer(DataFile.class, fileRenderer);
 
 		model.setTableModelFromWorklist(listToShow);
 		createDefaultColumnsFromModel();
@@ -103,6 +103,8 @@ public class WorklistTable extends BasicTable {
 					model.removeTableModelListener(table);
 					model.setTableModelFromWorklist(worklist);
 					createDefaultColumnsFromModel();
+					setDefaultRenderer(Date.class, dtRenderer);
+					setDefaultRenderer(DataFile.class, fileRenderer);
 					model.addTableModelListener(table);
 					model.fireTableDataChanged();
 					thf.setTable(table);

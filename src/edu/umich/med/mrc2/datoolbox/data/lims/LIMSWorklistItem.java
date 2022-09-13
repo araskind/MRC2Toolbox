@@ -63,6 +63,12 @@ public class LIMSWorklistItem extends WorklistItem implements Serializable {
 		this.injectionVolume = injectionVolume;
 	}
 
+	public LIMSWorklistItem(WorklistItem item) {
+		super(item.getDataFile());
+		this.timeStamp = item.getTimeStamp();
+		this.properties.putAll(item.getProperties());
+	}
+
 	/**
 	 * @return the acquisitionMethod
 	 */

@@ -434,11 +434,11 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		library = lit.getParsedLibrary();
 
 		// Show unassigned features
-		if (!lit.getUnassigned().isEmpty()) {
+		if (!lit.getUnassignedFeatures().isEmpty()) {
 
 			ArrayList<String> flist = new ArrayList<String>();
 
-			for (MsFeature msf : lit.getUnassigned())
+			for (MsFeature msf : lit.getUnassignedFeatures())
 				flist.add(msf.getName());
 
 			@SuppressWarnings("unused")
@@ -458,7 +458,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 					StringUtils.join(lit.getUnmatchedAdducts(), "\n"),
 					null);
 		}
-		if (!lit.getUnassigned().isEmpty() || !lit.getUnmatchedAdducts().isEmpty()) {
+		if (!lit.getUnassignedFeatures().isEmpty() || !lit.getUnmatchedAdducts().isEmpty()) {
 
 			setStatus(TaskStatus.ERROR);
 			return false;

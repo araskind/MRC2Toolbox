@@ -153,6 +153,7 @@ public class WorklistTableModel extends DefaultTableModel {
 				else if (columnNames.get(i).equals(AgilentSampleInfoFields.DATA_FILE.getName()))
 					newRow[i] = item.getDataFile();
 				else if (columnNames.get(i).equals(AgilentSampleInfoFields.INJ_VOL.getName())) {
+					
 					 if(NumberUtils.isCreatable(item.getProperty(AgilentSampleInfoFields.INJ_VOL.getName())))
 						 newRow[i] = Double.parseDouble(item.getProperty(AgilentSampleInfoFields.INJ_VOL.getName()));
 					 else

@@ -50,8 +50,7 @@ public class SimpleMsFeature implements Serializable {
 			MassSpectrum observedSpectrum, 
 			double retentionTime,
 			DataPipeline dataPipeline) {
-		super();
-		
+		super();		
 		this.uniqueId = DataPrefix.MS_FEATURE.getName() + 
 				UUID.randomUUID().toString();
 		this.libraryTargetId = libraryTargetId;
@@ -64,14 +63,28 @@ public class SimpleMsFeature implements Serializable {
 			MassSpectrum observedSpectrum, 
 			double retentionTime, 
 			DataPipeline dataPipeline) {
-		super();
-		
+		super();		
 		this.uniqueId = DataPrefix.MS_FEATURE.getName() + 
 				UUID.randomUUID().toString();
 		this.observedSpectrum = observedSpectrum;
 		this.retentionTime = retentionTime;
 		this.dataPipeline = dataPipeline;
 	}
+	
+	public SimpleMsFeature(
+			MsFeature parent, 
+			DataPipeline dataPipeline) {
+		super();		
+		this.uniqueId = DataPrefix.MS_FEATURE.getName() + 
+				UUID.randomUUID().toString();
+		this.libraryTargetId = parent.getTargetId();
+		this.observedSpectrum = parent.getSpectrum();
+		this.retentionTime = parent.getRetentionTime();
+		this.dataPipeline = dataPipeline;	
+		this.polarity = parent.getPolarity();
+		this.area = parent.getArea();
+		this.height = parent.getHeight();
+	}	
 
 	public String getUniqueId() {
 		return uniqueId;

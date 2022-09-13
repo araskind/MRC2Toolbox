@@ -44,7 +44,6 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.AgilentCefFields;
-import edu.umich.med.mrc2.datoolbox.data.enums.AgilentDatabaseFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
@@ -56,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.LibraryUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
@@ -77,12 +77,22 @@ public abstract class CEFProcessingTask extends AbstractTask {
 	}
 
 	protected void parseInputCefFile(File fileToParse) throws Exception {
-
-		taskDescription = 
-				"Reading features from " + inputCefFile.getName();
 		
 		inputCefFile = fileToParse;
+		if(inputCefFile == null || !inputCefFile.exists()) {
+			errorMessage = "Input file not found";
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
+		taskDescription = 
+				"Reading features from " + inputCefFile.getName();
+				
 		Document cefDocument = XmlUtils.readXmlFile(inputCefFile);
+		if(cefDocument == null) {
+			errorMessage = "Failed to parse input file";
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
 		inputFeatureList = new ArrayList<MsFeature>();
 		List<Element>featureNodes = 
 				cefDocument.getRootElement().getChild("CompoundList").getChildren("Compound");
@@ -135,8 +145,13 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				MRC2ToolBoxConfiguration.getRtFormat().format(rt);
 		}
 		MsFeature feature = new MsFeature(name, rt);
-		feature.setNeutralMass(neutralMass);	
+		feature.setNeutralMass(neutralMass);
+		if(location.getAttribute("a") != null)
+			feature.setArea(location.getAttribute("a").getDoubleValue());
 
+		if(location.getAttribute("y") != null)
+			feature.setHeight(location.getAttribute("y").getDoubleValue());
+		
 		parseSpectra(cpdElement, feature);
 
 		// Parse identifications
@@ -144,7 +159,17 @@ public abstract class CEFProcessingTask extends AbstractTask {
 				parseIdentifications(feature, cpdElement, conn);
 		if(!identifications.isEmpty()) {
 			identifications.stream().forEach(id -> feature.addIdentity(id));
-			feature.setPrimaryIdentity(identifications.iterator().next());
+			
+			for(MsFeatureIdentity id : feature.getIdentifications()) {
+				
+				if(id.getCompoundIdentity() == null || id.getCompoundIdentity().getPrimaryDatabaseId() == null)
+					continue;
+					
+				String dbId = id.getCompoundIdentity().getPrimaryDatabaseId();
+				if(!dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
+						&& !dbId.startsWith(DataPrefix.MS_FEATURE.getName()))
+					feature.setPrimaryIdentity(id);
+			}		
 		}
 		return feature;
 	}
@@ -333,14 +358,20 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			MsFeatureIdentity msid = null;
 			String name = molElement.getAttributeValue("name");
 			String molecularFormula = molElement.getAttributeValue("formula");
-			if(name.isEmpty())	{
+			if(name == null || name.isEmpty())	{
+				
 				CompoundIdentity mfId = new CompoundIdentity(molecularFormula, molecularFormula);
+				if(mfId.getExactMass() == 0)
+					mfId.setExactMass(feature.getNeutralMass());
+					
 				msid = new MsFeatureIdentity(mfId, CompoundIdentificationConfidence.ACCURATE_MASS);
 				msid.setIdSource(CompoundIdSource.FORMULA_GENERATOR);
-				identifications.add(msid);
 			}	
 			else {
 				CompoundIdentity cid = new CompoundIdentity(name, molecularFormula);
+				if(cid.getExactMass() == 0)
+					cid.setExactMass(feature.getNeutralMass());
+				
 				for(Element dbElement : molElement.getChild("Database").getChildren("Accession")) {
 					
 					String databaseName = dbElement.getAttributeValue("db");
@@ -349,10 +380,10 @@ public abstract class CEFProcessingTask extends AbstractTask {
 					if(databaseName != null && !databaseName.isEmpty() 
 							&& databaseId != null && !databaseId.isEmpty()) {		
 							
-						if(databaseName.equals(AgilentDatabaseFields.CAS_ID.getName())
-								&& databaseId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())){
-								feature.setId(databaseId);
-						}
+//						if(databaseName.equals(AgilentDatabaseFields.CAS_ID.getName())
+//								&& databaseId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())){
+//								feature.setId(databaseId);
+//						}
 						CompoundDatabaseEnum database = 
 								LibraryUtils.parseCompoundDatabaseName(databaseName);
 						if(database == null)
@@ -422,6 +453,8 @@ public abstract class CEFProcessingTask extends AbstractTask {
 					}
 				}			
 			}
+			if(msid != null)
+				identifications.add(msid);
 		}
 		// Add ID by name if not specified in the library
 		if(!feature.getName().startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())
@@ -458,7 +491,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		return inputFeatureList;
 	}
 
-	public TreeSet<String> getUnmatchedAdducts() {
+	public Set<String> getUnmatchedAdducts() {
 		return unmatchedAdducts;
 	}
 }

@@ -64,6 +64,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	protected String name;
 	protected MassSpectrum spectrum;
 	protected double retentionTime;
+	private double area, height;
 	protected double medianObservedRetentionTime = -1.0;
 	protected Range rtRange;
 	protected double neutralMass;	
@@ -987,6 +988,35 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			else
 				idDisabled = false;
 		}
+	}
+	
+	public String getTargetId() {
+		
+		String targetId = identifications.stream().
+			filter(i -> i.getCompoundIdentity() != null).
+			map(i -> i.getCompoundIdentity()).
+			flatMap(c -> c.getDbIdMap().values().stream()).
+			filter(id -> (id.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
+					|| id.startsWith(DataPrefix.MS_FEATURE.getName()))).
+			findFirst().orElse(null);
+		
+		return targetId;
+	}
+
+	public double getArea() {
+		return area;
+	}
+
+	public void setArea(double area) {
+		this.area = area;
+	}
+
+	public double getHeight() {
+		return height;
+	}
+
+	public void setHeight(double height) {
+		this.height = height;
 	}
 }
 

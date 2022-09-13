@@ -100,7 +100,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.derepl.MergeDuplicateFeatu
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefDataAddTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.MultiCefImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.QuantMatrixImportTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.CefLibraryImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.ClearIdentificationsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibrarySearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
@@ -1256,10 +1255,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (e.getSource().getClass().equals(QuantMatrixImportTask.class))
 				finalizeQuantDataLoad((QuantMatrixImportTask) e.getSource());
 
-			//	Load library
-			if (e.getSource().getClass().equals(CefLibraryImportTask.class))
-				finalizeLibraryLoad((CefLibraryImportTask) e.getSource());
-
 			//	Load data from multiple CEF files
 			if (e.getSource().getClass().equals(MultiCefImportTask.class))
 				finalizeMultiCefDataLoad((MultiCefImportTask) e.getSource());
@@ -1370,39 +1365,39 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		resetFeatureTable();
 	}
 
-	private void finalizeLibraryLoad(CefLibraryImportTask lit) {
-
-		setTableModelFromFeatureSet(
-				currentProject.getActiveFeatureSetForDataPipeline(activeDataPipeline));
-
-		// Show unassigned features
-		if (!lit.getUnassigned().isEmpty()) {
-
-			ArrayList<String> flist = new ArrayList<String>();
-
-			for (MsFeature msf : lit.getUnassigned())
-				flist.add(msf.getName());
-
-			@SuppressWarnings("unused")
-			InformationDialog id = new InformationDialog(
-					"Unmatched features",
-					"Not all features were matched to the library.\n"
-					+ "Below is the list of unmatched features.",
-					StringUtils.join(flist, "\n"),
-					this.getContentPane());
-		}
-		// Show unassigned adducts
-		if (!lit.getUnmatchedAdducts().isEmpty()) {
-
-			@SuppressWarnings("unused")
-			InformationDialog id = new InformationDialog(
-					"Unmatched adducts",
-					"Not all adducts were matched to the database.\n"
-					+ "Below is the list of unmatched adducts.",
-					StringUtils.join(lit.getUnmatchedAdducts(), "\n"),
-					this.getContentPane());
-		}
-	}
+//	private void finalizeLibraryLoad(CefLibraryImportTask lit) {
+//
+//		setTableModelFromFeatureSet(
+//				currentProject.getActiveFeatureSetForDataPipeline(activeDataPipeline));
+//
+//		// Show unassigned features
+//		if (!lit.getUnassigned().isEmpty()) {
+//
+//			ArrayList<String> flist = new ArrayList<String>();
+//
+//			for (MsFeature msf : lit.getUnassigned())
+//				flist.add(msf.getName());
+//
+//			@SuppressWarnings("unused")
+//			InformationDialog id = new InformationDialog(
+//					"Unmatched features",
+//					"Not all features were matched to the library.\n"
+//					+ "Below is the list of unmatched features.",
+//					StringUtils.join(flist, "\n"),
+//					this.getContentPane());
+//		}
+//		// Show unassigned adducts
+//		if (!lit.getUnmatchedAdducts().isEmpty()) {
+//
+//			@SuppressWarnings("unused")
+//			InformationDialog id = new InformationDialog(
+//					"Unmatched adducts",
+//					"Not all adducts were matched to the database.\n"
+//					+ "Below is the list of unmatched adducts.",
+//					StringUtils.join(lit.getUnmatchedAdducts(), "\n"),
+//					this.getContentPane());
+//		}
+//	}
 	
 	private void finalizeDatabaseLibraryLoad(LoadDatabaseLibraryTask task) {
 

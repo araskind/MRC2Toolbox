@@ -78,7 +78,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTCefImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTCefMSMSPrescanOrImportTask;
 
 public class IDTrackerMultiFileMSMSDataImportDialog extends JDialog
@@ -363,12 +362,6 @@ public class IDTrackerMultiFileMSMSDataImportDialog extends JDialog
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
-			if (e.getSource().getClass().equals(IDTCefImportTask.class)) {
-
-				IDTCefImportTask task = (IDTCefImportTask)e.getSource();
-				importLog.addAll(task.getImportLog());
-				processedFiles++;
-			}
 			if (e.getSource().getClass().equals(IDTCefMSMSPrescanOrImportTask.class)) {
 
 				IDTCefMSMSPrescanOrImportTask task = (IDTCefMSMSPrescanOrImportTask)e.getSource();

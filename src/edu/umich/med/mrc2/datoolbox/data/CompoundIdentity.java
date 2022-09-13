@@ -137,8 +137,13 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		super();
 		this.commonName = commonName;
 		this.formula = formula;
-		IMolecularFormula mf = MolecularFormulaManipulator.getMolecularFormula(formula, DefaultChemObjectBuilder.getInstance());
-		exactMass = MolecularFormulaManipulator.getMajorIsotopeMass(mf);
+		if(formula != null) {
+			
+			IMolecularFormula mf = 
+					MolecularFormulaManipulator.getMolecularFormula(
+							formula, DefaultChemObjectBuilder.getInstance());
+			exactMass = MolecularFormulaManipulator.getMajorIsotopeMass(mf);
+		}
 		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
 	}
 

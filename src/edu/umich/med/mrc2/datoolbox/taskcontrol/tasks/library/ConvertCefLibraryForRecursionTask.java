@@ -220,7 +220,7 @@ public class ConvertCefLibraryForRecursionTask extends CEFProcessingTask {
 		Element libId = new Element("Accession");
 		libId.setAttribute("db", "CAS ID");
 		if(createNewId)
-			libId.setAttribute("id", DataPrefix.MS_FEATURE.getName() + UUID.randomUUID().toString());
+			libId.setAttribute("id", DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString());
 		else
 			libId.setAttribute("id", lt.getId());
 		

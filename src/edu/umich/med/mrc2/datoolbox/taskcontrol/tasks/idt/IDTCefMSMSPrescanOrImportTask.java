@@ -40,9 +40,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.jdom2.Document;
+import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompositeAdduct;
@@ -70,17 +69,16 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cef.CEFProcessingTask;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
-public class IDTCefMSMSPrescanOrImportTask extends AbstractTask {
+public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 
-	private File inputCefFile;
 	private Document dataDocument;
 	private Collection<CompoundIdentity>missingIdentities;
 	private Map<CompoundIdentity, Collection<TandemMassSpectrum>>idSpectrumMap;
@@ -134,56 +132,51 @@ public class IDTCefMSMSPrescanOrImportTask extends AbstractTask {
 			taskDescription = "Pre-scanning data from " + inputCefFile.getName();
 		
 		setStatus(TaskStatus.PROCESSING);
-		dataDocument = null;
 		try {
-			dataDocument = XmlUtils.readXmlFile(inputCefFile);
-		} catch (Exception e) {
+			parseInputCefFile(inputCefFile);
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
-		//	Parse CEF data
-		if(dataDocument != null) {
+		if(inputFeatureList == null || inputFeatureList.isEmpty()) {
+			errorMessage = "No features found in input file";
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
+		try {
+			mapCompoundIdsToDatabase();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+		}
+		try {
+			mapMSMSLibraryMatchesToDatabase();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+		}
+		if(uploadData) {
+			
+			if(dataExtractionMethod == null || injectionId == null) {
+				setStatus(TaskStatus.FINISHED);
+				return;
+			}				
+			if(!missingIdentities.isEmpty() || !idSpectrumMap.isEmpty()) {
+				importLog.add("Data can not be imported from " + 
+						inputCefFile.getName() + 
+						" before the compound IDs and/or MSMS library entries are  resolved.");				
+				setStatus(TaskStatus.FINISHED);
+				return;
+			}
 			try {
-				parseCefFile();
+				uploadParsedData();
 			}
 			catch (Exception e) {
 				e.printStackTrace();
 				setStatus(TaskStatus.ERROR);
 			}
-			try {
-				mapCompoundIdsToDatabase();
-			} catch (Exception e1) {
-				e1.printStackTrace();
-				setStatus(TaskStatus.ERROR);
-			}
-			try {
-				mapMSMSLibraryMatchesToDatabase();
-			} catch (Exception e1) {
-				e1.printStackTrace();
-				setStatus(TaskStatus.ERROR);
-			}
-			if(uploadData) {
-				
-				if(dataExtractionMethod == null || injectionId == null) {
-					setStatus(TaskStatus.FINISHED);
-					return;
-				}				
-				if(!missingIdentities.isEmpty() || !idSpectrumMap.isEmpty()) {
-					importLog.add("Data can not be imported from " + 
-							inputCefFile.getName() + 
-							" before the compound IDs and/or MSMS library entries are  resolved.");				
-					setStatus(TaskStatus.FINISHED);
-					return;
-				}
-				try {
-					uploadParsedData();
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-					setStatus(TaskStatus.ERROR);
-				}
-			}
-		}
+		}		
 		setStatus(TaskStatus.FINISHED);
 	}
 	
