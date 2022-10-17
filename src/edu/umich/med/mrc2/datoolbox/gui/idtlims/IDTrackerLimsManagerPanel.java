@@ -759,6 +759,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 					experimentDialog.getExperimentDescription(), 
 					experimentDialog.getExperimentNotes(),
 					experimentDialog.getExperimentProject());
+			newExperiment.setCreator(MRC2ToolBoxCore.getIdTrackerUser());
 			try {
 				String experimentId = IDTUtils.addNewExperiment(newExperiment);
 				newExperiment.setId(experimentId);

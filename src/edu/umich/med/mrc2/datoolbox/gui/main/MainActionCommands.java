@@ -982,6 +982,8 @@ public enum MainActionCommands {
 	SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND("IDTracker data export setup"),
 	EXPORT_IDTRACKER_DATA_COMMAND("Export IDTracker data"),
 	RESET_IDTRACKER_DATA_EXPORT_FIELDS_COMMAND("Reset IDTracker data export fields"),
+	SHOW_MSMS_CLUSTER_DATA_EXPORT_DIALOG_COMMAND("MSMS clusters data export setup"),
+	EXPORT_MSMS_CLUSTER_DATA_COMMAND("Export MSMS clusters data"),
 	
 	//	Tracker search dialog
 	SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND("IDTracker database search setup"),

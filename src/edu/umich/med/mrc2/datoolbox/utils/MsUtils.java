@@ -846,6 +846,65 @@ public class MsUtils {
 		return error;
 	}
 	
+	public static double getMassErrorForIdentity(
+			double expectedMz, 
+			MsFeatureIdentity id, 
+			MassErrorType errorType) {
+
+		double error = 0.0d;
+		LibraryMsFeature mslf = null;
+
+		if(id.getIdSource().equals(CompoundIdSource.LIBRARY)) {
+			
+			MsRtLibraryMatch libMatch = id.getMsRtLibraryMatch();
+			if(libMatch == null)
+				return 0.0d;
+
+			if(libMatch.getTopAdductMatch() == null)
+				return 0.0d;
+			
+			Adduct idAdduct = libMatch.getTopAdductMatch().getUnknownMatch();
+			if(idAdduct != null) {
+
+				//	Compare to library feature if present
+				if(libMatch.getLibraryTargetId() != null) {
+
+					try {
+						mslf = RemoteMsLibraryUtils.getLibraryFeatureById(libMatch.getLibraryTargetId());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					if(mslf != null) {
+
+						Adduct matchAdduct = libMatch.getTopAdductMatch().getLibraryMatch();
+						if(matchAdduct != null) {
+
+							MsPoint[] libMs = mslf.getSpectrum().getMsForAdduct(matchAdduct);
+							if(libMs != null)
+								return calculateMassError(libMs[0].getMz(), expectedMz, errorType);
+						}
+					}
+				}
+			}
+		}		
+		//	Calculate error for MSMS match based on parent M/Z in experimental and library spectrum
+		if(id.getIdSource().equals(CompoundIdSource.LIBRARY_MS2) || 
+				id.getIdSource().equals(CompoundIdSource.LIBRARY_MS2_RT)) {
+
+			if(id.getReferenceMsMsLibraryMatch() != null) {
+				
+				MsPoint parentPeak = id.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getParent();
+				if(parentPeak == null) {
+					System.out.println("No parent peak for " + id.getName());
+					return 0.0d;
+				}
+				return calculateMassError(parentPeak.getMz(), expectedMz, errorType);				
+			}
+		}
+		return error;
+	}
+	
 	public static double calculateMassError(
 			double ref, 
 			double unknown, 

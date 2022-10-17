@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.LibMatchedSimpleMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
@@ -79,7 +80,7 @@ import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 
-	private Document dataDocument;
+
 	private Collection<CompoundIdentity>missingIdentities;
 	private Map<CompoundIdentity, Collection<TandemMassSpectrum>>idSpectrumMap;
 	private DataExtractionMethod dataExtractionMethod;
@@ -144,6 +145,8 @@ public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 			setStatus(TaskStatus.ERROR);
 			return;
 		}
+//		inputFeatureList.stream().
+//			forEach(f -> features.add(new LibMatchedSimpleMsFeature(f, dataPipeline)));
 		try {
 			mapCompoundIdsToDatabase();
 		} catch (Exception e1) {
@@ -180,356 +183,6 @@ public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 		setStatus(TaskStatus.FINISHED);
 	}
 	
-	private void parseCefFile() throws XPathExpressionException {
-
-		taskDescription = "Parsing CEF data file " + inputCefFile.getName();
-		dataDocument = null;
-		try {
-			dataDocument = XmlUtils.readXmlFile(inputCefFile);
-		} catch (Exception e) {
-			e.printStackTrace();
-			setStatus(TaskStatus.ERROR);
-		}
-		XPathExpression expr = null;
-		NodeList targetNodes;
-		XPathFactory factory = XPathFactory.newInstance();
-		XPath xpath = factory.newXPath();
-		expr = xpath.compile("//CEF/CompoundList/Compound");
-		targetNodes = (NodeList) expr.evaluate(dataDocument, XPathConstants.NODESET);
-		total = targetNodes.getLength();
-		processed = 0;
-		for (int i = 0; i < targetNodes.getLength(); i++) {
-
-			Element cpdElement = (Element) targetNodes.item(i);
-			Element locationElement = (Element) cpdElement.getElementsByTagName("Location").item(0);
-			double rt = Double.parseDouble(locationElement.getAttribute("rt"));
-			MassSpectrum spectrum =
-					parseSpectraNodes(cpdElement.getElementsByTagName("Spectrum"));
-
-			String targetId = getTargetId(cpdElement);
-			String mass = null;
-			LibMatchedSimpleMsFeature msf = 
-					new LibMatchedSimpleMsFeature(targetId, spectrum, rt, dataPipeline);
-			if(!locationElement.getAttribute("m").isEmpty()) {
-				double neutralMass = Double.parseDouble(locationElement.getAttribute("m"));
-				mass = MRC2ToolBoxConfiguration.getMzFormat().format(neutralMass);
-				msf.setNeutralMass(neutralMass);
-			}
-			else {
-				mass = MRC2ToolBoxConfiguration.getMzFormat().format(spectrum.getMonoisotopicMz());
-			}
-			Element msDetailsElement = (Element) cpdElement.getElementsByTagName("MSDetails").item(0);
-			String sign = msDetailsElement.getAttribute("p");
-			Polarity polarity = Polarity.Positive;
-			if(sign.equals("-"))
-				polarity = Polarity.Negative;
-
-			msf.setPolarity(polarity);
-			
-			// Parse identifications
-			TandemMassSpectrum instrumentMsms = spectrum.getTandemSpectra().stream().
-					filter(s -> (s.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL))).
-					findFirst().orElse(null);
-
-			TandemMassSpectrum msmsLibraryMatch = spectrum.getTandemSpectra().stream().
-					filter(s -> (s.getSpectrumSource().equals(SpectrumSource.LIBRARY)
-							|| s.getSpectrumSource().equals(SpectrumSource.DATABASE))).
-					findFirst().orElse(null);
-
-			if(instrumentMsms != null) {
-				mass = MRC2ToolBoxConfiguration.getMzFormat().format(instrumentMsms.getParent().getMz());
-				if(msmsLibraryMatch != null) {
-					msmsLibraryMatch.setCidLevel(instrumentMsms.getCidLevel());
-					msmsLibraryMatch.setPolarity(instrumentMsms.getPolarity());
-				}
-			}
-			//	Get name
-			String name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-					mass + "_" + locationElement.getAttribute("rt");
-			msf.setName(name);
-			MsFeatureIdentity msid = parseIdentity(cpdElement, msmsLibraryMatch, name);
-			msf.setIdentity(msid);
-
-			//	Add extra data for feature
-			if(!locationElement.getAttribute("a").isEmpty())
-				msf.setArea(Double.parseDouble(locationElement.getAttribute("a")));
-
-			if(!locationElement.getAttribute("y").isEmpty())
-				msf.setHeight(Double.parseDouble(locationElement.getAttribute("y")));
-
-			features.add(msf);
-			processed++;
-		}	
-	}
-	
-	protected MsFeatureIdentity parseIdentity(
-			Element compoundElement,
-			TandemMassSpectrum msmsLibraryMatch,
-			String featureName) {
-
-		MsFeatureIdentity msid = null;
-		
-		//	No ID
-		if(compoundElement.getElementsByTagName("Molecule").getLength() == 0) {
-			
-			CompoundIdentity unkId = new CompoundIdentity();
-			unkId.setCommonName(featureName);
-			msid = new MsFeatureIdentity(unkId, CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
-			msid.setIdSource(CompoundIdSource.UNKNOWN);
-			return msid;
-		}
-		Element molecule = (Element) compoundElement.getElementsByTagName("Molecule").item(0);
-		String name = molecule.getAttribute("name").trim();
-
-		//	Generated molecular formula
-		String molecularFormula = molecule.getAttribute("formula").replaceAll("\\s+", "");
-		if(name.isEmpty())	{
-			CompoundIdentity mfId = new CompoundIdentity(molecularFormula, molecularFormula);
-			msid = new MsFeatureIdentity(mfId, CompoundIdentificationConfidence.ACCURATE_MASS);
-			msid.setIdSource(CompoundIdSource.FORMULA_GENERATOR);
-			return msid;
-		}		
-		//	Database or library match
-		CompoundIdentity cid = new CompoundIdentity(name, molecularFormula);
-		NodeList iDlist = compoundElement.getElementsByTagName("Accession");
-		if (iDlist.getLength() > 0) {
-
-			for (int j = 0; j < iDlist.getLength(); j++) {
-
-				Element idElement = (Element) iDlist.item(j);
-				String database = idElement.getAttribute("db").trim();
-				String accession = idElement.getAttribute("id").trim();
-				if (!database.isEmpty() && !accession.isEmpty()) {
-
-					CompoundDatabaseEnum db = AgilentDatabaseFields.getDatabaseByName(database);
-					if(db == null)
-						db = CompoundDatabaseEnum.getCompoundDatabaseByName(database);
-
-					if(db != null) {
-
-						if(db.equals(CompoundDatabaseEnum.METLIN))
-							accession = "METLIN:" + accession;
-
-						//	TODO may change if Agilent upgrades PCDL to use new HMDB ID format
-						if(db.equals(CompoundDatabaseEnum.HMDB))
-							accession = accession.replace("HMDB", "HMDB00");
-
-						cid.addDbId(db, accession);
-					}
-				}
-			}
-		}
-		msid = new MsFeatureIdentity(cid, CompoundIdentificationConfidence.ACCURATE_MASS);
-		msid.setIdSource(CompoundIdSource.DATABASE);
-		if(msmsLibraryMatch != null) {
-			msid.setConfidenceLevel(CompoundIdentificationConfidence.ACCURATE_MASS_MSMS);
-			double score = getLibraryMatchScore(compoundElement);
-			msid.setScoreCarryOver(score);
-			msid.setIdSource(CompoundIdSource.LIBRARY_MS2);
-		}
-		return msid;
-	}
-	
-	protected MassSpectrum parseSpectraNodes(NodeList spectra) {
-
-		MassSpectrum spectrum = new MassSpectrum();
-		TandemMassSpectrum observedMsms = null;
-		TandemMassSpectrum libMsms = null;
-
-		for (int i = 0; i < spectra.getLength(); i++) {
-
-			Element spectrumElement = (Element) spectra.item(i);
-			String ta = spectrumElement.getAttribute("type");
-
-			//	Add MS1
-			if(ta.equals(AgilentCefFields.MS1_SPECTRUM.getName())
-					|| spectrumElement.getAttribute("type").equals(AgilentCefFields.FBF_SPECTRUM.getName())) {
-
-				Map<Adduct,Collection<MsPoint>>adductMap = parseMsOneSpectrumElement(spectrumElement);
-				adductMap.entrySet().stream().forEach(e -> spectrum.addSpectrumForAdduct(e.getKey(), e.getValue()));
-				String detectionAlgorithm =  spectrumElement.getAttribute("cpdAlgo");
-				if(!detectionAlgorithm.isEmpty())
-					spectrum.setDetectionAlgorithm(detectionAlgorithm);
-			}
-			//	Add observed MSMS
-			if(ta.equals(AgilentCefFields.MS2_SPECTRUM.getName())) {
-				observedMsms = parseMsTwoSpectrumElement(spectrumElement);
-				observedMsms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
-				spectrum.addTandemMs(observedMsms);
-			}
-		}
-		//	Add library MS2 spectrum
-		if (observedMsms != null) {
-
-			for (int i = 0; i < spectra.getLength(); i++) {
-
-				Element spectrumElement = (Element) spectra.item(i);
-				String ta = spectrumElement.getAttribute("type");
-				if (ta.equals(AgilentCefFields.LIBRARY_MS2_SPECTRUM.getName())) {
-
-					libMsms = parseLibMsTwoSpectrumElement(spectrumElement, observedMsms.getPolarity());
-					if (libMsms != null) {
-						libMsms.setSpectrumSource(SpectrumSource.LIBRARY);
-						spectrum.addTandemMs(libMsms);
-					}
-					break;
-				}
-			}
-		}
-		return spectrum;
-	}
-	
-	protected TandemMassSpectrum parseLibMsTwoSpectrumElement(Element spectrumElement, Polarity polarity) {
-
-		NodeList precursors = spectrumElement.getElementsByTagName("mz");
-		double mz = Double.parseDouble(precursors.item(0).getFirstChild().getNodeValue());
-		TandemMassSpectrum msms = new TandemMassSpectrum(2, new MsPoint(mz, 999.0d), polarity);
-		msms.setSpectrumSource(SpectrumSource.LIBRARY);
-		NodeList msmsPeaks = spectrumElement.getElementsByTagName("p");
-		Collection<MsPoint>msmsPoints = new ArrayList<MsPoint>();
-		for (int j = 0; j < msmsPeaks.getLength(); j++) {
-
-			Element peakElement = (Element) msmsPeaks.item(j);
-			msmsPoints.add(new MsPoint(
-					Double.parseDouble(peakElement.getAttribute("x")),
-					Double.parseDouble(peakElement.getAttribute("y"))));
-		}
-		msms.setSpectrum(msmsPoints);
-		return msms;
-	}
-
-	protected Map<Adduct,Collection<MsPoint>>parseMsOneSpectrumElement(Element spectrumElement){
-
-		Element msDetails = (Element) spectrumElement.getElementsByTagName("MSDetails").item(0);
-		String sign = msDetails.getAttribute("p");
-		Polarity pol = null;
-		if(sign.equals("+"))
-			pol = Polarity.Positive;
-
-		if(sign.equals("-"))
-			pol = Polarity.Negative;
-
-		Map<Adduct,Collection<MsPoint>>cmMap = new TreeMap<Adduct,Collection<MsPoint>>();
-		NodeList msPeaks = spectrumElement.getElementsByTagName("p");
-
-		//	Check if no adducts are specified
-		if(((Element) msPeaks.item(0)).getAttribute("s").isEmpty()) {
-			HashSet<MsPoint> points = new HashSet<MsPoint>();
-
-			for (int j = 0; j < msPeaks.getLength(); j++) {
-
-				Element peakElement = (Element) msPeaks.item(j);
-				points.add(new MsPoint(
-						Double.parseDouble(peakElement.getAttribute("x")),
-						Double.parseDouble(peakElement.getAttribute("y"))));
-			}
-			cmMap.put(AdductManager.getDefaultAdductForPolarity(pol), points);
-			return cmMap;
-		}
-		Map<String,Collection<MsPoint>>adductMap = new TreeMap<String,Collection<MsPoint>>();
-		for (int j = 0; j < msPeaks.getLength(); j++) {
-
-			Element peakElement = (Element) msPeaks.item(j);
-			String adduct = peakElement.getAttribute("s").replaceAll("\\+[0-9]+$", "");
-			if(!adductMap.containsKey(adduct))
-				adductMap.put(adduct, new HashSet<MsPoint>());
-
-			adductMap.get(adduct).add(new MsPoint(
-					Double.parseDouble(peakElement.getAttribute("x")),
-					Double.parseDouble(peakElement.getAttribute("y"))));
-		}
-		for (Entry<String, Collection<MsPoint>> entry : adductMap.entrySet()) {
-
-			Adduct adduct = AdductManager.getAdductByCefNotation(entry.getKey());
-			if(adduct != null)
-				cmMap.put(adduct, entry.getValue());
-		}
-		return cmMap;
-	}
-	
-	protected double getLibraryMatchScore(Element libraryFeatureElement) {
-
-		if(libraryFeatureElement.getElementsByTagName("Molecule").getLength() == 0)
-			return 0.0d;
-
-		Element molecule = (Element) libraryFeatureElement.getElementsByTagName("Molecule").item(0);
-		NodeList scoreList = molecule.getElementsByTagName("Match");
-		if (scoreList.getLength() > 0) {
-
-			for (int i = 0; i < scoreList.getLength(); i++) {
-				Element scoreElement = (Element) scoreList.item(i);
-				if(scoreElement.getAttribute("algo").equals("lib"))
-					return Double.parseDouble(scoreElement.getAttribute("score"));
-			}
-		}
-		return 0.0d;
-	}
-
-	protected TandemMassSpectrum parseMsTwoSpectrumElement(Element spectrumElement){
-
-		NodeList precursors = spectrumElement.getElementsByTagName("mz");
-		double mz = Double.parseDouble(precursors.item(0).getFirstChild().getNodeValue());
-		Element msDetails = (Element) spectrumElement.getElementsByTagName("MSDetails").item(0);
-		String sign = msDetails.getAttribute("p");
-		Polarity pol = null;
-		if(sign.equals("+"))
-			pol = Polarity.Positive;
-
-		if(sign.equals("-"))
-			pol = Polarity.Negative;
-
-		TandemMassSpectrum msms = new TandemMassSpectrum(2, new MsPoint(mz, 999.0d), pol);
-		String detectionAlgorithm =  spectrumElement.getAttribute("cpdAlgo");
-		if(!detectionAlgorithm.isEmpty())
-			msms.setDetectionAlgorithm(detectionAlgorithm);
-
-		String ionisationType =  msDetails.getAttribute("is");
-		if(!ionisationType.isEmpty())
-			msms.setIonisationType(ionisationType);
-		String collisionEnergy = msDetails.getAttribute("ce").replaceAll("V", "");
-		if(!collisionEnergy.isEmpty()) {
-			double ce = Double.parseDouble(collisionEnergy);
-			msms.setCidLevel(ce);
-		}
-		String fragVoltage = msDetails.getAttribute("fv").replaceAll("V", "");
-		if(!fragVoltage.isEmpty()) {
-			double fv = Double.parseDouble(fragVoltage);
-			msms.setFragmenterVoltage(fv);
-		}
-		NodeList msmsPeaks = spectrumElement.getElementsByTagName("p");
-		Collection<MsPoint>msmsPoints = new ArrayList<MsPoint>();
-		for (int j = 0; j < msmsPeaks.getLength(); j++) {
-
-			Element peakElement = (Element) msmsPeaks.item(j);
-			msmsPoints.add(new MsPoint(
-					Double.parseDouble(peakElement.getAttribute("x")),
-					Double.parseDouble(peakElement.getAttribute("y"))));
-		}
-		msms.setSpectrum(msmsPoints);
-		return msms;
-	}
-
-	protected String getTargetId(Element cpdElement) {
-
-		NodeList dbReference = cpdElement.getElementsByTagName("Accession");
-		if (dbReference.getLength() > 0) {
-
-			for (int j = 0; j < dbReference.getLength(); j++) {
-
-				Element idElement = (Element) dbReference.item(j);
-				String database = idElement.getAttribute("db");
-				String accession = idElement.getAttribute("id");
-
-				if (!database.isEmpty() && !accession.isEmpty()) {
-
-					if (accession.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName()))
-						return accession;
-				}
-			}
-		}
-		return null;
-	}
-	
 	private void mapCompoundIdsToDatabase() throws Exception {
 
 		taskDescription = "Mapping identifications to compound database for " + inputCefFile.getName();
@@ -564,12 +217,12 @@ public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 		PreparedStatement cidPs = conn.prepareStatement(cidQuery);
 		ResultSet cidRs = null;
 		
-		//	Map MSMS library matches queries
-		
-		for(LibMatchedSimpleMsFeature feature : features) {
+		//	Map MSMS library matches queries		
+		for(MsFeature feature : inputFeatureList) {
 			
-			MsFeatureIdentity msid = feature.getIdentity();			
-			if(msid.getIdSource().equals(CompoundIdSource.FORMULA_GENERATOR)
+			MsFeatureIdentity msid = feature.getPrimaryIdentity();			
+			if(msid == null 
+					|| msid.getIdSource().equals(CompoundIdSource.FORMULA_GENERATOR)
 					|| msid.getIdSource().equals(CompoundIdSource.UNKNOWN)) {
 				processed++;
 				continue;
@@ -651,11 +304,14 @@ public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 	
 	private void mapMSMSLibraryMatchesToDatabase() throws Exception {
 
-		taskDescription = "Mapping identifications to compound database for " + inputCefFile.getName();
+		taskDescription = 
+				"Mapping identifications to compound database for " + 
+						inputCefFile.getName();
 		total = features.size();
 		processed = 0;	
 		DecimalFormat ceFormat = new DecimalFormat("##.#");
 		
+		//	TODO maybe drop collision energy? it is not from METLIN, but from the experimantal MSMS
 		Connection conn = ConnectionManager.getConnection();
 		String idQuery =
 				"SELECT C.MRC2_LIB_ID, SPECTRUM_HASH " +
@@ -666,15 +322,15 @@ public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 				"AND C.POLARITY = ?";
 		PreparedStatement idPs = conn.prepareStatement(idQuery);
 		ResultSet rs = null;
-		for(LibMatchedSimpleMsFeature feature : features) {
+		for(MsFeature feature : inputFeatureList) {
 
 			TandemMassSpectrum refMsms = 
-					feature.getObservedSpectrum().getReferenceTandemSpectrum();
+					feature.getSpectrum().getReferenceTandemSpectrum();
 			if(refMsms == null) {
 				processed++;
 				continue;
 			}
-			CompoundIdentity cid = feature.getIdentity().getCompoundIdentity();
+			CompoundIdentity cid = feature.getPrimaryIdentity().getCompoundIdentity();
 			if(cid == null) {
 				processed++;
 				continue;
@@ -706,9 +362,9 @@ public class IDTCefMSMSPrescanOrImportTask extends CEFProcessingTask {
 			rs.close();
 			if(mrcMsMsId != null) {
 				ReferenceMsMsLibraryMatch rmsMatch = 
-						new ReferenceMsMsLibraryMatch(mrcMsMsId, feature.getIdentity().getScoreCarryOver());
+						new ReferenceMsMsLibraryMatch(mrcMsMsId, feature.getPrimaryIdentity().getScoreCarryOver());
 				rmsMatch.setMatchType(MSMSMatchType.Regular);
-				feature.getIdentity().setReferenceMsMsLibraryMatch(rmsMatch);
+				feature.getPrimaryIdentity().setReferenceMsMsLibraryMatch(rmsMatch);
 			}
 			else {
 //				String importError =

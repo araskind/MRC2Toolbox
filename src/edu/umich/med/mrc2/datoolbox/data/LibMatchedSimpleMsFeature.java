@@ -41,6 +41,13 @@ public class LibMatchedSimpleMsFeature extends SimpleMsFeature implements Serial
 
 		super(targetId, observedSpectrum, retentionTime, dataPipeline);
 	}
+	
+	public LibMatchedSimpleMsFeature(
+			MsFeature feature, 
+			DataPipeline dataPipeline) {
+		super(feature, dataPipeline);
+		identity = feature.getPrimaryIdentity();
+	}
 
 	/**
 	 * @return the identity

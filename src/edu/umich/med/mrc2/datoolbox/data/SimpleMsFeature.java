@@ -33,17 +33,18 @@ public class SimpleMsFeature implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -8911576246576007819L;
-	private String uniqueId;
-	private String libraryTargetId;
-	private String name;
-	private MassSpectrum observedSpectrum;
-	private double retentionTime;
-	private double neutralMass;
-	private double qualityScore;
-	private double area, height, volume;
-	private DataPipeline dataPipeline;	
-	private Polarity polarity;
+	protected static final long serialVersionUID = -8911576246576007819L;
+	
+	protected String uniqueId;
+	protected String libraryTargetId;
+	protected String name;
+	protected MassSpectrum observedSpectrum;
+	protected double retentionTime;
+	protected double neutralMass;
+	protected double qualityScore;
+	protected double area, height, volume;
+	protected DataPipeline dataPipeline;	
+	protected Polarity polarity;
 	
 	public SimpleMsFeature(
 			String libraryTargetId, 

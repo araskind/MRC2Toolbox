@@ -209,8 +209,37 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			batchUpdateDFileNames();
+			remapFeaturesFromNeutralMass();
 		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void remapFeaturesFromNeutralMass() {
+		
+		File renameMapFile = new File(
+				"Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_DOCS\\_INTERMEDIATES\\"
+				+ "T68 - Liver\\RPNEG\\BATCH1_20210603\\PROCESSED_20220926\\UNNAMED\\feature-remap.txt");
+		String[][] renameMapData = DelimitedTextParser.parseTextFile(renameMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		ArrayList<String>lines = new ArrayList<String>();
+		for(int i=1; i<renameMapData.length; i++) {
+			
+			double mass = Double.parseDouble(renameMapData[i][0]);
+			
+			String adductName = "[M-H]-";
+			if(renameMapData[i].length == 3)
+				 adductName = renameMapData[i][2];
+				
+			Adduct adduct = AdductManager.getAdductByName(adductName);
+			double mz = MsUtils.calculateModifiedMz(mass, adduct);
+			String newLine = MRC2ToolBoxConfiguration.defaultMzFormat.format(mz)  + "_" + renameMapData[i][1];
+			lines.add(newLine);
+		}	
+		Path output = Paths.get(renameMapFile.getParentFile().getAbsolutePath(), "new_feature_names.txt");
+		try {
+			Files.write(output, lines);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

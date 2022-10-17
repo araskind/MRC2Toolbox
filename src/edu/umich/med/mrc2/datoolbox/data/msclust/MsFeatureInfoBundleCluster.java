@@ -375,6 +375,28 @@ public class MsFeatureInfoBundleCluster {
 	public void setLookupFeature(MinimalMSOneFeature lookupFeature) {
 		this.lookupFeature = lookupFeature;
 	}
+
+	public boolean hasAnnotations() {
+
+		long saCount = components.stream().flatMap(b -> b.getStandadAnnotations().stream()).count();
+		long aCount = components.stream().flatMap(b -> b.getMsFeature().getAnnotations().stream()).count();
+		return (saCount + aCount) > 0;
+	}
+
+	public boolean hasIdFollowupSteps() {
+
+		return components.stream().flatMap(b -> b.getIdFollowupSteps().stream()).count() > 0;
+	}
+	
+	public MSFeatureInfoBundle getMSFeatureInfoBundleForPrimaryId() {
+		
+		if(primaryIdentity == null)
+			return null;
+		
+		return components.stream().
+			filter(c -> c.getMsFeature().getIdentifications().contains(primaryIdentity)).
+			findFirst().orElse(null);
+	}
 }
 
 

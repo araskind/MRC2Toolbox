@@ -28,30 +28,39 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.UUID;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom2.DataConversionException;
 import org.jdom2.Document;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.AgilentCefFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -68,6 +77,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 	protected TreeSet<String> allAdducts;
 	protected TreeSet<String> unmatchedAdducts;
 	protected List<String> errorLog;
+	protected Collection<LibraryMsFeature>libraryFeatureListForExport;
 
 	public CEFProcessingTask() {
 		super();
@@ -117,7 +127,9 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		
 		Element location = cpdElement.getChild("Location");
 		double rt = location.getAttribute("rt").getDoubleValue();
-		double neutralMass = location.getAttribute("m").getDoubleValue();
+		double neutralMass = 0.0d;
+		if(location.getAttribute("m") != null)
+			neutralMass = location.getAttribute("m").getDoubleValue();
 				
 		String name = "";
 		Element resultsElement = cpdElement.getChild("Results");
@@ -414,6 +426,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 						}
 						if (newId != null) {
 							msid.setCompoundIdentity(newId);
+							newId.getDbIdMap().putAll(cid.getDbIdMap());
 							break;
 						}
 					}
@@ -456,35 +469,236 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			if(msid != null)
 				identifications.add(msid);
 		}
-		// Add ID by name if not specified in the library
-		if(!feature.getName().startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())
-				&& feature.getName().indexOf('@') == -1
-				&& feature.getPrimaryIdentity() == null) {
+//		if(identifications.isEmpty()) {
+//			
+//			// Add ID by name if not specified in the library
+//			if(!feature.getName().startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())
+//					&& feature.getName().indexOf('@') == -1
+//					&& feature.getPrimaryIdentity() == null) {
+//
+//				CompoundIdentity pcId = null;
+//				try {
+//					pcId = CompoundDatabaseUtils.getCompoundIdentityByName(feature.getName(), conn);
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				if( pcId != null){
+//
+//					MsFeatureIdentity msId2 = 
+//							new MsFeatureIdentity(pcId, CompoundIdentificationConfidence.ACCURATE_MASS_RT);
+//					if (feature.getPrimaryIdentity() == null)
+//						feature.setPrimaryIdentity(msId2);
+//					else{
+//						for(Entry<CompoundDatabaseEnum, String> entry : pcId.getDbIdMap().entrySet()){
+//
+//							if(feature.getPrimaryIdentity().getCompoundIdentity().getDbId(entry.getKey()) == null)
+//								feature.getPrimaryIdentity().getCompoundIdentity().addDbId(entry.getKey(), entry.getValue());
+//						}
+//					}
+//					identifications.add(msId2);
+//				}
+//			}
+//		}
+		return identifications;
+	}
+	
+	protected void writeCefLibrary(
+			Collection<LibraryMsFeature>exportTargetList,
+			boolean combineAdducts) throws Exception {
 
-			CompoundIdentity pcId = null;
-			try {
-				pcId = CompoundDatabaseUtils.getCompoundIdentityByName(feature.getName(), conn);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		total = exportTargetList.size();
+		processed = 0;
+		
+		Document exportedLibraryDocument = new Document();
+        Element cefRoot = new Element("CEF");
+        cefRoot.setAttribute("version", "1.0.0.0");
+		String libId = DataPrefix.MS_LIBRARY.getName() + UUID.randomUUID().toString();
+		cefRoot.setAttribute("library_id", libId);
+		exportedLibraryDocument.addContent(cefRoot);	
+		Element compoundListElement = new Element("CompoundList");
+		cefRoot.addContent(compoundListElement);
+
+		for(LibraryMsFeature lt : exportTargetList){
+			
+			if(lt.getSpectrum() == null) {
+				System.err.println(lt.getName() + " has no spectrum.");
+				continue;
 			}
-			if( pcId != null){
+			if(combineAdducts){
+				Element compound = createCefCompoundElement(lt, null, false);
+				compoundListElement.addContent(compound);
+			}
+			else{
+				boolean createNewId = false;	//	Create new feature ID if more than 1 adduct is added as separate entry
+				for(Adduct adduct : lt.getSpectrum().getAdducts()){
 
-				MsFeatureIdentity msId2 = 
-						new MsFeatureIdentity(pcId, CompoundIdentificationConfidence.ACCURATE_MASS_RT);
-				if (feature.getPrimaryIdentity() == null)
-					feature.setPrimaryIdentity(msId2);
-				else{
-					for(Entry<CompoundDatabaseEnum, String> entry : pcId.getDbIdMap().entrySet()){
+					//	TODO make this check optional
+					if(lt.getSpectrum().getMsForAdduct(adduct).length > 1){
 
-						if(feature.getPrimaryIdentity().getCompoundIdentity().getDbId(entry.getKey()) == null)
-							feature.getPrimaryIdentity().getCompoundIdentity().addDbId(entry.getKey(), entry.getValue());
+						Element compound = createCefCompoundElement(lt, adduct, createNewId);
+						compoundListElement.addContent(compound);
 					}
+					createNewId = true;
 				}
-				identifications.add(msId2);
+			}
+			processed++;
+		}
+		String extension = FilenameUtils.getExtension(outputCefFile.getAbsolutePath());
+		if(!extension.equalsIgnoreCase(MsLibraryFormat.CEF.getFileExtension()))
+			outputCefFile = new File(FilenameUtils.removeExtension(outputCefFile.getAbsolutePath()) + "."
+					+ MsLibraryFormat.CEF.getFileExtension());
+
+		XmlUtils.writeXMLDocumentToFile(exportedLibraryDocument, outputCefFile);
+	}
+	
+	protected Element createCefCompoundElement(
+			LibraryMsFeature lt, 
+			Adduct adduct, 
+			boolean createNewId) {
+
+		Element compound = new Element("Compound");
+
+		String mass = MRC2ToolBoxConfiguration.getMzFormat().format(lt.getNeutralMass());
+		String rt = MRC2ToolBoxConfiguration.getRtFormat().format(lt.getRetentionTime());
+		compound.setAttribute("mppid", mass + "_" + rt);
+		compound.setAttribute("algo", "FindByFormula");
+
+		//	Location
+		Element location = new Element("Location");
+		location.setAttribute("m", mass);
+		location.setAttribute("rt", rt);
+		double area = 100.0d;
+		location.setAttribute("a", Double.toString(area));
+		compound.addContent(location);
+
+		//	Identification
+		Element results = new Element("Results");
+		Element molecule = new Element("Molecule");
+
+		String compoundName = "";
+		String formula = "";
+		if(lt.getPrimaryIdentity() != null) {
+			compoundName = lt.getPrimaryIdentity().getName();
+			formula = lt.getPrimaryIdentity().getCompoundIdentity().getFormula();
+		}
+		else {
+			compoundName = lt.getName();
+		}
+		molecule.setAttribute("name", compoundName);
+		if(formula != null && !formula.isEmpty())
+			molecule.setAttribute("formula", compoundName);
+		
+		Element database = new Element("Database");
+		Element libId = new Element("Accession");
+		libId.setAttribute("db", "CAS ID");
+		if(createNewId)
+			libId.setAttribute("id", DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString());
+		else
+			libId.setAttribute("id", lt.getId());
+		
+		database.addContent(libId);
+
+		if(lt.getPrimaryIdentity() != null 
+				&& lt.getPrimaryIdentity().getPrimaryLinkLabel() != null
+				&& !lt.getPrimaryIdentity().getPrimaryLinkLabel().isEmpty()){
+
+			Element accession = new Element("Accession");
+			accession.setAttribute("db", "KEGG ID");
+			accession.setAttribute("id", lt.getPrimaryIdentity().getPrimaryLinkLabel());
+			database.addContent(accession);
+		}
+		molecule.addContent(database);
+		results.addContent(molecule);
+		compound.addContent(results);
+
+		//	Spectrum
+		Element spectrum = new Element("Spectrum");
+		spectrum.setAttribute("type", "FbF");
+		spectrum.setAttribute("cpdAlgo", "FindByFormula");
+
+		Element msDetails = new Element("MSDetails");
+		String sign = (lt.getPolarity().equals(Polarity.Positive)) ? "+" : "-";
+		msDetails.setAttribute("p", sign);
+		spectrum.addContent(msDetails);
+
+		Element msPeaks = new Element("MSPeaks");
+		if(adduct != null){
+
+			String charge = Integer.toString(adduct.getCharge());
+			MsPoint[] adductMs = lt.getSpectrum().getMsForAdduct(adduct);
+
+			for(int i=0; i<adductMs.length; i++){
+
+				Element peak = new Element("p");
+				peak.setAttribute("x", MRC2ToolBoxConfiguration.getMzFormat().format(adductMs[i].getMz()));
+				peak.setAttribute("y", Double.toString(adductMs[i].getIntensity()));
+				peak.setAttribute("z", charge);
+				
+				String aname = adduct.getCefNotation();
+				if(i>0)
+					aname = aname + "+" + i;
+
+				peak.setAttribute("s", aname);
+				msPeaks.addContent(peak);
 			}
 		}
-		return identifications;
+		else{
+			for(Adduct ad : lt.getSpectrum().getAdducts()){
+
+				String charge = Integer.toString(ad.getCharge());
+				MsPoint[] adductMs = lt.getSpectrum().getMsForAdduct(ad);
+
+				for(int i=0; i<adductMs.length; i++){
+
+					Element peak = new Element("p");
+					peak.setAttribute("x", MRC2ToolBoxConfiguration.getMzFormat().format(adductMs[i].getMz()));
+					peak.setAttribute("y", Double.toString(adductMs[i].getIntensity()));
+					peak.setAttribute("z", charge);
+					String aname = ad.getCefNotation();
+
+					if(i>0)
+						aname = aname + "+" + i;
+
+					peak.setAttribute("s", aname);
+					msPeaks.addContent(peak);
+				}
+			}
+		}
+		spectrum.addContent(msPeaks);
+		compound.addContent(spectrum);
+		return compound;
+	}
+	
+	protected void createLibraryFeaturetListFromCefFile() {
+
+		if(inputCefFile != null){
+			try {
+				parseInputCefFile(inputCefFile);
+			} catch (Exception e) {
+				setStatus(TaskStatus.ERROR);
+				e.printStackTrace();
+			}
+			if(!unmatchedAdducts.isEmpty()){
+
+				@SuppressWarnings("unused")
+				InformationDialog id = new InformationDialog(
+						"Unmatched features",
+						"Not all adducts were matched to the database.\n"
+						+ "Below is the list of unmatched adducts.",
+						StringUtils.join(unmatchedAdducts, "\n"),
+						null);
+				setStatus(TaskStatus.ERROR);
+				return;
+			}
+		}
+		libraryFeatureListForExport = 
+				new ArrayList<LibraryMsFeature>();
+		inputFeatureList.stream().
+			forEach(f -> libraryFeatureListForExport.add(new LibraryMsFeature(f)));
+		libraryFeatureListForExport = libraryFeatureListForExport.stream().
+				sorted(new MsFeatureComparator(SortProperty.RT)).
+				collect(Collectors.toList());
 	}
 
 	public Collection<MsFeature> getInputFeatureList() {

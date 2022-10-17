@@ -180,18 +180,16 @@
 													<leaf id="0" nodeId="1631029354257">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanel</placeholder>
-															<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
-															<placeholder>dock.single.RawDataExaminerPanel</placeholder>
-															<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 															<placeholder>dock.single.WorklistPanel</placeholder>
 															<placeholder>dock.single.IDWorkbenchPanel</placeholder>
-															<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 															<placeholder>dock.single.AutomatorPanel</placeholder>
 															<placeholder>dock.single.QCPanel</placeholder>
 															<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
-															<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
+															<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
+															<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 															<placeholder>dock.single.MsLibraryPanel</placeholder>
 															<placeholder>dock.single.METLIMSPanel</placeholder>
+															<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 														</placeholders>
 														<placeholder-map>
 															<version>0</version>
@@ -212,7 +210,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>2</selected>
+										<selected>7</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -272,6 +270,15 @@
 												<key shared="false">
 													<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
+												<item key="dock.placeholder" type="s">dock.single.DuplicatesPanelClusterDisplayPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -288,8 +295,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">3</item>
-												<item key="dock.id" type="i">3</item>
+												<item key="dock.index" type="i">4</item>
+												<item key="dock.id" type="i">4</item>
 												<item key="dock.placeholder" type="s">dock.single.CompoundDatabasePanel</item>
 											</entry>
 											<entry>
@@ -302,8 +309,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">4</item>
-												<item key="dock.id" type="i">4</item>
+												<item key="dock.index" type="i">5</item>
+												<item key="dock.id" type="i">5</item>
 												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanel</item>
 											</entry>
 											<entry>
@@ -326,8 +333,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">5</item>
-												<item key="dock.id" type="i">5</item>
+												<item key="dock.index" type="i">6</item>
+												<item key="dock.id" type="i">6</item>
 												<item key="dock.placeholder" type="s">dock.single.IDTrackerLimsManagerPanel</item>
 											</entry>
 											<entry>
@@ -340,8 +347,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">6</item>
-												<item key="dock.id" type="i">6</item>
+												<item key="dock.index" type="i">7</item>
+												<item key="dock.id" type="i">7</item>
 												<item key="dock.placeholder" type="s">dock.single.METLIMSPanel</item>
 											</entry>
 											<entry>
@@ -354,14 +361,23 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">7</item>
-												<item key="dock.id" type="i">7</item>
+												<item key="dock.index" type="i">8</item>
+												<item key="dock.id" type="i">8</item>
 												<item key="dock.placeholder" type="s">dock.single.RawDataExaminerPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
 													<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
 												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">9</item>
+												<item key="dock.id" type="i">9</item>
+												<item key="dock.placeholder" type="s">dock.single.MoTrPACDataTrackingPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -401,6 +417,16 @@
 												<replacement id="dockablesingle MsLibraryPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>MsLibraryPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DuplicatesPanelClusterDisplayPanel">
+												<replacement id="dockablesingle DuplicatesPanelClusterDisplayPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DuplicatesPanelClusterDisplayPanel</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -451,6 +477,16 @@
 												<replacement id="dockablesingle RawDataExaminerPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>RawDataExaminerPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.MoTrPACDataTrackingPanel">
+												<replacement id="dockablesingle MoTrPACDataTrackingPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>MoTrPACDataTrackingPanel</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -584,33 +620,6 @@
 								<children ignore="false"/>
 							</layout>
 						</child>
-						<child key="single MoTrPACDataTrackingPanel" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-									<backup-path>
-										<node location="BOTTOM" size="0.5" id="1644019430912"/>
-										<node location="BOTTOM" size="0.5" id="1644019399042"/>
-										<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
-										<leaf id="1631029354257"/>
-									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>8</index>
-									<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.MoTrPACDataTrackingPanel">
-									<replacement id="dockablesingle MoTrPACDataTrackingPanel"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>MoTrPACDataTrackingPanel</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
 						<child key="single ProjectSetupDraw" root="ccontrol center" location="true">
 							<location>
 								<property factory="SplitDockPlaceholderProperty">
@@ -628,34 +637,6 @@
 									<replacement id="dockablesingle ProjectSetupDraw"/>
 									<delegate id="delegate_ccontrol backup factory id">
 										<id>ProjectSetupDraw</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
-						<child key="single DuplicatesPanelClusterDisplayPanel" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
-									<backup-path>
-										<node location="BOTTOM" size="0.5" id="1644019430912"/>
-										<node location="BOTTOM" size="0.5" id="1644019417832"/>
-										<node location="BOTTOM" size="0.5" id="1644019399042"/>
-										<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
-										<leaf id="1631029354257"/>
-									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>1</index>
-									<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.DuplicatesPanelClusterDisplayPanel">
-									<replacement id="dockablesingle DuplicatesPanelClusterDisplayPanel"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>DuplicatesPanelClusterDisplayPanel</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -1030,7 +1011,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single MoTrPACDataTrackingPanel">
+						<entry id="single MoTrPACDataTrackingPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -1229,7 +1210,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DuplicatesPanelClusterDisplayPanel">
+						<entry id="single DuplicatesPanelClusterDisplayPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.maximized</mode>
 								<mode>dock.mode.normal</mode>

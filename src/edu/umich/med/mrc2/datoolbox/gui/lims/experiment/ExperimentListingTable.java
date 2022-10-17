@@ -108,8 +108,10 @@ public class ExperimentListingTable extends BasicTable {
 	}
 
 	public void setModelFromExperimentCollection(Collection<LIMSExperiment>experimentCollection) {
+		thf.setTable(null);
 		model.setModelFromExperimentCollection(experimentCollection);
 		rowSorter.sort();
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

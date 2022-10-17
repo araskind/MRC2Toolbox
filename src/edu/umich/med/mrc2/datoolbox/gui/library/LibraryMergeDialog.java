@@ -33,6 +33,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import java.util.prefs.Preferences;
@@ -246,63 +247,27 @@ public class LibraryMergeDialog  extends JDialog implements ActionListener, Back
 	}
 
 	private void createLibraryExportTask(File selectedFile) {
-
-		LibraryExportTask let = null;
+		
 		File libraryInputFile = null;
 		if(!sourceLibraryTextField.getText().isEmpty())
 			libraryInputFile = new File(sourceLibraryTextField.getText());
 
 		MsLibraryFormat libraryFormat = getSelectedFormat();
 
-		//	Combine database and file library
-		if(libraryInputFile != null && currentLibrary != null && combineLibCheckBox.isSelected()) {
-
-			let = new LibraryExportTask(
-					selectedFile,
-					libraryFormat,
-					libraryInputFile,
-					currentLibrary,
-					combineAdductsCheckBox.isSelected());
-		}
-		//	Re-write file library only in proper format
-		else if(libraryInputFile != null && (currentLibrary == null || !combineLibCheckBox.isSelected())) {
-
-			let = new LibraryExportTask(
-					selectedFile,
-					libraryFormat,
-					libraryInputFile,
-					null,
-					combineAdductsCheckBox.isSelected());
-		}
-		//	Re-write database library only in proper format
-		else if(libraryInputFile == null && currentLibrary != null) {
-
-			let = new LibraryExportTask(
-					selectedFile,
-					libraryFormat,
-					null,
-					currentLibrary,
-					combineAdductsCheckBox.isSelected());
-		}
-		else {
+		if(libraryInputFile == null && currentLibrary == null) {
 			MessageDialog.showErrorMsg("No database and/or file library to process!", this);
+			return;
 		}
-		if(let != null) {
-			MRC2ToolBoxCore.getTaskController().addTask(let);
-			this.dispose();
-		}
-	}
-
-	private String getExtensionForFilter(FileFilter filter) {
-
-		String extension = "";
-
-		for(MsLibraryFormat format : MsLibraryFormat.values()){
-
-			if(format.getName().equals(filter.getDescription()))
-				extension = format.getFileExtension();
-		}
-		return extension;
+		LibraryExportTask let = new LibraryExportTask(
+				libraryInputFile,
+				selectedFile,
+				combineAdductsCheckBox.isSelected(),
+				currentLibrary,
+				null,
+				null,
+				libraryFormat);
+		MRC2ToolBoxCore.getTaskController().addTask(let);
+		this.dispose();
 	}
 
 	private void selectInputLibraryFile() {
@@ -314,7 +279,9 @@ public class LibraryMergeDialog  extends JDialog implements ActionListener, Back
 		libFileChooser.setMultiSelectionEnabled(false);
 		libFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		libFileChooser.setDialogTitle("Select library file:");
-		FileNameExtensionFilter cefFilter = new FileNameExtensionFilter(MsLibraryFormat.CEF.getName(), MsLibraryFormat.CEF.getFileExtension());
+		FileNameExtensionFilter cefFilter = 
+				new FileNameExtensionFilter(MsLibraryFormat.CEF.getName(), 
+						MsLibraryFormat.CEF.getFileExtension());
 		libFileChooser.setFileFilter(cefFilter);
 		libFileChooser.setCurrentDirectory(baseDirectory);
 

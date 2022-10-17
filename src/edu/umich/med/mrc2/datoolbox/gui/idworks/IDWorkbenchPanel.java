@@ -78,6 +78,8 @@ import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
+import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
+import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMSMSClusterProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSComponentTableFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
@@ -115,6 +117,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClus
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary.MSMSCLusterDataSetSummaryDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerMSMSClusterDataSetExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.MSMSClusterDataSetEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.AddFeaturesToCollectionDialog;
@@ -190,6 +193,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPull
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullWithFilteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerDataExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerMSMSClusterDataExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerProjectDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSClusterDataSetUploadTask;
@@ -278,6 +282,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private DatasetSummaryDialog datasetSummaryDialog;	
 	private MSMSClusterDataSetEditorDialog msmsClusterDataSetEditorDialog;	
 	private IdentificationTableModelListener identificationTableModelListener;
+	private IDTrackerMSMSClusterDataSetExportDialog idTrackerMSMSClusterDataSetExportDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -606,6 +611,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if (command.equals(MainActionCommands.EXPORT_FEATURES_TO_SIRIUS_MS_COMMAND.getName()))
 			exportMsMsfeaturesToSiriusMsFile();
+		
+		if (command.equals(MainActionCommands.SHOW_MSMS_CLUSTER_DATA_EXPORT_DIALOG_COMMAND.getName()))
+			msmsClusterDataExportSetup();
+
+		if (command.equals(MainActionCommands.EXPORT_MSMS_CLUSTER_DATA_COMMAND.getName()))
+			exportMSMSClusterData();
 
 		//	MS1 features commands
 		if (command.equals(MainActionCommands.SEARCH_FEATURE_AGAINST_LIBRARY_COMMAND.getName()))
@@ -806,6 +817,43 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND.getName()))
 			showMSMSClustersSummary();
 		
+	}
+
+	private void msmsClusterDataExportSetup() {
+
+		if(activeMSMSClusterDataSet == null 
+				|| activeMSMSClusterDataSet.getClusters().isEmpty())
+			return;
+
+		idTrackerMSMSClusterDataSetExportDialog = 
+				new IDTrackerMSMSClusterDataSetExportDialog(this);
+		idTrackerMSMSClusterDataSetExportDialog.setLocationRelativeTo(this.getContentPane());
+		idTrackerMSMSClusterDataSetExportDialog.setVisible(true);
+	}
+
+	private void exportMSMSClusterData() {
+		
+		Collection<String> errors = 
+				idTrackerMSMSClusterDataSetExportDialog.validateFormParameters();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors), idTrackerMSMSClusterDataSetExportDialog);
+			return;
+		}
+		Collection<IDTrackerMSMSClusterProperties>msmsClusterProperties = 
+				idTrackerMSMSClusterDataSetExportDialog.getSelectedMSMSClusterProperties();
+
+		Collection<IDTrackerFeatureIdentificationProperties> identificationProperties = 
+				idTrackerMSMSClusterDataSetExportDialog.getSelectedIdentificationProperties();
+		
+		IDTrackerMSMSClusterDataExportTask task = new IDTrackerMSMSClusterDataExportTask(
+				activeMSMSClusterDataSet,
+				msmsClusterProperties,
+				identificationProperties,
+				idTrackerMSMSClusterDataSetExportDialog.getOutputFile());
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);	
+		idTrackerMSMSClusterDataSetExportDialog.dispose();
 	}
 
 	private void showMSMSClusterFilter() {
@@ -2752,8 +2800,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				finalizeNISTMspepSearchRoundTripTask((NISTMsPepSearchRoundTripTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(IDTrackerDataExportTask.class))
-				finalizeIDRackerExportTask((IDTrackerDataExportTask)e.getSource());	
+				finalizeIDTrackerExportTask((IDTrackerDataExportTask)e.getSource());	
 			
+			if (e.getSource().getClass().equals(IDTrackerMSMSClusterDataExportTask.class))
+				finalizeIDTrackerMSMSClusterDataExportTask((IDTrackerMSMSClusterDataExportTask)e.getSource());	
+					
 			if (e.getSource().getClass().equals(RawDataLoadForInjectionsTask.class))
 				finalizeRawDataLoadTask((RawDataLoadForInjectionsTask)e.getSource());
 			
@@ -2792,6 +2843,23 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MainWindow.hideProgressDialog();
 		}
 	}		
+
+	private void finalizeIDTrackerMSMSClusterDataExportTask(IDTrackerMSMSClusterDataExportTask task) {
+
+		File results = task.getOutputFile();
+		if(results.exists()) {
+
+			if(MessageDialog.showChoiceMsg("Export file created, do you want to open containing folder?",
+				this.getContentPane()) == JOptionPane.YES_OPTION) {
+				try {
+					Desktop.getDesktop().open(results.getParentFile());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}	
+	}
 
 	private void finalizeMSMSClusterDataSetUploadTask(MSMSClusterDataSetUploadTask task) {
 
@@ -2923,7 +2991,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.RAW_DATA_EXAMINER);
 	}
 
-	private void finalizeIDRackerExportTask(IDTrackerDataExportTask task) {
+	private void finalizeIDTrackerExportTask(IDTrackerDataExportTask task) {
 
 		File results = task.getOutputFile();
 		if(results.exists()) {

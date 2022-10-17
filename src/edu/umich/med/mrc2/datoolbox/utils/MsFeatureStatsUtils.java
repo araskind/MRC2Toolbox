@@ -306,7 +306,7 @@ public class MsFeatureStatsUtils {
 			
 			if(!msmsSearchTypes.contains(HiResSearchOption.z)) {
 				
-				features = msmsLibMatched.stream().
+				features = features.stream().
 						filter(f -> !f.getMsFeature().getPrimaryIdentity().
 								getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Regular)).
 						collect(Collectors.toList());
@@ -314,7 +314,7 @@ public class MsFeatureStatsUtils {
 					return features;
 			}
 			if(!msmsSearchTypes.contains(HiResSearchOption.u)) {
-				features = msmsLibMatched.stream().
+				features = features.stream().
 						filter(f -> !f.getMsFeature().getPrimaryIdentity().
 								getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.InSource)).
 						collect(Collectors.toList());
@@ -322,7 +322,7 @@ public class MsFeatureStatsUtils {
 					return features;
 			}
 			if(!msmsSearchTypes.contains(HiResSearchOption.y)) {
-				features = msmsLibMatched.stream().
+				features = features.stream().
 						filter(f -> !f.getMsFeature().getPrimaryIdentity().
 								getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Hybrid)).
 						collect(Collectors.toList());

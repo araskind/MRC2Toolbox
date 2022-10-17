@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +36,12 @@ import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureChromatogramBundleFie
 import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
 import edu.umich.med.mrc2.datoolbox.utils.ChromatogramUtils;
 
-public class MsFeatureChromatogramBundle {
+public class MsFeatureChromatogramBundle implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1701321428762284984L;
 	private ChromatogramDefinition chromatogramDefinition;
 	private Map<DataFile, Collection<ExtractedIonData>>chromatograms;
 	private String featureId;

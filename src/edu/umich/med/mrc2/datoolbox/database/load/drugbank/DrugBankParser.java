@@ -99,32 +99,34 @@ public class DrugBankParser {
 
 		for (int i = 0; i < externIdNodes.size(); i++) {
 
-			String eresource = (externIdNodes.get(i)).getElementsByTagName("resource").item(0).getFirstChild().getNodeValue();
-			String identifier = (externIdNodes.item(i)).getElementsByTagName("identifier").item(0).getFirstChild().getNodeValue();
-			DrugbankCrossrefFields cf = DrugbankCrossrefFields.getByName(eresource);
-			if(cf != null)
-				record.getDrugIdentity().addDbId(cf.getDatabase(), identifier);
+			//	TODO
+//			String eresource = (externIdNodes.get(i)).getElementsByTagName("resource").item(0).getFirstChild().getNodeValue();
+//			String identifier = (externIdNodes.item(i)).getElementsByTagName("identifier").item(0).getFirstChild().getNodeValue();
+//			DrugbankCrossrefFields cf = DrugbankCrossrefFields.getByName(eresource);
+//			if(cf != null)
+//				record.getDrugIdentity().addDbId(cf.getDatabase(), identifier);
 		}
 	}
 
 	private static void parseCategories(List<Element>categoriesNodes, DrugBankRecord record) {
 
-		for (int i = 0; i < categoriesNodes.getLength(); i++) {
-
-			if (categoriesNodes.item(i).getParentNode().getNodeName().equals("categories")) {
-
-				String ccategory = ((Element)categoriesNodes.item(i)).getElementsByTagName("category").item(0).getFirstChild().getNodeValue();
-
-				String meshid = "";
-				Node mesh = ((Element)categoriesNodes.item(i)).getElementsByTagName("mesh-id").item(0).getFirstChild();
-
-				if(mesh != null)
-					meshid = mesh.getNodeValue();
-
-				DrugCategory dc = new DrugCategory(ccategory, meshid);
-				record.addCategory(dc);
-			}
-		}
+		//	TODO
+//		for (int i = 0; i < categoriesNodes.getLength(); i++) {
+//
+//			if (categoriesNodes.item(i).getParentNode().getNodeName().equals("categories")) {
+//
+//				String ccategory = ((Element)categoriesNodes.item(i)).getElementsByTagName("category").item(0).getFirstChild().getNodeValue();
+//
+//				String meshid = "";
+//				Node mesh = ((Element)categoriesNodes.item(i)).getElementsByTagName("mesh-id").item(0).getFirstChild();
+//
+//				if(mesh != null)
+//					meshid = mesh.getNodeValue();
+//
+//				DrugCategory dc = new DrugCategory(ccategory, meshid);
+//				record.addCategory(dc);
+//			}
+//		}
 	}
 
 	private static void parseProperties(Element drugElement, DrugBankRecord record) {

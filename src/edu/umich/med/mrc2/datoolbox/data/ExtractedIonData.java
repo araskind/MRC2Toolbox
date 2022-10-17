@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
 import org.jdom2.Element;
@@ -30,8 +31,12 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.ExtractedIonDataFields;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 
-public class ExtractedIonData {
+public class ExtractedIonData implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4203747109582512528L;
 	protected String name;
 	protected double extractedMass;
 	protected double[] timeValues;

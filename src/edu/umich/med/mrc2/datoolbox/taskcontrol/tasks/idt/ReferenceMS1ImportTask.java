@@ -21,9 +21,13 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
+import java.io.File;
+import java.sql.Connection;
+
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.LibMatchedSimpleMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -38,9 +42,12 @@ import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class ReferenceMS1ImportTask extends CEFProcessingTask {
 
+	private DataFile dataFile;
+	private DataPipeline dataPipeline;
 	private LIMSExperiment experiment;
 	private ExperimentalSample selectedSample;
 	private DataAcquisitionMethod acquisitionMethod;
+	private DataExtractionMethod dataExtractionMethod;
 
 	public ReferenceMS1ImportTask(
 			DataFile dataFile,
@@ -48,7 +55,9 @@ public class ReferenceMS1ImportTask extends CEFProcessingTask {
 			LIMSExperiment experiment,
 			ExperimentalSample selectedSample) {
 
-		super(dataFile, dataPipeline);
+		super();
+		this.dataFile = dataFile; 
+		this.dataPipeline = dataPipeline;
 		this.experiment = experiment;
 		this.selectedSample = selectedSample;
 		this.acquisitionMethod = dataPipeline.getAcquisitionMethod();
@@ -62,56 +71,55 @@ public class ReferenceMS1ImportTask extends CEFProcessingTask {
 			LIMSExperiment experiment,
 			ExperimentalSample selectedSample) {
 
-		super(dataFile, dataExtractionMethod);
+		super();
+		this.dataFile = dataFile; 
 		this.experiment = experiment;
 		this.selectedSample = selectedSample;
 		this.acquisitionMethod = acquisitionMethod;
+		this.dataExtractionMethod = dataExtractionMethod;
 	}
 
 	@Override
 	public void run() {
 
+		if(dataExtractionMethod == null) {
+			errorMessage = "Data extraction method missing";
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
 		taskDescription = "Importing data from " + dataFile.getName();
 		setStatus(TaskStatus.PROCESSING);
-		try {
-			dataDocument = null;
-			// Read CEF file
-			try {
-				dataDocument = XmlUtils.readXmlFile(inputCefFile);
-			} catch (Exception e) {
-				e.printStackTrace();
-				setStatus(TaskStatus.ERROR);
-			}
-			//	Parse CEF data
-			if(dataDocument != null) {
-				try {
-					parseCefData();
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-					setStatus(TaskStatus.ERROR);
-				}
-				try {
-					uploadParsedData();
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-					setStatus(TaskStatus.ERROR);
-				}
-			}
-		} catch (Exception e) {
+		String cefPath = dataFile.getResultForDataExtractionMethod(
+				dataExtractionMethod).getFullPath();
+		if(cefPath == null) {
+			errorMessage = "Path to CEF file not specified";
 			setStatus(TaskStatus.ERROR);
+			return;
+		}
+		inputCefFile = new File(cefPath);		
+		try {
+			parseInputCefFile(inputCefFile);
+		} catch (Exception e) {
+			errorMessage = "Failed to parse " + inputCefFile.getName();
 			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+			return;
+		}
+		try {
+			uploadParsedData();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
 		}
 		setStatus(TaskStatus.FINISHED);
 	}
 
-	@Override
-	protected void uploadParsedData() throws Exception {
+	private void uploadParsedData() throws Exception {
 
-		conn = ConnectionManager.getConnection();
+		Connection conn = ConnectionManager.getConnection();
 		taskDescription = "Uploading data data from " + dataFile.getName() + " to database";
-		total = features.size();
+		total = inputFeatureList.size();
 		processed = 0;
 		String sourceDataBundleId = IDTUtils.addNewReferenceMS1DataBundle(
 						experiment,
@@ -119,8 +127,16 @@ public class ReferenceMS1ImportTask extends CEFProcessingTask {
 						acquisitionMethod,
 						dataExtractionMethod,
 						conn);
-		for(LibMatchedSimpleMsFeature feature  : features) {
-			IDTMsDataUtils.uploadPoolMs1Feature(feature, sourceDataBundleId, conn);
+		
+		if(dataPipeline == null)
+			dataPipeline = new DataPipeline(
+					acquisitionMethod, dataExtractionMethod);
+		
+		for(MsFeature feature  : inputFeatureList) {
+			
+			LibMatchedSimpleMsFeature lmFeature = 
+					new LibMatchedSimpleMsFeature(feature, dataPipeline);
+			IDTMsDataUtils.uploadPoolMs1Feature(lmFeature, sourceDataBundleId, conn);
 			processed++;
 		}
 		ConnectionManager.releaseConnection(conn);

@@ -48,9 +48,12 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>{
 		super();
 		this.acquisitionMethod = acquisitionMethod;
 		this.dataExtractionMethod = dataExtractionMethod;
-		this.name = acquisitionMethod.getName();
+		this.name = "DP";
+		if(acquisitionMethod != null)
+			this.name = acquisitionMethod.getName();
+		
 		if(dataExtractionMethod != null)
-			this.name += "\n" + dataExtractionMethod.getName();
+			this.name += "\n" + dataExtractionMethod.getName();		
 	}
 
 	public DataPipeline(

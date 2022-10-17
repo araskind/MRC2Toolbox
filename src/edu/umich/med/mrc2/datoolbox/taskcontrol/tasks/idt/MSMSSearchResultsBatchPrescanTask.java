@@ -64,7 +64,9 @@ public class MSMSSearchResultsBatchPrescanTask extends AbstractTask implements T
 	private IChemObjectBuilder builder;
 	private Collection<String>prescanLog;
 
-	public MSMSSearchResultsBatchPrescanTask(Collection<File> inputCefFiles, File missingCompoundsListFile) {
+	public MSMSSearchResultsBatchPrescanTask(
+			Collection<File> inputCefFiles, 
+			File missingCompoundsListFile) {
 		super();
 		this.inputCefFiles = inputCefFiles;
 		this.missingCompoundsListFile = missingCompoundsListFile;
@@ -83,8 +85,8 @@ public class MSMSSearchResultsBatchPrescanTask extends AbstractTask implements T
 		idSpectrumMap = new HashMap<CompoundIdentity, Collection<TandemMassSpectrum>>();
 		for(File cefFile : inputCefFiles) {
 
-			IDTCefMSMSPrescanOrImportTask task = new IDTCefMSMSPrescanOrImportTask(cefFile);
-			//	MSMSSearchResultsPrescanTask task = new MSMSSearchResultsPrescanTask(cefFile);
+			IDTCefMSMSPrescanOrImportTask task = 
+					new IDTCefMSMSPrescanOrImportTask(cefFile);
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
@@ -96,31 +98,7 @@ public class MSMSSearchResultsBatchPrescanTask extends AbstractTask implements T
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
-			if (e.getSource().getClass().equals(MSMSSearchResultsPrescanTask.class)) {
-
-				MSMSSearchResultsPrescanTask task = (MSMSSearchResultsPrescanTask)e.getSource();
-				extractData(task);
-				processed++;
-				if(processed == total) {
-
-					if(!idSpectrumMap.isEmpty()) {
-						
-						try {
-							uploadNewMetlinSpectra();
-						} catch (Exception e2) {
-							// TODO Auto-generated catch block
-							e2.printStackTrace();
-						}
-					}
-					try {
-						createMissingCompoundsReport();
-						return;
-					} catch (Exception e1) {
-						setStatus(TaskStatus.ERROR);
-						e1.printStackTrace();
-					}
-				}
-			}
+			
 			if (e.getSource().getClass().equals(IDTCefMSMSPrescanOrImportTask.class)) {
 
 				IDTCefMSMSPrescanOrImportTask task = (IDTCefMSMSPrescanOrImportTask)e.getSource();
@@ -277,8 +255,6 @@ public class MSMSSearchResultsBatchPrescanTask extends AbstractTask implements T
 				System.out.println(id.getFormula());
 				e.printStackTrace();
 			}
-//			double mass =
-//					MolecularFormulaManipulator.getMass(mf, MolecularFormulaManipulator.MonoIsotopic);
 			double mass = 0.0d;
 			if(mf != null) 
 				mass = MolecularFormulaManipulator.getMajorIsotopeMass(mf);
@@ -293,6 +269,9 @@ public class MSMSSearchResultsBatchPrescanTask extends AbstractTask implements T
 			}
 			writer.append(StringUtils.join(headerChunks, "\t") + "\n");
 		}
+		if(!prescanLog.isEmpty())
+			writer.append(StringUtils.join(prescanLog, "\n"));
+						
 		writer.flush();
 		writer.close();
 	}
@@ -329,29 +308,6 @@ public class MSMSSearchResultsBatchPrescanTask extends AbstractTask implements T
 			processed++;
 		}
 		ConnectionManager.releaseConnection(conn);
-	}
-
-	private void extractData(MSMSSearchResultsPrescanTask task) {
-
-		missingIdentities.addAll(task.getMissingIdentities());
-
-		for (Entry<CompoundIdentity, Collection<TandemMassSpectrum>> entry : task.getIdSpectrumMap().entrySet()) {
-
-			CompoundIdentity cid = entry.getKey();
-			if(!idSpectrumMap.containsKey(cid))
-				idSpectrumMap.put(cid, new HashSet<TandemMassSpectrum>());
-
-			Collection<TandemMassSpectrum> msmsList = idSpectrumMap.get(cid);
-			for(TandemMassSpectrum msms : entry.getValue()) {
-
-				TandemMassSpectrum existingMsms = msmsList.stream().
-						filter(s -> s.getPolarity().equals(msms.getPolarity())).
-						filter(s -> s.getCidLevel() == msms.getCidLevel()).findFirst().orElse(null);
-
-				if(existingMsms == null)
-					msmsList.add(msms);
-			}
-		}
 	}
 
 	@Override

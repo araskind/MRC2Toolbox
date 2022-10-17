@@ -180,41 +180,16 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 
 		MsLibraryFormat libraryFormat = MsLibraryFormat.getFormatByDescription(
 				chooser.getFileFilter().getDescription());
-		LibraryExportTask let = null;
-		if(featureSubset == null){
-
-			let = new LibraryExportTask(
-					selectedFile,
-					currentLibrary,
-					targetSubset,
-					libraryFormat,
-					combineAdductsCheckBox.isSelected());
-		}
-		//	Export features only
-		if(targetSubset == null && featureSubset != null){
-
-			let = new LibraryExportTask(
-					selectedFile,
-					currentLibrary,
-					featureSubset,
+		LibraryExportTask let = new LibraryExportTask(
+					null,
+					selectedFile,				
 					combineAdductsCheckBox.isSelected(),
-					libraryFormat);
-		}
-		//	Export merged library
-		if(targetSubset != null && featureSubset != null){
-
-			let = new LibraryExportTask(
-					selectedFile,
 					currentLibrary,
 					targetSubset,
 					featureSubset,
-					combineAdductsCheckBox.isSelected(),
 					libraryFormat);
-		}
-		if(let != null) {
-			let.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(let);
-		}
+		let.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(let);	
 	}
 
 	public void setCurrentLibrary(CompoundLibrary currentLibrary) {

@@ -54,6 +54,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon exportMSPIconSmall = GuiUtils.getIcon("exportToMSP", 16);
 	private static final Icon siriusIcon = GuiUtils.getIcon("sirius", 24);
 	private static final Icon exportTrackerDataIcon = GuiUtils.getIcon("saveList", 24);
+	private static final Icon exportMSMSClustersIcon = GuiUtils.getIcon("exportClusterSet", 24);
 	private static final Icon idStatusManagerIcon = GuiUtils.getIcon("idStatusManager", 24);
 	private static final Icon idStatusManagerIconSmall = GuiUtils.getIcon("idStatusManager", 16);
 	private static final Icon idFollowupStepManagerIcon = GuiUtils.getIcon("idFollowupStepManager", 24);
@@ -122,7 +123,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private JMenuItem
 		trackerExportMenuItem,
 		mspExportMenuItem,
-		siriusExportMenuItem;
+		siriusExportMenuItem,
+		exportMSMSClustersMenuItem;
 	
 	public IDWorkbenchMenuBar(ActionListener listener) {
 
@@ -262,7 +264,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 				exportMSPIcon);
 		siriusExportMenuItem = addItem(exportMenu, 
 				MainActionCommands.SHOW_SIRIUS_MS_EXPORT_DIALOG_COMMAND, 
-				siriusIcon);
+				siriusIcon);		
+		exportMSMSClustersMenuItem = addItem(exportMenu, 
+				MainActionCommands.SHOW_MSMS_CLUSTER_DATA_EXPORT_DIALOG_COMMAND, 
+				exportMSMSClustersIcon);
 		
 		add(exportMenu);
 	}
