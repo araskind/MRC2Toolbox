@@ -64,7 +64,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMSMSClusterProperties;
-import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -105,8 +105,8 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 				IDTrackerFeatureIdentificationProperties.DATABASE_ID,
 				IDTrackerFeatureIdentificationProperties.SOURCE_DATABASE,
 				IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY,
-				IDTrackerFeatureIdentificationProperties.FWD_SCORE,
-				IDTrackerFeatureIdentificationProperties.REVERSE_SCORE,
+				IDTrackerFeatureIdentificationProperties.MSMS_ENTROPY_SCORE,
+				IDTrackerFeatureIdentificationProperties.ID_SCORE,
 				IDTrackerFeatureIdentificationProperties.MATCH_TYPE,
 				IDTrackerFeatureIdentificationProperties.ANNOTATIONS,
 				IDTrackerFeatureIdentificationProperties.FOLLOWUPS,
@@ -124,15 +124,22 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 	
 	private final String BROWSE_COMMAND = "BROWSE_FOR_OUTPUT";
 	
+	private MSMSClusterDataSet activeMSMSClusterDataSet;
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public IDTrackerMSMSClusterDataSetExportDialog(ActionListener listener) {
+	public IDTrackerMSMSClusterDataSetExportDialog(
+			ActionListener listener, 
+			MSMSClusterDataSet activeMSMSClusterDataSet) {
 		super();
-		setTitle("Export data from IDTracker");
+		setTitle("Export data for the active MSMS cluster data set \"" + 
+				activeMSMSClusterDataSet.getName() +"\"");
 		setIconImage(((ImageIcon) dialogIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setSize(new Dimension(700, 640));
 		setPreferredSize(new Dimension(700, 640));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		
+		this.activeMSMSClusterDataSet = activeMSMSClusterDataSet;
 		
 		JPanel panel = new JPanel();
 		getContentPane().add(panel, BorderLayout.CENTER);
@@ -233,9 +240,9 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		buttonPanel.add(btnCancel);
 		btnCancel.addActionListener(al);
 
-		exportButton = new JButton(MainActionCommands.EXPORT_IDTRACKER_DATA_COMMAND.getName());
+		exportButton = new JButton(MainActionCommands.EXPORT_MSMS_CLUSTER_DATA_COMMAND.getName());
 		buttonPanel.add(exportButton);
-		exportButton.setActionCommand(MainActionCommands.EXPORT_IDTRACKER_DATA_COMMAND.getName());
+		exportButton.setActionCommand(MainActionCommands.EXPORT_MSMS_CLUSTER_DATA_COMMAND.getName());
 		exportButton.addActionListener(listener);
 		JRootPane rootPane = SwingUtilities.getRootPane(exportButton);
 		rootPane.setDefaultButton(exportButton);
@@ -245,9 +252,10 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		loadPreferences();
 		initFileChoosers();
 		
-		String filePath = Paths.get(baseDirectory.getAbsolutePath(), 
-				"IDTracker_export" + 
-				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt").
+		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
+		String fileName = activeMSMSClusterDataSet.getName().replaceAll("\\W+", "-") 
+				+ "MSMSClusterExport_" + timestamp + ".txt";		
+		String filePath = Paths.get(baseDirectory.getAbsolutePath(), fileName).
 				toString();
 		outputFilleTextField.setText(filePath);
 		pack();
@@ -308,7 +316,8 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 	private void selectOutputFile() {
 		
 		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-		String fileName = "IDTrackerDataExport_" + timestamp + ".txt";
+		String fileName = activeMSMSClusterDataSet.getName().replaceAll("\\W+", "-") 
+				+ "MSMSClusterExport_" + timestamp + ".txt";
 		outputFileChooser.setSelectedFile(new File(fileName));			
 		if(outputFileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			outputFilleTextField.setText(outputFileChooser.getSelectedFile().getAbsolutePath());
@@ -320,6 +329,8 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 	
 		selectedMSMSClusterProperties = defaultMSMSClusterProperties;
 		selectedMSMSClusterIdentificationProperties = defaultMSMSClusterIdentificationProperties;
+		selectFeaturePropertiesListItems(selectedMSMSClusterProperties);
+		selectIdentificationPropertiesListItems(selectedMSMSClusterIdentificationProperties);
 	}
 	
 	@Override
@@ -336,12 +347,12 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 				getAbsoluteFile();
 		
 		//	Select fields for export
-		ArrayList<IDTrackerMsFeatureProperties> storedFeatureProperties = 
-				 new ArrayList<IDTrackerMsFeatureProperties>();
+		ArrayList<IDTrackerMSMSClusterProperties> storedFeatureProperties = 
+				 new ArrayList<IDTrackerMSMSClusterProperties>();
 		ArrayList<IDTrackerFeatureIdentificationProperties> storedIdentificationProperties = 
 				 new ArrayList<IDTrackerFeatureIdentificationProperties>();
 		
-		storedFeatureProperties = new ArrayList<IDTrackerMsFeatureProperties>();
+		storedFeatureProperties = new ArrayList<IDTrackerMSMSClusterProperties>();
 		storedIdentificationProperties = new ArrayList<IDTrackerFeatureIdentificationProperties>();
 		String msTwoFeaturePropertiesString = preferences.get(MSMS_CLUSTER_PROPERTIES, "");
 		selectedMSMSClusterProperties = defaultMSMSClusterProperties;
@@ -352,8 +363,8 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 
 			 for(String name : selectedMsTwoFeaturePropertiesNames) {
 				 
-				IDTrackerMsFeatureProperties fProperty = 					
-						IDTrackerMsFeatureProperties.getPropertyByName(name);
+				 IDTrackerMSMSClusterProperties fProperty = 					
+						 IDTrackerMSMSClusterProperties.getPropertyByName(name);
 				if(fProperty != null)
 					storedFeatureProperties.add(fProperty);
 			 }

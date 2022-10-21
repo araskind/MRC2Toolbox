@@ -38,7 +38,6 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cef.CEFProcessingTask;
-import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class ReferenceMS1ImportTask extends CEFProcessingTask {
 

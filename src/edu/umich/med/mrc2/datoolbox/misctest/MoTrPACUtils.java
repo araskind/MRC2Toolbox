@@ -87,14 +87,15 @@ public class MoTrPACUtils {
 		MRC2ToolBoxConfiguration.initConfiguration();
 		
 		File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
+		//File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
-			createMoTrPACTissueAssayManifestFile(
+			createMoTrPACTissueAssayNoRawManifestFile(
 					"T06",
 					"IONPNEG",
 					parentDir,
 					"BATCH1_20220404",
 					"PROCESSED_20221014",
-					"20221014");
+					"20221019");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -467,6 +468,60 @@ public class MoTrPACUtils {
 			checkSumData.append(localPath + "," + zipHash + "\n");
 		}
 		File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "file_manifest_" + manifestDate + ".csv").toFile();
+		FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
+	}
+	
+	public static void createMoTrPACTissueAssayNoRawManifestFile(
+			String tissue,
+			String assay,
+			File parentDirectory,
+			String batchId,
+			String processedFolderId,
+			String manifestDate) throws IOException {
+		
+		StringBuffer checkSumData = new StringBuffer();
+		checkSumData.append("file_name,md5\n");
+		Path batchPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId);
+		Path processedPath = Paths.get(batchPath.toString(), processedFolderId);
+		Path namedDirPath = Paths.get(processedPath.toString(), "NAMED");
+		List<Path> pathList = Files.find(namedDirPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + "NAMED" + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		Path unnamedDirPath = Paths.get(processedPath.toString(), "UNNAMED");
+		pathList = Files.find(unnamedDirPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + "UNNAMED" + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		pathList = Files.find(processedPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_failedsamples_"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		pathList = Files.find(batchPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_phase"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "file_manifest_noRaw" + manifestDate + ".csv").toFile();
 		FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
 	}
 	

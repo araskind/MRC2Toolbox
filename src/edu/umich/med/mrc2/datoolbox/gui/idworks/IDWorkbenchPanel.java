@@ -826,7 +826,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 
 		idTrackerMSMSClusterDataSetExportDialog = 
-				new IDTrackerMSMSClusterDataSetExportDialog(this);
+				new IDTrackerMSMSClusterDataSetExportDialog(this, activeMSMSClusterDataSet);
 		idTrackerMSMSClusterDataSetExportDialog.setLocationRelativeTo(this.getContentPane());
 		idTrackerMSMSClusterDataSetExportDialog.setVisible(true);
 	}

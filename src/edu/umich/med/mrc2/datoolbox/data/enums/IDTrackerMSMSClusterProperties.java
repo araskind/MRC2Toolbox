@@ -24,11 +24,13 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 public enum IDTrackerMSMSClusterProperties {
 
 	CLUSTER_ID("Cluster ID"),
-	MEDIAN_RETENTION_TIME("Median RT"),
+	LOOKUP_FEATURE_NAME("Lookup feature"),
 	MEDIAN_MZ("Median M/Z"),
-	LOOKUP_FEATURE_MZ("Lookup M/Z"),
+	LOOKUP_FEATURE_MZ("Lookup M/Z"),	
+	MZ_ERROR_PPM("M/Z error, ppm"),
+	MEDIAN_RETENTION_TIME("Median RT"),
 	LOOKUP_FEATURE_RT("Lookup RT"),
-	LOOKUP_FEATURE_NAME("Lookup name"),
+	RT_ERROR("RT error, min"),
 	;
 
 	private final String name;

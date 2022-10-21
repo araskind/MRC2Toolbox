@@ -34,24 +34,18 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
-import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
@@ -59,26 +53,19 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleClusterComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.ClassyFireClassificationLevels;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMSMSClusterProperties;
-import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
-import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.enums.RefMetClassificationLevels;
-import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -430,108 +417,57 @@ public class IDTrackerMSMSClusterDataExportTask extends AbstractTask {
 		writer.close();
 	}
 	
-	private String getFeatureProperty(MsFeatureInfoBundleCluster bundle, 
+	private String getFeatureProperty(
+			MsFeatureInfoBundleCluster cluster, 
 			IDTrackerMSMSClusterProperties property) {
+		
+		MinimalMSOneFeature lookupFeature = cluster.getLookupFeature();
 
-		MsFeature feature =  bundle.getMsFeature();		
-		if(property.equals(IDTrackerMsFeatureProperties.FEATURE_ID)) {
-			
-			TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
-			if(msms != null)
-				return msms.getId();
-			else
-				return feature.getId();
-		}		
-		if(property.equals(IDTrackerMsFeatureProperties.RETENTION_TIME))
-			return rtFormat.format(feature.getRetentionTime());
+		if(property.equals(IDTrackerMSMSClusterProperties.CLUSTER_ID))
+			return cluster.getId();
 		
-		if(property.equals(IDTrackerMsFeatureProperties.EXPERIMENT_ID)) {
-			if(bundle.getExperiment() != null)
-				return bundle.getExperiment().getId();
-			else
-				return "";
-		}
+		if(property.equals(IDTrackerMSMSClusterProperties.MEDIAN_RETENTION_TIME))
+			return rtFormat.format(cluster.getRt());
 		
-		if(property.equals(IDTrackerMsFeatureProperties.SAMPLE_ID)) {
-			if(bundle.getSample() != null)
-				return bundle.getSample().getId();
-			else
-				return "";
-		}
-		if(property.equals(IDTrackerMsFeatureProperties.SAMPLE_TYPE)) {
-			if(bundle.getStockSample() != null)
-				return bundle.getStockSample().getLimsSampleType().getName();
-			else
-				return "";
-		}
-		if(property.equals(IDTrackerMsFeatureProperties.ACQ_METHOD)) {	
-			if(bundle.getAcquisitionMethod() != null)
-				return bundle.getAcquisitionMethod().getName();
-			else
-				return "";
-		}
-		if(property.equals(IDTrackerMsFeatureProperties.DATA_ANALYSIS_METHOD)) {
-			if(bundle.getDataExtractionMethod() != null)
-				return bundle.getDataExtractionMethod().getName();
-			else
-				return "";
-		}
-		if(property.equals(IDTrackerMsFeatureProperties.RAW_DATA_FILE)) {
-			
-			String injId = bundle.getInjectionId();
-			Injection inj = injections.stream().
-					filter(i -> i.getId().equals(injId)).
-					findFirst().orElse(null);
-			if(inj != null)
-				return inj.getDataFileName();
-			else
-				return bundle.getDataFile().getName();
-		}
+		if(property.equals(IDTrackerMSMSClusterProperties.MEDIAN_MZ))
+			return mzFormat.format(cluster.getMz());
 		
-		//	MS1 only properties
-		if(msLevel.equals(MsDepth.MS1)) {
+		if(property.equals(IDTrackerMSMSClusterProperties.LOOKUP_FEATURE_MZ)) {
 			
-			if(property.equals(IDTrackerMsFeatureProperties.BASE_PEAK_MZ))
-					return mzFormat.format(feature.getBasePeakMz());
-			
-			if(property.equals(IDTrackerMsFeatureProperties.CHARGE))
-					return Integer.toString(feature.getCharge());
-			
-			if(property.equals(IDTrackerMsFeatureProperties.ADDUCT)) {
-				if(feature.getSpectrum() != null) {
-					Adduct adduct = feature.getSpectrum().getPrimaryAdduct();
-					if(adduct != null)
-						return adduct.getName();
-				}
-			}		
-			if(property.equals(IDTrackerMsFeatureProperties.NEUTRAL_MASS))
-					return mzFormat.format(feature.getNeutralMass());
-			
-			if(property.equals(IDTrackerMsFeatureProperties.KMD))
-					return ppmFormat.format(feature.getKmd());
-			
-			if(property.equals(IDTrackerMsFeatureProperties.KMD_MOD))
-					return ppmFormat.format(feature.getModifiedKmd());		
+			if(lookupFeature != null)
+				return mzFormat.format(lookupFeature.getMz());
+			else
+				return "";			
 		}
-		//	MS2 only properties
-		TandemMassSpectrum instrumentMsMs = null;
-		if(msLevel.equals(MsDepth.MS2)) {
+		if(property.equals(IDTrackerMSMSClusterProperties.LOOKUP_FEATURE_RT)) {
 			
-			instrumentMsMs = feature.getSpectrum().getTandemSpectra().
-				stream().filter(s -> s.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
-				findFirst().orElse(null);
+			if(lookupFeature != null)
+				return rtFormat.format(lookupFeature.getRt());
+			else
+				return "";			
+		}
+		if(property.equals(IDTrackerMSMSClusterProperties.LOOKUP_FEATURE_NAME)) {
 			
-			if(property.equals(IDTrackerMsFeatureProperties.PRECURSOR_MZ))
-				return mzFormat.format(instrumentMsMs.getParent().getMz());
+			if(lookupFeature != null)
+				return lookupFeature.getName();
+			else
+				return "";			
+		}
+		if(property.equals(IDTrackerMSMSClusterProperties.MZ_ERROR_PPM)) {
 			
-			if(property.equals(IDTrackerMsFeatureProperties.COLLISION_ENERGY))
-				return ppmFormat.format(instrumentMsMs.getCidLevel());
+			if(lookupFeature != null) {				
+				double mzError = ((cluster.getMz() - lookupFeature.getMz()) / lookupFeature.getMz()) * 1000000.0d;
+				return  ppmFormat.format(mzError);
+			}
+			else
+				return "";			
+		}
+		if(property.equals(IDTrackerMSMSClusterProperties.RT_ERROR)) {
 			
-			if(property.equals(IDTrackerMsFeatureProperties.SPECTRUM_ENTROPY)) 
-				return entropyFormat.format(instrumentMsMs.getEntropy());
-			
-			if(property.equals(IDTrackerMsFeatureProperties.TOTAL_INTENSITY))
-				return intensityFormat.format(instrumentMsMs.getTotalIntensity());		
+			if(lookupFeature != null)
+				return rtFormat.format(cluster.getRt() - lookupFeature.getRt());
+			else
+				return "";			
 		}
 		return "";
 	}
