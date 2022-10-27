@@ -45,6 +45,7 @@ public class MSMSFeatureClusterTreeMouseHandler extends MouseAdapter {
 	private static final Icon sortByFeatureNumIcon = GuiUtils.getIcon("sortByFeatureNum", 24);
 	private static final Icon sortByClusterNameIcon = GuiUtils.getIcon("sortByClusterName", 24);
 	private static final Icon sortByRtIcon = GuiUtils.getIcon("sortByRt", 24);
+	private static final Icon sortByRankIcon = GuiUtils.getIcon("rank", 24);
 	private static final Icon annotationIcon = GuiUtils.getIcon("msAnnotation", 24);
 	private static final Icon qualIcon = GuiUtils.getIcon("AgtQual", 24);
 	private static final Icon lockIcon = GuiUtils.getIcon("locked", 24);
@@ -66,6 +67,7 @@ public class MSMSFeatureClusterTreeMouseHandler extends MouseAdapter {
 		sortByFnumMenuItem,
 		sortByCnumMenuItem,
 		sortByRTMenuItem,
+		sortByRankMenuItem,
 		createXicSetMenuItem,
 		assingnAnnotationMenuItem,
 		toggleLockMenuItem,
@@ -107,6 +109,11 @@ public class MSMSFeatureClusterTreeMouseHandler extends MouseAdapter {
 				MainActionCommands.SORT_BY_RT_COMMAND.getName(), tree,
 				MainActionCommands.SORT_BY_RT_COMMAND.getName());
 		sortByRTMenuItem.setIcon(sortByRtIcon);
+				
+		sortByRankMenuItem = GuiUtils.addMenuItem(sortPopupMenu, 
+				MainActionCommands.SORT_BY_RANK_COMMAND.getName(), tree,
+				MainActionCommands.SORT_BY_RANK_COMMAND.getName());
+		sortByRankMenuItem.setIcon(sortByRankIcon);
 
 //		createXicSetMenuItem = GuiUtils.addMenuItem(sortPopupMenu,
 //				MainActionCommands.CREATE_XIC_METHOD_SET_COMMAND.getName(), tree,

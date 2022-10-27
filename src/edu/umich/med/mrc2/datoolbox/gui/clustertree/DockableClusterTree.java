@@ -47,11 +47,15 @@ public class DockableClusterTree extends DefaultSingleCDockable implements Actio
 	private static final Icon componentIcon = GuiUtils.getIcon("cluster", 16);
 	private static final Icon expandTreeIcon = GuiUtils.getIcon("expand", 16);
 	private static final Icon collapseTreeIcon = GuiUtils.getIcon("collapse", 16);
+	private static final Icon problemClustersIcon = GuiUtils.getIcon("levelInactive", 16);
+	private static final Icon allClustersIcon = GuiUtils.getIcon("level", 16);
 	
 	private SimpleButtonAction
-		expandCollapseTreeButton;
+		expandCollapseTreeButton,
+		toggleProblemClustersButton;
 	
-	public DockableClusterTree(String id, String title, ActionListener featurePopupListener, TreeSelectionListener tsl) {
+	public DockableClusterTree(String id, String title, 
+			ActionListener featurePopupListener, TreeSelectionListener tsl) {
 
 		super(id, componentIcon, title, null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
@@ -59,10 +63,11 @@ public class DockableClusterTree extends DefaultSingleCDockable implements Actio
 		clusterTree = new ClusterTree(featurePopupListener);
 		clusterTree.addTreeSelectionListener(tsl);
 		add(new JScrollPane(clusterTree));
-		initButtons(this);
+		initButtons(this, featurePopupListener);
 	}
 	
-	private void initButtons(ActionListener l) {
+	private void initButtons(ActionListener l,
+			ActionListener featurePopupListener) {
 
 		DefaultDockActionSource actions = new DefaultDockActionSource(
 				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
@@ -71,7 +76,14 @@ public class DockableClusterTree extends DefaultSingleCDockable implements Actio
 				MainActionCommands.EXPAND_TREE.getName(),
 				MainActionCommands.EXPAND_TREE.getName(), 
 				expandTreeIcon, l);
-		actions.add(expandCollapseTreeButton);		
+		actions.add(expandCollapseTreeButton);	
+		
+		toggleProblemClustersButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_ONLY_PROBLEM_CLUSTERS_COMMAND.getName(),
+				MainActionCommands.SHOW_ONLY_PROBLEM_CLUSTERS_COMMAND.getName(), 
+				allClustersIcon, featurePopupListener);
+		actions.add(toggleProblemClustersButton);
+		
 		actions.addSeparator();
 		intern().setActionOffers(actions);
 	}
@@ -93,14 +105,32 @@ public class DockableClusterTree extends DefaultSingleCDockable implements Actio
 
 			expandCollapseTreeButton.setIcon(collapseTreeIcon);
 			expandCollapseTreeButton.setCommand(MainActionCommands.COLLAPSE_TREE.getName());
-			expandCollapseTreeButton.setTooltip("Collapse all file nodes");
+			expandCollapseTreeButton.setText(MainActionCommands.COLLAPSE_TREE.getName());
+			expandCollapseTreeButton.setTooltip(MainActionCommands.COLLAPSE_TREE.getName());
 		} else {
 			expandCollapseTreeButton.setIcon(expandTreeIcon);
 			expandCollapseTreeButton.setCommand(MainActionCommands.EXPAND_TREE.getName());
-			expandCollapseTreeButton.setTooltip("Expand all file nodes");
+			expandCollapseTreeButton.setText(MainActionCommands.EXPAND_TREE.getName());
+			expandCollapseTreeButton.setTooltip(MainActionCommands.EXPAND_TREE.getName());
 		}
 	}
 
+	public void showOnlyProblemClusters(boolean probOnly) {
+
+		if (probOnly) {
+
+			toggleProblemClustersButton.setIcon(problemClustersIcon);
+			toggleProblemClustersButton.setCommand(MainActionCommands.SHOW_ALL_CLUSTERS_COMMAND.getName());		
+			toggleProblemClustersButton.setText(MainActionCommands.SHOW_ALL_CLUSTERS_COMMAND.getName());
+			toggleProblemClustersButton.setTooltip(MainActionCommands.SHOW_ALL_CLUSTERS_COMMAND.getName());
+		} else {
+			toggleProblemClustersButton.setIcon(allClustersIcon);
+			toggleProblemClustersButton.setCommand(MainActionCommands.SHOW_ONLY_PROBLEM_CLUSTERS_COMMAND.getName());
+			toggleProblemClustersButton.setText(MainActionCommands.SHOW_ONLY_PROBLEM_CLUSTERS_COMMAND.getName());
+			toggleProblemClustersButton.setTooltip(MainActionCommands.SHOW_ONLY_PROBLEM_CLUSTERS_COMMAND.getName());
+		}
+	}
+	
 	public ClusterTree getTree() {
 		return clusterTree;
 	}

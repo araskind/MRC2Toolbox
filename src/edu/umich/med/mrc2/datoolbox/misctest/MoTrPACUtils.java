@@ -86,15 +86,15 @@ public class MoTrPACUtils {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		
-		File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
-		//File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
+		// File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
+		File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
 			createMoTrPACTissueAssayNoRawManifestFile(
-					"T06",
+					"T70 - Adipose white",
 					"IONPNEG",
 					parentDir,
-					"BATCH1_20220404",
-					"PROCESSED_20221014",
+					"BATCH1_20210603",
+					"PROCESSED_20220926",
 					"20221019");
 		} catch (Exception e) {
 			e.printStackTrace();

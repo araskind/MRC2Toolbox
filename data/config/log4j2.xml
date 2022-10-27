@@ -9,7 +9,6 @@
 	</Properties>
 
 	<Appenders>
-
 		<!-- Console Appender -->
 		<Console name="Console" target="SYSTEM_OUT" follow="true">
 			<PatternLayout pattern="${LOG_PATTERN}" />
@@ -42,7 +41,7 @@
 		<RollingFile name="errorLog"
 			fileName="${APP_LOG_ROOT}/app-error.log"
 			filePattern="${APP_LOG_ROOT}/app-error-%d{yyyy-MM-dd}-%i.log">
-			<LevelRangeFilter minLevel="ERROR" maxLevel="ERROR"
+			<LevelRangeFilter minLevel="ERROR" maxLevel="FATAL"
 				onMatch="ACCEPT" onMismatch="DENY" />
 			<PatternLayout pattern="${LOG_PATTERN}" />
 			<Policies>
@@ -50,7 +49,6 @@
 			</Policies>
 			<DefaultRolloverStrategy max="10" />
 		</RollingFile>
-
 	</Appenders>
 
 	<Loggers>
@@ -60,6 +58,9 @@
 			<AppenderRef ref="infoLog" />
 			<AppenderRef ref="errorLog" />
 			<AppenderRef ref="Console" />
+		</Logger>
+		<Logger name="edu.umich.med.mrc2.datoolbox.gui.owl" additivity="true" level="warn">
+			<AppenderRef ref="errorLog" />
 		</Logger>
 		<Logger name="org.semanticweb" additivity="true" level="warn">
 			<AppenderRef ref="errorLog" />
@@ -73,7 +74,8 @@
 		<Logger name=" com.thoughtworks.xstream" additivity="true" level="warn">
 			<AppenderRef ref="errorLog" />
 		</Logger>
-		<Root level="debug" additivity="false">
+		
+		<Root level="warn" additivity="false">
 			<appender-ref ref="Console" />
 		</Root>
 	</Loggers>

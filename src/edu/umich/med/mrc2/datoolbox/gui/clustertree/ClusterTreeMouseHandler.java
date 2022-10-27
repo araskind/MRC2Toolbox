@@ -81,15 +81,18 @@ public class ClusterTreeMouseHandler extends MouseAdapter {
 
 		sortPopupMenu = new JPopupMenu();
 
-		sortByAreaMenuItem = GuiUtils.addMenuItem(sortPopupMenu, MainActionCommands.SORT_BY_AREA_COMMAND.getName(),
+		sortByAreaMenuItem = GuiUtils.addMenuItem(sortPopupMenu, 
+				MainActionCommands.SORT_BY_AREA_COMMAND.getName(),
 				tree, MainActionCommands.SORT_BY_AREA_COMMAND.getName());
 		sortByAreaMenuItem.setIcon(sortByAreaIcon);
 
-		sortByMzMenuItem = GuiUtils.addMenuItem(sortPopupMenu, MainActionCommands.SORT_BY_MZ_COMMAND.getName(), tree,
+		sortByMzMenuItem = GuiUtils.addMenuItem(sortPopupMenu, 
+				MainActionCommands.SORT_BY_MZ_COMMAND.getName(), tree,
 				MainActionCommands.SORT_BY_MZ_COMMAND.getName());
 		sortByMzMenuItem.setIcon(sortByMzIcon);
 
-		sortByFnumMenuItem = GuiUtils.addMenuItem(sortPopupMenu, MainActionCommands.SORT_BY_FNUM_COMMAND.getName(),
+		sortByFnumMenuItem = GuiUtils.addMenuItem(sortPopupMenu, 
+				MainActionCommands.SORT_BY_FNUM_COMMAND.getName(),
 				tree, MainActionCommands.SORT_BY_FNUM_COMMAND.getName());
 		sortByFnumMenuItem.setIcon(sortByFeatureNumIcon);
 
@@ -98,7 +101,8 @@ public class ClusterTreeMouseHandler extends MouseAdapter {
 				MainActionCommands.SORT_BY_CLUSTER_NAME_COMMAND.getName());
 		sortByCnumMenuItem.setIcon(sortByClusterNameIcon);
 
-		sortByRTMenuItem = GuiUtils.addMenuItem(sortPopupMenu, MainActionCommands.SORT_BY_RT_COMMAND.getName(), tree,
+		sortByRTMenuItem = GuiUtils.addMenuItem(sortPopupMenu, 
+				MainActionCommands.SORT_BY_RT_COMMAND.getName(), tree,
 				MainActionCommands.SORT_BY_RT_COMMAND.getName());
 		sortByRTMenuItem.setIcon(sortByRtIcon);
 
@@ -119,7 +123,8 @@ public class ClusterTreeMouseHandler extends MouseAdapter {
 				MainActionCommands.DISSOLVE_CLUSTER_COMMAND.getName());
 		dissolveClusterMenuItem.setIcon(forkIcon);
 
-		editClusterMenuItem = GuiUtils.addMenuItem(clusterPopupMenu, MainActionCommands.EDIT_CLUSTER_COMMAND.getName(),
+		editClusterMenuItem = GuiUtils.addMenuItem(clusterPopupMenu, 
+				MainActionCommands.EDIT_CLUSTER_COMMAND.getName(),
 				tree, MainActionCommands.EDIT_CLUSTER_COMMAND.getName());
 		editClusterMenuItem.setIcon(editIcon);
 

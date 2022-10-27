@@ -26,8 +26,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
@@ -187,9 +189,39 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 			removSelectedFeaturesFromCluster();
 		
 		if (command.equals(MainActionCommands.CHECK_FOR_DUPLICATE_NAMES_COMMAND.getName()))
-			checkForDuplicateNames();		
+			checkForDuplicateNames();	
+		
+		if (command.equals(MainActionCommands.SHOW_ALL_CLUSTERS_COMMAND.getName()))
+			showAllFeatureClusters();
+		
+		if (command.equals(MainActionCommands.SHOW_ONLY_PROBLEM_CLUSTERS_COMMAND.getName()))
+			showProblemFeatureClusters();		
 	}
 	
+	private void showAllFeatureClusters() {
+		
+		Set<MsFeatureCluster> allClusters = 
+				currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline);
+		if(allClusters == null)
+			return;
+		
+		loadFeatureClusters(allClusters);
+		clusterTree.showOnlyProblemClusters(false);
+	}
+
+	private void showProblemFeatureClusters() {
+		
+		Set<MsFeatureCluster> allClusters = 
+				currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline);
+		if(allClusters == null)
+			return;
+		
+		List<MsFeatureCluster> problemClusters = allClusters.stream().
+				filter(c -> c.hasChargeMismatch()).collect(Collectors.toList());
+		loadFeatureClusters(problemClusters);
+		clusterTree.showOnlyProblemClusters(true);		
+	}
+
 	private void checkForDuplicateNames() {
 		
 		if(currentProject == null || activeDataPipeline == null)

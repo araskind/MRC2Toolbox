@@ -172,24 +172,27 @@
 													</placeholders>
 												</leaf>
 												<node nodeId="1631029354244" orientation="HORIZONTAL" divider="0.246900269541779">
-													<leaf id="-1" nodeId="1631029354246">
+													<leaf id="0" nodeId="1631029354246">
 														<placeholders>
 															<placeholder>dock.single.ProjectSetupDraw</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="0" nodeId="1631029354257">
+													<leaf id="1" nodeId="1631029354257">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanel</placeholder>
-															<placeholder>dock.single.WorklistPanel</placeholder>
+															<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
+															<placeholder>dock.single.RawDataExaminerPanel</placeholder>
+															<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 															<placeholder>dock.single.IDWorkbenchPanel</placeholder>
+															<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
+															<placeholder>dock.single.ExperimentDesignPanel</placeholder>
 															<placeholder>dock.single.AutomatorPanel</placeholder>
 															<placeholder>dock.single.QCPanel</placeholder>
 															<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
-															<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
-															<placeholder>dock.single.RawDataExaminerPanel</placeholder>
+															<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
 															<placeholder>dock.single.MsLibraryPanel</placeholder>
+															<placeholder>dock.single.FeatureDataPanel</placeholder>
 															<placeholder>dock.single.METLIMSPanel</placeholder>
-															<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 														</placeholders>
 														<placeholder-map>
 															<version>0</version>
@@ -209,8 +212,18 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
+									<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
+										<replacement id="dockablesingle ProjectSetupDraw"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ProjectSetupDraw</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>5</selected>
+										<selected>4</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -265,6 +278,15 @@
 												<key shared="false">
 													<placeholder>dock.single.WorklistPanel</placeholder>
 												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
+												<item key="dock.placeholder" type="s">dock.single.WorklistPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -276,8 +298,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">3</item>
-												<item key="dock.id" type="i">3</item>
+												<item key="dock.index" type="i">4</item>
+												<item key="dock.id" type="i">4</item>
 												<item key="dock.placeholder" type="s">dock.single.DuplicatesPanelClusterDisplayPanel</item>
 											</entry>
 											<entry>
@@ -295,8 +317,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">4</item>
-												<item key="dock.id" type="i">4</item>
+												<item key="dock.index" type="i">5</item>
+												<item key="dock.id" type="i">5</item>
 												<item key="dock.placeholder" type="s">dock.single.CompoundDatabasePanel</item>
 											</entry>
 											<entry>
@@ -309,8 +331,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">5</item>
-												<item key="dock.id" type="i">5</item>
+												<item key="dock.index" type="i">6</item>
+												<item key="dock.id" type="i">6</item>
 												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanel</item>
 											</entry>
 											<entry>
@@ -333,8 +355,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">6</item>
-												<item key="dock.id" type="i">6</item>
+												<item key="dock.index" type="i">7</item>
+												<item key="dock.id" type="i">7</item>
 												<item key="dock.placeholder" type="s">dock.single.IDTrackerLimsManagerPanel</item>
 											</entry>
 											<entry>
@@ -347,8 +369,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">7</item>
-												<item key="dock.id" type="i">7</item>
+												<item key="dock.index" type="i">8</item>
+												<item key="dock.id" type="i">8</item>
 												<item key="dock.placeholder" type="s">dock.single.METLIMSPanel</item>
 											</entry>
 											<entry>
@@ -361,8 +383,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">8</item>
-												<item key="dock.id" type="i">8</item>
+												<item key="dock.index" type="i">9</item>
+												<item key="dock.id" type="i">9</item>
 												<item key="dock.placeholder" type="s">dock.single.RawDataExaminerPanel</item>
 											</entry>
 											<entry>
@@ -375,8 +397,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">9</item>
-												<item key="dock.id" type="i">9</item>
+												<item key="dock.index" type="i">10</item>
+												<item key="dock.id" type="i">10</item>
 												<item key="dock.placeholder" type="s">dock.single.MoTrPACDataTrackingPanel</item>
 											</entry>
 											<entry>
@@ -417,6 +439,16 @@
 												<replacement id="dockablesingle MsLibraryPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>MsLibraryPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.WorklistPanel">
+												<replacement id="dockablesingle WorklistPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>WorklistPanel</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -592,57 +624,6 @@
 								<children ignore="false"/>
 							</layout>
 						</child>
-						<child key="single WorklistPanel" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.WorklistPanel</placeholder>
-									<backup-path>
-										<node location="BOTTOM" size="0.5" id="1644019430912"/>
-										<node location="BOTTOM" size="0.5" id="1644019417832"/>
-										<node location="BOTTOM" size="0.5" id="1644019399042"/>
-										<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
-										<leaf id="1631029354257"/>
-									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>1</index>
-									<placeholder>dock.single.WorklistPanel</placeholder>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.WorklistPanel">
-									<replacement id="dockablesingle WorklistPanel"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>WorklistPanel</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
-						<child key="single ProjectSetupDraw" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.ProjectSetupDraw</placeholder>
-									<backup-path>
-										<node location="BOTTOM" size="0.5" id="1644019430912"/>
-										<node location="BOTTOM" size="0.5" id="1644019399042"/>
-										<node location="LEFT" size="0.246900269541779" id="1631029354244"/>
-										<leaf id="1631029354246"/>
-									</backup-path>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
-									<replacement id="dockablesingle ProjectSetupDraw"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>ProjectSetupDraw</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
 						<child key="single DataIntegratorPanelClusterDisplayPanel" root="ccontrol center" location="true">
 							<location>
 								<property factory="SplitDockPlaceholderProperty">
@@ -770,7 +751,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>6</index>
+											<index>5</index>
 											<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 										</property>
 									</location>
@@ -802,12 +783,14 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
 												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 												<leaf id="1631029354257"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>6</index>
+											<index>5</index>
 											<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 										</property>
 									</location>
@@ -857,7 +840,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single WorklistPanel">
+						<entry id="single WorklistPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.maximized</mode>
 								<mode>dock.mode.normal</mode>
@@ -909,7 +892,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>9</index>
+											<index>8</index>
 											<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 										</property>
 									</location>
@@ -941,12 +924,14 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
 												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 												<leaf id="1631029354257"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>9</index>
+											<index>8</index>
 											<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 										</property>
 									</location>
@@ -967,7 +952,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>5</index>
+											<index>4</index>
 											<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 										</property>
 									</location>
@@ -999,12 +984,14 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
 												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 												<leaf id="1631029354257"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>5</index>
+											<index>4</index>
 											<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 										</property>
 									</location>
@@ -1013,9 +1000,22 @@
 						</entry>
 						<entry id="single MoTrPACDataTrackingPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.maximized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.maximized">
+									<mode>dock.mode.maximized</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockFullScreenPropertyFactory"/>
+										<property factory="StackDockPropertyFactory">
+											<index>9</index>
+											<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -1024,9 +1024,15 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.5" id="1642002985958"/>
-												<leaf id="1642002985956"/>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
+												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
+												<leaf id="1631029354257"/>
 											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>9</index>
+											<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
 										</property>
 									</location>
 								</property>
@@ -1058,6 +1064,8 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.FeatureDataPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
 												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 												<leaf id="1631029354257"/>
 											</backup-path>
@@ -1070,10 +1078,10 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ProjectSetupDraw">
+						<entry id="single ProjectSetupDraw" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
@@ -1106,6 +1114,8 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.ProjectSetupDraw</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
 												<node location="LEFT" size="0.246900269541779" id="1631029354244"/>
 												<leaf id="1631029354246"/>
 											</backup-path>
@@ -1128,7 +1138,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>8</index>
+											<index>7</index>
 											<placeholder>dock.single.METLIMSPanel</placeholder>
 										</property>
 									</location>
@@ -1160,12 +1170,14 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.METLIMSPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
 												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 												<leaf id="1631029354257"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>8</index>
+											<index>7</index>
 											<placeholder>dock.single.METLIMSPanel</placeholder>
 										</property>
 									</location>
@@ -1198,6 +1210,8 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.ExperimentDesignPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
 												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 												<leaf id="1631029354257"/>
 											</backup-path>
@@ -1223,7 +1237,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>4</index>
+											<index>3</index>
 											<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 										</property>
 									</location>
@@ -1236,12 +1250,14 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
 												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 												<leaf id="1631029354257"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>4</index>
+											<index>3</index>
 											<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 										</property>
 									</location>
@@ -1332,6 +1348,8 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.MsLibraryPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
 												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 												<leaf id="1631029354257"/>
 											</backup-path>
@@ -1400,7 +1418,7 @@
 									<location>
 										<property factory="SplitDockFullScreenPropertyFactory"/>
 										<property factory="StackDockPropertyFactory">
-											<index>7</index>
+											<index>6</index>
 											<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 										</property>
 									</location>
@@ -1432,12 +1450,14 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 											<backup-path>
+												<node location="BOTTOM" size="0.5" id="1644019430912"/>
+												<node location="BOTTOM" size="0.5" id="1644019399042"/>
 												<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 												<leaf id="1631029354257"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>7</index>
+											<index>6</index>
 											<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 										</property>
 									</location>

@@ -125,6 +125,9 @@ public class MSMSFeatureClusterTree extends JTree implements ActionListener {
 
 		if (command.equals(MainActionCommands.SORT_BY_RT_COMMAND.getName()))
 			sortTree(SortProperty.RT, SortDirection.ASC);
+		
+		if (command.equals(MainActionCommands.SORT_BY_RANK_COMMAND.getName()))
+			sortTree(SortProperty.Rank, SortDirection.DESC);
 
 //		if (command.equals(MainActionCommands.CREATE_XIC_METHOD_COMMAND.getName()))
 //			createXicMethodForSelectedClusters();

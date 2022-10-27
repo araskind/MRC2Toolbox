@@ -195,19 +195,20 @@ public final class BuildInformation {
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.16.0</version>
+			<version>2.19.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.16.0</version>
+			<version>2.19.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-jul -->
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-slf4j-impl -->
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-jul</artifactId>
-			<version>2.16.0</version>
+		    <groupId>org.apache.logging.log4j</groupId>
+		    <artifactId>log4j-slf4j-impl</artifactId>
+		    <version>2.19.0</version>
+		    <scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -531,12 +532,6 @@ public final class BuildInformation {
 		    <groupId>org.xerial</groupId>
 		    <artifactId>sqlite-jdbc</artifactId>
 		    <version>3.34.0</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/uk.org.lidalia/sysout-over-slf4j -->
-		<dependency>
-		    <groupId>uk.org.lidalia</groupId>
-		    <artifactId>sysout-over-slf4j</artifactId>
-		    <version>1.0.2</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.jdom/jdom2 -->
 		<dependency>

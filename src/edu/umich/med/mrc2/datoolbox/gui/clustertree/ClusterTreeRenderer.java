@@ -46,6 +46,7 @@ public class ClusterTreeRenderer extends DefaultTreeCellRenderer {
 
 	static final Icon featureIcon = GuiUtils.getIcon("feature", 24);
 	static final Icon clusterIcon = GuiUtils.getIcon("cluster", 24);
+	static final Icon problemClusterIcon = GuiUtils.getIcon("problemCluster", 24);
 	static final Icon namedClusterIcon = GuiUtils.getIcon("namedCluster", 24);
 	static final Icon multiNamedClusterIcon = GuiUtils.getIcon("multiNamedCluster", 24);
 
@@ -90,6 +91,9 @@ public class ClusterTreeRenderer extends DefaultTreeCellRenderer {
 
 			if (cluster.isLocked())
 				label.setForeground(lockedColor);
+			
+			if(cluster.hasChargeMismatch())
+				label.setIcon(problemClusterIcon);
 
 			label.setFont(bigFont);
 		}

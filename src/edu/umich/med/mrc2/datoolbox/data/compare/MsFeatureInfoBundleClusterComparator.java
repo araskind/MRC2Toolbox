@@ -92,6 +92,21 @@ public class MsFeatureInfoBundleClusterComparator extends ObjectCompatrator<MsFe
 				return result;
 			else
 				return -result;
+			
+		case Rank:			
+			double r1 = 0.0d;
+			double r2 = 0.0d;
+			if(c1.getLookupFeature() != null)
+				r1 = c1.getLookupFeature().getRank();
+			
+			if(c2.getLookupFeature() != null)
+				r2 = c2.getLookupFeature().getRank();
+			
+			result = Double.compare(r1, r2);
+			if (direction == SortDirection.ASC)
+				return result;
+			else
+				return -result;	
 
 		default:
 			break;

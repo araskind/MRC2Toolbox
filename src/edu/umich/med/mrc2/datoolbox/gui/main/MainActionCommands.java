@@ -364,7 +364,9 @@ public enum MainActionCommands {
 	EXPORT_DUPLICATES_COMMAND("Export duplicate entries"),
 	EXPORT_RESULTS_TO_EXCEL_COMMAND("Export project report to Excel"),
 	EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND("Export results for metabolomics workbench"),
-	CHECK_FOR_DUPLICATE_NAMES_COMMAND("Check for duplicate names"),
+	CHECK_FOR_DUPLICATE_NAMES_COMMAND("Check for duplicate names"),	
+	SHOW_ONLY_PROBLEM_CLUSTERS_COMMAND("Show only problem clusters"),	
+	SHOW_ALL_CLUSTERS_COMMAND("Show all clusters"),
 	
 	//	MSMS clusters
 	SHOW_MSMS_CLUSTER_FILTER_COMMAND("Show MSMS cluster filter"),
@@ -385,6 +387,7 @@ public enum MainActionCommands {
 	SORT_BY_FNUM_COMMAND(	"Sort by feature number in cluster (high to low)"),
 	SORT_BY_CLUSTER_NAME_COMMAND(	"Sort by cluster name"),
 	SORT_BY_RT_COMMAND("Sort by retention"),
+	SORT_BY_RANK_COMMAND("Sort by rank"),
 
 	// Feature statistics panel commands
 	CALC_FEATURES_STATS_COMMAND("Calculate features stats"),
@@ -1072,6 +1075,7 @@ public enum MainActionCommands {
     OPEN_RAW_DATA_FILE_COMMAND("Open raw data file(s)"),
     CLOSE_RAW_DATA_FILE_COMMAND("Close raw data file(s)"),
     FINALIZE_CLOSE_RAW_DATA_FILE_COMMAND("Complete raw data file(s) closing"),
+    
     
 	//	Data extract
 	EXTRACT_CHROMATOGRAM("Extract chromatogram"),

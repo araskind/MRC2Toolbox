@@ -115,6 +115,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.UniversalIdentificationResul
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.filter.MSMSClusterFilterDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary.MSMSCLusterDataSetSummaryDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerMSMSClusterDataSetExportDialog;
@@ -206,6 +207,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryI
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 import umich.ms.datatypes.LCMSData;
 
 public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel 
@@ -283,6 +285,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private MSMSClusterDataSetEditorDialog msmsClusterDataSetEditorDialog;	
 	private IdentificationTableModelListener identificationTableModelListener;
 	private IDTrackerMSMSClusterDataSetExportDialog idTrackerMSMSClusterDataSetExportDialog;
+	private MSMSClusterFilterDialog msmsClusterFilterDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -857,18 +860,86 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void showMSMSClusterFilter() {
-		// TODO Auto-generated method stub
 		
+		if(activeMSMSClusterDataSet == null || activeMSMSClusterDataSet.getClusters().isEmpty())
+			return;
+
+		msmsClusterFilterDialog = new MSMSClusterFilterDialog(this);
+		msmsClusterFilterDialog.setLocationRelativeTo(this.getContentPane());
+		msmsClusterFilterDialog.setVisible(true);
 	}
 
 	private void filterMSMSClusters() {
-		// TODO Auto-generated method stub
-		
+
+		Collection<String>errors = msmsClusterFilterDialog.validateInput();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), msmsClusterFilterDialog);
+			return;
+		}
+		Collection<MsFeatureInfoBundleCluster> filteredClusters = 
+				new ArrayList<MsFeatureInfoBundleCluster>();
+		filteredClusters.addAll(activeMSMSClusterDataSet.getClusters());
+		Range mzRange = msmsClusterFilterDialog.getMzRange();
+		if(mzRange != null) {
+			filteredClusters = filteredClusters.stream().
+				filter(c -> mzRange.contains(c.getMz())).collect(Collectors.toList());
+		}
+		Range rtRange = msmsClusterFilterDialog.getRTRange();
+		if(rtRange != null) {
+			filteredClusters = filteredClusters.stream().
+				filter(c -> rtRange.contains(c.getRt())).collect(Collectors.toList());
+		}
+		String lookupName = msmsClusterFilterDialog.getLookupFeatureName();
+		if(!lookupName.isEmpty()) {
+			
+			filteredClusters = filteredClusters.stream().
+					filter(c -> c.getLookupFeature() != null).
+					filter(c -> c.getLookupFeature().getName().equalsIgnoreCase(lookupName)).
+					collect(Collectors.toList());
+		}
+		String compoundName = 
+				msmsClusterFilterDialog.getCompoundName().toUpperCase();
+		if(!compoundName.isEmpty()) {
+			
+			filteredClusters = filteredClusters.stream().
+					filter(c -> c.getPrimaryIdentity() != null).
+					filter(c -> c.getPrimaryIdentity().getCompoundIdentity().getName().toUpperCase().contains(compoundName)).
+					collect(Collectors.toList());
+		}
+		String formula = msmsClusterFilterDialog.getFormula();
+		if(!formula.isEmpty()) {
+			
+			filteredClusters = filteredClusters.stream().
+					filter(c -> c.getPrimaryIdentity() != null).
+					filter(c -> c.getPrimaryIdentity().getCompoundIdentity().getFormula().equals(formula)).
+					collect(Collectors.toList());
+		}
+		if(msmsClusterFilterDialog.showIdentifiedOnly()) {
+			
+			filteredClusters = filteredClusters.stream().
+					filter(c -> c.getPrimaryIdentity() != null).					
+					collect(Collectors.toList());
+		}
+		if(filteredClusters.isEmpty()) {
+			
+			MessageDialog.showWarningMsg(
+					"No clusters found matching all selected criteria", 
+					msmsClusterFilterDialog);
+			return;
+		}
+		else {
+			clearMSMSFeatureData();
+			msmsFeatureClusterTreePanel.loadFeatureClusters(filteredClusters);
+			activeCluster = null;
+			msmsClusterFilterDialog.dispose();
+		}		
 	}
 
 	private void reloadActiveMSMSClustersDataSet() {
-		// TODO Auto-generated method stub
-		
+
+		clearMSMSFeatureData();
+		msmsFeatureClusterTreePanel.loadFeatureClusters(activeMSMSClusterDataSet.getClusters());
+		activeCluster = null;
 	}
 
 	private void showMSMSClustersSummary() {

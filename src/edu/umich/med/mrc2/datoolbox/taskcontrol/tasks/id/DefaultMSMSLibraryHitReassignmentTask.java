@@ -148,8 +148,11 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 
 		Collection<MsFeatureIdentity>idsToRank = 
 				new TreeSet<MsFeatureIdentity>(entropyScoreComparator);
+
 		idsToRank.addAll(hitTypeMap.get(HiResSearchOption.z));
-		idsToRank.addAll(hitTypeMap.get(HiResSearchOption.u));
+		if(topHitReassignmentOption.equals(TopHitReassignmentOption.ALLOW_IN_SOURCE_HITS))
+			idsToRank.addAll(hitTypeMap.get(HiResSearchOption.u));
+		
 		List<MsFeatureIdentity> metlinHits = 
 				bundle.getMsFeature().getIdentifications().stream().
 				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).

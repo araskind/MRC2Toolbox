@@ -69,6 +69,7 @@ public class MsFeatureCluster implements Serializable {
 	private Collection<ModificationBlock> chemicalModificationsMap;
 	private Map<MsFeature, Set<Adduct>> annotationMap;
 	private boolean locked;
+	private boolean chargeMismatch;
 	private MsFeature primaryFeature;
 
 	public MsFeatureCluster() {
@@ -94,6 +95,9 @@ public class MsFeatureCluster implements Serializable {
 			rtRange = new Range(cf.getRetentionTime());
 		else
 			rtRange.extendRange(cf.getRetentionTime());		
+		
+		chargeMismatch = clusterFeatures.get(pipeline).stream().
+				map(f -> f.getCharge()).distinct().count() > 1;
 	}
 
 	public Collection<Double>getMassDifferencesWithinRange(
@@ -562,6 +566,10 @@ public class MsFeatureCluster implements Serializable {
 				maxScore = score;
 		}		
 		return maxScore;
+	}
+
+	public boolean hasChargeMismatch() {
+		return chargeMismatch;
 	}
 }
 

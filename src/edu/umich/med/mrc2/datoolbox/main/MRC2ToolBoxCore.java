@@ -47,11 +47,11 @@ import org.apache.commons.jcs3.JCS;
 import org.apache.commons.jcs3.access.CacheAccess;
 import org.apache.commons.jcs3.engine.control.CompositeCacheManager;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.renjin.script.RenjinScriptEngine;
 import org.renjin.script.RenjinScriptEngineFactory;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.slf4j.LoggerFactory;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -116,7 +116,7 @@ public final class MRC2ToolBoxCore {
 	public static TaskControllerImpl getTaskController() {
 		return taskController;
 	}	
-	private static Logger logger;
+	private static org.slf4j.Logger logger;
 
 	public static void main(String[] args) {
 		
@@ -141,17 +141,16 @@ public final class MRC2ToolBoxCore {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		
 		//	Configure logging
-		
-		//	Stop all logs from printing to stdout
-		//	SysStreamsLogger.bindSystemStreams();
-		
-		//	Stop stdout printing but keep errors
-		SysStreamsLogger.bindOutputStream();
-		
 		File file = new File(configDir + "log4j2.xml");
 		((LoggerContext) LogManager.getContext(false)).setConfigLocation(file.toURI());			
-		logger = LogManager.getLogger(MRC2ToolBoxCore.class);
-		logger.info("Statring the program");	
+		logger = LoggerFactory.getLogger(MRC2ToolBoxCore.class);
+		logger.info("Statring the program");
+		
+		//	Stop all logs from printing to stdout
+		SysStreamsLogger.bindSystemStreams();
+		
+		//	Stop stdout printing but keep errors
+		//	SysStreamsLogger.bindOutputStream();
 				
 		MRC2ToolBoxConfiguration.initConfiguration();
 		boolean conectionSetupTried = false;

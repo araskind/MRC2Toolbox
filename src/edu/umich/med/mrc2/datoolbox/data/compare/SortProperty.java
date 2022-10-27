@@ -47,5 +47,6 @@ public enum SortProperty {
 	dataFile,
 	resultFile,
 	spectrumEntropy,
-	msmsIntensity;
+	msmsIntensity,
+	Rank;
 }
