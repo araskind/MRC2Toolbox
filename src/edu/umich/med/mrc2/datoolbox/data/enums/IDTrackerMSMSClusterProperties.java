@@ -31,6 +31,7 @@ public enum IDTrackerMSMSClusterProperties {
 	MEDIAN_RETENTION_TIME("Median RT"),
 	LOOKUP_FEATURE_RT("Lookup RT"),
 	RT_ERROR("RT error, min"),
+	RANK("Rank"),
 	;
 
 	private final String name;

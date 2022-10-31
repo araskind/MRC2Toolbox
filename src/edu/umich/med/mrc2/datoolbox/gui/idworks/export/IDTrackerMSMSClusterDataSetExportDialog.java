@@ -97,7 +97,8 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 				IDTrackerMSMSClusterProperties.MEDIAN_MZ,
 				IDTrackerMSMSClusterProperties.LOOKUP_FEATURE_MZ,
 				IDTrackerMSMSClusterProperties.LOOKUP_FEATURE_RT,
-				IDTrackerMSMSClusterProperties.LOOKUP_FEATURE_NAME,				
+				IDTrackerMSMSClusterProperties.LOOKUP_FEATURE_NAME,
+				IDTrackerMSMSClusterProperties.RANK,
 		};
 	private final static IDTrackerFeatureIdentificationProperties[] defaultMSMSClusterIdentificationProperties 
 		= new IDTrackerFeatureIdentificationProperties[] {				

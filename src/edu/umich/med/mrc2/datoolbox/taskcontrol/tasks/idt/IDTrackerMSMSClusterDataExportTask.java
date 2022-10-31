@@ -469,7 +469,14 @@ public class IDTrackerMSMSClusterDataExportTask extends AbstractTask {
 			else
 				return "";			
 		}
-		return "";
+		if(property.equals(IDTrackerMSMSClusterProperties.RANK)) {
+			
+			if(lookupFeature != null)
+				return entropyFormat.format(lookupFeature.getRank());
+			else
+				return "";			
+		}
+		return "";		
 	}
 
 	private String getFeatureIdentificationProperty(

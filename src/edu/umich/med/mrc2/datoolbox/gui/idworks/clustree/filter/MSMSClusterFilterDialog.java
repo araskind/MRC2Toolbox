@@ -77,11 +77,11 @@ public class MSMSClusterFilterDialog extends JDialog implements BackedByPreferen
 	private static final String MZ_VALUE = "MZ_VALUE";
 	private static final String MZ_ERROR = "MZ_ERROR";
 	private static final String MZ_ERROR_TYPE = "MZ_ERROR_TYPE";
-	private static final String RT_VALUE = "MZ_VALUE";
+	private static final String RT_VALUE = "RT_VALUE";
 	private static final String RT_ERROR = "RT_ERROR";
-	private static final String COMPOUND_NAME = "RT_ERROR";
-	private static final String FORMULA = "RT_ERROR";
-	private static final String IDENTIFIED_ONLY = "RT_ERROR";
+	private static final String COMPOUND_NAME = "COMPOUND_NAME";
+	private static final String FORMULA = "FORMULA";
+	private static final String IDENTIFIED_ONLY = "IDENTIFIED_ONLY";
 	
 	private static final NumberFormat twoDecFormat = new DecimalFormat("###.##");
 	private static final NumberFormat wholeNumDecFormat = new DecimalFormat("###");
