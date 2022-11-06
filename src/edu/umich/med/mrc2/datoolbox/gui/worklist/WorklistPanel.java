@@ -55,6 +55,7 @@ import org.apache.commons.lang3.StringUtils;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
+import edu.umich.med.mrc2.datoolbox.data.WorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -572,18 +573,48 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	}
 
 	private void finalizeWorklistLoad(WorklistImportTask eTask) {
-
+		
+		//	Clean worklist from files missing in the project 
+		//	and check for files missing in worklist
+		Worklist newWorklist = eTask.getWorklist();
+		Set<DataFile> allDataFiles = 
+				currentProject.getDataFilesForPipeline(activeDataPipeline, false);
+		Set<DataFile> worklistDataFiles = newWorklist.getWorklistItems().stream().
+				map(i -> i.getDataFile()).collect(Collectors.toSet());
+		
+		List<DataFile> missingInWorklistFiles = 
+				allDataFiles.stream().filter(f -> !worklistDataFiles.contains(f)).
+				sorted().collect(Collectors.toList());
+		
+		List<DataFile> missingInProjectFiles = 
+				worklistDataFiles.stream().filter(f -> !allDataFiles.contains(f)).
+				sorted().collect(Collectors.toList());
+		if(!missingInProjectFiles.isEmpty()) {
+			
+			List<WorklistItem> newItems = newWorklist.getWorklistItems().
+					stream().filter(i -> allDataFiles.contains(i.getDataFile())).
+					collect(Collectors.toList());
+			newWorklist.getWorklistItems().clear();
+			newWorklist.getWorklistItems().addAll(newItems);
+		}
 		if(!eTask.isAppendWorklist())
 			currentProject.setWorklistForAcquisitionMethod(
-					eTask.getDataAcquisitionMethod(), eTask.getWorklist());
+					eTask.getDataAcquisitionMethod(), newWorklist);
 		else
 			currentProject.getWorklistForDataAcquisitionMethod(
-					eTask.getDataAcquisitionMethod()).appendWorklist(eTask.getWorklist());
-		
-//		MRC2ToolBoxCore.getMainWindow().
-//			switchPanelForDataPipeline(activeDataPipeline, PanelList.WORKLIST);
+					eTask.getDataAcquisitionMethod()).appendWorklist(newWorklist);
 		
 		switchDataPipeline(currentProject, activeDataPipeline);
+		
+		if(!missingInWorklistFiles.isEmpty()) {
+			
+			List<String> fileNames = missingInWorklistFiles.stream().
+					map(f -> f.getName()).sorted().collect(Collectors.toList());
+			
+			MessageDialog.showWarningMsg(
+					"Worklist data missing for:\n" + StringUtils.join(fileNames, "\n"), 
+					this.getContentPane());
+		}
 	}
 
 	@Override

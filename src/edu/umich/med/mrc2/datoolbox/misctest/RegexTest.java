@@ -209,7 +209,7 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			remapFeaturesFromNeutralMass();
+			batchUpdateDFileNames();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -246,7 +246,7 @@ public class RegexTest {
 	
 	private static void batchUpdateDFileNames() {
 		
-		File sourceDirectory = new File("Y:\\_QUALTMP\\EX01235\\BATCH-05\\NEG");
+		File sourceDirectory = new File("C:\\Users\\Sasha\\Downloads\\_2_rename\\_SEG1");
 		IOFileFilter dotDfilter = 
 				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
 		Collection<File> dotDfiles = FileUtils.listFilesAndDirs(
@@ -260,8 +260,8 @@ public class RegexTest {
 //		String find = "CS0000009-010";
 //		String replace = "CS0000009-10";
 		
-		String find = "20220816";
-		String replace = "20220907";
+		String find = "-P";
+		String replace = "-N";
 		
 		for(File ddf : dotDfiles) {
 			

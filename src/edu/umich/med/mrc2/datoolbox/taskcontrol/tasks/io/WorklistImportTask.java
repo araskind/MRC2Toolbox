@@ -96,6 +96,9 @@ public class WorklistImportTask extends WorklistTask {
 					e.printStackTrace();
 					setStatus(TaskStatus.ERROR);
 				}
+				if(worklist != null)
+					worklist.getWorklistItems().stream().
+						forEach(i -> i.getDataFile().setDataAcquisitionMethod(dataAcquisitionMethod));
 			}
 		}
 		if(importType.equals(WorklistImportType.PLAIN_TEXT_FILE)) {
