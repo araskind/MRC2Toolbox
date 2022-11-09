@@ -57,7 +57,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -70,7 +69,6 @@ import javax.swing.WindowConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
@@ -106,7 +104,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -133,7 +131,6 @@ public class MultiFileDataImportDialog extends JDialog
 	private DataPipeline existingDataPipeline = null;
 	private DataPipeline newDataPipeline = null;
 	
-	private JFileChooser chooser;
 	private File baseLibraryDirectory, 
 				libraryFile, 
 				dataFileDirectory, 
@@ -141,13 +138,17 @@ public class MultiFileDataImportDialog extends JDialog
 				pfaTempDir;
 	private CompoundLibrary currentLibrary;
 	private JTextField libraryTextField;
-	private JButton cancelButton;
-	private JButton importDataButton;
+//	private JButton cancelButton;
+//	private JButton importDataButton;
 	private MultiFileImportToolbar toolBar;
-	private FileNameExtensionFilter txtFilter;
-	private FileNameExtensionFilter xmlFilter;
-	private FileNameExtensionFilter mgfFilter;
-	private FileNameExtensionFilter pfaFilter;
+	
+//	private JFileChooser chooser;
+//	private FileNameExtensionFilter txtFilter;
+//	private FileNameExtensionFilter xmlFilter;
+//	private FileNameExtensionFilter mgfFilter;
+//	private FileNameExtensionFilter pfaFilter;
+//	private String followupCommand;
+	
 	private JComboBox featureSubsetcomboBox;
 	private DataFileSampleMatchPanel matchPanel;
 	private TaskListener dataLoadTaskListener;
@@ -160,7 +161,6 @@ public class MultiFileDataImportDialog extends JDialog
 	private DataAnalysisProject currentProject;
 	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
 	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
-	private String followupCommand;
 	
 	private static final Icon importMultifileIcon = GuiUtils.getIcon("importMultifile", 32);
 
@@ -282,7 +282,7 @@ public class MultiFileDataImportDialog extends JDialog
 		gbc_panel.gridx = 0;
 		gbc_panel.gridy = 1;
 		panel_1.add(dataPipelineDefinitionPanel, gbc_panel);
-		cancelButton = new JButton("Cancel");
+		JButton cancelButton = new JButton("Cancel");
 		GridBagConstraints gbc_cancelButton = new GridBagConstraints();
 		gbc_cancelButton.anchor = GridBagConstraints.NORTHWEST;
 		gbc_cancelButton.insets = new Insets(0, 0, 0, 5);
@@ -293,7 +293,7 @@ public class MultiFileDataImportDialog extends JDialog
 
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		importDataButton = new JButton("Import data");
+		JButton importDataButton = new JButton("Import data");
 		importDataButton.setActionCommand(MainActionCommands.IMPORT_DATA_COMMAND.getName());
 		importDataButton.addActionListener(this);
 		GridBagConstraints gbc_importDataButton = new GridBagConstraints();
@@ -306,7 +306,7 @@ public class MultiFileDataImportDialog extends JDialog
 		
 		currentProject = MRC2ToolBoxCore.getCurrentProject();
 		loadPreferences();
-		initChooser();
+//		initChooser();
 		pack();
 	}
 	
@@ -316,49 +316,50 @@ public class MultiFileDataImportDialog extends JDialog
 		super.dispose();
 	}
 
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseLibraryDirectory);
-
-		txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv");
-		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "CEF");
-		mgfFilter = new FileNameExtensionFilter("MGF files", "mgf", "MGF");
-		pfaFilter = new FileNameExtensionFilter("ProFinder archive files", "pfa", "PFA");
-	}
+//	private void initChooser() {
+//
+//		chooser = new ImprovedFileChooser();
+//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
+//		chooser.addActionListener(this);
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		chooser.setCurrentDirectory(baseLibraryDirectory);
+//
+//		txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv");
+//		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "CEF");
+//		mgfFilter = new FileNameExtensionFilter("MGF files", "mgf", "MGF");
+//		pfaFilter = new FileNameExtensionFilter("ProFinder archive files", "pfa", "PFA");
+//	}
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
 				
 		String command = event.getActionCommand();
-		if(command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName())
-				|| command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName())
-				|| command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName())
-				|| command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName())) {
-			followupCommand = command;
-		}		
-		if (event.getSource().equals(chooser) 
-				&& event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			if(followupCommand.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
-				addSelectedLibraryFile();
 		
-			if(followupCommand.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
-				addSelectedDataFiles();
-			
-			if (followupCommand.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
-				loadDesignFromFile();
-			
-			if (followupCommand.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
-				addResultsProFinderPfaFileToNewPipeline();
-			
-			followupCommand = null;
-		}
-		else {
+//		if(command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName())
+//				|| command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName())
+//				|| command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName())
+//				|| command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName())) {
+//			followupCommand = command;
+//		}		
+//		if (event.getSource().equals(chooser) 
+//				&& event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
+//
+//			if(followupCommand.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
+//				addSelectedLibraryFile();
+//		
+//			if(followupCommand.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
+//				addSelectedDataFiles();
+//			
+//			if (followupCommand.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
+//				loadDesignFromFile();
+//			
+//			if (followupCommand.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
+//				addResultsProFinderPfaFileToNewPipeline();
+//			
+//			followupCommand = null;
+//		}
+//		else {
 			if (command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
 				selectLibraryFile();
 
@@ -386,7 +387,7 @@ public class MultiFileDataImportDialog extends JDialog
 				editReferenceSamples();
 			
 			if (command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
-				chooseDesignFile();
+				selectDesignFile();
 			
 			if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName()))
 				showAcquisitionMethodEditor();
@@ -399,7 +400,7 @@ public class MultiFileDataImportDialog extends JDialog
 			
 			if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
 				addDataExtractionMethod();
-		}
+//		}
 	}
 	
 	private void showDataExtractionMethodEditor() {
@@ -494,55 +495,46 @@ public class MultiFileDataImportDialog extends JDialog
 		rsd.setLocationRelativeTo(this.getContentPane());
 		rsd.setVisible(true);
 	}
-	public void chooseDesignFile() {
-
-		chooser.resetChoosableFileFilters();
-		chooser.setFileFilter(txtFilter);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setCurrentDirectory(baseDesignDirectory);
-		chooser.rescanCurrentDirectory();
-		chooser.showOpenDialog(this);
-	}
 	
-	private void addSelectedDataFiles() {
-		
-		File[] dataFiles = chooser.getSelectedFiles();
-		if(dataFiles.length == 0)
-			return;
-		
-		if(pfaLoaded &&  !matchPanel.getSampleDataResultObjects(false).isEmpty()) {
-			
-			MessageDialog.showErrorMsg("You've selected ProFinder archive as data source.\n"
-					+ "Adding individual CEF files to this data analysis pipeline is not supported.", 
-					this);
-			return;
-		}		
-		dataFileDirectory = dataFiles[0].getParentFile();
-		savePreferences();
-		//	Add data to existing pipeline
-		if(existingDataPipeline != null) {
-			addResultsToExistingPipeline(dataFiles);
-			return;
-		}
-		//	Add extra data to new pipeline
-		if(newDataPipeline != null) {
-			addResultsToNewPipeline(newDataPipeline, dataFiles);
-			return;
-		}
-		//	Create new pipeline and add data to it		
-		newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
-		if(existingDataPipeline == null && MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
-			MessageDialog.showErrorMsg("The project already contains data pipeline \n"
-					+ "with selected combination of assay, data acquisition and data analysis methods.\n"
-					+ "Please adjust you selection.\n"
-					+ "If you want to replace the existing data\n"
-					+ "please delete them first and then re-upload.", 
-					this);
-			newDataPipeline = null;
-			return;
-		}	
-		addResultsToNewPipeline(newDataPipeline, dataFiles);		
-	}
+//	private void addSelectedDataFiles() {
+//		
+//		File[] dataFiles = chooser.getSelectedFiles();
+//		if(dataFiles.length == 0)
+//			return;
+//		
+//		if(pfaLoaded && !matchPanel.getSampleDataResultObjects(false).isEmpty()) {
+//			
+//			MessageDialog.showErrorMsg("You've selected ProFinder archive as data source.\n"
+//					+ "Adding individual CEF files to this data analysis pipeline is not supported.", 
+//					this);
+//			return;
+//		}		
+//		dataFileDirectory = dataFiles[0].getParentFile();
+//		savePreferences();
+//		//	Add data to existing pipeline
+//		if(existingDataPipeline != null) {
+//			addResultsToExistingPipeline(dataFiles);
+//			return;
+//		}
+//		//	Add extra data to new pipeline
+//		if(newDataPipeline != null) {
+//			addResultsToNewPipeline(newDataPipeline, dataFiles);
+//			return;
+//		}
+//		//	Create new pipeline and add data to it		
+//		newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
+//		if(existingDataPipeline == null && MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
+//			MessageDialog.showErrorMsg("The project already contains data pipeline \n"
+//					+ "with selected combination of assay, data acquisition and data analysis methods.\n"
+//					+ "Please adjust you selection.\n"
+//					+ "If you want to replace the existing data\n"
+//					+ "please delete them first and then re-upload.", 
+//					this);
+//			newDataPipeline = null;
+//			return;
+//		}	
+//		addResultsToNewPipeline(newDataPipeline, dataFiles);		
+//	}
 	
 	private void addResultsToNewPipeline(DataPipeline pipeline, File[] dataFiles) {
 
@@ -627,28 +619,28 @@ public class MultiFileDataImportDialog extends JDialog
 		matchPanel.loadSampleDataResultObject(sampleDataResultObjects);
 	}
 	
-	private void addResultsProFinderPfaFileToNewPipeline() {
-		
-		newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
-		if(newDataPipeline == null)
-			return;
-
-		if(MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
-			MessageDialog.showErrorMsg("The project already contains data pipeline \n"
-					+ "with selected combination of assay, data acquisition and data analysis methods.\n"
-					+ "Please adjust you selection.\n"
-					+ "If you want to replace the existing data\n"
-					+ "please delete them first and then re-upload.", 
-					this);
-			return;
-		}
-		File pfaFile = chooser.getSelectedFile();		
-		ProFinderArchiveExtractionTask task = 
-				new ProFinderArchiveExtractionTask(pfaFile, newDataPipeline);
-		idp = new IndeterminateProgressDialog("Loading document preview ...", this, task);
-		idp.setLocationRelativeTo(this.getContentPane());
-		idp.setVisible(true);	
-	}
+//	private void addResultsProFinderPfaFileToNewPipeline() {
+//		
+//		newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
+//		if(newDataPipeline == null)
+//			return;
+//
+//		if(MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
+//			MessageDialog.showErrorMsg("The project already contains data pipeline \n"
+//					+ "with selected combination of assay, data acquisition and data analysis methods.\n"
+//					+ "Please adjust you selection.\n"
+//					+ "If you want to replace the existing data\n"
+//					+ "please delete them first and then re-upload.", 
+//					this);
+//			return;
+//		}
+//		File pfaFile = chooser.getSelectedFile();		
+//		ProFinderArchiveExtractionTask task = 
+//				new ProFinderArchiveExtractionTask(pfaFile, newDataPipeline);
+//		idp = new IndeterminateProgressDialog("Loading document preview ...", this, task);
+//		idp.setLocationRelativeTo(this.getContentPane());
+//		idp.setVisible(true);	
+//	}
 	
 	class ProFinderArchiveExtractionTask extends LongUpdateTask {
 
@@ -742,13 +734,13 @@ public class MultiFileDataImportDialog extends JDialog
         return cefFiles;
     }
 
-	private void addSelectedLibraryFile() {
-		
-		libraryFile = chooser.getSelectedFile();
-		libraryTextField.setText(libraryFile.getPath());
-		baseLibraryDirectory = libraryFile.getParentFile();
-		savePreferences();	
-	}
+//	private void addSelectedLibraryFile() {
+//		
+//		libraryFile = chooser.getSelectedFile();
+//		libraryTextField.setText(libraryFile.getPath());
+//		baseLibraryDirectory = libraryFile.getParentFile();
+//		savePreferences();	
+//	}
 
 	public synchronized void clearPanel() {
 
@@ -843,12 +835,50 @@ public class MultiFileDataImportDialog extends JDialog
 
 	private void selectDataFiles() {
 
-		chooser.resetChoosableFileFilters();
-		chooser.setFileFilter(xmlFilter);
-		chooser.setMultiSelectionEnabled(true);
-		chooser.setCurrentDirectory(dataFileDirectory);
-		chooser.rescanCurrentDirectory();
-		chooser.showOpenDialog(this);
+		JnaFileChooser fc = new JnaFileChooser(dataFileDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.setTitle("Select CEF files for the samples");
+		fc.setMultiSelectionEnabled(true);
+		if (fc.showOpenDialog(this)) {
+			
+			File[] dataFiles = fc.getSelectedFiles();
+			if(dataFiles.length == 0)
+				return;
+			
+			if(pfaLoaded && !matchPanel.getSampleDataResultObjects(false).isEmpty()) {
+				
+				MessageDialog.showErrorMsg("You've selected ProFinder archive as data source.\n"
+						+ "Adding individual CEF files to this data analysis pipeline is not supported.", 
+						this);
+				return;
+			}		
+			dataFileDirectory = dataFiles[0].getParentFile();
+			savePreferences();
+			//	Add data to existing pipeline
+			if(existingDataPipeline != null) {
+				addResultsToExistingPipeline(dataFiles);
+				return;
+			}
+			//	Add extra data to new pipeline
+			if(newDataPipeline != null) {
+				addResultsToNewPipeline(newDataPipeline, dataFiles);
+				return;
+			}
+			//	Create new pipeline and add data to it		
+			newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
+			if(existingDataPipeline == null && MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
+				MessageDialog.showErrorMsg("The project already contains data pipeline \n"
+						+ "with selected combination of assay, data acquisition and data analysis methods.\n"
+						+ "Please adjust you selection.\n"
+						+ "If you want to replace the existing data\n"
+						+ "please delete them first and then re-upload.", 
+						this);
+				newDataPipeline = null;
+				return;
+			}	
+			addResultsToNewPipeline(newDataPipeline, dataFiles);
+		}
 	}
 	
 	private void selectPfaFile() {
@@ -858,26 +888,79 @@ public class MultiFileDataImportDialog extends JDialog
 					+ "to existing data analysis pipeline i not supported\n"
 					+ "Please create new data pipeline to import the data from ProFinder.", this);
 			return;
-		}		
-		chooser.resetChoosableFileFilters();
-		chooser.setFileFilter(pfaFilter);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setCurrentDirectory(dataFileDirectory);
-		chooser.rescanCurrentDirectory();
-		chooser.showOpenDialog(this);
+		}	
+		JnaFileChooser fc = new JnaFileChooser(dataFileDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("ProFinder archive files", "pfa", "PFA");
+		fc.setTitle("Select ProFinder archive file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
+			if(newDataPipeline == null)
+				return;
+
+			if(MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
+				MessageDialog.showErrorMsg("The project already contains data pipeline \n"
+						+ "with selected combination of assay, data acquisition and data analysis methods.\n"
+						+ "Please adjust you selection.\n"
+						+ "If you want to replace the existing data\n"
+						+ "please delete them first and then re-upload.", 
+						this);
+				return;
+			}
+			File pfaFile = fc.getSelectedFile();
+			dataFileDirectory = pfaFile.getParentFile();
+			savePreferences();	
+			
+			ProFinderArchiveExtractionTask task = 
+					new ProFinderArchiveExtractionTask(pfaFile, newDataPipeline);
+			idp = new IndeterminateProgressDialog("Loading document preview ...", this, task);
+			idp.setLocationRelativeTo(this.getContentPane());
+			idp.setVisible(true);
+		}
 	}
 
 	private void selectLibraryFile() {
 		
 		if(existingDataPipeline != null)
 			return;
+		
+		JnaFileChooser fc = new JnaFileChooser(baseLibraryDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.setTitle("Select library CEF file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			libraryFile = fc.getSelectedFile();
+			libraryTextField.setText(libraryFile.getPath());
+			baseLibraryDirectory = libraryFile.getParentFile();
+			savePreferences();	
+		}
+	}
+		
+	public void selectDesignFile() {
 
-		chooser.resetChoosableFileFilters();
-		chooser.setFileFilter(xmlFilter);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setCurrentDirectory(baseLibraryDirectory);
-		chooser.rescanCurrentDirectory();
-		chooser.showOpenDialog(this);
+		JnaFileChooser fc = new JnaFileChooser(baseDesignDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT", "tsv", "TSV");
+		fc.setTitle("Select experiment design file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File designFile = fc.getSelectedFile();
+			baseDesignDirectory = designFile.getParentFile();
+			savePreferences();	
+			
+			//	TODO read design
+		}
+//		chooser.resetChoosableFileFilters();
+//		chooser.setFileFilter(txtFilter);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setCurrentDirectory(baseDesignDirectory);
+//		chooser.rescanCurrentDirectory();
+//		chooser.showOpenDialog(this);
 	}
 	
 	public void setExistingDataPipeline(DataPipeline pipeline) {

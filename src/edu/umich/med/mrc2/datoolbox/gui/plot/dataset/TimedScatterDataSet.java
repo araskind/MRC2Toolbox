@@ -61,6 +61,7 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 		Collection<ExperimentalSample> samples = 
 				project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 		
+		int seriesCount = 1;
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
 			
 			for(MsFeature msf : entry.getValue()) {
@@ -72,13 +73,14 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 				
 				Map<DataFile, Double> dataMap = 
 						PlotDataSetUtils.getNormalizedDataForFeature(project, msf, entry.getKey(), files, dataScale);
-				NamedTimeSeries series = new NamedTimeSeries(msf.getName());	
+				NamedTimeSeries series = new NamedTimeSeries(Integer.toString(seriesCount) + " - " + msf.getName());	
 				for(DataFile df : files) {
 					
 					if (df.getInjectionTime() != null)
 						series.add(df.getInjectionTime(), dataMap.get(df), df.getName());
 				}
 				addSeries(series);
+				seriesCount++;
 			}	
 		}	
 	}

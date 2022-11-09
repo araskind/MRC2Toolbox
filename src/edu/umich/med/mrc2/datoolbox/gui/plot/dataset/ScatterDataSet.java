@@ -62,6 +62,7 @@ public class ScatterDataSet extends XYSeriesCollection {
 		Collection<ExperimentalSample> samples = 
 				project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 		
+		int seriesCount = 1;
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
 			
 			for(MsFeature msf : entry.getValue()) {
@@ -73,7 +74,7 @@ public class ScatterDataSet extends XYSeriesCollection {
 
 				Map<DataFile, Double> dataMap = 
 						PlotDataSetUtils.getNormalizedDataForFeature(project, msf, entry.getKey(), files, dataScale);
-				NamedXYSeries series = new NamedXYSeries(msf.getName());
+				NamedXYSeries series = new NamedXYSeries(Integer.toString(seriesCount) + " - " + msf.getName());
 				int counter = 1;
 				for(DataFile df : files) {
 
@@ -81,6 +82,7 @@ public class ScatterDataSet extends XYSeriesCollection {
 					counter++;
 				}
 				addSeries(series);
+				seriesCount++;
 			}
 		}
 	}

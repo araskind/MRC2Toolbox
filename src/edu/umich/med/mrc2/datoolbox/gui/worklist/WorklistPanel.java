@@ -582,6 +582,18 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		Set<DataFile> worklistDataFiles = newWorklist.getWorklistItems().stream().
 				map(i -> i.getDataFile()).collect(Collectors.toSet());
 		
+		//	update timestamps
+		for(DataFile df : allDataFiles) {
+			
+			for(DataFile wklFile : worklistDataFiles) {
+				
+				if(df.equals(wklFile)) {
+					
+					df.setInjectionTime(wklFile.getInjectionTime());
+//					df.setInjectionVolume(wklFile.getInjectionVolume());
+				}
+			}
+		}		
 		List<DataFile> missingInWorklistFiles = 
 				allDataFiles.stream().filter(f -> !worklistDataFiles.contains(f)).
 				sorted().collect(Collectors.toList());

@@ -136,7 +136,7 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 		};
 		btnCancel.addActionListener(al);
 
-		JButton btnSave = new JButton("Save");
+		JButton btnSave = new JButton(MainActionCommands.NEW_RAW_DATA_PROJECT_COMMAND.getName());
 		btnSave.setActionCommand(MainActionCommands.NEW_RAW_DATA_PROJECT_COMMAND.getName());
 		btnSave.addActionListener(actionListener);
 		panel.add(btnSave);

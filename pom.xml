@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.2.03</version>
+	<version>1.2.04</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>
@@ -560,6 +560,13 @@ public final class BuildInformation {
 		    <artifactId>owl</artifactId>
 		    <version>1.01</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/net.java.dev.jna/jna -->
+		<dependency>
+		    <groupId>net.java.dev.jna</groupId>
+		    <artifactId>jna</artifactId>
+		    <version>5.12.1</version>
+		</dependency>
+		
 		<!-- 
 		<dependency>
 		    <groupId>org.codehaus.plexus</groupId>

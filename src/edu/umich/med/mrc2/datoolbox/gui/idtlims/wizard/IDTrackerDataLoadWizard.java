@@ -178,7 +178,7 @@ public class IDTrackerDataLoadWizard extends JDialog implements ActionListener, 
 
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		saveButton = new JButton("Upload data");
+		saveButton = new JButton(MainActionCommands.UPLOAD_DATA_TO_IDTRACKER_COMMAND.getName());
 		saveButton.setActionCommand(MainActionCommands.UPLOAD_DATA_TO_IDTRACKER_COMMAND.getName());
 		saveButton.addActionListener(this);
 		GridBagConstraints gbc_saveButton = new GridBagConstraints();
