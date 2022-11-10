@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -45,7 +45,7 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
@@ -209,22 +209,20 @@ public class DockableInputFilesPanel extends DefaultSingleCDockable
 	}
 	
 	private void selectRawDataFolder(String command) {
-
-		JFileChooser chooser = new ImprovedFileChooser();
-		File dataFolder = null;
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setDialogTitle("Select folder containing data files:");		
+		
+		JnaFileChooser fc = new JnaFileChooser();
 		if (command.equals(MainActionCommands.BROWSE_FOR_POSITIVE_MODE_RAW_DATA_FOLDER.getName()))
-			chooser.setCurrentDirectory(positiveModeBaseDirectory);
+			fc.setCurrentDirectory(positiveModeBaseDirectory.getAbsolutePath());
 		
 		if (command.equals(MainActionCommands.BROWSE_FOR_NEGATIVE_MODE_RAW_DATA_FOLDER.getName()))
-			chooser.setCurrentDirectory(negativeModeBaseDirectory);
+			fc.setCurrentDirectory(negativeModeBaseDirectory.getAbsolutePath());
+		
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select folder containing data files:");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
 			
-		if (chooser.showOpenDialog(MRC2ToolBoxCore.getMainWindow()) == JFileChooser.APPROVE_OPTION) {
-
-			dataFolder = chooser.getSelectedFile();
+			File dataFolder = fc.getSelectedFile();
 			if (command.equals(MainActionCommands.BROWSE_FOR_POSITIVE_MODE_RAW_DATA_FOLDER.getName())) {
 				positiveModeFolderTextField.setText(dataFolder.getAbsolutePath());
 				positiveModeBaseDirectory = dataFolder.getParentFile();
@@ -236,6 +234,33 @@ public class DockableInputFilesPanel extends DefaultSingleCDockable
 			recentFiles.add(dataFolder);
 			savePreferences();
 		}
+
+//		JFileChooser chooser = new ImprovedFileChooser();
+//		File dataFolder = null;
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//		chooser.setDialogTitle("Select folder containing data files:");		
+//		if (command.equals(MainActionCommands.BROWSE_FOR_POSITIVE_MODE_RAW_DATA_FOLDER.getName()))
+//			chooser.setCurrentDirectory(positiveModeBaseDirectory);
+//		
+//		if (command.equals(MainActionCommands.BROWSE_FOR_NEGATIVE_MODE_RAW_DATA_FOLDER.getName()))
+//			chooser.setCurrentDirectory(negativeModeBaseDirectory);
+//			
+//		if (chooser.showOpenDialog(MRC2ToolBoxCore.getMainWindow()) == JFileChooser.APPROVE_OPTION) {
+//
+//			dataFolder = chooser.getSelectedFile();
+//			if (command.equals(MainActionCommands.BROWSE_FOR_POSITIVE_MODE_RAW_DATA_FOLDER.getName())) {
+//				positiveModeFolderTextField.setText(dataFolder.getAbsolutePath());
+//				positiveModeBaseDirectory = dataFolder.getParentFile();
+//			}
+//			if (command.equals(MainActionCommands.BROWSE_FOR_NEGATIVE_MODE_RAW_DATA_FOLDER.getName())) {
+//				negativeModeFolderTextField.setText(dataFolder.getAbsolutePath());
+//				negativeModeBaseDirectory = dataFolder.getParentFile();
+//			}
+//			recentFiles.add(dataFolder);
+//			savePreferences();
+//		}
 	}
 
 	public File getNegativeDataFolder() {

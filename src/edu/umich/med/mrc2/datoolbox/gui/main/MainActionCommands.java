@@ -653,6 +653,7 @@ public enum MainActionCommands {
 	SEARCH_DATABASE_COMMAND("Search compound database"),
 	SEARCH_DATABASE_BY_MZ_ADDUCT_COMMAND("Search compound database using MZ/Adduct"),
 	CLEAR_DATABASE_SEARCH_COMMAND("Clear compound database search"),
+	SETUP_BATCH_COMPOUND_IMPORT_TO_DATABASE_COMMAND("Setup batch compound import into the database"),
 	IMPORT_COMPOUNDS_TO_DATABASE_COMMAND("Import compounds into the database"),
 	EXPORT_COMPOUNDS_FROM_DATABASE_COMMAND("Export selected compounds from the database"),
 	CREATE_LIBRARY_FROM_DATABASE_DIALOG_COMMAND("New library from selected compounds dialog"),

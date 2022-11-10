@@ -27,13 +27,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Date;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.Document;
@@ -55,7 +55,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MSFeatureBundleDataUpdater;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
@@ -75,7 +75,7 @@ public class DockableObjectAnnotationPanel extends DefaultSingleCDockable
 	private ObjectAnnotationEditor objectAnnotationEditor;
 	private StructuralAnnotationEditor structuralAnnotationEditor;
 	private DocumentAnnotationDialog documentAnnotationDialog;
-	private ImprovedFileChooser chooser;
+//	private ImprovedFileChooser chooser;
 	private File baseDirectory;
 	private JChemPaintCA jcp;
 	private	AnnotationMetadataPanel annotationMetadataPanel; 
@@ -122,20 +122,20 @@ public class DockableObjectAnnotationPanel extends DefaultSingleCDockable
 		add(annotationMetadataPanel, BorderLayout.SOUTH);
 		
 		loadPreferences();
-		initChooser();
+//		initChooser();
 		currentObject = null;
 	}
 
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		// chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-	}
+//	private void initChooser() {
+//
+//		chooser = new ImprovedFileChooser();
+//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
+//		chooser.addActionListener(this);
+//		chooser.setAcceptAllFileFilterUsed(true);
+//		chooser.setMultiSelectionEnabled(false);
+//		// chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//		chooser.setCurrentDirectory(baseDirectory);
+//	}
 
 	public synchronized void clearPanel() {
 		objectAnnotationTable.clearTable();
@@ -263,39 +263,92 @@ public class DockableObjectAnnotationPanel extends DefaultSingleCDockable
 		if(annotation == null)
 			return;
 			
-		if(annotation.getRtfDocument() != null) {
-			
-			chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			chooser.setDialogTitle("Specify file name");		
-			if(chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-				AdvancedRTFEditorKit editor = new AdvancedRTFEditorKit();
-				Document rtfDocument = annotation.getRtfDocument();	
-				File output = FIOUtils.changeExtension(chooser.getSelectedFile(), DocumentFormat.RTF.name());
-				try {
-					editor.write(output.getAbsolutePath(), rtfDocument);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}				
-				baseDirectory = chooser.getSelectedFile().getParentFile();
-				savePreferences();
-			}
+		if(annotation.getRtfDocument() != null) {			
+			saveRTFDocument(annotation);
+			return;
 		}
 		if(annotation.getLinkedDocumentId() != null) {
-			
-			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			chooser.setDialogTitle("Select destination folder");
-			if(chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {				
-				try {
-					DocumentUtils.saveDocumentToFile(annotation.getLinkedDocumentId(), chooser.getSelectedFile());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				baseDirectory = chooser.getSelectedFile();
-				savePreferences();
-			}
+			saveLinkedDocument(annotation);
+			return;
 		}
 	}	
+	
+	private void saveRTFDocument(ObjectAnnotation annotation) {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("RTF files", "rtf", "RTF");
+		fc.setTitle("Specify file name");
+		fc.setMultiSelectionEnabled(false);
+		String defaultFileName = "Annotation_" + annotation.getUniqueId() +
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".RTF";
+		fc.setDefaultFileName(defaultFileName);		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			AdvancedRTFEditorKit editor = new AdvancedRTFEditorKit();
+			Document rtfDocument = annotation.getRtfDocument();	
+			File output = FIOUtils.changeExtension(
+					fc.getSelectedFile(), DocumentFormat.RTF.name());
+			try {
+				editor.write(output.getAbsolutePath(), rtfDocument);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}				
+			baseDirectory = fc.getSelectedFile().getParentFile();
+			savePreferences();
+		}
+		
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		chooser.setDialogTitle("Specify file name");		
+//		if(chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+//			AdvancedRTFEditorKit editor = new AdvancedRTFEditorKit();
+//			Document rtfDocument = annotation.getRtfDocument();	
+//			File output = FIOUtils.changeExtension(
+//					chooser.getSelectedFile(), DocumentFormat.RTF.name());
+//			try {
+//				editor.write(output.getAbsolutePath(), rtfDocument);
+//			} catch (Exception ex) {
+//				ex.printStackTrace();
+//			}				
+//			baseDirectory = chooser.getSelectedFile().getParentFile();
+//			savePreferences();
+//		}
+	}
+	
+	private void saveLinkedDocument(ObjectAnnotation annotation) {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select destination folder");
+		fc.setMultiSelectionEnabled(false);		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			try {
+				DocumentUtils.saveDocumentToFile(
+						annotation.getLinkedDocumentId(), 
+						fc.getSelectedFile());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			baseDirectory = fc.getSelectedFile();
+			savePreferences();
+		}
+		
+//		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//		chooser.setDialogTitle("Select destination folder");
+//		if(chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {				
+//			try {
+//				DocumentUtils.saveDocumentToFile(
+//						annotation.getLinkedDocumentId(), 
+//						chooser.getSelectedFile());
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			baseDirectory = chooser.getSelectedFile();
+//			savePreferences();
+//		}
+	}
 
 	private void editSelectedAnnotation() {
 

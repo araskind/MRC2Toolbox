@@ -25,17 +25,21 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
+import java.util.Date;
 
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import org.apache.commons.io.FileUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
@@ -49,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.io.ExperimentDesignParser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -321,25 +325,29 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 		if(experimentDesign == null)
 			return;
 
-		JFileChooser chooser = new ImprovedFileChooser();
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setDialogTitle("Save experiment design to file:");
-		chooser.setApproveButtonText("Save design");
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setFileFilter(txtFilter);
-
-		if (chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-
-			baseDirectory = chooser.getCurrentDirectory();
-			File outputFile = FIOUtils.changeExtension(chooser.getSelectedFile(), "txt") ;
-			baseDirectory = chooser.getSelectedFile().getParentFile();
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Save experiment design to file:");
+		fc.setMultiSelectionEnabled(false);
+		String defaultFileName = "Experiment_design_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt";
+		fc.setDefaultFileName(defaultFileName);
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File outputFile = fc.getSelectedFile();
+			baseDirectory = outputFile.getParentFile();
+			outputFile = FIOUtils.changeExtension(outputFile, "txt") ;
 			String designString = expDesignTable.getDesignDataAsString();
-			try {
-				FileUtils.writeStringToFile(outputFile, designString);
+			Path outputPath = Paths.get(outputFile.getAbsolutePath());
+		    try {
+				Files.writeString(outputPath, 
+						designString, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.APPEND);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -383,18 +391,15 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 		if (MRC2ToolBoxCore.getCurrentProject() == null)
 			return null;
 
-		JFileChooser chooser = new ImprovedFileChooser();
-		chooser.setDialogTitle("Select experiment design file");
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setFileFilter(txtFilter);
-		chooser.setCurrentDirectory(baseDirectory);
-
-		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-
-			baseDirectory = chooser.getCurrentDirectory();
-			return chooser.getSelectedFile();
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT", "tsv", "TSV");
+		fc.setTitle("Select experiment design file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			File designFile = fc.getSelectedFile();
+			baseDirectory = designFile.getParentFile();
+			return designFile;
 		}
 		else
 			return null;

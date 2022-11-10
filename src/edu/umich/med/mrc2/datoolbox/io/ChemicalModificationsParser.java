@@ -27,7 +27,6 @@ import java.io.FileWriter;
 import java.io.Writer;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
-import edu.umich.med.mrc2.datoolbox.gui.adducts.chemmod.ChemModificationTableModel;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -35,6 +34,21 @@ public class ChemicalModificationsParser {
 
 	private static final String lineSeparator = System.getProperty("line.separator");
 	private static char columnSeparator;
+	
+	public static final String ORDER_COLUMN = "##";
+	public static final String ENABLED_COLUMN = "Active";
+	public static final String TYPE_COLUMN = "Type";
+	public static final String CHEM_MOD_COLUMN = "Name";
+	public static final String CEF_NOTATION_COLUMN = "CEF notation";
+	public static final String DESCRIPTION_COLUMN = "Description";
+	public static final String CHARGE_COLUMN = "Charge";
+	public static final String OLIGOMER_COLUMN = "Oligomer";
+	public static final String ADDED_GROUP_COLUMN = "Added group";
+	public static final String REMOVED_GROUP_COLUMN = "Removed group";
+	public static final String MASS_CORRECTION_COLUMN = "Mass correction";
+	public static final String MASS_CORRECTION_ABS_COLUMN = "Mass correction abs.";
+	public static final String KMD_COLUMN = "KMD";
+	public static final String POOLED_MEDIAN_COLUMN = "Pooled median";
 
 	public static void writeChemicalModificationsToFile(File exportFile) throws Exception {
 
@@ -43,23 +57,23 @@ public class ChemicalModificationsParser {
 		columnSeparator = MRC2ToolBoxConfiguration.getTabDelimiter();
 
 		// Create header
-		writer.append(ChemModificationTableModel.ENABLED_COLUMN);
+		writer.append(ENABLED_COLUMN);
 		writer.append(columnSeparator);
-		writer.append(ChemModificationTableModel.TYPE_COLUMN);
+		writer.append(TYPE_COLUMN);
 		writer.append(columnSeparator);
-		writer.append(ChemModificationTableModel.CHEM_MOD_COLUMN);
+		writer.append(CHEM_MOD_COLUMN);
 		writer.append(columnSeparator);
-		writer.append(ChemModificationTableModel.DESCRIPTION_COLUMN);
+		writer.append(DESCRIPTION_COLUMN);
 		writer.append(columnSeparator);
-		writer.append(ChemModificationTableModel.CHARGE_COLUMN);
+		writer.append(CHARGE_COLUMN);
 		writer.append(columnSeparator);
-		writer.append(ChemModificationTableModel.OLIGOMER_COLUMN);
+		writer.append(OLIGOMER_COLUMN);
 		writer.append(columnSeparator);
-		writer.append(ChemModificationTableModel.ADDED_GROUP_COLUMN);
+		writer.append(ADDED_GROUP_COLUMN);
 		writer.append(columnSeparator);
-		writer.append(ChemModificationTableModel.REMOVED_GROUP_COLUMN);
+		writer.append(REMOVED_GROUP_COLUMN);
 		writer.append(columnSeparator);
-		writer.append(ChemModificationTableModel.MASS_CORRECTION_COLUMN);
+		writer.append(MASS_CORRECTION_COLUMN);
 		writer.append(lineSeparator);
 
 		for (Adduct mod : AdductManager.getAdductList()) {

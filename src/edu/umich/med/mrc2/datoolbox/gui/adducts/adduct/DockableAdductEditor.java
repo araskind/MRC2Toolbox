@@ -26,12 +26,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
+import java.util.Date;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -44,10 +45,12 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.io.ChemicalModificationsParser;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DockableAdductEditor extends DefaultSingleCDockable implements ActionListener {
 
@@ -231,26 +234,39 @@ public class DockableAdductEditor extends DefaultSingleCDockable implements Acti
 
 	private void exportModificationsToFile() {
 
-		JFileChooser chooser = new ImprovedFileChooser();
-		File outputFile = null;
-
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setDialogTitle("Save modifications to file:");
-		chooser.setApproveButtonText("Save modifications");
-
-		chooser.setCurrentDirectory(baseDirectory);
-
-		if (chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-
-			outputFile = chooser.getSelectedFile();
-
-			String filePath = outputFile.getAbsolutePath();
-
-			if (!filePath.endsWith(".txt") && !filePath.endsWith(".TXT"))
-				outputFile = new File(filePath + ".txt");
-
+//		JFileChooser chooser = new ImprovedFileChooser();
+//		File outputFile = null;
+//
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		chooser.setDialogTitle("Save modifications to file:");
+//		chooser.setApproveButtonText("Save modifications");
+//		chooser.setCurrentDirectory(baseDirectory);
+//		if (chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+//
+//			outputFile = chooser.getSelectedFile();
+//			FIOUtils.changeExtension(outputFile, "TXT");
+//			try {
+//				ChemicalModificationsParser.writeChemicalModificationsToFile(outputFile);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Save adducts/modifications to text file");
+		fc.setMultiSelectionEnabled(false);
+		String defaultFileName = "Chemical_modification_list_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".TXT";
+		fc.setDefaultFileName(defaultFileName);
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File outputFile = fc.getSelectedFile();
+			FIOUtils.changeExtension(outputFile, "TXT");
 			try {
 				ChemicalModificationsParser.writeChemicalModificationsToFile(outputFile);
 			} catch (Exception e) {

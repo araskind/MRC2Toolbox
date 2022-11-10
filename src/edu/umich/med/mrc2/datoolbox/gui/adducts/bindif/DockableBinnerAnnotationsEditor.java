@@ -31,6 +31,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -38,9 +39,9 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -58,7 +59,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -281,18 +282,48 @@ public class DockableBinnerAnnotationsEditor
 
 	private void exportBinnerAnnotationsFile() {
 
-		JFileChooser chooser = new ImprovedFileChooser();
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setDialogTitle("Save Binner annotations to file:");
-		chooser.setApproveButtonText("Save annotations");
-		chooser.setCurrentDirectory(baseDirectory);		
-		File outputFile = new File("Binner_annotations_" + FIOUtils.getTimestamp() + ".TXT");
-		chooser.setSelectedFile(outputFile);
-		if (chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-
-			outputFile = chooser.getSelectedFile();
+//		JFileChooser chooser = new ImprovedFileChooser();
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		chooser.setDialogTitle("Save Binner annotations to file:");
+//		chooser.setApproveButtonText("Save annotations");
+//		chooser.setCurrentDirectory(baseDirectory);		
+//		File outputFile = new File("Binner_annotations_" + FIOUtils.getTimestamp() + ".TXT");
+//		chooser.setSelectedFile(outputFile);
+//		if (chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+//
+//			outputFile = chooser.getSelectedFile();
+//			try {
+//				writeBinnerAnnotationsToFile(outputFile);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//			baseDirectory = outputFile.getParentFile();
+//			savePreferences();
+//			if(MessageDialog.showChoiceMsg("Annotation file created, do you want to open containing folder?",
+//					this.getContentPane()) == JOptionPane.YES_OPTION) {
+//				try {
+//					Desktop.getDesktop().open(baseDirectory);
+//				} catch (IOException e1) {
+//					e1.printStackTrace();
+//				}
+//			}
+//		}
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Save Binner annotations to text file");
+		fc.setMultiSelectionEnabled(false);
+		String defaultFileName = "Binner_annotation_list_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".TXT";
+		fc.setDefaultFileName(defaultFileName);
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File outputFile = fc.getSelectedFile();
+			FIOUtils.changeExtension(outputFile, "TXT");
 			try {
 				writeBinnerAnnotationsToFile(outputFile);
 			} catch (Exception e) {

@@ -34,7 +34,6 @@ import java.util.Map.Entry;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -190,9 +189,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		populatePanelsMenu();
 		
 		databaseSearchDialog = new DatabaseSearchDialog(this);
-		databaseEntryEditDialog = new DatabaseEntryEditDialog(this);
-		dbLibDialog = new DatabaseToLibraryDialog();
-		databaseCompoundImportDialog = new DatabaseCompoundImportDialog(this);
+		dbLibDialog = new DatabaseToLibraryDialog();		
 	}
 
 	@Override
@@ -244,8 +241,8 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 				addCompoundIcon, this));
 		
 		SimpleButtonAction importAction = GuiUtils.setupButtonAction(
-				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(),
-				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(), 
+				MainActionCommands.SETUP_BATCH_COMPOUND_IMPORT_TO_DATABASE_COMMAND.getName(),
+				MainActionCommands.SETUP_BATCH_COMPOUND_IMPORT_TO_DATABASE_COMMAND.getName(), 
 				importCompoundsIcon, this);
 		importAction.setEnabled(false);
 		menuActions.add(importAction);
@@ -292,20 +289,12 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		if (command.equals(MainActionCommands.CLEAR_DATABASE_SEARCH_COMMAND.getName()))
 			clearPanel();
 
-		if (command.equals(MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName())) {
+		if (command.equals(MainActionCommands.SETUP_BATCH_COMPOUND_IMPORT_TO_DATABASE_COMMAND.getName()))
+			setupBatchCompoundImport();
+				
+		if (command.equals(MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName())) 
+			batchImportCompounds();
 
-			databaseCompoundImportDialog.setLocationRelativeTo(this.getContentPane());
-			databaseCompoundImportDialog.setVisible(true);
-		}
-
-		if (event.getSource() instanceof JFileChooser) {
-
-			if (event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
-				importCompoundsFromFile(((JFileChooser) event.getSource()).getSelectedFile());
-
-			if (event.getActionCommand().equals(JFileChooser.CANCEL_SELECTION))
-				databaseCompoundImportDialog.setVisible(false);
-		}
 		if (command.equals(MainActionCommands.EXPORT_COMPOUNDS_FROM_DATABASE_COMMAND.getName())) {
 
 		}
@@ -320,13 +309,8 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		if (command.equals(MainActionCommands.ADD_COMPOUND_LIST_TO_LIBRARY_DIALOG_COMMAND.getName()))
 			showAddCompoundListToActiveLibraryDialog();
 
-		if (command.equals(MainActionCommands.EDIT_DATABASE_ENTRY_DIALOG_COMMAND.getName())) {
-
-			CompoundIdentity id = null;
-			databaseEntryEditDialog.loadData(id);
-			databaseEntryEditDialog.setLocationRelativeTo(this.getContentPane());
-			databaseEntryEditDialog.setVisible(true);
-		}
+		if (command.equals(MainActionCommands.EDIT_DATABASE_ENTRY_DIALOG_COMMAND.getName()))
+			editCompoundDatabaseEntry();
 
 		if (command.equals(MainActionCommands.EDIT_DATABASE_ENTRY_COMMAND.getName()))
 			editSelectedDatabaseEntry();
@@ -378,6 +362,29 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 			showCompoundDatabaseCurator();		
 	}
 	
+	private void editCompoundDatabaseEntry() {
+		// TODO Auto-generated method stub
+		CompoundIdentity id = null;
+		databaseEntryEditDialog = new DatabaseEntryEditDialog(this);
+		databaseEntryEditDialog.loadData(id);
+		databaseEntryEditDialog.setLocationRelativeTo(this.getContentPane());
+		databaseEntryEditDialog.setVisible(true);
+	}
+
+	private void setupBatchCompoundImport() {
+		
+		databaseCompoundImportDialog = new DatabaseCompoundImportDialog(this);
+		databaseCompoundImportDialog.setLocationRelativeTo(this.getContentPane());
+		databaseCompoundImportDialog.setVisible(true);
+	}
+
+	private void batchImportCompounds() {
+		// TODO Auto-generated method stub
+		
+		
+		databaseCompoundImportDialog.dispose();
+	}
+
 	private void showCompoundDatabaseCurator() {
 		
 		if(compoundDatabaseCuratorFrame == null) {

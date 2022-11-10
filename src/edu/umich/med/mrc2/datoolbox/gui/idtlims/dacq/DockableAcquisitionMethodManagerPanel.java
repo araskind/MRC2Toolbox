@@ -290,7 +290,7 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 	private void showAcquisitionMethodEditor(DataAcquisitionMethod method) {
 
 		acquisitionMethodEditorDialog = new AcquisitionMethodExtendedEditorDialog(method, this);
-		acquisitionMethodEditorDialog.setLocationRelativeTo(this.getContentPane());
+		acquisitionMethodEditorDialog.setLocationRelativeTo(idTrackerLimsManager.getContentPane());
 		acquisitionMethodEditorDialog.setVisible(true);
 	}
 

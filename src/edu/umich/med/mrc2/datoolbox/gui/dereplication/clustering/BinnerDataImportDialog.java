@@ -39,7 +39,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -48,12 +47,11 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class BinnerDataImportDialog extends JDialog implements BackedByPreferences, ActionListener{
@@ -66,15 +64,12 @@ public class BinnerDataImportDialog extends JDialog implements BackedByPreferenc
 
 	private Preferences preferences;
 	private File baseDirectory;
-	private ImprovedFileChooser chooser;
-	private JButton btnImport;
-	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.dereplication.BinnerDataImportDialog";
+
+	public static final String PREFS_NODE = 
+			"edu.umich.med.mrc2.cefanalyzer.gui.dereplication.BinnerDataImportDialog";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	private JTextField binnerReportTextField;
 	private JTextField postProcessorReportTextField;
-	private JButton postProccessorBrowseButton;
-	private JButton binnerReportBrowseButton;
-	private String chooserFileType;
 
 	public BinnerDataImportDialog(ActionListener actionListener) {
 		super();
@@ -113,7 +108,7 @@ public class BinnerDataImportDialog extends JDialog implements BackedByPreferenc
 		panel_1.add(binnerReportTextField, gbc_binnerReportTextField);
 		binnerReportTextField.setColumns(10);
 
-		binnerReportBrowseButton = new JButton("Browse");
+		JButton binnerReportBrowseButton = new JButton("Browse");
 		binnerReportBrowseButton.setActionCommand(
 				MainActionCommands.BROWSE_FOR_BINNER_REPORT_COMMAND.getName());
 		binnerReportBrowseButton.addActionListener(this);
@@ -140,7 +135,7 @@ public class BinnerDataImportDialog extends JDialog implements BackedByPreferenc
 		gbc_textField.gridy = 3;
 		panel_1.add(postProcessorReportTextField, gbc_textField);
 
-		postProccessorBrowseButton = new JButton("Browse");
+		JButton postProccessorBrowseButton = new JButton("Browse");
 		postProccessorBrowseButton.setActionCommand(
 				MainActionCommands.BROWSE_FOR_BINNER_POSTPROCESSOR_REPORT_COMMAND.getName());
 		postProccessorBrowseButton.addActionListener(this);
@@ -164,8 +159,10 @@ public class BinnerDataImportDialog extends JDialog implements BackedByPreferenc
 		};
 		btnCancel.addActionListener(al);
 
-		btnImport = new JButton("Import Binner results");
-		btnImport.setActionCommand(MainActionCommands.IMPORT_BINNER_DATA_COMMAND.getName());
+		JButton btnImport = new JButton(
+				MainActionCommands.IMPORT_BINNER_DATA_COMMAND.getName());
+		btnImport.setActionCommand(
+				MainActionCommands.IMPORT_BINNER_DATA_COMMAND.getName());
 		btnImport.addActionListener(actionListener);
 		panel.add(btnImport);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnImport);
@@ -173,7 +170,6 @@ public class BinnerDataImportDialog extends JDialog implements BackedByPreferenc
 		rootPane.setDefaultButton(btnImport);
 		
 		loadPreferences();
-		initChooser();
 		pack();
 	}
 
@@ -181,48 +177,49 @@ public class BinnerDataImportDialog extends JDialog implements BackedByPreferenc
 	public void dispose() {
 		savePreferences();
 		super.dispose();
-	}	
-	
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setFileFilter(new FileNameExtensionFilter("Excel files", "xlsx"));
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getActionCommand().equals(MainActionCommands.BROWSE_FOR_BINNER_REPORT_COMMAND.getName())) {
+		if(e.getActionCommand().equals(
+				MainActionCommands.BROWSE_FOR_BINNER_REPORT_COMMAND.getName()))
+			selectBinnerReportFile();
+		
+		if(e.getActionCommand().equals(
+				MainActionCommands.BROWSE_FOR_BINNER_POSTPROCESSOR_REPORT_COMMAND.getName()))
+			selectBinnerPostProcessorReportFile();
+	}
 
-			chooserFileType = MainActionCommands.BROWSE_FOR_BINNER_REPORT_COMMAND.getName();
-			chooser.setSelectedFile(null);
-			chooser.rescanCurrentDirectory();
-			chooser.showOpenDialog(this);
-		}
-		if(e.getActionCommand().equals(MainActionCommands.BROWSE_FOR_BINNER_POSTPROCESSOR_REPORT_COMMAND.getName())) {
+	private void selectBinnerReportFile() {
 
-			chooserFileType = MainActionCommands.BROWSE_FOR_BINNER_POSTPROCESSOR_REPORT_COMMAND.getName();
-			chooser.setSelectedFile(null);
-			chooser.rescanCurrentDirectory();
-			chooser.showOpenDialog(this);
-		}
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			File inputFile = chooser.getSelectedFile();
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Excel files", "xlsx");
+		fc.setTitle("Select Binner report file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File inputFile = fc.getSelectedFile();
+			binnerReportTextField.setText(inputFile.getAbsolutePath());
 			baseDirectory = inputFile.getParentFile();
 			savePreferences();
+		}
+	}
 
-			if(chooserFileType.equals(MainActionCommands.BROWSE_FOR_BINNER_REPORT_COMMAND.getName()))
-				binnerReportTextField.setText(inputFile.getAbsolutePath());
-
-			if(chooserFileType.equals(MainActionCommands.BROWSE_FOR_BINNER_POSTPROCESSOR_REPORT_COMMAND.getName()))
-				postProcessorReportTextField.setText(inputFile.getAbsolutePath());
+	private void selectBinnerPostProcessorReportFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Excel files", "xlsx");
+		fc.setTitle("Select Binner post-processor report file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File inputFile = fc.getSelectedFile();
+			postProcessorReportTextField.setText(inputFile.getAbsolutePath());
+			baseDirectory = inputFile.getParentFile();
+			savePreferences();
 		}
 	}
 
@@ -251,7 +248,8 @@ public class BinnerDataImportDialog extends JDialog implements BackedByPreferenc
 	@Override
 	public void loadPreferences() {
 		preferences = Preferences.userRoot().node(PREFS_NODE);
-		baseDirectory =  new File(preferences.get(BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+		baseDirectory =  new File(preferences.get(
+				BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
 	}
 
 	@Override

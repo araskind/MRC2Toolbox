@@ -211,7 +211,8 @@ public class WindowsFileChooser
 				// disable "open as read-only" feature
 				| Comdlg32.OFN_HIDEREADONLY
 				// enable resizing of the dialog
-				| Comdlg32.OFN_ENABLESIZING;
+				| Comdlg32.OFN_ENABLESIZING
+				| Comdlg32.OFN_OVERWRITEPROMPT;
 
 		if(Window.class.isAssignableFrom(parent.getClass()))
 			params.hwndOwner = parent == null ? null : Native.getWindowPointer((Window)parent);
@@ -242,7 +243,8 @@ public class WindowsFileChooser
 		final int bufferSize = 4 * bufferLength + 1; //TODO: 4 bytes or 2?
 		params.lpstrFile = new Memory(bufferSize);
 
-		if (open & !defaultFilename.isEmpty()) {
+		if (//open & 
+				!defaultFilename.isEmpty()) {
 			params.lpstrFile.setWideString(0, defaultFilename);
 		} else {
 			params.lpstrFile.clear(bufferSize);

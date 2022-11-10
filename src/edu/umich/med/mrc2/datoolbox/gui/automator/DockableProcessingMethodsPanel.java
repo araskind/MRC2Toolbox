@@ -35,9 +35,9 @@ import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -46,7 +46,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
@@ -210,18 +210,16 @@ public class DockableProcessingMethodsPanel extends DefaultSingleCDockable
 	
 	private void selectMethodFile(String command) {
 
-		JFileChooser chooser = new ImprovedFileChooser();
-		File inputFile = null;
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setDialogTitle("Select data analysis method:");	
-		chooser.setCurrentDirectory(methodsBaseDirectory);
-		if (chooser.showOpenDialog(MRC2ToolBoxCore.getMainWindow()) == JFileChooser.APPROVE_OPTION) {
-
-			inputFile = chooser.getSelectedFile();
+		JnaFileChooser fc = new JnaFileChooser(methodsBaseDirectory);		
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select data analysis method:");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File inputFile = fc.getSelectedFile();
 			if(!inputFile.isDirectory() || !inputFile.getName().endsWith(".m")) {
-				MessageDialog.showErrorMsg(inputFile.getName() + " is not a valid Agilent method!", chooser);
+				MessageDialog.showErrorMsg(inputFile.getName() + 
+						" is not a valid Agilent method!", this.getContentPane());
 				return;
 			}
 			methodsBaseDirectory = inputFile.getParentFile();
@@ -232,8 +230,33 @@ public class DockableProcessingMethodsPanel extends DefaultSingleCDockable
 				negMethodTextField.setText(inputFile.getAbsolutePath());					
 			
 			recentFiles.add(inputFile);
-			savePreferences();			
+			savePreferences();
 		}
+		
+//		JFileChooser chooser = new ImprovedFileChooser();
+//		File inputFile = null;
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//		chooser.setDialogTitle("Select data analysis method:");	
+//		chooser.setCurrentDirectory(methodsBaseDirectory);
+//		if (chooser.showOpenDialog(MRC2ToolBoxCore.getMainWindow()) == JFileChooser.APPROVE_OPTION) {
+//
+//			inputFile = chooser.getSelectedFile();
+//			if(!inputFile.isDirectory() || !inputFile.getName().endsWith(".m")) {
+//				MessageDialog.showErrorMsg(inputFile.getName() + " is not a valid Agilent method!", chooser);
+//				return;
+//			}
+//			methodsBaseDirectory = inputFile.getParentFile();
+//			if (command.equals(MainActionCommands.BROWSE_FOR_POSITIVE_MODE_METHOD.getName())) 
+//				posMethodTextField.setText(inputFile.getAbsolutePath());				
+//			
+//			if (command.equals(MainActionCommands.BROWSE_FOR_NEGATIVE_MODE_METHOD.getName())) 
+//				negMethodTextField.setText(inputFile.getAbsolutePath());					
+//			
+//			recentFiles.add(inputFile);
+//			savePreferences();			
+//		}
 	}
 	
 	public File getNegativeMethodFile() {

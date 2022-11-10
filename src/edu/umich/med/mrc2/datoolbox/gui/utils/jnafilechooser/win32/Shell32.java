@@ -53,4 +53,6 @@ public class Shell32
 	public static final int BIF_BROWSEINCLUDEFILES = 0x00004000;
 	public static final int BIF_SHAREABLE = 0x00008000;
 	public static final int BIF_BROWSEFILEJUNCTIONS = 0x00010000;
+	
+	
 }

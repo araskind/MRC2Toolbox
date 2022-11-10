@@ -39,9 +39,9 @@ import java.io.PrintStream;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Map;
+import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -73,17 +73,19 @@ import edu.umich.med.mrc2.datoolbox.database.load.mona.MonaParser;
 import edu.umich.med.mrc2.datoolbox.database.load.refmet.RefMetFields;
 import edu.umich.med.mrc2.datoolbox.database.load.refmet.RefMetParser;
 import edu.umich.med.mrc2.datoolbox.gui.automator.TextAreaOutputStream;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class DatabaseParserLoader extends JFrame implements ActionListener, WindowListener{
+public class DatabaseParserLoader extends JFrame 
+	implements ActionListener, WindowListener, BackedByPreferences{
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 946976178706518706L;
 
-	private JFileChooser chooser;
 	private File inputFile;
 	private File baseDirectory;
 	private JTextField textField;
@@ -97,6 +99,10 @@ public class DatabaseParserLoader extends JFrame implements ActionListener, Wind
 
 	public static final String BROWSE_FOR_INPUT = "BROWSE_FOR_INPUT";
 	public static final String UPLOAD_DATA = "UPLOAD_DATA";
+	
+	private Preferences preferences;
+	public static final String PREFS_NODE = "edu.umich.med.mrc2.datoolbox.DatabaseParserLoader";
+	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 
 	//	TODO update connection manager if needed to re-parse the data
 	public static void main(String[] args) {
@@ -182,27 +188,28 @@ public class DatabaseParserLoader extends JFrame implements ActionListener, Wind
 		panel_1.add(areaScrollPane, BorderLayout.CENTER);
 
 		//	Input chooser
-		initChooser();
+		//`initChooser();
 		initConsol();
+		loadPreferences();
 	}
 
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-		baseDirectory = new File("E:\\DataAnalysis\\Databases\\MONA\\20180130").getAbsoluteFile();
-		chooser.setCurrentDirectory(baseDirectory);
-
-		sdfFilter = new FileNameExtensionFilter("SDF files", "SDF", "sdf");
-		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "XML");
-		txtFilter = new FileNameExtensionFilter("Text files", "txt", "TXT", "TSV", "CSV", "data");
-		mspFilter = new FileNameExtensionFilter("MSP files", "msp", "MSP");
-	}
+//	private void initChooser() {
+//
+//		chooser = new ImprovedFileChooser();
+//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
+//		chooser.addActionListener(this);
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//
+//		baseDirectory = new File("E:\\DataAnalysis\\Databases\\MONA\\20180130").getAbsoluteFile();
+//		chooser.setCurrentDirectory(baseDirectory);
+//
+//		sdfFilter = new FileNameExtensionFilter("SDF files", "SDF", "sdf");
+//		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "XML");
+//		txtFilter = new FileNameExtensionFilter("Text files", "txt", "TXT", "TSV", "CSV", "data");
+//		mspFilter = new FileNameExtensionFilter("MSP files", "msp", "MSP");
+//	}
 
 	private void initConsol() {
 
@@ -224,24 +231,31 @@ public class DatabaseParserLoader extends JFrame implements ActionListener, Wind
 	public void actionPerformed(ActionEvent e) {
 
 		String command = e.getActionCommand();
+		if (command.equals(BROWSE_FOR_INPUT))
+			selectInputFile();
 
-		if (command.equals(BROWSE_FOR_INPUT)) {
-
-			chooser.resetChoosableFileFilters();
-			//	chooser.setFileFilter(sdfFilter);
-			//	chooser.setFileFilter(xmlFilter);
-			chooser.setFileFilter(mspFilter);
-			chooser.showOpenDialog(this);
-		}
 		if (command.equals(UPLOAD_DATA)) {
 			//	uploadMonaData();
-			uploadLipidBlast("P");
+			//	uploadLipidBlast("P");
 		}
-		if (e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))  {
-
-			inputFile = chooser.getSelectedFile();
+	}
+	
+	private void selectInputFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("SDF files", "SDF", "sdf");
+		fc.addFilter("XML files", "xml", "XML");
+		fc.addFilter("Text files", "txt", "TXT", "TSV", "CSV", "data");
+		fc.addFilter("MSP files", "msp", "MSP");
+		fc.setTitle("Select input file");
+		fc.setMultiSelectionEnabled(true);
+		if (fc.showOpenDialog(this)) {
+			
+			inputFile = fc.getSelectedFile();
 			baseDirectory = inputFile.getParentFile();
-			textField.setText(chooser.getSelectedFile().getAbsolutePath());
+			textField.setText(fc.getSelectedFile().getAbsolutePath());
+			savePreferences();
 		}
 	}
 
@@ -626,5 +640,23 @@ public class DatabaseParserLoader extends JFrame implements ActionListener, Wind
 
 	}
 
+	@Override
+	public void loadPreferences(Preferences prefs) {
+		preferences = prefs;
+		baseDirectory =  
+				new File(preferences.get(BASE_DIRECTORY, 
+						MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+	}
+
+	@Override
+	public void loadPreferences() {
+		loadPreferences(Preferences.userRoot().node(PREFS_NODE));
+	}
+
+	@Override
+	public void savePreferences() {
+		preferences = Preferences.userRoot().node(PREFS_NODE);
+		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
+	}
 
 }

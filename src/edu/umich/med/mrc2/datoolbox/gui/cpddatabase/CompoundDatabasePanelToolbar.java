@@ -118,8 +118,8 @@ public class CompoundDatabasePanelToolbar extends CommonToolbar {
 				buttonDimension);
 		
 		importCompoundsButton = GuiUtils.addButton(this, null, importCompoundsIcon, commandListener,
-				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(),
-				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND.getName(), buttonDimension);
+				MainActionCommands.SETUP_BATCH_COMPOUND_IMPORT_TO_DATABASE_COMMAND.getName(),
+				MainActionCommands.SETUP_BATCH_COMPOUND_IMPORT_TO_DATABASE_COMMAND.getName(), buttonDimension);
 		importCompoundsButton.setEnabled(false);
 		
 		exportCompoundsButton = GuiUtils.addButton(this, null, exportCompoundsIcon, commandListener,

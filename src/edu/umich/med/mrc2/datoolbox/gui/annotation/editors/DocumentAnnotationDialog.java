@@ -40,7 +40,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -49,7 +48,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -59,7 +57,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class DocumentAnnotationDialog extends JDialog implements ActionListener, BackedByPreferences{
@@ -85,7 +83,7 @@ public class DocumentAnnotationDialog extends JDialog implements ActionListener,
 	private JButton btnBrowse;
 	private JLabel lblFile;
 	private JTextField sourceFileTextField;
-	private ImprovedFileChooser chooser;
+//	private ImprovedFileChooser chooser;
 	private File baseDirectory;
 	private JLabel fileTypeLabel;
 
@@ -188,28 +186,28 @@ public class DocumentAnnotationDialog extends JDialog implements ActionListener,
 		rootPane.setDefaultButton(saveButton);
 
 		loadPreferences();
-		initChooser();
+//		initChooser();
 		pack();
 	}
 
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setApproveButtonText("Attach document");
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Word files", "doc", "docx"));
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("PowerPoint files", "ppt", "pptx"));
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Excel files", "xls", "xlsx"));
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF files", "pdf"));
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Image files", "png", "jpg", "jpeg", "tiff", "gif", "bmp"));
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("SDF structure files", "sdf"));
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("MOL files", "mol"));
-	}
+//	private void initChooser() {
+//
+//		chooser = new ImprovedFileChooser();
+//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
+//		chooser.addActionListener(this);
+//		chooser.setAcceptAllFileFilterUsed(true);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		chooser.setCurrentDirectory(baseDirectory);
+//		chooser.setApproveButtonText("Attach document");
+//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Word files", "doc", "docx"));
+//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("PowerPoint files", "ppt", "pptx"));
+//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Excel files", "xls", "xlsx"));
+//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF files", "pdf"));
+//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Image files", "png", "jpg", "jpeg", "tiff", "gif", "bmp"));
+//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("SDF structure files", "sdf"));
+//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("MOL files", "mol"));
+//	}
 
 	public void loadAnnotation(ObjectAnnotation annotation) {
 
@@ -233,13 +231,43 @@ public class DocumentAnnotationDialog extends JDialog implements ActionListener,
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(BROWSE_COMMAND))
-			chooser.showOpenDialog(this);
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			File inputFile = chooser.getSelectedFile();
+			selectLinkedFile();
+			
+//			chooser.showOpenDialog(this);
+//
+//		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
+//
+//			File inputFile = chooser.getSelectedFile();
+//			baseDirectory = inputFile.getParentFile();
+//			sourceFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+//			documentTitleTextField.setText(FilenameUtils.getBaseName(inputFile.getName()));
+//			
+//			Icon ftIcon = GuiUtils.getDocumentFormatIcon(
+//					DocumentFormat.getFormatByFileExtension(
+//							FilenameUtils.getExtension(inputFile.getName())), 64);
+//			fileTypeLabel.setIcon(ftIcon);
+//			savePreferences();
+//		}
+	}
+	
+	private void selectLinkedFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Word files", "doc", "docx");
+		fc.addFilter("PowerPoint files", "ppt", "pptx");
+		fc.addFilter("Excel files", "xls", "xlsx");
+		fc.addFilter("PDF files", "pdf");
+		fc.addFilter("Image files", "png", "jpg", "jpeg", "tiff", "gif", "bmp");
+		fc.addFilter("SDF structure files", "sdf");
+		fc.addFilter("MOL files", "mol");
+		fc.setTitle("Attach document");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File inputFile = fc.getSelectedFile();
 			baseDirectory = inputFile.getParentFile();
-			sourceFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+			sourceFileTextField.setText(fc.getSelectedFile().getAbsolutePath());
 			documentTitleTextField.setText(FilenameUtils.getBaseName(inputFile.getName()));
 			
 			Icon ftIcon = GuiUtils.getDocumentFormatIcon(

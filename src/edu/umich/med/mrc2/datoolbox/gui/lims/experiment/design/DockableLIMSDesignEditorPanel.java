@@ -26,14 +26,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.Date;
 
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import org.apache.commons.io.FileUtils;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
@@ -41,8 +45,9 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignDisplay;
 import edu.umich.med.mrc2.datoolbox.gui.expdesign.editor.ExperimentDesignTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 
 public class DockableLIMSDesignEditorPanel  extends DefaultSingleCDockable implements ActionListener, ExperimentDesignDisplay {
@@ -134,27 +139,53 @@ public class DockableLIMSDesignEditorPanel  extends DefaultSingleCDockable imple
 		if(experimentDesign == null)
 			return;
 
-		JFileChooser chooser = new ImprovedFileChooser();
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setDialogTitle("Save experiment design to file:");
-		chooser.setApproveButtonText("Save design");
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setFileFilter(txtFilter);
-
-		if (chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-
-			File outputFile = FIOUtils.changeExtension(chooser.getSelectedFile(), "txt") ;
-			baseDirectory = chooser.getSelectedFile().getParentFile();
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Save experiment design to file:");
+		fc.setMultiSelectionEnabled(false);
+		String defaultFileName = "Experiment_design_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".TXT";
+		fc.setDefaultFileName(defaultFileName);
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File outputFile = fc.getSelectedFile();
+			baseDirectory = outputFile.getParentFile();
+			outputFile = FIOUtils.changeExtension(outputFile, "txt") ;
 			String designString = expDesignTable.getDesignDataAsString();
-			try {
-				FileUtils.writeStringToFile(outputFile, designString);
+			Path outputPath = Paths.get(outputFile.getAbsolutePath());
+		    try {
+				Files.writeString(outputPath, 
+						designString, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.APPEND);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+//		JFileChooser chooser = new ImprovedFileChooser();
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		chooser.setDialogTitle("Save experiment design to file:");
+//		chooser.setApproveButtonText("Save design");
+//		chooser.setCurrentDirectory(baseDirectory);
+//		chooser.setFileFilter(txtFilter);
+//
+//		if (chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+//
+//			File outputFile = FIOUtils.changeExtension(chooser.getSelectedFile(), "txt") ;
+//			baseDirectory = chooser.getSelectedFile().getParentFile();
+//			String designString = expDesignTable.getDesignDataAsString();
+//			try {
+//				FileUtils.writeStringToFile(outputFile, designString);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 	}
 
 	public void showExperimentDesign(ExperimentDesign newDesign) {

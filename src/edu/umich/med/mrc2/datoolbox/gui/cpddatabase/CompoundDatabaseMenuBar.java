@@ -136,7 +136,7 @@ public class CompoundDatabaseMenuBar extends CommonMenuBar {
 				MainActionCommands.SHOW_CUSTOM_COMPOUND_LOADER, 
 				addCompoundIcon);
 		batchAddMenuItem = addItem(importMenu, 
-				MainActionCommands.IMPORT_COMPOUNDS_TO_DATABASE_COMMAND, 
+				MainActionCommands.SETUP_BATCH_COMPOUND_IMPORT_TO_DATABASE_COMMAND, 
 				importCompoundsIcon);
 		batchAddMenuItem.setEnabled(false);
 		

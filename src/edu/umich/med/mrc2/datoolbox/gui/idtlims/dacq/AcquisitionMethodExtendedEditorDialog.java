@@ -124,9 +124,9 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
-
-		loadLayout(layoutConfigFile);
+		
 		loadMethodData();
+		loadLayout(layoutConfigFile);
 		pack();
 	}
 	
@@ -154,7 +154,7 @@ public class AcquisitionMethodExtendedEditorDialog extends JDialog implements Pe
 		
 		//	TODO load gradient
 		
-		pack();
+//		pack();
 	}
 	
 	public void setMethodFile(File methodFile) {

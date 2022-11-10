@@ -28,19 +28,23 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Objects;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.SwingUtilities;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
@@ -59,7 +63,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -261,27 +265,32 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 	private void saveWorklistToFile() {
 
 		String worklistString = worklistTable.getWorklistsAsString();
-		if(worklistString == null)
+		if(worklistString == null || worklistString.isEmpty())
 			return;
 
-		if(worklistString.isEmpty())
-			return;
-
-		JFileChooser chooser = new ImprovedFileChooser();
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setDialogTitle("Save experiment design to file:");
-		chooser.setApproveButtonText("Save design");
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setFileFilter(new FileNameExtensionFilter("Text files", "txt", "TXT"));
-		if (chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-
-			File outputFile = FIOUtils.changeExtension(chooser.getSelectedFile(), "txt") ;
-			try {
-				FileUtils.writeStringToFile(outputFile, worklistString);
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Save worklist to file:");
+		fc.setMultiSelectionEnabled(false);
+		String defaultFileName = "Worklist_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt";
+		fc.setDefaultFileName(defaultFileName);
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File outputFile = fc.getSelectedFile();
+			baseDirectory = outputFile.getParentFile();
+			outputFile = FIOUtils.changeExtension(outputFile, "txt") ;
+			String designString = worklistString;
+			Path outputPath = Paths.get(outputFile.getAbsolutePath());
+		    try {
+				Files.writeString(outputPath, 
+						designString, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.APPEND);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -373,25 +382,38 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 
 	private File selectRawFilesDirectory() {
 
-		JFileChooser chooser = new ImprovedFileChooser();
-		File inputFile = null;
-
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setDialogTitle("Select folder containing data files:");
-		chooser.setCurrentDirectory(baseDirectory);
-
-		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-
-			inputFile = chooser.getSelectedFile();
-
-			if (inputFile.exists()) {
-				baseDirectory = inputFile.getParentFile();
-				savePreferences();
-			}
+//		JFileChooser chooser = new ImprovedFileChooser();
+//		File inputFile = null;
+//
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//		chooser.setDialogTitle("Select folder containing data files:");
+//		chooser.setCurrentDirectory(baseDirectory);
+//
+//		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+//
+//			inputFile = chooser.getSelectedFile();
+//
+//			if (inputFile.exists()) {
+//				baseDirectory = inputFile.getParentFile();
+//				savePreferences();
+//			}
+//		}
+//		return inputFile;
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select directory containing raw data files:");
+		fc.setOpenButtonText("Select folder");
+		fc.setMultiSelectionEnabled(false);		
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane())))	{	
+			baseDirectory = fc.getSelectedFile();
+			savePreferences();
+			return baseDirectory;
 		}
-		return inputFile;
+		else
+			return null;
 	}
 
 	@Override

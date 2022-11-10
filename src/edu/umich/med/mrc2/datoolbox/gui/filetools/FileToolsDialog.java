@@ -34,10 +34,11 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -49,7 +50,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -57,6 +57,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
@@ -77,7 +78,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.TableClipboardKeyAdapter;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.gui.worklist.WorklistTable;
 import edu.umich.med.mrc2.datoolbox.gui.worklist.WorklistTableModel;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -105,7 +106,6 @@ public class FileToolsDialog extends JDialog
 	public static final String ZIP_DATA_BASE_DIRECTORY = "ZIP_DATA_BASE_DIRECTORY";
 	public static final String RECURSIVE_SCAN = "RECURSIVE_SCAN";
 	
-	private JFileChooser chooser;
 	private File baseDirectory;
 	private JTextField rawDataFolderForCleanupTextField;
 	private JTextArea consoleTextArea;
@@ -122,7 +122,6 @@ public class FileToolsDialog extends JDialog
 	private JButton cleanAndZipButton;
 	private JButton zipDirBrowseButton;
 	private JButton rawDataBrowseButton;
-	private String fileSelectType;
 	private JCheckBox recursiveScanCheckBox;
 	private JCheckBox createZipsCheckBox;
 
@@ -152,7 +151,7 @@ public class FileToolsDialog extends JDialog
 		dotDfilter = FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
 		txtFilter = new FileNameExtensionFilter("Text files", "txt", "TXT");
 		loadPreferences();
-		initChooser();		
+	
 		pack();
 	}
 	
@@ -254,16 +253,6 @@ public class FileToolsDialog extends JDialog
 		panel.add(cleanAndZipButton, gbc_cleanAndZipButton);
 		
 		return panel;
-	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
 	}
 	
 	private JPanel createUntargetedResultsCleanupPanel() {
@@ -404,28 +393,49 @@ public class FileToolsDialog extends JDialog
 		if (command.equals(MainActionCommands.CLEANUP_RAW_DATA.getName())) 
 			removeResultsFolders();
 		
-		if (command.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName()) ||
-				command.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName())) {
+		if (command.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName()))
+			selectRawDataDirectory();
 
-			fileSelectType = command;
-			selectFileOrDirectory(command);
-		}
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			File inputFile = chooser.getSelectedFile();
-			if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName())) {
-				baseDirectory = inputFile.getParentFile();
-				rawDataDirTextField.setText(inputFile.getAbsolutePath());
-			}
-			if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName())) {
-				zipBaseDirectory = inputFile.getParentFile();
-				zipDirTextField.setText(inputFile.getAbsolutePath());
-			}
-			savePreferences();
-		}
+		if(command.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName()))
+			selectZIPDestinationDirectory();
+		
 		if(command.equals(MainActionCommands.CLEAN_AND_ZIP_COMMAND.getName()))
 			cleanAndZip();
 	}
+	
+	private void selectRawDataDirectory() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select directory containing raw data files to compress:");
+		fc.setOpenButtonText("Select folder");
+		fc.setMultiSelectionEnabled(false);
+		
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File inputFile = fc.getSelectedFile();
+			baseDirectory = inputFile.getParentFile();
+			rawDataDirTextField.setText(inputFile.getAbsolutePath());
+			savePreferences();
+		}
+	}
+	
+	private void selectZIPDestinationDirectory() {
+		
+		JnaFileChooser fc = new JnaFileChooser(zipBaseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select detination directory for compressed raw data files:");
+		fc.setOpenButtonText("Select folder");
+		fc.setMultiSelectionEnabled(false);
+		
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File inputFile = fc.getSelectedFile();
+			zipBaseDirectory = inputFile.getParentFile();
+			zipDirTextField.setText(inputFile.getAbsolutePath());
+			savePreferences();
+		}
+	}	
 	
 	private void cleanAndZip() {
 
@@ -445,25 +455,6 @@ public class FileToolsDialog extends JDialog
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
-	
-	private void selectFileOrDirectory(String command) {
-
-		chooser = new ImprovedFileChooser();
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setDialogTitle(command);
-		chooser.setApproveButtonText(command);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-		if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName()))
-			chooser.setCurrentDirectory(baseDirectory);
-
-		if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName()))
-			chooser.setCurrentDirectory(zipBaseDirectory);
-
-		chooser.showOpenDialog(this);
-	}	
 
 	private void scanDirectoryForSampleInfo(boolean appendWorklist) throws Exception {
 
@@ -494,43 +485,47 @@ public class FileToolsDialog extends JDialog
 		if(worklistString == null || worklistString.isEmpty())
 			return;
 
-		JFileChooser chooser = new ImprovedFileChooser();
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setDialogTitle("Save assay worklist to file:");
-		chooser.setApproveButtonText("Save worklist");
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setFileFilter(txtFilter);
-
-		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-		String fileName = "EXTRACTED_WORKLIST_" + timestamp + ".txt";
-		File outputFile = Paths.get(fileName).toFile();
-		chooser.setSelectedFile(outputFile);
-		if (chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-
-			outputFile = FIOUtils.changeExtension(chooser.getSelectedFile(), "txt") ;
-			try {
-				FileUtils.writeStringToFile(outputFile, worklistString, Charset.defaultCharset());
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Save assay worklist to file:");
+		fc.setMultiSelectionEnabled(false);
+		String defaultFileName = "EXTRACTED_WORKLIST_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt";
+		fc.setDefaultFileName(defaultFileName);
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File outputFile = fc.getSelectedFile();
+			baseDirectory = outputFile.getParentFile();
+			outputFile = FIOUtils.changeExtension(outputFile, "txt") ;
+			Path outputPath = Paths.get(outputFile.getAbsolutePath());
+		    try {
+				Files.writeString(outputPath, 
+						worklistString, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.APPEND);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
 
 	private File selectRawFilesDirectory() {
-
-		File inputFile = null;
-		chooser.setDialogTitle("Select folder containing data files:");
-		chooser.setCurrentDirectory(baseDirectory);
-		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-			inputFile = chooser.getSelectedFile();
-			if (inputFile.exists())
-				baseDirectory = inputFile.getParentFile();
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select directory containing raw data files:");
+		fc.setOpenButtonText("Select folder");
+		fc.setMultiSelectionEnabled(false);		
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane())))	{	
+			baseDirectory = fc.getSelectedFile();
+			savePreferences();
+			return baseDirectory;
 		}
-		return inputFile;
+		else
+			return null;
 	}
 	
 	private void copyWorklistToClipboard() {
@@ -555,11 +550,17 @@ public class FileToolsDialog extends JDialog
 	
 	private void selectRawDataFolderForCleanup() {
 	
-		chooser.setDialogTitle("Select folder containing data files:");
-		chooser.setCurrentDirectory(baseDirectory);
-		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-			rawDataFolderForCleanupTextField.setText(chooser.getSelectedFile().getAbsolutePath());	
-			baseDirectory = chooser.getSelectedFile().getParentFile();
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select directory containing raw data files:");
+		fc.setOpenButtonText("Select folder");
+		fc.setMultiSelectionEnabled(false);
+		
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File inputFile = fc.getSelectedFile();
+			baseDirectory = inputFile.getParentFile();
+			rawDataFolderForCleanupTextField.setText(inputFile.getAbsolutePath());
 			savePreferences();
 		}
 	}

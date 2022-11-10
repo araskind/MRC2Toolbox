@@ -32,12 +32,11 @@ import java.util.Set;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartMouseEvent;
@@ -67,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -783,24 +782,35 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	}
 
 	private File selectBinnerDataFile() {
-
-		JFileChooser chooser = new ImprovedFileChooser();
-		File inputFile = null;
-
-		File projectsDir = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
-		chooser.setCurrentDirectory(projectsDir);
-
-		chooser.setDialogTitle("Select Binner results file");
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		FileNameExtensionFilter projectFileFilter = new FileNameExtensionFilter("Excel files", "xlsx");
-		chooser.setFileFilter(projectFileFilter);
-
-		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION)
-			inputFile = chooser.getSelectedFile();
-
-		return inputFile;
+		
+		JnaFileChooser fc = new JnaFileChooser(
+				MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Excel files", "xlsx", "XLSX");
+		fc.setTitle("Select Binner results file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane())))			
+			return fc.getSelectedFile();
+		
+		return null;
+						
+//		JFileChooser chooser = new ImprovedFileChooser();
+//		File inputFile = null;
+//
+//		File projectsDir = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
+//		chooser.setCurrentDirectory(projectsDir);
+//
+//		chooser.setDialogTitle("Select Binner results file");
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		FileNameExtensionFilter projectFileFilter = new FileNameExtensionFilter("Excel files", "xlsx");
+//		chooser.setFileFilter(projectFileFilter);
+//
+//		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION)
+//			inputFile = chooser.getSelectedFile();
+//
+//		return inputFile;
 	}
 
 	@Override

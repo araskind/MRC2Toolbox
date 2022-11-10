@@ -33,27 +33,28 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.PrintStream;
+import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 
 import edu.umich.med.mrc2.datoolbox.database.load.XMLdatabase;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GlassPane;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -63,12 +64,18 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.dbparsers.DrugBankParserTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.dbparsers.HMDBParserTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.dbparsers.T3DBParserTask;
 
-public class DbParserFrame extends JFrame implements ActionListener, TaskListener{
+public class DbParserFrame extends JFrame 
+		implements ActionListener, TaskListener, BackedByPreferences{
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -1588870352349217881L;
+	
+	private Preferences preferences;
+	public static final String PREFS_NODE = "edu.umich.med.mrc2.datoolbox.DbParserFrame";
+	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
+	
 	private static final String SELECT_INPUT_FILE = "SELECT_INPUT_FILE";
 	private static final String START_PARSER = "START_PARSER";
 	private static final String CLEAR_LOG = "CLEAR_LOG";
@@ -79,7 +86,7 @@ public class DbParserFrame extends JFrame implements ActionListener, TaskListene
 	private File inputFile;
 	private JLabel inputFileLabel;
 
-	private JFileChooser chooser;
+//	private JFileChooser chooser;
 	private FileFilter txtFilter, xmlFilter;
 	private File baseDirectory;
 	private JLabel lblNewLabel_1;
@@ -168,7 +175,7 @@ public class DbParserFrame extends JFrame implements ActionListener, TaskListene
 		clearButton.setActionCommand(CLEAR_LOG);
 		panel_1.add(clearButton);
 
-		initChooser();
+//		initChooser();
 
 		textArea = new JTextArea();
 		getContentPane().add(textArea, BorderLayout.CENTER);
@@ -177,6 +184,8 @@ public class DbParserFrame extends JFrame implements ActionListener, TaskListene
 
 		standardOut = System.out;
 		standardError = System.err;
+		
+		loadPreferences();
 	}
 
 	@Override
@@ -184,13 +193,9 @@ public class DbParserFrame extends JFrame implements ActionListener, TaskListene
 
 		String command = event.getActionCommand();
 
-		if (command.equals(SELECT_INPUT_FILE)){
+		if (command.equals(SELECT_INPUT_FILE))
+			selectInputFile();
 
-			if(baseDirectory != null)
-				chooser.setCurrentDirectory(baseDirectory);
-
-			chooser.showOpenDialog(this);
-		}
 		if (command.equals(START_PARSER)){
 			try {
 				parseDataFile();
@@ -200,15 +205,24 @@ public class DbParserFrame extends JFrame implements ActionListener, TaskListene
 		}
 		if (command.equals(CLEAR_LOG))
 			clearConsole();
-
-		if (event.getSource().equals(chooser)) {
-
-			if (event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-				inputFile = chooser.getSelectedFile();
-				inputFileLabel.setText(inputFile.getPath());
-				baseDirectory = inputFile.getParentFile();
-			}
+	}
+	
+	private void selectInputFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("SDF files", "SDF", "sdf");
+		fc.addFilter("XML files", "xml", "XML");
+		fc.addFilter("Text files", "txt", "TXT", "TSV", "CSV", "data");
+		fc.addFilter("MSP files", "msp", "MSP");
+		fc.setTitle("Select input file");
+		fc.setMultiSelectionEnabled(true);
+		if (fc.showOpenDialog(this)) {
+			
+			inputFile = fc.getSelectedFile();
+			baseDirectory = inputFile.getParentFile();
+			inputFileLabel.setText(fc.getSelectedFile().getAbsolutePath());
+			savePreferences();
 		}
 	}
 
@@ -222,21 +236,21 @@ public class DbParserFrame extends JFrame implements ActionListener, TaskListene
         }
 	}
 
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "wkl");
-		chooser.addChoosableFileFilter(xmlFilter);
-
-		txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv");
-		chooser.addChoosableFileFilter(txtFilter);
-	}
+//	private void initChooser() {
+//
+//		chooser = new ImprovedFileChooser();
+//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
+//		chooser.addActionListener(this);
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//
+//		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "wkl");
+//		chooser.addChoosableFileFilter(xmlFilter);
+//
+//		txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv");
+//		chooser.addChoosableFileFilter(txtFilter);
+//	}
 
 	private void parseDataFile() throws Exception{
 
@@ -293,6 +307,25 @@ public class DbParserFrame extends JFrame implements ActionListener, TaskListene
 		if (e.getStatus() == TaskStatus.ERROR)
 			MRC2ToolBoxCore.getMainWindow().hideProgressDialog();
 
+	}
+	
+	@Override
+	public void loadPreferences(Preferences prefs) {
+		preferences = prefs;
+		baseDirectory =  
+				new File(preferences.get(BASE_DIRECTORY, 
+						MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+	}
+
+	@Override
+	public void loadPreferences() {
+		loadPreferences(Preferences.userRoot().node(PREFS_NODE));
+	}
+
+	@Override
+	public void savePreferences() {
+		preferences = Preferences.userRoot().node(PREFS_NODE);
+		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
 
 //    public static void main(String[] args) {

@@ -101,12 +101,12 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213802276" orientation="HORIZONTAL" divider="0.7592223330009971">
 											<node nodeId="1600213802278" orientation="VERTICAL" divider="0.4891416752843847">
-												<leaf id="2" nodeId="1600213802280">
+												<leaf id="0" nodeId="1600213802280">
 													<placeholders>
 														<placeholder>dock.single.DockableExperimentListingTable</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="0" nodeId="1600213802282">
+												<leaf id="2" nodeId="1600213802282">
 													<placeholders>
 														<placeholder>dock.single.DockableLIMSDesignEditorPanel</placeholder>
 													</placeholders>
@@ -128,10 +128,10 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLIMSDesignEditorPanel">
-										<replacement id="dockablesingle DockableLIMSDesignEditorPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
+										<replacement id="dockablesingle DockableExperimentListingTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLIMSDesignEditorPanel</id>
+											<id>DockableExperimentListingTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -148,10 +148,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
-										<replacement id="dockablesingle DockableExperimentListingTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableLIMSDesignEditorPanel">
+										<replacement id="dockablesingle DockableLIMSDesignEditorPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentListingTable</id>
+											<id>DockableLIMSDesignEditorPanel</id>
 											<area/>
 										</delegate>
 									</layout>

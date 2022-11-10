@@ -31,53 +31,28 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.prefs.Preferences;
-import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.IonizationType;
 import edu.umich.med.mrc2.datoolbox.data.MassAnalyzerType;
 import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.SoftwareSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable 
-	implements ItemListener, ActionListener, BackedByPreferences {
-
-	private static final Icon componentIcon = GuiUtils.getIcon("editDataAcquisitionMethod", 16);
-	
-	private Preferences preferences;
-	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.DockableAcquisitionMethodDataPanel";
-	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
-	
-	private static final String BROWSE_COMMAND = "BROWSE_COMMAND";
+public class dp extends JPanel implements ItemListener, ActionListener {
 	
 	private JTextField methodNameTextField;
 	private JTextField methodFileTextField;
@@ -93,82 +68,15 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 	private JComboBox massAnalyzerComboBox;
 	private JComboBox separationTypeComboBox;
 	private JButton btnBrowse;
-//	private ImprovedFileChooser chooser;
-	private File baseDirectory;
-	private JDialog parentDialog;
-	private DataAcquisitionMethod method;
-	private SoftwareSelectorDialog softwareSelectorDialog;
-	private DataProcessingSoftware software;
 	
-	public DockableAcquisitionMethodDataPanel(JDialog parentDialog) {
+	private static final String BROWSE_COMMAND = "BROWSE_COMMAND";
 
-		super("DockableAcquisitionMethodDataPanel", componentIcon, "Method data", null, Permissions.MIN_MAX_STACK);
-		setCloseable(false);
-		setLayout(new BorderLayout(0,0));
-		this.parentDialog = parentDialog;
-		JPanel dataPanel = createDataPanel();
-		add(dataPanel, BorderLayout.CENTER);
-		loadPreferences();
-		separationTypeComboBox.addItemListener(this);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void loadMethodData(DataAcquisitionMethod method) {
-		
-		this.method = method;
-		separationTypeComboBox.removeItemListener(this);
-		if(method == null) {
-
-			polarityComboBox.setSelectedIndex(-1);
-			msTypeComboBox.setSelectedIndex(-1);
-			columnComboBox.setSelectedIndex(-1);
-			ionizationTypeComboBox.setSelectedIndex(-1);
-			massAnalyzerComboBox.setSelectedIndex(-1);
-			separationTypeComboBox.setSelectedIndex(-1);
-		}
-		else {
-			idValueLabel.setText(method.getId());
-
-			if (method.getCreatedOn() != null)
-				dateCreatedLabel.setText(MRC2ToolBoxConfiguration.getDateTimeFormat().format(method.getCreatedOn()));
-
-			methodNameTextField.setText(method.getName());
-			descriptionTextArea.setText(method.getDescription());
-
-			if(method.getCreatedBy() != null)
-				methodAuthorLabel.setText(method.getCreatedBy().getInfo());
-
-			polarityComboBox.setSelectedItem(method.getPolarity());
-			msTypeComboBox.setSelectedItem(method.getMsType());
-			ionizationTypeComboBox.setSelectedItem(method.getIonizationType());
-			massAnalyzerComboBox.setSelectedItem(method.getMassAnalyzerType());
-			separationTypeComboBox.setSelectedItem(method.getSeparationType());
-
-			Collection<LIMSChromatographicColumn> columnSet =
-					IDTDataCash.getChromatographicColumns().stream().
-					filter(c -> c.getSeparationType().equals(method.getSeparationType())).
-					collect(Collectors.toList());
-
-			columnComboBox.setModel(
-					new SortedComboBoxModel<LIMSChromatographicColumn>(columnSet));
-
-			columnComboBox.setSelectedItem(method.getColumn());
-			
-			software  = method.getSoftware();
-			if(method.getSoftware() != null)
-				softwareNameTextField.setText(method.getSoftware().getName());
-		}
-		loadPreferences();
-		//initChooser();
-		separationTypeComboBox.addItemListener(this);
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private JPanel createDataPanel() {
-
+	public dp() {
+		super();
 		JPanel dataPanel = new JPanel();
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-		getContentPane().add(dataPanel, BorderLayout.CENTER);
+		//	getContentPane().add(dataPanel, BorderLayout.CENTER);
+		add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{0, 137, 82, 144, 0, 0};
 		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -421,206 +329,18 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		gbc_selectSoftButton.gridx = 4;
 		gbc_selectSoftButton.gridy = 9;
 		dataPanel.add(selectSoftButton, gbc_selectSoftButton);
-		
-		return dataPanel;
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		if(e.getActionCommand().equals(MainActionCommands.SHOW_SOFTWARE_SELECTOR_COMMAND.getName()))
-			showSoftwareSelector();
-		
-		if(e.getActionCommand().equals(MainActionCommands.SELECT_SOFTWARE_COMMAND.getName()))
-			selectSoftware();
-		
-		if(e.getActionCommand().equals(BROWSE_COMMAND))
-			selectMethodFile();
-	}
-	
-	private void selectMethodFile() {
-		
-		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
-		fc.setMode(JnaFileChooser.Mode.FilesAndDirectories);
-		fc.setTitle("Select acquisition method file");
-		fc.setMultiSelectionEnabled(false);
-		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
-			
-			File methodFile = fc.getSelectedFile();
-			baseDirectory = methodFile.getParentFile();
-			methodFileTextField.setText(methodFile.getAbsolutePath());
-			if(method == null) {
-				methodNameTextField.setText(methodFile.getName());
-				descriptionTextArea.setText(methodFile.getName());
-			}
-			savePreferences();
-		}
-	}
-	
-	public void setMethodFile(File methodFile) {
-
-		baseDirectory = methodFile.getParentFile();
-		methodFileTextField.setText(methodFile.getAbsolutePath());
-		if(method == null) {
-			methodNameTextField.setText(methodFile.getName());
-			descriptionTextArea.setText(methodFile.getName());
-		}
-		savePreferences();
-	}
-	
-	private void showSoftwareSelector() {
-
-		softwareSelectorDialog = new SoftwareSelectorDialog(this);
-		softwareSelectorDialog.setLocationRelativeTo(this.getContentPane());
-		softwareSelectorDialog.setVisible(true);
-	}
-	
-	private void selectSoftware() {
-		
-		if(softwareSelectorDialog.getSelectedSoftware() != null) {
-			
-			software = softwareSelectorDialog.getSelectedSoftware();
-			softwareNameTextField.setText(software.getName());
-			softwareSelectorDialog.dispose();
-		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-
-		if (e.getStateChange() == ItemEvent.SELECTED) {
-
-			if (e.getSource().equals(separationTypeComboBox)) {
-
-				ChromatographicSeparationType sType = getChromatographicSeparationType();
-				Collection<LIMSChromatographicColumn> columnSet =
-						IDTDataCash.getChromatographicColumns().stream().
-						filter(c -> c.getSeparationType().equals(sType)).
-						collect(Collectors.toList());
-
-				columnComboBox.setModel(
-						new SortedComboBoxModel<LIMSChromatographicColumn>(columnSet));
-			}
-		}
-	}
-	
-	public String getMethodName() {
-		return methodNameTextField.getText().trim();
-	}
-
-	public String getMethodDescription() {
-		return descriptionTextArea.getText().trim();
-	}
-
-	public Polarity getMethodPolarity() {
-		return (Polarity) polarityComboBox.getSelectedItem();
-	}
-
-	public MsType getMethodMsType() {
-		return (MsType) msTypeComboBox.getSelectedItem();
-	}
-
-	public LIMSChromatographicColumn getColumn() {
-		return (LIMSChromatographicColumn)columnComboBox.getSelectedItem();
-	}
-
-	public IonizationType getIonizationType() {
-		return (IonizationType)ionizationTypeComboBox.getSelectedItem();
-	}
-
-	public MassAnalyzerType getMassAnalyzerType() {
-		return (MassAnalyzerType)massAnalyzerComboBox.getSelectedItem();
-	}
-
-	public ChromatographicSeparationType getChromatographicSeparationType() {
-		return (ChromatographicSeparationType)separationTypeComboBox.getSelectedItem();
-	}
-
-	public File getMethodFile() {
-
-		if(methodFileTextField.getText().trim().isEmpty())
-			return null;
-
-		return new File(methodFileTextField.getText().trim());
-	}
-	
-	public Collection<String>validateMethodData(){
+		// TODO Auto-generated method stub
 		
-		Collection<String>errors = new ArrayList<String>();
-		if(getMethodName().isEmpty()) 
-			errors.add("Method name can not be empty.");
-		
-		if(method == null && getMethodFile() == null) 
-			errors.add("Method file should be specified for new method definition.");
-		
-		DataAcquisitionMethod existingFileMethod = null;
-		
-		//	Check if method file was already used
-		if(getMethodFile() != null) {
-			existingFileMethod = IDTDataCash.getAcquisitionMethodByName(getMethodFile().getName());
-			if(existingFileMethod != null)
-				errors.add("Method file \"" + getMethodFile().getName() + "\" is already in the database.");
-		}
-		//	Check if method name was already used
-		if(!getMethodName().isEmpty()) {
-			
-			if(method == null) {	//	New method 
-				existingFileMethod = IDTDataCash.getAcquisitionMethodByName(getMethodName());
-				if(existingFileMethod != null)
-					errors.add("Method \"" + getMethodName() + "\" is already in the database.");
-			}
-			else {
-				String newName = getMethodName();
-				existingFileMethod = IDTDataCash.getAcquisitionMethods().stream().
-					filter(m -> !m.equals(method)).
-					filter(m -> m.getName().equals(newName)).
-					findFirst().orElse(null);
-				if(existingFileMethod != null)
-					errors.add("Another method named \"" + newName + "\" is already in the database.");
-			}
-		}
-		if(getMethodPolarity() == null)
-			errors.add("Method polarity should be specified.");
-
-		if(getMethodMsType() == null)
-			errors.add("Method MS type should be specified.");
-
-		if(getIonizationType() == null)
-			errors.add("Ionization type should be specified.");
-
-		if(getMassAnalyzerType() == null)
-			errors.add("Mass analyzer type should be specified.");
-
-		if(getChromatographicSeparationType() == null)
-			errors.add("Chromatographic separation type should be specified.");
-		
-		if(software == null)
-			errors.add("Software should be specified.");
-		
-		return errors;
 	}
 
 	@Override
-	public void loadPreferences(Preferences prefs) {
-		preferences = prefs;
-		baseDirectory =
-			new File(preferences.get(BASE_DIRECTORY,
-					MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
-	@Override
-	public void loadPreferences() {
-		loadPreferences(Preferences.userRoot().node(PREFS_NODE));
-	}
-
-	@Override
-	public void savePreferences() {
-		preferences = Preferences.userRoot().node(PREFS_NODE);
-		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
-	}
-
-	public DataProcessingSoftware getSoftware() {
-		return software;
-	}
 }

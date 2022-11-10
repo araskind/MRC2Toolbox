@@ -50,7 +50,7 @@ public class DatabaseEntryEditDialog extends JDialog {
 		setModalityType(ModalityType.MODELESS);
 		setSize(new Dimension(450, 220));
 		setResizable(true);
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 	}
 
 	public void loadData(CompoundIdentity id) {

@@ -316,91 +316,51 @@ public class MultiFileDataImportDialog extends JDialog
 		super.dispose();
 	}
 
-//	private void initChooser() {
-//
-//		chooser = new ImprovedFileChooser();
-//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-//		chooser.addActionListener(this);
-//		chooser.setAcceptAllFileFilterUsed(false);
-//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-//		chooser.setCurrentDirectory(baseLibraryDirectory);
-//
-//		txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv");
-//		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "CEF");
-//		mgfFilter = new FileNameExtensionFilter("MGF files", "mgf", "MGF");
-//		pfaFilter = new FileNameExtensionFilter("ProFinder archive files", "pfa", "PFA");
-//	}
-
 	@Override
 	public void actionPerformed(ActionEvent event) {
 				
 		String command = event.getActionCommand();
+
+		if (command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
+			selectLibraryFile();
+
+		if (command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
+			selectDataFiles();
 		
-//		if(command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName())
-//				|| command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName())
-//				|| command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName())
-//				|| command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName())) {
-//			followupCommand = command;
-//		}		
-//		if (event.getSource().equals(chooser) 
-//				&& event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-//
-//			if(followupCommand.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
-//				addSelectedLibraryFile();
-//		
-//			if(followupCommand.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
-//				addSelectedDataFiles();
-//			
-//			if (followupCommand.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
-//				loadDesignFromFile();
-//			
-//			if (followupCommand.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
-//				addResultsProFinderPfaFileToNewPipeline();
-//			
-//			followupCommand = null;
-//		}
-//		else {
-			if (command.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
-				selectLibraryFile();
+		if (command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
+			selectPfaFile();
 
-			if (command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
-				selectDataFiles();
-			
-			if (command.equals(MainActionCommands.LOAD_DATA_FROM_PROFINDER_PFA_COMMAND.getName()))
-				selectPfaFile();
+		if (command.equals(MainActionCommands.REMOVE_DATA_FILES_COMMAND.getName()))
+			removeDataFiles();
 
-			if (command.equals(MainActionCommands.REMOVE_DATA_FILES_COMMAND.getName()))
-				removeDataFiles();
+		if (event.getActionCommand().equals(MainActionCommands.IMPORT_DATA_COMMAND.getName()))
+			importData();
 
-			if (event.getActionCommand().equals(MainActionCommands.IMPORT_DATA_COMMAND.getName()))
-				importData();
+		if (command.equals(MainActionCommands.CLEAR_DATA_COMMAND.getName())) {
 
-			if (command.equals(MainActionCommands.CLEAR_DATA_COMMAND.getName())) {
-
-				if (MessageDialog.showChoiceMsg("Clear input data?", this) == JOptionPane.YES_OPTION)
-					clearPanel();
-			}
-			if(command.equals(MainActionCommands.SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND.getName()))
-				showReferenceSamplesEditDialog();
-			
-			if(command.equals(MainActionCommands.EDIT_REFERENCE_SAMPLES_COMMAND.getName()))
-				editReferenceSamples();
-			
-			if (command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
-				selectDesignFile();
-			
-			if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName()))
-				showAcquisitionMethodEditor();
-			
-			if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_COMMAND.getName()))
-				addAcquisitionMethod();
-			
-			if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName()))
-				showDataExtractionMethodEditor();
-			
-			if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
-				addDataExtractionMethod();
-//		}
+			if (MessageDialog.showChoiceMsg("Clear input data?", this) == JOptionPane.YES_OPTION)
+				clearPanel();
+		}
+		if(command.equals(MainActionCommands.SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND.getName()))
+			showReferenceSamplesEditDialog();
+		
+		if(command.equals(MainActionCommands.EDIT_REFERENCE_SAMPLES_COMMAND.getName()))
+			editReferenceSamples();
+		
+		if (command.equals(MainActionCommands.LOAD_DATA_FILE_SAMPLE_MAP_COMMAND.getName()))
+			selectDesignFile();
+		
+		if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName()))
+			showAcquisitionMethodEditor();
+		
+		if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_COMMAND.getName()))
+			addAcquisitionMethod();
+		
+		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName()))
+			showDataExtractionMethodEditor();
+		
+		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
+			addDataExtractionMethod();
 	}
 	
 	private void showDataExtractionMethodEditor() {

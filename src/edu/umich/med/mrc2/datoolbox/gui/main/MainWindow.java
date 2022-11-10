@@ -74,7 +74,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 import edu.umich.med.mrc2.datoolbox.gui.adducts.AdductManagerFrame;
-import edu.umich.med.mrc2.datoolbox.gui.adducts.chemmod.ChemicalModificationManagerFrame;
 import edu.umich.med.mrc2.datoolbox.gui.assay.AssayManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.dbparse.DbParserFrame;
@@ -147,7 +146,6 @@ public class MainWindow extends JFrame
 	private static NewProjectDialog newProjectFrame;
 	private static DbParserFrame dbParserFrame;
 	private static MSToolsFrame msToolsFrame;
-	private static ChemicalModificationManagerFrame chemicalModificationManagerFrame;
 	private static AdductManagerFrame adductManagerFrame;
 	private static AssayManagerDialog assayMethodsManagerDialog;
 	private static ReferenceSampleManagerDialog referenceSampleManagerDialog;

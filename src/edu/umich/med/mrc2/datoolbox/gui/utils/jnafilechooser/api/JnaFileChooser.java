@@ -167,14 +167,16 @@ public class JnaFileChooser
 			return false;
 		
 		// Native windows filechooser doesn't support mixed selection mode
-		if (Platform.isWindows() && mode != Mode.FilesAndDirectories) {
+		if (Platform.isWindows() && mode == Mode.Files) {
 			
-			// windows filechooser can only multiselect files
-			if (mode == Mode.Directories && !multiSelectionEnabled)
-				return showWindowsFolderBrowser(parent);
+//			// windows filechooser can only multiselect files, 
+			//	windows folder browser doesn't support remembering last location
+//			if (mode == Mode.Directories && !multiSelectionEnabled)
+//				return showWindowsFolderBrowser(parent);
+//			
+//			if (mode == Mode.Files)
 			
-			if (mode == Mode.Files)
-				return showWindowsFileChooser(parent, action);	
+			return showWindowsFileChooser(parent, action);	
 		}
 		// fallback to Swing
 		return showSwingFileChooser(parent, action);
@@ -230,20 +232,6 @@ public class JnaFileChooser
 	            }
 			}
 		}
-		if(Component.class.isAssignableFrom(parent.getClass())) {
-			
-			if (action == Action.Open) {
-				result = fc.showOpenDialog((Component)parent);
-			}
-			else {
-				if (saveButtonText.isEmpty()) {
-					result = fc.showSaveDialog((Component)parent);
-	            }
-				else {
-					result = fc.showDialog((Component)parent, null);
-	            }
-			}
-		}
 		if (result == JFileChooser.APPROVE_OPTION) {
 
 			selectedFiles = multiSelectionEnabled ? fc.getSelectedFiles() : new File[] { fc.getSelectedFile() };
@@ -289,7 +277,7 @@ public class JnaFileChooser
 		final WindowsFolderBrowser fb = new WindowsFolderBrowser();
 		if (!dialogTitle.isEmpty()) {
 			fb.setTitle(dialogTitle);
-		}
+		}		
 		final File file = fb.showDialog(parent);
 		if (file != null) {
 			selectedFiles = new File[] { file };
