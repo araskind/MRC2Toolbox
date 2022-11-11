@@ -31,6 +31,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
@@ -38,7 +39,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -51,8 +51,9 @@ import javax.swing.border.EmptyBorder;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class CefMsMsPrescanSetupDialog extends JDialog
 	implements ActionListener, BackedByPreferences{
@@ -200,30 +201,33 @@ public class CefMsMsPrescanSetupDialog extends JDialog
 
 	private void selectCPDoutFile() {
 
-		ImprovedFileChooser chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(cpdFileParentDir);
-		if(chooser.showDialog(this, "Set log file") == JFileChooser.APPROVE_OPTION) {
-			missingCompoundsFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+		JnaFileChooser fc = new JnaFileChooser(cpdFileParentDir);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Set log file:");
+		fc.setSaveButtonText("Set log file");
+		fc.setMultiSelectionEnabled(false);
+		String defaultFileName = "missingCompounds_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt";
+		fc.setDefaultFileName(defaultFileName);		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {			
+			missingCompoundsFileTextField.setText(fc.getSelectedFile().getAbsolutePath());
 			savePreferences();
 		}
 	}
 
 	private void selectCEFDir() {
-
-		ImprovedFileChooser chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setCurrentDirectory(cefParentDir);
-		if(chooser.showDialog(this, "Select folder") == JFileChooser.APPROVE_OPTION) {
-			cefFolderTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+		
+		JnaFileChooser fc = new JnaFileChooser(cefParentDir);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select folder containing CEF files:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setAllowOverwrite(true);
+		fc.setOpenButtonText("Select folder");
+		
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this))) {
+			
+			cefFolderTextField.setText(fc.getSelectedFile().getAbsolutePath());
 			missingCompoundsFileTextField.setText(cefFolderTextField.getText() + File.separator + "missingCompounds.txt");
 			savePreferences();
 		}

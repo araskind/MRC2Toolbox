@@ -47,7 +47,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -64,7 +63,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
@@ -73,7 +71,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsfdr.NISTPepSearchResultManipulator;
@@ -92,7 +90,6 @@ public class PepserchResultsImportDialog extends JDialog
 	private static final long serialVersionUID = 7900043273522577847L;
 	private static final Icon dialogIcon = GuiUtils.getIcon("NISTMS-pep-upload", 32);
 	private Preferences preferences;
-	private ImprovedFileChooser inputMsMsFileChooser;
 	private File inputFileDirectory;
 	private int skippedIdCount = 0;
 	private NISTPepSearchParameterObject pepSearchParameterObject;
@@ -104,13 +101,11 @@ public class PepserchResultsImportDialog extends JDialog
 	private JSpinner maxHitsPerFeatureSpinner;
 	private JTextArea textArea;
 	
-	private boolean resultsValid = false;
-	
+	private boolean resultsValid = false;	
 	private Map<String, ReferenceMsMsLibrary>refLibMap;
 	private PepSearchSetupDialog pepSearchSetupDialog;
 	private JCheckBox addMissingParamsCheckBox;
-	
-	
+		
 	public PepserchResultsImportDialog() {
 		super();
 		setTitle("Verify PepSearch results for upload");
@@ -247,25 +242,8 @@ public class PepserchResultsImportDialog extends JDialog
 		buttonPanel.add(uploadButton);
 		
 		loadPreferences();
-		initFileChooser();
 		inputFile = null;
 		pack();
-	}
-	
-	private void initFileChooser() {
-
-		inputMsMsFileChooser = new ImprovedFileChooser();
-		inputMsMsFileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		inputMsMsFileChooser.addActionListener(this);
-		inputMsMsFileChooser.setAcceptAllFileFilterUsed(false);
-		inputMsMsFileChooser.setMultiSelectionEnabled(false);
-		inputMsMsFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		inputMsMsFileChooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
-		inputMsMsFileChooser.setCurrentDirectory(inputFileDirectory);
-
-		FileNameExtensionFilter txtFilter =
-			new FileNameExtensionFilter("Pepsearch output files", "txt", "TXT");
-		inputMsMsFileChooser.addChoosableFileFilter(txtFilter);
 	}
 
 	@Override
@@ -279,14 +257,9 @@ public class PepserchResultsImportDialog extends JDialog
 		
 		String command = e.getActionCommand();
 
-		if(command.equals(MainActionCommands.SELECT_PEPSEARCH_OUTPUT_FILE_COMMAND.getName())) {
-
-			if(inputMsMsFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-				inputFileTextField.setText(inputMsMsFileChooser.getSelectedFile().getAbsolutePath());
-				inputFileDirectory = inputMsMsFileChooser.getCurrentDirectory();
-				inputFile = inputMsMsFileChooser.getSelectedFile();
-			}
-		}
+		if(command.equals(MainActionCommands.SELECT_PEPSEARCH_OUTPUT_FILE_COMMAND.getName()))
+			selectPepSearchResultsFileForUpload();
+		
 		if(command.equals(MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_COMMAND.getName())) 
 			startResultValidationAndUpload(true, false);
 		
@@ -296,6 +269,23 @@ public class PepserchResultsImportDialog extends JDialog
 		if(command.equals(MainActionCommands.VALIDATE_PEPSEARCH_RESULTS_AND_WRITE_FILE_WITH_SPECTRA_COMMAND.getName()))
 			startResultValidationAndUpload(true, true);
 	}	
+	
+	private void selectPepSearchResultsFileForUpload() {
+		
+		JnaFileChooser fc = new JnaFileChooser(inputFileDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Pepsearch output files", "txt", "TXT");
+		fc.setTitle("Select PepSearch results file");
+		fc.setOpenButtonText("Select file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			inputFile = fc.getSelectedFile();
+			inputFileTextField.setText(inputFile.getAbsolutePath());
+			inputFileDirectory = inputFile.getParentFile();			
+			savePreferences();	
+		}
+	}
 
 	private void startResultValidationAndUpload(boolean validateOnly, boolean writeResultsFileWithSpectra) {
 		

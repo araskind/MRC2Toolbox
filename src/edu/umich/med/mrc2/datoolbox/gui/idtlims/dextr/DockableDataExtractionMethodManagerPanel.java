@@ -31,10 +31,9 @@ import java.util.Date;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -47,7 +46,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -63,7 +62,6 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 //	private DataExtractionMethodManagerToolbar toolbar;
 	private DataExtractionMethodTable dataExtractionMethodTable;
 	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
-	private ImprovedFileChooser chooser;
 	private File baseDirectory;
 	private Preferences preferences;
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.DataExtractionMethodManagerPanel";
@@ -126,17 +124,6 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 				downloadMethodIcon, this));
 	}
 
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-	}
-
 	public void loadMethods() {
 		dataExtractionMethodTable.setTableModelFromMethods(IDTDataCash.getDataExtractionMethods());
 	}
@@ -166,10 +153,7 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 			deleteDataExtractionMethod();
 
 		if(command.equals(MainActionCommands.DOWNLOAD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
-			showMethodSaveDialog();
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
-			downloadDataExtractionMethodFile();
+			downloadDataExtractionMethodFile();			
 
 		if(command.equals(MainActionCommands.LINK_DATA_EXTRACTION_METHOD_TO_ACQUISITION_COMMAND.getName()))
 			linkDataExtractionMethodToAcquisitionMethod();
@@ -184,23 +168,35 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 			return;
 
 	}
+	
+	private void downloadDataExtractionMethodFile() {
 
-	private void showMethodSaveDialog() {
-
-		DataExtractionMethod method = 
+		DataExtractionMethod selectedMethod = 
 				dataExtractionMethodTable.getSelectedMethod();
-		if(method == null)
+		if(selectedMethod == null)
 			return;
-
-		if(chooser == null)
-			initChooser();
-
-		chooser.setDialogTitle("Save method \"" + 
-					method.getName() + "\" to local drive");
-		chooser.setSelectedFile(null);
-		chooser.showSaveDialog(this.getContentPane());
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Save method \"" + selectedMethod.getName() + "\" to local drive");
+		fc.setMultiSelectionEnabled(false);
+		fc.setAllowOverwrite(true);
+		fc.setSaveButtonText("Select destination folder");
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File destination = fc.getSelectedFile();
+			baseDirectory = destination;
+			try {
+				IDTUtils.getDataExtractionMethodFile(selectedMethod, destination);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			savePreferences();
+		}
 	}
-
+	
 	private void saveDataExtractionMethod() {
 
 		Collection<String>errors = 
@@ -287,20 +283,6 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 			IDTDataCash.refreshDataExtractionMethodList();
 			loadMethods();
 		}
-	}
-
-	private void downloadDataExtractionMethodFile() {
-
-		DataExtractionMethod selectedMethod = dataExtractionMethodTable.getSelectedMethod();
-		File destination = chooser.getSelectedFile();
-		baseDirectory = destination;
-		try {
-			IDTUtils.getDataExtractionMethodFile(selectedMethod, destination);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		savePreferences();
 	}
 
 	@Override

@@ -52,7 +52,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -63,7 +62,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
@@ -75,7 +73,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -100,7 +98,6 @@ public class FeatureCollectionEditorDialog extends JDialog
 	private JButton btnSave;
 	private JLabel dateCreatedLabel, lastModifiedLabel;
 	private JTextArea descriptionTextArea;	
-	private ImprovedFileChooser chooser;
 	private File baseDirectory;
 	private JTextField methodNameTextField;
 	private JLabel idValueLabel;
@@ -340,7 +337,6 @@ public class FeatureCollectionEditorDialog extends JDialog
 				methodAuthorLabel.setText(featureCollection.getOwner().getInfo());
 		}
 		loadPreferences();
-		initChooser();
 		pack();
 	}
 	
@@ -415,62 +411,60 @@ public class FeatureCollectionEditorDialog extends JDialog
 		super.dispose();
 	}	
 
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);		
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setAcceptAllFileFilterUsed(false);
-		FileNameExtensionFilter txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv", "csv");
-		chooser.addChoosableFileFilter(txtFilter);
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(BROWSE_COMMAND))
-			chooser.showOpenDialog(this);
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
-			validateFeatureListFile();
+			selectAndValidateFeatureListFile();
 	}
 	
-	private void validateFeatureListFile() {
+	private void selectAndValidateFeatureListFile() {
 		
-		File inputFile = chooser.getSelectedFile();
-		if(inputFile.exists() && inputFile.canRead()) {
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "tsv", "csv");
+		fc.setTitle("Select feature list file");
+		fc.setMultiSelectionEnabled(true);
+		if (fc.showOpenDialog(this)) {
 			
-			List<String>lines = null;
-			try {
-				lines = Files.readAllLines(Paths.get(inputFile.getAbsolutePath()));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if(lines != null && !lines.isEmpty()) {
+			File inputFile = fc.getSelectedFile();
+			if(inputFile.exists() && inputFile.canRead()) {
 				
-				for(String line : lines) {
-					
-					String trimmed = line.trim();
-					if(trimmed.startsWith(DataPrefix.MSMS_SPECTRUM.getName()) && trimmed.length() == 16)
-						msmsFeatureIdsToAdd.add(trimmed);				
+				List<String>lines = null;
+				try {
+					lines = Files.readAllLines(Paths.get(inputFile.getAbsolutePath()));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			}
-			if(!msmsFeatureIdsToAdd.isEmpty()) {
-				
-				ValidateMSMSIDlistTask task = new ValidateMSMSIDlistTask(msmsFeatureIdsToAdd);
-				idp = new IndeterminateProgressDialog("Validating MSMS feature IDs ...", this, task);
-				idp.setLocationRelativeTo(this);
-				idp.setVisible(true);
-				
+				if(lines != null && !lines.isEmpty()) {
+					
+					for(String line : lines) {
+						
+						String trimmed = line.trim();
+						if(trimmed.startsWith(DataPrefix.MSMS_SPECTRUM.getName()) && trimmed.length() == 16)
+							msmsFeatureIdsToAdd.add(trimmed);				
+					}
+				}
 				if(!msmsFeatureIdsToAdd.isEmpty()) {
-					featureFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
-					btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND.getName());
-					MessageDialog.showInfoMsg("Extracted " + Integer.toString(msmsFeatureIdsToAdd.size()) + 
-							" valid MSMS feature IDs", this);
+					
+					ValidateMSMSIDlistTask task = new ValidateMSMSIDlistTask(msmsFeatureIdsToAdd);
+					idp = new IndeterminateProgressDialog("Validating MSMS feature IDs ...", this, task);
+					idp.setLocationRelativeTo(this);
+					idp.setVisible(true);
+					
+					if(!msmsFeatureIdsToAdd.isEmpty()) {
+						featureFileTextField.setText(inputFile.getAbsolutePath());
+						btnSave.setText(MainActionCommands.ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND.getName());
+						MessageDialog.showInfoMsg("Extracted " + Integer.toString(msmsFeatureIdsToAdd.size()) + 
+								" valid MSMS feature IDs", this);
+					}
+					else {
+						String message = "No valid MSMS feature IDs found in " + inputFile.getName() + "\n"
+								+ "Correct MSMS feature ID format is " + DataPrefix.MSMS_SPECTRUM.getName() + " followed by 12 digits.";
+						MessageDialog.showWarningMsg(message, this);
+						return;
+					}
 				}
 				else {
 					String message = "No valid MSMS feature IDs found in " + inputFile.getName() + "\n"
@@ -480,17 +474,11 @@ public class FeatureCollectionEditorDialog extends JDialog
 				}
 			}
 			else {
-				String message = "No valid MSMS feature IDs found in " + inputFile.getName() + "\n"
-						+ "Correct MSMS feature ID format is " + DataPrefix.MSMS_SPECTRUM.getName() + " followed by 12 digits.";
-				MessageDialog.showWarningMsg(message, this);
-				return;
+				MessageDialog.showErrorMsg("Can not read input file", this);
 			}
+			baseDirectory = inputFile.getParentFile();		
+			savePreferences();	
 		}
-		else {
-			MessageDialog.showErrorMsg("Can not read input file", this);
-		}
-		baseDirectory = inputFile.getParentFile();		
-		savePreferences();	
 	}
 	
 	class ValidateMSMSIDlistTask extends LongUpdateTask {

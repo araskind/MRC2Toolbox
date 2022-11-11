@@ -31,10 +31,9 @@ import java.util.Date;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -47,7 +46,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -65,7 +64,6 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 
 	private Preferences preferences;
 	private File baseDirectory;
-	private ImprovedFileChooser chooser;
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.ProtocolManagerPanel";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 
@@ -125,16 +123,16 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 				downloadProtocolIcon, this));
 	}
 	
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-	}
+//	private void initChooser() {
+//
+//		chooser = new ImprovedFileChooser();
+//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
+//		chooser.addActionListener(this);
+//		chooser.setAcceptAllFileFilterUsed(true);
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//		chooser.setCurrentDirectory(baseDirectory);
+//	}
 
 	public void loadProtocolData() {
 		protocolTable.setTableModelFromProtocols(IDTDataCash.getProtocols());
@@ -160,9 +158,6 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 			deleteProtocol();
 
 		if(e.getActionCommand().equals(MainActionCommands.DOWNLOAD_SOP_PROTOCOL_COMMAND.getName()))
-			showMethodSaveDialog();
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
 			downloadProtocol();
 	}
 	
@@ -183,34 +178,32 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 		protocolEditorDialog.setLocationRelativeTo(this.getContentPane());
 		protocolEditorDialog.setVisible(true);
 	}
-	
-	private void showMethodSaveDialog() {
-
-		LIMSProtocol protocol = protocolTable.getSelectedProtocol();
-
-		if(protocol == null)
-			return;
-
-		if(chooser == null)
-			initChooser();
-
-		chooser.setDialogTitle("Save SOP protocol \"" + protocol.getSopName() + "\" to local drive");
-		chooser.setSelectedFile(null);
-		chooser.showSaveDialog(this.getContentPane());
-	}
 
 	private void downloadProtocol() {
 
 		LIMSProtocol protocol = protocolTable.getSelectedProtocol();
-		File destination = chooser.getSelectedFile();
-		baseDirectory = destination;
-		try {
-			IDTUtils.getSopProtocolFile(protocol, destination);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(protocol == null)
+			return;
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Save SOP protocol \"" + protocol.getSopName() + "\" to local drive");
+		fc.setMultiSelectionEnabled(false);
+		fc.setAllowOverwrite(true);
+		fc.setSaveButtonText("Select destination folder");
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File destination = fc.getSelectedFile();
+			baseDirectory = destination;
+			try {
+				IDTUtils.getSopProtocolFile(protocol, destination);;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			savePreferences();
 		}
-		savePreferences();
 	}
 
 	private void deleteProtocol() {

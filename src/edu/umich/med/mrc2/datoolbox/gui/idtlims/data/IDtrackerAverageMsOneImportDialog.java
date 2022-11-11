@@ -31,12 +31,13 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -48,7 +49,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -57,7 +57,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -72,7 +71,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -97,8 +96,8 @@ public class IDtrackerAverageMsOneImportDialog extends JDialog
 	private LIMSExperiment experiment;
 	private JButton uploadDataButton;
 	private File baseDirectory;
-	private JFileChooser chooser;
-	private FileNameExtensionFilter xmlFilter;
+//	private JFileChooser chooser;
+//	private FileNameExtensionFilter xmlFilter;
 	private Collection<String> importLog;
 	private JTextField inputFileTextField;
 	private JLabel experimentNameLabel;
@@ -282,15 +281,15 @@ public class IDtrackerAverageMsOneImportDialog extends JDialog
 
 		loadPreferences();
 
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "CEF");
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileFilter(xmlFilter);
+//		chooser = new ImprovedFileChooser();
+//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
+//		chooser.addActionListener(this);
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		chooser.setCurrentDirectory(baseDirectory);
+//		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "CEF");
+//		chooser.setMultiSelectionEnabled(false);
+//		chooser.setFileFilter(xmlFilter);
 
 		importLog = new ArrayList<String>();
 		pack();
@@ -300,7 +299,7 @@ public class IDtrackerAverageMsOneImportDialog extends JDialog
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(MainActionCommands.SELECT_REF_MS1_DATA_FILE_COMMAND.getName()))
-			chooser.showOpenDialog(this);
+			selectMS1DataFile();
 
 		if(e.getActionCommand().equals(MainActionCommands.SELECT_DA_METHOD_DIALOG_COMMAND.getName()))
 			showDaMethodSelector();
@@ -308,16 +307,25 @@ public class IDtrackerAverageMsOneImportDialog extends JDialog
 		if(e.getActionCommand().equals(MainActionCommands.SELECT_DA_METHOD_COMMAND.getName()))
 			selectDaMethod();
 
-		if (e.getSource().equals(chooser) &&
-				e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			inputDataFile = chooser.getSelectedFile();
+		if(e.getActionCommand().equals(MainActionCommands.LOAD_AVG_MS1_DATA_FROM_FILE_COMMAND.getName()))
+			uploadAverageMs1Data();
+	}
+	
+	private void selectMS1DataFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.setTitle("Select reference MS1 CEF file");
+		fc.setMultiSelectionEnabled(false);
+		fc.setOpenButtonText("Select");
+		if (fc.showOpenDialog(this)) {
+			
+			inputDataFile = fc.getSelectedFile();
 			inputFileTextField.setText(inputDataFile.getAbsolutePath());
 			baseDirectory = inputDataFile.getParentFile();
 			savePreferences();
 		}
-		if(e.getActionCommand().equals(MainActionCommands.LOAD_AVG_MS1_DATA_FROM_FILE_COMMAND.getName()))
-			uploadAverageMs1Data();
 	}
 
 	private void uploadAverageMs1Data() {
@@ -377,26 +385,23 @@ public class IDtrackerAverageMsOneImportDialog extends JDialog
 
 				//	Write error log
 				String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-				File erorFile =
-						Paths.get(chooser.getCurrentDirectory().getAbsolutePath(),
-								"REFERENCE_MS1DATA_IMPORT_LOG_" + timestamp + ".TXT").toFile();
-
-				String message = "Data import completed.\n";
+				Path outputPath = Paths.get(baseDirectory.getAbsolutePath(),
+								"REFERENCE_MS1DATA_IMPORT_LOG_" + timestamp + ".TXT");
+				
 				if(!importLog.isEmpty()) {
 
-					try {
-						final Writer writer = new BufferedWriter(new FileWriter(erorFile));
-						writer.append(StringUtils.join(importLog,  System.getProperty("line.separator")));
-						writer.flush();
-						writer.close();
-						message += "Import log saved to " + erorFile.getAbsolutePath();
-					}
-					catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+				    try {
+						Files.write(outputPath, 
+								importLog, 
+								StandardCharsets.UTF_8,
+								StandardOpenOption.CREATE, 
+								StandardOpenOption.APPEND);
+					} catch (IOException ex) {
+						ex.printStackTrace();
 					}
 				}
-				MessageDialog.showInfoMsg(message, this);
+				MessageDialog.showInfoMsg("Data import completed.\n"
+						+ "Error log saved to " + outputPath.toString(), this);
 				dispose();
 			}
 		}
@@ -405,7 +410,9 @@ public class IDtrackerAverageMsOneImportDialog extends JDialog
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;
-		baseDirectory =  new File(preferences.get(BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+		baseDirectory =  
+				new File(preferences.get(BASE_DIRECTORY, 
+						MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
 	}
 
 	@Override

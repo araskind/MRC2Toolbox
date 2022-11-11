@@ -28,12 +28,13 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,7 +51,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -58,10 +58,6 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
@@ -71,7 +67,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -106,9 +102,6 @@ public class IDTrackerMultiFileMSMSDataImportDialog extends JDialog
 	private IDtrackerDataFileSampleMatchTable dataFileSampleMatchTable;
 	private IDTrackerMultiFileImportToolbar toolbar;
 	private File baseDirectory;
-	private JFileChooser chooser;
-	private FileNameExtensionFilter xmlFilter;
-	private FileNameExtensionFilter mgfFilter;
 	private int fileNumber, processedFiles;
 	private Collection<String> importLog;
 
@@ -183,32 +176,12 @@ public class IDTrackerMultiFileMSMSDataImportDialog extends JDialog
 		rootPane.setDefaultButton(uploadDataButton);
 
 		loadPreferences();
-		initChooser();
 		pack();
 	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "CEF");
-		mgfFilter = new FileNameExtensionFilter("MGF files", "mgf", "MGF");
-	}
-
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if (e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			File[] dataFiles = chooser.getSelectedFiles();
-			dataFileSampleMatchTable.setTableModelFromFiles(dataFiles, experiment);
-			baseDirectory = dataFiles[0].getParentFile();
-			savePreferences();
-		}
 		if (e.getActionCommand().equals(ADD_DATA_FILES))
 			addDataFiles();
 
@@ -223,6 +196,28 @@ public class IDTrackerMultiFileMSMSDataImportDialog extends JDialog
 
 		if (e.getActionCommand().equals(MainActionCommands.LOAD_MSMS_DATA_FROM_MULTIFILES_COMMAND.getName()))
 			importMSdata();
+	}
+	
+	private void addDataFiles() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.addFilter("MGF files", "mgf", "MGF");
+		fc.setTitle("Select MSMS files");
+		fc.setMultiSelectionEnabled(true);
+		fc.setOpenButtonText("Select files");
+		
+		if (fc.showOpenDialog(this)) {
+			
+			File[] dataFiles = fc.getSelectedFiles();
+			if(dataFiles.length == 0)
+				return;
+			
+			dataFileSampleMatchTable.setTableModelFromFiles(dataFiles, experiment);
+			baseDirectory = dataFiles[0].getParentFile();
+			savePreferences();
+		}
 	}
 
 	private void assignDaMethodToFiles() {
@@ -246,14 +241,6 @@ public class IDTrackerMultiFileMSMSDataImportDialog extends JDialog
 						dataFileSampleMatchTable.getSelectedDataFiles(), this);
 		daMethodAssignmentDialog.setLocationRelativeTo(this);
 		daMethodAssignmentDialog.setVisible(true);
-	}
-
-	private void addDataFiles() {
-
-		chooser.resetChoosableFileFilters();
-		chooser.setFileFilter(xmlFilter);
-		chooser.setMultiSelectionEnabled(true);
-		chooser.showOpenDialog(this);
 	}
 
 	private void removeDataFiles() {
@@ -372,25 +359,23 @@ public class IDTrackerMultiFileMSMSDataImportDialog extends JDialog
 
 				//	Write error log
 				String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-				File erorFile =
-						Paths.get(chooser.getCurrentDirectory().getAbsolutePath(),
-								"MSDATA_IMPORT_LOG_" + timestamp + ".TXT").toFile();
-
-				String message = "Data import completed.\n";
+				Path outputPath = Paths.get(baseDirectory.getAbsolutePath(),
+								"MSMS_DATA_IMPORT_LOG_" + timestamp + ".TXT");
+				
 				if(!importLog.isEmpty()) {
 
-					try {
-						final Writer writer = new BufferedWriter(new FileWriter(erorFile));
-						writer.append(StringUtils.join(importLog,  System.getProperty("line.separator")));
-						writer.flush();
-						writer.close();
-						message += "Import log saved to " + erorFile.getAbsolutePath();
-					}
-					catch (IOException e1) {
-						e1.printStackTrace();
+				    try {
+						Files.write(outputPath, 
+								importLog, 
+								StandardCharsets.UTF_8,
+								StandardOpenOption.CREATE, 
+								StandardOpenOption.APPEND);
+					} catch (IOException ex) {
+						ex.printStackTrace();
 					}
 				}
-				MessageDialog.showInfoMsg(message, this.getContentPane());
+				MessageDialog.showInfoMsg("Data import completed.\n"
+						+ "Error log saved to " + outputPath.toString(), this);
 				dispose();
 			}
 		}

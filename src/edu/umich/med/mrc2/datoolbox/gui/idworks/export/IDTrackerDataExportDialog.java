@@ -50,7 +50,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -75,7 +74,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class IDTrackerDataExportDialog extends JDialog 
@@ -154,7 +153,6 @@ public class IDTrackerDataExportDialog extends JDialog
 	private IDTrackerFeatureIdentificationProperties[] selectedMsTwoIdentificationProperties;
 
 	private JButton exportButton;
-	private ImprovedFileChooser outputFileChooser;
 	private File baseDirectory;
 	private JTextField outputFilleTextField;
 	private JComboBox<MsDepth> msDepthComboBox;
@@ -416,10 +414,9 @@ public class IDTrackerDataExportDialog extends JDialog
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 			
 		loadPreferences();
-		initFileChoosers();
 		
 		String filePath = Paths.get(baseDirectory.getAbsolutePath(), 
-				"IDTracker_export" + 
+				"IDTracker_export_" + 
 				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt").
 				toString();
 		outputFilleTextField.setText(filePath);
@@ -479,19 +476,6 @@ public class IDTrackerDataExportDialog extends JDialog
 				selectIdentificationPropertiesListItems(defaultMsTwoIdentificationProperties);
 		}
 	}
-	
-	protected void initFileChoosers() {
-
-		outputFileChooser = new ImprovedFileChooser();
-		outputFileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		outputFileChooser.addActionListener(this);
-		outputFileChooser.setAcceptAllFileFilterUsed(true);
-		outputFileChooser.setMultiSelectionEnabled(false);
-		outputFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		outputFileChooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
-		outputFileChooser.setCurrentDirectory(baseDirectory);
-		outputFileChooser.setApproveButtonText("Set output file");
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -505,12 +489,20 @@ public class IDTrackerDataExportDialog extends JDialog
 	
 	private void selectOutputFile() {
 		
-		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-		String fileName = "IDTrackerDataExport_" + timestamp + ".txt";
-		outputFileChooser.setSelectedFile(new File(fileName));			
-		if(outputFileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			outputFilleTextField.setText(outputFileChooser.getSelectedFile().getAbsolutePath());
-			baseDirectory = outputFileChooser.getSelectedFile().getParentFile();
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Export IDTracker data to text file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Set output file");
+		String defaultFileName = "IDTracker_export_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt";
+		fc.setDefaultFileName(defaultFileName);	
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File exportFile  = fc.getSelectedFile();
+			outputFilleTextField.setText(exportFile.getAbsolutePath());
+			baseDirectory = exportFile.getParentFile();
 		}
 	}
 	

@@ -31,10 +31,9 @@ import java.util.Date;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,7 +47,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -68,7 +67,7 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 //	private AcquisitionMethodManagerToolbar toolbar;
 	private AcquisitionMethodTable methodTable;
 	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
-	private JFileChooser chooser;
+//	private JFileChooser chooser;
 	private File baseDirectory;
 
 	public DockableAcquisitionMethodManagerPanel(IDTrackerLimsManagerPanel idTrackerLimsManager) {
@@ -127,17 +126,6 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 				MainActionCommands.DOWNLOAD_ACQUISITION_METHOD_COMMAND.getName(), 
 				downloadMethodIcon, this));
 	}
-	
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -164,10 +152,12 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 			deleteAcquisitionMethod();
 
 		if(command.equals(MainActionCommands.DOWNLOAD_ACQUISITION_METHOD_COMMAND.getName()))
-			showMethodSaveDialog();
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
 			downloadAcquisitionMethodFile();
+		
+//			showMethodSaveDialog();
+//
+//		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
+//			downloadAcquisitionMethodFile();
 
 		if(command.equals(MainActionCommands.LINK_ACQUISITION_METHOD_TO_EXPERIMENT_COMMAND.getName()))
 			linkAcquisitionMethodToExperiment();
@@ -183,20 +173,6 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 			return;
 
 
-	}
-
-	private void showMethodSaveDialog() {
-
-		DataAcquisitionMethod method = methodTable.getSelectedMethod();
-		if(method == null)
-			return;
-
-		if(chooser == null)
-			initChooser();
-
-		chooser.setDialogTitle("Save method \"" + method.getName() + "\" to local drive");
-		chooser.setSelectedFile(null);
-		chooser.showSaveDialog(this.getContentPane());
 	}
 
 	private void saveAcquisitionMethodData() {
@@ -297,15 +273,28 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 	private void downloadAcquisitionMethodFile() {
 
 		DataAcquisitionMethod selectedMethod = methodTable.getSelectedMethod();
-		File destination = chooser.getSelectedFile();
-		baseDirectory = destination;
-		try {
-			AcquisitionMethodUtils.getAcquisitionMethodFile(selectedMethod, destination);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(selectedMethod == null)
+			return;
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Save method \"" + selectedMethod.getName() + "\" to local drive");
+		fc.setMultiSelectionEnabled(false);
+		fc.setAllowOverwrite(true);
+		fc.setSaveButtonText("Select destination folder");
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File destination = fc.getSelectedFile();
+			baseDirectory = destination;
+			try {
+				AcquisitionMethodUtils.getAcquisitionMethodFile(selectedMethod, destination);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			savePreferences();
 		}
-		savePreferences();
 	}
 
 	@Override

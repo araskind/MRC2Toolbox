@@ -24,6 +24,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.sun.jna.Platform;
 
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
 
 /**
  * JnaFileChooser is a wrapper around the native Windows file chooser
@@ -71,6 +72,7 @@ public class JnaFileChooser
 	protected ArrayList<String[]> filters;
 	protected boolean multiSelectionEnabled;
 	protected Mode mode;
+	protected boolean allowOverwrite = false;
 
 	protected String defaultFile;
     protected String dialogTitle;
@@ -184,7 +186,7 @@ public class JnaFileChooser
 	
 	private boolean showSwingFileChooser(Object parent, Action action) {
 			
-		final JFileChooser fc = new JFileChooser(currentDirectory);
+		final ImprovedFileChooser fc = new ImprovedFileChooser(currentDirectory);
 		fc.setMultiSelectionEnabled(multiSelectionEnabled);
 		fc.setFileSelectionMode(mode.getJFileChooserValue());
 
@@ -237,7 +239,8 @@ public class JnaFileChooser
 			selectedFiles = multiSelectionEnabled ? fc.getSelectedFiles() : new File[] { fc.getSelectedFile() };
 			currentDirectory = fc.getCurrentDirectory();
 
-			if (action == Action.Save && fc.getSelectedFile() != null && fc.getSelectedFile().exists()) {
+			if (action == Action.Save && fc.getSelectedFile() != null 
+					&& fc.getSelectedFile().exists() && !allowOverwrite ) {
 
 				int answer = JOptionPane.showConfirmDialog(fc,
 						"File " + fc.getSelectedFile().getName() + " already exists, overwrite?", "Overwrite warning",
@@ -379,5 +382,9 @@ public class JnaFileChooser
 
 	public File getCurrentDirectory() {
 		return currentDirectory;
+	}
+
+	public void setAllowOverwrite(boolean allowOverwrite) {
+		this.allowOverwrite = allowOverwrite;
 	}
 }

@@ -56,7 +56,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -75,7 +74,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -88,7 +86,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsfdr.NISTPepSearchResultManipulator;
@@ -162,9 +160,6 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 	protected File inputFileDirectory;
 	protected File libraryDirectory;
 	protected NISTLibraryTable libraryTable;
-	protected JFileChooser
-		inputMsMsFileChooser,
-		libraryFileChooser;
 
 	@SuppressWarnings("rawtypes")
 	protected JComboBox
@@ -211,11 +206,8 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		fileSource,
 		internalSource;
 
-	protected JTextField inputFileTextField;
-	
-
+	protected JTextField inputFileTextField;	
 	protected ActionListener listener;
-	//	protected JPanel commandPreviewPanel;
 	protected JTextArea commandPreviewTextArea;
 	protected JButton generateCommandButton;
 	protected JButton copyButton;
@@ -288,7 +280,6 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		rootPane.setDefaultButton(searchButton);
 
 		loadPreferences();
-		initFileChoosers();
 		pack();
 	}
 
@@ -297,46 +288,6 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 //		savePreferences();
 //		super.dispose();
 //	}
-
-	protected void initFileChoosers() {
-
-		//	Input file
-		inputMsMsFileChooser = new ImprovedFileChooser();
-		inputMsMsFileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		inputMsMsFileChooser.addActionListener(this);
-		inputMsMsFileChooser.setAcceptAllFileFilterUsed(false);
-		inputMsMsFileChooser.setMultiSelectionEnabled(false);
-		inputMsMsFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		inputMsMsFileChooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
-		inputMsMsFileChooser.setCurrentDirectory(inputFileDirectory);
-
-		FileNameExtensionFilter xmlFilter =
-			new FileNameExtensionFilter("Agilent XML MSMS export files", "xml", "XML");
-		inputMsMsFileChooser.addChoosableFileFilter(xmlFilter);
-		FileNameExtensionFilter cefFilter =
-			new FileNameExtensionFilter("Agilent CEF files", "cef", "CEF");
-		inputMsMsFileChooser.addChoosableFileFilter(cefFilter);
-		FileNameExtensionFilter mspFilter =
-			new FileNameExtensionFilter("NIST MSP MSMS files", "msp", "MSP");
-		inputMsMsFileChooser.addChoosableFileFilter(mspFilter);
-		FileNameExtensionFilter mgfFilter =
-				new FileNameExtensionFilter("MGF files", "mgf", "MGF");
-		inputMsMsFileChooser.addChoosableFileFilter(mgfFilter);
-
-		//	Library
-		libraryFileChooser = new ImprovedFileChooser();
-		libraryFileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		libraryFileChooser.addActionListener(this);
-		libraryFileChooser.setMultiSelectionEnabled(true);
-		libraryFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		libraryFileChooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
-		try {
-			libraryFileChooser.setCurrentDirectory(libraryDirectory);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			//	e.printStackTrace();
-		}
-	}
 	
 	private JPanel createInputAndLibraryPanel() {
 		
@@ -1020,14 +971,9 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		
 		String command = e.getActionCommand();
 
-		if(command.equals(MainActionCommands.SELECT_PEPSEARCH_INPUT_FILE_COMMAND.getName())) {
+		if(command.equals(MainActionCommands.SELECT_PEPSEARCH_INPUT_FILE_COMMAND.getName()))
+			selectPepSearchInputFile();
 
-			if(inputMsMsFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-				inputFileTextField.setText(inputMsMsFileChooser.getSelectedFile().getAbsolutePath());
-				inputFileDirectory = inputMsMsFileChooser.getCurrentDirectory();
-				inputFile = inputMsMsFileChooser.getSelectedFile();
-			}
-		}
 		if(command.equals(MainActionCommands.REMOVE_PEPSEARCH_LIBRARY_COMMAND.getName()))
 			removeSelectedLibrary();
 
@@ -1039,6 +985,26 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		
 		if(command.equals(MainActionCommands.COPY_PEPSEARCH_CLI_COMMAND.getName()))
 			copyPepSearchCommand();
+	}
+	
+	private void selectPepSearchInputFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(inputFileDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.addFilter("Agilent XML MSMS export files", "xml", "XML");	
+		fc.addFilter("NIST MSP MSMS files", "msp", "MSP");
+		fc.addFilter("MGF files", "mgf", "MGF");		
+		fc.setTitle("Select PepSearch input file");
+		fc.setOpenButtonText("Select file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			inputFile = fc.getSelectedFile();
+			inputFileTextField.setText(inputFile.getAbsolutePath());
+			inputFileDirectory = inputFile.getParentFile();			
+			savePreferences();	
+		}
 	}
 
 	protected void generatePepSearchCommand() {
@@ -1064,22 +1030,34 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 	}
 
 	protected void addNistLibrary() {
-
+		
 		Collection<File> presentLibs = libraryTable.getLibraryFiles();
-		if(libraryFileChooser.showOpenDialog(inputAndLibraryPanel) == JFileChooser.APPROVE_OPTION) {
-
-			for(File libFile : libraryFileChooser.getSelectedFiles()) {
+		JnaFileChooser fc = new JnaFileChooser(libraryDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select NIST format libraries");
+		fc.setOpenButtonText("Add selected libraries");
+		fc.setMultiSelectionEnabled(true);
+		if (fc.showOpenDialog(this)) {
+			
+			ArrayList<String>errors = new ArrayList<String>();
+			for(File libFile : fc.getSelectedFiles()) {
 
 				if(libFile.exists() && !presentLibs.contains(libFile)) {
+					
 					File dbuFile = Paths.get(libFile.getAbsolutePath(), "USER.DBU").toFile();
 					if(!dbuFile.exists()) {
-						MessageDialog.showErrorMsg(libFile.getName() + " is not a valid NIST format library folder.", this);
-						return;
+						errors.add(libFile.getName() + " is not a valid NIST format library folder.");
 					}
-					libraryTable.addLibraryFile(libFile);
+					else {
+						libraryTable.addLibraryFile(libFile);
+						libraryDirectory = libFile.getParentFile();
+					}
 				}
 			}
-			libraryDirectory = libraryFileChooser.getCurrentDirectory();
+			if(!errors.isEmpty()) {
+				MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+			}
+			savePreferences();	
 		}
 	}
 

@@ -41,7 +41,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -59,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class ProtocolEditorDialog extends JDialog implements ActionListener, BackedByPreferences{
@@ -88,7 +87,6 @@ public class ProtocolEditorDialog extends JDialog implements ActionListener, Bac
 	private JLabel dateCreatedValueLabel;
 	private JButton browseButton;
 	private File baseDirectory;
-	private ImprovedFileChooser chooser;
 
 	public ProtocolEditorDialog(LIMSProtocol protocol, ActionListener actionListener) {
 		super();
@@ -300,19 +298,7 @@ public class ProtocolEditorDialog extends JDialog implements ActionListener, Bac
 
 		loadProtocolData();
 		loadPreferences();
-		initChooser();
 		pack();
-	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
 	}
 
 	private void loadProtocolData() {
@@ -350,13 +336,20 @@ public class ProtocolEditorDialog extends JDialog implements ActionListener, Bac
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(BROWSE_COMMAND))
-			chooser.showOpenDialog(this);
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			File inputFile = chooser.getSelectedFile();
+			selectSOPFile();
+	}
+	
+	private void selectSOPFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.setTitle("Select SOP file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File inputFile = fc.getSelectedFile();
 			baseDirectory = inputFile.getParentFile();
-			sopFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+			sopFileTextField.setText(inputFile.getAbsolutePath());
 			savePreferences();
 		}
 	}

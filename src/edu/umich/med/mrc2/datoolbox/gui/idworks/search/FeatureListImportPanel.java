@@ -34,7 +34,6 @@ import java.util.Collection;
 import java.util.TreeSet;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -44,7 +43,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -58,7 +56,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -77,7 +75,6 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	private static final long serialVersionUID = 3411264885987118578L;
 
 	private MinimalMSOneFeatureTable featureTable;
-	private ImprovedFileChooser chooser;
 	private File baseDirectory;
 	private JTextField dataSetNameTextField;
 	private JTextArea descriptionTextArea;
@@ -160,8 +157,6 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		gbc_textArea.gridx = 0;
 		gbc_textArea.gridy = 2;
 		panel.add(descriptionTextArea, gbc_textArea);
-		
-		initChooser();
 	}
 	
 	public void disableLoadingFeaturesFromDatabase() {
@@ -171,25 +166,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	public void disableLoadingFeatures() {
 		btnNewButton.setEnabled(false);
 		dbOpenButton.setEnabled(false);
-	}
-	
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		
-		//	chooser.setApproveButtonText("Attach document");
-		chooser.addChoosableFileFilter(
-				new FileNameExtensionFilter("Text files (TAB-separated)", "txt", "TXT", "tsv", "TSV"));
-		chooser.addChoosableFileFilter(
-				new FileNameExtensionFilter("Comma-separated text files", "csv", "CSV"));
-		chooser.addChoosableFileFilter(
-				new FileNameExtensionFilter("CEF files", "cef", "CEF"));
-	}
+	}	
 	
 	public String getDataSetName() {
 		return dataSetNameTextField.getText().trim();
@@ -209,7 +186,6 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	
 	public void setBaseDirectory(File baseDirectory) {
 		this.baseDirectory = baseDirectory;
-		chooser.setCurrentDirectory(baseDirectory);
 	}
 
 	public File getBaseDirectory() {
@@ -238,20 +214,32 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getActionCommand().equals(MainActionCommands.IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND.getName())) 			
-			chooser.showOpenDialog(this);
+		if(e.getActionCommand().equals(MainActionCommands.IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND.getName()))
+			importLookupFeatureListFromFile();
 
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			File inputFile = chooser.getSelectedFile();
-			baseDirectory = inputFile.getParentFile();
-			readFeaturesFromInputFile(inputFile);
-		}
 		if(e.getActionCommand().equals(MainActionCommands.SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName()))
 			selectLookupFeatureListFromDatabase();
 		
 		if(e.getActionCommand().equals(MainActionCommands.LOAD_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND.getName()))
 			loadLookupFeatureListFromDatabase();
+	}
+	
+	private void importLookupFeatureListFromFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files (TAB-separated)", "txt", "TXT", "tsv", "TSV");
+		fc.addFilter("Comma-separated text files", "csv", "CSV");
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.setTitle("Read MZ/RT feature list from file");
+		fc.setOpenButtonText("Import feature list from file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File inputFile = fc.getSelectedFile();
+			baseDirectory = inputFile.getParentFile();
+			readFeaturesFromInputFile(inputFile);
+		}
 	}
 
 	private void loadLookupFeatureListFromDatabase() {

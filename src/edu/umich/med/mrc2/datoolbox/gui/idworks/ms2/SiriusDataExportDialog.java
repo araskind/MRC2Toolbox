@@ -42,7 +42,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -52,7 +51,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
@@ -60,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -263,36 +261,30 @@ public class SiriusDataExportDialog extends JDialog implements ActionListener, B
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+
 		if(e.getActionCommand().equals(BROWSE_FOR_OUTPUT_DIR)) {
-			setOutputDirectory();
+			selectOutputFile();
 		}
 	}	
 	
-	private void setOutputDirectory() {
+	private void selectOutputFile() {
 		
-		ImprovedFileChooser chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(outputDir);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setApproveButtonText("Set output file");
-		FileNameExtensionFilter txtFilter = new FileNameExtensionFilter(
-				MsLibraryFormat.SIRIUS_MS.getName(), MsLibraryFormat.SIRIUS_MS.getFileExtension());
-		chooser.addChoosableFileFilter(txtFilter);
-		
-		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-		String fileName = 
-				"MSMS_FEATURES_FOR_SIRIUS_INTERPRETATION_" + timestamp + "." + 
-					MsLibraryFormat.SIRIUS_MS.getFileExtension();
-		
-		chooser.setSelectedFile(new File(fileName));
-		if(chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			outputFilleTextField.setText(chooser.getSelectedFile().getAbsolutePath());		
-			outputDir = getOutputFile().getParentFile();
+		JnaFileChooser fc = new JnaFileChooser(outputDir);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter(MsLibraryFormat.SIRIUS_MS.getName(), 
+				MsLibraryFormat.SIRIUS_MS.getFileExtension());
+		fc.setTitle("Export IDTracker data to text file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Set output file");
+		String defaultFileName = "MSMS_FEATURES_FOR_SIRIUS_INTERPRETATION_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) 
+				+ "." + MsLibraryFormat.SIRIUS_MS.getFileExtension();
+		fc.setDefaultFileName(defaultFileName);	
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File exportFile  = fc.getSelectedFile();
+			outputFilleTextField.setText(exportFile.getAbsolutePath());
+			outputDir = exportFile.getParentFile();
 			savePreferences();
 		}
 	}

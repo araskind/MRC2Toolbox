@@ -50,7 +50,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -78,7 +77,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -124,7 +123,6 @@ public class DataExportDialog extends JDialog
 	private FileNameExtensionFilter txtFilter;
 	private JCheckBox exportManifestCheckBox;
 	private JTextField resultsFileTextField;
-	private ImprovedFileChooser chooser;
 
 	public DataExportDialog() {		
 		this(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND);
@@ -336,7 +334,6 @@ public class DataExportDialog extends JDialog
 		rootPane.setDefaultButton(btnSave);
 
 		loadPreferences();
-		initChooser();
 		setBaseDirectory(currentProject.getExportsDirectory());
 		exportTypeComboBox.setSelectedItem(exportType);
 		pack();
@@ -361,12 +358,34 @@ public class DataExportDialog extends JDialog
 	}
 	
 	private void selectExportFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Export IDTracker data to text file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Set output file");
+		String defaultFileName = createExportFile(getExportType());
+		fc.setDefaultFileName(defaultFileName);	
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File exportFile  = fc.getSelectedFile();
+			resultsFileTextField.setText(exportFile.getAbsolutePath());
+			baseDirectory = exportFile.getParentFile();
+		}
+	}
 
-		chooser.setCurrentDirectory(baseDirectory);
-		String fileName = createExportFile(getExportType());
-		chooser.setSelectedFile(new File(fileName));
-		if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			resultsFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+	public void setBaseDirectory(File newBase) {
+		
+		baseDirectory = newBase;
+		String fileName = createExportFile(getExportType());	
+		String newFilePath = Paths.get(baseDirectory.getAbsolutePath(),fileName).
+				toAbsolutePath().toString();
+		resultsFileTextField.setText(newFilePath);
+	}
+
+	public void setExportType(MainActionCommands exportType) {
+		exportTypeComboBox.setSelectedItem(exportType);
 	}
 
 	private void exportData() {
@@ -465,19 +484,6 @@ public class DataExportDialog extends JDialog
 			return new File(filePath);
 	}
 
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setMultiSelectionEnabled(false);
-
-		txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv");
-	}
-
 	@Override
 	public void itemStateChanged(ItemEvent event) {
 
@@ -501,23 +507,6 @@ public class DataExportDialog extends JDialog
 					toAbsolutePath().toString();
 			resultsFileTextField.setText(newFilePath);
 		}
-	}
-
-	public void setBaseDirectory(File newBase) {
-		
-		baseDirectory = newBase;
-		chooser.setCurrentDirectory(baseDirectory);
-		
-		String fileName = createExportFile(getExportType());	
-		String newFilePath = Paths.get(baseDirectory.getAbsolutePath(),fileName).
-				toAbsolutePath().toString();
-		resultsFileTextField.setText(newFilePath);
-	}
-
-	public void setExportType(MainActionCommands exportType) {
-		exportTypeComboBox.setSelectedItem(exportType);
-		String fileName = createExportFile(exportType);
-		chooser.setSelectedFile(new File(fileName));
 	}
 
 	public DataExportFields getNamingField() {

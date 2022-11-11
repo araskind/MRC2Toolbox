@@ -46,7 +46,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -68,7 +67,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog 
@@ -117,7 +116,6 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 	private IDTrackerFeatureIdentificationProperties[] selectedMSMSClusterIdentificationProperties;
 
 	private JButton exportButton;
-	private ImprovedFileChooser outputFileChooser;
 	private File baseDirectory;
 	private JTextField outputFilleTextField;
 	private JList<IDTrackerMSMSClusterProperties> featurePropertyList;
@@ -251,13 +249,11 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 			
 		populateExportPropertyLists();
 		loadPreferences();
-		initFileChoosers();
 		
 		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
 		String fileName = activeMSMSClusterDataSet.getName().replaceAll("\\W+", "-") 
 				+ "MSMSClusterExport_" + timestamp + ".txt";		
-		String filePath = Paths.get(baseDirectory.getAbsolutePath(), fileName).
-				toString();
+		String filePath = Paths.get(baseDirectory.getAbsolutePath(), fileName).toString();
 		outputFilleTextField.setText(filePath);
 		pack();
 	}
@@ -290,19 +286,6 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		else
 			selectIdentificationPropertiesListItems(defaultMSMSClusterIdentificationProperties);		
 	}
-	
-	protected void initFileChoosers() {
-
-		outputFileChooser = new ImprovedFileChooser();
-		outputFileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		outputFileChooser.addActionListener(this);
-		outputFileChooser.setAcceptAllFileFilterUsed(true);
-		outputFileChooser.setMultiSelectionEnabled(false);
-		outputFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		outputFileChooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
-		outputFileChooser.setCurrentDirectory(baseDirectory);
-		outputFileChooser.setApproveButtonText("Set output file");
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -315,14 +298,24 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 	}
 	
 	private void selectOutputFile() {
-		
-		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
-		String fileName = activeMSMSClusterDataSet.getName().replaceAll("\\W+", "-") 
-				+ "MSMSClusterExport_" + timestamp + ".txt";
-		outputFileChooser.setSelectedFile(new File(fileName));			
-		if(outputFileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			outputFilleTextField.setText(outputFileChooser.getSelectedFile().getAbsolutePath());
-			baseDirectory = outputFileChooser.getSelectedFile().getParentFile();
+				
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT");
+		fc.setTitle("Export data for \"" + activeMSMSClusterDataSet.getName() 
+			+ "\" data set to text file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Set output file");
+		String defaultFileName = 
+				activeMSMSClusterDataSet.getName().replaceAll("\\W+", "-") 
+				+ "MSMSClusterExport_"  + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt";
+		fc.setDefaultFileName(defaultFileName);	
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File exportFile  = fc.getSelectedFile();
+			outputFilleTextField.setText(exportFile.getAbsolutePath());
+			baseDirectory = exportFile.getParentFile();
 		}
 	}
 	

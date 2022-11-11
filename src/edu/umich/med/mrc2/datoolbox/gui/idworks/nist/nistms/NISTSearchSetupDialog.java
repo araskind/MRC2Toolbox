@@ -51,7 +51,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -66,13 +65,14 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FileUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTMassErrorType;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTPreSearchType;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -99,7 +99,7 @@ public class NISTSearchSetupDialog extends JDialog implements ActionListener, Ba
 	private JButton mspSelectButton;
 	private JLabel lblMspFile;
 	private JPanel panel_3;
-	private JFileChooser fileChooser;
+
 	private File baseDirectory;
 	private FileNameExtensionFilter xmlFilter;
 	private FileNameExtensionFilter mspFilter;	
@@ -292,7 +292,6 @@ public class NISTSearchSetupDialog extends JDialog implements ActionListener, Ba
 		rootPane.setDefaultButton(searchButton);
 
 		initStandardFiles();
-		initFileChooser();		
 		loadPreferences();
 		pack();
 	}
@@ -428,32 +427,25 @@ public class NISTSearchSetupDialog extends JDialog implements ActionListener, Ba
 		return true;
 	}
 
-	private void initFileChooser() {
-
-		fileChooser = new ImprovedFileChooser();
-		fileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		fileChooser.addActionListener(this);
-		fileChooser.setAcceptAllFileFilterUsed(false);
-		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		fileChooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
-		fileChooser.setCurrentDirectory(baseDirectory);
-
-		xmlFilter = new FileNameExtensionFilter("Agilent XML MSMS export files", "xml", "XML");
-		fileChooser.addChoosableFileFilter(xmlFilter);
-		mspFilter = new FileNameExtensionFilter("NIST MSP MSMS files", "msp", "MSP");
-		fileChooser.addChoosableFileFilter(mspFilter);
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getActionCommand().equals(SELECT_MSP_FILE)) {
-
-			if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-				mspFileTextField.setText(fileChooser.getSelectedFile().getAbsolutePath());
-		}
+		if(e.getActionCommand().equals(SELECT_MSP_FILE)) 
+			selectMSPFile();
+	}
+	
+	private void selectMSPFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter(MsLibraryFormat.MSP.getName(), MsLibraryFormat.MSP.getFileExtension());
+		fc.setTitle("Select MSP file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setOpenButtonText("Select file");
+		
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			mspFileTextField.setText(fc.getSelectedFile().getAbsolutePath());
+		}		
 	}
 
 	public File getInputFile() {

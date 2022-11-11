@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +51,7 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-import javax.swing.border.TitledBorder;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -172,7 +173,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MSFeatureBundleDataUpdater;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
@@ -2580,24 +2581,21 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		else
 			toExport = selectedFeatures;
-
-		ImprovedFileChooser mspchooser = new ImprovedFileChooser();
-		mspchooser.setDialogType(JFileChooser.SAVE_DIALOG);
-		mspchooser.setBorder(new TitledBorder(null, "Output", 
-				TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		mspchooser.setAcceptAllFileFilterUsed(false);
-		mspchooser.setMultiSelectionEnabled(false);
-		mspchooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		mspchooser.setApproveButtonText("Export library");
-
-		//	TODO add preferences
-		mspchooser.setCurrentDirectory(baseDirectory);
-		FileNameExtensionFilter txtFilter = new FileNameExtensionFilter(
-				MsLibraryFormat.MSP.getName(), MsLibraryFormat.MSP.getFileExtension());
-		mspchooser.addChoosableFileFilter(txtFilter);
-		if(mspchooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION ) {
-
-			File exportFile = mspchooser.getSelectedFile();
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter(MsLibraryFormat.MSP.getName(), MsLibraryFormat.MSP.getFileExtension());
+		fc.setTitle("Export MSMS features to MSP file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Export");
+		String defaultFileName = "MSMS_feature_export_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) 
+				+ "." + MsLibraryFormat.MSP.getFileExtension();
+		fc.setDefaultFileName(defaultFileName);
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File exportFile = fc.getSelectedFile();
 			if(exportFile != null) {
 
 				ExtendedMSPExportTask task = new ExtendedMSPExportTask(toExport, exportFile, true);

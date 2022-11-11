@@ -42,7 +42,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -59,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class DataExtractionMethodEditorDialog extends JDialog implements ActionListener, BackedByPreferences{
@@ -84,7 +83,7 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 	private JTextArea descriptionTextArea;
 	private JButton btnBrowse;
 	private static final String BROWSE_COMMAND = "BROWSE_COMMAND";
-	private ImprovedFileChooser chooser;
+
 	private File baseDirectory;
 	private JTextField methodNameTextField;
 	private JLabel idValueLabel;
@@ -295,7 +294,6 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 				softwareTextField.setText(software.getName());
 		}
 		loadPreferences();
-		initChooser();
 		pack();
 	}
 	
@@ -305,17 +303,6 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 		savePreferences();
 		super.dispose();
 	}	
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		chooser.setCurrentDirectory(baseDirectory);
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -327,10 +314,26 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 			selectSoftware();
 
 		if(e.getActionCommand().equals(BROWSE_COMMAND))
-			chooser.showOpenDialog(this);
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
-			setMethodFile();
+			selectMethodFile();
+	}
+	
+	private void selectMethodFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.FilesAndDirectories);
+		fc.setTitle("Select data extraction method file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File methodFile = fc.getSelectedFile();
+			baseDirectory = methodFile.getParentFile();
+			methodFileTextField.setText(methodFile.getAbsolutePath());
+			if(method == null) {
+				methodNameTextField.setText(methodFile.getName());
+				descriptionTextArea.setText(methodFile.getName());
+			}
+			savePreferences();
+		}
 	}
 	
 	private void showSoftwareSelector() {
@@ -350,17 +353,7 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 		}
 	}
 
-	private void setMethodFile() {
-		
-		File inputFile = chooser.getSelectedFile();
-		baseDirectory = inputFile.getParentFile();
-		methodFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
-		savePreferences();
-		if(method == null){
-			methodNameTextField.setText(inputFile.getName());
-			descriptionTextArea.setText(inputFile.getName());
-		}	
-	}
+
 
 	public DataExtractionMethod getMethod() {
 		return method;

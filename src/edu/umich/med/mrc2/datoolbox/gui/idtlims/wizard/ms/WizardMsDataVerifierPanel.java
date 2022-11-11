@@ -32,11 +32,9 @@ import java.util.Map;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang.StringUtils;
@@ -59,7 +57,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -81,7 +79,6 @@ public class WizardMsDataVerifierPanel extends IDTrackerDataLoadWizardPanel
 	private File baseDirectory;
 	private IDtrackerDataFileSampleMatchTable dataFileSampleMatchTable;
 	private WizardMsDataFileImportToolbar toolbar;
-	private ImprovedFileChooser chooser;
 	private FileNameExtensionFilter txtFilter, xmlFilter, mgfFilter;
 	private LIMSExperiment experiment;
 	private Collection<CompoundIdentity>missingIdentities;
@@ -103,7 +100,6 @@ public class WizardMsDataVerifierPanel extends IDTrackerDataLoadWizardPanel
 		missingIdentities = null;
 		dataVerified = false;
 		loadPreferences();
-		initChooser();
 	}
 	
 	private JPanel initPanel() {
@@ -119,20 +115,6 @@ public class WizardMsDataVerifierPanel extends IDTrackerDataLoadWizardPanel
 		return panel;
 	}
 	
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-
-		txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv");
-		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "CEF");
-		mgfFilter = new FileNameExtensionFilter("MGF files", "mgf");
-	}
-	
 	public void setExperiment(LIMSExperiment experiment) {
 		this.experiment = experiment;
 	}
@@ -144,18 +126,7 @@ public class WizardMsDataVerifierPanel extends IDTrackerDataLoadWizardPanel
 			return;
 		
 		String command = e.getActionCommand();
-		if (e.getSource().equals(chooser) && command.equals(JFileChooser.APPROVE_SELECTION)) {
 
-			int originalFileCount = dataFileSampleMatchTable.getDataFiles().size();
-			File[] dataFiles = chooser.getSelectedFiles();
-			//	dataFileSampleMatchTable.setTableModelFromFiles(dataFiles, experiment);
-			dataFileSampleMatchTable.addDataFilesUsingWorklist(dataFiles, wizard.getWorklist());
-			baseDirectory = dataFiles[0].getParentFile();
-			savePreferences();
-			
-			if(dataFileSampleMatchTable.getDataFiles().size() > originalFileCount)
-				dataVerified = false;			
-		}	
 		if(command.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
 			addDataFiles();
 		
@@ -175,6 +146,27 @@ public class WizardMsDataVerifierPanel extends IDTrackerDataLoadWizardPanel
 			runCefMsMsPrescan();				
 	}
 	
+	private void addDataFiles() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.setTitle("Select MSMS CEF files");
+		fc.setOpenButtonText("Select files");
+		fc.setMultiSelectionEnabled(true);
+		if (fc.showOpenDialog(this)) {
+			
+			int originalFileCount = dataFileSampleMatchTable.getDataFiles().size();
+			File[] dataFiles = fc.getSelectedFiles();
+			dataFileSampleMatchTable.addDataFilesUsingWorklist(dataFiles, wizard.getWorklist());
+			baseDirectory = dataFiles[0].getParentFile();
+			savePreferences();
+			
+			if(dataFileSampleMatchTable.getDataFiles().size() > originalFileCount)
+				dataVerified = false;
+		}	
+	}
+	
 	private void runCefMsMsPrescan() {
 		
 		if(dataFileSampleMatchTable.getDataFiles().isEmpty())
@@ -185,14 +177,6 @@ public class WizardMsDataVerifierPanel extends IDTrackerDataLoadWizardPanel
 		MSMSSearchResultsBatchPrescanTask task = new MSMSSearchResultsBatchPrescanTask(fileList, null);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
-	}
-	
-	private void addDataFiles() {
-
-		chooser.resetChoosableFileFilters();
-		chooser.setFileFilter(xmlFilter);
-		chooser.setMultiSelectionEnabled(true);
-		chooser.showOpenDialog(this);
 	}
 	
 	private void removeDataFiles() {

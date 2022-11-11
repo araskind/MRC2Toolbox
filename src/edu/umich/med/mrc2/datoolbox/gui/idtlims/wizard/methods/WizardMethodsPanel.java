@@ -38,9 +38,9 @@ import java.util.TreeSet;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
-import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -64,7 +64,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.dpl.AcquisitionMethodSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -334,25 +334,23 @@ public class WizardMethodsPanel extends IDTrackerDataLoadWizardPanel
 
 	private File selectRawFilesDirectory() {
 
-		JFileChooser chooser = new ImprovedFileChooser();
-		File inputFile = null;
-
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setDialogTitle("Select folder containing raw data files:");
-		chooser.setCurrentDirectory(baseDirectory);
-
-		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-			inputFile = chooser.getSelectedFile();
-
-			if (inputFile.exists()) {
-				baseDirectory = inputFile.getParentFile();
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select folder containing raw data files:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setAllowOverwrite(true);
+		fc.setOpenButtonText("Select folder");
+		
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this))) {
+			
+			File rawDataDir = fc.getSelectedFile();
+			if (rawDataDir.exists()) {
+				baseDirectory = rawDataDir.getParentFile();
 				savePreferences();
+				return rawDataDir;
 			}
 		}
-		return inputFile;
+		return null;
 	}	
 	
 	private void showAcquisitionMethodSelector(){
