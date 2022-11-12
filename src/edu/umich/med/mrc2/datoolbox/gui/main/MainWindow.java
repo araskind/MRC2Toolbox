@@ -81,7 +81,6 @@ import edu.umich.med.mrc2.datoolbox.gui.filetools.FileToolsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.organization.OrganizationManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
-import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.NewProjectDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.raw.RawDataUploadPrepDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mstools.MSToolsFrame;
@@ -172,7 +171,6 @@ public class MainWindow extends JFrame
 	public static StatusBar statusBar;
 
 	private DataExportDialog exportDialog;
-	private IntegratedReportDialog integratedReportDialog;
 	private FileToolsDialog fileToolsDialog;
 	
 	private RawDataAnalysisProjectSetupDialog rawDataAnalysisProjectSetupDialog;
@@ -276,9 +274,6 @@ public class MainWindow extends JFrame
 
 		if (command.equals(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND.getName()))
 			exportAnalysisResults(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND);
-
-		if (command.equals(MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND.getName()))
-			showIntegratedReportDialog();
 
 		if (command.equals(MainActionCommands.SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG.getName()))
 			showRawDataUploadPrepDialog();
@@ -1156,20 +1151,6 @@ public class MainWindow extends JFrame
 	private void showHelp() {
 		MessageDialog.showInfoMsg(
 				MainActionCommands.SHOW_HELP_COMMAND.getName());
-	}
-
-	private void showIntegratedReportDialog() {
-
-		if(integratedReportDialog == null)
-			integratedReportDialog = new IntegratedReportDialog();
-
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
-
-		if (currentProject != null) {
-
-			integratedReportDialog.setLocationRelativeTo(this);
-			integratedReportDialog.setVisible(true);
-		}
 	}
 	
 	private void showNewRawDataAnalysisProjectDialog() {

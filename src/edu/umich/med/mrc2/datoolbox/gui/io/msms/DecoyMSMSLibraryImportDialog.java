@@ -45,7 +45,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -57,7 +56,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -70,7 +68,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.msms.MSMSDecoyLibraryImportTask;
@@ -294,24 +292,18 @@ public class DecoyMSMSLibraryImportDialog extends JDialog
 	
 	private void selectLibraryFile() {
 		
-		ImprovedFileChooser intputFileChooser = new ImprovedFileChooser();
-		intputFileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		intputFileChooser.addActionListener(this);
-		intputFileChooser.setAcceptAllFileFilterUsed(false);
-		intputFileChooser.resetChoosableFileFilters();
-		intputFileChooser.setFileFilter(
-				new FileNameExtensionFilter("NIST MS files", 
-						MsLibraryFormat.MSP.getFileExtension()));
-		intputFileChooser.setMultiSelectionEnabled(false);
-		intputFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		intputFileChooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
-		intputFileChooser.setCurrentDirectory(baseDirectory);
-		intputFileChooser.setApproveButtonText("Select input file");		
-		if(intputFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter(MsLibraryFormat.MSP.getName(), 
+				MsLibraryFormat.MSP.getFileExtension());
+		fc.setTitle("Select decoy library file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
 			
-			intputFileTextField.setText(intputFileChooser.getSelectedFile().getAbsolutePath());
-			baseDirectory = intputFileChooser.getSelectedFile();
-			savePreferences();
+			File libraryFile = fc.getSelectedFile();
+			intputFileTextField.setText(libraryFile.getPath());
+			baseDirectory = libraryFile.getParentFile();
+			savePreferences();	
 		}
 	}
 	

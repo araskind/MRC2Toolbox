@@ -31,42 +31,47 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class DockableExcelWorksheetPreviewTable extends DefaultSingleCDockable implements ActionListener, ItemListener {
+public class DockableExcelWorksheetPreviewTable extends DefaultSingleCDockable 
+		implements ActionListener, ItemListener, BackedByPreferences {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("table", 16);
 	private static final String BROWSE_FOR_INPUT = "BROWSE_FOR_INPUT";
+	private Preferences preferences;
+	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
+	private File baseDirectory;
 
 	private WorksheetPreviewTable previewTable;
 	private ExcelWorksheetPreviewToolbar toolbar;
 	private JTextField inputFileTextField;
-	private JFileChooser chooser;
-	private File baseDirectory;
 	private File inputFile;
 	private JComboBox worksheetComboBox;
 	private Workbook workbook;
@@ -143,21 +148,7 @@ public class DockableExcelWorksheetPreviewTable extends DefaultSingleCDockable i
 		gbc_comboBox.gridy = 1;
 		buttonsPanel.add(worksheetComboBox, gbc_comboBox);
 
-		initChooser();
-	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setFileFilter(new FileNameExtensionFilter("Excel files", "xls", "xlsx"));
-		chooser.addActionListener(this);
+		loadPreferences();
 	}
 
 	public void setTableModelFromWorksheet(Sheet sheet, DataDirection direction) {
@@ -170,16 +161,7 @@ public class DockableExcelWorksheetPreviewTable extends DefaultSingleCDockable i
 		String command = e.getActionCommand();
 
 		if(command.equals(BROWSE_FOR_INPUT))
-			chooser.showOpenDialog(this.getContentPane());
-
-		if (e.getSource().equals(chooser) && command.equals(JFileChooser.APPROVE_SELECTION)) {
-			try {
-				importExcelFile();
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
+			selectExcelFile();
 
 		if(command.equals(MainActionCommands.ENABLE_SELECTED_SAMPLES_COMMAND.getName())) {
 
@@ -197,34 +179,55 @@ public class DockableExcelWorksheetPreviewTable extends DefaultSingleCDockable i
 
 		}
 	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void selectExcelFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Excel files", "xlsx", "XLSX");
+		fc.setTitle("Select input Excel file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			inputFile = fc.getSelectedFile();
+			if(inputFile.canRead()) {
 
-	private void importExcelFile() throws Exception {
+				inputFileTextField.setText(inputFile.getPath());
+				baseDirectory = inputFile.getParentFile();
+				savePreferences();
 
-		inputFile = chooser.getSelectedFile();
-		if(inputFile.canRead()) {
+				try {
+					workbook =  WorkbookFactory.create(new FileInputStream(inputFile));
+				} catch (EncryptedDocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(workbook == null)
+					return;
 
-			inputFileTextField.setText(inputFile.getPath());
-			baseDirectory = inputFile.getParentFile();
-			chooser.setCurrentDirectory(baseDirectory);
+				Collection<String>workshetNames = new ArrayList<String>();
+				for (Sheet sheet : workbook)
+					workshetNames.add(sheet.getSheetName());
 
-			InputStream is = new FileInputStream(inputFile);
-			workbook =  WorkbookFactory.create(is);
+				worksheetComboBox.removeItemListener(this);
+				worksheetComboBox.setModel(new SortedComboBoxModel(workshetNames));
+				worksheetComboBox.addItemListener(this);
+				worksheetComboBox.setSelectedIndex(0);
 
-			Collection<String>workshetNames = new ArrayList<String>();
-			for (Sheet sheet : workbook)
-				workshetNames.add(sheet.getSheetName());
-
-			worksheetComboBox.removeItemListener(this);
-			worksheetComboBox.setModel(new SortedComboBoxModel(workshetNames));
-			worksheetComboBox.addItemListener(this);
-			worksheetComboBox.setSelectedIndex(0);
-
-			//	TODO
-			//assayDesignPanel.reloadDesign();
-			showSelectedDataSheet();
+				//	TODO
+				//assayDesignPanel.reloadDesign();
+				showSelectedDataSheet();
+			}
 		}
 	}
-
+	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 
@@ -252,5 +255,24 @@ public class DockableExcelWorksheetPreviewTable extends DefaultSingleCDockable i
 
 	public DataDirection getDataDirection() {
 		return toolbar.getDataDirection();
+	}
+	
+	@Override
+	public void loadPreferences(Preferences prefs) {		
+		preferences = prefs;		
+		baseDirectory =  new File(preferences.get(BASE_DIRECTORY, 
+				MRC2ToolBoxConfiguration.getDefaultDataDirectory()));		
+	}
+
+	@Override
+	public void loadPreferences() {
+		loadPreferences(
+				Preferences.userRoot().node(DockableExcelWorksheetPreviewTable.class.getName()));
+	}
+
+	@Override
+	public void savePreferences() {
+		preferences = Preferences.userRoot().node(DockableExcelWorksheetPreviewTable.class.getName());
+		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
 }

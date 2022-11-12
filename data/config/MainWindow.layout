@@ -172,12 +172,12 @@
 													</placeholders>
 												</leaf>
 												<node nodeId="1631029354244" orientation="HORIZONTAL" divider="0.246900269541779">
-													<leaf id="-1" nodeId="1631029354246">
+													<leaf id="0" nodeId="1631029354246">
 														<placeholders>
 															<placeholder>dock.single.ProjectSetupDraw</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="0" nodeId="1631029354257">
+													<leaf id="1" nodeId="1631029354257">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 															<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
@@ -212,6 +212,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
+										<replacement id="dockablesingle ProjectSetupDraw"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ProjectSetupDraw</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>1</selected>
@@ -609,29 +619,6 @@
 									<replacement id="dockablesingle AutomatorPanel"/>
 									<delegate id="delegate_ccontrol backup factory id">
 										<id>AutomatorPanel</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
-						<child key="single ProjectSetupDraw" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.ProjectSetupDraw</placeholder>
-									<backup-path>
-										<node location="BOTTOM" size="0.5" id="1644019430912"/>
-										<node location="BOTTOM" size="0.5" id="1644019399042"/>
-										<node location="LEFT" size="0.246900269541779" id="1631029354244"/>
-										<leaf id="1631029354246"/>
-									</backup-path>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
-									<replacement id="dockablesingle ProjectSetupDraw"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>ProjectSetupDraw</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -1094,7 +1081,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ProjectSetupDraw">
+						<entry id="single ProjectSetupDraw" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.maximized</mode>
 								<mode>dock.mode.minimized</mode>

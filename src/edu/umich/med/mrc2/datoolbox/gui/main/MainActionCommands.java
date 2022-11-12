@@ -24,7 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.main;
 public enum MainActionCommands {
 
 	// Project
-	NEW_PROJECT_COMMAND("New metabolomics project"),
+	NEW_PROJECT_COMMAND("Create new metabolomics project"),
 	OPEN_PROJECT_COMMAND("Open metabolomics project"),
 	SAVE_PROJECT_COMMAND("Save project"),
 	SAVE_PROJECT_COPY_COMMAND("Save project as ..."),

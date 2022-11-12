@@ -33,7 +33,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeSet;
@@ -46,7 +47,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -56,9 +56,9 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -71,7 +71,7 @@ import edu.umich.med.mrc2.datoolbox.gui.projectsetup.dpl.DataPipelineDefinitionP
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 
@@ -88,7 +88,6 @@ public class ExcelImportWizard extends JDialog
 	private Workbook workbook;
 	private WorksheetPreviewTable previewTable;
 	private JTextField inputFileTextField;
-	private JFileChooser chooser;
 	private File baseDirectory;
 	private File inputFile;
 	private JComboBox worksheetComboBox;
@@ -245,7 +244,6 @@ public class ExcelImportWizard extends JDialog
 		btnCancel.addActionListener(al);
 
 		loadPreferences();
-		initChooser();
 		pack();
 	}
 
@@ -253,19 +251,6 @@ public class ExcelImportWizard extends JDialog
 	public void dispose() {
 		savePreferences();
 		super.dispose();
-	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setFileFilter(new FileNameExtensionFilter("Excel files", "xls", "xlsx"));
-		chooser.addActionListener(this);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -287,16 +272,8 @@ public class ExcelImportWizard extends JDialog
 
 		String command = e.getActionCommand();
 		if(command.equals(MainActionCommands.LOAD_EXCEL_DATA_FOR_PREVIEW_COMMAND.getName()))
-			chooser.showOpenDialog(this);
+			selectExcelFile();
 
-		if (e.getSource().equals(chooser) && command.equals(JFileChooser.APPROVE_SELECTION)) {
-			try {
-				importExcelFile();
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
 		if(command.equals(MainActionCommands.CLEAR_EXCEL_IMPORT_WIZARD_COMMAND.getName()))
 			clearPanel();
 
@@ -305,6 +282,54 @@ public class ExcelImportWizard extends JDialog
 
 		if(command.equals(MainActionCommands.ACCEPT_EXCEL_SAMPLE_MATCH_COMMAND.getName()))
 			acceptSampleAssignment();
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void selectExcelFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Excel files", "xlsx", "XLSX");
+		fc.setTitle("Select input Excel file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			inputFile = fc.getSelectedFile();
+			if(inputFile.canRead()) {
+
+				inputFileTextField.setText(inputFile.getPath());
+				baseDirectory = inputFile.getParentFile();
+				savePreferences();
+
+				try {
+					workbook =  WorkbookFactory.create(new FileInputStream(inputFile));
+				} catch (EncryptedDocumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(workbook == null)
+					return;
+
+				Collection<String>workshetNames = new ArrayList<String>();
+				for (Sheet sheet : workbook)
+					workshetNames.add(sheet.getSheetName());
+
+				worksheetComboBox.removeItemListener(this);
+				worksheetComboBox.setModel(new SortedComboBoxModel(workshetNames));
+				worksheetComboBox.addItemListener(this);
+				worksheetComboBox.setSelectedIndex(0);
+
+				//	TODO
+				//assayDesignPanel.reloadDesign();
+				showSelectedDataSheet();
+			}
+		}
 	}
 
 	private void showSampleAssignmentDialog() {
@@ -349,31 +374,6 @@ public class ExcelImportWizard extends JDialog
 		worksheetComboBox.addItemListener(this);
 		revalidate();
 		repaint();
-	}
-
-	@SuppressWarnings("unchecked")
-	private void importExcelFile() throws Exception {
-
-		inputFile = chooser.getSelectedFile();
-		if(inputFile.canRead()) {
-
-			inputFileTextField.setText(inputFile.getPath());
-			baseDirectory = inputFile.getParentFile();
-			chooser.setCurrentDirectory(baseDirectory);
-			InputStream is = new FileInputStream(inputFile);
-			workbook =  WorkbookFactory.create(is);
-
-			Collection<String>workshetNames = new ArrayList<String>();
-			for (Sheet sheet : workbook)
-				workshetNames.add(sheet.getSheetName());
-
-			worksheetComboBox.removeItemListener(this);
-			worksheetComboBox.setModel(new SortedComboBoxModel<String>(workshetNames));
-			worksheetComboBox.addItemListener(this);
-			worksheetComboBox.setSelectedIndex(0);
-
-			showSelectedDataSheet();
-		}
 	}
 
 	@Override

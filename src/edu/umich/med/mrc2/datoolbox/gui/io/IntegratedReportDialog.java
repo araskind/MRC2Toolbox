@@ -25,8 +25,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -34,7 +32,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -47,19 +45,17 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
@@ -69,7 +65,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataExportFields;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -84,30 +80,21 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 
 	private static final Icon exportExcelIcon = GuiUtils.getIcon("excel", 32);
 	private static final String SAVE_REPORT = "Save report";
-	private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-	private ImprovedFileChooser chooser;
+	private static final String BROWSE = "BROWSE";
+
 	private File baseDirectory;
-	private FileNameExtensionFilter excelFilter;
-	private boolean painted;
-
-	private JSplitPane mainSplitPane;
-	private JButton cancelButton, saveButton;
-	private JPanel panel_2, featureSelectorGridPanel;
-	private JLabel lblNewLabel;
-
+	private JPanel featureSelectorGridPanel;
 	private ExperimentDesignSubset activeSet;
 	private HashSet<FeatureSetSelectionPanel>featureSetSelectors;
-	private JPanel panel_3;
-	private JPanel panel_4;
+	private File exportFile;
 
 	private JComboBox designComboBox;
-	private JLabel lblNameBy;
 	private JComboBox namingComboBox;
-	private JPanel panel_5;
-	private JLabel lblIntegratedDataSet;
-	private JComboBox integratedSeComboBox;
+	private JComboBox integratedSeComboBox;	
+	private DataAnalysisProject currentProject;
+	private JTextField exportFileTextField;
 
-	public IntegratedReportDialog() {
+	public IntegratedReportDialog(DataAnalysisProject currentProject) {
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Export integrated report to Excel");
 		setPreferredSize(new Dimension(640, 800));
@@ -115,65 +102,21 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setSize(new Dimension(640, 800));
 		setResizable(true);
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		
+		this.currentProject = currentProject;
 
-		mainSplitPane = new JSplitPane();
-		mainSplitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		mainSplitPane.setDividerSize(0);
-		getContentPane().add(mainSplitPane, BorderLayout.CENTER);
-
-		initChooser();
-		mainSplitPane.setLeftComponent(chooser);
-
-		JPanel panel = new JPanel();
-		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
-		mainSplitPane.setRightComponent(panel);
-		panel.setLayout(new BorderLayout(0, 0));
-
-		JPanel panel_1 = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) panel_1.getLayout();
-		flowLayout.setAlignment(FlowLayout.RIGHT);
-		panel.add(panel_1, BorderLayout.SOUTH);
-
-		cancelButton = new JButton("Cancel");
-		panel_1.add(cancelButton);
-
-		saveButton = new JButton("Save report");
-		saveButton.addActionListener(this);
-		saveButton.setActionCommand(SAVE_REPORT);
-		panel_1.add(saveButton);
-
-		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-		ActionListener al = new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
-			}
-		};
-		JRootPane rootPane = SwingUtilities.getRootPane(mainSplitPane);
-		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-		cancelButton.addActionListener(al);
-
-		rootPane.setDefaultButton(saveButton);
-
-		panel_2 = new JPanel();
-		panel_2.setBorder(new EmptyBorder(0, 0, 10, 0));
-		FlowLayout flowLayout_1 = (FlowLayout) panel_2.getLayout();
-		flowLayout_1.setAlignment(FlowLayout.LEFT);
-		panel.add(panel_2, BorderLayout.NORTH);
-
-		lblNewLabel = new JLabel("Specify parameters for integrated report:");
-		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblNewLabel.setHorizontalAlignment(SwingConstants.LEFT);
-		panel_2.add(lblNewLabel);
-
-		panel_3 = new JPanel();
-		panel.add(panel_3, BorderLayout.CENTER);
+		JPanel panel_3 = new JPanel();
+		getContentPane().add(panel_3, BorderLayout.CENTER);
 		panel_3.setLayout(new BorderLayout(0, 0));
 
-		panel_4 = new JPanel();
+		JPanel panel_4 = new JPanel();
 		panel_4.setBorder(
-				new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Select experimental design to export",
-						TitledBorder.LEADING, TitledBorder.TOP, new Font("Tahoma", Font.BOLD, 12), new Color(0, 0, 0)));
+			new CompoundBorder(new EmptyBorder(10, 10, 10, 10), 
+					new CompoundBorder(new TitledBorder(
+					new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), 
+					"Select experimental design to export", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
+							new EmptyBorder(10, 0, 10, 0))));
 		panel_3.add(panel_4, BorderLayout.NORTH);
 		GridBagLayout gbl_panel_4 = new GridBagLayout();
 		gbl_panel_4.columnWidths = new int[]{300, 45, 28, 0};
@@ -191,7 +134,7 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 		gbc_designComboBox.gridy = 0;
 		panel_4.add(designComboBox, gbc_designComboBox);
 
-		lblNameBy = new JLabel("Name by ");
+		JLabel lblNameBy = new JLabel("Name by ");
 		GridBagConstraints gbc_lblNameBy = new GridBagConstraints();
 		gbc_lblNameBy.anchor = GridBagConstraints.WEST;
 		gbc_lblNameBy.insets = new Insets(0, 0, 0, 5);
@@ -199,8 +142,11 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 		gbc_lblNameBy.gridy = 0;
 		panel_4.add(lblNameBy, gbc_lblNameBy);
 
-		DefaultComboBoxModel<DataExportFields> namingModel = new DefaultComboBoxModel<DataExportFields>(
-				new DataExportFields[] { DataExportFields.SAMPLE_EXPORT_NAME, DataExportFields.SAMPLE_EXPORT_ID });
+		DefaultComboBoxModel<DataExportFields> namingModel = 
+				new DefaultComboBoxModel<DataExportFields>(
+					new DataExportFields[] { 
+							DataExportFields.SAMPLE_EXPORT_NAME, 
+							DataExportFields.SAMPLE_EXPORT_ID });
 		namingComboBox = new JComboBox<DataExportFields>(namingModel);
 		namingComboBox.setPreferredSize(new Dimension(200, 25));
 		GridBagConstraints gbc_namingComboBox = new GridBagConstraints();
@@ -214,12 +160,14 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 		FlowLayout flowLayout_3 = (FlowLayout) featureSelectorGridPanel.getLayout();
 		flowLayout_3.setAlignOnBaseline(true);
 		flowLayout_3.setAlignment(FlowLayout.LEFT);
-		featureSelectorGridPanel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"),
-				"Select feature sets to export for each assay", TitledBorder.LEADING, TitledBorder.TOP, new Font("Tahoma", Font.BOLD, 12),
-				new Color(0, 0, 0)));
+		featureSelectorGridPanel.setBorder(
+				new CompoundBorder(new EmptyBorder(10, 10, 10, 10), 
+				new CompoundBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), 
+				new Color(160, 160, 160)), "Select feature sets to export for each assay", 
+				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(10, 0, 10, 0))));
 		panel_3.add(featureSelectorGridPanel, BorderLayout.CENTER);
 
-		panel_5 = new JPanel();
+		JPanel panel_5 = new JPanel();
 		panel_5.setBorder(new EmptyBorder(10, 10, 10, 10));
 		panel_3.add(panel_5, BorderLayout.SOUTH);
 		GridBagLayout gbl_panel_5 = new GridBagLayout();
@@ -229,7 +177,7 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 		gbl_panel_5.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		panel_5.setLayout(gbl_panel_5);
 
-		lblIntegratedDataSet = new JLabel("Integrated data set:");
+		JLabel lblIntegratedDataSet = new JLabel("Integrated data set:");
 		GridBagConstraints gbc_lblIntegratedDataSet = new GridBagConstraints();
 		gbc_lblIntegratedDataSet.insets = new Insets(0, 0, 0, 5);
 		gbc_lblIntegratedDataSet.anchor = GridBagConstraints.EAST;
@@ -244,6 +192,64 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 		gbc_integratedSeComboBox.gridy = 0;
 		panel_5.add(integratedSeComboBox, gbc_integratedSeComboBox);
 
+		JPanel panel_1 = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel_1.getLayout();
+		flowLayout.setAlignment(FlowLayout.RIGHT);
+		getContentPane().add(panel_1, BorderLayout.SOUTH);
+
+		JButton cancelButton = new JButton("Cancel");
+		panel_1.add(cancelButton);
+
+		JButton saveButton = new JButton("Save report");
+		saveButton.addActionListener(this);
+		saveButton.setActionCommand(SAVE_REPORT);
+		panel_1.add(saveButton);
+
+		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+		ActionListener al = new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				setVisible(false);
+			}
+		};
+		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
+		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		cancelButton.addActionListener(al);
+		rootPane.setDefaultButton(saveButton);
+		getContentPane().add(panel_1, BorderLayout.SOUTH);
+		
+		JPanel panel = new JPanel();
+		panel.setBorder(new CompoundBorder(new EmptyBorder(10, 10, 10, 10), 
+				new CompoundBorder(new TitledBorder(
+						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), 
+						"Export file", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)), 
+						new EmptyBorder(10, 0, 10, 0))));
+		getContentPane().add(panel, BorderLayout.NORTH);
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[]{0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0};
+		gbl_panel.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		panel.setLayout(gbl_panel);
+		
+		exportFileTextField = new JTextField();
+		exportFileTextField.setEditable(false);
+		GridBagConstraints gbc_exportFileTextField = new GridBagConstraints();
+		gbc_exportFileTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_exportFileTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_exportFileTextField.gridx = 0;
+		gbc_exportFileTextField.gridy = 0;
+		panel.add(exportFileTextField, gbc_exportFileTextField);
+		exportFileTextField.setColumns(10);
+		
+		JButton btnNewButton = new JButton("Browse");
+		btnNewButton.setActionCommand(BROWSE);
+		btnNewButton.addActionListener(this);
+		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
+		gbc_btnNewButton.gridx = 1;
+		gbc_btnNewButton.gridy = 0;
+		panel.add(btnNewButton, gbc_btnNewButton);
+
+		setPanelDataFromProject(currentProject);
 		pack();
 	}
 
@@ -251,85 +257,66 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 	public void actionPerformed(ActionEvent event) {
 
 		String command = event.getActionCommand();
+		if (command.equals(BROWSE))
+			selectReportFile();
 
-		if (command.equals(SAVE_REPORT)) {
-
-			chooser.approveSelection();
-			File exportFile = chooser.getSelectedFile();
-			ExperimentDesignSubset design = (ExperimentDesignSubset) designComboBox.getSelectedItem();
-			Map<DataPipeline, MsFeatureSet>featureMap = new TreeMap<DataPipeline, MsFeatureSet>();
-			for(FeatureSetSelectionPanel panel : featureSetSelectors)
-				featureMap.put(panel.getDataPipeline(), panel.getSelectedFeatureSet());
-
-			DataExportFields namingField = (DataExportFields) namingComboBox.getSelectedItem();
-
-			MsFeatureSet integratedSet = null;
-			if(integratedSeComboBox.getSelectedIndex() > -1)
-				integratedSet = ((MsFeatureClusterSet)integratedSeComboBox.getSelectedItem()).getPrimaryFeatures();
-
-			IntegratedExcelReportExportTask task = 
-					new IntegratedExcelReportExportTask(
-							exportFile,
-							design, 
-							featureMap, 
-							integratedSet, 
-							namingField);
-			MRC2ToolBoxCore.getTaskController().addTask(task);
-			setVisible(false);
+		if (command.equals(SAVE_REPORT))
+			saveReport();
+	}
+	
+	public void selectReportFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Excel files", "xlsx", "XLSX");
+		fc.setTitle("Set report file name and location:");
+		fc.setMultiSelectionEnabled(false);
+		String defaultFileName = currentProject.getName() + "_INTEGRATED_REPORT_" 
+				+ MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".xlsx";
+		fc.setDefaultFileName(defaultFileName);
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+				
+			exportFile = fc.getSelectedFile();
+			try {
+				exportFileTextField.setText(exportFile.getCanonicalPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
+	
+	public void saveReport() {
+		
+		if(exportFile == null)
+			return;
 
-	@SuppressWarnings("unchecked")
-	private void clearPanel() {
+		ExperimentDesignSubset design = (ExperimentDesignSubset) designComboBox.getSelectedItem();
+		Map<DataPipeline, MsFeatureSet>featureMap = new TreeMap<DataPipeline, MsFeatureSet>();
+		for(FeatureSetSelectionPanel panel : featureSetSelectors)
+			featureMap.put(panel.getDataPipeline(), panel.getSelectedFeatureSet());
 
-		integratedSeComboBox.setModel(new DefaultComboBoxModel<MsFeatureSet>());
-		featureSelectorGridPanel.removeAll();
-	}
+		DataExportFields namingField = (DataExportFields) namingComboBox.getSelectedItem();
 
-	private String createExportFile() {
+		MsFeatureSet integratedSet = null;
+		if(integratedSeComboBox.getSelectedIndex() > -1)
+			integratedSet = ((MsFeatureClusterSet)integratedSeComboBox.getSelectedItem()).getPrimaryFeatures();
 
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
-		String timestamp = dateTimeFormat.format(new Date());
-		String fileName = currentProject.getName() + "_INTEGRATED_REPORT_" + timestamp + ".xlsx";
-		return fileName;
-	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setDialogType(JFileChooser.SAVE_DIALOG);
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setControlButtonsAreShown(false);
-		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
-
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
-		chooser.setCurrentDirectory(baseDirectory);
-
-		excelFilter = new FileNameExtensionFilter("Excel files", "xlsx");
-		chooser.addChoosableFileFilter(excelFilter);
-	}
-
-	@Override
-	public void paint(Graphics g) {
-
-		super.paint(g);
-
-		if (!painted) {
-
-			painted = true;
-
-			mainSplitPane.setDividerLocation(0.5);
-			mainSplitPane.setResizeWeight(0.5);
-		}
+		IntegratedExcelReportExportTask task = 
+				new IntegratedExcelReportExportTask(
+						exportFile,
+						design, 
+						featureMap, 
+						integratedSet, 
+						namingField);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void setPanelDataFromProject(DataAnalysisProject currentProject) {
 
+		baseDirectory = currentProject.getExportsDirectory();
 		//	Design selector
 		ExperimentDesign design = currentProject.getExperimentDesign();
 		ExperimentDesignSubset[] designSets =
@@ -353,33 +340,5 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 				currentProject.getIntergratedFeatureSets().stream().
 				sorted().toArray(MsFeatureClusterSet[]::new);
 		integratedSeComboBox.setModel(new DefaultComboBoxModel<MsFeatureClusterSet>(ifs));
-		revalidate();
-		repaint();
 	}
-
-
-	@Override
-	public void setVisible(boolean visible){
-
-		if(visible){
-
-			DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
-			if(currentProject != null){
-
-				baseDirectory = currentProject.getExportsDirectory();
-				chooser.setCurrentDirectory(baseDirectory);
-				setPanelDataFromProject(currentProject);
-				String exportFileName = createExportFile();
-				chooser.setSelectedFile(new File(baseDirectory.getPath() + File.separator + exportFileName));
-			}
-			else{
-				baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
-				chooser.setCurrentDirectory(baseDirectory);
-				clearPanel();
-			}
-			chooser.rescanCurrentDirectory();
-		}
-		super.setVisible(visible);
-	}
-
 }

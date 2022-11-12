@@ -191,6 +191,7 @@ public class ImprovedFileChooser extends JFileChooser {
 
     @Override protected JDialog createDialog(Component parent) throws HeadlessException {
         this.dialog = super.createDialog(parent);  // Grab our own local reference to the dialog.
+        this.dialog.setPreferredSize(new Dimension(1000, 750));
         return this.dialog;
     }
 

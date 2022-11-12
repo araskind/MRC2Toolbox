@@ -292,6 +292,7 @@ public class DataExportDialog extends JDialog
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 		
 		resultsFileTextField = new JTextField();
+		resultsFileTextField.setEditable(false);
 		GridBagConstraints gbc_textField = new GridBagConstraints();
 		gbc_textField.gridwidth = 5;
 		gbc_textField.insets = new Insets(0, 0, 0, 5);
@@ -306,6 +307,7 @@ public class DataExportDialog extends JDialog
 				MainActionCommands.SELECT_DATA_EXPORT_FILE_COMMAND.getName());
 		browseButton.addActionListener(this);
 		GridBagConstraints gbc_browseButton = new GridBagConstraints();
+		gbc_browseButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_browseButton.gridx = 5;
 		gbc_browseButton.gridy = 6;
 		panel.add(browseButton, gbc_browseButton);

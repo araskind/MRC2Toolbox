@@ -10,6 +10,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Window;
 import java.io.File;
 import java.util.ArrayList;
@@ -187,6 +188,7 @@ public class JnaFileChooser
 	private boolean showSwingFileChooser(Object parent, Action action) {
 			
 		final ImprovedFileChooser fc = new ImprovedFileChooser(currentDirectory);
+		fc.setPreferredSize(new Dimension(800, 640));
 		fc.setMultiSelectionEnabled(multiSelectionEnabled);
 		fc.setFileSelectionMode(mode.getJFileChooserValue());
 

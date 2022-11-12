@@ -74,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.noid.MissingIdentificationsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableIdentificationResultsTable;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.MultiFileDataImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.excel.ExcelImportWizard;
 import edu.umich.med.mrc2.datoolbox.gui.io.mwtab.MWTabExportDialog;
@@ -141,6 +142,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private TextDataImportDialog textDataImportDialog;
 	private DataExportDialog exportDialog;
 	private MWTabExportDialog mwTabExportDialog;
+	private IntegratedReportDialog integratedReportDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -458,7 +460,21 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			
 			if (command.equals(MainActionCommands.EXPORT_RESULTS_TO_MWTAB_COMMAND.getName()))
 				showMwTabReportDialog();
+			
+			if (command.equals(MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND.getName()))
+				showIntegratedReportDialog();			
 		}	
+	}
+	
+	private void showIntegratedReportDialog() {
+		
+		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		if (currentProject == null)
+			return;
+
+		integratedReportDialog = new IntegratedReportDialog(currentProject);
+		integratedReportDialog.setLocationRelativeTo(this.getContentPane());
+		integratedReportDialog.setVisible(true);
 	}
 	
 	private void showMwTabReportDialog() {
