@@ -293,8 +293,9 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 
 		CompoundLibrary currentLibrary = new CompoundLibrary(libraryName);
 		LibraryExportDialog libraryExportDialog = 
-				new LibraryExportDialog(MainActionCommands.EXPORT_FEATURE_SUBSET_COMMAND.getName());
-		libraryExportDialog.setCurrentLibrary(currentLibrary);
+				new LibraryExportDialog(
+						MainActionCommands.EXPORT_FEATURE_SUBSET_COMMAND.getName(),
+						currentLibrary);
 		libraryExportDialog.setFeatureSubset(setToExport.getFeatures());
 		libraryExportDialog.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
 		libraryExportDialog.setVisible(true);

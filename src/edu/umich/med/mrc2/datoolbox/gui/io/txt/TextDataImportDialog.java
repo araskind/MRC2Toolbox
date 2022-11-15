@@ -38,7 +38,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -52,7 +51,6 @@ import javax.swing.WindowConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -60,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.projectsetup.dpl.DataPipelineDefinitionPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -79,15 +77,12 @@ public class TextDataImportDialog extends JDialog
 	private File dataFileDirectory;
 	private JTextField libraryTextField;
 	private JButton importDataButton;
-	private ImprovedFileChooser chooser;
-	private FileNameExtensionFilter txtFilter;
-	private FileNameExtensionFilter xmlFilter;
-	private FileNameExtensionFilter mgfFilter;
-	private TextFileImportToolbar toolbar;
-	private String currentTask;
-	private File libraryFile;
-	private DataPipelineDefinitionPanel dataPipelineDefinitionPanel;
 
+	private TextFileImportToolbar toolbar;
+	private File libraryFile;
+	private File dataFile;
+	private DataPipelineDefinitionPanel dataPipelineDefinitionPanel;
+	
 	public static final String PREFS_NODE = TextDataImportDialog.class.getName();
 	public static final String BASE_LIBRARY_DIRECTORY = "BASE_LIBRARY_DIRECTORY";
 	public static final String BASE_DATA_FILES_DIRECTORY = "BASE_DATA_FILES_DIRECTORY";
@@ -159,12 +154,6 @@ public class TextDataImportDialog extends JDialog
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-
-//				for(DataFile df : matchPanel.getDataFiles()) {
-//
-//					if(df.getParentSample() != null)
-//						df.getParentSample().removeDataFile(df);
-//				}
 				dispose();
 			}
 		};		
@@ -205,25 +194,87 @@ public class TextDataImportDialog extends JDialog
 		rootPane.setDefaultButton(importDataButton);
 
 		loadPreferences();
-		initChooser();
 		pack();
 	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseLibraryDirectory);
-		chooser.setMultiSelectionEnabled(false);
-
-		txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv");
-		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "CEF");
-		mgfFilter = new FileNameExtensionFilter("MGF files", "mgf");
+	
+	@Override
+	public void dispose() {
+		savePreferences();
+		super.dispose();
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent event) {
+
+		if (event.getActionCommand().equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
+			selectLibraryFile();
+
+		if (event.getActionCommand().equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
+			selectDataFile();
+
+		if (event.getActionCommand().equals(MainActionCommands.IMPORT_DATA_COMMAND.getName()))
+			importData();
+
+		if (event.getActionCommand().equals(MainActionCommands.CLEAR_DATA_COMMAND.getName())) {
+
+			if (MessageDialog.showChoiceMsg("Clear input data?", this) == JOptionPane.YES_OPTION)
+				clearPanel();
+		}
+	}
+	
+	private void selectDataFile() {
+		
+		DataPipeline pipeline = dataPipelineDefinitionPanel.getDataPipeline();
+		if(pipeline == null)
+			return;
+
+		if(MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(pipeline)) {
+			MessageDialog.showErrorMsg("The project already contains data pipeline \n"
+					+ "with selected combination of assay, data acquisition and data analysis methods."
+					+ "Please adjust you selection.\nIf you want to replace the existing data\n"
+					+ "please delete them first and then re-upload.", 
+					this);
+			return;
+		}			
+		JnaFileChooser fc = new JnaFileChooser(dataFileDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "tsv", "TXT", "TSV");
+		fc.setTitle("Select data file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			dataFile = fc.getSelectedFile();
+			dataFileDirectory = dataFile.getParentFile();
+			savePreferences();
+		}
+	}
+
+	private void selectLibraryFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseLibraryDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.setTitle("Select library file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			libraryFile = fc.getSelectedFile();
+			libraryTextField.setText(libraryFile.getPath());
+			baseLibraryDirectory = libraryFile.getParentFile();
+			savePreferences();
+		}
+	}
+
+	public synchronized void clearPanel() {
+		libraryFile = null;
+		libraryTextField.setText("");
+	}
+
+	private void importData() {
+		// TODO Auto-generated method stub
+
+	}
+	
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;
@@ -247,89 +298,5 @@ public class TextDataImportDialog extends JDialog
 				baseLibraryDirectory.getAbsolutePath());
 		preferences.put(BASE_DATA_FILES_DIRECTORY, 
 				dataFileDirectory.getAbsolutePath());
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent event) {
-
-		if(!event.getSource().equals(chooser))
-			currentTask = event.getActionCommand();
-
-		if (event.getSource().equals(chooser) && event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			if(currentTask.equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
-				addSelectedLibraryFile();
-		
-			if(currentTask.equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
-				addSelectedDataFile();
-		}
-		if (event.getActionCommand().equals(MainActionCommands.SELECT_INPUT_LIBRARY_COMMAND.getName()))
-			selectLibraryFile();
-
-		if (event.getActionCommand().equals(MainActionCommands.ADD_DATA_FILES_COMMAND.getName()))
-			selectDataFile();
-
-		if (event.getActionCommand().equals(MainActionCommands.IMPORT_DATA_COMMAND.getName()))
-			importData();
-
-		if (currentTask.equals(MainActionCommands.CLEAR_DATA_COMMAND.getName())) {
-
-			if (MessageDialog.showChoiceMsg("Clear input data?", this) == JOptionPane.YES_OPTION)
-				clearPanel();
-		}
-	}
-
-	private void addSelectedLibraryFile() {
-		libraryFile = chooser.getSelectedFile();
-		libraryTextField.setText(libraryFile.getPath());
-		baseLibraryDirectory = libraryFile.getParentFile();
-		savePreferences();
-	}
-
-	private void addSelectedDataFile() {
-		DataPipeline pipeline = dataPipelineDefinitionPanel.getDataPipeline();
-		if(pipeline == null)
-			return;
-
-		if(MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(pipeline)) {
-			MessageDialog.showErrorMsg("The project already contains data pipeline \n"
-					+ "with selected combination of assay, data acquisition and data analysis methods."
-					+ "Please adjust you selection.\nIf you want to replace the existing data\n"
-					+ "please delete them first and then re-upload.", 
-					this);
-			return;
-		}	
-		File dataFile = chooser.getSelectedFile();
-		dataFileDirectory = dataFile.getParentFile();
-		savePreferences();
-	}
-
-	public synchronized void clearPanel() {
-
-		libraryFile = null;
-		libraryTextField.setText("");
-	}
-
-	private void importData() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void selectDataFile() {
-
-		chooser.resetChoosableFileFilters();
-		chooser.setFileFilter(txtFilter);
-		chooser.setCurrentDirectory(dataFileDirectory);
-		chooser.rescanCurrentDirectory();
-		chooser.showOpenDialog(this);
-	}
-
-	private void selectLibraryFile() {
-
-		chooser.resetChoosableFileFilters();
-		chooser.setFileFilter(xmlFilter);
-		chooser.setCurrentDirectory(baseLibraryDirectory);
-		chooser.rescanCurrentDirectory();
-		chooser.showOpenDialog(this);
 	}
 }

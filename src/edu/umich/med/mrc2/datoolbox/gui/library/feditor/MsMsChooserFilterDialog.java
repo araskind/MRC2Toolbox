@@ -39,7 +39,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -50,13 +49,12 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -65,19 +63,20 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.MSMSImportTask;
 
-public class MsMsChooserFilterDialog extends JDialog implements ActionListener, TaskListener, BackedByPreferences {
+public class MsMsChooserFilterDialog extends JDialog 
+	implements ActionListener, TaskListener, BackedByPreferences {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -8398380251982220161L;
+	private static final Icon filterMsMsIcon = GuiUtils.getIcon("filterMsMs", 32);
+	
 	private JCheckBox chckbxRemoveAllMassesAboveParent;
 	private JCheckBox chckbxRemoveAllMassesBelowCounts;
 	private JFormattedTextField minimalCountsTextField;
 	private JCheckBox chckbxLeaveOnly;
 	private JSpinner maxFragmentsSpinner;
-	private JButton btnCancel;
-	private JButton btnFilter;
 
 	private Preferences preferences;
 	public static final String REMOVE_MASSES_ABOVE_PARENT = "REMOVE_MASSES_ABOVE_PARENT";
@@ -85,30 +84,24 @@ public class MsMsChooserFilterDialog extends JDialog implements ActionListener, 
 	public static final String MINIMAL_COUNTS = "MINIMAL_COUNTS";
 	public static final String LEAVE_MAX_FRAGMENTS = "LEAVE_MAX_FRAGMENTS";
 	public static final String MAX_FRAGMENTS_COUNT = "MAX_FRAGMENTS_COUNT";
-	private JFileChooser fileChooser;
+	
 	private File baseDirectory;
-	private FileNameExtensionFilter xmlFilter;
-	private FileNameExtensionFilter mspFilter;
-	private DockableMsMsDataEditorPanel parent;
-
-	private static final Icon filterMsMsIcon = GuiUtils.getIcon("filterMsMs", 32);
-
+	private DockableMsMsDataEditorPanel parentPanel;
 	private LibraryMsFeature activeFeature;
 
-	public MsMsChooserFilterDialog(DockableMsMsDataEditorPanel parent) {
+	public MsMsChooserFilterDialog(DockableMsMsDataEditorPanel parentPanel) {
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Load MSMS data from file", true);
-		this.parent = parent;
+		this.parentPanel = parentPanel;
 
 		setIconImage(((ImageIcon) filterMsMsIcon).getImage());
 		setSize(new Dimension(600, 600));
-		setPreferredSize(new Dimension(600, 600));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setPreferredSize(new Dimension(600, 220));
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
-		initFileChooser();
-		getContentPane().add(fileChooser, BorderLayout.NORTH);
+		baseDirectory = 
+				new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -190,7 +183,7 @@ public class MsMsChooserFilterDialog extends JDialog implements ActionListener, 
 		gbc_label.gridy = 3;
 		panel.add(label, gbc_label);
 
-		btnCancel = new JButton("Cancel");
+		JButton btnCancel = new JButton("Cancel");
 		GridBagConstraints gbc_btnCancel = new GridBagConstraints();
 		gbc_btnCancel.anchor = GridBagConstraints.WEST;
 		gbc_btnCancel.insets = new Insets(0, 0, 0, 5);
@@ -201,13 +194,13 @@ public class MsMsChooserFilterDialog extends JDialog implements ActionListener, 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				dispose();
 			}
 		};
 		btnCancel.addActionListener(al);
 
-		btnFilter = new JButton(MainActionCommands.IMPORT_FILTERED_MSMS_DATA_COMMAND.getName());
-		btnFilter.setActionCommand(MainActionCommands.IMPORT_FILTERED_MSMS_DATA_COMMAND.getName());
+		JButton btnFilter = new JButton(MainActionCommands.SELECT_MSMS_FILE_TO_IMPORT_COMMAND.getName());
+		btnFilter.setActionCommand(MainActionCommands.SELECT_MSMS_FILE_TO_IMPORT_COMMAND.getName());
 		btnFilter.addActionListener(this);
 		GridBagConstraints gbc_btnFilter = new GridBagConstraints();
 		gbc_btnFilter.fill = GridBagConstraints.HORIZONTAL;
@@ -217,34 +210,19 @@ public class MsMsChooserFilterDialog extends JDialog implements ActionListener, 
 
 		JRootPane rootPane = SwingUtilities.getRootPane(btnFilter);
 		rootPane.setDefaultButton(btnFilter);
-
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-
 		loadPreferences();
 		pack();
-		setVisible(false);
 	}
 
-	private void initFileChooser() {
+	@Override
+	public void actionPerformed(ActionEvent event) {
 
-		fileChooser = new ImprovedFileChooser();
-		fileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		fileChooser.addActionListener(this);
-		fileChooser.setAcceptAllFileFilterUsed(false);
-		fileChooser.setMultiSelectionEnabled(false);
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		fileChooser.setControlButtonsAreShown(false);
-		fileChooser.getActionMap().get("viewTypeDetails").actionPerformed(null);
-
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
-		fileChooser.setCurrentDirectory(baseDirectory);
-
-		xmlFilter = new FileNameExtensionFilter("Agilent XML MSMS export files", "xml", "XML");
-		fileChooser.addChoosableFileFilter(xmlFilter);
-		mspFilter = new FileNameExtensionFilter("NIST MSP MSMS files", "msp", "MSP");
-		fileChooser.addChoosableFileFilter(mspFilter);
+		if (event.getActionCommand().equals(
+				MainActionCommands.SELECT_MSMS_FILE_TO_IMPORT_COMMAND.getName())) 
+			importFilteredMSMSData();		
 	}
-
+	
 	public int getMaxFragmentsCount() {
 
 		if(chckbxLeaveOnly.isSelected())
@@ -254,18 +232,84 @@ public class MsMsChooserFilterDialog extends JDialog implements ActionListener, 
 	}
 
 	public boolean removeMassesAboveParent() {
-
 		return chckbxRemoveAllMassesAboveParent.isSelected();
 	}
 
 	public double getMinimalIntensityCutoff() {
 
-		if(chckbxLeaveOnly.isSelected())
+		if(chckbxRemoveAllMassesBelowCounts.isSelected())
 			return Double.parseDouble(minimalCountsTextField.getText());
 		else
 			return 0.0;
+	}	
+	
+	private void importFilteredMSMSData() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Agilent XML MSMS export files", "xml", "XML");
+		fc.addFilter("NIST MSP MSMS files", "msp", "MSP");
+		fc.setTitle("Select MSMS input file");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Import MSMS");
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+						
+			File msmsFile = fc.getSelectedFile();
+			baseDirectory = msmsFile.getParentFile();
+			savePreferences();
+			MSMSImportTask mit = new MSMSImportTask(
+					activeFeature,
+					msmsFile,
+					removeMassesAboveParent(),
+					chckbxRemoveAllMassesBelowCounts.isSelected(),
+					getMinimalIntensityCutoff(),
+					chckbxLeaveOnly.isSelected(),
+					getMaxFragmentsCount());
+
+			mit.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(mit);
+		}
+	}
+	
+	@Override
+	public void statusChanged(TaskEvent e) {
+
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+
+			if (e.getSource().getClass().equals(MSMSImportTask.class)) {
+
+				MSMSImportTask mit = (MSMSImportTask) e.getSource();
+				mit.removeTaskListener(this);
+
+				if(mit.getActiveMsMs() != null)
+					parentPanel.loadMsMsData(mit.getActiveMsMs());
+
+				this.dispose();
+			}
+		}
+	}
+	
+	public void dispose() {
+		savePreferences();
+		super.dispose();
 	}
 
+	/**
+	 * @return the activeFeature
+	 */
+	public LibraryMsFeature getActiveFeature() {
+		return activeFeature;
+	}
+
+	/**
+	 * @param activeFeature the activeFeature to set
+	 */
+	public void setActiveFeature(LibraryMsFeature activeFeature) {
+		this.activeFeature = activeFeature;
+	}
+	
 	@Override
 	public void loadPreferences() {
 		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
@@ -301,65 +345,6 @@ public class MsMsChooserFilterDialog extends JDialog implements ActionListener, 
 		preferences.putDouble(MINIMAL_COUNTS, Double.parseDouble(minimalCountsTextField.getText()));
 		preferences.putBoolean(LEAVE_MAX_FRAGMENTS, chckbxLeaveOnly.isSelected());
 		preferences.putInt(MAX_FRAGMENTS_COUNT, (int) maxFragmentsSpinner.getValue());
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent event) {
-
-		String command = event.getActionCommand();
-
-		if (command.equals(MainActionCommands.IMPORT_FILTERED_MSMS_DATA_COMMAND.getName())) {
-
-			fileChooser.approveSelection();
-			baseDirectory = fileChooser.getCurrentDirectory();
-			File msmsFile = fileChooser.getSelectedFile();
-
-			MSMSImportTask mit = new MSMSImportTask(
-					activeFeature,
-					msmsFile,
-					chckbxRemoveAllMassesAboveParent.isSelected(),
-					chckbxRemoveAllMassesBelowCounts.isSelected(),
-					Double.parseDouble(minimalCountsTextField.getText()),
-					chckbxLeaveOnly.isSelected(),
-					(int)maxFragmentsSpinner.getValue());
-
-			mit.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(mit);
-		}
-	}
-
-	@Override
-	public void statusChanged(TaskEvent e) {
-
-		if (e.getStatus() == TaskStatus.FINISHED) {
-
-			((AbstractTask)e.getSource()).removeTaskListener(this);
-
-			if (e.getSource().getClass().equals(MSMSImportTask.class)) {
-
-				MSMSImportTask mit = (MSMSImportTask) e.getSource();
-				mit.removeTaskListener(this);
-
-				if(mit.getActiveMsMs() != null)
-					parent.loadMsMsData(mit.getActiveMsMs());
-
-				this.setVisible(false);
-			}
-		}
-	}
-
-	/**
-	 * @return the activeFeature
-	 */
-	public LibraryMsFeature getActiveFeature() {
-		return activeFeature;
-	}
-
-	/**
-	 * @param activeFeature the activeFeature to set
-	 */
-	public void setActiveFeature(LibraryMsFeature activeFeature) {
-		this.activeFeature = activeFeature;
 	}
 }
 

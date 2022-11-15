@@ -41,7 +41,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -51,7 +50,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -60,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
@@ -85,7 +83,6 @@ public class LibraryRtImportDialog extends JDialog implements ActionListener, Ba
 	private JComboBox nameColumnComboBox;
 	private JComboBox rtColumnComboBox;
 	private JButton browseButton;
-	private ImprovedFileChooser chooser;
 	private File baseDirectory;
 	private String[][] inputData;
 	private String[] header;
@@ -233,13 +230,12 @@ public class LibraryRtImportDialog extends JDialog implements ActionListener, Ba
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				savePreferences();
 				dispose();
 			}
 		};
 		btnCancel.addActionListener(al);
 
-		btnImport = new JButton("Import RT values");
+		btnImport = new JButton(MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_COMMAND.getName());
 		btnImport.setActionCommand(MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_COMMAND.getName());
 		btnImport.addActionListener(actionListener);
 		panel.add(btnImport);
@@ -248,32 +244,33 @@ public class LibraryRtImportDialog extends JDialog implements ActionListener, Ba
 		rootPane.setDefaultButton(btnImport);
 
 		loadPreferences();
-		initChooser();
 		pack();
 	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Text files", "txt", "TXT", "csv", "CSV"));
-		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Excel files", "xlsx"));
+	
+	@Override
+	public void dispose() {
+		savePreferences();
+		super.dispose();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(BROWSE_COMMAND))
-			chooser.showOpenDialog(this);
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			File inputFile = chooser.getSelectedFile();
+			readRTDataFromFile();
+	}
+	
+	private void readRTDataFromFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT", "csv", "CSV");
+		fc.addFilter("Excel files", "xlsx", "XLSX");
+		fc.setTitle("Select file with RT data");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File inputFile = fc.getSelectedFile();
 			baseDirectory = inputFile.getParentFile();
 			sourceFileTextField.setText(inputFile.getAbsolutePath());
 			savePreferences();
@@ -287,6 +284,8 @@ public class LibraryRtImportDialog extends JDialog implements ActionListener, Ba
 
 			if(FilenameUtils.getExtension(inputFile.getName()).equalsIgnoreCase("csv"))
 				parseInputTextFile(inputFile, ',');
+			
+			savePreferences();	
 		}
 	}
 

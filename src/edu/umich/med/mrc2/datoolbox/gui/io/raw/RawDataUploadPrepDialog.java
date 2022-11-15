@@ -48,7 +48,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -199,29 +199,46 @@ public class RawDataUploadPrepDialog extends JDialog
 	public void actionPerformed(ActionEvent e) {
 
 		String command = e.getActionCommand();
-		if (command.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName()) ||
-				command.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName())) {
-
-			fileSelectType = command;
-			selectFileOrDirectory(command);
-		}
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			File inputFile = chooser.getSelectedFile();
-			if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName())) {
-				baseDirectory = inputFile.getParentFile();
-				rawDataDirTextField.setText(inputFile.getAbsolutePath());
-			}
-			if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName())) {
-				zipBaseDirectory = inputFile.getParentFile();
-				zipDirTextField.setText(inputFile.getAbsolutePath());
-			}
-			savePreferences();
-		}
+		if (command.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName()))
+			selectRawDataDirectory();
+		
+		if (command.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName()))
+			selectZIPDirectory();
+		
 		if(command.equals(MainActionCommands.CLEAN_AND_ZIP_COMMAND.getName()))
 			cleanAndZip();
 	}
 
+	private void selectRawDataDirectory() {
+
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select directory containing raw data files:");
+		fc.setOpenButtonText("Select folder");
+		fc.setMultiSelectionEnabled(false);		
+		if (fc.showOpenDialog(this)) {	
+			File inputFile = fc.getSelectedFile();
+			rawDataDirTextField.setText(inputFile.getAbsolutePath());
+			baseDirectory = inputFile.getParentFile();
+			savePreferences();
+		}
+	}
+
+	private void selectZIPDirectory() {
+
+		JnaFileChooser fc = new JnaFileChooser(zipBaseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select directory to save compressed data files:");
+		fc.setOpenButtonText("Select folder");
+		fc.setMultiSelectionEnabled(false);		
+		if (fc.showOpenDialog(this)) {	
+			File inputFile = fc.getSelectedFile();
+			zipDirTextField.setText(inputFile.getAbsolutePath());
+			zipBaseDirectory = inputFile.getParentFile();
+			savePreferences();
+		}
+	}
+	
 	private void cleanAndZip() {
 
 		if(rawDataDirTextField.getText().isEmpty()) {
@@ -240,25 +257,6 @@ public class RawDataUploadPrepDialog extends JDialog
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
-
-	private void selectFileOrDirectory(String command) {
-
-		chooser = new ImprovedFileChooser();
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setDialogTitle(command);
-		chooser.setApproveButtonText(command);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-		if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_RAW_DATA_DIR.getName()))
-			chooser.setCurrentDirectory(baseDirectory);
-
-		if(fileSelectType.equals(MainActionCommands.BROWSE_FOR_ZIP_DIR.getName()))
-			chooser.setCurrentDirectory(zipBaseDirectory);
-
-		chooser.showOpenDialog(this);
-	}	
 
 	@Override
 	public void loadPreferences(Preferences prefs) {

@@ -45,7 +45,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -57,7 +56,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -71,7 +69,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ReferenceMSMSLibraryExportTask;
@@ -486,52 +484,50 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 	}
 	
 	private void selectOutputFolder() {
-		
-		ImprovedFileChooser outputFileChooser = new ImprovedFileChooser();
-		outputFileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		outputFileChooser.addActionListener(this);
-		outputFileChooser.setAcceptAllFileFilterUsed(true);
-		outputFileChooser.setMultiSelectionEnabled(false);
-		outputFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		outputFileChooser.setCurrentDirectory(baseDirectory);
-		outputFileChooser.setApproveButtonText("Set output folder");		
-		if(outputFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setOpenButtonText("Select");
+		fc.setTitle("Select output directory");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
 			
-			outputFolderTextField.setText(outputFileChooser.getSelectedFile().getAbsolutePath());
-			baseDirectory = outputFileChooser.getSelectedFile();
-			savePreferences();
-		}
+			baseDirectory = fc.getSelectedFile();
+			outputFolderTextField.setText(baseDirectory.getAbsolutePath());
+			savePreferences();	
+		}		
 	}
 	
 	private void selectOldLogFile() {
-		
-		ImprovedFileChooser oldLogFileChooser = new ImprovedFileChooser();
-		oldLogFileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		oldLogFileChooser.addActionListener(this);
-		oldLogFileChooser.setAcceptAllFileFilterUsed(false);
-		oldLogFileChooser.setMultiSelectionEnabled(false);
-		oldLogFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		oldLogFileChooser.setCurrentDirectory(baseDirectory);
-		oldLogFileChooser.setApproveButtonText("Select old log file");	
-		oldLogFileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Log files", "log", "LOG"));
-		if(oldLogFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)			
-			oldLogFileTextField.setText(oldLogFileChooser.getSelectedFile().getAbsolutePath());
+
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Log files", "log", "LOG");
+		fc.setTitle("Select log file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File logFile = fc.getSelectedFile();
+			oldLogFileTextField.setText(logFile.getAbsolutePath());
+			baseDirectory = logFile.getParentFile();
+			savePreferences();	
+		}
 	}
 	
 	private void selectPreviousMspOutputFile() {
 		
-		ImprovedFileChooser mspFileChooser = new ImprovedFileChooser();
-		mspFileChooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		mspFileChooser.addActionListener(this);
-		mspFileChooser.setAcceptAllFileFilterUsed(false);
-		mspFileChooser.setMultiSelectionEnabled(false);
-		mspFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		mspFileChooser.setCurrentDirectory(baseDirectory);
-		mspFileChooser.setApproveButtonText("Select previous MSP output file");	
-		mspFileChooser.addChoosableFileFilter(
-				new FileNameExtensionFilter(MsLibraryFormat.MSP.getName(), MsLibraryFormat.MSP.getFileExtension()));
-		if(mspFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)			
-			mspTextField.setText(mspFileChooser.getSelectedFile().getAbsolutePath());
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter(MsLibraryFormat.MSP.getName(), MsLibraryFormat.MSP.getFileExtension());
+		fc.setTitle("Select previous MSP output file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File mspFile = fc.getSelectedFile();
+			mspTextField.setText(mspFile.getAbsolutePath());
+			baseDirectory = mspFile.getParentFile();
+			savePreferences();	
+		}
 	}
 	
 	@Override

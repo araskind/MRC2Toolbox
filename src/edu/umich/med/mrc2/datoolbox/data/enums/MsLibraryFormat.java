@@ -70,4 +70,13 @@ public enum MsLibraryFormat {
 		}
 		return null;
 	}
+	
+	public static MsLibraryFormat getFormatByExtension(String extension) {
+
+		for(MsLibraryFormat f : MsLibraryFormat.values()) {
+			if(f.getFileExtension().equals(extension))
+				return f;
+		}
+		return null;
+	}
 }

@@ -635,6 +635,7 @@ public enum MainActionCommands {
 	RESET_MSMS_FILTER_COMMAND("Reset MSMS filter"),
 	ACCEPT_MSMS_COMMAND("Accept new/edited MSMS"),
 	DELETE_MSMS_COMMAND("Delete selected MSMS"),
+	SELECT_MSMS_FILE_TO_IMPORT_COMMAND("Select MSMSfile to import"),
 
 	NEW_LIBRARY_FEATURE_DIAOG_COMMAND("New library feature dialog"),
 	EDIT_LIBRARY_FEATURE_DIALOG_COMMAND("Show library feature editor"),

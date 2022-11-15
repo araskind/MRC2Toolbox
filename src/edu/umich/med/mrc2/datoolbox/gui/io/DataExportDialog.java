@@ -95,6 +95,7 @@ public class DataExportDialog extends JDialog
 	 */
 	private static final long serialVersionUID = 984393319681080424L;
 	private static final Icon exportIcon = GuiUtils.getIcon("export", 32);
+	private static final Icon stopIcon = GuiUtils.getIcon("stopSign", 64);
 	
 	public static final String EXPORT_TYPE = "EXPORT_TYPE";	
 	public static final String EXPORT_MISSING_TYPE = "EXPORT_MISSING_TYPE";	
@@ -370,8 +371,17 @@ public class DataExportDialog extends JDialog
 		String defaultFileName = createExportFile(getExportType());
 		fc.setDefaultFileName(defaultFileName);	
 		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
-			
+						
 			File exportFile  = fc.getSelectedFile();
+//			TODO check if necessary			
+//			if(exportFile.exists()) {
+//               int result = JOptionPane.showConfirmDialog(this,
+//                		"File " + exportFile.getName() + " already exists, overwrite?",
+//                		"Overwrite warning", JOptionPane.YES_NO_OPTION,
+//                		JOptionPane.QUESTION_MESSAGE, stopIcon);
+//               if(result != JOptionPane.YES_OPTION)
+//            	   return;
+//			}
 			resultsFileTextField.setText(exportFile.getAbsolutePath());
 			baseDirectory = exportFile.getParentFile();
 		}

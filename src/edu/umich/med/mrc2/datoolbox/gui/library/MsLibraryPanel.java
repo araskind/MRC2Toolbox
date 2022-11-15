@@ -44,12 +44,10 @@ import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -81,7 +79,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -99,7 +97,6 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 	private DockableMolStructurePanel molStructurePanel;
 	private LibraryManager libraryManager;
 	private LibraryExportDialog libraryExportDialog;
-	private LibraryMergeDialog libraryMergeDialog;
 	private ConvertLibraryForRecursionDialog convertLibraryForRecursionDialog;
 	private DockableLibraryFeatureEditorPanel libraryFeatureEditorPanel;
 	private CompoundLibrary currentLibrary;
@@ -787,8 +784,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 
 		if (currentLibrary != null) {
 
-			libraryExportDialog = new LibraryExportDialog(exportCommand);
-			libraryExportDialog.setCurrentLibrary(currentLibrary);
+			libraryExportDialog = 
+					new LibraryExportDialog(exportCommand, currentLibrary);
 
 			if (exportCommand.equals(MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND.getName()))
 				libraryExportDialog.setTargetSubset(null);
@@ -800,14 +797,6 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 		}
 	}
 
-	private void mergeLibraries() {
-
-		libraryMergeDialog = new LibraryMergeDialog();
-		libraryMergeDialog.setCurrentLibrary(currentLibrary);
-		libraryMergeDialog.setLocationRelativeTo(this.getContentPane());
-		libraryMergeDialog.setVisible(true);
-	}
-	
 	private void convertLibraryForRecursion() {
 		
 		convertLibraryForRecursionDialog = new ConvertLibraryForRecursionDialog();
@@ -901,32 +890,20 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 	private void importLibrary() {
 
 		if (currentLibrary == null) {
-
 			MessageDialog.showErrorMsg(
-					"Create new library or open existing one first\n" + "in order to import data from file!");
+					"Create new library or open existing one first\n" 
+					+ "in order to import data from file!");
 			return;
 		}
-
-		JFileChooser chooser = new ImprovedFileChooser();
-		File inputFile = null;
-
-		FileNameExtensionFilter libEditorFilter = new FileNameExtensionFilter("Library Editor files", "xml");
-		chooser.addChoosableFileFilter(libEditorFilter);
-
-		FileNameExtensionFilter cefFilter = new FileNameExtensionFilter("CEF files", "cef", "CEF");
-		chooser.addChoosableFileFilter(cefFilter);
-
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setDialogTitle("Select library file");
-
-		chooser.setCurrentDirectory(baseDirectory);
-
-		if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-
-			inputFile = chooser.getSelectedFile();
-
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.addFilter("Library Editor files", "xml");		
+		fc.setTitle("Select library file to import");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File inputFile = fc.getSelectedFile();
 			if (inputFile.exists()) {
 
 				baseDirectory = inputFile.getParentFile();
@@ -938,6 +915,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 					lit.addTaskListener(this);
 					MRC2ToolBoxCore.getTaskController().addTask(lit);
 				}
+				//	TODO read CEF file
 			}
 		}
 	}

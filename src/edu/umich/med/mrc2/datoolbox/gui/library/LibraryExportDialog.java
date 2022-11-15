@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.library;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -35,18 +36,20 @@ import java.util.Collection;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.commons.io.FilenameUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
@@ -55,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -70,7 +73,6 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 	 *
 	 */
 	private static final long serialVersionUID = -5710215500366663782L;
-	private JFileChooser chooser;
 	private File baseDirectory;
 	private JPanel panel;
 	private CompoundLibrary currentLibrary;
@@ -79,12 +81,20 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 	private JCheckBox combineAdductsCheckBox;
 
 	private static final Icon exportLibraryIcon = GuiUtils.getIcon("exportLibrary", 32);
+	private JLabel lblNewLabel;
+	private JTextField exportFileTextField;
+	private JButton browseButton;
+	private String exportCommand;
+	
+	private static final String BROWSE_COMMAND = "BROWSE";
 
-	public LibraryExportDialog(String exportCommand) {
+	public LibraryExportDialog(String exportCommand, CompoundLibrary currentLibrary) {
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Export library");
 		setIconImage(((ImageIcon) exportLibraryIcon).getImage());
-		setPreferredSize(new Dimension(640, 480));
+		setPreferredSize(new Dimension(640, 250));
+		this.exportCommand = exportCommand;
+		this.currentLibrary = currentLibrary;
 
 		String title = "";
 
@@ -109,77 +119,134 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(panel, BorderLayout.CENTER);
 
-		chooser = new ImprovedFileChooser();
-		chooser.setDialogType(JFileChooser.SAVE_DIALOG);
-		chooser.setBorder(new TitledBorder(null, "Output", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setApproveButtonText("Export library");
-		chooser.addActionListener(this);
-
-		for(MsLibraryFormat f : MsLibraryFormat.values()){
-
-			FileNameExtensionFilter txtFilter = new FileNameExtensionFilter(f.getName(), f.getFileExtension());
-			chooser.addChoosableFileFilter(txtFilter);
-		}
 		baseDirectory = new File(MRC2ToolBoxCore.libraryDir);
 		if(MRC2ToolBoxCore.getCurrentProject() != null)
 			baseDirectory = MRC2ToolBoxCore.getCurrentProject().getExportsDirectory();
 
-		chooser.setCurrentDirectory(baseDirectory);
-		panel.add(chooser);
-
 		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(new TitledBorder(null, "Options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel.add(panel_1, BorderLayout.NORTH);
+		panel_1.setBorder(new EmptyBorder(10, 10, 10, 10));
+		panel.add(panel_1, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[]{404, 0, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0, 0};
+		gbl_panel_1.columnWidths = new int[]{495, 0, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0};
 		gbl_panel_1.columnWeights = new double[]{1.0, 1.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
+		
+		lblNewLabel = new JLabel("Export file");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 0;
+		panel_1.add(lblNewLabel, gbc_lblNewLabel);
+		
+		exportFileTextField = new JTextField();
+		exportFileTextField.setEditable(false);
+		GridBagConstraints gbc_exportFileTextField = new GridBagConstraints();
+		gbc_exportFileTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_exportFileTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_exportFileTextField.gridx = 0;
+		gbc_exportFileTextField.gridy = 1;
+		panel_1.add(exportFileTextField, gbc_exportFileTextField);
+		exportFileTextField.setColumns(10);
+		
+		JButton browseButton = new JButton("Browse");
+		browseButton.setActionCommand(BROWSE_COMMAND);
+		browseButton.addActionListener(this);
+		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
+		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
+		gbc_btnNewButton.gridx = 1;
+		gbc_btnNewButton.gridy = 1;
+		panel_1.add(browseButton, gbc_btnNewButton);
 
 		combineAdductsCheckBox = new JCheckBox("Combine all adducts in a single library entry");
 		GridBagConstraints gbc_combineAdductsCheckBox = new GridBagConstraints();
 		gbc_combineAdductsCheckBox.anchor = GridBagConstraints.WEST;
 		gbc_combineAdductsCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_combineAdductsCheckBox.gridx = 0;
-		gbc_combineAdductsCheckBox.gridy = 0;
+		gbc_combineAdductsCheckBox.gridy = 2;
 		panel_1.add(combineAdductsCheckBox, gbc_combineAdductsCheckBox);
 
+		JPanel panel = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
+		flowLayout.setAlignment(FlowLayout.RIGHT);
+		getContentPane().add(panel, BorderLayout.SOUTH);
+
+		JButton btnCancel = new JButton("Cancel");
+		panel.add(btnCancel);
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				dispose();
 			}
 		};
-		JRootPane rootPane = SwingUtilities.getRootPane(chooser);
+		btnCancel.addActionListener(al);
+
+		JButton btnSave = new JButton(exportCommand);
+		btnSave.setActionCommand(exportCommand);
+		btnSave.addActionListener(this);
+		panel.add(btnSave);
+		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-		pack();
+		rootPane.setDefaultButton(btnSave);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent event) {
 
-		if (event.getSource().equals(chooser)) {
+		if (event.getActionCommand().equals(BROWSE_COMMAND))
+			setExportFile();
+		
+		if (event.getActionCommand().equals(exportCommand))
+			exportLibrary();
+	}
 
-			if (event.getActionCommand().equals(JFileChooser.CANCEL_SELECTION))
-				this.dispose();
-
-			if (event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
-				exportLibrary();
-		}
+	private void setExportFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		for(MsLibraryFormat f : MsLibraryFormat.values())
+			fc.addFilter(f.getName(), f.getFileExtension());
+			
+		fc.setTitle("Export library");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Select");		
+		String defaultFileName = currentLibrary.getLibraryName() 
+				+ "." + MsLibraryFormat.values()[0].getFileExtension();
+		fc.setDefaultFileName(defaultFileName);	
+		if (fc.showSaveDialog(this)) {
+						
+			File exportFile  = fc.getSelectedFile();
+			String[] fileFilter  = fc.getSelectedFilter();
+			if(fileFilter != null) {
+				MsLibraryFormat libraryFormat = MsLibraryFormat.getFormatByDescription(fileFilter[0]);
+				exportFile = FIOUtils.changeExtension(exportFile, libraryFormat.getFileExtension());
+				exportFileTextField.setText(exportFile.getAbsolutePath());
+			}
+		}		
 	}
 
 	private void exportLibrary() {
-
-		File selectedFile = chooser.getSelectedFile();
+		
+		String flePath = exportFileTextField.getSelectedText().trim();
+		if(flePath == null || flePath.isEmpty())
+			return;
+		
+		File selectedFile = Paths.get(flePath).toFile();
 		if(selectedFile == null)
 			return;
+		
+		String extension = 
+				FilenameUtils.getExtension(selectedFile.getName());
+		MsLibraryFormat libraryFormat = 
+				MsLibraryFormat.getFormatByExtension(extension);
 
-		MsLibraryFormat libraryFormat = MsLibraryFormat.getFormatByDescription(
-				chooser.getFileFilter().getDescription());
+		if(libraryFormat == null) {
+			MessageDialog.showErrorMsg("Unrecognized export format: " + extension, this);
+			return;
+		}
 		LibraryExportTask let = new LibraryExportTask(
 					null,
 					selectedFile,				
@@ -190,16 +257,6 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 					libraryFormat);
 		let.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(let);	
-	}
-
-	public void setCurrentLibrary(CompoundLibrary currentLibrary) {
-		this.currentLibrary = currentLibrary;
-		MsLibraryFormat libraryFormat = MsLibraryFormat.getFormatByDescription(
-				chooser.getFileFilter().getDescription());
-		File selectedFile= Paths.get(baseDirectory.getAbsolutePath(),
-				currentLibrary.getLibraryName()).toFile();
-		File libExportFile = FIOUtils.changeExtension(selectedFile, libraryFormat.getFileExtension());
-		chooser.setSelectedFile(libExportFile);
 	}
 
 	public void setFeatureSubset(Collection<MsFeature> features) {

@@ -32,7 +32,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.prefs.Preferences;
@@ -44,15 +43,14 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -63,7 +61,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -78,20 +76,20 @@ public class MWTabExportDialog extends JDialog implements BackedByPreferences, A
 	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 32);
 	private Preferences preferences;
 	private File baseDirectory;
-	private ImprovedFileChooser chooser;
 	private DataAnalysisProject project;
 	private JButton btnSave;
 	private JComboBox dataPipelineComboBox;
 	public static final String PREFS_NODE = MWTabExportDialog.class.getName();
-	private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 	private JComboBox reportStyleComboBox;
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
+	private static final String BROWSE = "BROWSE";
 	private static final String SAVE_REPORT = "Save report";
+	private JTextField exportFileTextField;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public MWTabExportDialog() {
 		super();
-		setPreferredSize(new Dimension(640, 500));
+		setPreferredSize(new Dimension(640, 250));
 		setIconImage(((ImageIcon) exportMwTabIcon).getImage());
 		setTitle("Save MWTab report for experiment");
 		setModalityType(ModalityType.APPLICATION_MODAL);
@@ -100,29 +98,55 @@ public class MWTabExportDialog extends JDialog implements BackedByPreferences, A
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		project = MRC2ToolBoxCore.getCurrentProject();
-		//	loadPreferences();
-		initChooser();
-
 		JPanel panel_1 = new JPanel();
 		getContentPane().add(panel_1, BorderLayout.CENTER);
 		panel_1.setLayout(new BorderLayout(0, 0));
 
 		JPanel panel_2 = new JPanel();
 		panel_2.setBorder(new EmptyBorder(10, 5, 10, 5));
-		panel_1.add(panel_2, BorderLayout.SOUTH);
+		panel_1.add(panel_2, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_2 = new GridBagLayout();
-		gbl_panel_2.columnWidths = new int[]{0, 0, 0};
-		gbl_panel_2.rowHeights = new int[]{0, 0, 0};
-		gbl_panel_2.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_panel_2.rowHeights = new int[]{0, 0, 0, 0, 0};
+		gbl_panel_2.columnWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_2.setLayout(gbl_panel_2);
+		
+		JLabel lblNewLabel = new JLabel("Export file");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.gridwidth = 2;
+		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 0;
+		panel_2.add(lblNewLabel, gbc_lblNewLabel);
+		
+		exportFileTextField = new JTextField();
+		exportFileTextField.setEditable(false);
+		GridBagConstraints gbc_exportFileTextField = new GridBagConstraints();
+		gbc_exportFileTextField.gridwidth = 2;
+		gbc_exportFileTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_exportFileTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_exportFileTextField.gridx = 0;
+		gbc_exportFileTextField.gridy = 1;
+		panel_2.add(exportFileTextField, gbc_exportFileTextField);
+		exportFileTextField.setColumns(10);
+		
+		JButton btnNewButton = new JButton("Browse");
+		btnNewButton.setActionCommand(BROWSE);
+		btnNewButton.addActionListener(this);
+		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
+		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
+		gbc_btnNewButton.gridx = 2;
+		gbc_btnNewButton.gridy = 1;
+		panel_2.add(btnNewButton, gbc_btnNewButton);
 
 		JLabel lblSelectAssayMethod = new JLabel("Assay method");
 		GridBagConstraints gbc_lblSelectAssayMethod = new GridBagConstraints();
 		gbc_lblSelectAssayMethod.insets = new Insets(0, 0, 5, 5);
 		gbc_lblSelectAssayMethod.anchor = GridBagConstraints.EAST;
 		gbc_lblSelectAssayMethod.gridx = 0;
-		gbc_lblSelectAssayMethod.gridy = 0;
+		gbc_lblSelectAssayMethod.gridy = 2;
 		panel_2.add(lblSelectAssayMethod, gbc_lblSelectAssayMethod);
 
 		dataPipelineComboBox = new JComboBox<DataPipeline>();
@@ -132,28 +156,30 @@ public class MWTabExportDialog extends JDialog implements BackedByPreferences, A
 		dataPipelineComboBox.setSelectedIndex(-1);
 
 		GridBagConstraints gbc_assayComboBox = new GridBagConstraints();
-		gbc_assayComboBox.insets = new Insets(0, 0, 5, 0);
+		gbc_assayComboBox.gridwidth = 2;
+		gbc_assayComboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_assayComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_assayComboBox.gridx = 1;
-		gbc_assayComboBox.gridy = 0;
+		gbc_assayComboBox.gridy = 2;
 		panel_2.add(dataPipelineComboBox, gbc_assayComboBox);
-		panel_1.add(chooser, BorderLayout.CENTER);
 		
 		JLabel lblReportType = new JLabel("Report style");
 		GridBagConstraints gbc_lblReportType = new GridBagConstraints();
 		gbc_lblReportType.anchor = GridBagConstraints.EAST;
 		gbc_lblReportType.insets = new Insets(0, 0, 0, 5);
 		gbc_lblReportType.gridx = 0;
-		gbc_lblReportType.gridy = 1;
+		gbc_lblReportType.gridy = 3;
 		panel_2.add(lblReportType, gbc_lblReportType);
 		
 		reportStyleComboBox = new JComboBox<MWtabReportStyle>(
 				new DefaultComboBoxModel<MWtabReportStyle>(MWtabReportStyle.values()));
 		reportStyleComboBox.setSelectedIndex(-1);
 		GridBagConstraints gbc_reportTypeComboBox = new GridBagConstraints();
+		gbc_reportTypeComboBox.gridwidth = 2;
+		gbc_reportTypeComboBox.insets = new Insets(0, 0, 0, 5);
 		gbc_reportTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_reportTypeComboBox.gridx = 1;
-		gbc_reportTypeComboBox.gridy = 1;
+		gbc_reportTypeComboBox.gridy = 3;
 		panel_2.add(reportStyleComboBox, gbc_reportTypeComboBox);
 
 		JPanel panel = new JPanel();
@@ -185,33 +211,61 @@ public class MWTabExportDialog extends JDialog implements BackedByPreferences, A
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if (e.getActionCommand().equals(SAVE_REPORT)) {
+		if (e.getActionCommand().equals(BROWSE))
+			setOutputFile();
+			
+		if (e.getActionCommand().equals(SAVE_REPORT))
+			saveReport();
+	}
+	
+	private void setOutputFile() {
 
-			chooser.approveSelection();
-			File exportFile = chooser.getSelectedFile();
-			if(exportFile == null)
-				return;
-
-			ArrayList<String>errors = validateProjectData();
-			if(!errors.isEmpty()) {
-				MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
-				return;
-			}
-			DataPipeline assay = (DataPipeline) dataPipelineComboBox.getSelectedItem();
-			MWtabReportStyle style = (MWtabReportStyle)reportStyleComboBox.getSelectedItem();
-			ExperimentDesignSubset designSubset = project.getExperimentDesign().getActiveDesignSubset();
-			MWTabReportTask task = new MWTabReportTask(
-					exportFile, 
-					project, 
-					assay, 
-					designSubset, 
-					style);			
-			task.addTaskListener(MRC2ToolBoxCore.getMainWindow());
-			MRC2ToolBoxCore.getTaskController().addTask(task);
-			baseDirectory = chooser.getCurrentDirectory();
-			savePreferences();
-			this.dispose();
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("MWTab files", MWTabReportTask.MWTAB_EXTENSION);
+		fc.setTitle("Export project data to MWTAB file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Set output file");
+		String timestamp = MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date());
+		String defaultFileName =
+				project.getName() + "_MWTAB_REPORT_" +
+				timestamp + "." + MWTabReportTask.MWTAB_EXTENSION;
+		fc.setDefaultFileName(defaultFileName);	
+		if (fc.showSaveDialog(this)) {
+			File outputFile = fc.getSelectedFile();
+			exportFileTextField.setText(outputFile.getAbsolutePath());
 		}
+	}
+
+	private void saveReport() {
+			
+		String outputPath = exportFileTextField.getText().trim();
+		if(outputPath == null || outputPath.isEmpty())
+			return;
+		
+		File exportFile = Paths.get(outputPath).toFile();
+		if(exportFile == null)
+			return;
+
+		ArrayList<String>errors = validateProjectData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+			return;
+		}
+		DataPipeline assay = (DataPipeline) dataPipelineComboBox.getSelectedItem();
+		MWtabReportStyle style = (MWtabReportStyle)reportStyleComboBox.getSelectedItem();
+		ExperimentDesignSubset designSubset = project.getExperimentDesign().getActiveDesignSubset();
+		MWTabReportTask task = new MWTabReportTask(
+				exportFile, 
+				project, 
+				assay, 
+				designSubset, 
+				style);			
+		task.addTaskListener(MRC2ToolBoxCore.getMainWindow());
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+		baseDirectory = exportFile.getParentFile();
+		savePreferences();
+		this.dispose();
 	}
 
 	private ArrayList<String> validateProjectData() {
@@ -231,37 +285,6 @@ public class MWTabExportDialog extends JDialog implements BackedByPreferences, A
 			errors.add("Report style should be specified.");
 
 		return errors;
-	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setDialogType(JFileChooser.SAVE_DIALOG);
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setControlButtonsAreShown(false);
-		//	chooser.getActionMap().get("viewTypeDetails").actionPerformed(null); //	?
-		FileNameExtensionFilter mwTabFilter = new FileNameExtensionFilter("MWTab files", MWTabReportTask.MWTAB_EXTENSION);
-		chooser.addChoosableFileFilter(mwTabFilter);
-		chooser.setFileFilter(mwTabFilter);
-
-		chooser.setSelectedFile(Paths.get(
-				project.getExportsDirectory().getAbsolutePath(),
-				createExportFileName()).toFile());
-	}
-
-	private String createExportFileName() {
-
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
-		String timestamp = dateTimeFormat.format(new Date());
-		String fileName =
-				currentProject.getName() + "_MWTAB_REPORT_" +
-				timestamp + "." + MWTabReportTask.MWTAB_EXTENSION;
-		return fileName;
 	}
 
 	@Override

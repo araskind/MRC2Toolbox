@@ -71,6 +71,7 @@ public class JnaFileChooser
 	protected File[] selectedFiles;
 	protected File currentDirectory;
 	protected ArrayList<String[]> filters;
+	protected String[] selectedFilter;
 	protected boolean multiSelectionEnabled;
 	protected Mode mode;
 	protected boolean allowOverwrite = false;
@@ -240,7 +241,14 @@ public class JnaFileChooser
 
 			selectedFiles = multiSelectionEnabled ? fc.getSelectedFiles() : new File[] { fc.getSelectedFile() };
 			currentDirectory = fc.getCurrentDirectory();
-
+			
+			FileNameExtensionFilter fFilter = (FileNameExtensionFilter) fc.getFileFilter();
+			if(fFilter != null) {
+				ArrayList<String> parts = new ArrayList<String>();
+				parts.add(fFilter.getDescription());
+				Collections.addAll(parts, fFilter.getExtensions());
+				selectedFilter = parts.toArray(new String[parts.size()]);
+			}
 			if (action == Action.Save && fc.getSelectedFile() != null 
 					&& fc.getSelectedFile().exists() && !allowOverwrite ) {
 
@@ -274,6 +282,9 @@ public class JnaFileChooser
 		if (result) {
 			selectedFiles = fc.getSelectedFiles();
 			currentDirectory = fc.getCurrentDirectory();
+			
+			if(filters.size() > 0 && fc.getFilterIndex() > 0)
+				selectedFilter = filters.get(fc.getFilterIndex() - 1);
 		}
 		return result;
 	}
@@ -388,5 +399,13 @@ public class JnaFileChooser
 
 	public void setAllowOverwrite(boolean allowOverwrite) {
 		this.allowOverwrite = allowOverwrite;
+	}
+
+	public ArrayList<String[]> getFilters() {
+		return filters;
+	}
+
+	public String[] getSelectedFilter() {
+		return selectedFilter;
 	}
 }

@@ -42,7 +42,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -51,7 +50,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -60,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.ConvertCefLibraryForRecursionTask;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
@@ -250,55 +248,46 @@ public class ConvertLibraryForRecursionDialog  extends JDialog implements Action
 	
 	private void selectInputLibraryFile() {
 
-		JFileChooser libFileChooser = new ImprovedFileChooser();
-		File inputFile = null;
-
-		libFileChooser.setAcceptAllFileFilterUsed(false);
-		libFileChooser.setMultiSelectionEnabled(false);
-		libFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		libFileChooser.setDialogTitle("Select library file:");
-		FileNameExtensionFilter cefFilter = 
-				new FileNameExtensionFilter(MsLibraryFormat.CEF.getName(), 
-						MsLibraryFormat.CEF.getFileExtension());
-		libFileChooser.setFileFilter(cefFilter);
-		libFileChooser.setCurrentDirectory(baseLibraryDirectory);
-
-		if (libFileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-			inputFile = libFileChooser.getSelectedFile();
-			baseLibraryDirectory = libFileChooser.getCurrentDirectory();
+		JnaFileChooser fc = new JnaFileChooser(baseLibraryDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.setTitle("Select library file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File inputFile = fc.getSelectedFile();
 			if (inputFile.exists() && inputFile.canRead()) {
 
 				sourceLibraryTextField.setText(inputFile.getAbsolutePath());
-				savePreferences();
-				
 				if(getOutputFolder() == null)
 					outputFolderTextField.setText(inputFile.getParentFile().getAbsolutePath());
+				
+				baseLibraryDirectory = inputFile.getParentFile();
+				savePreferences();
 			}
 		}
 	}
 	
 	private void selectOutputFolder() {
-		
-		JFileChooser outputFolderChooser = new ImprovedFileChooser();
-		File outputFolder = null;
 
-		outputFolderChooser.setMultiSelectionEnabled(false);
-		outputFolderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		outputFolderChooser.setDialogTitle("Select output folder:");
+		JnaFileChooser fc = new JnaFileChooser(baseLibraryDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select output folder for converted library file");
+		fc.setMultiSelectionEnabled(false);
+		
 		File inputCef =  getInputFile();
 		if(inputCef != null)
-			outputFolderChooser.setCurrentDirectory(inputCef.getParentFile());
+			fc.setCurrentDirectory(inputCef.getParentFile().getAbsolutePath());
 		else
-			outputFolderChooser.setCurrentDirectory(baseLibraryDirectory);
-
-		if (outputFolderChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-			outputFolder = outputFolderChooser.getSelectedFile();
-			baseLibraryDirectory = outputFolderChooser.getCurrentDirectory();
-
-			if (outputFolder.exists() && outputFolder.canWrite())
+			fc.setCurrentDirectory(baseLibraryDirectory.getAbsolutePath());
+		
+		if (fc.showOpenDialog(this)) {
+			
+			File outputFolder = fc.getSelectedFile();			
+			if (outputFolder.exists() && outputFolder.canWrite()) {
 				outputFolderTextField.setText(outputFolder.getAbsolutePath());
+				baseLibraryDirectory = outputFolder;
+			}
 		}
 	}
 
