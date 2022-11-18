@@ -92,12 +92,16 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Export library");
 		setIconImage(((ImageIcon) exportLibraryIcon).getImage());
+		setModalityType(ModalityType.APPLICATION_MODAL);
+		setResizable(true);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setPreferredSize(new Dimension(640, 250));
+//		setSize(new Dimension(640, 250));
+		
 		this.exportCommand = exportCommand;
 		this.currentLibrary = currentLibrary;
 
 		String title = "";
-
 		if (exportCommand.equals(MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND.getName()))
 			title = "Export complete library to file";
 
@@ -108,11 +112,6 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 			title = "Export feature subset as library file";
 
 		setTitle(title);
-
-		setModalityType(ModalityType.APPLICATION_MODAL);
-		setSize(new Dimension(640, 480));
-		setResizable(true);
-		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		panel = new JPanel();
 		panel.setLayout(new BorderLayout(0, 0));
@@ -191,6 +190,7 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
+		pack();
 	}
 
 	@Override
@@ -213,8 +213,7 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 		fc.setTitle("Export library");
 		fc.setMultiSelectionEnabled(false);
 		fc.setSaveButtonText("Select");		
-		String defaultFileName = currentLibrary.getLibraryName() 
-				+ "." + MsLibraryFormat.values()[0].getFileExtension();
+		String defaultFileName = currentLibrary.getLibraryName();
 		fc.setDefaultFileName(defaultFileName);	
 		if (fc.showSaveDialog(this)) {
 						
@@ -230,7 +229,7 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 
 	private void exportLibrary() {
 		
-		String flePath = exportFileTextField.getSelectedText().trim();
+		String flePath = exportFileTextField.getText().trim();
 		if(flePath == null || flePath.isEmpty())
 			return;
 		

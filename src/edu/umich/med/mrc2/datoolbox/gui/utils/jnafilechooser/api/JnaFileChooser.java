@@ -240,14 +240,16 @@ public class JnaFileChooser
 		if (result == JFileChooser.APPROVE_OPTION) {
 
 			selectedFiles = multiSelectionEnabled ? fc.getSelectedFiles() : new File[] { fc.getSelectedFile() };
-			currentDirectory = fc.getCurrentDirectory();
-			
-			FileNameExtensionFilter fFilter = (FileNameExtensionFilter) fc.getFileFilter();
-			if(fFilter != null) {
-				ArrayList<String> parts = new ArrayList<String>();
-				parts.add(fFilter.getDescription());
-				Collections.addAll(parts, fFilter.getExtensions());
-				selectedFilter = parts.toArray(new String[parts.size()]);
+			currentDirectory = fc.getCurrentDirectory();		
+			if(fc.getFileFilter() instanceof FileNameExtensionFilter) {
+				
+				FileNameExtensionFilter fFilter = (FileNameExtensionFilter) fc.getFileFilter();
+				if(fFilter != null) {
+					ArrayList<String> parts = new ArrayList<String>();
+					parts.add(fFilter.getDescription());
+					Collections.addAll(parts, fFilter.getExtensions());
+					selectedFilter = parts.toArray(new String[parts.size()]);
+				}
 			}
 			if (action == Action.Save && fc.getSelectedFile() != null 
 					&& fc.getSelectedFile().exists() && !allowOverwrite ) {

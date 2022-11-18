@@ -237,7 +237,7 @@ public class NewIDTrackerBasedProjectDialog extends JDialog implements ActionLis
 
 		chooser = new ImprovedFileChooser();
 		chooser.setDialogType(JFileChooser.SAVE_DIALOG);
-		chooser.setPreferredSize(new Dimension(0, 0));
+		chooser.setPreferredSize(new Dimension(800, 640));
 		chooser.setBorder(null);
 		chooser.addActionListener(this);
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);

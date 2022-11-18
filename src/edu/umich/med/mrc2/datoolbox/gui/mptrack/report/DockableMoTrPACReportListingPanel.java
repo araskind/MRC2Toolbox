@@ -35,10 +35,9 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -58,7 +57,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.tables.XTableColumnModel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -71,7 +70,6 @@ public class DockableMoTrPACReportListingPanel extends DefaultSingleCDockable
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	private MoTrPACReportTable reportsTable;
 	private ReportTableToolbar toolbar;
-	private ImprovedFileChooser chooser;
 	private File baseDirectory;
 	private MotrpacReportUploadDialog motrpacReportUploadDialog;
 	private MoTrPACDataTrackingPanel parentPanel;
@@ -111,23 +109,6 @@ public class DockableMoTrPACReportListingPanel extends DefaultSingleCDockable
 		JScrollPane designScrollPane = new JScrollPane(reportsTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
 		loadPreferences();
-		initChooser();
-	}
-	
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		try {
-			chooser.setCurrentDirectory(baseDirectory);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
-		}
 	}
 	
 	public void loadReports(Collection<MoTrPACReport>reports) {
@@ -135,16 +116,17 @@ public class DockableMoTrPACReportListingPanel extends DefaultSingleCDockable
 	}
 
 	private void downloadReport(MoTrPACReport report) {
-		
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.setDialogTitle("Save report file \"" + report.getLinkedDocumentName() + "\" to local drive");
-		chooser.setSelectedFile(null);
-		if(chooser.showSaveDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION){
+
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select location to download \"" + report.getLinkedDocumentName() + "\" file");
+		fc.setOpenButtonText("Download report");
+		fc.setMultiSelectionEnabled(false);		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
 			
-			File destination = chooser.getSelectedFile();
-			baseDirectory = destination;
+			baseDirectory = fc.getSelectedFile();
 			try {
-				DocumentUtils.saveDocumentToFile(report.getLinkedDocumentId(), destination);
+				DocumentUtils.saveDocumentToFile(report.getLinkedDocumentId(), baseDirectory);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

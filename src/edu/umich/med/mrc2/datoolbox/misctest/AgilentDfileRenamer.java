@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -58,7 +57,7 @@ import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
@@ -71,7 +70,6 @@ public class AgilentDfileRenamer extends JFrame
 	 */
 	private static final long serialVersionUID = 946976178706518706L;
 
-	private JFileChooser chooser;
 	private File inputFile;
 	private File baseDirectory;
 	private JTextField originalNameTextField;
@@ -190,44 +188,34 @@ public class AgilentDfileRenamer extends JFrame
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(runButton);
 		rootPane.setDefaultButton(runButton);
-
 		loadPreferences();
 		pack();
-	}
-	
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);		
-		if(baseDirectory != null)
-			chooser.setCurrentDirectory(baseDirectory);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		String command = e.getActionCommand();
+		if (command.equals(BROWSE_FOR_INPUT)) 
+			selectAgilentRawDataFile();
 
-		if (command.equals(BROWSE_FOR_INPUT)) {
-			
-			if(chooser == null)
-				initChooser();
-			
-			chooser.showOpenDialog(this);
-		}
-		if (command.equals(RENAME_FILE)) {
+		if (command.equals(RENAME_FILE)) 
 			renameFile();
-		}
-		if (e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))  {
+	}
+	
+	private void selectAgilentRawDataFile() {
 
-			inputFile = chooser.getSelectedFile();
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select Agilent raw data file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			inputFile = fc.getSelectedFile();
 			baseDirectory = inputFile.getParentFile();
-			originalNameTextField.setText(chooser.getSelectedFile().getName());
-			newNameTextField.setText(chooser.getSelectedFile().getName());
+			originalNameTextField.setText(inputFile.getName());
+			newNameTextField.setText(inputFile.getName());
+			savePreferences();	
 		}
 	}
 
@@ -242,11 +230,6 @@ public class AgilentDfileRenamer extends JFrame
 		}		
 		String oldName = originalNameTextField.getText().trim();
 		String newName = newNameTextField.getText().trim();
-		
-//		if(oldName.equals(newName)) {
-//			MessageDialog.showWarningMsg("No name change!", this);
-//			return;
-//		}
 		if(newName.isEmpty()) {
 			MessageDialog.showWarningMsg("Name can not be empty!", this);
 			return;
@@ -255,7 +238,6 @@ public class AgilentDfileRenamer extends JFrame
 			newName += ".D";
 		
 		savePreferences();
-		chooser.setCurrentDirectory(baseDirectory);
 		try {
 			renameFileInSampleInfo(oldName, newName);
 		} catch (Exception e1) {

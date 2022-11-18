@@ -268,6 +268,28 @@ public class MotrPacDataCleaner extends JFrame implements ActionListener, Window
 			}
 		}
 	}
+	
+	private void selectFileOrDirectory(String command) {
+
+		chooser = new ImprovedFileChooser();
+		chooser.setPreferredSize(new Dimension(800, 640));
+		chooser.addActionListener(this);
+		chooser.setAcceptAllFileFilterUsed(false);
+		chooser.setMultiSelectionEnabled(false);
+		chooser.setDialogTitle(command);
+		chooser.setApproveButtonText(command);
+
+		if(command.equals(BROWSE_FOR_MANIFEST_FILE))
+			chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		else
+			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+		if(baseDirectory == null)
+			baseDirectory = new File(".");
+
+		chooser.setCurrentDirectory(baseDirectory);
+		chooser.showOpenDialog(this);
+	}
 
 	private void hashAndManifest() {
 		// TODO Auto-generated method stub
@@ -329,27 +351,6 @@ public class MotrPacDataCleaner extends JFrame implements ActionListener, Window
 			}
 			return null;
 		}
-	}
-
-	private void selectFileOrDirectory(String command) {
-
-		chooser = new ImprovedFileChooser();
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setDialogTitle(command);
-		chooser.setApproveButtonText(command);
-
-		if(command.equals(BROWSE_FOR_MANIFEST_FILE))
-			chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		else
-			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-		if(baseDirectory == null)
-			baseDirectory = new File(".");
-
-		chooser.setCurrentDirectory(baseDirectory);
-		chooser.showOpenDialog(this);
 	}
 
 	@Override

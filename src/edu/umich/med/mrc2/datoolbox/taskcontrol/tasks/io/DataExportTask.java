@@ -100,6 +100,7 @@ public class DataExportTask extends AbstractTask {
 	private ExperimentDesignSubset experimentDesignSubset;
 	private TreeSet<ExperimentalSample>activeSamples;
 	private boolean exportManifest;
+	boolean replaceSpecialCharacters;
 	
 	private static final NumberFormat rtFormat = MRC2ToolBoxConfiguration.getRtFormat();
 	private static final NumberFormat mzFormat = MRC2ToolBoxConfiguration.getMzFormat();
@@ -115,7 +116,8 @@ public class DataExportTask extends AbstractTask {
 			double pooledRsdCutoff,
 			double pooledFrequencyCutoff,
 			DataExportFields namingField,
-			boolean exportManifest) {
+			boolean exportManifest,
+			boolean replaceSpecialCharacters) {
 		
 		this.currentProject = currentProject;
 		this.dataPipeline = dataPipeline;
@@ -127,6 +129,7 @@ public class DataExportTask extends AbstractTask {
 		this.minPooledFrequency = pooledFrequencyCutoff;
 		this.namingField = namingField;
 		this.exportManifest = exportManifest;
+		this.replaceSpecialCharacters = replaceSpecialCharacters;
 		
 		columnSeparator = MRC2ToolBoxConfiguration.getTabDelimiter();
 		timeMap = new TreeMap<DataFile, String>();
@@ -246,9 +249,14 @@ public class DataExportTask extends AbstractTask {
 		HashMap<DataFile, Integer> fileColumnMap = 
 				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
 
-		for(String columnName : columnList)
-			header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
-
+		if(replaceSpecialCharacters) {
+			for(String columnName : columnList)
+				header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
+		}
+		else {
+			for(String columnName : columnList)
+				header[++columnCount] = columnName;
+		}
 		mzWriter.append(StringUtils.join(header, columnSeparator));
 		mzWriter.append(lineSeparator);
 		rtWriter.append(StringUtils.join(header, columnSeparator));
@@ -472,9 +480,14 @@ public class DataExportTask extends AbstractTask {
 		HashMap<DataFile, Long>matrixFileMap = new HashMap<DataFile, Long>();
 		fileColumnMap.keySet().stream().forEach(f -> matrixFileMap.put(f, dataMatrix.getRowForLabel(f)));
 
-		for(String columnName : columnList)
-			header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
-
+		if(replaceSpecialCharacters) {
+			for(String columnName : columnList)
+				header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
+		}
+		else {
+			for(String columnName : columnList)
+				header[++columnCount] = columnName;
+		}
 		writer.append(StringUtils.join(header, columnSeparator));
 		writer.append(lineSeparator);
 		long[] coordinates = new long[2];
@@ -570,9 +583,14 @@ public class DataExportTask extends AbstractTask {
 		HashMap<DataFile, Integer> fileColumnMap = 
 				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
 
-		for(String columnName : columnList)
-			header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
-
+		if(replaceSpecialCharacters) {
+			for(String columnName : columnList)
+				header[++columnCount] = columnName.replaceAll("\\p{Punct}+", "-");
+		}
+		else {
+			for(String columnName : columnList)
+				header[++columnCount] = columnName;
+		}
 		writer.append(StringUtils.join(header, columnSeparator));
 		writer.append(lineSeparator);
 
@@ -853,6 +871,7 @@ public class DataExportTask extends AbstractTask {
 				maxPooledRsd,
 				minPooledFrequency,
 				namingField,
-				exportManifest);
+				exportManifest,
+				replaceSpecialCharacters);
 	}
 }

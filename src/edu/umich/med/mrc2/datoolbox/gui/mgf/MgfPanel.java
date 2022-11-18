@@ -28,13 +28,12 @@ import java.util.Arrays;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.umich.med.mrc2.datoolbox.data.MsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsMs;
@@ -51,7 +50,7 @@ import edu.umich.med.mrc2.datoolbox.gui.mgf.mgftree.DockableMsMsTree;
 import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -175,21 +174,18 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 
 	private File selectMgfFile() {
 
-		JFileChooser chooser = new ImprovedFileChooser();
-		File inputFile = null;
-		chooser.setCurrentDirectory(baseDirectory);
-
-		chooser.setDialogTitle("Select MGF file");
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		FileNameExtensionFilter mgfFileFilter = new FileNameExtensionFilter("MGF files", "MGF", "mgf");
-		chooser.setFileFilter(mgfFileFilter);
-
-		if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
-			inputFile = chooser.getSelectedFile();
-
-		return inputFile;
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.setTitle("Select library CEF file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File inputFile = fc.getSelectedFile();
+			baseDirectory = inputFile.getParentFile();
+			return inputFile;
+		}
+		return null;
 	}
 
 	@Override

@@ -246,7 +246,8 @@ public class RegexTest {
 	
 	private static void batchUpdateDFileNames() {
 		
-		File sourceDirectory = new File("C:\\Users\\Sasha\\Downloads\\_2_rename\\_SEG1");
+		File sourceDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T "
+				+ "C20000316E\\A049 - Central carbon metabolism profiling\\Raw data\\Heart\\NEG");
 		IOFileFilter dotDfilter = 
 				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
 		Collection<File> dotDfiles = FileUtils.listFilesAndDirs(

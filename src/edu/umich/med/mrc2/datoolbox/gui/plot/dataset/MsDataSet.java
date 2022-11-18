@@ -269,7 +269,7 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 
 			MsPoint[] libPattern = cf.getSpectrum().getCompletePattern(scaleMs);
 			msSeries.put(featureCount, libPattern);
-			String fName = cf.getName();
+			String fName = Integer.toString(featureCount + 1) + " - " + cf.getName();
 			if(cf instanceof LibraryMsFeature)
 				fName += " - library";
 

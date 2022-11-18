@@ -234,33 +234,6 @@ public class DockableInputFilesPanel extends DefaultSingleCDockable
 			recentFiles.add(dataFolder);
 			savePreferences();
 		}
-
-//		JFileChooser chooser = new ImprovedFileChooser();
-//		File dataFolder = null;
-//		chooser.setAcceptAllFileFilterUsed(false);
-//		chooser.setMultiSelectionEnabled(false);
-//		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-//		chooser.setDialogTitle("Select folder containing data files:");		
-//		if (command.equals(MainActionCommands.BROWSE_FOR_POSITIVE_MODE_RAW_DATA_FOLDER.getName()))
-//			chooser.setCurrentDirectory(positiveModeBaseDirectory);
-//		
-//		if (command.equals(MainActionCommands.BROWSE_FOR_NEGATIVE_MODE_RAW_DATA_FOLDER.getName()))
-//			chooser.setCurrentDirectory(negativeModeBaseDirectory);
-//			
-//		if (chooser.showOpenDialog(MRC2ToolBoxCore.getMainWindow()) == JFileChooser.APPROVE_OPTION) {
-//
-//			dataFolder = chooser.getSelectedFile();
-//			if (command.equals(MainActionCommands.BROWSE_FOR_POSITIVE_MODE_RAW_DATA_FOLDER.getName())) {
-//				positiveModeFolderTextField.setText(dataFolder.getAbsolutePath());
-//				positiveModeBaseDirectory = dataFolder.getParentFile();
-//			}
-//			if (command.equals(MainActionCommands.BROWSE_FOR_NEGATIVE_MODE_RAW_DATA_FOLDER.getName())) {
-//				negativeModeFolderTextField.setText(dataFolder.getAbsolutePath());
-//				negativeModeBaseDirectory = dataFolder.getParentFile();
-//			}
-//			recentFiles.add(dataFolder);
-//			savePreferences();
-//		}
 	}
 
 	public File getNegativeDataFolder() {

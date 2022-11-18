@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.rawdata;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +44,7 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.border.EmptyBorder;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -94,6 +95,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
@@ -134,7 +136,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private DockableMsExtractorPanel msExtractorPanel;
 	private DockableRawDataFilePropertiesTable rawDataFilePropertiesTable;
 	private DockableScanPanel scanNavigationPanel;
-	private ImprovedFileChooser chooser;
 	private IndeterminateProgressDialog idp;
 	private CloseRawDataFilesDialog closeRawDataFilesDialog;
 	private RawDataConversionSetupDialog rawDataConversionSetupDialog;
@@ -214,7 +215,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		initActions();
 		loadLayout(layoutConfigFile);
 		loadPreferences();
-		initChooser();
 		populatePanelsMenu();
 	}
 	
@@ -294,21 +294,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName(),
 				MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName(), 
 				dataFileToolsIcon, this));
-	}
-	
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setMultiSelectionEnabled(true);
-		File rawDataRepository = new File(MRC2ToolBoxConfiguration.getRawDataRepository());
-		if(rawDataRepository.exists() && rawDataRepository.isDirectory())
-			chooser.setCurrentDirectory(rawDataRepository);
-
-		chooser.setFileFilter(
-				new FileNameExtensionFilter("Raw MS files", "mzml", "mzML", "mzXML", "mzxml"));
 	}
 
 	@Override
@@ -864,6 +849,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 		JFileChooser chooser = new ImprovedFileChooser();
 		chooser.setCurrentDirectory(baseDirectory);
+		chooser.setPreferredSize(new Dimension(800, 640));
 		chooser.setDialogTitle("Select raw data analysis project file");
 		chooser.setAcceptAllFileFilterUsed(false);
 		chooser.setMultiSelectionEnabled(false);
@@ -1028,15 +1014,37 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		MRC2ToolBoxCore.getTaskController().addTask(task);		
 		rawDataConversionSetupDialog.dispose();
 	}
+	
+//	private void initChooser() {
+//
+//		chooser = new ImprovedFileChooser();
+//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
+//		chooser.setAcceptAllFileFilterUsed(false);
+//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//		chooser.setMultiSelectionEnabled(true);
+//		File rawDataRepository = new File(MRC2ToolBoxConfiguration.getRawDataRepository());
+//		if(rawDataRepository.exists() && rawDataRepository.isDirectory())
+//			chooser.setCurrentDirectory(rawDataRepository);
+//
+//		chooser.setFileFilter(
+//				new FileNameExtensionFilter("Raw MS files", "mzml", "mzML", "mzXML", "mzxml"));
+//	}
 
 	private void openRawDataFiles() {
 		
-		if(chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+		JnaFileChooser fc = new JnaFileChooser(MRC2ToolBoxConfiguration.getRawDataRepository());
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Raw MS files", "mzml", "mzML", "mzXML", "mzxml");
+		fc.setTitle("Select raw data files");
+		fc.setMultiSelectionEnabled(true);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
 			
-			File[] selectedFiles = chooser.getSelectedFiles();
+			File[] selectedFiles = fc.getSelectedFiles();
 			if(selectedFiles.length == 0)
 				return;
 			
+			baseDirectory = selectedFiles[0].getParentFile();
+			savePreferences();
 			ArrayList<File>filesToOpen = new ArrayList<File>();
 			for(File rf : selectedFiles) {
 				
@@ -1046,8 +1054,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			if(filesToOpen.isEmpty()) {
 				MessageDialog.showWarningMsg("All selected files already opened.", this.getContentPane());
 				return;
-			}			
-			chooser.setCurrentDirectory(chooser.getSelectedFile().getParentFile());
+			}
 			RawDataFileOpenTask task = new RawDataFileOpenTask(filesToOpen);
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
@@ -1072,7 +1079,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			this.append = true;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public Void doInBackground() {
 

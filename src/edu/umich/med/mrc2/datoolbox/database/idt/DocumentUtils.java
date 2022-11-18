@@ -215,7 +215,8 @@ public class DocumentUtils {
 	public static void saveDocumentToFile(String linkedDocumentId, File destinationFolder) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
-		String query = "SELECT DOCUMENT_NAME, DOCUMENT_FORMAT, DOCUMENT_CONTENTS FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
+		String query = "SELECT DOCUMENT_NAME, DOCUMENT_FORMAT, "
+				+ "DOCUMENT_CONTENTS FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, linkedDocumentId);
 		ResultSet rs = ps.executeQuery();

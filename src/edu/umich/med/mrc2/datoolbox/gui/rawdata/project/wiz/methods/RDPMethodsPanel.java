@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -336,6 +337,7 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 	private File selectRawFilesDirectory() {
 
 		JFileChooser chooser = new ImprovedFileChooser();
+		chooser.setPreferredSize(new Dimension(800, 640));
 		File inputFile = null;
 
 		chooser.setAcceptAllFileFilterUsed(false);

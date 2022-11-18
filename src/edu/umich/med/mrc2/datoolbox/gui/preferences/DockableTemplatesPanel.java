@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.preferences;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -622,6 +623,7 @@ public class DockableTemplatesPanel extends DefaultSingleCDockable implements Ba
 		JFileChooser chooser = new ImprovedFileChooser();
 		chooser.setAcceptAllFileFilterUsed(false);
 		chooser.setMultiSelectionEnabled(false);
+		chooser.setPreferredSize(new Dimension(800, 640));
 		File inputFile = null;
 		String title = "";
 

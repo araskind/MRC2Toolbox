@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -370,6 +371,7 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 	private File selectRawFilesDirectory() {
 
 		JFileChooser chooser = new ImprovedFileChooser();
+		chooser.setPreferredSize(new Dimension(800, 640));
 		File inputFile = null;
 
 		chooser.setAcceptAllFileFilterUsed(false);

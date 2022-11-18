@@ -55,7 +55,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
@@ -77,7 +76,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -104,7 +103,6 @@ public class MotrpacReportUploadDialog extends JDialog implements ActionListener
 	private JLabel dateCreatedValueLabel;
 	private JButton browseButton;
 	private File baseDirectory;
-	private ImprovedFileChooser chooser;
 	private boolean allowDropFile;
 
 	private Collection<MotrpacReportCodeSelectorPanel>codeSelectors;
@@ -351,14 +349,10 @@ public class MotrpacReportUploadDialog extends JDialog implements ActionListener
 		            ex.printStackTrace();
 		        }
 		    }
-		});
-		
+		});		
 		loadPreferences();
-		initChooser();
-		
 		studyComboBox.addItemListener(this);
-		experimentComboBox.addItemListener(this);
-		
+		experimentComboBox.addItemListener(this);		
 		pack();
 	}
 	
@@ -496,30 +490,26 @@ public class MotrpacReportUploadDialog extends JDialog implements ActionListener
 		}		
 		return errors;
 	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(true);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setCurrentDirectory(baseDirectory);
-	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(BROWSE_COMMAND))
-			chooser.showOpenDialog(this);
-
-		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-
-			File inputFile = chooser.getSelectedFile();
+			selectReportFile();
+	}
+	
+	private void selectReportFile() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.setTitle("Select report file to upload");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			File inputFile = fc.getSelectedFile();
 			baseDirectory = inputFile.getParentFile();
-			reportFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
-			savePreferences();
+			reportFileTextField.setText(inputFile.getAbsolutePath());
+			savePreferences();	
 		}
 	}
 	

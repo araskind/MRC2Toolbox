@@ -32,14 +32,12 @@ import java.util.Date;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.orsoncharts.graphics3d.ExportUtils;
 import com.orsoncharts.graphics3d.swing.Panel3D;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.ImageExportFormat;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.ArgumentChecker;
@@ -81,47 +79,88 @@ public class ExportChartToFileAction extends AbstractAction {
     @Override
 	public void actionPerformed(ActionEvent e) {
 
-		JFileChooser fileChooser = new ImprovedFileChooser();
-		FileNameExtensionFilter filter = new FileNameExtensionFilter(format.getName(), format.getExtension());
-		fileChooser.addChoosableFileFilter(filter);
-		fileChooser.setFileFilter(filter);
-		fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
-
-		File baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
-		if (MRC2ToolBoxCore.getCurrentProject() != null) {
+//		JFileChooser fileChooser = new ImprovedFileChooser();
+//		FileNameExtensionFilter filter = new FileNameExtensionFilter(format.getName(), format.getExtension());
+//		fileChooser.addChoosableFileFilter(filter);
+//		fileChooser.setFileFilter(filter);
+//		fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+//
+//		File baseDirectory = 
+//				new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
+//		if (MRC2ToolBoxCore.getCurrentProject() != null) {
+//			baseDirectory = MRC2ToolBoxCore.getCurrentProject().getExportsDirectory();
+//
+//			fileChooser.setCurrentDirectory(baseDirectory);
+//			String fileName = "New image-" + MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + "." + format.getExtension();
+//			fileChooser.setSelectedFile(new File(fileName));
+//			int option = fileChooser.showSaveDialog(this.panel);
+//
+//			if (option == JFileChooser.APPROVE_OPTION) {
+//
+//				File imageFile = FIOUtils.changeExtension(fileChooser.getSelectedFile(), format.getExtension());
+//
+//				Dimension2D size = panel.getSize();
+//				int w = (int) size.getWidth();
+//				int h = (int) size.getHeight();
+//
+//				if(format.equals(ImageExportFormat.PNG)) {
+//
+//					BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+//					Graphics2D g2 = image.createGraphics();
+//					panel.getDrawable().draw(g2, new Rectangle(w, h));
+//
+//					try {
+//						ImageIO.write(image, "png", imageFile);
+//					} catch (IOException ex) {
+//						throw new RuntimeException(ex);
+//					}
+//				}
+//				if(format.equals(ImageExportFormat.PDF))
+//					ExportUtils.writeAsPDF(panel.getDrawable(), w, h, imageFile);
+//
+//				if(format.equals(ImageExportFormat.SVG))
+//					ExportUtils.writeAsSVG(panel.getDrawable(), w, h, imageFile);
+//			}
+//		}
+		File baseDirectory = new File(
+				MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
+		if (MRC2ToolBoxCore.getCurrentProject() != null)
 			baseDirectory = MRC2ToolBoxCore.getCurrentProject().getExportsDirectory();
+		String defaultFileName = "New image-" + 
+			MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + 
+			"." + format.getExtension();
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter(format.getName(), format.getExtension());
+		fc.setTitle("Export chart to image file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Export");
+		fc.setDefaultFileName(defaultFileName);	
+		if (fc.showSaveDialog(this.panel)) {
+			
+			File imageFile = FIOUtils.changeExtension(fc.getSelectedFile(), format.getExtension());
+			Dimension2D size = panel.getSize();
+			int w = (int) size.getWidth();
+			int h = (int) size.getHeight();
 
-			fileChooser.setCurrentDirectory(baseDirectory);
-			String fileName = "New image-" + MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + "." + format.getExtension();
-			fileChooser.setSelectedFile(new File(fileName));
-			int option = fileChooser.showSaveDialog(this.panel);
+			if(format.equals(ImageExportFormat.PNG)) {
 
-			if (option == JFileChooser.APPROVE_OPTION) {
+				BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+				Graphics2D g2 = image.createGraphics();
+				panel.getDrawable().draw(g2, new Rectangle(w, h));
 
-				File imageFile = FIOUtils.changeExtension(fileChooser.getSelectedFile(), format.getExtension());
-
-				Dimension2D size = panel.getSize();
-				int w = (int) size.getWidth();
-				int h = (int) size.getHeight();
-
-				if(format.equals(ImageExportFormat.PNG)) {
-
-					BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-					Graphics2D g2 = image.createGraphics();
-					panel.getDrawable().draw(g2, new Rectangle(w, h));
-
-					try {
-						ImageIO.write(image, "png", imageFile);
-					} catch (IOException ex) {
-						throw new RuntimeException(ex);
-					}
+				try {
+					ImageIO.write(image, "png", imageFile);
+				} catch (IOException ex) {
+					throw new RuntimeException(ex);
 				}
-				if(format.equals(ImageExportFormat.PDF))
-					ExportUtils.writeAsPDF(panel.getDrawable(), w, h, imageFile);
-
-				if(format.equals(ImageExportFormat.SVG))
-					ExportUtils.writeAsSVG(panel.getDrawable(), w, h, imageFile);
 			}
+			if(format.equals(ImageExportFormat.PDF))
+				ExportUtils.writeAsPDF(panel.getDrawable(), w, h, imageFile);
+
+			if(format.equals(ImageExportFormat.SVG))
+				ExportUtils.writeAsSVG(panel.getDrawable(), w, h, imageFile);
 		}
 	}
 }

@@ -28,19 +28,16 @@ import java.io.File;
 import java.util.Collection;
 
 import javax.swing.Icon;
-import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.SwingUtilities;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 
 public class DockableRawDataFileSelector extends DefaultSingleCDockable 
 		implements ActionListener {
 
-	private ImprovedFileChooser chooser;
 	private File baseDirectory;
 	private RawDataFilesTable rawDataFilesTable;
 	private RawDataFileSelectorToolbar toolbar;
@@ -56,26 +53,12 @@ public class DockableRawDataFileSelector extends DefaultSingleCDockable
 		rawDataFilesTable = new RawDataFilesTable();
 		JScrollPane scroll = new JScrollPane(rawDataFilesTable);
 		add(scroll, BorderLayout.CENTER);
-		
-		initChooser();
 	}
 
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setMultiSelectionEnabled(true);
-		chooser.setFileFilter(
-				new FileNameExtensionFilter("Raw MS files", "mzml", "mzML", "mzXML", "mzxml"));
-	}
-	
 	public void setBaseDirectory(File baseDir) {
 		
-		baseDirectory = baseDir;
-		if(baseDirectory.exists() && baseDirectory.isDirectory())
-			chooser.setCurrentDirectory(baseDirectory);
+		if(baseDir != null && baseDir.exists() && baseDir.isDirectory())
+			baseDirectory = baseDir;
 	}
 	
 	@Override
@@ -94,9 +77,14 @@ public class DockableRawDataFileSelector extends DefaultSingleCDockable
 	
 	private void addRawDataFiles() {
 		
-		if(chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Raw MS files", "mzml", "mzML", "mzXML", "mzxml");
+		fc.setTitle("Select raw data files");
+		fc.setMultiSelectionEnabled(true);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
 			
-			File[] selectedFiles = chooser.getSelectedFiles();
+			File[] selectedFiles = fc.getSelectedFiles();
 			if(selectedFiles.length == 0)
 				return;
 			

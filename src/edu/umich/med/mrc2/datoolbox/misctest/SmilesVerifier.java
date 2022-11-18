@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -43,7 +44,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -72,7 +72,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDbConnectionManager;
 import edu.umich.med.mrc2.datoolbox.gui.structure.MolStructurePanel;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import net.sf.jniinchi.INCHI_RET;
 
@@ -94,7 +94,6 @@ public class SmilesVerifier extends JFrame implements ActionListener, WindowList
 	private SmilesGenerator smilesGenerator;
 	private InChIGeneratorFactory igfactory;
 	private InChIGenerator inChIGenerator;
-	private JFileChooser chooser;
 	private File inputFile;
 	private File baseDirectory;
 	private JLabel pepInputFileLabel;
@@ -282,13 +281,6 @@ public class SmilesVerifier extends JFrame implements ActionListener, WindowList
 		pepSmilesButton.setActionCommand(CREATE_PEPTIDE_SMILES);
 		pepSmilesButton.addActionListener(this);
 
-		//	Input chooser
-		chooser = new ImprovedFileChooser();
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
 		addWindowListener(this);
 	}
 
@@ -324,13 +316,20 @@ public class SmilesVerifier extends JFrame implements ActionListener, WindowList
 				e.printStackTrace();
 			}
 		}
-		if (event.getSource().equals(chooser)) {
+	}
 
-			if (event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-				inputFile = chooser.getSelectedFile();
-				baseDirectory = inputFile.getParentFile();
-				pepInputFileLabel.setText(inputFile.getPath());
-			}
+	private void selectPeptideInput() {
+
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("Text files", "txt", "TXT", "tsv", "TSV");
+		fc.setTitle("Select input file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(this)) {
+			
+			inputFile = fc.getSelectedFile();
+			baseDirectory = inputFile.getParentFile();
+			pepInputFileLabel.setText(inputFile.getPath());
 		}
 	}
 
@@ -407,9 +406,10 @@ public class SmilesVerifier extends JFrame implements ActionListener, WindowList
 			}
 		}
 		//	Create and write output
-		File exportFile = new File(baseDirectory + File.separator + FilenameUtils.getBaseName(inputFile.getPath()) + "_output.txt");
+		File exportFile = 
+				Paths.get(baseDirectory.getAbsolutePath(), 
+						FilenameUtils.getBaseName(inputFile.getPath()) + "_output.txt").toFile();
 		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
-
 		for (Entry<String, String[]> entry : pepDataMap.entrySet()) {
 
 			String line = entry.getKey() + columnSeparator + StringUtils.join(entry.getValue(), columnSeparator) + "\n";
@@ -417,11 +417,6 @@ public class SmilesVerifier extends JFrame implements ActionListener, WindowList
 		}
 		writer.flush();
 		writer.close();
-	}
-
-
-	private void selectPeptideInput() {
-		chooser.showOpenDialog(this);
 	}
 
 	private void showPepetideStructure(){

@@ -498,6 +498,9 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			if(entry.getValue().getClazz().equals(Integer.class))
 				ps.setInt(entry.getKey(), (Integer)entry.getValue().getValue());
 		}
+		Adduct defaultAdduct = 
+				AdductManager.getDefaultAdductForPolarity(polarity);
+		
 		//	MS1 query 
 		String msOneQuery =
 				"SELECT ADDUCT_ID, COMPOSITE_ADDUCT_ID, MZ, HEIGHT "
@@ -533,11 +536,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			MsFeature f = new MsFeature(id, name, rt);
 			f.setPolarity(polarity);
 			f.setAnnotatedObjectType(AnnotatedObjectType.MSMS_FEATURE);
-			Adduct defaultAdduct = 
-					AdductManager.getDefaultAdductForPolarity(polarity);
 			
 			//	TODO
-//			IDTMsDataUtils.attachMS1SpectrumForMsMs(f, conn);
 			MassSpectrum spectrum = new MassSpectrum();
 			Map<Adduct, Collection<MsPoint>> adductMap =
 					new TreeMap<Adduct,Collection<MsPoint>>();
@@ -546,15 +546,13 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			msOneRs = msOnePs.executeQuery();
 			while(msOneRs.next()) {
 				
+				Adduct adduct = defaultAdduct;
 				String adductId = msOneRs.getString("ADDUCT_ID");
 				if(adductId == null)
 					adductId = msOneRs.getString("COMPOSITE_ADDUCT_ID");
 
-				Adduct adduct =
-						AdductManager.getAdductById(adductId);
-
-				if(adduct == null)
-					adduct = defaultAdduct;
+				if(adductId != null)
+					adduct = AdductManager.getAdductById(adductId);
 
 				if(!adductMap.containsKey(adduct))
 					adductMap.put(adduct, new ArrayList<MsPoint>());
@@ -717,8 +715,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 							fb.getMsFeature().getSpectrum().getMsPoints().stream().
 							filter(p -> !p.equals(m1p)).
 							filter(p -> iw.contains(p.getMz())).
-							sorted(MsUtils.mzSorter).collect(Collectors.toList());
-					
+							sorted(MsUtils.mzSorter).collect(Collectors.toList());					
 					msms.setMinorParentIons(minorParentIons, msOneParent);
 					
 					//	Get scan map

@@ -124,6 +124,7 @@ public class DataExportDialog extends JDialog
 	private FileNameExtensionFilter txtFilter;
 	private JCheckBox exportManifestCheckBox;
 	private JTextField resultsFileTextField;
+	private JCheckBox replaceSpecCharsCheckBox;
 
 	public DataExportDialog() {		
 		this(MainActionCommands.EXPORT_RESULTS_4BINNER_COMMAND);
@@ -284,6 +285,16 @@ public class DataExportDialog extends JDialog
 		gbc_maxRsdTextField.gridy = 3;
 		panel.add(maxRsdTextField, gbc_maxRsdTextField);
 		
+		replaceSpecCharsCheckBox = 
+				new JCheckBox("Replace special characters with dash symbol");
+		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
+		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_chckbxNewCheckBox.gridwidth = 2;
+		gbc_chckbxNewCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_chckbxNewCheckBox.gridx = 0;
+		gbc_chckbxNewCheckBox.gridy = 4;
+		panel.add(replaceSpecCharsCheckBox, gbc_chckbxNewCheckBox);
+		
 		JLabel lblNewLabel = new JLabel("Export file:");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
@@ -293,7 +304,6 @@ public class DataExportDialog extends JDialog
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 		
 		resultsFileTextField = new JTextField();
-		resultsFileTextField.setEditable(false);
 		GridBagConstraints gbc_textField = new GridBagConstraints();
 		gbc_textField.gridwidth = 5;
 		gbc_textField.insets = new Insets(0, 0, 0, 5);
@@ -386,6 +396,10 @@ public class DataExportDialog extends JDialog
 			baseDirectory = exportFile.getParentFile();
 		}
 	}
+	
+	public boolean replaceSpecChars() {
+		return replaceSpecCharsCheckBox.isSelected();
+	}
 
 	public void setBaseDirectory(File newBase) {
 		
@@ -417,7 +431,8 @@ public class DataExportDialog extends JDialog
 				getMaxRsd(),
 				getMinFrequency(),
 				getDataExportNamingField(),
-				exportManifest());
+				exportManifest(),
+				replaceSpecChars());
 		det.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(det);		
 	}

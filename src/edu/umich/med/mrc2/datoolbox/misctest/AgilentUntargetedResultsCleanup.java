@@ -42,13 +42,13 @@ import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
@@ -59,7 +59,7 @@ import org.apache.commons.io.FileUtils;
 
 import edu.umich.med.mrc2.datoolbox.gui.automator.TextAreaOutputStream;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 
 public class AgilentUntargetedResultsCleanup extends JFrame implements ActionListener, WindowListener{
 
@@ -69,7 +69,6 @@ public class AgilentUntargetedResultsCleanup extends JFrame implements ActionLis
 	 */
 	private static final long serialVersionUID = 946976178706518706L;
 
-	private JFileChooser chooser;
 	private File inputFile;
 	private File baseDirectory;
 	private JTextField textField;
@@ -175,23 +174,7 @@ public class AgilentUntargetedResultsCleanup extends JFrame implements ActionLis
 		areaScrollPane.setPreferredSize(new Dimension(600, 250));
 
 		panel_1.add(areaScrollPane, BorderLayout.CENTER);
-
-		//	Input chooser
-		initChooser();
 		initConsol();
-	}
-
-	private void initChooser() {
-
-		chooser = new ImprovedFileChooser();
-		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-		chooser.addActionListener(this);
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-//		baseDirectory = new File(".").getAbsoluteFile();
-//		chooser.setCurrentDirectory(baseDirectory);
 	}
 
 	private void initConsol() {
@@ -215,25 +198,28 @@ public class AgilentUntargetedResultsCleanup extends JFrame implements ActionLis
 
 		String command = e.getActionCommand();
 
-		if (command.equals(BROWSE_FOR_INPUT)) {
+		if (command.equals(BROWSE_FOR_INPUT))
+			selectRawDataFolder();
 
-			chooser.resetChoosableFileFilters();
-			//	chooser.setFileFilter(sdfFilter);
-			chooser.setFileFilter(xmlFilter);
-			//	chooser.setFileFilter(mspFilter);
-			chooser.showOpenDialog(this);
-		}
-		if (command.equals(REMOVE_RESULTS)) {
+		if (command.equals(REMOVE_RESULTS))
 			removeResultsFolders();
-		}
-		if (e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))  {
-
-			inputFile = chooser.getSelectedFile();
+	}
+	
+	private void selectRawDataFolder() {
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Directories);
+		fc.setTitle("Select directory containing raw data files:");
+		fc.setOpenButtonText("Select folder");
+		fc.setMultiSelectionEnabled(false);		
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane())))	{	
+			
+			inputFile = fc.getSelectedFile();
 			baseDirectory = inputFile.getParentFile();
-			textField.setText(chooser.getSelectedFile().getAbsolutePath());
+			textField.setText(inputFile.getAbsolutePath());
 		}
 	}
-
+	
 	private void removeResultsFolders() {
 		consoleTextArea.setText("");
 		initConsol();

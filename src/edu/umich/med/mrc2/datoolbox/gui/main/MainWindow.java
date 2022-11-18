@@ -727,9 +727,8 @@ public class MainWindow extends JFrame
 
 	private void initProjectLoadTask(ProjectType projectType) {
 
-//		File savedProjectFile = selectProjectFile(projectType);
-		
 		JFileChooser chooser = new ImprovedFileChooser();
+		chooser.setPreferredSize(new Dimension(800, 640));
 		chooser.setCurrentDirectory(projectBaseDirectory);
 		chooser.setDialogTitle("Select project file");
 		chooser.setAcceptAllFileFilterUsed(false);
@@ -813,40 +812,6 @@ public class MainWindow extends JFrame
 			ltp.addTaskListener(getPanel(PanelList.RAW_DATA_EXAMINER));
 			MRC2ToolBoxCore.getTaskController().addTask(ltp);
 		}
-	}
-	
-	private File selectProjectFile(ProjectType projectType) {
-
-		JFileChooser chooser = new ImprovedFileChooser();
-		chooser.setCurrentDirectory(projectBaseDirectory);
-		chooser.setDialogTitle("Select project file");
-		chooser.setAcceptAllFileFilterUsed(false);
-		chooser.setMultiSelectionEnabled(false);
-		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		chooser.getActionMap().get("viewTypeDetails").actionPerformed(null);	
-		File projectFile = null;
-		if (chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
-			
-			
-			File selectedFile = chooser.getSelectedFile();
-			if(selectedFile.isDirectory()) {
-				List<String> pfList = FIOUtils.findFilesByExtension(
-						Paths.get(selectedFile.getAbsolutePath()), 
-						MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION);
-				if(pfList == null || pfList.isEmpty()) {
-					MessageDialog.showWarningMsg(selectedFile.getName() + " is not a valid project", chooser);
-					return null;
-				}
-				projectFile = new File(pfList.get(0));
-				projectBaseDirectory = selectedFile.getParentFile();
-			}
-			else {
-				projectFile = selectedFile;
-				projectBaseDirectory = projectFile.getParentFile().getParentFile();
-			}
-			savePreferences();
-		}
-		return projectFile;
 	}
 
 	private synchronized void initWindow() {
@@ -1109,6 +1074,7 @@ public class MainWindow extends JFrame
 		File inputFile = null;
 
 		chooser.setCurrentDirectory(new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()));
+		chooser.setPreferredSize(new Dimension(800, 640));
 		chooser.setDialogTitle("Select the name and destination for the project copy");
 		chooser.setAcceptAllFileFilterUsed(false);
 		chooser.setMultiSelectionEnabled(false);

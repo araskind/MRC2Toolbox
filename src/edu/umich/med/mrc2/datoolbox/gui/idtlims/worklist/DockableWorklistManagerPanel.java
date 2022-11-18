@@ -282,11 +282,10 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 			File outputFile = fc.getSelectedFile();
 			baseDirectory = outputFile.getParentFile();
 			outputFile = FIOUtils.changeExtension(outputFile, "txt") ;
-			String designString = worklistString;
 			Path outputPath = Paths.get(outputFile.getAbsolutePath());
 		    try {
 				Files.writeString(outputPath, 
-						designString, 
+						worklistString, 
 						StandardCharsets.UTF_8,
 						StandardOpenOption.CREATE, 
 						StandardOpenOption.APPEND);

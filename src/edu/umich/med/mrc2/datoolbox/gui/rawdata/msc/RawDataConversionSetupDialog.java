@@ -167,6 +167,7 @@ public class RawDataConversionSetupDialog extends JDialog
 	private void initChooser() {
 
 		chooser = new ImprovedFileChooser();
+		chooser.setPreferredSize(new Dimension(800, 640));
 		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
 		chooser.setAcceptAllFileFilterUsed(true);
 	}

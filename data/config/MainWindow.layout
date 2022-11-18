@@ -172,12 +172,12 @@
 													</placeholders>
 												</leaf>
 												<node nodeId="1631029354244" orientation="HORIZONTAL" divider="0.246900269541779">
-													<leaf id="0" nodeId="1631029354246">
+													<leaf id="-1" nodeId="1631029354246">
 														<placeholders>
 															<placeholder>dock.single.ProjectSetupDraw</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="1" nodeId="1631029354257">
+													<leaf id="0" nodeId="1631029354257">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 															<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
@@ -187,7 +187,6 @@
 															<placeholder>dock.single.IDWorkbenchPanel</placeholder>
 															<placeholder>dock.single.DuplicatesPanelClusterDisplayPanel</placeholder>
 															<placeholder>dock.single.ExperimentDesignPanel</placeholder>
-															<placeholder>dock.single.AutomatorPanel</placeholder>
 															<placeholder>dock.single.QCPanel</placeholder>
 															<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
 															<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
@@ -213,18 +212,8 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
-										<replacement id="dockablesingle ProjectSetupDraw"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ProjectSetupDraw</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
+										<selected>11</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -411,6 +400,15 @@
 												<key shared="false">
 													<placeholder>dock.single.AutomatorPanel</placeholder>
 												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">11</item>
+												<item key="dock.id" type="i">11</item>
+												<item key="dock.placeholder" type="s">dock.single.AutomatorPanel</item>
 											</entry>
 										</placeholders>
 									</layout>
@@ -525,6 +523,16 @@
 											</layout>
 											<children ignore="false"/>
 										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.AutomatorPanel">
+												<replacement id="dockablesingle AutomatorPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>AutomatorPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
 									</children>
 								</child>
 							</children>
@@ -598,27 +606,23 @@
 								<children ignore="false"/>
 							</layout>
 						</child>
-						<child key="single AutomatorPanel" root="ccontrol center" location="true">
+						<child key="single ProjectSetupDraw" root="ccontrol center" location="true">
 							<location>
 								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.AutomatorPanel</placeholder>
+									<placeholder>dock.single.ProjectSetupDraw</placeholder>
 									<backup-path>
 										<node location="BOTTOM" size="0.5" id="1644019430912"/>
 										<node location="BOTTOM" size="0.5" id="1644019399042"/>
-										<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
-										<leaf id="1631029354257"/>
+										<node location="LEFT" size="0.246900269541779" id="1631029354244"/>
+										<leaf id="1631029354246"/>
 									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>11</index>
-									<placeholder>dock.single.AutomatorPanel</placeholder>
 								</property>
 							</location>
 							<layout>
-								<layout factory="predefined" placeholder="dock.single.AutomatorPanel">
-									<replacement id="dockablesingle AutomatorPanel"/>
+								<layout factory="predefined" placeholder="dock.single.ProjectSetupDraw">
+									<replacement id="dockablesingle ProjectSetupDraw"/>
 									<delegate id="delegate_ccontrol backup factory id">
-										<id>AutomatorPanel</id>
+										<id>ProjectSetupDraw</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -819,7 +823,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single AutomatorPanel">
+						<entry id="single AutomatorPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -1081,7 +1085,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single ProjectSetupDraw" current="dock.mode.normal">
+						<entry id="single ProjectSetupDraw">
 							<history>
 								<mode>dock.mode.maximized</mode>
 								<mode>dock.mode.minimized</mode>

@@ -161,6 +161,7 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 	private void setProjectLocation() {
 		
 		ImprovedFileChooser chooser = new ImprovedFileChooser();
+		chooser.setPreferredSize(new Dimension(800, 640));
 		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
 		chooser.setAcceptAllFileFilterUsed(false);
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

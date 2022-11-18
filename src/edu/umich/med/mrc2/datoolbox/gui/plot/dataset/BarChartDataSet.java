@@ -71,17 +71,16 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 		featuresToPlot = new MsFeature[] {msf};
 
 		//	Collect data
-		Collection<ExperimentalSample> samples = project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+		Collection<ExperimentalSample> samples = 
+				project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 		HashSet<DataFile> files = samples.stream().
 				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
 				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
-
 		Map<DataFile, Double> dataMap = 
 				PlotDataSetUtils.getNormalizedDataForFeature(project, msf, pipeline, files, dataScale);
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(pipeline, files,
 				sortingOrder, activeDesign, groupingType, category, subCategory, splitByBatch);
-
 		Map<String,Paint>seriesPaintNameMap = new TreeMap<String,Paint>();
 		seriesPaintMap = new TreeMap<Integer,Paint>();
 		int sCount = 0;

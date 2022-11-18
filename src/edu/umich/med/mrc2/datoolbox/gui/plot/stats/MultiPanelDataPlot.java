@@ -496,7 +496,8 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 				DateAxis dateAxis = new DateAxis("Timestamp");
 				dateAxis.setDateFormatOverride(new SimpleDateFormat("MM/dd HH:mm"));
 				scatterPlot.setDomainAxis(dateAxis);
-				TimedScatterDataSet tscs = new TimedScatterDataSet(plottedFeaturesMap, activeDesign, dataScale);
+				TimedScatterDataSet tscs = 
+						new TimedScatterDataSet(plottedFeaturesMap, activeDesign, dataScale);
 
 				if(tscs.getRangeBounds(true) == null)
 					return;
@@ -517,7 +518,8 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 			}
 			if (sortingOrder.equals(FileSortingOrder.NAME)) {
 
-				ScatterDataSet scs = new ScatterDataSet(plottedFeaturesMap, activeDesign, dataScale);
+				ScatterDataSet scs = 
+						new ScatterDataSet(plottedFeaturesMap, activeDesign, dataScale);
 				for(int i=0; i<scs.getSeriesCount(); i++) {
 
 					scatterPlot.getRenderer().setSeriesPaint(i, getSeriesPaint(i));

@@ -793,6 +793,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSele
 			if (exportCommand.equals(MainActionCommands.EXPORT_FILTERED_COMPOUND_LIBRARY_COMMAND.getName()))
 				libraryExportDialog.setTargetSubset(libraryFeatureTable.getFilteredTargets());
 
+			libraryExportDialog.setLocationRelativeTo(this.getContentPane());
 			libraryExportDialog.setVisible(true);
 		}
 	}

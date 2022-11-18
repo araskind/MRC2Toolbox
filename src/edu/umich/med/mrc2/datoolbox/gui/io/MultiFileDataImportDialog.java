@@ -915,12 +915,6 @@ public class MultiFileDataImportDialog extends JDialog
 			
 			//	TODO read design
 		}
-//		chooser.resetChoosableFileFilters();
-//		chooser.setFileFilter(txtFilter);
-//		chooser.setMultiSelectionEnabled(false);
-//		chooser.setCurrentDirectory(baseDesignDirectory);
-//		chooser.rescanCurrentDirectory();
-//		chooser.showOpenDialog(this);
 	}
 	
 	public void setExistingDataPipeline(DataPipeline pipeline) {
