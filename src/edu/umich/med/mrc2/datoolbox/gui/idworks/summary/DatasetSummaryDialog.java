@@ -121,7 +121,6 @@ public class DatasetSummaryDialog extends JDialog
 		JButton btnCancel = new JButton("Close");
 		panel_1.add(btnCancel);
 		btnCancel.addActionListener(al);
-		btnCancel.addActionListener(al);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnCancel);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 

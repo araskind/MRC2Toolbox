@@ -355,6 +355,7 @@ public enum MainActionCommands {
 	FILTER_FEATURES_COMMAND("Filter features"),
 	SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND("Search by RT/identity setup"),
 	SEARCH_FEATURES_BY_RT_ID_COMMAND("Search features by RT/identity"),
+	SHOW_MSMS_DATA_SET_STATISTICS_COMMAND("Show MSMS data set statistics"),
 
 	// Duplicates
 	SHOW_FIND_DUPLICATES_DIALOG_COMMAND("Show find duplicates options"),

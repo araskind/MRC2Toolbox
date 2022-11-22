@@ -213,7 +213,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>11</selected>
+										<selected>6</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -565,6 +565,8 @@
 								<property factory="SplitDockPlaceholderProperty">
 									<placeholder>dock.single.QCPanel</placeholder>
 									<backup-path>
+										<node location="BOTTOM" size="0.5" id="1644019430912"/>
+										<node location="BOTTOM" size="0.5" id="1644019399042"/>
 										<node location="RIGHT" size="0.753099730458221" id="1631029354244"/>
 										<leaf id="1631029354257"/>
 									</backup-path>

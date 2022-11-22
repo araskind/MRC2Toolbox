@@ -47,6 +47,7 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 	private static final Icon componentIcon = GuiUtils.getIcon("msTwo", 16);
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 16);
 	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 16);
+	private static final Icon statsIcon = GuiUtils.getIcon("calcStats", 16);
 	private static final Icon reloadClusterSetFeaturesIcon = GuiUtils.getIcon("reloadClusterSetFeatures", 16);
 	
 	public DockableMSMSFeatureTable(DockableMRC2ToolboxPanel parentPanel) {
@@ -76,12 +77,6 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 		actionMenu.setText("Reload");       
 		actions.add((DockAction)actionMenu);
 		intern().setActionOffers(actions);
-
-//		findMSMSFeaturesButton = GuiUtils.setupButtonAction(
-//				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND.getName(),
-//				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND.getName(), 
-//				findMSMSFeaturesIcon, l);	
-//		actions.add(findMSMSFeaturesButton);
 				
 		SimpleButtonAction reloadFeaturesButton = GuiUtils.setupButtonAction(
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
@@ -94,6 +89,12 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
 				reloadClusterSetFeaturesIcon, l);
 		menuActions.add(reloadClusterSetFeaturesButton);
+		
+		SimpleButtonAction showDataSetStatsButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName(),
+				MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName(), 
+				statsIcon, l);
+		actions.add(showDataSetStatsButton);
 				
 		actions.addSeparator();
 		

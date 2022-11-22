@@ -765,6 +765,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if (command.equals(MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName())) 
 			showFeatureFilter();
+		
+		if (command.equals(MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName())) 
+			showMSMSDataSetStatistics();	
 			
 		if (command.equals(MainActionCommands.FILTER_FEATURES_COMMAND.getName()))
 			filterFeatureTable();
@@ -821,6 +824,54 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND.getName()))
 			showMSMSClustersSummary();
 		
+	}
+
+	private void showMSMSDataSetStatistics() {
+
+		if((activeMSMSClusterDataSet == null || activeMSMSClusterDataSet.getClusters().isEmpty()) 
+				&& (activeFeatureCollection == null || activeFeatureCollection.getFeatures().isEmpty()))
+			return;
+		
+		Collection<MSFeatureInfoBundle> featureCollection = new ArrayList<MSFeatureInfoBundle>();
+		if(activeMSMSClusterDataSet != null && !activeMSMSClusterDataSet.getClusters().isEmpty()) {
+			featureCollection = 
+					activeMSMSClusterDataSet.getClusters().stream().
+					flatMap(c -> c.getComponents().stream()).distinct().
+					collect(Collectors.toList());
+		}
+		if(featureCollection.isEmpty() && activeFeatureCollection != null 
+				&& !activeFeatureCollection.getFeatures().isEmpty()) {
+			featureCollection = activeFeatureCollection.getFeatures();
+		}
+		CreateDataSetSummaryTask task = new CreateDataSetSummaryTask(featureCollection);
+		idp = new IndeterminateProgressDialog("Creating statistics for feature set ...", 
+				this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
+	class CreateDataSetSummaryTask extends LongUpdateTask {
+
+		private Collection<MSFeatureInfoBundle> featureCollection;
+		
+		public CreateDataSetSummaryTask(Collection<MSFeatureInfoBundle> featureCollection) {
+			this.featureCollection = featureCollection;
+		}
+
+		@Override
+		public Void doInBackground() {
+
+
+			return null;
+		}
+		
+	    @Override
+	    public void done() {
+			super.done();
+			DatasetSummaryDialog datasetSummaryDialog = new DatasetSummaryDialog();
+			datasetSummaryDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
+			datasetSummaryDialog.setVisible(true);
+	    }
 	}
 
 	private void msmsClusterDataExportSetup() {

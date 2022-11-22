@@ -563,9 +563,11 @@ public class IDTrackerMSMSClusterDataExportTask extends AbstractTask {
 
 		if(property.equals(IDTrackerFeatureIdentificationProperties.RETENTION_ERROR)) {
 			Double deltaRt = calculateRetentionShift(id, msmsCluster.getRt());
-			return rtFormat.format(deltaRt);
+			if(deltaRt == null)
+				return "";
+			else
+				return rtFormat.format(deltaRt);
 		}
-
 		double parentMz = 0.0d;
 		String collisionEnergyValue = null;
 		boolean isHybrid = false;
