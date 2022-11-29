@@ -209,7 +209,7 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 		if(acquisitionMethods.isEmpty()) {
 			MessageDialog.showWarningMsg(
 					"Please add data acquisition method(s) to the project first.", this);
-			wizard.showStagePanel(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
+			wizard.validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
 			return;
 		}		
 		acquisitionMethodAssignmentDialog = 
@@ -507,6 +507,11 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 	public void updateColumnEditorsFromSamplesAndPrep() {		
 		instrumentSequenceTable.updateColumnEditorsFromSamplesAndPrep(
 				experiment.getExperimentDesign().getSamples(), samplePrep);
+	}
+	
+	@Override
+	public Collection<String> validateInputData() {
+		return validateWorklistData();
 	}
 	
 	public Collection<String> validateWorklistData() {

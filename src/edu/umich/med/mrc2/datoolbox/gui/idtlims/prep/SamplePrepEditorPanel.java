@@ -362,8 +362,10 @@ public class SamplePrepEditorPanel extends JPanel
 		
 		idValueLabel.setText(prep.getId());
 		nameTextField.setText(prep.getName());
-		prepUserLabel.setText(prep.getCreator().getInfo());
 		prepUser = prep.getCreator();
+		if(prepUser != null)
+			prepUserLabel.setText(prep.getCreator().getInfo());
+		
 		if (prep.getPrepDate() != null) {
 			LocalDate localDate = 
 					prep.getPrepDate().toInstant().

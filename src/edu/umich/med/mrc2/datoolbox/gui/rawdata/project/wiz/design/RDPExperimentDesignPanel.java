@@ -85,4 +85,9 @@ public class RDPExperimentDesignPanel extends RDPMetadataWizardPanel implements 
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public Collection<String> validateInputData() {
+		return validateExperimentDesign();
+	}
 }

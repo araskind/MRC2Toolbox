@@ -32,6 +32,7 @@ public enum IDTrackerMSMSClusterProperties {
 	LOOKUP_FEATURE_RT("Lookup RT"),
 	RT_ERROR("RT error, min"),
 	RANK("Rank"),
+	PRIMARY_ID_RAW_DATA_FILE("Raw data file for prim. ID"),
 	;
 
 	private final String name;

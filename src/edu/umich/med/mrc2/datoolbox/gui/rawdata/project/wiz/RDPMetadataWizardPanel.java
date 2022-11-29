@@ -25,6 +25,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.Collection;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -102,4 +103,6 @@ public abstract class RDPMetadataWizardPanel extends JPanel {
 	}
 	
 	public abstract void clearPanel();
+	
+	public abstract Collection<String>validateInputData();
 }

@@ -39,12 +39,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
@@ -66,6 +68,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -113,7 +116,15 @@ public class IDTrackerMSMSClusterDataExportTask extends AbstractTask {
 	public void run() {
 		
 		setStatus(TaskStatus.PROCESSING);
-		accessions = getAccessions(msmsClusterDataSet.getClusters());
+		if(msmsClusterPropertyList.contains(IDTrackerMSMSClusterProperties.PRIMARY_ID_RAW_DATA_FILE)) {
+			try {
+				getInjections();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}	
+		accessions = getAccessions(msmsClusterDataSet.getClusters());		
 		if(identificationDetailsList.contains(IDTrackerFeatureIdentificationProperties.SYSTEMATIC_NAME)) {
 			try {
 				getSystematicNames();
@@ -154,6 +165,28 @@ public class IDTrackerMSMSClusterDataExportTask extends AbstractTask {
 			setStatus(TaskStatus.ERROR);
 			e1.printStackTrace();
 		}
+	}
+	
+	private void getInjections() throws Exception {
+		
+
+		Collection<String> injectionIds = msmsClusterDataSet.getClusters().stream().
+				flatMap(c -> c.getComponents().stream()).
+				filter(f -> Objects.nonNull(f.getInjectionId())).
+				map(f -> f.getInjectionId()).
+				collect(Collectors.toCollection(TreeSet::new));
+		
+		total = injectionIds.size();
+		processed = 0;
+		injections = new TreeSet<Injection>();
+		Connection conn = ConnectionManager.getConnection();		
+		for(String id : injectionIds) {
+			
+			Injection inj = IDTRawDataUtils.getInjectionForId(id, conn);
+			if(inj != null)
+				injections.add(inj);
+		}
+		ConnectionManager.releaseConnection(conn);		
 	}
 	
 	private void getRefMetNames() throws Exception {
@@ -362,7 +395,7 @@ public class IDTrackerMSMSClusterDataExportTask extends AbstractTask {
 
 			line = new ArrayList<String>();
 			for(IDTrackerMSMSClusterProperties property : msmsClusterPropertyList)
-				line.add(getFeatureProperty(msmsCluster, property));
+				line.add(getClusterProperty(msmsCluster, property));
 			
 			String accession = null;
 			if(msmsCluster.getPrimaryIdentity() != null 
@@ -417,7 +450,7 @@ public class IDTrackerMSMSClusterDataExportTask extends AbstractTask {
 		writer.close();
 	}
 	
-	private String getFeatureProperty(
+	private String getClusterProperty(
 			MsFeatureInfoBundleCluster cluster, 
 			IDTrackerMSMSClusterProperties property) {
 		
@@ -475,6 +508,21 @@ public class IDTrackerMSMSClusterDataExportTask extends AbstractTask {
 				return entropyFormat.format(lookupFeature.getRank());
 			else
 				return "";			
+		}
+		if(property.equals(IDTrackerMSMSClusterProperties.PRIMARY_ID_RAW_DATA_FILE)) {
+			
+			MSFeatureInfoBundle bundle = cluster.getMSFeatureInfoBundleForPrimaryId();
+			if(bundle == null)
+				bundle = cluster.getComponents().iterator().next();
+			
+			String injId = bundle.getInjectionId();
+			Injection inj = injections.stream().
+					filter(i -> i.getId().equals(injId)).
+					findFirst().orElse(null);
+			if(inj != null)
+				return inj.getDataFileName();
+			else
+				return bundle.getDataFile().getName();
 		}
 		return "";		
 	}

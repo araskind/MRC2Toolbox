@@ -41,8 +41,12 @@ public class DockableRawDataFileSelector extends DefaultSingleCDockable
 	private File baseDirectory;
 	private RawDataFilesTable rawDataFilesTable;
 	private RawDataFileSelectorToolbar toolbar;
+	private RawDataAnalysisProjectSetupDialog parentDialog;
 
-	public DockableRawDataFileSelector(String title, Icon chromIcon) {
+	public DockableRawDataFileSelector(
+			String title, 
+			Icon chromIcon,
+			RawDataAnalysisProjectSetupDialog parentDialog) {
 
 		super(title.replace(" ", ""), chromIcon, title, null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
@@ -50,6 +54,7 @@ public class DockableRawDataFileSelector extends DefaultSingleCDockable
 		toolbar = new RawDataFileSelectorToolbar(this);
 		add(toolbar, BorderLayout.NORTH);
 
+		this.parentDialog = parentDialog;
 		rawDataFilesTable = new RawDataFilesTable();
 		JScrollPane scroll = new JScrollPane(rawDataFilesTable);
 		add(scroll, BorderLayout.CENTER);
@@ -89,7 +94,8 @@ public class DockableRawDataFileSelector extends DefaultSingleCDockable
 				return;
 			
 			rawDataFilesTable.addDataFiles(selectedFiles);
-			baseDirectory = selectedFiles[0].getParentFile();
+			baseDirectory = selectedFiles[0].getParentFile();			
+			parentDialog.adjustRawDataBaseDirectory(baseDirectory);
 		}
 	}
 	

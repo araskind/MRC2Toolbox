@@ -76,6 +76,11 @@ public class RDPExperimentDefinitionPanel extends RDPMetadataWizardPanel {
 	public String getExperimentNotes() {
 		return experimentDefinitionPanel.getExperimentNotes();
 	}
+		
+	@Override
+	public Collection<String> validateInputData() {
+		return validateExperimentDefinition();
+	}
 	
 	public Collection<String>validateExperimentDefinition(){
 		return experimentDefinitionPanel.validateExperimentDefinition();

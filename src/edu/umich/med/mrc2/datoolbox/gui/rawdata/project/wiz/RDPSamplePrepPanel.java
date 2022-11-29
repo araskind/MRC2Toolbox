@@ -101,6 +101,11 @@ public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 		return samplePrepEditorPanel.getPrepAnnotations();
 	}
 
+	@Override
+	public Collection<String> validateInputData() {
+		return validateSamplePrepDefinition();
+	}
+	
 	public Collection<String> validateSamplePrepDefinition() {
 		return samplePrepEditorPanel.vaidateSamplePrepData();
 	}

@@ -46,8 +46,10 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 	private MSMSFeatureTable featureTable;
 	private static final Icon componentIcon = GuiUtils.getIcon("msTwo", 16);
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 16);
+	private static final Icon filterClustersIcon = GuiUtils.getIcon("filterClusters", 16);	
 	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 16);
 	private static final Icon statsIcon = GuiUtils.getIcon("calcStats", 16);
+	private static final Icon clusteredStatsIcon = GuiUtils.getIcon("calcClusteredStats", 16);	
 	private static final Icon reloadClusterSetFeaturesIcon = GuiUtils.getIcon("reloadClusterSetFeatures", 16);
 	
 	public DockableMSMSFeatureTable(DockableMRC2ToolboxPanel parentPanel) {
@@ -65,36 +67,59 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 		DefaultDockActionSource actions = new DefaultDockActionSource(
 				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
 		
+		DefaultDockActionSource filterMenuActions = new DefaultDockActionSource();		
+		SimpleMenuAction filterActionMenu = new SimpleMenuAction(filterMenuActions);
+		filterActionMenu.setIcon(filterIcon);
+		filterActionMenu.setText("Filter");       
+		actions.add((DockAction)filterActionMenu);
+		
 		SimpleButtonAction filterFeaturesButton = GuiUtils.setupButtonAction(
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(),
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(), 
 				filterIcon, l);
-		actions.add(filterFeaturesButton);
+		filterMenuActions.add(filterFeaturesButton);
 		
-		DefaultDockActionSource menuActions = new DefaultDockActionSource();		
-		SimpleMenuAction actionMenu = new SimpleMenuAction(menuActions);
-		actionMenu.setIcon(reloadIcon);
-		actionMenu.setText("Reload");       
-		actions.add((DockAction)actionMenu);
-		intern().setActionOffers(actions);
+		SimpleButtonAction filterClusteredFeaturesButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_CLUSTERED_FEATURE_FILTER_COMMAND.getName(),
+				MainActionCommands.SHOW_CLUSTERED_FEATURE_FILTER_COMMAND.getName(), 
+				filterClustersIcon, l);
+		filterMenuActions.add(filterClusteredFeaturesButton);
+		
+		DefaultDockActionSource reloadMenuActions = new DefaultDockActionSource();		
+		SimpleMenuAction reloadActionMenu = new SimpleMenuAction(reloadMenuActions);
+		reloadActionMenu.setIcon(reloadIcon);
+		reloadActionMenu.setText("Reload");       
+		actions.add((DockAction)reloadActionMenu);
 				
 		SimpleButtonAction reloadFeaturesButton = GuiUtils.setupButtonAction(
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
 				reloadIcon, l);
-		menuActions.add(reloadFeaturesButton);
+		reloadMenuActions.add(reloadFeaturesButton);
 		
 		SimpleButtonAction reloadClusterSetFeaturesButton = GuiUtils.setupButtonAction(
 				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
 				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
 				reloadClusterSetFeaturesIcon, l);
-		menuActions.add(reloadClusterSetFeaturesButton);
+		reloadMenuActions.add(reloadClusterSetFeaturesButton);
+		
+		DefaultDockActionSource statsMenuActions = new DefaultDockActionSource();		
+		SimpleMenuAction statsActionMenu = new SimpleMenuAction(statsMenuActions);
+		statsActionMenu.setIcon(statsIcon);
+		statsActionMenu.setText("Summary");       
+		actions.add((DockAction)statsActionMenu);
 		
 		SimpleButtonAction showDataSetStatsButton = GuiUtils.setupButtonAction(
 				MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName(),
 				MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName(), 
 				statsIcon, l);
-		actions.add(showDataSetStatsButton);
+		statsMenuActions.add(showDataSetStatsButton);
+		
+		SimpleButtonAction showClusteredDataSetStatsButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND.getName(),
+				MainActionCommands.SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND.getName(), 
+				clusteredStatsIcon, l);
+		statsMenuActions.add(showClusteredDataSetStatsButton);
 				
 		actions.addSeparator();
 		

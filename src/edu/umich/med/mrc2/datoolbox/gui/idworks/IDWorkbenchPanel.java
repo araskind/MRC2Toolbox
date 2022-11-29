@@ -730,8 +730,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT.getName()))	
 			showIDTrackerDataExplorerDialog();
 		
-		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName()))	
-			reloadCompleteActiveMSMSFeatureSet();
+		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName())) //reloadCompleteActiveMSMSFeatureSet();
+			reloadActiveMSMSFeatureCollection();
 		
 		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName()))	
 			reloadActiveMSMSClusterSetFeatures();
@@ -763,11 +763,26 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.REASSIGN_DEFAULT_MSMS_LIBRARY_MATCHES.getName()))
 			reassignTopMSMSHits();
 		
-		if (command.equals(MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName())) 
-			showFeatureFilter();
-		
-		if (command.equals(MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName())) 
-			showMSMSDataSetStatistics();	
+		if (command.equals(MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName())) {
+			
+			if(activeFeatureCollection != null && !activeFeatureCollection.getFeatures().isEmpty())
+				showFeatureFilter(activeFeatureCollection.getFeatures());
+		}
+		if (command.equals(MainActionCommands.SHOW_CLUSTERED_FEATURE_FILTER_COMMAND.getName())) {
+			
+			if(activeMSMSClusterDataSet != null && !activeMSMSClusterDataSet.getClusters().isEmpty())
+				showFeatureFilter(activeMSMSClusterDataSet.getAllFeatures());
+		}	
+		if (command.equals(MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName())) {
+			
+			if(activeFeatureCollection != null && !activeFeatureCollection.getFeatures().isEmpty())
+				showMSMSDataSetStatistics(activeFeatureCollection.getFeatures());
+		}
+		if (command.equals(MainActionCommands.SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND.getName())) {
+			
+			if(activeMSMSClusterDataSet != null && !activeMSMSClusterDataSet.getClusters().isEmpty())
+				showMSMSDataSetStatistics(activeMSMSClusterDataSet.getAllFeatures());
+		}
 			
 		if (command.equals(MainActionCommands.FILTER_FEATURES_COMMAND.getName()))
 			filterFeatureTable();
@@ -826,23 +841,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 	}
 
-	private void showMSMSDataSetStatistics() {
+	private void showMSMSDataSetStatistics(Collection<MSFeatureInfoBundle> featureCollection) {
 
-		if((activeMSMSClusterDataSet == null || activeMSMSClusterDataSet.getClusters().isEmpty()) 
-				&& (activeFeatureCollection == null || activeFeatureCollection.getFeatures().isEmpty()))
+		if(featureCollection == null || featureCollection.isEmpty())
 			return;
 		
-		Collection<MSFeatureInfoBundle> featureCollection = new ArrayList<MSFeatureInfoBundle>();
-		if(activeMSMSClusterDataSet != null && !activeMSMSClusterDataSet.getClusters().isEmpty()) {
-			featureCollection = 
-					activeMSMSClusterDataSet.getClusters().stream().
-					flatMap(c -> c.getComponents().stream()).distinct().
-					collect(Collectors.toList());
-		}
-		if(featureCollection.isEmpty() && activeFeatureCollection != null 
-				&& !activeFeatureCollection.getFeatures().isEmpty()) {
-			featureCollection = activeFeatureCollection.getFeatures();
-		}
 		CreateDataSetSummaryTask task = new CreateDataSetSummaryTask(featureCollection);
 		idp = new IndeterminateProgressDialog("Creating statistics for feature set ...", 
 				this.getContentPane(), task);
@@ -1382,14 +1385,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		msmsFeatureRTIDSearchDialog.dispose();
 	}
 
-	private void showFeatureFilter() {
+	private void showFeatureFilter(Collection<MSFeatureInfoBundle>featuresToFilter) {
 		
-		Collection<MSFeatureInfoBundle> allFeatures = 
-				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
-		if(allFeatures.isEmpty())
+//		Collection<MSFeatureInfoBundle> allFeatures = 
+//				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
+		if(featuresToFilter == null || featuresToFilter.isEmpty())
 			return;
 		
-		filterTrackerFeaturesDialog = new FilterTrackerMSMSFeaturesDialog(this);
+		filterTrackerFeaturesDialog = new FilterTrackerMSMSFeaturesDialog(this, featuresToFilter);
 		filterTrackerFeaturesDialog.setLocationRelativeTo(this.getContentPane());
 		filterTrackerFeaturesDialog.setVisible(true);
 	}
@@ -1403,16 +1406,20 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					StringUtils.join(errors, "\n"), filterTrackerFeaturesDialog);
 			return;
 		}	
-		FilterMSMSFeaturesTask task = new FilterMSMSFeaturesTask();
-		idp = new IndeterminateProgressDialog("Filtering MSMS features ...", this.getContentPane(), task);
+		FilterMSMSFeaturesTask task = 
+				new FilterMSMSFeaturesTask(filterTrackerFeaturesDialog.getFeaturesToFilter());
+		idp = new IndeterminateProgressDialog(
+				"Filtering MSMS features ...", this.getContentPane(), task);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
 	}
 	
 	class FilterMSMSFeaturesTask extends LongUpdateTask {
 
-		public FilterMSMSFeaturesTask() {
-
+		private Collection<MSFeatureInfoBundle>featuresToFilter;
+		
+		public FilterMSMSFeaturesTask(Collection<MSFeatureInfoBundle>featuresToFilter) {
+			this.featuresToFilter = featuresToFilter;
 		}
 
 		@Override
@@ -1424,7 +1431,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 			Collection<MSFeatureInfoBundle>filtered = 
 					MsFeatureStatsUtils.filterMSMSFeatureTable(
-							msTwoFeatureTable.getBundles(TableRowSubset.ALL), 
+							featuresToFilter, 
 							filterParameters);
 			safelyLoadMSMSFeatures(filtered);			
 			return null;

@@ -66,6 +66,7 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IncludeSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
@@ -163,9 +164,10 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog
 	private JFormattedTextField precPurityMaxTextField;	
 	
 	private FilterTrackerMSMSFeaturesDialogToolbar toolbar;
+	private Collection<MSFeatureInfoBundle>featuresToFilter;
 
-	@SuppressWarnings("rawtypes")
-	public FilterTrackerMSMSFeaturesDialog(ActionListener listener) {
+	public FilterTrackerMSMSFeaturesDialog(
+			ActionListener listener, Collection<MSFeatureInfoBundle>featuresToFilter) {
 
 		super();
 		setTitle("Filter MSMS features");
@@ -174,6 +176,7 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog
 		setSize(new Dimension(750, 600));
 		setPreferredSize(new Dimension(750, 600));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.featuresToFilter = featuresToFilter;
 		
 		toolbar = new FilterTrackerMSMSFeaturesDialogToolbar(this);
 		toolbar.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
@@ -1557,6 +1560,10 @@ public class FilterTrackerMSMSFeaturesDialog extends JDialog
 				massErrorTextField.setBorder(activeBorder);
 			}
 		}
+	}
+
+	public Collection<MSFeatureInfoBundle> getFeaturesToFilter() {
+		return featuresToFilter;
 	}
 }
 

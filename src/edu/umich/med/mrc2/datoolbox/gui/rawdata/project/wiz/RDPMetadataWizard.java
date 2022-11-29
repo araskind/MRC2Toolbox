@@ -344,7 +344,7 @@ public class RDPMetadataWizard extends JDialog
 		String command = e.getActionCommand();
 		for(RDPMetadataDefinitionStage stage : RDPMetadataDefinitionStage.values()) {
 			if(command.equals(stage.getName())) 
-				showStagePanel(stage);
+				validateInputAndShowStagePanel(stage);
 		}	
 		if(command.equals(MainActionCommands.COMPLETE_EXPERIMENT_DEFINITION_COMMAND.getName())) 
 			completeExperimentDefinitionStage();
@@ -392,26 +392,74 @@ public class RDPMetadataWizard extends JDialog
 		}
 	}
 
-	public void showStagePanel(RDPMetadataDefinitionStage stage) {
+	public void validateInputAndShowStagePanel(RDPMetadataDefinitionStage stage) {
 		
-		stagePanel.remove(panels.get(activeStage));
-		revalidate();
-		repaint();
-		activeStage = stage;
-		stagePanel.add(panels.get(stage), gbc_panel);
-		setTitle(stage.getName());
-		toolbar.highlightStageButton(stage);
+		if(stage.equals(activeStage))
+			return;
+		
+		for(int i=0; i<RDPMetadataDefinitionStage.values().length; i++) {
+			
+			RDPMetadataDefinitionStage toValidate = RDPMetadataDefinitionStage.values()[i];
+			if(stage.equals(toValidate)) {
+				
+				stagePanel.remove(panels.get(activeStage));
+				revalidate();
+				repaint();
+				activeStage = stage;
+				stagePanel.add(panels.get(stage), gbc_panel);
+				setTitle(stage.getName());
+				toolbar.highlightStageButton(stage);
+				return;
+			}
+			Collection<String> errors = panels.get(toValidate).validateInputData();
+			if(!errors.isEmpty()) {
+				MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+				return;
+			}	
+			else {
+				completeMetadataDefinitionStage(toValidate);
+			}
+		}
+	}
+	
+	public void completeMetadataDefinitionStage(RDPMetadataDefinitionStage stage) {
+		
+		switch (stage) {
+
+			case CREATE_EXPERIMENT:
+				completeExperimentDefinitionStage();
+				return;
+	
+			case ADD_SAMPLES:
+				completeSampleListDefinitionStage();
+				return;
+				
+			case ADD_SAMPLE_PREPARATION_DATA:
+				completeSamplePrepDefinitionStage();
+				return;
+				
+			case ADD_ACQ_DA_METHODS:
+				completeAnalysisMethodsDefinitionStage();
+				return;
+				
+			case ADD_WORKLISTS:	
+				completeWorklistVerificationStage();
+				return;
+
+			default:
+				break;
+		}
 	}
 	
 	private boolean completeExperimentDefinitionStage() {
 
 		RDPExperimentDefinitionPanel experimentPanel = 
 				(RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
-		Collection<String>errors = experimentPanel.validateExperimentDefinition();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
-			return false;
-		}
+//		Collection<String>errors = experimentPanel.validateExperimentDefinition();
+//		if(!errors.isEmpty()) {
+//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+//			return false;
+//		}
 		newExperiment.setName(experimentPanel.getExperimentName());
 		newExperiment.setDescription(experimentPanel.getExperimentDescription());
 		newExperiment.setNotes(experimentPanel.getExperimentNotes());
@@ -423,7 +471,7 @@ public class RDPMetadataWizard extends JDialog
 		}
 		stageCompleted.put(RDPMetadataDefinitionStage.CREATE_EXPERIMENT, true);
 		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.CREATE_EXPERIMENT, true);
-		showStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLES);
+//		validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLES);
 		return true;
 	}
 
@@ -431,35 +479,35 @@ public class RDPMetadataWizard extends JDialog
 		
 		RDPExperimentDesignPanel designPanel = 
 				(RDPExperimentDesignPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
-		Collection<String>errors = designPanel.validateExperimentDesign();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
-			return false;
-		}
+//		Collection<String>errors = designPanel.validateExperimentDesign();
+//		if(!errors.isEmpty()) {
+//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+//			return false;
+//		}
 		stageCompleted.put(RDPMetadataDefinitionStage.ADD_SAMPLES, true);
 		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_SAMPLES, true);
 		RDPSamplePrepPanel prepPanel = 
 				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
 
 		prepPanel.loadPrepDataForExperiment(getSamplePrep(), newExperiment);
-		showStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);		
+//		validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);		
 		return true;
 	}
 
 	private boolean completeSamplePrepDefinitionStage() {
 		
-		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLES)) {
-
-			if(!completeSampleListDefinitionStage())
-				return false;
-		}
+//		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLES)) {
+//
+//			if(!completeSampleListDefinitionStage())
+//				return false;
+//		}
 		RDPSamplePrepPanel prepPanel = 
 				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
-		Collection<String>errors = prepPanel.validateSamplePrepDefinition();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
-			return false;
-		}
+//		Collection<String>errors = prepPanel.validateSamplePrepDefinition();
+//		if(!errors.isEmpty()) {
+//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+//			return false;
+//		}
 		LIMSSamplePreparation samplePrep = getSamplePrep();
 		
 		//	New sample prep
@@ -521,7 +569,7 @@ public class RDPMetadataWizard extends JDialog
 		
 		stageCompleted.put(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA, true);
 		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA, true);
-		showStagePanel(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);	
+//		validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);	
 		return true;
 	}
 
@@ -529,33 +577,33 @@ public class RDPMetadataWizard extends JDialog
 
 		RDPMethodsPanel methodsPanel = 
 				(RDPMethodsPanel)panels.get(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
-		Collection<String>errors = methodsPanel.validateMethodsData();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
-			return false;
-		}
+//		Collection<String>errors = methodsPanel.validateMethodsData();
+//		if(!errors.isEmpty()) {
+//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+//			return false;
+//		}
 		//	TODO upload new methods to the database
 				
 		stageCompleted.put(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS, true);
 		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS, true);
-		showStagePanel(RDPMetadataDefinitionStage.ADD_WORKLISTS);
+//		validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_WORKLISTS);
 		return true;
 	}
 
 	private boolean completeWorklistVerificationStage() {
 		
-		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS)) {
-			
-			if(!completeAnalysisMethodsDefinitionStage())
-				return false;
-		}
-		RDPWorklistPanel worklistPanel = 
-				(RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS);
-		Collection<String>errors = worklistPanel.validateWorklistData();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
-			return false;
-		}		
+//		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS)) {
+//			
+//			if(!completeAnalysisMethodsDefinitionStage())
+//				return false;
+//		}
+//		RDPWorklistPanel worklistPanel = 
+//				(RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS);
+//		Collection<String>errors = worklistPanel.validateWorklistData();
+//		if(!errors.isEmpty()) {
+//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+//			return false;
+//		}		
 		stageCompleted.put(RDPMetadataDefinitionStage.ADD_WORKLISTS, true);
 		progressToolbar.markStageCompletedStatus(RDPMetadataDefinitionStage.ADD_WORKLISTS, true);	
 		return true;
@@ -680,26 +728,39 @@ public class RDPMetadataWizard extends JDialog
 
 	private void saveProjectMetadata() {
 		
-		if(!completeExperimentDefinitionStage()) {
-			showStagePanel(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
-			return;
-		}
-		if(!completeSampleListDefinitionStage()) {
-			showStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLES);
-			return;
-		}
-		if(!completeSamplePrepDefinitionStage()) {
-			showStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
-			return;
-		}
-		if(!completeAnalysisMethodsDefinitionStage()) {
-			showStagePanel(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
-			return;
-		}
-		if(!completeWorklistVerificationStage()) {
-			showStagePanel(RDPMetadataDefinitionStage.ADD_WORKLISTS);
-			return;
-		}	
+//		if(!completeExperimentDefinitionStage()) {
+////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
+//			return;
+//		}
+//		if(!completeSampleListDefinitionStage()) {
+////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLES);
+//			return;
+//		}
+//		if(!completeSamplePrepDefinitionStage()) {
+////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+//			return;
+//		}
+//		if(!completeAnalysisMethodsDefinitionStage()) {
+////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
+//			return;
+//		}
+//		if(!completeWorklistVerificationStage()) {
+////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_WORKLISTS);
+//			return;
+//		}	
+		
+		for(int i=0; i<RDPMetadataDefinitionStage.values().length; i++) {
+			
+			RDPMetadataDefinitionStage toValidate = RDPMetadataDefinitionStage.values()[i];
+			Collection<String> errors = panels.get(toValidate).validateInputData();
+			if(!errors.isEmpty()) {
+				MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
+				return;
+			}	
+			else {
+				completeMetadataDefinitionStage(toValidate);
+			}
+		}		
 		Collection<String>errors = checkStageCompletion();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);

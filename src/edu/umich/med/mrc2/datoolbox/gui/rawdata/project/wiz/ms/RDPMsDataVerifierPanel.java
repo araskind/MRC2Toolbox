@@ -222,6 +222,11 @@ public class RDPMsDataVerifierPanel extends RDPMetadataWizardPanel
 //		dataFileSampleMatchTable.setDaMethodFoFiles(files, method);
 //		daMethodAssignmentDialog.dispose();
 //	}
+	
+	@Override
+	public Collection<String> validateInputData() {
+		return verifyDataForUpload();
+	}
 
 	public Collection<String> verifyDataForUpload() {
 

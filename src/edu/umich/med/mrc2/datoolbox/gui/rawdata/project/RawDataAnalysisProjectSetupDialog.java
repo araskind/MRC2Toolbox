@@ -107,8 +107,10 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
 		
-		rawMSMSDataFileSelector = new DockableRawDataFileSelector("Select MSMS data files", msmsIcon);	
-		rawMSOneDataFileSelector =  new DockableRawDataFileSelector("Select MS1 data files", msOneIcon);
+		rawMSMSDataFileSelector = 
+				new DockableRawDataFileSelector("Select MSMS data files", msmsIcon, this);	
+		rawMSOneDataFileSelector =  
+				new DockableRawDataFileSelector("Select MS1 data files", msOneIcon, this);
 		grid.add(0, 0, 75, 100, rawMSMSDataFileSelector, rawMSOneDataFileSelector);
 		control.getContentArea().deploy(grid);
 		getContentPane().add(control.getContentArea(), BorderLayout.CENTER);
@@ -206,6 +208,15 @@ public class RawDataAnalysisProjectSetupDialog extends JDialog
 	
 	public boolean copyRawDataToProject() {
 		return copyFilesCheckBox.isSelected();
+	}
+	
+	public void adjustRawDataBaseDirectory(File newRawDataBaseDirectory) {
+		
+		if(newRawDataBaseDirectory != null && newRawDataBaseDirectory.exists()) {
+			
+			rawMSOneDataFileSelector.setBaseDirectory(newRawDataBaseDirectory);
+			rawMSMSDataFileSelector.setBaseDirectory(newRawDataBaseDirectory);
+		}
 	}
 	
 	public void dispose() {

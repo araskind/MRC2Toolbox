@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -330,6 +331,13 @@ public class MSMSClusterDataSet {
 
 	public void setFeatureLookupDataSet(FeatureLookupDataSet featureLookupDataSet) {
 		this.featureLookupDataSet = featureLookupDataSet;
+	}
+	
+	public Collection<MSFeatureInfoBundle> getAllFeatures(){ 
+	
+		return clusters.stream().
+				flatMap(c -> c.getComponents().stream()).distinct().
+				collect(Collectors.toList());
 	}
 }
 
