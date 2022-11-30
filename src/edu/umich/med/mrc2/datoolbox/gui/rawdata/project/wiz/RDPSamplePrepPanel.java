@@ -30,7 +30,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.prep.SamplePrepEditorPanel;
-import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 
 public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 
@@ -48,10 +47,10 @@ public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 		samplePrepEditorPanel.setWizardStep(true);
 		add(samplePrepEditorPanel, gbc_panel);
 		
-		completeStageButton.setText(
-				MainActionCommands.COMPLETE_SAMPLE_PREP_DEFINITION_COMMAND.getName());		
-		completeStageButton.setActionCommand(
-				MainActionCommands.COMPLETE_SAMPLE_PREP_DEFINITION_COMMAND.getName());
+//		completeStageButton.setText(
+//				MainActionCommands.COMPLETE_SAMPLE_PREP_DEFINITION_COMMAND.getName());		
+//		completeStageButton.setActionCommand(
+//				MainActionCommands.COMPLETE_SAMPLE_PREP_DEFINITION_COMMAND.getName());
 	}
 	
 	public void loadPrepDataForExperiment(

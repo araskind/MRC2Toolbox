@@ -91,10 +91,10 @@ public class RDPMsDataVerifierPanel extends RDPMetadataWizardPanel
 		JPanel panel  = initPanel();
 		add(panel, gbc_panel);
 		
-		completeStageButton.setText(
-				MainActionCommands.COMPLETE_DATA_VERIFICATION_COMMAND.getName());		
-		completeStageButton.setActionCommand(
-				MainActionCommands.COMPLETE_DATA_VERIFICATION_COMMAND.getName());
+//		completeStageButton.setText(
+//				MainActionCommands.COMPLETE_DATA_VERIFICATION_COMMAND.getName());		
+//		completeStageButton.setActionCommand(
+//				MainActionCommands.COMPLETE_DATA_VERIFICATION_COMMAND.getName());
 		
 		missingIdentities = null;
 		dataVerified = false;

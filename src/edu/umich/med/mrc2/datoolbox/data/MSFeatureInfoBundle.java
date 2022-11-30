@@ -55,6 +55,7 @@ public class MSFeatureInfoBundle implements Serializable {
 	private String injectionId;
 	private Collection<MSFeatureIdentificationFollowupStep>idFollowupSteps;
 	private Collection<StandardFeatureAnnotation>standadAnnotations;
+	private boolean hasChromatogram;
 	
 	private DataFile dataFile;
 
@@ -381,5 +382,13 @@ public class MSFeatureInfoBundle implements Serializable {
 					standadAnnotations.add(stan);
 			}		
 		}
+	}
+
+	public boolean getHasChromatogram() {
+		return hasChromatogram;
+	}
+
+	public void setHasChromatogram(boolean hasChromatogram) {
+		this.hasChromatogram = hasChromatogram;
 	}
 }

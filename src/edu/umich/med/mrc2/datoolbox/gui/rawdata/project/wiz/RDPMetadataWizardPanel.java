@@ -21,13 +21,11 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz;
 
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.Collection;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -45,7 +43,6 @@ public abstract class RDPMetadataWizardPanel extends JPanel {
 	
 	protected RDPMetadataDefinitionStage stage;
 	protected RDPMetadataWizard wizard;
-	protected JButton completeStageButton;
 	protected GridBagConstraints gbc_panel;
 
 	public RDPMetadataWizardPanel(RDPMetadataWizard wizard) {
@@ -55,9 +52,9 @@ public abstract class RDPMetadataWizardPanel extends JPanel {
 		
 		GridBagLayout gbl_stagePanel = new GridBagLayout();
 		gbl_stagePanel.columnWidths = new int[]{0, 0};
-		gbl_stagePanel.rowHeights = new int[]{0, 0, 0};
+		gbl_stagePanel.rowHeights = new int[]{0, 0};
 		gbl_stagePanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gbl_stagePanel.rowWeights = new double[]{1.0, 0.1, Double.MIN_VALUE};
+		gbl_stagePanel.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 		setLayout(gbl_stagePanel);
 
 		gbc_panel = new GridBagConstraints();
@@ -65,17 +62,6 @@ public abstract class RDPMetadataWizardPanel extends JPanel {
 		gbc_panel.insets = new Insets(0, 0, 5, 0);
 		gbc_panel.gridx = 0;
 		gbc_panel.gridy = 0;
-		
-		//add(new JPanel(), gbc_panel);
-		
-		completeStageButton = new JButton("");
-		completeStageButton.setFont(new Font("Tahoma", Font.BOLD, 12));
-		completeStageButton.addActionListener(wizard); 
-		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
-		gbc_btnNewButton.anchor = GridBagConstraints.EAST;
-		gbc_btnNewButton.gridx = 0;
-		gbc_btnNewButton.gridy = 1;
-		add(completeStageButton, gbc_btnNewButton);
 	}
 	
 	public void setStage(RDPMetadataDefinitionStage stage) {

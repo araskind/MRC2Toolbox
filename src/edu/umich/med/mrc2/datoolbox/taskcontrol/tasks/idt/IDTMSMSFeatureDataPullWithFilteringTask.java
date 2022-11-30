@@ -152,7 +152,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"SELECT F.FEATURE_ID, F2.MSMS_FEATURE_ID, F.POLARITY,  " +
-				"F.MZ_OF_INTEREST, F.RETENTION_TIME, S.SAMPLE_ID,  " +
+				"F.MZ_OF_INTEREST, F.RETENTION_TIME, F.HAS_CHROMATOGRAM, S.SAMPLE_ID,  " +
 				"T.STOCK_SAMPLE_ID, I.INJECTION_ID, F2.COLLISION_ENERGY  " +
 				"FROM MSMS_PARENT_FEATURE F,  " +
 				"DATA_ANALYSIS_MAP M,  " +
@@ -261,6 +261,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 						IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);
 					bundle.setSample(sample);
 					bundle.setInjectionId(rs.getString("INJECTION_ID"));
+					bundle.setHasChromatogram(rs.getString("HAS_CHROMATOGRAM") != null);
 					features.add(bundle);
 					
 					processed++;

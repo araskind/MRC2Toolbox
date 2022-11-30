@@ -76,8 +76,6 @@ import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMSMSClusterProperties;
@@ -3016,36 +3014,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		Set<MsFeatureInfoBundleCluster> clusters = dataSet.getClusters();
 		msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
 		activeCluster = null;
-		
-		//	Debug only
-//		for(MsFeatureInfoBundleCluster cluster : clusters) {
-//			 
-//			if(cluster.getPrimaryIdentity() != null)
-//				System.err.println(cluster.getPrimaryIdentity().getUniqueId());
-//			
-//			List<MsFeatureIdentity> idList = cluster.getComponents().stream().
-//				flatMap(c -> c.getMsFeature().getIdentifications().stream()).
-//				filter(i -> i.getReferenceMsMsLibraryMatch() != null).
-//				collect(Collectors.toList());
-//			
-//			Collection<String> matchIds = cluster.getComponents().stream().
-//					flatMap(c -> c.getMsFeature().getIdentifications().stream()).
-//					filter(i -> i.getReferenceMsMsLibraryMatch() != null).
-//					map(i -> i.getUniqueId()).collect(Collectors.toCollection(TreeSet::new));
-//			if(!matchIds.isEmpty()) {
-//				System.err.print(StringUtils.join(matchIds, "\n"));
-//				break;
-//			}
-//		}
-		
-		List<MSFeatureInfoBundle> clusteredFeatures = clusters.stream().
-				flatMap(c -> c.getComponents().stream()).
-				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
-				collect(Collectors.toList());
-		
+	
 		activeFeatureCollection = new MsFeatureInfoBundleCollection(
 				"Features for \"" + activeMSMSClusterDataSet.getName() + "\" data set");		
-		activeFeatureCollection.addFeatures(clusteredFeatures);
+		activeFeatureCollection.addFeatures(activeMSMSClusterDataSet.getAllFeatures());
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 		StatusBar.setActiveMSMSClusterDataSet(activeMSMSClusterDataSet);
@@ -3692,6 +3664,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		else {
 			msfCb = FeatureChromatogramUtils.retrieveFeatureChromatogramBundleFromCache(
 					selectedBundle.getMSFeatureId());
+			if(msfCb == null) {
+				
+				try {
+					msfCb = FeatureChromatogramUtils.getMsFeatureChromatogramBundleForFeature(selectedBundle.getMSFeatureId());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(msfCb != null)
+					FeatureChromatogramUtils.putFeatureChromatogramBundleInCache(msfCb);
+			}
 		}
 		TandemMassSpectrum msms = null;	
 		if(selectedBundle.getMsFeature().getSpectrum() != null)

@@ -106,10 +106,10 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 //		dataExtractionMethods = new TreeSet<DataExtractionMethod>();
 		dataAcquisitionMethods = new TreeSet<DataAcquisitionMethod>();
 
-		completeStageButton.setText(
-				MainActionCommands.COMPLETE_ANALYSIS_METHODS_DEFINITION_COMMAND.getName());		
-		completeStageButton.setActionCommand(
-				MainActionCommands.COMPLETE_ANALYSIS_METHODS_DEFINITION_COMMAND.getName());
+//		completeStageButton.setText(
+//				MainActionCommands.COMPLETE_ANALYSIS_METHODS_DEFINITION_COMMAND.getName());		
+//		completeStageButton.setActionCommand(
+//				MainActionCommands.COMPLETE_ANALYSIS_METHODS_DEFINITION_COMMAND.getName());
 		
 		missingMethodNameToFileMap = new TreeMap<String, File>();
 		loadPreferences();

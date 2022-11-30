@@ -74,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityIDLevelComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityMSMSScoreComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -150,6 +151,11 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	protected boolean lookupSecondaryLibMatches;
 	protected Collection<MSFeatureInfoBundle>features;
 	protected Collection<MSFeatureInfoBundle>cashedFeatures;
+	
+	protected Collection<String>compoundIds;
+	protected Collection<String>msmsLibraryIds;
+	protected Map<String, CompoundIdentity>compoundMap;
+	protected Map<String, MsMsLibraryFeature>msmsLibraryFeatureMap;
 	
 	public IDTMSMSFeatureSearchTask(
 			Polarity polarity, 
@@ -267,7 +273,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		String query = 
 			"SELECT DISTINCT FEATURE_ID, MSMS_FEATURE_ID, RETENTION_TIME, MZ_OF_INTEREST, ACQUISITION_METHOD_ID, " + 
 			"EXTRACTION_METHOD_ID, EXPERIMENT_ID, STOCK_SAMPLE_ID, SAMPLE_ID, INJECTION_ID, POLARITY FROM (" + 
-			"SELECT F.FEATURE_ID, F.POLARITY, F.MZ_OF_INTEREST, F.RETENTION_TIME, " +
+			"SELECT F.FEATURE_ID, F.POLARITY, F.MZ_OF_INTEREST, F.RETENTION_TIME, F.HAS_CHROMATOGRAM, " +
 			"I.ACQUISITION_METHOD_ID, M.EXTRACTION_METHOD_ID, S.EXPERIMENT_ID, S.SAMPLE_ID, " +
 			"T.STOCK_SAMPLE_ID, I.INJECTION_ID, R.ACCESSION, F2.MSMS_FEATURE_ID, F2.COLLISION_ENERGY " + 
 			"FROM MSMS_PARENT_FEATURE F, " +
@@ -278,7 +284,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			"SAMPLE S, " +
 			"STOCK_SAMPLE T, " +
 			"MSMS_FEATURE F2 ";
-		
+
 		//	Library matches
 		query += 
 			"LEFT JOIN (SELECT H.MSMS_FEATURE_ID, RC.ACCESSION " + 
@@ -579,6 +585,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);
 			bundle.setSample(sample);
 			bundle.setInjectionId(rs.getString("INJECTION_ID"));
+			bundle.setHasChromatogram(rs.getString("HAS_CHROMATOGRAM") != null);
 			features.add(bundle);
 			processed++;
 		}
@@ -630,7 +637,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		String query =
 				"SELECT MSMS_FEATURE_ID, PARENT_MZ, FRAGMENTATION_ENERGY, "
 				+ "COLLISION_ENERGY, POLARITY, ID_DISABLED, "
-				+ "ISOLATION_WINDOW_MIN, ISOLATION_WINDOW_MAX " +
+				+ "ISOLATION_WINDOW_MIN, ISOLATION_WINDOW_MAX, HAS_SCANS " +
 				"FROM MSMS_FEATURE WHERE PARENT_FEATURE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = null;
@@ -666,7 +673,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 							polarity);
 					msms.setSpectrumSource(SpectrumSource.EXPERIMENTAL);
 					MsPoint parent = new MsPoint(rs.getDouble("PARENT_MZ"), 200.0d);
-					msms.setParent(parent);		
+					msms.setParent(parent);	
+					msms.setHasScans(rs.getString("HAS_SCANS") != null);
 					
 					Range isolationWindow = new Range(
 							rs.getDouble("ISOLATION_WINDOW_MIN"), 
@@ -719,18 +727,21 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					msms.setMinorParentIons(minorParentIons, msOneParent);
 					
 					//	Get scan map
-					scanMapPs.setString(1, msms.getId());
-					scanMapRs = scanMapPs.executeQuery();
-					while(scanMapRs.next()) {
+					if(msms.getHasScans()) {
 						
-						msms.getAveragedScanNumbers().put(
-								scanMapRs.getInt("SCAN"), scanMapRs.getInt("PARENT_SCAN"));
-						msms.getScanRtMap().put(
-								scanMapRs.getInt("SCAN"), scanMapRs.getDouble("RT"));
-						msms.getScanRtMap().put(
-								scanMapRs.getInt("PARENT_SCAN"), scanMapRs.getDouble("PARENT_RT"));
+						scanMapPs.setString(1, msms.getId());
+						scanMapRs = scanMapPs.executeQuery();
+						while(scanMapRs.next()) {
+							
+							msms.getAveragedScanNumbers().put(
+									scanMapRs.getInt("SCAN"), scanMapRs.getInt("PARENT_SCAN"));
+							msms.getScanRtMap().put(
+									scanMapRs.getInt("SCAN"), scanMapRs.getDouble("RT"));
+							msms.getScanRtMap().put(
+									scanMapRs.getInt("PARENT_SCAN"), scanMapRs.getDouble("PARENT_RT"));
+						}
+						scanMapRs.close();
 					}
-					scanMapRs.close();
 					fb.getMsFeature().getSpectrum().addTandemMs(msms);
 				}
 			} catch (SQLException e) {
@@ -781,10 +792,11 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		for(MSFeatureInfoBundle fb : features) {
 			try {
 				TandemMassSpectrum msms = 
-						fb.getMsFeature().getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
-				if(msms == null)
+						fb.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+				if(msms == null) {
+					processed++;
 					continue;
-
+				}
 				ps.setString(1, msms.getId());
 				rs = ps.executeQuery();
 				while(rs.next()) {
@@ -903,6 +915,87 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		msmsps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
+	
+	
+	protected void getCompoundAndMSMSLibraryIds(Connection conn) throws Exception {
+				
+		taskDescription = "Gettting compound and library IDs ...";
+		List<MSFeatureInfoBundle> featuresToProcess = features.stream().
+				filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum())).
+				filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+				collect(Collectors.toList());
+		
+		total = featuresToProcess.size();
+		processed = 0;
+		compoundIds = new TreeSet<String>();
+		msmsLibraryIds = new TreeSet<String>();
+		
+		String query = "SELECT DISTINCT C.MRC2_LIB_ID, C.ACCESSION " +
+						"FROM MSMS_FEATURE_LIBRARY_MATCH M, " +
+						"REF_MSMS_LIBRARY_COMPONENT C " +
+						"WHERE C.MRC2_LIB_ID = M.MRC2_LIB_ID " +
+						"AND M.MSMS_FEATURE_ID = ? ";			
+		PreparedStatement ps = conn.prepareStatement(query);		
+		ResultSet rs = null;			
+		for(MSFeatureInfoBundle fb : featuresToProcess) {
+			
+			TandemMassSpectrum msms = 
+					fb.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+			ps.setString(1, msms.getId());
+			rs = ps.executeQuery();
+			while(rs.next()) {				
+				compoundIds.add(rs.getString("ACCESSION"));
+				msmsLibraryIds.add(rs.getString("MRC2_LIB_ID"));				
+			}
+			rs.close();
+			processed++;
+		}
+		ps.close();	
+	}
+	
+	protected void getCompounds(Connection conn) throws Exception {
+		
+		if(compoundIds.isEmpty())
+			return;
+		
+		taskDescription = "Gettting compounds ...";
+		total = compoundIds.size();
+		processed = 0;
+		compoundMap = new TreeMap<String, CompoundIdentity>();
+		
+		String query =
+				"SELECT D.SOURCE_DB, D.PRIMARY_NAME, D.MOL_FORMULA, "
+				+ "D.EXACT_MASS, D.SMILES, D.INCHI_KEY "+
+				"FROM COMPOUND_DATA D WHERE D.ACCESSION = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+			
+		for(String cid : compoundIds) {
+			
+			ps.setString(1, cid);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()){
+
+				CompoundDatabaseEnum dbSource =
+						CompoundDatabaseEnum.getCompoundDatabaseByName(rs.getString("SOURCE_DB"));
+				String commonName = rs.getString("PRIMARY_NAME");
+				String formula = rs.getString("MOL_FORMULA");
+				double exactMass = rs.getDouble("EXACT_MASS");
+				String smiles = rs.getString("SMILES");
+				CompoundIdentity identity = new CompoundIdentity(
+						dbSource, cid, commonName,
+						commonName, formula, exactMass, smiles);
+				identity.setInChiKey(rs.getString("INCHI_KEY"));
+				compoundMap.put(cid, identity);
+			}
+			rs.close();
+			processed++;
+		}
+		ps.close();
+	}
+	
+	protected void getMSMSLibraryEntries(Connection conn) throws Exception {
+		
+	}
 
 	protected void retievePepSearchParameters() {		
 		
@@ -934,11 +1027,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		PreparedStatement ps = conn.prepareStatement(query);		
 		ResultSet rs = null;			
 		for(MSFeatureInfoBundle fb : features) {
-//			try {
-//				IDTMsDataUtils.attachMsMsManualIdentifications(fb.getMsFeature(), conn);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
+
 			try {
 				TandemMassSpectrum msms =
 						fb.getMsFeature().getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
@@ -994,9 +1083,16 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	
 	protected void attachChromatograms() throws Exception {
 			
+		List<MSFeatureInfoBundle> featuresWithChromatograms = 
+				features.stream().
+				filter(f -> f.getHasChromatogram()).
+				collect(Collectors.toList());
+		if(featuresWithChromatograms.isEmpty())
+			return;
+		
 		Connection conn = ConnectionManager.getConnection();
 		taskDescription = "Reading chromatograms ...";
-		total = features.size();
+		total = featuresWithChromatograms.size();
 		processed = 0;
 		Collection<StoredExtractedIonData>storedChroms = 
 				new ArrayList<StoredExtractedIonData>();		
@@ -1008,7 +1104,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				"WHERE FEATURE_ID = ? ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = null;
-		for(MSFeatureInfoBundle fb : features) {
+		for(MSFeatureInfoBundle fb : featuresWithChromatograms) {
 			
 			ps.setString(1, fb.getMSFeatureId());
 			rs = ps.executeQuery();

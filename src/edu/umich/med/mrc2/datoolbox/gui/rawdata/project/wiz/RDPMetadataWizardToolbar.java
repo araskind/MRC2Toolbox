@@ -33,7 +33,6 @@ import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -101,13 +100,13 @@ public class RDPMetadataWizardToolbar  extends CommonToolbar {
 				largeButtonDimension);
 		buttons.add(addWorklistsButton);
 		
-		addSeparator(largeButtonDimension);
-		
-		clearMetadataButton = GuiUtils.addButton(this, null, clearMetadataIcon, commandListener,
-				MainActionCommands.CLEAR_PROJECT_METADATA_COMMAND.getName(),
-				MainActionCommands.CLEAR_PROJECT_METADATA_COMMAND.getName(),
-				largeButtonDimension);
-		clearMetadataButton.setEnabled(false);
+//		addSeparator(largeButtonDimension);
+//		
+//		clearMetadataButton = GuiUtils.addButton(this, null, clearMetadataIcon, commandListener,
+//				MainActionCommands.CLEAR_PROJECT_METADATA_COMMAND.getName(),
+//				MainActionCommands.CLEAR_PROJECT_METADATA_COMMAND.getName(),
+//				largeButtonDimension);
+//		clearMetadataButton.setEnabled(false);
 	}
 
 	@Override

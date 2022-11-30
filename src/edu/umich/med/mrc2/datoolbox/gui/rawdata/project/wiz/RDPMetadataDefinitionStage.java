@@ -27,7 +27,7 @@ import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.wkl.RDPWorklistPanel
 
 public enum RDPMetadataDefinitionStage {
 
-	CREATE_EXPERIMENT("Create experiment", RDPExperimentDefinitionPanel.class),
+	CREATE_EXPERIMENT("Add experiment details", RDPExperimentDefinitionPanel.class),
 	ADD_SAMPLES("Add samples", RDPExperimentDesignPanel.class),
 	ADD_SAMPLE_PREPARATION_DATA("Add sample preparation data", RDPSamplePrepPanel.class),
 	ADD_ACQ_DA_METHODS("Add acquisition and data analysis methods", RDPMethodsPanel.class),

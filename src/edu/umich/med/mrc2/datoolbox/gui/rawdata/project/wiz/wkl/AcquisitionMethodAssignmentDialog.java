@@ -26,6 +26,8 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Collection;
 
 import javax.swing.Icon;
@@ -67,6 +69,7 @@ public class AcquisitionMethodAssignmentDialog extends JDialog {
 		
 		methodTable = new AcquisitionMethodTable();
 		methodTable.setTableModelFromAcquisitionMethodsCollection(acquisitionMethods);
+
 		JScrollPane scroll = new JScrollPane(methodTable);
 		getContentPane().add(scroll, BorderLayout.CENTER);
 		
@@ -94,6 +97,15 @@ public class AcquisitionMethodAssignmentDialog extends JDialog {
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
+		
+		methodTable.addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							btnSave.doClick();
+						}
+					}
+				});
 	}
 	
 	public DataAcquisitionMethod getSelectedDataAcquisitionMethod() {

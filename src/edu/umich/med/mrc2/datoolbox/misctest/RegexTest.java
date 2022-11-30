@@ -56,7 +56,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -113,8 +112,6 @@ import com.Ostermiller.util.CSVParser;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
-import edu.umich.med.mrc2.datoolbox.data.LibraryEntrySource;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
@@ -143,10 +140,8 @@ import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.DocumentUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTMsDataUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.database.load.massbank.MassBankFileParser;
 import edu.umich.med.mrc2.datoolbox.database.load.massbank.MassBankTandemMassSpectrum;
@@ -176,7 +171,6 @@ import edu.umich.med.mrc2.datoolbox.utils.MGFUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PeptideUtils;
-import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 import edu.umich.med.mrc2.datoolbox.utils.WebUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
@@ -3420,28 +3414,28 @@ public class RegexTest {
 //		}
 	}
 	
-	private static void matchMs2Ms1forIdda() {
-		
-		String samplePrepId = "SPR0061";
-		String sampleId = "IDS000077";
-		String daMethodId = "DXM0198";
-		String acquisitionMethodId = "DQM0559";	//	DQM0558 for NEG
-		Polarity polarity = Polarity.Positive;
-		String dataFileName = "NIST4-POS.txt";
-		
-		try {
-			matchIddaData(
-					samplePrepId,
-					sampleId,
-					daMethodId,
-					acquisitionMethodId,
-					polarity,
-					dataFileName);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	private static void matchMs2Ms1forIdda() {
+//		
+//		String samplePrepId = "SPR0061";
+//		String sampleId = "IDS000077";
+//		String daMethodId = "DXM0198";
+//		String acquisitionMethodId = "DQM0559";	//	DQM0558 for NEG
+//		Polarity polarity = Polarity.Positive;
+//		String dataFileName = "NIST4-POS.txt";
+//		
+//		try {
+//			matchIddaData(
+//					samplePrepId,
+//					sampleId,
+//					daMethodId,
+//					acquisitionMethodId,
+//					polarity,
+//					dataFileName);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 	
 	private static void exportLibrary() {
 		
@@ -5905,39 +5899,39 @@ public class RegexTest {
 		CompoundDbConnectionManager.releaseConnection(conn);
 	}
 
-	private static void exportMsMsLibForExperiment() {
-
-		String samplePrepId = "SPR0037";
-		String sampleId = "IDS000041";
-		String daMethodId = "DXM0091";
-		String acquisitionMethodId = "DQM0524";
-		Polarity polarity = Polarity.Positive;
-		String dataFileName = "EX00961-iDDA-POS-MATCH.TXT";
-		String libraryName = "EX00961-iDDA-based-POS-library";
-		String libraryDescription = "EX00961 MS1 positive mode library based on iDDA identification data";
-		String libId = null;
-
-		matchIddaData(
-				samplePrepId,
-				sampleId,
-				daMethodId,
-				acquisitionMethodId,
-				polarity,
-				dataFileName);
-
-		File libFile =
-				Paths.get("C:\\Users\\Sasha\\Downloads\\MSMS", dataFileName + "_4LIB.TXT").toFile();
-
-		String sourceFile = libFile.getAbsolutePath();
-		try {
-			libId = RemoteMsLibraryUtils.createNewLibrary(libraryName, libraryDescription);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if(libFile.exists() && libId != null)
-			insertLibraryFromIddaMatchedData(sourceFile, libId);
-	}
+//	private static void exportMsMsLibForExperiment() {
+//
+//		String samplePrepId = "SPR0037";
+//		String sampleId = "IDS000041";
+//		String daMethodId = "DXM0091";
+//		String acquisitionMethodId = "DQM0524";
+//		Polarity polarity = Polarity.Positive;
+//		String dataFileName = "EX00961-iDDA-POS-MATCH.TXT";
+//		String libraryName = "EX00961-iDDA-based-POS-library";
+//		String libraryDescription = "EX00961 MS1 positive mode library based on iDDA identification data";
+//		String libId = null;
+//
+//		matchIddaData(
+//				samplePrepId,
+//				sampleId,
+//				daMethodId,
+//				acquisitionMethodId,
+//				polarity,
+//				dataFileName);
+//
+//		File libFile =
+//				Paths.get("C:\\Users\\Sasha\\Downloads\\MSMS", dataFileName + "_4LIB.TXT").toFile();
+//
+//		String sourceFile = libFile.getAbsolutePath();
+//		try {
+//			libId = RemoteMsLibraryUtils.createNewLibrary(libraryName, libraryDescription);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		if(libFile.exists() && libId != null)
+//			insertLibraryFromIddaMatchedData(sourceFile, libId);
+//	}
 
 	private static void MINEImport() {
 
@@ -6350,157 +6344,157 @@ public class RegexTest {
 		System.out.println("Complete");
 	}
 
-	public static void matchIddaData(
-			String samplePrepId,
-			String sampleId,
-			String daMethodId,
-			String acquisitionMethodId,
-			Polarity polarity,
-			String dataFileName) {
-
-		MRC2ToolBoxConfiguration.initConfiguration();
-		try {
-			AdductManager.refreshAlldata();;
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-		Collection<MsFeature> features = new ArrayList<MsFeature>();
-		Collection<MsFeature> msmsFeatures = new ArrayList<MsFeature>();
-		try {
-			Connection conn = ConnectionManager.getConnection();
-			features =
-				IDTMsDataUtils.getReferenceMS1FeaturesForSample(
-						sampleId, acquisitionMethodId, daMethodId, conn);
-
-			msmsFeatures =
-				IDTMsDataUtils.getIdentifiedMSMSFeaturesForSample(
-						sampleId,
-						samplePrepId,
-						polarity,
-						conn);
-
-			ConnectionManager.releaseConnection(conn);
-		}
-		catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Map<MsFeature,Collection<MsFeature>> tandemMap =
-			new HashMap<MsFeature,Collection<MsFeature>>();
-
-		for(MsFeature f : features) {
-
-			Range rtLookupRange =
-				new Range(f.getRetentionTime() - 0.1d, f.getRetentionTime() + 0.1d);
-			Collection<MsFeature>rtFiltered =
-					msmsFeatures.stream().
-					filter(tdf -> rtLookupRange.contains(tdf.getRetentionTime())).
-					collect(Collectors.toList());
-
-			if(rtFiltered.isEmpty())
-				continue;
-
-			Range parentMzLookupRange = MsUtils.createPpmMassRange(f.getSpectrum().getBasePeakMz(), 50.0d);
-			Collection<MsFeature>mzFiltered =
-					rtFiltered.stream().
-					filter(tdf -> parentMzLookupRange.contains(
-							tdf.getSpectrum().getTandemSpectra().iterator().next().getParent().getMz())).
-					collect(Collectors.toList());
-
-			if(mzFiltered.isEmpty())
-				continue;
-
-			tandemMap.put(f, mzFiltered);
-		}
-		Polarity pol = Polarity.Positive;
-		if(polarity.equals("N"))
-			pol = Polarity.Negative;
-
-		Collection<String>compoundData = new ArrayList<String>();
-		String header =
-			"PARENT_FEATURE_ID	PARENT_MZ	PARENT_RT	ADUCT	MSMS_FEATURE_ID	MSMS_PARENT_MZ	"
-			+ "MS_RT	Delta RT	MZ_ERROR_PPM	CID	ACCESSION	NAME	FORMULA	NEUTRAL MASS	BULK_ID";
-		compoundData.add(header);
-		Collection<String>fLine = new ArrayList<String>();
-		HashSet<LibraryEntrySource>uniqueEntries = new HashSet<LibraryEntrySource>();
-		for (Entry<MsFeature, Collection<MsFeature>> entry : tandemMap.entrySet()) {
-
-			MsFeature parent = entry.getKey();
-			for(MsFeature msms : entry.getValue()) {
-
-				fLine.clear();
-				fLine.add(parent.getId());
-				fLine.add(MRC2ToolBoxConfiguration.getMzFormat().format(parent.getBasePeakMz()));
-				fLine.add(MRC2ToolBoxConfiguration.getRtFormat().format(parent.getRetentionTime()));
-				fLine.add(parent.getSpectrum().getPrimaryAdduct().getName());
-
-				fLine.add(msms.getId());
-				TandemMassSpectrum tdMs = msms.getSpectrum().getTandemSpectra().iterator().next();
-				fLine.add(MRC2ToolBoxConfiguration.getMzFormat().format(tdMs.getParent().getMz()));
-				fLine.add(MRC2ToolBoxConfiguration.getRtFormat().format(msms.getRetentionTime()));
-				fLine.add(MRC2ToolBoxConfiguration.getRtFormat().format(parent.getRetentionTime() - msms.getRetentionTime()));
-
-				double massError = Math.abs((parent.getBasePeakMz() - tdMs.getParent().getMz())/parent.getBasePeakMz()) * 1000000.0d;
-				fLine.add(MRC2ToolBoxConfiguration.getPpmFormat().format(massError));
-
-				fLine.add(Double.toString(tdMs.getCidLevel()));
-
-				CompoundIdentity cid = msms.getPrimaryIdentity().getCompoundIdentity();
-				fLine.add(cid.getPrimaryDatabaseId());
-				fLine.add(cid.getName());
-				fLine.add(cid.getFormula());
-				fLine.add(MRC2ToolBoxConfiguration.getMzFormat().format(cid.getExactMass()));
-
-				String lipidBulk = cid.getDbId(CompoundDatabaseEnum.LIPIDMAPS_BULK);
-				if(lipidBulk == null)
-					lipidBulk = cid.getPrimaryDatabaseId();
-				fLine.add(lipidBulk);
-				compoundData.add(StringUtils.join(fLine,  MRC2ToolBoxConfiguration.getTabDelimiter()));
-
-				LibraryEntrySource les = new LibraryEntrySource(
-						lipidBulk,
-						parent.getRetentionTime(),
-						pol,
-						parent.getSpectrum().getPrimaryAdduct());
-
-				uniqueEntries.add(les);
-			}
-		}
-		File outputFile =
-				Paths.get("C:\\Users\\Sasha\\Downloads\\MSMS", dataFileName + ".TXT").toFile();
-		try {
-			final Writer writer = new BufferedWriter(new FileWriter(outputFile));
-			writer.append(StringUtils.join(compoundData,  System.getProperty("line.separator")));
-			writer.flush();
-			writer.close();
-		}
-		catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		File outputFile2 =
-				Paths.get("C:\\Users\\Sasha\\Downloads\\MSMS", dataFileName + "_4LIB.TXT").toFile();
-		try {
-			final Writer writer = new BufferedWriter(new FileWriter(outputFile2));
-			writer.append("ID	RT	ADUCT	POLARITY\n");
-			for(LibraryEntrySource les : uniqueEntries) {
-
-				fLine.clear();
-				fLine.add(les.getBulkId());
-				fLine.add(MRC2ToolBoxConfiguration.getRtFormat().format(les.getRt()));
-				fLine.add(les.getAdduct().getName());
-				fLine.add(Integer.toString(les.getPolarity().getSign()));
-				writer.append(StringUtils.join(fLine,  MRC2ToolBoxConfiguration.getTabDelimiter()) + "\n");
-			}
-			writer.flush();
-			writer.close();
-		}
-		catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		System.out.println("Complete");
-	}
+//	public static void matchIddaData(
+//			String samplePrepId,
+//			String sampleId,
+//			String daMethodId,
+//			String acquisitionMethodId,
+//			Polarity polarity,
+//			String dataFileName) {
+//
+//		MRC2ToolBoxConfiguration.initConfiguration();
+//		try {
+//			AdductManager.refreshAlldata();;
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//		Collection<MsFeature> features = new ArrayList<MsFeature>();
+//		Collection<MsFeature> msmsFeatures = new ArrayList<MsFeature>();
+//		try {
+//			Connection conn = ConnectionManager.getConnection();
+//			features =
+//				IDTMsDataUtils.getReferenceMS1FeaturesForSample(
+//						sampleId, acquisitionMethodId, daMethodId, conn);
+//
+//			msmsFeatures =
+//				IDTMsDataUtils.getIdentifiedMSMSFeaturesForSample(
+//						sampleId,
+//						samplePrepId,
+//						polarity,
+//						conn);
+//
+//			ConnectionManager.releaseConnection(conn);
+//		}
+//		catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		Map<MsFeature,Collection<MsFeature>> tandemMap =
+//			new HashMap<MsFeature,Collection<MsFeature>>();
+//
+//		for(MsFeature f : features) {
+//
+//			Range rtLookupRange =
+//				new Range(f.getRetentionTime() - 0.1d, f.getRetentionTime() + 0.1d);
+//			Collection<MsFeature>rtFiltered =
+//					msmsFeatures.stream().
+//					filter(tdf -> rtLookupRange.contains(tdf.getRetentionTime())).
+//					collect(Collectors.toList());
+//
+//			if(rtFiltered.isEmpty())
+//				continue;
+//
+//			Range parentMzLookupRange = MsUtils.createPpmMassRange(f.getSpectrum().getBasePeakMz(), 50.0d);
+//			Collection<MsFeature>mzFiltered =
+//					rtFiltered.stream().
+//					filter(tdf -> parentMzLookupRange.contains(
+//							tdf.getSpectrum().getTandemSpectra().iterator().next().getParent().getMz())).
+//					collect(Collectors.toList());
+//
+//			if(mzFiltered.isEmpty())
+//				continue;
+//
+//			tandemMap.put(f, mzFiltered);
+//		}
+//		Polarity pol = Polarity.Positive;
+//		if(polarity.equals("N"))
+//			pol = Polarity.Negative;
+//
+//		Collection<String>compoundData = new ArrayList<String>();
+//		String header =
+//			"PARENT_FEATURE_ID	PARENT_MZ	PARENT_RT	ADUCT	MSMS_FEATURE_ID	MSMS_PARENT_MZ	"
+//			+ "MS_RT	Delta RT	MZ_ERROR_PPM	CID	ACCESSION	NAME	FORMULA	NEUTRAL MASS	BULK_ID";
+//		compoundData.add(header);
+//		Collection<String>fLine = new ArrayList<String>();
+//		HashSet<LibraryEntrySource>uniqueEntries = new HashSet<LibraryEntrySource>();
+//		for (Entry<MsFeature, Collection<MsFeature>> entry : tandemMap.entrySet()) {
+//
+//			MsFeature parent = entry.getKey();
+//			for(MsFeature msms : entry.getValue()) {
+//
+//				fLine.clear();
+//				fLine.add(parent.getId());
+//				fLine.add(MRC2ToolBoxConfiguration.getMzFormat().format(parent.getBasePeakMz()));
+//				fLine.add(MRC2ToolBoxConfiguration.getRtFormat().format(parent.getRetentionTime()));
+//				fLine.add(parent.getSpectrum().getPrimaryAdduct().getName());
+//
+//				fLine.add(msms.getId());
+//				TandemMassSpectrum tdMs = msms.getSpectrum().getTandemSpectra().iterator().next();
+//				fLine.add(MRC2ToolBoxConfiguration.getMzFormat().format(tdMs.getParent().getMz()));
+//				fLine.add(MRC2ToolBoxConfiguration.getRtFormat().format(msms.getRetentionTime()));
+//				fLine.add(MRC2ToolBoxConfiguration.getRtFormat().format(parent.getRetentionTime() - msms.getRetentionTime()));
+//
+//				double massError = Math.abs((parent.getBasePeakMz() - tdMs.getParent().getMz())/parent.getBasePeakMz()) * 1000000.0d;
+//				fLine.add(MRC2ToolBoxConfiguration.getPpmFormat().format(massError));
+//
+//				fLine.add(Double.toString(tdMs.getCidLevel()));
+//
+//				CompoundIdentity cid = msms.getPrimaryIdentity().getCompoundIdentity();
+//				fLine.add(cid.getPrimaryDatabaseId());
+//				fLine.add(cid.getName());
+//				fLine.add(cid.getFormula());
+//				fLine.add(MRC2ToolBoxConfiguration.getMzFormat().format(cid.getExactMass()));
+//
+//				String lipidBulk = cid.getDbId(CompoundDatabaseEnum.LIPIDMAPS_BULK);
+//				if(lipidBulk == null)
+//					lipidBulk = cid.getPrimaryDatabaseId();
+//				fLine.add(lipidBulk);
+//				compoundData.add(StringUtils.join(fLine,  MRC2ToolBoxConfiguration.getTabDelimiter()));
+//
+//				LibraryEntrySource les = new LibraryEntrySource(
+//						lipidBulk,
+//						parent.getRetentionTime(),
+//						pol,
+//						parent.getSpectrum().getPrimaryAdduct());
+//
+//				uniqueEntries.add(les);
+//			}
+//		}
+//		File outputFile =
+//				Paths.get("C:\\Users\\Sasha\\Downloads\\MSMS", dataFileName + ".TXT").toFile();
+//		try {
+//			final Writer writer = new BufferedWriter(new FileWriter(outputFile));
+//			writer.append(StringUtils.join(compoundData,  System.getProperty("line.separator")));
+//			writer.flush();
+//			writer.close();
+//		}
+//		catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		File outputFile2 =
+//				Paths.get("C:\\Users\\Sasha\\Downloads\\MSMS", dataFileName + "_4LIB.TXT").toFile();
+//		try {
+//			final Writer writer = new BufferedWriter(new FileWriter(outputFile2));
+//			writer.append("ID	RT	ADUCT	POLARITY\n");
+//			for(LibraryEntrySource les : uniqueEntries) {
+//
+//				fLine.clear();
+//				fLine.add(les.getBulkId());
+//				fLine.add(MRC2ToolBoxConfiguration.getRtFormat().format(les.getRt()));
+//				fLine.add(les.getAdduct().getName());
+//				fLine.add(Integer.toString(les.getPolarity().getSign()));
+//				writer.append(StringUtils.join(fLine,  MRC2ToolBoxConfiguration.getTabDelimiter()) + "\n");
+//			}
+//			writer.flush();
+//			writer.close();
+//		}
+//		catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		System.out.println("Complete");
+//	}
 
 	private static void updateNistMSMS2PeptideData() {
 

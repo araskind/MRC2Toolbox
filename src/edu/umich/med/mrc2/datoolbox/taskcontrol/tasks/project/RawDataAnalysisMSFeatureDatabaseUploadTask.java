@@ -116,8 +116,8 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		String parentFeatureQuery =
 				"INSERT INTO MSMS_PARENT_FEATURE "
 				+ "(FEATURE_ID, DATA_ANALYSIS_ID, RETENTION_TIME, HEIGHT, "
-				+ "AREA, DETECTION_ALGORITHM, BASE_PEAK, POLARITY) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "AREA, DETECTION_ALGORITHM, BASE_PEAK, POLARITY, HAS_CHROMATOGRAM) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement parentFeaturePs = conn.prepareStatement(parentFeatureQuery);
 		parentFeaturePs.setString(2, dataAnalysisId);
 		
@@ -128,8 +128,8 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		String msmsFeatureQuery =
 				"INSERT INTO MSMS_FEATURE (PARENT_FEATURE_ID, MSMS_FEATURE_ID, DATA_ANALYSIS_ID, "
 				+ "RETENTION_TIME, PARENT_MZ, FRAGMENTATION_ENERGY, COLLISION_ENERGY, POLARITY, "
-				+ "ISOLATION_WINDOW_MIN, ISOLATION_WINDOW_MAX) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "ISOLATION_WINDOW_MIN, ISOLATION_WINDOW_MAX, HAS_SCANS) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement msmsFeaturePs = conn.prepareStatement(msmsFeatureQuery);
 		msmsFeaturePs.setString(3, dataAnalysisId);
 		
@@ -309,6 +309,13 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 			parentFeaturePs.setDouble(7, bpMz);
 
 		parentFeaturePs.setString(8, feature.getPolarity().getCode());
+		
+		if(chromatogramMap.get(bundle.getMsFeature().getId()) != null){
+			parentFeaturePs.setString(9, "Y");
+		}
+		else {
+			parentFeaturePs.setNull(9, java.sql.Types.NULL);
+		}
 		parentFeaturePs.addBatch();
 		
 		//	MS1
@@ -355,6 +362,13 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		else {
 			msmsFeaturePs.setNull(9, java.sql.Types.NULL);
 			msmsFeaturePs.setNull(10, java.sql.Types.NULL);
+		}
+		if(instrumentMsms.getAveragedScanNumbers() != null 
+				&& !instrumentMsms.getAveragedScanNumbers().isEmpty()) {
+			msmsFeaturePs.setString(11, "Y");
+		}
+		else {
+			msmsFeaturePs.setNull(11, java.sql.Types.NULL);
 		}
 		msmsFeaturePs.addBatch();
 		

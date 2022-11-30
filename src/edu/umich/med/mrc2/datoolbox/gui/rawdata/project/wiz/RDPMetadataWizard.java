@@ -105,6 +105,8 @@ public class RDPMetadataWizard extends JDialog
 	private LIMSExperiment newExperiment;
 	private IndeterminateProgressDialog idp;
 	private int processedFiles, fileNumber;
+	
+	private static final String NEXT_STAGE_COMMAND = "Next";
 
 	public RDPMetadataWizard(
 			RawDataExaminerPanel parentPanel,
@@ -186,8 +188,8 @@ public class RDPMetadataWizard extends JDialog
 
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-		saveButton = new JButton(MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName());
-		saveButton.setActionCommand(MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName());
+		saveButton = new JButton(NEXT_STAGE_COMMAND);
+		saveButton.setActionCommand(NEXT_STAGE_COMMAND);
 		saveButton.addActionListener(this);
 		GridBagConstraints gbc_saveButton = new GridBagConstraints();
 		gbc_saveButton.anchor = GridBagConstraints.NORTHWEST;
@@ -345,7 +347,17 @@ public class RDPMetadataWizard extends JDialog
 		for(RDPMetadataDefinitionStage stage : RDPMetadataDefinitionStage.values()) {
 			if(command.equals(stage.getName())) 
 				validateInputAndShowStagePanel(stage);
-		}	
+		}		
+		if(command.equals(NEXT_STAGE_COMMAND)) {
+				
+			for(int i=0; i<RDPMetadataDefinitionStage.values().length; i++) {
+				
+				if(RDPMetadataDefinitionStage.values()[i].equals(activeStage)) {
+					validateInputAndShowStagePanel(RDPMetadataDefinitionStage.values()[i+1]);
+					return;
+				}
+			}
+		}
 		if(command.equals(MainActionCommands.COMPLETE_EXPERIMENT_DEFINITION_COMMAND.getName())) 
 			completeExperimentDefinitionStage();
 		
@@ -409,6 +421,13 @@ public class RDPMetadataWizard extends JDialog
 				stagePanel.add(panels.get(stage), gbc_panel);
 				setTitle(stage.getName());
 				toolbar.highlightStageButton(stage);
+				
+				String command = MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName();
+				if(i < RDPMetadataDefinitionStage.values().length - 1) 
+					command = NEXT_STAGE_COMMAND;
+
+				saveButton.setText(command);
+				saveButton.setActionCommand(command);							
 				return;
 			}
 			Collection<String> errors = panels.get(toValidate).validateInputData();

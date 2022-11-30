@@ -83,6 +83,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	protected Map<Integer,Double>scanRtMap;
 	protected boolean parentIonIsMinorIsotope;
 	protected double parentIonPurity = 1.0d;
+	protected boolean hasScans;
 
 	public TandemMassSpectrum(
 			int depth,
@@ -814,6 +815,14 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	
 	public String getSpectrumAsPythonArray() {		
 		return MsUtils.getSpectrumAsPythonArray(spectrum);		
+	}
+
+	public boolean getHasScans() {
+		return hasScans;
+	}
+
+	public void setHasScans(boolean hasScans) {
+		this.hasScans = hasScans;
 	}
 }
 

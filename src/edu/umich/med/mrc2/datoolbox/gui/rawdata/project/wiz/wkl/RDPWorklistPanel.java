@@ -96,10 +96,10 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 		add(panel, gbc_panel);
 		appendWorklist = false;
 		
-		completeStageButton.setText(
-				MainActionCommands.COMPLETE_ANALYSIS_WORKLIST_VERIFICATION_COMMAND.getName());		
-		completeStageButton.setActionCommand(
-				MainActionCommands.COMPLETE_ANALYSIS_WORKLIST_VERIFICATION_COMMAND.getName());
+//		completeStageButton.setText(
+//				MainActionCommands.COMPLETE_ANALYSIS_WORKLIST_VERIFICATION_COMMAND.getName());		
+//		completeStageButton.setActionCommand(
+//				MainActionCommands.COMPLETE_ANALYSIS_WORKLIST_VERIFICATION_COMMAND.getName());
 		
 		loadPreferences();
 	}
@@ -548,9 +548,18 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 		if(items.stream().filter(i -> Objects.isNull(i.getSample())).count() > 0)
 			errors.add("Some data files not linked to samples.");
 
+		//	Verify prep assignment
 		if(items.stream().filter(i -> Objects.isNull(i.getPrepItemId())).count() > 0)
 			errors.add("Some data files not linked to sample prep items.");
+		
+		//	Verify method assignment
+		if(items.stream().filter(i -> Objects.isNull(i.getAcquisitionMethod())).count() > 0)
+			errors.add("Some data files not linked to acquisition methods.");
 	
+		//	Verify injection volumes
+		if(items.stream().filter(i -> i.getInjectionVolume() == 0.0d).count() > 0)
+			errors.add("Injection volume not specified for some data files.");
+		
 		return errors;
 	}
 

@@ -125,7 +125,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		processed = 0;	
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
-				"SELECT F.FEATURE_ID, F.POLARITY, F.MZ_OF_INTEREST, F.RETENTION_TIME, " +
+				"SELECT F.FEATURE_ID, F.POLARITY, F.MZ_OF_INTEREST, F.RETENTION_TIME, F.HAS_CHROMATOGRAM, " +
 				"I.ACQUISITION_METHOD_ID, M.EXTRACTION_METHOD_ID, S.EXPERIMENT_ID, S.SAMPLE_ID, " +
 				"T.STOCK_SAMPLE_ID, I.INJECTION_ID, F2.COLLISION_ENERGY " +
 				"FROM MSMS_PARENT_FEATURE F, " +
@@ -151,6 +151,10 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 				+ "FROM MSMS_PARENT_FEATURE_PEAK WHERE FEATURE_ID = ?";
 		PreparedStatement msOnePs = conn.prepareStatement(msOneQuery);
 		
+		Adduct defaultAdduct = null;
+		if(polarity != null)
+			defaultAdduct = AdductManager.getDefaultAdductForPolarity(polarity);
+		
 		for(String msmsId : featureIds) {
 			
 			ps.setString(1, msmsId);
@@ -168,6 +172,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 				polarity = Polarity.getPolarityByCode(rs.getString("POLARITY"));
 				f.setPolarity(polarity);
 				f.setAnnotatedObjectType(AnnotatedObjectType.MSMS_FEATURE);
+				defaultAdduct = AdductManager.getDefaultAdductForPolarity(polarity);
 				
 				MassSpectrum spectrum = new MassSpectrum();
 				Map<Adduct, Collection<MsPoint>> adductMap =
@@ -177,21 +182,18 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 				ResultSet msOneRs = msOnePs.executeQuery();
 				while(msOneRs.next()) {
 					
+					Adduct adduct = defaultAdduct;
 					String adductId = msOneRs.getString("ADDUCT_ID");
 					if(adductId == null)
 						adductId = msOneRs.getString("COMPOSITE_ADDUCT_ID");
 
-					Adduct adduct =
-							AdductManager.getAdductById(adductId);
-
-					if(adduct == null)
-						continue;
+					if(adductId != null)
+						adduct = AdductManager.getAdductById(adductId);
 
 					if(!adductMap.containsKey(adduct))
 						adductMap.put(adduct, new ArrayList<MsPoint>());
 
-					adductMap.get(adduct).add(
-							new MsPoint(msOneRs.getDouble("MZ"), msOneRs.getDouble("HEIGHT")));
+					adductMap.get(adduct).add(new MsPoint(msOneRs.getDouble("MZ"), msOneRs.getDouble("HEIGHT")));
 				}
 				msOneRs.close();
 				adductMap.entrySet().stream().
@@ -213,6 +215,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 					IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);
 				bundle.setSample(sample);
 				bundle.setInjectionId(rs.getString("INJECTION_ID"));
+				bundle.setHasChromatogram(rs.getString("HAS_CHROMATOGRAM") != null);
 				features.add(bundle);
 			}			
 			rs.close();

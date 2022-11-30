@@ -27,7 +27,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.experiment.IDTExperimentDefinitionPanel;
-import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 
 public class RDPExperimentDefinitionPanel extends RDPMetadataWizardPanel {
 
@@ -43,10 +42,10 @@ public class RDPExperimentDefinitionPanel extends RDPMetadataWizardPanel {
 		
 		experimentDefinitionPanel = new IDTExperimentDefinitionPanel(null);
 		add(experimentDefinitionPanel, gbc_panel);		
-		completeStageButton.setText(
-				MainActionCommands.COMPLETE_EXPERIMENT_DEFINITION_COMMAND.getName());		
-		completeStageButton.setActionCommand(
-				MainActionCommands.COMPLETE_EXPERIMENT_DEFINITION_COMMAND.getName());
+//		completeStageButton.setText(
+//				MainActionCommands.COMPLETE_EXPERIMENT_DEFINITION_COMMAND.getName());		
+//		completeStageButton.setActionCommand(
+//				MainActionCommands.COMPLETE_EXPERIMENT_DEFINITION_COMMAND.getName());
 	}
 
 	@Override

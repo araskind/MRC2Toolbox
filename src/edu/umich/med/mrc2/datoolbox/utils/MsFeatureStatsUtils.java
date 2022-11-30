@@ -217,6 +217,7 @@ public class MsFeatureStatsUtils {
 				return features;
 		}		
 		if(filterParameters.getFeatureNameSubstring() != null) {
+			
 			String upName = filterParameters.getFeatureNameSubstring().toUpperCase();		
 			if(filterParameters.isDoSearchAllIds()) {
 				features = features.stream().
@@ -292,43 +293,59 @@ public class MsFeatureStatsUtils {
 		if(minimalMSMSScore > 0.0d) {
 			
 			features = features.stream().
-					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
-					filter(f -> Objects.nonNull(f.getMsFeature().
-							getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+					filter(f -> msmsLibMatched.contains(f)).
 					filter(f -> f.getMsFeature().getPrimaryIdentity().
 							getReferenceMsMsLibraryMatch().getScore() > minimalMSMSScore).
 					collect(Collectors.toList());
 			if(features.isEmpty())
 				return features;
 		}
-		Collection<HiResSearchOption> msmsSearchTypes = filterParameters.getMsmsSearchTypes();
+		Collection<HiResSearchOption> msmsSearchTypes = filterParameters.getMsmsSearchTypes();	
 		if(!msmsSearchTypes.isEmpty()) {
 			
-			if(!msmsSearchTypes.contains(HiResSearchOption.z)) {
-				
-				features = features.stream().
-						filter(f -> !f.getMsFeature().getPrimaryIdentity().
-								getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Regular)).
-						collect(Collectors.toList());
-				if(features.isEmpty())
-					return features;
-			}
-			if(!msmsSearchTypes.contains(HiResSearchOption.u)) {
-				features = features.stream().
-						filter(f -> !f.getMsFeature().getPrimaryIdentity().
-								getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.InSource)).
-						collect(Collectors.toList());
-				if(features.isEmpty())
-					return features;
-			}
-			if(!msmsSearchTypes.contains(HiResSearchOption.y)) {
-				features = features.stream().
-						filter(f -> !f.getMsFeature().getPrimaryIdentity().
-								getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Hybrid)).
-						collect(Collectors.toList());
-				if(features.isEmpty())
-					return features;
-			}
+			Collection<MSMSMatchType>msmsMatchTypes = new ArrayList<MSMSMatchType>();
+			if(msmsSearchTypes.contains(HiResSearchOption.z))
+				msmsMatchTypes.add(MSMSMatchType.Regular);
+			
+			if(msmsSearchTypes.contains(HiResSearchOption.u))
+				msmsMatchTypes.add(MSMSMatchType.InSource);
+			
+			if(msmsSearchTypes.contains(HiResSearchOption.y))
+				msmsMatchTypes.add(MSMSMatchType.Hybrid);
+			
+			features = features.stream().
+					filter(f -> msmsLibMatched.contains(f)).
+					filter(f -> msmsMatchTypes.contains(f.getMsFeature().
+							getPrimaryIdentity().getReferenceMsMsLibraryMatch().getMatchType())).
+					collect(Collectors.toList()); 
+			if(features.isEmpty())
+				return features;
+			
+//			if(!msmsSearchTypes.contains(HiResSearchOption.z)) {
+//				
+//				features = features.stream().
+//						filter(f -> !f.getMsFeature().getPrimaryIdentity().
+//								getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Regular)).
+//						collect(Collectors.toList());
+//				if(features.isEmpty())
+//					return features;
+//			}
+//			if(!msmsSearchTypes.contains(HiResSearchOption.u)) {
+//				features = features.stream().
+//						filter(f -> !f.getMsFeature().getPrimaryIdentity().
+//								getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.InSource)).
+//						collect(Collectors.toList());
+//				if(features.isEmpty())
+//					return features;
+//			}
+//			if(!msmsSearchTypes.contains(HiResSearchOption.y)) {
+//				features = features.stream().
+//						filter(f -> !f.getMsFeature().getPrimaryIdentity().
+//								getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Hybrid)).
+//						collect(Collectors.toList());
+//				if(features.isEmpty())
+//					return features;
+//			}
 		}
 		return features;
 	}

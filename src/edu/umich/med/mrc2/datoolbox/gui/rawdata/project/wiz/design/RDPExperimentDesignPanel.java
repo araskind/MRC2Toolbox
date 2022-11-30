@@ -28,7 +28,6 @@ import java.util.Collection;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizardPanel;
 
@@ -48,10 +47,10 @@ public class RDPExperimentDesignPanel extends RDPMetadataWizardPanel implements 
 		experimentDesignEditorPanel.setWizardPanel(true);
 		add(experimentDesignEditorPanel, gbc_panel);		
 		
-		completeStageButton.setText(
-				MainActionCommands.COMPLETE_SAMPLE_LIST_DEFINITION_COMMAND.getName());		
-		completeStageButton.setActionCommand(
-				MainActionCommands.COMPLETE_SAMPLE_LIST_DEFINITION_COMMAND.getName());
+//		completeStageButton.setText(
+//				MainActionCommands.COMPLETE_SAMPLE_LIST_DEFINITION_COMMAND.getName());		
+//		completeStageButton.setActionCommand(
+//				MainActionCommands.COMPLETE_SAMPLE_LIST_DEFINITION_COMMAND.getName());
 	}
 
 	public synchronized void clearPanel() {
