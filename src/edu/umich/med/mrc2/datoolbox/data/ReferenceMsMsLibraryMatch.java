@@ -26,6 +26,7 @@ import java.io.Serializable;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
 import edu.umich.med.mrc2.datoolbox.project.store.ReferenceMsMsLibraryMatchFields;
 
@@ -124,6 +125,23 @@ public class ReferenceMsMsLibraryMatch implements Serializable {
 		this.hybridDeltaMz = poo.getHybridDeltaMz();
 		this.matchType = poo.getMatchType();
 		this.decoyMatch = poo.isDecoy();		
+	}
+	
+	public double getScoreOfType(MSMSScoringParameter scoreType) {
+		
+		if(scoreType.equals(MSMSScoringParameter.NIST_SCORE))
+			return score;
+		
+		if(scoreType.equals(MSMSScoringParameter.ENTROPY_SCORE)) 
+			return entropyBasedScore;
+		
+		if(scoreType.equals(MSMSScoringParameter.DOT_PRODUCT)) 
+			return dotProduct;
+		
+		if(scoreType.equals(MSMSScoringParameter.PROBABILITY)) 
+			return probability;
+		
+		return 0.0d;
 	}
 
 	/**

@@ -27,11 +27,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
@@ -78,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.IdentityWordWrapCellRen
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MSFeatureIdentificationLevelColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ReferenceMsMsLibraryRenderer;
+import edu.umich.med.mrc2.datoolbox.utils.IdentificationUtils;
 
 public class UniversalIdentificationResultsTable extends BasicTable {
 
@@ -90,8 +87,6 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 	private MsFeature parentFeature;
 	private MouseMotionAdapter mma;
 	private TableModelListener identificationTableModelListener;
-	private static final MsFeatureIdentityComparator idQualitySorter = 
-			new MsFeatureIdentityComparator(SortProperty.Quality);
 
 	public UniversalIdentificationResultsTable() {
 
@@ -249,7 +244,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		removeModelListeners();
 		parentFeature = feature;
 		if(showUniqueIdsOnly)
-			idList = getBestMatchIds(feature);			
+			idList = IdentificationUtils.getBestMatchIds(feature);			
 		
 		model.setParentFeature(parentFeature);
 		model.setModelFromIdList(idList, parentFeature.getPrimaryIdentity());		
@@ -281,7 +276,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		MsFeatureIdentity selectedId = this.getSelectedIdentity();
 		Collection<MsFeatureIdentity> idList = feature.getIdentifications();
 		if(showUniqueIdsOnly)
-			idList = getBestMatchIds(feature);
+			idList = IdentificationUtils.getBestMatchIds(feature);
 			
 		if(sorcesToExclude != null && !sorcesToExclude.isEmpty())
 			idList = feature.getIdentifications().stream().
@@ -299,26 +294,6 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 			selectPrimaryIdentity();
 		
 		addModelListeners();
-	}
-	
-	private Collection<MsFeatureIdentity>getBestMatchIds(MsFeature feature){
-		
-		Collection<MsFeatureIdentity> idList = feature.getIdentifications();			
-		Map<CompoundIdentity, List<MsFeatureIdentity>> idsByCompound = 
-				idList.stream().collect(Collectors.groupingBy(MsFeatureIdentity::getCompoundIdentity));
-		
-		Collection<MsFeatureIdentity> bestMatchList = new ArrayList<MsFeatureIdentity>();
-		for(Entry<CompoundIdentity, List<MsFeatureIdentity>> matchList : idsByCompound.entrySet()) {
-			
-			MsFeatureIdentity bestMatch = matchList.getValue().
-					stream().sorted(idQualitySorter).findFirst().orElse(null);
-			if(bestMatch != null)
-				bestMatchList.add(bestMatch);
-		}
-		if(feature.getPrimaryIdentity() != null && !bestMatchList.contains(feature.getPrimaryIdentity()))
-			bestMatchList.add(feature.getPrimaryIdentity());
-		
-		return bestMatchList;
 	}
 	
 	public void removeModelListeners() {

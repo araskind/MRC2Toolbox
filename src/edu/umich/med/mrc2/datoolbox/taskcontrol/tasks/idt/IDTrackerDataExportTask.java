@@ -27,6 +27,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,6 +38,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,12 +82,12 @@ import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class IDTrackerDataExportTask extends AbstractTask {
@@ -110,6 +115,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 	private Map<String,Map<ClassyFireClassificationLevels,String>>classyFireClassifications;
 	private Map<String,String>systematicNames;
 	private Map<String,String>refMetNames;
+	private Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>identificationMap;
 	
 	private boolean removeRedundant;
 	private double redundantMzWindow;
@@ -119,31 +125,10 @@ public class IDTrackerDataExportTask extends AbstractTask {
 	private MSMSScoringParameter msmsScoringParameter;	
 	private double minimalMSMSScore;	
 	private FeatureIDSubset featureIDSubset;	
-	private Collection<HiResSearchOption>msmsSearchTypes;
+	private Collection<MSMSMatchType>msmsSearchTypes;
+	private boolean excludeIfNoIdsLeft;
 	
 	private IDTrackerDataExportParameters params;
-
-	public IDTrackerDataExportTask(
-			MsDepth msLevel, 
-			Collection<MSFeatureInfoBundle> featuresToExport,
-			Collection<IDTrackerMsFeatureProperties> featurePropertyList,
-			Collection<IDTrackerFeatureIdentificationProperties> identificationDetailsList, 
-			boolean removeRedundant,
-			double redundantMzWindow,
-			MassErrorType redMzErrorType,
-			double redundantRTWindow,
-			File outputFile) {
-		super();
-		this.msLevel = msLevel;
-		this.featuresToExport = featuresToExport;
-		this.featurePropertyList = featurePropertyList;
-		this.identificationDetailsList = identificationDetailsList;
-		this.removeRedundant = removeRedundant;
-		this.redundantMzWindow = redundantMzWindow;
-		this.redMzErrorType = redMzErrorType;
-		this.redundantRTWindow = redundantRTWindow;
-		this.outputFile = outputFile;
-	}
 	
 	public IDTrackerDataExportTask(
 			Collection<MSFeatureInfoBundle> featuresToExport,
@@ -160,10 +145,12 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		this.redundantMzWindow = params.getRedundantMzWindow();
 		this.redMzErrorType = params.getRedMzErrorType();
 		this.redundantRTWindow = params.getRedundantRTWindow();
+		
 		this.msmsScoringParameter = params.getMsmsScoringParameter();	
 		this.minimalMSMSScore = params.getMinimalMSMSScore();	
 		this.featureIDSubset = params.getFeatureIDSubset();	
 		this.msmsSearchTypes = params.getMsmsSearchTypes();
+		this.excludeIfNoIdsLeft = params.isExcludeFromExportWhenAllIdsFilteredOut();
 		
 		this.outputFile = outputFile;
 	}
@@ -216,6 +203,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 				e.printStackTrace();
 			}
 		}
+		createIdentificationsMap();
 		try {
 			writeExportFile();
 			setStatus(TaskStatus.FINISHED);
@@ -226,6 +214,60 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		}
 	}
 	
+	private void createIdentificationsMap() {
+
+		taskDescription = "Filtering IDs for export ...";
+		identificationMap = new HashMap<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>();
+		featuresToExport.stream().
+			filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity())).
+			forEach(f -> identificationMap.put(f, null));
+		Collection<MSFeatureInfoBundle>featuresToMap = featuresToExport.stream().
+				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+				collect(Collectors.toList());
+		total = featuresToMap.size();
+		processed = 0;
+		for(MSFeatureInfoBundle f : featuresToMap) {
+			
+			Collection<MsFeatureIdentity>featureIds = filterIdentities(f);
+			identificationMap.put(f, featureIds);
+			processed++;
+		}
+	}
+	
+	private Collection<MsFeatureIdentity>filterIdentities(MSFeatureInfoBundle f){
+		
+		Collection<MsFeatureIdentity>filteredIds = new ArrayList<MsFeatureIdentity>();
+		MsFeatureIdentity primaryId = f.getMsFeature().getPrimaryIdentity();
+		Set<MsFeatureIdentity> allIds = f.getMsFeature().getIdentifications();
+		
+		if(featureIDSubset.equals(FeatureIDSubset.PRIMARY_ONLY))
+			filteredIds.add(primaryId);
+		
+		if(featureIDSubset.equals(FeatureIDSubset.ALL))
+			filteredIds.addAll(allIds);
+
+		if(featureIDSubset.equals(FeatureIDSubset.BEST_FOR_EACH_COMPOUND))
+			filteredIds.addAll(IdentificationUtils.getBestMatchIds(f.getMsFeature()));
+		
+		if(filteredIds.isEmpty())
+			return filteredIds;
+		
+		if(!msmsSearchTypes.isEmpty()) {
+			
+			filteredIds = 
+					IdentificationUtils.filterIdsOnMatchType(filteredIds, msmsSearchTypes);			
+			if(filteredIds.isEmpty())
+				return filteredIds;
+		}
+		if(minimalMSMSScore > 0.0d) {
+			filteredIds = IdentificationUtils.filterIdsOnScore(
+					filteredIds,
+					minimalMSMSScore,
+					msmsScoringParameter);
+		}
+		return filteredIds;
+	}
+
 	private void removeRedundantFeatures() {
 		
 		taskDescription = "Removing redundant features ...";
@@ -491,6 +533,129 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		taskDescription = "Wtiting output";
 		total = featuresToExport.size();
 		processed = 0;
+		List<String>dataToExport = new ArrayList<String>();
+		String header = createExportFileHeader();
+		dataToExport.add(header);
+		
+		List<MSFeatureInfoBundle> toExport = featuresToExport.stream().
+				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
+				collect(Collectors.toList());
+		
+		for(MSFeatureInfoBundle bundle : toExport) {
+
+			Collection<MsFeatureIdentity> featureIds = identificationMap.get(bundle);
+			if(featureIds == null || featureIds.isEmpty()) {
+				
+				if(!bundle.getMsFeature().getIdentifications().isEmpty() && !excludeIfNoIdsLeft) {
+					
+					ArrayList<String>line = new ArrayList<String>();
+					for(IDTrackerMsFeatureProperties property : featurePropertyList)
+						line.add(getFeatureProperty(bundle, property));
+					
+					for(IDTrackerFeatureIdentificationProperties property : identificationDetailsList)
+						line.add("");
+					
+					dataToExport.add(StringUtils.join(line, columnSeparator));
+				}
+			}
+			else {
+				for(MsFeatureIdentity fid : featureIds) {
+					
+					ArrayList<String>line = new ArrayList<String>();
+					for(IDTrackerMsFeatureProperties property : featurePropertyList)
+						line.add(getFeatureProperty(bundle, property));
+										
+					String accession = null;
+					if(fid != null && fid.getCompoundIdentity() != null)
+						accession = fid.getCompoundIdentity().getPrimaryDatabaseId();
+					
+					for(IDTrackerFeatureIdentificationProperties property : identificationDetailsList) {
+						
+						if(property.equals(IDTrackerFeatureIdentificationProperties.REFMET_CLASSIFICATION)) {
+
+							if(accession != null) {
+								Map<RefMetClassificationLevels,String> rmClassMap = refMetClassifications.get(accession);
+								for(RefMetClassificationLevels rmLevel : RefMetClassificationLevels.values())
+									line.add(rmClassMap.get(rmLevel));
+							}
+							else {
+								for(RefMetClassificationLevels rmLevel : RefMetClassificationLevels.values())
+									line.add("");
+							}
+						}
+						else if(property.equals(IDTrackerFeatureIdentificationProperties.CLASSYFIRE_CLASSIFICATION)) {
+							
+							if(accession != null) {
+								Map<ClassyFireClassificationLevels,String> cfClassMap = classyFireClassifications.get(accession);
+								if(cfClassMap != null) {
+									
+									for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
+										if(cfLevel != null)
+											line.add(cfClassMap.get(cfLevel));
+										else
+											line.add("");
+								}
+								else {
+									for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
+										line.add("");
+								}
+							}
+							else {
+								for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
+									line.add("");
+							}
+						}
+						else {
+							line.add(getFeatureIdentificationProperty(fid, bundle, property));
+						}
+					}
+					dataToExport.add(StringUtils.join(line, columnSeparator));
+				}
+			}
+			processed++;
+		}	
+		Path outputPath = Paths.get(outputFile.getAbsolutePath());
+		try {
+			Files.write(outputPath, 
+					dataToExport, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private String createExportFileHeader(){
+		
+		ArrayList<String>header = new ArrayList<String>();
+		featurePropertyList.stream().forEach(v -> header.add(v.getName()));
+		
+		// Add Identification fields
+		for(IDTrackerFeatureIdentificationProperties idField : identificationDetailsList) {
+			
+			if(idField.equals(IDTrackerFeatureIdentificationProperties.REFMET_CLASSIFICATION)) {
+				
+				for(RefMetClassificationLevels rmLevel : RefMetClassificationLevels.values())
+					header.add(rmLevel.getName());			
+			}
+			else if(idField.equals(IDTrackerFeatureIdentificationProperties.CLASSYFIRE_CLASSIFICATION)) {
+				
+				for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
+					header.add(cfLevel.getName());	
+			}
+			else {
+				header.add(idField.getName());
+			}		
+		}
+		return StringUtils.join(header, columnSeparator);
+	}
+	
+	private void writeExportFileOld() throws IOException {
+
+		taskDescription = "Wtiting output";
+		total = featuresToExport.size();
+		processed = 0;
 		final Writer writer = new BufferedWriter(new FileWriter(outputFile, StandardCharsets.UTF_8));
 		
 		//	Header
@@ -569,7 +734,7 @@ public class IDTrackerDataExportTask extends AbstractTask {
 					}
 				}
 				else {
-					line.add(getFeatureIdentificationProperty(bundle, property));
+					line.add(getPrimaryFeatureIdentificationProperty(bundle, property));
 				}
 			}
 			writer.append(StringUtils.join(line, columnSeparator));
@@ -686,7 +851,8 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		return "";
 	}
 
-	private String getFeatureIdentificationProperty(MSFeatureInfoBundle bundle,
+	private String getPrimaryFeatureIdentificationProperty(
+			MSFeatureInfoBundle bundle,
 			IDTrackerFeatureIdentificationProperties property) {
 		
 		MsFeature feature =  bundle.getMsFeature();	
@@ -709,6 +875,248 @@ public class IDTrackerDataExportTask extends AbstractTask {
 			if(idLevel != null)
 				idLevelName = idLevel.getName();
 		}
+		boolean hasAnnotations = !feature.getAnnotations().isEmpty();
+		boolean hasFollowup = !bundle.getIdFollowupSteps().isEmpty();
+		double deltaMz = MsUtils.getPpmMassErrorForIdentity(feature, id);
+
+		if(property.equals(IDTrackerFeatureIdentificationProperties.COMPOUND_NAME))
+			return compoundName;
+				 
+		if(id.getCompoundIdentity() != null) {
+			
+			if(id.getCompoundIdentity().getPrimaryDatabase() != null) {
+				
+				if(property.equals(IDTrackerFeatureIdentificationProperties.DATABASE_ID))
+					return id.getCompoundIdentity().getPrimaryDatabaseId();
+					
+				if(property.equals(IDTrackerFeatureIdentificationProperties.SOURCE_DATABASE))
+					return id.getCompoundIdentity().getPrimaryDatabase().getName();	
+				
+				if(property.equals(IDTrackerFeatureIdentificationProperties.FORMULA))
+					return id.getCompoundIdentity().getFormula();	
+				
+				if(property.equals(IDTrackerFeatureIdentificationProperties.INCHI_KEY))
+					return id.getCompoundIdentity().getInChiKey();	
+				
+				if(property.equals(IDTrackerFeatureIdentificationProperties.SMILES))
+					return id.getCompoundIdentity().getSmiles();
+								
+				if(property.equals(IDTrackerFeatureIdentificationProperties.REFMET_NAME))
+					return refMetNames.get(id.getCompoundIdentity().getPrimaryDatabaseId());
+								
+				if(property.equals(IDTrackerFeatureIdentificationProperties.SYSTEMATIC_NAME))
+					return systematicNames.get(id.getCompoundIdentity().getPrimaryDatabaseId());			
+			}
+		}
+		if(property.equals(IDTrackerFeatureIdentificationProperties.ID_SOURCE))
+			return id.getIdSource().getName();
+		
+		if(property.equals(IDTrackerFeatureIdentificationProperties.ANNOTATIONS) && hasAnnotations)
+			return trueMarker;
+		
+		if(property.equals(IDTrackerFeatureIdentificationProperties.FOLLOWUPS) && hasFollowup)
+			return trueMarker;
+		
+		if(property.equals(IDTrackerFeatureIdentificationProperties.MRC2_ID_LEVEL))
+			return idLevelName;
+		
+		if(property.equals(IDTrackerFeatureIdentificationProperties.ID_SCORE)) {
+			
+			if(id.getScore() > 0.0d)
+				return entropyFormat.format(id.getScore());
+		}
+		if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_ENTROPY_SCORE)) {
+			
+			if(id.getEntropyBasedScore() > 0.0d)
+				return entropyFormat.format(id.getEntropyBasedScore());
+		}		
+		if(property.equals(IDTrackerFeatureIdentificationProperties.MASS_ERROR) && deltaMz != 0.0d)
+			return ppmFormat.format(deltaMz);
+		
+		//	MS1 only properties
+		if(msLevel.equals(MsDepth.MS1)) {
+
+			if(id.getMsRtLibraryMatch() != null) {
+				if(property.equals(IDTrackerFeatureIdentificationProperties.BEST_MATCH_ADDUCT))
+					return id.getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch().getName();
+			
+				if(property.equals(IDTrackerFeatureIdentificationProperties.MSRT_LIB)) {
+					//	TODO reeplace by library object or name
+					return id.getMsRtLibraryMatch().getLibraryId();					
+				}
+			}
+			if(property.equals(IDTrackerFeatureIdentificationProperties.RETENTION_ERROR)) {
+				Double deltaRt = calculateRetentionShift(id, feature);
+				return rtFormat.format(deltaRt);
+			}
+		}
+		//	MS2 only properties
+		TandemMassSpectrum instrumentMsMs = null;
+		if(msLevel.equals(MsDepth.MS2)) {
+			
+			double parentMz = 0.0d;
+			String collisionEnergyValue = null;
+			boolean isHybrid = false;
+			boolean isInSource = false;
+			double forwardScore = 0.0d;
+			double reverseScore = 0.0d;
+			double probability = 0.0d;
+			double dotProduct = 0.0d;		
+			double revDotProduct = 0.0d;
+			double hybDotProduct = 0.0d;
+			double hybScore = 0.0d;
+			double hybDmz = 0.0d;
+			double msmsEntropy = 0.0d;			
+			double qValue = 0.0d;
+			double posteriorProbability = 0.0d;
+			double percolatorScore = 0.0d;
+			String featureSpectrumArray = "";
+			String libraryHitSpectrumArray = "";		
+			double libraryPrecursorDeltaMz = 0.0d;
+			double neutralMassDeltaMz = 0.0d;
+			double precursorPurity = 1.0d;
+			
+			instrumentMsMs = feature.getSpectrum().getExperimentalTandemSpectrum();
+			if(instrumentMsMs != null) {
+
+				if(instrumentMsMs.getParent() != null)
+					parentMz = instrumentMsMs.getParent().getMz();
+				
+				featureSpectrumArray = instrumentMsMs.getSpectrumAsPythonArray();				
+				precursorPurity = instrumentMsMs.getParentIonPurity();
+			}
+			ReferenceMsMsLibraryMatch msmslibMatch = id.getReferenceMsMsLibraryMatch();
+			ReferenceMsMsLibrary lib = null;
+			MsMsLibraryFeature matchFeature = null;
+			if(msmslibMatch != null) {
+				matchFeature = msmslibMatch.getMatchedLibraryFeature();
+				lib = IDTDataCash.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
+				collisionEnergyValue = matchFeature.getCollisionEnergyValue();
+				forwardScore = msmslibMatch.getForwardScore();
+				reverseScore = msmslibMatch.getReverseScore();
+				probability = msmslibMatch.getProbability();
+				dotProduct = msmslibMatch.getDotProduct();
+				isHybrid = msmslibMatch.isHybridMatch();
+				isInSource = msmslibMatch.isInSourceMatch();
+				revDotProduct = msmslibMatch.getReverseDotProduct();
+				hybDotProduct = msmslibMatch.getHybridDotProduct();
+				hybScore = msmslibMatch.getHybridScore();
+				hybDmz = msmslibMatch.getHybridDeltaMz();
+				msmsEntropy = matchFeature.getSpectrumEntropy();				
+				if(!isHybrid)
+					deltaMz = MsUtils.getPpmMassErrorForIdentity(feature, id);
+				
+				qValue = msmslibMatch.getqValue();
+				posteriorProbability = msmslibMatch.getPosteriorErrorProbability();
+				percolatorScore = msmslibMatch.getPercolatorScore();				
+				libraryHitSpectrumArray = matchFeature.getSpectrumAsPythonArray();
+
+				if(id.getCompoundIdentity() != null) {
+					double neutralMass = id.getCompoundIdentity().getExactMass();
+					neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
+				}
+				MsPoint libPrecursor = msmslibMatch.getMatchedLibraryFeature().getParent();
+				if(libPrecursor != null) 
+					libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();				
+			}	
+			if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY) && lib != null)
+				return lib.getName();
+			
+//			if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY_ENTRY_ID)) {
+//				msmslibMatch.getMatchedLibraryFeature().getMsmsLibraryIdentifier()
+//			}
+			if(property.equals(IDTrackerFeatureIdentificationProperties.COLLISION_ENERGY) && collisionEnergyValue != null)
+				return collisionEnergyValue;
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_SCORE) && reverseScore != 0.0d)
+				return entropyFormat.format(reverseScore);
+
+			if(property.equals(IDTrackerFeatureIdentificationProperties.PROBABILITY) && probability != 0.0d) 
+				return entropyFormat.format(probability);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.DOT_PRODUCT_COLUMN) && dotProduct != 0.0d)
+				return entropyFormat.format(dotProduct);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_DOT_PRODUCT) && revDotProduct != 0.0d)
+				return entropyFormat.format(revDotProduct);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.MATCH_TYPE)) {
+				if(isHybrid)
+					return MSMSMatchType.Hybrid.name();
+				else if(isInSource)
+					return MSMSMatchType.InSource.name();
+				else
+					return MSMSMatchType.Regular.name();
+			}
+			if(property.equals(IDTrackerFeatureIdentificationProperties.HYBRID_DOT_PRODUCT) && hybDotProduct != 0.0d)
+				return entropyFormat.format(hybDotProduct);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.HYBRID_SCORE) && hybScore != 0.0d)
+				return entropyFormat.format(hybScore);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.HYBRID_DELTA_MZ) && hybDmz != 0.0d)
+				return mzFormat.format(hybDmz);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.SPECTRUM_ENTROPY) && msmsEntropy != 0.0d)
+				return entropyFormat.format(msmsEntropy);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_PRECURSOR_DELTA_MZ) && libraryPrecursorDeltaMz != 0.0d)
+				return mzFormat.format(libraryPrecursorDeltaMz);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.NEUTRAL_MASS_PRECURSOR_DELTA_MZ) && neutralMassDeltaMz != 0.0d)
+				return mzFormat.format(neutralMassDeltaMz);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.PRECURSOR_PURITY) && precursorPurity != 0.0d)
+				return entropyFormat.format(precursorPurity);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.FDR_Q_VALUE) && qValue != 0.0d) {
+				if(qValue < 0.001d || qValue > 1000.d)
+					return sciFormatter.format(qValue);
+				else
+					return entropyFormat.format(qValue);
+			}
+			if(property.equals(IDTrackerFeatureIdentificationProperties.POSTERIOR_PROBABILITY) && posteriorProbability != 0.0d) {
+				if(posteriorProbability < 0.001d || posteriorProbability > 1000.d)
+					return sciFormatter.format(posteriorProbability);
+				else
+					return entropyFormat.format(posteriorProbability);	
+			}
+			if(property.equals(IDTrackerFeatureIdentificationProperties.PERCOLATOR_SCORE) && percolatorScore != 0.0d)
+				return entropyFormat.format(percolatorScore);	
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.FEATURE_MSMS))
+				return featureSpectrumArray;	
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_MATCH_MSMS))
+				return libraryHitSpectrumArray;
+		}
+		return "";
+	}
+	
+	private String getFeatureIdentificationProperty(
+			MsFeatureIdentity id,
+			MSFeatureInfoBundle bundle,
+			IDTrackerFeatureIdentificationProperties property) {
+		
+		if(id == null)
+			return "";
+		
+		MsFeature feature =  bundle.getMsFeature(); 		
+		String compoundName = "";
+		String idLevelName = "";
+		MSFeatureIdentificationLevel idLevel = null;
+
+		compoundName = id.getIdentityName();
+		if(id.getCompoundIdentity() != null)
+			compoundName = id.getName();
+		
+		if(compoundName == null)
+			compoundName = "";
+		
+		idLevel = id.getIdentificationLevel();
+		if(idLevel != null)
+			idLevelName = idLevel.getName();
+		
 		boolean hasAnnotations = !feature.getAnnotations().isEmpty();
 		boolean hasFollowup = !bundle.getIdFollowupSteps().isEmpty();
 		double deltaMz = MsUtils.getPpmMassErrorForIdentity(feature, id);
@@ -973,38 +1381,34 @@ public class IDTrackerDataExportTask extends AbstractTask {
 //		
 //		System.out.println(accessionNull.size());
 		
-		Collection<String>accessions = features.stream().
-				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
-				filter(f -> Objects.nonNull(f.getMsFeature().
-						getPrimaryIdentity().getCompoundIdentity())).
-				map(f -> f.getMsFeature().getPrimaryIdentity().
-						getCompoundIdentity().getPrimaryDatabaseId()).
+		Collection<String>accessions = null;
+		if(featureIDSubset.equals(FeatureIDSubset.PRIMARY_ONLY)  ) {
+			
+			accessions = features.stream().
+					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+					filter(f -> Objects.nonNull(f.getMsFeature().
+							getPrimaryIdentity().getCompoundIdentity())).
+					map(f -> f.getMsFeature().getPrimaryIdentity().
+							getCompoundIdentity().getPrimaryDatabaseId()).
+					distinct().sorted().collect(Collectors.toList());
+		}
+		else {
+			accessions = features.stream().
+				flatMap(f -> f.getMsFeature().getIdentifications().stream()).
+				filter(i -> Objects.nonNull(i.getCompoundIdentity())).
+				map(i -> i.getCompoundIdentity().getPrimaryDatabaseId()).
 				distinct().sorted().collect(Collectors.toList());
-		
+		}	
 		return accessions;
 	}
 
 	@Override
 	public Task cloneTask() {
-		
-		if(params != null) {
-			return new IDTrackerDataExportTask(
-					featuresToExport,
-					params,
-					outputFile);
-		}
-		else {
-			return new IDTrackerDataExportTask(
-					msLevel, 
-					featuresToExport,
-					featurePropertyList,
-					identificationDetailsList, 
-					removeRedundant,
-					redundantMzWindow,
-					redMzErrorType,
-					redundantRTWindow,
-					outputFile);
-		}
+
+		return new IDTrackerDataExportTask(
+				featuresToExport,
+				params,
+				outputFile);
 	}
 	
 	public File getOutputFile() {

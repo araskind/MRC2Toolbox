@@ -26,10 +26,10 @@ import java.util.Collection;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 
 public class IDTrackerDataExportParameters {
 
@@ -43,7 +43,8 @@ public class IDTrackerDataExportParameters {
 	private MSMSScoringParameter msmsScoringParameter;	
 	private double minimalMSMSScore;	
 	private FeatureIDSubset featureIDSubset;	
-	private Collection<HiResSearchOption>msmsSearchTypes;
+	private Collection<MSMSMatchType>msmsSearchTypes;
+	private boolean excludeFromExportWhenAllIdsFilteredOut;
 	
 	public IDTrackerDataExportParameters() {
 		super();
@@ -61,7 +62,8 @@ public class IDTrackerDataExportParameters {
 			MSMSScoringParameter msmsScoringParameter, 
 			double minimalMSMSScore, 
 			FeatureIDSubset featureIDSubset,
-			Collection<HiResSearchOption> msmsSearchTypes) {
+			Collection<MSMSMatchType> msmsSearchTypes,
+			boolean excludeFromExportWhenAllIdsFilteredOut) {
 		super();
 		this.msLevel = msLevel;
 		this.featurePropertyList = featurePropertyList;
@@ -74,6 +76,7 @@ public class IDTrackerDataExportParameters {
 		this.minimalMSMSScore = minimalMSMSScore;
 		this.featureIDSubset = featureIDSubset;
 		this.msmsSearchTypes = msmsSearchTypes;
+		this.excludeFromExportWhenAllIdsFilteredOut = excludeFromExportWhenAllIdsFilteredOut;
 	}
 
 	public MsDepth getMsLevel() {
@@ -157,11 +160,19 @@ public class IDTrackerDataExportParameters {
 		this.featureIDSubset = featureIDSubset;
 	}
 
-	public Collection<HiResSearchOption> getMsmsSearchTypes() {
+	public Collection<MSMSMatchType> getMsmsSearchTypes() {
 		return msmsSearchTypes;
 	}
 
-	public void setMsmsSearchTypes(Collection<HiResSearchOption> msmsSearchTypes) {
+	public void setMsmsSearchTypes(Collection<MSMSMatchType> msmsSearchTypes) {
 		this.msmsSearchTypes = msmsSearchTypes;
+	}
+
+	public boolean isExcludeFromExportWhenAllIdsFilteredOut() {
+		return excludeFromExportWhenAllIdsFilteredOut;
+	}
+
+	public void setExcludeFromExportWhenAllIdsFilteredOut(boolean excludeFromExportWhenAllIdsFilteredOut) {
+		this.excludeFromExportWhenAllIdsFilteredOut = excludeFromExportWhenAllIdsFilteredOut;
 	}
 }

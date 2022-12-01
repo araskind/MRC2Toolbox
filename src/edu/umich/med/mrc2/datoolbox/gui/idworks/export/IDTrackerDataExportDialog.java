@@ -75,11 +75,11 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -115,6 +115,7 @@ public class IDTrackerDataExportDialog extends JDialog
 	public static final String INCLUDE_IN_SOURCE_MATCH = "INCLUDE_IN_SOURCE_MATCH";
 	public static final String INCLUDE_HYBRID_MATCH = "INCLUDE_HYBRID_MATCH";
 	public static final String IDS_PER_FEATURE = "IDS_PER_FEATURE";
+	public static final String EXCLUDE_IF_NO_IDS = "EXCLUDE_IF_NO_IDS";
 	
 	//	IDTrackerMsFeatureProperties	
 	//	IDTrackerFeatureIdentificationProperties
@@ -189,6 +190,7 @@ public class IDTrackerDataExportDialog extends JDialog
 	private JCheckBox hybridMatchCheckBox;
 	private JFormattedTextField minScoreTextField;	
 	private JComboBox scoringParameterComboBox;
+	private JCheckBox excludeIfNoIdsLeftCheckBox;
 	
 	private static final NumberFormat twoDecFormat = new DecimalFormat("###.##");
 	
@@ -235,9 +237,9 @@ public class IDTrackerDataExportDialog extends JDialog
 		
 		GridBagLayout gbl_panel_4 = new GridBagLayout();
 		gbl_panel_4.columnWidths = new int[] { 0, 0, 0, 0, 0, 0 };
-		gbl_panel_4.rowHeights = new int[] { 0, 0, 0, 0 };
+		gbl_panel_4.rowHeights = new int[] { 0, 0, 0, 0, 0 };
 		gbl_panel_4.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		gbl_panel_4.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_panel_4.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		panel_4.setLayout(gbl_panel_4);
 		
 		JLabel lblNewLabel_9 = new JLabel("IDs to export for each feature: ");
@@ -294,7 +296,7 @@ public class IDTrackerDataExportDialog extends JDialog
 		JLabel lblNewLabel_8 = new JLabel("Scoring parameter");
 		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
 		gbc_lblNewLabel_8.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_8.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_8.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_8.gridx = 0;
 		gbc_lblNewLabel_8.gridy = 2;
 		panel_4.add(lblNewLabel_8, gbc_lblNewLabel_8);
@@ -303,7 +305,7 @@ public class IDTrackerDataExportDialog extends JDialog
 				new DefaultComboBoxModel<MSMSScoringParameter>(MSMSScoringParameter.values()));	
 		GridBagConstraints gbc_scoringParameterComboBox = new GridBagConstraints();
 		gbc_scoringParameterComboBox.gridwidth = 2;
-		gbc_scoringParameterComboBox.insets = new Insets(0, 0, 0, 5);
+		gbc_scoringParameterComboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_scoringParameterComboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_scoringParameterComboBox.gridx = 1;
 		gbc_scoringParameterComboBox.gridy = 2;
@@ -312,7 +314,7 @@ public class IDTrackerDataExportDialog extends JDialog
 		JLabel lblNewLabel_2 = new JLabel("Minimal score");
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_2.gridx = 3;
 		gbc_lblNewLabel_2.gridy = 2;
 		panel_4.add(lblNewLabel_2, gbc_lblNewLabel_2);
@@ -320,10 +322,20 @@ public class IDTrackerDataExportDialog extends JDialog
 		minScoreTextField = new JFormattedTextField(twoDecFormat);
 		minScoreTextField.setColumns(10);
 		GridBagConstraints gbc_minScoreTextField = new GridBagConstraints();
+		gbc_minScoreTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_minScoreTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_minScoreTextField.gridx = 4;
 		gbc_minScoreTextField.gridy = 2;
 		panel_4.add(minScoreTextField, gbc_minScoreTextField);
+		
+		excludeIfNoIdsLeftCheckBox = new JCheckBox("Exclude features from export if all IDs were filtered out");
+		GridBagConstraints gbc_excludeIfNoIdsLeftCheckBox = new GridBagConstraints();
+		gbc_excludeIfNoIdsLeftCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_excludeIfNoIdsLeftCheckBox.gridwidth = 4;
+		gbc_excludeIfNoIdsLeftCheckBox.insets = new Insets(0, 0, 0, 5);
+		gbc_excludeIfNoIdsLeftCheckBox.gridx = 0;
+		gbc_excludeIfNoIdsLeftCheckBox.gridy = 3;
+		panel_4.add(excludeIfNoIdsLeftCheckBox, gbc_excludeIfNoIdsLeftCheckBox);
 		
 		JLabel lblNewLabel_3 = new JLabel("Save to");
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
@@ -798,6 +810,9 @@ public class IDTrackerDataExportDialog extends JDialog
 		FeatureIDSubset idsPerFeature = FeatureIDSubset.getFeatureIDSubsetByName(
 				preferences.get(IDS_PER_FEATURE, FeatureIDSubset.PRIMARY_ONLY.name()));		
 		featureIdSubsetComboBox.setSelectedItem(idsPerFeature);
+		
+		excludeIfNoIdsLeftCheckBox.setSelected(
+				preferences.getBoolean(EXCLUDE_IF_NO_IDS, false));
 	}
 
 	@Override
@@ -871,6 +886,8 @@ public class IDTrackerDataExportDialog extends JDialog
 		
 		preferences.put(SCORING_PARAMETER, getMSMSScoringParameter().name());
 		preferences.put(IDS_PER_FEATURE, getFeatureIDSubset().name());
+		
+		preferences.putBoolean(EXCLUDE_IF_NO_IDS, excludeIfNoIdsLeftCheckBox.isSelected());
 	}
 	
 	private void selectFeaturePropertiesListItems(
@@ -973,19 +990,24 @@ public class IDTrackerDataExportDialog extends JDialog
 		return (FeatureIDSubset)featureIdSubsetComboBox.getSelectedItem();
 	}
 	
-	public Collection<HiResSearchOption>getMSMSSearchTypes(){
+	public Collection<MSMSMatchType>getMSMSSearchTypes(){
 		
-		Collection<HiResSearchOption>searchTypes = new ArrayList<HiResSearchOption>();
+		Collection<MSMSMatchType>searchTypes = new ArrayList<MSMSMatchType>();
 		if(regularMatchCheckBox.isSelected())
-			searchTypes.add(HiResSearchOption.z);
+			searchTypes.add(MSMSMatchType.Regular);
 		
 		if(inSourceCheckBox.isSelected())
-			searchTypes.add(HiResSearchOption.u);
+			searchTypes.add(MSMSMatchType.InSource);
 		
 		if(hybridMatchCheckBox.isSelected())
-			searchTypes.add(HiResSearchOption.y);
+			searchTypes.add(MSMSMatchType.Hybrid);
 		
 		return searchTypes;
+	}
+	
+	public boolean excludeIfNoIdsLeft() {
+		return excludeIfNoIdsLeftCheckBox.isSelected();
+		//	EXCLUDE_IF_NO_IDS
 	}
 	
 	public IDTrackerDataExportParameters getIDTrackerDataExportParameters() {
@@ -1001,7 +1023,8 @@ public class IDTrackerDataExportDialog extends JDialog
 				getMSMSScoringParameter(), 
 				getMinimalMSMSScore(), 
 				getFeatureIDSubset(),
-				getMSMSSearchTypes());
+				getMSMSSearchTypes(),
+				excludeIfNoIdsLeft());
 		return params;
 	}	
 	
