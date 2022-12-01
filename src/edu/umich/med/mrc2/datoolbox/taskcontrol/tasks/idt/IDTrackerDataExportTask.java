@@ -48,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
+import edu.umich.med.mrc2.datoolbox.data.IDTrackerDataExportParameters;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -62,9 +63,11 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.ClassyFireClassificationLevels;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.enums.RefMetClassificationLevels;
@@ -74,6 +77,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -111,6 +115,13 @@ public class IDTrackerDataExportTask extends AbstractTask {
 	private double redundantMzWindow;
 	private MassErrorType redMzErrorType;
 	private double redundantRTWindow;
+	
+	private MSMSScoringParameter msmsScoringParameter;	
+	private double minimalMSMSScore;	
+	private FeatureIDSubset featureIDSubset;	
+	private Collection<HiResSearchOption>msmsSearchTypes;
+	
+	private IDTrackerDataExportParameters params;
 
 	public IDTrackerDataExportTask(
 			MsDepth msLevel, 
@@ -131,6 +142,29 @@ public class IDTrackerDataExportTask extends AbstractTask {
 		this.redundantMzWindow = redundantMzWindow;
 		this.redMzErrorType = redMzErrorType;
 		this.redundantRTWindow = redundantRTWindow;
+		this.outputFile = outputFile;
+	}
+	
+	public IDTrackerDataExportTask(
+			Collection<MSFeatureInfoBundle> featuresToExport,
+			IDTrackerDataExportParameters params,
+			File outputFile) {
+		super();
+		this.params = params;
+		
+		this.msLevel = params.getMsLevel();
+		this.featuresToExport = featuresToExport;
+		this.featurePropertyList = params.getFeaturePropertyList();
+		this.identificationDetailsList = params.getIdentificationDetailsList();
+		this.removeRedundant = params.isRemoveRedundant();
+		this.redundantMzWindow = params.getRedundantMzWindow();
+		this.redMzErrorType = params.getRedMzErrorType();
+		this.redundantRTWindow = params.getRedundantRTWindow();
+		this.msmsScoringParameter = params.getMsmsScoringParameter();	
+		this.minimalMSMSScore = params.getMinimalMSMSScore();	
+		this.featureIDSubset = params.getFeatureIDSubset();	
+		this.msmsSearchTypes = params.getMsmsSearchTypes();
+		
 		this.outputFile = outputFile;
 	}
 
@@ -952,17 +986,25 @@ public class IDTrackerDataExportTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-
-		return new IDTrackerDataExportTask(
-						msLevel, 
-						featuresToExport,
-						featurePropertyList,
-						identificationDetailsList, 
-						removeRedundant,
-						redundantMzWindow,
-						redMzErrorType,
-						redundantRTWindow,
-						outputFile);
+		
+		if(params != null) {
+			return new IDTrackerDataExportTask(
+					featuresToExport,
+					params,
+					outputFile);
+		}
+		else {
+			return new IDTrackerDataExportTask(
+					msLevel, 
+					featuresToExport,
+					featurePropertyList,
+					identificationDetailsList, 
+					removeRedundant,
+					redundantMzWindow,
+					redMzErrorType,
+					redundantRTWindow,
+					outputFile);
+		}
 	}
 	
 	public File getOutputFile() {

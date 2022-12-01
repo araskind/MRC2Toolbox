@@ -271,8 +271,10 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		int paramCount = 1;
 		
 		String query = 
-			"SELECT DISTINCT FEATURE_ID, MSMS_FEATURE_ID, RETENTION_TIME, MZ_OF_INTEREST, ACQUISITION_METHOD_ID, " + 
-			"EXTRACTION_METHOD_ID, EXPERIMENT_ID, STOCK_SAMPLE_ID, SAMPLE_ID, INJECTION_ID, POLARITY FROM (" + 
+			"SELECT DISTINCT FEATURE_ID, MSMS_FEATURE_ID, RETENTION_TIME, "
+			+ "MZ_OF_INTEREST, ACQUISITION_METHOD_ID, " + 
+			"EXTRACTION_METHOD_ID, EXPERIMENT_ID, STOCK_SAMPLE_ID, SAMPLE_ID, "
+			+ "INJECTION_ID, POLARITY, HAS_CHROMATOGRAM FROM (" + 
 			"SELECT F.FEATURE_ID, F.POLARITY, F.MZ_OF_INTEREST, F.RETENTION_TIME, F.HAS_CHROMATOGRAM, " +
 			"I.ACQUISITION_METHOD_ID, M.EXTRACTION_METHOD_ID, S.EXPERIMENT_ID, S.SAMPLE_ID, " +
 			"T.STOCK_SAMPLE_ID, I.INJECTION_ID, R.ACCESSION, F2.MSMS_FEATURE_ID, F2.COLLISION_ENERGY " + 
@@ -487,7 +489,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		}		
 		query += ") AD ORDER BY MZ_OF_INTEREST, RETENTION_TIME";
 		
-//		System.out.println(query);
+		System.out.println(query);
 		
 		PreparedStatement ps = conn.prepareStatement(query,
 		         ResultSet.TYPE_SCROLL_INSENSITIVE ,
@@ -756,7 +758,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	protected void attachMsMsLibraryIdentifications() throws Exception {
+	protected void attachMsMsLibraryIdentificationsOld() throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		taskDescription = "Adding MSMS library identifications ...";
@@ -916,6 +918,83 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
+	protected void attachMsMsLibraryIdentifications() throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();
+		getCompoundAndMSMSLibraryIds(conn);
+		getCompounds(conn);
+		getMSMSLibraryEntries(conn);
+		
+		taskDescription = "Adding MSMS library identifications ...";
+		List<MSFeatureInfoBundle> featuresToProcess = features.stream().
+				filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum())).
+				filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+				collect(Collectors.toList());
+		
+		total = featuresToProcess.size();
+		processed = 0;
+		
+		String query =
+			"SELECT MATCH_ID, MRC2_LIB_ID, MATCH_SCORE, FWD_SCORE, REVERSE_SCORE, " +
+			"PROBABILITY, DOT_PRODUCT, SEARCH_PARAMETER_SET_ID, IS_PRIMARY, IDENTIFICATION_LEVEL_ID, " +
+			"REVERSE_DOT_PRODUCT, HYBRID_DOT_PRODUCT, HYBRID_SCORE, HYBRID_DELTA_MZ, MATCH_TYPE, DECOY_MATCH " +
+			"FROM MSMS_FEATURE_LIBRARY_MATCH M " +
+			"WHERE MSMS_FEATURE_ID = ? ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = null;
+		for(MSFeatureInfoBundle fb : featuresToProcess) {
+					
+			TandemMassSpectrum msms = 
+					fb.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+			ps.setString(1, msms.getId());
+			rs = ps.executeQuery();
+			while(rs.next()) {
+
+				MsMsLibraryFeature feature = msmsLibraryFeatureMap.get(rs.getString("MRC2_LIB_ID"));
+				MsFeatureIdentity id = new MsFeatureIdentity(feature.getCompoundIdentity(),
+						CompoundIdentificationConfidence.ACCURATE_MASS_MSMS);
+				id.setIdSource(CompoundIdSource.LIBRARY_MS2);
+				id.setUniqueId(rs.getString("MATCH_ID"));
+				MSMSMatchType matchType = 
+						MSMSMatchType.getMSMSMatchTypeByName(rs.getString("MATCH_TYPE"));
+				
+				ReferenceMsMsLibraryMatch match = new ReferenceMsMsLibraryMatch(
+						feature,
+						rs.getDouble("MATCH_SCORE"), 
+						rs.getDouble("FWD_SCORE"),
+						rs.getDouble("REVERSE_SCORE"), 
+						rs.getDouble("PROBABILITY"), 
+						rs.getDouble("DOT_PRODUCT"), 
+						rs.getDouble("REVERSE_DOT_PRODUCT"),
+						rs.getDouble("HYBRID_DOT_PRODUCT"),
+						rs.getDouble("HYBRID_SCORE"),
+						rs.getDouble("HYBRID_DELTA_MZ"),
+						matchType,
+						rs.getString("DECOY_MATCH") != null,
+						rs.getString("SEARCH_PARAMETER_SET_ID"));
+				
+				id.setReferenceMsMsLibraryMatch(match);
+				if(rs.getString("IS_PRIMARY") != null)
+					id.setPrimary(true);
+
+				String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
+				if(statusId != null) 
+					id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
+				
+				if(id.isPrimary() && !fb.getMsFeature().isIdDisabled())
+					fb.getMsFeature().setPrimaryIdentity(id);
+				else
+					fb.getMsFeature().addIdentity(id);
+				
+				match.setEntropyBasedScore(
+						MSMSScoreCalculator.calculateDefaultEntropyMatchScore(msms, match));
+			}
+			rs.close();
+			processed++;
+		}		
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
 	
 	protected void getCompoundAndMSMSLibraryIds(Connection conn) throws Exception {
 				
@@ -943,8 +1022,11 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					fb.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
 			ps.setString(1, msms.getId());
 			rs = ps.executeQuery();
-			while(rs.next()) {				
-				compoundIds.add(rs.getString("ACCESSION"));
+			while(rs.next()) {	
+				
+				if(rs.getString("ACCESSION") != null)
+					compoundIds.add(rs.getString("ACCESSION"));
+				
 				msmsLibraryIds.add(rs.getString("MRC2_LIB_ID"));				
 			}
 			rs.close();
@@ -961,29 +1043,30 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		taskDescription = "Gettting compounds ...";
 		total = compoundIds.size();
 		processed = 0;
-		compoundMap = new TreeMap<String, CompoundIdentity>();
-		
+		compoundMap = new TreeMap<String, CompoundIdentity>();		
 		String query =
-				"SELECT D.SOURCE_DB, D.PRIMARY_NAME, D.MOL_FORMULA, "
-				+ "D.EXACT_MASS, D.SMILES, D.INCHI_KEY "+
-				"FROM COMPOUND_DATA D WHERE D.ACCESSION = ?";
-		PreparedStatement ps = conn.prepareStatement(query);
-			
+				"SELECT SOURCE_DB, PRIMARY_NAME, MOL_FORMULA, "
+				+ "EXACT_MASS, SMILES, INCHI_KEY "+
+				"FROM COMPOUND_DATA WHERE ACCESSION IN (?)";
+		PreparedStatement ps = conn.prepareStatement(query);	
+				
 		for(String cid : compoundIds) {
 			
-			ps.setString(1, cid);
+            ps.setString(1, cid);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()){
 
 				CompoundDatabaseEnum dbSource =
 						CompoundDatabaseEnum.getCompoundDatabaseByName(rs.getString("SOURCE_DB"));
 				String commonName = rs.getString("PRIMARY_NAME");
-				String formula = rs.getString("MOL_FORMULA");
-				double exactMass = rs.getDouble("EXACT_MASS");
-				String smiles = rs.getString("SMILES");
 				CompoundIdentity identity = new CompoundIdentity(
-						dbSource, cid, commonName,
-						commonName, formula, exactMass, smiles);
+						dbSource, 
+						cid, 
+						commonName,
+						commonName, 
+						rs.getString("MOL_FORMULA"), 
+						rs.getDouble("EXACT_MASS"), 
+						rs.getString("SMILES"));
 				identity.setInChiKey(rs.getString("INCHI_KEY"));
 				compoundMap.put(cid, identity);
 			}
@@ -995,6 +1078,94 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	
 	protected void getMSMSLibraryEntries(Connection conn) throws Exception {
 		
+		if(msmsLibraryIds.isEmpty())
+			return;
+		
+		taskDescription = "Getting MSMS library features ...";
+		total = msmsLibraryIds.size();
+		processed = 0;
+		msmsLibraryFeatureMap = new TreeMap<String, MsMsLibraryFeature>();
+		
+		String lfQuery =
+				"SELECT POLARITY, IONIZATION, COLLISION_ENERGY, PRECURSOR_MZ, ADDUCT, "
+				+ "COLLISION_GAS, INSTRUMENT, INSTRUMENT_TYPE, IN_SOURCE_VOLTAGE, "
+				+ "MSN_PATHWAY, PRESSURE, SAMPLE_INLET, SPECIAL_FRAGMENTATION, "
+				+ "SPECTRUM_TYPE, CHROMATOGRAPHY_TYPE, CONTRIBUTOR, SPLASH, "
+				+ "RESOLUTION, SPECTRUM_SOURCE, IONIZATION_TYPE, LIBRARY_NAME, "
+				+ "ORIGINAL_LIBRARY_ID, ACCESSION, SPECTRUM_HASH, ENTROPY "
+				+ "FROM REF_MSMS_LIBRARY_COMPONENT WHERE MRC2_LIB_ID = ?";
+		PreparedStatement lfps = conn.prepareStatement(lfQuery);
+		ResultSet lfrs = null;
+		
+		String msmsQuery =
+				"SELECT MZ, INTENSITY, FRAGMENT_COMMENT FROM REF_MSMS_LIBRARY_PEAK "
+				+ "WHERE MRC2_LIB_ID = ? ORDER BY 1";
+		PreparedStatement msmsps = conn.prepareStatement(msmsQuery);
+		ResultSet msmsrs = null;
+		
+		for(String mrc2msmsId : msmsLibraryIds) {
+			
+			MsMsLibraryFeature feature = null;
+			lfps.setString(1, mrc2msmsId);
+			lfrs = lfps.executeQuery();
+			while(lfrs.next()) {
+
+				feature = new MsMsLibraryFeature(
+						mrc2msmsId,
+						Polarity.getPolarityByCode(
+								lfrs.getString(MSMSComponentTableFields.POLARITY.name())));
+				feature.setSpectrumSource(
+						SpectrumSource.getSpectrumSourceByName(
+								lfrs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
+				feature.setIonizationType(
+						IDTDataCash.getIonizationTypeById(
+								lfrs.getString(MSMSComponentTableFields.IONIZATION_TYPE.name())));
+				feature.setCollisionEnergyValue(
+						lfrs.getString(MSMSComponentTableFields.COLLISION_ENERGY.name()));
+				feature.setSpectrumEntropy(
+						lfrs.getDouble(MSMSComponentTableFields.ENTROPY.name()));
+				
+				Map<String, String> properties = feature.getProperties();
+				for(MSMSComponentTableFields field : MSMSComponentTableFields.values()) {
+
+					if(!field.equals(MSMSComponentTableFields.PRECURSOR_MZ) 
+							&& !field.equals(MSMSComponentTableFields.MRC2_LIB_ID)) {
+						
+						String value = lfrs.getString(field.name());
+						if(value != null && !value.trim().isEmpty())
+							properties.put(field.getName(), value);
+					}
+				}
+				ReferenceMsMsLibrary refLib =
+						IDTDataCash.getReferenceMsMsLibraryByPrimaryLibraryId(
+								lfrs.getString(MSMSComponentTableFields.LIBRARY_NAME.name()));
+				feature.setMsmsLibraryIdentifier(refLib.getUniqueId());
+
+				//	Add spectrum
+				double precursorMz = lfrs.getDouble(MSMSComponentTableFields.PRECURSOR_MZ.name());
+				msmsps.setString(1, mrc2msmsId);
+				msmsrs = msmsps.executeQuery();
+				while(msmsrs.next()) {
+
+					MsPoint p = new MsPoint(msmsrs.getDouble("MZ"), msmsrs.getDouble("INTENSITY"));
+					feature.getSpectrum().add(p);
+					if(p.getMz() == precursorMz)
+						feature.setParent(p);
+
+					if(msmsrs.getString("FRAGMENT_COMMENT") != null)
+						feature.getMassAnnotations().put(p, msmsrs.getString("FRAGMENT_COMMENT"));
+				}
+				msmsrs.close();
+				if(lfrs.getString("ACCESSION") != null)
+					feature.setCompoundIdentity(compoundMap.get(lfrs.getString("ACCESSION")));
+				
+				msmsLibraryFeatureMap.put(mrc2msmsId, feature);
+			}
+			lfrs.close();
+			processed++;
+		}
+		lfps.close();
+		msmsps.close();
 	}
 
 	protected void retievePepSearchParameters() {		

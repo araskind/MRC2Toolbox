@@ -115,13 +115,13 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="0" nodeId="1654626696607">
+												<leaf id="1" nodeId="1654626696607">
 													<placeholders>
 														<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
 													</placeholders>
 												</leaf>
 											</node>
-											<leaf id="1" nodeId="1654626686614">
+											<leaf id="0" nodeId="1654626686614">
 												<placeholders>
 													<placeholder>dock.single.DockableFeatureListPanel</placeholder>
 												</placeholders>
@@ -137,20 +137,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDataPipelinesTable">
-										<replacement id="dockablesingle DockableDataPipelinesTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableFeatureListPanel">
+										<replacement id="dockablesingle DockableFeatureListPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDataPipelinesTable</id>
+											<id>DockableFeatureListPanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableFeatureListPanel">
-										<replacement id="dockablesingle DockableFeatureListPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableDataPipelinesTable">
+										<replacement id="dockablesingle DockableDataPipelinesTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableFeatureListPanel</id>
+											<id>DockableDataPipelinesTable</id>
 											<area/>
 										</delegate>
 									</layout>

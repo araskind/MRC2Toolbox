@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.idworks.export;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -34,6 +35,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,17 +63,23 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.IDTrackerDataExportParameters;
+import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -99,6 +108,13 @@ public class IDTrackerDataExportDialog extends JDialog
 	public static final String MSONE_FEATURE_PROPERTIES = "MSONE_FEATURE_PROPERTIES";
 	public static final String MSONE_IDENTIFICATION_PROPERTIES = "MSONE_IDENTIFICATION_PROPERTIES";
 	public static final String PROPERTIES_DELIMITER = "@";
+	
+	public static final String MIN_SCORE = "MIN_SCORE";
+	public static final String SCORING_PARAMETER = "SCORING_PARAMETER";
+	public static final String INCLUDE_NORMAL_MATCH = "INCLUDE_NORMAL_MATCH";
+	public static final String INCLUDE_IN_SOURCE_MATCH = "INCLUDE_IN_SOURCE_MATCH";
+	public static final String INCLUDE_HYBRID_MATCH = "INCLUDE_HYBRID_MATCH";
+	public static final String IDS_PER_FEATURE = "IDS_PER_FEATURE";
 	
 	//	IDTrackerMsFeatureProperties	
 	//	IDTrackerFeatureIdentificationProperties
@@ -167,14 +183,23 @@ public class IDTrackerDataExportDialog extends JDialog
 	private JFormattedTextField rtWindowTextField;
 	private JComboBox massErrorTypeComboBox;
 	
+	private JComboBox featureIdSubsetComboBox;
+	private JCheckBox regularMatchCheckBox;
+	private JCheckBox inSourceCheckBox;
+	private JCheckBox hybridMatchCheckBox;
+	private JFormattedTextField minScoreTextField;	
+	private JComboBox scoringParameterComboBox;
+	
+	private static final NumberFormat twoDecFormat = new DecimalFormat("###.##");
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public IDTrackerDataExportDialog(ActionListener listener) {
 		super();
 		setTitle("Export data from IDTracker");
 		setIconImage(((ImageIcon) dialogIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setSize(new Dimension(700, 640));
-		setPreferredSize(new Dimension(700, 640));
+		setSize(new Dimension(800, 800));
+		setPreferredSize(new Dimension(800, 800));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
 		JPanel panel = new JPanel();
@@ -186,18 +211,127 @@ public class IDTrackerDataExportDialog extends JDialog
 		panel.add(panel_1, BorderLayout.SOUTH);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0};
 		gbl_panel_1.columnWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
-		JLabel lblNewLabel_2 = new JLabel("Save to");
+		JPanel panel_4 = new JPanel();
+		panel_4.setBorder(
+			new CompoundBorder(
+				new TitledBorder(
+						new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255),
+								new Color(160, 160, 160)),
+						"Identification export settings", TitledBorder.LEADING, TitledBorder.TOP, null,
+						new Color(0, 0, 0)),
+				new EmptyBorder(10, 10, 10, 10)));
+		GridBagConstraints gbc_panel_4 = new GridBagConstraints();
+		gbc_panel_4.gridwidth = 3;
+		gbc_panel_4.insets = new Insets(0, 0, 5, 5);
+		gbc_panel_4.fill = GridBagConstraints.BOTH;
+		gbc_panel_4.gridx = 0;
+		gbc_panel_4.gridy = 0;
+		panel_1.add(panel_4, gbc_panel_4);
+		
+		GridBagLayout gbl_panel_4 = new GridBagLayout();
+		gbl_panel_4.columnWidths = new int[] { 0, 0, 0, 0, 0, 0 };
+		gbl_panel_4.rowHeights = new int[] { 0, 0, 0, 0 };
+		gbl_panel_4.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_panel_4.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		panel_4.setLayout(gbl_panel_4);
+		
+		JLabel lblNewLabel_9 = new JLabel("IDs to export for each feature: ");
+		GridBagConstraints gbc_lblNewLabel_9 = new GridBagConstraints();
+		gbc_lblNewLabel_9.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_9.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_9.gridx = 0;
+		gbc_lblNewLabel_9.gridy = 0;
+		panel_4.add(lblNewLabel_9, gbc_lblNewLabel_9);
+		
+		featureIdSubsetComboBox = 
+				new JComboBox<FeatureIDSubset>(
+						new DefaultComboBoxModel<FeatureIDSubset>(FeatureIDSubset.values()));
+		GridBagConstraints gbc_featureIdSubsetComboBox = new GridBagConstraints();
+		gbc_featureIdSubsetComboBox.gridwidth = 3;
+		gbc_featureIdSubsetComboBox.insets = new Insets(0, 0, 5, 5);
+		gbc_featureIdSubsetComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_featureIdSubsetComboBox.gridx = 1;
+		gbc_featureIdSubsetComboBox.gridy = 0;
+		panel_4.add(featureIdSubsetComboBox, gbc_featureIdSubsetComboBox);
+		
+		JLabel lblNewLabel_5 = new JLabel("Top MSMS library hit must be: ");
+		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
+		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_5.gridx = 0;
+		gbc_lblNewLabel_5.gridy = 1;
+		panel_4.add(lblNewLabel_5, gbc_lblNewLabel_5);
+
+		regularMatchCheckBox = new JCheckBox("Regular match");
+		GridBagConstraints gbc_regularMatchCheckBox = new GridBagConstraints();
+		gbc_regularMatchCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_regularMatchCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_regularMatchCheckBox.gridx = 1;
+		gbc_regularMatchCheckBox.gridy = 1;
+		panel_4.add(regularMatchCheckBox, gbc_regularMatchCheckBox);
+
+		inSourceCheckBox = new JCheckBox("In-source match");
+		GridBagConstraints gbc_inSourceCheckBox = new GridBagConstraints();
+		gbc_inSourceCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_inSourceCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_inSourceCheckBox.gridx = 2;
+		gbc_inSourceCheckBox.gridy = 1;
+		panel_4.add(inSourceCheckBox, gbc_inSourceCheckBox);
+
+		hybridMatchCheckBox = new JCheckBox("Hybrid match");
+		GridBagConstraints gbc_hybridMatchCheckBox = new GridBagConstraints();
+		gbc_hybridMatchCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_hybridMatchCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_hybridMatchCheckBox.gridx = 3;
+		gbc_hybridMatchCheckBox.gridy = 1;
+		panel_4.add(hybridMatchCheckBox, gbc_hybridMatchCheckBox);
+
+		JLabel lblNewLabel_8 = new JLabel("Scoring parameter");
+		GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
+		gbc_lblNewLabel_8.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_8.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_8.gridx = 0;
+		gbc_lblNewLabel_8.gridy = 2;
+		panel_4.add(lblNewLabel_8, gbc_lblNewLabel_8);
+
+		scoringParameterComboBox = new JComboBox<MSMSScoringParameter>(
+				new DefaultComboBoxModel<MSMSScoringParameter>(MSMSScoringParameter.values()));	
+		GridBagConstraints gbc_scoringParameterComboBox = new GridBagConstraints();
+		gbc_scoringParameterComboBox.gridwidth = 2;
+		gbc_scoringParameterComboBox.insets = new Insets(0, 0, 0, 5);
+		gbc_scoringParameterComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_scoringParameterComboBox.gridx = 1;
+		gbc_scoringParameterComboBox.gridy = 2;
+		panel_4.add(scoringParameterComboBox, gbc_scoringParameterComboBox);
+
+		JLabel lblNewLabel_2 = new JLabel("Minimal score");
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_2.gridx = 0;
-		gbc_lblNewLabel_2.gridy = 0;
-		panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_2.gridx = 3;
+		gbc_lblNewLabel_2.gridy = 2;
+		panel_4.add(lblNewLabel_2, gbc_lblNewLabel_2);
+
+		minScoreTextField = new JFormattedTextField(twoDecFormat);
+		minScoreTextField.setColumns(10);
+		GridBagConstraints gbc_minScoreTextField = new GridBagConstraints();
+		gbc_minScoreTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_minScoreTextField.gridx = 4;
+		gbc_minScoreTextField.gridy = 2;
+		panel_4.add(minScoreTextField, gbc_minScoreTextField);
+		
+		JLabel lblNewLabel_3 = new JLabel("Save to");
+		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
+		gbc_lblNewLabel_3.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_3.gridx = 0;
+		gbc_lblNewLabel_3.gridy = 1;
+		panel_1.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		outputFilleTextField = new JTextField();
 		outputFilleTextField.setEditable(false);
@@ -205,7 +339,7 @@ public class IDTrackerDataExportDialog extends JDialog
 		gbc_outputFilleTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_outputFilleTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_outputFilleTextField.gridx = 1;
-		gbc_outputFilleTextField.gridy = 0;
+		gbc_outputFilleTextField.gridy = 1;
 		panel_1.add(outputFilleTextField, gbc_outputFilleTextField);
 		outputFilleTextField.setColumns(10);
 		
@@ -215,7 +349,7 @@ public class IDTrackerDataExportDialog extends JDialog
 		GridBagConstraints gbc_outputFileBrowseButton = new GridBagConstraints();
 		gbc_outputFileBrowseButton.anchor = GridBagConstraints.BELOW_BASELINE;
 		gbc_outputFileBrowseButton.gridx = 2;
-		gbc_outputFileBrowseButton.gridy = 0;
+		gbc_outputFileBrowseButton.gridy = 1;
 		panel_1.add(outputFileBrowseButton, gbc_outputFileBrowseButton);
 		
 		JPanel panel_2 = new JPanel();
@@ -269,16 +403,17 @@ public class IDTrackerDataExportDialog extends JDialog
 		gbc_comboBox_1.gridy = 0;
 		panel_2.add(featureSubsetComboBox, gbc_comboBox_1);
 		
-		JLabel lblNewLabel_3 = new JLabel("Filter by ID");
-		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
-		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_3.gridx = 5;
-		gbc_lblNewLabel_3.gridy = 0;
-		panel_2.add(lblNewLabel_3, gbc_lblNewLabel_3);
+		JLabel lblNewLabel_31 = new JLabel("Filter by ID");
+		GridBagConstraints gbc_lblNewLabel_31 = new GridBagConstraints();
+		gbc_lblNewLabel_31.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_31.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_31.gridx = 5;
+		gbc_lblNewLabel_31.gridy = 0;
+		panel_2.add(lblNewLabel_31, gbc_lblNewLabel_31);
 		
 		idFilterComboBox = new JComboBox<FeatureSubsetByIdentification>(
-				new DefaultComboBoxModel<FeatureSubsetByIdentification>(FeatureSubsetByIdentification.values()));
+				new DefaultComboBoxModel<FeatureSubsetByIdentification>(
+						FeatureSubsetByIdentification.values()));
 		idFilterComboBox.setPreferredSize(new Dimension(80, 25));
 		idFilterComboBox.setMinimumSize(new Dimension(80, 25));
 		GridBagConstraints gbc_idFilterComboBox = new GridBagConstraints();
@@ -436,6 +571,7 @@ public class IDTrackerDataExportDialog extends JDialog
 
 			MsDepth depth = (MsDepth)msDepthComboBox.getSelectedItem();
 			populateExportPropertyLists(depth);
+			//	TODO toggle MSMS results filters
 		}
 	}
 	
@@ -645,6 +781,23 @@ public class IDTrackerDataExportDialog extends JDialog
 			selectFeaturePropertiesListItems(selectedMsTwoFeatureProperties);
 			selectIdentificationPropertiesListItems(selectedMsTwoIdentificationProperties);
 		}
+		regularMatchCheckBox.setSelected(
+				preferences.getBoolean(INCLUDE_NORMAL_MATCH, false));
+		inSourceCheckBox.setSelected(
+				preferences.getBoolean(INCLUDE_IN_SOURCE_MATCH, false));
+		hybridMatchCheckBox.setSelected(
+				preferences.getBoolean(INCLUDE_HYBRID_MATCH, false));
+		double minScore = preferences.getDouble(MIN_SCORE, 0.0d);
+		if(minScore > 0)
+			minScoreTextField.setText(Double.toString(minScore));
+		
+		MSMSScoringParameter msmsScoringParameter = MSMSScoringParameter.getMSMSScoringParameterByName(
+				preferences.get(SCORING_PARAMETER, MSMSScoringParameter.ENTROPY_SCORE.name()));
+		scoringParameterComboBox.setSelectedItem(msmsScoringParameter);
+
+		FeatureIDSubset idsPerFeature = FeatureIDSubset.getFeatureIDSubsetByName(
+				preferences.get(IDS_PER_FEATURE, FeatureIDSubset.PRIMARY_ONLY.name()));		
+		featureIdSubsetComboBox.setSelectedItem(idsPerFeature);
 	}
 
 	@Override
@@ -706,6 +859,18 @@ public class IDTrackerDataExportDialog extends JDialog
 				StringUtils.join(msTwoFeatureProperties, PROPERTIES_DELIMITER));
 		preferences.put(MSTWO_IDENTIFICATION_PROPERTIES, 
 				StringUtils.join(msTwoIdentificationProperties, PROPERTIES_DELIMITER));
+		
+		preferences.putBoolean(INCLUDE_NORMAL_MATCH, regularMatchCheckBox.isSelected());
+		preferences.putBoolean(INCLUDE_IN_SOURCE_MATCH, inSourceCheckBox.isSelected());
+		preferences.putBoolean(INCLUDE_HYBRID_MATCH, hybridMatchCheckBox.isSelected());
+		double minScore = 0.0d;
+		if(!minScoreTextField.getText().trim().isEmpty())
+			minScore = Double.parseDouble(minScoreTextField.getText().trim());
+		
+		preferences.putDouble(MIN_SCORE, minScore);
+		
+		preferences.put(SCORING_PARAMETER, getMSMSScoringParameter().name());
+		preferences.put(IDS_PER_FEATURE, getFeatureIDSubset().name());
 	}
 	
 	private void selectFeaturePropertiesListItems(
@@ -791,6 +956,54 @@ public class IDTrackerDataExportDialog extends JDialog
 		
 		return Paths.get(outputFilleTextField.getText()).toFile();
 	}
+	
+	public MSMSScoringParameter getMSMSScoringParameter() {
+		return (MSMSScoringParameter)scoringParameterComboBox.getSelectedItem();
+	}
+	
+	public double getMinimalMSMSScore() {
+		
+		if(minScoreTextField.getText().trim().isEmpty())
+			return 0.0d;
+		else
+			return Double.parseDouble(minScoreTextField.getText());
+	}
+	
+	public FeatureIDSubset getFeatureIDSubset() {		
+		return (FeatureIDSubset)featureIdSubsetComboBox.getSelectedItem();
+	}
+	
+	public Collection<HiResSearchOption>getMSMSSearchTypes(){
+		
+		Collection<HiResSearchOption>searchTypes = new ArrayList<HiResSearchOption>();
+		if(regularMatchCheckBox.isSelected())
+			searchTypes.add(HiResSearchOption.z);
+		
+		if(inSourceCheckBox.isSelected())
+			searchTypes.add(HiResSearchOption.u);
+		
+		if(hybridMatchCheckBox.isSelected())
+			searchTypes.add(HiResSearchOption.y);
+		
+		return searchTypes;
+	}
+	
+	public IDTrackerDataExportParameters getIDTrackerDataExportParameters() {
+		
+		IDTrackerDataExportParameters params = new IDTrackerDataExportParameters(
+				getMsLevel(), 
+				getSelectedFeatureProperties(),
+				getSelectedIdentificationProperties(), 
+				removeRedundant(),
+				getRedundantMzWindow(), 
+				getRedundantMzErrorType(), 
+				getRedundantRTWindow(),
+				getMSMSScoringParameter(), 
+				getMinimalMSMSScore(), 
+				getFeatureIDSubset(),
+				getMSMSSearchTypes());
+		return params;
+	}	
 	
 	public Collection<String>validateFormParameters(){
 		

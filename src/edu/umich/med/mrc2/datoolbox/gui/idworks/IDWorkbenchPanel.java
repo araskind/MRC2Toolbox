@@ -1787,17 +1787,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), idTrackerDataExportDialog);
 			return;
-		}		
+		}
 		IDTrackerDataExportTask task = new IDTrackerDataExportTask(
-				 msLevel, 
 				 featuresToExport,
-				 idTrackerDataExportDialog.getSelectedFeatureProperties(),
-				 idTrackerDataExportDialog.getSelectedIdentificationProperties(), 
-				 idTrackerDataExportDialog.removeRedundant(),
-				 idTrackerDataExportDialog.getRedundantMzWindow(),
-				 idTrackerDataExportDialog.getRedundantMzErrorType(),
-				 idTrackerDataExportDialog.getRedundantRTWindow(),
+				 idTrackerDataExportDialog.getIDTrackerDataExportParameters(),
 				 idTrackerDataExportDialog.getOutputFile());
+		
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);		
 		idTrackerDataExportDialog.dispose();

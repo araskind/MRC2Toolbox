@@ -203,11 +203,11 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			batchUpdateDFileNames();
+			//	remapFeaturesFromNeutralMass();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
+	}	
 	
 	private static void remapFeaturesFromNeutralMass() {
 		
