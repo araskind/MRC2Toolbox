@@ -98,9 +98,10 @@
 									<id>ccontrol center</id>
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
+										<fullscreen id="0"/>
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1605720012294" orientation="VERTICAL" divider="0.7713248638838476">
-											<leaf id="1" nodeId="1605720007186">
+											<leaf id="0" nodeId="1605720007186">
 												<placeholders>
 													<placeholder>dock.single.DockableAdductExchangeManager</placeholder>
 													<placeholder>dock.single.DockableBinnerAnnotationsEditor</placeholder>
@@ -132,7 +133,7 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="0" nodeId="1605720012292">
+											<leaf id="1" nodeId="1605720012292">
 												<placeholders>
 													<placeholder>dock.single.AdductManagerFrameDockableMolStructurePanel</placeholder>
 												</placeholders>
@@ -148,18 +149,8 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.AdductManagerFrameDockableMolStructurePanel">
-										<replacement id="dockablesingle AdductManagerFrameDockableMolStructurePanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>AdductManagerFrameDockableMolStructurePanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>2</selected>
+										<selected>0</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -245,6 +236,16 @@
 										</child>
 									</children>
 								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.AdductManagerFrameDockableMolStructurePanel">
+										<replacement id="dockablesingle AdductManagerFrameDockableMolStructurePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>AdductManagerFrameDockableMolStructurePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 							</children>
 						</root>
 						<root name="ccontrol west">
@@ -273,11 +274,24 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DockableAdductExchangeManager" current="dock.mode.normal">
+						<entry id="single DockableAdductExchangeManager" current="dock.mode.maximized">
 							<history>
 								<mode>dock.mode.normal</mode>
+								<mode>dock.mode.maximized</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.maximized">
+									<mode>dock.mode.maximized</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockFullScreenPropertyFactory"/>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableAdductExchangeManager</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -298,11 +312,24 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableBinnerAnnotationsEditor" current="dock.mode.normal">
+						<entry id="single DockableBinnerAnnotationsEditor" current="dock.mode.maximized">
 							<history>
 								<mode>dock.mode.normal</mode>
+								<mode>dock.mode.maximized</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.maximized">
+									<mode>dock.mode.maximized</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockFullScreenPropertyFactory"/>
+										<property factory="StackDockPropertyFactory">
+											<index>2</index>
+											<placeholder>dock.single.DockableBinnerAnnotationsEditor</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -344,11 +371,24 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableAdductEditor" current="dock.mode.normal">
+						<entry id="single DockableAdductEditor" current="dock.mode.maximized">
 							<history>
 								<mode>dock.mode.normal</mode>
+								<mode>dock.mode.maximized</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.maximized">
+									<mode>dock.mode.maximized</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockFullScreenPropertyFactory"/>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableAdductEditor</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -371,7 +411,24 @@
 						</entry>
 					</dockables>
 					<modes>
-						<entry id="dock.mode.maximized"/>
+						<entry id="dock.mode.maximized">
+							<maximized>
+								<item id="ccontrol center">
+									<mode>dock.mode.normal</mode>
+									<location>
+										<mode>dock.mode.normal</mode>
+										<root>ccontrol center</root>
+										<applicationDefined>false</applicationDefined>
+										<location>
+											<property factory="SplitDockPathProperty">
+												<node location="TOP" size="0.7713248638838476" id="1605720012294"/>
+												<leaf id="1605720007186"/>
+											</property>
+										</location>
+									</location>
+								</item>
+							</maximized>
+						</entry>
 					</modes>
 				</modes>
 			</current>

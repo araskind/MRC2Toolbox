@@ -27,7 +27,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.prefs.Preferences;
@@ -38,7 +37,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +50,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class MZRTSearchParametersPanel extends JPanel implements ActionListener {
+public class MZRTSearchParametersPanel extends TrackerSearchParametersPanel {
 
 	/**
 	 * 
@@ -90,6 +88,7 @@ public class MZRTSearchParametersPanel extends JPanel implements ActionListener 
 
 		bpmzTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getMzFormat());
 		bpmzTextField.setColumns(10);
+		bpmzTextField.getDocument().addDocumentListener(fdl);
 		GridBagConstraints gbc_bpmzMinTextField = new GridBagConstraints();
 		gbc_bpmzMinTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_bpmzMinTextField.fill = GridBagConstraints.HORIZONTAL;
@@ -104,7 +103,7 @@ public class MZRTSearchParametersPanel extends JPanel implements ActionListener 
 		gbc_lblTo_1.gridy = 0;
 		add(lblTo_1, gbc_lblTo_1);
 
-		massErrorTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getPpmFormat());
+		massErrorTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getPpmFormat());		
 		massErrorTextField.setColumns(10);
 		GridBagConstraints gbc_bpMxMaxTextField = new GridBagConstraints();
 		gbc_bpMxMaxTextField.insets = new Insets(0, 0, 5, 5);
@@ -134,6 +133,7 @@ public class MZRTSearchParametersPanel extends JPanel implements ActionListener 
 		add(lblNewLabel, gbc_lblNewLabel);
 		
 		fragmentListTextField = new JTextField();
+		fragmentListTextField.getDocument().addDocumentListener(fdl);
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
 		gbc_lblNewLabel_1.gridwidth = 4;
 		gbc_lblNewLabel_1.fill = GridBagConstraints.HORIZONTAL;
@@ -193,6 +193,7 @@ public class MZRTSearchParametersPanel extends JPanel implements ActionListener 
 		add(lblCollisionEnergy, gbc_lblCollisionEnergy);
 
 		collisionEnergyComboBox = new JComboBox();
+		collisionEnergyComboBox.addItemListener(this);
 		collisionEnergyComboBox.setPreferredSize(new Dimension(50, 25));
 		collisionEnergyComboBox.setMinimumSize(new Dimension(50, 25));
 		GridBagConstraints gbc_collisionEnergyComboBox = new GridBagConstraints();
@@ -222,6 +223,7 @@ public class MZRTSearchParametersPanel extends JPanel implements ActionListener 
 		add(lblRetentionTimeFrom, gbc_lblRetentionTimeFrom);
 
 		rtFromTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getRtFormat());
+		rtFromTextField.getDocument().addDocumentListener(fdl);
 		rtFromTextField.setColumns(10);
 		GridBagConstraints gbc_rtFromTextField = new GridBagConstraints();
 		gbc_rtFromTextField.insets = new Insets(0, 0, 5, 5);
@@ -239,6 +241,7 @@ public class MZRTSearchParametersPanel extends JPanel implements ActionListener 
 		add(lblTo, gbc_lblTo);
 
 		rtToTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getRtFormat());
+		rtToTextField.getDocument().addDocumentListener(fdl);
 		rtToTextField.setColumns(10);
 		GridBagConstraints gbc_rtToTextField = new GridBagConstraints();
 		gbc_rtToTextField.insets = new Insets(0, 0, 5, 5);
@@ -478,8 +481,17 @@ public class MZRTSearchParametersPanel extends JPanel implements ActionListener 
 		}
 		return null;
 	}
-	
-	
+
+	@Override
+	public boolean hasSpecifiedConstraints() {
+
+		if(getRtRange() != null 
+				|| (getCollisionEnergy() != null && getCollisionEnergy() > 0.0d)
+				|| (getPrecursorMz() != null && !ignoreMz()))
+			return true;
+		else
+			return false;
+	}
 }
 
 

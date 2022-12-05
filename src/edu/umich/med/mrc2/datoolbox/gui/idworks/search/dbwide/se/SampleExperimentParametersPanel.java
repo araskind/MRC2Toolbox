@@ -26,13 +26,12 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -40,9 +39,10 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.lookup.SampleTypeTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.TrackerSearchParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 
-public class SampleExperimentParametersPanel extends JPanel implements ActionListener {
+public class SampleExperimentParametersPanel extends TrackerSearchParametersPanel {
 
 	/**
 	 * 
@@ -118,6 +118,9 @@ public class SampleExperimentParametersPanel extends JPanel implements ActionLis
 					IDTDataCash.getExperiments());
 		sampleTypeTable.setModelFromSampleTypeList(
 					IDTDataCash.getSampleTypeList());
+		
+		experimentListingTable.getSelectionModel().addListSelectionListener(this);
+		sampleTypeTable.getSelectionModel().addListSelectionListener(this);
 	}
 	
 	public void setTableModelFromExperimentList(Collection<LIMSExperiment>experimentList) {		
@@ -148,17 +151,11 @@ public class SampleExperimentParametersPanel extends JPanel implements ActionLis
 			sampleTypeTable.scrollToSelected();
 	}
 
-	public void resetPanel() {
-
-		experimentListingTable.clearSelection();
-		sampleTypeTable.clearSelection();
-	}
-	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(MainActionCommands.IDTRACKER_RESET_FORM_COMMAND.getName()))
-			resetPanel();
+			resetPanel(null);
 	}
 	
 	public Collection<String>validateInput(){
@@ -167,5 +164,21 @@ public class SampleExperimentParametersPanel extends JPanel implements ActionLis
 		
 		
 		return errors;
+	}
+
+	@Override
+	public void resetPanel(Preferences preferences) {
+
+		experimentListingTable.clearSelection();
+		sampleTypeTable.clearSelection();
+	}
+
+	@Override
+	public boolean hasSpecifiedConstraints() {
+		if(!getSelectedSampleTypes().isEmpty() 
+				|| !getSelectedExperiments().isEmpty())
+			return true;
+		else
+			return false;
 	}
 }

@@ -27,13 +27,12 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
@@ -46,9 +45,10 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodTable;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.DataExtractionMethodTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.TrackerSearchParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 
-public class DataAcquisitionParametersPanel extends JPanel implements ActionListener {
+public class DataAcquisitionParametersPanel extends TrackerSearchParametersPanel {
 
 	/**
 	 * 
@@ -193,6 +193,12 @@ public class DataAcquisitionParametersPanel extends JPanel implements ActionList
 		
 		acquisitionMethodTable.setTableModelFromAcquisitionMethods(IDTDataCash.getAcquisitionMethods());
 		dataExtractionMethodTable.setTableModelFromMethods(IDTDataCash.getDataExtractionMethods());
+		
+		chromatographicSeparationTypeTable.getSelectionModel().addListSelectionListener(this);
+		msTypeTable.getSelectionModel().addListSelectionListener(this);
+		chromatographicColumnListTable.getSelectionModel().addListSelectionListener(this);
+		acquisitionMethodTable.getSelectionModel().addListSelectionListener(this);
+		dataExtractionMethodTable.getSelectionModel().addListSelectionListener(this);
 	}
 	
 	public void setSelectedDataAcquisitionMethods(Collection<DataAcquisitionMethod>methodsToSelect) {
@@ -244,15 +250,7 @@ public class DataAcquisitionParametersPanel extends JPanel implements ActionList
 		if(msTypeTable.getSelectedRow() > -1)
 			msTypeTable.scrollToSelected();
 	}
-	
-	public void resetPanel() {		
-		chromatographicSeparationTypeTable.clearSelection();
-		chromatographicColumnListTable.clearSelection();
-		msTypeTable.clearSelection();		
-		acquisitionMethodTable.clearSelection();		
-		dataExtractionMethodTable.clearSelection();
-	}
-	
+		
 	public Collection<String>validateInput(){
 		
 		Collection<String>errors = new ArrayList<String>();
@@ -265,7 +263,29 @@ public class DataAcquisitionParametersPanel extends JPanel implements ActionList
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(MainActionCommands.IDTRACKER_RESET_FORM_COMMAND.getName()))
-			resetPanel();
+			resetPanel(null);
+	}
+
+	@Override
+	public void resetPanel(Preferences preferences) {
+		chromatographicSeparationTypeTable.clearSelection();
+		chromatographicColumnListTable.clearSelection();
+		msTypeTable.clearSelection();		
+		acquisitionMethodTable.clearSelection();		
+		dataExtractionMethodTable.clearSelection();
+	}
+
+	@Override
+	public boolean hasSpecifiedConstraints() {
+		
+		if(!getSelectedAcquisitionMethods().isEmpty()
+				|| !getSelectedDataExtractionMethods().isEmpty()
+				|| !getSelectedChromatographicSeparationTypes().isEmpty()
+				|| !getSelectedChromatographicColumns().isEmpty()
+				|| !getSelectedMsTypes().isEmpty())
+			return true;
+		else
+			return false;
 	}
 }
 

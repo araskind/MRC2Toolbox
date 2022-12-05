@@ -22,12 +22,14 @@
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -44,13 +46,17 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
-import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.lang.StringUtils;
 
+import bibliothek.extension.gui.dock.theme.EclipseTheme;
+import bibliothek.gui.dock.common.CControl;
+import bibliothek.gui.dock.common.CGrid;
+import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import bibliothek.gui.dock.common.intern.DefaultCDockable.Permissions;
 import edu.umich.med.mrc2.datoolbox.data.IDTSearchQuery;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
@@ -72,6 +78,8 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTSearchQueryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.acq.DataAcquisitionParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.id.IdAnnotationSearchParametersPanel;
@@ -81,6 +89,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.query.SaveQueryDia
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.se.SampleExperimentParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
+import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -89,7 +98,8 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMS1FeatureSearchTas
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureSearchTask;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class IDTrackerDataSearchDialog extends JDialog implements ActionListener, BackedByPreferences {
+public class IDTrackerDataSearchDialog extends JDialog 
+		implements ActionListener, BackedByPreferences, FormChangeListener, PersistentLayout {
 
 	/**
 	 * 
@@ -98,6 +108,7 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 
 	private static final Icon dialogIcon = GuiUtils.getIcon("componentIcon", 32);
 	public static final Icon resetIcon = GuiUtils.getIcon("rerun", 24);
+	public static final Icon paramsDefinedIcon = GuiUtils.getIcon("multipleIds", 16);
 	
 	private Preferences preferences;
 	public static final String PREFS_NODE = IDTrackerDataSearchDialog.class.getName();
@@ -138,6 +149,11 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 	public static final String MSMS_LIBRARY_LIST = "MSMS_LIBRARY_LIST";
 	public static final String SEARCH_ALL_MSMS_LIBRARY_IDS = "SEARCH_ALL_MSMS_LIBRARY_IDS";
 	
+	public static final String WINDOW_WIDTH = "WINDOW_WIDTH";
+	public static final String WINDOW_HEIGTH = "WINDOW_HEIGTH";
+	public static final String WINDOW_X = "WINDOW_X";
+	public static final String WINDOW_Y = "WINDOW_Y";
+	
 	private IDWorkbenchPanel parentPanel;
 	private IDTrackerDataSearchDialogToolbar toolbar;
 	
@@ -145,9 +161,21 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 	private SampleExperimentParametersPanel sampleExperimentParametersPanel;
 	private IdAnnotationSearchParametersPanel idAnnotationSearchParametersPanel;
 	private DataAcquisitionParametersPanel dataAcquisitionParametersPanel;	
-	private LibrarySearchPanel librarySearchPanel;
+	private LibrarySearchPanel librarySearchParametersPanel;
 	private IDTrackerSearchQueryManager idTrackerSearchQueryManager;
 	private SaveQueryDialog saveQueryDialog;
+	
+	private DefaultSingleCDockable 
+		mzRtParameterDockablePanel, 
+		sampleExperimentParametersDockablePanel,
+		idAnnotationSearchParametersDockablePanel,
+		dataAcquisitionParametersDockablePanel,
+		librarySearchParametersDockablePanel;
+	
+	private CControl control;
+	private CGrid grid;
+	private static final File layoutConfigFile = 
+			new File(MRC2ToolBoxCore.configDir + "IDTrackerDataSearchDialog.layout");
 	
 	public IDTrackerDataSearchDialog(IDWorkbenchPanel parentPanel) {
 		
@@ -166,35 +194,57 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 		toolbar = new IDTrackerDataSearchDialogToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 		
-		JPanel dataPanel = new JPanel(new BorderLayout(0,0));
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);	
-		tabbedPane.setAlignmentY(Component.TOP_ALIGNMENT);
-		tabbedPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-		
+		control = new CControl(MRC2ToolBoxCore.getMainWindow());
+		control.getController().setTheme(new EclipseTheme());
+		this.add( control.getContentArea() );
+		grid = new CGrid(control);
+
 		mzrtSearchParametersPanel = new MZRTSearchParametersPanel();
+		mzrtSearchParametersPanel.addFormChangeListener(this);
 		JPanel mzrtjp = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		mzrtjp.add(mzrtSearchParametersPanel);
-		tabbedPane.addTab("MZ / RT", mzrtjp);
+		mzRtParameterDockablePanel = 
+				new DefaultSingleCDockable("DockableMZRTSearchParameters", null, "MZ / RT", 
+						mzrtjp, Permissions.MIN_MAX_STACK);
+		mzRtParameterDockablePanel.setCloseable(false);
 		
 		sampleExperimentParametersPanel = new SampleExperimentParametersPanel();
-		sampleExperimentParametersPanel.setPreferredSize(new Dimension(tabWidth, tabHeight));
-		tabbedPane.addTab("Sample / Experiment", sampleExperimentParametersPanel);
+		sampleExperimentParametersPanel.addFormChangeListener(this);
+		sampleExperimentParametersDockablePanel = 
+				new DefaultSingleCDockable("DockableSampleExperimentParameters", null, "Sample / Experiment", 
+					sampleExperimentParametersPanel, Permissions.MIN_MAX_STACK);
+		sampleExperimentParametersDockablePanel.setCloseable(false);
 		
 		idAnnotationSearchParametersPanel = new IdAnnotationSearchParametersPanel();
-		idAnnotationSearchParametersPanel.setPreferredSize(new Dimension(tabWidth, tabHeight));
-		tabbedPane.addTab("ID / Annotations", idAnnotationSearchParametersPanel);
+		idAnnotationSearchParametersPanel.addFormChangeListener(this);
+		idAnnotationSearchParametersDockablePanel = 
+				new DefaultSingleCDockable("DockableIDAnnotationSearchParameters", null, "ID / Annotations", 
+					idAnnotationSearchParametersPanel, Permissions.MIN_MAX_STACK);
+		idAnnotationSearchParametersDockablePanel.setCloseable(false);
 		
-		dataAcquisitionParametersPanel = new DataAcquisitionParametersPanel();		
-		dataAcquisitionParametersPanel.setPreferredSize(new Dimension(tabWidth, tabHeight));
-		tabbedPane.addTab("Data acquisition", dataAcquisitionParametersPanel);
+		dataAcquisitionParametersPanel = new DataAcquisitionParametersPanel();
+		dataAcquisitionParametersPanel.addFormChangeListener(this);
+		dataAcquisitionParametersDockablePanel = 
+				new DefaultSingleCDockable("DockableDataAcquisitionParameters", null, "Data acquisition", 
+					dataAcquisitionParametersPanel, Permissions.MIN_MAX_STACK);
+		dataAcquisitionParametersDockablePanel.setCloseable(false);
 		
-		librarySearchPanel = new LibrarySearchPanel();
-		librarySearchPanel.setPreferredSize(new Dimension(tabWidth, tabHeight));
-		tabbedPane.addTab("MSMS library", librarySearchPanel);
-		
-		dataPanel.add(tabbedPane, BorderLayout.CENTER);
-		
-		getContentPane().add(dataPanel, BorderLayout.CENTER);
+		librarySearchParametersPanel = new LibrarySearchPanel();
+		librarySearchParametersPanel.addFormChangeListener(this);
+		librarySearchParametersDockablePanel = 
+				new DefaultSingleCDockable("DockableLibrarySearchParameters", null, "MSMS library", 
+						librarySearchParametersPanel, Permissions.MIN_MAX_STACK);
+		librarySearchParametersDockablePanel.setCloseable(false);
+
+		grid.add(0, 0, 1, 1,
+				mzRtParameterDockablePanel, 
+				sampleExperimentParametersDockablePanel,
+				idAnnotationSearchParametersDockablePanel,
+				dataAcquisitionParametersDockablePanel,
+				librarySearchParametersDockablePanel);
+
+		control.getContentArea().deploy(grid);
+		grid.select(0, 0, 1, 1, mzRtParameterDockablePanel);
 				
 		JPanel panel_1 = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel_1.getLayout();
@@ -228,13 +278,49 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 		
 		populateSelectorsFromDatabase();
 		loadPreferences();
+		loadLayout(layoutConfigFile);
+		markPopulatedTabs();
 		pack();
+	}
+	
+	@Override
+	public void formDataChanged(FormChangeEvent e) {
+		markPopulatedTabs();
+	}
+	
+	private void markPopulatedTabs() {
+		
+		if(mzrtSearchParametersPanel.hasSpecifiedConstraints())
+			mzRtParameterDockablePanel.setTitleIcon(paramsDefinedIcon);
+		else
+			mzRtParameterDockablePanel.setTitleIcon(null);
+		
+		if(sampleExperimentParametersPanel.hasSpecifiedConstraints())
+			sampleExperimentParametersDockablePanel.setTitleIcon(paramsDefinedIcon);
+		else
+			sampleExperimentParametersDockablePanel.setTitleIcon(null);
+		
+		if(idAnnotationSearchParametersPanel.hasSpecifiedConstraints())
+			idAnnotationSearchParametersDockablePanel.setTitleIcon(paramsDefinedIcon);
+		else
+			idAnnotationSearchParametersDockablePanel.setTitleIcon(null);
+		
+		if(dataAcquisitionParametersPanel.hasSpecifiedConstraints())
+			dataAcquisitionParametersDockablePanel.setTitleIcon(paramsDefinedIcon);
+		else
+			dataAcquisitionParametersDockablePanel.setTitleIcon(null);
+		
+		if(librarySearchParametersPanel.hasSpecifiedConstraints())
+			librarySearchParametersDockablePanel.setTitleIcon(paramsDefinedIcon);
+		else
+			librarySearchParametersDockablePanel.setTitleIcon(null);	
 	}
 	
 	@Override
 	public void dispose() {
 		
 		savePreferences();
+		saveLayout(layoutConfigFile);
 		super.dispose();
 	}
 
@@ -329,8 +415,8 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 		
 		Collection<String>errors = new ArrayList<String>();
 		boolean ignoreMzRtValidation = false;
-		if(idAnnotationSearchParametersPanel.hasLimitingInput() || 
-				librarySearchPanel.hasLimitingInput())
+		if(idAnnotationSearchParametersPanel.hasSpecifiedConstraints() || 
+				librarySearchParametersPanel.hasSpecifiedConstraints())
 			ignoreMzRtValidation = true;
 		
 		if(!ignoreMzRtValidation)		
@@ -339,7 +425,7 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 		errors.addAll(idAnnotationSearchParametersPanel.validateInput());
 		errors.addAll(sampleExperimentParametersPanel.validateInput());
 		errors.addAll(dataAcquisitionParametersPanel.validateInput());
-		errors.addAll(librarySearchPanel.validateInput());
+		errors.addAll(librarySearchParametersPanel.validateInput());
 			
 		return errors;
 	}
@@ -406,10 +492,10 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 					dataAcquisitionParametersPanel.getSelectedMsTypes(),
 					dataAcquisitionParametersPanel.getSelectedAcquisitionMethods(),
 					dataAcquisitionParametersPanel.getSelectedDataExtractionMethods(), 
-					librarySearchPanel.getOriginalLibraryId(), 
-					librarySearchPanel.getMRC2LibraryId(), 
-					librarySearchPanel.searchAllLibraryMatches(),
-					librarySearchPanel.getSelectedLibraries());
+					librarySearchParametersPanel.getOriginalLibraryId(), 
+					librarySearchParametersPanel.getMRC2LibraryId(), 
+					librarySearchParametersPanel.searchAllLibraryMatches(),
+					librarySearchParametersPanel.getSelectedLibraries());
 
 			task.addTaskListener(parentPanel);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
@@ -469,10 +555,10 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 					dataAcquisitionParametersPanel.getSelectedMsTypes(),
 					dataAcquisitionParametersPanel.getSelectedAcquisitionMethods(),
 					dataAcquisitionParametersPanel.getSelectedDataExtractionMethods(), 
-					librarySearchPanel.getOriginalLibraryId(), 
-					librarySearchPanel.getMRC2LibraryId(), 
-					librarySearchPanel.searchAllLibraryMatches(),
-					librarySearchPanel.getSelectedLibraries());
+					librarySearchParametersPanel.getOriginalLibraryId(), 
+					librarySearchParametersPanel.getMRC2LibraryId(), 
+					librarySearchParametersPanel.searchAllLibraryMatches(),
+					librarySearchParametersPanel.getSelectedLibraries());
 			
 			task.addTaskListener(parentPanel);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
@@ -490,10 +576,10 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 	private void resetForm() {
 		
 		mzrtSearchParametersPanel.resetPanel(preferences);
-		idAnnotationSearchParametersPanel.resetPanel();
-		sampleExperimentParametersPanel.resetPanel();
-		dataAcquisitionParametersPanel.resetPanel();
-		librarySearchPanel.resetPanel();
+		idAnnotationSearchParametersPanel.resetPanel(null);
+		sampleExperimentParametersPanel.resetPanel(null);
+		dataAcquisitionParametersPanel.resetPanel(null);
+		librarySearchParametersPanel.resetPanel(null);
 	}
 	
 	@Override
@@ -700,8 +786,8 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 		}
 		
 		//	Library search 
-		librarySearchPanel.setOriginalLibraryId(preferences.get(ORIGINAL_MSMS_LIBRARY_ID, ""));
-		librarySearchPanel.setMRC2LibraryId(preferences.get(MRC2_MSMS_LIBRARY_ID, ""));
+		librarySearchParametersPanel.setOriginalLibraryId(preferences.get(ORIGINAL_MSMS_LIBRARY_ID, ""));
+		librarySearchParametersPanel.setMRC2LibraryId(preferences.get(MRC2_MSMS_LIBRARY_ID, ""));
 		Collection<ReferenceMsMsLibrary>msmsLibsToSelect = new ArrayList<ReferenceMsMsLibrary>();		
 		String[] msmsLibsUids = 
 				StringUtils.split(preferences.get(MSMS_LIBRARY_LIST, ""), ';');
@@ -713,9 +799,17 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 				if(msmsLib != null)
 					msmsLibsToSelect.add(msmsLib);
 			}
-			librarySearchPanel.selectLibraries(msmsLibsToSelect);
+			librarySearchParametersPanel.selectLibraries(msmsLibsToSelect);
 		}
-		librarySearchPanel.setSearchAllLibraryMatches(preferences.getBoolean(SEARCH_ALL_MSMS_LIBRARY_IDS, false));
+		librarySearchParametersPanel.setSearchAllLibraryMatches(preferences.getBoolean(SEARCH_ALL_MSMS_LIBRARY_IDS, false));
+		
+		int width = preferences.getInt(WINDOW_WIDTH, 1000);
+		int heigh = preferences.getInt(WINDOW_HEIGTH, 800);
+		setSize(new Dimension(width, heigh));
+		setPreferredSize(new Dimension(width, heigh));		
+		int x = preferences.getInt(WINDOW_X, 100);
+		int y = preferences.getInt(WINDOW_Y, 100);		
+		setLocation(x,y);
 	}
 
 	@Override
@@ -872,18 +966,24 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 		preferences.put(MS_TYPE_LIST, msTypeString);
 		
 		//	Library search 
-		preferences.put(ORIGINAL_MSMS_LIBRARY_ID, librarySearchPanel.getOriginalLibraryId());
-		preferences.put(MRC2_MSMS_LIBRARY_ID, librarySearchPanel.getMRC2LibraryId());
+		preferences.put(ORIGINAL_MSMS_LIBRARY_ID, librarySearchParametersPanel.getOriginalLibraryId());
+		preferences.put(MRC2_MSMS_LIBRARY_ID, librarySearchParametersPanel.getMRC2LibraryId());
 		
 		String msmsLibString = "";
-		Collection<ReferenceMsMsLibrary>selectedMsmsLibs = librarySearchPanel.getSelectedLibraries();
+		Collection<ReferenceMsMsLibrary>selectedMsmsLibs = librarySearchParametersPanel.getSelectedLibraries();
 		if(!selectedMsmsLibs.isEmpty()) {
 			Set<String> idSet =  
 					selectedMsmsLibs.stream().map(t -> t.getUniqueId()).collect(Collectors.toSet());
 			msmsLibString = StringUtils.join(idSet, ';');
 		}
 		preferences.put(MSMS_LIBRARY_LIST, msmsLibString);
-		preferences.putBoolean(SEARCH_ALL_MSMS_LIBRARY_IDS, librarySearchPanel.searchAllLibraryMatches());
+		preferences.putBoolean(SEARCH_ALL_MSMS_LIBRARY_IDS, librarySearchParametersPanel.searchAllLibraryMatches());
+		
+		preferences.putInt(WINDOW_WIDTH, getWidth());
+		preferences.putInt(WINDOW_HEIGTH, getHeight());	
+		Point location = getLocation();
+		preferences.putInt(WINDOW_X, location.x);
+		preferences.putInt(WINDOW_Y, location.y);
 	}
 	
 	public String getQueryParameterString() {
@@ -1038,18 +1138,18 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 		params.add(DATA_ANALYSIS_METHODS_LIST + "|" + dataAnalysisMethodIdString);
 		
 		//	Library search 
-		params.add(ORIGINAL_MSMS_LIBRARY_ID + "|" + librarySearchPanel.getOriginalLibraryId());
-		params.add(MRC2_MSMS_LIBRARY_ID + "|" + librarySearchPanel.getMRC2LibraryId());
+		params.add(ORIGINAL_MSMS_LIBRARY_ID + "|" + librarySearchParametersPanel.getOriginalLibraryId());
+		params.add(MRC2_MSMS_LIBRARY_ID + "|" + librarySearchParametersPanel.getMRC2LibraryId());
 		
 		String msmsLibString = "";
-		Collection<ReferenceMsMsLibrary>selectedMsmsLibs = librarySearchPanel.getSelectedLibraries();
+		Collection<ReferenceMsMsLibrary>selectedMsmsLibs = librarySearchParametersPanel.getSelectedLibraries();
 		if(!selectedMsmsLibs.isEmpty()) {
 			Set<String> idSet =  
 					selectedMsmsLibs.stream().map(t -> t.getUniqueId()).collect(Collectors.toSet());
 			msmsLibString = StringUtils.join(idSet, ';');
 		}
 		params.add(MSMS_LIBRARY_LIST + "|" + msmsLibString);
-		params.add(SEARCH_ALL_MSMS_LIBRARY_IDS + "|" + librarySearchPanel.searchAllLibraryMatches());
+		params.add(SEARCH_ALL_MSMS_LIBRARY_IDS + "|" + librarySearchParametersPanel.searchAllLibraryMatches());
 		
 		return StringUtils.join(params, "\n");
 	}
@@ -1314,10 +1414,10 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 	
 		//	Library search 
 		if(paramsMap.containsKey(ORIGINAL_MSMS_LIBRARY_ID))
-			librarySearchPanel.setOriginalLibraryId(paramsMap.get(ORIGINAL_MSMS_LIBRARY_ID));
+			librarySearchParametersPanel.setOriginalLibraryId(paramsMap.get(ORIGINAL_MSMS_LIBRARY_ID));
 	
 		if(paramsMap.containsKey(MRC2_MSMS_LIBRARY_ID))
-			librarySearchPanel.setMRC2LibraryId(paramsMap.get(MRC2_MSMS_LIBRARY_ID));
+			librarySearchParametersPanel.setMRC2LibraryId(paramsMap.get(MRC2_MSMS_LIBRARY_ID));
 		
 		if(paramsMap.get(MSMS_LIBRARY_LIST) != null && !paramsMap.get(MSMS_LIBRARY_LIST).isEmpty()) {
 			
@@ -1332,12 +1432,51 @@ public class IDTrackerDataSearchDialog extends JDialog implements ActionListener
 					if(msmsLib != null)
 						msmsLibsToSelect.add(msmsLib);
 				}
-				librarySearchPanel.selectLibraries(msmsLibsToSelect);
+				librarySearchParametersPanel.selectLibraries(msmsLibsToSelect);
 			}
 		}
 		if(paramsMap.containsKey(SEARCH_ALL_MSMS_LIBRARY_IDS))
-			librarySearchPanel.setSearchAllLibraryMatches(
+			librarySearchParametersPanel.setSearchAllLibraryMatches(
 					Boolean.valueOf(paramsMap.get(SEARCH_ALL_MSMS_LIBRARY_IDS)));
+	}
+	
+	@Override
+	public void loadLayout(File layoutFile) {
+
+		if(control != null) {
+
+			if(layoutFile.exists()) {
+				try {
+					control.readXML(layoutFile);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				try {
+					control.writeXML(layoutFile);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	@Override
+	public void saveLayout(File layoutFile) {
+
+		if(control != null) {
+			try {
+				control.writeXML(layoutFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public File getLayoutFile() {
+		return layoutConfigFile;
 	}
 }
 

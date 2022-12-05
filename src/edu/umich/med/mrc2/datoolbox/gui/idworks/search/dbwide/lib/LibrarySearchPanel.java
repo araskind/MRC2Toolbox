@@ -27,16 +27,15 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
@@ -46,9 +45,10 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.TrackerSearchParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 
-public class LibrarySearchPanel extends JPanel implements ActionListener {
+public class LibrarySearchPanel extends TrackerSearchParametersPanel {
 
 	/**
 	 * 
@@ -79,6 +79,7 @@ public class LibrarySearchPanel extends JPanel implements ActionListener {
 		add(lblNewLabel, gbc_lblNewLabel);
 		
 		originalLibIdTextField = new JTextField();
+		originalLibIdTextField.getDocument().addDocumentListener(fdl);
 		GridBagConstraints gbc_originalLibIdTextField = new GridBagConstraints();
 		gbc_originalLibIdTextField.gridwidth = 2;
 		gbc_originalLibIdTextField.insets = new Insets(0, 0, 5, 0);
@@ -98,6 +99,7 @@ public class LibrarySearchPanel extends JPanel implements ActionListener {
 		add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		mrc2libIdTextField = new JTextField();
+		mrc2libIdTextField.getDocument().addDocumentListener(fdl);
 		GridBagConstraints gbc_mrc2libIdTextField = new GridBagConstraints();
 		gbc_mrc2libIdTextField.gridwidth = 2;
 		gbc_mrc2libIdTextField.insets = new Insets(0, 0, 5, 0);
@@ -107,9 +109,10 @@ public class LibrarySearchPanel extends JPanel implements ActionListener {
 		add(mrc2libIdTextField, gbc_mrc2libIdTextField);
 		mrc2libIdTextField.setColumns(10);
 		
-		msmsLibraryListingTable = new MSMSLibraryListingTable();
+		msmsLibraryListingTable = new MSMSLibraryListingTable();		
 		msmsLibraryListingTable.setTableModelFromReferenceMsMsLibraryList(
 				IDTDataCash.getPrimaryReferenceMsMsLibraryList());
+		msmsLibraryListingTable.getSelectionModel().addListSelectionListener(this);
 		JScrollPane scrollPane = new JScrollPane(msmsLibraryListingTable);
 		scrollPane.setBorder(
 				new TitledBorder(null, "Library matches should come only from selected libraries:", 
@@ -151,7 +154,7 @@ public class LibrarySearchPanel extends JPanel implements ActionListener {
 		add(resetButton, gbc_btnNewButton);		
 	}
 
-	public void resetPanel() {
+	public void resetPanel(Preferences preferences) {
 		
 		originalLibIdTextField.setText("");
 		mrc2libIdTextField.setText("");
@@ -197,17 +200,9 @@ public class LibrarySearchPanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(MainActionCommands.IDTRACKER_RESET_FORM_COMMAND.getName()))
-			resetPanel();
+			resetPanel(null);
 	}
 	
-	public boolean hasLimitingInput() {
-		
-		if(!getOriginalLibraryId().isEmpty() || !getMRC2LibraryId().isEmpty())			
-			return true;		
-		else
-			return false;
-	}
-
 	public Collection<String> validateInput() {
 		
 		Collection<String>errors = new ArrayList<String>();
@@ -220,6 +215,18 @@ public class LibrarySearchPanel extends JPanel implements ActionListener {
 						DataPrefix.MSMS_LIBRARY_ENTRY.getName() + " followed by 9 digits");				
 		}	
 		return errors;
+	}
+
+	@Override
+	public boolean hasSpecifiedConstraints() {
+
+		if(!getOriginalLibraryId().isEmpty() 
+				|| !getMRC2LibraryId().isEmpty() 
+				|| !getSelectedLibraries().isEmpty()) {
+			return true;
+		}
+		else
+			return false;
 	}
 }
 

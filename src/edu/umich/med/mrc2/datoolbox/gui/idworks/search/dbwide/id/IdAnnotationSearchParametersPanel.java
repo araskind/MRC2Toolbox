@@ -28,9 +28,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -57,9 +57,10 @@ import edu.umich.med.mrc2.datoolbox.data.enums.IdentifierSearchOptions;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idfus.IdFollowupStepTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.TrackerSearchParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 
-public class IdAnnotationSearchParametersPanel extends JPanel implements ActionListener{
+public class IdAnnotationSearchParametersPanel extends TrackerSearchParametersPanel{
 
 	/**
 	 * 
@@ -98,6 +99,7 @@ public class IdAnnotationSearchParametersPanel extends JPanel implements ActionL
 		
 		idFilterComboBox = new JComboBox<FeatureSubsetByIdentification>(
 				new DefaultComboBoxModel<FeatureSubsetByIdentification>(FeatureSubsetByIdentification.values()));
+		idFilterComboBox.addItemListener(this);
 		idFilterComboBox.setPreferredSize(new Dimension(80, 25));
 		idFilterComboBox.setMinimumSize(new Dimension(80, 25));
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
@@ -130,6 +132,7 @@ public class IdAnnotationSearchParametersPanel extends JPanel implements ActionL
 		add(idOptionComboBox, gbc_idOptionComboBox);
 		
 		nameIdTextField = new JTextField();
+		nameIdTextField.getDocument().addDocumentListener(fdl);
 		GridBagConstraints gbc_nameIdTextField = new GridBagConstraints();
 		gbc_nameIdTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_nameIdTextField.gridwidth = 3;
@@ -149,6 +152,7 @@ public class IdAnnotationSearchParametersPanel extends JPanel implements ActionL
 		add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
 		formulaTextField = new JTextField();
+		formulaTextField.getDocument().addDocumentListener(fdl);
 		GridBagConstraints gbc_formulaTextField = new GridBagConstraints();
 		gbc_formulaTextField.gridwidth = 2;
 		gbc_formulaTextField.insets = new Insets(0, 0, 5, 0);
@@ -168,6 +172,7 @@ public class IdAnnotationSearchParametersPanel extends JPanel implements ActionL
 		add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		inChIKeyTextField = new JTextField();
+		inChIKeyTextField.getDocument().addDocumentListener(fdl);
 		GridBagConstraints gbc_InChIKeyTextField = new GridBagConstraints();
 		gbc_InChIKeyTextField.gridwidth = 2;
 		gbc_InChIKeyTextField.insets = new Insets(0, 0, 5, 0);
@@ -197,6 +202,7 @@ public class IdAnnotationSearchParametersPanel extends JPanel implements ActionL
 		add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
 		annotationsOnlyCheckBox = new JCheckBox("Only features with annotations");
+		annotationsOnlyCheckBox.addItemListener(this);
 		annotationsOnlyCheckBox.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_annotationsOnlyCheckBox = new GridBagConstraints();
 		gbc_annotationsOnlyCheckBox.anchor = GridBagConstraints.WEST;
@@ -224,6 +230,7 @@ public class IdAnnotationSearchParametersPanel extends JPanel implements ActionL
 		idLevelListTable = new IdLevelListTable();
 		idLevelListTable.setTableModelFromLevelList(
 				IDTDataCash.getMsFeatureIdentificationLevelList());
+		idLevelListTable.getSelectionModel().addListSelectionListener(this);
 		JScrollPane scrollPane = new JScrollPane(idLevelListTable);
 //		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBorder(new CompoundBorder(new EmptyBorder(10, 0, 0, 5), 
@@ -240,6 +247,7 @@ public class IdAnnotationSearchParametersPanel extends JPanel implements ActionL
 		idFollowupStepTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		idFollowupStepTable.setTableModelFromFollowupStepList(
 				IDTDataCash.getMsFeatureIdentificationFollowupStepList());
+		idFollowupStepTable.getSelectionModel().addListSelectionListener(this);
 		JScrollPane scrollPane_1 = new JScrollPane(idFollowupStepTable);
 //		JScrollPane scrollPane_1 = new JScrollPane();
 		scrollPane_1.setBorder(new CompoundBorder(new EmptyBorder(10, 5, 0, 0), 
@@ -338,7 +346,7 @@ public class IdAnnotationSearchParametersPanel extends JPanel implements ActionL
 		searchAllIdsCheckBox.setSelected(b);
 	}
 
-	public void resetPanel() {
+	public void resetPanel(Preferences preferences) {
 		
 		idFilterComboBox.setSelectedItem(FeatureSubsetByIdentification.ALL);
 		idOptionComboBox.setSelectedIndex(-1);
@@ -371,24 +379,7 @@ public class IdAnnotationSearchParametersPanel extends JPanel implements ActionL
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals(MainActionCommands.IDTRACKER_RESET_FORM_COMMAND.getName()))
-			resetPanel();
-	}
-
-	public boolean hasLimitingInput() {
-
-//		if(!getNameIdString().isEmpty() && getIdentifierSearchOption() != null)
-//			return true;
-//		
-//		if(!getFormula().isEmpty() && fomulaValid(getFormula()))
-//			return true;
-//		
-//		if(!getInChIKey().isEmpty() && inchiKeyIsValid())
-//			return true;
-		
-		if(!getNameIdString().isEmpty() || !getFormula().isEmpty() || !getInChIKey().isEmpty())
-			return true;
-		else	
-			return false;
+			resetPanel(null);
 	}
 	
 	private boolean inchiKeyIsValid() {
@@ -410,7 +401,25 @@ public class IdAnnotationSearchParametersPanel extends JPanel implements ActionL
 		}
 		return queryFormula != null;
 	}
+
+	@Override
+	public boolean hasSpecifiedConstraints() {
+
+		if(!getNameIdString().isEmpty() 
+				|| !getFormula().isEmpty() 
+				|| !getInChIKey().isEmpty()
+				|| !getFeatureSubsetByIdentification().equals(FeatureSubsetByIdentification.ALL)
+				|| getAnnotatedOnly()
+				|| !getSelectedIdLevels().isEmpty()
+				|| !getSelectedFollowupSteps().isEmpty())
+			return true;
+		else	
+			return false;
+	}
 }
+
+
+
 
 
 
