@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1656109900806" orientation="VERTICAL" divider="0.25">
-											<leaf id="0" nodeId="1656109890669">
+											<leaf id="1" nodeId="1656109890669">
 												<placeholders>
 													<placeholder>dock.single.DockableExperimentsTable</placeholder>
 												</placeholders>
@@ -114,7 +114,7 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="1" nodeId="1656109900804">
+											<leaf id="0" nodeId="1656109900804">
 												<placeholders>
 													<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
 												</placeholders>
@@ -130,20 +130,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentsTable">
-										<replacement id="dockablesingle DockableExperimentsTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableDataPipelinesTable">
+										<replacement id="dockablesingle DockableDataPipelinesTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentsTable</id>
+											<id>DockableDataPipelinesTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDataPipelinesTable">
-										<replacement id="dockablesingle DockableDataPipelinesTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentsTable">
+										<replacement id="dockablesingle DockableExperimentsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDataPipelinesTable</id>
+											<id>DockableExperimentsTable</id>
 											<area/>
 										</delegate>
 									</layout>

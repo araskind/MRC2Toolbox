@@ -29,10 +29,8 @@ import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.action.DefaultDockActionSource;
-import bibliothek.gui.dock.action.DockAction;
 import bibliothek.gui.dock.action.LocationHint;
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
-import bibliothek.gui.dock.action.actions.SimpleMenuAction;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -67,59 +65,55 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 		DefaultDockActionSource actions = new DefaultDockActionSource(
 				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
 		
-		DefaultDockActionSource filterMenuActions = new DefaultDockActionSource();		
-		SimpleMenuAction filterActionMenu = new SimpleMenuAction(filterMenuActions);
-		filterActionMenu.setIcon(filterIcon);
-		filterActionMenu.setText("Filter");       
-		actions.add((DockAction)filterActionMenu);
-		
 		SimpleButtonAction filterFeaturesButton = GuiUtils.setupButtonAction(
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(),
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND.getName(), 
 				filterIcon, l);
-		filterMenuActions.add(filterFeaturesButton);
+		actions.add(filterFeaturesButton);
 		
-		SimpleButtonAction filterClusteredFeaturesButton = GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_CLUSTERED_FEATURE_FILTER_COMMAND.getName(),
-				MainActionCommands.SHOW_CLUSTERED_FEATURE_FILTER_COMMAND.getName(), 
-				filterClustersIcon, l);
-		filterMenuActions.add(filterClusteredFeaturesButton);
-		
-		DefaultDockActionSource reloadMenuActions = new DefaultDockActionSource();		
-		SimpleMenuAction reloadActionMenu = new SimpleMenuAction(reloadMenuActions);
-		reloadActionMenu.setIcon(reloadIcon);
-		reloadActionMenu.setText("Reload");       
-		actions.add((DockAction)reloadActionMenu);
-				
 		SimpleButtonAction reloadFeaturesButton = GuiUtils.setupButtonAction(
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName(), 
 				reloadIcon, l);
-		reloadMenuActions.add(reloadFeaturesButton);
-		
-		SimpleButtonAction reloadClusterSetFeaturesButton = GuiUtils.setupButtonAction(
-				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
-				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
-				reloadClusterSetFeaturesIcon, l);
-		reloadMenuActions.add(reloadClusterSetFeaturesButton);
-		
-		DefaultDockActionSource statsMenuActions = new DefaultDockActionSource();		
-		SimpleMenuAction statsActionMenu = new SimpleMenuAction(statsMenuActions);
-		statsActionMenu.setIcon(statsIcon);
-		statsActionMenu.setText("Summary");       
-		actions.add((DockAction)statsActionMenu);
+		actions.add(reloadFeaturesButton);
 		
 		SimpleButtonAction showDataSetStatsButton = GuiUtils.setupButtonAction(
 				MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName(),
 				MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName(), 
 				statsIcon, l);
-		statsMenuActions.add(showDataSetStatsButton);
+		actions.add(showDataSetStatsButton);
 		
-		SimpleButtonAction showClusteredDataSetStatsButton = GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND.getName(),
-				MainActionCommands.SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND.getName(), 
-				clusteredStatsIcon, l);
-		statsMenuActions.add(showClusteredDataSetStatsButton);
+//		DefaultDockActionSource filterMenuActions = new DefaultDockActionSource();		
+//		SimpleMenuAction filterActionMenu = new SimpleMenuAction(filterMenuActions);
+//		filterActionMenu.setIcon(filterIcon);
+//		filterActionMenu.setText("Filter");       
+//		actions.add((DockAction)filterActionMenu);
+//		filterMenuActions.add(filterFeaturesButton);
+//		filterMenuActions.add(filterClusteredFeaturesButton);
+//		
+//		DefaultDockActionSource reloadMenuActions = new DefaultDockActionSource();		
+//		SimpleMenuAction reloadActionMenu = new SimpleMenuAction(reloadMenuActions);
+//		reloadActionMenu.setIcon(reloadIcon);
+//		reloadActionMenu.setText("Reload");       
+//		actions.add((DockAction)reloadActionMenu);
+//						
+//		SimpleButtonAction reloadClusterSetFeaturesButton = GuiUtils.setupButtonAction(
+//				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
+//				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
+//				reloadClusterSetFeaturesIcon, l);
+//		reloadMenuActions.add(reloadClusterSetFeaturesButton);
+//		
+//		DefaultDockActionSource statsMenuActions = new DefaultDockActionSource();		
+//		SimpleMenuAction statsActionMenu = new SimpleMenuAction(statsMenuActions);
+//		statsActionMenu.setIcon(statsIcon);
+//		statsActionMenu.setText("Summary");       
+//		actions.add((DockAction)statsActionMenu);
+//		SimpleButtonAction showClusteredDataSetStatsButton = GuiUtils.setupButtonAction(
+//		MainActionCommands.SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND.getName(),
+//		MainActionCommands.SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND.getName(), 
+//		clusteredStatsIcon, l);
+
+//		statsMenuActions.add(showDataSetStatsButton);
 				
 		actions.addSeparator();
 		
