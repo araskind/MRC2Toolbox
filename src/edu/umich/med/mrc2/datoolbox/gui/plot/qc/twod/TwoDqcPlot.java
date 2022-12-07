@@ -57,6 +57,10 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolT
 
 public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemListener {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8509961200306648220L;
 	private QcPlotType plotType;
 	private FileSortingOrder sortingOrder;
 	private DataScale dataScale;

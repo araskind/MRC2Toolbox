@@ -78,42 +78,10 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 		actions.add(reloadFeaturesButton);
 		
 		SimpleButtonAction showDataSetStatsButton = GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName(),
-				MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName(), 
+				MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND.getName(),
+				MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND.getName(), 
 				statsIcon, l);
 		actions.add(showDataSetStatsButton);
-		
-//		DefaultDockActionSource filterMenuActions = new DefaultDockActionSource();		
-//		SimpleMenuAction filterActionMenu = new SimpleMenuAction(filterMenuActions);
-//		filterActionMenu.setIcon(filterIcon);
-//		filterActionMenu.setText("Filter");       
-//		actions.add((DockAction)filterActionMenu);
-//		filterMenuActions.add(filterFeaturesButton);
-//		filterMenuActions.add(filterClusteredFeaturesButton);
-//		
-//		DefaultDockActionSource reloadMenuActions = new DefaultDockActionSource();		
-//		SimpleMenuAction reloadActionMenu = new SimpleMenuAction(reloadMenuActions);
-//		reloadActionMenu.setIcon(reloadIcon);
-//		reloadActionMenu.setText("Reload");       
-//		actions.add((DockAction)reloadActionMenu);
-//						
-//		SimpleButtonAction reloadClusterSetFeaturesButton = GuiUtils.setupButtonAction(
-//				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
-//				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName(), 
-//				reloadClusterSetFeaturesIcon, l);
-//		reloadMenuActions.add(reloadClusterSetFeaturesButton);
-//		
-//		DefaultDockActionSource statsMenuActions = new DefaultDockActionSource();		
-//		SimpleMenuAction statsActionMenu = new SimpleMenuAction(statsMenuActions);
-//		statsActionMenu.setIcon(statsIcon);
-//		statsActionMenu.setText("Summary");       
-//		actions.add((DockAction)statsActionMenu);
-//		SimpleButtonAction showClusteredDataSetStatsButton = GuiUtils.setupButtonAction(
-//		MainActionCommands.SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND.getName(),
-//		MainActionCommands.SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND.getName(), 
-//		clusteredStatsIcon, l);
-
-//		statsMenuActions.add(showDataSetStatsButton);
 				
 		actions.addSeparator();
 		

@@ -33,7 +33,9 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -52,13 +54,12 @@ import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
-import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.DockableDataPipelinesTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.DockableExperimentsTable;
-import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
@@ -81,10 +82,14 @@ public class DatasetSummaryDialog extends JDialog
 	private CGrid grid;
 	private DockableExperimentsTable experimentsTable;
 	private DockableDataPipelinesTable dataPipelinesTable;
+	private DockableDataSetStatsPanel dataSetStatsPanel;
 	private Window idp;
+	private MsFeatureInfoBundleCollection activeFeatureCollection;
 	
-	public DatasetSummaryDialog() {
+	public DatasetSummaryDialog(MsFeatureInfoBundleCollection activeFeatureCollection) {
+		
 		super();
+		this.activeFeatureCollection = activeFeatureCollection;
 		
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
@@ -97,11 +102,13 @@ public class DatasetSummaryDialog extends JDialog
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
 		
-		experimentsTable = new DockableExperimentsTable(this);
-		experimentsTable.setTableModelFromExperimentList(IDTDataCash.getExperiments());
+		experimentsTable = new DockableExperimentsTable(this);		
 		dataPipelinesTable = new DockableDataPipelinesTable();
-
-		grid.add(0, 0, 75, 100, experimentsTable, 
+		dataSetStatsPanel = new DockableDataSetStatsPanel(activeFeatureCollection);
+		
+		grid.add(0, 0, 1, 1, 
+				dataSetStatsPanel,
+				experimentsTable, 
 				dataPipelinesTable);
 		
 		control.getContentArea().deploy(grid);
@@ -128,6 +135,52 @@ public class DatasetSummaryDialog extends JDialog
 		pack();
 	}
 	
+	public void generateDataSetStats() {
+
+		CreateDataSetSummaryTask task = 
+				new CreateDataSetSummaryTask(activeFeatureCollection);
+		idp = new IndeterminateProgressDialog(
+				"Generating data set summary ...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
+	class CreateDataSetSummaryTask extends LongUpdateTask {
+		/*
+		 * Main task. Executed in background thread.
+		 */	
+		private MsFeatureInfoBundleCollection featureCollection;
+		
+		public CreateDataSetSummaryTask(MsFeatureInfoBundleCollection featureCollection) {			
+			this.featureCollection = featureCollection;
+		}
+
+		@Override
+		public Void doInBackground() {
+
+			try {
+				createDataSetSummary(featureCollection);
+					
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
+	
+	private void createDataSetSummary(MsFeatureInfoBundleCollection featureCollection) {
+		// TODO Auto-generated method stub
+		
+		List<LIMSExperiment> experiments = 
+				featureCollection.getFeatures().stream().
+				map(b -> b.getExperiment()).distinct().
+				sorted().collect(Collectors.toList());
+		experimentsTable.setTableModelFromExperimentList(experiments);
+		
+		
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
@@ -139,14 +192,14 @@ public class DatasetSummaryDialog extends JDialog
 		}
 		String command = e.getActionCommand();
 
-		if(command.equals(MainActionCommands.IDTRACKER_RESET_FORM_COMMAND.getName()))
-			resetForm();
-
-		if(command.equals(MainActionCommands.IDTRACKER_REFRESH_FORM_OPTIONS_COMMAND.getName()))
-			populateSelectorsFromDatabase();
-
-		if(command.equals(MainActionCommands.SEARCH_ID_TRACKER_BY_EXPERIMENT_MZ_RT_COMMAND.getName()))
-			searchIdTracker();
+//		if(command.equals(MainActionCommands.IDTRACKER_RESET_FORM_COMMAND.getName()))
+//			resetForm();
+//
+//		if(command.equals(MainActionCommands.IDTRACKER_REFRESH_FORM_OPTIONS_COMMAND.getName()))
+//			populateSelectorsFromDatabase();
+//
+//		if(command.equals(MainActionCommands.SEARCH_ID_TRACKER_BY_EXPERIMENT_MZ_RT_COMMAND.getName()))
+//			searchIdTracker();
 	}
 
 	private void resetForm() {
@@ -246,53 +299,5 @@ public class DatasetSummaryDialog extends JDialog
 	@Override
 	public File getLayoutFile() {
 		return layoutConfigFile;
-	}
-
-	public void generateDataSetStats(
-			Collection<MSFeatureInfoBundle> allMSOneFeatures,
-			Collection<MSFeatureInfoBundle> allMSMSFeatures) {
-
-		CreateDataSetSummaryTask task = 
-				new CreateDataSetSummaryTask(allMSOneFeatures, allMSMSFeatures);
-		idp = new IndeterminateProgressDialog(
-				"Generating data set summary ...", this.getContentPane(), task);
-		idp.setLocationRelativeTo(this.getContentPane());
-		idp.setVisible(true);
-	}
-	
-	class CreateDataSetSummaryTask extends LongUpdateTask {
-		/*
-		 * Main task. Executed in background thread.
-		 */	
-		private Collection<MSFeatureInfoBundle> allMSOneFeatures;
-		private Collection<MSFeatureInfoBundle> allMSMSFeatures;
-		
-		public CreateDataSetSummaryTask(
-				Collection<MSFeatureInfoBundle> allMSOneFeatures,
-				Collection<MSFeatureInfoBundle> allMSMSFeatures) {
-			
-			this.allMSOneFeatures = allMSOneFeatures;
-			this.allMSMSFeatures = allMSMSFeatures;
-		}
-
-		@Override
-		public Void doInBackground() {
-
-			try {
-				createDataSetSummary(allMSOneFeatures, allMSMSFeatures);
-					
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
-		}
-	}
-	
-	private void createDataSetSummary(
-			Collection<MSFeatureInfoBundle> allMSOneFeatures,
-			Collection<MSFeatureInfoBundle> allMSMSFeatures) {
-		// TODO Auto-generated method stub
-		
 	}
 }

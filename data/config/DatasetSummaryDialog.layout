@@ -99,27 +99,38 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1656109900806" orientation="VERTICAL" divider="0.25">
-											<leaf id="1" nodeId="1656109890669">
-												<placeholders>
-													<placeholder>dock.single.DockableExperimentsTable</placeholder>
-												</placeholders>
-												<placeholder-map>
-													<version>0</version>
-													<format>dock.PlaceholderList</format>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableExperimentsTable</placeholder>
-														</key>
-													</entry>
-												</placeholder-map>
-											</leaf>
-											<leaf id="0" nodeId="1656109900804">
-												<placeholders>
-													<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
-												</placeholders>
-											</leaf>
-										</node>
+										<leaf id="0" nodeId="1670355749447">
+											<placeholders>
+												<placeholder>dock.single.DockableDataSetStatsPanel</placeholder>
+												<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
+												<placeholder>dock.single.DockableExperimentsTable</placeholder>
+											</placeholders>
+											<placeholder-map>
+												<version>0</version>
+												<format>dock.PlaceholderList</format>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.DockableDataSetStatsPanel</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.DockableExperimentsTable</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+											</placeholder-map>
+										</leaf>
 									</content>
 								</delegate>
 							</layout>
@@ -130,24 +141,87 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDataPipelinesTable">
-										<replacement id="dockablesingle DockableDataPipelinesTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDataPipelinesTable</id>
-											<area/>
-										</delegate>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableDataSetStatsPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableDataSetStatsPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableExperimentsTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableExperimentsTable</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableDataPipelinesTable</item>
+											</entry>
+										</placeholders>
 									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentsTable">
-										<replacement id="dockablesingle DockableExperimentsTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentsTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableDataSetStatsPanel">
+												<replacement id="dockablesingle DockableDataSetStatsPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableDataSetStatsPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableExperimentsTable">
+												<replacement id="dockablesingle DockableExperimentsTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableExperimentsTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableDataPipelinesTable">
+												<replacement id="dockablesingle DockableDataPipelinesTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableDataPipelinesTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
 								</child>
 							</children>
 						</root>
@@ -190,9 +264,36 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableExperimentsTable</placeholder>
 											<backup-path>
-												<node location="TOP" size="0.25" id="1656109900806"/>
-												<leaf id="1656109890669"/>
+												<leaf id="1670355749447"/>
 											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableExperimentsTable</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableDataSetStatsPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableDataSetStatsPanel</placeholder>
+											<backup-path>
+												<leaf id="1670355749447"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableDataSetStatsPanel</placeholder>
 										</property>
 									</location>
 								</property>
@@ -211,9 +312,12 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.75" id="1656109900806"/>
-												<leaf id="1656109900804"/>
+												<leaf id="1670355749447"/>
 											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>2</index>
+											<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
 										</property>
 									</location>
 								</property>

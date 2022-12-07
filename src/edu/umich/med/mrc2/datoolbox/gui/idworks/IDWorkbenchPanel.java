@@ -771,17 +771,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(activeMSMSClusterDataSet != null && !activeMSMSClusterDataSet.getClusters().isEmpty())
 				showFeatureFilter(activeMSMSClusterDataSet.getAllFeatures());
 		}	
-		if (command.equals(MainActionCommands.SHOW_MSMS_DATA_SET_STATISTICS_COMMAND.getName())) {
-			
-			if(activeFeatureCollection != null && !activeFeatureCollection.getFeatures().isEmpty())
-				showMSMSDataSetStatistics(activeFeatureCollection.getFeatures());
-		}
-		if (command.equals(MainActionCommands.SHOW_CLUSTERED_MSMS_DATA_SET_STATISTICS_COMMAND.getName())) {
-			
-			if(activeMSMSClusterDataSet != null && !activeMSMSClusterDataSet.getClusters().isEmpty())
-				showMSMSDataSetStatistics(activeMSMSClusterDataSet.getAllFeatures());
-		}
-			
 		if (command.equals(MainActionCommands.FILTER_FEATURES_COMMAND.getName()))
 			filterFeatureTable();
 		
@@ -838,41 +827,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			showMSMSClustersSummary();
 		
 	}
-
-	private void showMSMSDataSetStatistics(Collection<MSFeatureInfoBundle> featureCollection) {
-
-		if(featureCollection == null || featureCollection.isEmpty())
-			return;
-		
-		CreateDataSetSummaryTask task = new CreateDataSetSummaryTask(featureCollection);
-		idp = new IndeterminateProgressDialog("Creating statistics for feature set ...", 
-				this.getContentPane(), task);
-		idp.setLocationRelativeTo(this.getContentPane());
-		idp.setVisible(true);
-	}
 	
-	class CreateDataSetSummaryTask extends LongUpdateTask {
-
-		private Collection<MSFeatureInfoBundle> featureCollection;
+	private void showActiveDataSetSummary() {
 		
-		public CreateDataSetSummaryTask(Collection<MSFeatureInfoBundle> featureCollection) {
-			this.featureCollection = featureCollection;
-		}
+		// TODO - deal with MS1 stuff later 
+		if(activeFeatureCollection == null || activeFeatureCollection.getFeatures().isEmpty())
+			return;
 
-		@Override
-		public Void doInBackground() {
-
-
-			return null;
-		}
-		
-	    @Override
-	    public void done() {
-			super.done();
-			DatasetSummaryDialog datasetSummaryDialog = new DatasetSummaryDialog();
-			datasetSummaryDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
-			datasetSummaryDialog.setVisible(true);
-	    }
+		datasetSummaryDialog = new DatasetSummaryDialog(activeFeatureCollection);
+		datasetSummaryDialog.setLocationRelativeTo(IDWorkbenchPanel.this.getContentPane());
+		datasetSummaryDialog.generateDataSetStats();
+		datasetSummaryDialog.setVisible(true);	
 	}
 
 	private void msmsClusterDataExportSetup() {
@@ -1119,22 +1084,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		msmsClusterDataSetEditorDialog.setFeatureLookupDataSet(activeMSMSClusterDataSet.getFeatureLookupDataSet());
 		msmsClusterDataSetEditorDialog.setLocationRelativeTo(this.getContentPane());
 		msmsClusterDataSetEditorDialog.setVisible(true);
-	}
-
-	private void showActiveDataSetSummary() {
-		
-		// TODO - deal with MS1 stuff later 
-		Collection<MSFeatureInfoBundle> allMSOneFeatures = 
-				msOneFeatureTable.getBundles(TableRowSubset.ALL);
-		Collection<MSFeatureInfoBundle> allMSMSFeatures = 
-				msTwoFeatureTable.getBundles(TableRowSubset.ALL);
-		if(allMSOneFeatures.isEmpty() && allMSMSFeatures.isEmpty())
-			return;
-		
-		datasetSummaryDialog = new DatasetSummaryDialog();
-		datasetSummaryDialog.setLocationRelativeTo(this.getContentPane());
-		datasetSummaryDialog.setVisible(true);
-		datasetSummaryDialog.generateDataSetStats(allMSOneFeatures, allMSMSFeatures);
 	}
 
 	private void setupSpectrumEntropyScoringParameters() {
