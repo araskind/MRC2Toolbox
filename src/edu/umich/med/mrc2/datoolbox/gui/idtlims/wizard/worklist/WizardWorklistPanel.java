@@ -184,13 +184,15 @@ public class WizardWorklistPanel extends IDTrackerDataLoadWizardPanel
 		if(selectedSample != null) {
 			worklist.getTimeSortedWorklistItems().stream().
 				filter(LIMSWorklistItem.class::isInstance).
-				map(LIMSWorklistItem.class::cast).filter(i -> selectedFiles.contains(i.getDataFile())).
+				map(LIMSWorklistItem.class::cast).
+				filter(i -> selectedFiles.contains(i.getDataFile())).
 				forEach(i -> i.setSample(selectedSample));
 		}
 		if(selectedPrep != null) {
 			worklist.getTimeSortedWorklistItems().stream().
 				filter(LIMSWorklistItem.class::isInstance).
-				map(LIMSWorklistItem.class::cast).filter(i -> selectedFiles.contains(i.getDataFile())).
+				map(LIMSWorklistItem.class::cast).
+				filter(i -> selectedFiles.contains(i.getDataFile())).
 				forEach(i -> i.setPrepItemId(selectedPrep));
 		}
 		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(worklist, experiment, samplePrep);

@@ -34,6 +34,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Objects;
 
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
@@ -42,6 +44,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class DataSetStatsPanel extends JPanel implements ActionListener, ItemListener {
@@ -61,6 +64,8 @@ public class DataSetStatsPanel extends JPanel implements ActionListener, ItemLis
 		totalNumFeaturesLabel,
 		numIdentifiedFeaturesLabel
 		;
+
+	private JComboBox<MSMSScoringParameter> scoringParameterComboBox;
 	
 	public DataSetStatsPanel(MsFeatureInfoBundleCollection activeFeatureCollection) {
 		
@@ -179,11 +184,50 @@ public class DataSetStatsPanel extends JPanel implements ActionListener, ItemLis
 					TitledBorder.TOP, null, new Color(0, 0, 0)), new EmptyBorder(5, 5, 5, 5))));
 		add(plotControlsPanel, BorderLayout.SOUTH);
 		GridBagLayout gbl_plotControlsPanel = new GridBagLayout();
-		gbl_plotControlsPanel.columnWidths = new int[]{0};
-		gbl_plotControlsPanel.rowHeights = new int[]{0};
-		gbl_plotControlsPanel.columnWeights = new double[]{Double.MIN_VALUE};
-		gbl_plotControlsPanel.rowWeights = new double[]{Double.MIN_VALUE};
+		gbl_plotControlsPanel.columnWidths = new int[]{0, 0, 0, 0, 0};
+		gbl_plotControlsPanel.rowHeights = new int[]{0, 0};
+		gbl_plotControlsPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_plotControlsPanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		plotControlsPanel.setLayout(gbl_plotControlsPanel);
+		
+		JLabel lblNewLabel_5 = new JLabel("Plot type");
+		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
+		gbc_lblNewLabel_5.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_5.gridx = 0;
+		gbc_lblNewLabel_5.gridy = 0;
+		plotControlsPanel.add(lblNewLabel_5, gbc_lblNewLabel_5);
+		
+		JComboBox<DataSetSummaryPlotType> plotTypeComboBox = new JComboBox<DataSetSummaryPlotType>(
+				new DefaultComboBoxModel<DataSetSummaryPlotType>(DataSetSummaryPlotType.values()));
+		plotTypeComboBox.setSelectedItem(DataSetSummaryPlotType.PERCENT_IDENTIFIED_ANNOTATED);
+		plotTypeComboBox.addItemListener(this);
+		GridBagConstraints gbc_plotTypeComboBox = new GridBagConstraints();
+		gbc_plotTypeComboBox.insets = new Insets(0, 0, 0, 5);
+		gbc_plotTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_plotTypeComboBox.gridx = 1;
+		gbc_plotTypeComboBox.gridy = 0;
+		plotControlsPanel.add(plotTypeComboBox, gbc_plotTypeComboBox);
+		
+		JLabel lblNewLabel_6 = new JLabel("Scoring parameter ");
+		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
+		gbc_lblNewLabel_6.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_6.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_6.gridx = 2;
+		gbc_lblNewLabel_6.gridy = 0;
+		plotControlsPanel.add(lblNewLabel_6, gbc_lblNewLabel_6);
+		
+		scoringParameterComboBox = new JComboBox<MSMSScoringParameter>(
+				new DefaultComboBoxModel<MSMSScoringParameter>(MSMSScoringParameter.values()));
+		scoringParameterComboBox.setSelectedItem(MSMSScoringParameter.NIST_SCORE);
+		scoringParameterComboBox.addItemListener(this);
+		scoringParameterComboBox.setEnabled(false);
+		GridBagConstraints gbc_comboBox = new GridBagConstraints();
+		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_comboBox.gridx = 3;
+		gbc_comboBox.gridy = 0;
+		plotControlsPanel.add(scoringParameterComboBox, gbc_comboBox);
+			
 		showDataSetInfo();
 	}
 	
@@ -203,8 +247,23 @@ public class DataSetStatsPanel extends JPanel implements ActionListener, ItemLis
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		// TODO Auto-generated method stub
 
+		if (e.getStateChange() == ItemEvent.SELECTED) { 
+			
+			if(e.getItem() instanceof DataSetSummaryPlotType) {
+					
+				if(((DataSetSummaryPlotType)e.getItem()).equals(DataSetSummaryPlotType.MATCH_SCORE_DISTRIBUTION)) {
+					scoringParameterComboBox.setEnabled(true);	
+					dataSetStatsPlotPanel.createScoreHistogram((MSMSScoringParameter)scoringParameterComboBox.getSelectedItem());
+				}
+				else {
+					scoringParameterComboBox.setEnabled(false);				
+					dataSetStatsPlotPanel.createPieChart((DataSetSummaryPlotType)e.getItem());
+				}
+			}
+			if(e.getItem() instanceof MSMSScoringParameter) 				
+				dataSetStatsPlotPanel.createScoreHistogram((MSMSScoringParameter)e.getItem());
+		}
 	}
 
 	@Override

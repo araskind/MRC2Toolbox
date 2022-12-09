@@ -39,6 +39,7 @@ public class MSFeatureIdentificationLevel implements Serializable, Comparable<MS
 	private boolean allowToReplaceAsDefault;
 	private String shorcut;
 	public static final String SET_PRIMARY = "SET_PRIMARY_";
+	private boolean locked;
 		
 	public MSFeatureIdentificationLevel(String id, String name) {
 		super();
@@ -69,12 +70,14 @@ public class MSFeatureIdentificationLevel implements Serializable, Comparable<MS
 			String name, 
 			int rank, 
 			String colorCode,
-			boolean allowToReplaceAsDefault) {
+			boolean allowToReplaceAsDefault,
+			boolean isLocked) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.rank = rank;
 		this.allowToReplaceAsDefault = allowToReplaceAsDefault;
+		this.locked = isLocked;
 		setColorCodeFromHex(colorCode);		
 	}
 
@@ -194,5 +197,13 @@ public class MSFeatureIdentificationLevel implements Serializable, Comparable<MS
 
 	public void setShorcut(String shorcut) {
 		this.shorcut = shorcut;
+	}
+
+	public boolean isLocked() {
+		return locked;
+	}
+
+	public void setLocked(boolean locked) {
+		this.locked = locked;
 	}
 }

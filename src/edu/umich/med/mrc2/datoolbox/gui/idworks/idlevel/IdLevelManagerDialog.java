@@ -105,11 +105,16 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 	
 		if(command.equals(MainActionCommands.EDIT_ID_LEVEL_DIALOG_COMMAND.getName())) {
 			
-			MSFeatureIdentificationLevel status = idLevelTable.getSelectedLevel();
-			if(status == null)
+			MSFeatureIdentificationLevel level = idLevelTable.getSelectedLevel();
+			if(level == null)
 				return;
+			else if(level.isLocked()) {
+				MessageDialog.showWarningMsg("ID level \"" + 
+						level.getName() + "\" is locked and can not be modified.", this);
+				return;
+			}
 			else
-				showLevelEditor(status);
+				showLevelEditor(level);
 		}		
 		if(command.equals(MainActionCommands.EDIT_ID_LEVEL_COMMAND.getName()))
 			editIdLevel();
@@ -260,6 +265,12 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 		MSFeatureIdentificationLevel level = idLevelTable.getSelectedLevel();
 		if(level == null)
 			return;
+		
+		else if(level.isLocked()) {
+			MessageDialog.showWarningMsg("ID level \"" + 
+					level.getName() + "\" is locked and can not be deleted.", this);
+			return;
+		}
 		
 		String yesNoQuestion = 
 				"Do you want to delete selected identification level?\n"

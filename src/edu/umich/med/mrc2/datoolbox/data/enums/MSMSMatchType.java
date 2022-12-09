@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.data.enums;
 
+import java.awt.Color;
+
 public enum MSMSMatchType {
 
 		Regular,
@@ -35,6 +37,21 @@ public enum MSMSMatchType {
 			if(type.name().equals(name))
 				return type;
 		}		
+		return null;
+	}
+	
+	public static Color getColorCode(MSMSMatchType type) {
+		
+		if(type.equals(MSMSMatchType.Regular))
+			return Color.GREEN;
+		
+		if(type.equals(MSMSMatchType.InSource))
+			return Color.BLUE;
+		
+		
+		if(type.equals(MSMSMatchType.Hybrid))
+			return Color.ORANGE;
+		
 		return null;
 	}
 }

@@ -37,21 +37,24 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class IdLevelUtils {
 	
-	public static Collection<MSFeatureIdentificationLevel> getMSFeatureIdentificationLevelList() 
-			throws Exception {
+	public static Collection<MSFeatureIdentificationLevel> 
+			getMSFeatureIdentificationLevelList() throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
-		Collection<MSFeatureIdentificationLevel> statusList = getMSFeatureIdentificationLevelList(conn);
+		Collection<MSFeatureIdentificationLevel> statusList = 
+				getMSFeatureIdentificationLevelList(conn);
 		ConnectionManager.releaseConnection(conn);
 		return statusList;
 	}
 	
-	private static Collection<MSFeatureIdentificationLevel> getMSFeatureIdentificationLevelList(Connection conn) throws Exception {
+	private static Collection<MSFeatureIdentificationLevel> 
+			getMSFeatureIdentificationLevelList(Connection conn) throws Exception {
 
-		Collection<MSFeatureIdentificationLevel>levelList = new TreeSet<MSFeatureIdentificationLevel>();
+		Collection<MSFeatureIdentificationLevel>levelList = 
+				new TreeSet<MSFeatureIdentificationLevel>();
 		String query =
 				"SELECT IDENTIFICATION_LEVEL_ID, NAME, RANK_ORDER, "
-				+ "COLOR_CODE, ALLOW_TO_REPLACE_AS_DEFAULT, SHORTCUT "
+				+ "COLOR_CODE, ALLOW_TO_REPLACE_AS_DEFAULT, SHORTCUT, IS_LOCKED "
 				+ "FROM IDENTIFICATION_LEVEL ORDER BY RANK_ORDER";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -62,7 +65,8 @@ public class IdLevelUtils {
 					rs.getString("NAME"),
 					rs.getInt("RANK_ORDER"),
 					rs.getString("COLOR_CODE"),
-					rs.getBoolean("ALLOW_TO_REPLACE_AS_DEFAULT"));
+					rs.getBoolean("ALLOW_TO_REPLACE_AS_DEFAULT"),
+					(rs.getString("IS_LOCKED") != null));
 			
 			level.setShorcut(rs.getString("SHORTCUT"));
 			levelList.add(level);
@@ -249,8 +253,6 @@ public class IdLevelUtils {
 		ps.executeUpdate();
 		ps.close();	
 	}
-
-
 	
 	public static void setIdLevelForMSMSFeatureIdentification(MsFeatureIdentity newIdentity) throws Exception {
 		

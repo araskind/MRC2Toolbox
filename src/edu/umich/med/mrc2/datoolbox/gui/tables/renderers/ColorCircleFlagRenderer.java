@@ -84,15 +84,18 @@ public class ColorCircleFlagRenderer extends DefaultTableCellRenderer {
 			if(match.isDecoyMatch()) {
 				
 				if(match.getMatchType().equals(MSMSMatchType.Regular)) {
-					setIcon(new SmallPie(size, 0.5d, Color.RED, Color.GREEN));
+					setIcon(new SmallPie(size, 0.5d, Color.RED, 
+							MSMSMatchType.getColorCode(MSMSMatchType.Regular)));
 					setToolTipText("Regular (precursor) match / Decoy");
 				}
 				else if(match.getMatchType().equals(MSMSMatchType.InSource)) {
-					setIcon(new SmallPie(size, 0.5d, Color.RED, Color.BLUE));
+					setIcon(new SmallPie(size, 0.5d, Color.RED,  
+							MSMSMatchType.getColorCode(MSMSMatchType.InSource)));
 					setToolTipText("In-source match / Decoy");
 				}
 				else if(match.getMatchType().equals(MSMSMatchType.Hybrid)) {
-					setIcon(new SmallPie(size, 0.5d, Color.RED, Color.ORANGE));
+					setIcon(new SmallPie(size, 0.5d, Color.RED,  
+							MSMSMatchType.getColorCode(MSMSMatchType.Hybrid)));
 					setToolTipText("Hybrid match / Decoy");
 				}
 				else {

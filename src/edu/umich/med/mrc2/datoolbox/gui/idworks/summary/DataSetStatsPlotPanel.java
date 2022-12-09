@@ -22,20 +22,35 @@
 package edu.umich.med.mrc2.datoolbox.gui.idworks.summary;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
+import org.jfree.data.statistics.SimpleHistogramDataset;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.PieChartDrawingSupplier;
+import edu.umich.med.mrc2.datoolbox.utils.HistogramUtils;
 
 public class DataSetStatsPlotPanel extends MasterPlotPanel {
 
@@ -45,45 +60,25 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 	 */
 	private static final long serialVersionUID = 3359294404327470333L;
 	private MsFeatureInfoBundleCollection activeFeatureCollection;
+	private List<Color>pieChartColorList;
 
 	public DataSetStatsPlotPanel(MsFeatureInfoBundleCollection activeFeatureCollection) {
 		super();
 		this.activeFeatureCollection = activeFeatureCollection;
+		pieChartColorList = new ArrayList<Color>();
 		initChart();
-		createPlot(DataSetSummaryPlotType.PERCENT_IDENTIFIED_ANNOTATED);
-	}
-
-	@Override
-	protected void initAxes() {
-		// TODO Auto-generated method stub
-
-	}
-	
-	private void createPlot(DataSetSummaryPlotType plotType) {
-		
-		removeAllDataSets();
-		if(plotType.equals(DataSetSummaryPlotType.PERCENT_IDENTIFIED_ANNOTATED)) {
-			
-			PieDataset pds = createPieDataset(plotType);
-			if(chart.getPlot() instanceof PiePlot)
-				((PiePlot) chart.getPlot()).setDataset(pds);
-		}		
+		createPieChart(DataSetSummaryPlotType.PERCENT_IDENTIFIED_ANNOTATED);		
 	}
 	
 	@Override
 	protected void initChart() {
-
-//		chart = ChartFactory.createBarChart("", // title
-//				"", // x-axis label - categories
-//				"Value", // y-axis label
-//				null, // data set
-//				PlotOrientation.VERTICAL, // orientation
-//				true, // create legend?
-//				true, // generate tooltips?
-//				false // generate URLs?
-//		);	
+		initPieChart();
+	}
+	
+	private void initPieChart() {
+		
 		chart = ChartFactory.createPieChart(
-				DataSetSummaryPlotType.PERCENT_IDENTIFIED_ANNOTATED.getName(), // chart title
+				null, // chart title
 				null, // data
 				true, // include legend
 				true, 
@@ -93,19 +88,131 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 		setChart(chart);
 	}
 	
+	private void initHistogram() {
+		
+		chart = ChartFactory.createHistogram(
+				"MSMS match score distribution",
+	            null, 
+	            "Frequency", 
+	            null,
+	            PlotOrientation.VERTICAL, 
+	            false, 
+	            false,
+	            false);
+		chart.setBackgroundPaint(Color.white);
+		chart.getPlot().setBackgroundPaint(Color.white);
+		setChart(chart);
+	}
+	
+	@Override
+	protected void initAxes() {
+		// TODO Auto-generated method stub
+
+	}
+	
+	public void createPieChart(DataSetSummaryPlotType plotType) {
+		
+		if(!PiePlot.class.isAssignableFrom(chart.getPlot().getClass()))
+			initPieChart();
+			
+		removeAllDataSets();
+		chart.setTitle(plotType.getName());	
+		if(plotType.equals(DataSetSummaryPlotType.PERCENT_IDENTIFIED_ANNOTATED) 
+				|| plotType.equals(DataSetSummaryPlotType.BY_ID_LEVEL) 
+				|| plotType.equals(DataSetSummaryPlotType.BY_MATCH_TYPE)) {
+			
+			PieDataset pds = createPieDataset(plotType);				
+			PiePlot piePlot = (PiePlot) chart.getPlot();
+			piePlot.setDataset(pds);
+			piePlot.setDrawingSupplier(new PieChartDrawingSupplier(pieChartColorList));			
+		}
+	}
+	
+	public void createScoreHistogram(MSMSScoringParameter item) {
+
+		Object pl = chart.getPlot();
+		if(!XYPlot.class.isAssignableFrom(chart.getPlot().getClass()))
+			initHistogram();
+		
+		XYPlot histogram = (XYPlot) chart.getPlot();
+		histogram.getDomainAxis().setLabel(item.getName());
+		
+		double[] scores = activeFeatureCollection.getFeatures().stream().
+			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+			mapToDouble(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getScoreOfType(item)).			
+			toArray();
+		
+		SimpleHistogramDataset dataSet = 
+			HistogramUtils.calcHistogram(scores, item.getName(), false);
+		histogram.setDataset(dataSet);		 
+	}
+	
 	private PieDataset createPieDataset(DataSetSummaryPlotType plotType) {
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
+		pieChartColorList.clear();
+		List<MSFeatureInfoBundle> identified = 
+				activeFeatureCollection.getFeatures().stream().
+					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+					collect(Collectors.toList());
+
 		if (plotType.equals(DataSetSummaryPlotType.PERCENT_IDENTIFIED_ANNOTATED)) {
+		 
+			long annotated =  identified.stream().filter(f -> isFeatureManuallyAnnotated(f)).count();
+			 
+			dataset.setValue("Annotated", annotated);
+			pieChartColorList.add(Color.GREEN);
+			dataset.setValue("Tentative ID", identified.size() - annotated);
+			pieChartColorList.add(IDTDataCash.getMSFeatureIdentificationLevelById("IDS002").getColorCode());
+			dataset.setValue("Unknowns", activeFeatureCollection.getFeatures().size() - identified.size());
+			pieChartColorList.add(Color.RED);
+			return dataset;
+		}
+		if(plotType.equals(DataSetSummaryPlotType.BY_ID_LEVEL)) {
 
-			long numIdentified = activeFeatureCollection.getFeatures().stream()
-					.filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).count();
+			Map<MSFeatureIdentificationLevel, Long> idCountsByLevel = identified.stream().
+			 	filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getIdentificationLevel())).
+			 	map(f -> f.getMsFeature().getPrimaryIdentity().getIdentificationLevel()).
+				collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+			idCountsByLevel.entrySet().stream().
+			 	forEach(c -> {
+			 				dataset.setValue(c.getKey().getName(), c.getValue());
+			 				pieChartColorList.add(c.getKey().getColorCode());
+			 			}
+			 		);
+			return dataset;
+		}
+		if(plotType.equals(DataSetSummaryPlotType.BY_MATCH_TYPE)) {
 
-			dataset.setValue("Identified", numIdentified);
-			dataset.setValue("Unknowns", activeFeatureCollection.getFeatures().size() - numIdentified);
+			Map<MSMSMatchType, Long> idCountsByLevel = identified.stream().
+			 	filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+			 	map(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getMatchType()).
+				collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+			idCountsByLevel.entrySet().stream().
+			 	forEach(c -> {
+			 				dataset.setValue(c.getKey().name(), c.getValue());
+			 				pieChartColorList.add(MSMSMatchType.getColorCode(c.getKey()));
+			 			}
+			 		);
 			return dataset;
 		}
 		return null;
+	}
+	
+	private boolean isFeatureManuallyAnnotated(MSFeatureInfoBundle f) {
+		
+		MsFeatureIdentity id = f.getMsFeature().getPrimaryIdentity();
+		if(id.getIdentificationLevel() != null && !id.getIdentificationLevel().getId().equals("IDS002"))
+			return true;
+		
+		if(f.getStandadAnnotations() != null && !f.getStandadAnnotations().isEmpty())
+			return true;
+		
+		if(f.getMsFeature().getAnnotations() != null && !f.getMsFeature().getAnnotations().isEmpty())
+			return true;
+				
+		return false;
 	}
 
 	@Override

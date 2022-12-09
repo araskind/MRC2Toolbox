@@ -26,6 +26,7 @@ public enum DataSetSummaryPlotType {
 	PERCENT_IDENTIFIED_ANNOTATED("% identified / annotated"), 
 	BY_MATCH_TYPE("Identified by MS/MS match type"), 
 	BY_ID_LEVEL("Identified by ID level"), 
+	MATCH_SCORE_DISTRIBUTION("Match score distribution"),
 	;
 
 	private final String name;
