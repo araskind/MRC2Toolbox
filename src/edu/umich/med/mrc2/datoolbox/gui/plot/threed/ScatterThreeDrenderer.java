@@ -25,19 +25,24 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.orsoncharts.axis.Axis3D;
-import com.orsoncharts.data.xyz.XYZDataset;
-import com.orsoncharts.data.xyz.XYZItemKey;
-import com.orsoncharts.graphics3d.Dimension3D;
-import com.orsoncharts.graphics3d.Object3D;
-import com.orsoncharts.graphics3d.Offset3D;
-import com.orsoncharts.graphics3d.World;
-import com.orsoncharts.plot.XYZPlot;
-import com.orsoncharts.renderer.xyz.ScatterXYZRenderer;
+import org.jfree.chart3d.axis.Axis3D;
+import org.jfree.chart3d.data.xyz.XYZDataset;
+import org.jfree.chart3d.data.xyz.XYZItemKey;
+import org.jfree.chart3d.graphics3d.Dimension3D;
+import org.jfree.chart3d.graphics3d.Object3D;
+import org.jfree.chart3d.graphics3d.Offset3D;
+import org.jfree.chart3d.graphics3d.World;
+import org.jfree.chart3d.plot.XYZPlot;
+import org.jfree.chart3d.renderer.xyz.ScatterXYZRenderer;
+
 
 public class ScatterThreeDrenderer extends ScatterXYZRenderer{
 
-    private Offset3D  itemLabelOffsetPercent;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3380995670727927310L;
+	private Offset3D  itemLabelOffsetPercent;
 	private double size;
 	private Map<Integer, PlotShapes>seriesShapeMap;
 	private Map<Integer, Color>seriesColorMap;

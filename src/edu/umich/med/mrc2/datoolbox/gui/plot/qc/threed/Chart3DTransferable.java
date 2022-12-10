@@ -29,7 +29,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import com.orsoncharts.Chart3D;
+import org.jfree.chart3d.Chart3D;
 
 /**
  * Based on JFreeChart

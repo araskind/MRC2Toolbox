@@ -36,6 +36,8 @@ import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
@@ -50,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PieChartDrawingSupplier;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.utils.HistogramUtils;
 
 public class DataSetStatsPlotPanel extends MasterPlotPanel {
@@ -84,7 +87,7 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 				true, 
 				false);
 		chart.setBackgroundPaint(Color.white);
-		chart.getPlot().setBackgroundPaint(Color.white);
+		setBasicPlotGui(chart.getPlot());
 		setChart(chart);
 	}
 	
@@ -96,11 +99,11 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 	            "Frequency", 
 	            null,
 	            PlotOrientation.VERTICAL, 
-	            false, 
+	            true, 
 	            false,
 	            false);
 		chart.setBackgroundPaint(Color.white);
-		chart.getPlot().setBackgroundPaint(Color.white);
+		setBasicPlotGui(chart.getPlot());
 		setChart(chart);
 	}
 	
@@ -108,6 +111,36 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 	protected void initAxes() {
 		// TODO Auto-generated method stub
 
+	}
+	
+	private void setBasicPlotGui(Plot newPlot) {
+		
+		newPlot.setBackgroundPaint(Color.white);
+		
+		if(newPlot instanceof XYPlot) {
+			
+			XYPlot xyPlot = (XYPlot)newPlot;
+			
+			xyPlot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+			xyPlot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+			xyPlot.setDomainGridlinePaint(GRID_COLOR);
+			xyPlot.setRangeGridlinePaint(GRID_COLOR);
+			xyPlot.setDomainCrosshairVisible(false);
+			xyPlot.setRangeCrosshairVisible(false);
+			xyPlot.setDomainPannable(true);
+			xyPlot.setRangePannable(true);
+		}
+		if(newPlot instanceof CategoryPlot) {
+			
+			CategoryPlot catPlot = (CategoryPlot)newPlot;
+			catPlot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+			catPlot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+			catPlot.setDomainGridlinePaint(GRID_COLOR);
+			catPlot.setRangeGridlinePaint(GRID_COLOR);
+			catPlot.setDomainCrosshairVisible(false);
+			catPlot.setRangeCrosshairVisible(false);
+			catPlot.setRangePannable(false);
+		}
 	}
 	
 	public void createPieChart(DataSetSummaryPlotType plotType) {
@@ -124,24 +157,69 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 			PieDataset pds = createPieDataset(plotType);				
 			PiePlot piePlot = (PiePlot) chart.getPlot();
 			piePlot.setDataset(pds);
+			piePlot.setShadowPaint(null);
 			piePlot.setDrawingSupplier(new PieChartDrawingSupplier(pieChartColorList));			
 		}
 	}
 	
+	public void createScoreHistogramByMatchType(MSMSScoringParameter item) {
+
+		if(!XYPlot.class.isAssignableFrom(chart.getPlot().getClass()))
+			initHistogram();
+		
+		XYPlot histogram = (XYPlot) chart.getPlot();
+		histogram.getDomainAxis().setLabel(item.getName());
+		histogram.setDatasetRenderingOrder(DatasetRenderingOrder.REVERSE);
+		pieChartColorList.clear();
+		
+		int dsCount = 0;
+		for(MSMSMatchType mt : MSMSMatchType.values()) {
+			
+			double[] scores = activeFeatureCollection.getFeatures().stream().
+					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+					filter(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getMatchType().equals(mt)).
+					mapToDouble(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getScoreOfType(item)).	
+					filter(s -> s > 0.0d).
+					toArray();
+				
+			SimpleHistogramDataset dataSet = 
+					HistogramUtils.calcHistogram(scores, mt.name(), false);
+
+			if(dataSet != null) {
+				
+				XYBarRenderer renderer = new XYBarRenderer();
+				renderer.setBarPainter(new StandardXYBarPainter());
+				Color dsColor = ColorUtils.addTrasparency(MSMSMatchType.getColorCode(mt), 120);
+				pieChartColorList.add(dsColor);
+			    renderer.setDrawBarOutline(false);
+			    renderer.setShadowVisible(false);		    
+
+				histogram.setDataset(dsCount, dataSet);
+				histogram.setRenderer(dsCount, renderer);
+			}
+			dsCount++;
+		}
+		histogram.setDrawingSupplier(new PieChartDrawingSupplier(pieChartColorList));
+	}
+		
 	public void createScoreHistogram(MSMSScoringParameter item) {
 
-		Object pl = chart.getPlot();
 		if(!XYPlot.class.isAssignableFrom(chart.getPlot().getClass()))
 			initHistogram();
 		
 		XYPlot histogram = (XYPlot) chart.getPlot();
 		histogram.getDomainAxis().setLabel(item.getName());
 		
+		XYBarRenderer renderer = (XYBarRenderer)histogram.getRenderer();
+		renderer.setBarPainter(new StandardXYBarPainter());
+		renderer.setDefaultPaint(Color.BLUE);		
 		double[] scores = activeFeatureCollection.getFeatures().stream().
 			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
 			mapToDouble(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getScoreOfType(item)).			
 			toArray();
+
 		
 		SimpleHistogramDataset dataSet = 
 			HistogramUtils.calcHistogram(scores, item.getName(), false);

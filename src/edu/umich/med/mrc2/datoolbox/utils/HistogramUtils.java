@@ -37,24 +37,24 @@ public class HistogramUtils {
 		double bw = 2 * iqr / Math.pow((double)data.length, 1.0d/3.0d);
 		final int BIN_COUNT = (int)Math.ceil((da.getMax() - da.getMin()) / bw);
 
-		EmpiricalDistribution distribution = new EmpiricalDistribution(BIN_COUNT);
-		distribution.load(data);
-		
-		SimpleHistogramDataset dataSet = new SimpleHistogramDataset(title);		
-		for(SummaryStatistics stats: distribution.getBinStats()) {
+		if(BIN_COUNT > 0) {
+			EmpiricalDistribution distribution = new EmpiricalDistribution(BIN_COUNT);
+			distribution.load(data);
 			
-			if(stats.getSum() == 0.0d || stats.getMin() == stats.getMax())
-				continue;
-			
-			double min = stats.getMin();
-			double max = stats.getMax();
-			SimpleHistogramBin bin = 
-					new SimpleHistogramBin(stats.getMin(), stats.getMax(), true, false);
-			bin.setItemCount((int) stats.getN());
-		    dataSet.addBin(bin);
-		}			
-		dataSet.setAdjustForBinSize(adjustForBinSize);
-		
-		return dataSet;
+			SimpleHistogramDataset dataSet = new SimpleHistogramDataset(title);		
+			for(SummaryStatistics stats: distribution.getBinStats()) {
+				
+				if(stats.getSum() == 0.0d || stats.getMin() == stats.getMax())
+					continue;
+
+				SimpleHistogramBin bin = 
+						new SimpleHistogramBin(stats.getMin(), stats.getMax(), true, false);
+				bin.setItemCount((int) stats.getN());
+			    dataSet.addBin(bin);
+			}			
+			dataSet.setAdjustForBinSize(adjustForBinSize);
+			return dataSet;
+		}
+		return null;
 	}
 }

@@ -218,6 +218,10 @@ public class ColorUtils {
 
 	    return new Color(red, green, blue, alpha);
 	}
+	
+	public static Color addTrasparency(Color color, int alpha) { 
+		return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+	}
 }
 
 

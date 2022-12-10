@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213793228" orientation="VERTICAL" divider="0.5">
-											<leaf id="2" nodeId="1600213793230">
+											<leaf id="1" nodeId="1600213793230">
 												<placeholders>
 													<placeholder>dock.single.QCPanelDockableDataSetStatsTable</placeholder>
 												</placeholders>
@@ -120,7 +120,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="1" nodeId="1600213927551">
+												<leaf id="2" nodeId="1600213927551">
 													<placeholders>
 														<placeholder>dock.single.QCPanelDockable3DChartPanel</placeholder>
 													</placeholders>
@@ -147,20 +147,20 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockable3DChartPanel">
-										<replacement id="dockablesingle QCPanelDockable3DChartPanel"/>
+									<layout factory="predefined" placeholder="dock.single.QCPanelDockableDataSetStatsTable">
+										<replacement id="dockablesingle QCPanelDockableDataSetStatsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockable3DChartPanel</id>
+											<id>QCPanelDockableDataSetStatsTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockableDataSetStatsTable">
-										<replacement id="dockablesingle QCPanelDockableDataSetStatsTable"/>
+									<layout factory="predefined" placeholder="dock.single.QCPanelDockable3DChartPanel">
+										<replacement id="dockablesingle QCPanelDockable3DChartPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockableDataSetStatsTable</id>
+											<id>QCPanelDockable3DChartPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -239,9 +239,18 @@
 						</entry>
 						<entry id="single QCPanelDockable3DChartPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.maximized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.maximized">
+									<mode>dock.mode.maximized</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockFullScreenPropertyFactory"/>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>

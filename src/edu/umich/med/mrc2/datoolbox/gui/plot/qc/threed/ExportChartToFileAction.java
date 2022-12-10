@@ -33,8 +33,8 @@ import java.util.Date;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 
-import com.orsoncharts.graphics3d.ExportUtils;
-import com.orsoncharts.graphics3d.swing.Panel3D;
+import org.jfree.chart3d.export.ExportUtils;
+import org.jfree.chart3d.graphics3d.swing.Panel3D;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.ImageExportFormat;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;

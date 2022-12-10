@@ -47,8 +47,7 @@ public enum MSMSMatchType {
 		
 		if(type.equals(MSMSMatchType.InSource))
 			return Color.BLUE;
-		
-		
+				
 		if(type.equals(MSMSMatchType.Hybrid))
 			return Color.ORANGE;
 		

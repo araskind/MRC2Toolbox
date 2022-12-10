@@ -254,7 +254,7 @@ public class DataSetStatsPanel extends JPanel implements ActionListener, ItemLis
 					
 				if(((DataSetSummaryPlotType)e.getItem()).equals(DataSetSummaryPlotType.MATCH_SCORE_DISTRIBUTION)) {
 					scoringParameterComboBox.setEnabled(true);	
-					dataSetStatsPlotPanel.createScoreHistogram((MSMSScoringParameter)scoringParameterComboBox.getSelectedItem());
+					dataSetStatsPlotPanel.createScoreHistogramByMatchType((MSMSScoringParameter)scoringParameterComboBox.getSelectedItem());
 				}
 				else {
 					scoringParameterComboBox.setEnabled(false);				
@@ -262,7 +262,7 @@ public class DataSetStatsPanel extends JPanel implements ActionListener, ItemLis
 				}
 			}
 			if(e.getItem() instanceof MSMSScoringParameter) 				
-				dataSetStatsPlotPanel.createScoreHistogram((MSMSScoringParameter)e.getItem());
+				dataSetStatsPlotPanel.createScoreHistogramByMatchType((MSMSScoringParameter)e.getItem());
 		}
 	}
 
