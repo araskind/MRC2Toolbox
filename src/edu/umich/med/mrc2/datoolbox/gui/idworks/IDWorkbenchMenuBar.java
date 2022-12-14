@@ -53,6 +53,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon exportMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
 	private static final Icon exportMSPIconSmall = GuiUtils.getIcon("exportToMSP", 16);
 	private static final Icon siriusIcon = GuiUtils.getIcon("sirius", 24);
+	private static final Icon siriusClusterIcon = GuiUtils.getIcon("siriusCluster", 24);	
 	private static final Icon exportTrackerDataIcon = GuiUtils.getIcon("saveList", 24);
 	private static final Icon exportMSMSClustersIcon = GuiUtils.getIcon("exportClusterSet", 24);
 	private static final Icon idStatusManagerIcon = GuiUtils.getIcon("idStatusManager", 24);
@@ -73,6 +74,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon dsSummaryIcon = GuiUtils.getIcon("infoGreen", 24);
 	private static final Icon saveClusterDataSetIcon = GuiUtils.getIcon("saveCluster", 24);
 	private static final Icon clearWorkbenchIcon = GuiUtils.getIcon("clearWorklist", 24);
+	private static final Icon calcStatsIcon = GuiUtils.getIcon("calcStats", 24);
+	
 
 	// Menus
 	private JMenu
@@ -124,7 +127,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		trackerExportMenuItem,
 		mspExportMenuItem,
 		siriusExportMenuItem,
-		exportMSMSClustersMenuItem;
+		exportMSMSClustersMenuItem,
+		exportMSMSClustersForSIRIUSMenuItem;
 	
 	public IDWorkbenchMenuBar(ActionListener listener) {
 
@@ -248,7 +252,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		
 		dataSetSummaryMenuItem = addItem(explorationMenu, 
 				MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND, 
-				dsSummaryIcon);
+				calcStatsIcon);
 
 		add(explorationMenu);
 		
@@ -268,6 +272,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		exportMSMSClustersMenuItem = addItem(exportMenu, 
 				MainActionCommands.SHOW_MSMS_CLUSTER_DATA_EXPORT_DIALOG_COMMAND, 
 				exportMSMSClustersIcon);
+		
+		exportMSMSClustersForSIRIUSMenuItem = addItem(exportMenu, 
+				MainActionCommands.EXPORT_MSMS_CLUSTER_DATA_FOR_SIRIUS_COMMAND, 
+				siriusClusterIcon);
 		
 		add(exportMenu);
 	}

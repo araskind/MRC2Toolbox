@@ -118,6 +118,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.filter.MSMSClusterFilte
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary.MSMSCLusterDataSetSummaryDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerMSMSClusterDataSetExportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.export.SiriusDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.FeatureAndClusterCollectionManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters.MSMSClusterDataSetEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features.AddFeaturesToCollectionDialog;
@@ -135,7 +136,6 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSLibraryEntryPropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockablePepSearchParameterListingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.MsMsFeaturePopupMenu;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.SiriusDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.FilterTrackerMSMSFeaturesDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.filter.MSMSFilterParameters;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.rtid.MSMSFeatureRTIDSearchDialog;
@@ -195,7 +195,8 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureSearchTa
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerDataExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerMSMSClusterDataExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerProjectDataFetchTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsClusterExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsExportWithClusteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSClusterDataSetUploadTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSFeatureClusteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.SpectrumEntropyRecalculationTask;
@@ -620,6 +621,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.EXPORT_MSMS_CLUSTER_DATA_COMMAND.getName()))
 			exportMSMSClusterData();
 
+		if (command.equals(MainActionCommands.EXPORT_MSMS_CLUSTER_DATA_FOR_SIRIUS_COMMAND.getName()))
+			exportClustersToSiriusMSFile();
+		
 		//	MS1 features commands
 		if (command.equals(MainActionCommands.SEARCH_FEATURE_AGAINST_LIBRARY_COMMAND.getName()))
 			searchSelectedMsOneFeaturesAgainstLibrary();
@@ -2631,8 +2635,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		double rtError = siriusDataExportDialog.getRetentionWindow();
 		double mzError = siriusDataExportDialog.getMassWindow();
-		IDTrackerSiriusMsExportTask task = 
-				new IDTrackerSiriusMsExportTask(
+		IDTrackerSiriusMsExportWithClusteringTask task = 
+				new IDTrackerSiriusMsExportWithClusteringTask(
 						featuresToExport,
 						rtError,
 						mzError,
@@ -2640,6 +2644,35 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);	
 		siriusDataExportDialog.dispose();
+	}
+	
+	private void exportClustersToSiriusMSFile() {
+		
+		if(activeMSMSClusterDataSet == null || activeMSMSClusterDataSet.getClusters().isEmpty())
+			return;		
+		
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter(MsLibraryFormat.SIRIUS_MS.getName(), MsLibraryFormat.SIRIUS_MS.getFileExtension());
+		fc.setTitle("Export MSMS features to MSP file:");
+		fc.setMultiSelectionEnabled(false);
+		fc.setSaveButtonText("Export");
+		String defaultFileName = "MSMS_cluster_export_4SIRIUS_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) 
+				+ "." + MsLibraryFormat.SIRIUS_MS.getFileExtension();
+		fc.setDefaultFileName(defaultFileName);
+		
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File exportFile = fc.getSelectedFile();
+			if(exportFile != null) {
+
+				IDTrackerSiriusMsClusterExportTask task = 
+						new IDTrackerSiriusMsClusterExportTask(activeMSMSClusterDataSet, exportFile);
+				task.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(task);
+			}
+		}
 	}
 	
 	private void runNistMsPepSearch() {

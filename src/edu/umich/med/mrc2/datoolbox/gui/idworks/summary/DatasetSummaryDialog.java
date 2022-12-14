@@ -74,7 +74,7 @@ public class DatasetSummaryDialog extends JDialog
 	 * 
 	 */
 	private static final long serialVersionUID = -1012978681503321256L;
-	private static final Icon dsSummaryIcon = GuiUtils.getIcon("infoGreen", 32);
+	private static final Icon dsSummaryIcon = GuiUtils.getIcon("calcStats", 32);
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "DatasetSummaryDialog.layout");
 	

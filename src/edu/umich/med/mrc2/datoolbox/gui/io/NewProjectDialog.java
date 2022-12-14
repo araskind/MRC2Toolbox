@@ -230,7 +230,7 @@ public class NewProjectDialog extends JDialog implements ActionListener {
 		fc.setTitle("Select project location:");
 		fc.setMultiSelectionEnabled(false);
 		fc.setSaveButtonText("Set project location");
-		if (fc.showSaveDialog(this)) {
+		if (fc.showOpenDialog(this)) {
 			try {
 				experimentDirectoryLocationTextField.setText(fc.getSelectedFile().getCanonicalPath());
 			} catch (IOException e) {
@@ -294,7 +294,9 @@ public class NewProjectDialog extends JDialog implements ActionListener {
 		this.activeExperiment = activeExperiment;
 		if(activeExperiment != null) {
 			
-			projectNameTextField.setText(activeExperiment.getName());
+			String projectName = 
+					activeExperiment.getId() + " - " + activeExperiment.getName();
+			projectNameTextField.setText(projectName);
 			
 			String description = "";
 			if(activeExperiment.getDescription() != null)

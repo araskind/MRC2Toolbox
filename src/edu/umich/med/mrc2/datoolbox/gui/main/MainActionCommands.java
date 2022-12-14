@@ -992,6 +992,7 @@ public enum MainActionCommands {
 	RESET_IDTRACKER_DATA_EXPORT_FIELDS_COMMAND("Reset IDTracker data export fields"),
 	SHOW_MSMS_CLUSTER_DATA_EXPORT_DIALOG_COMMAND("MSMS clusters data export setup"),
 	EXPORT_MSMS_CLUSTER_DATA_COMMAND("Export MSMS clusters data"),
+	EXPORT_MSMS_CLUSTER_DATA_FOR_SIRIUS_COMMAND("Export MSMS clusters data for SIRIUS"),
 	
 	//	Tracker search dialog
 	SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND("IDTracker database search setup"),

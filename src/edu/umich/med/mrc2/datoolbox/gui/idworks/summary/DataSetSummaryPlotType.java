@@ -27,6 +27,7 @@ public enum DataSetSummaryPlotType {
 	BY_MATCH_TYPE("Identified by MS/MS match type"), 
 	BY_ID_LEVEL("Identified by ID level"), 
 	MATCH_SCORE_DISTRIBUTION("Match score distribution"),
+	HITS_BY_LIBRARY_MATCH_TYPE("Hits by library / match type"),
 	;
 
 	private final String name;

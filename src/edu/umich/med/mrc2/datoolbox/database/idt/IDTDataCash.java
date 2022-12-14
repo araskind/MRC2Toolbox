@@ -1064,6 +1064,16 @@ public class IDTDataCash {
 		return getReferenceMsMsLibraryList().stream().
 				filter(l -> l.getUniqueId().equals(id)).findFirst().orElse(null);
 	}
+	
+	public static String getReferenceMsMsLibraryNameById(String id) {
+
+		ReferenceMsMsLibrary library =  getReferenceMsMsLibraryList().stream().
+				filter(l -> l.getUniqueId().equals(id)).findFirst().orElse(null);
+		if(library != null)
+			return library.getName();
+		else
+			return null;
+	}
 
 	public static ReferenceMsMsLibrary getReferenceMsMsLibraryByPrimaryLibraryId(String primaryId) {
 		return getReferenceMsMsLibraryList().stream().

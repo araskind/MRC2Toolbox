@@ -23,9 +23,11 @@ package edu.umich.med.mrc2.datoolbox.gui.idworks.summary;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,9 +38,13 @@ import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.StackedBarRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.general.DatasetUtils;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 import org.jfree.data.statistics.SimpleHistogramDataset;
@@ -47,6 +53,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
+import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
@@ -107,6 +114,23 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 		setChart(chart);
 	}
 	
+	private void initBarChart() {
+		
+		chart = ChartFactory.createStackedBarChart(
+	            "Hits by library / match type",  // chart title
+	            null,                  // domain axis label
+	            "# of hits",                     // range axis label
+	            null,                     // data
+	            PlotOrientation.VERTICAL,    // the plot orientation
+	            true,                        // legend
+	            true,                        // tooltips
+	            false                        // urls
+	        );
+		chart.setBackgroundPaint(Color.white);
+		setBasicPlotGui(chart.getPlot());
+		setChart(chart);
+	}
+	
 	@Override
 	protected void initAxes() {
 		// TODO Auto-generated method stub
@@ -160,6 +184,61 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 			piePlot.setShadowPaint(null);
 			piePlot.setDrawingSupplier(new PieChartDrawingSupplier(pieChartColorList));			
 		}
+	}
+	
+	public void createLibraryHitBarChart() {
+		
+		if(!CategoryPlot.class.isAssignableFrom(chart.getPlot().getClass()))
+			initBarChart();
+		
+		 List<ReferenceMsMsLibraryMatch> msmsMatches = activeFeatureCollection.getFeatures().stream().
+			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
+			map(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch()).
+			collect(Collectors.toList());
+
+		 Collection<MSMSMatchType> matchTypes = msmsMatches.stream().
+		 	map(m -> m.getMatchType()).
+		 	collect(Collectors.toCollection(TreeSet::new));
+		 pieChartColorList.clear();
+		 for(MSMSMatchType mt : matchTypes)
+			 pieChartColorList.add(MSMSMatchType.getColorCode(mt));
+		 
+		 Collection<String> libIdSet = msmsMatches.stream().
+				map(m -> m.getMatchedLibraryFeature().getMsmsLibraryIdentifier()).
+				collect(Collectors.toCollection(TreeSet::new));
+		 String[]libNames = new String[libIdSet.size()];
+		 int libCount = 0;
+		 for(String libId : libIdSet) {
+			 libNames[libCount] = IDTDataCash.getReferenceMsMsLibraryNameById(libId);
+			 libCount++;
+		 }
+		 double[][] data = new double[matchTypes.size()][libIdSet.size()];
+			 
+		 int mtCount = 0;		 
+		 for(MSMSMatchType mt : matchTypes) {
+			 
+			 libCount = 0;
+			 for(String libId : libIdSet) {
+				 
+				 long numMatches = msmsMatches.stream().
+				 	filter(m -> m.getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(libId)).
+				 	filter(m -> m.getMatchType().equals(mt)).count();
+				 
+				 data[mtCount][libCount] = (double)numMatches;
+				 libCount++;
+			 }
+			 mtCount++;
+		 }
+		 MSMSMatchType[] mtArray = matchTypes.toArray(new MSMSMatchType[matchTypes.size()]);
+		 CategoryDataset ds =  DatasetUtils.createCategoryDataset(mtArray, libNames, data);
+		 CategoryPlot barPlot = (CategoryPlot) chart.getPlot();
+		 
+		 StackedBarRenderer renderer = (StackedBarRenderer)barPlot.getRenderer();
+		 renderer.setBarPainter(new StandardBarPainter());
+			
+		 barPlot.setDataset(ds);
+		 barPlot.setDrawingSupplier(new PieChartDrawingSupplier(pieChartColorList));	
 	}
 	
 	public void createScoreHistogramByMatchType(MSMSScoringParameter item) {

@@ -256,6 +256,10 @@ public class DataSetStatsPanel extends JPanel implements ActionListener, ItemLis
 					scoringParameterComboBox.setEnabled(true);	
 					dataSetStatsPlotPanel.createScoreHistogramByMatchType((MSMSScoringParameter)scoringParameterComboBox.getSelectedItem());
 				}
+				else if(((DataSetSummaryPlotType)e.getItem()).equals(DataSetSummaryPlotType.HITS_BY_LIBRARY_MATCH_TYPE)) {
+					scoringParameterComboBox.setEnabled(false);	
+					dataSetStatsPlotPanel.createLibraryHitBarChart();
+				}
 				else {
 					scoringParameterComboBox.setEnabled(false);				
 					dataSetStatsPlotPanel.createPieChart((DataSetSummaryPlotType)e.getItem());

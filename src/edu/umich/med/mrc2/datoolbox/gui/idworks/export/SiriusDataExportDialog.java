@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.export;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

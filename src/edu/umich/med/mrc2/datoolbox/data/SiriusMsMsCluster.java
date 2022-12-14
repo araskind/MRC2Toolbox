@@ -32,7 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
+import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -68,7 +68,7 @@ public class SiriusMsMsCluster implements Serializable {
 			adduct = AdductManager.getDefaultAdductForPolarity(firstBundle.getMsFeature().getPolarity());
 			
 		TandemMassSpectrum msms = 
-				firstBundle.getMsFeature().getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
+				firstBundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
 		parentIon = msms.getParent();
 		rtRange = new Range(
 				firstBundle.getMsFeature().getRetentionTime() - rtError, 
@@ -83,6 +83,39 @@ public class SiriusMsMsCluster implements Serializable {
 		//	TODO check for compatible acquisition methods
 	}
 	
+	public SiriusMsMsCluster(MsFeatureInfoBundleCluster cluster) {
+
+		super();
+		msmsComponents = new HashSet<MSFeatureInfoBundle>();
+		MSFeatureInfoBundle[] features = cluster.getComponents().
+				toArray(new MSFeatureInfoBundle[cluster.getComponents().size()]);
+		MSFeatureInfoBundle firstBundle = features[0];
+		msmsComponents.add(firstBundle);		
+		adduct = firstBundle.getMsFeature().getSpectrum().getPrimaryAdduct();
+		if(adduct == null)
+			adduct = AdductManager.getDefaultAdductForPolarity(firstBundle.getMsFeature().getPolarity());
+			
+		TandemMassSpectrum msms = 
+				firstBundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+		parentIon = msms.getParent();
+		
+		meanRt = new DescriptiveStatistics();
+		meanRt.addValue(firstBundle.getMsFeature().getRetentionTime());
+		meanMz = new DescriptiveStatistics();
+		meanMz.addValue(parentIon.getMz());
+		
+		for(int i=1; i<features.length; i++) {
+			
+			msmsComponents.add(features[i]);			
+			meanRt.addValue(features[i].getMsFeature().getRetentionTime());
+			double newParentMz = features[i].getMsFeature().getSpectrum().
+					getExperimentalTandemSpectrum().getParent().getMz();
+			meanMz.addValue(newParentMz);
+		}
+		rtRange = new Range(meanRt.getMin(), meanRt.getMax());		
+		mzRange = new Range(meanMz.getMin(), meanMz.getMax());
+	}
+
 	public boolean addFeatureBundle(MSFeatureInfoBundle newBundle) {
 		
 		MsFeature feature = newBundle.getMsFeature();
@@ -93,7 +126,7 @@ public class SiriusMsMsCluster implements Serializable {
 			return false;
 		
 		TandemMassSpectrum msms = 
-				feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
+				feature.getSpectrum().getExperimentalTandemSpectrum();
 		double newParentMz = msms.getParent().getMz();
 
 		if(!mzRange.contains(newParentMz))

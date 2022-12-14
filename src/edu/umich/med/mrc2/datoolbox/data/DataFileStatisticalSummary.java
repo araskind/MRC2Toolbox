@@ -23,13 +23,17 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.TreeMap;
+import java.util.stream.DoubleStream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.jfree.data.statistics.BoxAndWhiskerCalculator;
 import org.jfree.data.statistics.BoxAndWhiskerItem;
 import org.ujmp.core.Matrix;
+import org.ujmp.core.calculation.Calculation.Ret;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -52,42 +56,35 @@ public class DataFileStatisticalSummary implements Serializable {
 
 	public void calculateFileStat() {
 
-		DescriptiveStatistics stats = new DescriptiveStatistics();
-		DescriptiveStatistics trimmedStats = new DescriptiveStatistics();
-
 		Matrix datamatrix = MRC2ToolBoxCore.getCurrentProject()
 				.getDataMatrixForDataPipeline(MRC2ToolBoxCore.getCurrentProject().getActiveDataPipeline());
-		Object[] featureObjects = datamatrix.getMetaDataDimensionMatrix(0).toObjectArray()[0];
-		MsFeature[] features = Arrays.copyOf(featureObjects, featureObjects.length, MsFeature[].class);
-
-		long[] coordinates = new long[2];
-		coordinates[0] = datamatrix.getRowForLabel(file);
-
-		for (MsFeature cf : features) {
-
-			coordinates[1] = datamatrix.getColumnForLabel(cf);
-			double value = datamatrix.getAsDouble(coordinates);
-
-			if (value > 0)
-				stats.addValue(value);
-		}
+		Matrix featureRows = datamatrix.selectRows(Ret.LINK, datamatrix.getRowForLabel(file));
+		double[] fValues = StreamSupport.stream(featureRows.allValues().spliterator(), false).
+				filter(o -> Objects.nonNull(o)).
+				filter(o -> Double.valueOf((double)o) > 0.0d).
+				map(Double.class::cast).mapToDouble(Double::valueOf).toArray();
+		int totalFeatureCount = 
+				Long.valueOf(datamatrix.getMetaDataDimensionMatrix(0).getValueCount()).intValue();
+		
+		DescriptiveStatistics stats = new DescriptiveStatistics(fValues);
+		
 		properties.put(DataSetQcField.MIN, stats.getMin());
 		properties.put(DataSetQcField.MAX, stats.getMax());
 		properties.put(DataSetQcField.MEAN, stats.getMean());
 		properties.put(DataSetQcField.MEDIAN, stats.getPercentile(50.0));
 		properties.put(DataSetQcField.SD, stats.getStandardDeviation());
 		properties.put(DataSetQcField.OBSERVATIONS, (int) stats.getN());
-		properties.put(DataSetQcField.MISSING, features.length - (int) stats.getN());
+		properties.put(DataSetQcField.MISSING, totalFeatureCount - (int) stats.getN());
 		properties.put(DataSetQcField.OUTLIERS, countOutliers(stats));
 
 		double lowerLimit = stats.getPercentile(5.0d);
 		double upperLimit = stats.getPercentile(95.0d);
-
-		for (double d : stats.getValues()) {
-
-			if (d <= upperLimit && d >= lowerLimit)
-				trimmedStats.addValue(d);
-		}
+		double[] trimmedValues = DoubleStream.of(fValues).
+			filter(v -> v >= lowerLimit).
+			filter(v -> v <= upperLimit).boxed().
+			mapToDouble(Double::valueOf).toArray();
+		DescriptiveStatistics trimmedStats = new DescriptiveStatistics(trimmedValues);
+		
 		properties.put(DataSetQcField.MEAN_TRIM, trimmedStats.getMean());
 		properties.put(DataSetQcField.SD_TRIM, trimmedStats.getStandardDeviation());
 		properties.put(DataSetQcField.RSD, stats.getStandardDeviation() / stats.getMean());
