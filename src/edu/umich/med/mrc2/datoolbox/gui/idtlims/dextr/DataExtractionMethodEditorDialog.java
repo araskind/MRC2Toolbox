@@ -52,6 +52,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
@@ -338,7 +339,7 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 	
 	private void showSoftwareSelector() {
 
-		softwareSelectorDialog = new SoftwareSelectorDialog(this);
+		softwareSelectorDialog = new SoftwareSelectorDialog(this, SoftwareType.DATA_ANALYSIS);
 		softwareSelectorDialog.setLocationRelativeTo(this);
 		softwareSelectorDialog.setVisible(true);
 	}

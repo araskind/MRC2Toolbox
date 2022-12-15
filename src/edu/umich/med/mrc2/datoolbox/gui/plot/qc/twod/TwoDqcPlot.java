@@ -37,7 +37,9 @@ import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
@@ -91,9 +93,11 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 		
 		dataSetStats = dataSetStats2;		
 		
-		if (plotType.equals(QcPlotType.BARCHART))
+		if (plotType.equals(QcPlotType.BARCHART)) {
+			BarRenderer renderer = (BarRenderer) ((CategoryPlot)chart.getPlot()).getRenderer();
+			renderer.setBarPainter(new StandardBarPainter());
 			chart.getCategoryPlot().setDataset(new QcBarChartDataSet(dataSetStats, sortingOrder, qcParameter));
-		
+		}
 		if ((plotType.equals(QcPlotType.LINES) || plotType.equals(QcPlotType.SCATTER)) && sortingOrder.equals(FileSortingOrder.NAME))
 			chart.getXYPlot().setDataset(new QcScatterDataSet(dataSetStats, qcParameter));
 		

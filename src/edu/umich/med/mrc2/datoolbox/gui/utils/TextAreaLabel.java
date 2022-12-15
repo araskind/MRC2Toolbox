@@ -26,7 +26,6 @@ import java.awt.Color;
 import java.awt.Font;
 
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
@@ -43,6 +42,7 @@ public class TextAreaLabel extends JPanel{
 		super(new BorderLayout(0,0));
 		setBorder(null);
 		textArea = new JTextArea();
+		textArea.setRows(3);
 	    textArea.setWrapStyleWord(true);
 	    textArea.setLineWrap(true);
 	    textArea.setOpaque(false);
@@ -52,9 +52,9 @@ public class TextAreaLabel extends JPanel{
 	    textArea.setFont(UIManager.getFont("Label.font"));
 	    textArea.setBorder(null);
 
-		JScrollPane scrollPane = new JScrollPane(textArea);
-		scrollPane.setBorder(null);
-		add(scrollPane, BorderLayout.CENTER);
+//		JScrollPane scrollPane = new JScrollPane(textArea);
+//		scrollPane.setBorder(null);
+		add(textArea, BorderLayout.CENTER);
 	}
 
 	public void setText(String text) {

@@ -51,9 +51,11 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSBioSpecies;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.lookup.SampleTypeLookupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.lookup.TaxonomyLookupDialog;
@@ -73,7 +75,8 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 	private static final Icon editSampleIcon = GuiUtils.getIcon("editSample", 32);
 
 	private Preferences preferences;
-	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.idtracker.StockSampleEditorDialog";
+	public static final String PREFS_NODE = 
+			"edu.umich.med.mrc2.cefanalyzer.gui.idtracker.StockSampleEditorDialog";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 
 	private File baseDirectory;
@@ -81,6 +84,7 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 	private JTextField externalSourceIDTextField;
 	private JTextField externalSourceNametextField;
 	private JTextArea descriptionTextArea;
+	private JTextArea limsExperimentValueTextArea;
 	private JLabel sampleTypeValueLabel;
 	private JLabel speciesValueLabel;
 	private JLabel sampleIdValueLabel;
@@ -90,7 +94,9 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 	private LIMSSampleType sampleType;
 	private LIMSBioSpecies species;
 	private StockSample stockSample;
+	private LIMSExperiment limsExperiment;
 
+	private LIMSExperimentSelectorDialog limsExperimentSelectorDialog;
 	private TaxonomyLookupDialog taxonomyLookupDialog;
 	private SampleTypeLookupDialog sampleTypeLookupDialog;
 
@@ -101,8 +107,8 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 			sampleType = sample.getLimsSampleType();
 			species = sample.getSpecies();
 		}
-		setPreferredSize(new Dimension(600, 350));
-		setSize(new Dimension(600, 350));
+		setPreferredSize(new Dimension(640, 400));
+		setSize(new Dimension(640, 400));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -112,9 +118,9 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{0, 0, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 0.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 
 		JLabel lblSampleId = new JLabel("Stock sample ID");
@@ -154,25 +160,26 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		gbc_sampleNameTextField.gridy = 1;
 		dataPanel.add(sampleNameTextField, gbc_sampleNameTextField);
 		sampleNameTextField.setColumns(10);
-
-		JLabel lblDescription = new JLabel("Description");
-		lblDescription.setFont(new Font("Tahoma", Font.BOLD, 11));
-		GridBagConstraints gbc_lblDescription = new GridBagConstraints();
-		gbc_lblDescription.anchor = GridBagConstraints.NORTHEAST;
-		gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
-		gbc_lblDescription.gridx = 0;
-		gbc_lblDescription.gridy = 2;
-		dataPanel.add(lblDescription, gbc_lblDescription);
+		
+				JLabel lblDescription = new JLabel("Description");
+				lblDescription.setFont(new Font("Tahoma", Font.BOLD, 11));
+				GridBagConstraints gbc_lblDescription = new GridBagConstraints();
+				gbc_lblDescription.anchor = GridBagConstraints.NORTHWEST;
+				gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
+				gbc_lblDescription.gridx = 0;
+				gbc_lblDescription.gridy = 2;
+				dataPanel.add(lblDescription, gbc_lblDescription);
 
 		descriptionTextArea = new JTextArea();
+		descriptionTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		descriptionTextArea.setWrapStyleWord(true);
 		descriptionTextArea.setLineWrap(true);
 		GridBagConstraints gbc_descriptionTextArea = new GridBagConstraints();
-		gbc_descriptionTextArea.gridwidth = 2;
+		gbc_descriptionTextArea.gridwidth = 3;
 		gbc_descriptionTextArea.insets = new Insets(0, 0, 5, 0);
 		gbc_descriptionTextArea.fill = GridBagConstraints.BOTH;
-		gbc_descriptionTextArea.gridx = 1;
-		gbc_descriptionTextArea.gridy = 2;
+		gbc_descriptionTextArea.gridx = 0;
+		gbc_descriptionTextArea.gridy = 3;
 		dataPanel.add(descriptionTextArea, gbc_descriptionTextArea);
 
 		JLabel lblSampleType = new JLabel("Sample type");
@@ -181,7 +188,7 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		gbc_lblSampleType.anchor = GridBagConstraints.EAST;
 		gbc_lblSampleType.insets = new Insets(0, 0, 5, 5);
 		gbc_lblSampleType.gridx = 0;
-		gbc_lblSampleType.gridy = 3;
+		gbc_lblSampleType.gridy = 4;
 		dataPanel.add(lblSampleType, gbc_lblSampleType);
 
 		sampleTypeValueLabel = new JLabel("");
@@ -191,7 +198,7 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		gbc_sampleTypeValueLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_sampleTypeValueLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_sampleTypeValueLabel.gridx = 1;
-		gbc_sampleTypeValueLabel.gridy = 3;
+		gbc_sampleTypeValueLabel.gridy = 4;
 		dataPanel.add(sampleTypeValueLabel, gbc_sampleTypeValueLabel);
 
 		sampleTypeSelectButton = new JButton("Select sample type");
@@ -201,7 +208,7 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		gbc_sampleTypeSelectButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_sampleTypeSelectButton.insets = new Insets(0, 0, 5, 0);
 		gbc_sampleTypeSelectButton.gridx = 2;
-		gbc_sampleTypeSelectButton.gridy = 3;
+		gbc_sampleTypeSelectButton.gridy = 4;
 		dataPanel.add(sampleTypeSelectButton, gbc_sampleTypeSelectButton);
 
 		JLabel lblSpecies = new JLabel("Species");
@@ -210,7 +217,7 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		gbc_lblSpecies.anchor = GridBagConstraints.EAST;
 		gbc_lblSpecies.insets = new Insets(0, 0, 5, 5);
 		gbc_lblSpecies.gridx = 0;
-		gbc_lblSpecies.gridy = 4;
+		gbc_lblSpecies.gridy = 5;
 		dataPanel.add(lblSpecies, gbc_lblSpecies);
 
 		speciesValueLabel = new JLabel("");
@@ -220,7 +227,7 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		gbc_speciesValueLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_speciesValueLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_speciesValueLabel.gridx = 1;
-		gbc_speciesValueLabel.gridy = 4;
+		gbc_speciesValueLabel.gridy = 5;
 		dataPanel.add(speciesValueLabel, gbc_speciesValueLabel);
 
 		speciesSelectButton = new JButton("Select species");
@@ -231,15 +238,50 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		gbc_speciesSelectButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_speciesSelectButton.anchor = GridBagConstraints.NORTH;
 		gbc_speciesSelectButton.gridx = 2;
-		gbc_speciesSelectButton.gridy = 4;
+		gbc_speciesSelectButton.gridy = 5;
 		dataPanel.add(speciesSelectButton, gbc_speciesSelectButton);
+		
+		JLabel lblLimsExperiment = new JLabel("LIMS experiment");
+		lblLimsExperiment.setFont(new Font("Tahoma", Font.BOLD, 11));
+		GridBagConstraints gbc_lblLimsExperiment = new GridBagConstraints();
+		gbc_lblLimsExperiment.anchor = GridBagConstraints.NORTHEAST;
+		gbc_lblLimsExperiment.insets = new Insets(0, 0, 5, 5);
+		gbc_lblLimsExperiment.gridx = 0;
+		gbc_lblLimsExperiment.gridy = 6;
+		dataPanel.add(lblLimsExperiment, gbc_lblLimsExperiment);
+		
+		limsExperimentValueTextArea = new JTextArea("");
+		limsExperimentValueTextArea.setWrapStyleWord(true);
+		limsExperimentValueTextArea.setLineWrap(true);
+		limsExperimentValueTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		limsExperimentValueTextArea.setEditable(false);
+		limsExperimentValueTextArea.setForeground(Color.BLUE);
+		limsExperimentValueTextArea.setFont(new Font("Tahoma", Font.BOLD, 12));
+		GridBagConstraints gbc_limsExperimentValueLabel = new GridBagConstraints();
+		gbc_limsExperimentValueLabel.gridwidth = 2;
+		gbc_limsExperimentValueLabel.fill = GridBagConstraints.BOTH;
+		gbc_limsExperimentValueLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_limsExperimentValueLabel.gridx = 1;
+		gbc_limsExperimentValueLabel.gridy = 6;
+		dataPanel.add(limsExperimentValueTextArea, gbc_limsExperimentValueLabel);
+		
+		JButton selectExperimentButton = new JButton("Select LIMS experiment");
+		selectExperimentButton.setActionCommand(
+				MainActionCommands.SHOW_LIMS_EXPERIMENT_SELECTOR_COMMAND.getName());
+		selectExperimentButton.addActionListener(this);
+		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
+		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
+		gbc_btnNewButton.gridx = 2;
+		gbc_btnNewButton.gridy = 7;
+		dataPanel.add(selectExperimentButton, gbc_btnNewButton);
 
 		JLabel lblExternalSource = new JLabel("External source");
 		lblExternalSource.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_lblExternalSource = new GridBagConstraints();
 		gbc_lblExternalSource.insets = new Insets(0, 0, 5, 5);
 		gbc_lblExternalSource.gridx = 0;
-		gbc_lblExternalSource.gridy = 5;
+		gbc_lblExternalSource.gridy = 8;
 		dataPanel.add(lblExternalSource, gbc_lblExternalSource);
 
 		externalSourceNametextField = new JTextField("");
@@ -248,7 +290,7 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		gbc_externalSourceNameLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_externalSourceNameLabel.gridwidth = 2;
 		gbc_externalSourceNameLabel.gridx = 1;
-		gbc_externalSourceNameLabel.gridy = 5;
+		gbc_externalSourceNameLabel.gridy = 8;
 		dataPanel.add(externalSourceNametextField, gbc_externalSourceNameLabel);
 
 		JLabel lblExternalId = new JLabel("External ID");
@@ -257,7 +299,7 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		gbc_lblExternalId.anchor = GridBagConstraints.EAST;
 		gbc_lblExternalId.insets = new Insets(0, 0, 0, 5);
 		gbc_lblExternalId.gridx = 0;
-		gbc_lblExternalId.gridy = 6;
+		gbc_lblExternalId.gridy = 9;
 		dataPanel.add(lblExternalId, gbc_lblExternalId);
 
 		externalSourceIDTextField = new JTextField("");
@@ -265,7 +307,7 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		gbc_externalSourceIDLabel.insets = new Insets(0, 0, 0, 5);
 		gbc_externalSourceIDLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_externalSourceIDLabel.gridx = 1;
-		gbc_externalSourceIDLabel.gridy = 6;
+		gbc_externalSourceIDLabel.gridy = 9;
 		dataPanel.add(externalSourceIDTextField, gbc_externalSourceIDLabel);
 
 		JPanel panel = new JPanel();
@@ -315,6 +357,8 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 			externalSourceNametextField.setText(stockSample.getExternalSource());
 			sampleTypeValueLabel.setText(stockSample.getLimsSampleType().getName());
 			speciesValueLabel.setText(stockSample.getSpecies().getSpeciesPrimaryName());
+			if(stockSample.getLimsExperiment() != null)
+				limsExperimentValueTextArea.setText(stockSample.getLimsExperiment().toString());
 		}
 		pack();
 	}
@@ -329,6 +373,10 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 
 	public LIMSBioSpecies getSpecies() {
 		return species;
+	}
+	
+	public LIMSExperiment getLIMSExperiment() {
+		return limsExperiment;
 	}
 
 	public String getSampleName() {
@@ -364,36 +412,77 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		String command = e.getActionCommand();
 
-		if(e.getActionCommand().equals(MainActionCommands.SHOW_SELECT_SPECIES_DIALOG_COMMAND.getName())) {
-			taxonomyLookupDialog = new TaxonomyLookupDialog(this);
-			taxonomyLookupDialog.setLocationRelativeTo(this);
-			taxonomyLookupDialog.setVisible(true);
-		}
-		if(e.getActionCommand().equals(MainActionCommands.SELECT_SPECIES_COMMAND.getName())) {
+		if(command.equals(MainActionCommands.SHOW_SELECT_SPECIES_DIALOG_COMMAND.getName()))
+			showTaxonomySelector();
+		
+		if(command.equals(MainActionCommands.SELECT_SPECIES_COMMAND.getName()))
+			selectTaxonomyGroup();
 
-			if(taxonomyLookupDialog.getSelectedSpecies() == null)
-				return;
+		if(command.equals(MainActionCommands.SHOW_SELECT_SAMPLE_TYPE_DIALOG_COMMAND.getName()))
+			showSampleTypeSelector();
+		
+		if(command.equals(MainActionCommands.SELECT_SAMPLE_TYPE_COMMAND.getName()))
+			selectSampleType();
+		
+		if(command.equals(MainActionCommands.SHOW_LIMS_EXPERIMENT_SELECTOR_COMMAND.getName()))
+			showLIMSExperimentSelector();
+			
+		if(command.equals(MainActionCommands.SELECT_LIMS_EXPERIMENT_COMMAND.getName()))
+			selectLIMSExperiment();
+	}
+	
+	private void showTaxonomySelector() {
+		
+		taxonomyLookupDialog = new TaxonomyLookupDialog(this);
+		taxonomyLookupDialog.setLocationRelativeTo(this);
+		taxonomyLookupDialog.setVisible(true);
+	}
+	
+	private void selectTaxonomyGroup() {
+		
+		if(taxonomyLookupDialog.getSelectedSpecies() == null)
+			return;
 
-			species = taxonomyLookupDialog.getSelectedSpecies();
-			speciesValueLabel.setText(species.getSpeciesPrimaryName());
-			taxonomyLookupDialog.dispose();
-		}
-		if(e.getActionCommand().equals(MainActionCommands.SHOW_SELECT_SAMPLE_TYPE_DIALOG_COMMAND.getName())) {
+		species = taxonomyLookupDialog.getSelectedSpecies();
+		speciesValueLabel.setText(species.getSpeciesPrimaryName());
+		taxonomyLookupDialog.dispose();
+	}
+	
+	private void showSampleTypeSelector() {
+		
+		sampleTypeLookupDialog = new SampleTypeLookupDialog(this);
+		sampleTypeLookupDialog.setLocationRelativeTo(this);
+		sampleTypeLookupDialog.setVisible(true);
+	}
+	
+	private void selectSampleType() {
+		
+		if(sampleTypeLookupDialog.getSelectedSampleType() == null)
+			return;
 
-			sampleTypeLookupDialog = new SampleTypeLookupDialog(this);
-			sampleTypeLookupDialog.setLocationRelativeTo(this);
-			sampleTypeLookupDialog.setVisible(true);
-		}
-		if(e.getActionCommand().equals(MainActionCommands.SELECT_SAMPLE_TYPE_COMMAND.getName())) {
+		sampleType = sampleTypeLookupDialog.getSelectedSampleType();
+		sampleTypeValueLabel.setText(sampleType.getName());
+		sampleTypeLookupDialog.dispose();
+	}
+	
+	private void showLIMSExperimentSelector() {
+		
+		limsExperimentSelectorDialog = new LIMSExperimentSelectorDialog(this);
+		limsExperimentSelectorDialog.setLocationRelativeTo(this);
+		limsExperimentSelectorDialog.setVisible(true);
+	}
+	
+	private void selectLIMSExperiment() {
+		
+		if(limsExperimentSelectorDialog.getSelectedLIMSExperiment() == null)
+			return;
 
-			if(sampleTypeLookupDialog.getSelectedSampleType() == null)
-				return;
-
-			sampleType = sampleTypeLookupDialog.getSelectedSampleType();
-			sampleTypeValueLabel.setText(sampleType.getName());
-			sampleTypeLookupDialog.dispose();
-		}
+		limsExperiment = limsExperimentSelectorDialog.getSelectedLIMSExperiment();
+		limsExperimentValueTextArea.setText(limsExperiment.toString());			
+		limsExperimentSelectorDialog.dispose();
 	}
 
 	@Override
@@ -405,7 +494,8 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 	@Override
 	public void loadPreferences() {
 		preferences = Preferences.userRoot().node(PREFS_NODE);
-		baseDirectory =  new File(preferences.get(BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+		baseDirectory =  new File(preferences.get(BASE_DIRECTORY, 
+				MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
 	}
 
 	@Override

@@ -247,7 +247,7 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 				showNewProjectDialog(ProjectType.DATA_ANALYSIS, null, activeExperiment);
 	}
 
-	private void refreshLimsData() {
+	public void refreshLimsData() {
 
 		LimsDataPullTask lpt = new LimsDataPullTask();
 		lpt.addTaskListener(this);

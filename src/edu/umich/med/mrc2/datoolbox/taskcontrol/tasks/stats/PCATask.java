@@ -95,7 +95,7 @@ public class PCATask extends AbstractTask {
 					AttributeMap.builder().setDim((int)dataSubset.getRowCount(), (int)dataSubset.getColumnCount()).build();
 			DoubleArrayVector testMatrix = new DoubleArrayVector(converted, map);
 			rScriptEngine.put("z", testMatrix);
-			rScriptEngine.eval("pcarr <- prcomp(z, scale. = TRUE)");
+			rScriptEngine.eval("pcarr <- prcomp(z[ , which(apply(z, 2, var) != 0)], scale. = TRUE)");
 
 			ListVector summary = (ListVector)rScriptEngine.eval("summary(pcarr)");
 			DoubleArrayVector importance = (DoubleArrayVector)summary.getElementAsSEXP(5);

@@ -143,6 +143,7 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 		if(software == null) {
 			
 			software = new DataProcessingSoftware(null, 
+					softwareEditorDialog.getSoftwareType(),
 					softwareEditorDialog.getSoftwareName(), 
 					softwareEditorDialog.getSoftwareDescription(), 
 					softwareEditorDialog.getSoftwareVendor());			
@@ -153,7 +154,7 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 			}
 		}
 		else {	//	Edit existing software
-			
+			software.setSoftwareType(softwareEditorDialog.getSoftwareType());
 			software.setName(softwareEditorDialog.getSoftwareName());
 			software.setDescription(softwareEditorDialog.getSoftwareDescription());
 			software.setVendor(softwareEditorDialog.getSoftwareVendor());

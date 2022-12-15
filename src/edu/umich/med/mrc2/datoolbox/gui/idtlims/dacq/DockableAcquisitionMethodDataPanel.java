@@ -55,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.data.IonizationType;
 import edu.umich.med.mrc2.datoolbox.data.MassAnalyzerType;
 import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
@@ -470,7 +471,7 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 	
 	private void showSoftwareSelector() {
 
-		softwareSelectorDialog = new SoftwareSelectorDialog(this);
+		softwareSelectorDialog = new SoftwareSelectorDialog(this, SoftwareType.INSTRUMENT_CONTROL);
 		softwareSelectorDialog.setLocationRelativeTo(this.getContentPane());
 		softwareSelectorDialog.setVisible(true);
 	}

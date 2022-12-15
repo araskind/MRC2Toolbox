@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
+
 public class DataProcessingSoftware implements Serializable, Comparable<DataProcessingSoftware>{
 
 	/**
@@ -34,14 +36,17 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
 	private String name;
 	private String description;
 	private Manufacturer vendor;
+	private SoftwareType softwareType;
 	
 	public DataProcessingSoftware(
 			String id, 
+			SoftwareType softwareType,
 			String name, 
 			String description, 
 			Manufacturer vendor) {
 		super();
 		this.id = id;
+		this.softwareType = softwareType;
 		this.name = name;
 		this.description = description;
 		this.vendor = vendor;
@@ -116,5 +121,13 @@ public class DataProcessingSoftware implements Serializable, Comparable<DataProc
         hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
         return hash;
     }
+
+	public SoftwareType getSoftwareType() {
+		return softwareType;
+	}
+
+	public void setSoftwareType(SoftwareType softwareType) {
+		this.softwareType = softwareType;
+	}
 
 }

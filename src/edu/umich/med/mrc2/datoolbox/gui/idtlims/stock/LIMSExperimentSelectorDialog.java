@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr;
+package edu.umich.med.mrc2.datoolbox.gui.idtlims.stock;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -29,8 +29,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -43,51 +41,40 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
 
-import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.gui.idtlims.software.SoftwareTable;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.gui.lims.experiment.ExperimentListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class SoftwareSelectorDialog extends JDialog {
+public class LIMSExperimentSelectorDialog extends JDialog {
 
 	/**
-	 * 
+	 *
 	 */
-	private static final long serialVersionUID = -4134991839687534786L;
-
-	private static final Icon softwareIcon = GuiUtils.getIcon("software", 32);
-	
-	private SoftwareTable softwareTable;
+	private static final long serialVersionUID = 376171483863252389L;
+	private static final Icon limsIcon = GuiUtils.getIcon("experimentDatabase", 32);
 	private JButton btnSave;
-	
-	public SoftwareSelectorDialog(ActionListener listener, SoftwareType softwareType) {
-		
+	private ExperimentListingTable experimentListingTable;
+
+	public LIMSExperimentSelectorDialog(ActionListener actionListener) {
 		super();
-		setTitle("Select software package");
-		setIconImage(((ImageIcon) softwareIcon).getImage());
+		setTitle("Select LIMS experiment");
+		setIconImage(((ImageIcon) limsIcon).getImage());
+		setPreferredSize(new Dimension(1000, 400));
+		setSize(new Dimension(1000, 400));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setSize(640,480);
-		setPreferredSize(new Dimension(640,480));
 
-		JPanel dataPanel = new JPanel(new BorderLayout(0,0));
-		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+		JPanel dataPanel = new JPanel();
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
-		
-		softwareTable = new SoftwareTable();
-		Collection<DataProcessingSoftware> softwareList = IDTDataCash.getSoftwareList();
-		if(softwareType != null) {
-			softwareList = softwareList.stream().
-				filter(s -> s.getSoftwareType().equals(softwareType)).
-				sorted().collect(Collectors.toList());
-		}
-		softwareTable.setTableModelFromSoftwareList(softwareList);
-		softwareTable.addMouseListener(
+		dataPanel.setLayout(new BorderLayout(0, 0));
+
+		experimentListingTable = new ExperimentListingTable();
+		experimentListingTable.setModelFromExperimentCollection(LIMSDataCash.getExperiments());
+		experimentListingTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {
 						if (e.getClickCount() == 2) {
@@ -95,8 +82,8 @@ public class SoftwareSelectorDialog extends JDialog {
 						}
 					}
 				});
-		JScrollPane scroll = new JScrollPane(softwareTable);
-		dataPanel.add(scroll, BorderLayout.CENTER);
+		JScrollPane scrollPane = new JScrollPane(experimentListingTable);
+		dataPanel.add(scrollPane, BorderLayout.CENTER);
 
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -112,30 +99,19 @@ public class SoftwareSelectorDialog extends JDialog {
 			}
 		};
 		btnCancel.addActionListener(al);
-		btnSave = new JButton(MainActionCommands.SELECT_SOFTWARE_COMMAND.getName());
-		btnSave.setActionCommand(MainActionCommands.SELECT_SOFTWARE_COMMAND.getName());
-		btnSave.addActionListener(listener);
+
+		btnSave = new JButton("Select stock sample");
+		btnSave.setActionCommand(MainActionCommands.SELECT_LIMS_EXPERIMENT_COMMAND.getName());
+		btnSave.addActionListener(actionListener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
+
 		pack();
 	}
-	
-	public DataProcessingSoftware getSelectedSoftware() {
-		return softwareTable.getSelectedSoftware();
+
+	public LIMSExperiment getSelectedLIMSExperiment(){
+		return experimentListingTable.getSelectedExperiment();
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

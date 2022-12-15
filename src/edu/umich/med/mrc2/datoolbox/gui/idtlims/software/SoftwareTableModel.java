@@ -35,6 +35,7 @@ public class SoftwareTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = -1135263422810449762L;
 	public static final String SOFTWARE_COLUMN = "Name";
+	public static final String SOFTWARE_TYPE_COLUMN = "Type";
 	public static final String SOFTWARE_DESCRIPTION_COLUMN = "Description";
 	public static final String VENDOR_COLUMN = "Vendor";
 
@@ -43,6 +44,7 @@ public class SoftwareTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 			new ColumnContext(SOFTWARE_COLUMN, DataProcessingSoftware.class, false),
+			new ColumnContext(SOFTWARE_TYPE_COLUMN, String.class, false),
 			new ColumnContext(SOFTWARE_DESCRIPTION_COLUMN, String.class, false),
 			new ColumnContext(VENDOR_COLUMN, Manufacturer.class, false),
 		};
@@ -58,6 +60,7 @@ public class SoftwareTableModel extends BasicTableModel {
 
 			Object[] obj = {
 				item,
+				item.getSoftwareType().getName(),
 				item.getDescription(),
 				item.getVendor(),			
 			};

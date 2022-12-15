@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSBioSpecies;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 
 public class StockSample implements Serializable, Comparable<StockSample>{
@@ -42,7 +43,7 @@ public class StockSample implements Serializable, Comparable<StockSample>{
 	private String  externalId;
 	private String  externalSource;
 	private LIMSBioSpecies  species;
-
+	private LIMSExperiment limsExperiment;
 
 	public StockSample(
 			String sampleId,
@@ -249,6 +250,14 @@ public class StockSample implements Serializable, Comparable<StockSample>{
         hash = 53 * hash + (this.sampleId != null ? this.sampleId.hashCode() : 0);
         return hash;
     }
+
+	public LIMSExperiment getLimsExperiment() {
+		return limsExperiment;
+	}
+
+	public void setLimsExperiment(LIMSExperiment limsExperiment) {
+		this.limsExperiment = limsExperiment;
+	}
 }
 
 

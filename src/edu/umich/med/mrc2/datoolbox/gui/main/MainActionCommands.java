@@ -719,6 +719,10 @@ public enum MainActionCommands {
 	SHOW_STOCK_SAMPLE_SELECTOR_COMMAND("Show stock sample selector"),
 	SELECT_STOCK_SAMPLE_COMMAND("Select stock sample"),
 	
+	//	LIMS experiment selector
+	SHOW_LIMS_EXPERIMENT_SELECTOR_COMMAND("Show LIMS experiment selector"),
+	SELECT_LIMS_EXPERIMENT_COMMAND("Select LIMS experiment"),
+		
 	//	Software list editor
 	ADD_SOFTWARE_COMMAND("Add software"),
 	EDIT_SOFTWARE_COMMAND("Edit software"),

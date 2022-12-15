@@ -63,6 +63,7 @@ import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -455,7 +456,8 @@ public class IDTUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
 				"SELECT DISTINCT STOCK_SAMPLE_ID, SAMPLE_NAME, DESCRIPTION, "
-				+ "DATE_CREATED, SAMPLE_TYPE_ID, EXTERNAL_ID, EXTERNAL_SOURCE, TAX_ID, LIMS_SAMPLE_ID " +
+				+ "DATE_CREATED, SAMPLE_TYPE_ID, EXTERNAL_ID, EXTERNAL_SOURCE, "
+				+ "TAX_ID, LIMS_SAMPLE_ID, LIMS_EXPERIMENT_ID " +
 				"FROM STOCK_SAMPLE ORDER BY 1 ";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -478,8 +480,12 @@ public class IDTUtils {
 					rs.getString("EXTERNAL_ID"),
 					rs.getString("EXTERNAL_SOURCE"),
 					species);
+			
+			String limsExperimentId = rs.getString("LIMS_EXPERIMENT_ID");
+			if(limsExperimentId != null)
+				sample.setLimsExperiment(LIMSDataCash.getExperimentById(limsExperimentId));
 
-			stockSamples.add(sample);
+			stockSamples.add(sample);		
 		}
 		rs.close();
 		ps.close();
@@ -712,17 +718,20 @@ public class IDTUtils {
 		Collection<DataProcessingSoftware>softwareList = new TreeSet<DataProcessingSoftware>();
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
-			"SELECT SOFTWARE_ID, SOFTWARE_NAME, SOFTWARE_DESCRIPTION, "
-			+ "MANUFACTURER_ID FROM DATA_ANALYSIS_SOFTWARE";
+			"SELECT SOFTWARE_ID, SOFTWARE_TYPE, SOFTWARE_NAME, "
+			+ "SOFTWARE_DESCRIPTION, MANUFACTURER_ID "
+			+ "FROM DATA_ANALYSIS_SOFTWARE";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 			
 			Manufacturer vendor = 
 					IDTDataCash.getManufacturerById(rs.getString("MANUFACTURER_ID"));
-
+			SoftwareType type = SoftwareType.getSoftwareTypeByName(rs.getString("SOFTWARE_TYPE"));
+			
 			DataProcessingSoftware item = new DataProcessingSoftware(
 					rs.getString("SOFTWARE_ID"),
+					type,
 					rs.getString("SOFTWARE_NAME"),
 					rs.getString("SOFTWARE_DESCRIPTION"),
 					vendor);
@@ -745,20 +754,21 @@ public class IDTUtils {
 		newSoftwareItem.setId(id);
 		
 		String query  =
-			"INSERT INTO DATA_ANALYSIS_SOFTWARE(SOFTWARE_ID, "
+			"INSERT INTO DATA_ANALYSIS_SOFTWARE(SOFTWARE_ID, SOFTWARE_TYPE, "
 			+ "SOFTWARE_NAME, SOFTWARE_DESCRIPTION, MANUFACTURER_ID) " +
-			"VALUES(?, ?, ?, ?)";
+			"VALUES(?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 
 		ps.setString(1, id);
-		ps.setString(2, newSoftwareItem.getName());
+		ps.setString(2, newSoftwareItem.getSoftwareType().name());
+		ps.setString(3, newSoftwareItem.getName());
 		String description = newSoftwareItem.getDescription();
 		if(description != null)
-			ps.setString(3, description);
+			ps.setString(4, description);
 		else
-			ps.setNull(3, java.sql.Types.NULL);
+			ps.setNull(4, java.sql.Types.NULL);
 				
-		ps.setString(4, newSoftwareItem.getVendor().getId());
+		ps.setString(5, newSoftwareItem.getVendor().getId());
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
@@ -770,12 +780,11 @@ public class IDTUtils {
 		Connection conn = ConnectionManager.getConnection();	
 		String query  =
 			"UPDATE DATA_ANALYSIS_SOFTWARE SET SOFTWARE_NAME = ?, "
-			+ "SOFTWARE_DESCRIPTION = ?, MANUFACTURER_ID = ? " +
+			+ "SOFTWARE_DESCRIPTION = ?, MANUFACTURER_ID = ?, SOFTWARE_TYPE = ? " +
 			"WHERE SOFTWARE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 
-		ps.setString(1, itemToEdit.getName());
-		//	ps.setString(2, itemToEdit.getDescription());		
+		ps.setString(1, itemToEdit.getName());		
 		String description = itemToEdit.getDescription();
 		if(description != null)
 			ps.setString(2, description);
@@ -783,7 +792,8 @@ public class IDTUtils {
 			ps.setNull(2, java.sql.Types.NULL);
 		
 		ps.setString(3, itemToEdit.getVendor().getId());
-		ps.setString(4, itemToEdit.getId());
+		ps.setString(4, itemToEdit.getSoftwareType().name());
+		ps.setString(5, itemToEdit.getId());
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
@@ -1526,7 +1536,9 @@ public class IDTUtils {
 		while (rs.next()) {
 
 			String stockId = rs.getString("STOCK_SAMPLE_ID");
-			StockSample ss = stockSamples.stream().filter(s -> s.getSampleId().equals(stockId)).findFirst().get();
+			StockSample ss = stockSamples.stream().
+					filter(s -> s.getSampleId().equals(stockId)).
+					findFirst().orElse(null);
 			IDTExperimentalSample sample = new IDTExperimentalSample(
 					rs.getString("SAMPLE_ID"),
 					rs.getString("SAMPLE_NAME"),
@@ -2294,6 +2306,7 @@ public class IDTUtils {
 			"EXTERNAL_ID = ?, " +
 			"EXTERNAL_SOURCE = ?, " +
 			"TAX_ID = ? " +
+			"LIMS_EXPERIMENT_ID = ? " + 
 			"WHERE STOCK_SAMPLE_ID = ? ";
 
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -2303,8 +2316,12 @@ public class IDTUtils {
 		ps.setString(4, stockSample.getExternalId());
 		ps.setString(5, stockSample.getExternalSource());
 		ps.setInt(6, stockSample.getTaxonomyId());
-		ps.setString(7, stockSample.getSampleId());
-
+		if(stockSample.getLimsExperiment() != null)
+			ps.setString(7, stockSample.getLimsExperiment().getId());
+		else
+			ps.setNull(7, java.sql.Types.NULL);
+		
+		ps.setString(8, stockSample.getSampleId());
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
@@ -2313,19 +2330,6 @@ public class IDTUtils {
 	public static void insertStockSample(StockSample stockSample) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();
-//		String stockSampleId = null;
-//		String query  =
-//				"SELECT '" + DataPrefix.STOCK_SAMPLE.getName() +
-//				"' || LPAD(ID_STOCK_SAMPLE_SEQ.NEXTVAL, 5, '0') AS STOCK_SAMPLE_ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) {
-//			stockSampleId = rs.getString("STOCK_SAMPLE_ID");
-//			break;
-//		}
-//		rs.close();
-//		stockSample.setSampleId(stockSampleId);
-
 		String stockSampleId = SQLUtils.getNextIdFromSequence(conn, 
 				"ID_STOCK_SAMPLE_SEQ",
 				DataPrefix.STOCK_SAMPLE,
@@ -2340,7 +2344,8 @@ public class IDTUtils {
 			"EXTERNAL_ID, " +
 			"EXTERNAL_SOURCE, " +
 			"TAX_ID, " +
-			"STOCK_SAMPLE_ID) VALUES (?, ?, ?, ?, ?, ?, ?) ";
+			"STOCK_SAMPLE_ID, "
+			+ "LIMS_EXPERIMENT_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, stockSample.getSampleName());
@@ -2350,7 +2355,11 @@ public class IDTUtils {
 		ps.setString(5, stockSample.getExternalSource());
 		ps.setInt(6, stockSample.getTaxonomyId());
 		ps.setString(7, stockSample.getSampleId());
-
+		if(stockSample.getLimsExperiment() != null)
+			ps.setString(8, stockSample.getLimsExperiment().getId());
+		else
+			ps.setNull(8, java.sql.Types.NULL);
+		
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);

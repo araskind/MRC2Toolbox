@@ -35,9 +35,11 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -49,7 +51,9 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
@@ -73,6 +77,7 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 	private JTextField vendorTextField;
 	private Manufacturer softwareVendor;
 	private VendorSelectorDialog vendorSelectorDialog;
+	private JComboBox softwareTypeComboBox;
 	
 	public SoftwareEditorDialog(
 			ActionListener listener, 
@@ -89,10 +94,10 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
-		gbl_dataPanel.columnWidths = new int[]{0, 114, 126, 132, 0, 0};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0};
-		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_dataPanel.columnWidths = new int[]{0, 85, 126, 132, 0, 0};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.columnWeights = new double[]{0.0, 0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		dataPanel.setLayout(gbl_dataPanel);
 
 		JLabel lblId = new JLabel("ID");
@@ -130,16 +135,36 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 		gbc_softwareNameTextField.gridy = 1;
 		dataPanel.add(softwareNameTextField, gbc_softwareNameTextField);
 		softwareNameTextField.setColumns(10);
+		
+		JLabel lblNewLabel_1 = new JLabel("Software type");
+		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_1.gridx = 1;
+		gbc_lblNewLabel_1.gridy = 2;
+		dataPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
+		
+		softwareTypeComboBox = new JComboBox<SoftwareType>(
+				new DefaultComboBoxModel<SoftwareType>(SoftwareType.values()));
+		softwareTypeComboBox.setSelectedIndex(-1);
+		GridBagConstraints gbc_softwareTypeComboBox = new GridBagConstraints();
+		gbc_softwareTypeComboBox.gridwidth = 2;
+		gbc_softwareTypeComboBox.insets = new Insets(0, 0, 5, 0);
+		gbc_softwareTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_softwareTypeComboBox.gridx = 2;
+		gbc_softwareTypeComboBox.gridy = 2;
+		dataPanel.add(softwareTypeComboBox, gbc_softwareTypeComboBox);
 
 		JLabel lblDescription = new JLabel("Description");
 		GridBagConstraints gbc_lblDescription = new GridBagConstraints();
 		gbc_lblDescription.anchor = GridBagConstraints.NORTH;
 		gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
 		gbc_lblDescription.gridx = 0;
-		gbc_lblDescription.gridy = 2;
+		gbc_lblDescription.gridy = 3;
 		dataPanel.add(lblDescription, gbc_lblDescription);
 
 		descriptionTextArea = new JTextArea();
+		descriptionTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		descriptionTextArea.setRows(3);
 		descriptionTextArea.setWrapStyleWord(true);
 		descriptionTextArea.setLineWrap(true);
@@ -148,7 +173,7 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 		gbc_textArea.insets = new Insets(0, 0, 5, 0);
 		gbc_textArea.fill = GridBagConstraints.BOTH;
 		gbc_textArea.gridx = 1;
-		gbc_textArea.gridy = 2;
+		gbc_textArea.gridy = 3;
 		dataPanel.add(descriptionTextArea, gbc_textArea);
 		
 		JLabel lblNewLabel = new JLabel("Vendor");
@@ -156,7 +181,7 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 		gbc_lblNewLabel.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 3;
+		gbc_lblNewLabel.gridy = 4;
 		dataPanel.add(lblNewLabel, gbc_lblNewLabel);
 
 		vendorTextField = new JTextField();
@@ -166,7 +191,7 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 		gbc_vendorTextField.insets = new Insets(0, 0, 0, 5);
 		gbc_vendorTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_vendorTextField.gridx = 1;
-		gbc_vendorTextField.gridy = 3;
+		gbc_vendorTextField.gridy = 4;
 		dataPanel.add(vendorTextField, gbc_vendorTextField);
 		vendorTextField.setColumns(10);
 
@@ -178,7 +203,7 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 		GridBagConstraints gbc_btnSelectVendor = new GridBagConstraints();
 		gbc_btnSelectVendor.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnSelectVendor.gridx = 4;
-		gbc_btnSelectVendor.gridy = 3;
+		gbc_btnSelectVendor.gridy = 4;
 		dataPanel.add(btnSelectVendor, gbc_btnSelectVendor);
 
 		JPanel panel = new JPanel();
@@ -247,6 +272,7 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 			setIconImage(((ImageIcon) editSoftwareIcon).getImage());
 			idValueLabel.setText(softwareItem.getId());
 			softwareNameTextField.setText(softwareItem.getName());
+			softwareTypeComboBox.setSelectedItem(softwareItem.getSoftwareType());
 			descriptionTextArea.setText(softwareItem.getDescription());
 			softwareVendor = softwareItem.getVendor();
 			vendorTextField.setText(softwareVendor.getName());
@@ -267,6 +293,10 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 	
 	public Manufacturer getSoftwareVendor() {
 		return softwareVendor;
+	}
+	
+	public SoftwareType getSoftwareType() {
+		return (SoftwareType)softwareTypeComboBox.getSelectedItem();
 	}
 	
 	public Collection<String>validateSoftware(){
@@ -296,6 +326,9 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 						findFirst().orElse(null);	
 			}
 		}
+		if(getSoftwareType() == null)
+			errors.add("Software type must be specified");
+		
 		if(exisingSoftware != null) {
 			errors.add("Software \"" + exisingSoftware.getName() +
 					"\" is already in the database.");

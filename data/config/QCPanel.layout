@@ -100,32 +100,34 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213793228" orientation="VERTICAL" divider="0.5">
-											<leaf id="1" nodeId="1600213793230">
+											<leaf id="0" nodeId="1600213793230">
 												<placeholders>
 													<placeholder>dock.single.QCPanelDockableDataSetStatsTable</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1600213927553" orientation="HORIZONTAL" divider="0.6147378832838774">
-												<leaf id="0" nodeId="1600213793238">
-													<placeholders>
-														<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
-													</placeholders>
-													<placeholder-map>
-														<version>0</version>
-														<format>dock.PlaceholderList</format>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
-															</key>
-														</entry>
-													</placeholder-map>
-												</leaf>
-												<leaf id="2" nodeId="1600213927551">
-													<placeholders>
-														<placeholder>dock.single.QCPanelDockable3DChartPanel</placeholder>
-													</placeholders>
-												</leaf>
-											</node>
+											<leaf id="1" nodeId="1600213793238">
+												<placeholders>
+													<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
+												</placeholders>
+												<placeholder-map>
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.QCPanelDockable3DChartPanel</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+												</placeholder-map>
+											</leaf>
 										</node>
 									</content>
 								</delegate>
@@ -137,16 +139,6 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockable2DQCPanel">
-										<replacement id="dockablesingle QCPanelDockable2DQCPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockable2DQCPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="predefined" placeholder="dock.single.QCPanelDockableDataSetStatsTable">
 										<replacement id="dockablesingle QCPanelDockableDataSetStatsTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
@@ -157,14 +149,63 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.QCPanelDockable3DChartPanel">
-										<replacement id="dockablesingle QCPanelDockable3DChartPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>QCPanelDockable3DChartPanel</id>
-											<area/>
-										</delegate>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.QCPanelDockable2DQCPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.QCPanelDockable2DQCPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.QCPanelDockable3DChartPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.QCPanelDockable3DChartPanel</item>
+											</entry>
+										</placeholders>
 									</layout>
-									<children ignore="false"/>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.QCPanelDockable2DQCPanel">
+												<replacement id="dockablesingle QCPanelDockable2DQCPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>QCPanelDockable2DQCPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.QCPanelDockable3DChartPanel">
+												<replacement id="dockablesingle QCPanelDockable3DChartPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>QCPanelDockable3DChartPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
 								</child>
 							</children>
 						</root>

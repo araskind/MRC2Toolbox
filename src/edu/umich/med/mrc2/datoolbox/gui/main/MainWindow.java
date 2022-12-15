@@ -83,6 +83,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.organization.OrganizationManager
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.NewProjectDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.raw.RawDataUploadPrepDialog;
+import edu.umich.med.mrc2.datoolbox.gui.lims.METLIMSPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mstools.MSToolsFrame;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.PreferencesDialog;
@@ -446,9 +447,13 @@ public class MainWindow extends JFrame
 		else {
 			MRC2ToolBoxCore.setIdTrackerUser(user);
 			MRC2ToolBoxCore.getMainWindow().setIdTrackerUser(user);
-			//MessageDialogue.showInfoMsg("You are now logged into ID tracker database as " + user.getFullName(), this);
+
 			((IDTrackerLimsManagerPanel) MRC2ToolBoxCore.getMainWindow().
 					getPanel(PanelList.ID_TRACKER_LIMS)).refreshIdTrackerdata();
+			
+			((METLIMSPanel) MRC2ToolBoxCore.getMainWindow().
+					getPanel(PanelList.LIMS)).refreshLimsData();
+			
 			idtLogin.dispose();
 		}
 	}

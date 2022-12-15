@@ -77,7 +77,6 @@ public class DataSetUtils {
 		subset.setMetaDataDimensionMatrix(0, newFeatureMatrix);
 		subset.setMetaDataDimensionMatrix(1, newFileMatrix);
 		return subset;
-
 	}
 
 	public static Matrix getFeatureSubsetMatrix(
