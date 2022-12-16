@@ -448,11 +448,11 @@ public class MainWindow extends JFrame
 			MRC2ToolBoxCore.setIdTrackerUser(user);
 			MRC2ToolBoxCore.getMainWindow().setIdTrackerUser(user);
 
-			((IDTrackerLimsManagerPanel) MRC2ToolBoxCore.getMainWindow().
-					getPanel(PanelList.ID_TRACKER_LIMS)).refreshIdTrackerdata();
-			
 			((METLIMSPanel) MRC2ToolBoxCore.getMainWindow().
 					getPanel(PanelList.LIMS)).refreshLimsData();
+			
+			((IDTrackerLimsManagerPanel) MRC2ToolBoxCore.getMainWindow().
+					getPanel(PanelList.ID_TRACKER_LIMS)).refreshIdTrackerdata();
 			
 			idtLogin.dispose();
 		}

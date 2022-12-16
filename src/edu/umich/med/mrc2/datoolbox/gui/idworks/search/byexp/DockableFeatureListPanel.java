@@ -22,20 +22,25 @@
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
+import edu.umich.med.mrc2.datoolbox.gui.communication.DockableParametersPanel;
+import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.FeatureListImportPanel;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class DockableFeatureListPanel extends DefaultSingleCDockable implements BackedByPreferences {
+public class DockableFeatureListPanel extends DockableParametersPanel implements BackedByPreferences {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("editCollection", 16);
 	
@@ -49,12 +54,32 @@ public class DockableFeatureListPanel extends DefaultSingleCDockable implements 
 	
 	public DockableFeatureListPanel() {
 		
-		super("DockableFeatureListPanel", componentIcon, "Feature list manager", null, Permissions.MIN_MAX_STACK);
+		super("DockableFeatureListPanel", componentIcon, "Lookup feature list manager", Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 
 		featureListImportPanel = new FeatureListImportPanel();
 		add(featureListImportPanel, BorderLayout.CENTER);
 		loadPreferences();
+	}
+	
+	@Override
+	public void addFormChangeListener(FormChangeListener listener) {
+		changeListeners.add(listener);
+		featureListImportPanel.addFormChangeListener(listener);
+	}
+	
+	@Override
+	public void removeFormChangeListener(FormChangeListener listener) {
+		changeListeners.remove(listener);
+		featureListImportPanel.removeFormChangeListener(listener);
+	}
+
+	@Override
+	public void fireFormChangeEvent(ParameterSetStatus newStatus) {
+
+		FormChangeEvent event = new FormChangeEvent(featureListImportPanel, newStatus);
+		changeListeners.stream().forEach(l -> ((FormChangeListener) l).
+				formDataChanged(event));
 	}
 
 	@Override
@@ -83,6 +108,30 @@ public class DockableFeatureListPanel extends DefaultSingleCDockable implements 
 	
 	public Collection<MinimalMSOneFeature>getAllFeatures(){
 		return featureListImportPanel.getAllFeatures();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Collection<String> validateInput() {
+
+		Collection<String>errors = new ArrayList<String>();
+		
+		return errors;
+	}
+
+	@Override
+	public void resetPanel(Preferences preferences) {
+		featureListImportPanel.clearPanel();
+	}
+
+	@Override
+	public boolean hasSpecifiedConstraints() {
+		return !getAllFeatures().isEmpty();
 	}
 }
 

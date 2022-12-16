@@ -79,9 +79,9 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
-		gbl_dataPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_dataPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_dataPanel.columnWeights = new double[] { 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE };
-		gbl_dataPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+		gbl_dataPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0,
 				Double.MIN_VALUE };
 		setLayout(gbl_dataPanel);
 
@@ -167,30 +167,31 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		lblInstrument.setForeground(Color.BLUE);
 		lblInstrument.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_lblInstrument = new GridBagConstraints();
-		gbc_lblInstrument.anchor = GridBagConstraints.EAST;
+		gbc_lblInstrument.anchor = GridBagConstraints.WEST;
 		gbc_lblInstrument.insets = new Insets(0, 0, 5, 5);
 		gbc_lblInstrument.gridx = 0;
 		gbc_lblInstrument.gridy = 3;
 		add(lblInstrument, gbc_lblInstrument);
 		
+		JButton instrumentSelectButton = new JButton("Select instrument");
+		instrumentSelectButton.setActionCommand(MainActionCommands.SELECT_INSTRUMENT_DIALOG_COMMAND.getName());
+		instrumentSelectButton.addActionListener(this);
+		
 		instrumentTextField = new JTextField();
 		instrumentTextField.setEditable(false);
 		GridBagConstraints gbc_instrumentTextField = new GridBagConstraints();
-		gbc_instrumentTextField.gridwidth = 2;
+		gbc_instrumentTextField.gridwidth = 3;
 		gbc_instrumentTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_instrumentTextField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_instrumentTextField.gridx = 1;
-		gbc_instrumentTextField.gridy = 3;
+		gbc_instrumentTextField.gridx = 0;
+		gbc_instrumentTextField.gridy = 4;
 		add(instrumentTextField, gbc_instrumentTextField);
 		instrumentTextField.setColumns(10);
-		
-		JButton instrumentSelectButton = new JButton("Select");
-		instrumentSelectButton.setActionCommand(MainActionCommands.SELECT_INSTRUMENT_DIALOG_COMMAND.getName());
-		instrumentSelectButton.addActionListener(this);
 		GridBagConstraints gbc_instrumentSelectButton = new GridBagConstraints();
+		gbc_instrumentSelectButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_instrumentSelectButton.insets = new Insets(0, 0, 5, 0);
 		gbc_instrumentSelectButton.gridx = 3;
-		gbc_instrumentSelectButton.gridy = 3;
+		gbc_instrumentSelectButton.gridy = 4;
 		add(instrumentSelectButton, gbc_instrumentSelectButton);
 
 		JLabel lblDescription = new JLabel("Description");
@@ -200,7 +201,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		gbc_lblDescription.anchor = GridBagConstraints.NORTHWEST;
 		gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
 		gbc_lblDescription.gridx = 0;
-		gbc_lblDescription.gridy = 4;
+		gbc_lblDescription.gridy = 5;
 		add(lblDescription, gbc_lblDescription);
 
 		descriptionTextArea = new JTextArea();
@@ -215,7 +216,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		gbc_scrollPane.gridwidth = 4;
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 5;
+		gbc_scrollPane.gridy = 6;
 		add(scrollPane, gbc_scrollPane);
 
 		JLabel lblNotes = new JLabel("Notes");
@@ -225,7 +226,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		gbc_lblNotes.anchor = GridBagConstraints.NORTHWEST;
 		gbc_lblNotes.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNotes.gridx = 0;
-		gbc_lblNotes.gridy = 6;
+		gbc_lblNotes.gridy = 7;
 		add(lblNotes, gbc_lblNotes);
 
 		notesTextArea = new JTextArea();
@@ -240,7 +241,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		gbc_scrollPane_1.gridwidth = 4;
 		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane_1.gridx = 0;
-		gbc_scrollPane_1.gridy = 7;
+		gbc_scrollPane_1.gridy = 8;
 		add(scrollPane_1, gbc_scrollPane_1);
 
 		JLabel lblClient = new JLabel("Organization");
@@ -250,7 +251,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		gbc_lblClient.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblClient.insets = new Insets(0, 0, 5, 5);
 		gbc_lblClient.gridx = 0;
-		gbc_lblClient.gridy = 8;
+		gbc_lblClient.gridy = 9;
 		add(lblClient, gbc_lblClient);
 
 		organizationDataLabel = new JLabel("");
@@ -259,7 +260,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		gbc_clientDataLabel.gridwidth = 3;
 		gbc_clientDataLabel.insets = new Insets(0, 0, 5, 0);
 		gbc_clientDataLabel.gridx = 1;
-		gbc_clientDataLabel.gridy = 8;
+		gbc_clientDataLabel.gridy = 9;
 		add(organizationDataLabel, gbc_clientDataLabel);
 
 		JLabel lblContactPerson = new JLabel("Contact person");
@@ -269,7 +270,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		gbc_lblContactPerson.anchor = GridBagConstraints.NORTHEAST;
 		gbc_lblContactPerson.insets = new Insets(0, 0, 0, 5);
 		gbc_lblContactPerson.gridx = 0;
-		gbc_lblContactPerson.gridy = 9;
+		gbc_lblContactPerson.gridy = 10;
 		add(lblContactPerson, gbc_lblContactPerson);
 
 		contactDataLabel = new JLabel("");
@@ -277,7 +278,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		gbc_contactDataLabel.gridwidth = 3;
 		gbc_contactDataLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_contactDataLabel.gridx = 1;
-		gbc_contactDataLabel.gridy = 9;
+		gbc_contactDataLabel.gridy = 10;
 		add(contactDataLabel, gbc_contactDataLabel);
 		
 		loadExperimentData();
@@ -296,6 +297,10 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		projectComboBox.setSelectedItem(experiment.getProject());
 		descriptionTextArea.setText(experiment.getDescription());
 		notesTextArea.setText(experiment.getNotes());
+		
+		instrument = IDTDataCash.getInstrumentForExperiment(experiment);
+		if(instrument != null)
+			instrumentTextField.setText(instrument.toString());
 		
 		LIMSOrganization organization = null;
 		if(experiment.getProject() != null && experiment.getProject().getOrganization() != null)

@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.TreeSet;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -53,13 +54,18 @@ import org.apache.commons.lang.StringUtils;
 
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
+import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import bibliothek.gui.dock.common.intern.CDockable;
+import bibliothek.gui.dock.common.intern.DefaultCDockable.Permissions;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.MSMSClusteringParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -71,13 +77,17 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullWithFilteringTask;
 
 public class ExperimentMZRTDataSearchDialog extends JDialog
-		implements ActionListener, BackedByPreferences, ItemListener, ListSelectionListener, PersistentLayout {
+		implements ActionListener, BackedByPreferences, ItemListener, 
+		ListSelectionListener, PersistentLayout, FormChangeListener {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1012978681503321256L;
 	private static final Icon searchIcon = GuiUtils.getIcon("searchIdExperiment", 32);
+	public static final Icon paramsDefinedIcon = GuiUtils.getIcon("multipleIds", 16);
+	public static final Icon paramsIcon = GuiUtils.getIcon("cluster", 16);
+	
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "ExperimentDataSearchDialog.layout");
 	
@@ -92,7 +102,7 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 	private DockableFeatureListPanel featureListPanel;
 	private DockableDataPipelinesTable dataPipelinesTable;
 	private MSMSClusteringParametersPanel msmsClusteringParametersPanel;
-	
+		
 	public ExperimentMZRTDataSearchDialog(IDWorkbenchPanel parentPanel) {
 		super();
 		this.parentPanel = parentPanel;
@@ -105,19 +115,26 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 		setPreferredSize(new Dimension(800, 800));	
 		
 		msmsClusteringParametersPanel = new MSMSClusteringParametersPanel();
-		getContentPane().add(msmsClusteringParametersPanel, BorderLayout.NORTH);
-		
+		DefaultSingleCDockable cpWrapper  = new DefaultSingleCDockable(
+				"DockableMSMSClusteringParametersPanel", paramsIcon, "MSMS clustering parameters", 
+				msmsClusteringParametersPanel, Permissions.MIN_MAX_STACK);
+		cpWrapper.setCloseable(false);
+				
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
 		
 		experimentsTable = new DockableExperimentsTable(this);
 		experimentsTable.setTableModelFromExperimentList(IDTDataCash.getExperiments());
+		experimentsTable.addFormChangeListener(this);
+		
 		dataPipelinesTable = new DockableDataPipelinesTable();
+		dataPipelinesTable.addFormChangeListener(this);
 		
 		featureListPanel = new DockableFeatureListPanel();	
+		featureListPanel.addFormChangeListener(this);
 		grid.add(0, 0, 75, 100, experimentsTable, 
-				dataPipelinesTable, featureListPanel);
+				dataPipelinesTable, featureListPanel, cpWrapper);
 		
 		control.getContentArea().deploy(grid);
 		getContentPane().add(control.getContentArea(), BorderLayout.CENTER);
@@ -251,26 +268,39 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 	
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		// TODO Auto-generated method stub
+
 		if(!e.getValueIsAdjusting()) {
 			
-			Collection<LIMSExperiment> selectedExperiments = 
-					experimentsTable.getSelectedExperiments();
-			if(selectedExperiments.isEmpty())
-				return;
-			
-			Collection<DataPipeline>allPipelines = new TreeSet<DataPipeline>();
-			for(LIMSExperiment experiment : selectedExperiments) {
-				
-				Collection<DataPipeline> pipelines = 
-						IDTDataCash.getDataPipelinesForExperiment(experiment);
-				if(pipelines != null)
-					allPipelines.addAll(pipelines);
-			}
-			dataPipelinesTable.setTableModelFromDataPipelineCollection(allPipelines);
+			adjustDataPipelineListing();
+			markPopulatedTabs();
 		}
 	}
 
+	private void adjustDataPipelineListing() {
+
+		Collection<LIMSExperiment> selectedExperiments = 
+				experimentsTable.getSelectedExperiments();
+		if(selectedExperiments.isEmpty()) {
+			dataPipelinesTable.clearPanel();
+			return;
+		}			
+		Collection<DataPipeline>allPipelines = new TreeSet<DataPipeline>();		
+		for(LIMSExperiment experiment : selectedExperiments) {
+			
+			Collection<DataPipeline> pipelines = 
+					IDTDataCash.getDataPipelinesForExperiment(experiment);
+			if(pipelines != null)
+				allPipelines.addAll(pipelines);
+		}
+		Polarity pol = experimentsTable.getSelectedPolarity();
+		if(pol != null) {
+			allPipelines = allPipelines.stream().
+			filter(p -> p.getAcquisitionMethod().getPolarity().equals(pol)).
+			collect(Collectors.toList());
+		}
+		dataPipelinesTable.setTableModelFromDataPipelineCollection(allPipelines);
+	}
+	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		// TODO Auto-generated method stub
@@ -283,6 +313,7 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 		this.preferences = prefs;
 		msmsClusteringParametersPanel.loadPreferences();
 		featureListPanel.loadPreferences();
+		markPopulatedTabs();
 	}
 
 	@Override
@@ -343,4 +374,30 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 		return layoutConfigFile;
 	}
 
+	@Override
+	public void formDataChanged(FormChangeEvent e) {
+		
+		markPopulatedTabs();
+		
+		if(!DataPipelinesTable.class.isAssignableFrom(e.getSource().getClass()))
+			adjustDataPipelineListing();
+	}
+
+	private void markPopulatedTabs() {
+		
+		if(experimentsTable.hasSpecifiedConstraints())
+			experimentsTable.setTitleIcon(paramsDefinedIcon);
+		else
+			experimentsTable.setTitleIcon(null);
+		
+		if(dataPipelinesTable.hasSpecifiedConstraints())
+			dataPipelinesTable.setTitleIcon(paramsDefinedIcon);
+		else
+			dataPipelinesTable.setTitleIcon(null);
+		
+		if(featureListPanel.hasSpecifiedConstraints())
+			featureListPanel.setTitleIcon(paramsDefinedIcon);
+		else
+			featureListPanel.setTitleIcon(null);		
+	}
 }

@@ -161,14 +161,14 @@ public class StockSampleEditorDialog extends JDialog  implements ActionListener,
 		dataPanel.add(sampleNameTextField, gbc_sampleNameTextField);
 		sampleNameTextField.setColumns(10);
 		
-				JLabel lblDescription = new JLabel("Description");
-				lblDescription.setFont(new Font("Tahoma", Font.BOLD, 11));
-				GridBagConstraints gbc_lblDescription = new GridBagConstraints();
-				gbc_lblDescription.anchor = GridBagConstraints.NORTHWEST;
-				gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
-				gbc_lblDescription.gridx = 0;
-				gbc_lblDescription.gridy = 2;
-				dataPanel.add(lblDescription, gbc_lblDescription);
+		JLabel lblDescription = new JLabel("Description");
+		lblDescription.setFont(new Font("Tahoma", Font.BOLD, 11));
+		GridBagConstraints gbc_lblDescription = new GridBagConstraints();
+		gbc_lblDescription.anchor = GridBagConstraints.NORTHWEST;
+		gbc_lblDescription.insets = new Insets(0, 0, 5, 5);
+		gbc_lblDescription.gridx = 0;
+		gbc_lblDescription.gridy = 2;
+		dataPanel.add(lblDescription, gbc_lblDescription);
 
 		descriptionTextArea = new JTextArea();
 		descriptionTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));

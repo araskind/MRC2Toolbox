@@ -116,4 +116,18 @@ public class DataPipelinesTable extends BasicTable {
 		
 		return pipelines;
 	}
+
+	public void setSelectedDataPipelines(Collection<DataPipeline>selected) {
+		
+		int dpColumn = model.getColumnIndex(DataPipelinesTableModel.CODE_COLUMN);
+		for(int i=0; i<model.getRowCount(); i++) {
+			
+			if(selected.contains((DataPipeline)model.getValueAt(i, dpColumn)))
+				getSelectionModel().addSelectionInterval(i, i);
+		}
+	}
 }
+
+
+
+

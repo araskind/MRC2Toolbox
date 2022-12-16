@@ -41,6 +41,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -64,8 +65,8 @@ public class IDTrackerExperimentDialog  extends JDialog {
 		super();
 		this.experiment = experiment;
 		setIconImage(((ImageIcon) newCdpIdExperimentIcon).getImage());
-		setPreferredSize(new Dimension(400, 500));
-		setSize(new Dimension(400, 500));
+		setPreferredSize(new Dimension(640, 480));
+		setSize(new Dimension(640, 480));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -122,6 +123,10 @@ public class IDTrackerExperimentDialog  extends JDialog {
 		return experimentDefinitionPanel.getExperimentProject();
 	}
 
+	public LIMSInstrument getInstrument() {
+		return experimentDefinitionPanel.getInstrument();
+	}
+	
 	public String getExperimentName() {
 		return experimentDefinitionPanel.getExperimentName();
 	}

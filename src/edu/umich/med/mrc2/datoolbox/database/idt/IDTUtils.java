@@ -63,6 +63,7 @@ import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
@@ -284,6 +285,22 @@ public class IDTUtils {
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(1, experiment.getId());
 		ps.setString(2, instrument.getInstrumentId());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void updateInstrumentForExperiment(
+			LIMSExperiment experiment, LIMSInstrument instrument) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query  =
+			"UPDATE EXPERIMENT_INSTRUMENT_MAP "
+			+ "SET INSTRUMENT_ID = ? WHERE EXPERIMENT_ID = ?";
+
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, instrument.getInstrumentId());
+		ps.setString(2, experiment.getId());
 		ps.executeUpdate();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
@@ -2618,6 +2635,110 @@ public class IDTUtils {
 			ps.close();
 		}		
 		return paramSets;
+	}
+
+	public static Map<LIMSExperiment, Collection<StockSample>> getExperimentStockSampleMap() throws Exception {
+				
+		 Connection conn = ConnectionManager.getConnection();	 
+		 Map<LIMSExperiment, Collection<StockSample>> experimentStockSampleMap = 
+				 getExperimentStockSampleMap(conn);
+		 ConnectionManager.releaseConnection(conn);			 
+		 return experimentStockSampleMap;
+	}
+	
+	public static Map<LIMSExperiment, Collection<StockSample>> getExperimentStockSampleMap(Connection conn) throws Exception {
+		
+		Map<LIMSExperiment, Collection<StockSample>> experimentStockSampleMap = 
+				new TreeMap<LIMSExperiment, Collection<StockSample>>();
+		String query = "SELECT DISTINCT EXPERIMENT_ID, STOCK_SAMPLE_ID FROM SAMPLE ORDER BY 1,2";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			LIMSExperiment e = IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+			if(e != null) {
+				if(!experimentStockSampleMap.containsKey(e))
+					experimentStockSampleMap.put(e,  new TreeSet<StockSample>());
+				
+				StockSample s = IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+				if(s != null)
+					experimentStockSampleMap.get(e).add(s);
+			}			
+		}
+		rs.close();
+		ps.close();
+		return experimentStockSampleMap;		
+	}
+
+	public static Map<LIMSExperiment, LIMSInstrument> getExperimentInstrumentMap() throws Exception {
+
+		 Connection conn = ConnectionManager.getConnection();	 
+		 Map<LIMSExperiment, LIMSInstrument> experimentInstrumentMap = 
+				 getExperimentInstrumentMap(conn);
+		 ConnectionManager.releaseConnection(conn);			 
+		 return experimentInstrumentMap;
+	}
+	
+	public static Map<LIMSExperiment, LIMSInstrument> getExperimentInstrumentMap(Connection conn) throws Exception {
+
+		Map<LIMSExperiment, LIMSInstrument> experimentInstrumentMap = 
+				new TreeMap<LIMSExperiment, LIMSInstrument>();
+		String query = "SELECT DISTINCT EXPERIMENT_ID, INSTRUMENT_ID "
+				+ "FROM EXPERIMENT_INSTRUMENT_MAP ORDER BY 1,2";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			LIMSExperiment e = IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+			LIMSInstrument i = IDTDataCash.getInstrumentById(rs.getString("INSTRUMENT_ID"));
+			if(e != null && i != null) 
+				experimentInstrumentMap.put(e, i);			
+		}
+		rs.close();
+		ps.close();
+		return experimentInstrumentMap;
+	}
+	
+	public static Map<LIMSExperiment, Collection<Polarity>> getExperimentPolarityMap() throws Exception {
+		
+		 Connection conn = ConnectionManager.getConnection();	 
+		 Map<LIMSExperiment, Collection<Polarity>> experimentPolarityMap = 
+				 getExperimentPolarityMap(conn);
+		 ConnectionManager.releaseConnection(conn);			 
+		 return experimentPolarityMap;
+	}
+	
+	public static Map<LIMSExperiment, Collection<Polarity>> getExperimentPolarityMap(Connection conn) throws Exception {
+		
+		Map<LIMSExperiment, Collection<Polarity>> experimentPolarityMap = 
+				new TreeMap<LIMSExperiment, Collection<Polarity>>();
+		String query = 
+				"SELECT DISTINCT S.EXPERIMENT_ID, M.POLARITY " +
+				"FROM SAMPLE S, " +
+				"PREPARED_SAMPLE P, " +
+				"INJECTION I, " +
+				"DATA_ACQUISITION_METHOD M " +
+				"WHERE S.SAMPLE_ID = P.SAMPLE_ID " +
+				"AND P.PREP_ITEM_ID = I.PREP_ITEM_ID " +
+				"AND I.ACQUISITION_METHOD_ID = M.ACQ_METHOD_ID " +
+				"ORDER BY 1,2 ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			LIMSExperiment e = IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+			if(e != null) {
+				if(!experimentPolarityMap.containsKey(e))
+					experimentPolarityMap.put(e,  new TreeSet<Polarity>());
+				
+				Polarity p = Polarity.getPolarityByCode(rs.getString("POLARITY"));
+				if(p != null)
+					experimentPolarityMap.get(e).add(p);
+			}			
+		}
+		rs.close();
+		ps.close();
+		return experimentPolarityMap;		
 	}
 }
 

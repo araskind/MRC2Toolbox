@@ -176,6 +176,7 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 		stockSample.setSpecies(stockSampleEditorDialog.getSpecies());
 		stockSample.setExternalId(stockSampleEditorDialog.getExternalSourceId());
 		stockSample.setExternalSource(stockSampleEditorDialog.getExternalSourceName());
+		stockSample.setLimsExperiment(stockSampleEditorDialog.getLIMSExperiment());
 		try {
 			IDTUtils.updateStockSample(stockSample);
 		} catch (Exception e) {
@@ -201,6 +202,7 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 				stockSampleEditorDialog.getSpecies());
 		stockSample.setExternalId(stockSampleEditorDialog.getExternalSourceId());
 		stockSample.setExternalSource(stockSampleEditorDialog.getExternalSourceName());
+		stockSample.setLimsExperiment(stockSampleEditorDialog.getLIMSExperiment());
 		try {
 			IDTUtils.insertStockSample(stockSample);
 		} catch (Exception e) {

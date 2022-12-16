@@ -31,7 +31,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Collection;
+import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -39,6 +41,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -48,8 +51,11 @@ import org.apache.commons.io.FilenameUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
+import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
+import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.lookup.FeatureLookupListSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.MinimalMSOneFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -81,11 +87,13 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	private FeatureLookupDataSet dataSet;
 	private JButton btnNewButton, dbOpenButton;
 	private  FeatureLookupListSelectorDialog featureLookupListSelectorDialog;
+	protected Set<FormChangeListener> changeListeners;
 	
 	public FeatureListImportPanel() {
 		
 		super(new BorderLayout(0,0));
-
+		changeListeners = ConcurrentHashMap.newKeySet();
+		
 		featureTable = new MinimalMSOneFeatureTable();
 		add(new JScrollPane(featureTable), BorderLayout.CENTER);
 		
@@ -209,6 +217,8 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		Collection<MinimalMSOneFeature>features = task.getMinFeatures(); 
 		if(features != null)
 			featureTable.setTableModelFromFeatureCollection(features);
+		
+		fireFormChangeEvent(ParameterSetStatus.CHANGED);
 	}
 
 	@Override
@@ -234,7 +244,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		fc.setTitle("Read MZ/RT feature list from file");
 		fc.setOpenButtonText("Import feature list from file");
 		fc.setMultiSelectionEnabled(false);
-		if (fc.showOpenDialog(this)) {
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this))) {
 			
 			File inputFile = fc.getSelectedFile();
 			baseDirectory = inputFile.getParentFile();
@@ -250,6 +260,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 			return;				
 		featureLookupListSelectorDialog.dispose();		
 		loadDataSet(dataSet);
+		fireFormChangeEvent(ParameterSetStatus.CHANGED);
 	}
 
 	private void selectLookupFeatureListFromDatabase() {
@@ -408,8 +419,10 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 				}
 			}
 		}
-		if(features != null) 
-			featureTable.setTableModelFromFeatureCollection(features);		
+		if(features != null) {
+			featureTable.setTableModelFromFeatureCollection(features);
+			fireFormChangeEvent(ParameterSetStatus.CHANGED);
+		}
 	}
 	
 	public Collection<MinimalMSOneFeature>getSelectedFeatures(){
@@ -422,5 +435,24 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 
 	public FeatureLookupDataSet getDataSet() {
 		return dataSet;
+	}
+	
+	public void addFormChangeListener(FormChangeListener listener) {
+		changeListeners.add(listener);
+	}
+	
+	public void removeFormChangeListener(FormChangeListener listener) {
+		changeListeners.remove(listener);
+	}
+
+	public void fireFormChangeEvent(ParameterSetStatus newStatus) {
+
+		FormChangeEvent event = new FormChangeEvent(this, newStatus);
+		changeListeners.stream().forEach(l -> ((FormChangeListener) l).
+				formDataChanged(event));
+	}
+	
+	public void clearPanel() {
+		featureTable.clearTable();
 	}
 }

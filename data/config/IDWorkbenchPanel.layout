@@ -133,7 +133,7 @@
 														</placeholders>
 													</leaf>
 													<node nodeId="1666720209180" orientation="VERTICAL" divider="0.6534961251805596">
-														<leaf id="1" nodeId="1654996481318">
+														<leaf id="5" nodeId="1654996481318">
 															<placeholders>
 																<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
 																<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
@@ -157,7 +157,7 @@
 																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="3" nodeId="1654996481328">
+														<leaf id="1" nodeId="1654996481328">
 															<placeholders>
 																<placeholder>dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable</placeholder>
 															</placeholders>
@@ -314,7 +314,7 @@
 														</leaf>
 													</node>
 												</node>
-												<leaf id="5" nodeId="1654996947445">
+												<leaf id="3" nodeId="1654996947445">
 													<placeholders>
 														<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
 														<placeholder>dock.single.DockableFollowupStepTable</placeholder>
@@ -368,68 +368,14 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableMSMSFeatureTable</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableReferenceMsOneFeatureTable</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.IdTrackerDockableMSMSFeatureClusterTree</placeholder>
-												</key>
-											</entry>
-										</placeholders>
+									<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable">
+										<replacement id="dockablesingle IDWorkbenchPanelDockableUniversalIdentificationResultsTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>IDWorkbenchPanelDockableUniversalIdentificationResultsTable</id>
+											<area/>
+										</delegate>
 									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableMSMSFeatureTable">
-												<replacement id="dockablesingle DockableMSMSFeatureTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableMSMSFeatureTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableReferenceMsOneFeatureTable">
-												<replacement id="dockablesingle DockableReferenceMsOneFeatureTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableReferenceMsOneFeatureTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
+									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
@@ -569,14 +515,111 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable">
-										<replacement id="dockablesingle IDWorkbenchPanelDockableUniversalIdentificationResultsTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>IDWorkbenchPanelDockableUniversalIdentificationResultsTable</id>
-											<area/>
-										</delegate>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>2</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableStandardFeatureAnnotationTable</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableFollowupStepTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableFollowupStepTable</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">2</item>
+												<item key="dock.id" type="i">2</item>
+												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelAnnotations</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.IDWorkbenchPanelDockableMolStructurePanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
+												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelDockableMolStructurePanel</item>
+											</entry>
+										</placeholders>
 									</layout>
-									<children ignore="false"/>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableStandardFeatureAnnotationTable">
+												<replacement id="dockablesingle DockableStandardFeatureAnnotationTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableStandardFeatureAnnotationTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableFollowupStepTable">
+												<replacement id="dockablesingle DockableFollowupStepTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableFollowupStepTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelAnnotations">
+												<replacement id="dockablesingle IDWorkbenchPanelAnnotations"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>IDWorkbenchPanelAnnotations</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableMolStructurePanel">
+												<replacement id="dockablesingle IDWorkbenchPanelDockableMolStructurePanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>IDWorkbenchPanelDockableMolStructurePanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
@@ -687,13 +730,13 @@
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>2</selected>
+										<selected>0</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableStandardFeatureAnnotationTable</placeholder>
+													<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -703,11 +746,11 @@
 												</item>
 												<item key="dock.index" type="i">0</item>
 												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableStandardFeatureAnnotationTable</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMSMSFeatureTable</item>
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableFollowupStepTable</placeholder>
+													<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -717,74 +760,31 @@
 												</item>
 												<item key="dock.index" type="i">1</item>
 												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableFollowupStepTable</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableReferenceMsOneFeatureTable</item>
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
+													<placeholder>dock.single.IdTrackerDockableMSMSFeatureClusterTree</placeholder>
 												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">2</item>
-												<item key="dock.id" type="i">2</item>
-												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelAnnotations</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.IDWorkbenchPanelDockableMolStructurePanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">3</item>
-												<item key="dock.id" type="i">3</item>
-												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanelDockableMolStructurePanel</item>
 											</entry>
 										</placeholders>
 									</layout>
 									<children ignore="false">
 										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableStandardFeatureAnnotationTable">
-												<replacement id="dockablesingle DockableStandardFeatureAnnotationTable"/>
+											<layout factory="predefined" placeholder="dock.single.DockableMSMSFeatureTable">
+												<replacement id="dockablesingle DockableMSMSFeatureTable"/>
 												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableStandardFeatureAnnotationTable</id>
+													<id>DockableMSMSFeatureTable</id>
 													<area/>
 												</delegate>
 											</layout>
 											<children ignore="false"/>
 										</child>
 										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableFollowupStepTable">
-												<replacement id="dockablesingle DockableFollowupStepTable"/>
+											<layout factory="predefined" placeholder="dock.single.DockableReferenceMsOneFeatureTable">
+												<replacement id="dockablesingle DockableReferenceMsOneFeatureTable"/>
 												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableFollowupStepTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelAnnotations">
-												<replacement id="dockablesingle IDWorkbenchPanelAnnotations"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>IDWorkbenchPanelAnnotations</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableMolStructurePanel">
-												<replacement id="dockablesingle IDWorkbenchPanelDockableMolStructurePanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>IDWorkbenchPanelDockableMolStructurePanel</id>
+													<id>DockableReferenceMsOneFeatureTable</id>
 													<area/>
 												</delegate>
 											</layout>

@@ -47,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.LIMSExperimentComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.ReferenceMsMsLibraryComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.UserAffiliation;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
@@ -81,6 +82,8 @@ public class IDTDataCash {
 			new LIMSExperimentComparator(SortProperty.ID, SortDirection.DESC));
 	public static Collection<StockSample> stockSamples = 
 			new TreeSet<StockSample>();
+	public static Map<LIMSExperiment, Collection<StockSample>> experimentStockSampleMap =
+			new TreeMap<LIMSExperiment, Collection<StockSample>>();
 	public static Collection<LIMSChromatographicColumn> chromatographicColumns = 
 			new TreeSet<LIMSChromatographicColumn>();
 	public static Collection<DataAcquisitionMethod> acquisitionMethods = 
@@ -115,6 +118,8 @@ public class IDTDataCash {
 			new TreeSet<String>();
 	public static Collection<LIMSInstrument>instruments = 
 			new TreeSet<LIMSInstrument>();
+	public static Map<LIMSExperiment, LIMSInstrument>experimentInstrumentMap = 
+			new TreeMap<LIMSExperiment, LIMSInstrument>();
 	public static Collection<ReferenceMsMsLibrary>referenceMsMsLibraries = 
 			new TreeSet<ReferenceMsMsLibrary>();
 	public static Collection<NISTPepSearchParameterObject>pepSearchParameters = 
@@ -135,7 +140,14 @@ public class IDTDataCash {
 			new TreeSet<Double>();	
 	public static Collection<MSMSExtractionParameterSet>msmsExtractionParameters = 
 			new HashSet<MSMSExtractionParameterSet>();
-
+	public static Map<LIMSExperiment, Collection<Polarity>> experimentPolarityMap = 
+			new TreeMap<LIMSExperiment, Collection<Polarity>>();
+	
+	public static void refreshExperimentPolarityMap() {
+		experimentPolarityMap.clear();
+		getExperimentPolarityMap();
+	}
+	
 	public static void refreshCollisionEnergies() {
 		collisionEnergies.clear();
 		getCollisionEnergiesList();
@@ -180,6 +192,12 @@ public class IDTDataCash {
 	public static void refreshInstrumentList() {
 		instruments.clear();
 		getInstrumentList();
+	}
+	
+	public static void refreshExperimentInstrumentMap() {
+		
+		experimentInstrumentMap.clear();
+		getExperimentInstrumentMap();
 	}
 
 	public static void refreshUnits() {
@@ -283,6 +301,45 @@ public class IDTDataCash {
 	public static void refreshNISTPepSearchParameters() {
 		pepSearchParameters.clear();
 		getNISTPepSearchParameterObjecs();
+	}
+	
+	public static void refreshExperimentStockSampleMap() {
+		experimentStockSampleMap.clear();
+		getExperimentStockSampleMap();
+	}
+
+	public static Map<LIMSExperiment, Collection<StockSample>> getExperimentStockSampleMap() {
+		// TODO Auto-generated method stub
+		if(experimentStockSampleMap == null)
+			experimentStockSampleMap =
+				new TreeMap<LIMSExperiment, Collection<StockSample>>();
+
+		if(experimentStockSampleMap.isEmpty()) {
+			try {
+				experimentStockSampleMap.putAll(IDTUtils.getExperimentStockSampleMap());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return experimentStockSampleMap;
+	}
+	
+	public static Collection<StockSample>getStockSamplesForExperiment(LIMSExperiment e){
+		return getExperimentStockSampleMap().get(e);
+	}
+	
+	public static Collection<LIMSExperiment>getLIMSExperimentsForTrackerExperiment(LIMSExperiment e){
+		
+		Collection<StockSample>ss = getStockSamplesForExperiment(e);
+		if(ss == null)
+			return null;
+		else {
+			return ss.stream().
+					filter(s -> Objects.nonNull(s.getLimsExperiment())).
+					map(s -> s.getLimsExperiment()).
+					distinct().sorted().collect(Collectors.toList());
+		}
 	}
 
 	public static Map<LIMSExperiment, Collection<LIMSSamplePreparation>> getExperimentSamplePrepMap() {
@@ -732,7 +789,7 @@ public class IDTDataCash {
 		return sopCategories;
 	}
 
-	private static Collection<String>getResultValuetUnits(){
+	public static Collection<String>getResultValuetUnits(){
 
 		if(resultValueUnits == null)
 			resultValueUnits = new TreeSet<String>();
@@ -748,7 +805,7 @@ public class IDTDataCash {
 		return resultValueUnits;
 	}
 
-	private static Collection<String> getSampleQuantityUnits() {
+	public static Collection<String> getSampleQuantityUnits() {
 
 		if(sampleQuantityUnits == null)
 			sampleQuantityUnits = new TreeSet<String>();
@@ -777,6 +834,25 @@ public class IDTDataCash {
 			}
 		}
 		return instruments;
+	}
+	
+	public static Map<LIMSExperiment, LIMSInstrument> getExperimentInstrumentMap() {
+
+		if(experimentInstrumentMap == null)
+			experimentInstrumentMap = new TreeMap<LIMSExperiment, LIMSInstrument>();
+		
+		if(experimentInstrumentMap.isEmpty()) {
+			try {
+				experimentInstrumentMap.putAll(IDTUtils.getExperimentInstrumentMap());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return experimentInstrumentMap;
+	}
+	
+	public static LIMSInstrument getInstrumentForExperiment(LIMSExperiment e) {
+		return getExperimentInstrumentMap().get(e);
 	}
 
 	public static Collection<ReferenceMsMsLibrary> getReferenceMsMsLibraryList(){
@@ -912,6 +988,26 @@ public class IDTDataCash {
 			}
 		}
 		return collisionEnergies;
+	}
+	
+	private static Map<LIMSExperiment, Collection<Polarity>>getExperimentPolarityMap() {
+		
+		if(experimentPolarityMap == null)
+			experimentPolarityMap = new TreeMap<LIMSExperiment, Collection<Polarity>>();
+		
+		if(experimentPolarityMap.isEmpty()) {
+			try {
+				experimentPolarityMap.putAll(IDTUtils.getExperimentPolarityMap());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return experimentPolarityMap;
+	}
+	
+	public static Collection<Polarity>getPolaritiesForExperiment(LIMSExperiment e){
+		return getExperimentPolarityMap().get(e);
 	}
 	
 	public static LIMSInstrument getInstrumentById(String instrumentId) {

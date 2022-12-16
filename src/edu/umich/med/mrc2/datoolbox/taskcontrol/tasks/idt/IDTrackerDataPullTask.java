@@ -71,6 +71,14 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			IDTDataCash.refreshStockSampleList();
 			processed = processed + 3;
 			
+			taskDescription = "Refreshing experiment/stock sample map";
+			IDTDataCash.refreshExperimentStockSampleMap();
+			processed = processed + 3;
+			
+			taskDescription = "Refreshing experiment polarity map ";
+			IDTDataCash.refreshExperimentPolarityMap();
+			processed = processed + 3;
+			
 			taskDescription = "Refreshing manufacturers list ";
 			IDTDataCash.refreshManufacturers();
 			processed = processed + 3;
@@ -93,6 +101,10 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			
 			taskDescription = "Refreshing instrument list";
 			IDTDataCash.refreshInstrumentList();
+			processed = processed + 3;
+			
+			taskDescription = "Refreshing experiment / instrument map";
+			IDTDataCash.refreshExperimentInstrumentMap();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing chromatographic separation types";

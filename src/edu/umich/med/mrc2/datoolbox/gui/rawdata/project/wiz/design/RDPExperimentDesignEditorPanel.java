@@ -82,6 +82,7 @@ public class RDPExperimentDesignEditorPanel extends IDTrackerExperimentDesignEdi
 				stockSampleEditorDialog.getSpecies());
 		stockSample.setExternalId(stockSampleEditorDialog.getExternalSourceId());
 		stockSample.setExternalSource(stockSampleEditorDialog.getExternalSourceName());
+		stockSample.setLimsExperiment(stockSampleEditorDialog.getLIMSExperiment());
 		try {
 			IDTUtils.insertStockSample(stockSample);
 		} catch (Exception e) {

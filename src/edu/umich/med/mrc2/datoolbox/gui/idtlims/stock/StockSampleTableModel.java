@@ -38,6 +38,7 @@ public class StockSampleTableModel extends BasicTableModel {
 	public static final String SAMPLE_DESCRIPTION_COLUMN = "Description";
 	public static final String SAMPLE_TYPE_COLUMN = "Sample type";
 	public static final String SAMPLE_SPECIES_COLUMN = "Species";
+	public static final String LIMS_EXPERIMENT_COLUMN = "LIMS experiment";
 	public static final String SAMPLE_EXTERNAL_SOURCE_COLUMN = "External source";
 	public static final String SAMPLE_EXTERNAL_ID_COLUMN = "External ID";
 
@@ -50,6 +51,7 @@ public class StockSampleTableModel extends BasicTableModel {
 			new ColumnContext(SAMPLE_DESCRIPTION_COLUMN, String.class, false),
 			new ColumnContext(SAMPLE_TYPE_COLUMN, String.class, false),
 			new ColumnContext(SAMPLE_SPECIES_COLUMN, String.class, false),
+			new ColumnContext(LIMS_EXPERIMENT_COLUMN, String.class, false),
 			new ColumnContext(SAMPLE_EXTERNAL_SOURCE_COLUMN, String.class, false),
 			new ColumnContext(SAMPLE_EXTERNAL_ID_COLUMN, String.class, false),
 		};
@@ -63,6 +65,10 @@ public class StockSampleTableModel extends BasicTableModel {
 			return;
 
 		for (StockSample sample : samples) {
+			
+			String limsExperimentId = "";
+			if(sample.getLimsExperiment() != null)
+				limsExperimentId = sample.getLimsExperiment().getId();
 
 			Object[] obj = {
 
@@ -71,6 +77,7 @@ public class StockSampleTableModel extends BasicTableModel {
 				sample.getSampleDescription(),
 				sample.getLimsSampleType(),
 				sample.getSpecies(),
+				limsExperimentId,
 				sample.getExternalSource(),
 				sample.getExternalId()
 			};

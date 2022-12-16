@@ -761,10 +761,16 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 					experimentDialog.getExperimentProject());
 			newExperiment.setCreator(MRC2ToolBoxCore.getIdTrackerUser());
 			try {
-				String experimentId = IDTUtils.addNewExperiment(newExperiment);
+				String experimentId = IDTUtils.addNewExperiment(newExperiment);				
 				newExperiment.setId(experimentId);
-				experimentDialog.getExperimentProject().getExperiments().add(newExperiment);
+				IDTUtils.setInstrumentForExperiment(
+						newExperiment, experimentDialog.getInstrument());
+						
 				IDTDataCash.getExperiments().add(newExperiment);
+				IDTDataCash.getExperimentInstrumentMap().put(
+						newExperiment, experimentDialog.getInstrument());
+				
+				experimentDialog.getExperimentProject().getExperiments().add(newExperiment);
 				projectTreePanel.addObject(newExperiment);	
 				projectTreePanel.expandNodeForObject(newExperiment.getProject());
 			} catch (Exception e) {
@@ -778,6 +784,11 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 						experimentDialog.getExperimentNotes(),
 						experimentDialog.getExperimentProject().getId(),
 						experimentDialog.getExperiment().getId());
+				
+				IDTUtils.updateInstrumentForExperiment(
+						experimentDialog.getExperiment(), experimentDialog.getInstrument());
+				IDTDataCash.getExperimentInstrumentMap().put(
+						experimentDialog.getExperiment(), experimentDialog.getInstrument());
 				
 				LIMSExperiment experiment = experimentDialog.getExperiment();
 				if(!experiment.getProject().equals(experimentDialog.getExperimentProject())) {
