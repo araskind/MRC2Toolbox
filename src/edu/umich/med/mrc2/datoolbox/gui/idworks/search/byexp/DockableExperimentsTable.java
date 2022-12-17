@@ -113,6 +113,10 @@ public class DockableExperimentsTable extends DockableParametersPanel {
 	public Collection<LIMSExperiment>getAllExperiments(){
 		 return experimentsTable.getAllExperiments();
 	}
+	
+	public void clearSelection() {
+		experimentsTable.clearSelection();
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override

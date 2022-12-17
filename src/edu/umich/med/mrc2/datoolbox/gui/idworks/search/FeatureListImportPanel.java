@@ -454,5 +454,8 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 	
 	public void clearPanel() {
 		featureTable.clearTable();
+		dataSetNameTextField.setText("");
+		descriptionTextArea.setText("");
+		dataSet = null;
 	}
 }

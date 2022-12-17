@@ -2988,16 +2988,20 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		clearMSMSFeatureData();
 		clearMSMSClusterData();
 		activeMSMSClusterDataSet = dataSet;
-		Set<MsFeatureInfoBundleCluster> clusters = dataSet.getClusters();
-		msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
-		activeCluster = null;
-	
-		activeFeatureCollection = new MsFeatureInfoBundleCollection(
-				"Features for \"" + activeMSMSClusterDataSet.getName() + "\" data set");		
-		activeFeatureCollection.addFeatures(activeMSMSClusterDataSet.getAllFeatures());
-		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
-		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
-		StatusBar.setActiveMSMSClusterDataSet(activeMSMSClusterDataSet);
+		
+		if(activeMSMSClusterDataSet != null) {
+			
+			Set<MsFeatureInfoBundleCluster> clusters = dataSet.getClusters();
+			msmsFeatureClusterTreePanel.loadFeatureClusters(clusters);
+			activeCluster = null;
+		
+			activeFeatureCollection = new MsFeatureInfoBundleCollection(
+					"Features for \"" + activeMSMSClusterDataSet.getName() + "\" data set");		
+			activeFeatureCollection.addFeatures(activeMSMSClusterDataSet.getAllFeatures());
+			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+			StatusBar.setActiveMSMSClusterDataSet(activeMSMSClusterDataSet);
+		}
 	}
 
 	private void finalizeSpectrumEntropyRecalculation() {
@@ -3028,7 +3032,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void finalizeIDTMSMSFeatureDataPullTask(IDTMSMSFeatureDataPullTask task) {
-			
+		
+		activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
 		activeFeatureCollection.clearCollection();
 		activeFeatureCollection.addFeatures(task.getSelectedFeatures());
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
@@ -3038,7 +3043,18 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	private void finalizeIDTMSMSFeatureDataPullWithFilteringTask(IDTMSMSFeatureDataPullWithFilteringTask task) {
-		loadMSMSClusterDataSetInGUI(task.getMsmsClusterDataSet());
+		
+		if(task.getMsmsClusterDataSet() != null)
+			loadMSMSClusterDataSetInGUI(task.getMsmsClusterDataSet());
+		else {
+			activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
+			activeFeatureCollection.clearCollection();
+			activeFeatureCollection.addFeatures(task.getSelectedFeatures());
+			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+			activeMSMSClusterDataSet = null;
+			activeCluster = null;
+		}
 	}
 
 	private void finalizeCromatogramExtractionTask(ChromatogramExtractionTask task) {

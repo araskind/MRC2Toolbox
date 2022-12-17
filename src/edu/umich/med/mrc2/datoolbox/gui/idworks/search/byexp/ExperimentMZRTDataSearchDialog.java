@@ -72,6 +72,8 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullWithFilteringTask;
@@ -154,6 +156,11 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 		panel_1.add(btnCancel);
 		btnCancel.addActionListener(al);
 		btnCancel.addActionListener(al);
+		
+		JButton refreshButton = new JButton("Refresh data");
+		refreshButton.addActionListener(this);
+		refreshButton.setActionCommand(MainActionCommands.IDTRACKER_REFRESH_FORM_OPTIONS_COMMAND.getName());
+		panel_1.add(refreshButton);
 
 		JButton resetButton = new JButton("Reset form");
 		resetButton.addActionListener(this);
@@ -177,12 +184,6 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
-			MessageDialog.showErrorMsg(
-					"You are not logged in ID tracker!", 
-					this.getContentPane());
-			return;
-		}
 		String command = e.getActionCommand();
 
 		if(command.equals(MainActionCommands.IDTRACKER_RESET_FORM_COMMAND.getName()))
@@ -196,43 +197,121 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 	}
 
 	private void resetForm() {
-		// TODO Auto-generated method stub
-		
+
+		experimentsTable.resetPanel(null);
+		dataPipelinesTable.resetPanel(null);
+		featureListPanel.resetPanel(null);
 	}
 
 	private void populateSelectorsFromDatabase() {
 		// TODO Auto-generated method stub
-		
+		DataRefreshTask task = new DataRefreshTask();
+		IndeterminateProgressDialog idp = 
+				new IndeterminateProgressDialog("Refreshing data ...", this, task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
 	}
 
+	class DataRefreshTask extends LongUpdateTask {
+
+		public DataRefreshTask() {
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Void doInBackground() {
+
+			try {
+				IDTDataCash.refreshUserList();
+				IDTDataCash.refreshOrganizationList();
+				IDTDataCash.refreshProjectList();
+				IDTDataCash.refreshExperimentList();
+				IDTDataCash.refreshStockSampleList();
+				IDTDataCash.refreshExperimentStockSampleMap();
+				IDTDataCash.refreshExperimentPolarityMap();
+				IDTDataCash.refreshManufacturers();
+				IDTDataCash.refreshExperimentSamplePrepMap();
+				IDTDataCash.refreshSamplePrepDataPipelineMap();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			experimentsTable.setTableModelFromExperimentList(IDTDataCash.getExperiments());
+			return null;
+		}
+	}
+	
 	private void searchIdTracker() {
 
 		Collection<LIMSExperiment>selectedExperiments =  
 				experimentsTable.getSelectedExperiments();
 		
 		if(selectedExperiments.isEmpty()) {
-			MessageDialog.showErrorMsg("Please select experiment(s)", 
+			MessageDialog.showErrorMsg("Please select one or more experiment(s)", 
 					this.getContentPane());
 			return;
 		}
 		Collection<MinimalMSOneFeature>mzrtFeatureList = 
 				featureListPanel.getAllFeatures();
 			
-		if(mzrtFeatureList.isEmpty()) {		
-			int res = MessageDialog.showChoiceMsg(
+		if(mzrtFeatureList.isEmpty()) {	
+			
+			int res = MessageDialog.showChooseOrCancelMsg(
 					"M/Z-RT list is empty, do you want to cluster "
-					+ "all the features in selected experiments?", 
+					+ "all the features in selected experiments using specified parameters? (YES)\n"
+					+ "or just retrieve all the features for selected experiment(s) (NO)?", 
 					this.getContentPane());
-			if(res != JOptionPane.YES_OPTION)
+			if(res == JOptionPane.CANCEL_OPTION)
 				return;
-		}	
+			
+			if(res == JOptionPane.YES_OPTION)
+				getExperimentDataAndClusterFeatures(selectedExperiments, mzrtFeatureList);
+
+			if(res == JOptionPane.NO_OPTION)
+				getExperimentFeatures(selectedExperiments);
+		}
+		else {
+			getExperimentDataAndClusterFeatures(selectedExperiments, mzrtFeatureList);
+		}
+	}
+	
+	private void getExperimentFeatures(Collection<LIMSExperiment> selectedExperiments) {
+
+		Collection<DataPipeline> dataPipelines = 
+				dataPipelinesTable.getSelectedDataPipelines();
+		if(dataPipelines.isEmpty()) {
+			dataPipelines = dataPipelinesTable.getAllDataPipelines().stream().
+				filter(p -> p.getAcquisitionMethod().getPolarity().equals(experimentsTable.getSelectedPolarity())).
+				collect(Collectors.toList());
+		}
+		if(dataPipelines.isEmpty()) {
+
+				MessageDialog.showErrorMsg("No data available for selected experiment(s)", 
+						this.getContentPane());
+				return;			
+		}		
+		IDTMSMSFeatureDataPullWithFilteringTask task = 
+				new IDTMSMSFeatureDataPullWithFilteringTask(
+						selectedExperiments, 
+						dataPipelines,
+						null,
+						null);
+		task.addTaskListener(parentPanel);
+		MRC2ToolBoxCore.getTaskController().addTask(task);
+		dispose();
+	}
+
+	private void getExperimentDataAndClusterFeatures(
+			Collection<LIMSExperiment>selectedExperiments,
+			Collection<MinimalMSOneFeature>mzrtFeatureList) {
+
 		Collection<String>paramErrors = 
 				msmsClusteringParametersPanel.validateParameters();
 		if(!paramErrors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(paramErrors, "\n"), 
 					this.getContentPane());
 			return;
-		}		
+		}
 		Collection<DataPipeline> dataPipelines = 
 				dataPipelinesTable.getSelectedDataPipelines();
 		if(dataPipelines.isEmpty()) {
@@ -242,7 +321,9 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 			if(res != JOptionPane.YES_OPTION)
 				return;
 			else
-				dataPipelines = dataPipelinesTable.getAllDataPipelines();
+				dataPipelines = dataPipelinesTable.getAllDataPipelines().stream().
+					filter(p -> p.getAcquisitionMethod().getPolarity().equals(experimentsTable.getSelectedPolarity())).
+					collect(Collectors.toList());
 		}		
 		MSMSClusteringParameterSet clusteringParams = 
 				msmsClusteringParametersPanel.getParameters();
