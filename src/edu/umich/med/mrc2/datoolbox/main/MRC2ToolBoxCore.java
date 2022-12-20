@@ -45,6 +45,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.jcs3.JCS;
 import org.apache.commons.jcs3.access.CacheAccess;
+import org.apache.commons.jcs3.access.exception.CacheException;
 import org.apache.commons.jcs3.engine.control.CompositeCacheManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -100,6 +101,8 @@ public final class MRC2ToolBoxCore {
 	private static Properties cacheProps;
 	public static CacheAccess<Object, Object> msFeatureCache;
 	public static CacheAccess<Object, Object> featureChromatogramCache;
+	public static CacheAccess<Object, Object> compoundIdCache;
+	public static CacheAccess<Object, Object> msmsLibraryCache;
 
 	@SuppressWarnings("rawtypes")
 	private static Map<DataFile, LCMSData>rawDataMap;
@@ -245,8 +248,15 @@ public final class MRC2ToolBoxCore {
 	public static void shutDown() {
 
 		RawDataManager.releaseAllDataSources();		
-		msFeatureCache.clear();
-		featureChromatogramCache.clear();
+		try {
+			msFeatureCache.clear();
+			featureChromatogramCache.clear();		
+			compoundIdCache.clear();
+			msmsLibraryCache.clear();
+		} catch (CacheException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		try {
 			JCS.shutdown();
 		} catch (Exception e) {
@@ -402,8 +412,15 @@ public final class MRC2ToolBoxCore {
 		
 		msFeatureCache = JCS.getInstance("msmsFeatureCache");
 		msFeatureCache.clear();
+		
 		featureChromatogramCache = JCS.getInstance("featureChromatogramCache");
 		featureChromatogramCache.clear();
+		
+		compoundIdCache = JCS.getInstance("compoundIdCache");
+		compoundIdCache.clear();
+		
+		msmsLibraryCache = JCS.getInstance("msmsLibraryCache");
+		msmsLibraryCache.clear();
 	}
 
 	public static RawDataAnalysisProject getActiveRawDataAnalysisProject() {

@@ -45,6 +45,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundNameScope;
 import edu.umich.med.mrc2.datoolbox.data.enums.InChiKeyPortion;
 import edu.umich.med.mrc2.datoolbox.data.enums.StringMatchFidelity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
@@ -282,10 +283,14 @@ public class CompoundDatabaseUtils {
 		return identity;
 	}
 
-	public static CompoundIdentity getCompoundById(String accession) throws Exception{
-
+	public static CompoundIdentity getCompoundById(String accession) throws Exception {
+		
+		CompoundIdentity identity = DiskCashUtils.retrieveCompoundIdentityFromCache(accession);
+		if(identity != null)
+			return identity;
+		
 		Connection conn = ConnectionManager.getConnection();
-		CompoundIdentity identity = getCompoundById(accession, conn);
+		identity = getCompoundById(accession, conn);
 		ConnectionManager.releaseConnection(conn);
 
 		return identity;
@@ -293,7 +298,10 @@ public class CompoundDatabaseUtils {
 
 	public static CompoundIdentity getCompoundById(String accession, Connection conn) throws Exception{
 
-		CompoundIdentity identity = null;
+		CompoundIdentity identity = DiskCashUtils.retrieveCompoundIdentityFromCache(accession);
+		if(identity != null)
+			return identity;
+		
 		String query =
 			"SELECT D.SOURCE_DB, D.PRIMARY_NAME, D.MOL_FORMULA, "
 			+ "D.EXACT_MASS, D.SMILES, D.INCHI_KEY "+
@@ -494,18 +502,26 @@ public class CompoundDatabaseUtils {
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()){
 
-			CompoundIdentity pcId = new CompoundIdentity();
-			pcId.setCommonName(rs.getString("PRIMARY_NAME"));
-			pcId.setFormula(rs.getString("MOL_FORMULA"));
-			pcId.setExactMass(rs.getDouble("EXACT_MASS"));
-			pcId.setSmiles(rs.getString("SMILES"));
-			pcId.setInChiKey(rs.getString("INCHI_KEY"));
-			CompoundDatabaseEnum db =
-					CompoundDatabaseEnum.getCompoundDatabaseByName(rs.getString("SOURCE_DB"));
-			if(db != null)
-				pcId.addDbId(db, rs.getString("ACCESSION"));
+			CompoundIdentity pcId = 
+					DiskCashUtils.retrieveCompoundIdentityFromCache(rs.getString("ACCESSION"));
+			if(pcId != null) {
+				idList.add(pcId);
+				continue;
+			}
+			else {
+				pcId = new CompoundIdentity();
+				pcId.setCommonName(rs.getString("PRIMARY_NAME"));
+				pcId.setFormula(rs.getString("MOL_FORMULA"));
+				pcId.setExactMass(rs.getDouble("EXACT_MASS"));
+				pcId.setSmiles(rs.getString("SMILES"));
+				pcId.setInChiKey(rs.getString("INCHI_KEY"));
+				CompoundDatabaseEnum db =
+						CompoundDatabaseEnum.getCompoundDatabaseByName(rs.getString("SOURCE_DB"));
+				if(db != null)
+					pcId.addDbId(db, rs.getString("ACCESSION"));
 
-			idList.add(pcId);
+				idList.add(pcId);
+			}
 		}
 		rs.close();
 		ps.close();
@@ -663,6 +679,7 @@ public class CompoundDatabaseUtils {
 		ps.close();
 		CompoundIdentity inserted = 
 				CompoundDatabaseUtils.getCompoundById(newCompound.getPrimaryDatabaseId(), conn);
+		DiskCashUtils.putCompoundIdentityInCache(inserted);
 		ConnectionManager.releaseConnection(conn);
 		return inserted;
 	}

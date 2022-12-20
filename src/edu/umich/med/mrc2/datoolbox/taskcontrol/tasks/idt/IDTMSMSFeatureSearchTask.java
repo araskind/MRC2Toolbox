@@ -99,7 +99,6 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
@@ -110,6 +109,7 @@ import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
@@ -527,7 +527,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		while (rs.next()) {
 
 			MSFeatureInfoBundle fInCash = 
-					FeatureCollectionUtils.retrieveMSFeatureInfoBundleFromCache(
+					DiskCashUtils.retrieveMSFeatureInfoBundleFromCache(
 							rs.getString("FEATURE_ID"));
 			if(fInCash != null) {
 				cashedFeatures.add(fInCash);
@@ -1052,6 +1052,12 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				
 		for(String cid : compoundIds) {
 			
+			CompoundIdentity identity = DiskCashUtils.retrieveCompoundIdentityFromCache(cid);
+			if(identity != null) {
+				compoundMap.put(cid, identity);
+				processed++;
+				continue;
+			}			
             ps.setString(1, cid);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()){
@@ -1059,7 +1065,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				CompoundDatabaseEnum dbSource =
 						CompoundDatabaseEnum.getCompoundDatabaseByName(rs.getString("SOURCE_DB"));
 				String commonName = rs.getString("PRIMARY_NAME");
-				CompoundIdentity identity = new CompoundIdentity(
+				identity = new CompoundIdentity(
 						dbSource, 
 						cid, 
 						commonName,
@@ -1069,6 +1075,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						rs.getString("SMILES"));
 				identity.setInChiKey(rs.getString("INCHI_KEY"));
 				compoundMap.put(cid, identity);
+				DiskCashUtils.putCompoundIdentityInCache(identity);
 			}
 			rs.close();
 			processed++;
@@ -1105,7 +1112,12 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		
 		for(String mrc2msmsId : msmsLibraryIds) {
 			
-			MsMsLibraryFeature feature = null;
+			MsMsLibraryFeature feature = DiskCashUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
+			if(feature != null) {
+				msmsLibraryFeatureMap.put(mrc2msmsId, feature);
+				processed++;
+				continue;
+			}
 			lfps.setString(1, mrc2msmsId);
 			lfrs = lfps.executeQuery();
 			while(lfrs.next()) {
@@ -1160,6 +1172,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					feature.setCompoundIdentity(compoundMap.get(lfrs.getString("ACCESSION")));
 				
 				msmsLibraryFeatureMap.put(mrc2msmsId, feature);
+				DiskCashUtils.putMsMsLibraryFeatureInCache(feature);
 			}
 			lfrs.close();
 			processed++;
@@ -1529,7 +1542,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	
 	protected void putDataInCache() {		
 		features.stream().
-			forEach(f -> FeatureCollectionUtils.putMSFeatureInfoBundleInCache(f));
+			forEach(f -> DiskCashUtils.putMSFeatureInfoBundleInCache(f));
 	}
 	
 	protected void applyAdditionalFilters() {

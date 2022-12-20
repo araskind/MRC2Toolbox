@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.jcs3.access.exception.CacheException;
-
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -248,21 +246,6 @@ public class FeatureCollectionUtils {
 		ps.close();		
 		ConnectionManager.releaseConnection(conn);
 	}
-
-    public static void putMSFeatureInfoBundleInCache( MSFeatureInfoBundle bundle ) {
-        String key = bundle.getMSFeatureId();
-        try {
-        	MRC2ToolBoxCore.msFeatureCache.put(key, bundle );
-        }
-        catch ( CacheException e ) {
-            System.err.println( String.format( "Problem putting feature info bundle %s in the cache, for key %s%n%s",
-            		bundle.getMsFeature().getName(), key, e.getMessage() ) );
-        }
-    }
-
-    public static MSFeatureInfoBundle retrieveMSFeatureInfoBundleFromCache( String msId ) {
-        return (MSFeatureInfoBundle)MRC2ToolBoxCore.msFeatureCache.get( msId );
-    }	
     
 	public static Set<String>validateMSMSIDlist(Set<String>idsToValidate) throws Exception {
 

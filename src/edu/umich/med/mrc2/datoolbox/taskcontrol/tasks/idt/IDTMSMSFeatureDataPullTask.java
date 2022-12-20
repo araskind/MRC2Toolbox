@@ -43,13 +43,13 @@ import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
 
 public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 
@@ -107,7 +107,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		for(String msmsId : featureIds) {
 			
 			MSFeatureInfoBundle fInCash = 
-					FeatureCollectionUtils.retrieveMSFeatureInfoBundleFromCache(msmsId);
+					DiskCashUtils.retrieveMSFeatureInfoBundleFromCache(msmsId);
 			if(fInCash != null) {
 				cashedFeatures.add(fInCash);
 				cashedIds.add(msmsId);					

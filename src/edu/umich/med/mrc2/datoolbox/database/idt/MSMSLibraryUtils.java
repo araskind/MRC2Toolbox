@@ -43,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
@@ -134,8 +135,12 @@ public class MSMSLibraryUtils {
 
 	public static MsMsLibraryFeature getMsMsLibraryFeatureById(String mrc2msmsId) throws Exception {
 
+		MsMsLibraryFeature f = DiskCashUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
+		if(f != null)
+			return f;
+		
 		Connection conn = ConnectionManager.getConnection();
-		MsMsLibraryFeature f = getMsMsLibraryFeatureById(mrc2msmsId, conn);
+		f = getMsMsLibraryFeatureById(mrc2msmsId, conn);
 		ConnectionManager.releaseConnection(conn);
 		return f;
 	}
@@ -144,7 +149,11 @@ public class MSMSLibraryUtils {
 			String mrc2msmsId,
 			Connection conn) throws Exception {
 
-		MsMsLibraryFeature feature = null;
+		MsMsLibraryFeature feature = 
+				DiskCashUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
+		if(feature != null)
+			return feature;
+		
 		String query =
 			"SELECT POLARITY, IONIZATION, COLLISION_ENERGY, PRECURSOR_MZ, ADDUCT, "
 			+ "COLLISION_GAS, INSTRUMENT, INSTRUMENT_TYPE, IN_SOURCE_VOLTAGE, "
@@ -307,6 +316,10 @@ public class MSMSLibraryUtils {
 		while(rs.next()) {
 
 			String mrc2msmsId = rs.getString("MRC2_LIB_ID");
+			feature = DiskCashUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
+			if(feature != null)
+				break;
+			
 			feature = new MsMsLibraryFeature(
 					mrc2msmsId,
 					Polarity.getPolarityByCode(MSMSComponentTableFields.POLARITY.name()));
@@ -385,21 +398,6 @@ public class MSMSLibraryUtils {
 		ConnectionManager.releaseConnection(conn);
 		return newFeatureId;
 	}
-	
-//	public static String getNextMsMsLibraryFeatureId(Connection conn) throws Exception {
-//		
-//		String libId = null;
-//		String query = "SELECT '" + DataPrefix.MSMS_LIBRARY_ENTRY.getName() +
-//			"' || LPAD(MSMS_LIB_ENTRY_SEQ.NEXTVAL, 9, '0') AS MRC2ID FROM DUAL";
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next())
-//			libId = rs.getString("MRC2ID");
-//
-//		rs.close();
-//		ps.close();
-//		return libId;
-//	}
 
 	public static String insertNewReferenceMsMsLibraryFeature(
 			TandemMassSpectrum msms,
