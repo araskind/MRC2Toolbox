@@ -315,7 +315,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
         	!this.commonName.equalsIgnoreCase(cid.getCommonName()))
         	return false;
 
-        return false;
+        return true;
 	}
 
     @Override

@@ -21,8 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,6 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
@@ -48,7 +50,7 @@ public class IdentificationUtils {
 		Map<CompoundIdentity, List<MsFeatureIdentity>> idsByCompound = 
 				idList.stream().collect(Collectors.groupingBy(MsFeatureIdentity::getCompoundIdentity));
 		
-		Collection<MsFeatureIdentity> bestMatchList = new ArrayList<MsFeatureIdentity>();
+		Collection<MsFeatureIdentity> bestMatchList = new HashSet<MsFeatureIdentity>();
 		for(Entry<CompoundIdentity, List<MsFeatureIdentity>> matchList : idsByCompound.entrySet()) {
 			
 			MsFeatureIdentity bestMatch = matchList.getValue().
@@ -69,7 +71,27 @@ public class IdentificationUtils {
 		return toFilter.stream().
 				filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
 				filter(i -> msmsSearchTypes.contains(i.getReferenceMsMsLibraryMatch().getMatchType())).
-				collect(Collectors.toList());
+				collect(Collectors.toSet());
+	}
+	
+	public static MsFeatureIdentity getTopScoringIdForMatchTypes(
+			Collection<MsFeatureIdentity>toFilter,
+			Collection<MSMSMatchType>msmsSearchTypes,
+			MSMSScoringParameter msmsScoringParameter){
+		
+		Collection<MsFeatureIdentity>toScore = filterIdsOnMatchType(toFilter, msmsSearchTypes);
+		if(toScore.isEmpty())
+			return null;
+		
+		Map<MsFeatureIdentity,Double>scoreMap = new HashMap<MsFeatureIdentity,Double>();
+		toScore.stream().
+			forEach(i -> scoreMap.put(i, i.getReferenceMsMsLibraryMatch().getScoreOfType(msmsScoringParameter)));
+		Entry<MsFeatureIdentity, Double> topEntry = 
+				MapUtils.getTopEntryByValue(scoreMap, SortDirection.DESC);
+		if(topEntry == null)
+			return null;
+		else
+			return topEntry.getKey();
 	}
 	
 	public static Collection<MsFeatureIdentity>filterIdsOnScore(
@@ -80,6 +102,6 @@ public class IdentificationUtils {
 		return toFilter.stream().
 				filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
 				filter(i -> i.getReferenceMsMsLibraryMatch().getScoreOfType(msmsScoringParameter) > minScore).
-				collect(Collectors.toList());
+				collect(Collectors.toSet());
 	}
 }

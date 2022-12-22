@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 public enum FeatureIDSubset {
 	
 	PRIMARY_ONLY("Primary ID only"),
+	BEST_SCORING_ONLY("Best scoring for selected match type"),
 	BEST_FOR_EACH_COMPOUND("Top-scoring ID for each compound"),
 	ALL("All identifications"),
 	;

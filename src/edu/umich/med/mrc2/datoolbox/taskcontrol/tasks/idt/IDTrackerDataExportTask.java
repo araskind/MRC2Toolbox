@@ -236,14 +236,15 @@ public class IDTrackerDataExportTask extends AbstractTask {
 	
 	private Collection<MsFeatureIdentity>filterIdentities(MSFeatureInfoBundle f){
 		
-		Collection<MsFeatureIdentity>filteredIds = new ArrayList<MsFeatureIdentity>();
+		Collection<MsFeatureIdentity>filteredIds = new HashSet<MsFeatureIdentity>();
 		MsFeatureIdentity primaryId = f.getMsFeature().getPrimaryIdentity();
 		Set<MsFeatureIdentity> allIds = f.getMsFeature().getIdentifications();
 		
 		if(featureIDSubset.equals(FeatureIDSubset.PRIMARY_ONLY))
 			filteredIds.add(primaryId);
 		
-		if(featureIDSubset.equals(FeatureIDSubset.ALL))
+		if(featureIDSubset.equals(FeatureIDSubset.ALL) 
+				|| featureIDSubset.equals(FeatureIDSubset.BEST_SCORING_ONLY))
 			filteredIds.addAll(allIds);
 
 		if(featureIDSubset.equals(FeatureIDSubset.BEST_FOR_EACH_COMPOUND))
@@ -264,7 +265,19 @@ public class IDTrackerDataExportTask extends AbstractTask {
 					filteredIds,
 					minimalMSMSScore,
 					msmsScoringParameter);
+			if(filteredIds.isEmpty())
+				return filteredIds;
 		}
+		if(featureIDSubset.equals(FeatureIDSubset.BEST_SCORING_ONLY)) {
+			
+			MsFeatureIdentity topHit = IdentificationUtils.getTopScoringIdForMatchTypes(
+					filteredIds,
+					msmsSearchTypes,
+					msmsScoringParameter);
+			filteredIds.clear();
+			if(topHit != null)
+				filteredIds.add(topHit);
+		}			
 		return filteredIds;
 	}
 
@@ -546,7 +559,8 @@ public class IDTrackerDataExportTask extends AbstractTask {
 			Collection<MsFeatureIdentity> featureIds = identificationMap.get(bundle);
 			if(featureIds == null || featureIds.isEmpty()) {
 				
-				if(!bundle.getMsFeature().getIdentifications().isEmpty() && !excludeIfNoIdsLeft) {
+				if((!bundle.getMsFeature().getIdentifications().isEmpty() && !excludeIfNoIdsLeft)
+						|| bundle.getMsFeature().getPrimaryIdentity() == null) {
 					
 					ArrayList<String>line = new ArrayList<String>();
 					for(IDTrackerMsFeatureProperties property : featurePropertyList)
