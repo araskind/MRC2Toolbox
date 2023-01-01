@@ -113,23 +113,25 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 
 		public void tableChanged(TableModelEvent e) {
 
-			int featureCol = getColumnIndex(DuplicateSelectionTableModel.FEATURE_COLUMN);
-			MsFeature selectedFeature = (MsFeature) getValueAt(e.getFirstRow(), featureCol);
-			int row = convertRowIndexToView(e.getFirstRow());
-			int col = convertColumnIndexToView(e.getColumn());
+			int featureCol = model.getColumnIndex(DuplicateSelectionTableModel.FEATURE_COLUMN);
+			int row = e.getFirstRow();
+			int col = e.getColumn();
+			MsFeature selectedFeature = (MsFeature) model.getValueAt(row, featureCol);
+//			int row = convertRowIndexToView(e.getFirstRow());
+//			int col = convertColumnIndexToView(e.getColumn());
 
-			if (col == getColumnIndex(DuplicateSelectionTableModel.ID_COLUMN)) {
+			if (col == model.getColumnIndex(DuplicateSelectionTableModel.ID_COLUMN)) {
 
-				if((boolean) getValueAt(row, col))
+				if((boolean) model.getValueAt(row, col))
 					activeCluster.setPrimaryFeature(selectedFeature);
 
 				model.removeTableModelListener(modelListener);
 				model.reloadData();
 				model.addTableModelListener(modelListener);
 			}
-			if (col == getColumnIndex(DuplicateSelectionTableModel.DATA_COLUMN)) {
+			if (col == model.getColumnIndex(DuplicateSelectionTableModel.DATA_COLUMN)) {
 
-				if((boolean) getValueAt(row, col)) {
+				if((boolean) model.getValueAt(row, col)) {
 
 					for(MsFeature f : activeCluster.getFeatures()) {
 
@@ -153,71 +155,6 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 		model.setRowCount(0);
 		model.addTableModelListener(modelListener);
 	}
-
-/*
-	@Override
-	public void editingStopped(ChangeEvent event) {
-
-		super.editingStopped(event);
-		if(this.getSelectedRow() > -1) {
-
-			MsFeature selectedFeature;
-			boolean selected;
-			boolean selectionPresent;
-			int idColumn  = getColumnModel().getColumnIndex(DuplicateSelectionTableModel.ID_COLUMN);
-			int dataColumn  = getColumnModel().getColumnIndex(DuplicateSelectionTableModel.DATA_COLUMN);
-			int featureColumn = getColumnModel().getColumnIndex(DuplicateSelectionTableModel.FEATURE_COLUMN);
-
-			if (event.getSource().getClass().equals(RadioButtonEditor.class)) {
-
-				selected = (boolean) ((DefaultCellEditor) event.getSource()).getCellEditorValue();
-				selectedFeature = (MsFeature) this.getValueAt(this.getSelectedRow(), featureColumn);
-				selectionPresent = false;
-
-				if(this.getSelectedColumn() == idColumn) {
-
-					if (!selected) {
-
-						selectedFeature.setPrinmary(false);
-
-						for (MsFeature cf : activeCluster.getFeatures()) {
-
-							if (cf.isPrinmary()) {
-
-								selectionPresent = true;
-								break;
-							}
-						}
-						if (!selectionPresent)
-							selectedFeature.setPrinmary(true);
-					}
-					else {
-						selectedFeature.setPrinmary(true);
-
-						for (MsFeature cf : activeCluster.getFeatures()) {
-
-							if (!cf.equals(selectedFeature))
-								cf.setPrinmary(false);
-						}
-					}
-				}
-				if(this.getSelectedColumn() == dataColumn) {
-
-					if (selected) {
-
-						selectedFeature.setActive(true);
-
-						for (MsFeature cf : activeCluster.getFeatures()) {
-
-							if (!cf.equals(selectedFeature))
-								cf.setActive(false);
-						}
-					}
-				}
-				model.setTableModelFromFeatures(activeCluster.getFeatures());
-			}
-		}
-	}*/
 
 	public int getFeatureRow(MsFeature feature) {
 
@@ -256,9 +193,9 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 	public Collection<MsFeature> getSelectedFeatures() {
 
 		ArrayList<MsFeature> selected = new ArrayList<MsFeature>();
-		int col = getColumnIndex(DuplicateSelectionTableModel.FEATURE_COLUMN);
+		int col = model.getColumnIndex(DuplicateSelectionTableModel.FEATURE_COLUMN);
 		for (int i : getSelectedRows()) {
-			MsFeature rowFeature = (MsFeature) getValueAt(i, col);
+			MsFeature rowFeature = (MsFeature) model.getValueAt(convertRowIndexToModel(i), col);
 			selected.add(rowFeature);
 		}
 		return selected;
@@ -271,8 +208,8 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 		if(row == -1)
 			return null;
 
-		return (MsFeature) model.getValueAt(row, 
-				getColumnIndex(DuplicateSelectionTableModel.FEATURE_COLUMN));
+		return (MsFeature) model.getValueAt(convertRowIndexToModel(row), 
+				model.getColumnIndex(DuplicateSelectionTableModel.FEATURE_COLUMN));
 	}
 
 	@Override
@@ -284,8 +221,8 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 		int dpcol = model.getColumnIndex(DuplicateSelectionTableModel.DATA_PIPELINE_COLUMN);
 		for (int i : getSelectedRows()) {
 
-			MsFeature rowFeature = (MsFeature) getValueAt(i, fcol);
-			DataPipeline dp = (DataPipeline) getValueAt(i, dpcol);
+			MsFeature rowFeature = (MsFeature) model.getValueAt(convertRowIndexToModel(i), fcol);
+			DataPipeline dp = (DataPipeline) model.getValueAt(convertRowIndexToModel(i), dpcol);
 			if(!featureMap.containsKey(dp))
 				featureMap.put(dp, new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.Name)));
 			
