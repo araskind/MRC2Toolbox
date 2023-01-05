@@ -213,6 +213,8 @@ public class ChromatographyUtils {
 					rs.getString("MOBILE_PHASE_NAME"));
 			mobilePhaseList.add(p);
 		}
+		rs.close();
+		ps.close();	
 		return mobilePhaseList;
 	}
 	

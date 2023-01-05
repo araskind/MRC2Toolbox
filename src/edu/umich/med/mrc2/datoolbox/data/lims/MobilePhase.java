@@ -81,4 +81,32 @@ public class MobilePhase implements Serializable, Comparable<MobilePhase>{
 	public String toString() {
 		return id;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+		if (obj == null)
+			return false;
+
+		if (!MobilePhase.class.isAssignableFrom(obj.getClass()))
+			return false;
+
+		final MobilePhase other = (MobilePhase) obj;
+
+		if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+			return false;
+
+		return true;
+	}
+	
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+        return hash;
+    }
 }

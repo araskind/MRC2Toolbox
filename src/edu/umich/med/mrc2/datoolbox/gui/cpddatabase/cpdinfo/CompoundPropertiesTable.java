@@ -23,18 +23,18 @@ package edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo;
 
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 
-public class CpdPropertiesTable extends BasicTable {
+public class CompoundPropertiesTable extends BasicTable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6761893383490446061L;
 	
-	private CpdPropertiesTableModel model;
+	private CompoundPropertiesTableModel model;
 
-	public CpdPropertiesTable() {
+	public CompoundPropertiesTable() {
 		super();
-		model = new CpdPropertiesTableModel();
+		model = new CompoundPropertiesTableModel();
 		setModel(model);
 		
 		// TODO Auto-generated constructor stub

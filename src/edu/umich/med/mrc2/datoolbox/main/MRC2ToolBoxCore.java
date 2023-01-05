@@ -68,6 +68,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.impl.TaskControllerImpl;
+import edu.umich.med.mrc2.datoolbox.utils.SysStreamsLogger;
 import umich.ms.datatypes.LCMSData;
 
 public final class MRC2ToolBoxCore {
@@ -149,10 +150,10 @@ public final class MRC2ToolBoxCore {
 		logger.info("Statring the program");
 		
 		//	Stop all logs from printing to stdout
-	//	SysStreamsLogger.bindSystemStreams();
+//		SysStreamsLogger.bindSystemStreams();
 		
 		//	Stop stdout printing but keep errors
-//		SysStreamsLogger.bindOutputStream();
+		SysStreamsLogger.bindOutputStream();
 				
 		MRC2ToolBoxConfiguration.initConfiguration();
 		boolean conectionSetupTried = false;

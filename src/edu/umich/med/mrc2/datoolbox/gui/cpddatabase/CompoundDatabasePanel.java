@@ -162,7 +162,8 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 						compoundTable.getTable());
 		synonymsTable.getTable().setSynonymsModelListener(synMoldelListener);
 
-		propertiesTable = new DockableCompoundPropertiesTable();
+		propertiesTable = 
+				new DockableCompoundPropertiesTable("DatabaseCompoundPropertiesTable");
 		concentrationsTable = new DockableConcentrationsTable();
 		spectraTable = new DockableSpectraTable();
 		spectraTable.getTable().getSelectionModel().addListSelectionListener(this);

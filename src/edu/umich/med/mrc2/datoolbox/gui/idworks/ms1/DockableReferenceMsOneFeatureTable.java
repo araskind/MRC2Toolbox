@@ -77,4 +77,10 @@ public class DockableReferenceMsOneFeatureTable extends DefaultSingleCDockable {
 		return bundles.stream().
 				map(b -> b.getMsFeature()).collect(Collectors.toList());
 	}
+
+	public void selectBundle(MSFeatureInfoBundle toSelect) {
+		
+		featureTable.selectBundle(toSelect);
+		featureTable.scrollToSelected();
+	}
 }

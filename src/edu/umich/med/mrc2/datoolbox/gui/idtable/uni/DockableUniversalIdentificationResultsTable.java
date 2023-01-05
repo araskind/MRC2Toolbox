@@ -104,6 +104,19 @@ public class DockableUniversalIdentificationResultsTable
 	public synchronized void clearTable() {
 		idTable.clearTable();
 	}
+	
+	public void refreshTable() {
+		
+		MsFeature feature = idTable.getParentFeature();
+		if(feature == null)
+			return;
+		
+		MsFeatureIdentity currentId = getSelectedIdentity();
+		idTable.setModelFromMsFeature(
+				feature, sorcesToExclude, showUniqueIdsOnly);
+		if(currentId != null)
+			idTable.selectIdentity(currentId);
+	}
 
 	public void setModelFromMsFeature(MsFeature feature) {
 		this.sorcesToExclude = null;

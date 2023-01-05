@@ -101,6 +101,7 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 
 	public void selectBundle(MSFeatureInfoBundle toSelect) {
 		featureTable.selectBundle(toSelect);
+		featureTable.scrollToSelected();
 	}
 
 	public Collection<MSFeatureInfoBundle>getBundles(TableRowSubset subset){

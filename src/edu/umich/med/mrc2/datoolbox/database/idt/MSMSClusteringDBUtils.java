@@ -145,6 +145,7 @@ public class MSMSClusteringDBUtils {
 	
 	public static Map<MSMSClusterDataSet, Set<String>>getMSMSClusterDataSets(Connection conn) throws Exception {
 		
+		FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();
 		Map<MSMSClusterDataSet, Set<String>> dataSets = 
 				new HashMap<MSMSClusterDataSet, Set<String>>();
 		String query = 

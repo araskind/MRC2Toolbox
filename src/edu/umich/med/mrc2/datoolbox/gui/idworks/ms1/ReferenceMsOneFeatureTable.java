@@ -249,4 +249,18 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 	public void updateFeatureData(MSFeatureInfoBundle selectedBundle) {
 		model.updateFeatureData(selectedBundle);
 	}
+
+	public void selectBundle(MSFeatureInfoBundle toSelect) {
+
+		int colIdx = model.getColumnIndex(ReferenceMsOneFeatureTableModel.MS_FEATURE_COLUMN);
+		
+		for(int i=0; i<getRowCount(); i++) {
+
+			if(((MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(i), colIdx)).equals(toSelect)) {
+				setRowSelectionInterval(i, i);
+				scrollToSelected();
+				break;
+			}
+		}
+	}
 }

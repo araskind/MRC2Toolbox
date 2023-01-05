@@ -274,6 +274,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 			boolean showUniqueIdsOnly) {
 		
 		MsFeatureIdentity selectedId = this.getSelectedIdentity();
+		
 		Collection<MsFeatureIdentity> idList = feature.getIdentifications();
 		if(showUniqueIdsOnly)
 			idList = IdentificationUtils.getBestMatchIds(feature);
@@ -328,12 +329,23 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		model.addTableModelListener(this.identificationTableModelListener);
 	}
 	
+	public void toggleIdentificationTableModelListener(boolean enable) {
+		
+		if(identificationTableModelListener != null) {
+			
+			if(enable)
+				model.addTableModelListener(this.identificationTableModelListener);
+			else
+				model.removeTableModelListener(identificationTableModelListener);
+		}
+	}
+	
 	public void selectPrimaryIdentity() {
 
 		clearSelection();
-		int primaryCol = getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN);
+		int primaryCol = model.getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN);
 		for(int i=0; i<getRowCount(); i++) {
-			if((boolean)getValueAt(i, primaryCol)) {
+			if((boolean)model.getValueAt(convertRowIndexToModel(i), primaryCol)) {
 				setRowSelectionInterval(i, i);
 				break;
 			}
@@ -343,10 +355,10 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 	public void selectIdentity(MsFeatureIdentity id) {
 
 		clearSelection();
-		int idCol = getColumnIndex(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN);
+		int idCol = model.getColumnIndex(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN);
 
 		for(int i=0; i<getRowCount(); i++) {
-			if(getValueAt(i, idCol).equals(id)) {
+			if(model.getValueAt(convertRowIndexToModel(i), idCol).equals(id)) {
 				setRowSelectionInterval(i, i);
 				scrollToSelected();
 				break;

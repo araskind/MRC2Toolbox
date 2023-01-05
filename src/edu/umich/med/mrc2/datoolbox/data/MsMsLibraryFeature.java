@@ -247,9 +247,9 @@ public class MsMsLibraryFeature implements Serializable {
 //		protected Map<String,String>properties;
 //		protected String collisionEnergyValue;
 		ArrayList<String>nameParts = new ArrayList<String>();
-		nameParts.add(compoundIdentity.getName());
-
-
+		
+		if(compoundIdentity != null && compoundIdentity.getName() != null)
+			nameParts.add(compoundIdentity.getName());
 
 		return StringUtils.join(nameParts, ", ");
 	}

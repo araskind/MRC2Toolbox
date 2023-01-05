@@ -45,32 +45,6 @@
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableCompoundPropertiesTable</placeholder>
-													<placeholder>dock.single.DockableConcentrationsTable</placeholder>
-													<placeholder>dock.single.DockableNarrativeDataPanel</placeholder>
-												</key>
-												<item key="map" type="p">
-													<version>0</version>
-													<format>dock.PlaceholderList</format>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableNarrativeDataPanel</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableCompoundPropertiesTable</placeholder>
-														</key>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableConcentrationsTable</placeholder>
-														</key>
-													</entry>
-												</item>
-											</entry>
-											<entry>
-												<key shared="false">
 													<placeholder>dock.single.DockableMSMSLibraryEntryPropertiesTable</placeholder>
 												</key>
 											</entry>
@@ -95,6 +69,26 @@
 													<entry>
 														<key shared="false">
 															<placeholder>dock.single.CompoundDatabasePanelDockableMsMsTable</placeholder>
+														</key>
+													</entry>
+												</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableConcentrationsTable</placeholder>
+													<placeholder>dock.single.DockableNarrativeDataPanel</placeholder>
+												</key>
+												<item key="map" type="p">
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableNarrativeDataPanel</placeholder>
+														</key>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableConcentrationsTable</placeholder>
 														</key>
 													</entry>
 												</item>
@@ -162,18 +156,18 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213799033" orientation="VERTICAL" divider="0.3481927710843373">
 											<node nodeId="1600214046293" orientation="HORIZONTAL" divider="0.24170616113744076">
-												<leaf id="0" nodeId="1600214046291">
+												<leaf id="2" nodeId="1600214046291">
 													<placeholders>
 														<placeholder>dock.single.DockableCompoundDatabaseSearchPanel</placeholder>
 													</placeholders>
 												</leaf>
 												<node nodeId="1628554024680" orientation="HORIZONTAL" divider="0.7076773235443492">
-													<leaf id="7" nodeId="1600213799037">
+													<leaf id="3" nodeId="1600213799037">
 														<placeholders>
 															<placeholder>dock.single.DockableDatabaseCompoundTable</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="3" nodeId="1628554024679">
+													<leaf id="0" nodeId="1628554024679">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanelDockableMolStructurePanel</placeholder>
 														</placeholders>
@@ -201,7 +195,7 @@
 											<node nodeId="1600214064887" orientation="HORIZONTAL" divider="0.7186738176499269">
 												<node nodeId="1600214095263" orientation="HORIZONTAL" divider="0.44876343836134214">
 													<node nodeId="1600214310292" orientation="VERTICAL" divider="0.47246376811594215">
-														<leaf id="5" nodeId="1600213799044">
+														<leaf id="7" nodeId="1600213799044">
 															<placeholders>
 																<placeholder>dock.single.DockableCompoundPropertiesTable</placeholder>
 																<placeholder>dock.single.DockableNarrativeDataPanel</placeholder>
@@ -216,16 +210,9 @@
 																	<item key="convert" type="b">true</item>
 																	<item key="convert-keys" type="a"/>
 																</entry>
-																<entry>
-																	<key shared="false">
-																		<placeholder>dock.single.DockableCompoundPropertiesTable</placeholder>
-																	</key>
-																	<item key="convert" type="b">true</item>
-																	<item key="convert-keys" type="a"/>
-																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="4" nodeId="1600214310291">
+														<leaf id="1" nodeId="1600214310291">
 															<placeholders>
 																<placeholder>dock.single.DockableDatabaseLinksTable</placeholder>
 															</placeholders>
@@ -249,14 +236,14 @@
 															</placeholder-map>
 														</leaf>
 													</node>
-													<leaf id="2" nodeId="1600214095261">
+													<leaf id="5" nodeId="1600214095261">
 														<placeholders>
 															<placeholder>dock.single.DockableSpectraTable</placeholder>
 														</placeholders>
 													</leaf>
 												</node>
 												<node nodeId="1600214080591" orientation="VERTICAL" divider="0.6114072837047981">
-													<leaf id="1" nodeId="1600214064885">
+													<leaf id="4" nodeId="1600214064885">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanelDockableSpectumPlot</placeholder>
 															<placeholder>dock.single.CompoundDatabasePanelDockableMsMsTable</placeholder>
@@ -297,85 +284,6 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableCompoundDatabaseSearchPanel">
-										<replacement id="dockablesingle DockableCompoundDatabaseSearchPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableCompoundDatabaseSearchPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.CompoundDatabasePanelDockableSpectumPlot</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.CompoundDatabasePanelDockableSpectumPlot</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.CompoundDatabasePanelDockableMsMsTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.CompoundDatabasePanelDockableMsMsTable</item>
-											</entry>
-										</placeholders>
-									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.CompoundDatabasePanelDockableSpectumPlot">
-												<replacement id="dockablesingle CompoundDatabasePanelDockableSpectumPlot"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>CompoundDatabasePanelDockableSpectumPlot</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.CompoundDatabasePanelDockableMsMsTable">
-												<replacement id="dockablesingle CompoundDatabasePanelDockableMsMsTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>CompoundDatabasePanelDockableMsMsTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableSpectraTable">
-										<replacement id="dockablesingle DockableSpectraTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableSpectraTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -495,6 +403,105 @@
 									</children>
 								</child>
 								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableCompoundDatabaseSearchPanel">
+										<replacement id="dockablesingle DockableCompoundDatabaseSearchPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableCompoundDatabaseSearchPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableDatabaseCompoundTable">
+										<replacement id="dockablesingle DockableDatabaseCompoundTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableDatabaseCompoundTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.CompoundDatabasePanelDockableSpectumPlot</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.CompoundDatabasePanelDockableSpectumPlot</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.CompoundDatabasePanelDockableMsMsTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.CompoundDatabasePanelDockableMsMsTable</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.CompoundDatabasePanelDockableSpectumPlot">
+												<replacement id="dockablesingle CompoundDatabasePanelDockableSpectumPlot"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>CompoundDatabasePanelDockableSpectumPlot</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.CompoundDatabasePanelDockableMsMsTable">
+												<replacement id="dockablesingle CompoundDatabasePanelDockableMsMsTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>CompoundDatabasePanelDockableMsMsTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableSpectraTable">
+										<replacement id="dockablesingle DockableSpectraTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableSpectraTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableMSMSLibraryEntryPropertiesTable">
+										<replacement id="dockablesingle DockableMSMSLibraryEntryPropertiesTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableMSMSLibraryEntryPropertiesTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
 										<placeholders>
@@ -516,7 +523,7 @@
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableCompoundPropertiesTable</placeholder>
+													<placeholder>dock.single.DockableConcentrationsTable</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -526,20 +533,6 @@
 												</item>
 												<item key="dock.index" type="i">1</item>
 												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableCompoundPropertiesTable</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableConcentrationsTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">2</item>
-												<item key="dock.id" type="i">2</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableConcentrationsTable</item>
 											</entry>
 										</placeholders>
@@ -556,16 +549,6 @@
 											<children ignore="false"/>
 										</child>
 										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableCompoundPropertiesTable">
-												<replacement id="dockablesingle DockableCompoundPropertiesTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableCompoundPropertiesTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
 											<layout factory="predefined" placeholder="dock.single.DockableConcentrationsTable">
 												<replacement id="dockablesingle DockableConcentrationsTable"/>
 												<delegate id="delegate_ccontrol backup factory id">
@@ -576,26 +559,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMSMSLibraryEntryPropertiesTable">
-										<replacement id="dockablesingle DockableMSMSLibraryEntryPropertiesTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMSMSLibraryEntryPropertiesTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDatabaseCompoundTable">
-										<replacement id="dockablesingle DockableDatabaseCompoundTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDatabaseCompoundTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>
@@ -621,56 +584,23 @@
 							<children ignore="false"/>
 						</root>
 					</roots>
-					<children/>
+					<children>
+						<child key="single DatabaseCompoundPropertiesTable" location="false">
+							<layout>
+								<layout factory="predefined" placeholder="dock.single.DatabaseCompoundPropertiesTable">
+									<replacement id="dockablesingle DatabaseCompoundPropertiesTable"/>
+									<delegate id="delegate_ccontrol backup factory id">
+										<id>DatabaseCompoundPropertiesTable</id>
+										<area/>
+									</delegate>
+								</layout>
+								<children ignore="false"/>
+							</layout>
+						</child>
+					</children>
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DockableCompoundPropertiesTable" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.minimized</mode>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.minimized">
-									<mode>dock.mode.minimized</mode>
-									<root>ccontrol north</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="flap dock">
-											<index>0</index>
-											<holding>false</holding>
-											<size>400</size>
-											<placeholder>dock.single.DockableCompoundPropertiesTable</placeholder>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockableCompoundPropertiesTable</placeholder>
-										</property>
-									</location>
-								</property>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableCompoundPropertiesTable</placeholder>
-											<backup-path>
-												<node location="BOTTOM" size="0.6518072289156627" id="1600213799033"/>
-												<node location="LEFT" size="0.7186738176499269" id="1600214064887"/>
-												<node location="LEFT" size="0.44876343836134214" id="1600214095263"/>
-												<node location="TOP" size="0.47246376811594215" id="1600214310292"/>
-												<leaf id="1600213799044"/>
-											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>1</index>
-											<placeholder>dock.single.DockableCompoundPropertiesTable</placeholder>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
 						<entry id="single DockableNarrativeDataPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.minimized</mode>
@@ -868,6 +798,10 @@
 									</location>
 								</property>
 							</properties>
+						</entry>
+						<entry id="single DatabaseCompoundPropertiesTable">
+							<history/>
+							<properties/>
 						</entry>
 						<entry id="single DockableDatabaseLinksTable" current="dock.mode.normal">
 							<history>

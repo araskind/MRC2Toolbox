@@ -30,14 +30,14 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 public class DockableCompoundPropertiesTable  extends DefaultSingleCDockable {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("compoundInfo", 16);
-	private CpdPropertiesTable compoundProprtiesTable;
+	private CompoundPropertiesTable compoundProprtiesTable;
 
-	public DockableCompoundPropertiesTable() {
+	public DockableCompoundPropertiesTable(String id) {
 
-		super("DockableCompoundPropertiesTable", componentIcon, "Compound properties", null, Permissions.MIN_MAX_STACK);
+		super(id, componentIcon, "Compound properties", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 
-		compoundProprtiesTable = new CpdPropertiesTable();
+		compoundProprtiesTable = new CompoundPropertiesTable();
 		add(new JScrollPane(compoundProprtiesTable));
 	}
 

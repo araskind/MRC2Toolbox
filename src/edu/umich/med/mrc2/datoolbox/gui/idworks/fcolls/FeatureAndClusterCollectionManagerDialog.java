@@ -108,13 +108,13 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 		
 		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
 			featureCollectionsManager.loadDatabaseStoredCollections();
-			featureClusterCollectionsManager.loadDatabaseStoredMSMSClusterDataSets();
 			featureLookupDataSetManager.loadDatabaseStoredFeatureLookupDataSets();
+			featureClusterCollectionsManager.loadDatabaseStoredMSMSClusterDataSets();			
 		}
 		else {
 			featureCollectionsManager.loadCollectionsForActiveProject();
-			featureClusterCollectionsManager.loadMSMSClusterDataSetsForActiveProject();
 			featureLookupDataSetManager.loadFeatureLookupDataSetsForActiveProject();
+			featureClusterCollectionsManager.loadMSMSClusterDataSetsForActiveProject();			
 		}
 		pack();
 	}

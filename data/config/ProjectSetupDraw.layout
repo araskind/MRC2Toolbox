@@ -99,11 +99,12 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600213788712" orientation="VERTICAL" divider="0.5199349064279902">
+										<node nodeId="1672779752873" orientation="VERTICAL" divider="0.6042654028436019">
 											<leaf id="0" nodeId="1600213788852">
 												<placeholders>
 													<placeholder>dock.single.DockableLIMSDataPanel</placeholder>
 													<placeholder>dock.single.ProjectDetailsPanel</placeholder>
+													<placeholder>dock.single.FeatureSubsetPanel</placeholder>
 												</placeholders>
 												<placeholder-map>
 													<version>0</version>
@@ -117,18 +118,26 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="-1" nodeId="1600213788855">
+											<leaf id="1" nodeId="1672779752871">
 												<placeholders>
 													<placeholder>dock.single.DesignSubsetPanel</placeholder>
-													<placeholder>dock.single.FeatureSubsetPanel</placeholder>
 												</placeholders>
 												<placeholder-map>
 													<version>0</version>
 													<format>dock.PlaceholderList</format>
 													<entry>
 														<key shared="false">
+															<placeholder>dock.single.DesignSubsetPanel</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+													<entry>
+														<key shared="false">
 															<placeholder>dock.single.FeatureSubsetPanel</placeholder>
 														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
 													</entry>
 												</placeholder-map>
 											</leaf>
@@ -180,29 +189,11 @@
 												<key shared="false">
 													<placeholder>dock.single.DesignSubsetPanel</placeholder>
 												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">2</item>
-												<item key="dock.id" type="i">2</item>
-												<item key="dock.placeholder" type="s">dock.single.DesignSubsetPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
 													<placeholder>dock.single.FeatureSubsetPanel</placeholder>
 												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">3</item>
-												<item key="dock.id" type="i">3</item>
-												<item key="dock.placeholder" type="s">dock.single.FeatureSubsetPanel</item>
 											</entry>
 										</placeholders>
 									</layout>
@@ -227,6 +218,45 @@
 											</layout>
 											<children ignore="false"/>
 										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DesignSubsetPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DesignSubsetPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.FeatureSubsetPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.FeatureSubsetPanel</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
 										<child>
 											<layout factory="predefined" placeholder="dock.single.DesignSubsetPanel">
 												<replacement id="dockablesingle DesignSubsetPanel"/>
@@ -295,9 +325,13 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.FeatureSubsetPanel</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.48006509357200977" id="1600213788712"/>
-												<leaf id="1600213788855"/>
+												<node location="TOP" size="0.5884676145339652" id="1672779752873"/>
+												<leaf id="1600213788852"/>
 											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>2</index>
+											<placeholder>dock.single.FeatureSubsetPanel</placeholder>
 										</property>
 									</location>
 								</property>
@@ -355,12 +389,12 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DesignSubsetPanel</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.48006509357200977" id="1600213788712"/>
-												<leaf id="1600213788855"/>
+												<node location="TOP" size="0.5199349064279902" id="1600213788712"/>
+												<leaf id="1600213788852"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>1</index>
+											<index>2</index>
 											<placeholder>dock.single.DesignSubsetPanel</placeholder>
 										</property>
 									</location>

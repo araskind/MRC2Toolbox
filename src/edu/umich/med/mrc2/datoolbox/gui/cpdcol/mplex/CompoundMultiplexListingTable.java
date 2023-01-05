@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.cpddatabase;
+package edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex;
 
 import java.awt.Cursor;
 import java.awt.Point;
@@ -41,39 +41,40 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.cpdcol.CompoundPopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 
-public class DatabaseCompoundTable extends BasicTable {
+public class CompoundMultiplexListingTable extends BasicTable {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -3817580957098149548L;
 
-	private DatabaseCompoundTableModel model;
+	private CompoundMultiplexListingTableModel model;
 	private MouseMotionAdapter mma;
 
-	public DatabaseCompoundTable() {
+	public CompoundMultiplexListingTable() {
 
 		super();
 
-		model = new DatabaseCompoundTableModel();
+		model = new CompoundMultiplexListingTableModel();
 		setModel(model);
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<DatabaseCompoundTableModel>(model);
+		rowSorter = new TableRowSorter<CompoundMultiplexListingTableModel>(model);
 		setRowSorter(rowSorter);
 
-		rowSorter.setComparator(model.getColumnIndex(DatabaseCompoundTableModel.ID_COLUMN),
+		rowSorter.setComparator(model.getColumnIndex(CompoundMultiplexListingTableModel.ID_COLUMN),
 				new MsFeatureIdentityComparator(SortProperty.ID));
 
 		// Database ID column
 		//cidRenderer = new CompoundIdentityRenderer(CompoundIdentityField.DB_ID);
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
-		columnModel.getColumnById(DatabaseCompoundTableModel.ID_COLUMN)
+		columnModel.getColumnById(CompoundMultiplexListingTableModel.ID_COLUMN)
 			.setCellRenderer(msfIdRenderer);
-		columnModel.getColumnById(DatabaseCompoundTableModel.MASS_COLUMN)
+		columnModel.getColumnById(CompoundMultiplexListingTableModel.MASS_COLUMN)
 			.setCellRenderer(mzRenderer); // Neutral mass
 
 		//	Database link adapter
@@ -83,9 +84,9 @@ public class DatabaseCompoundTable extends BasicTable {
 
 				Point p = e.getPoint();
 
-				if(columnModel.isColumnVisible(columnModel.getColumnById(DatabaseCompoundTableModel.ID_COLUMN))) {
+				if(columnModel.isColumnVisible(columnModel.getColumnById(CompoundMultiplexListingTableModel.ID_COLUMN))) {
 
-					if (columnAtPoint(p) == columnModel.getColumnIndex(DatabaseCompoundTableModel.ID_COLUMN))
+					if (columnAtPoint(p) == columnModel.getColumnIndex(CompoundMultiplexListingTableModel.ID_COLUMN))
 						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 					else
 						setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -139,7 +140,7 @@ public class DatabaseCompoundTable extends BasicTable {
 
 		return (MsFeatureIdentity) model.getValueAt(
 				convertRowIndexToModel(row), 
-				model.getColumnIndex(DatabaseCompoundTableModel.ID_COLUMN));
+				model.getColumnIndex(CompoundMultiplexListingTableModel.ID_COLUMN));
 	}
 	
 	public CompoundIdentity getSelectedCompound() {
@@ -150,14 +151,14 @@ public class DatabaseCompoundTable extends BasicTable {
 
 		return ((MsFeatureIdentity) model.getValueAt(
 				convertRowIndexToModel(row), 
-				model.getColumnIndex(DatabaseCompoundTableModel.ID_COLUMN))).
+				model.getColumnIndex(CompoundMultiplexListingTableModel.ID_COLUMN))).
 					getCompoundIdentity();
 	}
 
 	public Collection<CompoundIdentity> getListedCompounds() {
 
 		Collection<CompoundIdentity>listedCompounds = new ArrayList<CompoundIdentity>();
-		int idCol = model.getColumnIndex(DatabaseCompoundTableModel.ID_COLUMN);
+		int idCol = model.getColumnIndex(CompoundMultiplexListingTableModel.ID_COLUMN);
 		for(int i=0; i<getRowCount(); i++)
 			listedCompounds.add(
 				((MsFeatureIdentity) model.getValueAt(

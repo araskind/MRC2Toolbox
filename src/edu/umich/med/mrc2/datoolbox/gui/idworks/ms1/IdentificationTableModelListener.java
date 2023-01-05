@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.ms1;
 
+import java.util.Collections;
+
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
@@ -32,29 +34,34 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 
 public class IdentificationTableModelListener  implements TableModelListener {
 
-	private UniversalIdentificationResultsTable table;
 	private IDWorkbenchPanel parentPanel;
+	private UniversalIdentificationResultsTable table;
 
-	public IdentificationTableModelListener(UniversalIdentificationResultsTable table, IDWorkbenchPanel parentPanel) {
+	public IdentificationTableModelListener(IDWorkbenchPanel parentPanel) {
 		super();
-		this.table = table;
 		this.parentPanel = parentPanel;
+		this.table = table;
 	}
 
 	public void tableChanged(TableModelEvent e) {
-
-		int row = table.convertRowIndexToView(e.getFirstRow());
-		int col = table.convertColumnIndexToView(e.getColumn());
-		MSFeatureInfoBundle selectedMS1FeatureBundle = parentPanel.getSelectedMSFeatureBundle();		
-		MSFeatureInfoBundle selectedMsMsFeatureBundle = parentPanel.getSelectedMSMSFeatureBundle();
+		
+		UniversalIdentificationResultsTableModel model = 
+				(UniversalIdentificationResultsTableModel)e.getSource();
+		int row = e.getFirstRow();
+		int col = e.getColumn();
+		
+		MSFeatureInfoBundle selectedMS1FeatureBundle = 
+				parentPanel.getSelectedMSFeatureBundle();		
+		MSFeatureInfoBundle selectedMsMsFeatureBundle = 
+				parentPanel.getSelectedMSMSFeatureBundle();
 		if(selectedMsMsFeatureBundle == null && selectedMS1FeatureBundle == null)
 			return;
 
 		boolean dataChanged = false;
-		if (col == table.getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN)) {
+		if (col == model.getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN)) {
 
-			MsFeatureIdentity selectedId = (MsFeatureIdentity) table.getValueAt(row,
-					table.getColumnIndex(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN));
+			MsFeatureIdentity selectedId = (MsFeatureIdentity) model.getValueAt(row,
+					model.getColumnIndex(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN));
 
 			if(selectedMsMsFeatureBundle != null) {
 				
@@ -70,20 +77,23 @@ public class IdentificationTableModelListener  implements TableModelListener {
 					dataChanged = true;
 				}
 			}
-		}
-		
-		if (col == table.getColumnIndex(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN))
+		}		
+		if (col == model.getColumnIndex(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN))
 			dataChanged = true;	
 		
 //		TODO handle other changes if necessary
 		
 		if(dataChanged) {
 			
-			if(selectedMsMsFeatureBundle != null)
-				parentPanel.updateSelectedMSMSFeatures();
-
-			if(selectedMS1FeatureBundle != null)
-				parentPanel.updateSelectedMSFeatures();
+			if(selectedMsMsFeatureBundle != null) {
+				parentPanel.updateMSMSFeatures(Collections.singleton(selectedMsMsFeatureBundle));
+				parentPanel.selectMSMSFeature(selectedMsMsFeatureBundle);
+			}
+			if(selectedMS1FeatureBundle != null) {
+				parentPanel.updateMSFeatures(Collections.singleton(selectedMS1FeatureBundle));
+				parentPanel.selectMSFeature(selectedMS1FeatureBundle);
+			}
+			parentPanel.refreshIdentificationsTable();
 		}
 	}
 }

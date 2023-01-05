@@ -29,7 +29,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-public class CompoundDatabaseTableModel extends BasicTableModel {
+public class DatabaseCompoundTableModel extends BasicTableModel {
 
 	/**
 	 *
@@ -44,7 +44,7 @@ public class CompoundDatabaseTableModel extends BasicTableModel {
 	public static final String SPECTRA_COLUMN = "Spectra";
 	public static final String BIOLOCATION_COLUMN = "Bio location";
 
-	public CompoundDatabaseTableModel() {
+	public DatabaseCompoundTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
 			new ColumnContext(ORDER_COLUMN, Integer.class, false),

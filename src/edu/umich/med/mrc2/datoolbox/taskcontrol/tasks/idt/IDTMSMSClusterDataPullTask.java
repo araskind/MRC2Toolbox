@@ -77,7 +77,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
 		}
-		if(!featureIds.isEmpty()) {
+		if(featureIds != null && !featureIds.isEmpty()) {
 			try {
 				getMsMsFeatures();
 			} catch (Exception e1) {
@@ -210,7 +210,8 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 						cluster, rs.getString("MSMS_ALT_ID"));
 			
 			String lfId = rs.getString("LOOKUP_FEATURE_ID");
-			if(lfId != null) {
+			if(lfId != null && flDataSet != null) {
+				
 				MinimalMSOneFeature lf = flDataSet.getFeatures().stream().
 						filter(f -> f.getId().equals(lfId)).
 						findFirst().orElse(null);

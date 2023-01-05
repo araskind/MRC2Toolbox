@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.main;
 
 import edu.umich.med.mrc2.datoolbox.gui.automator.AutomatorPanel;
+import edu.umich.med.mrc2.datoolbox.gui.cpdcol.CompoundCollectionsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.CompoundDatabasePanel;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering.CorrelationResultsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates.DuplicatesPanel;
@@ -52,6 +53,7 @@ public enum PanelList {
 	CORRELATIONS("Correlation analysis", CorrelationResultsPanel.class, Boolean.FALSE),
 	INTEGRATION("Data integration", DataIntegratorPanel.class, Boolean.FALSE),
 	MS_LIBRARY("MS library", MsLibraryPanel.class, Boolean.FALSE),
+	COMPOUND_COLLECTIONS("Compound collections", CompoundCollectionsPanel.class, Boolean.FALSE),
 	DATABASE("Databases", CompoundDatabasePanel.class, Boolean.FALSE),
 	ID_WORKBENCH("IDTracker workbench", IDWorkbenchPanel.class, Boolean.FALSE),
 	ID_TRACKER_LIMS("IDTracker LIMS", IDTrackerLimsManagerPanel.class, Boolean.FALSE),

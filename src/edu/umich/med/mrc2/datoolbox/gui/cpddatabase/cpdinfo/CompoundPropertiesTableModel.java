@@ -25,7 +25,7 @@ import javax.swing.table.DefaultTableModel;
 
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-public class CpdPropertiesTableModel extends DefaultTableModel {
+public class CompoundPropertiesTableModel extends DefaultTableModel {
 
 	/**
 	 * 

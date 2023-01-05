@@ -99,6 +99,9 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 	}
 	
 	protected void getCashedFeatures() {
+		
+		if(featureIds == null || featureIds.isEmpty())
+			return;
 
 		taskDescription = "Getting feature data from IDTracker database";
 		total = featureIds.size();

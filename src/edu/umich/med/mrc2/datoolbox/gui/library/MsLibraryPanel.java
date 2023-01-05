@@ -47,7 +47,6 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -91,7 +90,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibrar
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.msms.DecoyLibraryGenerationTask;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
-public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ListSelectionListener, ItemListener {
+public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemListener {
 
 	private DockableLibraryFeatureTable libraryFeatureTable;
 	private DockableMolStructurePanel molStructurePanel;
