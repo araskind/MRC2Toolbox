@@ -41,6 +41,7 @@ import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JViewport;
@@ -449,13 +450,21 @@ public class BasicTable extends JTable implements ActionListener{
                     
                     if (JTextField.class.isAssignableFrom(comp.getClass()))
                     	txt = ((JTextField) comp).getText();
-                }              
-            	try {
-					tableData.append(txt.trim().replaceAll("<[^>]*>", "")); //	Strip HTML code
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+                    
+                    if (JTextArea.class.isAssignableFrom(comp.getClass()))
+                    	txt = ((JTextArea) comp).getText();
+                }
+                if(txt != null) {
+                	try {
+    					tableData.append(txt.trim().replaceAll("<[^>]*>", "")); //	Strip HTML code
+    				} catch (Exception e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}
+                }
+                else {
+                	tableData.append("");
+                }
                 if(j<numCols-1)
                 	tableData.append("\t");
                 else

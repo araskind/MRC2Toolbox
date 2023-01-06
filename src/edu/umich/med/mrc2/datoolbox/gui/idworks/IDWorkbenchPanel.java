@@ -76,10 +76,14 @@ import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMSMSClusterProperties;
+import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSComponentTableFields;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
@@ -865,15 +869,36 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		Collection<IDTrackerMSMSClusterProperties>msmsClusterProperties = 
 				idTrackerMSMSClusterDataSetExportDialog.getSelectedMSMSClusterProperties();
-
+		Collection<IDTrackerMsFeatureProperties> msmsFeatureProperties = 
+				idTrackerMSMSClusterDataSetExportDialog.getSelectedFeatureProperties();
 		Collection<IDTrackerFeatureIdentificationProperties> identificationProperties = 
-				idTrackerMSMSClusterDataSetExportDialog.getSelectedIdentificationProperties();
+				idTrackerMSMSClusterDataSetExportDialog.getSelectedIdentificationProperties();		
+		boolean exportIndividualFeatureData = 
+				idTrackerMSMSClusterDataSetExportDialog.exportIndividualFeatureData();
+		MSMSScoringParameter scoringParam = 
+				idTrackerMSMSClusterDataSetExportDialog.getMSMSScoringParameter();
+		double minimalMSMSScore = 
+				idTrackerMSMSClusterDataSetExportDialog.getMinimalMSMSScore();
+		FeatureIDSubset idSubset = 
+				idTrackerMSMSClusterDataSetExportDialog.getFeatureIDSubset();
+		Collection<MSMSMatchType>msmsSearchTypes = 
+				idTrackerMSMSClusterDataSetExportDialog.getMSMSSearchTypes();
+		boolean excludeIfNoIdsLeft = 
+				idTrackerMSMSClusterDataSetExportDialog.excludeIfNoIdsLeft();
 		
-		IDTrackerMSMSClusterDataExportTask task = new IDTrackerMSMSClusterDataExportTask(
-				activeMSMSClusterDataSet,
-				msmsClusterProperties,
-				identificationProperties,
-				idTrackerMSMSClusterDataSetExportDialog.getOutputFile());
+		IDTrackerMSMSClusterDataExportTask task = 
+				new IDTrackerMSMSClusterDataExportTask(
+					activeMSMSClusterDataSet,
+					msmsClusterProperties,
+					msmsFeatureProperties,
+					identificationProperties,
+					exportIndividualFeatureData,
+					scoringParam,
+					minimalMSMSScore,
+					idSubset,
+					msmsSearchTypes,
+					excludeIfNoIdsLeft,
+					idTrackerMSMSClusterDataSetExportDialog.getOutputFile());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);	
 		idTrackerMSMSClusterDataSetExportDialog.dispose();

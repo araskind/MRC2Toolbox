@@ -376,6 +376,7 @@ public enum MainActionCommands {
 	FILTER_MSMS_CLUSTERS_COMMAND("Filter MSMS clusters"),
 	RELOAD_ACTIVE_MSMS_CLUSTERS_SET_COMMAND("Reload active MSMS clusters data set"),
 	SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND("Show MSMS clusters summary"),
+	COPY_LOOKUP_FEATURES_TO_CLIPBOARD_COMMAND("Copy lookup features toclipboard"),
 
 	// Data integration
 	DATA_INTEGRATION_DIALOG_COMMAND("Show data integration setup dialog"),

@@ -42,7 +42,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -62,10 +64,11 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.MinimalMSOneFeatureTable;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class MSMSCLusterDataSetSummaryDialog extends JDialog {
+public class MSMSCLusterDataSetSummaryDialog extends JDialog implements ActionListener{
 
 	/**
 	 * 
@@ -89,7 +92,7 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 	private JLabel flSetLastModifiedLabel;
 	private JLabel flSetCreatedByLabel;	
 	private FoundLookupFeaturesTable foundLookupFeaturesTable;
-	private MinimalMSOneFeatureTable notFoundFeaturesTable;
+	private MinimalMSOneFeatureTable notFoundLookupFeaturesTable;
 	private JLabel dataSetCreatedByLabel;
 	private JLabel lastModifedLabel;
 	private JLabel numFoundLookupFesturesLabel;
@@ -116,12 +119,16 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 		panel_1.add(tabbedPane, BorderLayout.CENTER);
 		
 		foundLookupFeaturesTable = new FoundLookupFeaturesTable();
+		foundLookupFeaturesTable.addTablePopupMenu(
+				new LookupFeatureTablePopupMenu(this));
 		tabbedPane.addTab("Found lookup features", foundIcon, 
 				new JScrollPane(foundLookupFeaturesTable), null);
 
-		notFoundFeaturesTable = new MinimalMSOneFeatureTable();
+		notFoundLookupFeaturesTable = new MinimalMSOneFeatureTable();
+		notFoundLookupFeaturesTable.addTablePopupMenu(
+				new LookupFeatureTablePopupMenu(this));
 		tabbedPane.addTab("NOT found lookup features", notFoundIcon, 
-				new JScrollPane(notFoundFeaturesTable), null);
+				new JScrollPane(notFoundLookupFeaturesTable), null);
 		
 		JPanel panel_4 = new JPanel();
 		panel_4.setBorder(new CompoundBorder(new EmptyBorder(5, 5, 5, 5), 
@@ -469,10 +476,23 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog {
 					filter(f -> !foundLookupFeatures.contains(f)).
 					sorted().collect(Collectors.toList());
 			if(!notFoundLookupFeatures.isEmpty())
-				notFoundFeaturesTable.setTableModelFromFeatureCollection(notFoundLookupFeatures);
+				notFoundLookupFeaturesTable.setTableModelFromFeatureCollection(notFoundLookupFeatures);
 			
 			numFoundLookupFesturesLabel.setText(Integer.toString(foundLookupFeatures.size()));
 			numNotFoundLookupFesturesLabel.setText(Integer.toString(notFoundLookupFeatures.size()));
+		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if(e.getActionCommand().equals(MainActionCommands.COPY_LOOKUP_FEATURES_TO_CLIPBOARD_COMMAND.getName())) {
+			
+			if(((JPopupMenu) ((JMenuItem)e.getSource()).getParent()).getInvoker().equals(foundLookupFeaturesTable))
+				foundLookupFeaturesTable.copyTableDataToClipboard();
+			
+			if(((JPopupMenu) ((JMenuItem)e.getSource()).getParent()).getInvoker().equals(notFoundLookupFeaturesTable))
+				notFoundLookupFeaturesTable.copyTableDataToClipboard();			
 		}
 	}
 }
