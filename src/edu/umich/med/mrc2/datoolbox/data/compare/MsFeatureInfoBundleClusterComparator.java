@@ -45,6 +45,14 @@ public class MsFeatureInfoBundleClusterComparator extends ObjectCompatrator<MsFe
 
 		switch (property) {
 
+		case ID:
+			result = c1.getId().compareTo(c2.getId());
+
+			if (direction == SortDirection.ASC)
+				return result;
+			else
+				return -result;
+			
 		case RT:
 			result = Double.compare(c1.getRt(), c2.getRt());
 

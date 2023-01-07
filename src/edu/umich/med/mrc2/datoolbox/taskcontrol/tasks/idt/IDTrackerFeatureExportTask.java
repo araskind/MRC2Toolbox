@@ -28,14 +28,19 @@ import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
+import edu.umich.med.mrc2.datoolbox.data.IDTrackerDataExportParameters;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -52,27 +57,32 @@ import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationPro
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
-import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
+import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.enums.RefMetClassificationLevels;
+import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
+import edu.umich.med.mrc2.datoolbox.utils.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 
-	protected Collection<IDTrackerMsFeatureProperties> msmsFeaturePropertyList; 
+	protected IDTrackerDataExportParameters params;
+	
+	protected Collection<IDTrackerMsFeatureProperties> featurePropertyList; 
 	protected Collection<IDTrackerFeatureIdentificationProperties>identificationDetailsList;
 
-	protected MSMSScoringParameter scoringParam; 
+	protected MSMSScoringParameter msmsScoringParameter; 
 	protected double minimalMSMSScore; 
-	protected FeatureIDSubset idSubset; 
+	protected FeatureIDSubset featureIdSubset; 
 	protected Collection<MSMSMatchType> msmsSearchTypes; 
 	protected boolean excludeIfNoIdsLeft;
 	protected File outputFile;
+	protected MsDepth msLevel;
 	
 	protected static final String lineSeparator = System.getProperty("line.separator");
 	protected static final char columnSeparator = MRC2ToolBoxConfiguration.getTabDelimiter();
@@ -91,7 +101,8 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 	protected Map<String,Map<ClassyFireClassificationLevels,String>>classyFireClassifications;
 	protected Map<String,String>systematicNames;
 	protected Map<String,String>refMetNames;
-
+	protected Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>identificationMap;
+	protected FeatureIDSubset featureIDSubset;
 	
 	protected void getInjections(Collection<MSFeatureInfoBundle>features) throws Exception {
 		
@@ -111,6 +122,29 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 				injections.add(inj);
 		}
 		ConnectionManager.releaseConnection(conn);		
+	}
+	
+	protected Collection<String>getAccessions(Collection<MSFeatureInfoBundle>features){
+		
+		Collection<String>accessions = null;
+		if(featureIDSubset.equals(FeatureIDSubset.PRIMARY_ONLY)  ) {
+			
+			accessions = features.stream().
+					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+					filter(f -> Objects.nonNull(f.getMsFeature().
+							getPrimaryIdentity().getCompoundIdentity())).
+					map(f -> f.getMsFeature().getPrimaryIdentity().
+							getCompoundIdentity().getPrimaryDatabaseId()).
+					distinct().sorted().collect(Collectors.toList());
+		}
+		else {
+			accessions = features.stream().
+				flatMap(f -> f.getMsFeature().getIdentifications().stream()).
+				filter(i -> Objects.nonNull(i.getCompoundIdentity())).
+				map(i -> i.getCompoundIdentity().getPrimaryDatabaseId()).
+				distinct().sorted().collect(Collectors.toList());
+		}	
+		return accessions;
 	}
 	
 	protected void getSystematicNames() throws Exception {
@@ -291,236 +325,430 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	protected String getFeatureIdentificationProperty(
-			MsFeature feature,
-			MsFeatureIdentity fid,
-			IDTrackerFeatureIdentificationProperties property) {
+	protected void createIdentificationsMap(Collection<MSFeatureInfoBundle>featuresToExport) {
 
-		if(fid == null)
+		taskDescription = "Filtering IDs for export ...";
+		identificationMap = new HashMap<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>();
+		featuresToExport.stream().
+			filter(f -> Objects.isNull(f.getMsFeature().getPrimaryIdentity())).
+			forEach(f -> identificationMap.put(f, null));
+		Collection<MSFeatureInfoBundle>featuresToMap = featuresToExport.stream().
+				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+				collect(Collectors.toList());
+		total = featuresToMap.size();
+		processed = 0;
+		for(MSFeatureInfoBundle f : featuresToMap) {
+			
+			Collection<MsFeatureIdentity>featureIds = filterIdentities(f);
+			identificationMap.put(f, featureIds);
+			processed++;
+		}
+	}
+	
+	protected Collection<MsFeatureIdentity>filterIdentities(MSFeatureInfoBundle f){
+		
+		Collection<MsFeatureIdentity>filteredIds = new HashSet<MsFeatureIdentity>();
+		MsFeatureIdentity primaryId = f.getMsFeature().getPrimaryIdentity();
+		Set<MsFeatureIdentity> allIds = f.getMsFeature().getIdentifications();
+		
+		if(featureIDSubset.equals(FeatureIDSubset.PRIMARY_ONLY))
+			filteredIds.add(primaryId);
+		
+		if(featureIDSubset.equals(FeatureIDSubset.ALL) 
+				|| featureIDSubset.equals(FeatureIDSubset.BEST_SCORING_ONLY))
+			filteredIds.addAll(allIds);
+
+		if(featureIDSubset.equals(FeatureIDSubset.BEST_FOR_EACH_COMPOUND))
+			filteredIds.addAll(IdentificationUtils.getBestMatchIds(f.getMsFeature()));
+		
+		if(filteredIds.isEmpty())
+			return filteredIds;
+		
+		if(!msmsSearchTypes.isEmpty()) {
+			
+			filteredIds = 
+					IdentificationUtils.filterIdsOnMatchType(filteredIds, msmsSearchTypes);			
+			if(filteredIds.isEmpty())
+				return filteredIds;
+		}
+		if(minimalMSMSScore > 0.0d) {
+			filteredIds = IdentificationUtils.filterIdsOnScore(
+					filteredIds,
+					minimalMSMSScore,
+					msmsScoringParameter);
+			if(filteredIds.isEmpty())
+				return filteredIds;
+		}
+		if(featureIDSubset.equals(FeatureIDSubset.BEST_SCORING_ONLY)) {
+			
+			MsFeatureIdentity topHit = IdentificationUtils.getTopScoringIdForMatchTypes(
+					filteredIds,
+					msmsSearchTypes,
+					msmsScoringParameter);
+			filteredIds.clear();
+			if(topHit != null)
+				filteredIds.add(topHit);
+		}			
+		return filteredIds;
+	}
+	
+	protected String getFeatureProperty(
+			MSFeatureInfoBundle bundle, 
+			IDTrackerMsFeatureProperties property) {
+
+		MsFeature feature =  bundle.getMsFeature();	
+		boolean hasAnnotations = !feature.getAnnotations().isEmpty();
+		boolean hasFollowup = !bundle.getIdFollowupSteps().isEmpty();
+		
+		if(property.equals(IDTrackerMsFeatureProperties.FEATURE_ID)) {
+			
+			TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
+			if(msms != null)
+				return msms.getId();
+			else
+				return feature.getId();
+		}		
+		if(property.equals(IDTrackerMsFeatureProperties.RETENTION_TIME))
+			return rtFormat.format(feature.getRetentionTime());
+		
+		if(property.equals(IDTrackerMsFeatureProperties.EXPERIMENT_ID)) {
+			if(bundle.getExperiment() != null)
+				return bundle.getExperiment().getId();
+			else
+				return "";
+		}		
+		if(property.equals(IDTrackerMsFeatureProperties.SAMPLE_ID)) {
+			if(bundle.getSample() != null)
+				return bundle.getSample().getId();
+			else
+				return "";
+		}
+		if(property.equals(IDTrackerMsFeatureProperties.SAMPLE_TYPE)) {
+			if(bundle.getStockSample() != null)
+				return bundle.getStockSample().getLimsSampleType().getName();
+			else
+				return "";
+		}
+		if(property.equals(IDTrackerMsFeatureProperties.ACQ_METHOD)) {	
+			if(bundle.getAcquisitionMethod() != null)
+				return bundle.getAcquisitionMethod().getName();
+			else
+				return "";
+		}
+		if(property.equals(IDTrackerMsFeatureProperties.DATA_ANALYSIS_METHOD)) {
+			if(bundle.getDataExtractionMethod() != null)
+				return bundle.getDataExtractionMethod().getName();
+			else
+				return "";
+		}
+		if(property.equals(IDTrackerMsFeatureProperties.RAW_DATA_FILE)) {
+			
+			String injId = bundle.getInjectionId();
+			Injection inj = injections.stream().
+					filter(i -> i.getId().equals(injId)).
+					findFirst().orElse(null);
+			if(inj != null)
+				return inj.getDataFileName();
+			else
+				return bundle.getDataFile().getName();
+		}		
+		//	MS1 only properties
+		if(msLevel.equals(MsDepth.MS1)) {
+			
+			if(property.equals(IDTrackerMsFeatureProperties.BASE_PEAK_MZ))
+					return mzFormat.format(feature.getBasePeakMz());
+			
+			if(property.equals(IDTrackerMsFeatureProperties.CHARGE))
+					return Integer.toString(feature.getCharge());
+			
+			if(property.equals(IDTrackerMsFeatureProperties.ADDUCT)) {
+				if(feature.getSpectrum() != null) {
+					Adduct adduct = feature.getSpectrum().getPrimaryAdduct();
+					if(adduct != null)
+						return adduct.getName();
+				}
+			}		
+			if(property.equals(IDTrackerMsFeatureProperties.NEUTRAL_MASS))
+					return mzFormat.format(feature.getNeutralMass());
+			
+			if(property.equals(IDTrackerMsFeatureProperties.KMD))
+					return ppmFormat.format(feature.getKmd());
+			
+			if(property.equals(IDTrackerMsFeatureProperties.KMD_MOD))
+					return ppmFormat.format(feature.getModifiedKmd());		
+		}
+		//	MS2 only properties
+		TandemMassSpectrum instrumentMsMs = null;
+		if(msLevel.equals(MsDepth.MS2)) {
+			
+			instrumentMsMs = feature.getSpectrum().getTandemSpectra().
+				stream().filter(s -> s.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
+				findFirst().orElse(null);
+			
+			if(property.equals(IDTrackerMsFeatureProperties.PRECURSOR_MZ))
+				return mzFormat.format(instrumentMsMs.getParent().getMz());
+			
+			if(property.equals(IDTrackerMsFeatureProperties.COLLISION_ENERGY))
+				return ppmFormat.format(instrumentMsMs.getCidLevel());
+			
+			if(property.equals(IDTrackerMsFeatureProperties.SPECTRUM_ENTROPY)) 
+				return entropyFormat.format(instrumentMsMs.getEntropy());
+			
+			if(property.equals(IDTrackerMsFeatureProperties.TOTAL_INTENSITY))
+				return intensityFormat.format(instrumentMsMs.getTotalIntensity());		
+		}
+		
+		if(property.equals(IDTrackerMsFeatureProperties.ANNOTATIONS) && hasAnnotations)
+			return trueMarker;
+		
+		if(property.equals(IDTrackerMsFeatureProperties.FOLLOWUPS) && hasFollowup)
+			return trueMarker;
+		
+		return "";
+	}
+	
+	protected String getFeatureIdentificationProperty(
+			MsFeatureIdentity id,
+			MsFeature feature,
+			IDTrackerFeatureIdentificationProperties property) {
+		
+		if(id == null)
 			return "";
 		
 		String compoundName = "";
 		String idLevelName = "";
 		MSFeatureIdentificationLevel idLevel = null;
-		if(fid != null) {
-			compoundName = fid.getIdentityName();
-			if(fid.getCompoundIdentity() != null)
-				compoundName = fid.getName();
-			
-			if(compoundName == null)
-				compoundName = "";
-			
-			idLevel = fid.getIdentificationLevel();
-			if(idLevel != null)
-				idLevelName = idLevel.getName();
-		}		
-		double deltaMz = MsUtils.getMassErrorForIdentity(
-				feature.getMonoisotopicMz(), fid, MassErrorType.ppm);
+
+		compoundName = id.getIdentityName();
+		if(id.getCompoundIdentity() != null)
+			compoundName = id.getName();
+		
+		if(compoundName == null)
+			compoundName = "";
+		
+		idLevel = id.getIdentificationLevel();
+		if(idLevel != null)
+			idLevelName = idLevel.getName();
+
+		double deltaMz = MsUtils.getPpmMassErrorForIdentity(feature, id);
 
 		if(property.equals(IDTrackerFeatureIdentificationProperties.COMPOUND_NAME))
 			return compoundName;
-				 
-		if(fid.getCompoundIdentity() != null) {
+		
+		if(property.equals(IDTrackerFeatureIdentificationProperties.IS_PRIMARY_ID)) {
 			
-			if(fid.getCompoundIdentity().getPrimaryDatabase() != null) {
+			if(feature.getPrimaryIdentity() == null)
+				return "";
+			
+			if(feature.getPrimaryIdentity().equals(id))
+				return trueMarker;
+			else
+				return "";			
+		}
+		if(id.getCompoundIdentity() != null) {
+			
+			if(id.getCompoundIdentity().getPrimaryDatabase() != null) {
 				
 				if(property.equals(IDTrackerFeatureIdentificationProperties.DATABASE_ID))
-					return fid.getCompoundIdentity().getPrimaryDatabaseId();
+					return id.getCompoundIdentity().getPrimaryDatabaseId();
 					
 				if(property.equals(IDTrackerFeatureIdentificationProperties.SOURCE_DATABASE))
-					return fid.getCompoundIdentity().getPrimaryDatabase().getName();	
+					return id.getCompoundIdentity().getPrimaryDatabase().getName();	
 				
 				if(property.equals(IDTrackerFeatureIdentificationProperties.FORMULA))
-					return fid.getCompoundIdentity().getFormula();	
+					return id.getCompoundIdentity().getFormula();	
 				
 				if(property.equals(IDTrackerFeatureIdentificationProperties.INCHI_KEY))
-					return fid.getCompoundIdentity().getInChiKey();	
+					return id.getCompoundIdentity().getInChiKey();	
 				
 				if(property.equals(IDTrackerFeatureIdentificationProperties.SMILES))
-					return fid.getCompoundIdentity().getSmiles();
+					return id.getCompoundIdentity().getSmiles();
 								
 				if(property.equals(IDTrackerFeatureIdentificationProperties.REFMET_NAME))
-					return refMetNames.get(fid.getCompoundIdentity().getPrimaryDatabaseId());
+					return refMetNames.get(id.getCompoundIdentity().getPrimaryDatabaseId());
 								
 				if(property.equals(IDTrackerFeatureIdentificationProperties.SYSTEMATIC_NAME))
-					return systematicNames.get(fid.getCompoundIdentity().getPrimaryDatabaseId());			
+					return systematicNames.get(id.getCompoundIdentity().getPrimaryDatabaseId());			
 			}
 		}
 		if(property.equals(IDTrackerFeatureIdentificationProperties.ID_SOURCE))
-			return fid.getIdSource().getName();
-
-		//	Move to feature properties, these are not identity properties
-		
-//		if(property.equals(IDTrackerFeatureIdentificationProperties.ANNOTATIONS) && hasAnnotations)
-//			return trueMarker;
-//		
-//		if(property.equals(IDTrackerFeatureIdentificationProperties.FOLLOWUPS) && hasFollowup)
-//			return trueMarker;
+			return id.getIdSource().getName();
 		
 		if(property.equals(IDTrackerFeatureIdentificationProperties.MRC2_ID_LEVEL))
 			return idLevelName;
 		
 		if(property.equals(IDTrackerFeatureIdentificationProperties.ID_SCORE)) {
 			
-			if(fid.getScore() > 0.0d)
-				return entropyFormat.format(fid.getScore());
+			if(id.getScore() > 0.0d)
+				return entropyFormat.format(id.getScore());
 		}
 		if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_ENTROPY_SCORE)) {
 			
-			if(fid.getEntropyBasedScore() > 0.0d)
-				return entropyFormat.format(fid.getEntropyBasedScore());
+			if(id.getEntropyBasedScore() > 0.0d)
+				return entropyFormat.format(id.getEntropyBasedScore());
 		}		
 		if(property.equals(IDTrackerFeatureIdentificationProperties.MASS_ERROR) && deltaMz != 0.0d)
 			return ppmFormat.format(deltaMz);
-
-		if(property.equals(IDTrackerFeatureIdentificationProperties.RETENTION_ERROR)) {
-			Double deltaRt = calculateRetentionShift(fid, feature.getRetentionTime());
-			if(deltaRt == null)
-				return "";
-			else
-				return rtFormat.format(deltaRt);
-		}
-		double parentMz = 0.0d;
-		String collisionEnergyValue = null;
-		boolean isHybrid = false;
-		boolean isInSource = false;
-		double forwardScore = 0.0d;
-		double reverseScore = 0.0d;
-		double probability = 0.0d;
-		double dotProduct = 0.0d;		
-		double revDotProduct = 0.0d;
-		double hybDotProduct = 0.0d;
-		double hybScore = 0.0d;
-		double hybDmz = 0.0d;
-		double msmsEntropy = 0.0d;			
-		double qValue = 0.0d;
-		double posteriorProbability = 0.0d;
-		double percolatorScore = 0.0d;
-		String featureSpectrumArray = "";
-		String libraryHitSpectrumArray = "";		
-		double libraryPrecursorDeltaMz = 0.0d;
-		double neutralMassDeltaMz = 0.0d;
-		double precursorPurity = 1.0d;
 		
-		TandemMassSpectrum instrumentMsMs = feature.getSpectrum().getExperimentalTandemSpectrum();
-		
-		if(instrumentMsMs != null) {
+		//	MS1 only properties
+		if(msLevel.equals(MsDepth.MS1)) {
 
-			if(instrumentMsMs.getParent() != null)
-				parentMz = instrumentMsMs.getParent().getMz();
+			if(id.getMsRtLibraryMatch() != null) {
+				if(property.equals(IDTrackerFeatureIdentificationProperties.BEST_MATCH_ADDUCT))
+					return id.getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch().getName();
 			
-			featureSpectrumArray = instrumentMsMs.getSpectrumAsPythonArray();				
-			precursorPurity = instrumentMsMs.getParentIonPurity();
-		}
-		ReferenceMsMsLibraryMatch msmslibMatch = fid.getReferenceMsMsLibraryMatch();
-		ReferenceMsMsLibrary lib = null;
-		MsMsLibraryFeature matchFeature = null;
-		if(msmslibMatch != null) {
-			
-			matchFeature = msmslibMatch.getMatchedLibraryFeature();
-			lib = IDTDataCash.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
-			collisionEnergyValue = matchFeature.getCollisionEnergyValue();
-			forwardScore = msmslibMatch.getForwardScore();
-			reverseScore = msmslibMatch.getReverseScore();
-			probability = msmslibMatch.getProbability();
-			dotProduct = msmslibMatch.getDotProduct();
-			isHybrid = msmslibMatch.isHybridMatch();
-			isInSource = msmslibMatch.isInSourceMatch();
-			revDotProduct = msmslibMatch.getReverseDotProduct();
-			hybDotProduct = msmslibMatch.getHybridDotProduct();
-			hybScore = msmslibMatch.getHybridScore();
-			hybDmz = msmslibMatch.getHybridDeltaMz();
-			msmsEntropy = matchFeature.getSpectrumEntropy();				
-			if(!isHybrid)
-				deltaMz = MsUtils.getMassErrorForIdentity(
-						feature.getMonoisotopicMz(), fid, MassErrorType.ppm);
-			
-			qValue = msmslibMatch.getqValue();
-			posteriorProbability = msmslibMatch.getPosteriorErrorProbability();
-			percolatorScore = msmslibMatch.getPercolatorScore();				
-			libraryHitSpectrumArray = matchFeature.getSpectrumAsPythonArray();
-
-			if(fid.getCompoundIdentity() != null) {
-				double neutralMass = fid.getCompoundIdentity().getExactMass();
-				neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
+				if(property.equals(IDTrackerFeatureIdentificationProperties.MSRT_LIB)) {
+					//	TODO reeplace by library object or name
+					return id.getMsRtLibraryMatch().getLibraryId();					
+				}
 			}
-			MsPoint libPrecursor = msmslibMatch.getMatchedLibraryFeature().getParent();
-			if(libPrecursor != null) 
-				libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();				
-		}	
-		if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY) && lib != null)
-			return lib.getName();
-		
-//		if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY_ENTRY_ID))
-//			msmslibMatch.getMatchedLibraryFeature().getMsmsLibraryIdentifier();
+			if(property.equals(IDTrackerFeatureIdentificationProperties.RETENTION_ERROR)) {
+				Double deltaRt = calculateRetentionShift(id, feature.getRetentionTime());
+				return rtFormat.format(deltaRt);
+			}
+		}
+		//	MS2 only properties
+		TandemMassSpectrum instrumentMsMs = null;
+		if(msLevel.equals(MsDepth.MS2)) {
 			
-		if(property.equals(IDTrackerFeatureIdentificationProperties.COLLISION_ENERGY) && collisionEnergyValue != null)
-			return collisionEnergyValue;
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_SCORE) && reverseScore != 0.0d)
-			return entropyFormat.format(reverseScore);
+			double parentMz = 0.0d;
+			String collisionEnergyValue = null;
+			boolean isHybrid = false;
+			boolean isInSource = false;
+			double forwardScore = 0.0d;
+			double reverseScore = 0.0d;
+			double probability = 0.0d;
+			double dotProduct = 0.0d;		
+			double revDotProduct = 0.0d;
+			double hybDotProduct = 0.0d;
+			double hybScore = 0.0d;
+			double hybDmz = 0.0d;
+			double msmsEntropy = 0.0d;			
+			double qValue = 0.0d;
+			double posteriorProbability = 0.0d;
+			double percolatorScore = 0.0d;
+			String featureSpectrumArray = "";
+			String libraryHitSpectrumArray = "";		
+			double libraryPrecursorDeltaMz = 0.0d;
+			double neutralMassDeltaMz = 0.0d;
+			double precursorPurity = 1.0d;
+			
+			instrumentMsMs = feature.getSpectrum().getExperimentalTandemSpectrum();
+			if(instrumentMsMs != null) {
 
-		if(property.equals(IDTrackerFeatureIdentificationProperties.PROBABILITY) && probability != 0.0d) 
-			return entropyFormat.format(probability);
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.DOT_PRODUCT_COLUMN) && dotProduct != 0.0d)
-			return entropyFormat.format(dotProduct);
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_DOT_PRODUCT) && revDotProduct != 0.0d)
-			return entropyFormat.format(revDotProduct);
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.MATCH_TYPE)) {
-			if(isHybrid)
-				return MSMSMatchType.Hybrid.name();
-			else if(isInSource)
-				return MSMSMatchType.InSource.name();
-			else
-				return MSMSMatchType.Regular.name();
+				if(instrumentMsMs.getParent() != null)
+					parentMz = instrumentMsMs.getParent().getMz();
+				
+				featureSpectrumArray = instrumentMsMs.getSpectrumAsPythonArray();				
+				precursorPurity = instrumentMsMs.getParentIonPurity();
+			}
+			ReferenceMsMsLibraryMatch msmslibMatch = id.getReferenceMsMsLibraryMatch();
+			ReferenceMsMsLibrary lib = null;
+			MsMsLibraryFeature matchFeature = null;
+			if(msmslibMatch != null) {
+				matchFeature = msmslibMatch.getMatchedLibraryFeature();
+				lib = IDTDataCash.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
+				collisionEnergyValue = matchFeature.getCollisionEnergyValue();
+				forwardScore = msmslibMatch.getForwardScore();
+				reverseScore = msmslibMatch.getReverseScore();
+				probability = msmslibMatch.getProbability();
+				dotProduct = msmslibMatch.getDotProduct();
+				isHybrid = msmslibMatch.isHybridMatch();
+				isInSource = msmslibMatch.isInSourceMatch();
+				revDotProduct = msmslibMatch.getReverseDotProduct();
+				hybDotProduct = msmslibMatch.getHybridDotProduct();
+				hybScore = msmslibMatch.getHybridScore();
+				hybDmz = msmslibMatch.getHybridDeltaMz();
+				msmsEntropy = matchFeature.getSpectrumEntropy();				
+				if(!isHybrid)
+					deltaMz = MsUtils.getPpmMassErrorForIdentity(feature, id);
+				
+				qValue = msmslibMatch.getqValue();
+				posteriorProbability = msmslibMatch.getPosteriorErrorProbability();
+				percolatorScore = msmslibMatch.getPercolatorScore();				
+				libraryHitSpectrumArray = matchFeature.getSpectrumAsPythonArray();
+
+				if(id.getCompoundIdentity() != null) {
+					double neutralMass = id.getCompoundIdentity().getExactMass();
+					neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
+				}
+				MsPoint libPrecursor = msmslibMatch.getMatchedLibraryFeature().getParent();
+				if(libPrecursor != null) 
+					libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();				
+			}	
+			if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY) && lib != null)
+				return lib.getName();
+			
+//			if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY_ENTRY_ID)) {
+//				msmslibMatch.getMatchedLibraryFeature().getMsmsLibraryIdentifier()
+//			}
+			if(property.equals(IDTrackerFeatureIdentificationProperties.COLLISION_ENERGY) && collisionEnergyValue != null)
+				return collisionEnergyValue;
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_SCORE) && reverseScore != 0.0d)
+				return entropyFormat.format(reverseScore);
+
+			if(property.equals(IDTrackerFeatureIdentificationProperties.PROBABILITY) && probability != 0.0d) 
+				return entropyFormat.format(probability);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.DOT_PRODUCT_COLUMN) && dotProduct != 0.0d)
+				return entropyFormat.format(dotProduct);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_DOT_PRODUCT) && revDotProduct != 0.0d)
+				return entropyFormat.format(revDotProduct);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.MATCH_TYPE)) {
+				if(isHybrid)
+					return MSMSMatchType.Hybrid.name();
+				else if(isInSource)
+					return MSMSMatchType.InSource.name();
+				else
+					return MSMSMatchType.Regular.name();
+			}
+			if(property.equals(IDTrackerFeatureIdentificationProperties.HYBRID_DOT_PRODUCT) && hybDotProduct != 0.0d)
+				return entropyFormat.format(hybDotProduct);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.HYBRID_SCORE) && hybScore != 0.0d)
+				return entropyFormat.format(hybScore);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.HYBRID_DELTA_MZ) && hybDmz != 0.0d)
+				return mzFormat.format(hybDmz);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.SPECTRUM_ENTROPY) && msmsEntropy != 0.0d)
+				return entropyFormat.format(msmsEntropy);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_PRECURSOR_DELTA_MZ) && libraryPrecursorDeltaMz != 0.0d)
+				return mzFormat.format(libraryPrecursorDeltaMz);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.NEUTRAL_MASS_PRECURSOR_DELTA_MZ) && neutralMassDeltaMz != 0.0d)
+				return mzFormat.format(neutralMassDeltaMz);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.PRECURSOR_PURITY) && precursorPurity != 0.0d)
+				return entropyFormat.format(precursorPurity);
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.FDR_Q_VALUE) && qValue != 0.0d) {
+				if(qValue < 0.001d || qValue > 1000.d)
+					return sciFormatter.format(qValue);
+				else
+					return entropyFormat.format(qValue);
+			}
+			if(property.equals(IDTrackerFeatureIdentificationProperties.POSTERIOR_PROBABILITY) && posteriorProbability != 0.0d) {
+				if(posteriorProbability < 0.001d || posteriorProbability > 1000.d)
+					return sciFormatter.format(posteriorProbability);
+				else
+					return entropyFormat.format(posteriorProbability);	
+			}
+			if(property.equals(IDTrackerFeatureIdentificationProperties.PERCOLATOR_SCORE) && percolatorScore != 0.0d)
+				return entropyFormat.format(percolatorScore);	
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.FEATURE_MSMS))
+				return featureSpectrumArray;	
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_MATCH_MSMS))
+				return libraryHitSpectrumArray;
 		}
-		if(property.equals(IDTrackerFeatureIdentificationProperties.HYBRID_DOT_PRODUCT) && hybDotProduct != 0.0d)
-			return entropyFormat.format(hybDotProduct);
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.HYBRID_SCORE) && hybScore != 0.0d)
-			return entropyFormat.format(hybScore);
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.HYBRID_DELTA_MZ) && hybDmz != 0.0d)
-			return mzFormat.format(hybDmz);
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.SPECTRUM_ENTROPY) && msmsEntropy != 0.0d)
-			return entropyFormat.format(msmsEntropy);
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_PRECURSOR_DELTA_MZ) && libraryPrecursorDeltaMz != 0.0d)
-			return mzFormat.format(libraryPrecursorDeltaMz);
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.NEUTRAL_MASS_PRECURSOR_DELTA_MZ) && neutralMassDeltaMz != 0.0d)
-			return mzFormat.format(neutralMassDeltaMz);
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.PRECURSOR_PURITY) && precursorPurity != 0.0d)
-			return entropyFormat.format(precursorPurity);
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.FDR_Q_VALUE) && qValue != 0.0d) {
-			if(qValue < 0.001d || qValue > 1000.d)
-				return sciFormatter.format(qValue);
-			else
-				return entropyFormat.format(qValue);
-		}
-		if(property.equals(IDTrackerFeatureIdentificationProperties.POSTERIOR_PROBABILITY) && posteriorProbability != 0.0d) {
-			if(posteriorProbability < 0.001d || posteriorProbability > 1000.d)
-				return sciFormatter.format(posteriorProbability);
-			else
-				return entropyFormat.format(posteriorProbability);	
-		}
-		if(property.equals(IDTrackerFeatureIdentificationProperties.PERCOLATOR_SCORE) && percolatorScore != 0.0d)
-			return entropyFormat.format(percolatorScore);	
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.FEATURE_MSMS))
-			return featureSpectrumArray;	
-		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_MATCH_MSMS))
-			return libraryHitSpectrumArray;
-		
 		return "";
-	}	
+	}
 	
 	protected Double calculateRetentionShift(MsFeatureIdentity id, double observedRt) {
 

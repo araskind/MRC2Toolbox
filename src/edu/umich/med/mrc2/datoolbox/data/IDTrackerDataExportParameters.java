@@ -25,6 +25,7 @@ import java.util.Collection;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
+import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMSMSClusterProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
@@ -34,6 +35,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 public class IDTrackerDataExportParameters {
 
 	private MsDepth msLevel;
+	private Collection<IDTrackerMSMSClusterProperties> msmsClusterPropertyList;
 	private Collection<IDTrackerMsFeatureProperties> featurePropertyList;
 	private Collection<IDTrackerFeatureIdentificationProperties> identificationDetailsList; 
 	private boolean removeRedundant;
@@ -45,12 +47,14 @@ public class IDTrackerDataExportParameters {
 	private FeatureIDSubset featureIDSubset;	
 	private Collection<MSMSMatchType>msmsSearchTypes;
 	private boolean excludeFromExportWhenAllIdsFilteredOut;
+	private boolean exportIndividualFeatures;	//	For cluster export
 	
 	public IDTrackerDataExportParameters() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
+	//	For feature export
 	public IDTrackerDataExportParameters(
 			MsDepth msLevel, 
 			Collection<IDTrackerMsFeatureProperties> featurePropertyList,
@@ -72,6 +76,31 @@ public class IDTrackerDataExportParameters {
 		this.redundantMzWindow = redundantMzWindow;
 		this.redMzErrorType = redMzErrorType;
 		this.redundantRTWindow = redundantRTWindow;
+		this.msmsScoringParameter = msmsScoringParameter;
+		this.minimalMSMSScore = minimalMSMSScore;
+		this.featureIDSubset = featureIDSubset;
+		this.msmsSearchTypes = msmsSearchTypes;
+		this.excludeFromExportWhenAllIdsFilteredOut = excludeFromExportWhenAllIdsFilteredOut;
+	}
+	
+	//	For cluster export
+	public IDTrackerDataExportParameters(
+			MsDepth msLevel, 
+			Collection<IDTrackerMSMSClusterProperties> msmsClusterPropertyList,
+			Collection<IDTrackerMsFeatureProperties> featurePropertyList,
+			Collection<IDTrackerFeatureIdentificationProperties> identificationDetailsList, 
+			boolean exportIndividualFeatures,
+			MSMSScoringParameter msmsScoringParameter, 
+			double minimalMSMSScore, 
+			FeatureIDSubset featureIDSubset,
+			Collection<MSMSMatchType> msmsSearchTypes,
+			boolean excludeFromExportWhenAllIdsFilteredOut) {
+		super();
+		this.msLevel = msLevel;
+		this.msmsClusterPropertyList = msmsClusterPropertyList;
+		this.featurePropertyList = featurePropertyList;
+		this.identificationDetailsList = identificationDetailsList;
+		this.exportIndividualFeatures = exportIndividualFeatures;		
 		this.msmsScoringParameter = msmsScoringParameter;
 		this.minimalMSMSScore = minimalMSMSScore;
 		this.featureIDSubset = featureIDSubset;
@@ -174,5 +203,21 @@ public class IDTrackerDataExportParameters {
 
 	public void setExcludeFromExportWhenAllIdsFilteredOut(boolean excludeFromExportWhenAllIdsFilteredOut) {
 		this.excludeFromExportWhenAllIdsFilteredOut = excludeFromExportWhenAllIdsFilteredOut;
+	}
+
+	public Collection<IDTrackerMSMSClusterProperties> getMsmsClusterPropertyList() {
+		return msmsClusterPropertyList;
+	}
+
+	public void setMsmsClusterPropertyList(Collection<IDTrackerMSMSClusterProperties> msmsClusterPropertyList) {
+		this.msmsClusterPropertyList = msmsClusterPropertyList;
+	}
+
+	public boolean isExportIndividualFeatures() {
+		return exportIndividualFeatures;
+	}
+
+	public void setExportIndividualFeatures(boolean exportIndividualFeatures) {
+		this.exportIndividualFeatures = exportIndividualFeatures;
 	}
 }

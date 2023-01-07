@@ -113,7 +113,9 @@ public class IDTrackerDataExportDialog extends JDialog
 				IDTrackerMsFeatureProperties.ACQ_METHOD,
 				IDTrackerMsFeatureProperties.SAMPLE_TYPE,
 				IDTrackerMsFeatureProperties.SPECTRUM_ENTROPY,
-				IDTrackerMsFeatureProperties.TOTAL_INTENSITY,				
+				IDTrackerMsFeatureProperties.TOTAL_INTENSITY,
+				IDTrackerMsFeatureProperties.ANNOTATIONS,
+				IDTrackerMsFeatureProperties.FOLLOWUPS,
 		};
 	private final static IDTrackerFeatureIdentificationProperties[] defaultMsTwoIdentificationProperties 
 		= new IDTrackerFeatureIdentificationProperties[] {				
@@ -124,8 +126,6 @@ public class IDTrackerDataExportDialog extends JDialog
 				IDTrackerFeatureIdentificationProperties.FWD_SCORE,
 				IDTrackerFeatureIdentificationProperties.REVERSE_SCORE,
 				IDTrackerFeatureIdentificationProperties.MATCH_TYPE,
-				IDTrackerFeatureIdentificationProperties.ANNOTATIONS,
-				IDTrackerFeatureIdentificationProperties.FOLLOWUPS,
 				IDTrackerFeatureIdentificationProperties.ID_LEVEL,				
 		};	
 	private final static IDTrackerMsFeatureProperties[] defaultMsOneFeatureProperties 
@@ -135,6 +135,8 @@ public class IDTrackerDataExportDialog extends JDialog
 				IDTrackerMsFeatureProperties.BASE_PEAK_MZ,
 				IDTrackerMsFeatureProperties.ACQ_METHOD,
 				IDTrackerMsFeatureProperties.SAMPLE_TYPE,
+				IDTrackerMsFeatureProperties.ANNOTATIONS,
+				IDTrackerMsFeatureProperties.FOLLOWUPS,
 		};
 	private final static IDTrackerFeatureIdentificationProperties[] defaultMsOneIdentificationProperties 
 		= new IDTrackerFeatureIdentificationProperties[] {
@@ -144,8 +146,6 @@ public class IDTrackerDataExportDialog extends JDialog
 				IDTrackerFeatureIdentificationProperties.MSRT_LIB,
 				IDTrackerFeatureIdentificationProperties.MASS_ERROR,
 				IDTrackerFeatureIdentificationProperties.RETENTION_ERROR,
-				IDTrackerFeatureIdentificationProperties.ANNOTATIONS,
-				IDTrackerFeatureIdentificationProperties.FOLLOWUPS,
 				IDTrackerFeatureIdentificationProperties.ID_LEVEL,
 		};
 	

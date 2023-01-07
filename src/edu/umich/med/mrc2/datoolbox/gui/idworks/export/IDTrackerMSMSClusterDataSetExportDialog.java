@@ -64,12 +64,14 @@ import javax.swing.border.TitledBorder;
 
 import org.apache.commons.lang3.StringUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.IDTrackerDataExportParameters;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMSMSClusterProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
+import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -117,7 +119,9 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 				IDTrackerMsFeatureProperties.ACQ_METHOD,
 				IDTrackerMsFeatureProperties.SAMPLE_TYPE,
 				IDTrackerMsFeatureProperties.SPECTRUM_ENTROPY,
-				IDTrackerMsFeatureProperties.TOTAL_INTENSITY,				
+				IDTrackerMsFeatureProperties.TOTAL_INTENSITY,
+				IDTrackerMsFeatureProperties.ANNOTATIONS,
+				IDTrackerMsFeatureProperties.FOLLOWUPS,
 		};
 	
 	private final static IDTrackerFeatureIdentificationProperties[] defaultMSMSClusterIdentificationProperties 
@@ -129,8 +133,6 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 				IDTrackerFeatureIdentificationProperties.MSMS_ENTROPY_SCORE,
 				IDTrackerFeatureIdentificationProperties.ID_SCORE,
 				IDTrackerFeatureIdentificationProperties.MATCH_TYPE,
-				IDTrackerFeatureIdentificationProperties.ANNOTATIONS,
-				IDTrackerFeatureIdentificationProperties.FOLLOWUPS,
 				IDTrackerFeatureIdentificationProperties.ID_LEVEL,				
 		};	
 
@@ -652,6 +654,22 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		
 		if (e.getStateChange() == ItemEvent.DESELECTED)
 			identificationExportSettingsPanel.toggleFormStatus(false);
+	}
+	
+	public IDTrackerDataExportParameters getIDTrackerDataExportParameters() {
+		
+		IDTrackerDataExportParameters params = new IDTrackerDataExportParameters(
+				MsDepth.MS2, 
+				getSelectedMSMSClusterProperties(),
+				getSelectedFeatureProperties(),
+				getSelectedIdentificationProperties(), 
+				exportIndividualFeatureData(),
+				getMSMSScoringParameter(), 
+				getMinimalMSMSScore(), 
+				getFeatureIDSubset(),
+				getMSMSSearchTypes(),
+				excludeIfNoIdsLeft());
+		return params;
 	}
 }
 

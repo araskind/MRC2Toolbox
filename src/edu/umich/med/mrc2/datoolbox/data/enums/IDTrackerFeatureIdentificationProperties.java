@@ -31,8 +31,6 @@ public enum IDTrackerFeatureIdentificationProperties {
 	SMILES("SMILES"),
 	ID_LEVEL("ID level"),
 	ID_SOURCE("ID source"),
-	ANNOTATIONS("Is annotated"),
-	FOLLOWUPS("Follow-up assigned"),
 	MRC2_ID_LEVEL("MRC2 ID level"),
 	ID_SCORE("Score"),
 	MSMS_ENTROPY_SCORE("MSMS entropy score"),
@@ -64,7 +62,8 @@ public enum IDTrackerFeatureIdentificationProperties {
 	POSTERIOR_PROBABILITY("Posterior probability"),
 	PERCOLATOR_SCORE("Percolator score"),
 	FEATURE_MSMS("Feature MSMS"),
-	LIBRARY_MATCH_MSMS("Library match MSMS"),	
+	LIBRARY_MATCH_MSMS("Library match MSMS"),
+	IS_PRIMARY_ID("PrimaryID"),
 	;
 
 	private final String name;

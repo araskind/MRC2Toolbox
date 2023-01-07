@@ -41,6 +41,8 @@ public enum IDTrackerMsFeatureProperties {
 	COLLISION_ENERGY("Collision energy"),
 	SPECTRUM_ENTROPY("Entropy"),
 	TOTAL_INTENSITY("Total intensity"),
+	ANNOTATIONS("Is annotated"),
+	FOLLOWUPS("Follow-up assigned"),
 	;
 
 	private final String name;
