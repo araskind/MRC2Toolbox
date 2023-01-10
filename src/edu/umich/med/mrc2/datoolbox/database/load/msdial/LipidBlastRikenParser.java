@@ -280,7 +280,7 @@ public class LipidBlastRikenParser {
 					unprocessedIds,
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -359,7 +359,7 @@ public class LipidBlastRikenParser {
 					unprocessedIds,
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -476,7 +476,7 @@ public class LipidBlastRikenParser {
 					unprocessedIds,
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

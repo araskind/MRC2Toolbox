@@ -370,7 +370,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 						manifestString, 
 						StandardCharsets.UTF_8,
 						StandardOpenOption.CREATE, 
-						StandardOpenOption.APPEND);
+						StandardOpenOption.TRUNCATE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -420,7 +420,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 						worklistString, 
 						StandardCharsets.UTF_8,
 						StandardOpenOption.CREATE, 
-						StandardOpenOption.APPEND);
+						StandardOpenOption.TRUNCATE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

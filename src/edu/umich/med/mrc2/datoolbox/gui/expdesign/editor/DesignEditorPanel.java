@@ -346,7 +346,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 						designString, 
 						StandardCharsets.UTF_8,
 						StandardOpenOption.CREATE, 
-						StandardOpenOption.APPEND);
+						StandardOpenOption.TRUNCATE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

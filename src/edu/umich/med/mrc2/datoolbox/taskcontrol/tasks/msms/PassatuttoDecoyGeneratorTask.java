@@ -329,7 +329,7 @@ public class PassatuttoDecoyGeneratorTask extends AbstractTask {
 					line + "\n", 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.WRITE,
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

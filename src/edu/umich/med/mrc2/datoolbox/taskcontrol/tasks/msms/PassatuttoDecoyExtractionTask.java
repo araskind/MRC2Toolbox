@@ -161,7 +161,7 @@ public class PassatuttoDecoyExtractionTask extends AbstractTask {
 					mspEntry, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.WRITE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}    

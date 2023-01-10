@@ -117,7 +117,7 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 					line + "\n", 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.WRITE,
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

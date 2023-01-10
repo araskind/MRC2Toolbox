@@ -505,7 +505,7 @@ public class FileToolsDialog extends JDialog
 						worklistString, 
 						StandardCharsets.UTF_8,
 						StandardOpenOption.CREATE, 
-						StandardOpenOption.APPEND);
+						StandardOpenOption.TRUNCATE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

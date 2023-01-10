@@ -460,6 +460,12 @@ public class IDTrackerDataExportDialog extends JDialog
 				new DefaultListModel<IDTrackerMsFeatureProperties>();
 		fPropsModel.addAll(Arrays.asList(IDTrackerMsFeatureProperties.values()));
 		featurePropertyList.setModel(fPropsModel);
+
+		//	ID properties
+		DefaultListModel<IDTrackerFeatureIdentificationProperties> idPropsModel = 
+				new DefaultListModel<IDTrackerFeatureIdentificationProperties>();
+		idPropsModel.addAll(Arrays.asList(IDTrackerFeatureIdentificationProperties.values()));
+		identificationDetailsList.setModel(idPropsModel);
 		
 		if(msDepth.equals(MsDepth.MS1)) {
 			
@@ -485,11 +491,6 @@ public class IDTrackerDataExportDialog extends JDialog
 			else
 				selectIdentificationPropertiesListItems(defaultMsTwoIdentificationProperties);
 		}
-		//	ID properties
-		DefaultListModel<IDTrackerFeatureIdentificationProperties> idPropsModel = 
-				new DefaultListModel<IDTrackerFeatureIdentificationProperties>();
-		idPropsModel.addAll(Arrays.asList(IDTrackerFeatureIdentificationProperties.values()));
-		identificationDetailsList.setModel(idPropsModel);
 	}
 
 	@Override

@@ -203,11 +203,56 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			//	remapFeaturesFromNeutralMass();
+			matchMetaSci();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}	
+	
+	private static void matchMetaSci() throws Exception {
+		
+		File inputFile = new File(
+				"E:\\Development\\MRC2Toolbox\\Database\\MetaSci\\MetaSci_ID_accessions.txt");
+		String[][] inputData = DelimitedTextParser.parseTextFile(inputFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		ArrayList<String>lines = new ArrayList<String>();
+		
+		Connection conn = ConnectionManager.getConnection();
+		for(int i=0; i<inputData.length; i++) {
+			
+			ArrayList<String>line = new ArrayList<String>();
+			line.addAll(Arrays.asList(inputData[i]));
+			CompoundIdentity cid = null;
+			
+			String accession = inputData[i][0];
+			cid = CompoundDatabaseUtils.getCompoundById(accession, conn);
+			
+			if(cid == null) {
+				String inchiKey = inputData[i][1];
+				cid = CompoundDatabaseUtils.getCompoundByInChiKey(inchiKey, conn);
+			}
+			if(cid == null) {
+				String smiles = inputData[i][2];
+				cid = CompoundDatabaseUtils.getCompoundBySmiles(smiles, conn);
+			}
+			if(cid != null) {
+				line.add(cid.getPrimaryDatabaseId());
+				line.add(cid.getName());
+			}
+			lines.add(StringUtils.join(line, "\t"));
+		}
+		ConnectionManager.releaseConnection(conn);
+		Path outputPath = Paths.get(
+				inputFile.getParentFile().getAbsolutePath(), "MetaSci_ID_accessions_mapped.txt");
+		try {
+			Files.write(outputPath, 
+					lines, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	private static void remapFeaturesFromNeutralMass() {
 		
@@ -695,7 +740,7 @@ public class RegexTest {
 					paramLines, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -826,7 +871,7 @@ public class RegexTest {
 					scriptLines, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -909,7 +954,7 @@ public class RegexTest {
 					scriptLines, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -1300,7 +1345,7 @@ public class RegexTest {
 					libInfoLines, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -1310,7 +1355,7 @@ public class RegexTest {
 					smiles, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -1333,7 +1378,7 @@ public class RegexTest {
 							chunk, 
 							StandardCharsets.UTF_8,
 							StandardOpenOption.CREATE, 
-							StandardOpenOption.APPEND);
+							StandardOpenOption.TRUNCATE_EXISTING);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -1350,7 +1395,7 @@ public class RegexTest {
 						chunk, 
 						StandardCharsets.UTF_8,
 						StandardOpenOption.CREATE, 
-						StandardOpenOption.APPEND);
+						StandardOpenOption.TRUNCATE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -1429,7 +1474,7 @@ public class RegexTest {
 					libInfoLines, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.WRITE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -1445,7 +1490,7 @@ public class RegexTest {
 					molErrorLog, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.WRITE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -1471,7 +1516,7 @@ public class RegexTest {
 						mspEntry, 
 						StandardCharsets.UTF_8,
 						StandardOpenOption.WRITE, 
-						StandardOpenOption.APPEND);
+						StandardOpenOption.TRUNCATE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}  
@@ -1804,7 +1849,7 @@ public class RegexTest {
 					emptyMSMS, 					
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2439,7 +2484,7 @@ public class RegexTest {
 					noResponse, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -2655,7 +2700,7 @@ public class RegexTest {
 					logStart, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -2683,7 +2728,7 @@ public class RegexTest {
 							inchikey + "\n", 
 							StandardCharsets.UTF_8,
 							StandardOpenOption.WRITE, 
-							StandardOpenOption.APPEND);
+							StandardOpenOption.TRUNCATE_EXISTING);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -2930,8 +2975,8 @@ public class RegexTest {
 			try {
 			    Files.write(mspFilePath, 
 			    		entry, 
-			    		StandardOpenOption.WRITE, StandardOpenOption.APPEND);
-			    //StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+			    		StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+			    //StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 			} catch (IOException e) {
 			   e.printStackTrace();
 			}
@@ -6983,7 +7028,7 @@ public class RegexTest {
 					lines, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		

@@ -1293,7 +1293,7 @@ public class NISTPepSearchResultManipulator {
 					lines, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

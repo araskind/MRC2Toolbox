@@ -153,7 +153,7 @@ public class CompoundDatabaseUtils {
 		return identity;
 	}
 
-	private static CompoundIdentity getCompoundBySmiles(String smiles, Connection conn) throws Exception{
+	public static CompoundIdentity getCompoundBySmiles(String smiles, Connection conn) throws Exception{
 
 		CompoundIdentity identity = null;
 		String query =

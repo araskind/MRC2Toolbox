@@ -55,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSComponentTableFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
@@ -587,7 +588,8 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			if(id.getEntropyBasedScore() > 0.0d)
 				return entropyFormat.format(id.getEntropyBasedScore());
 		}		
-		if(property.equals(IDTrackerFeatureIdentificationProperties.MASS_ERROR) && deltaMz != 0.0d)
+		if(property.equals(IDTrackerFeatureIdentificationProperties.MASS_ERROR) 
+				&& deltaMz != 0.0d)
 			return ppmFormat.format(deltaMz);
 		
 		//	MS1 only properties
@@ -646,6 +648,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			ReferenceMsMsLibrary lib = null;
 			MsMsLibraryFeature matchFeature = null;
 			if(msmslibMatch != null) {
+				
 				matchFeature = msmslibMatch.getMatchedLibraryFeature();
 				lib = IDTDataCash.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
 				collisionEnergyValue = matchFeature.getCollisionEnergyValue();
@@ -682,19 +685,24 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 //			if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY_ENTRY_ID)) {
 //				msmslibMatch.getMatchedLibraryFeature().getMsmsLibraryIdentifier()
 //			}
-			if(property.equals(IDTrackerFeatureIdentificationProperties.COLLISION_ENERGY) && collisionEnergyValue != null)
+			if(property.equals(IDTrackerFeatureIdentificationProperties.COLLISION_ENERGY) 
+					&& collisionEnergyValue != null)
 				return collisionEnergyValue;
 			
-			if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_SCORE) && reverseScore != 0.0d)
+			if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_SCORE) 
+					&& reverseScore != 0.0d)
 				return entropyFormat.format(reverseScore);
 
-			if(property.equals(IDTrackerFeatureIdentificationProperties.PROBABILITY) && probability != 0.0d) 
+			if(property.equals(IDTrackerFeatureIdentificationProperties.PROBABILITY) 
+					&& probability != 0.0d) 
 				return entropyFormat.format(probability);
 			
-			if(property.equals(IDTrackerFeatureIdentificationProperties.DOT_PRODUCT_COLUMN) && dotProduct != 0.0d)
+			if(property.equals(IDTrackerFeatureIdentificationProperties.DOT_PRODUCT_COLUMN) 
+					&& dotProduct != 0.0d)
 				return entropyFormat.format(dotProduct);
 			
-			if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_DOT_PRODUCT) && revDotProduct != 0.0d)
+			if(property.equals(IDTrackerFeatureIdentificationProperties.REVERSE_DOT_PRODUCT) 
+					&& revDotProduct != 0.0d)
 				return entropyFormat.format(revDotProduct);
 			
 			if(property.equals(IDTrackerFeatureIdentificationProperties.MATCH_TYPE)) {
@@ -714,31 +722,38 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			if(property.equals(IDTrackerFeatureIdentificationProperties.HYBRID_DELTA_MZ) && hybDmz != 0.0d)
 				return mzFormat.format(hybDmz);
 			
-			if(property.equals(IDTrackerFeatureIdentificationProperties.SPECTRUM_ENTROPY) && msmsEntropy != 0.0d)
+			if(property.equals(IDTrackerFeatureIdentificationProperties.SPECTRUM_ENTROPY) 
+					&& msmsEntropy != 0.0d)
 				return entropyFormat.format(msmsEntropy);
 			
-			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_PRECURSOR_DELTA_MZ) && libraryPrecursorDeltaMz != 0.0d)
+			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_PRECURSOR_DELTA_MZ) 
+					&& libraryPrecursorDeltaMz != 0.0d)
 				return mzFormat.format(libraryPrecursorDeltaMz);
 			
-			if(property.equals(IDTrackerFeatureIdentificationProperties.NEUTRAL_MASS_PRECURSOR_DELTA_MZ) && neutralMassDeltaMz != 0.0d)
+			if(property.equals(IDTrackerFeatureIdentificationProperties.NEUTRAL_MASS_PRECURSOR_DELTA_MZ) 
+					&& neutralMassDeltaMz != 0.0d)
 				return mzFormat.format(neutralMassDeltaMz);
 			
-			if(property.equals(IDTrackerFeatureIdentificationProperties.PRECURSOR_PURITY) && precursorPurity != 0.0d)
+			if(property.equals(IDTrackerFeatureIdentificationProperties.PRECURSOR_PURITY) 
+					&& precursorPurity != 0.0d)
 				return entropyFormat.format(precursorPurity);
 			
-			if(property.equals(IDTrackerFeatureIdentificationProperties.FDR_Q_VALUE) && qValue != 0.0d) {
+			if(property.equals(IDTrackerFeatureIdentificationProperties.FDR_Q_VALUE) 
+					&& qValue != 0.0d) {
 				if(qValue < 0.001d || qValue > 1000.d)
 					return sciFormatter.format(qValue);
 				else
 					return entropyFormat.format(qValue);
 			}
-			if(property.equals(IDTrackerFeatureIdentificationProperties.POSTERIOR_PROBABILITY) && posteriorProbability != 0.0d) {
+			if(property.equals(IDTrackerFeatureIdentificationProperties.POSTERIOR_PROBABILITY) 
+					&& posteriorProbability != 0.0d) {
 				if(posteriorProbability < 0.001d || posteriorProbability > 1000.d)
 					return sciFormatter.format(posteriorProbability);
 				else
 					return entropyFormat.format(posteriorProbability);	
 			}
-			if(property.equals(IDTrackerFeatureIdentificationProperties.PERCOLATOR_SCORE) && percolatorScore != 0.0d)
+			if(property.equals(IDTrackerFeatureIdentificationProperties.PERCOLATOR_SCORE) 
+					&& percolatorScore != 0.0d)
 				return entropyFormat.format(percolatorScore);	
 			
 			if(property.equals(IDTrackerFeatureIdentificationProperties.FEATURE_MSMS))
@@ -746,6 +761,11 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			
 			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_MATCH_MSMS))
 				return libraryHitSpectrumArray;
+			
+			if(property.equals(IDTrackerFeatureIdentificationProperties.MSMS_LIBRARY_DEFINED_ADDUCT) 
+					&& matchFeature != null 
+					&& matchFeature.getProperty(MSMSComponentTableFields.ADDUCT.getName()) != null)
+				return matchFeature.getProperty(MSMSComponentTableFields.ADDUCT.getName());			
 		}
 		return "";
 	}

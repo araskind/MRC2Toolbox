@@ -46,6 +46,10 @@ public class DiskCashUtils {
     }
     
     public static void putCompoundIdentityInCache( CompoundIdentity cid ) {
+    	
+    	if(MRC2ToolBoxCore.compoundIdCache == null)
+    		return;
+    	
         String key = cid.getPrimaryDatabaseId();
         try {
         	MRC2ToolBoxCore.compoundIdCache.put(key, cid );
@@ -57,7 +61,11 @@ public class DiskCashUtils {
     }
 
     public static CompoundIdentity retrieveCompoundIdentityFromCache( String accession ) {
-        return (CompoundIdentity)MRC2ToolBoxCore.compoundIdCache.get( accession );
+    	
+    	if(MRC2ToolBoxCore.compoundIdCache == null)
+    		return null;
+    	else
+    		return (CompoundIdentity)MRC2ToolBoxCore.compoundIdCache.get( accession );
     }
     
     public static void putMsMsLibraryFeatureInCache( MsMsLibraryFeature msmsLibEntry ) {

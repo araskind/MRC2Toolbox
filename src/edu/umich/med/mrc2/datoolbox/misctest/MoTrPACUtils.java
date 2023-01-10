@@ -736,7 +736,7 @@ public class MoTrPACUtils {
 					lines, 					
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -872,7 +872,7 @@ public class MoTrPACUtils {
 					copyCommands, 					
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -956,7 +956,7 @@ public class MoTrPACUtils {
 					copyCommands, 					
 					StandardCharsets.UTF_8,
 					StandardOpenOption.CREATE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1009,7 +1009,7 @@ public class MoTrPACUtils {
 									correctedSampleDataLines, 
 									StandardCharsets.UTF_8,
 									StandardOpenOption.CREATE, 
-									StandardOpenOption.APPEND);
+									StandardOpenOption.TRUNCATE_EXISTING);
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

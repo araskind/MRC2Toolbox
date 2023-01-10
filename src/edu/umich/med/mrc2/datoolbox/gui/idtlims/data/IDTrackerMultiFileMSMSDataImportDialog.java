@@ -369,7 +369,7 @@ public class IDTrackerMultiFileMSMSDataImportDialog extends JDialog
 								importLog, 
 								StandardCharsets.UTF_8,
 								StandardOpenOption.CREATE, 
-								StandardOpenOption.APPEND);
+								StandardOpenOption.TRUNCATE_EXISTING);
 					} catch (IOException ex) {
 						ex.printStackTrace();
 					}

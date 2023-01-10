@@ -81,7 +81,7 @@ public class CoreDataBackupUtils {
 					commands, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.WRITE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
@@ -115,7 +115,7 @@ public class CoreDataBackupUtils {
 					commands, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.WRITE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 

@@ -626,7 +626,7 @@ public class TestClass {
 					mspEntry.add("\n");
 					try {
 						Files.write(mspOutputPath, mspEntry, StandardCharsets.UTF_8, StandardOpenOption.WRITE,
-								StandardOpenOption.APPEND);
+								StandardOpenOption.TRUNCATE_EXISTING);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -723,7 +723,7 @@ public class TestClass {
 									mspEntry, 
 									StandardCharsets.UTF_8,
 									StandardOpenOption.WRITE, 
-									StandardOpenOption.APPEND);
+									StandardOpenOption.TRUNCATE_EXISTING);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}

@@ -64,6 +64,7 @@ public enum IDTrackerFeatureIdentificationProperties {
 	FEATURE_MSMS("Feature MSMS"),
 	LIBRARY_MATCH_MSMS("Library match MSMS"),
 	IS_PRIMARY_ID("PrimaryID"),
+	MSMS_LIBRARY_DEFINED_ADDUCT("Parent mass adduct, as defined in MSMS library"),
 	;
 
 	private final String name;

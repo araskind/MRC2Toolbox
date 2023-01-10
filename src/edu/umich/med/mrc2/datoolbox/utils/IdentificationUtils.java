@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,8 +68,12 @@ public class IdentificationUtils {
 	public static Collection<MsFeatureIdentity>filterIdsOnMatchType(
 			Collection<MsFeatureIdentity>toFilter,
 			Collection<MSMSMatchType>msmsSearchTypes){
+		
+		if(toFilter == null)
+			return new ArrayList<MsFeatureIdentity>();
 
 		return toFilter.stream().
+				filter(Objects::nonNull).
 				filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
 				filter(i -> msmsSearchTypes.contains(i.getReferenceMsMsLibraryMatch().getMatchType())).
 				collect(Collectors.toSet());
@@ -99,7 +104,11 @@ public class IdentificationUtils {
 			double minScore,
 			MSMSScoringParameter msmsScoringParameter){
 
+		if(toFilter == null)
+			return new ArrayList<MsFeatureIdentity>();
+		
 		return toFilter.stream().
+				filter(Objects::nonNull).
 				filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
 				filter(i -> i.getReferenceMsMsLibraryMatch().getScoreOfType(msmsScoringParameter) > minScore).
 				collect(Collectors.toSet());

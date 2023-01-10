@@ -323,7 +323,7 @@ public class DecoyLibraryGenerationTask extends AbstractTask implements TaskList
 					line + "\n", 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.WRITE,
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -383,7 +383,7 @@ public class DecoyLibraryGenerationTask extends AbstractTask implements TaskList
 					mspEntry, 
 					StandardCharsets.UTF_8,
 					StandardOpenOption.WRITE, 
-					StandardOpenOption.APPEND);
+					StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}    
