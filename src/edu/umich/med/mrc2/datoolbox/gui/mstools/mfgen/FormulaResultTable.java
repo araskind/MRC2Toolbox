@@ -29,10 +29,10 @@ import javax.swing.table.TableRowSorter;
 import org.openscience.cdk.interfaces.IMolecularFormulaSet;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 

@@ -119,6 +119,7 @@ public final class MRC2ToolBoxCore {
 	public static TaskControllerImpl getTaskController() {
 		return taskController;
 	}	
+	
 	private static org.slf4j.Logger logger;
 
 	public static void main(String[] args) {

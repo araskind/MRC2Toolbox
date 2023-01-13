@@ -26,9 +26,9 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalSampleRenderer;
 
 public class ReferenceSampleTable extends BasicTable {

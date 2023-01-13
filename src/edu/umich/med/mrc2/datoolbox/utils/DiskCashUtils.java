@@ -47,7 +47,7 @@ public class DiskCashUtils {
     
     public static void putCompoundIdentityInCache( CompoundIdentity cid ) {
     	
-    	if(MRC2ToolBoxCore.compoundIdCache == null)
+    	if(MRC2ToolBoxCore.compoundIdCache == null || cid == null)
     		return;
     	
         String key = cid.getPrimaryDatabaseId();
@@ -62,13 +62,17 @@ public class DiskCashUtils {
 
     public static CompoundIdentity retrieveCompoundIdentityFromCache( String accession ) {
     	
-    	if(MRC2ToolBoxCore.compoundIdCache == null)
+    	if(MRC2ToolBoxCore.compoundIdCache == null || accession == null)
     		return null;
     	else
     		return (CompoundIdentity)MRC2ToolBoxCore.compoundIdCache.get( accession );
     }
     
     public static void putMsMsLibraryFeatureInCache( MsMsLibraryFeature msmsLibEntry ) {
+    	
+    	if(MRC2ToolBoxCore.msmsLibraryCache == null || msmsLibEntry == null)
+    		return;
+    				
         String key = msmsLibEntry.getUniqueId();
         try {
         	MRC2ToolBoxCore.msmsLibraryCache.put(key, msmsLibEntry );
@@ -80,6 +84,10 @@ public class DiskCashUtils {
     }
 
     public static MsMsLibraryFeature retrieveMsMsLibraryFeatureFromCache( String mrcLibId ) {
-        return (MsMsLibraryFeature)MRC2ToolBoxCore.msmsLibraryCache.get( mrcLibId );
+    	
+    	if(MRC2ToolBoxCore.msmsLibraryCache == null || mrcLibId == null)
+    		return null;
+    	else
+    		return (MsMsLibraryFeature)MRC2ToolBoxCore.msmsLibraryCache.get( mrcLibId );
     }
 }

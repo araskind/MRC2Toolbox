@@ -137,7 +137,7 @@ public class TaskControllerImpl implements TaskController, Runnable {
 		taskControllerThread.start();
 
 		// Create the task progress window
-		taskPanel = new TaskProgressPanel();
+		taskPanel = new TaskProgressPanel(this);
 	}
 
 	public synchronized void removeTaskControlListener(TaskControlListener listener) {

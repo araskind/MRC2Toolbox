@@ -39,9 +39,9 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 
 public class DatabaseCompoundTable extends BasicTable {

@@ -30,9 +30,9 @@ import edu.umich.med.mrc2.datoolbox.data.compare.LIMSSamplePreparationComparator
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.LIMSSamplePreparationFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 
 public class SamplePrepTable extends BasicTable {
 

@@ -30,9 +30,9 @@ import edu.umich.med.mrc2.datoolbox.data.compare.ChromatographicColumnComparator
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.ChromatographicColumnFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChromatographicColumnRenderer;
 
 public class ChromatographicColumnTable extends BasicTable {

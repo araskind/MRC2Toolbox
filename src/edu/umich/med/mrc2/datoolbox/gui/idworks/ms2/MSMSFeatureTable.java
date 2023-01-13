@@ -67,10 +67,10 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ColorCircleFlagRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
@@ -222,14 +222,6 @@ public class MSMSFeatureTable extends BasicTable {
 		thf.getParserModel().setComparator(ReferenceMsMsLibraryMatch.class, new ReferenceMsMsLibraryMatchTypeComparator());
 		
 		finalizeLayout();
-	}
-
-	public void setTableModelFromFeatureListOld(Collection<MSFeatureInfoBundle> featureList) {
-
-		thf.setTable(null);
-		model.setTableModelFromFeatureList(featureList);
-		thf.setTable(this);
-		adjustVariableColumns();
 	}
 	
 	private void adjustVariableColumns() {

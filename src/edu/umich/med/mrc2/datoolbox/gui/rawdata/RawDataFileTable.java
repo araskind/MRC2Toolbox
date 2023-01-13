@@ -32,10 +32,10 @@ import edu.umich.med.mrc2.datoolbox.data.compare.AnalysisMethodComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.AnalysisMethodFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms1.ReferenceMsOneFeatureTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
 
 public class RawDataFileTable extends BasicTable {

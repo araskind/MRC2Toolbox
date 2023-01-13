@@ -29,11 +29,11 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.TableLayoutListener;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 

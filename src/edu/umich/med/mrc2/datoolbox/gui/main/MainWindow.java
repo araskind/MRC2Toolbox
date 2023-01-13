@@ -128,7 +128,8 @@ import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
  */
 public class MainWindow extends JFrame
 		implements ProjectView, ActionListener, WindowListener,
-		ItemListener, TaskListener, TaskControlListener, PersistentLayout, BackedByPreferences {
+		ItemListener, TaskListener, TaskControlListener, 
+		PersistentLayout, BackedByPreferences {
 
 	/**
 	 *

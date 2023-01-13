@@ -34,10 +34,10 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SampleDataResultObjectComparato
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.ExperimentalSampleFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.SampleDataResultObjectFormat;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.ExperimentalSampleSelectorEditor;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalSampleRendererExtended;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.SampleDataResultObjectRenderer;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;

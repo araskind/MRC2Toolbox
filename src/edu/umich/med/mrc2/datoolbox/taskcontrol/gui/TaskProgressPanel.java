@@ -53,8 +53,6 @@ public class TaskProgressPanel extends JPanel implements ActionListener {
 	 */
 	private static final long serialVersionUID = -6250584696801682393L;
 
-	private static TaskController taskController;
-
 	private BasicTable taskTable;
 	private JPopupMenu popupMenu;
 	private JMenu priorityMenu;
@@ -72,15 +70,13 @@ public class TaskProgressPanel extends JPanel implements ActionListener {
 	/**
 	 * Constructor
 	 */
-	public TaskProgressPanel() {
+	public TaskProgressPanel(TaskController taskController) {
 
 		super();
 		// setPreferredSize(new Dimension(300, 200));
 		// setSize(new Dimension(300, 200));
 		setAlignmentY(Component.TOP_ALIGNMENT);
 		setAlignmentX(Component.LEFT_ALIGNMENT);
-
-		taskController = MRC2ToolBoxCore.getTaskController();
 
 		taskTable = new BasicTable(taskController.getTaskQueue());
 		taskTable.setAlignmentY(Component.TOP_ALIGNMENT);

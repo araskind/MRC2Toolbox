@@ -58,10 +58,10 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.compare.TableColumnStateComparator;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLlayoutManager;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.pref.TableColumnState;
 import edu.umich.med.mrc2.datoolbox.gui.tables.pref.TablePreferencesDialog;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;

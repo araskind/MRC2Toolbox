@@ -61,11 +61,11 @@ import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.ReferenceMsMsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.ReferenceMsMsLibraryMatchTypeFormat;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ColorCircleFlagRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
@@ -239,6 +239,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 			MsFeature feature, 			
 			boolean showUniqueIdsOnly) {
 
+		thf.setTable(null);
 		MsFeatureIdentity selectedId = this.getSelectedIdentity();
 		Collection<MsFeatureIdentity> idList = feature.getIdentifications();
 		removeModelListeners();
@@ -247,7 +248,8 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 			idList = IdentificationUtils.getBestMatchIds(feature);			
 		
 		model.setParentFeature(parentFeature);
-		model.setModelFromIdList(idList, parentFeature.getPrimaryIdentity());		
+		model.setModelFromIdList(idList, parentFeature.getPrimaryIdentity());	
+		thf.setTable(this);
 		adjustVarWidthColumns();
 		if(idList.contains(selectedId))
 			selectIdentity(selectedId);

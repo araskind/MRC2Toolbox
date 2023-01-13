@@ -22,7 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.dbparse;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -31,7 +31,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.prefs.Preferences;
 
@@ -40,37 +45,51 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.text.BadLocationException;
 
+import bibliothek.gui.dock.common.CControl;
+import bibliothek.gui.dock.common.CGrid;
+import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.database.load.XMLdatabase;
+import edu.umich.med.mrc2.datoolbox.gui.automator.TextAreaOutputStream;
+import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.utils.GlassPane;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskControlListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.dbparsers.DrugBankParserTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.dbparsers.HMDBParserTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.dbparsers.T3DBParserTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 
 public class DbParserFrame extends JFrame 
-		implements ActionListener, TaskListener, BackedByPreferences{
+		implements ActionListener, WindowListener,
+		ItemListener, TaskListener, TaskControlListener, 
+		BackedByPreferences, PersistentLayout{
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -1588870352349217881L;
+	
+	private static TaskProgressPanel progressPanel;
+	private static JDialog progressDialogue;
 	
 	private Preferences preferences;
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.datoolbox.DbParserFrame";
@@ -79,30 +98,134 @@ public class DbParserFrame extends JFrame
 	private static final String SELECT_INPUT_FILE = "SELECT_INPUT_FILE";
 	private static final String START_PARSER = "START_PARSER";
 	private static final String CLEAR_LOG = "CLEAR_LOG";
-	private JTextArea textArea;
-	private PrintStream printStream, standardOut, standardError;
+	
+	private static TextAreaOutputStream stdOutTaos;
+	private static TextAreaOutputStream stdErrTaos;
+	
+	private static PrintStream stdOutPrintStream; 
+	private static PrintStream stdErrorPrintStream;
+	public static final PrintStream sysout = System.out;
+	public static final PrintStream syserr = System.err;
 
-	private JButton selectInputButton, startButton, clearButton;
+	
 	private File inputFile;
 	private JLabel inputFileLabel;
 
-//	private JFileChooser chooser;
 	private FileFilter txtFilter, xmlFilter;
 	private File baseDirectory;
-	private JLabel lblNewLabel_1;
+
 	private JComboBox<XMLdatabase> dbTypecomboBox;
 
-	private Component defaultGlassPane;
+	private CControl control;
+	private CGrid grid;
+	private static DockableConsole outputConsole;
+	private static DockableConsole errorConsole;
+	
+	private static final File layoutConfigFile = 
+			new File(DbParserCore.configDir + "DbParserFrame.layout");
 
 	private static final Icon xml2DatabaseIcon = GuiUtils.getIcon("xml2Database", 32);
+	private static final Icon sysOutIcon = GuiUtils.getIcon("actions", 16);
+	private static final Icon sysErrIcon = GuiUtils.getIcon("sysError", 16);
 
 	public DbParserFrame() {
 
+		super();
+		try {
+			// Set System L&F
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (UnsupportedLookAndFeelException e) {
+			// handle exception
+		} catch (ClassNotFoundException e) {
+			// handle exception
+		} catch (InstantiationException e) {
+			// handle exception
+		} catch (IllegalAccessException e) {
+			// handle exception
+		}	
 		setSize(new Dimension(800, 640));
-		setTitle("Database XML parser");
+		setTitle("Compound Database Parser");
 		setIconImage(((ImageIcon) xml2DatabaseIcon).getImage());
-		defaultGlassPane = this.getGlassPane();
+		
+		getContentPane().add(createDatabaseSelector(), BorderLayout.NORTH);
+		
+		control = new CControl( this );
+		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
+		getContentPane().add(control.getContentArea(), BorderLayout.CENTER);
+				
+		outputConsole = new DockableConsole("CpdDbParserOutConsole","System output", sysOutIcon);
+		errorConsole = new DockableConsole("CpdDbParserErrorConsole","System errors", sysErrIcon);
+		
+		grid = new CGrid( control );
+		grid.add(0, 0, 1, 1,
+				outputConsole, 
+				errorConsole);
 
+		control.getContentArea().deploy(grid);
+		grid.select(0, 0, 1, 1, outputConsole);
+		
+		JPanel buttonPanel = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
+		flowLayout.setAlignment(FlowLayout.RIGHT);
+		buttonPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+
+		JButton startButton = new JButton("Start parser");
+		startButton.addActionListener(this);
+		startButton.setActionCommand(START_PARSER);
+		buttonPanel.add(startButton);
+
+		JButton clearButton = new JButton("Clear console");
+		clearButton.addActionListener(this);
+		clearButton.setActionCommand(CLEAR_LOG);
+		buttonPanel.add(clearButton);
+		
+		loadPreferences();
+		DbParserCore.getTaskController().addTaskControlListener(this);
+		initProgressDialog();
+		addWindowListener(this);
+		loadLayout(layoutConfigFile);
+	}
+	
+	@Override
+	public void dispose() {
+		
+		saveLayout(layoutConfigFile);
+		savePreferences();
+		super.dispose();
+	}
+	
+	public static void bindSystemStreams() {
+
+		try {
+			stdOutTaos = new TextAreaOutputStream(outputConsole.getConsoleTextArea());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (stdOutTaos != null) {
+
+			stdOutPrintStream = new PrintStream(stdOutTaos);
+			System.setOut(stdOutPrintStream);
+		}
+		try {
+			stdErrTaos = new TextAreaOutputStream(errorConsole.getConsoleTextArea());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (stdErrTaos != null) {
+
+			stdErrorPrintStream = new PrintStream(stdErrTaos);
+			System.setErr(stdErrorPrintStream);
+		}
+	}
+
+	public static void unbindSystemStreams() {
+		System.setOut(sysout);
+		System.setErr(syserr);
+	}
+	
+	private JPanel createDatabaseSelector() {
+		
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(panel, BorderLayout.NORTH);
@@ -113,7 +236,7 @@ public class DbParserFrame extends JFrame
 		gbl_panel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 
-		lblNewLabel_1 = new JLabel("Database: ");
+		JLabel lblNewLabel_1 = new JLabel("Database: ");
 		lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_lblNewLabel_1_1_1 = new GridBagConstraints();
 		gbc_lblNewLabel_1_1_1.anchor = GridBagConstraints.EAST;
@@ -150,7 +273,7 @@ public class DbParserFrame extends JFrame
 		gbc_lblNewLabel_2.gridy = 1;
 		panel.add(inputFileLabel, gbc_lblNewLabel_2);
 
-		selectInputButton = new JButton("Select input file");
+		JButton selectInputButton = new JButton("Select input file");
 		selectInputButton.addActionListener(this);
 		selectInputButton.setActionCommand(SELECT_INPUT_FILE);
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
@@ -158,34 +281,8 @@ public class DbParserFrame extends JFrame
 		gbc_btnNewButton.gridx = 2;
 		gbc_btnNewButton.gridy = 1;
 		panel.add(selectInputButton, gbc_btnNewButton);
-
-		JPanel panel_1 = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) panel_1.getLayout();
-		flowLayout.setAlignment(FlowLayout.RIGHT);
-		panel_1.setBorder(new EmptyBorder(10, 10, 10, 10));
-		getContentPane().add(panel_1, BorderLayout.SOUTH);
-
-		startButton = new JButton("Start parser");
-		startButton.addActionListener(this);
-		startButton.setActionCommand(START_PARSER);
-		panel_1.add(startButton);
-
-		clearButton = new JButton("Clear console");
-		clearButton.addActionListener(this);
-		clearButton.setActionCommand(CLEAR_LOG);
-		panel_1.add(clearButton);
-
-//		initChooser();
-
-		textArea = new JTextArea();
-		getContentPane().add(textArea, BorderLayout.CENTER);
-
-		printStream = new PrintStream(new CustomOutputStream(textArea));
-
-		standardOut = System.out;
-		standardError = System.err;
 		
-		loadPreferences();
+		return panel;
 	}
 
 	@Override
@@ -227,37 +324,15 @@ public class DbParserFrame extends JFrame
 	}
 
 	private void clearConsole(){
-        try {
-            textArea.getDocument().remove(0, textArea.getDocument().getLength());
-            //standardOut.println("Text area cleared");
-        }
-        catch (BadLocationException ex) {
-            ex.printStackTrace();
-        }
+		
+		outputConsole.setText("");
+		errorConsole.setText("");
 	}
-
-//	private void initChooser() {
-//
-//		chooser = new ImprovedFileChooser();
-//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-//		chooser.addActionListener(this);
-//		chooser.setAcceptAllFileFilterUsed(false);
-//		chooser.setMultiSelectionEnabled(false);
-//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-//
-//		xmlFilter = new FileNameExtensionFilter("XML files", "xml", "cef", "wkl");
-//		chooser.addChoosableFileFilter(xmlFilter);
-//
-//		txtFilter = new FileNameExtensionFilter("Text files", "txt", "tsv");
-//		chooser.addChoosableFileFilter(txtFilter);
-//	}
 
 	private void parseDataFile() throws Exception{
 
-		this.setGlassPane(new GlassPane());
 		clearConsole();
-		System.setOut(printStream);
-		System.setErr(printStream);
+		bindSystemStreams();
 
 		if(inputFile != null){
 
@@ -276,10 +351,9 @@ public class DbParserFrame extends JFrame
 					parserTask = new T3DBParserTask(inputFile);
 
 				parserTask.addTaskListener(this);
-				MRC2ToolBoxCore.getTaskController().addTask(parserTask);
+				DbParserCore.getTaskController().addTask(parserTask);
 			}
 		}
-		this.setGlassPane(defaultGlassPane);
 	}
 
 	@Override
@@ -298,15 +372,13 @@ public class DbParserFrame extends JFrame
 			if (e.getSource().getClass().equals(T3DBParserTask.class)) {
 
 			}
-			System.setOut(standardOut);
-			System.setErr(standardError);
+			unbindSystemStreams();
 		}
 		if (e.getStatus() == TaskStatus.CANCELED)
-			MRC2ToolBoxCore.getMainWindow().hideProgressDialog();
+			hideProgressDialog();
 
 		if (e.getStatus() == TaskStatus.ERROR)
-			MRC2ToolBoxCore.getMainWindow().hideProgressDialog();
-
+			hideProgressDialog();
 	}
 	
 	@Override
@@ -327,12 +399,132 @@ public class DbParserFrame extends JFrame
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
+	
+	public static void hideProgressDialog() {
+		progressDialogue.setVisible(false);
+	}
 
-//    public static void main(String[] args) {
-//
-//    	DbParserFrame frame = new DbParserFrame();
-//    	frame.setLocationRelativeTo(null);
-//    	frame.setVisible(true);
-//    }
+	private void initProgressDialog() {
+
+		progressPanel = DbParserCore.getTaskController().getTaskPanel();
+		progressDialogue = new JDialog(this, "Task in progress...", ModalityType.APPLICATION_MODAL);
+		progressDialogue.setTitle("Operation in progress ...");
+		progressDialogue.setSize(new Dimension(600, 150));
+		progressDialogue.setPreferredSize(new Dimension(600, 150));
+		progressDialogue.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		progressDialogue.getContentPane().setLayout(new BorderLayout());
+		progressDialogue.getContentPane().add(progressPanel, BorderLayout.CENTER);
+		progressDialogue.setLocationRelativeTo(this);
+		progressDialogue.pack();
+		progressDialogue.setVisible(false);
+	}
+
+	@Override
+	public void allTasksFinished(boolean atf) {
+
+		if (atf)
+			hideProgressDialog();
+	}
+
+	@Override
+	public void numberOfWaitingTasksChanged(int numOfTasks) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		exitProgram();
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private void exitProgram() {
+		// TODO Auto-generated method stub
+		if (MessageDialog.showChoiceWithWarningMsg(
+				"Are you sure you want to exit?", this.getContentPane()) == JOptionPane.YES_OPTION) {
+			DbParserCore.shutDown();
+		}
+	}
+	
+	@Override
+	public void loadLayout(File layoutFile) {
+
+		if(control != null) {
+
+			if(layoutFile.exists()) {
+				try {
+					control.readXML(layoutFile);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				try {
+					control.writeXML(layoutFile);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	@Override
+	public void saveLayout(File layoutFile) {
+
+		if(control != null) {
+			try {
+				control.writeXML(layoutFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@Override
+	public File getLayoutFile() {
+		return layoutConfigFile;
+	}
 }
 

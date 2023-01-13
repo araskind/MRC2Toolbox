@@ -255,7 +255,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>10</selected>
+										<selected>9</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>

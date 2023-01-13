@@ -48,9 +48,9 @@ import edu.umich.med.mrc2.datoolbox.data.format.CompoundIdentificationConfidence
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
 import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdConfidenceRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MsFeatureRenderer;

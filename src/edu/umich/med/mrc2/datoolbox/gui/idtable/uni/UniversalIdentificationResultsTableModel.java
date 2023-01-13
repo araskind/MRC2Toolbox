@@ -208,6 +208,7 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 			}
 			if(id.getCompoundIdentity() == null) {
 				System.out.println(id.toString());
+				return;
 			}
 			Object[] obj = {
 					id.equals(defaultId),

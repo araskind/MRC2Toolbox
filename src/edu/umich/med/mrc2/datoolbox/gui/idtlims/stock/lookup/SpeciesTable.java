@@ -29,9 +29,9 @@ import edu.umich.med.mrc2.datoolbox.data.compare.BioSpeciesComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.BioSpeciesFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSBioSpecies;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.AutoChoices;
-import edu.umich.med.mrc2.datoolbox.gui.coderazzi.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.BioSpeciesRenderer;
 
 public class SpeciesTable extends BasicTable {
