@@ -176,6 +176,11 @@ public final class BuildInformation {
 			<name>Sonatype OSS Maven Repository for Staging Snapshots</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</repository>
+		<repository>
+			<id>wso2</id>
+			<name>WSO2 Dist Repository</name>
+			<url>http://dist.wso2.org/maven2</url>
+		</repository>
 			<!-- 		
 		<repository>
 			<id>bioinf-jena</id>
@@ -573,6 +578,12 @@ public final class BuildInformation {
 		    <groupId>net.java.dev.jna</groupId>
 		    <artifactId>jna</artifactId>
 		    <version>5.12.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.xalan/xalan -->
+		<dependency>
+		    <groupId>org.apache.xalan</groupId>
+		    <artifactId>xalan</artifactId>
+		    <version>2.7.1</version>
 		</dependency>
 		
 		<!-- 

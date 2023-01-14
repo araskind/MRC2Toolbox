@@ -28,7 +28,6 @@ import java.util.Vector;
 import javax.swing.SwingUtilities;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskControlListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskController;
@@ -38,24 +37,24 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 
 public class TaskControllerImpl implements TaskController, Runnable {
 
-	ArrayList<TaskControlListener> listeners = new ArrayList<TaskControlListener>();
-	TaskControlListener listenerToRemove;
+	protected ArrayList<TaskControlListener> listeners = new ArrayList<TaskControlListener>();
+	protected TaskControlListener listenerToRemove;
 
 	/**
 	 * Update the task progress window every 300 ms
 	 */
-	private final int TASKCONTROLLER_THREAD_SLEEP = 300;
-	private Thread taskControllerThread;
-	private TaskQueue taskQueue;
-	private TaskProgressPanel taskPanel;
-	private int maxRunningThreads;
+	protected final int TASKCONTROLLER_THREAD_SLEEP = 300;
+	protected Thread taskControllerThread;
+	protected TaskQueue taskQueue;
+	protected TaskProgressPanel taskPanel;
+	protected int maxRunningThreads;
 
 	/**
 	 * This vector contains references to all running threads of NORMAL
 	 * priority. Maximum number of concurrent threads is specified in the
 	 * preferences dialog.
 	 */
-	private Vector<WorkerThread> runningThreads;
+	protected Vector<WorkerThread> runningThreads;
 
 	public void addTask(Task task) {
 		addTasks(new Task[] { task }, TaskPriority.NORMAL);
@@ -204,8 +203,7 @@ public class TaskControllerImpl implements TaskController, Runnable {
 				SwingUtilities.invokeLater(new Runnable() {
 
 					public void run() {
-
-						MRC2ToolBoxCore.getMainWindow().hideProgressDialog();
+						MainWindow.hideProgressDialog();
 					}
 				});
 				continue;

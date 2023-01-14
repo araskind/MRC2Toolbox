@@ -33,7 +33,7 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.database.load.massbank.MassBankFileParser;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.massbank.MassBankFileParser;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
