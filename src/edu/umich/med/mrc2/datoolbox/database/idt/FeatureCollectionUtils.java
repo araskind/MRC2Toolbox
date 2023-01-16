@@ -249,8 +249,15 @@ public class FeatureCollectionUtils {
     
 	public static Set<String>validateMSMSIDlist(Set<String>idsToValidate) throws Exception {
 
-		Set<String>validIds = new TreeSet<String>();
 		Connection conn = ConnectionManager.getConnection();
+		Set<String>validIds = validateMSMSIDlist(idsToValidate, conn);
+		ConnectionManager.releaseConnection(conn);
+		return validIds;
+	}
+	
+	public static Set<String>validateMSMSIDlist(Set<String>idsToValidate, Connection conn) throws Exception {
+
+		Set<String>validIds = new TreeSet<String>();
 		String query = "SELECT PARENT_FEATURE_ID FROM MSMS_FEATURE WHERE MSMS_FEATURE_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		for(String id : idsToValidate) {
@@ -258,11 +265,11 @@ public class FeatureCollectionUtils {
 			ps.setString(1, id);
 			ResultSet rs = ps.executeQuery();
 			while(rs.next())
-				validIds.add(id);
+				validIds.add(rs.getString("PARENT_FEATURE_ID"));
 			
 			rs.close();
 		}
-		ConnectionManager.releaseConnection(conn);
+		ps.close();
 		return validIds;
 	}
 }
