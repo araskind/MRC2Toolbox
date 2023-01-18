@@ -73,7 +73,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskControlListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.dbparsers.HMDBParserTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.DrugBankParserTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.HMDBParseAndUploadTask;
@@ -390,17 +389,11 @@ public class DbParserFrame extends JFrame
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
+			if(e.getSource().getClass().equals(HMDBParseAndUploadTask.class))
+				finalizeHMDBParseAndUploadTask((HMDBParseAndUploadTask)e.getSource());
 
-			if (e.getSource().getClass().equals(DrugBankParserTask.class)) {
-
-			}
-			if (e.getSource().getClass().equals(HMDBParserTask.class)) {
-
-			}
-			if (e.getSource().getClass().equals(T3DBParserTask.class)) {
-
-			}
 			unbindSystemStreams();
+			hideProgressDialog();
 		}
 		if (e.getStatus() == TaskStatus.CANCELED)
 			hideProgressDialog();
@@ -409,6 +402,11 @@ public class DbParserFrame extends JFrame
 			hideProgressDialog();
 	}
 	
+	private void finalizeHMDBParseAndUploadTask(HMDBParseAndUploadTask source) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;

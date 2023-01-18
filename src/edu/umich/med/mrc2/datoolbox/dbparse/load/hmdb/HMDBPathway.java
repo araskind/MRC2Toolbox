@@ -32,6 +32,12 @@ public class HMDBPathway {
 		this.name = name;
 		this.smpdbId = smpdbId;
 		this.keggMapId = keggMapId;
+		
+		if(smpdbId != null && smpdbId.isEmpty())
+			this.smpdbId = null;
+		
+		if(keggMapId != null && keggMapId.isEmpty())
+			this.keggMapId = null;
 	}
 
 	/**

@@ -43,6 +43,7 @@ public class HMDBRecord implements Record, Comparable<HMDBRecord> {
 	private Date lastUpdated;
 
 	private Collection<String>synonyms;
+	private Collection<String>secondaryHmdbAccesions;
 	private CompoundIdentity compoundIdentity;
 	private Collection<CompoundProperty>compoundProperties;
 	private Collection<CompoundBioLocation>biolocations;
@@ -57,6 +58,7 @@ public class HMDBRecord implements Record, Comparable<HMDBRecord> {
 		super();
 		this.primaryId = primaryId;
 		synonyms = new TreeSet<String>();
+		secondaryHmdbAccesions = new TreeSet<String>();
 		compoundIdentity = new CompoundIdentity();
 		compoundProperties = new ArrayList<CompoundProperty>();
 		biolocations = new ArrayList<CompoundBioLocation>();
@@ -258,6 +260,10 @@ public class HMDBRecord implements Record, Comparable<HMDBRecord> {
 
 	public void setTraditionalIupacName(String traditionalIupacName) {
 		this.traditionalIupacName = traditionalIupacName;
+	}
+
+	public Collection<String> getSecondaryHmdbAccesions() {
+		return secondaryHmdbAccesions;
 	}
 }
 

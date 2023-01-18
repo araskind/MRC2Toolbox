@@ -412,7 +412,7 @@ public final class MRC2ToolBoxCore {
 		}
 		compositeCacheManager.configure(cacheProps);
 		
-		msFeatureCache = JCS.getInstance("msmsFeatureCache");
+		msFeatureCache = JCS.getInstance("msFeatureCache");
 		msFeatureCache.clear();
 		
 		featureChromatogramCache = JCS.getInstance("featureChromatogramCache");

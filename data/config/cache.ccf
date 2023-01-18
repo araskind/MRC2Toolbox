@@ -13,16 +13,16 @@ jcs.default.elementattributes.IsEternal=false
 
 # MSMS FEATURE CACHE REGION
 
-jcs.msmsFeatureCache=DC
-jcs.msmsFeatureCache.cacheattributes= org.apache.commons.jcs3.engine.CompositeCacheAttributes
-jcs.msmsFeatureCache.cacheattributes.MaxObjects=30000
-jcs.msmsFeatureCache.cacheattributes.MemoryCacheName= org.apache.commons.jcs3.engine.memory.lru.LRUMemoryCache
-jcs.msmsFeatureCache.cacheattributes.UseMemoryShrinker=true
-jcs.msmsFeatureCache.cacheattributes.MaxMemoryIdleTimeSeconds=3600
-jcs.msmsFeatureCache.cacheattributes.ShrinkerIntervalSeconds=60
-jcs.msmsFeatureCache.cacheattributes.MaxSpoolPerRun=500
-jcs.msmsFeatureCache.elementattributes=org.apache.commons.jcs3.engine.ElementAttributes
-jcs.msmsFeatureCache.elementattributes.IsEternal=false
+jcs.msFeatureCache=DC
+jcs.msFeatureCache.cacheattributes= org.apache.commons.jcs3.engine.CompositeCacheAttributes
+jcs.msFeatureCache.cacheattributes.MaxObjects=30000
+jcs.msFeatureCache.cacheattributes.MemoryCacheName= org.apache.commons.jcs3.engine.memory.lru.LRUMemoryCache
+jcs.msFeatureCache.cacheattributes.UseMemoryShrinker=true
+jcs.msFeatureCache.cacheattributes.MaxMemoryIdleTimeSeconds=3600
+jcs.msFeatureCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.msFeatureCache.cacheattributes.MaxSpoolPerRun=500
+jcs.msFeatureCache.elementattributes=org.apache.commons.jcs3.engine.ElementAttributes
+jcs.msFeatureCache.elementattributes.IsEternal=false
 
 # CHROMATOGRAM CACHE REGION
 
@@ -36,6 +36,42 @@ jcs.featureChromatogramCache.cacheattributes.ShrinkerIntervalSeconds=60
 jcs.featureChromatogramCache.cacheattributes.MaxSpoolPerRun=500
 jcs.featureChromatogramCache.elementattributes=org.apache.commons.jcs3.engine.ElementAttributes
 jcs.featureChromatogramCache.elementattributes.IsEternal=false
+	
+# COMPOUND ID CACHE REGION
+jcs.compoundIdCache=DC
+jcs.compoundIdCache.cacheattributes= org.apache.commons.jcs3.engine.CompositeCacheAttributes
+jcs.compoundIdCache.cacheattributes.MaxObjects=30000
+jcs.compoundIdCache.cacheattributes.MemoryCacheName= org.apache.commons.jcs3.engine.memory.lru.LRUMemoryCache
+jcs.compoundIdCache.cacheattributes.UseMemoryShrinker=true
+jcs.compoundIdCache.cacheattributes.MaxMemoryIdleTimeSeconds=3600
+jcs.compoundIdCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.compoundIdCache.cacheattributes.MaxSpoolPerRun=500
+jcs.compoundIdCache.elementattributes=org.apache.commons.jcs3.engine.ElementAttributes
+jcs.compoundIdCache.elementattributes.IsEternal=false
+
+# MSMS LIBRARY CACHE REGION
+jcs.msmsLibraryCache=DC
+jcs.msmsLibraryCache.cacheattributes= org.apache.commons.jcs3.engine.CompositeCacheAttributes
+jcs.msmsLibraryCache.cacheattributes.MaxObjects=30000
+jcs.msmsLibraryCache.cacheattributes.MemoryCacheName= org.apache.commons.jcs3.engine.memory.lru.LRUMemoryCache
+jcs.msmsLibraryCache.cacheattributes.UseMemoryShrinker=true
+jcs.msmsLibraryCache.cacheattributes.MaxMemoryIdleTimeSeconds=3600
+jcs.msmsLibraryCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.msmsLibraryCache.cacheattributes.MaxSpoolPerRun=500
+jcs.msmsLibraryCache.elementattributes=org.apache.commons.jcs3.engine.ElementAttributes
+jcs.msmsLibraryCache.elementattributes.IsEternal=false
+
+# DATABASE UPLOAD CACHE REGION
+jcs.dbUploadCache=DC
+jcs.dbUploadCache.cacheattributes= org.apache.commons.jcs3.engine.CompositeCacheAttributes
+jcs.dbUploadCache.cacheattributes.MaxObjects=500000
+jcs.dbUploadCache.cacheattributes.MemoryCacheName= org.apache.commons.jcs3.engine.memory.lru.LRUMemoryCache
+jcs.dbUploadCache.cacheattributes.UseMemoryShrinker=true
+jcs.dbUploadCache.cacheattributes.MaxMemoryIdleTimeSeconds=108000
+jcs.dbUploadCache.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.dbUploadCache.cacheattributes.MaxSpoolPerRun=500
+jcs.dbUploadCache.elementattributes=org.apache.commons.jcs3.engine.ElementAttributes
+jcs.dbUploadCache.elementattributes.IsEternal=false
 
 # AVAILABLE AUXILIARY CACHES
 jcs.auxiliary.DC= org.apache.commons.jcs3.auxiliary.disk.indexed.IndexedDiskCacheFactory

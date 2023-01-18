@@ -63,7 +63,12 @@ public class HMDBParserJdom2 {
 		parseTimeStamps(recordElement, record, ns);
 		parseDescriptions(recordElement, record, ns);
 		parseSynonyms(recordElement, record, ns);
-		
+		parseBiologicalProperties(recordElement, record, ns);
+		parseExperimentalProperties(recordElement, record, ns);
+		parseConcentrations(recordElement, record, ns);
+		parseDeseases(recordElement, record, ns);
+		parseProteinAssociations(recordElement, record, ns);
+		parseGeneralReferences(recordElement, record, ns);
 		return record;
 	}
 	
@@ -101,9 +106,12 @@ public class HMDBParserJdom2 {
 	public static void parseSynonyms(
 			Element recordElement, HMDBRecord record, Namespace ns){
 		
+		Element synonymListElement = recordElement.getChild("synonyms", ns);
+		if(synonymListElement == null)
+			return;
+		
 		List<Element> synonymsList = 
-				recordElement.getChild("synonyms", ns).
-				getChildren("synonym", ns);
+				synonymListElement.getChildren("synonym", ns);
 		if(synonymsList.isEmpty())
 			return;
 		
@@ -119,6 +127,267 @@ public class HMDBParserJdom2 {
 			String dbId = recordElement.getChildText(dbRef.getName(), ns);
 			if(dbId != null && !dbId.isEmpty())
 				record.getCompoundIdentity().addDbId(dbRef.getDatabase(), dbId);				
+		}
+		//	Parse secondary HMDB accessions
+		Element secondaryAccessionsListElement = 
+				recordElement.getChild("secondary_accessions", ns);
+
+		if(secondaryAccessionsListElement != null) {
+			
+			List<Element> secondaryAccessionsList = 
+					secondaryAccessionsListElement.getChildren("accession", ns);
+			for(Element secondaryAccessionElement : secondaryAccessionsList) 		
+				record.getSecondaryHmdbAccesions().add(secondaryAccessionElement.getText());			
+		}
+	}
+	
+	public static void parseBiologicalProperties(
+			Element recordElement, HMDBRecord record, Namespace ns) {
+		
+		Element biologicalPropertiesElement = 
+				recordElement.getChild("biological_properties", ns);
+		if(biologicalPropertiesElement == null)
+			return;
+		
+		// Cellular
+		Element cellLocationsElement = 
+				biologicalPropertiesElement.getChild("cellular_locations", ns);
+
+		if(cellLocationsElement != null) {
+			
+			List<Element> cellLocations = 
+					cellLocationsElement.getChildren("cellular", ns);
+			for(Element cellLocation : cellLocations) {
+				
+				record.getBiolocations().add(
+						new CompoundBioLocation(cellLocation.getText(),
+									CompoundLocationType.CELLULAR));
+			}
+		}
+		// Biospecimen
+		Element biospecimenLocationsElement = 
+				biologicalPropertiesElement.getChild("biospecimen_locations", ns);
+
+		if(biospecimenLocationsElement != null) {
+			
+			List<Element> biospecimenLocations = 
+					biospecimenLocationsElement.getChildren("biospecimen", ns);
+			for(Element biospecimenLocation : biospecimenLocations) {
+				
+				record.getBiolocations().add(
+						new CompoundBioLocation(biospecimenLocation.getText(),
+									CompoundLocationType.BIOSPECIMEN));
+			}
+		}
+		// Biofluid
+		Element biofluidLocationsElement = 
+				biologicalPropertiesElement.getChild("biofluid_locations", ns);
+
+		if(biofluidLocationsElement != null) {
+			
+			List<Element> biofluidLocations = 
+					biofluidLocationsElement.getChildren("biofluid", ns);
+			for(Element biofluidLocation : biofluidLocations) {
+				
+				record.getBiolocations().add(
+						new CompoundBioLocation(biofluidLocation.getText(),
+									CompoundLocationType.BIOFLUID));
+			}
+		}
+		// Tissue
+		Element tissueLocationsElement = 
+				biologicalPropertiesElement.getChild("tissue_locations", ns);
+
+		if(tissueLocationsElement != null) {
+			
+			List<Element> tissueLocations = 
+					tissueLocationsElement.getChildren("tissue", ns);
+			for(Element tissueLocation : tissueLocations) {
+				
+				record.getBiolocations().add(
+						new CompoundBioLocation(tissueLocation.getText(),
+									CompoundLocationType.TISSUE));
+			}
+		}
+		//	Pathways
+		Element pathwayListElement = 
+				biologicalPropertiesElement.getChild("pathways", ns);
+		if(pathwayListElement != null) {
+			
+			List<Element> pathwayList = 
+					pathwayListElement.getChildren("pathway", ns);
+			
+			for(Element pathwayElement : pathwayList) {
+				
+				HMDBPathway patwayEntry = 
+						new HMDBPathway(
+								pathwayElement.getChildText("name", ns), 
+								pathwayElement.getChildText("smpdb_id", ns), 
+								pathwayElement.getChildText("kegg_map_id", ns));
+				record.getPathways().add(patwayEntry);
+			}
+		}
+	}
+	
+	public static void parseExperimentalProperties(
+			Element recordElement, HMDBRecord record, Namespace ns) {
+		
+		Element experimentalPropertiesElement = 
+				recordElement.getChild("experimental_properties", ns);
+		if(experimentalPropertiesElement == null)
+			return;
+		
+		//	TODO
+	}
+
+	public static void parseConcentrations(
+			Element recordElement, HMDBRecord record, Namespace ns) {
+		
+		//	Normal
+		Element normalConcentrationsElement = 
+				recordElement.getChild("normal_concentrations", ns);
+		if(normalConcentrationsElement != null) {
+			
+			List<Element> normalConcentrationsList = 
+					normalConcentrationsElement.getChildren("concentration", ns);
+			for(Element ncElement : normalConcentrationsList) {
+				
+				CompoundConcentration nc = parseConcentrationElement(
+						ncElement, ConcentrationType.NORMAL, ns);
+				record.getConcentrations().add(nc);
+			}
+		}
+		//	Abnormal
+		Element abnormalConcentrationsElement = 
+				recordElement.getChild("abnormal_concentrations", ns);
+		if(abnormalConcentrationsElement != null) {
+			
+			List<Element> abnormalConcentrationsList = 
+					abnormalConcentrationsElement.getChildren("concentration", ns);
+			for(Element acElement : abnormalConcentrationsList) {
+				
+				CompoundConcentration ac = parseConcentrationElement(
+						acElement, ConcentrationType.ABNORMAL, ns);
+				record.getConcentrations().add(ac);
+			}
+		}
+	}
+	
+	public static CompoundConcentration parseConcentrationElement(
+			Element concElement, ConcentrationType type, Namespace ns) {
+		CompoundConcentration cc = null;
+		
+		String biospecimen = concElement.getChildText("biospecimen", ns);
+		String value = concElement.getChildText("concentration_value", ns);
+		String units = concElement.getChildText("concentration_units", ns);
+		cc = new CompoundConcentration(biospecimen, value, units, type);
+		
+		if(type.equals(ConcentrationType.NORMAL)) {
+			cc.setAge(concElement.getChildText("subject_age", ns));
+			cc.setSex(concElement.getChildText("subject_sex", ns));
+			cc.setCondition(concElement.getChildText("subject_condition", ns));
+		}
+		if(type.equals(ConcentrationType.ABNORMAL)) {
+			cc.setAge(concElement.getChildText("patient_age", ns));
+			cc.setSex(concElement.getChildText("patient_sex", ns));
+			cc.setCondition(concElement.getChildText("patient_information", ns));
+		}
+		cc.setComment(concElement.getChildText("comment", ns));
+		Element citationListElement = 
+				concElement.getChild("references", ns);
+		if(citationListElement != null) {
+			
+			List<Element> citationList = 
+					citationListElement.getChildren("reference", ns);
+			
+			for(Element citationElement : citationList) {
+				
+				HMDBCitation ref = parseCitationElement(citationElement, ns);
+				cc.getReferences().add(ref);
+			}
+		}		
+		return cc;
+	}	
+	
+	public static HMDBCitation parseCitationElement(
+			Element citationElement, Namespace ns) {
+		
+		String refText = citationElement.getChildText("reference_text", ns);
+		String pubMedId = citationElement.getChildText("pubmed_id", ns);;
+		return new HMDBCitation(refText, pubMedId);
+	}
+	
+	public static void parseDeseases(
+			Element recordElement, HMDBRecord record, Namespace ns) {
+		
+		Element diseasesElement = 
+				recordElement.getChild("diseases", ns);
+		if(diseasesElement != null) {
+			
+			List<Element> diseasesList = 
+					diseasesElement.getChildren("disease", ns);
+			for(Element desElement : diseasesList) {
+				
+				String deseaseName = desElement.getChildText("name", ns);
+				String omimId = desElement.getChildText("omim_id", ns);
+				HMDBDesease des = new HMDBDesease(deseaseName, omimId);
+				
+				Element citationListElement = 
+						desElement.getChild("references", ns);
+				if(citationListElement != null) {
+					
+					List<Element> citationList = 
+							citationListElement.getChildren("reference", ns);
+					
+					for(Element citationElement : citationList) {
+						
+						HMDBCitation ref = parseCitationElement(citationElement, ns);
+						des.getReferences().add(ref);
+					}
+				}
+				record.getDeseases().add(des);
+			}
+		}
+	}
+	
+	public static void parseProteinAssociations(
+			Element recordElement, HMDBRecord record, Namespace ns) {
+		
+		Element proteinAssociationListElement = 
+				recordElement.getChild("protein_associations", ns);
+		if(proteinAssociationListElement != null) {
+			
+			List<Element> proteinAssociationList = 
+					proteinAssociationListElement.getChildren("protein", ns);
+			
+			for(Element proteinAssociationElement : proteinAssociationList) {
+				
+				HMDBProteinAssociation pa = new HMDBProteinAssociation(
+						proteinAssociationElement.getChildText("protein_accession", ns), 
+						proteinAssociationElement.getChildText("name", ns),
+						proteinAssociationElement.getChildText("uniprot_id", ns),
+						proteinAssociationElement.getChildText("gene_name", ns), 
+						proteinAssociationElement.getChildText("protein_type", ns));
+				record.getProteinAssociation().add(pa);;
+			}
+		}		
+	}
+	
+	public static void parseGeneralReferences(
+			Element recordElement, HMDBRecord record, Namespace ns) {
+		
+		Element citationListElement = 
+				recordElement.getChild("general_references", ns);
+		if(citationListElement != null) {
+			
+			List<Element> citationList = 
+					citationListElement.getChildren("reference", ns);
+			
+			for(Element citationElement : citationList) {
+				
+				HMDBCitation ref = parseCitationElement(citationElement, ns);
+				record.getReferences().add(ref);
+			}
 		}
 	}
 }

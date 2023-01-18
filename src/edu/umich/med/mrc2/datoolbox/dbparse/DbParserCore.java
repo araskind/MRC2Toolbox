@@ -30,9 +30,16 @@ import java.awt.RenderingHints;
 import java.awt.SplashScreen;
 import java.awt.Toolkit;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Properties;
 
+import org.apache.commons.jcs3.JCS;
+import org.apache.commons.jcs3.access.CacheAccess;
+import org.apache.commons.jcs3.access.exception.CacheException;
+import org.apache.commons.jcs3.engine.control.CompositeCacheManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.slf4j.LoggerFactory;
@@ -57,6 +64,10 @@ public class DbParserCore {
 	
 	private static DbParserTaskControllerImpl taskController;
 	private static org.slf4j.Logger logger;
+	
+	private static CompositeCacheManager compositeCacheManager;
+	private static Properties cacheProps;
+	public static CacheAccess<Object, Object> dbUploadCache;
 	
 	private static DbParserFrame mainWindow;
 
@@ -137,6 +148,8 @@ public class DbParserCore {
             renderSplashFrame(g, "Starting program ");
             splash.update();
         }
+        initCacheSysytem();
+        
 		taskController = new DbParserTaskControllerImpl();
 		taskController.initModule();
 		taskController.setMaxRunningThreads(MRC2ToolBoxConfiguration.getMaxThreadNumber());
@@ -144,6 +157,24 @@ public class DbParserCore {
 		mainWindow = new DbParserFrame();
 		mainWindow.setLocationRelativeTo(null);
 		mainWindow.setVisible(true);
+	}
+	
+	private static void initCacheSysytem() {
+		
+		compositeCacheManager = CompositeCacheManager.getUnconfiguredInstance();
+		cacheProps = new Properties(); 
+		try {
+			FileReader pfr = new FileReader(configDir + "cache.ccf");
+			cacheProps.load(pfr); 
+			File tmp = new File(tmpDir);
+			cacheProps.put("jcs.auxiliary.DC.attributes.DiskPath", tmp.getAbsolutePath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		compositeCacheManager.configure(cacheProps);	
+		dbUploadCache = JCS.getInstance("dbUploadCache");
+		dbUploadCache.clear();
 	}
 	
     static void renderSplashFrame(Graphics2D g, String message) {
@@ -185,6 +216,17 @@ public class DbParserCore {
 		if(lockFile != null)
 			lockFile.delete();
 		
+		try {
+			dbUploadCache.clear();
+		} catch (CacheException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			JCS.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
 		mainWindow.savePreferences();
 		mainWindow.dispose();
 		

@@ -41,10 +41,12 @@ public class CompoundConcentration {
 	private String comment;
 	private Collection<HMDBCitation>references;
 
-	public CompoundConcentration(String biospecimen, String value, String units, ConcentrationType type) {
+	public CompoundConcentration(
+			String biospecimen, String value, String units, ConcentrationType type) {
 		super();
 
-		uniqueId = DataPrefix.HMDB_CONCENTRATION.getName() + UUID.randomUUID().toString();
+		uniqueId = DataPrefix.HMDB_CONCENTRATION.getName() + 
+				UUID.randomUUID().toString();
 		this.biospecimen = biospecimen;
 		this.value = value;
 		this.units = units;

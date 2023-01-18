@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Collection;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.xml.stream.FactoryConfigurationError;
@@ -44,6 +45,7 @@ import org.jdom2.input.DOMBuilder;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import edu.umich.med.mrc2.datoolbox.dbparse.DbParserCore;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBParserJdom2;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBRecord;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -54,11 +56,13 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 	
 	private File hmdbXmlFile;
 	private Collection<HMDBRecord>records;
+	private Set<String>idSet;
 	
 	public HMDBParseAndUploadTask(File hmdbXmlFile) {
 		super();
 		this.hmdbXmlFile = hmdbXmlFile;
 		records = new TreeSet<HMDBRecord>();
+		idSet = new TreeSet<String>();
 	}
 
 	@Override
@@ -71,6 +75,12 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			e.printStackTrace();
 			errorMessage = e.getMessage();
 			setStatus(TaskStatus.ERROR);
+		}
+		try {
+			extractRedundantData();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 		try {
 			uploadRecordsToDatabase();
@@ -158,17 +168,31 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-			    	if(record != null)
-			    		records.add(record);
-			    	
+			    	if(record != null) {
+			    		records.add(record); // Put in cash and keep only ID list in memory?
+			    		idSet.add(record.getPrimaryId());
+			    		DbParserCore.dbUploadCache.put(record.getPrimaryId(), record);
+			    	}			    	
 			    	processed++;
 			    }
 			}
 		}
         catch (Exception e) {
 			e.printStackTrace();
-		}
+		}	
+	}
+	
+	private void extractRedundantData() {
 		
+		taskDescription = "Extracting redundant data ...";		
+		total = idSet.size();
+		processed = 0;
+		for(String id : idSet) {
+			
+			HMDBRecord record = (HMDBRecord)DbParserCore.dbUploadCache.get(id);
+			System.out.println(record.getName());
+			processed++;
+		}
 	}
 	
 	private void uploadRecordsToDatabase() {
