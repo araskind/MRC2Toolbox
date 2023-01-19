@@ -21,18 +21,31 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load;
 
-public class CompoundProperty {
+import java.io.Serializable;
 
+public class CompoundProperty implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 410037410224833018L;
+	
 	private String propertyName;
 	private String propertyValue;
 	private String source;
 	private CompoundPropertyType type;
+	private String globalId;
 	
-	public CompoundProperty(String propertyName, String propertyValue, CompoundPropertyType type) {
+	public CompoundProperty(
+			String propertyName, 
+			String propertyValue,
+			String source,
+			CompoundPropertyType type) {
 		super();
 		this.propertyName = propertyName;
 		this.propertyValue = propertyValue;
 		this.type = type;
+		this.source = source;
 	}
 
 	public String getPropertyName() {
@@ -54,6 +67,21 @@ public class CompoundProperty {
 	public void setSource(String source) {
 		this.source = source;
 	}
+
+	public String getGlobalId() {
+		return globalId;
+	}
+
+	public void setGlobalId(String globalId) {
+		this.globalId = globalId;
+	}
 	
-	
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.propertyName != null ? this.propertyName.hashCode() : 0)
+        		+ (this.type.name() != null ? this.type.name().hashCode() : 0);
+        return hash;
+    }
 }

@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -30,8 +31,13 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.Record;
 
-public class HMDBRecord implements Record, Comparable<HMDBRecord> {
+public class HMDBRecord implements Record, Comparable<HMDBRecord>, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6636647368395053931L;
+	
 	private String primaryId;
 	private String name;
 	private String sysName;
@@ -51,7 +57,7 @@ public class HMDBRecord implements Record, Comparable<HMDBRecord> {
 	private Collection<CompoundConcentration>concentrations;
 	private Collection<HMDBDesease>deseases;
 	private Collection<HMDBPathway>pathways;
-	private Collection<HMDBProteinAssociation>proteinAssociation;
+	private Collection<HMDBProteinAssociation>proteinAssociations;
 
 	public HMDBRecord(String primaryId) {
 
@@ -66,7 +72,7 @@ public class HMDBRecord implements Record, Comparable<HMDBRecord> {
 		concentrations = new ArrayList<CompoundConcentration>();
 		deseases = new ArrayList<HMDBDesease>();
 		pathways =  new ArrayList<HMDBPathway>();
-		proteinAssociation = new ArrayList<HMDBProteinAssociation>();
+		proteinAssociations = new ArrayList<HMDBProteinAssociation>();
 	}
 
 	@Override
@@ -181,8 +187,8 @@ public class HMDBRecord implements Record, Comparable<HMDBRecord> {
 	/**
 	 * @return the proteinAssociation
 	 */
-	public Collection<HMDBProteinAssociation> getProteinAssociation() {
-		return proteinAssociation;
+	public Collection<HMDBProteinAssociation> getProteinAssociations() {
+		return proteinAssociations;
 	}
 
 	public String getCsDescription() {

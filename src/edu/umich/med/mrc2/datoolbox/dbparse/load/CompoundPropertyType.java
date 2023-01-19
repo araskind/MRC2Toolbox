@@ -24,5 +24,5 @@ package edu.umich.med.mrc2.datoolbox.dbparse.load;
 public enum CompoundPropertyType {
 
 	EXPERIMENTAL,
-	CALCULATED;
+	PREDICTED;
 }

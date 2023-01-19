@@ -21,11 +21,19 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb;
 
-public class HMDBPathway {
+import java.io.Serializable;
 
+public class HMDBPathway implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4701781888008822261L;
+	
 	private String name;
 	private String smpdbId;
 	private String keggMapId;
+	private String globalId;
 
 	public HMDBPathway(String name, String smpdbId, String keggMapId) {
 		super();
@@ -60,6 +68,20 @@ public class HMDBPathway {
 	public String getKeggMapId() {
 		return keggMapId;
 	}
+	
+    @Override
+    public int hashCode() {
 
+        int hash = 3;
+        hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
+        return hash;
+    }
 
+	public String getGlobalId() {
+		return globalId;
+	}
+
+	public void setGlobalId(String globalId) {
+		this.globalId = globalId;
+	}
 }

@@ -140,6 +140,7 @@ public class DrugBankParser {
 				CompoundProperty expProp = new CompoundProperty(
 						pe.getChildText("kind"), 
 						pe.getChildText("value"), 
+						pe.getChildText("source"), 
 						CompoundPropertyType.EXPERIMENTAL);
 				record.addProperty(expProp);
 			}
@@ -153,7 +154,8 @@ public class DrugBankParser {
 				CompoundProperty expProp = new CompoundProperty(
 						pc.getChildText("kind"), 
 						pc.getChildText("value"), 
-						CompoundPropertyType.CALCULATED);
+						pc.getChildText("source"),
+						CompoundPropertyType.PREDICTED);
 				record.addProperty(expProp);
 			}
 		}

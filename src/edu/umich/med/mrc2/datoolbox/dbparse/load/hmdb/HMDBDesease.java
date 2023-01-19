@@ -21,14 +21,20 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 
-public class HMDBDesease {
+public class HMDBDesease implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4497633670707729873L;
+	
 	private String uniqueId;
 	private String name;
 	private String omimId;
@@ -69,4 +75,12 @@ public class HMDBDesease {
 	public String getUniqueId() {
 		return uniqueId;
 	}
+	
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
+        return hash;
+    }
 }

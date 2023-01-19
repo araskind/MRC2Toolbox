@@ -21,15 +21,26 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb;
 
-public class HMDBProteinAssociation {
+import java.io.Serializable;
 
+public class HMDBProteinAssociation implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6432800648735373062L;
+	
 	private String proteinAccession;
 	private String name;
 	private String uniprot;
 	private String geneName;
 	private String proteinType;
 
-	public HMDBProteinAssociation(String proteinAccession, String name, String uniprot, String geneName,
+	public HMDBProteinAssociation(
+			String proteinAccession, 
+			String name, 
+			String uniprot, 
+			String geneName,
 			String proteinType) {
 		super();
 		this.proteinAccession = proteinAccession;
@@ -73,4 +84,12 @@ public class HMDBProteinAssociation {
 	public String getProteinType() {
 		return proteinType;
 	}
+	
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.proteinAccession != null ? this.proteinAccession.hashCode() : 0);
+        return hash;
+    }
 }

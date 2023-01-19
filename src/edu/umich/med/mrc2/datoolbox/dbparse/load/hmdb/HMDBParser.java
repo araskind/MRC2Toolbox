@@ -208,7 +208,7 @@ public class HMDBParser {
 						proteinType = proteinTypeElement.item(0).getFirstChild().getNodeValue();
 				}
 				HMDBProteinAssociation pa = new HMDBProteinAssociation(proteinAccession, name, uniprotId, geneName, proteinType);
-				record.getProteinAssociation().add(pa);
+				record.getProteinAssociations().add(pa);
 			}
 		}
 	}
@@ -826,7 +826,7 @@ public class HMDBParser {
 		PreparedStatement ps = conn.prepareStatement(dataQuery);
 		ps.setString(1, record.getPrimaryId());
 
-		for (HMDBProteinAssociation assoc : record.getProteinAssociation()) {
+		for (HMDBProteinAssociation assoc : record.getProteinAssociations()) {
 
 			String proteinAccession = assoc.getProteinAccession();
 			if(proteinAccession == null)

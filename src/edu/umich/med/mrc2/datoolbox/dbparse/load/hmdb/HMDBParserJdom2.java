@@ -31,6 +31,9 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 
+import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundPropertyType;
+
 public class HMDBParserJdom2 {
 
 	public static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -55,7 +58,7 @@ public class HMDBParserJdom2 {
 		record.getCompoundIdentity().setInChiKey(recordElement.getChildText("inchikey", ns));
 		
 		String mzString = recordElement.getChildText("monisotopic_molecular_weight", ns);
-		if(mzString != null) {
+		if(mzString != null && !mzString.isEmpty()) {
 			double mz = Double.parseDouble(mzString);
 			record.getCompoundIdentity().setExactMass(mz);
 		}		
@@ -65,6 +68,7 @@ public class HMDBParserJdom2 {
 		parseSynonyms(recordElement, record, ns);
 		parseBiologicalProperties(recordElement, record, ns);
 		parseExperimentalProperties(recordElement, record, ns);
+		parsePredictedProperties(recordElement, record, ns);
 		parseConcentrations(recordElement, record, ns);
 		parseDeseases(recordElement, record, ns);
 		parseProteinAssociations(recordElement, record, ns);
@@ -237,9 +241,42 @@ public class HMDBParserJdom2 {
 		if(experimentalPropertiesElement == null)
 			return;
 		
-		//	TODO
+		List<Element> propertyList = 
+				experimentalPropertiesElement.getChildren("property", ns);
+		
+		for(Element propertyElement : propertyList) {
+			
+			CompoundProperty cp = new CompoundProperty(
+					propertyElement.getChildText("kind", ns), 
+					propertyElement.getChildText("value", ns), 
+					propertyElement.getChildText("source", ns),
+					CompoundPropertyType.EXPERIMENTAL);
+			record.getCompoundProperties().add(cp);
+		}
 	}
 
+	public static void parsePredictedProperties(
+			Element recordElement, HMDBRecord record, Namespace ns) {
+		
+		Element predictedPropertiesElement = 
+				recordElement.getChild("predicted_properties", ns);
+		if(predictedPropertiesElement == null)
+			return;
+		
+		List<Element> propertyList = 
+				predictedPropertiesElement.getChildren("property", ns);
+		
+		for(Element propertyElement : propertyList) {
+			
+			CompoundProperty cp = new CompoundProperty(
+					propertyElement.getChildText("kind", ns), 
+					propertyElement.getChildText("value", ns), 
+					propertyElement.getChildText("source", ns),
+					CompoundPropertyType.PREDICTED);
+			record.getCompoundProperties().add(cp);
+		}
+	}
+	
 	public static void parseConcentrations(
 			Element recordElement, HMDBRecord record, Namespace ns) {
 		
@@ -368,7 +405,7 @@ public class HMDBParserJdom2 {
 						proteinAssociationElement.getChildText("uniprot_id", ns),
 						proteinAssociationElement.getChildText("gene_name", ns), 
 						proteinAssociationElement.getChildText("protein_type", ns));
-				record.getProteinAssociation().add(pa);;
+				record.getProteinAssociations().add(pa);;
 			}
 		}		
 	}

@@ -21,14 +21,20 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 
-public class CompoundConcentration {
+public class CompoundConcentration implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1217086420780647240L;
+	
 	private String uniqueId;
 	private String biospecimen;
 	private String value;

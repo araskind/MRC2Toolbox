@@ -21,10 +21,18 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb;
 
-public class CompoundBioLocation {
+import java.io.Serializable;
 
+public class CompoundBioLocation implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8484060781075196345L;
+	
 	private String locationName;
 	private CompoundLocationType locationType;
+	private String globalId;
 
 	public CompoundBioLocation(String locationName, CompoundLocationType locationType) {
 		super();
@@ -44,5 +52,22 @@ public class CompoundBioLocation {
 	 */
 	public CompoundLocationType getLocationType() {
 		return locationType;
+	}
+	
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.locationName != null ? this.locationName.hashCode() : 0)
+        		+ (this.locationType.name() != null ? this.locationType.name().hashCode() : 0);
+        return hash;
+    }
+
+	public String getGlobalId() {
+		return globalId;
+	}
+
+	public void setGlobalId(String globalId) {
+		this.globalId = globalId;
 	}
 }

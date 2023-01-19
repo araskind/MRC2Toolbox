@@ -21,12 +21,18 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 
-public class HMDBCitation {
+public class HMDBCitation implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -68004700630512378L;
+	
 	private String uniqueId;
 	private String citationText;
 	private String pubmedId;
@@ -58,4 +64,12 @@ public class HMDBCitation {
 	public String getPubmedId() {
 		return pubmedId;
 	}
+	
+    @Override
+    public int hashCode() {
+
+        int hash = 3;
+        hash = 53 * hash + (this.citationText != null ? this.citationText.hashCode() : 0);
+        return hash;
+    }
 }
