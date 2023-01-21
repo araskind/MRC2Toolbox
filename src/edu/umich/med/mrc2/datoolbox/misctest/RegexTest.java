@@ -182,11 +182,6 @@ import net.sf.jniinchi.INCHI_RET;
 
 public class RegexTest {
 
-	public static String dataDir = "." + File.separator + "data" + File.separator;
-	private static String dbHome = dataDir + "database" + File.separator + "CefAnalyzerDB";
-	private static String dbUser = "CefAnalyzer";
-	private static String dbPassword = "CefAnalyzer";
-
 	public static final String pubchemCidUrl = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
 	private static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
 	private static final SmilesParser smipar = new SmilesParser(builder);

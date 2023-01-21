@@ -23,12 +23,26 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 
 public enum CompoundNameCategory {
 
-	PRI,
-	SYN,
-	IUP,
-	SYS,
-	BRN,
+	PRI("Primary"),
+	SYN("Synonym"),
+	IUP("IUPAC"),
+	SYS("Systematic"),
+	BRN("Brand name"),
 	;
+	
+	private final String name;
+
+	CompoundNameCategory(String type) {
+		this.name = type;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String toString() {
+		return name;
+	}
 	
 	public static CompoundNameCategory getCompoundNameCategoryByName(String name) {
 		

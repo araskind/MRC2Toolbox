@@ -24,17 +24,17 @@ package edu.umich.med.mrc2.datoolbox.dbparse.load.chebi;
 public enum ChebiFields {
 
 	CHEBI_ID("ChEBI ID"),
-	CHARGE("Charge"),
+	CHEBI_NAME("ChEBI Name"),
 	FORMULAE("Formulae"),
-	MONOISOTOPIC_MASS("Monoisotopic Mass"),
-	MASS("Mass"),
 	INCHI("InChI"),
 	INCHIKEY("InChIKey"),
 	SMILES("SMILES"),
+	MASS("Mass"),
+	MONOISOTOPIC_MASS("Monoisotopic Mass"),
+	CHARGE("Charge"),
 	DEFINITION("Definition"),
-	CHEBI_NAME("ChEBI Name"),
-	STAR("Star"),
 	LAST_MODIFIED("Last Modified"),
+	STAR("Star"),
 	;
 
 	private final String name;

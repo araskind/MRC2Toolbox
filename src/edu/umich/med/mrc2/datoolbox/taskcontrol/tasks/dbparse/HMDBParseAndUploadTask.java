@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
@@ -51,9 +52,11 @@ import org.jdom2.input.DOMBuilder;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundNameCategory;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.dbparse.DbParserCore;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.CompoundBioLocation;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.CompoundConcentration;
@@ -212,9 +215,9 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 						e.printStackTrace();
 					}
 			    	if(record != null) {
-//			    		records.add(record); // Put in cash and keep only ID list in memory?
-			    		idSet.add(record.getPrimaryId());
-			    		DbParserCore.dbUploadCache.put(record.getPrimaryId(), record);
+			    		records.add(record); // Put in cash and keep only ID list in memory?
+//			    		idSet.add(record.getPrimaryId());
+//			    		DbParserCore.dbUploadCache.put(record.getPrimaryId(), record);
 				    	System.out.println("Parsed - " + record.getName());
 			    	}			    	
 			    	processed++;
@@ -229,7 +232,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 	private void extractRedundantData() {
 		
 		taskDescription = "Extracting redundant data ...";		
-		total = idSet.size();
+		total = records.size();
 		processed = 0;
 		
 		bioLocations = new HashMap<Integer, CompoundBioLocation>();
@@ -239,9 +242,9 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		references = new HashMap<Integer, HMDBCitation>();
 		proteinAssociations = new HashMap<Integer, HMDBProteinAssociation>(); 
 		
-		for(String id : idSet) {
+		for(HMDBRecord record : records) {
 			
-			HMDBRecord record = (HMDBRecord)DbParserCore.dbUploadCache.get(id);
+//			HMDBRecord record = (HMDBRecord)DbParserCore.dbUploadCache.get(id);
 			
 			if(!record.getBiolocations().isEmpty())
 				record.getBiolocations().stream().forEach(b -> bioLocations.put(b.hashCode(), b));
@@ -529,8 +532,8 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		String compoundDataQuery = 
 				"INSERT INTO COMPOUNDDB.HMDB_COMPOUND_DATA "
 				+ "(ACCESSION, NAME, FORMULA, EXACT_MASS, SMILES, INCHI, INCHI_KEY, "
-				+ "AGGREGATE_STATE, DESCRIPTION, CS_DESCRIPTION, DATE_CREATED, LAST_UPDATED, CHARGE) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "AGGREGATE_STATE, DESCRIPTION, CS_DESCRIPTION, DATE_CREATED, LAST_UPDATED) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement compoundDataPs = conn.prepareStatement(compoundDataQuery);
 		
 		//	Synonyms
@@ -550,8 +553,8 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		//	Properties
 		String cpdPropertiesQuery = 
 				"INSERT INTO COMPOUNDDB.HMDB_COMPOUND_PROPERTY_MAP "
-				+ "(ACCESSION, PROPERTY_ID, PROPERTY_VALUE) "
-				+ "VALUES (?, ?, ?)";
+				+ "(ACCESSION, PROPERTY_ID, PROPERTY_VALUE, SOURCE) "
+				+ "VALUES (?, ?, ?, ?)";
 		PreparedStatement cpdPropertiesPs = conn.prepareStatement(cpdPropertiesQuery);
 	
 		//	Biolocations
@@ -571,7 +574,8 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		//	Concentrations
 		String concentrationsQuery = 
 				"INSERT INTO COMPOUNDDB.HMDB_CONCENTRATIONS "
-				+ "(ACCESSION, CONC_ID, TYPE, UNITS, VALUE, AGE, SEX, SUBJECT_CONDITION, COMMENTS) "
+				+ "(ACCESSION, CONC_ID, TYPE, UNITS, VALUE, "
+				+ "AGE, SEX, SUBJECT_CONDITION, COMMENTS) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement concentrationsPs = conn.prepareStatement(concentrationsQuery);
 		
@@ -603,9 +607,9 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 				+ "VALUES (?, ?)";
 		PreparedStatement genRefPs = conn.prepareStatement(genRefQuery);
 		
-		for(String id : idSet) {
+		for(HMDBRecord record : records) {
 			
-			HMDBRecord record = (HMDBRecord)DbParserCore.dbUploadCache.get(id);
+//			HMDBRecord record = (HMDBRecord)DbParserCore.dbUploadCache.get(id);
 			
 			//	Compound data
 			try {
@@ -631,7 +635,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			//	Properties
 			if(!record.getCompoundProperties().isEmpty()) {				
 				try {
-					insertCompoundProperties(record.getCompoundProperties(), conn, cpdPropertiesPs);
+					insertCompoundProperties(record, conn, cpdPropertiesPs);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -640,7 +644,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			//	Biolocations
 			if(!record.getBiolocations().isEmpty()) {				
 				try {
-					insertBiolocations(record.getBiolocations(), conn, biolocationsPs);
+					insertBiolocations(record, conn, biolocationsPs);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -649,7 +653,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			//  Pathways
 			if(!record.getPathways().isEmpty()) {				
 				try {
-					insertPathways(record.getPathways(), conn, pathwaysPs);
+					insertPathways(record, conn, pathwaysPs);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -659,7 +663,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			if(!record.getConcentrations().isEmpty()) {
 				try {
 					insertConcentrationsWithReferences(
-							record.getConcentrations(), conn, concentrationsPs, concRefsPs);
+							record, conn, concentrationsPs, concRefsPs);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -668,7 +672,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			//	Diseases with references
 			if(!record.getDeseases().isEmpty()) {
 				try {
-					insertDiseasesWithReferences(record.getDeseases(), conn, diseasesPs);
+					insertDiseasesWithReferences(record, conn, diseasesPs);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -677,7 +681,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			//	Protein associations
 			if(!record.getProteinAssociations().isEmpty()) {				
 				try {
-					insertProteinAssociations(record.getProteinAssociations(), conn, protAssocPs);
+					insertProteinAssociations(record, conn, protAssocPs);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -686,7 +690,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			//	General references
 			if(!record.getReferences().isEmpty()) {				
 				try {
-					insertGeneralReferences(record.getReferences(), conn, genRefPs);
+					insertGeneralReferences(record, conn, genRefPs);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -713,82 +717,264 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 			HMDBRecord record, 
 			Connection conn, 
 			PreparedStatement compoundDataPs) throws Exception{
-		// TODO Auto-generated method stub
+		CompoundIdentity cid = record.getCompoundIdentity();
+		double exactMass = 0.0d;
+		try {
+			exactMass = cid.getExactMass();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		compoundDataPs.setString(1, record.getPrimaryId());
+		compoundDataPs.setString(2, record.getName());
+		compoundDataPs.setString(3, cid.getFormula());
+		compoundDataPs.setDouble(4, exactMass);
+		compoundDataPs.setString(5, cid.getSmiles());
+		compoundDataPs.setString(6, cid.getInChi());
+		compoundDataPs.setString(7, cid.getInChiKey());		
+		if(record.getAggregateState() != null)
+			compoundDataPs.setString(8, record.getAggregateState());
+		else
+			compoundDataPs.setNull(8, java.sql.Types.NULL);
 		
+		if(record.getDescription() != null)
+			compoundDataPs.setString(9, record.getDescription());
+		else
+			compoundDataPs.setNull(9, java.sql.Types.NULL);
+		
+		if(record.getCsDescription() != null)
+			compoundDataPs.setString(10, record.getCsDescription());
+		else
+			compoundDataPs.setNull(10, java.sql.Types.NULL);
+		
+		compoundDataPs.setDate(11, new java.sql.Date(record.getDateCreated().getTime()));
+		compoundDataPs.setDate(12, new java.sql.Date(record.getLastUpdated().getTime()));
+		compoundDataPs.executeUpdate();
 	}
 	
 	private void insertSynonyms(
 			HMDBRecord record, 
 			Connection conn, 
 			PreparedStatement synonymsPs) throws Exception{
-		// TODO Auto-generated method stub
-		
+		synonymsPs.setString(1, record.getPrimaryId());
+		synonymsPs.setString(2, record.getName());
+		synonymsPs.setString(3, CompoundNameCategory.PRI.name());
+		synonymsPs.addBatch();
+		for(String synonym : record.getSynonyms()) {
+			
+			synonymsPs.setString(2, synonym);
+			synonymsPs.setString(3, CompoundNameCategory.SYN.name());
+			synonymsPs.addBatch();
+		}
+		if(record.getSysName() != null) {
+			
+			synonymsPs.setString(2, record.getSysName());
+			synonymsPs.setString(3, CompoundNameCategory.SYS.name());
+			synonymsPs.addBatch();
+		}
+		if(record.getTraditionalIupacName() != null) {
+			
+			synonymsPs.setString(2, record.getTraditionalIupacName());
+			synonymsPs.setString(3, CompoundNameCategory.IUP.name());
+			synonymsPs.addBatch();
+		}		
+		synonymsPs.executeBatch();
 	}
 
 	private void insertDatabaseCrossReferences(
 			HMDBRecord record, 
 			Connection conn, 
 			PreparedStatement dbCrossrefPs) throws Exception{
-		// TODO Auto-generated method stub
-		
+
+		dbCrossrefPs.setString(1, record.getPrimaryId());
+		dbCrossrefPs.setString(2, CompoundDatabaseEnum.HMDB.name() );
+		dbCrossrefPs.setString(3, record.getPrimaryId());
+		dbCrossrefPs.addBatch();
+		for(Entry<CompoundDatabaseEnum, String> dbRef : record.getCompoundIdentity().getDbIdMap().entrySet()) {
+			
+			dbCrossrefPs.setString(2, dbRef.getKey().name());
+			dbCrossrefPs.setString(3, dbRef.getValue());
+			dbCrossrefPs.addBatch();
+		}
+		if(record.getSecondaryHmdbAccesions() != null 
+				&& !record.getSecondaryHmdbAccesions().isEmpty()) {
+			
+			for(String secondaryHmdbAccesion : record.getSecondaryHmdbAccesions()) {
+				
+				dbCrossrefPs.setString(2, CompoundDatabaseEnum.HMDB_SECONDARY.name());
+				dbCrossrefPs.setString(3, secondaryHmdbAccesion);
+				dbCrossrefPs.addBatch();
+			}
+		}
+		dbCrossrefPs.executeBatch();
 	}
 
 	private void insertCompoundProperties(
-			Collection<CompoundProperty> compoundProperties2, 
+			HMDBRecord record, 
 			Connection conn,
 			PreparedStatement cpdPropertiesPs) throws Exception{
-		// TODO Auto-generated method stub
 		
+		Collection<CompoundProperty> compoundProperties2 = record.getCompoundProperties();
+		cpdPropertiesPs.setString(1, record.getPrimaryId());
+		
+		for(CompoundProperty prop : compoundProperties2) {
+			
+			String propId = compoundPropertiesIdMap.get(prop.hashCode());
+			if(propId != null) {
+				
+				cpdPropertiesPs.setString(2, propId);
+				cpdPropertiesPs.setString(3, prop.getPropertyValue());
+				cpdPropertiesPs.setString(4, prop.getSource());
+				cpdPropertiesPs.addBatch();
+			}
+		}
+		cpdPropertiesPs.executeBatch();
 	}
 
 	private void insertBiolocations(
-			Collection<CompoundBioLocation> biolocations2, 
+			HMDBRecord record, 
 			Connection conn,
 			PreparedStatement biolocationsPs) throws Exception{
-		// TODO Auto-generated method stub
 		
+		Collection<CompoundBioLocation> biolocations2 = record.getBiolocations();
+		biolocationsPs.setString(1, record.getPrimaryId());
+		for(CompoundBioLocation biolocation : biolocations2) {
+			
+			String locId = bioLocationsIdMap.get(biolocation.hashCode());
+			if(locId != null) {
+				biolocationsPs.setString(2, locId);
+				biolocationsPs.addBatch();
+			}			
+		}		
+		biolocationsPs.executeBatch();
 	}
 
 	private void insertPathways(
-			Collection<HMDBPathway> pathways2, 
+			HMDBRecord record, 
 			Connection conn, 
 			PreparedStatement pathwaysPs) throws Exception{
-		// TODO Auto-generated method stub
-		
+
+		Set<Integer> pathwayHashCodes = record.getPathways().stream().
+				map(p -> p.hashCode()).collect(Collectors.toSet());
+		pathwaysPs.setString(1, record.getPrimaryId());
+		for(Integer pwHash : pathwayHashCodes) {
+			
+			String pathwayId = pathwaysIdMap.get(pwHash);
+			if(pathwayId != null) {
+				pathwaysPs.setString(2, pathwayId);
+				pathwaysPs.addBatch();
+			}
+		}		
+		pathwaysPs.executeBatch();
 	}
 
 	private void insertConcentrationsWithReferences(
-			Collection<CompoundConcentration> concentrations, 
+			HMDBRecord record, 
 			Connection conn,
 			PreparedStatement concentrationsPs, 
 			PreparedStatement concRefsPs) throws Exception{
-		// TODO Auto-generated method stub
-		
+
+		Collection<CompoundConcentration> concentrations = record.getConcentrations();
+		concentrationsPs.setString(1, record.getPrimaryId());
+		for(CompoundConcentration conc : concentrations) {
+			
+			String concId = SQLUtils.getNextIdFromSequence(
+					conn, "COMPOUNDDB.CONCENTRATION_SEQ", 
+					DataPrefix.CONCENTRATION, "0", 16);
+			
+			concentrationsPs.setString(2, concId);
+			concentrationsPs.setString(3, conc.getType().name());
+			concentrationsPs.setString(4, conc.getUnits());
+			concentrationsPs.setString(5, conc.getValue());			
+			concentrationsPs.setString(6, conc.getAge());			
+			concentrationsPs.setString(7, conc.getSex());			
+			concentrationsPs.setString(8, conc.getCondition());
+			concentrationsPs.setString(9, conc.getComment());			
+			concentrationsPs.addBatch();
+			if(conc.getReferences() != null && !conc.getReferences().isEmpty()) {
+				
+				concRefsPs.setString(1, concId);
+				for(HMDBCitation ref : conc.getReferences()) {
+					
+					String refId = referencesIdMap.get(ref.hashCode());
+					if(refId != null) {
+						concRefsPs.setString(2, refId);
+						concRefsPs.addBatch();
+					}					
+				}
+			}
+		}
+		concentrationsPs.executeBatch();
+		concRefsPs.executeBatch();
 	}
 
 	private void insertDiseasesWithReferences(
-			Collection<HMDBDesease> deseases2,
+			HMDBRecord record,
 			Connection conn,
 			PreparedStatement diseasesPs) throws Exception{
-		// TODO Auto-generated method stub
 		
+		Collection<HMDBDesease> deseases2 = record.getDeseases();
+		diseasesPs.setString(1, record.getPrimaryId());
+		for(HMDBDesease des : deseases2) {
+
+			String diseaseId = deseasesIdMap.get(des.hashCode());
+			if(diseaseId != null) {
+				
+				diseasesPs.setString(2, diseaseId);
+				if(des.getReferences() == null || des.getReferences().isEmpty()) {
+					diseasesPs.setNull(3, java.sql.Types.NULL);
+					diseasesPs.addBatch();
+				}
+				else {
+					for(HMDBCitation ref : des.getReferences()) {
+						
+						String refId = referencesIdMap.get(ref.hashCode());
+						if(refId != null) {
+							diseasesPs.setString(3, refId);
+							diseasesPs.addBatch();
+						}					
+					}
+				}
+			}
+		}				
+		diseasesPs.executeBatch();
 	}
 
 	private void insertProteinAssociations(
-			Collection<HMDBProteinAssociation> proteinAssocs, 
+			HMDBRecord record, 
 			Connection conn,
 			PreparedStatement protAssocPs) throws Exception{
-		// TODO Auto-generated method stub
 		
+		Collection<HMDBProteinAssociation> proteinAssocs = record.getProteinAssociations();
+		protAssocPs.setString(1, record.getPrimaryId());
 		
+		for(HMDBProteinAssociation prAssoc : proteinAssocs) {
+			
+			String prAssocId = proteinAssociationsIdMap.get(prAssoc.hashCode());
+			if(prAssocId != null) {
+				
+				protAssocPs.setString(2, prAssocId);
+				protAssocPs.addBatch();
+			}
+		}
+		protAssocPs.executeBatch();
 	}
 
 	private void insertGeneralReferences(
-			Collection<HMDBCitation> genRefs, 
+			HMDBRecord record, 
 			Connection conn,
 			PreparedStatement genRefPs) throws Exception{
-		// TODO Auto-generated method stub
-		
+
+		genRefPs.setString(1, record.getPrimaryId());
+		for(HMDBCitation ref : record.getReferences()) {
+			
+			String refId = referencesIdMap.get(ref.hashCode());
+			if(refId != null) {
+				genRefPs.setString(2, refId);
+				genRefPs.addBatch();
+			}					
+		}
+		genRefPs.executeBatch();
 	}
 
 	@Override

@@ -1306,10 +1306,29 @@ public class MsUtils {
 				return points.iterator().next().getMz();
 		}
 		else {
+			IMolecularFormula mf = null;
 			if(formula != null) {
-				IMolecularFormula mf = MolecularFormulaManipulator.getMolecularFormula(
-						formula, DefaultChemObjectBuilder.getInstance());
-				return MolecularFormulaManipulator.getMajorIsotopeMass(mf);
+				
+				try {
+					mf = MolecularFormulaManipulator.getMolecularFormula(
+							formula, DefaultChemObjectBuilder.getInstance());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(mf != null)
+					return MolecularFormulaManipulator.getMajorIsotopeMass(mf);
+			}
+			if(mf == null) {
+				
+				Collection<MsPoint>points =
+						MsUtils.calculateIsotopeDistributionFromSmiles(
+								smiles, AdductManager.getDefaultAdductForCharge(0));
+				
+				if(points == null || points.isEmpty())
+					return 0.0d;
+				else
+					return points.iterator().next().getMz();
 			}
 		}		
 		return 0.0d;

@@ -30,6 +30,7 @@ public enum ChebiCitationFields {
 	CITEXPLORE("CiteXplore Citation Links", CompoundDatabaseEnum.CITEXPLORE),
 	PUBMED_CENTRAL("PubMed Central Citation Links", CompoundDatabaseEnum.PUBMED_CENTRAL),
 	PUBMED("PubMed Citation Links", CompoundDatabaseEnum.PUBMED),
+	PPR("PPR Links", CompoundDatabaseEnum.PPR)
 	;
 
 	private final String dbName;

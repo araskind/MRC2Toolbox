@@ -482,12 +482,23 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		TandemMassSpectrum instrumentMsMs = null;
 		if(msLevel.equals(MsDepth.MS2)) {
 			
-			instrumentMsMs = feature.getSpectrum().getTandemSpectra().
-				stream().filter(s -> s.getSpectrumSource().equals(SpectrumSource.EXPERIMENTAL)).
-				findFirst().orElse(null);
-			
-			if(property.equals(IDTrackerMsFeatureProperties.PRECURSOR_MZ))
-				return mzFormat.format(instrumentMsMs.getParent().getMz());
+			instrumentMsMs = feature.getSpectrum().getExperimentalTandemSpectrum();			
+			double precursorPurity = 1.0d;	
+			String featureSpectrumArray = "";
+			if(instrumentMsMs != null) {
+				
+				featureSpectrumArray = instrumentMsMs.getSpectrumAsPythonArray();				
+				precursorPurity = instrumentMsMs.getParentIonPurity();
+			}		
+			if(property.equals(IDTrackerMsFeatureProperties.PRECURSOR_MZ)) {
+				
+				if(instrumentMsMs.getParent() != null)
+					return mzFormat.format(instrumentMsMs.getParent().getMz());
+				else
+					return "";
+			}
+			if(property.equals(IDTrackerMsFeatureProperties.FEATURE_MSMS))
+				return featureSpectrumArray;	
 			
 			if(property.equals(IDTrackerMsFeatureProperties.COLLISION_ENERGY))
 				return ppmFormat.format(instrumentMsMs.getCidLevel());
@@ -496,7 +507,11 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 				return entropyFormat.format(instrumentMsMs.getEntropy());
 			
 			if(property.equals(IDTrackerMsFeatureProperties.TOTAL_INTENSITY))
-				return intensityFormat.format(instrumentMsMs.getTotalIntensity());		
+				return intensityFormat.format(instrumentMsMs.getTotalIntensity());	
+			
+			if(property.equals(IDTrackerMsFeatureProperties.PRECURSOR_PURITY) 
+					&& precursorPurity != 0.0d)
+				return entropyFormat.format(precursorPurity);
 		}
 		
 		if(property.equals(IDTrackerMsFeatureProperties.ANNOTATIONS) && hasAnnotations)
@@ -629,7 +644,6 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			double qValue = 0.0d;
 			double posteriorProbability = 0.0d;
 			double percolatorScore = 0.0d;
-			String featureSpectrumArray = "";
 			String libraryHitSpectrumArray = "";		
 			double libraryPrecursorDeltaMz = 0.0d;
 			double neutralMassDeltaMz = 0.0d;
@@ -641,7 +655,6 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 				if(instrumentMsMs.getParent() != null)
 					parentMz = instrumentMsMs.getParent().getMz();
 				
-				featureSpectrumArray = instrumentMsMs.getSpectrumAsPythonArray();				
 				precursorPurity = instrumentMsMs.getParentIonPurity();
 			}
 			ReferenceMsMsLibraryMatch msmslibMatch = id.getReferenceMsMsLibraryMatch();
@@ -734,10 +747,6 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 					&& neutralMassDeltaMz != 0.0d)
 				return mzFormat.format(neutralMassDeltaMz);
 			
-			if(property.equals(IDTrackerFeatureIdentificationProperties.PRECURSOR_PURITY) 
-					&& precursorPurity != 0.0d)
-				return entropyFormat.format(precursorPurity);
-			
 			if(property.equals(IDTrackerFeatureIdentificationProperties.FDR_Q_VALUE) 
 					&& qValue != 0.0d) {
 				if(qValue < 0.001d || qValue > 1000.d)
@@ -755,9 +764,6 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			if(property.equals(IDTrackerFeatureIdentificationProperties.PERCOLATOR_SCORE) 
 					&& percolatorScore != 0.0d)
 				return entropyFormat.format(percolatorScore);	
-			
-			if(property.equals(IDTrackerFeatureIdentificationProperties.FEATURE_MSMS))
-				return featureSpectrumArray;	
 			
 			if(property.equals(IDTrackerFeatureIdentificationProperties.LIBRARY_MATCH_MSMS))
 				return libraryHitSpectrumArray;

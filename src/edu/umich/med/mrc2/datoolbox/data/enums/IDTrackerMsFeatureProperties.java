@@ -43,6 +43,8 @@ public enum IDTrackerMsFeatureProperties {
 	TOTAL_INTENSITY("Total intensity"),
 	ANNOTATIONS("Is annotated"),
 	FOLLOWUPS("Follow-up assigned"),
+	FEATURE_MSMS("Feature MSMS"),
+	PRECURSOR_PURITY("Prec.Purity"),
 	;
 
 	private final String name;

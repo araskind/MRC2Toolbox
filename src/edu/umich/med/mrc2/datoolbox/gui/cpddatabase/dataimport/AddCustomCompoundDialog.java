@@ -88,6 +88,7 @@ import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import io.github.dan2097.jnainchi.InchiStatus;
 import net.sf.jniinchi.INCHI_RET;
 
 public class AddCustomCompoundDialog extends JDialog implements ActionListener, ItemListener {
@@ -366,11 +367,12 @@ public class AddCustomCompoundDialog extends JDialog implements ActionListener, 
 			String inchiKey = null;			
 			try {
 				inChIGenerator = igfactory.getInChIGenerator(mol);
-				INCHI_RET ret = inChIGenerator.getReturnStatus();
-				if (ret == INCHI_RET.WARNING) {
+//				INCHI_RET ret = inChIGenerator.getReturnStatus();
+				InchiStatus inchiStatus = inChIGenerator.getStatus();
+				if (inchiStatus.equals(InchiStatus.WARNING)) {
 					System.out.println("InChI warning: " + inChIGenerator.getMessage());
-				} else if (ret != INCHI_RET.OKAY) {
-					errors.add("InChI failed: " + ret.toString() + " [" + inChIGenerator.getMessage() + "]");
+				} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+					errors.add("InChI failed: [" + inChIGenerator.getMessage() + "]");
 				}
 				inchiKey = inChIGenerator.getInchiKey();
 			} catch (CDKException e1) {
