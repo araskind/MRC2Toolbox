@@ -46,7 +46,7 @@ public class CoreDataBackupUtils {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-
+			createRMDIRScript();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -70,7 +70,7 @@ public class CoreDataBackupUtils {
 			"\"R:\\Metabolomics-BRCF\\Shared\\_Reports\\" + expDir.getName() + " \" /mir /mt:16 /tbd /r:1 /w:3 /fft /np";
 			commands.add(command);
 		}
-		Path mspOutputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\robocopy.bat");
+		Path mspOutputPath = Paths.get("E:\\DataAnalysis\\Automation scripts & soft\\robocopy_20230126.bat");
 	    try {
 			Files.createFile(mspOutputPath);
 		} catch (IOException e) {
@@ -104,7 +104,7 @@ public class CoreDataBackupUtils {
 			String command = "rm -rf \"" + expDir.getAbsolutePath() +"\"";
 			commands.add(command);
 		}
-		Path mspOutputPath = Paths.get("Y:\\DataAnalysis\\_Reports\\rmdir.bat");
+		Path mspOutputPath = Paths.get("E:\\DataAnalysis\\Automation scripts & soft\\rmdir_20230126.bat");
 	    try {
 			Files.createFile(mspOutputPath);
 		} catch (IOException e) {

@@ -464,6 +464,7 @@ public class MotrpacReportEmptyFileGeneratorDialog extends JDialog implements Ac
 				e.printStackTrace();
 			}
 		}
+		MessageDialog.showInfoMsg("Files created", this);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.misctest;
+package edu.umich.med.mrc2.datoolbox.motrpac;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -66,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.LIMSReportingUtils;
 
-public class MoTrPACUtils {
+public class MoTrPACUtilsCopy {
 	
 	public static String dataDir = "." + File.separator + "data" + File.separator;
 
@@ -89,16 +89,118 @@ public class MoTrPACUtils {
 		// File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
 		File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
-			createMoTrPACTissueAssayNoRawManifestFile(
-					"T70 - Adipose white",
-					"IONPNEG",
-					parentDir,
-					"BATCH1_20210603",
-					"PROCESSED_20220926",
-					"20221019");
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void compressRawDataFromEX01190(String msMode) {
+		
+		String includeFileListFile = 
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\Interm\\T02\\EX01190- " + msMode + "-file-list.txt"; 
+		
+		List<String>sourceFolders = new ArrayList<String>();
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-01");
+		sourceFolders.add(                                                                   
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-02");
+		sourceFolders.add(                                                                   
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-03");
+		sourceFolders.add(                                                                   
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-04");
+		sourceFolders.add(                                                                   
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-05");
+		sourceFolders.add(                                                                   
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-06");
+		sourceFolders.add(                                                                   
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-07\\V2");
+		sourceFolders.add(                                                                   
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-08\\V2");
+		sourceFolders.add(                                                                  
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-09");
+		sourceFolders.add(                                                                   
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-10");
+		sourceFolders.add(                                                                   
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-11");
+		sourceFolders.add(                                                                  
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-12");
+		sourceFolders.add(                                                                   
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A003 - Untargeted\\Raw data\\" + msMode + "\\BATCH-13");
+		
+		String destinationFolder = 
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\T02\\RP" + msMode + "\\BATCH1_20230124\\RAW";
+		
+		compressRawDataFromMutibatchRun(
+				includeFileListFile, 
+				sourceFolders, 
+				destinationFolder);
+	}	
+	
+	private static void compressRawDataFromMutibatchRun(
+			String includeFileListFile, 
+			List<String>sourceFolders, 
+			String destinationFolder) {
+		
+		List<String> includeFileList = new ArrayList<String>();
+		Path includeFileListPath = Paths.get(includeFileListFile);
+		try {
+			includeFileList = Files.readAllLines(includeFileListPath);
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		Path destinationPath = Paths.get(destinationFolder);
+		for(String rawDataDirectory : sourceFolders) {
+			
+			Path sourcePath = Paths.get(rawDataDirectory);
+			List<Path> pathList = new ArrayList<Path>();
+			try {
+				pathList = Files.find(sourcePath,
+						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".d"))).
+					collect(Collectors.toList());
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+			for(Path rdp : pathList) {
+				
+				String rawFileName = FilenameUtils.getBaseName(rdp.toString());
+				if(includeFileList.contains(rawFileName)) {
+					
+					try {
+						FileUtils.deleteDirectory(Paths.get(rdp.toString(), "Results").toFile());
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					File destination = Paths.get(destinationPath.toString(),
+							FilenameUtils.getBaseName(rdp.toString()) + ".zip").toFile();
+					try {
+						CompressionUtils.zipFolder(rdp.toFile(), destination);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ArchiveException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}								
+				}
+			}
+		}		
+	}
+	
+	private static void createMotrpacDataUploadDirectoryStructure4PreCovidPlasma() {
+		
+		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T02"));
+		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\Interm");
+		String batchDateIdentifier = "20230124";
+		String processingDateIdentifier = "20230124";
+		createMotrpacDataUploadDirectoryStructure(
+				tissueTypes, 
+				 parentDirectory,
+				 batchDateIdentifier,
+				 processingDateIdentifier);
 	}
 	
 	private static void createMotrpacDataUploadDirectoryStructure4PreCovidMuscle() {
@@ -362,47 +464,6 @@ public class MoTrPACUtils {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-//				StringBuffer checkSumData = new StringBuffer();
-//				checkSumData.append("file_name,md5\n");
-//				Path processedPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, processedFolderId);
-//				Path namedDirPath = Paths.get(processedPath.toString(), "NAMED");
-//				List<Path> pathList = Files.find(namedDirPath,
-//						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
-//					collect(Collectors.toList());
-//				for(Path filePath : pathList) {
-//					String zipHash = DigestUtils.sha256Hex(
-//							new FileInputStream(filePath.toString()));
-//					String localPath = processedFolderId + File.separator + "NAMED" + File.separator + filePath.toFile().getName();
-//					checkSumData.append(localPath + "," + zipHash + "\n");
-//				}
-//				Path unnamedDirPath = Paths.get(processedPath.toString(), "UNNAMED");
-//				pathList = Files.find(unnamedDirPath,
-//						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
-//					collect(Collectors.toList());
-//				for(Path filePath : pathList) {
-//					String zipHash = DigestUtils.sha256Hex(
-//							new FileInputStream(filePath.toString()));
-//					String localPath = processedFolderId + File.separator + "UNNAMED" + File.separator + filePath.toFile().getName();
-//					checkSumData.append(localPath + "," + zipHash + "\n");
-//				}
-//				pathList = Files.find(processedPath,
-//						1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_failedsamples_"))).
-//					collect(Collectors.toList());
-//				for(Path filePath : pathList) {
-//					String zipHash = DigestUtils.sha256Hex(
-//							new FileInputStream(filePath.toString()));
-//					String localPath = processedFolderId + File.separator + filePath.toFile().getName();
-//					checkSumData.append(localPath + "," + zipHash + "\n");
-//				}
-//				Path rawChecksumPathPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW", " checksum.txt");
-//				List<String> zipCs = Files.readAllLines(rawChecksumPathPath);
-//				for(int i=1; i<zipCs.size(); i++) {
-//					String[]parts = zipCs.get(i).split("\t");
-//					checkSumData.append(parts[0].replace(".zip", "") + "," + parts[1] + "\n");
-//				}
-//				File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "file_manifest_20220208.csv").toFile();
-//				FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
 			}
 		}
 	}
@@ -467,7 +528,9 @@ public class MoTrPACUtils {
 			String localPath = filePath.toFile().getName().replace(".zip", "");
 			checkSumData.append(localPath + "," + zipHash + "\n");
 		}
-		File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "file_manifest_" + manifestDate + ".csv").toFile();
+		File manifestFile = 
+				Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, 
+						batchId, "file_manifest_" + manifestDate + ".csv").toFile();
 		FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
 	}
 	

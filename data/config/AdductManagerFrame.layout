@@ -98,7 +98,6 @@
 									<id>ccontrol center</id>
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
-										<fullscreen id="0"/>
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1605720012294" orientation="VERTICAL" divider="0.7713248638838476">
 											<leaf id="0" nodeId="1605720007186">
@@ -113,13 +112,6 @@
 													<entry>
 														<key shared="false">
 															<placeholder>dock.single.DockableAdductEditor</placeholder>
-														</key>
-														<item key="convert" type="b">true</item>
-														<item key="convert-keys" type="a"/>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableAdductExchangeManager</placeholder>
 														</key>
 														<item key="convert" type="b">true</item>
 														<item key="convert-keys" type="a"/>
@@ -274,10 +266,10 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DockableAdductExchangeManager" current="dock.mode.maximized">
+						<entry id="single DockableAdductExchangeManager" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -312,10 +304,10 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableBinnerAnnotationsEditor" current="dock.mode.maximized">
+						<entry id="single DockableBinnerAnnotationsEditor" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -371,10 +363,10 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableAdductEditor" current="dock.mode.maximized">
+						<entry id="single DockableAdductEditor" current="dock.mode.normal">
 							<history>
-								<mode>dock.mode.normal</mode>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
 								<property id="dock.mode.maximized">
@@ -411,24 +403,7 @@
 						</entry>
 					</dockables>
 					<modes>
-						<entry id="dock.mode.maximized">
-							<maximized>
-								<item id="ccontrol center">
-									<mode>dock.mode.normal</mode>
-									<location>
-										<mode>dock.mode.normal</mode>
-										<root>ccontrol center</root>
-										<applicationDefined>false</applicationDefined>
-										<location>
-											<property factory="SplitDockPathProperty">
-												<node location="TOP" size="0.7713248638838476" id="1605720012294"/>
-												<leaf id="1605720007186"/>
-											</property>
-										</location>
-									</location>
-								</item>
-							</maximized>
-						</entry>
+						<entry id="dock.mode.maximized"/>
 					</modes>
 				</modes>
 			</current>

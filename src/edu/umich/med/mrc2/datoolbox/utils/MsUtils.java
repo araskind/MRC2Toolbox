@@ -285,19 +285,25 @@ public class MsUtils {
 		
 		adduct.finalizeModification();
 
-		if (!adduct.getAddedGroup().isEmpty()) {
+		if (!adduct.getAddedGroup().trim().isEmpty()) {
 
-			addedGroupMf = MolecularFormulaManipulator.getMolecularFormula(adduct.getAddedGroup(), builder);
-			//	CDK 2.3 and above
-			//	addedMass = MolecularFormulaManipulator.getMass(addedGroupMf, MolecularFormulaManipulator.MonoIsotopic);
-			addedMass = MolecularFormulaManipulator.getMajorIsotopeMass(addedGroupMf);
+			addedGroupMf = MolecularFormulaManipulator.getMolecularFormula(adduct.getAddedGroup().trim(), builder);
+			if(addedGroupMf == null) {
+				System.err.println("Unable to parse " + adduct.getAddedGroup().trim());
+				return 0.0d;
+			}
+			addedMass = MolecularFormulaManipulator.getMass(addedGroupMf, MolecularFormulaManipulator.MonoIsotopic);
+			//	addedMass = MolecularFormulaManipulator.getMajorIsotopeMass(addedGroupMf);
 		}
-		if (!adduct.getRemovedGroup().isEmpty()) {
+		if (!adduct.getRemovedGroup().trim().isEmpty()) {
 
-			removedGroupMf = MolecularFormulaManipulator.getMolecularFormula(adduct.getRemovedGroup(), builder);
-			//	CDK 2.3 and above
-			//	removedMass = MolecularFormulaManipulator.getMass(removedGroupMf, MolecularFormulaManipulator.MonoIsotopic);
-			removedMass = MolecularFormulaManipulator.getMajorIsotopeMass(removedGroupMf);
+			removedGroupMf = MolecularFormulaManipulator.getMolecularFormula(adduct.getRemovedGroup().trim(), builder);
+			if(removedGroupMf == null) {
+				System.err.println("Unable to parse " + adduct.getRemovedGroup().trim());
+				return 0.0d;
+			}
+			removedMass = MolecularFormulaManipulator.getMass(removedGroupMf, MolecularFormulaManipulator.MonoIsotopic);
+		//	removedMass = MolecularFormulaManipulator.getMajorIsotopeMass(removedGroupMf);
 		}
 		totalCorrection = addedMass - removedMass - ELECTRON_MASS * adduct.getCharge();
 		return totalCorrection;
