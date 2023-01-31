@@ -206,7 +206,7 @@ public class PlotToolbar extends CommonToolbar {
 		}
 	}
 
-	public void toggleDataPointssIcon(boolean dataPointsVisibleVisible) {
+	public void toggleDataPointsIcon(boolean dataPointsVisibleVisible) {
 
 		if(toggleDataPointsButton == null)
 			return;

@@ -403,10 +403,15 @@ public class DataExplorerPlotPanel extends MasterPlotPanel {
 
 	@Override
 	public void removeAllDataSets() {
+		
+		if(plot == null)
+			return;
 
-		for (int i = 0; i < plot.getDatasetCount(); i++)
+		int count = plot.getDatasetCount();
+		for (int i = 0; i < count; i++)
 			plot.setDataset(i, null);
 
+		plot.clearAnnotations();
 		numberOfDataSets = 0;
 		markerRectangle = null;
 	}

@@ -400,21 +400,35 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void removeAllDataSets() {
 
-		Plot activePlot = chart.getPlot();	
+		Plot activePlot = chart.getPlot();			
+		if(activePlot == null)
+			return;
+			
 		if(activePlot instanceof XYPlot) {
 			
-			for (int i = 0; i < ((XYPlot)activePlot).getDatasetCount(); i++)
-				((XYPlot)chart.getPlot()).setDataset(i, null);						
+			XYPlot p = (XYPlot)activePlot;
+			int count = p.getDatasetCount();
+			for (int i = 0; i < count; i++)
+				p.setDataset(i, null);	
+			
+			p.clearAnnotations();
 		}
 		if(activePlot instanceof CategoryPlot) {
 			
-			for (int i = 0; i < ((CategoryPlot)activePlot).getDatasetCount(); i++)
-				((CategoryPlot)chart.getPlot()).setDataset(i, null);
+			CategoryPlot p = (CategoryPlot)activePlot;
+			int count = p.getDatasetCount();
+			for (int i = 0; i < count; i++)
+				p.setDataset(i, null);
+			
+			p.clearAnnotations();
 		}		
 		if(activePlot instanceof PiePlot)			
 			((PiePlot)activePlot).setDataset(null);
+
+		numberOfDataSets = 0;
 	}
 }

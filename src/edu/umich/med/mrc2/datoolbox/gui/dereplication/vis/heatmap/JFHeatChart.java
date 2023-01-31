@@ -192,10 +192,15 @@ public class JFHeatChart extends MasterPlotPanel implements ChartMouseListener {
 	}
 
 	public synchronized void removeAllDataSets() {
-
-		for (int i = 0; i < plot.getDatasetCount(); i++)
+		
+		if(plot == null)
+			return;
+			
+		int count = plot.getDatasetCount();
+		for (int i = 0; i < count; i++)
 			plot.setDataset(i, null);
-
+		
+		plot.clearAnnotations();
 		numberOfDataSets = 0;
 	}
 

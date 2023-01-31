@@ -91,7 +91,11 @@ public class MzDiffPlotPanel extends MasterPlotPanel{
 	@Override
 	public void removeAllDataSets() {
 
-		for (int i = 0; i < plot.getDatasetCount(); i++)
+		if(plot == null)
+			return;
+			
+		int count = plot.getDatasetCount();
+		for (int i = 0; i < count; i++)
 			plot.setDataset(i, null);
 
 		numberOfDataSets = 0;

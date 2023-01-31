@@ -98,6 +98,7 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 
 				//TODO handle through custom object to allow proper labels
 				//df.getFileName()
+
 				addValue(dataMap.get(df), rowCount, entry.getKey());
 				seriesPaintMap.put(rowCount, seriesPaintNameMap.get(entry.getKey()));
 				rowCount++;

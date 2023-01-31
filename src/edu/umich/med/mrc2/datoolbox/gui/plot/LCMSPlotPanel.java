@@ -540,18 +540,35 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	public void toggleDataPoints() {
 
+//		dataPointsVisible = !dataPointsVisible;
+//
+//		final int count = plot.getRendererCount();
+//		for (int i = 0; i < count; i++) {
+//
+//			if (plot.getRenderer(i) instanceof XYLineAndShapeRenderer) {
+//
+//				final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer(i);
+//				renderer.setDefaultShapesVisible(dataPointsVisible);
+//			}
+//		}
+//		toolbar.toggleDataPointssIcon(dataPointsVisible);
+		
 		dataPointsVisible = !dataPointsVisible;
-
-		final int count = plot.getRendererCount();
+		final int count = plot.getDatasetCount();	
 		for (int i = 0; i < count; i++) {
-
+			
 			if (plot.getRenderer(i) instanceof XYLineAndShapeRenderer) {
-
-				final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer(i);
+				final XYLineAndShapeRenderer renderer = 
+						(XYLineAndShapeRenderer) plot.getRenderer(i);
 				renderer.setDefaultShapesVisible(dataPointsVisible);
 			}
+			if(plot.getRenderer(i) instanceof FilledChromatogramRenderer) {
+				final FilledChromatogramRenderer renderer = 
+						(FilledChromatogramRenderer) plot.getRenderer(i);
+				renderer.setPlotShapes(dataPointsVisible);
+			}
 		}
-		toolbar.toggleDataPointssIcon(dataPointsVisible);
+		toolbar.toggleDataPointsIcon(dataPointsVisible);
 	}
 
 	private void updateMarker() {
@@ -571,20 +588,21 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	@Override
 	public synchronized void removeAllDataSets() {
 
-		if(plot != null) {
+		if(plot == null) 
+			return;
+						
+		int count = plot.getDatasetCount();
+		for (int i = 0; i < count; i++)
+			plot.setDataset(i, null);
 
-			removeMarkers();			
-			for (int i = 0; i < plot.getDatasetCount(); i++)
-				plot.setDataset(i, null);
-
-			plot.clearAnnotations();
-			numberOfDataSets = 0;
-		}
+		plot.clearAnnotations();
+		removeMarkers();
+		numberOfDataSets = 0;
+		
 		if(chromatograms != null)
 			chromatograms.clear();
 		
-		xicBundles = null;
-		
+		xicBundles = null;		
 		if(precursorMarkers != null)
 			precursorMarkers.clear();
 	}

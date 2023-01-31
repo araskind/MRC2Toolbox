@@ -245,8 +245,8 @@ public class RDPMetadataWizard extends JDialog
 		
 		RDPExperimentDefinitionPanel experimentDefinitionPanel = 
 				(RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
-		experimentDefinitionPanel.setExperiment(newExperiment);	
 		experimentDefinitionPanel.setInstrument(project.getInstrument());
+		experimentDefinitionPanel.setExperiment(newExperiment);			
 	}
 	
 	private void populateSampleAndPrepPanels() {

@@ -209,7 +209,7 @@ public class MultyPlotPanel extends MasterPlotPanel {
 					((FilledChromatogramRenderer)fRenderer).setPlotShapes(dataPointsVisible);
 			}
 		}
-		toolbar.toggleDataPointssIcon(dataPointsVisible);
+		toolbar.toggleDataPointsIcon(dataPointsVisible);
 	}
 	
 	@Override
@@ -242,15 +242,17 @@ public class MultyPlotPanel extends MasterPlotPanel {
 
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void removeAllDataSets() {
 
-		if(xicPlot != null) {
+		if(xicPlot == null)
+			return;
 
-			List subplots = new ArrayList(xicPlot.getSubplots());
-			for(Object spl : subplots)
-				xicPlot.remove((XYPlot) spl);
-		}
+		List subplots = new ArrayList(xicPlot.getSubplots());
+		for(Object spl : subplots)
+			xicPlot.remove((XYPlot) spl);
+		
 		filePlotMap.clear();
 	}
 	

@@ -33,7 +33,6 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.renderer.xy.XYDotRenderer;
@@ -292,16 +291,15 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 	@Override
 	public synchronized void removeAllDataSets() {
 
-		if(plot != null) {
+		if(plot == null)
+			return;
+			
+		int count = plot.getDatasetCount();
+		for (int i = 0; i < count; i++)
+			plot.setDataset(i, null);
 
-			for (int i = 0; i < plot.getDatasetCount(); i++)
-				plot.setDataset(i, null);
-
-			for(Object annotation : plot.getAnnotations())
-				plot.removeAnnotation((XYAnnotation)annotation);
-
-			numberOfDataSets = 0;
-		}
+		plot.clearAnnotations();
+		numberOfDataSets = 0;		
 	}
 }
 

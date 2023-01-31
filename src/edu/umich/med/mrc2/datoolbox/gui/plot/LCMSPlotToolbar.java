@@ -99,7 +99,7 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 
 		toggleLegendIcon(parentPlot.isLegendVisible());
 		toggleAnnotationsIcon(parentPlot.areAnnotationsVisible());
-		toggleDataPointssIcon(parentPlot.areDataPointsVisible());
+		toggleDataPointsIcon(parentPlot.areDataPointsVisible());
 
 		parentPlot.setToolbar(this);
 	}

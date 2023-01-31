@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.grad;
 import java.awt.Color;
 
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.PlotOrientation;
@@ -112,16 +111,14 @@ public class GradientChartPanel extends MasterPlotPanel {
 	@Override
 	public synchronized void removeAllDataSets() {
 
-		if(plot != null) {
+		if(plot == null)
+			return;
 
-			for (int i = 0; i < plot.getDatasetCount(); i++)
-				plot.setDataset(i, null);
+		for (int i = 0; i < plot.getDatasetCount(); i++)
+			plot.setDataset(i, null);
 
-			for(Object annotation : plot.getAnnotations())
-				plot.removeAnnotation((XYAnnotation)annotation);
-
-			numberOfDataSets = 0;
-		}
+		plot.clearAnnotations();
+		numberOfDataSets = 0;		
 	}
 	
 	public void showGradient(ChromatographicGradient gradient) {

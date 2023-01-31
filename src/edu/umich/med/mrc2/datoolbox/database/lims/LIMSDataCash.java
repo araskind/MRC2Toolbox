@@ -283,9 +283,12 @@ public class LIMSDataCash {
 	}
 	
 	public static LIMSClient getLIMSClientForUser(LIMSUser user) {
+				
 		return  getLimsClients().stream().
 				filter(o -> (o.getPrincipalInvestigator().equals(user) || 
-					o.getContactPerson().equals(user))).sorted().findFirst().orElse(null);
+					o.getContactPerson().equals(user) 
+					|| o.getOrganization().getId().equals(user.getOrganizationId()))).sorted().
+				findFirst().orElse(null);
 	}
 
 	/**

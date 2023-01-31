@@ -357,6 +357,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void clearPlotMatrix() {
 
 		if(categoryPlot != null) {
@@ -596,11 +597,16 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 
 				//	TODO add slider to plot to allow adjustment
 				if(ds.getRowCount() == ds.getColumnCount())
-					((BarRenderer)barChart.getRenderer()).setItemMargin(-10.2);
+					((BarRenderer)barChart.getRenderer()).setItemMargin(0.02);
+				
+				CategoryAxis axis = barChart.getDomainAxis();
+				axis.setLabel(msf.getName());
+				axis.setCategoryLabelPositions(getCategoryLabelPosition());
+				axis.setMaximumCategoryLabelLines(calculateLineNumberForCategoryLabels());
 
-				barChart.getDomainAxis().setLabel(msf.getName());
-				barChart.getDomainAxis().setCategoryLabelPositions(getCategoryLabelPosition());
-				barChart.getDomainAxis().setMaximumCategoryLabelLines(calculateLineNumberForCategoryLabels());
+				axis.setLowerMargin(0.1);
+				axis.setUpperMargin(0.1);
+				axis.setCategoryMargin(0.1);
 				categoryPlot.add(barChart);
 			}
 		}
@@ -693,7 +699,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 					 ((XYLineAndShapeRenderer)subPlot.getRenderer(i)).setDefaultShapesVisible(dataPointsVisible);
 			}
 		}
-		toolbar.toggleDataPointssIcon(dataPointsVisible);
+		toolbar.toggleDataPointsIcon(dataPointsVisible);
 	}
 
 	public void setDataScale(DataScale dataScale) {

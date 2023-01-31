@@ -38,6 +38,56 @@
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
+													<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
+													<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
+													<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
+													<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
+													<placeholder>dock.single.DockableVendorManagerPanel</placeholder>
+													<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
+												</key>
+												<item key="map" type="p">
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
+														</key>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
+														</key>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
+														</key>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
+														</key>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
+														</key>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
+														</key>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableVendorManagerPanel</placeholder>
+														</key>
+													</entry>
+												</item>
+											</entry>
 										</placeholders>
 									</content>
 								</delegate>
@@ -100,7 +150,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1652718002959" orientation="HORIZONTAL" divider="0.25">
-											<leaf id="2" nodeId="1652718002961">
+											<leaf id="1" nodeId="1652718002961">
 												<placeholders>
 													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</placeholders>
@@ -134,41 +184,6 @@
 														</entry>
 														<entry>
 															<key shared="false">
-																<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
-															</key>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
-															</key>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableVendorManagerPanel</placeholder>
-															</key>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
-															</key>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
-															</key>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
-															</key>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
-															</key>
-														</entry>
-														<entry>
-															<key shared="false">
 																<placeholder>dock.single.DockableSOPProtocolsManagerPanel</placeholder>
 															</key>
 															<item key="convert" type="b">true</item>
@@ -197,7 +212,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="1" nodeId="1652718303236">
+												<leaf id="2" nodeId="1652718303236">
 													<placeholders>
 														<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
 														<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
@@ -463,8 +478,18 @@
 									</children>
 								</child>
 								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
+										<replacement id="dockablesingle DockableIdProjectTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableIdProjectTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>4</selected>
+										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -641,16 +666,6 @@
 										</child>
 									</children>
 								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableIdProjectTree">
-										<replacement id="dockablesingle DockableIdProjectTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableIdProjectTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
 							</children>
 						</root>
 						<root name="ccontrol west">
@@ -681,9 +696,27 @@
 					<dockables>
 						<entry id="single DockableVendorManagerPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableVendorManagerPanel</placeholder>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableVendorManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -707,9 +740,27 @@
 						</entry>
 						<entry id="single DockableMobilePhaseManagerPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableMobilePhaseManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -785,9 +836,27 @@
 						</entry>
 						<entry id="single DockableSoftwareManagerPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -802,7 +871,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>2</index>
+											<index>4</index>
 											<placeholder>dock.single.DockableSoftwareManagerPanel</placeholder>
 										</property>
 									</location>
@@ -832,9 +901,27 @@
 						</entry>
 						<entry id="single DockableDataExtractionMethodManagerPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -849,7 +936,7 @@
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>3</index>
+											<index>5</index>
 											<placeholder>dock.single.DockableDataExtractionMethodManagerPanel</placeholder>
 										</property>
 									</location>
@@ -910,9 +997,27 @@
 						</entry>
 						<entry id="single DockableChromatographicColumnManagerPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableChromatographicColumnManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -936,9 +1041,27 @@
 						</entry>
 						<entry id="single DockableAcquisitionMethodManagerPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.DockableAcquisitionMethodManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -988,9 +1111,27 @@
 						</entry>
 						<entry id="single DockableInstrumentManagerPanel" current="dock.mode.normal">
 							<history>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>false</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -1000,9 +1141,13 @@
 											<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
 											<backup-path>
 												<node location="RIGHT" size="0.75" id="1652718002959"/>
-												<node location="BOTTOM" size="0.75" id="1652718303238"/>
+												<node location="BOTTOM" size="0.45066666666666666" id="1652718303238"/>
 												<leaf id="1652718303236"/>
 											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.DockableInstrumentManagerPanel</placeholder>
 										</property>
 									</location>
 								</property>

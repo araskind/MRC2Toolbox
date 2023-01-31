@@ -374,6 +374,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(activeProject == null)
 			return;
 		
+		if (activeProject.getMSMSDataFiles().isEmpty() 
+				|| activeProject.getMsMsFeatureBundles().isEmpty()) {
+			MessageDialog.showErrorMsg("No data to upload in the current project");
+			return;
+		}		
 		if(activeProject.getIdTrackerExperiment() != null 
 				&& activeProject.getIdTrackerExperiment().getId() != null) {
 			

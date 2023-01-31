@@ -262,6 +262,10 @@ public class MainMenuBar extends CommonMenuBar {
 				organizationManagerMenuItem.setEnabled(true);
 				loginMenuItem.setIcon(superUserIcon);
 			}
+			else {
+				userManagerMenuItem.setEnabled(false);
+				organizationManagerMenuItem.setEnabled(false);
+			}
 			for(int i=0; i<this.getMenuCount(); i++)				
 				this.getMenu(i).setEnabled(true);
 		}		

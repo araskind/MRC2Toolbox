@@ -100,17 +100,17 @@ public class TaskProgressPanel extends JPanel implements ActionListener {
 		// Create popup menu and items
 		popupMenu = new JPopupMenu();
 
-		priorityMenu = new JMenu("Set priority...");
-
-		highPriorityMenuItem = GuiUtils.addMenuItem(priorityMenu,
-				MainActionCommands.SET_HIGH_PRIORITY_COMMAND.getName(), this,
-				MainActionCommands.SET_HIGH_PRIORITY_COMMAND.getName());
-
-		normalPriorityMenuItem = GuiUtils.addMenuItem(priorityMenu,
-				MainActionCommands.SET_NORMAL_PRIORITY_COMMAND.getName(), this,
-				MainActionCommands.SET_NORMAL_PRIORITY_COMMAND.getName());
-
-		popupMenu.add(priorityMenu);
+//		priorityMenu = new JMenu("Set priority...");
+//
+//		highPriorityMenuItem = GuiUtils.addMenuItem(priorityMenu,
+//				MainActionCommands.SET_HIGH_PRIORITY_COMMAND.getName(), this,
+//				MainActionCommands.SET_HIGH_PRIORITY_COMMAND.getName());
+//
+//		normalPriorityMenuItem = GuiUtils.addMenuItem(priorityMenu,
+//				MainActionCommands.SET_NORMAL_PRIORITY_COMMAND.getName(), this,
+//				MainActionCommands.SET_NORMAL_PRIORITY_COMMAND.getName());
+//
+//		popupMenu.add(priorityMenu);
 
 		cancelTaskMenuItem = GuiUtils.addMenuItem(popupMenu,
 				MainActionCommands.CANCEL_SELECTED_TASK_COMMAND.getName(), this,

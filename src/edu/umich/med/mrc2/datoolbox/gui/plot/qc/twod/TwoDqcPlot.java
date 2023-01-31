@@ -203,7 +203,7 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 		if (activePlot instanceof XYPlot) 			
 			((XYLineAndShapeRenderer)((XYPlot) activePlot).getRenderer()).setDefaultShapesVisible(dataPointsVisible);		
 		
-		toolbar.toggleDataPointssIcon(dataPointsVisible);
+		toolbar.toggleDataPointsIcon(dataPointsVisible);
 	}
 	
 	@Override
@@ -324,16 +324,28 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 	@Override
 	public void removeAllDataSets() {
 
-		if(chart.getPlot() instanceof XYPlot) {
+		if(activePlot == null)
+			return;
 			
-			for (int i = 0; i < ((XYPlot)chart.getPlot()).getDatasetCount(); i++)
-				((XYPlot)chart.getPlot()).setDataset(i, null);						
-		}
-		if(chart.getPlot() instanceof CategoryPlot) {
+		if(activePlot instanceof XYPlot) {
 			
-			for (int i = 0; i < ((CategoryPlot)chart.getPlot()).getDatasetCount(); i++)
-				((CategoryPlot)chart.getPlot()).setDataset(i, null);
+			XYPlot p = (XYPlot)activePlot;
+			int count = p.getDatasetCount();
+			for (int i = 0; i < count; i++)
+				p.setDataset(i, null);	
+			
+			p.clearAnnotations();
 		}
+		if(activePlot instanceof CategoryPlot) {
+			
+			CategoryPlot p = (CategoryPlot)activePlot;
+			int count = p.getDatasetCount();
+			for (int i = 0; i < count; i++)
+				p.setDataset(i, null);
+			
+			p.clearAnnotations();
+		}
+		numberOfDataSets = 0;
 	}
 
 	public void toggleLegend() {

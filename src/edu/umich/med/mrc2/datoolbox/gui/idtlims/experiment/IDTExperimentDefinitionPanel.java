@@ -297,8 +297,10 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		projectComboBox.setSelectedItem(experiment.getProject());
 		descriptionTextArea.setText(experiment.getDescription());
 		notesTextArea.setText(experiment.getNotes());
+
+		if(instrument == null)
+			instrument = IDTDataCash.getInstrumentForExperiment(experiment);
 		
-		instrument = IDTDataCash.getInstrumentForExperiment(experiment);
 		if(instrument != null)
 			instrumentTextField.setText(instrument.toString());
 		
