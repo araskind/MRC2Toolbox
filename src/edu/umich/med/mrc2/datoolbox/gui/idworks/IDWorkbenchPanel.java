@@ -3268,8 +3268,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	public void filterMSMSFeatures(Collection<MSFeatureInfoBundle>featuresToInclude) {
 		
+		if(activeFeatureCollection == null)
+			return;
+		
 		Collection<MSFeatureInfoBundle>filtered = 
-				FeatureCollectionManager.msmsSearchResults.getFeatures().stream().
+				activeFeatureCollection.getFeatures().stream().
 				filter(f -> featuresToInclude.contains(f)).collect(Collectors.toSet());
 		
 		safelyLoadMSMSFeatures(filtered);

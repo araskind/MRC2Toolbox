@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
@@ -107,8 +108,13 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	protected transient Rectangle2D markerRectangle = null;
 	protected Point2D markerStartPoint = null;
-	public static final Paint markerColor = new Color(150, 150, 150);;
-
+	//public static final Paint markerColor = new Color(150, 150, 150);
+	public static final Color markerColor = new Color(255, 0, 0, 70);
+	public static final Color markerOutlineColor = Color.RED;
+	protected static final Color invizibleMarkerColor = new Color(255, 255, 255, 0);
+	
+	protected IntervalMarker domainMarker;
+	
 	protected NumberAxis xAxis, yAxis;
 	protected MassSpectrumRenderer defaultMsRenderer;
 	protected MsLabelGenerator defaultMsLabelGenerator;
@@ -150,6 +156,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		dataPointsVisible = false;
 		annotationsVisible = true;
 		precursorMarkers = new TreeSet<Double>();
+		setRangeZoomable(false);
+		addDoubleClickReset();
 	}
 
 	public void actionPerformed(ActionEvent event) {
@@ -279,9 +287,12 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	private void drawMarkerRectangle(Graphics2D g2, boolean xor) {
 
 		if (this.markerRectangle != null) {
+			
 			if (xor)
-				g2.setXORMode(Color.gray);
-
+				g2.setXORMode(Color.LIGHT_GRAY);
+			
+			g2.setColor(markerOutlineColor);
+			g2.draw(markerRectangle);
 			g2.setPaint(markerColor);
 			g2.fill(markerRectangle);
 
@@ -319,14 +330,14 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	 * @return the markerEnd
 	 */
 	public Double getMarkerEnd() {
-		return markerEnd;
+		return domainMarker.getEndValue();
 	}
 
 	/**
 	 * @return the markerStart
 	 */
 	public Double getMarkerStart() {
-		return markerStart;
+		return domainMarker.getStartValue();
 	}
 
 	private Point2D getMarkerStartPoint(int x, int y, Rectangle2D area) {
@@ -356,9 +367,9 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		double lower = 0d;
 		double upper = 0d;
 
-		if (!(markerStart.isNaN() && markerEnd.isNaN())) {
-			lower = markerStart;
-			upper = markerEnd;
+		if (domainMarker.getStartValue() > 0.0d && domainMarker.getEndValue() > 0.0d) {
+			lower = domainMarker.getStartValue();
+			upper = domainMarker.getEndValue();
 		} else {
 			lower = plot.getDomainAxis().getLowerBound();
 			upper = plot.getDomainAxis().getUpperBound();
@@ -406,7 +417,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				true, // generate tooltips?
 				false // generate URLs?
 		);
-		chart.setBackgroundPaint(Color.white);
+		chart.setBackgroundPaint(Color.white);		
 		setChart(chart);
 	}
 
@@ -422,6 +433,11 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		plot.setDomainCrosshairVisible(false);
 		plot.setRangeCrosshairVisible(false);
 		plot.setDomainPannable(true);
+		
+		domainMarker = new IntervalMarker(0.0d, 0.0d);
+		domainMarker.setPaint(invizibleMarkerColor);
+		domainMarker.setOutlineStroke(null);
+		plot.addDomainMarker(domainMarker, Layer.BACKGROUND);
 	}
 
 	private void initRendererForPlotType() {
@@ -456,60 +472,143 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	@Override
 	public void mouseDragged(MouseEvent e) {
 
-		if (MouseEvent.getMouseModifiersText(e.getModifiersEx()).equals("Shift+Button1")) {
+		int onmask = InputEvent.SHIFT_DOWN_MASK | InputEvent.BUTTON1_DOWN_MASK;
+		if (e.getModifiersEx() == onmask) {
+	        // if no initial zoom point was set, ignore dragging...
+	        if (this.markerStartPoint == null) {
+	            return;
+	        }
+	        Graphics2D g2 = (Graphics2D) getGraphics();
+	        markerRectangle = getScreenDataArea(
+	                (int) this.markerStartPoint.getX(), (int) this.markerStartPoint.getY());
 
-			Rectangle2D scaledDataArea = getScreenDataArea((int) this.markerStartPoint.getX(),
-					(int) this.markerStartPoint.getY());
-
-			double xmax = Math.min(e.getX(), scaledDataArea.getMaxX());
-			this.markerRectangle = new Rectangle2D.Double(this.markerStartPoint.getX(), scaledDataArea.getMinY(),
-					xmax - this.markerStartPoint.getX(), scaledDataArea.getHeight());
-
-			Graphics2D g2 = (Graphics2D) getGraphics();
-			drawMarkerRectangle(g2, true);
-			g2.dispose();
-		} else {
+            double xmax = Math.min(e.getX(), markerRectangle.getMaxX());
+            double ymin = markerRectangle.getMinY();
+            double height = markerRectangle.getHeight();
+            markerRectangle = null;
+            repaint();
+            
+            markerRectangle = new Rectangle2D.Double(
+                    this.markerStartPoint.getX(), 
+                    ymin,
+                    xmax - this.markerStartPoint.getX(), 
+                    height);
+            
+//            markerRectangle = new Rectangle2D.Double(
+//                    this.markerStartPoint.getX(), markerRectangle.getMinY(),
+//                    xmax - this.markerStartPoint.getX(), markerRectangle.getHeight());
+	        
+	        drawMarkerRectangle(g2, true);	
+	        g2.dispose();
+	        setInvizibleMarkers();
+		} 
+		else {
 			super.mouseDragged(e);
 		}
+	}
+	
+	@Override
+	public void paint(Graphics g) {
+		
+		super.paint(g);
+		Graphics2D g2 = (Graphics2D) g;
+		if (markerRectangle != null) {
+			g2.setColor(markerOutlineColor);
+			g2.draw(markerRectangle);
+			g2.setColor(markerColor);
+			g2.fill(markerRectangle);
+		}
+	}
+	
+	private void setInvizibleMarkers() {
+		
+		if(markerRectangle == null) {
+			zeroMarkers();
+			return;
+		}
+		Point2D startPoint = 
+				getChartPointForCoordinates(
+						markerRectangle.getMinX(), markerRectangle.getMinY());
+		Point2D endPoint = 
+				getChartPointForCoordinates(
+						markerRectangle.getMaxX(), markerRectangle.getMaxY());
+		
+		if(startPoint == null || endPoint == null) {
+			zeroMarkers();
+			return;
+		}
+		domainMarker.setStartValue(Math.min(startPoint.getX(), endPoint.getX()));
+		domainMarker.setEndValue(Math.max(startPoint.getX(), endPoint.getX()));
+	}
+	
+	private void zeroMarkers() {
+		
+		domainMarker.setStartValue(0.0d);
+		domainMarker.setEndValue(0.0d);
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
 
-		if (MouseEvent.getMouseModifiersText(e.getModifiersEx()).equals("Shift+Button1")) {
-
-			markerStart = getPosition(e);
-
+		int onmask = InputEvent.SHIFT_DOWN_MASK | InputEvent.BUTTON1_DOWN_MASK;
+		if (e.getModifiersEx() == onmask) {
+			
+			markerStartPoint = null;
+//			markerEndPoint = null;
+			markerRectangle = null;
+			zeroMarkers();
+			repaint();
+			
 			Rectangle2D screenDataArea = getScreenDataArea(e.getX(), e.getY());
-
-			if (screenDataArea != null)
-				markerStartPoint = getMarkerStartPoint(e.getX(), e.getY(), screenDataArea);
-
-		} else {
-			super.mousePressed(e);
-		}
+            if (screenDataArea != null) {
+                this.markerStartPoint = getPointInRectangle(e.getX(), e.getY(),
+                        screenDataArea);
+            }
+            else {
+                this.markerStartPoint = null;
+            }
+            markerRectangle = null;
+		} 
+		else {
+			super.mousePressed(e);	
+		}	
 	}
-
+	
+	
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		
+		if (e.getModifiersEx() == InputEvent.SHIFT_DOWN_MASK)	{
+			markerStartPoint = null;
+//			markerEndPoint = null;
+			markerRectangle = null;
+			zeroMarkers();
+			repaint();
+		}
+		else
+			super.mouseClicked(e);		
+	}
+	
 	@Override
 	public void mouseReleased(MouseEvent e) {
 
-		if (MouseEvent.getMouseModifiersText(e.getModifiersEx()).equals("Shift+Button1")) {
-
-			markerEnd = getPosition(e);
-			updateMarker();
-			markerRectangle = null;
-			markerStartPoint = null;
-			repaint();
-		} else {
-			super.mouseReleased(e);
+		if (e.getModifiersEx() == InputEvent.SHIFT_DOWN_MASK) {			
+            setInvizibleMarkers();
+           // drawMarkerRectangle((Graphics2D) getGraphics(), false);
 		}
+		else 
+			super.mouseReleased(e);		
 	}
 
 	public void removeMarkers() {
 
 		plot.clearDomainMarkers();
 		plot.clearRangeMarkers();
+		markerStartPoint = null;
+//		markerEndPoint = null;
 		markerRectangle = null;
+		zeroMarkers();
+		repaint();
 	}
 
 	public void setDefaultMsRenderer(MassSpectrumRenderer defaultMsRenderer) {
@@ -812,89 +911,6 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		((XYPlot) this.getPlot()).setDataset(dataSet);
 		((XYPlot) this.getPlot()).setRenderer(renderer);
 	}
-
-//	public void showMsFeatureChromatogramBundle(
-//			MsFeatureChromatogramBundle xicBundle,
-//			Collection<Double>markers,
-//			ChromatogramRenderingType rType) {
-//		
-//		chromatogramRenderingType = rType;
-//		this.xicBundle = xicBundle;	
-//		XYItemRenderer renderer = null;
-//		if(rType.equals(ChromatogramRenderingType.Spline))
-//			renderer = splineRenderer;
-//		
-//		if(rType.equals(ChromatogramRenderingType.Lines))
-//			renderer = linesChromatogramRenderer;
-//		
-//		if(rType.equals(ChromatogramRenderingType.Filled))
-//			renderer = filledChromatogramRenderer;
-//		
-//		final XYToolTipGenerator toolTipGenerator = 				
-//				new ChromatogramToolTipGenerator();		
-//		renderer.setDefaultToolTipGenerator(toolTipGenerator);	
-//		renderer.setDefaultShape(FilledChromatogramRenderer.dataPointsShape);
-//		if(XYLineAndShapeRenderer.class.isAssignableFrom(renderer.getClass()))		
-//			((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);
-//								
-//		XYSeriesCollection dataSet = new XYSeriesCollection();
-//		int seriesCount = 0;
-//		int fileChromCount = 0;
-//		for(Entry<DataFile, Collection<ExtractedIonData>> ce : xicBundle.getChromatograms().entrySet()) {
-//			
-//			DataFile dataFile = ce.getKey();
-//            List<Color> lineColorListList = 
-//            		ColorUtils.getColorBands(dataFile.getColor(), ce.getValue().size(), SortDirection.ASC);
-//			for(ExtractedIonData eid : ce.getValue()) {
-//				
-//				fileChromCount = 0;
-//				XYSeries series = new XYSeries(dataFile.getName() + " " + eid.toString());
-//				double[] times = eid.getTimeValues();
-//				double[] intensities = eid.getIntensityValues();	
-//				if(smoothChromatogram && smoothingFilter != null) {			
-//					try {
-//						intensities = smoothingFilter.filter(times, eid.getIntensityValues());
-//					} catch (IllegalArgumentException e) {					
-//						//e.printStackTrace();
-//						MessageDialog.showErrorMsg("Bad filter parameters", this);
-//					}
-//				}
-//				for(int i=0; i<times.length; i++)
-//					series.add(times[i], intensities[i]);	
-//				
-//				dataSet.addSeries(series);
-//				
-//				Color seriesColor = lineColorListList.get(fileChromCount);		
-//				if(rType.equals(ChromatogramRenderingType.Lines)) {
-//					renderer.setSeriesFillPaint(seriesCount, seriesColor);
-//					renderer.setSeriesPaint(seriesCount, seriesColor);
-//				}
-//				else {
-//					Paint seriesColorTp = new Color(
-//							seriesColor.getRed()/255.0f, 
-//							seriesColor.getGreen()/255.0f, 
-//							seriesColor.getBlue()/255.0f, 
-//							0.3f);
-//					renderer.setSeriesFillPaint(seriesCount, seriesColorTp);
-//					renderer.setSeriesPaint(seriesCount, seriesColorTp);
-//				}
-//				fileChromCount++;
-//				seriesCount++;
-//			}		
-//		}
-//		((XYPlot) this.getPlot()).setDataset(dataSet);	
-//		((XYPlot) this.getPlot()).setRenderer(renderer);
-//		precursorMarkers.addAll(markers);
-//		if(markers != null && !markers.isEmpty()) {
-//			
-//			for(double markerPosition : markers) {
-//				
-//				ValueMarker marker = new ValueMarker(markerPosition);
-//				marker.setPaint(Color.RED);
-//				((XYPlot) this.getPlot()).addDomainMarker(marker);
-//			}
-//		}	
-//	}
 	
 	public void showMsFeatureChromatogramBundles(
 			Collection<MsFeatureChromatogramBundle> xicBundles,
@@ -1039,6 +1055,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	public void setSmoothingFilter(Filter smoothingFilter) {
 		this.smoothingFilter = smoothingFilter;
 	}
+	
+
 }
 
 

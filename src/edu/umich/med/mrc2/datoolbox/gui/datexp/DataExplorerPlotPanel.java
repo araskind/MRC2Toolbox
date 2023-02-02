@@ -25,6 +25,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -139,11 +140,7 @@ public class DataExplorerPlotPanel extends MasterPlotPanel {
 				try {					  					
 					Point2D p = getChartPointAtMouse(event);
 					yMarker.setValue(p.getY());
-
-
 					xMarker.setValue(p.getX());
-
-				//	repaint();
 				} catch (Exception e) {
 
 				}
@@ -157,18 +154,15 @@ public class DataExplorerPlotPanel extends MasterPlotPanel {
 		});
 	}
 	
-	private void removeForegroundMarkers() {
-		
+	private void removeForegroundMarkers() {	
 		plot.getDomainMarkers(Layer.FOREGROUND);
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
 
-//		markerRectangle = null;
-//		protected Point2D markerStartPoint 
-		if (MouseEvent.getMouseModifiersText(e.getModifiers()).equals("Shift+Button1")) {
-
+		int onmask = InputEvent.SHIFT_DOWN_MASK | InputEvent.BUTTON1_DOWN_MASK;
+		if (e.getModifiersEx() == onmask) {
 	        // if no initial zoom point was set, ignore dragging...
 	        if (this.markerStartPoint == null) {
 	            return;
@@ -217,10 +211,10 @@ public class DataExplorerPlotPanel extends MasterPlotPanel {
 	@Override
 	public void mousePressed(MouseEvent e) {
 
-		if (MouseEvent.getMouseModifiersText(e.getModifiers()).equals("Shift+Button1")) {
-
-//			markerEndPoint = null;
-            Rectangle2D screenDataArea = getScreenDataArea(e.getX(), e.getY());
+		int onmask = InputEvent.SHIFT_DOWN_MASK | InputEvent.BUTTON1_DOWN_MASK;
+		if (e.getModifiersEx() == onmask) {
+			
+			Rectangle2D screenDataArea = getScreenDataArea(e.getX(), e.getY());
             if (screenDataArea != null) {
                 this.markerStartPoint = getPointInRectangle(e.getX(), e.getY(),
                         screenDataArea);
@@ -248,34 +242,18 @@ public class DataExplorerPlotPanel extends MasterPlotPanel {
 	@Override
 	public void mouseReleased(MouseEvent e) {
 
-		if (MouseEvent.getMouseModifiersText(e.getModifiers()).equals("Shift+Button1")) {
-
-//            Rectangle2D screenDataArea = getScreenDataArea(e.getX(), e.getY());
-//            if (screenDataArea != null) {
-//                this.markerEndPoint = getPointInRectangle(e.getX(), e.getY(),
-//                        screenDataArea);
-//            }
-//            else {
-//                this.markerEndPoint = null;
-//            }
-            setInvizibleMarkers();
-		} 
-		else {
-			super.mouseReleased(e);
-		}
+		if (e.getModifiersEx() == InputEvent.SHIFT_DOWN_MASK)			
+            setInvizibleMarkers();		
+		else 
+			super.mouseReleased(e);		
 	}
 	
 	private void setInvizibleMarkers() {
 		
-		if(markerRectangle == null 
-//				|| markerEndPoint == null
-				) {
+		if(markerRectangle == null) {
 			zeroMarkers();
 			return;
 		}
-//		Point2D startPoint = getChartPointForCoordinates(markerStartPoint.getX(), markerStartPoint.getY());
-//		Point2D endPoint = getChartPointForCoordinates(markerEndPoint.getX(), markerEndPoint.getY());
-		
 		Point2D startPoint = getChartPointForCoordinates(markerRectangle.getMinX(), markerRectangle.getMinY());
 		Point2D endPoint = getChartPointForCoordinates(markerRectangle.getMaxX(), markerRectangle.getMaxY());
 		
@@ -283,11 +261,6 @@ public class DataExplorerPlotPanel extends MasterPlotPanel {
 			zeroMarkers();
 			return;
 		}
-//		domainMarker.setStartValue(Math.min(startPoint.getX(), endPoint.getX()));
-//		domainMarker.setEndValue(Math.max(startPoint.getX(), endPoint.getX()));
-//		rangeMarker.setStartValue(Math.min(startPoint.getY(), endPoint.getY()));
-//		rangeMarker.setEndValue(Math.max(startPoint.getY(), endPoint.getY()));
-		
 		domainMarker.setStartValue(Math.min(startPoint.getX(), endPoint.getX()));
 		domainMarker.setEndValue(Math.max(startPoint.getX(), endPoint.getX()));
 		rangeMarker.setStartValue(Math.min(startPoint.getY(), endPoint.getY()));
@@ -296,8 +269,8 @@ public class DataExplorerPlotPanel extends MasterPlotPanel {
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		
-		if (MouseEvent.getMouseModifiersText(e.getModifiers()).equals("Shift+Button1")) {
+
+		if (e.getModifiersEx() == InputEvent.SHIFT_DOWN_MASK)	{		
 
 			markerStartPoint = null;
 //			markerEndPoint = null;
@@ -364,7 +337,8 @@ public class DataExplorerPlotPanel extends MasterPlotPanel {
 	        	rangeMarker.getEndValue(), dataArea, plot.getRangeAxisEdge());		
 	
             markerRectangle = new Rectangle2D.Double(
-            		xMin, yMin,
+            		xMin, 
+            		yMin,
             		xMax - xMin, 
                     yMax - yMin);
 		}		

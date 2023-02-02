@@ -72,6 +72,19 @@ public class RawDataManager {
 	public static LCMSData getRawData(DataFile file) {
 		
 		if(rawDataMap.get(file) == null) {
+			
+			File rdf = new File(file.getFullPath());
+			if(!rdf.exists()) {
+				
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
+				rdf = Paths.get(
+						MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getRawDataDirectory().getAbsolutePath(), 
+						file.getName()).toFile();
+			}
+			if(rdf == null || !rdf.exists())
+				return null;
+			
+			file.setFullPath(rdf.getAbsolutePath());
 			LCMSData data = null;
 			try {
 				data = createDataSource(new File(file.getFullPath()));
