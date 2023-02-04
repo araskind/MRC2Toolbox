@@ -3677,7 +3677,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 //			msOnePlot.showMsForPointCollection(
 //					Arrays.asList(feature.getSpectrum().getCompletePattern()), true, "MS1 scan");
 			msOnePlot.showMsForFeature(feature, false);
-			msOneTable.setTableModelFromSpectrum(feature);
+			msOneTable.setTableModelFromMsFeature(feature);
 		}
 		//	Add MSMS
 		if(!feature.getSpectrum().getTandemSpectra().isEmpty()) {

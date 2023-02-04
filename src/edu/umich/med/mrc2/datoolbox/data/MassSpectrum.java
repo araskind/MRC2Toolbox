@@ -599,12 +599,16 @@ public class MassSpectrum implements Serializable {
 		for(int i=0; i<mzValues.length; i++)
 			msPoints.add(new MsPoint(mzValues[i], intensityValues[i]));
 		
-		Element msmsListElement = spectrumElement.getChildren(MassSpectrumFields.MsmsList.name()).get(0);
-		List<Element> msmsList = msmsListElement.getChildren(TandemMassSpectrumFields.MSMS.name());
-		for(Element msmsElement : msmsList) {
+		List<Element>msmsElementList = spectrumElement.getChildren(MassSpectrumFields.MsmsList.name());
+		if(!msmsElementList.isEmpty()) {
 			
-			if(msmsElement.getName().equals(TandemMassSpectrumFields.MSMS.name()))
-				tandemSpectra.add(new TandemMassSpectrum(msmsElement));
+			Element msmsListElement = spectrumElement.getChildren(MassSpectrumFields.MsmsList.name()).get(0);
+			List<Element> msmsList = msmsListElement.getChildren(TandemMassSpectrumFields.MSMS.name());
+			for(Element msmsElement : msmsList) {
+				
+				if(msmsElement.getName().equals(TandemMassSpectrumFields.MSMS.name()))
+					tandemSpectra.add(new TandemMassSpectrum(msmsElement));
+			}
 		}
 	}
 }

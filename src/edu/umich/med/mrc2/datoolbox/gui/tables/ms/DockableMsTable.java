@@ -28,13 +28,14 @@ import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import umich.ms.datatypes.scan.IScan;
 
 public class DockableMsTable extends DefaultSingleCDockable {
 
-	private MsOneTable libraryMsTable;
+	private MsOneTable msOneTable;
 	private static final Icon componentIcon = GuiUtils.getIcon("table", 16);
 
 	public DockableMsTable(String id, String title) {
@@ -42,23 +43,27 @@ public class DockableMsTable extends DefaultSingleCDockable {
 		super(id, componentIcon, title, null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 
-		libraryMsTable = new MsOneTable();
-		add(new JScrollPane(libraryMsTable));
+		msOneTable = new MsOneTable();
+		add(new JScrollPane(msOneTable));
 	}
 
 	public HashSet<Adduct>getVisibleAdducts(){
-		return libraryMsTable.getVisibleAdducts();
+		return msOneTable.getVisibleAdducts();
 	}
 
-	public void setTableModelFromSpectrum(MsFeature feature) {
-		libraryMsTable.setTableModelFromSpectrum(feature);
+	public void setTableModelFromMsFeature(MsFeature feature) {
+		msOneTable.setTableModelFromMsFeature(feature);
+	}
+	
+	public void setTableModelFromSpectrum(MassSpectrum spectrum) {
+		msOneTable.setTableModelFromSpectrum(spectrum);
 	}
 	
 	public void setTableModelFromScan(IScan scan) {
-		libraryMsTable.setTableModelFromScan(scan);
+		msOneTable.setTableModelFromScan(scan);
 	}
 
 	public synchronized void clearTable() {
-		libraryMsTable.clearTable();
+		msOneTable.clearTable();
 	}
 }

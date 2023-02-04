@@ -388,7 +388,8 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 				cdElement.getAttributeValue(XICDefinitionFields.MsLevel.name()));
 
 		mzList = new TreeSet<Double>();
-		String mzListString = cdElement.getAttributeValue(XICDefinitionFields.MZList.name());
+		String mzListString = 
+				cdElement.getAttributeValue(XICDefinitionFields.MZList.name());
 		if(mzListString != null) {
 			String[] mzChunks = mzListString.split(" ");
 			for(String mz : mzChunks)

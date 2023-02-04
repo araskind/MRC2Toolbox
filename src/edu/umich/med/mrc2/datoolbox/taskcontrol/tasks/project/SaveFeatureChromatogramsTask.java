@@ -58,7 +58,7 @@ public class SaveFeatureChromatogramsTask extends AbstractTask {
 			ex.printStackTrace();
 			setStatus(TaskStatus.ERROR);
 		}
-		setStatus(TaskStatus.FINISHED);
+		
 	}
 
 	private void createChoromatogramsXml() {
@@ -79,6 +79,9 @@ public class SaveFeatureChromatogramsTask extends AbstractTask {
         document.addContent(chromatogramListRoot);
         
 		//	Save XML document
+        taskDescription = "Saving chromatogram XML file";
+		total = 100;
+		processed = 30;
 		File xmlFile = Paths.get(
 				projectToSave.getUncompressedProjectFilesDirectory().getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.FEATURE_CHROMATOGRAMS_FILE_NAME).toFile();
@@ -87,10 +90,12 @@ public class SaveFeatureChromatogramsTask extends AbstractTask {
             XMLOutputter outputter = new XMLOutputter();
             outputter.setFormat(Format.getCompactFormat());
             outputter.output(document, writer);
-            outputter.output(document, System.out);
+            processed = 100;
         } catch (Exception e) {
             e.printStackTrace();
-        }		
+            setStatus(TaskStatus.ERROR);
+        }
+        setStatus(TaskStatus.FINISHED);
 	}
 
 	@Override

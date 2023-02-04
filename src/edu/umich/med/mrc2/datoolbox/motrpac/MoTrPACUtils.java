@@ -89,7 +89,7 @@ public class MoTrPACUtils {
 		// File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
 		//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
-			createMoTrPACFileManifests4PreCovidPlasma();
+			createMoTrPACFileManifests4PreCovidAdipose();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -188,6 +188,34 @@ public class MoTrPACUtils {
 				}
 			}
 		}		
+	}
+	
+	private static void createMotrpacDataUploadDirectoryStructure4PreCovidAdipose() {
+		
+		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T11"));
+		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\Interm");
+		String batchDateIdentifier = "20230202";
+		String processingDateIdentifier = "20230202";
+		createMotrpacDataUploadDirectoryStructure(
+				tissueTypes, 
+				 parentDirectory,
+				 batchDateIdentifier,
+				 processingDateIdentifier);
+	}
+	
+	private static void createMoTrPACFileManifests4PreCovidAdipose() {
+		
+		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T11"));
+		File parentDirectory = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\HUMAN");
+		String batchDateIdentifier = "BATCH1_20230202";
+		String processingDateIdentifier = "PROCESSED_20230202";
+		createMoTrPACFileManifest(
+				tissueTypes, 
+				parentDirectory,
+				batchDateIdentifier,
+				processingDateIdentifier,
+				"20230202");
 	}
 	
 	private static void createMotrpacDataUploadDirectoryStructure4PreCovidPlasma() {
@@ -463,8 +491,8 @@ public class MoTrPACUtils {
 			String manifestDate) {
 		List<String>assayTypes = 
 				new ArrayList<String>(Arrays.asList(
-//						"IONPNEG" ,
-//						"RPNEG", 
+						"IONPNEG" ,
+						"RPNEG", 
 						"RPPOS"));
 		for(String tissue : tissueTypes) {
 			

@@ -1509,7 +1509,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 			spectrumPlot.showMsForPointCollection(
 					Arrays.asList(firstSelected.getSpectrum().getCompletePattern()), true, "Observed MS");
-			spectrumTable.setTableModelFromSpectrum(firstSelected);
+			spectrumTable.setTableModelFromMsFeature(firstSelected);
 		}
 		idTable.setModelFromMsFeature(firstSelected);
 		if(firstSelected.getPrimaryIdentity() != null) {

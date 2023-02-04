@@ -54,10 +54,13 @@ public class MsOneTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromSpectrum(MsFeature feature) {
+	public void setTableModelFromMsFeature(MsFeature feature) {
+		setTableModelFromSpectrum(feature.getSpectrum());
+	}
+	
+	public void setTableModelFromSpectrum(MassSpectrum spectrum) {
 
 		setRowCount(0);
-		MassSpectrum spectrum = feature.getSpectrum();
 		if(spectrum == null)
 			return;
 

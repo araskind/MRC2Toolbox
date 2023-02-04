@@ -23,5 +23,9 @@ package edu.umich.med.mrc2.datoolbox.project.store;
 
 public enum AvgMSFields {
 	AvgMs,
+	MsLevel,
+	DataFile,
+	RTRange,
+	ScanList,
 	;
 }

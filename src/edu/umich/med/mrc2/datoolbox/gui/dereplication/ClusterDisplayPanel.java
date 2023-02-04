@@ -457,7 +457,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 		
 		MsFeature firstSelected = allFeatures.get(0);	
 		spectrumPlot.showMsForFeatureList(allFeatures, false);
-		spectrumTable.setTableModelFromSpectrum(firstSelected);
+		spectrumTable.setTableModelFromMsFeature(firstSelected);
 		idTable.setModelFromMsFeature(firstSelected);		
 		featureAnnotationPanel.loadFeatureData(firstSelected);
 		if (allFeatures.size() > 1) {

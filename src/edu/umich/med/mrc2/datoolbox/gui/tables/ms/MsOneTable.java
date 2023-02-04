@@ -36,6 +36,7 @@ import javax.swing.table.TableRowSorter;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
@@ -88,12 +89,22 @@ public class MsOneTable  extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromSpectrum(MsFeature feature) {
+	public void setTableModelFromMsFeature(MsFeature feature) {
 
 		thf.setTable(null);
-		model.setTableModelFromSpectrum(feature);
+		model.setTableModelFromMsFeature(feature);
 		thf.setTable(this);
 		currentFeature = feature;
+		currentScan = null;
+		tca.adjustColumns();
+	}
+	
+	public void setTableModelFromSpectrum(MassSpectrum spectrum) {
+		
+		thf.setTable(null);
+		model.setTableModelFromSpectrum(spectrum);
+		thf.setTable(this);
+		currentFeature = null;
 		currentScan = null;
 		tca.adjustColumns();
 	}

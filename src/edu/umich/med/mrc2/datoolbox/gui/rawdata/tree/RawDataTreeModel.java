@@ -236,15 +236,6 @@ public class RawDataTreeModel extends DefaultTreeModel {
 					forEach(s -> insertNodeInto(new DefaultMutableTreeNode(s), spectraNode, getChildCount(spectraNode)));								
 			}
 		}
-		//	Add scans
-//		DefaultMutableTreeNode rawScansNode = new DefaultMutableTreeNode(scansNodeName);
-//		insertNodeInto(rawScansNode, newNode, getChildCount(newNode));
-//		try {
-//			addScans(dataFile, rawScansNode);
-//		} catch (FileParsingException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 	
 	private void addScans(DataFile dataFile, DefaultMutableTreeNode rawScansNode) throws FileParsingException {
@@ -277,29 +268,6 @@ public class RawDataTreeModel extends DefaultTreeModel {
 				}
 			}
 		}
-//		if(treeGrouping.equals(TreeGrouping.BY_DATA_FILE)) {
-//			
-//			DefaultMutableTreeNode fileNode = treeObjects.get(chrom.getDataFile());
-//			DefaultMutableTreeNode chromNode = null;
-//			if(fileNode != null) {
-//				
-//				while (fileNode.children().hasMoreElements()) {
-//					
-//					DefaultMutableTreeNode node = (DefaultMutableTreeNode)fileNode.children().nextElement();
-//					
-//				   if(node.getUserObject().equals(chromatogramNodeName)) {
-//					   chromNode = node;
-//					   break;
-//				   }
-//				}
-//				if(chromNode == null) {
-//					chromNode = new DefaultMutableTreeNode(chromatogramNodeName);
-//					insertNodeInto(chromNode, fileNode, getChildCount(fileNode));
-//				}
-//				DefaultMutableTreeNode xicNode = new DefaultMutableTreeNode(chrom);
-//				insertNodeInto(xicNode, chromNode, getChildCount(chromNode));
-//			}		
-//		}
 		if(treeGrouping.equals(TreeGrouping.BY_OBJECT_TYPE)) {
 			
 			DefaultMutableTreeNode xicNode = new DefaultMutableTreeNode(chrom);
@@ -328,7 +296,7 @@ public class RawDataTreeModel extends DefaultTreeModel {
 		if(treeGrouping.equals(TreeGrouping.BY_OBJECT_TYPE)) {
 			
 			DefaultMutableTreeNode msNode = new DefaultMutableTreeNode(spectrum);
-			insertNodeInto(msNode, spectraNode, getChildCount(chromatogramNode));
+			insertNodeInto(msNode, spectraNode, getChildCount(spectraNode));
 		}
 	}
 	

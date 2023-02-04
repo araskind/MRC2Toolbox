@@ -129,7 +129,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private DockableChromatogramPlot chromatogramPanel;
 	private DockableSpectumPlot msPlotPanel;
 	private DockableMsTable msTable;
-	private DockableSpectumPlot msmsPlotPane;
+	private DockableSpectumPlot msmsPlotPanel;
 	private DockableMsMsTable msmsTable;
 	private DockableDataTreePanel dataFileTreePanel;
 	private DockableXICSetupPanel xicSetupPanel;
@@ -187,7 +187,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				"RawDataExaminerPanelDockableSpectumPlotMS1", "MS1 spectra");	
 		msPlotPanel.setRawDataExaminerPanel(this);
 		msTable = new DockableMsTable("RawDataExaminerPanelDockableMsTableMS1", "MS1 table");
-		msmsPlotPane = new DockableSpectumPlot(
+		msmsPlotPanel = new DockableSpectumPlot(
 				"RawDataExaminerPanelDockableSpectumPlotMS2", "MS2 spectra");
 		msPlotPanel.setRawDataExaminerPanel(this);
 		msmsTable = new DockableMsMsTable(
@@ -203,7 +203,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		grid.add( 0, 0, 25, 100, dataFileTreePanel, 
 				scanNavigationPanel, rawDataFilePropertiesTable );
 		grid.add( 25, 0, 75, 50, chromatogramPanel );
-		grid.add( 25, 50, 50, 50, msPlotPanel, msTable, msmsPlotPane, msmsTable);
+		grid.add( 25, 50, 50, 50, msPlotPanel, msTable, msmsPlotPanel, msmsTable);
 		grid.add( 75, 50, 25, 50, xicSetupPanel, msExtractorPanel);
 				
 //		station.dropTree( grid.toTree() );
@@ -689,7 +689,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		chromatogramPanel.clearPanel();
 		msPlotPanel.clearPanel();
 		msTable.clearTable();
-		msmsPlotPane.clearPanel();
+		msmsPlotPanel.clearPanel();
 		msmsTable.clearTable();
 		rawDataFilePropertiesTable.clearTable();
 		scanNavigationPanel.clearPanel();
@@ -1178,7 +1178,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		// TODO clear only if data related to selected files
 		msPlotPanel.clearPanel();
 		msTable.clearTable();
-		msmsPlotPane.clearPanel();
+		msmsPlotPanel.clearPanel();
 		msmsTable.clearTable();
 	}
 
@@ -1399,7 +1399,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		chromatogramPanel.clearPanel();
 		msPlotPanel.clearPanel();
 		msTable.clearTable();
-		msmsPlotPane.clearPanel();
+		msmsPlotPanel.clearPanel();
 		msmsTable.clearTable();
 		xicSetupPanel.clearPanel();
 		msExtractorPanel.clearPanel();
@@ -1498,15 +1498,15 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 		MsFeature msFeature = msFeatureInfoBundle.getMsFeature();
 		msPlotPanel.showMsForFeature(msFeature, false);
-		msTable.setTableModelFromSpectrum(msFeature);
-		msmsPlotPane.clearPanel();
+		msTable.setTableModelFromMsFeature(msFeature);
+		msmsPlotPanel.clearPanel();
 		msmsTable.clearTable();
 	
 		if(msFeature.getSpectrum() != null) {
 			TandemMassSpectrum msms = 
 					msFeature.getSpectrum().getExperimentalTandemSpectrum();
 			if(msms != null) {
-				msmsPlotPane.showTandemMs(msms);;
+				msmsPlotPanel.showTandemMs(msms);;
 				msmsTable.setTableModelFromTandemMs(msms);
 			}
 		}
@@ -1565,7 +1565,16 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void showAverageMassSpectrum(AverageMassSpectrum averageMassSpectrum) {
-		msPlotPanel.showMsDataSet(new MsDataSet(averageMassSpectrum));
+		
+		if(averageMassSpectrum.getMsLlevel() == 1) {
+			msPlotPanel.showMsDataSet(new MsDataSet(averageMassSpectrum));
+			msTable.setTableModelFromSpectrum(averageMassSpectrum.getMasSpectrum());
+		}		
+		if(averageMassSpectrum.getMsLlevel() > 1) {
+			msmsPlotPanel.showMsDataSet(new MsDataSet(averageMassSpectrum));
+			msmsTable.setTableModelFromDataPoints(
+					averageMassSpectrum.getMasSpectrum().getMsPoints(), null);
+		}
 		DataFile df = averageMassSpectrum.getDataFile();
 		if(df != null) {
 			xicSetupPanel.selectFiles(Collections.singleton(df));
@@ -1586,17 +1595,17 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(s.getMsLevel() == 1) {
 			msPlotPanel.showScan(s);
 			msTable.setTableModelFromScan(s);
-			msmsPlotPane.clearPanel();
+			msmsPlotPanel.clearPanel();
 			msmsTable.clearTable();
 			
 			IScan next = s.getScanCollection().getNextScan(s.getNum());
 			if(next.getMsLevel() == 2) {
-				msmsPlotPane.showScan(next);
+				msmsPlotPanel.showScan(next);
 				msmsTable.setTableModelFromScan(next);
 			}
 		}
 		else {
-			msmsPlotPane.showScan(s);
+			msmsPlotPanel.showScan(s);
 			msmsTable.setTableModelFromScan(s);
 			
 			IScan parent = 

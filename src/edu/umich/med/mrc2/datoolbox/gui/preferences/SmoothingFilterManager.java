@@ -66,7 +66,6 @@ public class SmoothingFilterManager {
             XMLOutputter outputter = new XMLOutputter();
             outputter.setFormat(Format.getCompactFormat());
             outputter.output(document, writer);
-            outputter.output(document, System.out);
         } catch (Exception e) {
             e.printStackTrace();
         }

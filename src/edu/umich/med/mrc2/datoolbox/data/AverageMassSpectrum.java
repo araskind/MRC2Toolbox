@@ -23,11 +23,16 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.AvgMSFields;
+import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class AverageMassSpectrum implements Serializable, Comparable<AverageMassSpectrum>{
@@ -38,23 +43,30 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 	private static final long serialVersionUID = 5389615971414831904L;
 	private MassSpectrum masSpectrum;
 	private DataFile dataFile;
-	private int msLlevel;
+	private int msLevel;
 	private Range rtRange;
 	private Collection<Integer>scanNumbers;
 	
-	public AverageMassSpectrum(DataFile dataFile, int msLlevel, Range rtRange) {
+	public AverageMassSpectrum(
+			DataFile dataFile, 
+			int msLlevel, 
+			Range rtRange) {
 		super();
 		this.dataFile = dataFile;
-		this.msLlevel = msLlevel;
+		this.msLevel = msLlevel;
 		this.rtRange = rtRange;
 		masSpectrum = new MassSpectrum();
+		scanNumbers = new TreeSet<Integer>();
 	}
 
-	public AverageMassSpectrum(DataFile dataFile, int msLlevel, Collection<Integer> scanNumbers) {
+	public AverageMassSpectrum(
+			DataFile dataFile, 
+			int msLlevel, 
+			Collection<Integer> scanNumbers2) {
 		super();
 		this.dataFile = dataFile;
-		this.msLlevel = msLlevel;
-		this.scanNumbers = scanNumbers;
+		this.msLevel = msLlevel;
+		this.scanNumbers = new TreeSet<Integer>(scanNumbers);
 		masSpectrum = new MassSpectrum();
 	}
 
@@ -67,7 +79,7 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 	}
 
 	public int getMsLlevel() {
-		return msLlevel;
+		return msLevel;
 	}
 
 	public Range getRtRange() {
@@ -80,9 +92,14 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 	
 	@Override
 	public String toString() {
-		return "Averge MS for " + 
-			dataFile.getName() + " | " + 
-			rtRange.getFormattedString(MRC2ToolBoxConfiguration.getRtFormat());
+		String name =  
+				"Average MS" + Integer.toString(msLevel) + 
+				" for " + dataFile.getName();
+		if(rtRange != null)
+			name += " | " + rtRange.getFormattedString(
+					MRC2ToolBoxConfiguration.getRtFormat());
+		
+		return name;
 	}
 
 	@Override
@@ -91,21 +108,74 @@ public class AverageMassSpectrum implements Serializable, Comparable<AverageMass
 	}
 
 	public Element getXmlElement() {
-		// TODO Auto-generated method stub
 		
 		Element avgMsElement = new Element(AvgMSFields.AvgMs.name());
-
-//		private MassSpectrum masSpectrum;
-//		private DataFile dataFile;
-//		private int msLlevel;
-//		private Range rtRange;
-//		private Collection<Integer>scanNumbers;
+		avgMsElement.setAttribute(
+				AvgMSFields.MsLevel.name(), Integer.toString(msLevel));
+		
+		if(scanNumbers != null && !scanNumbers.isEmpty()) {
+			
+			if(scanNumbers.size() == 1) {
+				avgMsElement.setAttribute(
+						AvgMSFields.ScanList.name(), 
+						Double.toString(scanNumbers.iterator().next()));
+			}
+			else {
+				List<String> stringList = scanNumbers.stream().
+						map(mz -> Integer.toString(mz)).
+						collect(Collectors.toList());
+				avgMsElement.setAttribute(
+						AvgMSFields.ScanList.name(), 
+						StringUtils.join(stringList, " "));
+			}
+		}		
+		if(rtRange != null)
+			avgMsElement.setAttribute(
+					AvgMSFields.RTRange.name(), rtRange.getStorableString());
+		
+		if(masSpectrum != null)
+			avgMsElement.addContent(masSpectrum.getXmlElement());
 		
 		return avgMsElement;
 	}
 	
 	public AverageMassSpectrum(Element avgMsElement, DataFile dataFile2) {
-		// TODO Auto-generated constructor stub
+
 		this.dataFile = dataFile2;
+		if(avgMsElement.getAttributeValue(AvgMSFields.MsLevel.name()) != null)
+			msLevel = Integer.parseInt(
+				avgMsElement.getAttributeValue(AvgMSFields.MsLevel.name()));
+		
+		scanNumbers = new TreeSet<Integer>();
+		String scanListString = 
+				avgMsElement.getAttributeValue(AvgMSFields.ScanList.name());
+		if(scanListString != null) {
+			String[] scanChunks = scanListString.split(" ");
+			for(String sc : scanChunks)
+				scanNumbers.add(Integer.parseInt(sc));
+		}
+		String rtRangeString = 
+				avgMsElement.getAttributeValue(AvgMSFields.RTRange.name());
+		if(rtRangeString != null)
+			rtRange = new Range(rtRangeString);
+		
+		Element spectrumElement = 
+				avgMsElement.getChild(MassSpectrumFields.Spectrum.name());
+		if(spectrumElement != null)
+			masSpectrum = new MassSpectrum(spectrumElement);		
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

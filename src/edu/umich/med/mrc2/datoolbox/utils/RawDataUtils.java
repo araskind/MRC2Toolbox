@@ -21,8 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.utils;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -31,7 +29,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -39,7 +36,6 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.RawMsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.data.enums.SupportedRawDataTypes;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import umich.ms.datatypes.LCMSData;
@@ -51,9 +47,6 @@ import umich.ms.datatypes.scancollection.IScanCollection;
 import umich.ms.datatypes.scancollection.ScanIndex;
 import umich.ms.datatypes.spectrum.ISpectrum;
 import umich.ms.fileio.exceptions.FileParsingException;
-import umich.ms.fileio.filetypes.mzml.MZMLFile;
-import umich.ms.fileio.filetypes.mzxml.MZXMLFile;
-import umich.ms.fileio.filetypes.xmlbased.AbstractXMLBasedDataSource;
 
 public class RawDataUtils {
 
@@ -194,18 +187,7 @@ public class RawDataUtils {
 		
 		for(DataFile df : files) {
 			
-			Path path = Paths.get(df.getFullPath());
-			LCMSData fileData;
-			@SuppressWarnings("rawtypes")
-			AbstractXMLBasedDataSource source = null;
-			
-			if(FilenameUtils.getExtension(path.toString()).equalsIgnoreCase(SupportedRawDataTypes.MZML.name())) 				
-				source = new MZMLFile(path.toString());		
-			
-			if(FilenameUtils.getExtension(path.toString()).equalsIgnoreCase(SupportedRawDataTypes.MZXML.name()))		
-				source = new MZXMLFile(path.toString());
-
-			fileData = new LCMSData(source);
+			LCMSData fileData = RawDataManager.getRawData(df);
 			if(msLevel == 1)
 				fileData.load(LCMSDataSubset.MS1_WITH_SPECTRA, parent);
 			

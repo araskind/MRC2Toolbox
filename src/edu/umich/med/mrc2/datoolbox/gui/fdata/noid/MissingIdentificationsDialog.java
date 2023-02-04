@@ -207,7 +207,7 @@ public class MissingIdentificationsDialog extends JDialog implements ActionListe
 
 		//	TODO
 		//	msPlot.showMsForLibraryFeature(activeFeature, true);
-		libraryMsTable.setTableModelFromSpectrum(activeFeature);
+		libraryMsTable.setTableModelFromMsFeature(activeFeature);
 	}
 
 	public double getMassAccuracy() {
