@@ -31,6 +31,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
+import org.apache.commons.lang.StringUtils;
+
 import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
@@ -53,12 +55,14 @@ import edu.umich.med.mrc2.datoolbox.gui.mptrack.report.MotrpacReportUploadDialog
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.study.DockableMoTrPACStudyAssayListingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.study.DockableMoTrPACStudyManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.study.DockableMoTrPACTissueCodeListingPanel;
+import edu.umich.med.mrc2.datoolbox.gui.mptrack.upload.MoTrPACRawDataCompressionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.mp.AgilentDataCompressionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.mp.MotrpacLimsDataPullTask;
 
 public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implements TreeSelectionListener {
@@ -81,6 +85,7 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 	
 	private MotrpacReportUploadDialog motrpacReportUploadDialog;
 	private MotrpacReportEmptyFileGeneratorDialog motrpacReportEmptyFileGeneratorDialog;
+	private MoTrPACRawDataCompressionSetupDialog motrpacRawDataCompressionSetupDialog;
 	private boolean limsDataLoaded;
 
 	public MoTrPACDataTrackingPanel() {
@@ -171,6 +176,40 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 		
 		if(command.equals(MainActionCommands.CREATE_MOTRPAC_REPORT_FILES_COMMAND.getName()))
 			createEmptyReportFiles();
+		
+		if(command.equals(MainActionCommands.SET_UP_AGILENT_DOTD_FILES_COMPRESSION_COMMAND.getName()))
+			showCompressionSetupDialog();
+		
+		if(command.equals(MainActionCommands.COMPRESS_AGILENT_DOTD_FILES_FOR_UPLOAD_COMMAND.getName()))
+			compressRawData();
+	}
+
+	private void showCompressionSetupDialog() {
+
+		motrpacRawDataCompressionSetupDialog = new MoTrPACRawDataCompressionSetupDialog(this);
+		motrpacRawDataCompressionSetupDialog.setLocationRelativeTo(this.getContentPane());
+		motrpacRawDataCompressionSetupDialog.setVisible(true);
+	}
+	
+	private void compressRawData() {
+
+		Collection<String> errors = motrpacRawDataCompressionSetupDialog.validateInput();
+		if(!errors.isEmpty()) {
+			
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), 
+					motrpacRawDataCompressionSetupDialog);
+			return;
+		}
+		Collection<AgilentDataCompressionTask>tasks = 
+				motrpacRawDataCompressionSetupDialog.getCompressionTasks();
+		
+		if(!tasks.isEmpty()) {
+			for(AgilentDataCompressionTask task : tasks)
+				MRC2ToolBoxCore.getTaskController().addTask(task);
+			
+			motrpacRawDataCompressionSetupDialog.dispose();
+		}			
 	}
 	
 	private void createEmptyReportFiles() {

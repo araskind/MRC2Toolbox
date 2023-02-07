@@ -48,12 +48,15 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 	private static final Icon createFilesIcon = GuiUtils.getIcon("addMultifile", 24);
 	private static final Icon createFilesIconSmall = GuiUtils.getIcon("addMultifile", 16);
 	private static final Icon uploadReportIcon = GuiUtils.getIcon("addSop", 24);
+	private static final Icon uploadUtilsMenuIcon = GuiUtils.getIcon("cog", 16);
+	private static final Icon zipIcon = GuiUtils.getIcon("zip", 24);
 	
 	// Menus
 	private JMenu
 		databaseMenu,
 		referenceMenu,
-		reportMenu;
+		reportMenu,
+		dataUploadUtilsMenu;
 
 	// Database items
 	private JMenuItem
@@ -66,6 +69,11 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 	// Report items
 	private JMenuItem
 		createReportTemplateFilesMenuItem;
+	
+	//	Upload items
+	private JMenuItem
+		compressRawFilesMenuItem,
+		createManifestFileMenuItem;
 	
 	public MoTrPACPanelMenuBar(ActionListener listener) {
 
@@ -100,6 +108,15 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 				createFilesIcon);
 		
 		add(reportMenu);
+		
+		dataUploadUtilsMenu = new JMenu("Upload utilities");
+		dataUploadUtilsMenu.setIcon(uploadUtilsMenuIcon);
+		
+		compressRawFilesMenuItem = addItem(dataUploadUtilsMenu, 
+				MainActionCommands.SET_UP_AGILENT_DOTD_FILES_COMPRESSION_COMMAND, 
+				zipIcon);
+		
+		add(dataUploadUtilsMenu);
 	}
 
 	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {

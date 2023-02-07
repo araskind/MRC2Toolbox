@@ -73,7 +73,7 @@ public class RecentFilesDialog extends JDialog implements ActionListener {
 		this.recentFiles = recentFiles;
 		
 		filesTable = new FilesTable();
-		filesTable.setTableModelFromAssayCollection(recentFiles);	
+		filesTable.setTableModelFromFileCollection(recentFiles);	
 		JScrollPane scrollPane = new JScrollPane(filesTable);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 		

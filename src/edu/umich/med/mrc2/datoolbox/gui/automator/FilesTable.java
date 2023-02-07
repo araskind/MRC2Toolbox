@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.automator;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.TreeSet;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
@@ -52,7 +53,7 @@ public class FilesTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromAssayCollection(Collection<File> files) {
+	public void setTableModelFromFileCollection(Collection<File> files) {
 		thf.setTable(null);;
 		model.setTableModelFromAssayCollection(files);
 		thf.setTable(this);
@@ -66,5 +67,17 @@ public class FilesTable extends BasicTable {
 		
 		return (File)getValueAt(getSelectedRow(), getColumnIndex(FilesTableModel.FILES_COLUMN));
 	}
-
+	
+	public Collection<File> getAllFiles() {
+		
+		Collection<File>files = new TreeSet<File>();
+		int fileCol = model.getColumnIndex(FilesTableModel.FILES_COLUMN);
+		for(int i = 0; i<model.getRowCount(); i++) {
+			
+			File f = (File)model.getValueAt(i, fileCol);
+			if(f != null)
+				files.add(f);
+		}		
+		return files;		
+	}
 }

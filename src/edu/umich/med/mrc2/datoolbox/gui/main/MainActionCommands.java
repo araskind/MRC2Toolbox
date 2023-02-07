@@ -430,6 +430,12 @@ public enum MainActionCommands {
 	DELETE_MOTRPAC_REPORT_COMMAND("Delete MoTrpPAC report"),
 	
 	CREATE_MOTRPAC_REPORT_FILES_COMMAND("Create MoTrpPAC report files"),
+	
+	SELECT_FILE_LIST_FOR_COMPRESSION_COMMAND("Select file list for compression"),
+	SELECT_RAW_DATA_DIRECTORIES_COMMAND("Select raw data directories"),
+	SELECT_DESTINATION_FOR_COMPRESSED_FILES_COMMAND("Select destination for compressed files"),
+	SET_UP_AGILENT_DOTD_FILES_COMPRESSION_COMMAND("Set up Agilent raw data compression"),
+	COMPRESS_AGILENT_DOTD_FILES_FOR_UPLOAD_COMMAND("Compress Agilent raw data for upload"),	
 		
 	//	MoTrPAC study dialog
 	ADD_MOTRPAC_STUDY_DIALOG_COMMAND("Add MoTrPAC study dialog"),
@@ -1175,6 +1181,8 @@ public enum MainActionCommands {
 	IMPORT_LOOKUP_FEATURE_LIST_FROM_FILE_COMMAND("Import lookup feature list from file"),
 	SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND("Select lookup features list from database"),
 	LOAD_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND("Load lookup features list from database"),
+	
+	
 	;
 
 	private final String name;

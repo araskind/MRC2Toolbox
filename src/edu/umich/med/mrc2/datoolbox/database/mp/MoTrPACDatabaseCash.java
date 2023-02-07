@@ -73,7 +73,9 @@ public class MoTrPACDatabaseCash {
 	}
 	
 	public static MotracSubjectType getMotracSubjectTypeByName(String typeName) {
-		return getMotrpacSubjectTypeList().stream().filter(s -> s.getSubjectType().equals(typeName)).findFirst().orElse(null);
+		return getMotrpacSubjectTypeList().stream().
+				filter(s -> s.getSubjectType().equals(typeName)).
+				findFirst().orElse(null);
 	}
 	
 	public static void refreshMotrpacReportCodes() {

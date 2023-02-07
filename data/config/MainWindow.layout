@@ -126,7 +126,6 @@
 													<placeholder>dock.single.AutomatorPanel</placeholder>
 													<placeholder>dock.single.QCPanel</placeholder>
 													<placeholder>dock.single.IDTrackerLimsManagerPanel</placeholder>
-													<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
 													<placeholder>dock.single.MsLibraryPanel</placeholder>
 													<placeholder>dock.single.METLIMSPanel</placeholder>
 												</placeholders>
@@ -247,7 +246,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>7</selected>
+										<selected>8</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -417,6 +416,15 @@
 												<key shared="false">
 													<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
 												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">8</item>
+												<item key="dock.id" type="i">8</item>
+												<item key="dock.placeholder" type="s">dock.single.MoTrPACDataTrackingPanel</item>
 											</entry>
 										</placeholders>
 									</layout>
@@ -496,6 +504,16 @@
 												<replacement id="dockablesingle RawDataExaminerPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>RawDataExaminerPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.MoTrPACDataTrackingPanel">
+												<replacement id="dockablesingle MoTrPACDataTrackingPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>MoTrPACDataTrackingPanel</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -620,31 +638,6 @@
 									<replacement id="dockablesingle WorklistPanel"/>
 									<delegate id="delegate_ccontrol backup factory id">
 										<id>WorklistPanel</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
-						<child key="single MoTrPACDataTrackingPanel" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-									<backup-path>
-										<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-										<leaf id="1672779039466"/>
-									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>7</index>
-									<placeholder>dock.single.MoTrPACDataTrackingPanel</placeholder>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.MoTrPACDataTrackingPanel">
-									<replacement id="dockablesingle MoTrPACDataTrackingPanel"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>MoTrPACDataTrackingPanel</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -937,7 +930,7 @@
 								</property>
 							</properties>
 						</entry>
-						<entry id="single MoTrPACDataTrackingPanel">
+						<entry id="single MoTrPACDataTrackingPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
