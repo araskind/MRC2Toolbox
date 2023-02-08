@@ -265,8 +265,12 @@ public class CompressionSetupPanel extends JPanel implements ActionListener{
 				|| getRawDataDirectories().isEmpty() || destinationDir == null)
 			return null;
 		
-		AgilentDataCompressionTask task = new AgilentDataCompressionTask(
-				inputFileList, getRawDataDirectories(), destinationDir);
+		AgilentDataCompressionTask task = 
+				new AgilentDataCompressionTask(
+				inputFileList, 
+				getRawDataDirectories(), 
+				destinationDir,
+				assay.getDescription());
 		
 		return task;
 	}	

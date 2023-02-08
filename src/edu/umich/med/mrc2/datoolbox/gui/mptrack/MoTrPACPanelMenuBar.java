@@ -50,7 +50,8 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 	private static final Icon uploadReportIcon = GuiUtils.getIcon("addSop", 24);
 	private static final Icon uploadUtilsMenuIcon = GuiUtils.getIcon("cog", 16);
 	private static final Icon zipIcon = GuiUtils.getIcon("zip", 24);
-	
+	private static final Icon md5Icon = GuiUtils.getIcon("hashMd5", 24);
+		
 	// Menus
 	private JMenu
 		databaseMenu,
@@ -115,6 +116,9 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 		compressRawFilesMenuItem = addItem(dataUploadUtilsMenu, 
 				MainActionCommands.SET_UP_AGILENT_DOTD_FILES_COMPRESSION_COMMAND, 
 				zipIcon);
+		createManifestFileMenuItem = addItem(dataUploadUtilsMenu, 
+				MainActionCommands.SET_UP_UPLOAD_MANIFEST_GENERATION_COMMAND, 
+				md5Icon);
 		
 		add(dataUploadUtilsMenu);
 	}

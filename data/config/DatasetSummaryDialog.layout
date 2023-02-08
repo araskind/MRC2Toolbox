@@ -99,31 +99,30 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<leaf id="0" nodeId="1670355749447">
-											<placeholders>
-												<placeholder>dock.single.DockableDataSetStatsPanel</placeholder>
-												<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
-												<placeholder>dock.single.DockableExperimentsTable</placeholder>
-											</placeholders>
-											<placeholder-map>
-												<version>0</version>
-												<format>dock.PlaceholderList</format>
-												<entry>
-													<key shared="false">
-														<placeholder>dock.single.DockableExperimentsTable</placeholder>
-													</key>
-													<item key="convert" type="b">true</item>
-													<item key="convert-keys" type="a"/>
-												</entry>
-												<entry>
-													<key shared="false">
-														<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
-													</key>
-													<item key="convert" type="b">true</item>
-													<item key="convert-keys" type="a"/>
-												</entry>
-											</placeholder-map>
-										</leaf>
+										<node nodeId="1675801057967" orientation="VERTICAL" divider="0.520891364902507">
+											<leaf id="0" nodeId="1670355749447">
+												<placeholders>
+													<placeholder>dock.single.DockableDataSetStatsPanel</placeholder>
+													<placeholder>dock.single.DockableExperimentsTable</placeholder>
+												</placeholders>
+												<placeholder-map>
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableExperimentsTable</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+												</placeholder-map>
+											</leaf>
+											<leaf id="-1" nodeId="1675801057965">
+												<placeholders>
+													<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
+												</placeholders>
+											</leaf>
+										</node>
 									</content>
 								</delegate>
 							</layout>
@@ -344,12 +343,9 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
 											<backup-path>
-												<leaf id="1670355749447"/>
+												<node location="BOTTOM" size="0.479108635097493" id="1675801057967"/>
+												<leaf id="1675801057965"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>2</index>
-											<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
 										</property>
 									</location>
 								</property>

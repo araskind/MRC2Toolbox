@@ -93,49 +93,177 @@ public class MoTrPACUtils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}	
+		
+	private static void createMotrpacDataUploadDirectoryStructure(
+			List<String>tissueTypes, 
+			File parentDirectory,
+			String batchDateIdentifier,
+			String processingDateIdentifier,
+			String studyPhase) {
+		List<String>assayTypes = 
+				new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
+		try {
+			LIMSReportingUtils.createMotrpacDataUploadDirectoryStructure(
+					tissueTypes, 
+					assayTypes, 
+					parentDirectory,
+					1,
+					batchDateIdentifier,
+					processingDateIdentifier,
+					studyPhase);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
-	private static void compressRawDataFromEX01190() {
+	private static void createMoTrPACFileManifest(
+			List<String>tissueTypes, 
+			File parentDirectory,
+			String batchId,
+			String processedFolderId,
+			String manifestDate) {
+		List<String>assayTypes = 
+				new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
 		
-		String includeFileListFile = 
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\Interm\\T02\\IONPNEG\\BATCH1_20230124\\RAW\\EX01190-IONPNEG-file-list.txt"; 
+		for(String tissue : tissueTypes) {
+			
+			for(String assay : assayTypes) {
+				
+				try {
+					createMoTrPACTissueAssayManifestFile(
+							tissue,
+							assay,
+							parentDirectory,
+							batchId,
+							processedFolderId,
+							manifestDate);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public static void createMoTrPACTissueAssayManifestFile(
+			String tissue,
+			String assay,
+			File parentDirectory,
+			String batchId,
+			String processedFolderId,
+			String manifestDate) throws IOException {
 		
-		List<String>sourceFolders = new ArrayList<String>();
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-01");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-02");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-03");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-04");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-05");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-06");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-07");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-08");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-09");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-10");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-11");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-12");
-		sourceFolders.add(
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-13");
+		StringBuffer checkSumData = new StringBuffer();
+		checkSumData.append("file_name,md5\n");
+		Path batchPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId);
+		Path processedPath = Paths.get(batchPath.toString(), processedFolderId);
+		Path namedDirPath = Paths.get(processedPath.toString(), "NAMED");
+		List<Path> pathList = Files.find(namedDirPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + "NAMED" + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		Path unnamedDirPath = Paths.get(processedPath.toString(), "UNNAMED");
+		pathList = Files.find(unnamedDirPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + "UNNAMED" + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		pathList = Files.find(processedPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_failedsamples_"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		pathList = Files.find(batchPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_phase"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		Path rawDirPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW");
+		pathList = Files.find(rawDirPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".zip"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = filePath.toFile().getName().replace(".zip", "");
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), 
+				tissue, assay, batchId, "file_manifest_" + manifestDate + ".csv").toFile();
+		FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
+	}
+	
+	public static void createMoTrPACTissueAssayNoRawManifestFile(
+			String tissue,
+			String assay,
+			File parentDirectory,
+			String batchId,
+			String processedFolderId,
+			String manifestDate) throws IOException {
 		
-		String destinationFolder = 
-				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\T02\\IONPNEG\\BATCH1_20230124\\RAW";
-		
-		compressRawDataFromMutibatchRun(
-				includeFileListFile, 
-				sourceFolders, 
-				destinationFolder);
-	}	
+		StringBuffer checkSumData = new StringBuffer();
+		checkSumData.append("file_name,md5\n");
+		Path batchPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId);
+		Path processedPath = Paths.get(batchPath.toString(), processedFolderId);
+		Path namedDirPath = Paths.get(processedPath.toString(), "NAMED");
+		List<Path> pathList = Files.find(namedDirPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + "NAMED" + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		Path unnamedDirPath = Paths.get(processedPath.toString(), "UNNAMED");
+		pathList = Files.find(unnamedDirPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + "UNNAMED" + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		pathList = Files.find(processedPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_failedsamples_"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		pathList = Files.find(batchPath,
+				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_phase"))).
+			collect(Collectors.toList());
+		for(Path filePath : pathList) {
+			String zipHash = DigestUtils.sha256Hex(
+					new FileInputStream(filePath.toString()));
+			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
+			checkSumData.append(localPath + "," + zipHash + "\n");
+		}
+		File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "file_manifest_noRaw" + manifestDate + ".csv").toFile();
+		FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
+	}
 	
 	private static void compressRawDataFromMutibatchRun(
 			String includeFileListFile, 
@@ -190,17 +318,93 @@ public class MoTrPACUtils {
 		}		
 	}
 	
+	private static void writeMetaboliteMetadataFile(
+			Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>metaboliteMetadata,
+			Path metaboliteMetadataFilePath) {
+		
+		ArrayList<String>lines = new ArrayList<String>();
+		ArrayList<String>header = new ArrayList<String>();
+		for(MoTrPACmetaboliteMetaDataFields field : MoTrPACmetaboliteMetaDataFields.values())
+			header.add(field.getName());
+		
+		lines.add(StringUtils.join(header, MRC2ToolBoxConfiguration.getTabDelimiter()));
+		for(Map<MoTrPACmetaboliteMetaDataFields, String> mmd : metaboliteMetadata) {
+			
+			ArrayList<String>line = new ArrayList<String>();
+			for(MoTrPACmetaboliteMetaDataFields field : MoTrPACmetaboliteMetaDataFields.values()) {
+				
+				String value = mmd.get(field);
+				if(value != null)
+					line.add(value);
+				else
+					line.add("");				
+			}
+			lines.add(StringUtils.join(line, MRC2ToolBoxConfiguration.getTabDelimiter()));
+		}
+		try {
+			Files.write(metaboliteMetadataFilePath, 
+					lines, 					
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>
+			parseMetaboliteMetadataFile(File metaboliteMetadataFile) throws Exception{
+		
+		Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>metaboliteMetadata = 
+				new ArrayList<Map<MoTrPACmetaboliteMetaDataFields,String>>();
+		String[][] metaboliteData = null;
+		try {
+			metaboliteData =
+				DelimitedTextParser.parseTextFileWithEncodingSkippingComments(
+						metaboliteMetadataFile, MRC2ToolBoxConfiguration.getTabDelimiter(), ">");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		if(metaboliteData == null) {
+			throw new Exception("Unable to read metabolite data file!");
+		}
+		Map<MoTrPACmetaboliteMetaDataFields,Integer>columnMap = 
+				new TreeMap<MoTrPACmetaboliteMetaDataFields,Integer>();
+		String[]header = metaboliteData[0];
+		for(int i=0; i<header.length; i++) {
+			if(header[i].trim().isEmpty())
+				continue;
+			
+			MoTrPACmetaboliteMetaDataFields field = 
+					MoTrPACmetaboliteMetaDataFields.getMoTrPACmetaboliteMetadataFieldByName(header[i].trim());
+			
+			if(field != null)
+				columnMap.put(field, i);
+		}
+		for(int i=1; i<metaboliteData.length; i++) {
+			Map<MoTrPACmetaboliteMetaDataFields,String>mDataMap = new TreeMap<MoTrPACmetaboliteMetaDataFields,String>();
+			for(Entry<MoTrPACmetaboliteMetaDataFields, Integer> col : columnMap.entrySet())				
+				mDataMap.put(col.getKey(), metaboliteData[i][col.getValue()]);
+
+			metaboliteMetadata.add(mDataMap);
+		}
+		return metaboliteMetadata;
+	}
+	
 	private static void createMotrpacDataUploadDirectoryStructure4PreCovidAdipose() {
 		
 		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T11"));
 		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01242 - preCovid adipose Shipment W20000044X\\4BIC\\Interm");
 		String batchDateIdentifier = "20230202";
 		String processingDateIdentifier = "20230202";
+		String studyPhase = "HUMAN-PRECOVID";
 		createMotrpacDataUploadDirectoryStructure(
 				tissueTypes, 
 				 parentDirectory,
 				 batchDateIdentifier,
-				 processingDateIdentifier);
+				 processingDateIdentifier,
+				 studyPhase);
 	}
 	
 	private static void createMoTrPACFileManifests4PreCovidAdipose() {
@@ -224,11 +428,13 @@ public class MoTrPACUtils {
 		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\Interm");
 		String batchDateIdentifier = "20230124";
 		String processingDateIdentifier = "20230124";
+		String studyPhase = "HUMAN-PRECOVID";
 		createMotrpacDataUploadDirectoryStructure(
 				tissueTypes, 
 				 parentDirectory,
 				 batchDateIdentifier,
-				 processingDateIdentifier);
+				 processingDateIdentifier,
+				 studyPhase);
 	}
 	
 	private static void createMotrpacDataUploadDirectoryStructure4PreCovidMuscle() {
@@ -238,11 +444,13 @@ public class MoTrPACUtils {
 				+ "Skeletal Muscle Samples Pre COVID 2 19 2021\\4Upload\\_4BIC");
 		String batchDateIdentifier = "20220404";
 		String processingDateIdentifier = "20220404";
+		String studyPhase = "HUMAN-PRECOVID";
 		createMotrpacDataUploadDirectoryStructure(
-				tissueTypes, 
-				 parentDirectory,
-				 batchDateIdentifier,
-				 processingDateIdentifier);
+			 tissueTypes, 
+			 parentDirectory,
+			 batchDateIdentifier,
+			 processingDateIdentifier,
+			 studyPhase);
 	}
 	
 	private static void createMoTrPACFileManifests4PreCovidMuscle() {
@@ -377,25 +585,6 @@ public class MoTrPACUtils {
 			}
 		}
 	}
-	
-	private static void createMotrpacDataUploadDirectoryStructure(
-			List<String>tissueTypes, 
-			File parentDirectory,
-			String batchDateIdentifier,
-			String processingDateIdentifier) {
-		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
-		try {
-			LIMSReportingUtils.createMotrpacDataUploadDirectoryStructure(
-					tissueTypes, 
-					assayTypes, 
-					parentDirectory,
-					1,
-					batchDateIdentifier,
-					processingDateIdentifier);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	private static void createPass1ACMotrpacDataUploadDirectoryStructure() {
 		
@@ -411,7 +600,8 @@ public class MoTrPACUtils {
 						"T70 - Adipose white"));
 		List<String>assayTypes = new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));		
 		File parentDirectory = new File(
-				"Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC\\_FINALS");	
+				"Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1AC\\_FINALS");
+		String studyPhase = "PASS1A-06";
 		try {
 			LIMSReportingUtils.createMotrpacDataUploadDirectoryStructure(
 					tissueTypes, 
@@ -419,7 +609,8 @@ public class MoTrPACUtils {
 					parentDirectory,
 					1,
 					"20210603",
-					"20220926");
+					"20220926",
+					studyPhase);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -481,157 +672,8 @@ public class MoTrPACUtils {
 				}
 			}
 		}
-	}
-	
-	private static void createMoTrPACFileManifest(
-			List<String>tissueTypes, 
-			File parentDirectory,
-			String batchId,
-			String processedFolderId,
-			String manifestDate) {
-		List<String>assayTypes = 
-				new ArrayList<String>(Arrays.asList(
-						"IONPNEG" ,
-						"RPNEG", 
-						"RPPOS"));
-		for(String tissue : tissueTypes) {
-			
-			for(String assay : assayTypes) {
-				
-				try {
-					createMoTrPACTissueAssayManifestFile(
-							tissue,
-							assay,
-							parentDirectory,
-							batchId,
-							processedFolderId,
-							manifestDate);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	public static void createMoTrPACTissueAssayManifestFile(
-			String tissue,
-			String assay,
-			File parentDirectory,
-			String batchId,
-			String processedFolderId,
-			String manifestDate) throws IOException {
-		
-		StringBuffer checkSumData = new StringBuffer();
-		checkSumData.append("file_name,md5\n");
-		Path batchPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId);
-		Path processedPath = Paths.get(batchPath.toString(), processedFolderId);
-		Path namedDirPath = Paths.get(processedPath.toString(), "NAMED");
-		List<Path> pathList = Files.find(namedDirPath,
-				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
-			collect(Collectors.toList());
-		for(Path filePath : pathList) {
-			String zipHash = DigestUtils.sha256Hex(
-					new FileInputStream(filePath.toString()));
-			String localPath = processedFolderId + File.separator + "NAMED" + File.separator + filePath.toFile().getName();
-			checkSumData.append(localPath + "," + zipHash + "\n");
-		}
-		Path unnamedDirPath = Paths.get(processedPath.toString(), "UNNAMED");
-		pathList = Files.find(unnamedDirPath,
-				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
-			collect(Collectors.toList());
-		for(Path filePath : pathList) {
-			String zipHash = DigestUtils.sha256Hex(
-					new FileInputStream(filePath.toString()));
-			String localPath = processedFolderId + File.separator + "UNNAMED" + File.separator + filePath.toFile().getName();
-			checkSumData.append(localPath + "," + zipHash + "\n");
-		}
-		pathList = Files.find(processedPath,
-				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_failedsamples_"))).
-			collect(Collectors.toList());
-		for(Path filePath : pathList) {
-			String zipHash = DigestUtils.sha256Hex(
-					new FileInputStream(filePath.toString()));
-			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
-			checkSumData.append(localPath + "," + zipHash + "\n");
-		}
-		pathList = Files.find(batchPath,
-				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_phase"))).
-			collect(Collectors.toList());
-		for(Path filePath : pathList) {
-			String zipHash = DigestUtils.sha256Hex(
-					new FileInputStream(filePath.toString()));
-			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
-			checkSumData.append(localPath + "," + zipHash + "\n");
-		}
-		Path rawDirPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW");
-		pathList = Files.find(rawDirPath,
-				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".zip"))).
-			collect(Collectors.toList());
-		for(Path filePath : pathList) {
-			String zipHash = DigestUtils.sha256Hex(
-					new FileInputStream(filePath.toString()));
-			String localPath = filePath.toFile().getName().replace(".zip", "");
-			checkSumData.append(localPath + "," + zipHash + "\n");
-		}
-		File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "file_manifest_" + manifestDate + ".csv").toFile();
-		FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
-	}
-	
-	public static void createMoTrPACTissueAssayNoRawManifestFile(
-			String tissue,
-			String assay,
-			File parentDirectory,
-			String batchId,
-			String processedFolderId,
-			String manifestDate) throws IOException {
-		
-		StringBuffer checkSumData = new StringBuffer();
-		checkSumData.append("file_name,md5\n");
-		Path batchPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId);
-		Path processedPath = Paths.get(batchPath.toString(), processedFolderId);
-		Path namedDirPath = Paths.get(processedPath.toString(), "NAMED");
-		List<Path> pathList = Files.find(namedDirPath,
-				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
-			collect(Collectors.toList());
-		for(Path filePath : pathList) {
-			String zipHash = DigestUtils.sha256Hex(
-					new FileInputStream(filePath.toString()));
-			String localPath = processedFolderId + File.separator + "NAMED" + File.separator + filePath.toFile().getName();
-			checkSumData.append(localPath + "," + zipHash + "\n");
-		}
-		Path unnamedDirPath = Paths.get(processedPath.toString(), "UNNAMED");
-		pathList = Files.find(unnamedDirPath,
-				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".txt"))).
-			collect(Collectors.toList());
-		for(Path filePath : pathList) {
-			String zipHash = DigestUtils.sha256Hex(
-					new FileInputStream(filePath.toString()));
-			String localPath = processedFolderId + File.separator + "UNNAMED" + File.separator + filePath.toFile().getName();
-			checkSumData.append(localPath + "," + zipHash + "\n");
-		}
-		pathList = Files.find(processedPath,
-				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_failedsamples_"))).
-			collect(Collectors.toList());
-		for(Path filePath : pathList) {
-			String zipHash = DigestUtils.sha256Hex(
-					new FileInputStream(filePath.toString()));
-			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
-			checkSumData.append(localPath + "," + zipHash + "\n");
-		}
-		pathList = Files.find(batchPath,
-				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().contains("metadata_phase"))).
-			collect(Collectors.toList());
-		for(Path filePath : pathList) {
-			String zipHash = DigestUtils.sha256Hex(
-					new FileInputStream(filePath.toString()));
-			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
-			checkSumData.append(localPath + "," + zipHash + "\n");
-		}
-		File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "file_manifest_noRaw" + manifestDate + ".csv").toFile();
-		FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
-	}
-	
+	}	
+
 	private static void createMoTrPACFileManifest() throws IOException {
 		
 		List<String>tissueTypes = new ArrayList<String>(
@@ -814,81 +856,6 @@ public class MoTrPACUtils {
 			e.printStackTrace();
 		}
 	}
-		
-	private static void writeMetaboliteMetadataFile(
-			Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>metaboliteMetadata,
-			Path metaboliteMetadataFilePath) {
-		
-		ArrayList<String>lines = new ArrayList<String>();
-		ArrayList<String>header = new ArrayList<String>();
-		for(MoTrPACmetaboliteMetaDataFields field : MoTrPACmetaboliteMetaDataFields.values())
-			header.add(field.getName());
-		
-		lines.add(StringUtils.join(header, MRC2ToolBoxConfiguration.getTabDelimiter()));
-		for(Map<MoTrPACmetaboliteMetaDataFields, String> mmd : metaboliteMetadata) {
-			
-			ArrayList<String>line = new ArrayList<String>();
-			for(MoTrPACmetaboliteMetaDataFields field : MoTrPACmetaboliteMetaDataFields.values()) {
-				
-				String value = mmd.get(field);
-				if(value != null)
-					line.add(value);
-				else
-					line.add("");				
-			}
-			lines.add(StringUtils.join(line, MRC2ToolBoxConfiguration.getTabDelimiter()));
-		}
-		try {
-			Files.write(metaboliteMetadataFilePath, 
-					lines, 					
-					StandardCharsets.UTF_8,
-					StandardOpenOption.CREATE, 
-					StandardOpenOption.TRUNCATE_EXISTING);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	private static Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>
-			parseMetaboliteMetadataFile(File metaboliteMetadataFile) throws Exception{
-		
-		Collection<Map<MoTrPACmetaboliteMetaDataFields,String>>metaboliteMetadata = 
-				new ArrayList<Map<MoTrPACmetaboliteMetaDataFields,String>>();
-		String[][] metaboliteData = null;
-		try {
-			metaboliteData =
-				DelimitedTextParser.parseTextFileWithEncodingSkippingComments(
-						metaboliteMetadataFile, MRC2ToolBoxConfiguration.getTabDelimiter(), ">");
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		if(metaboliteData == null) {
-			throw new Exception("Unable to read metabolite data file!");
-		}
-		Map<MoTrPACmetaboliteMetaDataFields,Integer>columnMap = 
-				new TreeMap<MoTrPACmetaboliteMetaDataFields,Integer>();
-		String[]header = metaboliteData[0];
-		for(int i=0; i<header.length; i++) {
-			if(header[i].trim().isEmpty())
-				continue;
-			
-			MoTrPACmetaboliteMetaDataFields field = 
-					MoTrPACmetaboliteMetaDataFields.getMoTrPACmetaboliteMetadataFieldByName(header[i].trim());
-			
-			if(field != null)
-				columnMap.put(field, i);
-		}
-		for(int i=1; i<metaboliteData.length; i++) {
-			Map<MoTrPACmetaboliteMetaDataFields,String>mDataMap = new TreeMap<MoTrPACmetaboliteMetaDataFields,String>();
-			for(Entry<MoTrPACmetaboliteMetaDataFields, Integer> col : columnMap.entrySet())				
-				mDataMap.put(col.getKey(), metaboliteData[i][col.getValue()]);
-
-			metaboliteMetadata.add(mDataMap);
-		}
-		return metaboliteMetadata;
-	}
-	
 	
 	private static void fixMetaboliteNames() throws Exception {
 		
@@ -1141,5 +1108,47 @@ public class MoTrPACUtils {
 				e.printStackTrace();
 			}			
 		}
+	}
+	
+	private static void compressRawDataFromEX01190() {
+		
+		String includeFileListFile = 
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\Interm\\T02\\IONPNEG\\BATCH1_20230124\\RAW\\EX01190-IONPNEG-file-list.txt"; 
+		
+		List<String>sourceFolders = new ArrayList<String>();
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-01");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-02");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-03");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-04");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-05");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-06");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-07");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-08");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-09");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-10");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-11");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-12");
+		sourceFolders.add(
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\A049 - Central carbon metabolism profiling\\Raw data\\NEG\\BATCH-13");
+		
+		String destinationFolder = 
+				"Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\T02\\IONPNEG\\BATCH1_20230124\\RAW";
+		
+		compressRawDataFromMutibatchRun(
+				includeFileListFile, 
+				sourceFolders, 
+				destinationFolder);
 	}
 }

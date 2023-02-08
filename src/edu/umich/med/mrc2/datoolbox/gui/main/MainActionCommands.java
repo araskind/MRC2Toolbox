@@ -436,6 +436,10 @@ public enum MainActionCommands {
 	SELECT_DESTINATION_FOR_COMPRESSED_FILES_COMMAND("Select destination for compressed files"),
 	SET_UP_AGILENT_DOTD_FILES_COMPRESSION_COMMAND("Set up Agilent raw data compression"),
 	COMPRESS_AGILENT_DOTD_FILES_FOR_UPLOAD_COMMAND("Compress Agilent raw data for upload"),	
+	
+	SET_UP_UPLOAD_MANIFEST_GENERATION_COMMAND("Set up BIC upload manifest generation"),
+	SELECT_MOTRPAC_UPLOAD_BATCH_FOR_MANIFEST_FILE_COMMAND("Select MoTrPAC BATCH directory to process"),
+	CREATE_MANIFEST_FOR_BIC_UPLOAD_COMMAND("Create BIC upload manifest"),
 		
 	//	MoTrPAC study dialog
 	ADD_MOTRPAC_STUDY_DIALOG_COMMAND("Add MoTrPAC study dialog"),

@@ -52,15 +52,18 @@ public class AgilentDataCompressionTask extends AbstractTask {
 	private Collection<File> rawDataDirectories;	
 	private File destinationDir;
 	private Collection<Path>rawFilesPathList;
+	private String assayName;
 		
 	public AgilentDataCompressionTask(
 			File inputFileList, 
 			Collection<File> rawDataDirectories, 
-			File destinationDir) {
+			File destinationDir,
+			String assayName) {
 		super();
 		this.inputFileList = inputFileList;
 		this.rawDataDirectories = rawDataDirectories;
 		this.destinationDir = destinationDir;
+		this.assayName = assayName;
 	}
 
 	@Override
@@ -108,11 +111,14 @@ public class AgilentDataCompressionTask extends AbstractTask {
 	
 	private void collectFilesForCompression() {
 		
-		taskDescription = "Collecting .D files for compression";
+		taskDescription = "Collecting .D files for compression for " + assayName;
 		total = rawDataDirectories.size();
 		processed = 0;
 		rawFilesPathList = new TreeSet<Path>();
 		for(File sourceDir : rawDataDirectories) {
+			
+			if(isCanceled())
+				return;
 			
 			Path sourcePath = Paths.get(sourceDir.getAbsolutePath());
 			List<Path> pathList = new ArrayList<Path>();
@@ -133,8 +139,8 @@ public class AgilentDataCompressionTask extends AbstractTask {
 	
 	private void compressFiles() {
 		
-		taskDescription = "Compressing raw data";
-		total = rawFilesPathList.size();
+		taskDescription = "Compressing raw data for " + assayName;
+		total = inputFileNames.size();
 		processed = 0;
 		
 		processedFileNames = new TreeSet<String>();
@@ -142,6 +148,9 @@ public class AgilentDataCompressionTask extends AbstractTask {
 		Path destinationPath = Paths.get(destinationDir.getAbsolutePath());
 		
 		for(Path rawFilePath : rawFilesPathList) {
+			
+			if(isCanceled())
+				return;
 			
 			String pathString = rawFilePath.toString();		
 			String rawFileName = FilenameUtils.getBaseName(pathString);
@@ -167,12 +176,16 @@ public class AgilentDataCompressionTask extends AbstractTask {
 				}
 				if(destination.exists())
 					processedFileNames.add(rawFileName);
-			}
-			processed++;
+				
+				processed++;
+			}			
 		}
 	}
 	
 	private void writeLog() {
+		
+		if(isCanceled())
+			return;
 		
 		Set<String> missingfiles = inputFileNames.stream().
 				filter(f -> !processedFileNames.contains(f)).
@@ -181,7 +194,7 @@ public class AgilentDataCompressionTask extends AbstractTask {
 			
 			Path outputPath = Paths.get(
 					inputFileList.getParentFile().getAbsolutePath(), 
-					FilenameUtils.getBaseName(inputFileList.getName() + "_MISSING_RAW_FILES.TXT"));
+					FilenameUtils.getBaseName(inputFileList.getName()) + "_MISSING_RAW_FILES.TXT");
 			try {
 				Files.write(outputPath, 
 						missingfiles, 
@@ -200,6 +213,7 @@ public class AgilentDataCompressionTask extends AbstractTask {
 		return new AgilentDataCompressionTask(
 				 inputFileList, 
 				 rawDataDirectories, 
-				 destinationDir);
+				 destinationDir,
+				 assayName);
 	}
 }

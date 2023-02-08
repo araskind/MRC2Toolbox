@@ -22,10 +22,14 @@
 package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
@@ -120,7 +124,8 @@ public class LIMSReportingUtils {
 			File parentDirectory,
 			int batchNumber,
 			String batchDateIdentifier,
-			String processingDateIdentifier) throws Exception {
+			String processingDateIdentifier,
+			String studyPhase) throws Exception {
 
 		if(parentDirectory == null)
 			return;
@@ -141,6 +146,18 @@ public class LIMSReportingUtils {
 						Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, processedFolderId, "NAMED"));
 				Files.createDirectories(
 						Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, processedFolderId, "UNNAMED"));
+				
+				//	Write metadata  phase file
+				Path outputPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "metadata_phase.txt");
+				try {
+					Files.write(outputPath, 
+							Collections.singleton(studyPhase), 
+							StandardCharsets.UTF_8,
+							StandardOpenOption.CREATE, 
+							StandardOpenOption.TRUNCATE_EXISTING);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

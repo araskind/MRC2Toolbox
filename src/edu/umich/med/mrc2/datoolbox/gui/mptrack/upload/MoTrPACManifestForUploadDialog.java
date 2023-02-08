@@ -50,37 +50,37 @@ import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.mp.AgilentDataCompressionTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.mp.CreateUploadManifestTask;
 
-public class MoTrPACRawDataCompressionSetupDialog extends JDialog implements ActionListener, BackedByPreferences {
+public class MoTrPACManifestForUploadDialog extends JDialog implements ActionListener, BackedByPreferences {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8579406888629573415L;
 
-	private static final Icon zipIcon = GuiUtils.getIcon("zip", 32);	
+	private static final Icon md5Icon = GuiUtils.getIcon("hashMd5", 32);	
 	public static final String OUTPUT_DIRECTORY = "OUTPUT_DIRECTORY";	
 	
-	private Map<MoTrPACAssay,CompressionSetupPanel>assayPanelMap;
+	private Map<MoTrPACAssay,ManifestForUploadSetupPanel>assayPanelMap;
 	
-	public MoTrPACRawDataCompressionSetupDialog(ActionListener listener) {
+	public MoTrPACManifestForUploadDialog(ActionListener listener) {
 		super();
 		
 		setSize(new Dimension(800, 640));
 		setPreferredSize(new Dimension(800, 640));
-		setIconImage(((ImageIcon) zipIcon).getImage());
-		setTitle("Compress Agilent .D files for upload ");
+		setIconImage(((ImageIcon) md5Icon).getImage());
+		setTitle("Create manifest file (MD5) for upload ");
 		setModalityType(ModalityType.APPLICATION_MODAL);		
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
 		JTabbedPane tabbedPane = new JTabbedPane();
 		getContentPane().add(tabbedPane, BorderLayout.CENTER);
-		assayPanelMap = new TreeMap<MoTrPACAssay,CompressionSetupPanel>();
+		assayPanelMap = new TreeMap<MoTrPACAssay,ManifestForUploadSetupPanel>();
 		for(MoTrPACAssay assay : MoTrPACDatabaseCash.getMotrpacAssayList()) {
 			
-			CompressionSetupPanel assayPanel = new CompressionSetupPanel(assay, this);
+			ManifestForUploadSetupPanel assayPanel = new ManifestForUploadSetupPanel(assay, this);
 			assayPanelMap.put(assay, assayPanel);
 			String tabName = assay.getDescription() + " (" + assay.getCode() + ")";
 			tabbedPane.addTab(tabName, assayPanel);
@@ -101,9 +101,9 @@ public class MoTrPACRawDataCompressionSetupDialog extends JDialog implements Act
 		btnCancel.addActionListener(al);
 
 		JButton btnSave = new JButton(
-				MainActionCommands.COMPRESS_AGILENT_DOTD_FILES_FOR_UPLOAD_COMMAND.getName());
+				MainActionCommands.CREATE_MANIFEST_FOR_BIC_UPLOAD_COMMAND.getName());
 		btnSave.setActionCommand(
-				MainActionCommands.COMPRESS_AGILENT_DOTD_FILES_FOR_UPLOAD_COMMAND.getName());
+				MainActionCommands.CREATE_MANIFEST_FOR_BIC_UPLOAD_COMMAND.getName());
 		btnSave.addActionListener(listener);
 		buttonPanel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
@@ -126,32 +126,17 @@ public class MoTrPACRawDataCompressionSetupDialog extends JDialog implements Act
 		super.dispose();
 	}
 	
-	public Collection<String>validateInput(){
+	public Collection<CreateUploadManifestTask>getManifestTasks(){
 		
-		Collection<String>errors = new ArrayList<String>();
-		for(CompressionSetupPanel panel : assayPanelMap.values()) {
+		Collection<CreateUploadManifestTask>tasks = 
+				new ArrayList<CreateUploadManifestTask>();
 			
-			Collection<String>panelErrors = panel.validateInput();
-			if(!panelErrors.isEmpty())
-				errors.addAll(panelErrors);
-		}
-		return errors;
-	}
-	
-	public Collection<AgilentDataCompressionTask>getCompressionTasks(){
-		
-		Collection<AgilentDataCompressionTask>tasks = 
-				new ArrayList<AgilentDataCompressionTask>();
-		if(validateInput().isEmpty()) {
+		for(ManifestForUploadSetupPanel panel : assayPanelMap.values()) {
 			
-			for(CompressionSetupPanel panel : assayPanelMap.values()) {
-				AgilentDataCompressionTask task = 
-						panel.getCompressionTask();
-				
-				if(task != null)
-					tasks.add(task);
-			}
-		}
+			CreateUploadManifestTask task = panel.getManifestTask();				
+			if(task != null)
+				tasks.add(task);
+		}		
 		return tasks;
 	}
 
@@ -172,7 +157,6 @@ public class MoTrPACRawDataCompressionSetupDialog extends JDialog implements Act
 		// TODO Auto-generated method stub
 
 	}
-
-
-
 }
+
+
