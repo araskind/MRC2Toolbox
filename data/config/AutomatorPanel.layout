@@ -107,19 +107,19 @@
 															<placeholder>dock.single.DockableProcessingMethodsPanel</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="3" nodeId="1600213802088">
+													<leaf id="0" nodeId="1600213802088">
 														<placeholders>
 															<placeholder>dock.single.DockableInputFilesPanel</placeholder>
 														</placeholders>
 													</leaf>
 												</node>
-												<leaf id="1" nodeId="1600213802092">
+												<leaf id="3" nodeId="1600213802092">
 													<placeholders>
 														<placeholder>dock.single.DockableAutomatorTaskTable</placeholder>
 													</placeholders>
 												</leaf>
 											</node>
-											<leaf id="0" nodeId="1600213802094">
+											<leaf id="1" nodeId="1600213802094">
 												<placeholders>
 													<placeholder>dock.single.DockableAutomatorConsole</placeholder>
 													<placeholder>dock.single.DockableFailedTasksTable</placeholder>
@@ -153,6 +153,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableInputFilesPanel">
+										<replacement id="dockablesingle DockableInputFilesPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableInputFilesPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>1</selected>
@@ -213,16 +223,6 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableAutomatorTaskTable">
-										<replacement id="dockablesingle DockableAutomatorTaskTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableAutomatorTaskTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="predefined" placeholder="dock.single.DockableProcessingMethodsPanel">
 										<replacement id="dockablesingle DockableProcessingMethodsPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
@@ -233,10 +233,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableInputFilesPanel">
-										<replacement id="dockablesingle DockableInputFilesPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableAutomatorTaskTable">
+										<replacement id="dockablesingle DockableAutomatorTaskTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableInputFilesPanel</id>
+											<id>DockableAutomatorTaskTable</id>
 											<area/>
 										</delegate>
 									</layout>

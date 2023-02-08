@@ -67,8 +67,8 @@ public class MoTrPACManifestForUploadDialog extends JDialog implements ActionLis
 	public MoTrPACManifestForUploadDialog(ActionListener listener) {
 		super();
 		
-		setSize(new Dimension(800, 640));
-		setPreferredSize(new Dimension(800, 640));
+		setSize(new Dimension(1000, 250));
+		setPreferredSize(new Dimension(1000, 250));
 		setIconImage(((ImageIcon) md5Icon).getImage());
 		setTitle("Create manifest file (MD5) for upload ");
 		setModalityType(ModalityType.APPLICATION_MODAL);		

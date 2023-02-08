@@ -45,6 +45,7 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 	private static final Icon refreshDataIcon = GuiUtils.getIcon("refreshDbData", 24);
 	private static final Icon showMetadataIcon = GuiUtils.getIcon("metadata", 24);
 	private static final Icon showMetadataIconSmall = GuiUtils.getIcon("metadata", 16);
+	private static final Icon createReportDirIcon = GuiUtils.getIcon("newProject", 24);
 	private static final Icon createFilesIcon = GuiUtils.getIcon("addMultifile", 24);
 	private static final Icon createFilesIconSmall = GuiUtils.getIcon("addMultifile", 16);
 	private static final Icon uploadReportIcon = GuiUtils.getIcon("addSop", 24);
@@ -69,7 +70,8 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 
 	// Report items
 	private JMenuItem
-		createReportTemplateFilesMenuItem;
+		createReportTemplateFilesMenuItem,
+		createReportFolderStructureMenuItem;
 	
 	//	Upload items
 	private JMenuItem
@@ -104,6 +106,9 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 		reportMenu = new JMenu("Report");
 		reportMenu.setIcon(createFilesIconSmall);		
 		
+		createReportFolderStructureMenuItem = addItem(reportMenu, 
+				MainActionCommands.CREATE_DIRECTORY_STRUCTURE_FOR_BIC_UPLOAD, 
+				createReportDirIcon);
 		createReportTemplateFilesMenuItem = addItem(reportMenu, 
 				MainActionCommands.CREATE_MOTRPAC_REPORT_FILES_COMMAND, 
 				createFilesIcon);

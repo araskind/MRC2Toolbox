@@ -3,8 +3,8 @@ package edu.umich.med.mrc2.datoolbox.main;
 public final class BuildInformation {
 
 	public static final String versionNumber = "1";
-	public static final String revisionNumber = "1.2.22";
-	public static final String timeStamp = "02-02-2023 18:53";
+	public static final String revisionNumber = "1.2.23";
+	public static final String timeStamp = "02-07-2023 21:00";
 	public static final StartupConfiguration programConfiguration = 
 			StartupConfiguration.COMPLETE_TOOLBOX;
 	

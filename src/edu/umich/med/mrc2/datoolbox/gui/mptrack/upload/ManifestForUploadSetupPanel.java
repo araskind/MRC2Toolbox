@@ -101,6 +101,7 @@ public class ManifestForUploadSetupPanel extends JPanel implements ActionListene
 		
 		datePicker = new DatePicker();
 		LocalDate localDate = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		datePicker.setDate(localDate);
 		
 		lblNewLabel = new JLabel("Manifest date");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -109,7 +110,7 @@ public class ManifestForUploadSetupPanel extends JPanel implements ActionListene
 		gbc_lblNewLabel.gridx = 0;
 		gbc_lblNewLabel.gridy = 1;
 		add(lblNewLabel, gbc_lblNewLabel);
-		datePicker.setDate(localDate);
+		
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
 		gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel_1.gridx = 1;

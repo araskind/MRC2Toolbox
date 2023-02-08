@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 
@@ -172,6 +173,11 @@ public class MoTrPACStudy implements Serializable, Comparable<MoTrPACStudy>{
 	
 	public Collection<MoTrPACTissueCode>getTissueCodesForExperiment(LIMSExperiment experiment){
 		return experimentTissueMap.get(experiment);
+	}
+	
+	public Collection<MoTrPACTissueCode>getAllTissueCodes(){
+		return experimentTissueMap.values().stream().
+				flatMap(c -> c.stream()).collect(Collectors.toCollection(TreeSet::new));
 	}
 	
 	public void addTissueForExperiment(LIMSExperiment experiment, MoTrPACTissueCode tissue) {	

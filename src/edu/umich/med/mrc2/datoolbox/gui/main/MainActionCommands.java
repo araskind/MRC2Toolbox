@@ -428,9 +428,10 @@ public enum MainActionCommands {
 	SAVE_MOTRPAC_REPORT_METADATA_COMMAND("Save MoTrpPAC report metadata"),
 	CONFIRM_DELETE_MOTRPAC_REPORT_COMMAND("Authorize deleting MoTrpPAC report"),
 	DELETE_MOTRPAC_REPORT_COMMAND("Delete MoTrpPAC report"),
-	
+
 	CREATE_MOTRPAC_REPORT_FILES_COMMAND("Create MoTrpPAC report files"),
 	
+	CREATE_DIRECTORY_STRUCTURE_FOR_BIC_UPLOAD("Create directory structure for BIC upload"),
 	SELECT_FILE_LIST_FOR_COMPRESSION_COMMAND("Select file list for compression"),
 	SELECT_RAW_DATA_DIRECTORIES_COMMAND("Select raw data directories"),
 	SELECT_DESTINATION_FOR_COMPRESSED_FILES_COMMAND("Select destination for compressed files"),

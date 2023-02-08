@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.ref.MotrpacReferenceDataDialog;
+import edu.umich.med.mrc2.datoolbox.gui.mptrack.report.CreateUploadDirectoryStructureDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.report.DockableMoTrPACReportListingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.report.MotrpacReportEmptyFileGeneratorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.report.MotrpacReportUploadDialog;
@@ -174,7 +175,7 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 //		if(command.equals(MainActionCommands.SEND_DESIGN_TO_PROJECT_COMMAND.getName()))
 //			sendDesignToProject();
 
-		if(command.equals(MainActionCommands.CREATE_EXPERIMENT_DIRECTORY_STRUCTURE_COMMAND.getName()))
+		if(command.equals(MainActionCommands.CREATE_DIRECTORY_STRUCTURE_FOR_BIC_UPLOAD.getName()))
 			createMoTrPACExperimentReportDirectory();
 		
 		if(command.equals(MainActionCommands.CREATE_MOTRPAC_REPORT_FILES_COMMAND.getName()))
@@ -259,36 +260,10 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 
 	private void createMoTrPACExperimentReportDirectory() {
 
-//		LIMSExperiment experiment = experimentDataPanel.getSelectedExperiment();
-//		if(experiment == null)
-//			return;
-//
-//		File defaultDataDir = new File(CaConfiguration.getDefaultDataDirectory());
-//		int response = MessageDialogue.showChoiceMsg(
-//			"<HTML>Directory structure would be created or updated for experiment<br><b>" +
-//			experiment.getId() + "(" + experiment.getName() + ")</b><br>" +
-//			"in the <b>" + defaultDataDir.getPath() + "</b> directory.", this.getContentPane());
-//
-//		if(response == JOptionPane.YES_OPTION) {
-//
-//			try {
-//				Path experimentDir = LIMSReportingUtils.createExperimentDataDirectoryStructure(experiment.getId(), defaultDataDir);
-//				if(experimentDir.toFile().exists()) {
-//
-//					if(MessageDialogue.showChoiceMsg("Directory was created, do you want to open it?",
-//						this.getContentPane()) == JOptionPane.YES_OPTION)
-//					Desktop.getDesktop().open(experimentDir.toFile());
-//				}
-//				else {
-//					MessageDialogue.showErrorMsg("Failed to create experiment directory", this.getContentPane());
-//				}
-//			}
-//			catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//				MessageDialogue.showErrorMsg("Failed to create experiment directory", this.getContentPane());
-//			}
-//		}
+		CreateUploadDirectoryStructureDialog dialog = 
+				new CreateUploadDirectoryStructureDialog();
+		dialog.setLocationRelativeTo(this.getContentPane());
+		dialog.setVisible(true);
 	}
 
 //	private void syncMrc2limsAndMetlims() {
