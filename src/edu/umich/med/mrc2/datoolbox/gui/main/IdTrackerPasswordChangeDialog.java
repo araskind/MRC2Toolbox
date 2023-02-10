@@ -206,7 +206,7 @@ public class IdTrackerPasswordChangeDialog extends JDialog {
 
 		changePasswordButton = new JButton("Change password");
 		changePasswordButton.setIcon(GuiUtils.getIcon("key", 24));
-		changePasswordButton.setActionCommand(MainActionCommands.CHANGE_ID_TRACKER_PASSWORD_COMMAND.getName());
+		changePasswordButton.setActionCommand(MainActionCommands.CHANGE_IDTRACKER_PASSWORD_COMMAND.getName());
 		changePasswordButton.addActionListener(listener);
 				
 		JLabel label = new JLabel("  ");

@@ -91,7 +91,7 @@ public class DataIntegratorToolbar extends ClusterDisplayToolbar {
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 
 		boolean active = true;
 
@@ -115,7 +115,7 @@ public class DataIntegratorToolbar extends ClusterDisplayToolbar {
 
 		activeSetcomboBox.removeItemListener((ItemListener) commandListener);
 
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
 		if(project != null) {
 

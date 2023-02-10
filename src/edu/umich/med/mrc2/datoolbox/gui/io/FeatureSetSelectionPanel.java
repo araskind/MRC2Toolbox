@@ -83,7 +83,7 @@ public class FeatureSetSelectionPanel extends JPanel {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void populateFeatureSetSelector() {
 
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		
 		if(project != null && dataPipeline != null){
 			

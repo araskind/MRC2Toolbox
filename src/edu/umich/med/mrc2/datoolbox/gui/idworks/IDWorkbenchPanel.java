@@ -115,6 +115,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClus
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.filter.MSMSClusterFilterDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary.MSMSCLusterDataSetSummaryDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.experiment.OpenIDTrackerExperimentDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerMSMSClusterDataSetExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.SiriusDataExportDialog;
@@ -142,7 +143,6 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTReferenceLibraries;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.nistms.NISTMSSerchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PepSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.io.PepserchResultsImportDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.project.OpenIDTrackerProjectDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.ads.ActiveDataSetMZRTDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.ExperimentMZRTDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
@@ -192,8 +192,8 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPull
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullWithFilteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureSearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerDataExportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerExperimentDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerMSMSClusterDataExportTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerProjectDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsClusterExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerSiriusMsExportWithClusteringTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSClusterDataSetUploadTask;
@@ -238,7 +238,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private FileNameExtensionFilter xmlFilter;
 	private FileNameExtensionFilter mgfFilter;
 	private IDTrackerLimsManagerPanel idTrackerManager;
-	private OpenIDTrackerProjectDialog openIDTrackerProjectDialog;
+	private OpenIDTrackerExperimentDialog openIDTrackerExperimentDialog;
 	private LIMSExperiment idTrackerExperiment;
 	private PepSearchSetupDialog pepSearchSetupDialog;
 	private NISTMSSerchSetupDialog nistMSSerchSetupDialog;
@@ -289,7 +289,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
 	private static final Icon searchIdActiveDataSetIcon = GuiUtils.getIcon("searchIdActiveDataSet", 24);
 	private static final Icon dsSummaryIcon = GuiUtils.getIcon("infoGreen", 24);
-	private static final Icon openCdpIdProjectIcon = GuiUtils.getIcon("openIdExperiment", 24);
+	private static final Icon openCdpIdExperimentIcon = GuiUtils.getIcon("openIdExperiment", 24);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
 	private static final Icon idSetupIcon = GuiUtils.getIcon("searchCompounds", 24);
 	private static final Icon nistMsIcon = GuiUtils.getIcon("NISTMS", 24);
@@ -417,13 +417,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		super.initActions();
 		
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND.getName(), 
+				MainActionCommands.SHOW_IDTRACKER_SEARCH_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_IDTRACKER_SEARCH_DIALOG_COMMAND.getName(), 
 				searchIdTrackerIcon, this));
 		
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND.getName(), 
+				MainActionCommands.SHOW_IDTRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_IDTRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND.getName(), 
 				searchExperimentIcon, this));
 
 		menuActions.add(GuiUtils.setupButtonAction(
@@ -498,8 +498,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		menuActions.addSeparator();
 		
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT.getName(),
-				MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT.getName(), 
+				MainActionCommands.SHOW_IDTRACKER_DATA_EXPLORER_PLOT.getName(),
+				MainActionCommands.SHOW_IDTRACKER_DATA_EXPLORER_PLOT.getName(), 
 				bubblePlotIcon, this));
 		menuActions.add(GuiUtils.setupButtonAction(
 				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName(),
@@ -555,19 +555,19 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		String command = event.getActionCommand();
 
-		if (command.equals(MainActionCommands.SHOW_OPEN_CPD_ID_PROJECT_DIALOG_COMMAND.getName()))
-			showOpenIdProjectDialogue();
+		if (command.equals(MainActionCommands.SHOW_OPEN_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName()))
+			showOpenExperimentDialogue();
 
-		if (command.equals(MainActionCommands.OPEN_CPD_ID_PROJECT_COMMAND.getName()))
-			openIdProject();
+		if (command.equals(MainActionCommands.OPEN_IDTRACKER_EXPERIMENT_COMMAND.getName()))
+			openExperiment();
 
 		if (command.equals(MainActionCommands.ID_SETUP_DIALOG_COMMAND.getName()))
 			runIdentificationTask();
 		
-		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND.getName()))
+		if (command.equals(MainActionCommands.SHOW_IDTRACKER_SEARCH_DIALOG_COMMAND.getName()))
 			showTrackerSearchDialog();	
 		
-		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND.getName()))
+		if (command.equals(MainActionCommands.SHOW_IDTRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND.getName()))
 			showTrackerSearchByExperimentMzRtDialog();
 
 		if (command.equals(MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND.getName()))
@@ -726,7 +726,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.MERGE_DUPLICATES_COMMAND.getName()))	
 			mergeDuplicateMsMsFeatures();
 		
-		if (command.equals(MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT.getName()))	
+		if (command.equals(MainActionCommands.SHOW_IDTRACKER_DATA_EXPLORER_PLOT.getName()))	
 			showIDTrackerDataExplorerDialog();
 		
 		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName())) //reloadCompleteActiveMSMSFeatureSet();
@@ -998,7 +998,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		
 		activeCluster.setPrimaryIdentity(newId);		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 			
 			try {
 				MSMSClusteringDBUtils.updateMSMSClusterPrimaryIdentity(activeCluster);
@@ -1031,7 +1031,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		dataSet.setFeatureLookupDataSet(
 				msmsClusterDataSetEditorDialog.getFeatureLookupDataSet());
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 			
 			MSMSClusterDataSetUploadTask task = 
 					new MSMSClusterDataSetUploadTask(dataSet);
@@ -1051,10 +1051,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(activeMSMSClusterDataSet == null)
 			return;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 			
 			MessageDialog.showErrorMsg(
-					"This option is not available for offline projects", 
+					"This option is not available for offline experiments", 
 					this.getContentPane());
 			return;
 		}
@@ -1080,13 +1080,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 //					
 //					MessageDialog.showWarningMsg(
 //							"Data set \"" + activeMSMSClusterDataSet.getName() + 
-//							"\" already exists in the project", this.getContentPane());
+//							"\" already exists in the experiment", this.getContentPane());
 //					return;
 //				}
 //				else {
 //					MessageDialog.showErrorMsg(
 //							"A different data set \"" + existingSameNameSet.getName() + 
-//							"\" already exists in the project", this.getContentPane());
+//							"\" already exists in the experiment", this.getContentPane());
 //					return;
 //				}				
 //			}
@@ -1410,7 +1410,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 		reassignDefaultMSMSLibraryHitDialog = new ReassignDefaultMSMSLibraryHitDialog(this);
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
 			reassignDefaultMSMSLibraryHitDialog.blockCommitToDatabase();
 		
 		reassignDefaultMSMSLibraryHitDialog.setLocationRelativeTo(this.getContentPane());
@@ -1541,9 +1541,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void showTrackerSearchDialog() {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 			MessageDialog.showWarningMsg(
-					"Please close active raw data analysis project first.", 
+					"Please close active raw data analysis experiment first.", 
 					this.getContentPane());
 			return;
 		}		
@@ -1554,9 +1554,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void showTrackerSearchByExperimentMzRtDialog(){
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 			MessageDialog.showWarningMsg(
-					"Please close active raw data analysis project first.", 
+					"Please close active raw data analysis experiment first.", 
 					this.getContentPane());
 			return;
 		}	
@@ -1641,9 +1641,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void loadRawDataForCurrentMsMsFeatureSet() {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 			MessageDialog.showWarningMsg(
-					"Please close active raw data analysis project first.", 
+					"Please close active raw data analysis experiment first.", 
 					this.getContentPane());
 			return;
 		}	
@@ -2049,7 +2049,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 					try {
 						IdFollowupUtils.setIdFollowupStepsForMS1Feature(fib);
 					} catch (Exception e) {
@@ -2068,7 +2068,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 					try {
 						IdFollowupUtils.setIdFollowupStepsForMSMSFeature(fib);
 					} catch (Exception e) {
@@ -2110,7 +2110,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 					try {
 						StandardAnnotationUtils.setStandardFeatureAnnotationsForMS1Feature(fib);
 					} catch (Exception e) {
@@ -2129,7 +2129,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 					try {
 						StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(fib);
 					} catch (Exception e) {
@@ -2162,7 +2162,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(featuresToAdd.isEmpty())
 			return;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 			
 			if(FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().isEmpty()) {
 				MessageDialog.showWarningMsg("No custom collections defined yet.\n"
@@ -2171,8 +2171,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			}
 		}
 		else {
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getEditableMsFeatureInfoBundleCollections().isEmpty()) {
-				MessageDialog.showWarningMsg("No custom collections defined for the project yet.\n"
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getEditableMsFeatureInfoBundleCollections().isEmpty()) {
+				MessageDialog.showWarningMsg("No custom collections defined for the experiment yet.\n"
 						+ "Use \"Create new feature collection\" option instead.", this.getContentPane());
 				return;
 			}
@@ -2188,7 +2188,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(activeFeatureCollection == null || activeFeatureCollection.getFeatures().isEmpty())
 			return;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 						
 			if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(activeFeatureCollection)) {
 				MessageDialog.showWarningMsg("Collection \"" + activeFeatureCollection.getName() + 
@@ -2207,7 +2207,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			}
 		}
 		else {
-			if(!MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+			if(!MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
 					getEditableMsFeatureInfoBundleCollections().contains(activeFeatureCollection)) {
 				MessageDialog.showWarningMsg("Collection \"" + activeFeatureCollection.getName() + 
 						"\" can not be edited.", this.getContentPane());
@@ -2268,7 +2268,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			String yesNoQuestion = "Do you want to remove all identifications for " + feature.getName() + "?";
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 					try {
 						IdentificationUtils.clearReferenceMS1FeatureLibraryMatches(feature.getId());
 					} catch (Exception e) {
@@ -2292,7 +2292,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 				if(msms != null) {
-					if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+					if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 						try {					
 							IdentificationUtils.clearMSMSFeatureLibraryMatches(msms.getId());
 						} catch (Exception e) {
@@ -2329,7 +2329,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					
 				MsFeature msOneFeature = bundle.getMsFeature();
 				msOneFeature.disablePrimaryIdentity();
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 					try {
 						IdentificationUtils.disableReferenceMS1FeaturePrimaryIdentity(msOneFeature.getId());
 					} catch (Exception e) {
@@ -2345,7 +2345,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				
 				MsFeature msTwoFeature = bundle.getMsFeature();
 				msTwoFeature.disablePrimaryIdentity();
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 					try {
 						String msmsId = msTwoFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL).getId();
 						IdentificationUtils.disableMSMSFeaturePrimaryIdentity(msmsId);
@@ -2432,7 +2432,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				
 				if(id.getMsRtLibraryMatch() != null) {
-					if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+					if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 						try {
 							IdentificationUtils.removeReferenceMS1FeatureLibraryMatch(id);
 						} catch (Exception e) {
@@ -2442,7 +2442,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					}
 				}
 				else {
-					if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+					if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 						try {
 							IdentificationUtils.removeReferenceMS1FeatureManualId(id);
 						} catch (Exception e) {
@@ -2472,7 +2472,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				if(msms != null) {
 					
 					if(id.getReferenceMsMsLibraryMatch() != null) {
-						if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+						if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 							try {					
 								IdentificationUtils.removeMSMSFeatureLibraryMatch(id);
 							} catch (Exception e) {
@@ -2482,7 +2482,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 						}
 					}
 					else {
-						if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+						if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 							try {
 								IdentificationUtils.removeMSMSFeatureManualIdentification(id);
 							} catch (Exception e) {
@@ -2536,7 +2536,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(msOneFeatureTable.getSelectedBundle() != null) {
 			
 			MsFeature feature = msOneFeatureTable.getSelectedBundle().getMsFeature();		
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 				try {
 					IdentificationUtils.addReferenceMS1FeatureManualId(feature.getId(), manualId);
 				} catch (Exception e) {
@@ -2553,7 +2553,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 			MsFeature feature = msTwoFeatureTable.getSelectedBundle().getMsFeature();					
 			TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 				try {
 					IdentificationUtils.addMSMSFeatureManualId(msms.getId(), manualId);
 				} catch (Exception e) {
@@ -2722,7 +2722,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}		
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
 				task.setSkipResultsUpload(true);
 			
 			task.addTaskListener(this);
@@ -2793,14 +2793,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		pepSearchSetupDialog.dispose();
 	}
 
-	private void openIdProject() {
+	private void openExperiment() {
 
-		if(openIDTrackerProjectDialog.getSelectedLimsExperiment() == null) {
+		if(openIDTrackerExperimentDialog.getSelectedLimsExperiment() == null) {
 
 			MessageDialog.showErrorMsg("Please select IDTracker experiment!", this.getContentPane());
 			return;
 		}
-		idTrackerExperiment = openIDTrackerProjectDialog.getSelectedLimsExperiment();
+		idTrackerExperiment = openIDTrackerExperimentDialog.getSelectedLimsExperiment();
 
 		clearPanel();
 		Collection<LIMSSamplePreparation> preps = IDTDataCash.getExperimentSamplePrepMap().get(idTrackerExperiment);
@@ -2823,13 +2823,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		acquisitionDataExtractionMethodMap.clear();
 		featureSetataExtractionMethodMap.clear();
 
-		IDTrackerProjectDataFetchTask task = new IDTrackerProjectDataFetchTask(idTrackerExperiment);
+		IDTrackerExperimentDataFetchTask task = 
+				new IDTrackerExperimentDataFetchTask(idTrackerExperiment);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
-		openIDTrackerProjectDialog.dispose();
+		openIDTrackerExperimentDialog.dispose();
 	}
 
-	private void showOpenIdProjectDialogue() {
+	private void showOpenExperimentDialogue() {
 
 		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
 			MessageDialog.showErrorMsg("You are not logged in ID tracker!", this.getContentPane());
@@ -2837,9 +2838,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		//	TODO check if already opened experiment
 
-		openIDTrackerProjectDialog = new OpenIDTrackerProjectDialog(this);
-		openIDTrackerProjectDialog.setLocationRelativeTo(this.getContentPane());
-		openIDTrackerProjectDialog.setVisible(true);
+		openIDTrackerExperimentDialog = new OpenIDTrackerExperimentDialog(this);
+		openIDTrackerExperimentDialog.setLocationRelativeTo(this.getContentPane());
+		openIDTrackerExperimentDialog.setVisible(true);
 	}
 
 
@@ -2902,8 +2903,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				File results = task.getResultsFile();
 				MessageDialog.showInfoMsg("Results are in " + results.getAbsolutePath(), this.getContentPane());
 			}
-			if (e.getSource().getClass().equals(IDTrackerProjectDataFetchTask.class))
-				finalizeIdTrackerProjectLoad();
+			if (e.getSource().getClass().equals(IDTrackerExperimentDataFetchTask.class))
+				finalizeIdTrackerExperimentLoad();
 
 			if (e.getSource().getClass().equals(IDTMS1FeatureSearchTask.class))
 				loadMsOneSearchData(((IDTMS1FeatureSearchTask)e.getSource()).getSelectedFeatures());
@@ -2992,8 +2993,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeMSMSFeatureClusteringTask(MSMSFeatureClusteringTask source) {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null)
-			MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
+			MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
 					getMsmsClusterDataSets().add(source.getMsmsClusterDataSet());
 		
 		loadMSMSClusterDataSetInGUI(source.getMsmsClusterDataSet());
@@ -3182,7 +3183,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		}
 		activeMSMSClusterDataSet = selectedDataSet;
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 			
 			IDTMSMSClusterDataPullTask task = 
 					MSMSClusterDataSetManager.getMSMSClusterDataSetData(selectedDataSet);
@@ -3228,7 +3229,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		}
 		activeFeatureCollection = selectedCollection;
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 			IDTMSMSFeatureDataPullTask task = 
 					FeatureCollectionManager.getMsFeatureInfoBundleCollectionData(selectedCollection);
 			if(task == null) {
@@ -3280,13 +3281,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	public void reloadCompleteActiveMSMSFeatureSet() {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 			activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
 			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		}
 		else {
-			activeFeatureCollection = FeatureCollectionManager.activeProjectFeatureSet;
+			activeFeatureCollection = FeatureCollectionManager.activeExperimentFeatureSet;
 			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		}
@@ -3341,7 +3342,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 
-	private void finalizeIdTrackerProjectLoad() {
+	private void finalizeIdTrackerExperimentLoad() {
 		// TODO Auto-generated method stub
 
 	}
@@ -3520,7 +3521,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		for(MSFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
-			if(primaryId != null && MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			if(primaryId != null && MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 				try {
 					IdentificationUtils.setReferenceMS1FeaturePrimaryIdentity(
 							bundle.getMsFeature().getId(),
@@ -3551,7 +3552,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		for(MSFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();			
-			if(primaryId != null && MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			if(primaryId != null && MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 				
 				TandemMassSpectrum msmsFeature = 
 						bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
@@ -3710,10 +3711,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		MsFeatureChromatogramBundle msfCb = null;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null 
-				&& MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getChromatogramMap() != null) {
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null 
+				&& MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getChromatogramMap() != null) {
 			
-			msfCb = MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+			msfCb = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
 					getChromatogramMap().get(selectedBundle.getMsFeature().getId());
 		}
 		else {
@@ -3757,9 +3758,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		for(MSFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureChromatogramBundle msfCb = null;			
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null 
-					&& MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getChromatogramMap() != null) {				
-				msfCb = MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null 
+					&& MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getChromatogramMap() != null) {				
+				msfCb = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
 						getChromatogramMap().get(bundle.getMsFeature().getId());
 			}
 			else {
@@ -3824,15 +3825,15 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		return activeFeatureCollection;
 	}
 
-	public void loadFeaturesFromRawDataProject(RawDataAnalysisProject activeRawDataAnalysisProject) {
+	public void loadFeaturesFromRawDataExperiment(RawDataAnalysisProject activeRawDataAnalysisProject) {
 		
 		clearPanel();		
-		FeatureCollectionManager.activeProjectFeatureSet.clearCollection();
-		FeatureCollectionManager.activeProjectFeatureSet.addFeatures(
+		FeatureCollectionManager.activeExperimentFeatureSet.clearCollection();
+		FeatureCollectionManager.activeExperimentFeatureSet.addFeatures(
 				activeRawDataAnalysisProject.getMsMsFeatureBundles());
 		activeRawDataAnalysisProject.addMsFeatureInfoBundleCollection(
-				FeatureCollectionManager.activeProjectFeatureSet);
-		activeFeatureCollection = FeatureCollectionManager.activeProjectFeatureSet;
+				FeatureCollectionManager.activeExperimentFeatureSet);
+		activeFeatureCollection = FeatureCollectionManager.activeExperimentFeatureSet;
 		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());			
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 	}

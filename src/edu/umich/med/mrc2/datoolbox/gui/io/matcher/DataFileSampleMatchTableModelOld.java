@@ -63,7 +63,7 @@ public class DataFileSampleMatchTableModelOld extends BasicTableModel {
 	
 	public void addFilesForDataPipeline(File[] inputFiles, DataPipeline pipeline) {
 
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		for (File f : inputFiles) {
 
 			String fileBaseName = FilenameUtils.getBaseName(f.getName());

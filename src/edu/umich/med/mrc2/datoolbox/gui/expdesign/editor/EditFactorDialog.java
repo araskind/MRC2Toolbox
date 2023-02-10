@@ -200,10 +200,10 @@ public class EditFactorDialog extends JDialog implements ActionListener, ItemLis
 	@SuppressWarnings("unchecked")
 	private void loadCurrentDesign() {
 
-		if(MRC2ToolBoxCore.getCurrentProject() == null)
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return;
 
-		experimentDesign = MRC2ToolBoxCore.getCurrentProject().getExperimentDesign();
+		experimentDesign = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign();
 		if(activeFactor == null) {
 
 			setIconImage(((ImageIcon) addFactorIcon).getImage());
@@ -223,7 +223,7 @@ public class EditFactorDialog extends JDialog implements ActionListener, ItemLis
 			setTitle("Edit experimental factors");
 
 			//	TODO exclude "Sample type" factor
-			ExperimentDesignFactor[] factors = MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().
+			ExperimentDesignFactor[] factors = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().
 				getFactors().stream().filter(f -> !f.equals(ReferenceSamplesManager.getSampleControlTypeFactor())).
 				sorted().toArray(size -> new ExperimentDesignFactor[size]);
 
@@ -347,7 +347,7 @@ public class EditFactorDialog extends JDialog implements ActionListener, ItemLis
 			MessageDialog.showErrorMsg("Factor name can not be empty!", this);
 			return;
 		}
-		for(ExperimentDesignFactor factor : MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getFactors()) {
+		for(ExperimentDesignFactor factor : MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getFactors()) {
 
 			if(!factor.equals(activeFactor) && factor.getName().equals(newName)) {
 

@@ -121,7 +121,7 @@ public class MassDifferenceExplorerDialog extends JDialog implements ActionListe
 		double binningWindow = toolbar.getBinningWindow();
 		int minFrequency = toolbar.getMinFrequency();
 		int maxClusterSize = toolbar.getMaxClusterSize();
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Set<MsFeatureCluster> clusters = currentProject.
 				getMsFeatureClustersForDataPipeline(currentProject.getActiveDataPipeline());
 

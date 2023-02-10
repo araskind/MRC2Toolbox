@@ -105,7 +105,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 		designIsFromCurrentProject = false;
 		txtFilter = new FileNameExtensionFilter("Text files", "txt", "TXT", "tsv", "TSV");
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
+		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory());
 		
 		initActions();
 		
@@ -238,7 +238,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 	private void showReferenceSamplesEditDialog() {
 
 		if(rsd == null)
-			rsd = new ReferenceSampleDialog(this, MRC2ToolBoxCore.getCurrentProject());
+			rsd = new ReferenceSampleDialog(this, MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 
 		rsd.setLocationRelativeTo(this.getContentPane());
 		rsd.setVisible(true);
@@ -285,9 +285,9 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 	private void deleteFactor() {
 
-		if (MRC2ToolBoxCore.getCurrentProject() != null) {
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
 
-			if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getCompleteDesignSubset() != null) {
+			if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getCompleteDesignSubset() != null) {
 
 				DeleteFactorDialog ddf = new DeleteFactorDialog();
 				ddf.setLocationRelativeTo(this.getContentPane());
@@ -298,12 +298,12 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 	private void editFactor() {
 
-		if (MRC2ToolBoxCore.getCurrentProject() != null) {
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
 
-			if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getCompleteDesignSubset() != null) {
+			if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getCompleteDesignSubset() != null) {
 
 				EditFactorDialog edf =
-					new EditFactorDialog(MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getFactors().first());
+					new EditFactorDialog(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getFactors().first());
 				edf.setLocationRelativeTo(this.getContentPane());
 				edf.setVisible(true);
 			}
@@ -312,7 +312,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 	private void addFactor() {
 
-		if (MRC2ToolBoxCore.getCurrentProject() != null) {
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
 
 			EditFactorDialog edf = new EditFactorDialog(null);
 			edf.setLocationRelativeTo(this.getContentPane());
@@ -355,7 +355,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 	private void loadDesignFromFile(boolean append) {
 
-		if(MRC2ToolBoxCore.getCurrentProject() == null)
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return;
 
 		if(!experimentDesign.isEmpty()  && !append) {
@@ -388,7 +388,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 	public File chooseDesignFile() {
 
-		if (MRC2ToolBoxCore.getCurrentProject() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return null;
 
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
@@ -423,7 +423,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 	public synchronized void clearPanel() {
 
 		expDesignTable.clearTable();
-		menuBar.updateMenuFromProject(null, null);
+		menuBar.updateMenuFromExperiment(null, null);
 	}
 	
 	@Override
@@ -431,7 +431,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 		clearPanel();
 		super.switchDataPipeline(project, newPipeline);
-		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromExperiment(currentProject, activeDataPipeline);
 		if(currentProject == null) 
 			return;
 

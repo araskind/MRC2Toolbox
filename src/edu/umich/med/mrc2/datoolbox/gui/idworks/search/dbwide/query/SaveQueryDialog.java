@@ -84,9 +84,9 @@ public class SaveQueryDialog extends JDialog {
 		btnCancel.addActionListener(al);
 		btnCancel.addActionListener(al);
 
-		JButton searchButton = new JButton(MainActionCommands.ID_TRACKER_SAVE_QUERY_COMMAND.getName());
+		JButton searchButton = new JButton(MainActionCommands.IDTRACKER_SAVE_QUERY_COMMAND.getName());
 		searchButton.addActionListener(listener);
-		searchButton.setActionCommand(MainActionCommands.ID_TRACKER_SAVE_QUERY_COMMAND.getName());
+		searchButton.setActionCommand(MainActionCommands.IDTRACKER_SAVE_QUERY_COMMAND.getName());
 		panel_1.add(searchButton);
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);

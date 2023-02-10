@@ -119,7 +119,7 @@ public class DuplicatesPanelMenuBar extends CommonMenuBar {
 		add(exportMenu);
 	}
 
-	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

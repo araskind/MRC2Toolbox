@@ -65,7 +65,7 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 		setRowCount(0);
 		for (MSMSClusterDataSet dataSet : msmsClusterDataSetCollections) {
 
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null) {
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
 				
 				if(!MSMSClusterDataSetManager.getEditableMSMSClusterDataSets().contains(dataSet)
 						&& MSMSClusterDataSetManager.getMSMSClusterDataSetSize(dataSet) == 0) {
@@ -73,7 +73,7 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 				}
 			}
 			else{
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
 							getMsmsClusterDataSets().contains(dataSet) && dataSet.getClusters().size() == 0)
 					continue;
 			}

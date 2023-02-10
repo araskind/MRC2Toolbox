@@ -27,7 +27,7 @@ import java.util.List;
 import javax.swing.ListSelectionModel;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
-import edu.umich.med.mrc2.datoolbox.gui.projectsetup.expdesign.editor.FactorEditorTable;
+import edu.umich.med.mrc2.datoolbox.gui.expsetup.expdesign.editor.FactorEditorTable;
 
 public class FactorDeleteTable extends FactorEditorTable {
 

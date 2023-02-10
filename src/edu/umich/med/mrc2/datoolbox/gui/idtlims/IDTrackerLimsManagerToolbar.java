@@ -79,13 +79,13 @@ public class IDTrackerLimsManagerToolbar extends CommonToolbar {
 		addSeparator(buttonDimension);
 
 		newCpdIdProjectButton = GuiUtils.addButton(this, null, newCdpIdProjectIcon, commandListener,
-				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(),
-				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(),
+				MainActionCommands.NEW_IDTRACKER_PROJECT_DIALOG_COMMAND.getName(),
+				MainActionCommands.NEW_IDTRACKER_PROJECT_DIALOG_COMMAND.getName(),
 				buttonDimension);
 
 		newCdpIdExperimentButton = GuiUtils.addButton(this, null, newCdpIdExperimentIcon, commandListener,
-				MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName(),
-				MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName(),
+				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName(),
+				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName(),
 				buttonDimension);
 
 		addSeparator(buttonDimension);
@@ -116,7 +116,7 @@ public class IDTrackerLimsManagerToolbar extends CommonToolbar {
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
 
 	}

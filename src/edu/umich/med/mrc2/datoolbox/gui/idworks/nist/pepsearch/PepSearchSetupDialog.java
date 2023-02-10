@@ -1352,10 +1352,10 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 
 		inputFileTextField.setText(preferences.get(INPUT_FILE, null));
 		inputFileDirectory =
-			new File(preferences.get(INPUT_FILE_DIR, MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).
+			new File(preferences.get(INPUT_FILE_DIR, MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).
 			getAbsoluteFile();
 		libraryDirectory =
-			new File(preferences.get(LIBRARY_DIR, MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).
+			new File(preferences.get(LIBRARY_DIR, MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).
 			getAbsoluteFile();
 		
 		TableRowSubset subset = TableRowSubset.getSubsetByName(
@@ -1486,10 +1486,10 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		preferences = Preferences.userNodeForPackage(this.getClass());
 		inputFileTextField.setText("");
 		inputFileDirectory =
-			new File(preferences.get(INPUT_FILE_DIR, MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).
+			new File(preferences.get(INPUT_FILE_DIR, MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).
 			getAbsoluteFile();
 		libraryDirectory =
-			new File(preferences.get(LIBRARY_DIR, MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).
+			new File(preferences.get(LIBRARY_DIR, MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).
 			getAbsoluteFile();
 		
 		featureSubsetComboBox.setSelectedItem(TableRowSubset.ALL);

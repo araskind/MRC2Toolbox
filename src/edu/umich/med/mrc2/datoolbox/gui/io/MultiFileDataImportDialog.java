@@ -93,13 +93,13 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.expdesign.editor.ReferenceSampleDialog;
+import edu.umich.med.mrc2.datoolbox.gui.expsetup.dpl.DataPipelineDefinitionPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodExtendedEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.DockableAcquisitionMethodDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.DataExtractionMethodEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.matcher.DataFileSampleMatchPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.projectsetup.dpl.DataPipelineDefinitionPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
@@ -304,7 +304,7 @@ public class MultiFileDataImportDialog extends JDialog
 		JRootPane rootPane = SwingUtilities.getRootPane(importDataButton);
 		rootPane.setDefaultButton(importDataButton);		
 		
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		loadPreferences();
 //		initChooser();
 		pack();
@@ -450,7 +450,7 @@ public class MultiFileDataImportDialog extends JDialog
 	private void showReferenceSamplesEditDialog() {
 
 		if(rsd == null)
-			rsd = new ReferenceSampleDialog(this, MRC2ToolBoxCore.getCurrentProject());
+			rsd = new ReferenceSampleDialog(this, MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 
 		rsd.setLocationRelativeTo(this.getContentPane());
 		rsd.setVisible(true);
@@ -484,7 +484,7 @@ public class MultiFileDataImportDialog extends JDialog
 //		//	Create new pipeline and add data to it		
 //		newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
 //		if(existingDataPipeline == null && MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
-//			MessageDialog.showErrorMsg("The project already contains data pipeline \n"
+//			MessageDialog.showErrorMsg("The experiment already contains data pipeline \n"
 //					+ "with selected combination of assay, data acquisition and data analysis methods.\n"
 //					+ "Please adjust you selection.\n"
 //					+ "If you want to replace the existing data\n"
@@ -498,7 +498,7 @@ public class MultiFileDataImportDialog extends JDialog
 	
 	private void addResultsToNewPipeline(DataPipeline pipeline, File[] dataFiles) {
 
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Set<SampleDataResultObject>sampleDataResultObjects = new TreeSet<SampleDataResultObject>(
 				new SampleDataResultObjectComparator(SortProperty.resultFile));
 		
@@ -543,7 +543,7 @@ public class MultiFileDataImportDialog extends JDialog
 		DataAcquisitionMethod acqMethod = existingDataPipeline.getAcquisitionMethod();
 		DataExtractionMethod daMethod = existingDataPipeline.getDataExtractionMethod();
 		
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Set<DataFile> existingDataFiles = project.getDataFilesForAcquisitionMethod(acqMethod);
 		
 		for (File f : dataFiles) {
@@ -586,7 +586,7 @@ public class MultiFileDataImportDialog extends JDialog
 //			return;
 //
 //		if(MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
-//			MessageDialog.showErrorMsg("The project already contains data pipeline \n"
+//			MessageDialog.showErrorMsg("The experiment already contains data pipeline \n"
 //					+ "with selected combination of assay, data acquisition and data analysis methods.\n"
 //					+ "Please adjust you selection.\n"
 //					+ "If you want to replace the existing data\n"
@@ -827,8 +827,8 @@ public class MultiFileDataImportDialog extends JDialog
 			}
 			//	Create new pipeline and add data to it		
 			newDataPipeline = dataPipelineDefinitionPanel.getDataPipeline();
-			if(existingDataPipeline == null && MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
-				MessageDialog.showErrorMsg("The project already contains data pipeline \n"
+			if(existingDataPipeline == null && MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getDataPipelines().contains(newDataPipeline)) {
+				MessageDialog.showErrorMsg("The experiment already contains data pipeline \n"
 						+ "with selected combination of assay, data acquisition and data analysis methods.\n"
 						+ "Please adjust you selection.\n"
 						+ "If you want to replace the existing data\n"
@@ -860,8 +860,8 @@ public class MultiFileDataImportDialog extends JDialog
 			if(newDataPipeline == null)
 				return;
 
-			if(MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(newDataPipeline)) {
-				MessageDialog.showErrorMsg("The project already contains data pipeline \n"
+			if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getDataPipelines().contains(newDataPipeline)) {
+				MessageDialog.showErrorMsg("The experiment already contains data pipeline \n"
 						+ "with selected combination of assay, data acquisition and data analysis methods.\n"
 						+ "Please adjust you selection.\n"
 						+ "If you want to replace the existing data\n"

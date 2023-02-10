@@ -75,30 +75,30 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 		super(commandListener2);
 
 		newProjectButton = GuiUtils.addButton(this, null, newRdaProjectIcon, commandListener,
-				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
-				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
+				MainActionCommands.NEW_RAW_DATA_EXPERIMENT_SETUP_COMMAND.getName(),
+				MainActionCommands.NEW_RAW_DATA_EXPERIMENT_SETUP_COMMAND.getName(),
 				buttonDimension);
 
 		addSeparator(buttonDimension);
 
 		openProjectButton = GuiUtils.addButton(this, null, openProjectIcon, commandListener,
-				MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND.getName(),
-				MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND.getName(),
+				MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_COMMAND.getName(),
+				MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_COMMAND.getName(),
 				buttonDimension);
 
 		closeProjectButton = GuiUtils.addButton(this, null, closeProjectIcon, commandListener,
-				MainActionCommands.CLOSE_RAW_DATA_PROJECT_COMMAND.getName(),
-				MainActionCommands.CLOSE_RAW_DATA_PROJECT_COMMAND.getName(),
+				MainActionCommands.CLOSE_RAW_DATA_EXPERIMENT_COMMAND.getName(),
+				MainActionCommands.CLOSE_RAW_DATA_EXPERIMENT_COMMAND.getName(),
 				buttonDimension);
 
 		saveProjectButton = GuiUtils.addButton(this, null, saveProjectIcon, commandListener,
-				MainActionCommands.SAVE_RAW_DATA_PROJECT_COMMAND.getName(),
-				MainActionCommands.SAVE_RAW_DATA_PROJECT_COMMAND.getName(),
+				MainActionCommands.SAVE_RAW_DATA_EXPERIMENT_COMMAND.getName(),
+				MainActionCommands.SAVE_RAW_DATA_EXPERIMENT_COMMAND.getName(),
 				buttonDimension);
 		
 		editProjectButton = GuiUtils.addButton(this, null, editRdaProjectIcon, commandListener,
-				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
-				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND.getName(),
+				MainActionCommands.EDIT_RAW_DATA_EXPERIMENT_SETUP_COMMAND.getName(),
+				MainActionCommands.EDIT_RAW_DATA_EXPERIMENT_SETUP_COMMAND.getName(),
 				buttonDimension);
 		editProjectButton.setEnabled(false);	//	TODO
 		
@@ -117,12 +117,12 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 		addSeparator(buttonDimension);
 		
 		addMetaDataButton = GuiUtils.addButton(this, null, addMetaDataIcon, commandListener,
-				MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName(),
-				MainActionCommands.ADD_PROJECT_METADATA_COMMAND.getName(), buttonDimension);
+				MainActionCommands.ADD_EXPERIMENT_METADATA_COMMAND.getName(),
+				MainActionCommands.ADD_EXPERIMENT_METADATA_COMMAND.getName(), buttonDimension);
 		
 		sendProjectToDatabaseButton = GuiUtils.addButton(this, null, sendProjectToDatabaseIcon, commandListener,
-				MainActionCommands.SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND.getName(),
-				MainActionCommands.SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND.getName(), buttonDimension);
+				MainActionCommands.SET_EXPERIMENT_DATA_UPLOAD_PARAMETERS_COMMAND.getName(),
+				MainActionCommands.SET_EXPERIMENT_DATA_UPLOAD_PARAMETERS_COMMAND.getName(), buttonDimension);
 		
 		addSeparator(buttonDimension);
 		
@@ -153,7 +153,7 @@ public class RawDataExaminerToolbar extends CommonToolbar {
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
 		
 	}

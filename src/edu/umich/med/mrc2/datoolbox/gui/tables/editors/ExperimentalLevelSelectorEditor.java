@@ -77,9 +77,9 @@ public class ExperimentalLevelSelectorEditor extends DefaultCellEditor {
 				comboBox.setSelectedItem(selectedLevel);
 		}
 		else {
-			if(MRC2ToolBoxCore.getCurrentProject() != null) {
+			if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
 
-				for(ExperimentDesignFactor factor : MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getFactors()) {
+				for(ExperimentDesignFactor factor : MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getFactors()) {
 
 					if(table.getColumnName(column).equals(factor.getName())){
 

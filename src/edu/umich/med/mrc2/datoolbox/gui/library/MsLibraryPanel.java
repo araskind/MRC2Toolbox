@@ -1085,13 +1085,13 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	@Override
 	public void reloadDesign() {
 		super.switchDataPipeline(currentProject, activeDataPipeline);
-		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromExperiment(currentProject, activeDataPipeline);
 	}
 
 	@Override
-	public void closeProject() {
-		super.closeProject();
-		menuBar.updateMenuFromProject(null, null);
+	public void closeExperiment() {
+		super.closeExperiment();
+		menuBar.updateMenuFromExperiment(null, null);
 	}
 
 	@Override

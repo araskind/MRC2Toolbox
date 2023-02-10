@@ -106,8 +106,8 @@ public class ExperimentDesignPanel extends DockableMRC2ToolboxPanel {
 	}
 
 	@Override
-	public void closeProject() {
-		super.closeProject();
+	public void closeExperiment() {
+		super.closeExperiment();
 		clearPanel();
 		//	toolbar.updateGuiFromProjectAndAssay(null, null);
 	}

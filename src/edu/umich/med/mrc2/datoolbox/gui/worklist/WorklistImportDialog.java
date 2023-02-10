@@ -201,7 +201,7 @@ public class WorklistImportDialog extends JDialog
 		preferences = prefs;
 		baseDirectory =  
 				new File(preferences.get(BASE_DIRECTORY, 
-						MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()));
+						MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()));
 	}
 
 	@Override

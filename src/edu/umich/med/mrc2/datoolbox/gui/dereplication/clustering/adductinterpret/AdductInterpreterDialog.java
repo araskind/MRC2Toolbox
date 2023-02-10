@@ -496,12 +496,12 @@ public class AdductInterpreterDialog extends JDialog implements ActionListener, 
 	@SuppressWarnings("unchecked")
 	private void populateAdductSelector() {
 
-		if (MRC2ToolBoxCore.getCurrentProject() == null ||
-				MRC2ToolBoxCore.getCurrentProject().getActiveDataPipeline() == null) 			
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null ||
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline() == null) 			
 			return;
 
 		ArrayList<Adduct> modeAdducts = new ArrayList<Adduct>();
-		Polarity pol = MRC2ToolBoxCore.getCurrentProject().
+		Polarity pol = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getActiveDataPipeline().getAcquisitionMethod().getPolarity();
 
 		for (Adduct cm : AdductManager.getAdductsForType(ModificationType.ADDUCT)) {

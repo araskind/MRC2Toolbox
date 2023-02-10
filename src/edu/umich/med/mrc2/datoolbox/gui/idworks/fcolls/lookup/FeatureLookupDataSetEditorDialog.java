@@ -250,7 +250,7 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 			errors.add("Name can not be empty.");
 		
 		String nameError = null;
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
 			nameError = validateNameAgainstDatabase(newName);
 		else
 			nameError = validateNameAgainstProject(newName);
@@ -288,7 +288,7 @@ public class FeatureLookupDataSetEditorDialog extends JDialog
 		
 		FeatureLookupDataSet existing = null;
 		Set<FeatureLookupDataSet> projectFeatureLookupDataSets = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().
+				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
 					getMsmsClusterDataSets().stream().
 					filter(d -> d.getFeatureLookupDataSet() != null).
 					map(d -> d.getFeatureLookupDataSet()).collect(Collectors.toSet());

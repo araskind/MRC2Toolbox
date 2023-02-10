@@ -163,7 +163,7 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 		removeAllDataSets();
 		inputData = new XYSeriesCollection();
 		XYSeries series = new XYSeries("Data");
-		Matrix datamatrix = MRC2ToolBoxCore.getCurrentProject().
+		Matrix datamatrix = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getDataMatrixForDataPipeline(dataPipeline);
 
 		long[] coordinatesOne = new long[2];
@@ -172,7 +172,7 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 		coordinatesTwo[1] = datamatrix.getColumnForLabel(fTwo);
 
 		//	TODO Temporary fix until design subsets properly implemented
-		for(DataFile file : MRC2ToolBoxCore.getCurrentProject().
+		for(DataFile file : MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getDataFilesForAcquisitionMethod(dataPipeline.getAcquisitionMethod())) {
 
 			if(file.isEnabled()) {
@@ -208,7 +208,7 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 
 		inputData = new XYSeriesCollection();
 		XYSeries series = new XYSeries("Data");
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
 		Matrix matrixOne = project.getDataMatrixForDataPipeline(dataPipelineOne);
 		Matrix matrixTwo = project.getDataMatrixForDataPipeline(dataPipelineTwo);

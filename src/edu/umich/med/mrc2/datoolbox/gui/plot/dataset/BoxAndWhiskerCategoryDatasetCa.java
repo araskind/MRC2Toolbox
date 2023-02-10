@@ -69,7 +69,7 @@ public class BoxAndWhiskerCategoryDatasetCa extends DefaultBoxAndWhiskerCategory
 			boolean splitByBatch) {
 
 		super();
-		project = MRC2ToolBoxCore.getCurrentProject();
+		project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		featuresToPlot = selectedFeaturesMap.values().stream().
 				flatMap(c -> c.stream()).toArray(size -> new MsFeature[size]);
 

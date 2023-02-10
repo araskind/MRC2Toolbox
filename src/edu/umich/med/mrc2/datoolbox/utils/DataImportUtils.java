@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 public class DataImportUtils {
 
 	public static ExperimentalSample findSampleById(String sampleId) {
-		return findSampleById(sampleId, MRC2ToolBoxCore.getCurrentProject());
+		return findSampleById(sampleId, MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 	}
 	
 	public static ExperimentalSample findSampleById(String sampleId, DataAnalysisProject project) {
@@ -45,7 +45,7 @@ public class DataImportUtils {
 	}
 	
 	public static ExperimentalSample findSampleByName(String sampleName) {
-		return findSampleByName(sampleName, MRC2ToolBoxCore.getCurrentProject());
+		return findSampleByName(sampleName, MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 	}
 		
 	public static ExperimentalSample findSampleByName(String sampleName, DataAnalysisProject project) {
@@ -58,7 +58,7 @@ public class DataImportUtils {
 	}
 	
 	public static ExperimentalSample getSampleFromFileName(String fileName) {		
-		return getSampleFromFileName(fileName, MRC2ToolBoxCore.getCurrentProject());
+		return getSampleFromFileName(fileName, MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 	}
 	
 	public static ExperimentalSample getSampleFromFileName(String fileName, DataAnalysisProject project) {

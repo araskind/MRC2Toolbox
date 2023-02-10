@@ -161,7 +161,7 @@ public class DockableMoTrPACReportListingPanel extends DefaultSingleCDockable
 		if(command.equals(MainActionCommands.CONFIRM_DELETE_MOTRPAC_REPORT_COMMAND.getName()))
 			deleteReport();
 		
-		if(command.equals(MainActionCommands.VERIFY_TRACKER_PASSWORD_COMMAND.getName()))
+		if(command.equals(MainActionCommands.VERIFY_IDTRACKER_PASSWORD_COMMAND.getName()))
 			verifyPasswordAndPerformAction();
 	}
 	

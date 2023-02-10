@@ -395,7 +395,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 	public void loadMultipleFeatureData(Map<DataPipeline, Collection<MsFeature>> pfm) {
 
 		clearPlotMatrix();
-		if(MRC2ToolBoxCore.getCurrentProject() == null)
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return;
 		
 		if(pfm.isEmpty())
@@ -403,7 +403,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 		
 		//	Copy map to avoid side effects
 		copyFeatureMap(pfm);
-		activeDesign = MRC2ToolBoxCore.getCurrentProject().
+		activeDesign = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getExperimentDesign().getActiveDesignSubset();
 
 		// Create and display data set

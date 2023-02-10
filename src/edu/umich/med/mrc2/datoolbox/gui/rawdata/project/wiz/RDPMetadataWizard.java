@@ -373,10 +373,10 @@ public class RDPMetadataWizard extends JDialog
 		if(command.equals(MainActionCommands.COMPLETE_ANALYSIS_WORKLIST_VERIFICATION_COMMAND.getName()))
 			completeWorklistVerificationStage();
 		
-		if(command.equals(MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName()))
+		if(command.equals(MainActionCommands.SAVE_EXPERIMENT_METADATA_COMMAND.getName()))
 			saveProjectMetadata();
 		
-		if(command.equals(MainActionCommands.CLEAR_PROJECT_METADATA_COMMAND.getName()))
+		if(command.equals(MainActionCommands.CLEAR_EXPERIMENT_METADATA_COMMAND.getName()))
 			clearProjectMetadata();		
 	}
 	
@@ -422,7 +422,7 @@ public class RDPMetadataWizard extends JDialog
 				setTitle(stage.getName());
 				toolbar.highlightStageButton(stage);
 				
-				String command = MainActionCommands.SAVE_PROJECT_METADATA_COMMAND.getName();
+				String command = MainActionCommands.SAVE_EXPERIMENT_METADATA_COMMAND.getName();
 				if(i < RDPMetadataDefinitionStage.values().length - 1) 
 					command = NEXT_STAGE_COMMAND;
 
@@ -806,7 +806,7 @@ public class RDPMetadataWizard extends JDialog
 		
 		SaveStoredRawDataAnalysisProjectTask task = 
 				new SaveStoredRawDataAnalysisProjectTask(
-						MRC2ToolBoxCore.getActiveRawDataAnalysisProject());
+						MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}	

@@ -56,8 +56,8 @@ public class DataFileStatisticalSummary implements Serializable {
 
 	public void calculateFileStat() {
 
-		Matrix datamatrix = MRC2ToolBoxCore.getCurrentProject()
-				.getDataMatrixForDataPipeline(MRC2ToolBoxCore.getCurrentProject().getActiveDataPipeline());
+		Matrix datamatrix = MRC2ToolBoxCore.getActiveMetabolomicsExperiment()
+				.getDataMatrixForDataPipeline(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline());
 		Matrix featureRows = datamatrix.selectRows(Ret.LINK, datamatrix.getRowForLabel(file));
 		double[] fValues = StreamSupport.stream(featureRows.allValues().spliterator(), false).
 				filter(o -> Objects.nonNull(o)).

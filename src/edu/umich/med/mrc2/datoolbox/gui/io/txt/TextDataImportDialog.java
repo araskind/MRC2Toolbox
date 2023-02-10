@@ -53,9 +53,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.expsetup.dpl.DataPipelineDefinitionPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.projectsetup.dpl.DataPipelineDefinitionPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
@@ -228,8 +228,8 @@ public class TextDataImportDialog extends JDialog
 		if(pipeline == null)
 			return;
 
-		if(MRC2ToolBoxCore.getCurrentProject().getDataPipelines().contains(pipeline)) {
-			MessageDialog.showErrorMsg("The project already contains data pipeline \n"
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getDataPipelines().contains(pipeline)) {
+			MessageDialog.showErrorMsg("The experiment already contains data pipeline \n"
 					+ "with selected combination of assay, data acquisition and data analysis methods."
 					+ "Please adjust you selection.\nIf you want to replace the existing data\n"
 					+ "please delete them first and then re-upload.", 

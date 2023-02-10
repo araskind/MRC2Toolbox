@@ -124,7 +124,7 @@ public class IDTrackerSearchQueryManager extends JDialog implements ActionListen
 
 		JButton searchButton = new JButton("Load selected query into search form");
 		searchButton.addActionListener(listener);
-		searchButton.setActionCommand(MainActionCommands.LOAD_ID_TRACKER_SAVED_QUERY_COMMAND.getName());
+		searchButton.setActionCommand(MainActionCommands.LOAD_IDTRACKER_SAVED_QUERY_COMMAND.getName());
 		panel_1.add(searchButton);
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);
@@ -137,7 +137,7 @@ public class IDTrackerSearchQueryManager extends JDialog implements ActionListen
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getActionCommand().equals(MainActionCommands.ID_TRACKER_DELETE_QUERY_COMMAND.getName()))
+		if(e.getActionCommand().equals(MainActionCommands.IDTRACKER_DELETE_QUERY_COMMAND.getName()))
 			deleteSelectedQuery();
 	}
 

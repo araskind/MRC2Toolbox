@@ -188,7 +188,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 
 		clearPanel();
 		super.switchDataPipeline(project, newDataPipeline);
-		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromExperiment(currentProject, activeDataPipeline);
 		twoDQCpanel.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 		threeDpanel.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 		if(currentProject != null && activeDataPipeline != null) {
@@ -198,11 +198,11 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 	}
 
 	@Override
-	public void closeProject() {
+	public void closeExperiment() {
 
-		super.closeProject();
+		super.closeExperiment();
 		clearPanel();
-		menuBar.updateMenuFromProject(null, null);
+		menuBar.updateMenuFromExperiment(null, null);
 	}
 
 	@Override

@@ -292,7 +292,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		adjustEnabledButtonsForConfiguration();
 	}
 
-	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

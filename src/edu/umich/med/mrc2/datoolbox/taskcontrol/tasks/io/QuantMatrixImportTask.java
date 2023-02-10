@@ -89,7 +89,7 @@ public class QuantMatrixImportTask extends AbstractTask {
 		this.quantDataFile = quantDataFile;
 		this.dataPipeline = dataPipeline;
 
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		taskDescription = "Reading quant matrix from " + quantDataFile.getName();
 		unmatchedSamplesPresent = false;
 		readPreferences();

@@ -115,20 +115,20 @@ public class LabNoteToolbar extends CommonToolbar {
 
 		if(user == null) {
 			idTrackerUserButton.setIcon(idTrackerLoginIcon);
-			idTrackerUserButton.setActionCommand(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
-			idTrackerUserButton.setToolTipText(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
+			idTrackerUserButton.setActionCommand(MainActionCommands.SHOW_IDTRACKER_LOGIN_COMMAND.getName());
+			idTrackerUserButton.setToolTipText(MainActionCommands.SHOW_IDTRACKER_LOGIN_COMMAND.getName());
 			loggedUserLabel.setText("");
 		}
 		else {
 			idTrackerUserButton.setIcon(idTrackerUserIcon);
-			idTrackerUserButton.setActionCommand(MainActionCommands.ID_TRACKER_LOGOUT_COMMAND.getName());
-			idTrackerUserButton.setToolTipText(MainActionCommands.ID_TRACKER_LOGOUT_COMMAND.getName());
+			idTrackerUserButton.setActionCommand(MainActionCommands.IDTRACKER_LOGOUT_COMMAND.getName());
+			idTrackerUserButton.setToolTipText(MainActionCommands.IDTRACKER_LOGOUT_COMMAND.getName());
 			loggedUserLabel.setText(user.getFullName());
 		}
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
 
 	}

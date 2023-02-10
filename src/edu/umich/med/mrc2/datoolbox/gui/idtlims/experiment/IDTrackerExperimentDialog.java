@@ -106,12 +106,12 @@ public class IDTrackerExperimentDialog  extends JDialog {
 
 		if(experimentDefinitionPanel.getExperiment() == null) {
 			setTitle("Create new ID tracker experiment");
-			saveButton.setActionCommand(MainActionCommands.NEW_CPD_ID_EXPERIMENT_COMMAND.getName());
+			saveButton.setActionCommand(MainActionCommands.NEW_IDTRACKER_EXPERIMENT_COMMAND.getName());
 			experimentDefinitionPanel.setProject(parentPanel.getSelectedProject());
 		}
 		else {
 			setTitle("Edit experiment \"" + experimentDefinitionPanel.getExperiment().getName() + "\"");
-			saveButton.setActionCommand(MainActionCommands.SAVE_CPD_ID_EXPERIMENT_COMMAND.getName());
+			saveButton.setActionCommand(MainActionCommands.SAVE_IDTRACKER_EXPERIMENT_COMMAND.getName());
 		}
 	}
 

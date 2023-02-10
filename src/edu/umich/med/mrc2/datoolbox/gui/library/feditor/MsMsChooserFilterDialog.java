@@ -101,7 +101,7 @@ public class MsMsChooserFilterDialog extends JDialog
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
 		baseDirectory = 
-				new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
+				new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()).getAbsoluteFile();
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));

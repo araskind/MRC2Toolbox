@@ -44,8 +44,8 @@ public class ClearIdentificationsTask  extends AbstractTask {
 		setStatus(TaskStatus.PROCESSING);
 
 		Set<MsFeature> featureSet =
-				MRC2ToolBoxCore.getCurrentProject().
-				getActiveFeatureSetForDataPipeline(MRC2ToolBoxCore.getCurrentProject().getActiveDataPipeline()).
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
+				getActiveFeatureSetForDataPipeline(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline()).
 				getFeatures().stream().filter(f -> f.isIdentified()).collect(Collectors.toSet());
 
 		total = featureSet.size();

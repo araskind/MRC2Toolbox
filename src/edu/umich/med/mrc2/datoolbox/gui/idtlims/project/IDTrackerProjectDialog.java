@@ -249,13 +249,13 @@ public class IDTrackerProjectDialog extends JDialog {
 
 		if(project == null) {
 			setTitle("Create new ID tracker project");
-			saveButton.setActionCommand(MainActionCommands.NEW_CPD_ID_PROJECT_COMMAND.getName());
+			saveButton.setActionCommand(MainActionCommands.NEW_IDTRACKER_PROJECT_COMMAND.getName());
 			setIconImage(((ImageIcon) newCdpIdProjectIcon).getImage());
 		}
 		else {
 			setTitle("Edit project \"" + project.getName() + "\"");
 			setIconImage(((ImageIcon) editCdpIdProjectIcon).getImage());
-			saveButton.setActionCommand(MainActionCommands.SAVE_CPD_ID_PROJECT_COMMAND.getName());
+			saveButton.setActionCommand(MainActionCommands.SAVE_IDTRACKER_PROJECT_COMMAND.getName());
 
 			projectIdValueLabel.setText(project.getId());
 			if (project.getStartDate() != null)

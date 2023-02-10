@@ -67,7 +67,7 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 			boolean splitByBatch) {
 
 		super();
-		project = MRC2ToolBoxCore.getCurrentProject();
+		project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		featuresToPlot = new MsFeature[] {msf};
 
 		//	Collect data

@@ -97,7 +97,7 @@ public class MWTabExportDialog extends JDialog implements BackedByPreferences, A
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-		project = MRC2ToolBoxCore.getCurrentProject();
+		project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		JPanel panel_1 = new JPanel();
 		getContentPane().add(panel_1, BorderLayout.CENTER);
 		panel_1.setLayout(new BorderLayout(0, 0));

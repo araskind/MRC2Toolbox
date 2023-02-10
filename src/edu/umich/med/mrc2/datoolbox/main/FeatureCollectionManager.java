@@ -41,14 +41,14 @@ public class FeatureCollectionManager {
 	
 	public static final String CURRENT_MSMS_FEATURE_SEARCH_RESULT = "Current MSMS feature search";
 	public static final String CURRENT_MS1_FEATURE_SEARCH_RESULT = "Current MS1 feature search";
-	public static final String ACTIVE_PROJECT_FEATURE_SET = "Active project complete feature set";
+	public static final String ACTIVE_EXPERIMENT_FEATURE_SET = "Active experiment complete feature set";
 	
 	public static final MsFeatureInfoBundleCollection msmsSearchResults = 
 			new MsFeatureInfoBundleCollection(CURRENT_MSMS_FEATURE_SEARCH_RESULT);	
 	public static final MsFeatureInfoBundleCollection msOneSearchResults = 
 			new MsFeatureInfoBundleCollection(CURRENT_MS1_FEATURE_SEARCH_RESULT);
-	public static final MsFeatureInfoBundleCollection activeProjectFeatureSet = 
-			new MsFeatureInfoBundleCollection(ACTIVE_PROJECT_FEATURE_SET);
+	public static final MsFeatureInfoBundleCollection activeExperimentFeatureSet = 
+			new MsFeatureInfoBundleCollection(ACTIVE_EXPERIMENT_FEATURE_SET);
 	
 	public static final Map<MsFeatureInfoBundleCollection, Set<String>>featureCollectionsMSIDMap = 
 			new TreeMap<MsFeatureInfoBundleCollection, Set<String>>(
@@ -57,14 +57,14 @@ public class FeatureCollectionManager {
 	public static void clearDefaultCollections() {		
 		msmsSearchResults.clearCollection();
 		msOneSearchResults.clearCollection();
-		activeProjectFeatureSet.clearCollection();
+		activeExperimentFeatureSet.clearCollection();
 	}
 		
 	public static void refreshMsFeatureInfoBundleCollections() {
 		featureCollectionsMSIDMap.clear();
 		featureCollectionsMSIDMap.put(msmsSearchResults, new TreeSet<String>());
 		featureCollectionsMSIDMap.put(msOneSearchResults, new TreeSet<String>());
-		featureCollectionsMSIDMap.put(activeProjectFeatureSet, new TreeSet<String>());
+		featureCollectionsMSIDMap.put(activeExperimentFeatureSet, new TreeSet<String>());
 		try {
 			featureCollectionsMSIDMap.putAll(
 					FeatureCollectionUtils.getMsFeatureInformationBundleCollections());
@@ -89,7 +89,7 @@ public class FeatureCollectionManager {
 		return featureCollectionsMSIDMap.keySet().stream().
 			filter(c -> !c.equals(msmsSearchResults)).
 			filter(c -> !c.equals(msOneSearchResults)).
-			filter(c -> !c.equals(activeProjectFeatureSet)).
+			filter(c -> !c.equals(activeExperimentFeatureSet)).
 			sorted(new MsFeatureInformationBundleCollectionComparator(SortProperty.Name)).
 			collect(Collectors.toList());
 	}

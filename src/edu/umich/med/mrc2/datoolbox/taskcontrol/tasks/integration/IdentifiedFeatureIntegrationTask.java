@@ -50,7 +50,7 @@ public class IdentifiedFeatureIntegrationTask  extends AbstractTask {
 		this.clusterSet = integratedSet;
 		taskDescription = 
 				"Combining identified features from multiple assays";
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 	}
 
 	@Override

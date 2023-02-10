@@ -79,7 +79,7 @@ public class ExtendedDataFileSampleMatchTableModel extends BasicTableModel {
 		DataAcquisitionMethod acquisitionMethod) {
 
 		setRowCount(0);
-		project = MRC2ToolBoxCore.getCurrentProject();
+		project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		this.acquisitionMethod = acquisitionMethod;
 
 		String[] rows = null;

@@ -612,7 +612,7 @@ public class FileToolsDialog extends JDialog
 		preferences = prefs;
 		baseDirectory = Paths.get(
 				preferences.get(CURRENT_DIRECTORY,
-				MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).toFile();
+				MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).toFile();
 		zipBaseDirectory =
 				new File(preferences.get(ZIP_DATA_BASE_DIRECTORY,
 					MRC2ToolBoxConfiguration.getDefaultDataDirectory()));

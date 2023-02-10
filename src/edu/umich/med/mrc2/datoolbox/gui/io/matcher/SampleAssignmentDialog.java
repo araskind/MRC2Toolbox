@@ -100,8 +100,8 @@ public class SampleAssignmentDialog extends JDialog {
 		panel.add(lblSelectSample, gbc_lblSelectSample);
 
 		Collection<ExperimentalSample>samples = new ArrayList<ExperimentalSample>();
-		if(MRC2ToolBoxCore.getCurrentProject() != null)
-			samples = MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples();
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null)
+			samples = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples();
 
 		sampleComboBox = new JComboBox(new SortedComboBoxModel(samples));
 		sampleComboBox.setSelectedIndex(-1);

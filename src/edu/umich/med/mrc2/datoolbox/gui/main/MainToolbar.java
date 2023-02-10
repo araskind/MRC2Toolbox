@@ -141,16 +141,16 @@ public class MainToolbar extends CommonToolbar {
 
 		if(user == null) {
 			idTrackerUserButton.setIcon(idTrackerLoginIcon);
-			idTrackerUserButton.setActionCommand(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
-			idTrackerUserButton.setToolTipText(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
+			idTrackerUserButton.setActionCommand(MainActionCommands.SHOW_IDTRACKER_LOGIN_COMMAND.getName());
+			idTrackerUserButton.setToolTipText(MainActionCommands.SHOW_IDTRACKER_LOGIN_COMMAND.getName());
 			loggedUserLabel.setText("");
 			manageOrganizationsButton.setEnabled(false);
 			manageUsersButton.setEnabled(false);
 		}
 		else {
 			idTrackerUserButton.setIcon(activeUserIcon);
-			idTrackerUserButton.setActionCommand(MainActionCommands.ID_TRACKER_LOGOUT_COMMAND.getName());
-			idTrackerUserButton.setToolTipText(MainActionCommands.ID_TRACKER_LOGOUT_COMMAND.getName());
+			idTrackerUserButton.setActionCommand(MainActionCommands.IDTRACKER_LOGOUT_COMMAND.getName());
+			idTrackerUserButton.setToolTipText(MainActionCommands.IDTRACKER_LOGOUT_COMMAND.getName());
 			loggedUserLabel.setText(user.getFullName());
 			if(user.isSuperUser()) {
 				manageUsersButton.setEnabled(true);
@@ -176,7 +176,7 @@ public class MainToolbar extends CommonToolbar {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(
+	public void updateGuiFromExperimentAndDataPipeline(
 			DataAnalysisProject project, DataPipeline newDataPipeline) {
 
 	}

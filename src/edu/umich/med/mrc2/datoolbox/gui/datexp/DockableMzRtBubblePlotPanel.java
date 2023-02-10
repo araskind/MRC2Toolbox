@@ -49,12 +49,12 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetListener;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MsFeatureBubbleDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.tooltip.MsFeatureTooltipGenerator;
+import edu.umich.med.mrc2.datoolbox.gui.expsetup.featurelist.SimpleFeatureSubsetDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.FeatureDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
-import edu.umich.med.mrc2.datoolbox.gui.projectsetup.featurelist.SimpleFeatureSubsetDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -101,7 +101,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		
 		if(command.equals(MainActionCommands.ADD_SELECCTED_TO_EXISTING_MS_FEATURE_SUBSET.getName())) {
 			
-			DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+			DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 			Set<MsFeatureSet> subsets = 
 					project.getUnlockedMsFeatureSetsForDataPipeline(project.getActiveDataPipeline());
 			if(subsets.isEmpty()) {
@@ -131,7 +131,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 	
 	private void finishSubsetEdit() {
 
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if(currentProject == null)
 			return;
 		
@@ -173,7 +173,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		if(newName.isEmpty()) 
 			errors.add("Feature subset name has to be specified");
 		else {
-			DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
+			DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 			Set<MsFeatureSet> existingSubsets = 
 					currentProject.getUnlockedMsFeatureSetsForDataPipeline(currentProject.getActiveDataPipeline());
 			

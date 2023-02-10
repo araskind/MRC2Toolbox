@@ -95,7 +95,7 @@ public class ObjectAnnotationToolbar extends CommonToolbar {
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 
 //		boolean active = true;
 //		if(project == null || newAssay == null)

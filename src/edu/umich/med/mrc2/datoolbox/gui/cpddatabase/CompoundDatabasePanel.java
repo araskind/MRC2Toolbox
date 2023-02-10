@@ -949,9 +949,9 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	}
 
 	@Override
-	public void closeProject() {
-		super.closeProject();
-		menuBar.updateMenuFromProject(null, null);
+	public void closeExperiment() {
+		super.closeExperiment();
+		menuBar.updateMenuFromExperiment(null, null);
 	}
 
 	@Override

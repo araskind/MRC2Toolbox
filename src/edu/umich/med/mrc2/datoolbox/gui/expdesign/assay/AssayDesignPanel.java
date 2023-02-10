@@ -195,7 +195,7 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 		if(assayDesignTable.getSelectedRowCount() > 0){
 
 			int approve = MessageDialog.showChoiceWithWarningMsg(
-				"Remove selected data file(s) from the project?\n"
+				"Remove selected data file(s) from the experiment?\n"
 				+ "(NO UNDO!)");
 
 			if (approve == JOptionPane.YES_OPTION) {

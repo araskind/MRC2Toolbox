@@ -589,7 +589,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 			if (selected.length > 0) {
 
 				String message = "Selected cluster will be deleted, "
-						+ "its component features will remain part of the project";
+						+ "its component features will remain part of the experiment";
 
 				if (!activeSet.isLocked())
 					message = message + "\nbut they will be removed from the \"" + 
@@ -622,7 +622,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 			String message = 
 					"Selected cluster will be deleted, but its component features\n"
-					+ "will remain part of the project and all custom feature sets\n"
+					+ "will remain part of the experiment and all custom feature sets\n"
 					+ "Do you want to proceed?";
 		
 			int selectedValue = 
@@ -774,7 +774,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 
 	private void restoreRejectedFeatures() {
 
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Set<MsFeatureCluster> clusters = currentProject.getMsFeatureClustersForDataPipeline(activeDataPipeline);
 		clusters.stream().forEach(c -> c.enableAllFeatures());
 		clearPanel();
@@ -784,7 +784,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	private File selectBinnerDataFile() {
 		
 		JnaFileChooser fc = new JnaFileChooser(
-				MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
+				MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory());
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("Excel files", "xlsx", "XLSX");
 		fc.setTitle("Select Binner results file");
@@ -918,7 +918,7 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 						@SuppressWarnings("unused")
 						InformationDialog id = new InformationDialog(
 								"Unmatched features",
-								"Not all binned features were matched to the project features.\n"
+								"Not all binned features were matched to the experiment features.\n"
 								+ "Below is the list of unmatched features.",
 								StringUtils.join(eTask.getUnassignedFeatures(), "\n"),
 								this.getContentPane());
@@ -996,9 +996,9 @@ public class CorrelationResultsPanel extends ClusterDisplayPanel implements Char
 	}
 
 	@Override
-	public void closeProject() {
+	public void closeExperiment() {
 
-		super.closeProject();
+		super.closeExperiment();
 		clearPanel();
 //		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 	}

@@ -114,7 +114,7 @@ public class DeleteFactorDialog extends JDialog implements ActionListener {
 		rootPane.setDefaultButton(deleteButton);
 
 		ExperimentDesignSubset completeDesign =
-				MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getCompleteDesignSubset();
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getCompleteDesignSubset();
 		factorDeleteTable.setTableModelFromDesignSubset(completeDesign);
 
 		pack();
@@ -136,10 +136,10 @@ public class DeleteFactorDialog extends JDialog implements ActionListener {
 				if (approve == JOptionPane.YES_OPTION) {
 
 					for(ExperimentDesignFactor factor : factorDeleteTable.getSelectedFactors())
-						MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().removeFactor(factor);
+						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().removeFactor(factor);
 
 					ExperimentDesignSubset completeDesign =
-							MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getCompleteDesignSubset();
+							MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getCompleteDesignSubset();
 					factorDeleteTable.setTableModelFromDesignSubset(completeDesign);
 				}
 			}

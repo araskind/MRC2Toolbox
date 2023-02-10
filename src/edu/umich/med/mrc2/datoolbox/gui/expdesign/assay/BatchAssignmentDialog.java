@@ -150,8 +150,8 @@ public class BatchAssignmentDialog extends JDialog implements ActionListener{
 			int batchNumber = (int) batchNumberSpinner.getValue();
 			dataFiles.stream().forEach(f -> f.setBatchNumber(batchNumber));
 
-			if(MRC2ToolBoxCore.getCurrentProject() != null)
-				MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+			if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null)
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 
 			dispose();
 		}

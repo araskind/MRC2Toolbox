@@ -138,7 +138,7 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 				featureLookupDataSetEditorDialog.getAllFeatures());
 			
 		featureLookupDataSetEditorDialog.dispose();
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
 			createNewFeatureLookupDataSetInDatabase(dataSet);
 		else
 			createNewFeatureLookupDataSetInProject(dataSet);
@@ -228,7 +228,7 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 		
 		featureLookupDataSetEditorDialog.dispose();
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
 			saveFeatureLookupDataSetChangesToDatabase(edited);
 		else
 			saveFeatureLookupDataSetChangesToProject(edited);
@@ -283,7 +283,7 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 			return;
 		}
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
 			deleteFeatureLookupDataSetFromDatabase(selected);
 		else
 			deleteFeatureLookupDataSetFromProject(selected);
@@ -346,7 +346,7 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 		
 		featureLookupDataSetListTable.clearTable();		
 		RawDataAnalysisProject project = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisProject();
+				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
 		if(project == null)
 			return;
 		

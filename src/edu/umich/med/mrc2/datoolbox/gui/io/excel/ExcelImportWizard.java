@@ -65,9 +65,9 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
+import edu.umich.med.mrc2.datoolbox.gui.expsetup.dpl.DataPipelineDefinitionPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.projectsetup.dpl.DataPipelineDefinitionPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
@@ -408,7 +408,7 @@ public class ExcelImportWizard extends JDialog
 		preferences = prefs;
 		baseDirectory =
 			new File(preferences.get(BASE_DIRECTORY,
-				MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).getAbsoluteFile();
+				MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).getAbsoluteFile();
 	}
 
 	@Override

@@ -56,7 +56,7 @@ public class ScatterDataSet extends XYSeriesCollection {
 			DataScale dataScale) {
 
 		super();
-		project = MRC2ToolBoxCore.getCurrentProject();
+		project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		featuresToPlot = selectedFeaturesMap.values().stream().
 				flatMap(c -> c.stream()).toArray(size -> new MsFeature[size]);
 		Collection<ExperimentalSample> samples = 

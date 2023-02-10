@@ -24,49 +24,49 @@ package edu.umich.med.mrc2.datoolbox.gui.main;
 public enum MainActionCommands {
 
 	// Project
-	NEW_PROJECT_COMMAND("Create new metabolomics project"),
-	OPEN_PROJECT_COMMAND("Open metabolomics project"),
-	SAVE_PROJECT_COMMAND("Save project"),
-	SAVE_PROJECT_COPY_COMMAND("Save project as ..."),
+	NEW_METABOLOMICS_EXPERIMENT_COMMAND("Create new metabolomics experiment"),
+	OPEN_METABOLOMICS_EXPERIMENT_COMMAND("Open metabolomics experiment"),
+	SAVE_EXPERIMENT_COMMAND("Save experiment"),
+	SAVE_EXPERIMENT_COPY_COMMAND("Save experiment as ..."),
 	
-	NEW_CPD_ID_PROJECT_DIALOG_COMMAND("New IDTracker project"),
-	NEW_CPD_ID_PROJECT_COMMAND("Create new IDTracker project"),
-	EDIT_CPD_ID_PROJECT_DIALOG_COMMAND("Edit IDTracker project"),
-	SAVE_CPD_ID_PROJECT_COMMAND("Save IDTracker project"),
-	DELETE_CPD_ID_PROJECT_COMMAND("Delete IDTracker project"),
+	NEW_IDTRACKER_PROJECT_DIALOG_COMMAND("New MetIDTracker project"),
+	NEW_IDTRACKER_PROJECT_COMMAND("Create new MetIDTracker project"),
+	EDIT_IDTRACKER_PROJECT_DIALOG_COMMAND("Edit MetIDTracker project"),
+	SAVE_IDTRACKER_PROJECT_COMMAND("Save MetIDTracker project"),
+	DELETE_IDTRACKER_PROJECT_COMMAND("Delete MetIDTracker project"),
 		
-	NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND("New IDTracker experiment"),
-	NEW_CPD_ID_EXPERIMENT_COMMAND("Crearte new IDTracker experiment"),
-	EDIT_CPD_ID_EXPERIMENT_DIALOG_COMMAND("Edit IDTracker experiment"),
-	SAVE_CPD_ID_EXPERIMENT_COMMAND("Save IDTracker experiment"),	
-	DELETE_CPD_ID_EXPERIMENT_COMMAND("Delete IDTracker experiment"),	
+	NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND("New MetIDTracker experiment"),
+	NEW_IDTRACKER_EXPERIMENT_COMMAND("Crearte new MetIDTracker experiment"),
+	EDIT_IDTRACKER_EXPERIMENT_DIALOG_COMMAND("Edit MetIDTracker experiment"),
+	SAVE_IDTRACKER_EXPERIMENT_COMMAND("Save MetIDTracker experiment"),	
+	DELETE_IDTRACKER_EXPERIMENT_COMMAND("Delete MetIDTracker experiment"),	
 
-	SHOW_ID_TRACKER_LOGIN_COMMAND("Show ID tracker login"),	
-	ID_TRACKER_LOGOUT_COMMAND("Log out from ID tracker"),
-	LOGIN_TO_ID_TRACKER_COMMAND("Login to ID tracker"),
-	VERIFY_TRACKER_PASSWORD_COMMAND("Verify ID tracker password"),
-	CHANGE_ID_TRACKER_PASSWORD_DIALOG_COMMAND("ID tracker password change dialog"),
-	CHANGE_ID_TRACKER_PASSWORD_COMMAND("Change ID tracker password"),
-	COPY_ID_TRACKER_PASSWORD_COMMAND("Copy ID tracker password"),
+	SHOW_IDTRACKER_LOGIN_COMMAND("Show MetIDTracker login"),		
+	IDTRACKER_LOGIN_COMMAND("Login to MetIDTracker"),
+	VERIFY_IDTRACKER_PASSWORD_COMMAND("Verify MetIDTracker password"),
+	CHANGE_IDTRACKER_PASSWORD_DIALOG_COMMAND("MetIDTracker password change dialog"),
+	CHANGE_IDTRACKER_PASSWORD_COMMAND("Change MetIDTracker password"),
+	COPY_IDTRACKER_PASSWORD_COMMAND("Copy MetIDTracker password"),
+	IDTRACKER_LOGOUT_COMMAND("Log out from MetIDTracker"),
 	
-	SHOW_OPEN_CPD_ID_PROJECT_DIALOG_COMMAND("Show \"Open IDTracker project\" dialog"),
-	OPEN_CPD_ID_PROJECT_COMMAND("Open IDTracker project"),
-	CLOSE_PROJECT_COMMAND("Close project"),
-	SELECT_PROJECT_LOCATION_COMMAND("Select project location"),
+	SHOW_OPEN_IDTRACKER_EXPERIMENT_DIALOG_COMMAND("Show \"Open MetIDTracker experiment\" dialog"),
+	OPEN_IDTRACKER_EXPERIMENT_COMMAND("Open MetIDTracker experiment"),
+	CLOSE_EXPERIMENT_COMMAND("Close experiment"),
+	SELECT_EXPERIMENT_LOCATION_COMMAND("Select experiment location"),
 	
 	// Raw data project
-	NEW_RAW_DATA_PROJECT_SETUP_COMMAND("New raw data analysis project"),
-	NEW_RAW_DATA_PROJECT_COMMAND("Create new raw data analysis project"),
-	OPEN_RAW_DATA_PROJECT_COMMAND("Open raw data analysis project"),
-	CLOSE_RAW_DATA_PROJECT_COMMAND("Close raw data analysis project"),
-	SAVE_RAW_DATA_PROJECT_COMMAND("Save raw data analysis project"),
-	EDIT_RAW_DATA_PROJECT_SETUP_COMMAND("Show raw data analysis project editor"),
-	EDIT_RAW_DATA_PROJECT_COMMAND("Edit raw data analysis project"),
+	NEW_RAW_DATA_EXPERIMENT_SETUP_COMMAND("New raw data analysis experiment"),
+	NEW_RAW_DATA_EXPERIMENT_COMMAND("Create new raw data analysis experiment"),
+	OPEN_RAW_DATA_EXPERIMENT_COMMAND("Open raw data analysis experiment"),
+	CLOSE_RAW_DATA_EXPERIMENT_COMMAND("Close raw data analysis experiment"),
+	SAVE_RAW_DATA_EXPERIMENT_COMMAND("Save raw data analysis experiment"),
+	EDIT_RAW_DATA_EXPERIMENT_SETUP_COMMAND("Show raw data analysis experiment editor"),
+	EDIT_RAW_DATA_EXPERIMENT_COMMAND("Edit raw data analysis experiment"),
 	
 	//	Raw data analysis
 	MSMS_FEATURE_EXTRACTION_SETUP_COMMAND("Set up MSMS feature extraction"),
 	MSMS_FEATURE_EXTRACTION_COMMAND("Extract MSMS features"),
-	SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH("Send MSMS features to IDTracker workbench"),
+	SEND_MSMS_FEATURES_TO_IDTRACKER_WORKBENCH("Send MSMS features to MetIDTracker workbench"),
 	SHOW_SAVED_MSMS_FEATURE_EXTRACTION_METHOD_LIST_COMMAND("Show MSMS feature extraction method list"),
 	LOAD_SAVED_MSMS_FEATURE_EXTRACTION_METHOD_COMMAND("Load MSMS feature extraction method from database"),
 	SHOW_SAVE_MSMS_FEATURE_EXTRACTION_METHOD_DIALOG_COMMAND("Save current MSMS feature extraction method"),
@@ -100,25 +100,25 @@ public enum MainActionCommands {
 	SELECT_RAW_DATA_FOLDER_FOR_WORKLIST("Select raw data folder to extract worklist"),
 	EXTRACT_WORKLIST_FROM_RAW_DATA_FOLDER("Extract worklist"),
 	SAVE_EXTRACTED_WORKLIST_TO_FILE("Save worklist to file"),	
-	ADD_PROJECT_METADATA_COMMAND("Add project metadata"),
-	SAVE_PROJECT_METADATA_COMMAND("Save project metadata"),
-	SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND("Set project database upload parameters"),
-	SEND_PROJECT_DATA_TO_DATABASE_COMMAND("Send project data to database"),
-	CLEAR_PROJECT_METADATA_COMMAND("Clear project metadata"),
+	ADD_EXPERIMENT_METADATA_COMMAND("Add experiment metadata"),
+	SAVE_EXPERIMENT_METADATA_COMMAND("Save experiment metadata"),
+	SET_EXPERIMENT_DATA_UPLOAD_PARAMETERS_COMMAND("Set experiment database upload parameters"),
+	SEND_EXPERIMENT_DATA_TO_DATABASE_COMMAND("Send experiment data to database"),
+	CLEAR_EXPERIMENT_METADATA_COMMAND("Clear experiment metadata"),
 
 	ACTIVATE_DATA_PIPELINE_COMMAND("Activate data pipeline"),
 	DELETE_DATA_PIPELINE_COMMAND("Delete data pipeline"),
 	EDIT_DATA_PIPELINE_COMMAND("Edit data pipeline"),
 	CONFIRM_ASSAY_CHANGE_COMMAND("Confirm assay change"),
 
-	EDIT_PROJECT_NAME_COMMAND("Edit project name"),
-	EDIT_PROJECT_DESCRIPTION_COMMAND("Edit project description"),
-	SAVE_NEW_PROJECT_NAME_COMMAND("Save new project name"),
-	SAVE_NEW_PROJECT_DESCRIPTION_COMMAND("Save new project description"),
+	EDIT_EXPERIMENT_NAME_COMMAND("Edit experiment name"),
+	EDIT_EXPERIMENT_DESCRIPTION_COMMAND("Edit experiment description"),
+	SAVE_NEW_EXPERIMENT_NAME_COMMAND("Save new experiment name"),
+	SAVE_NEW_EXPERIMENT_DESCRIPTION_COMMAND("Save new experiment description"),
 
 	//	Preferences
 	SAVE_PREFERENCES_COMMAND("Save program preferences"),
-	DEFAULT_DIR_BROWSE_COMMAND("Browse for default project directory"),
+	DEFAULT_DIR_BROWSE_COMMAND("Browse for default experiment directory"),
 	DEFAULT_DATA_DIR_BROWSE_COMMAND("Browse for default data directory"),
 	RAW_DATA_REPOSITORY_DIR_BROWSE_COMMAND("Browse for raw data repository"),
 	QUAL_AUTOMATION_BROWSE_COMMAND("Browse for QualAutomation binary"),
@@ -212,7 +212,7 @@ public enum MainActionCommands {
 	SAVE_NEW_FACTOR_COMMAND("Save new factor"),
 	SAVE_EDITED_FACTOR_COMMAND("Save edited factor"),
 	SAVE_DESIGN_TO_LIMS_COMMAND("Save design to LIMS"),
-	SEND_DESIGN_TO_PROJECT_COMMAND("Send design to project"),
+	SEND_DESIGN_TO_EXPERIMENT_COMMAND("Send design to experiment"),
 	MATCH_IMPORTED_TO_DESIGN_COMMAND("Match imported data to samples"),
 	ACCEPT_EXCEL_SAMPLE_MATCH_COMMAND("Accept sample assignment"),
 	SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND("Edit reference sample(s) dialog"),
@@ -281,7 +281,7 @@ public enum MainActionCommands {
 	EXPORT_RESULTS_4MPP_COMMAND("Export results for MPP"),
 	EXPORT_RESULTS_4METSCAPE_COMMAND("Export results for MetScape"),
 	EXPORT_RESULTS_4BINNER_COMMAND("Export results for Binner"),
-	EXPORT_RESULTS_TO_MWTAB_COMMAND("Export project report in MWTab format"),
+	EXPORT_RESULTS_TO_MWTAB_COMMAND("Export experiment report in MWTab format"),
 	EXPORT_MZRT_STATISTICS_COMMAND("Export M/Z & RT data for individual samples"),
 	SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG("Prepare raw data for upload"),
 
@@ -365,7 +365,7 @@ public enum MainActionCommands {
 	SHOW_DUPLICATES_MERGE_DIALOG_COMMAND("Show duplicates merge options"),
 	MERGE_DUPLICATES_COMMAND("Merge duplicate entries"),
 	EXPORT_DUPLICATES_COMMAND("Export duplicate entries"),
-	EXPORT_RESULTS_TO_EXCEL_COMMAND("Export project report to Excel"),
+	EXPORT_RESULTS_TO_EXCEL_COMMAND("Export experiment report to Excel"),
 	EXPORT_RESULTS_FOR_METABOLOMICS_WORKBENCH_COMMAND("Export results for metabolomics workbench"),
 	CHECK_FOR_DUPLICATE_NAMES_COMMAND("Check for duplicate names"),	
 	SHOW_ONLY_PROBLEM_CLUSTERS_COMMAND("Show only problem clusters"),	
@@ -862,8 +862,8 @@ public enum MainActionCommands {
 	ASSIGN_STANDARD_FEATURE_ANNOTATIONS_TO_FEATURE_DIALOG_COMMAND("Assign standard feature annotations to feature"),
 	SAVE_STANDARD_FEATURE_ANNOTATION_ASSIGNMENT_COMMAND("Save standard feature annotation assignment"),
 	
-	//	ID tracker data explorer
-	SHOW_ID_TRACKER_DATA_EXPLORER_PLOT("Show ID-tracker data explorer"),
+	//	MetIDTracker data explorer
+	SHOW_IDTRACKER_DATA_EXPLORER_PLOT("Show MetIDtracker data explorer"),
 	
 	//	Linking raw data 
 	INDEX_RAW_DATA_REPOSITORY_COMMAND("Index raw data repository"),
@@ -949,17 +949,17 @@ public enum MainActionCommands {
 	CLEAN_AND_ZIP_COMMAND("Prepare raw data for upload"),
 
 	// ID workbench panel commands
-	SHOW_ID_TRACKER_MANAGER_COMMAND("Show ID tracker manager"),
+	SHOW_IDTRACKER_MANAGER_COMMAND("Show MetIDTracker manager"),
 	LOAD_FEATURES_FOR_ID_COMMAND("Load features for identification"),
 	ID_SETUP_DIALOG_COMMAND("Identification setup"),
 	IDDA_SETUP_DIALOG_COMMAND("IDDA experiment import setup"),
 	IDDA_IMPORT_COMMAND("Import IDDA experiment data"),
-	IDTRACKER_FEATURE_SEARCH_COMMAND("Search IDTracker features"),
-	IDTRACKER_RESET_FORM_COMMAND("Reset IDTracker search form"),
-	IDTRACKER_REFRESH_FORM_OPTIONS_COMMAND("Refresh IDTracker search form options"),
-	IDTRACKER_EXPERIMENT_FEATURE_SEARCH_COMMAND("Search IDTracker features for experiment"),
-	IDTRACKER_EXPERIMENT_RESET_FORM_COMMAND("Reset IDTracker experiment search form"),
-	IDTRACKER_EXPERIMENT_REFRESH_FORM_OPTIONS_COMMAND("Refresh IDTracker experiment search form options"),
+	IDTRACKER_FEATURE_SEARCH_COMMAND("Search MetIDTracker features"),
+	IDTRACKER_RESET_FORM_COMMAND("Reset MetIDTracker search form"),
+	IDTRACKER_REFRESH_FORM_OPTIONS_COMMAND("Refresh MetIDTracker search form options"),
+	IDTRACKER_EXPERIMENT_FEATURE_SEARCH_COMMAND("Search MetIDTracker features for experiment"),
+	IDTRACKER_EXPERIMENT_RESET_FORM_COMMAND("Reset MetIDTracker experiment search form"),
+	IDTRACKER_EXPERIMENT_REFRESH_FORM_OPTIONS_COMMAND("Refresh MetIDTracker experiment search form options"),
 	
 	RELOAD_ACTIVE_MSMS_FEATURES("Reload complete active MSMS feature set"),
 	RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES("Reload features for active MSMS cluster set"),
@@ -1002,25 +1002,25 @@ public enum MainActionCommands {
 	SETUP_SPECTRUM_ENTROPY_SCORING("Set parameters for MSMS entropy-based scoring"),
 	RECALCULATE_SPECTRUM_ENTROPY_SCORES("Recalculate entropy-based MSMS scores"),
 	
-	//	IDTracker export
-	SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND("IDTracker data export setup"),
-	EXPORT_IDTRACKER_DATA_COMMAND("Export IDTracker data"),
-	RESET_IDTRACKER_DATA_EXPORT_FIELDS_COMMAND("Reset IDTracker data export fields"),
+	//	MetIDTracker export
+	SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND("MetIDTracker data export setup"),
+	EXPORT_IDTRACKER_DATA_COMMAND("Export MetIDTracker data"),
+	RESET_IDTRACKER_DATA_EXPORT_FIELDS_COMMAND("Reset MetIDTracker data export fields"),
 	SHOW_MSMS_CLUSTER_DATA_EXPORT_DIALOG_COMMAND("MSMS clusters data export setup"),
 	EXPORT_MSMS_CLUSTER_DATA_COMMAND("Export MSMS clusters data"),
 	EXPORT_MSMS_CLUSTER_DATA_FOR_SIRIUS_COMMAND("Export MSMS clusters data for SIRIUS"),
 	
 	//	Tracker search dialog
-	SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND("IDTracker database search setup"),
-	SHOW_ID_TRACKER_SAVED_QUERIES_LIST_COMMAND("Show IDTracker saved queries list"),
-	LOAD_ID_TRACKER_SAVED_QUERY_COMMAND("Load saved IDTracker search query"),
-	SHOW_ID_TRACKER_SAVE_QUERY_DIALOG_COMMAND("Save current IDTracker search query"),
-	ID_TRACKER_SAVE_QUERY_COMMAND("Save IDTracker search query to database"),
-	ID_TRACKER_DELETE_QUERY_COMMAND("Delete selected IDTracker search query"),
+	SHOW_IDTRACKER_SEARCH_DIALOG_COMMAND("MetIDTracker database search setup"),
+	SHOW_IDTRACKER_SAVED_QUERIES_LIST_COMMAND("Show MetIDTracker saved queries list"),
+	LOAD_IDTRACKER_SAVED_QUERY_COMMAND("Load saved MetIDTracker search query"),
+	SHOW_IDTRACKER_SAVE_QUERY_DIALOG_COMMAND("Save current MetIDTracker search query"),
+	IDTRACKER_SAVE_QUERY_COMMAND("Save MetIDTracker search query to database"),
+	IDTRACKER_DELETE_QUERY_COMMAND("Delete selected MetIDTracker search query"),
 	
 	//	Tracker by experiment search dialog
-	SHOW_ID_TRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND("IDTracker database search by MZ/RT setup"),
-	SEARCH_ID_TRACKER_BY_EXPERIMENT_MZ_RT_COMMAND("Get selected MZ/RT data from IDTracker"),
+	SHOW_IDTRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND("MetIDTracker database search by MZ/RT setup"),
+	SEARCH_IDTRACKER_BY_EXPERIMENT_MZ_RT_COMMAND("Get selected MZ/RT data from MetIDTracker"),
 	SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND("Active data set search by MZ/RT setup"),
 	SEARCH_ACTIVE_DATA_SET_BY_MZ_RT_COMMAND("Get selected MZ/RT data from active data set"),
 	
@@ -1074,7 +1074,7 @@ public enum MainActionCommands {
 	SELECT_SAMPLE_TYPE_COMMAND("Sselect sample type"),
 	SEARCH_SAMPLE_TYPES_COMMAND("Search sample types database"),
 	
-	//	IDtracker data upload wizard
+	//	MetIDTracker data upload wizard
 	COMPLETE_EXPERIMENT_DEFINITION_COMMAND("Complete experiment definition"),
 	COMPLETE_SAMPLE_LIST_DEFINITION_COMMAND("Complete sample list definition"),
 	COMPLETE_SAMPLE_PREP_DEFINITION_COMMAND("Complete sample preparation definition"),
@@ -1134,7 +1134,7 @@ public enum MainActionCommands {
 	FILTER_SELECTED_MS_FEATURES_IN_TABLE("Show only selected in feature table"),
 	
 	
-	//	ID tracker MSMS-feature plot
+	//	MetIDTracker MSMS-feature plot
 	REFRESH_MSMS_FEATURE_PLOT("Refresh MSMS feature plot"),
 	CREATE_NEW_MSMS_FEATURE_COLLECTION_FROM_SELECTED("Create new collection from selected features"),
 	ADD_SELECTED_TO_EXISTING_MSMS_FEATURE_COLLECTION("Add selected features to existing collection"),

@@ -170,8 +170,8 @@ public class IdTrackerPasswordActionUnlockDialog extends JDialog {
 		};
 		btnCancel.addActionListener(al);
 
-		btnLogIn = new JButton(MainActionCommands.VERIFY_TRACKER_PASSWORD_COMMAND.getName());
-		btnLogIn.setActionCommand(MainActionCommands.VERIFY_TRACKER_PASSWORD_COMMAND.getName());
+		btnLogIn = new JButton(MainActionCommands.VERIFY_IDTRACKER_PASSWORD_COMMAND.getName());
+		btnLogIn.setActionCommand(MainActionCommands.VERIFY_IDTRACKER_PASSWORD_COMMAND.getName());
 		btnLogIn.addActionListener(listener);
 		GridBagConstraints gbc_btnLogIn = new GridBagConstraints();
 		gbc_btnLogIn.insets = new Insets(0, 0, 0, 5);

@@ -125,8 +125,8 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 */
 		
 		searchIdTrackerButton = GuiUtils.addButton(this, null, searchIdTrackerIcon, commandListener,
-				MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_IDTRACKER_SEARCH_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_IDTRACKER_SEARCH_DIALOG_COMMAND.getName(),
 				buttonDimension);
 		
 		addSeparator(buttonDimension);
@@ -196,8 +196,8 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 		addSeparator(buttonDimension);
 		
 		bubblePlotButton = GuiUtils.addButton(this, null, bubblePlotIcon, commandListener,
-				MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT.getName(),
-				MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT.getName(), buttonDimension);
+				MainActionCommands.SHOW_IDTRACKER_DATA_EXPLORER_PLOT.getName(),
+				MainActionCommands.SHOW_IDTRACKER_DATA_EXPLORER_PLOT.getName(), buttonDimension);
 		
 		editFeatureCollectionButton = GuiUtils.addButton(this, null, editFeatureCollectionIcon, commandListener,
 				MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName(),
@@ -222,7 +222,7 @@ public class IDWorkbenchToolbar extends CommonToolbar{
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
 
 	}

@@ -113,9 +113,9 @@ public class DesignLevelAssignmentDialog extends JDialog implements ActionListen
 		selectorMap = new TreeMap<ExperimentDesignFactor, JComboBox<ExperimentDesignLevel>>();
 		int rowCount = 1;
 
-		if(MRC2ToolBoxCore.getCurrentProject() != null) {
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
 
-			ExperimentDesign design = MRC2ToolBoxCore.getCurrentProject().getExperimentDesign();
+			ExperimentDesign design = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign();
 
 			for(ExperimentDesignFactor factor : design.getFactors()) {
 
@@ -197,7 +197,7 @@ public class DesignLevelAssignmentDialog extends JDialog implements ActionListen
 					samples.stream().forEach(s -> s.getDesignCell().put(entry.getKey(), selectedLevel));
 				}
 			}
-			MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+			MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 			dispose();
 		}
 	}

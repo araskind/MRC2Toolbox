@@ -50,7 +50,7 @@ public class MassDifferenceAssignmentTask extends AbstractTask {
 		super();
 		this.massAccuracy = massAccuracy;
 
-		project = MRC2ToolBoxCore.getCurrentProject();
+		project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		dataPipeline = project.getActiveDataPipeline();
 		featureClusters = 
 				project.getMsFeatureClustersForDataPipeline(dataPipeline);

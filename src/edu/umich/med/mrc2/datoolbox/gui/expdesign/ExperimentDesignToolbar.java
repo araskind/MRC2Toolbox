@@ -51,7 +51,7 @@ public class ExperimentDesignToolbar extends CommonToolbar {
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 
 		if (project == null)
 			saveDesignButton.setEnabled(false);

@@ -119,7 +119,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 	public void run() {
 
 		setStatus(TaskStatus.PROCESSING);
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		library = currentProject.getCompoundLibraryForDataPipeline(dataPipeline);
 		dataParsed = false;
 		initDataMatrixes();

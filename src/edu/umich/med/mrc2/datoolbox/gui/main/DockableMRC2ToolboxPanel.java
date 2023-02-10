@@ -99,7 +99,7 @@ public abstract class DockableMRC2ToolboxPanel extends DefaultSingleCDockable
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		if(e.getActionCommand().equals(MainActionCommands.VERIFY_TRACKER_PASSWORD_COMMAND.getName()))
+		if(e.getActionCommand().equals(MainActionCommands.VERIFY_IDTRACKER_PASSWORD_COMMAND.getName()))
 			verifyAdminPassword();	
 	}
 	
@@ -190,7 +190,7 @@ public abstract class DockableMRC2ToolboxPanel extends DefaultSingleCDockable
 		//	Implement specifics in other panels
 	}
 
-	public void closeProject() {
+	public void closeExperiment() {
 		currentProject = null;
 		activeDataPipeline = null;
 	}

@@ -299,7 +299,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 			errors.add("Name can not be empty.");
 		
 		String nameError = null;
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() == null)
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
 			nameError = validateNameAgainstDatabase(newName);
 		else
 			nameError = validateNameAgainstProject(newName);
@@ -332,7 +332,7 @@ public class MSMSClusterDataSetEditorDialog extends JDialog {
 	private String validateNameAgainstProject(String newName) {
 		
 		Collection<MSMSClusterDataSet> dataSets = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMsmsClusterDataSets();
+				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getMsmsClusterDataSets();
 		MSMSClusterDataSet existing = null;
 
 		if(this.dataSet == null) {

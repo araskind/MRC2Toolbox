@@ -64,8 +64,8 @@ public class ClusterUtils {
 
 	public static Matrix createClusterCorrelationMatrix(MsFeatureCluster fcluster, boolean activeOnly) {
 
-		Matrix dataMatrix = MRC2ToolBoxCore.getCurrentProject()
-				.getDataMatrixForDataPipeline(MRC2ToolBoxCore.getCurrentProject().getActiveDataPipeline());
+		Matrix dataMatrix = MRC2ToolBoxCore.getActiveMetabolomicsExperiment()
+				.getDataMatrixForDataPipeline(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline());
 
 		if(dataMatrix == null)
 			return null;
@@ -89,8 +89,8 @@ public class ClusterUtils {
 
 		//	TODO	Select active samples - this is a temporary fix untill design subsets are implemented
 		ArrayList<Long>rowList = new ArrayList<Long>();
-		for(DataFile file : MRC2ToolBoxCore.getCurrentProject().getDataFilesForAcquisitionMethod(
-				MRC2ToolBoxCore.getCurrentProject().getActiveDataPipeline().getAcquisitionMethod())) {
+		for(DataFile file : MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getDataFilesForAcquisitionMethod(
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline().getAcquisitionMethod())) {
 
 			if(file.isEnabled())
 				rowList.add(dataMatrix.getRowForLabel(file));

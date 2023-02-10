@@ -86,10 +86,10 @@ public class IDTrackerLimsManagerMenuBar extends CommonMenuBar {
 		limsMenu.addSeparator();
 
 		newProjectMenuItem = addItem(limsMenu, 
-				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND, 
+				MainActionCommands.NEW_IDTRACKER_PROJECT_DIALOG_COMMAND, 
 				newCdpIdProjectIcon);
 		newExperimentMenuItem = addItem(limsMenu, 
-				MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND, 
+				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND, 
 				newCdpIdExperimentIcon);
 		
 		add(limsMenu);
@@ -123,7 +123,7 @@ public class IDTrackerLimsManagerMenuBar extends CommonMenuBar {
 		add(dataLoadMenu);		
 	}
 
-	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

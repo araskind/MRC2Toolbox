@@ -52,7 +52,7 @@ public class METLIMSToolbar extends CommonToolbar {
 		syncLimsButton,
 		reloadExperimentFromLimsButton,
 		deleteExperimentButton,
-		sendDesignToProjectButton,
+		sendDesignToExperimentButton,
 		createExperimentDirButton;
 
 	public METLIMSToolbar(ActionListener commandListener) {
@@ -78,9 +78,9 @@ public class METLIMSToolbar extends CommonToolbar {
 
 		addSeparator(buttonDimension);
 
-		sendDesignToProjectButton = GuiUtils.addButton(this, null, sendDesignToProjectIcon, commandListener,
-				MainActionCommands.SEND_DESIGN_TO_PROJECT_COMMAND.getName(),
-				MainActionCommands.SEND_DESIGN_TO_PROJECT_COMMAND.getName(),
+		sendDesignToExperimentButton = GuiUtils.addButton(this, null, sendDesignToProjectIcon, commandListener,
+				MainActionCommands.SEND_DESIGN_TO_EXPERIMENT_COMMAND.getName(),
+				MainActionCommands.SEND_DESIGN_TO_EXPERIMENT_COMMAND.getName(),
 				buttonDimension);
 
 		createExperimentDirButton = GuiUtils.addButton(this, null, createExperimentDirIcon, commandListener,
@@ -90,7 +90,7 @@ public class METLIMSToolbar extends CommonToolbar {
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
 
 	}

@@ -151,7 +151,7 @@ public class MsFeatureCluster implements Serializable {
 			return null;
 
 		DataPipeline assay = clusterFeatures.keySet().iterator().next();
-		Matrix dataMatrix = MRC2ToolBoxCore.getCurrentProject().
+		Matrix dataMatrix = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getDataMatrixForDataPipeline(assay);
 
 		Collection<MsFeature> sorted = null;
@@ -171,7 +171,7 @@ public class MsFeatureCluster implements Serializable {
 
 		//	TODO	Select active samples - this is a temporary fix untill design subsets are implemented
 		ArrayList<Long>rowList = new ArrayList<Long>();
-		for(DataFile file : MRC2ToolBoxCore.getCurrentProject().
+		for(DataFile file : MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getDataFilesForAcquisitionMethod(assay.getAcquisitionMethod())) {
 
 			if(file.isEnabled())

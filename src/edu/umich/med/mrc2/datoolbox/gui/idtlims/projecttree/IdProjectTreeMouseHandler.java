@@ -79,33 +79,33 @@ public class IdProjectTreeMouseHandler extends MouseAdapter {
 		projectPopupMenu = new JPopupMenu();
 
 		editProjectMenuItem = GuiUtils.addMenuItem(projectPopupMenu,
-				MainActionCommands.EDIT_CPD_ID_PROJECT_DIALOG_COMMAND.getName(), popupListener,
-				MainActionCommands.EDIT_CPD_ID_PROJECT_DIALOG_COMMAND.getName());
+				MainActionCommands.EDIT_IDTRACKER_PROJECT_DIALOG_COMMAND.getName(), popupListener,
+				MainActionCommands.EDIT_IDTRACKER_PROJECT_DIALOG_COMMAND.getName());
 		editProjectMenuItem.setIcon(editIcon);
 
 		deleteProjectMenuItem = GuiUtils.addMenuItem(projectPopupMenu,
-				MainActionCommands.DELETE_CPD_ID_PROJECT_COMMAND.getName(), popupListener,
-				MainActionCommands.DELETE_CPD_ID_PROJECT_COMMAND.getName());
+				MainActionCommands.DELETE_IDTRACKER_PROJECT_COMMAND.getName(), popupListener,
+				MainActionCommands.DELETE_IDTRACKER_PROJECT_COMMAND.getName());
 		deleteProjectMenuItem.setIcon(deleteIcon);
 		
 		projectPopupMenu.addSeparator();
 		
 		addExperimentMenuItem = GuiUtils.addMenuItem(projectPopupMenu,
-				MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName(), popupListener,
-				MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName());
+				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName(), popupListener,
+				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName());
 		addExperimentMenuItem.setIcon(newCdpIdExperimentIcon);
 
 		//	Experiment
 		experimentPopupMenu = new JPopupMenu();
 
 		editExperimentMenuItem = GuiUtils.addMenuItem(experimentPopupMenu,
-				MainActionCommands.EDIT_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName(), popupListener,
-				MainActionCommands.EDIT_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName());
+				MainActionCommands.EDIT_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName(), popupListener,
+				MainActionCommands.EDIT_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName());
 		editExperimentMenuItem.setIcon(editIcon);
 
 		deleteExperimentMenuItem = GuiUtils.addMenuItem(experimentPopupMenu,
-				MainActionCommands.DELETE_CPD_ID_EXPERIMENT_COMMAND.getName(), popupListener,
-				MainActionCommands.DELETE_CPD_ID_EXPERIMENT_COMMAND.getName());
+				MainActionCommands.DELETE_IDTRACKER_EXPERIMENT_COMMAND.getName(), popupListener,
+				MainActionCommands.DELETE_IDTRACKER_EXPERIMENT_COMMAND.getName());
 		deleteExperimentMenuItem.setIcon(deleteIcon);
 		
 		experimentPopupMenu.addSeparator();

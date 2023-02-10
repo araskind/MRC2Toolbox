@@ -656,13 +656,13 @@ public class DockableTemplatesPanel extends DefaultSingleCDockable implements Ba
 
 			title = "Select default project directory:";
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			chooser.setCurrentDirectory(new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()));
+			chooser.setCurrentDirectory(new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()));
 		}
 		if (command.equals(MainActionCommands.RAW_DATA_REPOSITORY_DIR_BROWSE_COMMAND.getName())) {
 
 			title = "Select raw data repository:";
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			chooser.setCurrentDirectory(new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()));
+			chooser.setCurrentDirectory(new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()));
 		}	
 		if (command.equals(MainActionCommands.DEFAULT_DATA_DIR_BROWSE_COMMAND.getName())) {
 
@@ -765,7 +765,7 @@ public class DockableTemplatesPanel extends DefaultSingleCDockable implements Ba
 
 		prefs = preferences;
 
-		defaultProjectDirField.setText(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
+		defaultProjectDirField.setText(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory());
 		defaultDataDirField.setText(MRC2ToolBoxConfiguration.getDefaultDataDirectory());
 		rawDataRepositoryField.setText(MRC2ToolBoxConfiguration.getRawDataRepository());
 		qualAutomationTextField.setText(MRC2ToolBoxConfiguration.getQualAutomationExecutableFile());

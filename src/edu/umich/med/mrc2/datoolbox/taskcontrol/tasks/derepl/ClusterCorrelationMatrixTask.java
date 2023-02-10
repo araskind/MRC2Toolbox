@@ -38,7 +38,7 @@ public class ClusterCorrelationMatrixTask extends AbstractTask {
 	
 	public ClusterCorrelationMatrixTask() {
 		
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		activeDataPipeline = currentProject.getActiveDataPipeline();
 	}
 

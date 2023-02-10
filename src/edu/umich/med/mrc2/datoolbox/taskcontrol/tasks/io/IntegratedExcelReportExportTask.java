@@ -109,7 +109,7 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 		this.assayFeatureMap = featureMap;
 		this.integratedSet = integratedSet;
 		this.exportFieldNaming = exportFieldNaming;
-		this.currentProject = MRC2ToolBoxCore.getCurrentProject();
+		this.currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
 		activeSamples =
 			currentProject.getExperimentDesign().getActiveSamplesForDesignSubset(experimentDesignSubset);

@@ -87,7 +87,7 @@ public class TreeDropTarget implements DropTargetListener {
 		JTree tree = (JTree) dtc.getComponent();
 		TreePath parentpath = tree.getClosestPathForLocation(pt.x, pt.y);
 		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) parentpath.getLastPathComponent();
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Set<MsFeatureCluster> assayClusters = 
 				project.getMsFeatureClustersForDataPipeline(project.getActiveDataPipeline());
 

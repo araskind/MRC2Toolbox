@@ -139,7 +139,7 @@ public class DataExportDialog extends JDialog
 		}
 		setPreferredSize(new Dimension(800, 300));
 		setIconImage(((ImageIcon) exportIcon).getImage());
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		DataPipeline pipeline = currentProject.getActiveDataPipeline();
 		String dsName = currentProject.getActiveFeatureSetForDataPipeline(pipeline).getName();
 		setTitle("Export results for data pipeline " + pipeline.getName() + " (" + dsName + ")");
@@ -422,8 +422,8 @@ public class DataExportDialog extends JDialog
 			return;
 		}	
 		DataExportTask det = new DataExportTask(
-				MRC2ToolBoxCore.getCurrentProject(),
-				MRC2ToolBoxCore.getCurrentProject().getActiveDataPipeline(),
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
 				getResultsFile(),
 				getExportType(),
 				getMissingExportType(),
@@ -449,7 +449,7 @@ public class DataExportDialog extends JDialog
 	
 	private String createExportFile(MainActionCommands type) {
 
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
 		String typeString = "_DATA_";
 

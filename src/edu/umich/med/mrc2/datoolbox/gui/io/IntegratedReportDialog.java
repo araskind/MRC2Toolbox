@@ -249,7 +249,7 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 		gbc_btnNewButton.gridy = 0;
 		panel.add(btnNewButton, gbc_btnNewButton);
 
-		setPanelDataFromProject(currentProject);
+		setPanelDataFromExperiment(currentProject);
 		pack();
 	}
 
@@ -314,7 +314,7 @@ public class IntegratedReportDialog  extends JDialog implements ActionListener{
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void setPanelDataFromProject(DataAnalysisProject currentProject) {
+	public void setPanelDataFromExperiment(DataAnalysisProject currentProject) {
 
 		baseDirectory = currentProject.getExportsDirectory();
 		//	Design selector

@@ -52,18 +52,18 @@ public class IDTrackerDataSearchDialogToolbar extends CommonToolbar {
 		super(commandListener);
 
 		loadSearchQueryButton = GuiUtils.addButton(this, null, loadSearchQueryIcon, commandListener,
-				MainActionCommands.SHOW_ID_TRACKER_SAVED_QUERIES_LIST_COMMAND.getName(),
-				MainActionCommands.SHOW_ID_TRACKER_SAVED_QUERIES_LIST_COMMAND.getName(),
+				MainActionCommands.SHOW_IDTRACKER_SAVED_QUERIES_LIST_COMMAND.getName(),
+				MainActionCommands.SHOW_IDTRACKER_SAVED_QUERIES_LIST_COMMAND.getName(),
 				buttonDimension);
 
 		saveSearchQueryButton = GuiUtils.addButton(this, null, saveSearchQueryIcon, commandListener,
-				MainActionCommands.SHOW_ID_TRACKER_SAVE_QUERY_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_ID_TRACKER_SAVE_QUERY_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_IDTRACKER_SAVE_QUERY_DIALOG_COMMAND.getName(),
+				MainActionCommands.SHOW_IDTRACKER_SAVE_QUERY_DIALOG_COMMAND.getName(),
 				buttonDimension);
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
 
 	}

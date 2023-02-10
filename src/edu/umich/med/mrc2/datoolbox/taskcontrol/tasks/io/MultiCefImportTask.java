@@ -231,7 +231,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	
 	private void addDataToProject() {
 		
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();		
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();		
 		currentProject.addDataPipeline(dataPipeline);
 
 		//	Attach library
@@ -256,7 +256,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	
 	private void saveDataMatrixes() {
 		
-		DataAnalysisProject projectToSave = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject projectToSave = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if (projectToSave.getDataMatrixForDataPipeline(dataPipeline) != null) {
 
 			taskDescription = "Saving data matrix for  " + projectToSave.getName() +

@@ -143,13 +143,13 @@ public class PlotDataSetUtils {
 			ExperimentDesignFactor subCategory,
 			boolean splitByBatch) {
 
-		if (MRC2ToolBoxCore.getCurrentProject() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples().isEmpty())
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
 			return null;
 
 		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
@@ -163,7 +163,7 @@ public class PlotDataSetUtils {
 		}
 		else {
 			Collection<ExperimentalSample> samples =
-					MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+					MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 
 			Set<Set<ExperimentDesignLevel>>seriesSet =
 					PlotDataSetUtils.createExpLevelSeries(activeDesign, groupingType, category, subCategory);
@@ -224,18 +224,18 @@ public class PlotDataSetUtils {
 			FileSortingOrder sortingOrder,
 			ExperimentDesignSubset activeDesign) {
 
-		if (MRC2ToolBoxCore.getCurrentProject() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples().isEmpty())
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
 			return null;
 
 		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
 		DataFile[] sorted = DataSetUtils.sortFiles(pipeline, sortingOrder, activeDesign);
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Collection<ExperimentalSample> samples = 
 				project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 		int[] batches = project.getDataFilesForAcquisitionMethod(pipeline.getAcquisitionMethod()).
@@ -310,7 +310,7 @@ public class PlotDataSetUtils {
 		}
 		//	Filter level combinations to exclude non-existent
 		Collection<ExperimentalSample> samples =
-				MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 
 		for(Set<ExperimentDesignLevel>levelSet : seriesSet) {
 
@@ -360,18 +360,18 @@ public class PlotDataSetUtils {
 			FileSortingOrder sortingOrder,
 			ExperimentDesignSubset activeDesign){
 
-		if (MRC2ToolBoxCore.getCurrentProject() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples().isEmpty())
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
 			return null;
 
 		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
 		DataFile[] sorted = DataSetUtils.sortFiles(pipeline, sortingOrder, activeDesign);
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Collection<ExperimentalSample> samples = 
 				project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 
@@ -409,17 +409,17 @@ public class PlotDataSetUtils {
 
 	public static Map<DataFile, ExperimentalSample> createDataFileSampleMap(DataFile[] files) {
 
-		if (MRC2ToolBoxCore.getCurrentProject() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples().isEmpty())
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
 			return null;
 
 		Map<DataFile, ExperimentalSample>dataFileMap = new LinkedHashMap<DataFile, ExperimentalSample>();
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
 		for(DataFile f : files) {
 
@@ -434,7 +434,7 @@ public class PlotDataSetUtils {
 
 	public static Map<DataFile, ExperimentalSample> createDataFileSampleMap(MsFeature[] selectedFeatures) {
 
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if(project == null)
 			return null;
 		

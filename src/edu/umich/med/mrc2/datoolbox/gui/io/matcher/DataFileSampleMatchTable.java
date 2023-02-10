@@ -87,7 +87,7 @@ public class DataFileSampleMatchTable extends BasicTable {
 		
 		model.setModelFromSampleDataResultObjects(objects);
 		TreeSet<ExperimentalSample> samples = 
-				MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples();
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples();
 		
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(samples, this));
@@ -140,7 +140,7 @@ public class DataFileSampleMatchTable extends BasicTable {
 		
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(
-						MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples(), this));
+						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples(), this));
 
 		tca.adjustColumnsExcluding(Collections.singleton(
 				getColumnIndex(DataFileSampleMatchTableModel.ENABLED_COLUMN)));

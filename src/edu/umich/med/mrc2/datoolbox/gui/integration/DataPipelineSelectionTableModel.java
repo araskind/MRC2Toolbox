@@ -44,7 +44,7 @@ public class DataPipelineSelectionTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromProject(DataAnalysisProject currentProject) {
+	public void setTableModelFromExperiment(DataAnalysisProject currentProject) {
 
 		setRowCount(0);
 

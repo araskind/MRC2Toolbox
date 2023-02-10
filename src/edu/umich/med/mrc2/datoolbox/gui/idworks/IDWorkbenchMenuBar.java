@@ -139,11 +139,11 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		databaseSearchMenu.setIcon(searchIconSmall);
 		
 		databaseSearchMenuItem = addItem(databaseSearchMenu, 
-			MainActionCommands.SHOW_ID_TRACKER_SEARCH_DIALOG_COMMAND, 
+			MainActionCommands.SHOW_IDTRACKER_SEARCH_DIALOG_COMMAND, 
 			searchIdTrackerIcon);
 		
 		experimentSearchMenuItem = addItem(databaseSearchMenu, 
-				MainActionCommands.SHOW_ID_TRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND, 
+				MainActionCommands.SHOW_IDTRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND, 
 				searchExperimentIcon);
 				
 		activeDataSetSearchMenuItem = addItem(databaseSearchMenu, 
@@ -247,7 +247,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		explorationMenu.setIcon(bubblePlotIconSmall);
 		
 		bubblePlotMenuItem = addItem(explorationMenu, 
-				MainActionCommands.SHOW_ID_TRACKER_DATA_EXPLORER_PLOT, 
+				MainActionCommands.SHOW_IDTRACKER_DATA_EXPLORER_PLOT, 
 				bubblePlotIcon);
 		
 		dataSetSummaryMenuItem = addItem(explorationMenu, 
@@ -280,7 +280,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		add(exportMenu);
 	}
 
-	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

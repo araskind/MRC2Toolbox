@@ -132,7 +132,7 @@ public class IdTrackerLoginDialog extends JDialog implements ActionListener {
 		passwordTextField.setColumns(10);
 
 		btnLogIn = new JButton("Log in");
-		btnLogIn.setActionCommand(MainActionCommands.LOGIN_TO_ID_TRACKER_COMMAND.getName());
+		btnLogIn.setActionCommand(MainActionCommands.IDTRACKER_LOGIN_COMMAND.getName());
 		btnLogIn.addActionListener(listener);
 		
 		capsLockLabel = new JLabel("");
@@ -184,7 +184,7 @@ public class IdTrackerLoginDialog extends JDialog implements ActionListener {
 		
 		changePasswordButton = new JButton("Change password");
 		changePasswordButton.setIcon(GuiUtils.getIcon("key", 24));
-		changePasswordButton.setActionCommand(MainActionCommands.CHANGE_ID_TRACKER_PASSWORD_DIALOG_COMMAND.getName());
+		changePasswordButton.setActionCommand(MainActionCommands.CHANGE_IDTRACKER_PASSWORD_DIALOG_COMMAND.getName());
 		changePasswordButton.addActionListener(this);
 		GridBagConstraints gbc_changePasswordButton = new GridBagConstraints();
 		gbc_changePasswordButton.insets = new Insets(0, 0, 0, 5);
@@ -208,12 +208,12 @@ public class IdTrackerLoginDialog extends JDialog implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		if(e.getActionCommand().equals(MainActionCommands.CHANGE_ID_TRACKER_PASSWORD_DIALOG_COMMAND.getName())) {
+		if(e.getActionCommand().equals(MainActionCommands.CHANGE_IDTRACKER_PASSWORD_DIALOG_COMMAND.getName())) {
 			passwordChangeDialog = new IdTrackerPasswordChangeDialog(this);
 			passwordChangeDialog.setLocationRelativeTo(this);
 			passwordChangeDialog.setVisible(true);
 		}
-		if(e.getActionCommand().equals(MainActionCommands.CHANGE_ID_TRACKER_PASSWORD_COMMAND.getName())) {
+		if(e.getActionCommand().equals(MainActionCommands.CHANGE_IDTRACKER_PASSWORD_COMMAND.getName())) {
 			changePassword();
 		}
 	}

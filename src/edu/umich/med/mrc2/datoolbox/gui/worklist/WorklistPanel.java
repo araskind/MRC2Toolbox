@@ -344,10 +344,10 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		if(manifestString == null || manifestString.isEmpty())
 			return;
 
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
+		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()).getAbsoluteFile();
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if (currentProject != null)
-			baseDirectory = MRC2ToolBoxCore.getCurrentProject().getExportsDirectory();
+			baseDirectory = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory();
 
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
@@ -394,10 +394,10 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		if(worklistString == null || worklistString.isEmpty())
 			return;
 
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
+		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()).getAbsoluteFile();
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if (currentProject != null)
-			baseDirectory = MRC2ToolBoxCore.getCurrentProject().getExportsDirectory();
+			baseDirectory = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory();
 
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
@@ -522,18 +522,18 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 		clearPanel();
 		super.switchDataPipeline(project, newDataPipeline);
-		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromExperiment(currentProject, activeDataPipeline);
 		if(currentProject != null && newDataPipeline != null)
 			showWorklist(currentProject.getWorklistForDataAcquisitionMethod(
 					newDataPipeline.getAcquisitionMethod()));
 	}
 
 	@Override
-	public void closeProject() {
+	public void closeExperiment() {
 
-		super.closeProject();
+		super.closeExperiment();
 		clearPanel();
-		menuBar.updateMenuFromProject(null, null);
+		menuBar.updateMenuFromExperiment(null, null);
 	}
 
 	@Override

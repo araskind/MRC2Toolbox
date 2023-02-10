@@ -334,7 +334,7 @@ public class PepserchResultsImportDialog extends JDialog
 	@Override
 	public void loadPreferences(Preferences preferences) {
 		inputFileDirectory =
-			new File(preferences.get(BASE_DIR, MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).
+			new File(preferences.get(BASE_DIR, MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).
 			getAbsoluteFile();
 	}
 

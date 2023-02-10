@@ -211,11 +211,11 @@ public class RawDataTreeModel extends DefaultTreeModel {
 				dataFile.getAverageSpectra().stream().sorted().
 					forEach(s -> insertNodeInto(new DefaultMutableTreeNode(s), userSpectraNode, getChildCount(userSpectraNode)));
 			}
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
+			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 				DefaultMutableTreeNode ms2featuresNode = new DefaultMutableTreeNode(ms2featuresNodeName);
 				insertNodeInto(ms2featuresNode, newNode, getChildCount(newNode));
 				Collection<MSFeatureInfoBundle> msmsFeatures = 
-						MRC2ToolBoxCore.getActiveRawDataAnalysisProject().getMsFeaturesForDataFile(dataFile);
+						MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getMsFeaturesForDataFile(dataFile);
 				if(msmsFeatures != null && !msmsFeatures.isEmpty()) {
 					
 					msmsFeatures.stream().sorted(rtSorter).

@@ -157,9 +157,9 @@ public class ReferenceSampleManagerDialog extends JDialog implements ActionListe
 				refSampleTable.loadReferenceSamples();
 				refSampleTable.selectSampleRow(sample);
 
-				if(MRC2ToolBoxCore.getCurrentProject() != null) {
-					if(MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSampleById(sample.getId()) != null)
-						MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+				if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
+					if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSampleById(sample.getId()) != null)
+						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 				}
 				referenceSampleEditorDialog.dispose();
 			}
@@ -282,9 +282,9 @@ public class ReferenceSampleManagerDialog extends JDialog implements ActionListe
 					ReferenceSamplesManager.deleteReferenceSample(toDelete);
 					refSampleTable.loadReferenceSamples();
 
-					if(MRC2ToolBoxCore.getCurrentProject() != null) {
-						if(MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSampleById(toDelete.getId()) != null)
-							MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().removeSample(toDelete);
+					if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null) {
+						if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSampleById(toDelete.getId()) != null)
+							MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().removeSample(toDelete);
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block

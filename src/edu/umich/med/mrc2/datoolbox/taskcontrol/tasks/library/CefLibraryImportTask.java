@@ -77,7 +77,7 @@ public class CefLibraryImportTask extends CEFProcessingTask {
 
 		inputCefFile = inputFile;
 		this.dataPipeline = dataPipeline;
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		taskDescription = "Importing library from  " + inputFile.getName();
 		total = 100;
 		processed = 0;

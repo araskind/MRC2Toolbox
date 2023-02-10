@@ -468,7 +468,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	
 	private void showIntegratedReportDialog() {
 		
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if (currentProject == null)
 			return;
 
@@ -1541,7 +1541,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		clearPanel();
 		super.switchDataPipeline(project, newDataPipeline);
-		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromExperiment(currentProject, activeDataPipeline);
 		if (currentProject != null) {
 
 			dataPlot.setActiveDesign(currentProject.getExperimentDesign().getActiveDesignSubset());
@@ -1551,11 +1551,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	}
 
 	@Override
-	public void closeProject() {
+	public void closeExperiment() {
 		// TODO Auto-generated method stub
-		super.closeProject();
+		super.closeExperiment();
 		clearPanel();
-		menuBar.updateMenuFromProject(null, null);
+		menuBar.updateMenuFromExperiment(null, null);
 	}
 
 	@Override

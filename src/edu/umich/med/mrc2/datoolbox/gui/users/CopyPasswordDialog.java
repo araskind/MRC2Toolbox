@@ -96,7 +96,7 @@ public class CopyPasswordDialog extends JDialog implements ActionListener {
 		passwordTextField.setColumns(10);
 		
 		JButton btnCopy = new JButton("Copy");
-		btnCopy.setActionCommand(MainActionCommands.COPY_ID_TRACKER_PASSWORD_COMMAND.getName());
+		btnCopy.setActionCommand(MainActionCommands.COPY_IDTRACKER_PASSWORD_COMMAND.getName());
 		btnCopy.addActionListener(this);
 		GridBagConstraints gbc_btnCopy = new GridBagConstraints();
 		gbc_btnCopy.insets = new Insets(0, 0, 5, 0);
@@ -127,7 +127,7 @@ public class CopyPasswordDialog extends JDialog implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		if(e.getActionCommand().equals(MainActionCommands.COPY_ID_TRACKER_PASSWORD_COMMAND.getName())) {
+		if(e.getActionCommand().equals(MainActionCommands.COPY_IDTRACKER_PASSWORD_COMMAND.getName())) {
 			
 			Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
 			StringSelection stringSelection = new StringSelection(new String(passwordTextField.getPassword()));

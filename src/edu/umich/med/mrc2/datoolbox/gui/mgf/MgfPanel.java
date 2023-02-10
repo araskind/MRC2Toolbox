@@ -100,7 +100,7 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 		loadLayout(layoutConfigFile);
 		populatePanelsMenu();
 		
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultProjectsDirectory());
+		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory());
 	}
 
 	@Override
@@ -268,15 +268,15 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 
 		clearPanel();
 		super.switchDataPipeline(project, newPipeline);
-		menuBar.updateMenuFromProject(currentProject, activeDataPipeline);
+		menuBar.updateMenuFromExperiment(currentProject, activeDataPipeline);
 	}
 
 	@Override
-	public void closeProject() {
+	public void closeExperiment() {
 		// TODO Auto-generated method stub
-		super.closeProject();
+		super.closeExperiment();
 		clearPanel();
-		menuBar.updateMenuFromProject(null, null);
+		menuBar.updateMenuFromExperiment(null, null);
 	}
 
 	@Override

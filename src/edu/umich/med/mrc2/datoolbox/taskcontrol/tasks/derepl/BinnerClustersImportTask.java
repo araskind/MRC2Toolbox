@@ -86,7 +86,7 @@ public class BinnerClustersImportTask extends AbstractTask {
 		this.postprocessorDataFile = postprocessorDataFile;
 
 		clusterList = new HashSet<MsFeatureCluster>();
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		dataPipeline = currentProject.getActiveDataPipeline();
 		taskDescription = "Loading Binner-generated clusters";
 		dataMatrix = currentProject.getDataMatrixForDataPipeline(dataPipeline);

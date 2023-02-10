@@ -53,7 +53,7 @@ public abstract class CommonToolbar extends JToolBar {
 		setAlignmentX(Component.LEFT_ALIGNMENT);
 	}
 
-	public abstract void updateGuiFromProjectAndDataPipeline(
+	public abstract void updateGuiFromExperimentAndDataPipeline(
 			DataAnalysisProject project, DataPipeline newDataPipeline);
 
 }

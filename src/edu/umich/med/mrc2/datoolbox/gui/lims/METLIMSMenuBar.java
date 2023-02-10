@@ -68,7 +68,7 @@ public class METLIMSMenuBar extends CommonMenuBar {
 	
 	// Data retr items
 	private JMenuItem
-		limsExpToProjectMenuItem;
+		limsExpToExperimentMenuItem;
 
 	public METLIMSMenuBar(ActionListener listener) {
 
@@ -105,14 +105,14 @@ public class METLIMSMenuBar extends CommonMenuBar {
 		dataRetrievalMenu = new JMenu("Data retrieval");
 		dataRetrievalMenu.setIcon(sendDesignToProjectIconSmall);
 		
-		limsExpToProjectMenuItem = addItem(dataRetrievalMenu, 
-				MainActionCommands.SEND_DESIGN_TO_PROJECT_COMMAND, 
+		limsExpToExperimentMenuItem = addItem(dataRetrievalMenu, 
+				MainActionCommands.SEND_DESIGN_TO_EXPERIMENT_COMMAND, 
 				sendDesignToProjectIcon);
 		
 		add(dataRetrievalMenu);	
 	}
 
-	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

@@ -72,7 +72,7 @@ public class ColumnFieldMatchTable extends BasicTable {
 		model.setTableModelFromFiles(inputFiles, acquisitionMethod);
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(
-						MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples(), this));
+						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples(), this));
 
 		tca.adjustColumns();
 		//columnModel.getColumnById(DataFileSampleMatchTableModel.ENABLED_COLUMN).setWidth(50);

@@ -123,9 +123,9 @@ public class ExportChartToFileAction extends AbstractAction {
 //			}
 //		}
 		File baseDirectory = new File(
-				MRC2ToolBoxConfiguration.getDefaultProjectsDirectory()).getAbsoluteFile();
-		if (MRC2ToolBoxCore.getCurrentProject() != null)
-			baseDirectory = MRC2ToolBoxCore.getCurrentProject().getExportsDirectory();
+				MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()).getAbsoluteFile();
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null)
+			baseDirectory = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory();
 		String defaultFileName = "New image-" + 
 			MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + 
 			"." + format.getExtension();

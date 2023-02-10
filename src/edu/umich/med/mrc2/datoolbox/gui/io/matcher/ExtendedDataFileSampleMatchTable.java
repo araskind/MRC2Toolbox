@@ -76,7 +76,7 @@ public class ExtendedDataFileSampleMatchTable extends BasicTable {
 			sampleIds, sampleNames, dataFileNames, acquisitionMethod);
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(
-						MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples(), this));
+						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples(), this));
 
 		tca.adjustColumns();
 	}

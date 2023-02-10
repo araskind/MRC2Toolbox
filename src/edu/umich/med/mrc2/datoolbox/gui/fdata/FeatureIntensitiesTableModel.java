@@ -73,7 +73,7 @@ public class FeatureIntensitiesTableModel extends BasicTableModel {
 	public void setTableModelFromFeatureMap(Map<DataPipeline, Collection<MsFeature>> featureMap) {
 
 		setRowCount(0);
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if(project == null)
 			return;
 

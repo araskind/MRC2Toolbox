@@ -314,7 +314,7 @@ public class ReferenceSampleDialog extends JDialog implements ActionListener{
 	
 	public void editReferenceSamples() {
 		
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if(currentProject == null)
 			return;
 		

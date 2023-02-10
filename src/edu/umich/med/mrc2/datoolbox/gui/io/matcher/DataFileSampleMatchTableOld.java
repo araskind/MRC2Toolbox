@@ -81,7 +81,7 @@ public class DataFileSampleMatchTableOld extends BasicTable {
 		model.addFilesForDataPipeline(inputFiles, pipeline);
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(
-						MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples(), this));
+						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples(), this));
 
 		tca.adjustColumnsExcluding(Collections.singleton(
 				getColumnIndex(DataFileSampleMatchTableModelOld.ENABLED_COLUMN)));
@@ -91,7 +91,7 @@ public class DataFileSampleMatchTableOld extends BasicTable {
 		
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(
-						MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples(), this));
+						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples(), this));
 
 		tca.adjustColumnsExcluding(Collections.singleton(
 				getColumnIndex(DataFileSampleMatchTableModelOld.ENABLED_COLUMN)));

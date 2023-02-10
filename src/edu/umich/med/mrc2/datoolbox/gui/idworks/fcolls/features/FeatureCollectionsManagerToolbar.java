@@ -77,7 +77,7 @@ public class FeatureCollectionsManagerToolbar extends CommonToolbar {
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(
+	public void updateGuiFromExperimentAndDataPipeline(
 			DataAnalysisProject project, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
 

@@ -213,7 +213,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 		if (integratedSet != null) {
 
-			MRC2ToolBoxCore.getCurrentProject().deleteIntegratedFeatureClusterSet(integratedSet);
+			MRC2ToolBoxCore.getActiveMetabolomicsExperiment().deleteIntegratedFeatureClusterSet(integratedSet);
 			integratedSet = null;
 			clearPanel();
 			//	TODO find new place for this functionality?
@@ -238,7 +238,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 			warnings.add("Please define a name for the dataset!");
 
 		Optional<MsFeatureClusterSet> nm = 
-				MRC2ToolBoxCore.getCurrentProject().
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getDataIntegrationClusterSets().stream()
 				.filter(s -> s.getName().equalsIgnoreCase(dataSetName)).
 				findFirst();
@@ -295,7 +295,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 	private void acceptIntegratedCompoundList() {
 
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
 		if (integratedSet.getClusters().isEmpty())
 			MessageDialog.showErrorMsg("No identified compounds found.", this.getContentPane());
@@ -394,10 +394,10 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 	}
 
 	@Override
-	public void closeProject() {
+	public void closeExperiment() {
 		// TODO Auto-generated method stub
 
-		super.closeProject();
+		super.closeExperiment();
 		clearPanel();
 //		TODO find new place for this functionality?
 //		toolbar.updateGuiFromProjectAndDataPipeline(null, null);

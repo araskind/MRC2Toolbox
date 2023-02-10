@@ -727,7 +727,7 @@ public class MRC2ToolBoxConfiguration {
 		prefs.put(R_JAVA_DIR_PATH, rJavaDir);
 	}
 
-	public static String getDefaultProjectsDirectory() {
+	public static String getDefaultExperimentsDirectory() {
 		return prefs.get(PROJECTS_DIR, PROJECTS_DIR_DEFAULT);
 	}
 

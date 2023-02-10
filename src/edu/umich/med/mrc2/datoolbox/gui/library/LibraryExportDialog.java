@@ -119,8 +119,8 @@ public class LibraryExportDialog extends JDialog implements ActionListener, Task
 		getContentPane().add(panel, BorderLayout.CENTER);
 
 		baseDirectory = new File(MRC2ToolBoxCore.libraryDir);
-		if(MRC2ToolBoxCore.getCurrentProject() != null)
-			baseDirectory = MRC2ToolBoxCore.getCurrentProject().getExportsDirectory();
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null)
+			baseDirectory = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory();
 
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new EmptyBorder(10, 10, 10, 10));

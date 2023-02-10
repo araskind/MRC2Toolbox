@@ -169,7 +169,7 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 
 		JButton searchButton = new JButton("Search ...");
 		searchButton.addActionListener(this);
-		searchButton.setActionCommand(MainActionCommands.SEARCH_ID_TRACKER_BY_EXPERIMENT_MZ_RT_COMMAND.getName());
+		searchButton.setActionCommand(MainActionCommands.SEARCH_IDTRACKER_BY_EXPERIMENT_MZ_RT_COMMAND.getName());
 		panel_1.add(searchButton);
 		
 		JRootPane rootPane = SwingUtilities.getRootPane(searchButton);
@@ -192,7 +192,7 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 		if(command.equals(MainActionCommands.IDTRACKER_REFRESH_FORM_OPTIONS_COMMAND.getName()))
 			populateSelectorsFromDatabase();
 
-		if(command.equals(MainActionCommands.SEARCH_ID_TRACKER_BY_EXPERIMENT_MZ_RT_COMMAND.getName()))
+		if(command.equals(MainActionCommands.SEARCH_IDTRACKER_BY_EXPERIMENT_MZ_RT_COMMAND.getName()))
 			searchIdTracker();
 	}
 

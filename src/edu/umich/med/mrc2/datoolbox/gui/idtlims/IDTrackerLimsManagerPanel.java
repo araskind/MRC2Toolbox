@@ -198,12 +198,12 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		menuActions.addSeparator();
 		
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(),
-				MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName(), 
+				MainActionCommands.NEW_IDTRACKER_PROJECT_DIALOG_COMMAND.getName(),
+				MainActionCommands.NEW_IDTRACKER_PROJECT_DIALOG_COMMAND.getName(), 
 				newCdpIdProjectIcon, this));
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName(),
-				MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName(), 
+				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName(),
+				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName(), 
 				newCdpIdExperimentIcon, this));
 		
 		menuActions.addSeparator();
@@ -260,10 +260,10 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		if (command.equals(MainActionCommands.SHOW_DATA_UPLOAD_WIZARD_COMMAND.getName()))
 			showDataUploadWizard();
 	
-		if (command.equals(MainActionCommands.NEW_CPD_ID_PROJECT_DIALOG_COMMAND.getName()))
+		if (command.equals(MainActionCommands.NEW_IDTRACKER_PROJECT_DIALOG_COMMAND.getName()))
 			showProjectEditDialog(null);
 
-		if (command.equals(MainActionCommands.EDIT_CPD_ID_PROJECT_DIALOG_COMMAND.getName())) {
+		if (command.equals(MainActionCommands.EDIT_IDTRACKER_PROJECT_DIALOG_COMMAND.getName())) {
 
 			LIMSProject project = getSelectedProject();
 			if (project == null)
@@ -271,36 +271,36 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 
 			showProjectEditDialog(project);
 		}
-		if (command.equals(MainActionCommands.SAVE_CPD_ID_PROJECT_COMMAND.getName())
-				|| command.equals(MainActionCommands.NEW_CPD_ID_PROJECT_COMMAND.getName()))
+		if (command.equals(MainActionCommands.SAVE_IDTRACKER_PROJECT_COMMAND.getName())
+				|| command.equals(MainActionCommands.NEW_IDTRACKER_PROJECT_COMMAND.getName()))
 			saveProject();
 
-		if (command.equals(MainActionCommands.DELETE_CPD_ID_PROJECT_COMMAND.getName())) {
+		if (command.equals(MainActionCommands.DELETE_IDTRACKER_PROJECT_COMMAND.getName())) {
 			
 			LIMSProject project = getSelectedProject();
 			if (project == null)
 				return;
 			
-			reauthenticateAdminCommand(MainActionCommands.DELETE_CPD_ID_PROJECT_COMMAND.getName());
+			reauthenticateAdminCommand(MainActionCommands.DELETE_IDTRACKER_PROJECT_COMMAND.getName());
 		}
 
-		if (command.equals(MainActionCommands.NEW_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName()))
+		if (command.equals(MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName()))
 			showExperimentEditDialog(null);
 
-		if (command.equals(MainActionCommands.EDIT_CPD_ID_EXPERIMENT_DIALOG_COMMAND.getName()))
+		if (command.equals(MainActionCommands.EDIT_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName()))
 			showExperimentEditDialog(getSelectedExperiment());
 		
-		if (command.equals(MainActionCommands.SAVE_CPD_ID_EXPERIMENT_COMMAND.getName())
-				|| command.equals(MainActionCommands.NEW_CPD_ID_EXPERIMENT_COMMAND.getName()))
+		if (command.equals(MainActionCommands.SAVE_IDTRACKER_EXPERIMENT_COMMAND.getName())
+				|| command.equals(MainActionCommands.NEW_IDTRACKER_EXPERIMENT_COMMAND.getName()))
 			saveExperiment();
 
-		if (command.equals(MainActionCommands.DELETE_CPD_ID_EXPERIMENT_COMMAND.getName())) {
+		if (command.equals(MainActionCommands.DELETE_IDTRACKER_EXPERIMENT_COMMAND.getName())) {
 			
 			LIMSExperiment experiment = getSelectedExperiment();
 			if (experiment == null)
 				return;
 			
-			reauthenticateAdminCommand(MainActionCommands.DELETE_CPD_ID_EXPERIMENT_COMMAND.getName());//	deleteExperiment();
+			reauthenticateAdminCommand(MainActionCommands.DELETE_IDTRACKER_EXPERIMENT_COMMAND.getName());//	deleteExperiment();
 		}
 
 		if (command.equals(MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName()))
@@ -1051,10 +1051,10 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	@Override
 	protected void executeAdminCommand(String command) {
 		// TODO Auto-generated method stub
-		if (command.equals(MainActionCommands.DELETE_CPD_ID_EXPERIMENT_COMMAND.getName())) {
+		if (command.equals(MainActionCommands.DELETE_IDTRACKER_EXPERIMENT_COMMAND.getName())) {
 			deleteExperiment();
 		}
-		if (command.equals(MainActionCommands.DELETE_CPD_ID_PROJECT_COMMAND.getName())) {
+		if (command.equals(MainActionCommands.DELETE_IDTRACKER_PROJECT_COMMAND.getName())) {
 			deleteProject();
 		}		
 	}

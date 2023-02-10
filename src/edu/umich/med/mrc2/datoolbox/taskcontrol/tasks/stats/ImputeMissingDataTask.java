@@ -44,7 +44,7 @@ public class ImputeMissingDataTask  extends AbstractTask {
 		
 		imputationMethod = method;
 		imputationMethodParameters = parameters;
-		currentProject = MRC2ToolBoxCore.getCurrentProject();
+		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		activeDataPipeline = currentProject.getActiveDataPipeline();
 	}
 

@@ -50,8 +50,8 @@ public class DataPipelineSelectionTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromProject(DataAnalysisProject currentProject) {
-		model.setTableModelFromProject(currentProject);
+	public void setTableModelFromExperiment(DataAnalysisProject currentProject) {
+		model.setTableModelFromExperiment(currentProject);
 		tca.adjustColumns();
 	}
 	

@@ -169,9 +169,9 @@ public class RawDataAnalysisProjectDatabaseUploadDialog extends JDialog implemen
 		panel_1.add(cancelButton);
 
 		JButton uploadButton = 
-				new JButton(MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName());
+				new JButton(MainActionCommands.SEND_EXPERIMENT_DATA_TO_DATABASE_COMMAND.getName());
 		uploadButton.setActionCommand(
-				MainActionCommands.SEND_PROJECT_DATA_TO_DATABASE_COMMAND.getName());
+				MainActionCommands.SEND_EXPERIMENT_DATA_TO_DATABASE_COMMAND.getName());
 		uploadButton.addActionListener(parentPanel);
 		panel_1.add(uploadButton);
 

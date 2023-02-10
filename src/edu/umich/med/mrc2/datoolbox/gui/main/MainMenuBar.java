@@ -50,15 +50,15 @@ public class MainMenuBar extends CommonMenuBar {
 		    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();	
 
 	// Icons
-	private static final Icon newProjectIcon = GuiUtils.getIcon("newProject", 24);
-	private static final Icon openProjectIcon = GuiUtils.getIcon("open", 24);
-	private static final Icon saveProjectIcon = GuiUtils.getIcon("save", 24);
-	private static final Icon saveProjectCopyIcon = GuiUtils.getIcon("saveAs", 24);
-	private static final Icon newRdaProjectIcon = GuiUtils.getIcon("newRawDataAnalysisProject", 24);
-	private static final Icon editRdaProjectIcon = GuiUtils.getIcon("editRawDataAnalysisProject", 24);
-	private static final Icon openRdaProjectIcon = GuiUtils.getIcon("openRawDataAnalysisProject", 24);
-	private static final Icon saveRdaProjectIcon = GuiUtils.getIcon("saveRawDataAnalysisProject", 24);		
-	private static final Icon closeProjectIcon = GuiUtils.getIcon("close", 24);
+	private static final Icon newExperimentIcon = GuiUtils.getIcon("newProject", 24);
+	private static final Icon openExperimentIcon = GuiUtils.getIcon("open", 24);
+	private static final Icon saveExperimentIcon = GuiUtils.getIcon("save", 24);
+	private static final Icon saveExperimentCopyIcon = GuiUtils.getIcon("saveAs", 24);
+	private static final Icon newRdaExperimentIcon = GuiUtils.getIcon("newRawDataAnalysisProject", 24);
+	private static final Icon editRdaExperimentIcon = GuiUtils.getIcon("editRawDataAnalysisProject", 24);
+	private static final Icon openRdaExperimentIcon = GuiUtils.getIcon("openRawDataAnalysisProject", 24);
+	private static final Icon saveRdaExperimentIcon = GuiUtils.getIcon("saveRawDataAnalysisProject", 24);		
+	private static final Icon closeExperimentIcon = GuiUtils.getIcon("close", 24);
 	private static final Icon exitIcon = GuiUtils.getIcon("shutDown", 24);	
 	private static final Icon idTrackerLoginIcon = GuiUtils.getIcon("idTrackerLogin", 24);
 	private static final Icon activeUserIcon = GuiUtils.getIcon("activeUser", 24);
@@ -77,23 +77,23 @@ public class MainMenuBar extends CommonMenuBar {
 	
 	// Menus
 	private JMenu
-		projectMenu,
+		experimentMenu,
 		panelsMenu,
 		toolsMenu,
 		dbAccessMenu,
 		preferencesMenu,
 		helpMenu;
 
-	// Project items
+	// Experiment items
 	private JMenuItem
-		newProjectMenuItem,
-		newIDProjectMenuItem,
-		openProjectMenuItem,
-		openRdaProjectMenuItem,
-		saveProjectMenuItem,
-		saveProjectAsMenuItem,				
-		editIDProjectMenuItem,		
-		closeProjectMenuItem,		
+		newExperimentMenuItem,
+		newIDExperimentMenuItem,
+		openExperimentMenuItem,
+		openRdaExperimentMenuItem,
+		saveExperimentMenuItem,
+		saveExperimentAsMenuItem,				
+		editIDExperimentMenuItem,		
+		closeExperimentMenuItem,		
 		exitMenuItem;
 
 	// Tools menu items
@@ -121,68 +121,61 @@ public class MainMenuBar extends CommonMenuBar {
 
 		super(listener);
 
-		// Project
-		projectMenu = new JMenu("Project");
-//		projectMenu.setPreferredSize(preferredSize);
-		
+		// Experiment
+		experimentMenu = new JMenu("Experiment");
+
 		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
 
-			newProjectMenuItem = addItem(projectMenu, 
-					MainActionCommands.NEW_PROJECT_COMMAND, newProjectIcon);
-			newProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK | InputEvent.SHIFT_DOWN_MASK));
+			newExperimentMenuItem = addItem(experimentMenu, 
+					MainActionCommands.NEW_METABOLOMICS_EXPERIMENT_COMMAND, newExperimentIcon);
+			newExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
-		newIDProjectMenuItem = addItem(projectMenu, 
-				MainActionCommands.NEW_RAW_DATA_PROJECT_SETUP_COMMAND, newRdaProjectIcon);
-		newIDProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK));
+		newIDExperimentMenuItem = addItem(experimentMenu, 
+				MainActionCommands.NEW_RAW_DATA_EXPERIMENT_SETUP_COMMAND, newRdaExperimentIcon);
+		newIDExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK));
 		
-		projectMenu.addSeparator();
+		experimentMenu.addSeparator();
 
 		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
 			
-			openProjectMenuItem = addItem(projectMenu, 
-					MainActionCommands.OPEN_PROJECT_COMMAND, openProjectIcon);
-			openProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK | InputEvent.SHIFT_DOWN_MASK));
+			openExperimentMenuItem = addItem(experimentMenu, 
+					MainActionCommands.OPEN_METABOLOMICS_EXPERIMENT_COMMAND, openExperimentIcon);
+			openExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
-		openRdaProjectMenuItem = addItem(projectMenu, 
-				MainActionCommands.OPEN_RAW_DATA_PROJECT_COMMAND, openRdaProjectIcon);
-		openRdaProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK));
+		openRdaExperimentMenuItem = addItem(experimentMenu, 
+				MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_COMMAND, openRdaExperimentIcon);
+		openRdaExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK));
 		
-		projectMenu.addSeparator();
+		experimentMenu.addSeparator();
 		
-		editIDProjectMenuItem = addItem(projectMenu, 
-				MainActionCommands.EDIT_RAW_DATA_PROJECT_SETUP_COMMAND, editRdaProjectIcon);		
-		editIDProjectMenuItem.setEnabled(false);
+		editIDExperimentMenuItem = addItem(experimentMenu, 
+				MainActionCommands.EDIT_RAW_DATA_EXPERIMENT_SETUP_COMMAND, editRdaExperimentIcon);		
+		editIDExperimentMenuItem.setEnabled(false);
 		
-		saveProjectMenuItem = addItem(projectMenu, 
-				MainActionCommands.SAVE_PROJECT_COMMAND, saveProjectIcon);
-		saveProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('S', MASK));
+		saveExperimentMenuItem = addItem(experimentMenu, 
+				MainActionCommands.SAVE_EXPERIMENT_COMMAND, saveExperimentIcon);
+		saveExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('S', MASK));
 		
-		saveProjectAsMenuItem = addItem(projectMenu, 
-				MainActionCommands.SAVE_PROJECT_COPY_COMMAND, saveProjectCopyIcon);
-		saveProjectAsMenuItem.setEnabled(false);
+		saveExperimentAsMenuItem = addItem(experimentMenu, 
+				MainActionCommands.SAVE_EXPERIMENT_COPY_COMMAND, saveExperimentCopyIcon);
+		saveExperimentAsMenuItem.setEnabled(false);
 		
-		projectMenu.addSeparator();
+		experimentMenu.addSeparator();
 		
-		closeProjectMenuItem = addItem(projectMenu, 
-				MainActionCommands.CLOSE_PROJECT_COMMAND, closeProjectIcon);
-		closeProjectMenuItem.setAccelerator(KeyStroke.getKeyStroke('W', MASK));
+		closeExperimentMenuItem = addItem(experimentMenu, 
+				MainActionCommands.CLOSE_EXPERIMENT_COMMAND, closeExperimentIcon);
+		closeExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('W', MASK));
 		
-		projectMenu.addSeparator();
+		experimentMenu.addSeparator();
 		
-		exitMenuItem = addItem(projectMenu, 
+		exitMenuItem = addItem(experimentMenu, 
 				MainActionCommands.EXIT_COMMAND, exitIcon);
 		exitMenuItem.setAccelerator(KeyStroke.getKeyStroke('Q', MASK));
 		
-		add(projectMenu);
-		
-		// Panels
-		panelsMenu = new JMenu("Panels");
-//		panelsMenu.setPreferredSize(preferredSize);
-		add(panelsMenu);
+		add(experimentMenu);
 		
 		//	Tools
 		toolsMenu = new JMenu("Tools");
-//		toolsMenu.setPreferredSize(preferredSize);
 		msToolsMenuItem = addItem(toolsMenu, 
 				MainActionCommands.SHOW_MS_TOOLBOX_COMMAND, msToolboxIcon);
 		msToolsMenuItem.setAccelerator(KeyStroke.getKeyStroke('T', MASK));
@@ -202,7 +195,7 @@ public class MainMenuBar extends CommonMenuBar {
 //		dbAccessMenu.setPreferredSize(preferredSize);
 		
 		loginMenuItem = addItem(dbAccessMenu, 
-				MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND, loggedOutUserIcon);
+				MainActionCommands.SHOW_IDTRACKER_LOGIN_COMMAND, loggedOutUserIcon);
 		userManagerMenuItem = addItem(dbAccessMenu, 
 				MainActionCommands.SHOW_USER_MANAGER_COMMAND, manageUsersIcon);
 		userManagerMenuItem.setEnabled(false);
@@ -211,10 +204,13 @@ public class MainMenuBar extends CommonMenuBar {
 		organizationManagerMenuItem.setEnabled(false);
 		
 		add(dbAccessMenu);
+
+		// Panels
+		panelsMenu = new JMenu("Panels");
+		add(panelsMenu);
 		
 		//	Preferences
 		preferencesMenu = new JMenu("Preferences");
-//		preferencesMenu.setPreferredSize(preferredSize);
 		preferencesMenuItem = addItem(preferencesMenu, 
 				MainActionCommands.EDIT_PREFERENCES_COMMAND, preferencesIcon);
 		preferencesMenuItem.setAccelerator(KeyStroke.getKeyStroke('P', MASK | InputEvent.SHIFT_DOWN_MASK));
@@ -223,7 +219,6 @@ public class MainMenuBar extends CommonMenuBar {
 		
 		//	Help
 		helpMenu = new JMenu("Help");
-//		helpMenu.setPreferredSize(preferredSize);
 		helpMenuItem = addItem(helpMenu, 
 				MainActionCommands.SHOW_HELP_COMMAND, helpIcon);
 		helpMenuItem.setEnabled(false);
@@ -239,9 +234,9 @@ public class MainMenuBar extends CommonMenuBar {
 		
 		if(user == null) {
 			loginMenuItem.setIcon(loggedOutUserIcon);
-			loginMenuItem.setActionCommand(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
-			loginMenuItem.setToolTipText(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
-			loginMenuItem.setText(MainActionCommands.SHOW_ID_TRACKER_LOGIN_COMMAND.getName());
+			loginMenuItem.setActionCommand(MainActionCommands.SHOW_IDTRACKER_LOGIN_COMMAND.getName());
+			loginMenuItem.setToolTipText(MainActionCommands.SHOW_IDTRACKER_LOGIN_COMMAND.getName());
+			loginMenuItem.setText(MainActionCommands.SHOW_IDTRACKER_LOGIN_COMMAND.getName());
 			organizationManagerMenuItem.setEnabled(false);
 			userManagerMenuItem.setEnabled(false);
 			
@@ -254,8 +249,8 @@ public class MainMenuBar extends CommonMenuBar {
 		}
 		else {
 			loginMenuItem.setIcon(activeUserIcon);
-			loginMenuItem.setActionCommand(MainActionCommands.ID_TRACKER_LOGOUT_COMMAND.getName());
-			loginMenuItem.setToolTipText(MainActionCommands.ID_TRACKER_LOGOUT_COMMAND.getName());
+			loginMenuItem.setActionCommand(MainActionCommands.IDTRACKER_LOGOUT_COMMAND.getName());
+			loginMenuItem.setToolTipText(MainActionCommands.IDTRACKER_LOGOUT_COMMAND.getName());
 			loginMenuItem.setText(user.getFullName() + " (click to log out)");
 			if(user.isSuperUser()) {
 				userManagerMenuItem.setEnabled(true);
@@ -284,7 +279,7 @@ public class MainMenuBar extends CommonMenuBar {
 		}
 	}
 
-	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

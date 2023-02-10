@@ -110,17 +110,17 @@ public class DataSetUtils {
 			FileSortingOrder order,
 			ExperimentDesignSubset activeDesign) {
 
-		if (MRC2ToolBoxCore.getCurrentProject() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign() == null)
 			return null;
 
-		if (MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().getSamples().isEmpty())
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples().isEmpty())
 			return new DataFile[0];
 
 		Collection<ExperimentalSample> samples =
-				MRC2ToolBoxCore.getCurrentProject().getExperimentDesign().
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().
 				getSamplesForDesignSubset(activeDesign);
 
 		if (order.equals(FileSortingOrder.NAME))

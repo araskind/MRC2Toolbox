@@ -344,16 +344,16 @@ public class IDTrackerDataSearchDialog extends JDialog
 		if(command.equals(MainActionCommands.IDTRACKER_FEATURE_SEARCH_COMMAND.getName()))
 			searchIdTracker();
 		
-		if(command.equals(MainActionCommands.SHOW_ID_TRACKER_SAVE_QUERY_DIALOG_COMMAND.getName()))
+		if(command.equals(MainActionCommands.SHOW_IDTRACKER_SAVE_QUERY_DIALOG_COMMAND.getName()))
 			showSaveQueryDialog();					
 		
-		if(command.equals(MainActionCommands.SHOW_ID_TRACKER_SAVED_QUERIES_LIST_COMMAND.getName()))
+		if(command.equals(MainActionCommands.SHOW_IDTRACKER_SAVED_QUERIES_LIST_COMMAND.getName()))
 			showQueryManager();
 		
-		if(command.equals(MainActionCommands.LOAD_ID_TRACKER_SAVED_QUERY_COMMAND.getName()))
+		if(command.equals(MainActionCommands.LOAD_IDTRACKER_SAVED_QUERY_COMMAND.getName()))
 			loadSelectedQuery();
 		
-		if(command.equals(MainActionCommands.ID_TRACKER_SAVE_QUERY_COMMAND.getName()))
+		if(command.equals(MainActionCommands.IDTRACKER_SAVE_QUERY_COMMAND.getName()))
 			saveCurrentQuery();
 		
 		//	savePreferences();

@@ -157,12 +157,12 @@ public class PreferencesDialog extends JDialog implements BackedByPreferences, A
 
 		this.setVisible(false);
 
-		if(MRC2ToolBoxCore.getCurrentProject() == null || 
-				MRC2ToolBoxCore.getCurrentProject().getActiveDataPipeline() == null) 
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null || 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline() == null) 
 			return;
 
 		MRC2ToolBoxCore.getMainWindow().switchDataPipeline(
-				MRC2ToolBoxCore.getCurrentProject(),
-				MRC2ToolBoxCore.getCurrentProject().getActiveDataPipeline());		
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline());		
 	}
 }

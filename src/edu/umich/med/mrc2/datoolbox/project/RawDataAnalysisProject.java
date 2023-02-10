@@ -419,7 +419,7 @@ public class RawDataAnalysisProject extends Project {
 	public Collection<MsFeatureInfoBundleCollection> getEditableMsFeatureInfoBundleCollections(){
 		
 		return getFeatureCollections().stream().
-				filter(c -> !c.equals(FeatureCollectionManager.activeProjectFeatureSet)).
+				filter(c -> !c.equals(FeatureCollectionManager.activeExperimentFeatureSet)).
 				sorted(new MsFeatureInformationBundleCollectionComparator(SortProperty.Name)).
 				collect(Collectors.toList());
 	}

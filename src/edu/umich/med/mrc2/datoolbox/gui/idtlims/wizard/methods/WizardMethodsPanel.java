@@ -54,6 +54,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.expsetup.dpl.AcquisitionMethodSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodExtendedEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.DockableAcquisitionMethodDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.data.DataAnalysisMethodSelectionDialog;
@@ -62,7 +63,6 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.wizard.IDTrackerDataLoadWizard;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.wizard.IDTrackerDataLoadWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.projectsetup.dpl.AcquisitionMethodSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -443,7 +443,7 @@ public class WizardMethodsPanel extends IDTrackerDataLoadWizardPanel
 		
 		this.preferences = preferences;
 		baseDirectory =
-				new File(preferences.get(BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).
+				new File(preferences.get(BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).
 				getAbsoluteFile();
 	}
 

@@ -411,7 +411,7 @@ public class IDTrackerMSMSClusterDataSetExportDialog extends JDialog
 		
 		this.preferences = preferences;
 		baseDirectory =
-				new File(preferences.get(BASE_DIR, MRC2ToolBoxConfiguration.getDefaultProjectsDirectory())).
+				new File(preferences.get(BASE_DIR, MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).
 				getAbsoluteFile();
 		
 		//	Select fields for export

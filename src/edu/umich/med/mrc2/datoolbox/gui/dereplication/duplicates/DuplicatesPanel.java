@@ -448,7 +448,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 			clearClusterDataPanel();
 			MsFeatureCluster[] selected = clusterTree.getSelectedClusters();
-			currentProject = MRC2ToolBoxCore.getCurrentProject();
+			currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 			if (selected.length > 0) {
 
 				String message = "Selected cluster will be deleted,\n"
@@ -467,9 +467,9 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 	}
 
 	@Override
-	public void closeProject() {
+	public void closeExperiment() {
 		// TODO Auto-generated method stub
-		super.closeProject();
+		super.closeExperiment();
 		clearPanel();
 //		toolbar.updateGuiFromProjectAndDataPipeline(null, null);
 	}

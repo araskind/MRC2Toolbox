@@ -245,7 +245,7 @@ public class AddSamplesDialog extends JDialog implements BackedByPreferences, Ac
 
 		ArrayList<String>errors = new ArrayList<String>();
 		ArrayList<ExperimentalSample>samplesToAdd = new ArrayList<ExperimentalSample>();
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if(project == null)
 			return errors;
 

@@ -148,8 +148,8 @@ public class DataIntegrationSetupDialog extends JDialog {
 	public void setVisible(boolean visible) {
 		
 		if(visible) {
-			assaySelectionTable.setTableModelFromProject(
-					MRC2ToolBoxCore.getCurrentProject());
+			assaySelectionTable.setTableModelFromExperiment(
+					MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 			setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
 		}			
 		super.setVisible(visible);

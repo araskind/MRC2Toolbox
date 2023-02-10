@@ -115,12 +115,12 @@ public class ModificationSelectionPanel extends JPanel {
 	@SuppressWarnings("unchecked")
 	private void populateModificationSelector() {
 
-		if (MRC2ToolBoxCore.getCurrentProject() == null || 
-				MRC2ToolBoxCore.getCurrentProject().getActiveDataPipeline() == null)
+		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null || 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline() == null)
 			return;
 
 		ArrayList<Adduct> modeModifications = new ArrayList<Adduct>();
-		Polarity pol = MRC2ToolBoxCore.getCurrentProject().
+		Polarity pol = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 				getActiveDataPipeline().getAcquisitionMethod().getPolarity();
 		for (Adduct cm : AdductManager.getAdductsForType(modificationType)) {
 

@@ -101,10 +101,10 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		dbLinkageMenu.setIcon(sendProjectToDatabaseIconSmall);
 		
 		addMetadataMenuItem = addItem(dbLinkageMenu, 
-				MainActionCommands.ADD_PROJECT_METADATA_COMMAND, 
+				MainActionCommands.ADD_EXPERIMENT_METADATA_COMMAND, 
 				addMetaDataIcon);
 		sendProjectToTrackerMenuItem = addItem(dbLinkageMenu, 
-				MainActionCommands.SET_PROJECT_DATA_UPLOAD_PARAMETERS_COMMAND, 
+				MainActionCommands.SET_EXPERIMENT_DATA_UPLOAD_PARAMETERS_COMMAND, 
 				sendProjectToDatabaseIcon);
 		
 		add(dbLinkageMenu);
@@ -135,7 +135,7 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		add(rawDataMenu);
 	}
 
-	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

@@ -41,12 +41,12 @@ public class DockableRawDataFileSelector extends DefaultSingleCDockable
 	private File baseDirectory;
 	private RawDataFilesTable rawDataFilesTable;
 	private RawDataFileSelectorToolbar toolbar;
-	private RawDataAnalysisProjectSetupDialog parentDialog;
+	private RawDataAnalysisExperimentSetupDialog parentDialog;
 
 	public DockableRawDataFileSelector(
 			String title, 
 			Icon chromIcon,
-			RawDataAnalysisProjectSetupDialog parentDialog) {
+			RawDataAnalysisExperimentSetupDialog parentDialog) {
 
 		super(title.replace(" ", ""), chromIcon, title, null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);

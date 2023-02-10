@@ -327,7 +327,7 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 	private void repopulateLibraryTable() {
 
 		TreeSet<CompoundLibrary> libSet = new TreeSet<CompoundLibrary>();
-		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
+		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		if(project != null) {
 
 			if(project.getActiveDataPipeline() != null) {

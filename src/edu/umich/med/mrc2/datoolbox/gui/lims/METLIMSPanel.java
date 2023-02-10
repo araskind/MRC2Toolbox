@@ -113,8 +113,8 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 		menuActions.addSeparator();	
 		
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SEND_DESIGN_TO_PROJECT_COMMAND.getName(),
-				MainActionCommands.SEND_DESIGN_TO_PROJECT_COMMAND.getName(), 
+				MainActionCommands.SEND_DESIGN_TO_EXPERIMENT_COMMAND.getName(),
+				MainActionCommands.SEND_DESIGN_TO_EXPERIMENT_COMMAND.getName(), 
 				sendDesignToProjectIcon, this));
 		menuActions.add(GuiUtils.setupButtonAction(
 				MainActionCommands.CREATE_EXPERIMENT_DIRECTORY_STRUCTURE_COMMAND.getName(),
@@ -147,8 +147,8 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 		if(command.equals(MainActionCommands.RESYNCHRONIZE_MRC2LIMS_EXPERIMENT_TO_METLIMS_COMMAND.getName()))
 			resyncMrc2ExperimentToMetlims();
 		
-		if(command.equals(MainActionCommands.SEND_DESIGN_TO_PROJECT_COMMAND.getName()))
-			sendDesignToProject();
+		if(command.equals(MainActionCommands.SEND_DESIGN_TO_EXPERIMENT_COMMAND.getName()))
+			sendDesignToExperiment();
 
 		if(command.equals(MainActionCommands.CREATE_EXPERIMENT_DIRECTORY_STRUCTURE_COMMAND.getName()))
 			createExperimentDirectory();
@@ -233,18 +233,18 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 	
 	}
 	
-	private void sendDesignToProject() {
+	private void sendDesignToExperiment() {
 		
 		LIMSExperiment activeExperiment = experimentDataPanel.getSelectedExperiment();
 		if(activeExperiment == null)
 			return;
 		
-		if(MRC2ToolBoxCore.getCurrentProject() != null || MRC2ToolBoxCore.getActiveRawDataAnalysisProject() != null) {
-			MessageDialog.showWarningMsg("Please close currently active project first!");
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null || MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+			MessageDialog.showWarningMsg("Please close currently active experiment first!");
 			return;
 		}
 		MRC2ToolBoxCore.getMainWindow().
-				showNewProjectDialog(ProjectType.DATA_ANALYSIS, null, activeExperiment);
+				showNewExperimentDialog(ProjectType.DATA_ANALYSIS, null, activeExperiment);
 	}
 
 	public void refreshLimsData() {

@@ -107,7 +107,7 @@ public final class MRC2ToolBoxCore {
 	@SuppressWarnings("rawtypes")
 	private static Map<DataFile, LCMSData>rawDataMap;
 
-	public static DataAnalysisProject getCurrentProject() {
+	public static DataAnalysisProject getActiveMetabolomicsExperiment() {
 		return currentProject;
 	}
 
@@ -293,7 +293,7 @@ public final class MRC2ToolBoxCore {
 		return activeMsLibraries;
 	}
 
-	public static void setCurrentProject(DataAnalysisProject currentProject) {
+	public static void setActiveMetabolomicsExperiment(DataAnalysisProject currentProject) {
 		MRC2ToolBoxCore.currentProject = currentProject;
 	}
 
@@ -424,11 +424,11 @@ public final class MRC2ToolBoxCore {
 		msmsLibraryCache.clear();
 	}
 
-	public static RawDataAnalysisProject getActiveRawDataAnalysisProject() {
+	public static RawDataAnalysisProject getActiveRawDataAnalysisExperiment() {
 		return activeRawDataAnalysisProject;
 	}
 
-	public static void setActiveRawDataAnalysisProject(RawDataAnalysisProject activeRawDataAnalysisProject) {
+	public static void setActiveRawDataAnalysisExperiment(RawDataAnalysisProject activeRawDataAnalysisProject) {
 		MRC2ToolBoxCore.activeRawDataAnalysisProject = activeRawDataAnalysisProject;
 	}
 }

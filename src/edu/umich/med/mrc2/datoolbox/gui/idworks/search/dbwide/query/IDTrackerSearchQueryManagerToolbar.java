@@ -49,13 +49,13 @@ public class IDTrackerSearchQueryManagerToolbar extends CommonToolbar {
 		super(commandListener);
 
 		deleteSearchQueryButton = GuiUtils.addButton(this, null, deleteSearchQueryIcon, commandListener,
-				MainActionCommands.ID_TRACKER_DELETE_QUERY_COMMAND.getName(),
-				MainActionCommands.ID_TRACKER_DELETE_QUERY_COMMAND.getName(),
+				MainActionCommands.IDTRACKER_DELETE_QUERY_COMMAND.getName(),
+				MainActionCommands.IDTRACKER_DELETE_QUERY_COMMAND.getName(),
 				buttonDimension);
 	}
 
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
 
 	}

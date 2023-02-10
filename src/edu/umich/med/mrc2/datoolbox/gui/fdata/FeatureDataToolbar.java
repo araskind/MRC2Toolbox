@@ -256,7 +256,7 @@ public class FeatureDataToolbar extends CommonToolbar {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void updateGuiFromProjectAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 		
 		DataAnalysisProject currentProject = project;
 		if(currentProject == null) {

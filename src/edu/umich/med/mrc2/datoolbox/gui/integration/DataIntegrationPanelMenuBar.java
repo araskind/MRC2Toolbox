@@ -103,7 +103,7 @@ public class DataIntegrationPanelMenuBar extends CommonMenuBar {
 		add(searchMenu);
 	}
 
-	public void updateMenuFromProject(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}
