@@ -63,15 +63,15 @@ public class MSMSFeatureExtractionParameterSelectorDialog extends JDialog implem
 		setTitle("Select MSMS feature extraction parameters from database");
 		setIconImage(((ImageIcon) dbLookupIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setPreferredSize(new Dimension(600, 850));
-		setSize(new Dimension(600, 850));
+		setPreferredSize(new Dimension(1000, 800));
+		setSize(new Dimension(1000, 800));
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
 		parametersPanel = new MSMSFeatureExtractionParametersPanel();
 		parametersPanel.setEditingEnabled(false);
 		JScrollPane dscroll = new JScrollPane(parametersPanel);
-		getContentPane().add(dscroll, BorderLayout.NORTH);
+		getContentPane().add(dscroll, BorderLayout.EAST);
 		
 		msmsFeatureExtractionParametersTable = 
 				new MSMSFeatureExtractionParametersTable();

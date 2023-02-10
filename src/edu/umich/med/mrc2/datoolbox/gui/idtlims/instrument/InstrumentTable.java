@@ -63,7 +63,10 @@ public class InstrumentTable extends BasicTable {
 	}
 
 	public void setTableModelFromInstrumentList(Collection<LIMSInstrument> instruments) {
+		
+		thf.setTable(null);
 		model.setTableModelFromInstrumentList(instruments);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

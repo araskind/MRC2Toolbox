@@ -525,6 +525,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_panel_4.gridx = 0;
 		gbc_panel_4.gridy = 12;
 		add(panel_4, gbc_panel_4);
+		
 		GridBagLayout gbl_panel_4 = new GridBagLayout();
 		gbl_panel_4.columnWidths = new int[]{0, 0, 0, 0, 0};
 		gbl_panel_4.rowHeights = new int[]{0, 0, 0, 0};
@@ -597,6 +598,16 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_filterWidthComboBox.gridx = 1;
 		gbc_filterWidthComboBox.gridy = 2;
 		panel_4.add(filterWidthComboBox, gbc_filterWidthComboBox);
+		
+		disableMS1parameters();
+	}
+	
+	private void disableMS1parameters() {
+		
+		flagMinorIsotopesPrecursorsCheckBox.setEnabled(false);
+		maxChargeSpinner.setEnabled(false);
+//		xicWindowTextField.setEnabled(false);
+//		filterWidthComboBox.setEnabled(false);		
 	}
 	
 	public String getParameterSetName() {
