@@ -43,7 +43,7 @@ public class BoxplotDataSet extends DefaultBoxAndWhiskerCategoryDataset {
 	 */
 	private static final long serialVersionUID = -735602867894943589L;
 	private Map<Assay, DataFile[]>dataFileMap;
-	private DataAnalysisProject project;
+	private DataAnalysisProject experiment;
 	private MsFeature[] featuresToPlot;
 
 	public BoxplotDataSet(

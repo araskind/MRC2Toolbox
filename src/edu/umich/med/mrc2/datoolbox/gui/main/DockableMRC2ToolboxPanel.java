@@ -33,7 +33,6 @@ import javax.swing.JMenuItem;
 import javax.swing.event.ListSelectionListener;
 
 import bibliothek.gui.DockFrontend;
-import bibliothek.gui.dock.SplitDockStation;
 import bibliothek.gui.dock.action.DefaultDockActionSource;
 import bibliothek.gui.dock.action.DockAction;
 import bibliothek.gui.dock.action.LocationHint;
@@ -64,12 +63,11 @@ public abstract class DockableMRC2ToolboxPanel extends DefaultSingleCDockable
 	ExperimentDesignSubsetListener, MsFeatureListener,
 	FeatureSetListener, ListSelectionListener, PersistentLayout {
 
-	protected DataAnalysisProject currentProject;
+	protected DataAnalysisProject currentExperiment;
 	protected DataPipeline activeDataPipeline;
 	protected CControl control;
 	protected CGrid grid;
 	protected DockFrontend frontend;
-	protected SplitDockStation station;
 	protected CommonMenuBar menuBar;
 	protected JMenu panelsMenu;
 	protected IdTrackerPasswordActionUnlockDialog confirmActionDialog;
@@ -86,14 +84,6 @@ public abstract class DockableMRC2ToolboxPanel extends DefaultSingleCDockable
 		control = new CControl( MRC2ToolBoxCore.getMainWindow() );
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
-		
-//		frontend = new DockFrontend(control.getController());	
-//		station = new SplitDockStation();
-//		frontend.addRoot( "split", station );
-//		frontend.setShowHideAction(true);
-//        frontend.getController().getProperties().set( 
-//                PlaceholderStrategy.PLACEHOLDER_STRATEGY, 
-//                new CPlaceholderStrategy(control) );
 	}
 	
 	@Override
@@ -182,16 +172,16 @@ public abstract class DockableMRC2ToolboxPanel extends DefaultSingleCDockable
 
 	//	Load data for data pipeline
 	public void switchDataPipeline(
-			DataAnalysisProject project, DataPipeline newDataPipeline) {
+			DataAnalysisProject experiment, DataPipeline newDataPipeline) {
 
-		currentProject = project;
+		currentExperiment = experiment;
 		activeDataPipeline = newDataPipeline;
 
 		//	Implement specifics in other panels
 	}
 
 	public void closeExperiment() {
-		currentProject = null;
+		currentExperiment = null;
 		activeDataPipeline = null;
 	}
 

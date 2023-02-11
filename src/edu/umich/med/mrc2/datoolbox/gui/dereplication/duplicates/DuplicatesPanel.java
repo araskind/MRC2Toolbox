@@ -201,7 +201,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 	private void showAllFeatureClusters() {
 		
 		Set<MsFeatureCluster> allClusters = 
-				currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline);
+				currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline);
 		if(allClusters == null)
 			return;
 		
@@ -212,7 +212,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 	private void showProblemFeatureClusters() {
 		
 		Set<MsFeatureCluster> allClusters = 
-				currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline);
+				currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline);
 		if(allClusters == null)
 			return;
 		
@@ -224,25 +224,25 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 	private void checkForDuplicateNames() {
 		
-		if(currentProject == null || activeDataPipeline == null)
+		if(currentExperiment == null || activeDataPipeline == null)
 			return;
 			
 		FindDuplicateNamesTask task = 
-			new FindDuplicateNamesTask(currentProject, activeDataPipeline);
+			new FindDuplicateNamesTask(currentExperiment, activeDataPipeline);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);;
 	}
 
 	private void filterClusters() {
 		
-		Set<MsFeatureCluster> clusters = currentProject
+		Set<MsFeatureCluster> clusters = currentExperiment
 				.getDuplicateClustersForDataPipeline(activeDataPipeline);
 		filterClusterTree(clusters);
 	}
 	
 	private void resetClusterFilter() {
 		
-		Set<MsFeatureCluster> clusters = currentProject
+		Set<MsFeatureCluster> clusters = currentExperiment
 				.getDuplicateClustersForDataPipeline(activeDataPipeline);
 		resetClusterTreeFilter(clusters);
 	}
@@ -260,7 +260,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 			if (MessageDialog.showChoiceMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 
 				clearClusterDataPanel();
-				currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline).remove(activeCluster);
+				currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline).remove(activeCluster);
 				clusterTree.removeFeatureCluster(activeCluster);
 			}
 		} else {
@@ -278,17 +278,17 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 		duplicateFindDialog.setVisible(false);
 
-		if (currentProject != null) {
+		if (currentExperiment != null) {
 
-			if (currentProject.dataPipelineHasData(activeDataPipeline)) {
+			if (currentExperiment.dataPipelineHasData(activeDataPipeline)) {
 
-				if (!currentProject.statsCalculetedForDataPipeline(activeDataPipeline)) {
+				if (!currentExperiment.statsCalculetedForDataPipeline(activeDataPipeline)) {
 
 					MessageDialog.showWarningMsg("Please calculate descriptive statistics first!");
 					return;
 				}
 				FindDuplicateFeaturesTask fdt = new FindDuplicateFeaturesTask(
-						currentProject,
+						currentExperiment,
 						activeDataPipeline, 
 						duplicateFindDialog.getMassWindow(),
 						duplicateFindDialog.getRetentionWindow());
@@ -301,20 +301,20 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 	private void mergeDuplicateFeatures() {
 
-		if(currentProject == null || activeDataPipeline == null)
+		if(currentExperiment == null || activeDataPipeline == null)
 			return;
 
-		if (currentProject.dataPipelineHasData(activeDataPipeline)
-				&& currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline) != null) {
+		if (currentExperiment.dataPipelineHasData(activeDataPipeline)
+				&& currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline) != null) {
 
-			if (!currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline).isEmpty()) {
+			if (!currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline).isEmpty()) {
 
 				clearPanel();
 				clearPanel();
 				duplicateMergeDialog.setVisible(false);
 				MergeDuplicateFeaturesTask ddt = 
 						new MergeDuplicateFeaturesTask(
-								currentProject,
+								currentExperiment,
 								activeDataPipeline, 
 								duplicateMergeDialog.getMergeOption());
 				ddt.addTaskListener(this);
@@ -367,8 +367,8 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		Collection<MsFeatureCluster> duplicates = fdt.getDuplicateList();
 		if (duplicates.size() > 0) {
 
-			currentProject.setDuplicateClustersForDataPipeline(activeDataPipeline, duplicates);
-			loadFeatureClusters(currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline));
+			currentExperiment.setDuplicateClustersForDataPipeline(activeDataPipeline, duplicates);
+			loadFeatureClusters(currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline));
 			MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.DUPLICATES);
 
 		} else {
@@ -385,10 +385,10 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
 		MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().
-			switchDataPipeline(currentProject, activeDataPipeline);
+			switchDataPipeline(currentExperiment, activeDataPipeline);
 		
 		CalculateStatisticsTask cst = 
-				new CalculateStatisticsTask(currentProject, activeDataPipeline);
+				new CalculateStatisticsTask(currentExperiment, activeDataPipeline);
 		cst.addTaskListener(((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA)));
 		MRC2ToolBoxCore.getTaskController().addTask(cst);
 	}
@@ -423,7 +423,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 	@Override
 	public void reloadDesign() {
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override
@@ -432,10 +432,10 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 		clearPanel();
 		super.switchDataPipeline(project, newPipeline);
 //		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
-		if (currentProject != null && activeDataPipeline != null) {
+		if (currentExperiment != null && activeDataPipeline != null) {
 
 			Set<MsFeatureCluster> clusterList = 
-					currentProject.getMsFeatureClustersForDataPipeline(activeDataPipeline);
+					currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline);
 			if (clusterList != null)
 				loadFeatureClusters(clusterList);
 		}
@@ -448,7 +448,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 
 			clearClusterDataPanel();
 			MsFeatureCluster[] selected = clusterTree.getSelectedClusters();
-			currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+			currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 			if (selected.length > 0) {
 
 				String message = "Selected cluster will be deleted,\n"
@@ -458,7 +458,7 @@ public class DuplicatesPanel extends ClusterDisplayPanel {
 				if (MessageDialog.showChoiceMsg(message, this.getContentPane()) == JOptionPane.YES_OPTION) {
 
 					for (MsFeatureCluster c : selected) {
-						currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline).remove(c);
+						currentExperiment.getDuplicateClustersForDataPipeline(activeDataPipeline).remove(c);
 						clusterTree.removeFeatureCluster(c);
 					}
 				}

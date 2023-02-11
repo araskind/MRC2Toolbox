@@ -47,7 +47,7 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 	 */
 	private static final long serialVersionUID = -9053487866402210888L;
 	private MsFeature[] featuresToPlot;
-	private DataAnalysisProject project;
+	private DataAnalysisProject experiment;
 
 	public TimedScatterDataSet(
 			Map<DataPipeline,Collection<MsFeature>> selectedFeaturesMap, 
@@ -55,11 +55,11 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 			DataScale dataScale) {
 
 		super();
-		project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		featuresToPlot = selectedFeaturesMap.values().stream().
 				flatMap(c -> c.stream()).toArray(size -> new MsFeature[size]);
 		Collection<ExperimentalSample> samples = 
-				project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 		
 		int seriesCount = 1;
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
@@ -72,7 +72,7 @@ public class TimedScatterDataSet extends TimeSeriesCollection {
 						collect(Collectors.toCollection(LinkedHashSet::new));
 				
 				Map<DataFile, Double> dataMap = 
-						PlotDataSetUtils.getNormalizedDataForFeature(project, msf, entry.getKey(), files, dataScale);
+						PlotDataSetUtils.getNormalizedDataForFeature(experiment, msf, entry.getKey(), files, dataScale);
 				NamedTimeSeries series = new NamedTimeSeries(Integer.toString(seriesCount) + " - " + msf.getName());	
 				for(DataFile df : files) {
 					

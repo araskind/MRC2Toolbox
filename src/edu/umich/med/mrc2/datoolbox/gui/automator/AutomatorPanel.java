@@ -388,14 +388,14 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 
 	@Override
 	public void reloadDesign() {
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override
 	public void switchDataPipeline(DataAnalysisProject project, DataPipeline newPipeline) {
 
 		super.switchDataPipeline(project, newPipeline);
-		toolbar.updateGuiFromExperimentAndDataPipeline(currentProject, activeDataPipeline);
+		toolbar.updateGuiFromExperimentAndDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override

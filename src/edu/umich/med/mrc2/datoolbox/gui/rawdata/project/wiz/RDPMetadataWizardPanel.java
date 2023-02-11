@@ -42,10 +42,10 @@ public abstract class RDPMetadataWizardPanel extends JPanel {
 	protected LIMSExperiment experiment;
 	
 	protected RDPMetadataDefinitionStage stage;
-	protected RDPMetadataWizard wizard;
+	protected RDEMetadataWizard wizard;
 	protected GridBagConstraints gbc_panel;
 
-	public RDPMetadataWizardPanel(RDPMetadataWizard wizard) {
+	public RDPMetadataWizardPanel(RDEMetadataWizard wizard) {
 		
 		super();
 		this.wizard = wizard;

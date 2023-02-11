@@ -109,7 +109,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 		}
 		super.actionPerformed(event);
 		
-		if(currentProject == null || activeDataPipeline == null)
+		if(currentExperiment == null || activeDataPipeline == null)
 			return;
 
 		String command = event.getActionCommand();
@@ -123,7 +123,7 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 	private void calculateDataSetStats() {
 
 		DataSetStatisticsTask statTask =
-				new DataSetStatisticsTask(currentProject, activeDataPipeline);
+				new DataSetStatisticsTask(currentExperiment, activeDataPipeline);
 		statTask.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(statTask);
 	}
@@ -138,10 +138,10 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 	private void runDataSetPca() {
 
 		PCATask pcaTask = new PCATask(
-				currentProject,
+				currentExperiment,
 				activeDataPipeline,
-				currentProject.getExperimentDesign().getActiveDesignSubset(),
-				currentProject.getActiveFeatureSetForDataPipeline(activeDataPipeline),
+				currentExperiment.getExperimentDesign().getActiveDesignSubset(),
+				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline),
 				3);
 		pcaTask.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(pcaTask);
@@ -180,18 +180,18 @@ public class QCPanel extends DockableMRC2ToolboxPanel {
 
 	@Override
 	public void reloadDesign() {
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override
-	public void switchDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void switchDataPipeline(DataAnalysisProject experiment, DataPipeline newDataPipeline) {
 
 		clearPanel();
-		super.switchDataPipeline(project, newDataPipeline);
-		menuBar.updateMenuFromExperiment(currentProject, activeDataPipeline);
-		twoDQCpanel.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
-		threeDpanel.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
-		if(currentProject != null && activeDataPipeline != null) {
+		super.switchDataPipeline(experiment, newDataPipeline);
+		menuBar.updateMenuFromExperiment(currentExperiment, activeDataPipeline);
+		twoDQCpanel.updateGuiFromExperimentAndDataPipeline(currentExperiment, activeDataPipeline);
+		threeDpanel.updateGuiFromExperimentAndDataPipeline(currentExperiment, activeDataPipeline);
+		if(currentExperiment != null && activeDataPipeline != null) {
 			//TODO show data if available
 
 		}

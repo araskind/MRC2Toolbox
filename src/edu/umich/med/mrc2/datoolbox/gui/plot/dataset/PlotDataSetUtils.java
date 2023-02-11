@@ -60,17 +60,20 @@ public class PlotDataSetUtils {
 			MsFeature[] selectedFeatures,
 			FileSortingOrder fileSortingOrder,
 			ExperimentDesignSubset activeDesign) {
-//
-//		Map<Assay, DataFile[]> dataFileMap = new HashMap<Assay, DataFile[]>();
-//		DataAnalysisProject project = MRC2ToolBoxCore.getCurrentProject();
-//
-//		if(project != null) {
+
+		Map<Assay, DataFile[]> dataFileMap = new HashMap<Assay, DataFile[]>();
+		DataAnalysisProject experiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+
+//		if(experiment != null) {
 //
 //			for(MsFeature f : selectedFeatures) {
 //
+//				//	TODO
 //				if(dataFileMap.get(f.getAssayMethod()) == null) {
 //
-//					DataFile[] sortedFiles = DataSetUtils.sortFiles(f.getAssayMethod(), fileSortingOrder, activeDesign);
+//					DataFile[] sortedFiles = 
+//							DataSetUtils.sortFiles(f.getAssayMethod(), fileSortingOrder, activeDesign);
 //					dataFileMap.put(f.getAssayMethod(), sortedFiles);
 //				}
 //			}
@@ -81,7 +84,7 @@ public class PlotDataSetUtils {
 	}
 
 	public static Map<DataFile,Double>getNormalizedDataForFeature(
-			DataAnalysisProject project,
+			DataAnalysisProject experiment,
 			MsFeature feature,
 			DataPipeline pipeline,
 			Collection<DataFile>files,
@@ -89,7 +92,7 @@ public class PlotDataSetUtils {
 
 		Map<DataFile,Double>dataMap = new HashMap<DataFile,Double>();
 		DataFile[] sampleFiles = files.toArray(new DataFile[files.size()]);
-		Matrix dataMatrix = project.getDataMatrixForDataPipeline(pipeline);
+		Matrix dataMatrix = experiment.getDataMatrixForDataPipeline(pipeline);
 
 		long[] coordinates = new long[2];
 		coordinates[1] = dataMatrix.getColumnForLabel(feature);
@@ -235,10 +238,10 @@ public class PlotDataSetUtils {
 
 		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
 		DataFile[] sorted = DataSetUtils.sortFiles(pipeline, sortingOrder, activeDesign);
-		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Collection<ExperimentalSample> samples = 
-				project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
-		int[] batches = project.getDataFilesForAcquisitionMethod(pipeline.getAcquisitionMethod()).
+				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+		int[] batches = experiment.getDataFilesForAcquisitionMethod(pipeline.getAcquisitionMethod()).
 				stream().mapToInt(f -> f.getBatchNumber()).distinct().sorted().toArray();
 
 		if(sortingOrder.equals(FileSortingOrder.SAMPLE_ID) || sortingOrder.equals(FileSortingOrder.SAMPLE_NAME)) {
@@ -371,9 +374,9 @@ public class PlotDataSetUtils {
 
 		Map<String, DataFile[]> dataFileMap = new LinkedHashMap<String, DataFile[]>();
 		DataFile[] sorted = DataSetUtils.sortFiles(pipeline, sortingOrder, activeDesign);
-		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		Collection<ExperimentalSample> samples = 
-				project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 
 		if(sortingOrder.equals(FileSortingOrder.SAMPLE_ID) || 
 				sortingOrder.equals(FileSortingOrder.SAMPLE_NAME)) {
@@ -419,11 +422,11 @@ public class PlotDataSetUtils {
 			return null;
 
 		Map<DataFile, ExperimentalSample>dataFileMap = new LinkedHashMap<DataFile, ExperimentalSample>();
-		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
 		for(DataFile f : files) {
 
-			for(ExperimentalSample sample : project.getExperimentDesign().getSamples()) {
+			for(ExperimentalSample sample : experiment.getExperimentDesign().getSamples()) {
 
 				if(sample.hasDataFile(f))
 					dataFileMap.put(f, sample);
@@ -434,15 +437,15 @@ public class PlotDataSetUtils {
 
 	public static Map<DataFile, ExperimentalSample> createDataFileSampleMap(MsFeature[] selectedFeatures) {
 
-		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if(project == null)
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(experiment == null)
 			return null;
 		
 		Map<DataFile, ExperimentalSample>dataFileMap = 
 				new HashMap<DataFile, ExperimentalSample>();
-		for(DataPipeline pl : project.getDataPipelines()) {
+		for(DataPipeline pl : experiment.getDataPipelines()) {
 
-			for(ExperimentalSample sample : project.getExperimentDesign().getSamples()) {
+			for(ExperimentalSample sample : experiment.getExperimentDesign().getSamples()) {
 
 				for(DataFile df : sample.getDataFilesForMethod(pl.getAcquisitionMethod()))
 					dataFileMap.put(df, sample);

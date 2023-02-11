@@ -62,7 +62,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class SaveProjectTask extends AbstractTask {
+public class SaveExperimentTask extends AbstractTask {
 
 	private DataAnalysisProject projectToSave;
 	private File projectFile;
@@ -71,7 +71,7 @@ public class SaveProjectTask extends AbstractTask {
 	private HashMap<ExperimentDesignSubset, LinkedList<ExperimentDesignSubsetListener>> designSetListeners;
 	private HashSet<ExperimentDesignListener> designListeners;
 
-	public SaveProjectTask(DataAnalysisProject cefAnalyzerProject) {
+	public SaveExperimentTask(DataAnalysisProject cefAnalyzerProject) {
 
 		this.projectToSave = cefAnalyzerProject;
 		projectFile = projectToSave.getProjectFile();
@@ -272,6 +272,6 @@ public class SaveProjectTask extends AbstractTask {
 	@Override
 	public Task cloneTask() {
 
-		return new SaveProjectTask(projectToSave);
+		return new SaveExperimentTask(projectToSave);
 	}
 }

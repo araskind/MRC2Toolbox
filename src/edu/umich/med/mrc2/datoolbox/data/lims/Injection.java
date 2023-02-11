@@ -28,7 +28,7 @@ import java.util.Date;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.project.store.InjectionFields;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class Injection  implements Serializable, Comparable<Injection>{
 	
@@ -128,7 +128,7 @@ public class Injection  implements Serializable, Comparable<Injection>{
 		
 		if(timeStamp != null)
 			injectionElement.setAttribute(InjectionFields.Timestamp.name(), 
-					ProjectUtils.dateTimeFormat.format(timeStamp));
+					ExperimentUtils.dateTimeFormat.format(timeStamp));
 		
 		if(prepItemId != null)
 			injectionElement.setAttribute(
@@ -154,7 +154,7 @@ public class Injection  implements Serializable, Comparable<Injection>{
 				injectionElement.getAttributeValue(InjectionFields.Timestamp.name());
 		if(injTime != null) {
 			try {
-				timeStamp = ProjectUtils.dateTimeFormat.parse(injTime);
+				timeStamp = ExperimentUtils.dateTimeFormat.parse(injTime);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

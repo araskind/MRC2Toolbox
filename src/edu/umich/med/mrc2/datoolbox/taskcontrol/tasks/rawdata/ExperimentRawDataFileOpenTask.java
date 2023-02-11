@@ -44,7 +44,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import umich.ms.datatypes.LCMSData;
 
-public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskListener{
+public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskListener{
 
 
 	private int ticCount;
@@ -53,7 +53,7 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 	private Collection<String>errors;
 	
 	
-	public ProjectRawDataFileOpenTask(
+	public ExperimentRawDataFileOpenTask(
 			RawDataAnalysisProject project,
 			boolean copyFilesToProject) {
 		super();
@@ -169,11 +169,11 @@ public class ProjectRawDataFileOpenTask extends AbstractTask implements TaskList
 
 	@Override
 	public Task cloneTask() {
-		return new ProjectRawDataFileOpenTask(
+		return new ExperimentRawDataFileOpenTask(
 				project, copyFilesToProject);
 	}
 
-	public RawDataAnalysisProject getProject(){
+	public RawDataAnalysisProject getExperiment(){
 		return project;
 	}
 

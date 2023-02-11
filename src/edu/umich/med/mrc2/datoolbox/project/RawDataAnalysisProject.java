@@ -120,7 +120,7 @@ public class RawDataAnalysisProject extends Project {
 		initFields();
 	}
 	
-	public void updateProjectLocation(File newProjectFile) {
+	public void updateExperimentLocation(File newProjectFile) {
 		
 		projectFile = newProjectFile;
 		projectDirectory = newProjectFile.getParentFile();
@@ -319,7 +319,7 @@ public class RawDataAnalysisProject extends Project {
 		return id;
 	}
 
-	public File getProjectFile() {
+	public File getExperimentFile() {
 		return projectFile;
 	}
 

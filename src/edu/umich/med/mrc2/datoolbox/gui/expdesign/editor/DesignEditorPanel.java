@@ -183,7 +183,7 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 		}
 		super.actionPerformed(event);
 		
-		if(currentProject == null)
+		if(currentExperiment == null)
 			return;
 
 		String command = event.getActionCommand();
@@ -413,8 +413,8 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 		if(result == JOptionPane.YES_OPTION) {
 
-			if (currentProject != null)
-				currentProject.getExperimentDesign().clearDesign();
+			if (currentExperiment != null)
+				currentExperiment.getExperimentDesign().clearDesign();
 
 			reloadDesign();
 		}
@@ -431,22 +431,22 @@ public class DesignEditorPanel extends DockableMRC2ToolboxPanel {
 
 		clearPanel();
 		super.switchDataPipeline(project, newPipeline);
-		menuBar.updateMenuFromExperiment(currentProject, activeDataPipeline);
-		if(currentProject == null) 
+		menuBar.updateMenuFromExperiment(currentExperiment, activeDataPipeline);
+		if(currentExperiment == null) 
 			return;
 
-		experimentDesign = currentProject.getExperimentDesign();
-		expDesignTable.setModelFromProject(currentProject);
+		experimentDesign = currentExperiment.getExperimentDesign();
+		expDesignTable.setModelFromProject(currentExperiment);
 		designIsFromCurrentProject = true;
 	}
 
 	@Override
 	public void reloadDesign() {
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	public DataAnalysisProject getCurrentProject() {
-		return currentProject;
+		return currentExperiment;
 	}
 
 	@Override

@@ -44,7 +44,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class MsFeatureInfoBundleCollection implements Serializable {
 
@@ -271,10 +271,10 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 				FeatureCollectionFields.Description.name(), description);
 		msFeatureCollectionElement.setAttribute(
 				FeatureCollectionFields.DateCreataed.name(), 
-				ProjectUtils.dateTimeFormat.format(dateCreated));
+				ExperimentUtils.dateTimeFormat.format(dateCreated));
 		msFeatureCollectionElement.setAttribute(
 				FeatureCollectionFields.DateModified.name(), 
-				ProjectUtils.dateTimeFormat.format(lastModified));	
+				ExperimentUtils.dateTimeFormat.format(lastModified));	
 		msFeatureCollectionElement.setAttribute(
 				FeatureCollectionFields.UserId.name(), owner.getId());
 		
@@ -298,14 +298,14 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		this.name = xmlElement.getAttributeValue(FeatureCollectionFields.Name.name());
 		this.description = xmlElement.getAttributeValue(FeatureCollectionFields.Description.name());
 		try {
-			this.dateCreated = ProjectUtils.dateTimeFormat.parse(
+			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
 					xmlElement.getAttributeValue(FeatureCollectionFields.DateCreataed.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			this.lastModified = ProjectUtils.dateTimeFormat.parse(
+			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
 					xmlElement.getAttributeValue(FeatureCollectionFields.DateModified.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block

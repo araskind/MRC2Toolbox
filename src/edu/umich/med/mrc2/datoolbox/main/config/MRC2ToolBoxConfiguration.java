@@ -53,13 +53,15 @@ public class MRC2ToolBoxConfiguration {
 	private static String PWD_ENCRYPTION_KEY;
 
 	//	Values not subject to change
-	public static final String PROJECT_FILE_EXTENSION = "caproject";
-	public static final String ID_PROJECT_FILE_EXTENSION = "idproject";
-	public static final String RAW_DATA_PROJECT_FILE_EXTENSION = "rdproject";
+	public static final String EXPERIMENT_FILE_EXTENSION = "caproject";
+	public static final String ID_EXPERIMENT_FILE_EXTENSION = "idproject";
+	public static final String RAW_DATA_EXPERIMENT_FILE_EXTENSION = "rdproject";
 	public static final String DATA_MATRIX_EXTENSION = "dmat";
 	public static final String DATA_EXPORT_DIRECTORY = "exports";
 	public static final String RAW_DATA_DIRECTORY = "RawData";
 	public static final String TAB_DATA_DELIMITER = "\t";
+	
+	//	Maybe change to Experiment later, make back-compatible with existing projects
 	public static final String UNCOMPRESSED_PROJECT_FILES_DIRECTORY = "ProjectFiles";
 	public static final String PROJECT_FILE_NAME = "Project.xml";
 	public static final String FEATURE_CHROMATOGRAMS_FILE_NAME = "FeatureChromatograms.xml";
@@ -71,7 +73,8 @@ public class MRC2ToolBoxConfiguration {
 	public static String metLimsSid;
 
 	//	Preferences object
-	private static Preferences prefs = Preferences.userRoot().node(MRC2ToolBoxConfiguration.class.getName());
+	private static Preferences prefs = 
+			Preferences.userRoot().node(MRC2ToolBoxConfiguration.class.getName());
 
 	//	Unified database configuration
 	private static final String DATABASE_USER = "databaseUser";
@@ -85,7 +88,8 @@ public class MRC2ToolBoxConfiguration {
 	
 	//	Projects directory
 	public static final String PROJECTS_DIR = "defaultProjectsDirectory";
-	public static final String PROJECTS_DIR_DEFAULT = "." + File.separator + "data" + File.separator + "projects";
+	public static final String PROJECTS_DIR_DEFAULT = 
+			"." + File.separator + "data" + File.separator + "projects";
 
 	//	Data/reports directory
 	public static final String DATA_DIR = "defaultDataDirectory";
@@ -731,7 +735,7 @@ public class MRC2ToolBoxConfiguration {
 		return prefs.get(PROJECTS_DIR, PROJECTS_DIR_DEFAULT);
 	}
 
-	public static void setDefaultProjectsDirectory(String defaultProjectsDirectory) {
+	public static void setDefaultExperimentsDirectory(String defaultProjectsDirectory) {
 		prefs.put(PROJECTS_DIR, defaultProjectsDirectory);
 	}
 

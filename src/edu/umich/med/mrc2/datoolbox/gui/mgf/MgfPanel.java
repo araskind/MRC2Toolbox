@@ -260,15 +260,16 @@ public class MgfPanel extends DockableMRC2ToolboxPanel implements TreeSelectionL
 
 	@Override
 	public void reloadDesign() {
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override
-	public void switchDataPipeline(DataAnalysisProject project, DataPipeline newPipeline) {
+	public void switchDataPipeline(
+			DataAnalysisProject experiment, DataPipeline newPipeline) {
 
 		clearPanel();
-		super.switchDataPipeline(project, newPipeline);
-		menuBar.updateMenuFromExperiment(currentProject, activeDataPipeline);
+		super.switchDataPipeline(experiment, newPipeline);
+		menuBar.updateMenuFromExperiment(currentExperiment, activeDataPipeline);
 	}
 
 	@Override

@@ -39,7 +39,7 @@ public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 	private static final long serialVersionUID = 2460123645924507011L;
 	private SamplePrepEditorPanel samplePrepEditorPanel;
 
-	public RDPSamplePrepPanel(RDPMetadataWizard wizard) {
+	public RDPSamplePrepPanel(RDEMetadataWizard wizard) {
 		
 		super(wizard);
 		

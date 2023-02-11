@@ -62,13 +62,14 @@ public class QCToolbar extends CommonToolbar {
 	}
 
 	@Override
-	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(
+			DataAnalysisProject experiment, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
-		if(project != null) {
+		if(experiment != null) {
 
 			if(newDataPipeline != null) {
 
-				if(!project.getMsFeatureSetsForDataPipeline(newDataPipeline).isEmpty())
+				if(!experiment.getMsFeatureSetsForDataPipeline(newDataPipeline).isEmpty())
 					setToolbarActive(true);
 			}
 			else

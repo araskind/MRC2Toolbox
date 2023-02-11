@@ -58,7 +58,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodExtendedEd
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.DockableAcquisitionMethodDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDEMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
@@ -97,7 +97,7 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 	
 	private TreeMap<String, File> missingMethodNameToFileMap;
 	
-	public RDPMethodsPanel(RDPMetadataWizard wizard) {
+	public RDPMethodsPanel(RDEMetadataWizard wizard) {
 		
 		super(wizard);
 		JPanel panel  = initPanel();

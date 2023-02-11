@@ -38,7 +38,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MinimalMSOneFeatureFields;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 
@@ -213,10 +213,10 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 				FeatureLookupDataSetFields.CreatedBy.name(), createdBy.getId());	
 		featureLookupDataSetElement.setAttribute(
 				FeatureLookupDataSetFields.DateCreated.name(), 
-				ProjectUtils.dateTimeFormat.format(dateCreated));
+				ExperimentUtils.dateTimeFormat.format(dateCreated));
 		featureLookupDataSetElement.setAttribute(
 				FeatureLookupDataSetFields.LastModified.name(), 
-				ProjectUtils.dateTimeFormat.format(lastModified));		
+				ExperimentUtils.dateTimeFormat.format(lastModified));		
 
         Element featureListElement = 
         		new Element(FeatureLookupDataSetFields.FeatureList.name());
@@ -240,14 +240,14 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 		this.name = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Name.name());
 		this.description = xmlElement.getAttributeValue(FeatureLookupDataSetFields.Description.name());
 		try {
-			this.dateCreated = ProjectUtils.dateTimeFormat.parse(
+			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
 					xmlElement.getAttributeValue(FeatureLookupDataSetFields.DateCreated.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			this.lastModified = ProjectUtils.dateTimeFormat.parse(
+			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
 					xmlElement.getAttributeValue(FeatureLookupDataSetFields.LastModified.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block

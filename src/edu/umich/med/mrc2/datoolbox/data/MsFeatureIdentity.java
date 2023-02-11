@@ -39,7 +39,7 @@ import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsRtLibraryMatchFields;
 import edu.umich.med.mrc2.datoolbox.project.store.ReferenceMsMsLibraryMatchFields;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class MsFeatureIdentity implements Serializable {
 
@@ -385,7 +385,7 @@ public class MsFeatureIdentity implements Serializable {
 		
 		if(assignedOn != null)
 			msIdElement.setAttribute(MsFeatureIdentityFields.AssignedOn.name(), 
-					ProjectUtils.dateTimeFormat.format(assignedOn));			
+					ExperimentUtils.dateTimeFormat.format(assignedOn));			
 		
 		if(identificationLevel != null)
 			msIdElement.setAttribute(MsFeatureIdentityFields.IdLevel.name(), 
@@ -448,7 +448,7 @@ public class MsFeatureIdentity implements Serializable {
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.AssignedOn.name());
 		if(assignedOnString != null) {
 			try {
-				assignedOn = ProjectUtils.dateTimeFormat.parse(assignedOnString);
+				assignedOn = ExperimentUtils.dateTimeFormat.parse(assignedOnString);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -74,7 +74,8 @@ public class AcquisitionMethodToolbar  extends CommonToolbar {
 	}
 
 	@Override
-	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(
+			DataAnalysisProject experiment, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
 
 	}

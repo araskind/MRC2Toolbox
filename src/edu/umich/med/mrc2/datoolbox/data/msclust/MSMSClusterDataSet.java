@@ -44,7 +44,7 @@ import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusteringParameterSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class MSMSClusterDataSet {
 	
@@ -247,10 +247,10 @@ public class MSMSClusterDataSet {
 				MSMSClusterDataSetFields.UserId.name(), createdBy.getId());	
 		msmsClusterDataSetElement.setAttribute(
 				MSMSClusterDataSetFields.DateCreated.name(), 
-				ProjectUtils.dateTimeFormat.format(dateCreated));
+				ExperimentUtils.dateTimeFormat.format(dateCreated));
 		msmsClusterDataSetElement.setAttribute(
 				MSMSClusterDataSetFields.LastModified.name(), 
-				ProjectUtils.dateTimeFormat.format(lastModified));		
+				ExperimentUtils.dateTimeFormat.format(lastModified));		
 
 		msmsClusterDataSetElement.addContent(parameters.getXmlElement());
 		
@@ -279,14 +279,14 @@ public class MSMSClusterDataSet {
 		this.name = xmlElement.getAttributeValue(MSMSClusterDataSetFields.Name.name());
 		this.description = xmlElement.getAttributeValue(MSMSClusterDataSetFields.Description.name());
 		try {
-			this.dateCreated = ProjectUtils.dateTimeFormat.parse(
+			this.dateCreated = ExperimentUtils.dateTimeFormat.parse(
 					xmlElement.getAttributeValue(MSMSClusterDataSetFields.DateCreated.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
-			this.lastModified = ProjectUtils.dateTimeFormat.parse(
+			this.lastModified = ExperimentUtils.dateTimeFormat.parse(
 					xmlElement.getAttributeValue(MSMSClusterDataSetFields.LastModified.name()));
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block

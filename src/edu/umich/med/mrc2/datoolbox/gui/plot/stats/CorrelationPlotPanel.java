@@ -208,10 +208,10 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 
 		inputData = new XYSeriesCollection();
 		XYSeries series = new XYSeries("Data");
-		DataAnalysisProject project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		DataAnalysisProject experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
-		Matrix matrixOne = project.getDataMatrixForDataPipeline(dataPipelineOne);
-		Matrix matrixTwo = project.getDataMatrixForDataPipeline(dataPipelineTwo);
+		Matrix matrixOne = experiment.getDataMatrixForDataPipeline(dataPipelineOne);
+		Matrix matrixTwo = experiment.getDataMatrixForDataPipeline(dataPipelineTwo);
 
 		long[] coordinatesOne = new long[2];
 		long[] coordinatesTwo = new long[2];
@@ -219,8 +219,8 @@ public class CorrelationPlotPanel extends MasterPlotPanel {
 		coordinatesTwo[1] = matrixTwo.getColumnForLabel(fTwo);
 
 		TreeSet<ExperimentalSample> samples =
-				project.getExperimentDesign().getActiveSamplesForDesignSubset(
-						project.getExperimentDesign().getActiveDesignSubset());
+				experiment.getExperimentDesign().getActiveSamplesForDesignSubset(
+						experiment.getExperimentDesign().getActiveDesignSubset());
 		DataFile[] filesOne, filesTwo;
 
 		for(ExperimentalSample sample : samples) {

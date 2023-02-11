@@ -73,13 +73,13 @@ public class ExperimentDetailsPanel extends JPanel implements ActionListener {
 		add(lblNewLabel, gbc_lblNewLabel);
 		
 		experimentNameTextField = new JTextField();
-		GridBagConstraints gbc_projectNameTextField = new GridBagConstraints();
-		gbc_projectNameTextField.gridwidth = 2;
-		gbc_projectNameTextField.insets = new Insets(0, 0, 5, 0);
-		gbc_projectNameTextField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_projectNameTextField.gridx = 0;
-		gbc_projectNameTextField.gridy = 1;
-		add(experimentNameTextField, gbc_projectNameTextField);
+		GridBagConstraints gbc_experimentNameTextField = new GridBagConstraints();
+		gbc_experimentNameTextField.gridwidth = 2;
+		gbc_experimentNameTextField.insets = new Insets(0, 0, 5, 0);
+		gbc_experimentNameTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_experimentNameTextField.gridx = 0;
+		gbc_experimentNameTextField.gridy = 1;
+		add(experimentNameTextField, gbc_experimentNameTextField);
 		experimentNameTextField.setColumns(10);
 		
 		JLabel lblNewLabel_1 = new JLabel("Description");
@@ -142,12 +142,12 @@ public class ExperimentDetailsPanel extends JPanel implements ActionListener {
 		add(locLabel, gbc_locLabel);
 		
 		experimentLocationTextField = new JTextField();
-		GridBagConstraints gbc_projectLocationTextField = new GridBagConstraints();
-		gbc_projectLocationTextField.insets = new Insets(0, 0, 0, 5);
-		gbc_projectLocationTextField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_projectLocationTextField.gridx = 0;
-		gbc_projectLocationTextField.gridy = 7;
-		add(experimentLocationTextField, gbc_projectLocationTextField);
+		GridBagConstraints gbc_experimentLocationTextField = new GridBagConstraints();
+		gbc_experimentLocationTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_experimentLocationTextField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_experimentLocationTextField.gridx = 0;
+		gbc_experimentLocationTextField.gridy = 7;
+		add(experimentLocationTextField, gbc_experimentLocationTextField);
 		experimentLocationTextField.setColumns(10);
 		
 		JButton btnNewButton = new JButton("Browse ...");

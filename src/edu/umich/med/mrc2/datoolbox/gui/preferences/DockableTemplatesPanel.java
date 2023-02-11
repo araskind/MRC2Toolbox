@@ -66,7 +66,7 @@ public class DockableTemplatesPanel extends DefaultSingleCDockable implements Ba
 
 	private JButton 
 		defaultDataDirBrowseButton,
-		defaultProjectDirBrowseButton,
+		defaultExperimentDirBrowseButton,
 		lib2nistBrowseButton,
 		percolatorBrowseButton,
 		methodDirBrowseButton,
@@ -82,7 +82,7 @@ public class DockableTemplatesPanel extends DefaultSingleCDockable implements Ba
 
 	private JTextField 
 		defaultDataDirField,
-		defaultProjectDirField,
+		defaultExperimentDirField,
 		dirForMethodsTextField,
 		lib2nistTextField,
 		percolatorTextField,
@@ -114,32 +114,32 @@ public class DockableTemplatesPanel extends DefaultSingleCDockable implements Ba
 		int rowCount = 0;
 
 		//	Default project directory
-		JLabel lblDefaultProjectDirectory = new JLabel("Default project directory");
-		GridBagConstraints gbc_lblDefaultProjectDirectory = new GridBagConstraints();
-		gbc_lblDefaultProjectDirectory.anchor = GridBagConstraints.EAST;
-		gbc_lblDefaultProjectDirectory.insets = new Insets(0, 0, 5, 5);
-		gbc_lblDefaultProjectDirectory.gridx = 0;
-		gbc_lblDefaultProjectDirectory.gridy = rowCount;
-		add(lblDefaultProjectDirectory, gbc_lblDefaultProjectDirectory);
+		JLabel lblDefaultExperimentDirectory = new JLabel("Default experiment directory");
+		GridBagConstraints gbc_lblDefaultExperimentDirectory = new GridBagConstraints();
+		gbc_lblDefaultExperimentDirectory.anchor = GridBagConstraints.EAST;
+		gbc_lblDefaultExperimentDirectory.insets = new Insets(0, 0, 5, 5);
+		gbc_lblDefaultExperimentDirectory.gridx = 0;
+		gbc_lblDefaultExperimentDirectory.gridy = rowCount;
+		add(lblDefaultExperimentDirectory, gbc_lblDefaultExperimentDirectory);
 
-		defaultProjectDirField = new JTextField();
-		defaultProjectDirField.setEditable(false);
-		GridBagConstraints gbc_defaultProjectDirField = new GridBagConstraints();
-		gbc_defaultProjectDirField.insets = new Insets(0, 0, 5, 5);
-		gbc_defaultProjectDirField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_defaultProjectDirField.gridx = 1;
-		gbc_defaultProjectDirField.gridy = rowCount;
-		add(defaultProjectDirField, gbc_defaultProjectDirField);
-		defaultProjectDirField.setColumns(10);
+		defaultExperimentDirField = new JTextField();
+		defaultExperimentDirField.setEditable(false);
+		GridBagConstraints gbc_defaultExperimentDirField = new GridBagConstraints();
+		gbc_defaultExperimentDirField.insets = new Insets(0, 0, 5, 5);
+		gbc_defaultExperimentDirField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_defaultExperimentDirField.gridx = 1;
+		gbc_defaultExperimentDirField.gridy = rowCount;
+		add(defaultExperimentDirField, gbc_defaultExperimentDirField);
+		defaultExperimentDirField.setColumns(10);
 
-		defaultProjectDirBrowseButton = new JButton("Browse");
-		defaultProjectDirBrowseButton.setActionCommand(MainActionCommands.DEFAULT_DIR_BROWSE_COMMAND.getName());
-		defaultProjectDirBrowseButton.addActionListener(this);
-		GridBagConstraints gbc_defaultProjectDirBrowseButton = new GridBagConstraints();
-		gbc_defaultProjectDirBrowseButton.insets = new Insets(0, 0, 5, 0);
-		gbc_defaultProjectDirBrowseButton.gridx = 2;
-		gbc_defaultProjectDirBrowseButton.gridy = rowCount;
-		add(defaultProjectDirBrowseButton, gbc_defaultProjectDirBrowseButton);
+		defaultExperimentDirBrowseButton = new JButton("Browse");
+		defaultExperimentDirBrowseButton.setActionCommand(MainActionCommands.DEFAULT_DIR_BROWSE_COMMAND.getName());
+		defaultExperimentDirBrowseButton.addActionListener(this);
+		GridBagConstraints gbc_defaultExperimentDirBrowseButton = new GridBagConstraints();
+		gbc_defaultExperimentDirBrowseButton.insets = new Insets(0, 0, 5, 0);
+		gbc_defaultExperimentDirBrowseButton.gridx = 2;
+		gbc_defaultExperimentDirBrowseButton.gridy = rowCount;
+		add(defaultExperimentDirBrowseButton, gbc_defaultExperimentDirBrowseButton);
 
 		rowCount++;
 		
@@ -654,7 +654,7 @@ public class DockableTemplatesPanel extends DefaultSingleCDockable implements Ba
 		}
 		if (command.equals(MainActionCommands.DEFAULT_DIR_BROWSE_COMMAND.getName())) {
 
-			title = "Select default project directory:";
+			title = "Select default experiment directory:";
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			chooser.setCurrentDirectory(new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()));
 		}
@@ -726,7 +726,7 @@ public class DockableTemplatesPanel extends DefaultSingleCDockable implements Ba
 					rJavaTextField.setText(inputFile.getAbsolutePath());
 
 				if (command.equals(MainActionCommands.DEFAULT_DIR_BROWSE_COMMAND.getName()))
-					defaultProjectDirField.setText(inputFile.getAbsolutePath());
+					defaultExperimentDirField.setText(inputFile.getAbsolutePath());
 				
 				if (command.equals(MainActionCommands.RAW_DATA_REPOSITORY_DIR_BROWSE_COMMAND.getName()))
 					rawDataRepositoryField.setText(inputFile.getAbsolutePath());
@@ -765,7 +765,7 @@ public class DockableTemplatesPanel extends DefaultSingleCDockable implements Ba
 
 		prefs = preferences;
 
-		defaultProjectDirField.setText(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory());
+		defaultExperimentDirField.setText(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory());
 		defaultDataDirField.setText(MRC2ToolBoxConfiguration.getDefaultDataDirectory());
 		rawDataRepositoryField.setText(MRC2ToolBoxConfiguration.getRawDataRepository());
 		qualAutomationTextField.setText(MRC2ToolBoxConfiguration.getQualAutomationExecutableFile());
@@ -785,13 +785,13 @@ public class DockableTemplatesPanel extends DefaultSingleCDockable implements Ba
 	@Override
 	public void savePreferences() {
 
-		if(!defaultProjectDirField.getText().isEmpty()) {
+		if(!defaultExperimentDirField.getText().isEmpty()) {
 
-			File defaultProjectDir = new File(defaultProjectDirField.getText());
-			if(defaultProjectDir.exists())
-					MRC2ToolBoxConfiguration.setDefaultProjectsDirectory(defaultProjectDir.getAbsolutePath());
+			File defaultExperimentDir = new File(defaultExperimentDirField.getText());
+			if(defaultExperimentDir.exists())
+					MRC2ToolBoxConfiguration.setDefaultExperimentsDirectory(defaultExperimentDir.getAbsolutePath());
 			else {
-				MessageDialog.showErrorMsg("Invalid default project directory!", this.getContentPane());
+				MessageDialog.showErrorMsg("Invalid default experiment directory!", this.getContentPane());
 				return;
 			}
 		}

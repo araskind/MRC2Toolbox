@@ -142,8 +142,8 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 
 	private void activateDefaultSet() {
 		
-		MsFeatureSet allfeatureSet = currentProject.getAllFeaturesSetFordataPipeline(activeDataPipeline);
-		currentProject.setActiveFeatureSetForDataPipeline(allfeatureSet, activeDataPipeline);
+		MsFeatureSet allfeatureSet = currentExperiment.getAllFeaturesSetFordataPipeline(activeDataPipeline);
+		currentExperiment.setActiveFeatureSetForDataPipeline(allfeatureSet, activeDataPipeline);
 
 
 //		int column = featureSetTable.getColumnIndex(FeatureSubsetTableModel.FEATURES_SUBSET_COLUMN);
@@ -220,7 +220,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 	private void createNewFeatureSet(MsFeatureSet newSet) {
 
 		String newName = featureSubsetDialog.getSubsetName();
-		MsFeatureSet existing  = currentProject.getMsFeatureSetsForDataPipeline(activeDataPipeline).stream().
+		MsFeatureSet existing  = currentExperiment.getMsFeatureSetsForDataPipeline(activeDataPipeline).stream().
 			filter(s -> s.getName().equalsIgnoreCase(newName)).findFirst().orElse(null);
 		if (existing != null) {
 			MessageDialog.showWarningMsg("Feature set with the name '" + newSet.getName()
@@ -257,7 +257,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 
 		if (delete == JOptionPane.YES_OPTION){
 			
-			currentProject.getMsFeatureSetsForDataPipeline(activeDataPipeline).remove(setToDelete);
+			currentExperiment.getMsFeatureSetsForDataPipeline(activeDataPipeline).remove(setToDelete);
 			if(setToDelete.isActive())
 				activateDefaultSet();			
 		}
@@ -304,7 +304,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 	private void finishSubsetEdit() {
 
 		MsFeatureSet setToEdit = featureSubsetDialog.getActiveSet();
-		if (currentProject.getMsFeatureSetsForDataPipeline(activeDataPipeline).contains(setToEdit))
+		if (currentExperiment.getMsFeatureSetsForDataPipeline(activeDataPipeline).contains(setToEdit))
 			editSelectedFeatureSet(setToEdit);
 		else
 			createNewFeatureSet(setToEdit);			
@@ -397,7 +397,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 
 			if(!activeSet.equals(featureSet)) {
 				activeSet = featureSet;
-				currentProject.setActiveFeatureSetForDataPipeline(activeSet, activeDataPipeline);
+				currentExperiment.setActiveFeatureSetForDataPipeline(activeSet, activeDataPipeline);
 			}
 		}
 		if (status.equals(ParameterSetStatus.DELETED)) {
@@ -410,10 +410,10 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 			if(!activeSet.equals(featureSet)) {
 				
 				activeSet = featureSet;
-				currentProject.setActiveFeatureSetForDataPipeline(activeSet, activeDataPipeline);
+				currentExperiment.setActiveFeatureSetForDataPipeline(activeSet, activeDataPipeline);
 			}
 		}
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	private void unlinkFromFeatureDataPanel() {
@@ -436,22 +436,22 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 		if(project == null || newDataPipeline == null)
 			return;
 		
-		featureSetTable.setModelFromProject(currentProject, newDataPipeline);
+		featureSetTable.setModelFromProject(currentExperiment, newDataPipeline);
 		scrollPane.setPreferredSize(featureSetTable.getPreferredScrollableViewportSize());
 		activeSet = null;
 		if (newDataPipeline != null) {
 
-			for (MsFeatureSet set : currentProject.getMsFeatureSetsForDataPipeline(newDataPipeline))
+			for (MsFeatureSet set : currentExperiment.getMsFeatureSetsForDataPipeline(newDataPipeline))
 				addSetListeners(set);
 
-			activeSet = currentProject.getActiveFeatureSetForDataPipeline(newDataPipeline);
+			activeSet = currentExperiment.getActiveFeatureSetForDataPipeline(newDataPipeline);
 		}
-		toolbar.updateGuiFromExperimentAndDataPipeline(currentProject, newDataPipeline);
+		toolbar.updateGuiFromExperimentAndDataPipeline(currentExperiment, newDataPipeline);
 	}
 	
 	@Override
 	public void reloadDesign() {
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override
@@ -459,7 +459,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 
 		super.closeExperiment();
 		clearPanel();
-		toolbar.updateGuiFromExperimentAndDataPipeline(currentProject, activeDataPipeline);
+		toolbar.updateGuiFromExperimentAndDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override

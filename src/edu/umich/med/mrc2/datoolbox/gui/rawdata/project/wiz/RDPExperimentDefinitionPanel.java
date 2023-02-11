@@ -36,7 +36,7 @@ public class RDPExperimentDefinitionPanel extends RDPMetadataWizardPanel {
 	private static final long serialVersionUID = 2460123645924507011L;
 	private IDTExperimentDefinitionPanel experimentDefinitionPanel;
 
-	public RDPExperimentDefinitionPanel(RDPMetadataWizard wizard) {
+	public RDPExperimentDefinitionPanel(RDEMetadataWizard wizard) {
 		
 		super(wizard);
 		

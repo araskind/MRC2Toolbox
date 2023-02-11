@@ -128,7 +128,8 @@ public class MoTrPACPanelMenuBar extends CommonMenuBar {
 		add(dataUploadUtilsMenu);
 	}
 
-	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(
+			DataAnalysisProject experiment, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

@@ -44,7 +44,7 @@ import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 
 public enum PanelList {
 
-	PROJECT_SETUP("Project setup", ExperimentSetupDraw.class, Boolean.TRUE),
+	EXPERIMENT_SETUP("Experiment dashboard", ExperimentSetupDraw.class, Boolean.TRUE),
 	DESIGN("Experiment design", ExperimentDesignPanel.class, Boolean.TRUE),
 	FEATURE_DATA("Feature data", FeatureDataPanel.class, Boolean.FALSE),
 	WORKLIST("Assay worklist", WorklistPanel.class, Boolean.FALSE),

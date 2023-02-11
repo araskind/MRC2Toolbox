@@ -53,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.data.IDtrackerDataFileSampleMatc
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDEMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -84,7 +84,7 @@ public class RDPMsDataVerifierPanel extends RDPMetadataWizardPanel
 	private DAMethodAssignmentDialog daMethodAssignmentDialog;
 	private boolean dataVerified;
 
-	public RDPMsDataVerifierPanel(RDPMetadataWizard wizard) {
+	public RDPMsDataVerifierPanel(RDEMetadataWizard wizard) {
 		
 		super(wizard);
 		

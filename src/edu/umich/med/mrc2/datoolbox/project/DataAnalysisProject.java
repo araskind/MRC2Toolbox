@@ -130,7 +130,7 @@ public class DataAnalysisProject implements Serializable {
 				Paths.get(parentDirectory.getAbsolutePath(), projectName).toFile();
 		projectFile = 
 				Paths.get(projectDirectory.getAbsolutePath(), projectName + "."
-				+ MRC2ToolBoxConfiguration.PROJECT_FILE_EXTENSION).toFile();
+				+ MRC2ToolBoxConfiguration.EXPERIMENT_FILE_EXTENSION).toFile();
 		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
 		if (!createProjectDirectory(projectDirectory)) {

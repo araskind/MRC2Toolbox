@@ -75,7 +75,7 @@ public abstract class Project {
 		this.id = other.getId();
 		this.name = other.getName();
 		this.description = other.getDescription();
-		this.projectFile = other.getProjectFile();
+		this.projectFile = other.getExperimentFile();
 		this.dateCreated = other.getDateCreated();
 		this.lastModified = other.getLastModified();		
 		this.projectDirectory = other.getProjectDirectory();
@@ -88,7 +88,7 @@ public abstract class Project {
 				Paths.get(parentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-")).toFile();				
 		projectFile = 
 				Paths.get(projectDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-") + "."
-				+ MRC2ToolBoxConfiguration.RAW_DATA_PROJECT_FILE_EXTENSION).toFile();	
+				+ MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION).toFile();	
 		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
 		try {
@@ -137,7 +137,7 @@ public abstract class Project {
 		this.description = description;
 	}
 
-	public File getProjectFile() {
+	public File getExperimentFile() {
 		return projectFile;
 	}
 

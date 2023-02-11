@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.project.store.SamplePreparationFields;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class LIMSSamplePreparation implements 
 		Serializable, AnnotatedObject, Comparable<LIMSSamplePreparation>{
@@ -276,7 +276,7 @@ public class LIMSSamplePreparation implements
 			prepDate = new Date();
 		
 		prepElement.setAttribute(SamplePreparationFields.PrepDate.name(), 
-				ProjectUtils.dateTimeFormat.format(prepDate));
+				ExperimentUtils.dateTimeFormat.format(prepDate));
 		
 		if(creator != null)
 			prepElement.setAttribute(
@@ -333,7 +333,7 @@ public class LIMSSamplePreparation implements
 				prepElement.getAttributeValue(SamplePreparationFields.PrepDate.name());
 		if(startDateString != null) {
 			try {
-				prepDate = ProjectUtils.dateTimeFormat.parse(startDateString);
+				prepDate = ExperimentUtils.dateTimeFormat.parse(startDateString);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

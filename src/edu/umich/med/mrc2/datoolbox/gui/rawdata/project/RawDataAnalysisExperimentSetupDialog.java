@@ -81,7 +81,7 @@ public class RawDataAnalysisExperimentSetupDialog extends JDialog
 	public static final String MS1_BASE_DIRECTORY = "MS1_BASE_DIRECTORY";
 	public static final String EXPERIMENT_BASE_DIRECTORY = "EXPERIMENT_BASE_DIRECTORY";
 	public static final String COPY_RAW_DATA_TO_EXPERIMENT = "COPY_RAW_DATA_TO_EXPERIMENT";
-	private File projectBaseDir;
+	private File experimentBaseDir;
 
 	private CControl control;
 	private CGrid grid;
@@ -98,7 +98,7 @@ public class RawDataAnalysisExperimentSetupDialog extends JDialog
 		setSize(new Dimension(1000, 800));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
-		setTitle("Create new raw data analysis project");
+		setTitle("Create new raw data analysis experiment");
 		setIconImage(((ImageIcon) rdaExperimentIcon).getImage());
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -122,7 +122,7 @@ public class RawDataAnalysisExperimentSetupDialog extends JDialog
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		getContentPane().add(panel, BorderLayout.SOUTH);
 		
-		copyFilesCheckBox = new JCheckBox("Copy raw data to project");
+		copyFilesCheckBox = new JCheckBox("Copy raw data to experiment");
 		copyFilesCheckBox.setSelected(true);
 		copyFilesCheckBox.setEnabled(false);
 		panel.add(copyFilesCheckBox);
@@ -155,11 +155,11 @@ public class RawDataAnalysisExperimentSetupDialog extends JDialog
 
 		String command = e.getActionCommand();
 		if(command.equals(MainActionCommands.SELECT_EXPERIMENT_LOCATION_COMMAND.getName()))
-			setProjectLocation();
+			setexperimentLocation();
 
 	}
 	
-	private void setProjectLocation() {
+	private void setexperimentLocation() {
 		
 		ImprovedFileChooser chooser = new ImprovedFileChooser();
 		chooser.setPreferredSize(new Dimension(800, 640));
@@ -167,29 +167,29 @@ public class RawDataAnalysisExperimentSetupDialog extends JDialog
 		chooser.setAcceptAllFileFilterUsed(false);
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setMultiSelectionEnabled(false);
-		if(projectBaseDir != null)
-			chooser.setCurrentDirectory(projectBaseDir);
+		if(experimentBaseDir != null)
+			chooser.setCurrentDirectory(experimentBaseDir);
 		
 		if(chooser.showOpenDialog(this.getContentPane()) == JFileChooser.APPROVE_OPTION) {
 			
 			File selectedFile = chooser.getSelectedFile();
 			if(selectedFile != null && selectedFile.exists()) {
-				projectBaseDir = selectedFile;
+				experimentBaseDir = selectedFile;
 				experimentDetailsPanel.setExperimentLocation(selectedFile);
 				savePreferences();
 			}
 		}
 	}
 	
-	public String getProjectName() {
+	public String getExperimentName() {
 		return experimentDetailsPanel.getExperimentName();
 	}
 
-	public String getProjectDescription() {
+	public String getExperimentDescription() {
 		return experimentDetailsPanel.getExperimentDescription();
 	}
 	
-	public String getProjectLocationPath() {
+	public String ExperimentLocationPath() {
 		return experimentDetailsPanel.getExperimentLocationPath();
 	}
 	
@@ -205,7 +205,7 @@ public class RawDataAnalysisExperimentSetupDialog extends JDialog
 		return rawMSOneDataFileSelector.getDataFiles();
 	}
 	
-	public boolean copyRawDataToProject() {
+	public boolean copyRawDataToExperiment() {
 		return copyFilesCheckBox.isSelected();
 	}
 	
@@ -256,7 +256,8 @@ public class RawDataAnalysisExperimentSetupDialog extends JDialog
 
 				CDockable uiObject = control.getCDockable(i);
 				if(uiObject instanceof PersistentLayout)
-					((PersistentLayout)uiObject).saveLayout(((PersistentLayout)uiObject).getLayoutFile());
+					((PersistentLayout)uiObject).saveLayout(
+							((PersistentLayout)uiObject).getLayoutFile());
 			}
 			try {
 				control.writeXML(layoutFile);
@@ -284,12 +285,13 @@ public class RawDataAnalysisExperimentSetupDialog extends JDialog
 						MRC2ToolBoxConfiguration.getRawDataRepository()));
 		rawMSOneDataFileSelector.setBaseDirectory(msOneBaseDirectory);
 		
-		projectBaseDir =
+		experimentBaseDir =
 				new File(preferences.get(EXPERIMENT_BASE_DIRECTORY,
 						MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()));
-		experimentDetailsPanel.setExperimentLocation(projectBaseDir);
+		experimentDetailsPanel.setExperimentLocation(experimentBaseDir);
 		
-		copyFilesCheckBox.setSelected(preferences.getBoolean(COPY_RAW_DATA_TO_EXPERIMENT, Boolean.TRUE));
+		copyFilesCheckBox.setSelected(preferences.getBoolean(
+				COPY_RAW_DATA_TO_EXPERIMENT, Boolean.TRUE));
 	}
 
 	@Override
@@ -303,13 +305,15 @@ public class RawDataAnalysisExperimentSetupDialog extends JDialog
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		
 		if(rawMSMSDataFileSelector.getBaseDirectory() != null)
-			preferences.put(MSMS_BASE_DIRECTORY, rawMSMSDataFileSelector.getBaseDirectory().getAbsolutePath());
+			preferences.put(MSMS_BASE_DIRECTORY, 
+					rawMSMSDataFileSelector.getBaseDirectory().getAbsolutePath());
 		
 		if(rawMSOneDataFileSelector.getBaseDirectory() != null)
-			preferences.put(MS1_BASE_DIRECTORY, rawMSOneDataFileSelector.getBaseDirectory().getAbsolutePath());
+			preferences.put(MS1_BASE_DIRECTORY, 
+					rawMSOneDataFileSelector.getBaseDirectory().getAbsolutePath());
 		
-		if(projectBaseDir != null)
-			preferences.put(EXPERIMENT_BASE_DIRECTORY, projectBaseDir.getAbsolutePath());
+		if(experimentBaseDir != null)
+			preferences.put(EXPERIMENT_BASE_DIRECTORY, experimentBaseDir.getAbsolutePath());
 		
 		preferences.putBoolean(COPY_RAW_DATA_TO_EXPERIMENT, copyFilesCheckBox.isSelected());		
 	}

@@ -194,7 +194,7 @@ public class NewIDTrackerBasedExperimentDialog extends JDialog implements Action
 			return;
 		}
 		MRC2ToolBoxCore.getMainWindow().
-			createNewProjectFromIDTrackerExperiment(projFile, pdesc, activeExperiment);
+			createNewExperimentFromIDTrackerExperiment(projFile, pdesc, activeExperiment);
 		dispose();
 	}
 

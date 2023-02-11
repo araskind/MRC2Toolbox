@@ -41,10 +41,10 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleClusterFields;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSMSClusteringUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MsFeatureInfoBundleCluster {
@@ -348,7 +348,7 @@ public class MsFeatureInfoBundleCluster {
 		String compoundIdList = 
 				clusterElement.getChild(
 						MsFeatureInfoBundleClusterFields.FeatureIdList.name()).getText();
-		featureIds.addAll(ProjectUtils.getIdList(compoundIdList));
+		featureIds.addAll(ExperimentUtils.getIdList(compoundIdList));
 		Element primaryIdElement = 
 				clusterElement.getChild(MsFeatureIdentityFields.MSFID.name());
 		if(primaryIdElement != null)

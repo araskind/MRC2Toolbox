@@ -54,7 +54,7 @@ public class RawDataTreeModel extends DefaultTreeModel {
 	 */
 	private static final long serialVersionUID = 2864104877072789151L;
 	
-	public static final String rootNodeName = "Project";
+	public static final String rootNodeName = "Experiment";
 	public static final String dataFilesNodeName = "Data files";
 	public static final String chromatogramNodeName = "Chromatograms";
 	public static final String scansNodeName = "Scans";

@@ -88,7 +88,7 @@ public class ExistingDataListingDialog extends JDialog {
 		getContentPane().add(panel_1, BorderLayout.NORTH);
 		
 		JLabel lblNewLabel = new JLabel(
-				"MSMS data for some of the files in the project already uploaded.", 
+				"MSMS data for some of the files in the experiment already uploaded.", 
 				strongWarningIcon, 
 				SwingConstants.LEFT);
 		panel_1.add(lblNewLabel);

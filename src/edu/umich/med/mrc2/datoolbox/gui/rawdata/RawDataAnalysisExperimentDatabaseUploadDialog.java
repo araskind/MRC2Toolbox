@@ -56,17 +56,18 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
-public class RawDataAnalysisProjectDatabaseUploadDialog extends JDialog implements BackedByPreferences {
+public class RawDataAnalysisExperimentDatabaseUploadDialog 
+		extends JDialog implements BackedByPreferences {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1951718448449783609L;
 	
-	private static final Icon sendProjectToDatabaseIcon = GuiUtils.getIcon("xml2Database", 32);
+	private static final Icon sendexperimentToDatabaseIcon = GuiUtils.getIcon("xml2Database", 32);
 	
 	private Preferences preferences;
-	private static final String PREFERENCES_NODE = "RawDataAnalysisProjectDatabaseUploadDialog";
+	private static final String PREFERENCES_NODE = "RawDataAnalysisexperimentDatabaseUploadDialog";
 	private static final String MS_ONE_MZ_WINDOW = "MS_ONE_MZ_WINDOW";
 	
 	private JFormattedTextField msOneMzWindowTextField;
@@ -75,10 +76,10 @@ public class RawDataAnalysisProjectDatabaseUploadDialog extends JDialog implemen
 	private MSMSExtractionParameterSet ps;
 	private DataExtractionMethod deMethod;
 	
-	public RawDataAnalysisProjectDatabaseUploadDialog(RawDataExaminerPanel parentPanel) {
+	public RawDataAnalysisExperimentDatabaseUploadDialog(RawDataExaminerPanel parentPanel) {
 		super();
-		setTitle("Upload raw data project as new MetIDTracker experiment");
-		setIconImage(((ImageIcon) sendProjectToDatabaseIcon).getImage());
+		setTitle("Upload raw data experiment as new MetIDTracker experiment");
+		setIconImage(((ImageIcon) sendexperimentToDatabaseIcon).getImage());
 		setResizable(true);
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setPreferredSize(new Dimension(640, 320));

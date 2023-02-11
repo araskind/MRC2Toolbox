@@ -54,8 +54,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.worklist.WorklistImportPopupMenu
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDEMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataDefinitionStage;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizardPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
@@ -88,7 +88,7 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 	private AcquisitionMethodAssignmentDialog acquisitionMethodAssignmentDialog;
 	private InjectionVolumeAssignmentDialog injectionVolumeAssignmentDialog;
 	
-	public RDPWorklistPanel(RDPMetadataWizard wizard) {
+	public RDPWorklistPanel(RDEMetadataWizard wizard) {
 		
 		super(wizard);
 			
@@ -208,7 +208,7 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 				wizard.getDataAcquisitionMethods();
 		if(acquisitionMethods.isEmpty()) {
 			MessageDialog.showWarningMsg(
-					"Please add data acquisition method(s) to the project first.", this);
+					"Please add data acquisition method(s) to the experiment first.", this);
 			wizard.validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
 			return;
 		}		

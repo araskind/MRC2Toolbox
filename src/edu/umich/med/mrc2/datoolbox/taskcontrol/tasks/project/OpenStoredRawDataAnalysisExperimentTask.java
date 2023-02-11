@@ -72,10 +72,10 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.zip.ParallelZip;
 
-public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implements TaskListener {
+public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implements TaskListener {
 
 	private RawDataAnalysisProject project;
 	private File projectFile;
@@ -93,7 +93,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 	
 	private ArrayList<String>errors;
 	
-	public OpenStoredRawDataAnalysisProjectTask(File projectFile, boolean loadResults) {
+	public OpenStoredRawDataAnalysisExperimentTask(File projectFile, boolean loadResults) {
 		this.projectFile = projectFile;
 		this.loadResults = loadResults;
 		errors = new ArrayList<String>();
@@ -213,9 +213,9 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		String id = projectElement.getAttributeValue(ProjectFields.Id.name()); 
 		String name = projectElement.getAttributeValue(ProjectFields.Name.name()); 
 		String description = projectElement.getAttributeValue(ProjectFields.Description.name()); 
-		Date dateCreated = ProjectUtils.dateTimeFormat.parse(
+		Date dateCreated = ExperimentUtils.dateTimeFormat.parse(
 				projectElement.getAttributeValue(ProjectFields.DateCreated.name())); 
-		Date lastModified = ProjectUtils.dateTimeFormat.parse(
+		Date lastModified = ExperimentUtils.dateTimeFormat.parse(
 				projectElement.getAttributeValue(ProjectFields.DateModified.name())); 		
 		project = new RawDataAnalysisProject(
 				id, 
@@ -245,19 +245,19 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		
 		String compoundIdList = 
 				projectElement.getChild(ProjectFields.UniqueCIDList.name()).getText();
-		uniqueCompoundIds.addAll(ProjectUtils.getIdList(compoundIdList));
+		uniqueCompoundIds.addAll(ExperimentUtils.getIdList(compoundIdList));
 		
 		String msmsLibIdIdList = 
 				projectElement.getChild(ProjectFields.UniqueMSMSLibIdList.name()).getText();
-		uniqueMSMSLibraryIds.addAll(ProjectUtils.getIdList(msmsLibIdIdList));
+		uniqueMSMSLibraryIds.addAll(ExperimentUtils.getIdList(msmsLibIdIdList));
 
 		String msRtLibIdIdList = 
 				projectElement.getChild(ProjectFields.UniqueMSRTLibIdList.name()).getText();
-		uniqueMSRTLibraryIds.addAll(ProjectUtils.getIdList(msRtLibIdIdList));
+		uniqueMSRTLibraryIds.addAll(ExperimentUtils.getIdList(msRtLibIdIdList));
 
 		String sampleIdIdList = 
 				projectElement.getChild(ProjectFields.UniqueSampleIdList.name()).getText();
-		uniqueSampleIds.addAll(ProjectUtils.getIdList(sampleIdIdList));
+		uniqueSampleIds.addAll(ExperimentUtils.getIdList(sampleIdIdList));
 				
 		try {
 			populateDatabaseCashData();
@@ -431,7 +431,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 
 	@Override
 	public Task cloneTask() {
-		return new OpenStoredRawDataAnalysisProjectTask(projectFile, loadResults);
+		return new OpenStoredRawDataAnalysisExperimentTask(projectFile, loadResults);
 	}
 
 	@Override
@@ -516,7 +516,7 @@ public class OpenStoredRawDataAnalysisProjectTask extends AbstractTask implement
 		return errors;
 	}
 	
-	public RawDataAnalysisProject getProject() {
+	public RawDataAnalysisProject getExperiment() {
 		return project;
 	}
 }

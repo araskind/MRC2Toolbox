@@ -55,9 +55,9 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.CompressionUtils;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
-public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implements TaskListener {
+public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implements TaskListener {
 	
 	private RawDataAnalysisProject projectToSave;
 	private File xmlFile;
@@ -71,7 +71,7 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 	private Set<String>uniqueMSRTLibraryIds;
 	private Set<String>uniqueSampleIds;
 
-	public SaveStoredRawDataAnalysisProjectTask(RawDataAnalysisProject projectToSave) {
+	public SaveStoredRawDataAnalysisExperimentTask(RawDataAnalysisProject projectToSave) {
 		super();
 		this.projectToSave = projectToSave;
 	}
@@ -145,13 +145,13 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			projectRoot.addContent(experiment.getXmlElement());
 			
 		projectRoot.setAttribute(ProjectFields.ProjectFile.name(), 
-				projectToSave.getProjectFile().getAbsolutePath());
+				projectToSave.getExperimentFile().getAbsolutePath());
 		projectRoot.setAttribute(ProjectFields.ProjectDir.name(), 
 				projectToSave.getProjectDirectory().getAbsolutePath());	
 		projectRoot.setAttribute(ProjectFields.DateCreated.name(), 
-				ProjectUtils.dateTimeFormat.format(projectToSave.getDateCreated()));
+				ExperimentUtils.dateTimeFormat.format(projectToSave.getDateCreated()));
 		projectRoot.setAttribute(ProjectFields.DateModified.name(), 
-				ProjectUtils.dateTimeFormat.format(projectToSave.getLastModified()));
+				ExperimentUtils.dateTimeFormat.format(projectToSave.getLastModified()));
         
 		projectRoot.addContent(       		
         		new Element(ProjectFields.UniqueCIDList.name()).
@@ -297,7 +297,7 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 			
 			processed = 60;	
 			CompressionUtils.zipFile(
-					xmlFile, projectToSave.getProjectFile());
+					xmlFile, projectToSave.getExperimentFile());
 	        //	xmlFile.delete();
 	        processed = 100;
 		}
@@ -333,6 +333,6 @@ public class SaveStoredRawDataAnalysisProjectTask extends AbstractTask implement
 
 	@Override
 	public Task cloneTask() {
-		return new SaveStoredRawDataAnalysisProjectTask(projectToSave);
+		return new SaveStoredRawDataAnalysisExperimentTask(projectToSave);
 	}
 }

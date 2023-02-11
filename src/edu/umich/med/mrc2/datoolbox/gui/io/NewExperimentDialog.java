@@ -264,7 +264,7 @@ public class NewExperimentDialog extends JDialog implements ActionListener {
 			MRC2ToolBoxCore.getMainWindow().createNewExperimentFromLimsExperiment(
 					projFile, pdesc, projectType, activeExperiment);
 		else
-			MRC2ToolBoxCore.getMainWindow().createNewProject(
+			MRC2ToolBoxCore.getMainWindow().createNewExperiment(
 					projFile, pdesc, projectType, design);
 		
 		dispose();

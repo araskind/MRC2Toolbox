@@ -66,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
 
-public class ProjectUtils {
+public class ExperimentUtils {
 	
 	public static final DateFormat dateTimeFormat = 
 			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -98,7 +98,7 @@ public class ProjectUtils {
 		return false;
 	}
 	
-	public static void saveProjectFile(RawDataAnalysisProject projectToSave) {
+	public static void saveExperimentFile(RawDataAnalysisProject projectToSave) {
 		
 		projectToSave.setLastModified(new Date());
 		try {
@@ -117,7 +117,7 @@ public class ProjectUtils {
 			xstream.omitField(ExperimentDesign.class, "eventListeners");
 			
 			File xmlFile = Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
-					FilenameUtils.getBaseName(projectToSave.getProjectFile().getName()) + ".xml").toFile();
+					FilenameUtils.getBaseName(projectToSave.getExperimentFile().getName()) + ".xml").toFile();
 	        RandomAccessFile raf = new RandomAccessFile(xmlFile.getAbsolutePath(), "rw");
 	        FileOutputStream fout = new FileOutputStream(raf.getFD());	        
 			BufferedOutputStream bout = new BufferedOutputStream(fout);
@@ -128,7 +128,7 @@ public class ProjectUtils {
 			
 			if(xmlFile.exists()) {
 				
-		        OutputStream archiveStream = new FileOutputStream(projectToSave.getProjectFile());
+		        OutputStream archiveStream = new FileOutputStream(projectToSave.getExperimentFile());
 		        ZipArchiveOutputStream archive =
 		        	(ZipArchiveOutputStream) new ArchiveStreamFactory().
 		        	createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
@@ -150,7 +150,7 @@ public class ProjectUtils {
 		}
 	}
 	
-	public static void saveStorableRawDataAnalysisProject(RawDataAnalysisProject projectToSave) {
+	public static void saveStorableRawDataAnalysisExperiment(RawDataAnalysisProject projectToSave) {
 		
 		Document document = new Document();
 	    Element projectRoot = 
@@ -163,13 +163,13 @@ public class ProjectUtils {
 		projectRoot.setAttribute(ProjectFields.Description.name(), 
 				projectToSave.getDescription());
 		projectRoot.setAttribute(ProjectFields.ProjectFile.name(), 
-				projectToSave.getProjectFile().getAbsolutePath());
+				projectToSave.getExperimentFile().getAbsolutePath());
 		projectRoot.setAttribute(ProjectFields.ProjectDir.name(), 
 				projectToSave.getProjectDirectory().getAbsolutePath());	
 		projectRoot.setAttribute(ProjectFields.DateCreated.name(), 
-				ProjectUtils.dateTimeFormat.format(projectToSave.getDateCreated()));
+				ExperimentUtils.dateTimeFormat.format(projectToSave.getDateCreated()));
 		projectRoot.setAttribute(ProjectFields.DateModified.name(), 
-				ProjectUtils.dateTimeFormat.format(projectToSave.getLastModified()));
+				ExperimentUtils.dateTimeFormat.format(projectToSave.getLastModified()));
 		
 		projectRoot.addContent(       		
 				new Element(ProjectFields.UniqueCIDList.name()).setText(""));
@@ -211,7 +211,7 @@ public class ProjectUtils {
 		    e.printStackTrace();
 		}
 		try {
-			CompressionUtils.zipFile(xmlFile, projectToSave.getProjectFile());
+			CompressionUtils.zipFile(xmlFile, projectToSave.getExperimentFile());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

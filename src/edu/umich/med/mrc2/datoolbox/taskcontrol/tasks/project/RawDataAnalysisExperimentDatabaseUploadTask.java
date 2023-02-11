@@ -63,7 +63,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
-public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask implements TaskListener {
+public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask implements TaskListener {
 
 	private RawDataAnalysisProject project;
 	private double msOneMZWindow;
@@ -72,7 +72,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 	private DataExtractionMethod deMethod;
 	private Map<String, MsFeatureChromatogramBundle> newChromatogramMap;
 	
-	public RawDataAnalysisProjectDatabaseUploadTask(
+	public RawDataAnalysisExperimentDatabaseUploadTask(
 			RawDataAnalysisProject project,
 			double msOneMZWindow) {
 		super();
@@ -295,7 +295,7 @@ public class RawDataAnalysisProjectDatabaseUploadTask extends AbstractTask imple
 	
 	@Override
 	public Task cloneTask() {
-		return new RawDataAnalysisProjectDatabaseUploadTask(
+		return new RawDataAnalysisExperimentDatabaseUploadTask(
 				project, msOneMZWindow);
 	}
 

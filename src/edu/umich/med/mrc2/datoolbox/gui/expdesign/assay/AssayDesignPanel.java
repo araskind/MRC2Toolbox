@@ -174,7 +174,7 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 	}
 
 	public void reloadDesign() {
-		switchDataPipeline(currentProject, activeDataPipeline);		
+		switchDataPipeline(currentExperiment, activeDataPipeline);		
 	}
 
 	@Override
@@ -182,8 +182,8 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 
 		super.switchDataPipeline(project, newDataPipeline);
 		clearPanel();	
-		if(currentProject != null)
-			assayDesignTable.setTableModelFromExperimentDesign(currentProject, activeDataPipeline);			
+		if(currentExperiment != null)
+			assayDesignTable.setTableModelFromExperimentDesign(currentExperiment, activeDataPipeline);			
 	}
 
 	public synchronized void clearPanel() {
@@ -200,7 +200,7 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 
 			if (approve == JOptionPane.YES_OPTION) {
 
-				currentProject.getExperimentDesign().setSuppressEvents(true);
+				currentExperiment.getExperimentDesign().setSuppressEvents(true);
 
 				HashSet<DataFile>filesToRemove = new HashSet<DataFile>();
 				int fileCol = assayDesignTable.getColumnIndex(AssayDesignTableModel.DATA_FILE_COLUMN);
@@ -211,22 +211,22 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 					filesToRemove.add(df);
 				}
 				Matrix dataMatrix = 
-						currentProject.getDataMatrixForDataPipeline(activeDataPipeline);
+						currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
 				Matrix fileMatrix = dataMatrix.getMetaDataDimensionMatrix(1);
 				ArrayList<Long> rem = new ArrayList<Long>();
 
 				for (DataFile df : filesToRemove)
 					rem.add(dataMatrix.getRowForLabel(df));
 
-				currentProject.deleteDataFiles(filesToRemove);
+				currentExperiment.deleteDataFiles(filesToRemove);
 
 				Matrix newDataMatrix = dataMatrix.deleteRows(Ret.NEW, rem);
 				Matrix newFileMatrix = fileMatrix.deleteRows(Ret.NEW, rem);
 				newDataMatrix.setMetaDataDimensionMatrix(1, newFileMatrix);
 				newDataMatrix.setMetaDataDimensionMatrix(0, dataMatrix.getMetaDataDimensionMatrix(0));
-				currentProject.setDataMatrixForDataPipeline(activeDataPipeline, newDataMatrix);
-				currentProject.getExperimentDesign().setSuppressEvents(false);
-				currentProject.getExperimentDesign().fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
+				currentExperiment.setDataMatrixForDataPipeline(activeDataPipeline, newDataMatrix);
+				currentExperiment.getExperimentDesign().setSuppressEvents(false);
+				currentExperiment.getExperimentDesign().fireExperimentDesignEvent(ParameterSetStatus.CHANGED);
 				MessageDialog.showWarningMsg("You will have to re-calculate statistical data now!");
 			}
 		}
@@ -241,7 +241,7 @@ public class AssayDesignPanel extends DockableMRC2ToolboxPanel{
 		for(DataFile df : assayDesignTable.getDataFiles(false))
 			df.setEnabled(!df.isEnabled());
 
-		assayDesignTable.setTableModelFromExperimentDesign(currentProject, activeDataPipeline);
+		assayDesignTable.setTableModelFromExperimentDesign(currentExperiment, activeDataPipeline);
 	}
 
 	private void setSamplesEnabledStatus(boolean enable, boolean selectedOnly) {

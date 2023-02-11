@@ -67,7 +67,9 @@ public class StatusBar extends JPanel implements
 	private JLabel statusTextLabel;
 	private LabeledProgressBar memoryLabel;
 	private JButton gcButton;
-	private static JLabel projectNameLabel, featureCollectionLabel, msmsClusterLabel;
+	private static JLabel experimentNameLabel;
+	private static JLabel featureCollectionLabel;
+	private static JLabel msmsClusterLabel;
 
 	public StatusBar() {
 
@@ -86,7 +88,7 @@ public class StatusBar extends JPanel implements
 		
 		int fieldCount = 0;
 		
-		JLabel lblNewLabel = new JLabel("Project: ");
+		JLabel lblNewLabel = new JLabel("Experiment: ");
 		lblNewLabel.setForeground(Color.BLUE);
 		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -98,14 +100,14 @@ public class StatusBar extends JPanel implements
 		
 		fieldCount++;
 		
-		projectNameLabel = new JLabel("");
-		projectNameLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+		experimentNameLabel = new JLabel("");
+		experimentNameLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_projectNameLabel = new GridBagConstraints();
 		gbc_projectNameLabel.anchor = GridBagConstraints.WEST;
 		gbc_projectNameLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_projectNameLabel.gridx = fieldCount;
 		gbc_projectNameLabel.gridy = 0;
-		statusTextPanel.add(projectNameLabel, gbc_projectNameLabel);
+		statusTextPanel.add(experimentNameLabel, gbc_projectNameLabel);
 		
 		fieldCount++;
 		
@@ -206,14 +208,14 @@ public class StatusBar extends JPanel implements
 			msmsClusterLabel.setText(dataSet.getName());
 	}
 	
-	public static void clearProjectData() {	
-		projectNameLabel.setText("");	
+	public static void clearExperimentData() {	
+		experimentNameLabel.setText("");	
 		featureCollectionLabel.setText("");
 		msmsClusterLabel.setText("");
 	}
 	
-	public static void setProjectName(String projectName) {
-		projectNameLabel.setText(projectName);
+	public static void setExperimentName(String experimentName) {
+		experimentNameLabel.setText(experimentName);
 	}
 
 	/**
@@ -296,20 +298,20 @@ public class StatusBar extends JPanel implements
 			System.gc();
 	}
 
-	public static void switchDataPipeline(DataAnalysisProject project, DataPipeline pipeline) {
+	public static void switchDataPipeline(DataAnalysisProject experiment, DataPipeline pipeline) {
 		
-		clearProjectData();	
-		if(project != null) {
-			projectNameLabel.setText(project.getName());
+		clearExperimentData();	
+		if(experiment != null) {
+			experimentNameLabel.setText(experiment.getName());
 			//	TODO
 		}
 	}
 	
-	public static void showRawDataAnalysisProjectData(RawDataAnalysisProject project) {
+	public static void showRawDataAnalysisExperimentData(RawDataAnalysisProject experiment) {
 		
-		clearProjectData();	
-		if(project != null) {
-			projectNameLabel.setText(project.getName());
+		clearExperimentData();	
+		if(experiment != null) {
+			experimentNameLabel.setText(experiment.getName());
 			//	TODO
 		}
 	}

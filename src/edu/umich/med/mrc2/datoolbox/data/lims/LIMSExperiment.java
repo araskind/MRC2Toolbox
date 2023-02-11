@@ -34,7 +34,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 
@@ -333,7 +333,7 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 			startDate = new Date();
 		
 		experimentElement.setAttribute(LIMSExperimentFields.DateCreated.name(), 
-				ProjectUtils.dateTimeFormat.format(startDate));
+				ExperimentUtils.dateTimeFormat.format(startDate));
 		
 		if(creator != null)
 			experimentElement.setAttribute(
@@ -380,7 +380,7 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 				experimentElement.getAttributeValue(LIMSExperimentFields.DateCreated.name());
 		if(startDateString != null) {
 			try {
-				startDate = ProjectUtils.dateTimeFormat.parse(startDateString);
+				startDate = ExperimentUtils.dateTimeFormat.parse(startDateString);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

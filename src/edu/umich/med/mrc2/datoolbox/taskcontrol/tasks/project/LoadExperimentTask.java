@@ -55,12 +55,12 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class LoadProjectTask extends AbstractTask {
+public class LoadExperimentTask extends AbstractTask {
 
 	private DataAnalysisProject newProject;
 	private File projectDirectory, projectFile;
 
-	public LoadProjectTask(File projectFile) {
+	public LoadExperimentTask(File projectFile) {
 
 		this.projectFile = projectFile;
 		projectDirectory = projectFile.getParentFile();
@@ -223,7 +223,7 @@ public class LoadProjectTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-		return new LoadProjectTask(projectFile);
+		return new LoadExperimentTask(projectFile);
 	}
 	
 	public DataAnalysisProject getNewProject() {

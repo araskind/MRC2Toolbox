@@ -66,7 +66,8 @@ public class RawDataFileSelectorToolbar extends CommonToolbar {
 	}
 
 	@Override
-	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(
+			DataAnalysisProject experiment, DataPipeline newDataPipeline) {
 
 	}
 }

@@ -49,7 +49,7 @@ public class CompoundIdentificationProject extends DataAnalysisProject {
 
 		projectDirectory = new File(parentDirectory + File.separator + projectName);
 		projectFile = new File(projectDirectory.getAbsolutePath() + File.separator + projectName + "."
-				+ MRC2ToolBoxConfiguration.ID_PROJECT_FILE_EXTENSION);
+				+ MRC2ToolBoxConfiguration.ID_EXPERIMENT_FILE_EXTENSION);
 
 		exportsDirectory = new File(
 				projectDirectory.getAbsolutePath() + File.separator + MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY);

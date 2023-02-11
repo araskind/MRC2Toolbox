@@ -105,16 +105,16 @@ public class ExperimentSetupDraw extends DockableMRC2ToolboxPanel {
 
 	public void setActiveFeatureSubset(MsFeatureSet features) {
 
-		if(currentProject == null || activeDataPipeline == null)
+		if(currentExperiment == null || activeDataPipeline == null)
 			return;
 		
 		features.setActive(true);
-		featureSubsetPanel.switchDataPipeline(currentProject, activeDataPipeline);
+		featureSubsetPanel.switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override
 	public void reloadDesign() {
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override
@@ -122,17 +122,17 @@ public class ExperimentSetupDraw extends DockableMRC2ToolboxPanel {
 		
 		super.switchDataPipeline(project, newDataPipeline);
 		clearPanel();
-		if(currentProject == null) {
+		if(currentExperiment == null) {
 //			projectToolbar.updateGuiFromProjectAndDataPipeline(null, null);
 			return;
 		}
-		experimentDetailsPanel.switchDataPipeline(currentProject, activeDataPipeline);
-		featureSubsetPanel.switchDataPipeline(currentProject, activeDataPipeline);
-		designSubsetPanel.switchDataPipeline(currentProject, activeDataPipeline);
-		if(currentProject.getLimsProject() != null) {
+		experimentDetailsPanel.switchDataPipeline(currentExperiment, activeDataPipeline);
+		featureSubsetPanel.switchDataPipeline(currentExperiment, activeDataPipeline);
+		designSubsetPanel.switchDataPipeline(currentExperiment, activeDataPipeline);
+		if(currentExperiment.getLimsProject() != null) {
 			limsDataPanel.setDataFromLimsObjects(
-					currentProject.getLimsProject(),
-					currentProject.getLimsExperiment());
+					currentExperiment.getLimsProject(),
+					currentExperiment.getLimsExperiment());
 		}
 //		projectToolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
 	}

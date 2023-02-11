@@ -54,6 +54,6 @@ public abstract class CommonToolbar extends JToolBar {
 	}
 
 	public abstract void updateGuiFromExperimentAndDataPipeline(
-			DataAnalysisProject project, DataPipeline newDataPipeline);
+			DataAnalysisProject experiment, DataPipeline newDataPipeline);
 
 }

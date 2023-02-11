@@ -80,7 +80,9 @@ public class MGFPanelMenuBar extends CommonMenuBar {
 		add(exportMenu);
 	}
 
-	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(
+			DataAnalysisProject currentExperiment, 
+			DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

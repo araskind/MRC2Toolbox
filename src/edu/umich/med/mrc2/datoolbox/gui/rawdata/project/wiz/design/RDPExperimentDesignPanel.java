@@ -28,7 +28,7 @@ import java.util.Collection;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizard;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDEMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataWizardPanel;
 
 public class RDPExperimentDesignPanel extends RDPMetadataWizardPanel implements ActionListener {
@@ -39,7 +39,7 @@ public class RDPExperimentDesignPanel extends RDPMetadataWizardPanel implements 
 	private static final long serialVersionUID = 2460123645924507011L;
 	private RDPExperimentDesignEditorPanel experimentDesignEditorPanel;
 
-	public RDPExperimentDesignPanel(RDPMetadataWizard wizard) {
+	public RDPExperimentDesignPanel(RDEMetadataWizard wizard) {
 		
 		super(wizard);
 		

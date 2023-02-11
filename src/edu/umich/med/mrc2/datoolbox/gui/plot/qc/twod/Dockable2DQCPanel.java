@@ -60,8 +60,8 @@ public class Dockable2DQCPanel extends DefaultSingleCDockable{
 		plotPanel.removeAllDataSets();
 	}
 
-	public void updateGuiFromProjectAndDataPipeline(
-			DataAnalysisProject currentProject, DataPipeline activeDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(
+			DataAnalysisProject experiment, DataPipeline activeDataPipeline) {
 		plotPanel.removeAllDataSets();
 	}
 }

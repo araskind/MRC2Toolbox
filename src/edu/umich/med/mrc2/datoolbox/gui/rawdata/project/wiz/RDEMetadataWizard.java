@@ -82,9 +82,9 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisProjectTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisExperimentTask;
 
-public class RDPMetadataWizard extends JDialog 
+public class RDEMetadataWizard extends JDialog 
 			implements ActionListener, TaskListener, SamplePrepListener {
 	
 	/**
@@ -93,7 +93,7 @@ public class RDPMetadataWizard extends JDialog
 	private static final long serialVersionUID = -3308258276718203363L;
 	private static final Icon newCdpIdExperimentIcon = GuiUtils.getIcon("newIdExperiment", 32);
 	private RawDataExaminerPanel parentPanel;
-	private RawDataAnalysisProject project;
+	private RawDataAnalysisProject experiment;
 	private RDPMetadataWizardToolbar toolbar;
 	private JPanel stagePanel;
 	private JButton saveButton;
@@ -108,9 +108,9 @@ public class RDPMetadataWizard extends JDialog
 	
 	private static final String NEXT_STAGE_COMMAND = "Next";
 
-	public RDPMetadataWizard(
+	public RDEMetadataWizard(
 			RawDataExaminerPanel parentPanel,
-			RawDataAnalysisProject project) {
+			RawDataAnalysisProject experiment) {
 		
 		super();
 		setIconImage(((ImageIcon) newCdpIdExperimentIcon).getImage());
@@ -120,7 +120,7 @@ public class RDPMetadataWizard extends JDialog
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.parentPanel = parentPanel;
-		this.project = project;
+		this.experiment = experiment;
 		
 		toolbar = new RDPMetadataWizardToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
@@ -199,32 +199,32 @@ public class RDPMetadataWizard extends JDialog
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
 		rootPane.setDefaultButton(saveButton);
 
-		populateWizardByProjectData();
-		silentlyVerifyProjectMetadata();
+		populateWizardWithExperimentData();
+		silentlyVerifyExperimentMetadata();
 		pack();
 	}
 	
-	private void populateWizardByProjectData() {
+	private void populateWizardWithExperimentData() {
 		
-		LIMSUser createdBy = project.getCreatedBy();
+		LIMSUser createdBy = experiment.getCreatedBy();
 		if(createdBy == null)
 			createdBy  = MRC2ToolBoxCore.getIdTrackerUser();
 		
-		if(project.getIdTrackerExperiment() == null) {
+		if(experiment.getIdTrackerExperiment() == null) {
 			
 			newExperiment = new LIMSExperiment(
 							null, 
-							project.getName(), 
-							project.getDescription(), 
+							experiment.getName(), 
+							experiment.getDescription(), 
 							null, 
 							null, 
-							project.getDateCreated());
+							experiment.getDateCreated());
 			
 			newExperiment.setCreator(createdBy);
 			newExperiment.setDesign(new ExperimentDesign());
 		}	
 		else {
-			newExperiment = new LIMSExperiment(project.getIdTrackerExperiment());
+			newExperiment = new LIMSExperiment(experiment.getIdTrackerExperiment());
 			if(newExperiment.getCreator() == null)
 				newExperiment.setCreator(createdBy);
 		}
@@ -245,7 +245,7 @@ public class RDPMetadataWizard extends JDialog
 		
 		RDPExperimentDefinitionPanel experimentDefinitionPanel = 
 				(RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
-		experimentDefinitionPanel.setInstrument(project.getInstrument());
+		experimentDefinitionPanel.setInstrument(experiment.getInstrument());
 		experimentDefinitionPanel.setExperiment(newExperiment);			
 	}
 	
@@ -277,7 +277,7 @@ public class RDPMetadataWizard extends JDialog
 	private void populateMethodsPanel() {
 		
 		Collection<DataAcquisitionMethod> acqMethods = 
-				project.getDataAcquisitionMethods();
+				experiment.getDataAcquisitionMethods();
 		if(acqMethods == null || acqMethods.isEmpty())
 			return;
 		
@@ -290,7 +290,7 @@ public class RDPMetadataWizard extends JDialog
 	private void populateWorklistPanel() {
 		
 		//	Raw data files
-		Collection<DataFile> dataFileList = project.getDataFiles();
+		Collection<DataFile> dataFileList = experiment.getDataFiles();
 		if(dataFileList == null || dataFileList.isEmpty())
 			return;
 		
@@ -298,7 +298,7 @@ public class RDPMetadataWizard extends JDialog
 		if(!newExperiment.getSamplePreps().isEmpty())
 			prep = newExperiment.getSamplePreps().iterator().next();
 		
-		Worklist worklist = project.getWorklist();
+		Worklist worklist = experiment.getWorklist();
 		RDPWorklistPanel wklPanel = 
 				((RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS));
 		
@@ -315,7 +315,7 @@ public class RDPMetadataWizard extends JDialog
 			try {
 				panels.put(panelType, (RDPMetadataWizardPanel) 
 						panelType.getPanelClass().
-						getDeclaredConstructor(RDPMetadataWizard.class).newInstance(this));			
+						getDeclaredConstructor(RDEMetadataWizard.class).newInstance(this));			
 				stageCompleted.put(panelType, false);
 			}
 			catch (InstantiationException e) {
@@ -374,17 +374,17 @@ public class RDPMetadataWizard extends JDialog
 			completeWorklistVerificationStage();
 		
 		if(command.equals(MainActionCommands.SAVE_EXPERIMENT_METADATA_COMMAND.getName()))
-			saveProjectMetadata();
+			saveExperimentMetadata();
 		
 		if(command.equals(MainActionCommands.CLEAR_EXPERIMENT_METADATA_COMMAND.getName()))
-			clearProjectMetadata();		
+			clearExperimentMetadata();		
 	}
 	
-	private void clearProjectMetadata() {
+	private void clearExperimentMetadata() {
 
-		if(project.getIdTrackerExperiment() != null) {
+		if(experiment.getIdTrackerExperiment() != null) {
 			LIMSExperiment existingExperiment = 
-					IDTDataCash.getExperimentById(project.getIdTrackerExperiment().getId());
+					IDTDataCash.getExperimentById(experiment.getIdTrackerExperiment().getId());
 			if(existingExperiment != null) {
 				MessageDialog.showWarningMsg(
 						"Experiment \"" + existingExperiment.getName() + "\"\n"
@@ -397,10 +397,10 @@ public class RDPMetadataWizard extends JDialog
 		if(res ==  JOptionPane.YES_OPTION) {
 			
 			newExperiment = null;
-			project.setIdTrackerExperiment(null);
-			project.setCreatedBy(null);			
-			populateWizardByProjectData();
-			silentlyVerifyProjectMetadata();
+			experiment.setIdTrackerExperiment(null);
+			experiment.setCreatedBy(null);			
+			populateWizardWithExperimentData();
+			silentlyVerifyExperimentMetadata();
 		}
 	}
 
@@ -634,19 +634,9 @@ public class RDPMetadataWizard extends JDialog
 	
 	public LIMSSamplePreparation getSamplePrep() {
 		
-//		if(!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLES)
-//				||	!stageCompleted.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA))
-//			return null;
-		
 		return ((RDPSamplePrepPanel)
 				panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)).getSamplePrep();
 	}
-	
-//	public Collection<DataExtractionMethod> getDataExtractionMethods() {
-//
-//		return ((WizardMethodsPanel)
-//				panels.get(RawDataProjectMetadataDefinitionStage.ADD_ACQ_DA_METHODS)).getDataExtractionMethods();
-//	}
 
 	public Collection<DataAcquisitionMethod> getDataAcquisitionMethods() {
 		return ((RDPMethodsPanel)
@@ -669,7 +659,7 @@ public class RDPMetadataWizard extends JDialog
 		return errors;
 	}
 	
-	public Collection<String> silentlyVerifyProjectMetadata() {
+	public Collection<String> silentlyVerifyExperimentMetadata() {
 		
 		Collection<String>errors = new ArrayList<String>();
 		//	
@@ -745,7 +735,7 @@ public class RDPMetadataWizard extends JDialog
 		return errors;
 	}
 
-	private void saveProjectMetadata() {
+	private void saveExperimentMetadata() {
 		
 //		if(!completeExperimentDefinitionStage()) {
 ////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
@@ -786,10 +776,10 @@ public class RDPMetadataWizard extends JDialog
 			return;
 		}
 		//	Experiment
-		project.setIdTrackerExperiment(newExperiment);
+		experiment.setIdTrackerExperiment(newExperiment);
 		RDPExperimentDefinitionPanel experimentPanel = 
 				(RDPExperimentDefinitionPanel)panels.get(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
-		project.setInstrument(experimentPanel.getInstrument());
+		experiment.setInstrument(experimentPanel.getInstrument());
 		
 		//	Sample prep
 		RDPSamplePrepPanel prepPanel = 
@@ -802,10 +792,10 @@ public class RDPMetadataWizard extends JDialog
 		RDPWorklistPanel worklistPanel = 
 				(RDPWorklistPanel)panels.get(RDPMetadataDefinitionStage.ADD_WORKLISTS);
 		Worklist worklist = worklistPanel.getWorklist();
-		project.updateMetadataFromWorklist(worklist);
+		experiment.updateMetadataFromWorklist(worklist);
 		
-		SaveStoredRawDataAnalysisProjectTask task = 
-				new SaveStoredRawDataAnalysisProjectTask(
+		SaveStoredRawDataAnalysisExperimentTask task = 
+				new SaveStoredRawDataAnalysisExperimentTask(
 						MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);

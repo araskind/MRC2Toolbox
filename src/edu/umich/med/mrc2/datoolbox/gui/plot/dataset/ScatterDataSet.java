@@ -48,7 +48,7 @@ public class ScatterDataSet extends XYSeriesCollection {
 	 */
 	private static final long serialVersionUID = -3927433568211734846L;
 	private MsFeature[] featuresToPlot;
-	private DataAnalysisProject project;
+	private DataAnalysisProject experiment;
 
 	public ScatterDataSet(
 			Map<DataPipeline,Collection<MsFeature>> selectedFeaturesMap,
@@ -56,11 +56,11 @@ public class ScatterDataSet extends XYSeriesCollection {
 			DataScale dataScale) {
 
 		super();
-		project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		featuresToPlot = selectedFeaturesMap.values().stream().
 				flatMap(c -> c.stream()).toArray(size -> new MsFeature[size]);
 		Collection<ExperimentalSample> samples = 
-				project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 		
 		int seriesCount = 1;
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
@@ -73,7 +73,7 @@ public class ScatterDataSet extends XYSeriesCollection {
 						collect(Collectors.toCollection(LinkedHashSet::new));
 
 				Map<DataFile, Double> dataMap = 
-						PlotDataSetUtils.getNormalizedDataForFeature(project, msf, entry.getKey(), files, dataScale);
+						PlotDataSetUtils.getNormalizedDataForFeature(experiment, msf, entry.getKey(), files, dataScale);
 				NamedXYSeries series = new NamedXYSeries(Integer.toString(seriesCount) + " - " + msf.getName());
 				int counter = 1;
 				for(DataFile df : files) {

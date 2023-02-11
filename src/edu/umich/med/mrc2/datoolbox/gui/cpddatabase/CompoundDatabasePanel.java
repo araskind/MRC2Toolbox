@@ -945,7 +945,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 
 	@Override
 	public void reloadDesign() {
-		super.switchDataPipeline(currentProject, activeDataPipeline);
+		super.switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override

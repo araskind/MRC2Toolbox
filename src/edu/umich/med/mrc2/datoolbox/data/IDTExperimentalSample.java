@@ -30,7 +30,7 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTExperimentalSampleFields;
-import edu.umich.med.mrc2.datoolbox.utils.ProjectUtils;
+import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
 public class IDTExperimentalSample extends ExperimentalSample implements Serializable {
 
@@ -117,7 +117,7 @@ public class IDTExperimentalSample extends ExperimentalSample implements Seriali
 			dateCreated = new Date();
 		
 		sampleElement.setAttribute(IDTExperimentalSampleFields.DateCreated.name(), 
-				ProjectUtils.dateTimeFormat.format(dateCreated));
+				ExperimentUtils.dateTimeFormat.format(dateCreated));
 		
 		return sampleElement;
 	}
@@ -143,7 +143,7 @@ public class IDTExperimentalSample extends ExperimentalSample implements Seriali
 				sampleElement.getAttributeValue(IDTExperimentalSampleFields.DateCreated.name());
 		if(startDateString != null) {
 			try {
-				dateCreated = ProjectUtils.dateTimeFormat.parse(startDateString);
+				dateCreated = ExperimentUtils.dateTimeFormat.parse(startDateString);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

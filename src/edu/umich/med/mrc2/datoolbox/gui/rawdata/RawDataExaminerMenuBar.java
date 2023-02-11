@@ -51,8 +51,8 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);
 	private static final Icon dataFileToolsIconSmall= GuiUtils.getIcon("dataFileTools", 16);
 	private static final Icon addMetaDataIcon = GuiUtils.getIcon("addMetadata", 24);
-	private static final Icon sendProjectToDatabaseIcon = GuiUtils.getIcon("xml2Database", 24);
-	private static final Icon sendProjectToDatabaseIconSmall = GuiUtils.getIcon("xml2Database", 16);
+	private static final Icon sendExperimentToDatabaseIcon = GuiUtils.getIcon("xml2Database", 24);
+	private static final Icon sendExperimentToDatabaseIconSmall = GuiUtils.getIcon("xml2Database", 16);
 
 	// Menus
 	private JMenu
@@ -68,7 +68,7 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 	// DB link items
 	private JMenuItem
 		addMetadataMenuItem,
-		sendProjectToTrackerMenuItem;
+		sendExperimentToTrackerMenuItem;
 
 	// Raw data
 	private JMenuItem
@@ -98,14 +98,14 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		
 		//	DB linkage
 		dbLinkageMenu = new JMenu("IDTracker integration");
-		dbLinkageMenu.setIcon(sendProjectToDatabaseIconSmall);
+		dbLinkageMenu.setIcon(sendExperimentToDatabaseIconSmall);
 		
 		addMetadataMenuItem = addItem(dbLinkageMenu, 
 				MainActionCommands.ADD_EXPERIMENT_METADATA_COMMAND, 
 				addMetaDataIcon);
-		sendProjectToTrackerMenuItem = addItem(dbLinkageMenu, 
+		sendExperimentToTrackerMenuItem = addItem(dbLinkageMenu, 
 				MainActionCommands.SET_EXPERIMENT_DATA_UPLOAD_PARAMETERS_COMMAND, 
-				sendProjectToDatabaseIcon);
+				sendExperimentToDatabaseIcon);
 		
 		add(dbLinkageMenu);
 		
@@ -135,7 +135,8 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		add(rawDataMenu);
 	}
 
-	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(
+			DataAnalysisProject experiment, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

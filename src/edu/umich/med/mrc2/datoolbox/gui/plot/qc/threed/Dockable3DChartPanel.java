@@ -294,10 +294,10 @@ public class Dockable3DChartPanel  extends DefaultSingleCDockable implements Act
 		return chartPanel;
 	}
 	
-	public void updateGuiFromProjectAndDataPipeline(
-			DataAnalysisProject currentProject, DataPipeline activeDataPipeline) {
-		if(currentProject != null)
-			toolbar.populateCategories(currentProject.getExperimentDesign().getActiveDesignSubset());
+	public void updateGuiFromExperimentAndDataPipeline(
+			DataAnalysisProject experiment, DataPipeline activeDataPipeline) {
+		if(experiment != null)
+			toolbar.populateCategories(experiment.getExperimentDesign().getActiveDesignSubset());
 
 		redrawPlot();
 	}

@@ -218,7 +218,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		if (command.equals(MainActionCommands.EXTRACT_WORKLIST_COMMAND.getName()))
 			extractWorlkistFromRawDataFolderToFile();
 		
-		if(currentProject == null || activeDataPipeline == null)
+		if(currentExperiment == null || activeDataPipeline == null)
 			return;
 
 		if (command.equals(MainActionCommands.LOAD_WORKLIST_COMMAND.getName()))
@@ -251,16 +251,16 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 	private void checkWorklistForMissingData() {
 		
-		if(currentProject == null || activeDataPipeline == null)
+		if(currentExperiment == null || activeDataPipeline == null)
 			return;
 		
-		Worklist worklist = currentProject.getWorklistForDataAcquisitionMethod(
+		Worklist worklist = currentExperiment.getWorklistForDataAcquisitionMethod(
 				activeDataPipeline.getAcquisitionMethod());
 		
 		if(worklist == null)
 			return;
 				
-		Set<DataFile> allDataFiles = currentProject.getDataFilesForPipeline(activeDataPipeline, false);
+		Set<DataFile> allDataFiles = currentExperiment.getDataFilesForPipeline(activeDataPipeline, false);
 		Set<DataFile> worklistDataFiles = worklist.getWorklistItems().stream().
 				map(i -> i.getDataFile()).collect(Collectors.toSet());
 		
@@ -306,7 +306,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	
 	private void showWorklistLoadDialog(boolean appendWorklist) {
 		
-		if(!appendWorklist && currentProject.acquisitionMethodHasLinkedWorklist(
+		if(!appendWorklist && currentExperiment.acquisitionMethodHasLinkedWorklist(
 				activeDataPipeline.getAcquisitionMethod())) {
 
 			int replaceList = MessageDialog.showChoiceWithWarningMsg(
@@ -336,11 +336,11 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 	private void saveManifestToFile() {
 		
-		if(currentProject == null || activeDataPipeline == null)
+		if(currentExperiment == null || activeDataPipeline == null)
 			return;
 
 		String manifestString = 
-				WorklistUtils.createManifest(currentProject, activeDataPipeline);
+				WorklistUtils.createManifest(currentExperiment, activeDataPipeline);
 		if(manifestString == null || manifestString.isEmpty())
 			return;
 
@@ -430,7 +430,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	private void loadWorklistFromDirectoryScan(boolean appendWorklist) {
 
 		int selectedValue = JOptionPane.YES_OPTION;
-		if (!appendWorklist && currentProject.acquisitionMethodHasLinkedWorklist(
+		if (!appendWorklist && currentExperiment.acquisitionMethodHasLinkedWorklist(
 				activeDataPipeline.getAcquisitionMethod())) {
 
 			selectedValue = MessageDialog.showChoiceWithWarningMsg(
@@ -460,7 +460,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 		if (selectedValue == JOptionPane.YES_OPTION) {
 
-			currentProject.removeWorklistForMethod(activeDataPipeline.getAcquisitionMethod());
+			currentExperiment.removeWorklistForMethod(activeDataPipeline.getAcquisitionMethod());
 			MRC2ToolBoxCore.getMainWindow().
 				switchPanelForDataPipeline(activeDataPipeline, PanelList.WORKLIST);
 		}
@@ -514,7 +514,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 	@Override
 	public void reloadDesign() {
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override
@@ -522,9 +522,9 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 		clearPanel();
 		super.switchDataPipeline(project, newDataPipeline);
-		menuBar.updateMenuFromExperiment(currentProject, activeDataPipeline);
-		if(currentProject != null && newDataPipeline != null)
-			showWorklist(currentProject.getWorklistForDataAcquisitionMethod(
+		menuBar.updateMenuFromExperiment(currentExperiment, activeDataPipeline);
+		if(currentExperiment != null && newDataPipeline != null)
+			showWorklist(currentExperiment.getWorklistForDataAcquisitionMethod(
 					newDataPipeline.getAcquisitionMethod()));
 	}
 
@@ -577,7 +577,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		//	and check for files missing in worklist
 		Worklist newWorklist = eTask.getWorklist();
 		Set<DataFile> allDataFiles = 
-				currentProject.getDataFilesForPipeline(activeDataPipeline, false);
+				currentExperiment.getDataFilesForPipeline(activeDataPipeline, false);
 		Set<DataFile> worklistDataFiles = newWorklist.getWorklistItems().stream().
 				map(i -> i.getDataFile()).collect(Collectors.toSet());
 		
@@ -609,13 +609,13 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 			newWorklist.getWorklistItems().addAll(newItems);
 		}
 		if(!eTask.isAppendWorklist())
-			currentProject.setWorklistForAcquisitionMethod(
+			currentExperiment.setWorklistForAcquisitionMethod(
 					eTask.getDataAcquisitionMethod(), newWorklist);
 		else
-			currentProject.getWorklistForDataAcquisitionMethod(
+			currentExperiment.getWorklistForDataAcquisitionMethod(
 					eTask.getDataAcquisitionMethod()).appendWorklist(newWorklist);
 		
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 		
 		if(!missingInWorklistFiles.isEmpty()) {
 			

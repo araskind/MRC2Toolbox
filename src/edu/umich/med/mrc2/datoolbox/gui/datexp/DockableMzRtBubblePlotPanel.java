@@ -152,7 +152,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 					featureSubsetDialog.getFeatures());
 			setToEdit.addListener((FeatureSetListener) 
 					MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA));			
-			setToEdit.addListener(MainWindow.getProjectDashBooard().getFeatureSubsetPanel());
+			setToEdit.addListener(MainWindow.getExperimentSetupDraw().getFeatureSubsetPanel());
 			setToEdit.fireFeatureSetEvent(ParameterSetStatus.CREATED);
 		}
 		else {
@@ -160,7 +160,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 			setToEdit.setFeatures(featureSubsetDialog.getFeatures());
 			setToEdit.addListener((FeatureSetListener) 
 					MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA));
-			setToEdit.addListener(MainWindow.getProjectDashBooard().getFeatureSubsetPanel());
+			setToEdit.addListener(MainWindow.getExperimentSetupDraw().getFeatureSubsetPanel());
 			setToEdit.fireFeatureSetEvent(ParameterSetStatus.CHANGED);
 		}
 		featureSubsetDialog.dispose();

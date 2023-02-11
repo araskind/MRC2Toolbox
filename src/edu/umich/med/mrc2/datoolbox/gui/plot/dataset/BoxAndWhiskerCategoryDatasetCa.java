@@ -50,7 +50,7 @@ public class BoxAndWhiskerCategoryDatasetCa extends DefaultBoxAndWhiskerCategory
 	 *
 	 */
 	private static final long serialVersionUID = 7334649551613689395L;
-	private DataAnalysisProject project;
+	private DataAnalysisProject experiment;
 	private MsFeature[] featuresToPlot;
 
 	public MsFeature[] getFeaturesToPlot() {
@@ -69,13 +69,13 @@ public class BoxAndWhiskerCategoryDatasetCa extends DefaultBoxAndWhiskerCategory
 			boolean splitByBatch) {
 
 		super();
-		project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		featuresToPlot = selectedFeaturesMap.values().stream().
 				flatMap(c -> c.stream()).toArray(size -> new MsFeature[size]);
 
 		//	Collect data
 		Collection<ExperimentalSample> samples = 
-				project.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+				experiment.getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : selectedFeaturesMap.entrySet()) {
 			
@@ -87,7 +87,7 @@ public class BoxAndWhiskerCategoryDatasetCa extends DefaultBoxAndWhiskerCategory
 						collect(Collectors.toCollection(LinkedHashSet::new));
 				
 				Map<DataFile, Double> dataMap = 
-						PlotDataSetUtils.getNormalizedDataForFeature(project, msf, entry.getKey(),  files, dataScale);
+						PlotDataSetUtils.getNormalizedDataForFeature(experiment, msf, entry.getKey(),  files, dataScale);
 				Map<String, DataFile[]> seriesFileMap = 
 						PlotDataSetUtils.createSeriesFileMap(entry.getKey(), files,
 						sortingOrder, activeDesign, groupingType, category, subCategory, splitByBatch);

@@ -101,8 +101,8 @@ public class ExperimentDesignPanel extends DockableMRC2ToolboxPanel {
 
 		clearPanel();
 		super.switchDataPipeline(project, newPipeline);
-		assayDesignPanel.switchDataPipeline(currentProject, activeDataPipeline);
-		designEditorPanel.switchDataPipeline(currentProject, activeDataPipeline);
+		assayDesignPanel.switchDataPipeline(currentExperiment, activeDataPipeline);
+		designEditorPanel.switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override

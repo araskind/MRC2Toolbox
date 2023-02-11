@@ -295,13 +295,13 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 	private void acceptIntegratedCompoundList() {
 
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
 		if (integratedSet.getClusters().isEmpty())
 			MessageDialog.showErrorMsg("No identified compounds found.", this.getContentPane());
 
 		integratedSet.setActive(true);
-		currentProject.addIntegratedFeatureClusterSet(integratedSet);
+		currentExperiment.addIntegratedFeatureClusterSet(integratedSet);
 //		TODO find new place for this functionality?
 //		toolbar.updateGuiFromActiveSet(integratedSet);
 		// MessageDialogue.showInfoMsg(dataSetName + " set as integrated identified data
@@ -375,9 +375,9 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 		
 //		TODO find new place for this functionality?
 //		toolbar.updateGuiFromProjectAndDataPipeline(currentProject, activeDataPipeline);
-		if (currentProject != null) {
+		if (currentExperiment != null) {
 
-			integratedSet = currentProject.getActiveIntegratedFeatureSet();
+			integratedSet = currentExperiment.getActiveIntegratedFeatureSet();
 			if (integratedSet != null) {
 				loadFeatureClusters(integratedSet.getClusters());
 //				TODO find new place for this functionality?
@@ -390,7 +390,7 @@ public class DataIntegratorPanel extends ClusterDisplayPanel {
 
 	@Override
 	public void reloadDesign() {
-		switchDataPipeline(currentProject, activeDataPipeline);
+		switchDataPipeline(currentExperiment, activeDataPipeline);
 	}
 
 	@Override

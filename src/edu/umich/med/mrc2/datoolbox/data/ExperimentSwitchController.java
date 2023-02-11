@@ -30,10 +30,10 @@ public class ExperimentSwitchController {
 	private boolean exitProgram;
 	private ProjectType activeExperimentType;
 	private ProjectType newExperimentType;
-	private ProjectState experimentState;
+	private ExperimentState experimentState;
 	private LIMSExperiment limsExperiment;
 	
-	public enum ProjectState{
+	public enum ExperimentState{
 		NEW_EXPERIMENT,
 		EXISTING_EXPERIMENT,
 		CLOSING_EXPERIMENT,
@@ -47,7 +47,7 @@ public class ExperimentSwitchController {
 
 	public ExperimentSwitchController(
 			boolean saveCurrentExperiment, 
-			ProjectState projectState,
+			ExperimentState projectState,
 			boolean exitProgram,
 			ProjectType activeExperimentType, 
 			ProjectType newExperimentType) {
@@ -91,11 +91,11 @@ public class ExperimentSwitchController {
 		this.newExperimentType = newExperimentType;
 	}
 
-	public ProjectState getExperimentState() {
+	public ExperimentState getExperimentState() {
 		return experimentState;
 	}
 
-	public void setExperimentState(ProjectState experimentState) {
+	public void setExperimentState(ExperimentState experimentState) {
 		this.experimentState = experimentState;
 	}
 

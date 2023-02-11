@@ -303,13 +303,13 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 	private void activateSelectedDataPipeline() {
 		
 		DataPipeline pl = dataPipelinesTable.getSelectedDataPipeline();
-		if(pl == null || currentProject == null)
+		if(pl == null || currentExperiment == null)
 			return;
 		
 		if(activeDataPipeline != null && activeDataPipeline.equals(pl))
 			return;
 		
-		MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentProject, pl);
+		MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentExperiment, pl);
 	}
 
 	@Override
@@ -323,7 +323,7 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 		}
 		super.actionPerformed(e);
 		
-		if (currentProject == null)
+		if (currentExperiment == null)
 			return;
 
 		String command = e.getActionCommand();
@@ -362,8 +362,8 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 
 	private void saveProjectName() {
 
-		currentProject.setName(nameTextArea.getText());
-		MRC2ToolBoxCore.getMainWindow().setTitle(BuildInformation.getProgramName() + " - " + currentProject.getName());
+		currentExperiment.setName(nameTextArea.getText());
+		MRC2ToolBoxCore.getMainWindow().setTitle(BuildInformation.getProgramName() + " - " + currentExperiment.getName());
 		nameTextArea.setEditable(false);
 		nameEditButton.setText("Edit");
 		nameEditButton.setActionCommand(MainActionCommands.EDIT_EXPERIMENT_NAME_COMMAND.getName());
@@ -378,7 +378,7 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 
 	private void saveProjectDescription() {
 
-		currentProject.setDescription(descriptionTextArea.getText());
+		currentExperiment.setDescription(descriptionTextArea.getText());
 		descriptionTextArea.setEditable(false);
 		descEditButton.setText("Edit");
 		descEditButton.setActionCommand(MainActionCommands.EDIT_EXPERIMENT_DESCRIPTION_COMMAND.getName());
@@ -389,7 +389,7 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 		DataPipeline selectedPipeline = dataPipelinesTable.getSelectedDataPipeline();
 		DataPipeline modifiedPipeline = dataPipelineDefinitionDialog.getDataPipeline();
 		
-		Set<DataPipeline> otherPipelines = currentProject.getDataPipelines().stream().
+		Set<DataPipeline> otherPipelines = currentExperiment.getDataPipelines().stream().
 				filter(p -> !p.equals(selectedPipeline)).
 				collect(Collectors.toSet());
 		
@@ -414,7 +414,7 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 		selectedPipeline.setDataExtractionMethod(modifiedPipeline.getDataExtractionMethod());
 		selectedPipeline.setMotrpacAssay(modifiedPipeline.getMotrpacAssay());
 		selectedPipeline.setAssay(modifiedPipeline.getAssay());
-		dataPipelinesTable.setTableModelFromProject(currentProject);
+		dataPipelinesTable.setTableModelFromProject(currentExperiment);
 		dataPipelineDefinitionDialog.dispose();
 	}
 
@@ -443,9 +443,9 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 		if (MessageDialog.showChoiceWithWarningMsg(yesNoQuestion,
 				this.getContentPane()) == JOptionPane.OK_OPTION) {
 
-			currentProject.removeDataPipeline(selectedPipeline);
-			activeDataPipeline = currentProject.getActiveDataPipeline();
-			MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentProject, activeDataPipeline);
+			currentExperiment.removeDataPipeline(selectedPipeline);
+			activeDataPipeline = currentExperiment.getActiveDataPipeline();
+			MRC2ToolBoxCore.getMainWindow().switchDataPipeline(currentExperiment, activeDataPipeline);
 		}		
 	}
 
@@ -465,28 +465,28 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 		
 		super.switchDataPipeline(project, newDataPipeline);
 		clearPanel();
-		if(currentProject == null)
+		if(currentExperiment == null)
 			return;
 		
-		nameTextArea.setText(currentProject.getName());
-		descriptionTextArea.setText(currentProject.getDescription());
+		nameTextArea.setText(currentExperiment.getName());
+		descriptionTextArea.setText(currentExperiment.getDescription());
 		descriptionTextArea.setCaretPosition(0);
 
 		String created = "";
 		String modified = "";
 
-		if (currentProject.getDateCreated() != null)
+		if (currentExperiment.getDateCreated() != null)
 			created = MRC2ToolBoxConfiguration.getDateTimeFormat().
-				format(currentProject.getDateCreated());
+				format(currentExperiment.getDateCreated());
 
 		createdOnValueLabel.setText(created);
 
-		if (currentProject.getLastModified() != null)
+		if (currentExperiment.getLastModified() != null)
 			modified = MRC2ToolBoxConfiguration.getDateTimeFormat().
-				format(currentProject.getLastModified());
+				format(currentExperiment.getLastModified());
 
 		lastModifiedValueLabel.setText(modified);
-		dataPipelinesTable.setTableModelFromProject(currentProject);
+		dataPipelinesTable.setTableModelFromProject(currentExperiment);
 //		scrollPane.setPreferredSize(dataPipelinesTable.getPreferredScrollableViewportSize());
 		dataPipelinesTable.selectPipeline(newDataPipeline);
 	}
