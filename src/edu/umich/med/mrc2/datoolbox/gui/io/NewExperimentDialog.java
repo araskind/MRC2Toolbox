@@ -279,11 +279,11 @@ public class NewExperimentDialog extends JDialog implements ActionListener {
 			setTitle("Create new data analysis experiment");
 			setIconImage(((ImageIcon) newProjectIcon).getImage());
 		}
-		if(projectType.equals(ProjectType.FEATURE_IDENTIFICATION)) {
-
-			setTitle("Create new feature identification experiment");
-			setIconImage(((ImageIcon) newIdProjectIcon).getImage());
-		}
+//		if(projectType.equals(ProjectType.FEATURE_IDENTIFICATION)) {
+//
+//			setTitle("Create new feature identification experiment");
+//			setIconImage(((ImageIcon) newIdProjectIcon).getImage());
+//		}
 	}
 
 	public void setDesign(ExperimentDesign design) {

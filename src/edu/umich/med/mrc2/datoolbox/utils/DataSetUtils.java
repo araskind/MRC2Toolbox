@@ -47,15 +47,15 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 public class DataSetUtils {
 
 	public static Matrix subsetDataMatrix(
-			DataAnalysisProject currentProject,
+			DataAnalysisProject currentExperiment,
 			DataPipeline acivePipeline,
 			ExperimentDesignSubset activeDesign,
 			MsFeatureSet activeFeatures) {
 
-		if(currentProject == null || acivePipeline == null)
+		if(currentExperiment == null || acivePipeline == null)
 			return null;
 
-		Matrix source = currentProject.getDataMatrixForDataPipeline(acivePipeline);
+		Matrix source = currentExperiment.getDataMatrixForDataPipeline(acivePipeline);
 		Matrix featureMatrix = source.getMetaDataDimensionMatrix(0);
 		Matrix fileMatrix = source.getMetaDataDimensionMatrix(1);
 
@@ -94,9 +94,9 @@ public class DataSetUtils {
 		return subset;
 	}
 
-	public static ExperimentDesignSubset getSamplesOnlyDesignSubset(DataAnalysisProject currentProject) {
+	public static ExperimentDesignSubset getSamplesOnlyDesignSubset(DataAnalysisProject currentExperiment) {
 
-		if(currentProject.getExperimentDesign() == null)
+		if(currentExperiment.getExperimentDesign() == null)
 			return null;
 
 		ExperimentDesignSubset samplesOnly = 

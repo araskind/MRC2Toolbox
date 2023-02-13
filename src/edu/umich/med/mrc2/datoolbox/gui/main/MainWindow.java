@@ -103,10 +103,9 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.StartupConfiguration;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.CompoundIdentificationProject;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskControlListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -302,7 +301,7 @@ public class MainWindow extends JFrame
 		experimentBaseDirectory = 
 				new File(rawDataAnalysisExperimentSetupDialog.ExperimentLocationPath());	
 		savePreferences();
-		RawDataAnalysisProject newExperiment = new RawDataAnalysisProject(
+		RawDataAnalysisExperiment newExperiment = new RawDataAnalysisExperiment(
 				rawDataAnalysisExperimentSetupDialog.getExperimentName(), 
 				rawDataAnalysisExperimentSetupDialog.getExperimentDescription(), 
 				experimentBaseDirectory,
@@ -1313,7 +1312,7 @@ public class MainWindow extends JFrame
 
 	private void finalizeExperimentLoad(LoadExperimentTask eTask) {
 
-		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(eTask.getNewProject());
+		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(eTask.getNewExperiment());
 		setGuiFromActiveExperiment();
 	}
 	
@@ -1440,7 +1439,7 @@ public class MainWindow extends JFrame
 		experimentSetupDraw.switchDataPipeline(currentExperiment, activeDataPipeline);
 
 		//	TODO this may need updating for new panel display controls
-		if (activeDataPipeline != null &&  !(currentExperiment instanceof CompoundIdentificationProject)) {
+		if (activeDataPipeline != null) {
 
 			panelShowing.put(PanelList.FEATURE_DATA, 
 					currentExperiment.dataPipelineHasData(activeDataPipeline));
@@ -1450,10 +1449,6 @@ public class MainWindow extends JFrame
 					currentExperiment.hasDuplicateClusters(activeDataPipeline));
 			panelShowing.put(PanelList.CORRELATIONS, 
 					currentExperiment.correlationClustersCalculatedForDataPipeline(activeDataPipeline));
-		} else {
-			//	TODO deal with ID project
-/*			if(currentProject instanceof CompoundIdentificationProject)
-				showPanel(PanelList.ID_WORKBENCH);*/
 		}
 		currentExperiment.getExperimentDesign().addListener(experimentSetupDraw);	
 		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet()) {

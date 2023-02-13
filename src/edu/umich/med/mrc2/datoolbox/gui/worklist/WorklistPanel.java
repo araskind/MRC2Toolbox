@@ -344,9 +344,9 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		if(manifestString == null || manifestString.isEmpty())
 			return;
 
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()).getAbsoluteFile();
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if (currentProject != null)
+		baseDirectory = 
+				new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()).getAbsoluteFile();
+		if (currentExperiment != null)
 			baseDirectory = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory();
 
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
@@ -354,8 +354,8 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		fc.addFilter("Text files", "txt", "TXT");
 		fc.setTitle("Save manifest to file:");
 		fc.setMultiSelectionEnabled(false);
-		String defaultFileName = currentProject.getName() + "_"
-				+ currentProject.getActiveDataPipeline().getCode() + "_MANIFEST_"
+		String defaultFileName = currentExperiment.getName() + "_"
+				+ currentExperiment.getActiveDataPipeline().getCode() + "_MANIFEST_"
 				+ MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt";
 		fc.setDefaultFileName(defaultFileName);
 		
@@ -394,9 +394,9 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		if(worklistString == null || worklistString.isEmpty())
 			return;
 
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()).getAbsoluteFile();
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if (currentProject != null)
+		baseDirectory = 
+				new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory()).getAbsoluteFile();
+		if (currentExperiment != null)
 			baseDirectory = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExportsDirectory();
 
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
@@ -404,8 +404,8 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 		fc.addFilter("Text files", "txt", "TXT");
 		fc.setTitle("Save worklist to file:");
 		fc.setMultiSelectionEnabled(false);
-		String defaultFileName = currentProject.getName() + "_"
-				+ currentProject.getActiveDataPipeline().getCode() + "_WORKLIST_"
+		String defaultFileName = currentExperiment.getName() + "_"
+				+ currentExperiment.getActiveDataPipeline().getCode() + "_WORKLIST_"
 				+ MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".txt";
 		fc.setDefaultFileName(defaultFileName);
 		
@@ -518,14 +518,15 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 	}
 
 	@Override
-	public void switchDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void switchDataPipeline(
+			DataAnalysisProject experiment, DataPipeline newDataPipeline) {
 
 		clearPanel();
-		super.switchDataPipeline(project, newDataPipeline);
+		super.switchDataPipeline(experiment, newDataPipeline);
 		menuBar.updateMenuFromExperiment(currentExperiment, activeDataPipeline);
-		if(currentExperiment != null && newDataPipeline != null)
+		if(currentExperiment != null && activeDataPipeline != null)
 			showWorklist(currentExperiment.getWorklistForDataAcquisitionMethod(
-					newDataPipeline.getAcquisitionMethod()));
+					activeDataPipeline.getAcquisitionMethod()));
 	}
 
 	@Override
@@ -573,7 +574,7 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 
 	private void finalizeWorklistLoad(WorklistImportTask eTask) {
 		
-		//	Clean worklist from files missing in the project 
+		//	Clean worklist from files missing in the experiment 
 		//	and check for files missing in worklist
 		Worklist newWorklist = eTask.getWorklist();
 		Set<DataFile> allDataFiles = 
@@ -597,10 +598,10 @@ public class WorklistPanel extends DockableMRC2ToolboxPanel implements BackedByP
 				allDataFiles.stream().filter(f -> !worklistDataFiles.contains(f)).
 				sorted().collect(Collectors.toList());
 		
-		List<DataFile> missingInProjectFiles = 
+		List<DataFile> missingInExperimentFiles = 
 				worklistDataFiles.stream().filter(f -> !allDataFiles.contains(f)).
 				sorted().collect(Collectors.toList());
-		if(!missingInProjectFiles.isEmpty()) {
+		if(!missingInExperimentFiles.isEmpty()) {
 			
 			List<WorklistItem> newItems = newWorklist.getWorklistItems().
 					stream().filter(i -> allDataFiles.contains(i.getDataFile())).

@@ -100,7 +100,7 @@ import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -370,7 +370,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	private void setExperimentDataUploadParameters() {
 		
-		RawDataAnalysisProject activeExperiment = 
+		RawDataAnalysisExperiment activeExperiment = 
 				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
 		if(activeExperiment == null)
 			return;
@@ -492,7 +492,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	private void showExperimentMetadataWizard() {
 		
-		RawDataAnalysisProject experiment = 
+		RawDataAnalysisExperiment experiment = 
 				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
 		
 		if (experiment == null)

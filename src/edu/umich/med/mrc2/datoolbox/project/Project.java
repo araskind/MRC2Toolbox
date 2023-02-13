@@ -78,11 +78,11 @@ public abstract class Project {
 		this.projectFile = other.getExperimentFile();
 		this.dateCreated = other.getDateCreated();
 		this.lastModified = other.getLastModified();		
-		this.projectDirectory = other.getProjectDirectory();
+		this.projectDirectory = other.getExperimentDirectory();
 		this.exportsDirectory = other.getExportsDirectory();
 	}
 	
-	protected void initNewProject(File parentDirectory) {
+	protected void initNewExperiment(File parentDirectory) {
 		
 		projectDirectory = 
 				Paths.get(parentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-")).toFile();				
@@ -107,7 +107,7 @@ public abstract class Project {
 		}
 	}
 	
-	protected void setProjectDirectories() {
+	protected void setExperimentDirectories() {
 		
 		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
@@ -141,16 +141,16 @@ public abstract class Project {
 		return projectFile;
 	}
 
-	public void setProjectFile(File projectFile) {
-		this.projectFile = projectFile;
+	public void setExperimentFile(File experimentFile) {
+		this.projectFile = experimentFile;
 	}
 
-	public File getProjectDirectory() {
+	public File getExperimentDirectory() {
 		return projectDirectory;
 	}
 
-	public void setProjectDirectory(File projectDirectory) {
-		this.projectDirectory = projectDirectory;
+	public void setProjectDirectory(File experimentDirectory) {
+		this.projectDirectory = experimentDirectory;
 	}
 
 	public File getExportsDirectory() {

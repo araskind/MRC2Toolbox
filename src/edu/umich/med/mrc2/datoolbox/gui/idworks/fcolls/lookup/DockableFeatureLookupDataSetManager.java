@@ -48,7 +48,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 
 public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable implements ActionListener {
 
@@ -345,7 +345,7 @@ public class DockableFeatureLookupDataSetManager extends DefaultSingleCDockable 
 	public void loadFeatureLookupDataSetsForActiveProject() {
 		
 		featureLookupDataSetListTable.clearTable();		
-		RawDataAnalysisProject project = 
+		RawDataAnalysisExperiment project = 
 				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
 		if(project == null)
 			return;

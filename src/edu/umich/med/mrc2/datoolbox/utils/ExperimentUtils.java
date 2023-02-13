@@ -63,8 +63,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.store.ExperimentFields;
 
 public class ExperimentUtils {
 	
@@ -72,7 +72,7 @@ public class ExperimentUtils {
 			new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	public static boolean designValidForStats(
-			DataAnalysisProject currentProject,
+			DataAnalysisProject currentExperiment,
 			DataPipeline activePipeline,
 			boolean requirePooled) {
 
@@ -80,7 +80,7 @@ public class ExperimentUtils {
 		int sampleCount = 0;
 
 		//	TODO deal with by-batch stats
-		for (DataFile df : currentProject.getDataFilesForAcquisitionMethod(
+		for (DataFile df : currentExperiment.getDataFilesForAcquisitionMethod(
 				activePipeline.getAcquisitionMethod())) {
 
 			if(df.getParentSample().hasLevel(ReferenceSamplesManager.masterPoolLevel))
@@ -98,9 +98,10 @@ public class ExperimentUtils {
 		return false;
 	}
 	
-	public static void saveExperimentFile(RawDataAnalysisProject projectToSave) {
+	public static void saveExperimentFile(
+			RawDataAnalysisExperiment experimentToSave) {
 		
-		projectToSave.setLastModified(new Date());
+		experimentToSave.setLastModified(new Date());
 		try {
 			XStream xstream = new XStream(new StaxDriver());
 
@@ -116,24 +117,24 @@ public class ExperimentUtils {
 			xstream.omitField(ExperimentDesignSubset.class, "eventListeners");
 			xstream.omitField(ExperimentDesign.class, "eventListeners");
 			
-			File xmlFile = Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
-					FilenameUtils.getBaseName(projectToSave.getExperimentFile().getName()) + ".xml").toFile();
+			File xmlFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
+					FilenameUtils.getBaseName(experimentToSave.getExperimentFile().getName()) + ".xml").toFile();
 	        RandomAccessFile raf = new RandomAccessFile(xmlFile.getAbsolutePath(), "rw");
 	        FileOutputStream fout = new FileOutputStream(raf.getFD());	        
 			BufferedOutputStream bout = new BufferedOutputStream(fout);
-			xstream.toXML(projectToSave, bout);
+			xstream.toXML(experimentToSave, bout);
 			bout.close();
 			fout.close();
 			raf.close();
 			
 			if(xmlFile.exists()) {
 				
-		        OutputStream archiveStream = new FileOutputStream(projectToSave.getExperimentFile());
+		        OutputStream archiveStream = new FileOutputStream(experimentToSave.getExperimentFile());
 		        ZipArchiveOutputStream archive =
 		        	(ZipArchiveOutputStream) new ArchiveStreamFactory().
 		        	createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
 		        archive.setUseZip64(Zip64Mode.Always);
-		        ZipArchiveEntry entry = new ZipArchiveEntry(projectToSave.getName());
+		        ZipArchiveEntry entry = new ZipArchiveEntry(experimentToSave.getName());
 		        archive.putArchiveEntry(entry);
 
 		        BufferedInputStream input = new BufferedInputStream(new FileInputStream(xmlFile));
@@ -150,57 +151,58 @@ public class ExperimentUtils {
 		}
 	}
 	
-	public static void saveStorableRawDataAnalysisExperiment(RawDataAnalysisProject projectToSave) {
+	public static void saveStorableRawDataAnalysisExperiment(
+			RawDataAnalysisExperiment experimentToSave) {
 		
 		Document document = new Document();
-	    Element projectRoot = 
-	    		new Element(ProjectFields.IDTrackerRawDataProject.name());
-		projectRoot.setAttribute("version", "1.0.0.0");
-		projectRoot.setAttribute(ProjectFields.Id.name(), 
-				projectToSave.getId());
-		projectRoot.setAttribute(ProjectFields.Name.name(), 
-				projectToSave.getName());
-		projectRoot.setAttribute(ProjectFields.Description.name(), 
-				projectToSave.getDescription());
-		projectRoot.setAttribute(ProjectFields.ProjectFile.name(), 
-				projectToSave.getExperimentFile().getAbsolutePath());
-		projectRoot.setAttribute(ProjectFields.ProjectDir.name(), 
-				projectToSave.getProjectDirectory().getAbsolutePath());	
-		projectRoot.setAttribute(ProjectFields.DateCreated.name(), 
-				ExperimentUtils.dateTimeFormat.format(projectToSave.getDateCreated()));
-		projectRoot.setAttribute(ProjectFields.DateModified.name(), 
-				ExperimentUtils.dateTimeFormat.format(projectToSave.getLastModified()));
+	    Element experimentRoot = 
+	    		new Element(ExperimentFields.IDTrackerRawDataProject.name());
+		experimentRoot.setAttribute("version", "1.0.0.0");
+		experimentRoot.setAttribute(ExperimentFields.Id.name(), 
+				experimentToSave.getId());
+		experimentRoot.setAttribute(ExperimentFields.Name.name(), 
+				experimentToSave.getName());
+		experimentRoot.setAttribute(ExperimentFields.Description.name(), 
+				experimentToSave.getDescription());
+		experimentRoot.setAttribute(ExperimentFields.ProjectFile.name(), 
+				experimentToSave.getExperimentFile().getAbsolutePath());
+		experimentRoot.setAttribute(ExperimentFields.ProjectDir.name(), 
+				experimentToSave.getExperimentDirectory().getAbsolutePath());	
+		experimentRoot.setAttribute(ExperimentFields.DateCreated.name(), 
+				ExperimentUtils.dateTimeFormat.format(experimentToSave.getDateCreated()));
+		experimentRoot.setAttribute(ExperimentFields.DateModified.name(), 
+				ExperimentUtils.dateTimeFormat.format(experimentToSave.getLastModified()));
 		
-		projectRoot.addContent(       		
-				new Element(ProjectFields.UniqueCIDList.name()).setText(""));
-		projectRoot.addContent(       		
-				new Element(ProjectFields.UniqueMSMSLibIdList.name()).setText(""));
-		projectRoot.addContent(       		
-				new Element(ProjectFields.UniqueMSRTLibIdList.name()).setText(""));
-		projectRoot.addContent(       		
-				new Element(ProjectFields.UniqueSampleIdList.name()).setText(""));
+		experimentRoot.addContent(       		
+				new Element(ExperimentFields.UniqueCIDList.name()).setText(""));
+		experimentRoot.addContent(       		
+				new Element(ExperimentFields.UniqueMSMSLibIdList.name()).setText(""));
+		experimentRoot.addContent(       		
+				new Element(ExperimentFields.UniqueMSRTLibIdList.name()).setText(""));
+		experimentRoot.addContent(       		
+				new Element(ExperimentFields.UniqueSampleIdList.name()).setText(""));
 		
 		//	MS2 file list
 		Element msTwoFileListElement = 
-				new Element(ProjectFields.MsTwoFiles.name());		
-		for(DataFile ms2dataFile : projectToSave.getMSMSDataFiles())	        	
+				new Element(ExperimentFields.MsTwoFiles.name());		
+		for(DataFile ms2dataFile : experimentToSave.getMSMSDataFiles())	        	
 			msTwoFileListElement.addContent(ms2dataFile.getXmlElement());
 		
-		projectRoot.addContent(msTwoFileListElement);
+		experimentRoot.addContent(msTwoFileListElement);
 		
 		//	MS1 file list
 		Element msOneFileListElement = 
-				new Element(ProjectFields.MsOneFiles.name());		
-		for(DataFile msOnedataFile : projectToSave.getMSOneDataFiles())         	
+				new Element(ExperimentFields.MsOneFiles.name());		
+		for(DataFile msOnedataFile : experimentToSave.getMSOneDataFiles())         	
 			msOneFileListElement.addContent(msOnedataFile.getXmlElement());
 		
 		
-		projectRoot.addContent(msOneFileListElement);        
-		document.setContent(projectRoot);
+		experimentRoot.addContent(msOneFileListElement);        
+		document.setContent(experimentRoot);
 		
 		//	Save XML document
 		File xmlFile = Paths.get(
-				projectToSave.getUncompressedProjectFilesDirectory().getAbsolutePath(), 
+				experimentToSave.getUncompressedExperimentFilesDirectory().getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.PROJECT_FILE_NAME).toFile();
 		try {
 		    FileWriter writer = new FileWriter(xmlFile, false);
@@ -211,7 +213,7 @@ public class ExperimentUtils {
 		    e.printStackTrace();
 		}
 		try {
-			CompressionUtils.zipFile(xmlFile, projectToSave.getExperimentFile());
+			CompressionUtils.zipFile(xmlFile, experimentToSave.getExperimentFile());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

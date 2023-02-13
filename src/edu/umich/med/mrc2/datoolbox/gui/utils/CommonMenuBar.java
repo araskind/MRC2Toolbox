@@ -57,7 +57,8 @@ public class CommonMenuBar extends JMenuBar {
 		return item;
 	}
 	
-	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {
+	public void updateMenuFromExperiment(
+			DataAnalysisProject experiment, DataPipeline activePipeline) {
 		// TODO Auto-generated method stub
 
 	}

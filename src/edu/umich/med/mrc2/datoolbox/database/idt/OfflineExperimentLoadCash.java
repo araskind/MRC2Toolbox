@@ -29,7 +29,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 
-public class OfflineProjectLoadCash {
+public class OfflineExperimentLoadCash {
 
 	private static Map<String,ExperimentalSample> experimentalSamples = 
 			new TreeMap<String,ExperimentalSample>();

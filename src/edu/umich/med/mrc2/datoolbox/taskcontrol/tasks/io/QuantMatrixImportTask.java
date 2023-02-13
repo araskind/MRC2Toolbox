@@ -63,7 +63,7 @@ public class QuantMatrixImportTask extends AbstractTask {
 
 	private File quantDataFile;
 	private DataPipeline dataPipeline;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private ArrayList<MsFeature> featureList;
 	private ArrayList<DataFile> dataFiles;
 	private Matrix dataMatrix;
@@ -89,7 +89,7 @@ public class QuantMatrixImportTask extends AbstractTask {
 		this.quantDataFile = quantDataFile;
 		this.dataPipeline = dataPipeline;
 
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 		taskDescription = "Reading quant matrix from " + quantDataFile.getName();
 		unmatchedSamplesPresent = false;
 		readPreferences();
@@ -110,12 +110,12 @@ public class QuantMatrixImportTask extends AbstractTask {
 
 		setStatus(TaskStatus.PROCESSING);
 		try {
-			if (!currentProject.dataPipelineHasData(dataPipeline)) {
+			if (!currentExperiment.dataPipelineHasData(dataPipeline)) {
 
 				parseHeader();
 				createFeatureRowMap();
 				parseQuantData();
-				copyQuantFileToProject();
+				copyQuantFileToExperiment();
 			}
 		} catch (Exception e) {
 
@@ -130,16 +130,16 @@ public class QuantMatrixImportTask extends AbstractTask {
 		return new QuantMatrixImportTask(quantDataFile, dataPipeline);
 	}
 
-	private void copyQuantFileToProject() {
+	private void copyQuantFileToExperiment() {
 
 		if (quantDataFile.exists()) {
 
-			File quantFile = Paths.get(currentProject.getProjectDirectory().getAbsolutePath(),
+			File quantFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(),
 					quantDataFile.getName()).toFile();
 			if (!quantFile.exists()) {
 
 				try {
-					FileUtils.copyFileToDirectory(quantDataFile, currentProject.getProjectDirectory());
+					FileUtils.copyFileToDirectory(quantDataFile, currentExperiment.getExperimentDirectory());
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

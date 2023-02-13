@@ -112,12 +112,8 @@ public class ParallelZip {
         } catch (ArchiveException e) {
             e.printStackTrace();
         }
-    }
-
-//	public static void main(String[] args) {
-//
-//		compressFolder("Y:\\DataAnalysis\\MRC2ToolboxProjects\\RD_9\\xmls",
-//				"Y:\\DataAnalysis\\MRC2ToolboxProjects\\RD_9\\xmls.zip", null, null);
-//	}
-    
+    }   
 }
+
+
+

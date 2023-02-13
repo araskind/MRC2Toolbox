@@ -48,33 +48,33 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 public class MergeDuplicateFeaturesTask extends AbstractTask {
 
 	private DataPipeline activeDataPipeline;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private Set<MsFeatureCluster> duplicateList;
 	private DuplicatesCleanupOptions mergeOption;
 
 	public MergeDuplicateFeaturesTask(
-			DataAnalysisProject currentProject,
+			DataAnalysisProject experiment,
 			DataPipeline activeDataPipeline,
 			DuplicatesCleanupOptions duplicatesCleanupOptions) {
 		
 		this.activeDataPipeline = activeDataPipeline;
-		this.currentProject = currentProject;
+		this.currentExperiment = experiment;
 		this.mergeOption = duplicatesCleanupOptions;
 
 		duplicateList = 
-				currentProject.getDuplicateClustersForDataPipeline(activeDataPipeline);
+				experiment.getDuplicateClustersForDataPipeline(activeDataPipeline);
 		total = duplicateList.size();
 		processed = 20;
 	}
 
 	public MergeDuplicateFeaturesTask(
 			Collection<MsFeature>featuresToMerge,
-			DataAnalysisProject currentProject,
+			DataAnalysisProject experiment,
 			DataPipeline activeDataPipeline,
 			DuplicatesCleanupOptions duplicatesCleanupOptions) {
 
 		this.activeDataPipeline = activeDataPipeline;
-		this.currentProject = currentProject;
+		this.currentExperiment = experiment;
 		this.mergeOption = duplicatesCleanupOptions;
 
 		MsFeatureCluster mergeCluster = new MsFeatureCluster();
@@ -107,8 +107,9 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		taskDescription = "Reading MS feature matrix data";
 		processed = 30;
 		
-		File featureMatrixFile = Paths.get(currentProject.getProjectDirectory().getAbsolutePath(), 
-				currentProject.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline)).toFile();
+		File featureMatrixFile = 
+				Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+				currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline)).toFile();
 		if (!featureMatrixFile.exists())
 			return null;
 		
@@ -123,9 +124,9 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			if (featureMatrix != null) {
 
 				featureMatrix.setMetaDataDimensionMatrix(0, 
-						currentProject.getMetaDataMatrixForDataPipeline(activeDataPipeline, 0));
+						currentExperiment.getMetaDataMatrixForDataPipeline(activeDataPipeline, 0));
 				featureMatrix.setMetaDataDimensionMatrix(1, 
-						currentProject.getMetaDataMatrixForDataPipeline(activeDataPipeline, 1));
+						currentExperiment.getMetaDataMatrixForDataPipeline(activeDataPipeline, 1));
 			}
 		}		
 		return featureMatrix;
@@ -141,7 +142,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		taskDescription = "Removing duplicate features for active data pipeline";
 		processed = 50;
 		Matrix dataMatrix = 
-				currentProject.getDataMatrixForDataPipeline(activeDataPipeline);
+				currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
 		Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
 		ArrayList<MsFeature> featuresToRemove = new ArrayList<MsFeature>();
 		ArrayList<MsFeature> featuresToMerge = new ArrayList<MsFeature>();
@@ -204,7 +205,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 
 				long idColumn = dataMatrix.getColumnForLabel(idFeature);
 				coordinates[1] = idColumn;
-				for (ExperimentalSample sample : currentProject.getExperimentDesign().getSamples()) {
+				for (ExperimentalSample sample : currentExperiment.getExperimentDesign().getSamples()) {
 
 					if (sample.getDataFilesForMethod(acquisitionMethod) != null) {
 
@@ -234,7 +235,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 		for (MsFeature cf : featuresToRemove)
 			rem.add(dataMatrix.getColumnForLabel(cf));
 
-		currentProject.deleteFeatures(featuresToRemove, activeDataPipeline);
+		currentExperiment.deleteFeatures(featuresToRemove, activeDataPipeline);
 		Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
 		Matrix newFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
 
@@ -251,9 +252,9 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			newMsFeatureMatrix.setMetaDataDimensionMatrix(
 					1, dataMatrix.getMetaDataDimensionMatrix(1));
 			
-			//	TODO - there is no undo for it here, if the project is not saved
+			//	TODO - there is no undo for it here, if the experiment is not saved
 			//	Same for areas matrix?? they need backup for this case !!!
-			//	Maybe for now force save the project and warn that there is no UNDO
+			//	Maybe for now force save the experiment and warn that there is no UNDO
 			saveMsFeatureMatrix(newMsFeatureMatrix);
 			
 			System.err.println("Data: " + newDataMatrix.getRowCount() + 
@@ -261,23 +262,23 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 			System.err.println("Features: " + newMsFeatureMatrix.getRowCount() + 
 					" by " + newMsFeatureMatrix.getColumnCount());
 		}
-		currentProject.setDataMatrixForDataPipeline(
+		currentExperiment.setDataMatrixForDataPipeline(
 				activeDataPipeline, newDataMatrix);
 		duplicateList = new HashSet<MsFeatureCluster>();
-		currentProject.setDuplicateClustersForDataPipeline(
+		currentExperiment.setDuplicateClustersForDataPipeline(
 				activeDataPipeline, duplicateList);
 	}
 	
 	private void saveMsFeatureMatrix(Matrix msFeatureMatrix) {
 		
-		String featureMatrixFileName = currentProject.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline);
+		String featureMatrixFileName = currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline);
 		if(featureMatrixFileName != null) {
 			
-			taskDescription = "Saving feature matrix for  " + currentProject.getName() +
-					"(" + currentProject.getName() + ")";
+			taskDescription = "Saving feature matrix for  " + currentExperiment.getName() +
+					"(" + currentExperiment.getName() + ")";
 			processed = 90;
 			File featureMatrixFile = 
-					Paths.get(currentProject.getProjectDirectory().getAbsolutePath(), 
+					Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
 					featureMatrixFileName).toFile();
 			try {
 				Matrix featureMatrix = 
@@ -307,7 +308,7 @@ public class MergeDuplicateFeaturesTask extends AbstractTask {
 	@Override
 	public Task cloneTask() {
 		return new MergeDuplicateFeaturesTask(
-				currentProject, activeDataPipeline, mergeOption);
+				currentExperiment, activeDataPipeline, mergeOption);
 	}
 
 	public DataPipeline getDataPipeline() {

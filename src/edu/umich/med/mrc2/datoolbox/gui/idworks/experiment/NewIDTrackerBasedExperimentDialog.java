@@ -251,22 +251,6 @@ public class NewIDTrackerBasedExperimentDialog extends JDialog implements Action
 		chooser.setSelectedFile(new File(""));
 	}
 
-	public void setProjectType(ProjectType type) {
-
-		projectType = type;
-
-		if(projectType.equals(ProjectType.DATA_ANALYSIS)) {
-
-			setTitle("Create new data analysis project");
-			setIconImage(((ImageIcon) newProjectIcon).getImage());
-		}
-		if(projectType.equals(ProjectType.FEATURE_IDENTIFICATION)) {
-
-			setTitle("Create new feature identification project");
-			setIconImage(((ImageIcon) newIdProjectIcon).getImage());
-		}
-	}
-
 	/**
 	 * @return the projectType
 	 */

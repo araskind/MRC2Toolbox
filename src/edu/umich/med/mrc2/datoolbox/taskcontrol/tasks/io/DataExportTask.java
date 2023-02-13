@@ -88,7 +88,7 @@ public class DataExportTask extends AbstractTask {
 	private File exportFile;
 	private MainActionCommands exportType;
 	private MissingExportType exportMissingAs;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private DataPipeline dataPipeline;
 	private char columnSeparator;
 	private boolean enableFilters;
@@ -107,7 +107,7 @@ public class DataExportTask extends AbstractTask {
 	private static final NumberFormat peakAreaFormat = new DecimalFormat("###");
 
 	public DataExportTask(
-			DataAnalysisProject currentProject,
+			DataAnalysisProject experiment,
 			DataPipeline dataPipeline,
 			File exportFile,
 			MainActionCommands exportType,
@@ -119,7 +119,7 @@ public class DataExportTask extends AbstractTask {
 			boolean exportManifest,
 			boolean replaceSpecialCharacters) {
 		
-		this.currentProject = currentProject;
+		this.currentExperiment = experiment;
 		this.dataPipeline = dataPipeline;
 		this.exportFile = exportFile;
 		this.exportType = exportType;
@@ -143,7 +143,7 @@ public class DataExportTask extends AbstractTask {
 
 		setStatus(TaskStatus.PROCESSING);
 
-		ExperimentDesign design = currentProject.getExperimentDesign();
+		ExperimentDesign design = currentExperiment.getExperimentDesign();
 		experimentDesignSubset = design.getActiveDesignSubset();
 		activeSamples = design.getActiveSamplesForDesignSubset(experimentDesignSubset);
 		collectFeaturesForExport();
@@ -228,7 +228,7 @@ public class DataExportTask extends AbstractTask {
 		// Create header
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
 			= DataExportUtils.createSampleFileMapForDataPipeline(
-					currentProject, experimentDesignSubset, dataPipeline, namingField);
+					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 
 		String[] columnList =
 			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
@@ -347,8 +347,8 @@ public class DataExportTask extends AbstractTask {
 	
 	private Matrix readFeatureMatrix() {
 		
-		File featureMatrixFile = Paths.get(currentProject.getProjectDirectory().getAbsolutePath(), 
-				currentProject.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+		File featureMatrixFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+				currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
 		if (!featureMatrixFile.exists())
 			return null;
 		
@@ -363,9 +363,9 @@ public class DataExportTask extends AbstractTask {
 			if (featureMatrix != null) {
 
 				featureMatrix.setMetaDataDimensionMatrix(0, 
-						currentProject.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
+						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
 				featureMatrix.setMetaDataDimensionMatrix(1, 
-						currentProject.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
+						currentExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
 			}
 		}		
 		return featureMatrix;
@@ -373,7 +373,7 @@ public class DataExportTask extends AbstractTask {
 
 	private void writeManifestFile() {
 		
-		String manifestString = WorklistUtils.createManifest(currentProject, dataPipeline);
+		String manifestString = WorklistUtils.createManifest(currentExperiment, dataPipeline);
 		File outputFile = Paths.get(exportFile.getParentFile().getAbsolutePath(), 
 				FilenameUtils.getBaseName(exportFile.getName()) + "_MANIFEST.txt").toFile() ;		
 		try {
@@ -388,7 +388,7 @@ public class DataExportTask extends AbstractTask {
 
 		timeMap.clear();
 		Worklist worklist = 
-				currentProject.getWorklistForDataAcquisitionMethod(dataPipeline.getAcquisitionMethod());
+				currentExperiment.getWorklistForDataAcquisitionMethod(dataPipeline.getAcquisitionMethod());
 		if(worklist == null)
 			return;
 			
@@ -416,7 +416,7 @@ public class DataExportTask extends AbstractTask {
 		if (enableFilters) {
 
 			msFeatureSet4export =
-				currentProject.getActiveFeatureSetForDataPipeline(dataPipeline).
+				currentExperiment.getActiveFeatureSetForDataPipeline(dataPipeline).
 				getFeatures().stream().
 				filter(f -> (f.getStatsSummary().getPooledFrequency() >= minPooledFrequency)).
 				filter(f -> (f.getStatsSummary().getPooledRsd() <= maxPooledRsd)).
@@ -425,7 +425,7 @@ public class DataExportTask extends AbstractTask {
 		}
 		else {
 			msFeatureSet4export =
-					currentProject.getActiveFeatureSetForDataPipeline(dataPipeline).getFeatures();
+					currentExperiment.getActiveFeatureSetForDataPipeline(dataPipeline).getFeatures();
 		}
 	}
 
@@ -434,7 +434,7 @@ public class DataExportTask extends AbstractTask {
 		taskDescription = "Writing duplicate features data export file ...";
 		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
 
-		for (MsFeatureCluster fc : currentProject.getDuplicateClustersForDataPipeline(dataPipeline)) {
+		for (MsFeatureCluster fc : currentExperiment.getDuplicateClustersForDataPipeline(dataPipeline)) {
 
 			for (MsFeature feature : fc.getFeatures()) {
 
@@ -455,12 +455,12 @@ public class DataExportTask extends AbstractTask {
 
 		taskDescription = "Writing data export file for MPP ...";
 		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
-		final Matrix dataMatrix = currentProject.getDataMatrixForDataPipeline(dataPipeline);
+		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 
 		// Create header
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap =
 				DataExportUtils.createSampleFileMapForDataPipeline(
-						currentProject, experimentDesignSubset, dataPipeline, namingField);
+						currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 		String[] columnList =
 				DataExportUtils.createSampleColumnNameArrayForDataPipeline(
 						sampleFileMap, namingField, dataPipeline);
@@ -557,12 +557,12 @@ public class DataExportTask extends AbstractTask {
 
 		taskDescription = "Writing data export file for Binner ...";
 		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
-		final Matrix dataMatrix = currentProject.getDataMatrixForDataPipeline(dataPipeline);
+		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 
 		// Create header
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
 			= DataExportUtils.createSampleFileMapForDataPipeline(
-					currentProject, experimentDesignSubset, dataPipeline, namingField);
+					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 
 		String[] columnList =
 			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
@@ -677,12 +677,12 @@ public class DataExportTask extends AbstractTask {
 
 		taskDescription = "Writing data export file for Metabolomics Workbench ...";
 		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
-		final Matrix dataMatrix = currentProject.getDataMatrixForDataPipeline(dataPipeline);
+		final Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 
 		// Create header
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap
 			= DataExportUtils.createSampleFileMapForDataPipeline(
-					currentProject, experimentDesignSubset, dataPipeline, namingField);
+					currentExperiment, experimentDesignSubset, dataPipeline, namingField);
 
 		String[] columnList =
 			DataExportUtils.createSampleColumnNameArrayForDataPipeline(
@@ -753,7 +753,7 @@ public class DataExportTask extends AbstractTask {
 		taskDescription = "Writing data export file for R ...";
 		final Writer writer = new BufferedWriter(new FileWriter(exportFile));
 		final Matrix dataMatrix = 
-				currentProject.getDataMatrixForDataPipeline(dataPipeline);
+				currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 		TreeSet<ExperimentDesignFactor>activeFactors =
 				experimentDesignSubset.getDesignMap().stream().
 				filter(l-> Objects.nonNull(l.getParentFactor())).
@@ -770,13 +770,13 @@ public class DataExportTask extends AbstractTask {
 
 		boolean writeTime = false;
 
-		if (currentProject.acquisitionMethodHasLinkedWorklist(dataPipeline.getAcquisitionMethod())) {
+		if (currentExperiment.acquisitionMethodHasLinkedWorklist(dataPipeline.getAcquisitionMethod())) {
 
 			writeTime = true;
 			createTimeMap();
 			header = new String[msFeatureSet4export.size() + activeFactors.size() + 4];
 		}
-		if(currentProject.isDataAcquisitionMultiBatch(dataPipeline.getAcquisitionMethod()))
+		if(currentExperiment.isDataAcquisitionMultiBatch(dataPipeline.getAcquisitionMethod()))
 			header = new String[msFeatureSet4export.size() + activeFactors.size() + 5];
 
 		int columnCount = 0;
@@ -784,7 +784,7 @@ public class DataExportTask extends AbstractTask {
 		header[++columnCount] = ExperimentDesignFields.SAMPLE_NAME.getName();
 		header[++columnCount] = ExperimentDesignFields.SAMPLE_ID.getName();
 
-		if(currentProject.isDataAcquisitionMultiBatch(dataPipeline.getAcquisitionMethod()))
+		if(currentExperiment.isDataAcquisitionMultiBatch(dataPipeline.getAcquisitionMethod()))
 			header[++columnCount] = ExperimentDesignFields.BATCH.getName();
 
 		if(writeTime)
@@ -820,7 +820,7 @@ public class DataExportTask extends AbstractTask {
 						line[++columnCount] = sample.getName();
 						line[++columnCount] = sample.getId();
 
-						if(currentProject.isDataAcquisitionMultiBatch(dataPipeline.getAcquisitionMethod()))
+						if(currentExperiment.isDataAcquisitionMultiBatch(dataPipeline.getAcquisitionMethod()))
 							line[++columnCount] = Integer.toString(f.getBatchNumber());
 
 						if(writeTime) {
@@ -862,7 +862,7 @@ public class DataExportTask extends AbstractTask {
 	public Task cloneTask() {
 
 		return new DataExportTask(
-				currentProject,
+				currentExperiment,
 				dataPipeline,
 				exportFile,
 				exportType,

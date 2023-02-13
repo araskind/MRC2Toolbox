@@ -40,21 +40,21 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MassDifferenceAssignmentTask extends AbstractTask {
 
-	private Collection<Adduct> projectChemMods;
+	private Collection<Adduct> experimentChemMods;
 	private Set<MsFeatureCluster> featureClusters;
 	private double massAccuracy;
-	private DataAnalysisProject project;
+	private DataAnalysisProject experiment;
 	private DataPipeline dataPipeline;
 
 	public MassDifferenceAssignmentTask(double massAccuracy) {
 		super();
 		this.massAccuracy = massAccuracy;
 
-		project = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		dataPipeline = project.getActiveDataPipeline();
+		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		dataPipeline = experiment.getActiveDataPipeline();
 		featureClusters = 
-				project.getMsFeatureClustersForDataPipeline(dataPipeline);
-		projectChemMods = AdductManager.getNeutralModifications();
+				experiment.getMsFeatureClustersForDataPipeline(dataPipeline);
+		experimentChemMods = AdductManager.getNeutralModifications();
 		
 		taskDescription = "Assigning mass differences ...";
 	}
@@ -95,7 +95,7 @@ public class MassDifferenceAssignmentTask extends AbstractTask {
 									features[i].getMonoisotopicMz() * features[i].getAbsoluteObservedCharge(),
 									features[j].getMonoisotopicMz() * features[j].getAbsoluteObservedCharge());
 
-							for (Adduct mod : projectChemMods) {
+							for (Adduct mod : experimentChemMods) {
 
 								massRange = MsUtils.createMassRangeWithReference(mod.getMassCorrection(), refMass,
 										massAccuracy);

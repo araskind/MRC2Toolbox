@@ -54,12 +54,12 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 public class WorklistUtils {
 
 	public static String createManifest(
-			DataAnalysisProject currentProject,
+			DataAnalysisProject currentExperiment,
 			DataPipeline activeDataPipeline) {
 
-		Worklist worklist = currentProject.getWorklistForDataAcquisitionMethod(
+		Worklist worklist = currentExperiment.getWorklistForDataAcquisitionMethod(
 				activeDataPipeline.getAcquisitionMethod());
-		ExperimentDesign design = currentProject.getExperimentDesign();
+		ExperimentDesign design = currentExperiment.getExperimentDesign();
 		TreeSet<ExperimentalSample> activeSamples = 
 				design.getActiveSamplesForDesignSubset(design.getActiveDesignSubset());
 		DataAcquisitionMethod acquisitionMethod  = activeDataPipeline.getAcquisitionMethod();

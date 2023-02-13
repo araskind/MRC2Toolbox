@@ -62,7 +62,7 @@ public class MRC2ToolBoxConfiguration {
 	public static final String TAB_DATA_DELIMITER = "\t";
 	
 	//	Maybe change to Experiment later, make back-compatible with existing projects
-	public static final String UNCOMPRESSED_PROJECT_FILES_DIRECTORY = "ProjectFiles";
+	public static final String UNCOMPRESSED_EXPERIMENT_FILES_DIRECTORY = "ProjectFiles";
 	public static final String PROJECT_FILE_NAME = "Project.xml";
 	public static final String FEATURE_CHROMATOGRAMS_FILE_NAME = "FeatureChromatograms.xml";
 
@@ -86,10 +86,10 @@ public class MRC2ToolBoxConfiguration {
 	private static final String DATABASE_SCHEMA = "databaseSchema";
 	private static final String DATABASE_PORT = "databasePort";
 	
-	//	Projects directory
-	public static final String PROJECTS_DIR = "defaultProjectsDirectory";
-	public static final String PROJECTS_DIR_DEFAULT = 
-			"." + File.separator + "data" + File.separator + "projects";
+	//	Experiments directory
+	public static final String EXPERIMENTS_DIR = "defaultExperimentsDirectory";
+	public static final String EXPERIMENTS_DIR_DEFAULT = 
+			"." + File.separator + "data" + File.separator + "experiments";
 
 	//	Data/reports directory
 	public static final String DATA_DIR = "defaultDataDirectory";
@@ -732,11 +732,11 @@ public class MRC2ToolBoxConfiguration {
 	}
 
 	public static String getDefaultExperimentsDirectory() {
-		return prefs.get(PROJECTS_DIR, PROJECTS_DIR_DEFAULT);
+		return prefs.get(EXPERIMENTS_DIR, EXPERIMENTS_DIR_DEFAULT);
 	}
 
-	public static void setDefaultExperimentsDirectory(String defaultProjectsDirectory) {
-		prefs.put(PROJECTS_DIR, defaultProjectsDirectory);
+	public static void setDefaultExperimentsDirectory(String defaultExperimentsDirectory) {
+		prefs.put(EXPERIMENTS_DIR, defaultExperimentsDirectory);
 	}
 
 	public static String getDefaultDataDirectory() {

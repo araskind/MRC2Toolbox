@@ -36,7 +36,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -48,17 +48,17 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 
 
 	private int ticCount;
-	private RawDataAnalysisProject project;
-	private boolean copyFilesToProject;
+	private RawDataAnalysisExperiment experiment;
+	private boolean copyFilesToExperiment;
 	private Collection<String>errors;
 	
 	
 	public ExperimentRawDataFileOpenTask(
-			RawDataAnalysisProject project,
-			boolean copyFilesToProject) {
+			RawDataAnalysisExperiment experiment,
+			boolean copyFilesToExperiment) {
 		super();
-		this.project = project;
-		this.copyFilesToProject = copyFilesToProject;
+		this.experiment = experiment;
+		this.copyFilesToExperiment = copyFilesToExperiment;
 		ticCount = 0;
 		errors = new ArrayList<String>();
 	}
@@ -67,7 +67,7 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 	public void run() {
 		
 		setStatus(TaskStatus.PROCESSING);
-		if(copyFilesToProject)
+		if(copyFilesToExperiment)
 			copyDataFiles();
 		
 		loadRawData();
@@ -76,12 +76,12 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 	
 	private void copyDataFiles() {
 		
-		taskDescription = "Copying raw data files to project directory ...";
+		taskDescription = "Copying raw data files to experiment directory ...";
 		TreeSet<DataFile>filesToCopy = new TreeSet<DataFile>();
-		for(DataFile df : project.getDataFiles()) {
+		for(DataFile df : experiment.getDataFiles()) {
 			
 			File existingFile = 
-					Paths.get(project.getRawDataDirectory().getAbsolutePath(), 
+					Paths.get(experiment.getRawDataDirectory().getAbsolutePath(), 
 					df.getName()).toFile();
 			if(!existingFile.exists())
 				filesToCopy.add(df);			
@@ -93,7 +93,7 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 		processed = 0;		
 		for(DataFile df : filesToCopy) {
 			File source = Paths.get(df.getFullPath()).toFile();
-			File destination = Paths.get(project.getRawDataDirectory().getAbsolutePath(), 
+			File destination = Paths.get(experiment.getRawDataDirectory().getAbsolutePath(), 
 					df.getName()).toFile();
 			try {
 				Files.copy(source, destination);
@@ -109,29 +109,29 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 	
 	private synchronized void loadRawData() {
 		
-		taskDescription = "Loading raw data files for project ...";
-		total = project.getDataFiles().size();
+		taskDescription = "Loading raw data files for experiment ...";
+		total = experiment.getDataFiles().size();
 		processed = 0;	
 		
-		for(DataFile df : project.getMSMSDataFiles()) {
+		for(DataFile df : experiment.getMSMSDataFiles()) {
 			
 			LCMSData dataSource = RawDataManager.getRawData(df);
 			if(!dataSource.getScans().getMapMsLevel2index().containsKey(2)) {
 				errors.add("Data file \"" + df.getName() + 
-						"\" does not contatin MSMS data; not included in the project.");
-				project.removeMSMSDataFile(df);
+						"\" does not contatin MSMS data; not included in the experiment.");
+				experiment.removeMSMSDataFile(df);
 				RawDataManager.removeDataSource(df);
 			}
 			processed++;
 		}
-		for(DataFile df : project.getMSOneDataFiles()) {
+		for(DataFile df : experiment.getMSOneDataFiles()) {
 			
 			LCMSData dataSource = RawDataManager.getRawData(df);
 			if(dataSource.getScans().getMapMsLevel2index().containsKey(2)) {
 				errors.add("Data file \"" + df.getName() + 
 						"\" contatin MSMS data and can not be used as MS1 "
-						+ "reference file; not included in the project.");
-				project.removeMSOneDataFile(df);
+						+ "reference file; not included in the experiment.");
+				experiment.removeMSOneDataFile(df);
 				RawDataManager.removeDataSource(df);
 			}
 			processed++;
@@ -141,11 +141,11 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 	private void initTicExtraction() {
 		
 		taskDescription = "Extracting TICs ...";
-		total = project.getDataFiles().size();
+		total = experiment.getDataFiles().size();
 		processed = 1;	
 		Collection<Double> mzList = new ArrayList<Double>();
 		int fileCount = 0;
-		for(DataFile df : project.getDataFiles()) {
+		for(DataFile df : experiment.getDataFiles()) {
 			
 			df.setColor(ColorUtils.getColor(fileCount));			
 			ChromatogramExtractionTask xicTask = 
@@ -170,11 +170,11 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 	@Override
 	public Task cloneTask() {
 		return new ExperimentRawDataFileOpenTask(
-				project, copyFilesToProject);
+				experiment, copyFilesToExperiment);
 	}
 
-	public RawDataAnalysisProject getExperiment(){
-		return project;
+	public RawDataAnalysisExperiment getExperiment(){
+		return experiment;
 	}
 
 	@Override
@@ -187,7 +187,7 @@ public class ExperimentRawDataFileOpenTask extends AbstractTask implements TaskL
 			if (e.getSource().getClass().equals(ChromatogramExtractionTask.class)) {
 				
 				ticCount++;
-				if(ticCount == project.getDataFiles().size())
+				if(ticCount == experiment.getDataFiles().size())
 					setStatus(TaskStatus.FINISHED);
 			}
 		}		

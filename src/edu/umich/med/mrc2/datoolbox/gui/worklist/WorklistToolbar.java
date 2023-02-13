@@ -134,13 +134,14 @@ public class WorklistToolbar extends CommonToolbar {
 	}
 
 	@Override
-	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(
+			DataAnalysisProject experiment, DataPipeline newDataPipeline) {
 
-		if(project != null) {
+		if(experiment != null) {
 
 			if(newDataPipeline != null) {
 
-				if(project.dataPipelineHasData(newDataPipeline))
+				if(experiment.dataPipelineHasData(newDataPipeline))
 					setButtonsEnabled(true);
 				else
 					setButtonsEnabled(false);

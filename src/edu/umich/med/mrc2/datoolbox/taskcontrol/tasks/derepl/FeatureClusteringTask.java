@@ -48,15 +48,15 @@ public class FeatureClusteringTask extends AbstractTask {
 	private MsFeature[] features;
 	private double areaWeight, frequencyWeight;
 	private DataPipeline dataPipeline;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private boolean logTransform;
 
 	public FeatureClusteringTask(
-			DataAnalysisProject project, 
+			DataAnalysisProject experiment,
 			DataPipeline dataPipeline, 
 			boolean logTransform) {
 
-		this.currentProject = project;
+		this.currentExperiment = experiment;
 		this.dataPipeline = dataPipeline;
 		this.logTransform = logTransform;
 
@@ -64,7 +64,7 @@ public class FeatureClusteringTask extends AbstractTask {
 		//	correlationCutoff = CaConfiguration.getCorrelationCutoff();
 		rtWindow = MRC2ToolBoxConfiguration.getRtWindow();
 
-		dataMatrix = currentProject.getDataMatrixForDataPipeline(dataPipeline);
+		dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 		Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
 		features = Arrays.copyOf(featureMatrix.toObjectArray()[0], 
 				featureMatrix.toObjectArray()[0].length, MsFeature[].class);
@@ -96,7 +96,7 @@ public class FeatureClusteringTask extends AbstractTask {
 	@Override
 	public Task cloneTask() {
 
-		FeatureClusteringTask fct = new FeatureClusteringTask(currentProject, dataPipeline, logTransform);
+		FeatureClusteringTask fct = new FeatureClusteringTask(currentExperiment, dataPipeline, logTransform);
 		return fct;
 	}
 

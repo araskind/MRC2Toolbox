@@ -66,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.impl.TaskControllerImpl;
 import umich.ms.datatypes.LCMSData;
 
@@ -90,8 +90,8 @@ public final class MRC2ToolBoxCore {
 	
 	private static MainWindow mainWindow;
 	private static TaskControllerImpl taskController;
-	private static DataAnalysisProject currentProject;
-	private static RawDataAnalysisProject activeRawDataAnalysisProject;
+	private static DataAnalysisProject currentExperiment;
+	private static RawDataAnalysisExperiment activeRawDataAnalysisExperiment;
 	private static Collection<CompoundLibrary>activeMsLibraries;
 	private static RenjinScriptEngine rScriptEngine;
 
@@ -108,7 +108,7 @@ public final class MRC2ToolBoxCore {
 	private static Map<DataFile, LCMSData>rawDataMap;
 
 	public static DataAnalysisProject getActiveMetabolomicsExperiment() {
-		return currentProject;
+		return currentExperiment;
 	}
 
 	public static MainWindow getMainWindow() {
@@ -198,7 +198,7 @@ public final class MRC2ToolBoxCore {
             renderSplashFrame(g, "Starting program ");
             splash.update();
         }  
-		currentProject = null;
+		currentExperiment = null;
 		taskController = new TaskControllerImpl();
 		taskController.initModule();
 		taskController.setMaxRunningThreads(MRC2ToolBoxConfiguration.getMaxThreadNumber());
@@ -293,8 +293,8 @@ public final class MRC2ToolBoxCore {
 		return activeMsLibraries;
 	}
 
-	public static void setActiveMetabolomicsExperiment(DataAnalysisProject currentProject) {
-		MRC2ToolBoxCore.currentProject = currentProject;
+	public static void setActiveMetabolomicsExperiment(DataAnalysisProject newExperiment) {
+		MRC2ToolBoxCore.currentExperiment = newExperiment;
 	}
 
     static void renderSplashFrame(Graphics2D g, String message) {
@@ -311,19 +311,6 @@ public final class MRC2ToolBoxCore {
         
         g.setColor(Color.BLACK);
         g.drawString(BuildInformation.getVersionAndBuildDate(), 115, 100);
-    }
-
-    private static void initClassyFireOntology() {
-    	   	
-		ParserWrapper pw = new ParserWrapper();
-		graph = null;		
-		try {
-			graph = pw.parseToOWLGraph(classyFireOntology);
-		} catch (OWLOntologyCreationException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
     }
     
     private static class ClassyFireOntologyLoader implements Runnable {
@@ -376,7 +363,7 @@ public final class MRC2ToolBoxCore {
 
 	public static void addRawData(DataFile file, LCMSData data) {
 
-		if(currentProject == null)
+		if(currentExperiment == null)
 			return;
 
 		rawDataMap.put(file, data);
@@ -424,11 +411,12 @@ public final class MRC2ToolBoxCore {
 		msmsLibraryCache.clear();
 	}
 
-	public static RawDataAnalysisProject getActiveRawDataAnalysisExperiment() {
-		return activeRawDataAnalysisProject;
+	public static RawDataAnalysisExperiment getActiveRawDataAnalysisExperiment() {
+		return activeRawDataAnalysisExperiment;
 	}
 
-	public static void setActiveRawDataAnalysisExperiment(RawDataAnalysisProject activeRawDataAnalysisProject) {
-		MRC2ToolBoxCore.activeRawDataAnalysisProject = activeRawDataAnalysisProject;
+	public static void setActiveRawDataAnalysisExperiment(
+			RawDataAnalysisExperiment newRawDataAnalysisExperiment) {
+		activeRawDataAnalysisExperiment = newRawDataAnalysisExperiment;
 	}
 }

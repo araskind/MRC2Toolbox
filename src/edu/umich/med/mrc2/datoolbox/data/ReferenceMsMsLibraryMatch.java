@@ -27,7 +27,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
 import edu.umich.med.mrc2.datoolbox.project.store.ReferenceMsMsLibraryMatchFields;
 
 public class ReferenceMsMsLibraryMatch implements Serializable {
@@ -471,7 +471,7 @@ public class ReferenceMsMsLibraryMatch implements Serializable {
 				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.DbId.name());
 		if(msmsId != null)
 			matchedLibraryFeature = 
-			OfflineProjectLoadCash.getMsMsLibraryFeatureById(msmsId);
+			OfflineExperimentLoadCash.getMsMsLibraryFeatureById(msmsId);
 
 		String matchTypeId = 
 				msmsMatch.getAttributeValue(ReferenceMsMsLibraryMatchFields.MType.name());

@@ -81,7 +81,7 @@ public class MWTabReportTask extends AbstractTask {
 	public static final String PEAK_AREA = "Peak area";
 
 	private File reportFile;
-	private DataAnalysisProject project;
+	private DataAnalysisProject experiment;
 	private DataPipeline dataPipeline;
 	private IdTrackerOrganization mrcOrganization;
 	private LIMSUser mrc2user;
@@ -135,7 +135,7 @@ public class MWTabReportTask extends AbstractTask {
 			MWtabReportStyle reportStyle) {
 		super();
 		this.reportFile = FIOUtils.changeExtension(reportFile, TXT_EXTENSION);
-		this.project = project;
+		this.experiment = project;
 		this.dataPipeline = dataPipeline;
 		this.experimentDesignSubset = experimentDesignSubset;
 		this.reportStyle = reportStyle;
@@ -182,8 +182,8 @@ public class MWTabReportTask extends AbstractTask {
 
 	private void initProjectData() {
 
-		design = project.getExperimentDesign();
-		limsProject = project.getLimsProject();
+		design = experiment.getExperimentDesign();
+		limsProject = experiment.getLimsProject();
 		if (limsProject.getClient().getPrincipalInvestigator() != null)
 			projectOwner = limsProject.getClient().getPrincipalInvestigator();
 
@@ -196,7 +196,7 @@ public class MWTabReportTask extends AbstractTask {
 					projectOwner = limsProject.getClient().getContactPerson();
 			}
 		}
-		limsExperiment = project.getLimsExperiment();
+		limsExperiment = experiment.getLimsExperiment();
 		mrcOrganization = LIMSDataCash.getOrganizationById(
 				LIMSUtils.MRC2_IDT_ORGANIZATION_ID);
 		mrc2user = LIMSDataCash.getUserById(LIMSUtils.MRC2_ADMIN_ID);
@@ -470,7 +470,7 @@ public class MWTabReportTask extends AbstractTask {
 		appendDataBlock("MS_METABOLITE_DATA:UNITS", 33, PEAK_AREA, 80, TAB, writer); //	TODO units should come from data
 		writer.append("MS_METABOLITE_DATA_START\n");
 
-		final Matrix dataMatrix = project.getDataMatrixForDataPipeline(dataPipeline);
+		final Matrix dataMatrix = experiment.getDataMatrixForDataPipeline(dataPipeline);
 		if(dataMatrix == null) {
 			writer.append("MS_METABOLITE_DATA_END\n");
 			return;
@@ -478,7 +478,7 @@ public class MWTabReportTask extends AbstractTask {
 		// Create header
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap =
 				DataExportUtils.createSampleFileMapForDataPipeline(
-						project, experimentDesignSubset, dataPipeline, DataExportFields.SAMPLE_EXPORT_ID);
+						experiment, experimentDesignSubset, dataPipeline, DataExportFields.SAMPLE_EXPORT_ID);
 		String[] columnList =
 				DataExportUtils.createSampleColumnNameArrayForDataPipeline(
 						sampleFileMap, DataExportFields.SAMPLE_EXPORT_ID, dataPipeline);
@@ -499,7 +499,7 @@ public class MWTabReportTask extends AbstractTask {
 		writer.append(StringUtils.join(header, TAB) + "\n");
 
 		Collection<MsFeature> msFeatureSet4export =
-				project.getActiveFeatureSetForDataPipeline(dataPipeline).getFeatures();
+				experiment.getActiveFeatureSetForDataPipeline(dataPipeline).getFeatures();
 
 		//	Write out data
 		long[] coordinates = new long[2];
@@ -560,7 +560,7 @@ public class MWTabReportTask extends AbstractTask {
 	public Task cloneTask() {
 		return new MWTabReportTask(
 				reportFile,
-				project,
+				experiment,
 				dataPipeline,
 				experimentDesignSubset,
 				reportStyle);

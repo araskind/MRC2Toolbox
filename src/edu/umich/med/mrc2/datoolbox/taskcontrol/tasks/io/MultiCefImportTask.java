@@ -219,7 +219,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 			dataParsed = true;
 			try {
 				finalizeDataParsing();
-				addDataToProject();
+				addDataToExperiment();
 				saveDataMatrixes();
 				setStatus(TaskStatus.FINISHED);
 			} catch (Exception e1) {
@@ -229,44 +229,45 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 		}
 	}
 	
-	private void addDataToProject() {
+	private void addDataToExperiment() {
 		
-		DataAnalysisProject currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();		
-		currentProject.addDataPipeline(dataPipeline);
+		DataAnalysisProject currentExperiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();		
+		currentExperiment.addDataPipeline(dataPipeline);
 
 		//	Attach library
-		currentProject.setCompoundLibraryForDataPipeline(dataPipeline, library);
+		currentExperiment.setCompoundLibraryForDataPipeline(dataPipeline, library);
 
 		//	Attach data
-		currentProject.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
+		currentExperiment.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
 		
-		currentProject.setFeaturesForDataPipeline(
+		currentExperiment.setFeaturesForDataPipeline(
 				dataPipeline, new HashSet<MsFeature>(library.getFeatures()));
-		currentProject.setDataFilesForAcquisitionMethod(
+		currentExperiment.setDataFilesForAcquisitionMethod(
 				dataPipeline.getAcquisitionMethod(), getDataFiles());		
-		currentProject.addFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);		
+		currentExperiment.addFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);		
 
 		MsFeatureSet allFeatures = 
 				new MsFeatureSet(GlobalDefaults.ALL_FEATURES.getName(),	
-						currentProject.getMsFeaturesForDataPipeline(dataPipeline));
+						currentExperiment.getMsFeaturesForDataPipeline(dataPipeline));
 		allFeatures.setActive(true);
 		allFeatures.setLocked(true);
-		currentProject.addFeatureSetForDataPipeline(allFeatures, dataPipeline);
+		currentExperiment.addFeatureSetForDataPipeline(allFeatures, dataPipeline);
 	}
 	
 	private void saveDataMatrixes() {
 		
-		DataAnalysisProject projectToSave = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		if (projectToSave.getDataMatrixForDataPipeline(dataPipeline) != null) {
+		DataAnalysisProject experimentToSave = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if (experimentToSave.getDataMatrixForDataPipeline(dataPipeline) != null) {
 
-			taskDescription = "Saving data matrix for  " + projectToSave.getName() +
+			taskDescription = "Saving data matrix for  " + experimentToSave.getName() +
 					"(" + dataPipeline.getName() + ")";
 			processed = 50;
-			File dataMatrixFile = Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
-					projectToSave.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+			File dataMatrixFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
+					experimentToSave.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
 			try {
 				Matrix dataMatrix = Matrix.Factory
-						.linkToArray(projectToSave.getDataMatrixForDataPipeline(dataPipeline).
+						.linkToArray(experimentToSave.getDataMatrixForDataPipeline(dataPipeline).
 								toDoubleArray());
 				dataMatrix.save(dataMatrixFile);
 				processed = 80;
@@ -274,25 +275,25 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 				e.printStackTrace();
 //					setStatus(TaskStatus.ERROR);
 			}
-			String featureMatrixFileName = projectToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
+			String featureMatrixFileName = experimentToSave.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
 			if(featureMatrixFileName != null) {
 				
-				taskDescription = "Saving feature matrix for  " + projectToSave.getName() +
+				taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
 						"(" + dataPipeline.getName() + ")";
 				processed = 90;
 				File featureMatrixFile = 
-						Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
+						Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
 						featureMatrixFileName).toFile();
 				try {
 					Matrix featureMatrix = Matrix.Factory
-							.linkToArray(projectToSave.getFeatureMatrixForDataPipeline(dataPipeline).toObjectArray());
+							.linkToArray(experimentToSave.getFeatureMatrixForDataPipeline(dataPipeline).toObjectArray());
 					featureMatrix.save(featureMatrixFile);
 					processed = 100;
 				} catch (IOException e) {
 					e.printStackTrace();
 //					setStatus(TaskStatus.ERROR);
 				}
-				projectToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
+				experimentToSave.setFeatureMatrixForDataPipeline(dataPipeline, null);
 				featureMatrix = null;
 				System.gc();
 			}

@@ -176,7 +176,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -3825,7 +3825,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		return activeFeatureCollection;
 	}
 
-	public void loadFeaturesFromRawDataExperiment(RawDataAnalysisProject activeRawDataAnalysisProject) {
+	public void loadFeaturesFromRawDataExperiment(RawDataAnalysisExperiment activeRawDataAnalysisProject) {
 		
 		clearPanel();		
 		FeatureCollectionManager.activeExperimentFeatureSet.clearCollection();

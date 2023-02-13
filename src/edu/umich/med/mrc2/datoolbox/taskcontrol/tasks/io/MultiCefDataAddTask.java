@@ -85,7 +85,7 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 	private HashMap<DataFile, HashSet<SimpleMsFeature>> featureDataPers;
 	private File cashFile;
 	private DescriptiveStatistics descStats;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private MsFeature[] features;
 
 	public MultiCefDataAddTask(
@@ -119,8 +119,8 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 	public void run() {
 
 		setStatus(TaskStatus.PROCESSING);
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		library = currentProject.getCompoundLibraryForDataPipeline(dataPipeline);
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		library = currentExperiment.getCompoundLibraryForDataPipeline(dataPipeline);
 		dataParsed = false;
 		initDataMatrixes();
 		initDataLoad();
@@ -219,16 +219,16 @@ public class MultiCefDataAddTask extends AbstractTask implements TaskListener{
 
 	private void mergeDataMatrixes() {
 		
-		taskDescription = "Adding imported data to project ...";
+		taskDescription = "Adding imported data to experiment ...";
 		total = features.length;
 		processed = 0;
 		
-		Matrix loadedDataMatrix = currentProject.getDataMatrixForDataPipeline(dataPipeline);
+		Matrix loadedDataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 		
 		//	Data file
 		TreeSet<DataFile>allFiles = new TreeSet<DataFile>();
 		Set<DataFile> loadedFiles = 
-				currentProject.getDataFilesForAcquisitionMethod(dataPipeline.getAcquisitionMethod());		
+				currentExperiment.getDataFilesForAcquisitionMethod(dataPipeline.getAcquisitionMethod());		
 		allFiles.addAll(loadedFiles);
 		allFiles.addAll(Arrays.asList(addedDataFiles));
 		DataFile[]fileArray = allFiles.toArray(new DataFile[allFiles.size()]);

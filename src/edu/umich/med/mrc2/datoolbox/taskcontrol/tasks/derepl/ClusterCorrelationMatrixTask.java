@@ -33,13 +33,13 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class ClusterCorrelationMatrixTask extends AbstractTask {
 	
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private DataPipeline activeDataPipeline;
 	
 	public ClusterCorrelationMatrixTask() {
 		
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		activeDataPipeline = currentProject.getActiveDataPipeline();
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		activeDataPipeline = currentExperiment.getActiveDataPipeline();
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class ClusterCorrelationMatrixTask extends AbstractTask {
 		try {	
 			taskDescription = "Recalculating cluster correlation matrixes...";
 			Set<MsFeatureCluster> clusters = 
-					currentProject.getMsFeatureClustersForDataPipeline(activeDataPipeline);
+					currentExperiment.getMsFeatureClustersForDataPipeline(activeDataPipeline);
 			total = clusters.size();
 			processed = 0;			
 			for(MsFeatureCluster cluster : clusters) {			

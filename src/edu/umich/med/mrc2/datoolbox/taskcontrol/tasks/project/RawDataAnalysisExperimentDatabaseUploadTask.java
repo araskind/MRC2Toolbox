@@ -55,7 +55,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -65,7 +65,7 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask implements TaskListener {
 
-	private RawDataAnalysisProject project;
+	private RawDataAnalysisExperiment experiment;
 	private double msOneMZWindow;
 	private int processedFiles;
 	private Map<String,String>featureIdMap;
@@ -73,10 +73,10 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 	private Map<String, MsFeatureChromatogramBundle> newChromatogramMap;
 	
 	public RawDataAnalysisExperimentDatabaseUploadTask(
-			RawDataAnalysisProject project,
+			RawDataAnalysisExperiment experiment,
 			double msOneMZWindow) {
 		super();
-		this.project = project;
+		this.experiment = experiment;
 		this.msOneMZWindow = msOneMZWindow;
 		processedFiles = 0;
 		featureIdMap = new HashMap<String,String>();
@@ -92,9 +92,9 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 		total = 100;
 		processed = 20;
 		IDTDataCash.refreshDataExtractionMethodList();
-		//	String metodId = project.getMsmsExtractionParameterSet().getId();
+		//	String metodId = experiment.getMsmsExtractionParameterSet().getId();
 		deMethod = IDTDataCash.getDataExtractionMethodByMd5(
-				project.getMsmsExtractionParameterSet().getParameterSetHash());
+				experiment.getMsmsExtractionParameterSet().getParameterSetHash());
 		if(deMethod == null) {
 			errorMessage = "Data extraction method not defined!";
 			setStatus(TaskStatus.ERROR);
@@ -129,13 +129,13 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 		total = 100;
 		processed = 20;
 		
-		String expId = project.getIdTrackerExperiment().getId();
+		String expId = experiment.getIdTrackerExperiment().getId();
 		IDTDataCash.refreshExperimentList();
 		IDTDataCash.refreshExperimentSamplePrepMap();
 		if(IDTDataCash.getExperimentById(expId) != null) {
 			
 			try {
-				IDTUtils.deleteExperiment(project.getIdTrackerExperiment());
+				IDTUtils.deleteExperiment(experiment.getIdTrackerExperiment());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -167,9 +167,9 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 
 	private boolean insertWorklist() {
 
-		Worklist newWorklist =  project.getWorklist();
+		Worklist newWorklist =  experiment.getWorklist();
 		Map<String, String> prepItemMap = new TreeMap<String, String>();	
-		project.getIdTrackerExperiment().getSamplePreps().
+		experiment.getIdTrackerExperiment().getSamplePreps().
 			forEach(p -> prepItemMap.putAll(p.getPrepItemMap()));
 		newWorklist.getWorklistItems().stream().
 			filter(LIMSWorklistItem.class::isInstance).
@@ -188,12 +188,12 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 	private boolean insertSampleprep() {
 
 		Collection<IDTExperimentalSample>samples = 
-				project.getIdTrackerExperiment().getExperimentDesign().getSamples().stream().
+				experiment.getIdTrackerExperiment().getExperimentDesign().getSamples().stream().
 				filter(IDTExperimentalSample.class::isInstance).
 				map(IDTExperimentalSample.class::cast).
 				collect(Collectors.toList());
 		
-		for(LIMSSamplePreparation prep : project.getIdTrackerExperiment().getSamplePreps()) {
+		for(LIMSSamplePreparation prep : experiment.getIdTrackerExperiment().getSamplePreps()) {
 			
 			if(prep.getId() != null 
 					&& IDTDataCash.getSamplePrepById(prep.getId()) != null) {
@@ -202,11 +202,11 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 			try {
 				IDTUtils.addNewSamplePrepWithSopsAndAnnotations(prep, samples);	
 				IDTDataCash.getSamplePreps().add(prep);
-				if(IDTDataCash.getExperimentSamplePrepMap().get(project.getIdTrackerExperiment()) == null)
+				if(IDTDataCash.getExperimentSamplePrepMap().get(experiment.getIdTrackerExperiment()) == null)
 					IDTDataCash.getExperimentSamplePrepMap().
-						put(project.getIdTrackerExperiment(), new TreeSet<LIMSSamplePreparation>());
+						put(experiment.getIdTrackerExperiment(), new TreeSet<LIMSSamplePreparation>());
 				
-				IDTDataCash.getExperimentSamplePrepMap().get(project.getIdTrackerExperiment()).add(prep);
+				IDTDataCash.getExperimentSamplePrepMap().get(experiment.getIdTrackerExperiment()).add(prep);
 					
 			}
 			catch (Exception e) {
@@ -220,7 +220,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 	private boolean insertSamples() {
 		
 		TreeSet<ExperimentalSample> samples = 
-				project.getIdTrackerExperiment().getExperimentDesign().getSamples();
+				experiment.getIdTrackerExperiment().getExperimentDesign().getSamples();
 		for(ExperimentalSample sample : samples) {
 			
 			ExperimentalSample existingSample = null;
@@ -236,7 +236,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 				
 				try {
 					String sampleId = IDTUtils.addNewIDTSample(
-							(IDTExperimentalSample) sample, project.getIdTrackerExperiment());
+							(IDTExperimentalSample) sample, experiment.getIdTrackerExperiment());
 					sample.setId(sampleId);
 				}
 				catch (Exception e) {
@@ -250,7 +250,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 	
 	private boolean insertNewExperiment() {
 		
-		LIMSExperiment newExperiment = project.getIdTrackerExperiment();
+		LIMSExperiment newExperiment = experiment.getIdTrackerExperiment();
 		
 		//	If experiment already in the database
 		if(newExperiment.getId() != null) {
@@ -283,11 +283,11 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 		taskDescription = "Uploading MSMS features and chromatograms ...";
 		total = 100;
 		processed = 40;		
-		for(DataFile df : project.getMSMSDataFiles()) {
+		for(DataFile df : experiment.getMSMSDataFiles()) {
 			
 			RawDataAnalysisMSFeatureDatabaseUploadTask task = 				
 					new RawDataAnalysisMSFeatureDatabaseUploadTask(
-							project, df, deMethod, msOneMZWindow);
+							experiment, df, deMethod, msOneMZWindow);
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
@@ -296,11 +296,11 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 	@Override
 	public Task cloneTask() {
 		return new RawDataAnalysisExperimentDatabaseUploadTask(
-				project, msOneMZWindow);
+				experiment, msOneMZWindow);
 	}
 
-	public RawDataAnalysisProject getProject() {
-		return project;
+	public RawDataAnalysisExperiment getExperiment() {
+		return experiment;
 	}
 
 	@Override
@@ -317,13 +317,13 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 				newChromatogramMap.putAll(task.getChromatogramMap());
 				processedFiles++;
 			}
-			if(processedFiles == project.getMSMSDataFiles().size()) {
+			if(processedFiles == experiment.getMSMSDataFiles().size()) {
 					 
-				 project.getChromatogramMap().clear();
-				 project.getChromatogramMap().putAll(newChromatogramMap);
+				 experiment.getChromatogramMap().clear();
+				 experiment.getChromatogramMap().putAll(newChromatogramMap);
 				
-				if(!project.getEditableMsFeatureInfoBundleCollections().isEmpty() 
-						|| !project.getMsmsClusterDataSets().isEmpty())
+				if(!experiment.getEditableMsFeatureInfoBundleCollections().isEmpty() 
+						|| !experiment.getMsmsClusterDataSets().isEmpty())
 					uploadFeatureAndClusterCollections();
 				else
 					setStatus(TaskStatus.FINISHED);
@@ -333,7 +333,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 
 	private void uploadFeatureAndClusterCollections() {
 		
-		if(!project.getEditableMsFeatureInfoBundleCollections().isEmpty()) {
+		if(!experiment.getEditableMsFeatureInfoBundleCollections().isEmpty()) {
 			try {
 				uploadFeatureCollections();
 			} catch (Exception e1) {
@@ -341,7 +341,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 				e1.printStackTrace();
 			}
 		}
-		if(!project.getMsmsClusterDataSets().isEmpty()) {
+		if(!experiment.getMsmsClusterDataSets().isEmpty()) {
 			try {
 				uploadMSMSClusterCollections();
 			} catch (Exception e) {
@@ -357,7 +357,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 		taskDescription = "Uploading MSMS cluster data sets ...";
 		Connection conn = ConnectionManager.getConnection();
 		
-		for(MSMSClusterDataSet dataSet : project.getMsmsClusterDataSets()) {
+		for(MSMSClusterDataSet dataSet : experiment.getMsmsClusterDataSets()) {
 			
 			total = dataSet.getClusters().size();
 			processed = 0;	
@@ -490,10 +490,10 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 	private void uploadFeatureCollections() throws Exception {
 		
 		taskDescription = "Uploading MSMS cluster data sets ...";
-		total = project.getEditableMsFeatureInfoBundleCollections().size();
+		total = experiment.getEditableMsFeatureInfoBundleCollections().size();
 		processed = 0;
 		Connection conn = ConnectionManager.getConnection();
-		for(MsFeatureInfoBundleCollection fColl : project.getEditableMsFeatureInfoBundleCollections()) {
+		for(MsFeatureInfoBundleCollection fColl : experiment.getEditableMsFeatureInfoBundleCollections()) {
 			
 			FeatureCollectionUtils.addNewMsFeatureInformationBundleCollection(fColl, conn);
 			processed++;

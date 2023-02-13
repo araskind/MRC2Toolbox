@@ -45,7 +45,7 @@ import edu.umich.med.mrc2.datoolbox.utils.DataSetUtils;
 
 public class PCATask extends AbstractTask {
 
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private DataPipeline aciveDataPipeline;
 	private ExperimentDesignSubset activeDesign;
 	private MsFeatureSet activeFeatures;
@@ -57,7 +57,7 @@ public class PCATask extends AbstractTask {
 	private Matrix importanceMatrix;
 
 	public PCATask(
-			DataAnalysisProject currentProject,
+			DataAnalysisProject experiment,
 			DataPipeline aciveAssay,
 			ExperimentDesignSubset activeDesign,
 			MsFeatureSet activeFeatures,
@@ -67,7 +67,7 @@ public class PCATask extends AbstractTask {
 		taskDescription = "Running PCA on " + activeDesign.getName() + 
 				" using " + activeFeatures.getName() + " feature subset";
 
-		this.currentProject = currentProject;
+		this.currentExperiment = experiment;
 		this.aciveDataPipeline = aciveAssay;
 		this.activeDesign = activeDesign;
 		this.activeFeatures = activeFeatures;
@@ -86,7 +86,7 @@ public class PCATask extends AbstractTask {
 		try {
 			processed = 20;
 			dataSubset = DataSetUtils.subsetDataMatrix(
-					currentProject, aciveDataPipeline, activeDesign, activeFeatures);
+					currentExperiment, aciveDataPipeline, activeDesign, activeFeatures);
 			List<Double> target = new ArrayList<Double>();
 			dataSubset.replace(Ret.LINK, Double.NaN, 1.0d).replace(Ret.NEW, 0.0d, 1.0d).
 				transpose().allValues().forEach(o -> target.add((Double) o));
@@ -120,7 +120,7 @@ public class PCATask extends AbstractTask {
 	public Task cloneTask() {
 
 		return new PCATask(
-				currentProject, 
+				currentExperiment, 
 				aciveDataPipeline, 
 				activeDesign, 
 				activeFeatures, 

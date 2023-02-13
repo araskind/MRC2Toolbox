@@ -58,7 +58,7 @@ public class AdductAssignmentTask extends AbstractTask {
 	private Map<Adduct, Range> modifiedMassRanges;
 	private MsFeature primaryFeature;
 	private Adduct primaryFeatureForm;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private Polarity polarity;
 	private Collection<Adduct> adducts;
 	private Collection<Adduct> repeats;
@@ -87,8 +87,8 @@ public class AdductAssignmentTask extends AbstractTask {
 		modificationMap = new HashSet<HashMap<MsFeature, Adduct>>();
 		modifiedMassRanges = new HashMap<Adduct, Range>();
 
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		polarity = currentProject.getActiveDataPipeline().
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		polarity = currentExperiment.getActiveDataPipeline().
 				getAcquisitionMethod().getPolarity();
 		massAccuracy = massError;
 		
@@ -123,8 +123,8 @@ public class AdductAssignmentTask extends AbstractTask {
 		modificationMap = new HashSet<HashMap<MsFeature, Adduct>>();
 		modifiedMassRanges = new HashMap<Adduct, Range>();
 
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		polarity = currentProject.getActiveDataPipeline().
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		polarity = currentExperiment.getActiveDataPipeline().
 				getAcquisitionMethod().getPolarity();
 		massAccuracy = massError;
 		
@@ -147,12 +147,12 @@ public class AdductAssignmentTask extends AbstractTask {
 		modificationMap = new HashSet<HashMap<MsFeature, Adduct>>();
 		modifiedMassRanges = new HashMap<Adduct, Range>();
 
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		polarity = currentProject.getActiveDataPipeline().
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		polarity = currentExperiment.getActiveDataPipeline().
 				getAcquisitionMethod().getPolarity();
 
-		clusterSet = (HashSet<MsFeatureCluster>) currentProject
-				.getMsFeatureClustersForDataPipeline(currentProject.getActiveDataPipeline());
+		clusterSet = (HashSet<MsFeatureCluster>) currentExperiment
+				.getMsFeatureClustersForDataPipeline(currentExperiment.getActiveDataPipeline());
 
 		initAdducts(false, 0, 0);
 		
@@ -182,12 +182,12 @@ public class AdductAssignmentTask extends AbstractTask {
 		modificationMap = new HashSet<HashMap<MsFeature, Adduct>>();
 		modifiedMassRanges = new HashMap<Adduct, Range>();
 
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		polarity = currentProject.getActiveDataPipeline().
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		polarity = currentExperiment.getActiveDataPipeline().
 				getAcquisitionMethod().getPolarity();
 
-		clusterSet = (HashSet<MsFeatureCluster>) currentProject
-				.getMsFeatureClustersForDataPipeline(currentProject.getActiveDataPipeline());
+		clusterSet = (HashSet<MsFeatureCluster>) currentExperiment
+				.getMsFeatureClustersForDataPipeline(currentExperiment.getActiveDataPipeline());
 
 		initAdducts(generateAdducts, maxAdductCharge, maxOligomer);
 		

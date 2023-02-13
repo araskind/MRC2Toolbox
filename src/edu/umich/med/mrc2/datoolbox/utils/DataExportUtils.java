@@ -45,7 +45,7 @@ import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 public class DataExportUtils {
 
 	public static TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> createSampleFileMap(
-									DataAnalysisProject currentProject, 
+									DataAnalysisProject currentExperiment, 
 									ExperimentDesignSubset design, 
 									Set<DataPipeline> dataPipelines,
 									DataExportFields exportFieldNaming) {
@@ -60,7 +60,7 @@ public class DataExportUtils {
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>> sampleFileMap =
 				new TreeMap<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>>();
 		TreeSet<ExperimentalSample> activeSamples =
-				currentProject.getExperimentDesign().getActiveSamplesForDesignSubset(design);
+				currentExperiment.getExperimentDesign().getActiveSamplesForDesignSubset(design);
 
 		for (ExperimentalSample s : activeSamples) {
 
@@ -95,7 +95,7 @@ public class DataExportUtils {
 	}
 
 	public static TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>> createSampleFileMapForDataPipeline(
-			DataAnalysisProject currentProject, 
+			DataAnalysisProject currentExperiment, 
 			ExperimentDesignSubset designSubset, 
 			DataPipeline pipeline,
 			DataExportFields exportFieldNaming) {
@@ -109,7 +109,7 @@ public class DataExportUtils {
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>> sampleFileMap =
 				new TreeMap<ExperimentalSample, TreeMap<DataPipeline, TreeSet<DataFile>>>();
 		TreeSet<ExperimentalSample> activeSamples =
-				currentProject.getExperimentDesign().getActiveSamplesForDesignSubset(designSubset);
+				currentExperiment.getExperimentDesign().getActiveSamplesForDesignSubset(designSubset);
 		HashSet<DataPipeline> pipelines = new HashSet<DataPipeline>();
 		pipelines.add(pipeline);
 

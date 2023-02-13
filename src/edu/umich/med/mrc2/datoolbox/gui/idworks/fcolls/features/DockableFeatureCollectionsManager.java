@@ -49,7 +49,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 
 public class DockableFeatureCollectionsManager extends DefaultSingleCDockable implements ActionListener {
 
@@ -222,7 +222,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	
 	private void createNewFeatureCollectionInProject(MsFeatureInfoBundleCollection newCollection) {
 		
-		RawDataAnalysisProject project = 
+		RawDataAnalysisExperiment project = 
 				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();		
 		project.addMsFeatureInfoBundleCollection(newCollection);
 		
@@ -320,7 +320,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	
 	private void deleteFeatureCollectionFromProject(MsFeatureInfoBundleCollection selected) {
 
-		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();	
+		RawDataAnalysisExperiment project = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();	
 		if(!project.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
 			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
 					"\" is locked and can not be deleted.", this.getContentPane());
@@ -406,7 +406,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	
 	public void loadCollectionsForActiveProject() {
 		
-		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
+		RawDataAnalysisExperiment project = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
 		if(project == null)
 			return;
 		

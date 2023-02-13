@@ -21,7 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.project.store;
 
-public enum ProjectFields {
+public enum ExperimentFields {
 
 	IDTrackerRawDataProject,
 	Id,

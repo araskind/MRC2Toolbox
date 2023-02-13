@@ -36,7 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentalSampleFields;
 
 public class ExperimentalSample implements Comparable<ExperimentalSample>, Serializable, Renamable {
@@ -451,7 +451,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 	public ExperimentalSample(
 			Element sampleElement, 
 			ExperimentDesign design,
-			RawDataAnalysisProject parentProject) {		
+			RawDataAnalysisExperiment parentProject) {		
 		id = sampleElement.getAttributeValue(ExperimentalSampleFields.Id.name());
 		name = sampleElement.getAttributeValue(ExperimentalSampleFields.Name.name());
 		limsSampleType = 

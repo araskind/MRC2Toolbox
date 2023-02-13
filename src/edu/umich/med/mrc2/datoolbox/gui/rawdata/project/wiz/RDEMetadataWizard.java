@@ -77,7 +77,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
@@ -93,7 +93,7 @@ public class RDEMetadataWizard extends JDialog
 	private static final long serialVersionUID = -3308258276718203363L;
 	private static final Icon newCdpIdExperimentIcon = GuiUtils.getIcon("newIdExperiment", 32);
 	private RawDataExaminerPanel parentPanel;
-	private RawDataAnalysisProject experiment;
+	private RawDataAnalysisExperiment experiment;
 	private RDPMetadataWizardToolbar toolbar;
 	private JPanel stagePanel;
 	private JButton saveButton;
@@ -110,7 +110,7 @@ public class RDEMetadataWizard extends JDialog
 
 	public RDEMetadataWizard(
 			RawDataExaminerPanel parentPanel,
-			RawDataAnalysisProject experiment) {
+			RawDataAnalysisExperiment experiment) {
 		
 		super();
 		setIconImage(((ImageIcon) newCdpIdExperimentIcon).getImage());

@@ -40,20 +40,20 @@ import edu.umich.med.mrc2.datoolbox.utils.ClusterUtils;
 public class FindDuplicateFeaturesTask extends AbstractTask {
 
 	private DataPipeline dataPipeline;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private double rtWindow;
 	private double massAccuracy;
 	private Collection<MsFeature> featureList;
 	private Collection<MsFeatureCluster> duplicateList;
 
 	public FindDuplicateFeaturesTask(
-			DataAnalysisProject currentProject,
+			DataAnalysisProject experiment,
 			DataPipeline dataPipeline,
 			double massAccuracy,
 			double rtWindow) {
 
 		this.dataPipeline = dataPipeline;
-		this.currentProject = currentProject;
+		this.currentExperiment = experiment;
 		this.massAccuracy = massAccuracy;
 		this.rtWindow = rtWindow;
 
@@ -83,7 +83,7 @@ public class FindDuplicateFeaturesTask extends AbstractTask {
 		processed = 10;
 		taskDescription = "Sorting features by retention";
 		featureList =
-				currentProject.getMsFeaturesForDataPipeline(dataPipeline).stream().
+				currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).stream().
 				filter(f -> f.isPresent()).sorted(new MsFeatureComparator(SortProperty.RT)).
 				collect(Collectors.toList());
 	}
@@ -182,6 +182,6 @@ public class FindDuplicateFeaturesTask extends AbstractTask {
 	public Task cloneTask() {
 
 		return new FindDuplicateFeaturesTask(
-				currentProject, dataPipeline, massAccuracy, rtWindow);
+				currentExperiment, dataPipeline, massAccuracy, rtWindow);
 	}
 }

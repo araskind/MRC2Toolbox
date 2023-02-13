@@ -35,7 +35,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class ImputeMissingDataTask  extends AbstractTask {
 
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private DataPipeline activeDataPipeline;
 	private DataImputationType imputationMethod;
 	private Object[] imputationMethodParameters;
@@ -44,8 +44,8 @@ public class ImputeMissingDataTask  extends AbstractTask {
 		
 		imputationMethod = method;
 		imputationMethodParameters = parameters;
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		activeDataPipeline = currentProject.getActiveDataPipeline();
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		activeDataPipeline = currentExperiment.getActiveDataPipeline();
 	}
 
 	@Override
@@ -64,10 +64,10 @@ public class ImputeMissingDataTask  extends AbstractTask {
 		setStatus(TaskStatus.PROCESSING);
 
 		try {			
-			Matrix imputed = currentProject.getDataMatrixForDataPipeline(activeDataPipeline).impute(Ret.NEW,
+			Matrix imputed = currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline).impute(Ret.NEW,
 					imputationMethod.getMethod(), imputationMethodParameters);
 			imputed.setMetaData(DataManipulationType.IMPUTATION_TYPE.name(), imputationMethod);
-			currentProject.setImputedDataMatrixForDataPipeline(activeDataPipeline, imputed);
+			currentExperiment.setImputedDataMatrixForDataPipeline(activeDataPipeline, imputed);
 			setStatus(TaskStatus.FINISHED);	
 
 		} catch (Exception e) {

@@ -41,13 +41,13 @@ import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorListener;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignListener;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFields;
 import edu.umich.med.mrc2.datoolbox.project.store.IDTExperimentalSampleFields;
 
@@ -683,7 +683,7 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 	
 	public ExperimentDesign(
 			Element experimentDesignElement, 
-			RawDataAnalysisProject parentProject) {
+			RawDataAnalysisExperiment parentProject) {
 		
 		factorSet = new TreeSet<ExperimentDesignFactor>();
 		sampleSet = new TreeSet<ExperimentalSample>();
@@ -720,8 +720,8 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 				
 				sampleSet.add(sample);
 				
-				if(OfflineProjectLoadCash.getExperimentalSampleById(sample.getId()) == null)
-					OfflineProjectLoadCash.addExperimentalSample(sample);
+				if(OfflineExperimentLoadCash.getExperimentalSampleById(sample.getId()) == null)
+					OfflineExperimentLoadCash.addExperimentalSample(sample);
 			}
 		}
 		List<Element> subsetListElements = 

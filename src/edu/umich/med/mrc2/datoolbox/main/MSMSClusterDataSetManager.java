@@ -38,17 +38,14 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSClusterDataPull
 
 public class MSMSClusterDataSetManager {
 	
-	public static final String CURRENT_MSMS_CLUSTER_SEARCH_RESULT = "Current MSMS cluster search";
-	public static final String CURRENT_MS1_CLUSTER_SEARCH_RESULT = "Current MS1 cluster search";
-//	public static final String ACTIVE_PROJECT_DEFAULT_CLUSTER_DATA_SET = "Active project default cluster data set";
-	
+	public static final String CURRENT_MSMS_CLUSTER_SEARCH_RESULT = 
+			"Current MSMS cluster search";
+	public static final String CURRENT_MS1_CLUSTER_SEARCH_RESULT = 
+			"Current MS1 cluster search";	
 	public static final MSMSClusterDataSet msmsClusterSearchResults = 
 			new MSMSClusterDataSet(CURRENT_MSMS_CLUSTER_SEARCH_RESULT);	
 	public static final MSMSClusterDataSet msOneClusterSearchResults = 
-			new MSMSClusterDataSet(CURRENT_MS1_CLUSTER_SEARCH_RESULT);
-//	public static final MSMSClusterDataSet activeProjectDefaultClusterDataSet = 
-//			new MSMSClusterDataSet(ACTIVE_PROJECT_DEFAULT_CLUSTER_DATA_SET);
-	
+			new MSMSClusterDataSet(CURRENT_MS1_CLUSTER_SEARCH_RESULT);	
 	public static final Map<MSMSClusterDataSet, Set<String>>clusterDataSetsToClusterIdsMap = 
 			new TreeMap<MSMSClusterDataSet, Set<String>>(
 					new MSMSClusterDataSetComparator(SortProperty.Name));
@@ -59,7 +56,6 @@ public class MSMSClusterDataSetManager {
 	public static void clearDefaultCollections() {		
 		msmsClusterSearchResults.clearDataSet();
 		msOneClusterSearchResults.clearDataSet();
-//		activeProjectDefaultClusterDataSet.clearDataSet();
 	}
 		
 	public static void refreshMSMSClusterDataSetList() {
@@ -68,7 +64,6 @@ public class MSMSClusterDataSetManager {
 				msmsClusterSearchResults, new TreeSet<String>());
 		clusterDataSetsToClusterIdsMap.put(
 				msOneClusterSearchResults, new TreeSet<String>());
-//		clusterDataSetsToClusterIdsMap.put(activeProjectDefaultClusterDataSet, new TreeSet<String>());
 		try {
 			clusterDataSetsToClusterIdsMap.putAll(
 					MSMSClusteringDBUtils.getMSMSClusterDataSets());		
@@ -90,7 +85,6 @@ public class MSMSClusterDataSetManager {
 		return clusterDataSetsToClusterIdsMap.keySet().stream().
 			filter(c -> !c.equals(msmsClusterSearchResults)).
 			filter(c -> !c.equals(msOneClusterSearchResults)).
-//			filter(c -> !c.equals(activeProjectDefaultClusterDataSet)).
 			sorted(new MSMSClusterDataSetComparator(SortProperty.Name)).
 			collect(Collectors.toList());
 	}

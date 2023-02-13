@@ -64,10 +64,10 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
-public class RawDataAnalysisProject extends Project {
+public class RawDataAnalysisExperiment extends Project {
 	
 	protected File rawDataDirectory;
-	protected File uncompressedProjectFilesDirectory;
+	protected File uncompressedExperimentFilesDirectory;
 	protected LIMSInstrument instrument;
 	protected Collection<DataFile>msmsDataFiles;
 	protected Collection<DataFile>msOneDataFiles;
@@ -81,49 +81,49 @@ public class RawDataAnalysisProject extends Project {
 	protected LIMSUser createdBy;
 	protected LIMSExperiment idTrackerExperiment;
 	
-	//	New project
-	public RawDataAnalysisProject(
-			String projectName, 
-			String projectDescription, 
+	//	New experiment
+	public RawDataAnalysisExperiment(
+			String experimentName, 
+			String experimentDescription, 
 			File parentDirectory,
 			LIMSUser createdBy) {
 
-		super(projectName, projectDescription, parentDirectory);
-		initNewProject(parentDirectory);
+		super(experimentName, experimentDescription, parentDirectory);
+		initNewExperiment(parentDirectory);
 		this.createdBy = createdBy;
 		initFields();
 	}
 	
-	public RawDataAnalysisProject(RawDataAnalysisProject activeProject) {
+	public RawDataAnalysisExperiment(RawDataAnalysisExperiment activeExperiment) {
 		
-		super(activeProject);
+		super(activeExperiment);
 
-		this.exportsDirectory = activeProject.getExportsDirectory();
-		this.rawDataDirectory = activeProject.getRawDataDirectory();		
+		this.exportsDirectory = activeExperiment.getExportsDirectory();
+		this.rawDataDirectory = activeExperiment.getRawDataDirectory();		
 		this.msmsDataFiles = new TreeSet<DataFile>();
-		this.msmsDataFiles.addAll(activeProject.getMSMSDataFiles());
+		this.msmsDataFiles.addAll(activeExperiment.getMSMSDataFiles());
 		this.msOneDataFiles = new TreeSet<DataFile>();
-		this.msmsDataFiles.addAll(activeProject.getMSOneDataFiles());
-		this.createdBy = activeProject.getCreatedBy();
+		this.msmsDataFiles.addAll(activeExperiment.getMSOneDataFiles());
+		this.createdBy = activeExperiment.getCreatedBy();
 		initFields();
 	}
 	
-	public RawDataAnalysisProject(
+	public RawDataAnalysisExperiment(
 			String id, 
 			String name, 
 			String description, 
-			File projectFile, 
+			File experimentFile, 
 			Date dateCreated,
 			Date lastModified) {
-		super(id, name, description, projectFile, dateCreated, lastModified);
-		setProjectDirectories();
+		super(id, name, description, experimentFile, dateCreated, lastModified);
+		setExperimentDirectories();
 		initFields();
 	}
 	
-	public void updateExperimentLocation(File newProjectFile) {
+	public void updateExperimentLocation(File newExperimentFile) {
 		
-		projectFile = newProjectFile;
-		projectDirectory = newProjectFile.getParentFile();
+		projectFile = newExperimentFile;
+		projectDirectory = newExperimentFile.getParentFile();
 		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();	
 		File newRawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
@@ -134,20 +134,21 @@ public class RawDataAnalysisProject extends Project {
 				
 				File rdf = new File(df.getFullPath());
 				if(rdf.getParentFile().equals(rawDataDirectory))
-					df.setFullPath(Paths.get(newRawDataDirectory.getAbsolutePath(), df.getName()).toString());
+					df.setFullPath(Paths.get(newRawDataDirectory.getAbsolutePath(), 
+							df.getName()).toString());
 			}
 			rawDataDirectory = newRawDataDirectory;
 		}
 	}
 	
 	@Override
-	protected void initNewProject(File parentDirectory) {
+	protected void initNewExperiment(File parentDirectory) {
 		
-		super.initNewProject(parentDirectory);
+		super.initNewExperiment(parentDirectory);
 		rawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
-		uncompressedProjectFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();
+		uncompressedExperimentFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.UNCOMPRESSED_EXPERIMENT_FILES_DIRECTORY).toFile();
 		try {
 			Files.createDirectories(Paths.get(rawDataDirectory.getAbsolutePath()));
 		} catch (IOException e) {
@@ -156,7 +157,7 @@ public class RawDataAnalysisProject extends Project {
 			return;
 		}
 		try {
-			Files.createDirectories(Paths.get(uncompressedProjectFilesDirectory.getAbsolutePath()));
+			Files.createDirectories(Paths.get(uncompressedExperimentFilesDirectory.getAbsolutePath()));
 		} catch (IOException e) {
 			e.printStackTrace();
 			MessageDialog.showWarningMsg("Failed to create project files directory");
@@ -165,14 +166,14 @@ public class RawDataAnalysisProject extends Project {
 	}
 	
 	@Override
-	protected void setProjectDirectories() {
+	protected void setExperimentDirectories() {
 		
-		super.setProjectDirectories();
+		super.setExperimentDirectories();
 		
 		rawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
-		uncompressedProjectFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();
+		uncompressedExperimentFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.UNCOMPRESSED_EXPERIMENT_FILES_DIRECTORY).toFile();
 	}
 
 	private void initFields() {
@@ -268,15 +269,18 @@ public class RawDataAnalysisProject extends Project {
 		return msFeatureMap.get(df);
 	}
 	
-	public void addMsFeaturesForDataFile(DataFile df, Collection<MSFeatureInfoBundle>features){
+	public void addMsFeaturesForDataFile(DataFile df, 
+			Collection<MSFeatureInfoBundle>features){
 		msFeatureMap.get(df).addAll(features);
 	}
 	
-	public void setMsFeaturesForDataFile(DataFile df, Collection<MSFeatureInfoBundle>features){
+	public void setMsFeaturesForDataFile(DataFile df, 
+			Collection<MSFeatureInfoBundle>features){
 		msFeatureMap.put(df, features);
 	}
 	
-	public Collection<DataFile>getDataFilesForAcquisitionMethod(DataAcquisitionMethod method){
+	public Collection<DataFile>getDataFilesForAcquisitionMethod(
+			DataAcquisitionMethod method){
 		
 		return msmsDataFiles.stream().
 				filter(f -> f.getDataAcquisitionMethod().equals(method)).
@@ -317,14 +321,6 @@ public class RawDataAnalysisProject extends Project {
 
 	public String getId() {
 		return id;
-	}
-
-	public File getExperimentFile() {
-		return projectFile;
-	}
-
-	public File getProjectDirectory() {
-		return projectDirectory;
 	}
 
 	public File getExportsDirectory() {
@@ -386,8 +382,8 @@ public class RawDataAnalysisProject extends Project {
 				collect(Collectors.toList());
 	}
 
-	public File getUncompressedProjectFilesDirectory() {
-		return uncompressedProjectFilesDirectory;
+	public File getUncompressedExperimentFilesDirectory() {
+		return uncompressedExperimentFilesDirectory;
 	}
 
 	public Map<String, MsFeatureChromatogramBundle> getChromatogramMap() {
@@ -584,14 +580,6 @@ public class RawDataAnalysisProject extends Project {
 		
 		return msmsClusterDataSets;
 	}
-	
-//	public Collection<MSMSClusterDataSet> getEditableMsmsClusterDataSets(){
-//		
-//		return getMsmsClusterDataSets().stream().
-//				filter(c -> !c.equals(MSMSClusterDataSetManager.activeProjectDefaultClusterDataSet)).
-//				sorted(new MSMSClusterDataSetComparator(SortProperty.Name)).
-//				collect(Collectors.toList());
-//	}
 }
 
 

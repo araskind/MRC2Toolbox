@@ -59,7 +59,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class SlidingWindowClusteringTask extends AbstractTask {
 
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private DataPipeline dataPipeline;
 	private CorrelationAlgoritm correlationAlgoritm;
 	private double maxClusterWidth;
@@ -83,7 +83,7 @@ public class SlidingWindowClusteringTask extends AbstractTask {
 	private KendallsCorrelation kendall;
 
 	public SlidingWindowClusteringTask(
-			DataAnalysisProject currentProject,
+			DataAnalysisProject experiment,
 			DataPipeline dataPipeline,
 			boolean limitRtRange,
 			Range retentionRange,
@@ -101,7 +101,7 @@ public class SlidingWindowClusteringTask extends AbstractTask {
 
 		super();
 
-		this.currentProject = currentProject;
+		this.currentExperiment = experiment;
 		this.dataPipeline = dataPipeline;
 		this.limitRtRange = limitRtRange;
 		this.retentionRange = retentionRange;
@@ -141,9 +141,9 @@ public class SlidingWindowClusteringTask extends AbstractTask {
 		processed = 20;
 		taskDescription = "Creating data matrix without pooled samples ...";
 
-		featureSubset = currentProject.getMsFeaturesForDataPipeline(dataPipeline);
+		featureSubset = currentExperiment.getMsFeaturesForDataPipeline(dataPipeline);
 		if(limitRtRange && retentionRange != null) {
-			featureSubset = currentProject.getMsFeaturesForDataPipeline(dataPipeline).stream().
+			featureSubset = currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).stream().
 					filter(f -> retentionRange.contains(f.getRetentionTime())).
 					collect(Collectors.toSet());
 		}
@@ -155,9 +155,9 @@ public class SlidingWindowClusteringTask extends AbstractTask {
 					collect(Collectors.toSet());
 		}
 		MsFeatureSet allFeatures = new MsFeatureSet("Features", featureSubset);
-		ExperimentDesignSubset samplesOnly = DataSetUtils.getSamplesOnlyDesignSubset(currentProject);
+		ExperimentDesignSubset samplesOnly = DataSetUtils.getSamplesOnlyDesignSubset(currentExperiment);
 		sampleMatrix =
-				DataSetUtils.subsetDataMatrix(currentProject, dataPipeline, samplesOnly, allFeatures).
+				DataSetUtils.subsetDataMatrix(currentExperiment, dataPipeline, samplesOnly, allFeatures).
 				replace(Ret.LINK, Double.NaN, 2).
 				log2(Ret.LINK).
 				replace(Ret.NEW, 1.0d, Double.NaN);
@@ -231,13 +231,13 @@ public class SlidingWindowClusteringTask extends AbstractTask {
 
 	private void saveCorrMatrix(Matrix corrMatrix, Matrix corrMatrixAdj, Matrix clusterMatrix, int idx) throws IOException {
 
-		File corrFile = new File(currentProject.getExportsDirectory().getAbsolutePath() +
+		File corrFile = new File(currentExperiment.getExportsDirectory().getAbsolutePath() +
 				File.separator + "Cluster_" + StringUtils.leftPad(Integer.toString(idx), 4, '0') + ".txt");
-		File adjCorrFile = new File(currentProject.getExportsDirectory().getAbsolutePath() +
+		File adjCorrFile = new File(currentExperiment.getExportsDirectory().getAbsolutePath() +
 				File.separator + "Cluster_" + StringUtils.leftPad(Integer.toString(idx), 4, '0') + "_adjusted.txt");
-		File mtxColumnsFile = new File(currentProject.getExportsDirectory().getAbsolutePath() +
+		File mtxColumnsFile = new File(currentExperiment.getExportsDirectory().getAbsolutePath() +
 				File.separator + "Cluster_" + StringUtils.leftPad(Integer.toString(idx), 4, '0') + "_colnames.txt");
-		File dataFile = new File(currentProject.getExportsDirectory().getAbsolutePath() +
+		File dataFile = new File(currentExperiment.getExportsDirectory().getAbsolutePath() +
 				File.separator + "Cluster_" + StringUtils.leftPad(Integer.toString(idx), 4, '0') + "_data.txt");
 
 		DefaultMatrixFileExportDestination med = new DefaultMatrixFileExportDestination(corrMatrix, corrFile);
@@ -325,7 +325,7 @@ public class SlidingWindowClusteringTask extends AbstractTask {
 	public Task cloneTask() {
 
 		return new SlidingWindowClusteringTask(
-				 currentProject,
+				 currentExperiment,
 				 dataPipeline,
 				 limitRtRange,
 				 retentionRange,

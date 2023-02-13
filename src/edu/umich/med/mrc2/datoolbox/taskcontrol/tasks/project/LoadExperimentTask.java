@@ -57,45 +57,45 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class LoadExperimentTask extends AbstractTask {
 
-	private DataAnalysisProject newProject;
-	private File projectDirectory, projectFile;
+	private DataAnalysisProject newExperiment;
+	private File experimentDirectory, experimentFile;
 
-	public LoadExperimentTask(File projectFile) {
+	public LoadExperimentTask(File newExperimentFile) {
 
-		this.projectFile = projectFile;
-		projectDirectory = projectFile.getParentFile();
+		this.experimentFile = newExperimentFile;
+		experimentDirectory = experimentFile.getParentFile();
 	}
 	
 	@Override
 	public void run() {
 
 		setStatus(TaskStatus.PROCESSING);
-		taskDescription = "Loading project " + 
-				FilenameUtils.getBaseName(projectFile.getName());
+		taskDescription = "Loading experiment " + 
+				FilenameUtils.getBaseName(experimentFile.getName());
 
 		total = 100;
 		processed = 30;
-		newProject = null;
+		newExperiment = null;
 		try {
-			loadProjectFile();
+			loadExperimentFile();
 		} catch (Throwable e) {
 
 			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
 		}
-		if (newProject != null) {
+		if (newExperiment != null) {
 
-			newProject.updateProjectLocation(projectFile);
+			newExperiment.updateExperimentLocation(experimentFile);
 			verifyExperimentDesign();
-			newProject.recreateMatrixMaps();
+			newExperiment.recreateMatrixMaps();
 
-			for (DataPipeline dataPipeline : newProject.getDataPipelines()) {
+			for (DataPipeline dataPipeline : newExperiment.getDataPipelines()) {
 
 				taskDescription = "Reading data matrix for " + dataPipeline.getName();
 				//	Data matrix
 				File dataMatrixFile = 
-						Paths.get(projectDirectory.getAbsolutePath(), 
-							newProject.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+						Paths.get(experimentDirectory.getAbsolutePath(), 
+							newExperiment.getDataMatrixFileNameForDataPipeline(dataPipeline)).toFile();
 
 				Matrix dataMatrix = null;
 				if (dataMatrixFile.exists()) {
@@ -108,10 +108,10 @@ public class LoadExperimentTask extends AbstractTask {
 					if (dataMatrix != null) {
 
 						dataMatrix.setMetaDataDimensionMatrix(0, 
-								newProject.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
+								newExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
 						dataMatrix.setMetaDataDimensionMatrix(1, 
-								newProject.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
-						newProject.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
+								newExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
+						newExperiment.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
 					}
 				}
 				//	Feature matrix			
@@ -120,8 +120,8 @@ public class LoadExperimentTask extends AbstractTask {
 //					taskDescription = "Reading feature matrix for " + dataPipeline.getName();
 //					
 //					File featureMatrixFile = 
-//							Paths.get(projectDirectory.getAbsolutePath(), 
-//								newProject.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
+//							Paths.get(experimentDirectory.getAbsolutePath(), 
+//								newExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
 //
 //					Matrix featureMatrix = null;
 //					if (featureMatrixFile.exists()) {
@@ -134,52 +134,52 @@ public class LoadExperimentTask extends AbstractTask {
 //						if (featureMatrix != null) {
 //
 //							featureMatrix.setMetaDataDimensionMatrix(0, 
-//									newProject.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
+//									newExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
 //							featureMatrix.setMetaDataDimensionMatrix(1, 
-//									newProject.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
-//							newProject.setFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);
+//									newExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
+//							newExperiment.setFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);
 //						}
 //					}
 //				}
 			}
-			newProject.restoreData();
+			newExperiment.restoreData();
 		}
 		processed = 100;
 		this.setStatus(TaskStatus.FINISHED);
 	}
 
-	private void loadProjectFile() throws ZipException, IOException {
+	private void loadExperimentFile() throws ZipException, IOException {
 
-		taskDescription = "Unzipping and reading project file ...";
+		taskDescription = "Unzipping and reading experiment file ...";
 		ZipFile zipFile;
-		ZipEntry zippedProject;
+		ZipEntry zippedExperiment;
 		InputStream input;
 		BufferedReader br;
 
-		XStream projectImport = new XStream(new StaxDriver());
+		XStream experimentImport = new XStream(new StaxDriver());
 		/**
 		 * From
 		 * https://stackoverflow.com/questions/44698296/security-framework-of-xstream-not-initialized-xstream-is-probably-vulnerable
 		 * */
 		//clear out existing permissions and set own ones
-		projectImport.setMode(XStream.XPATH_RELATIVE_REFERENCES);
-		projectImport.addPermission(NoTypePermission.NONE);
-		projectImport.addPermission(NullPermission.NULL);
-		projectImport.addPermission(PrimitiveTypePermission.PRIMITIVES);
+		experimentImport.setMode(XStream.XPATH_RELATIVE_REFERENCES);
+		experimentImport.addPermission(NoTypePermission.NONE);
+		experimentImport.addPermission(NullPermission.NULL);
+		experimentImport.addPermission(PrimitiveTypePermission.PRIMITIVES);
 
 		//	TODO limit to actually used stuff
-		projectImport.allowTypesByRegExp(new String[] { ".*" });
-		projectImport.ignoreUnknownElements();
+		experimentImport.allowTypesByRegExp(new String[] { ".*" });
+		experimentImport.ignoreUnknownElements();
         
-		zipFile = new ZipFile(projectFile);
+		zipFile = new ZipFile(experimentFile);
 
 		if (zipFile.entries().hasMoreElements()) {
 
-			zippedProject = zipFile.entries().nextElement();
-			input = zipFile.getInputStream(zippedProject);
+			zippedExperiment = zipFile.entries().nextElement();
+			input = zipFile.getInputStream(zippedExperiment);
 			br = new BufferedReader(new InputStreamReader(input, "UTF-8"));
 
-			newProject = (DataAnalysisProject) projectImport.fromXML(br);
+			newExperiment = (DataAnalysisProject) experimentImport.fromXML(br);
 
 			br.close();
 			input.close();
@@ -191,7 +191,7 @@ public class LoadExperimentTask extends AbstractTask {
 	//	This is a workaround to handle reference samples
 	private void verifyExperimentDesign() {
 
-		ExperimentDesign design = newProject.getExperimentDesign();
+		ExperimentDesign design = newExperiment.getExperimentDesign();
 		ExperimentDesignFactor	sampleTypeFactor = 
 				new ExperimentDesignFactor(StandardFactors.SAMPLE_CONTROL_TYPE.getName());
 		Collection<ExperimentDesignLevel>refLevels =
@@ -223,11 +223,11 @@ public class LoadExperimentTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-		return new LoadExperimentTask(projectFile);
+		return new LoadExperimentTask(experimentFile);
 	}
 	
-	public DataAnalysisProject getNewProject() {
-		return newProject;
+	public DataAnalysisProject getNewExperiment() {
+		return newExperiment;
 	}
 }
 

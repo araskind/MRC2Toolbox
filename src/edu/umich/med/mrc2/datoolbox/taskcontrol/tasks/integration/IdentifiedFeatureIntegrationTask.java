@@ -39,7 +39,7 @@ public class IdentifiedFeatureIntegrationTask  extends AbstractTask {
 	
 	private Collection<DataPipeline>pipelines;
 	private MsFeatureClusterSet clusterSet;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 
 	public IdentifiedFeatureIntegrationTask(
 			Collection<DataPipeline>assays, 
@@ -50,7 +50,7 @@ public class IdentifiedFeatureIntegrationTask  extends AbstractTask {
 		this.clusterSet = integratedSet;
 		taskDescription = 
 				"Combining identified features from multiple assays";
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class IdentifiedFeatureIntegrationTask  extends AbstractTask {
 				new TreeMap<String, MsFeatureCluster>();
 		for(DataPipeline pipeine : pipelines) {		
 			
-			Set<MsFeature> features = currentProject.getMsFeaturesForDataPipeline(pipeine);
+			Set<MsFeature> features = currentExperiment.getMsFeaturesForDataPipeline(pipeine);
 			total = features.size();
 			processed = 0;
 			for(MsFeature f : features) {

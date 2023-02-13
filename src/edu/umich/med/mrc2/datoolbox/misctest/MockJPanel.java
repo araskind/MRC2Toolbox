@@ -31,7 +31,7 @@ public class MockJPanel extends JPanel {
 		FlowLayout flowLayout = (FlowLayout) getLayout();
 		flowLayout.setAlignment(FlowLayout.LEFT);
 		
-		JCheckBox copyFilesCheckBox = new JCheckBox("Copy raw data to project");
+		JCheckBox copyFilesCheckBox = new JCheckBox("Copy raw data to experiment");
 		add(copyFilesCheckBox);
 	}
 

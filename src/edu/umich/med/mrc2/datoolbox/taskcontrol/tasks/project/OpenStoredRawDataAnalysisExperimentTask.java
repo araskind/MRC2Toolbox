@@ -55,16 +55,16 @@ import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
+import edu.umich.med.mrc2.datoolbox.project.store.ExperimentFields;
 import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
 import edu.umich.med.mrc2.datoolbox.project.store.InjectionFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MSMSClusterDataSetFields;
-import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameters;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -73,14 +73,13 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
-import edu.umich.med.mrc2.datoolbox.utils.zip.ParallelZip;
 
 public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implements TaskListener {
 
-	private RawDataAnalysisProject project;
-	private File projectFile;
+	private RawDataAnalysisExperiment experiment;
+	private File experimentFile;
 	private boolean loadResults;
-	private File xmlProjectDir;
+	private File xmlExperimentFileDir;
 	private int featureFileCount;
 	private int processedFiles;
 	private boolean featureReadCompleted;
@@ -93,8 +92,10 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 	
 	private ArrayList<String>errors;
 	
-	public OpenStoredRawDataAnalysisExperimentTask(File projectFile, boolean loadResults) {
-		this.projectFile = projectFile;
+	public OpenStoredRawDataAnalysisExperimentTask(
+			File experimentFile, 
+			boolean loadResults) {
+		this.experimentFile = experimentFile;
 		this.loadResults = loadResults;
 		errors = new ArrayList<String>();
 	}
@@ -106,24 +107,19 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		total = 100;
 		processed = 0;
 		processedFiles = 0;
-		xmlProjectDir = Paths.get(projectFile.getParentFile().getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.UNCOMPRESSED_PROJECT_FILES_DIRECTORY).toFile();
+		xmlExperimentFileDir = 
+				Paths.get(experimentFile.getParentFile().getAbsolutePath(), 
+				MRC2ToolBoxConfiguration.UNCOMPRESSED_EXPERIMENT_FILES_DIRECTORY).toFile();
 		File chromatogramsFile = null;
-//		try {
-//			extractProject();
-//		} catch (Exception ex) {
-//			ex.printStackTrace();
-//			setStatus(TaskStatus.ERROR);
-//		}
 		Iterator<File> i = 
-				FileUtils.iterateFiles(xmlProjectDir, new String[] { "xml" }, true);
+				FileUtils.iterateFiles(xmlExperimentFileDir, new String[] { "xml" }, true);
 		Collection<File>featureFiles = new ArrayList<File>();
 		while (i.hasNext()) {
 			
 			File file = i.next();
 			if(file.getName().equals(MRC2ToolBoxConfiguration.PROJECT_FILE_NAME)) {
 				try {
-					parseProjectFile(file);
+					parseExperimentFile(file);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -162,7 +158,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		if(chromatogramsFile != null) {
 			
 			OpenChromatogramFileTask task = 
-					new OpenChromatogramFileTask(chromatogramsFile, project.getDataFiles());
+					new OpenChromatogramFileTask(chromatogramsFile, experiment.getDataFiles());
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
@@ -174,7 +170,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 	private DataFile getDataFileForFeatureFile(File featureFile) {
 		
 		String fileName = FilenameUtils.getBaseName(featureFile.getName());		
-		for(DataFile df : project.getDataFiles()) {
+		for(DataFile df : experiment.getDataFiles()) {
 			
 			String dfName = FilenameUtils.getBaseName(df.getName());
 			if(fileName.equals(dfName))
@@ -183,9 +179,9 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		return null;
 	}
 	
-	private void parseProjectFile(File projectXmlFile) throws Exception {
+	private void parseExperimentFile(File experimentXmlFile) throws Exception {
 		
-		taskDescription = "Parsing project file ...";
+		taskDescription = "Parsing experiment file ...";
 		total = 100;
 		processed = 10;
 		
@@ -197,7 +193,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		SAXBuilder sax = new SAXBuilder();
 		Document doc = null;
 		try {
-			doc = sax.build(projectXmlFile);
+			doc = sax.build(experimentXmlFile);
 		} catch (JDOMException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -208,55 +204,55 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			setStatus(TaskStatus.ERROR);
 			return;						
 		}
-		Element projectElement = doc.getRootElement();
+		Element experimentElement = doc.getRootElement();
 		
-		String id = projectElement.getAttributeValue(ProjectFields.Id.name()); 
-		String name = projectElement.getAttributeValue(ProjectFields.Name.name()); 
-		String description = projectElement.getAttributeValue(ProjectFields.Description.name()); 
+		String id = experimentElement.getAttributeValue(ExperimentFields.Id.name()); 
+		String name = experimentElement.getAttributeValue(ExperimentFields.Name.name()); 
+		String description = experimentElement.getAttributeValue(ExperimentFields.Description.name()); 
 		Date dateCreated = ExperimentUtils.dateTimeFormat.parse(
-				projectElement.getAttributeValue(ProjectFields.DateCreated.name())); 
+				experimentElement.getAttributeValue(ExperimentFields.DateCreated.name())); 
 		Date lastModified = ExperimentUtils.dateTimeFormat.parse(
-				projectElement.getAttributeValue(ProjectFields.DateModified.name())); 		
-		project = new RawDataAnalysisProject(
+				experimentElement.getAttributeValue(ExperimentFields.DateModified.name())); 		
+		experiment = new RawDataAnalysisExperiment(
 				id, 
 				name, 
 				description, 
-				projectFile, 
+				experimentFile, 
 				dateCreated, 
 				lastModified);
 		
-		String userId = projectElement.getAttributeValue(ProjectFields.UserId.name()); 
+		String userId = experimentElement.getAttributeValue(ExperimentFields.UserId.name()); 
 		if(userId != null)
-			project.setCreatedBy(IDTDataCash.getUserById(userId)); 
+			experiment.setCreatedBy(IDTDataCash.getUserById(userId)); 
 		
-		if(project.getCreatedBy() == null)
-			project.setCreatedBy(MRC2ToolBoxCore.getIdTrackerUser());
+		if(experiment.getCreatedBy() == null)
+			experiment.setCreatedBy(MRC2ToolBoxCore.getIdTrackerUser());
 		
-		String instrumentId = projectElement.getAttributeValue(ProjectFields.Instrument.name()); 
+		String instrumentId = experimentElement.getAttributeValue(ExperimentFields.Instrument.name()); 
 		if(instrumentId != null)
-			project.setInstrument(IDTDataCash.getInstrumentById(instrumentId));
+			experiment.setInstrument(IDTDataCash.getInstrumentById(instrumentId));
 		
 		Element msmsParamsElement = 
-				projectElement.getChild(MSMSExtractionParameters.MSMSExtractionParameterSet.name());
+				experimentElement.getChild(MSMSExtractionParameters.MSMSExtractionParameterSet.name());
 		if(msmsParamsElement != null) {
 			MSMSExtractionParameterSet msmsParamSet = new MSMSExtractionParameterSet(msmsParamsElement);
-			project.setMsmsExtractionParameterSet(msmsParamSet);
+			experiment.setMsmsExtractionParameterSet(msmsParamSet);
 		}
 		
 		String compoundIdList = 
-				projectElement.getChild(ProjectFields.UniqueCIDList.name()).getText();
+				experimentElement.getChild(ExperimentFields.UniqueCIDList.name()).getText();
 		uniqueCompoundIds.addAll(ExperimentUtils.getIdList(compoundIdList));
 		
 		String msmsLibIdIdList = 
-				projectElement.getChild(ProjectFields.UniqueMSMSLibIdList.name()).getText();
+				experimentElement.getChild(ExperimentFields.UniqueMSMSLibIdList.name()).getText();
 		uniqueMSMSLibraryIds.addAll(ExperimentUtils.getIdList(msmsLibIdIdList));
 
 		String msRtLibIdIdList = 
-				projectElement.getChild(ProjectFields.UniqueMSRTLibIdList.name()).getText();
+				experimentElement.getChild(ExperimentFields.UniqueMSRTLibIdList.name()).getText();
 		uniqueMSRTLibraryIds.addAll(ExperimentUtils.getIdList(msRtLibIdIdList));
 
 		String sampleIdIdList = 
-				projectElement.getChild(ProjectFields.UniqueSampleIdList.name()).getText();
+				experimentElement.getChild(ExperimentFields.UniqueSampleIdList.name()).getText();
 		uniqueSampleIds.addAll(ExperimentUtils.getIdList(sampleIdIdList));
 				
 		try {
@@ -265,68 +261,68 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);			
 		}	
-		Element experimentElement = 
-				projectElement.getChild(LIMSExperimentFields.limsExperiment.name());
-		if(experimentElement != null) {
+		Element limsExperimentElement = 
+				experimentElement.getChild(LIMSExperimentFields.limsExperiment.name());
+		if(limsExperimentElement != null) {
 			
-			LIMSExperiment experiment = null;
+			LIMSExperiment limsExperiment = null;
 			try {
-				experiment = new LIMSExperiment(experimentElement, project);
+				limsExperiment = new LIMSExperiment(limsExperimentElement, experiment);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if(experiment != null)
-				project.setIdTrackerExperiment(experiment);
+			if(limsExperiment != null)
+				experiment.setIdTrackerExperiment(limsExperiment);
 		}
-		if(projectElement.getChild(ProjectFields.Injections.name()) != null) {
+		if(experimentElement.getChild(ExperimentFields.Injections.name()) != null) {
 			
 			List<Element> injectionsList = 
-					projectElement.getChild(ProjectFields.Injections.name()).
+					experimentElement.getChild(ExperimentFields.Injections.name()).
 					getChildren(InjectionFields.Injection.name());
 			for (Element injectionElement : injectionsList) {
 				Injection injection = new Injection(injectionElement);
-				project.getInjections().add(injection);			
+				experiment.getInjections().add(injection);			
 			}
 		}
 		List<Element> msmsFileList = 
-				projectElement.getChild(ProjectFields.MsTwoFiles.name()).
+				experimentElement.getChild(ExperimentFields.MsTwoFiles.name()).
 				getChildren(DataFileFields.DataFile.name());
 		for (Element msmsFileElement : msmsFileList) {
 			DataFile msmsFile = new DataFile(msmsFileElement);
-			project.addMSMSDataFile(msmsFile);
+			experiment.addMSMSDataFile(msmsFile);
 		}
 		//	MS1 files
 		List<Element> msOneFileList = 
-				projectElement.getChild(ProjectFields.MsOneFiles.name()).
+				experimentElement.getChild(ExperimentFields.MsOneFiles.name()).
 				getChildren(DataFileFields.DataFile.name());
 		for (Element msOneFileElement : msOneFileList) {
 			DataFile msOneFile = new DataFile(msOneFileElement);
-			project.addMSOneDataFile(msOneFile);
+			experiment.addMSOneDataFile(msOneFile);
 		}
 		//	Feature collections
 		Element featureCollectionElement = 
-				projectElement.getChild(ProjectFields.FeatureCollectionList.name());
+				experimentElement.getChild(ExperimentFields.FeatureCollectionList.name());
 		if(featureCollectionElement != null) {
 			List<Element> featureCollectionList = featureCollectionElement.
 					getChildren(FeatureCollectionFields.FeatureCollection.name());
 			for (Element fce : featureCollectionList)
-				project.addMsFeatureInfoBundleCollection(
+				experiment.addMsFeatureInfoBundleCollection(
 						new MsFeatureInfoBundleCollection(fce));
 		}
 		Element msmsClusterListElement = 
-				projectElement.getChild(ProjectFields.MSMSClusterDataSetList.name());
+				experimentElement.getChild(ExperimentFields.MSMSClusterDataSetList.name());
 		if(msmsClusterListElement != null) {
 			List<Element> msmsClusterDataSetList = msmsClusterListElement.
 					getChildren(MSMSClusterDataSetFields.MSMSClusterDataSet.name());
 			for (Element mcds : msmsClusterDataSetList)
-				project.getMsmsClusterDataSets().add(new MSMSClusterDataSet(mcds));
+				experiment.getMsmsClusterDataSets().add(new MSMSClusterDataSet(mcds));
 		}
 	}
 	
 	private void populateDatabaseCashData() throws Exception {
 		
-		OfflineProjectLoadCash.reset();
+		OfflineExperimentLoadCash.reset();
 		Connection conn = ConnectionManager.getConnection();
 		if(!uniqueCompoundIds.isEmpty()) {
 			try {
@@ -374,7 +370,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			CompoundIdentity compId = 
 					CompoundDatabaseUtils.getCompoundById(cid, conn);
 			if(compId != null)
-				OfflineProjectLoadCash.addCompoundIdentity(compId);
+				OfflineExperimentLoadCash.addCompoundIdentity(compId);
 			
 			processed++;
 		}		
@@ -390,7 +386,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			MsMsLibraryFeature libFeature = 
 					MSMSLibraryUtils.getMsMsLibraryFeatureById(libId, conn);
 			if(libFeature != null)
-				OfflineProjectLoadCash.addMsMsLibraryFeature(libFeature);
+				OfflineExperimentLoadCash.addMsMsLibraryFeature(libFeature);
 			
 			processed++;
 		}	
@@ -398,14 +394,15 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 	
 	private void getMSRTLibraryEntries(Connection conn) throws Exception {
 		
+		// TODO Auto-generated method stub
 		taskDescription = "Populating MS-RT library data cash ...";
 		total = uniqueMSRTLibraryIds.size();
 		processed = 0;		
 		for(String libId : uniqueMSRTLibraryIds) {
 			
-			LibraryMsFeatureDbBundle bundle = null;	// TODO Auto-generated method stub
+			LibraryMsFeatureDbBundle bundle = null;	
 			if(bundle != null)
-				OfflineProjectLoadCash.addLibraryMsFeatureDbBundle(bundle);
+				OfflineExperimentLoadCash.addLibraryMsFeatureDbBundle(bundle);
 			
 			processed++;
 		}
@@ -417,21 +414,12 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 				IDTUtils.getExperimentalSamples(uniqueSampleIds, conn);
 		
 		for(IDTExperimentalSample sample :samples)
-			OfflineProjectLoadCash.addExperimentalSample(sample);		
-	}
-
-	private void extractProject() throws Exception {
-		taskDescription = "Extracting project files ...";
-		total = 100;
-		processed = 30;
-		ParallelZip.extractZip(
-				projectFile.getAbsolutePath(), 
-				xmlProjectDir.getAbsolutePath());
+			OfflineExperimentLoadCash.addExperimentalSample(sample);		
 	}
 
 	@Override
 	public Task cloneTask() {
-		return new OpenStoredRawDataAnalysisExperimentTask(projectFile, loadResults);
+		return new OpenStoredRawDataAnalysisExperimentTask(experimentFile, loadResults);
 	}
 
 	@Override
@@ -445,11 +433,11 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 				processedFiles++;
 				
 				OpenMsFeatureBundleFileTask task = (OpenMsFeatureBundleFileTask)e.getSource();
-				LIMSExperiment experiment = project.getIdTrackerExperiment();
-				if(experiment != null)
-					task.getFeatures().stream().forEach(f -> f.setExperiment(experiment));
+				LIMSExperiment limsExperiment = experiment.getIdTrackerExperiment();
+				if(limsExperiment != null)
+					task.getFeatures().stream().forEach(f -> f.setExperiment(limsExperiment));
 				
-				project.addMsFeaturesForDataFile(task.getDataFile(), task.getFeatures());
+				experiment.addMsFeaturesForDataFile(task.getDataFile(), task.getFeatures());
 				if(processedFiles == featureFileCount) {
 					populateFeatureCollections();
 					populateMSMSClusters();
@@ -458,7 +446,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			}	
 			if (e.getSource().getClass().equals(OpenChromatogramFileTask.class)) {
 				chromatogramReadCompleted = true;			
-				project.setChromatogramMap(
+				experiment.setChromatogramMap(
 						((OpenChromatogramFileTask)e.getSource()).getChromatogramMap());
 			}			
 			if(featureReadCompleted && chromatogramReadCompleted)
@@ -468,31 +456,31 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 
 	private void populateFeatureCollections() {
 
-		if(project.getEditableMsFeatureInfoBundleCollections().isEmpty())
+		if(experiment.getEditableMsFeatureInfoBundleCollections().isEmpty())
 			return;
 		
 		taskDescription = "Populating feature collections ... ";
-		total = project.getEditableMsFeatureInfoBundleCollections().size();
+		total = experiment.getEditableMsFeatureInfoBundleCollections().size();
 		processed = 0;
-		for(MsFeatureInfoBundleCollection fc : project.getEditableMsFeatureInfoBundleCollections())	{
-			fc.addFeatures(project.getFeatureBundlesForIds(fc.getFeatureIds()));	
+		for(MsFeatureInfoBundleCollection fc : experiment.getEditableMsFeatureInfoBundleCollections())	{
+			fc.addFeatures(experiment.getFeatureBundlesForIds(fc.getFeatureIds()));	
 			processed++;
 		}
 	}
 	
 	private void populateMSMSClusters() {
 
-		if(project.getMsmsClusterDataSets().isEmpty())
+		if(experiment.getMsmsClusterDataSets().isEmpty())
 			return;
 		
 		taskDescription = "Populating MSMS feature clusters ... ";
-		for(MSMSClusterDataSet ds : project.getMsmsClusterDataSets()) {	
+		for(MSMSClusterDataSet ds : experiment.getMsmsClusterDataSets()) {	
 			
 			total = ds.getClusters().size();
 			processed = 0;
 			for(MsFeatureInfoBundleCluster cluster : ds.getClusters()) {
 				
-				cluster.setFeatures(project.getFeatureBundlesForIds(cluster.getFeatureIds()));	
+				cluster.setFeatures(experiment.getFeatureBundlesForIds(cluster.getFeatureIds()));	
 				cluster.replaceStoredPrimaryIdentityFromFeatures();
 				processed++;
 			}		
@@ -516,7 +504,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		return errors;
 	}
 	
-	public RawDataAnalysisProject getExperiment() {
-		return project;
+	public RawDataAnalysisExperiment getExperiment() {
+		return experiment;
 	}
 }

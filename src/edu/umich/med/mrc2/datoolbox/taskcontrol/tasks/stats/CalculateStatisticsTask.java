@@ -46,24 +46,24 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 public class CalculateStatisticsTask extends AbstractTask {
 
 	private DataPipeline dataPipeline;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private DescriptiveStatistics sampleDescriptiveStatistics;
 	private DescriptiveStatistics pooledDescriptiveStatistics;
 	private ExperimentDesignSubset activeDesignSubset;
 	private DescriptiveStatistics totalDescriptiveStatistics;
 
 	public CalculateStatisticsTask(
-			DataAnalysisProject currentProject, DataPipeline dataPipeline) {
+			DataAnalysisProject experiment, DataPipeline dataPipeline) {
 
+		
+		this.currentExperiment = experiment;
 		this.dataPipeline = dataPipeline;
-		this.currentProject = currentProject;
 		activeDesignSubset = 
-				this.currentProject.getExperimentDesign().getActiveDesignSubset();
+				this.currentExperiment.getExperimentDesign().getActiveDesignSubset();
 
 		taskDescription = "Calculating statistics for active data pipeline";
-		total = currentProject.getMsFeaturesForDataPipeline(dataPipeline).size();
+		total = currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).size();
 		processed = 0;
-
 	}
 
 	@Override
@@ -106,10 +106,10 @@ public class CalculateStatisticsTask extends AbstractTask {
 		TreeSet<DataFile> pooledFiles = new TreeSet<DataFile>();
 		TreeSet<DataFile> sampleFiles = new TreeSet<DataFile>();
 		Set<DataFile>dataFiles =
-				currentProject.getActiveDataFilesForDesignAndAcquisitionMethod(
+				currentExperiment.getActiveDataFilesForDesignAndAcquisitionMethod(
 						activeDesignSubset, dataPipeline.getAcquisitionMethod());
 		HashMap<DataFile,Long>fileCoordinates = new HashMap<DataFile,Long>();
-		Matrix assayData = currentProject.getDataMatrixForDataPipeline(dataPipeline);
+		Matrix assayData = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 		long[] dataCoordinates = new long[2];
 
 		for (DataFile df : dataFiles) {
@@ -125,7 +125,7 @@ public class CalculateStatisticsTask extends AbstractTask {
 
 			fileCoordinates.put(df, assayData.getRowForLabel(df));
 		}
-		for (MsFeature cf : currentProject.getActiveFeatureSetForDataPipeline(dataPipeline).getFeatures()) {
+		for (MsFeature cf : currentExperiment.getActiveFeatureSetForDataPipeline(dataPipeline).getFeatures()) {
 
 			sampleDescriptiveStatistics.clear();
 			pooledDescriptiveStatistics.clear();
@@ -175,7 +175,7 @@ public class CalculateStatisticsTask extends AbstractTask {
 	@Override
 	public Task cloneTask() {
 		return new CalculateStatisticsTask(
-				currentProject, dataPipeline);
+				currentExperiment, dataPipeline);
 	}
 
 	public DataPipeline getDataPipeline() {
@@ -189,14 +189,14 @@ public class CalculateStatisticsTask extends AbstractTask {
 		processed = 20;
 
 		List<MsFeature> featuresToRemove = 
-			currentProject.getMsFeaturesForDataPipeline(dataPipeline).stream().
+			currentExperiment.getMsFeaturesForDataPipeline(dataPipeline).stream().
 			filter(f -> (f.getStatsSummary().getSampleFrequency() == 0.0d)).
 			filter(f -> (f.getStatsSummary().getPooledFrequency() == 0.0d)).
 			collect(Collectors.toList());
 
 		if(!featuresToRemove.isEmpty()) {
 
-			Matrix dataMatrix = currentProject.getDataMatrixForDataPipeline(dataPipeline);
+			Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 			Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
 
 			List<Long> rem = featuresToRemove.stream().
@@ -205,12 +205,12 @@ public class CalculateStatisticsTask extends AbstractTask {
 
 			processed = 50;
 
-			currentProject.deleteFeatures(featuresToRemove, dataPipeline);
+			currentExperiment.deleteFeatures(featuresToRemove, dataPipeline);
 			Matrix newDataMatrix = dataMatrix.deleteColumns(Ret.NEW, rem);
 			Matrix newFeatureMatrix = featureMatrix.deleteColumns(Ret.NEW, rem);
 			newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
 			newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
-			currentProject.setDataMatrixForDataPipeline(dataPipeline, newDataMatrix);
+			currentExperiment.setDataMatrixForDataPipeline(dataPipeline, newDataMatrix);
 		}
 		processed = 100;
 	}
@@ -219,7 +219,7 @@ public class CalculateStatisticsTask extends AbstractTask {
 	private void removeEmptyFeaturesFromSubset() {
 
 		MsFeatureSet subset = 
-				currentProject.getActiveFeatureSetForDataPipeline(dataPipeline);
+				currentExperiment.getActiveFeatureSetForDataPipeline(dataPipeline);
 		List<MsFeature> featuresToRemove = subset.getFeatures().stream().
 				filter(f -> (f.getStatsSummary().getSampleFrequency() == 0.0d)).
 				filter(f -> (f.getStatsSummary().getPooledFrequency() == 0.0d)).

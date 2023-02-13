@@ -33,19 +33,19 @@ import org.jdom2.output.XMLOutputter;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
-import edu.umich.med.mrc2.datoolbox.project.store.ProjectFields;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.project.store.ExperimentFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class SaveFeatureChromatogramsTask extends AbstractTask {
 	
-	private RawDataAnalysisProject projectToSave;
+	private RawDataAnalysisExperiment experimentToSave;
 
-	public SaveFeatureChromatogramsTask(RawDataAnalysisProject projectToSave) {
+	public SaveFeatureChromatogramsTask(RawDataAnalysisExperiment experiment) {
 		super();
-		this.projectToSave = projectToSave;
+		this.experimentToSave = experiment;
 	}
 
 	@Override
@@ -64,15 +64,15 @@ public class SaveFeatureChromatogramsTask extends AbstractTask {
 	private void createChoromatogramsXml() {
 
 		taskDescription = "Creating chromatogram XML file";
-		total = projectToSave.getChromatogramMap().size();
+		total = experimentToSave.getChromatogramMap().size();
 		processed = 0;
 		
         Document document = new Document();
         Element chromatogramListRoot = 
-        		new Element(ProjectFields.FeatureChromatogramList.name());
+        		new Element(ExperimentFields.FeatureChromatogramList.name());
 		chromatogramListRoot.setAttribute("version", "1.0.0.0");
 
-        for(Entry<String, MsFeatureChromatogramBundle> ce : projectToSave.getChromatogramMap().entrySet()) {   	
+        for(Entry<String, MsFeatureChromatogramBundle> ce : experimentToSave.getChromatogramMap().entrySet()) {   	
         	chromatogramListRoot.addContent(ce.getValue().getXmlElement(ce.getKey()));
         	processed++;
         }
@@ -83,7 +83,7 @@ public class SaveFeatureChromatogramsTask extends AbstractTask {
 		total = 100;
 		processed = 30;
 		File xmlFile = Paths.get(
-				projectToSave.getUncompressedProjectFilesDirectory().getAbsolutePath(), 
+				experimentToSave.getUncompressedExperimentFilesDirectory().getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.FEATURE_CHROMATOGRAMS_FILE_NAME).toFile();
         try {
             FileWriter writer = new FileWriter(xmlFile, false);
@@ -100,6 +100,6 @@ public class SaveFeatureChromatogramsTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-		return new SaveFeatureChromatogramsTask(projectToSave);
+		return new SaveFeatureChromatogramsTask(experimentToSave);
 	}
 }

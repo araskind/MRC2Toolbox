@@ -49,7 +49,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
@@ -276,7 +276,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	
 	private void createNewMSMSClusterDataSetInProject(MSMSClusterDataSet newDataSet) {
 		
-		RawDataAnalysisProject project = 
+		RawDataAnalysisExperiment project = 
 				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();		
 		project.getMsmsClusterDataSets().add(newDataSet);
 		if(msmsClusterDataSetEditorDialog.loadMSMSClusterDataSetIntoWorkBench()) {
@@ -326,7 +326,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	
 	private void deleteMSMSClusterDataSetFromProject(MSMSClusterDataSet selected) {
 
-		RawDataAnalysisProject project = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();		
+		RawDataAnalysisExperiment project = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();		
 		int res = MessageDialog.showChoiceWithWarningMsg(
 				"Are you sure you want to delete data set \"" + selected.getName() + "\"?", 
 				this.getContentPane());
@@ -416,7 +416,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	
 	public void loadMSMSClusterDataSetsForActiveProject() {
 		
-		RawDataAnalysisProject project = 
+		RawDataAnalysisExperiment project = 
 				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
 		if(project == null)
 			return;

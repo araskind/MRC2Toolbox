@@ -37,16 +37,16 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 public class FindDuplicateNamesTask extends AbstractTask {
 
 	private DataPipeline dataPipeline;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private Collection<MsFeature> featureList;
 	private Collection<MsFeatureCluster> duplicateNameList;
 
 	public FindDuplicateNamesTask(
-			DataAnalysisProject currentProject,
+			DataAnalysisProject experiment,
 			DataPipeline dataPipeline) {
 
 		this.dataPipeline = dataPipeline;
-		this.currentProject = currentProject;
+		this.currentExperiment = experiment;
 		taskDescription = "Finding duplicate names for " + 
 				dataPipeline.getName();
 	}
@@ -68,7 +68,7 @@ public class FindDuplicateNamesTask extends AbstractTask {
 	public Collection<MsFeatureCluster> findDuplicateNames() {
 
 		featureList =
-				currentProject.getMsFeaturesForDataPipeline(dataPipeline);
+				currentExperiment.getMsFeaturesForDataPipeline(dataPipeline);
 		total = featureList.size();
 		processed = 0;
 		taskDescription = "Finding duplicates";
@@ -118,6 +118,6 @@ public class FindDuplicateNamesTask extends AbstractTask {
 	public Task cloneTask() {
 
 		return new FindDuplicateNamesTask(
-				currentProject, dataPipeline);
+				currentExperiment, dataPipeline);
 	}
 }

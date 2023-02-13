@@ -42,14 +42,16 @@ public class OpenChromatogramFileTask extends AbstractTask {
 	
 	private File chromatogramFile;
 	private Map<String, MsFeatureChromatogramBundle>chromatogramMap;
-	private Collection<DataFile>projectDataFiles;
+	private Collection<DataFile>experimentDataFiles;
 
 	public OpenChromatogramFileTask(
-			File chromatogramFile, Collection<DataFile>projectDataFiles) {
+			File chromatogramFile, 
+			Collection<DataFile>experimentDataFiles) {
 		super();
 		this.chromatogramFile = chromatogramFile;
-		this.projectDataFiles = projectDataFiles;
-		chromatogramMap = new HashMap<String, MsFeatureChromatogramBundle>();
+		this.experimentDataFiles = experimentDataFiles;
+		chromatogramMap = 
+				new HashMap<String, MsFeatureChromatogramBundle>();
 	}
 
 	@Override
@@ -82,7 +84,7 @@ public class OpenChromatogramFileTask extends AbstractTask {
 
 				MsFeatureChromatogramBundle fcb = 
 						new MsFeatureChromatogramBundle(
-								chromBundleElement, projectDataFiles);
+								chromBundleElement, experimentDataFiles);
 				chromatogramMap.put(fcb.getFeatureId(), fcb);
 				processed++;
 			}
@@ -98,6 +100,6 @@ public class OpenChromatogramFileTask extends AbstractTask {
 	@Override
 	public Task cloneTask() {
 		return new OpenChromatogramFileTask(
-				chromatogramFile, projectDataFiles);
+				chromatogramFile, experimentDataFiles);
 	}
 }

@@ -508,7 +508,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 						this.getContentPane());
 				return;
 			}
-			File featureMatrixFile = Paths.get(currentExperiment.getProjectDirectory().getAbsolutePath(), 
+			File featureMatrixFile = Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
 					currentExperiment.getFeatureMatrixFileNameForDataPipeline(activeDataPipeline)).toFile();
 			if (!featureMatrixFile.exists()) {
 				MessageDialog.showWarningMsg(

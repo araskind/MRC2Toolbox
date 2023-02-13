@@ -53,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.StandardAnnotationUtils;
-import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -65,25 +65,25 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 	
 	private static final int BATCH_SIZE = 100;
 
-	private RawDataAnalysisProject project;
+	private RawDataAnalysisExperiment experiment;
 	private DataFile dataFile;
 	private double msOneMZWindow;
 	private Map<String,String>featureIdMap;
-	private LIMSExperiment experiment;
+	private LIMSExperiment limsExperiment;
 	private DataExtractionMethod deMethod;
 	private Map<String, MsFeatureChromatogramBundle> chromatogramMap;
 	
 	public RawDataAnalysisMSFeatureDatabaseUploadTask(
-			RawDataAnalysisProject project, 
+			RawDataAnalysisExperiment experiment, 
 			DataFile dataFile,
 			DataExtractionMethod deMethod,
 			double msOneMZWindow) {
 		super();
-		this.project = project;
+		this.experiment = experiment;
 		this.dataFile = dataFile;
 		this.deMethod = deMethod;
 		this.msOneMZWindow = msOneMZWindow;
-		this.experiment = project.getIdTrackerExperiment();
+		this.limsExperiment = experiment.getIdTrackerExperiment();
 		featureIdMap = new HashMap<String,String>();
 		taskDescription = "Uploading results for " + dataFile.getName();
 	}
@@ -105,7 +105,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 		
 		taskDescription = "Uploading results for " + dataFile.getName();
 		Collection<MSFeatureInfoBundle> bundles = 
-				project.getMsFeaturesForDataFile(dataFile);
+				experiment.getMsFeaturesForDataFile(dataFile);
 		total = bundles.size();
 		processed = 0;	
 		
@@ -282,7 +282,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 				"0",
 				12);			
 		chromatogramMap.put(parentFeatureId, 
-				project.getChromatogramMap().get(feature.getId()));
+				experiment.getChromatogramMap().get(feature.getId()));
 		featureIdMap.put(feature.getId(), parentFeatureId);
 		feature.setId(parentFeatureId);
 				
@@ -628,7 +628,7 @@ public class RawDataAnalysisMSFeatureDatabaseUploadTask extends AbstractTask {
 	public Task cloneTask() {
 
 		return new RawDataAnalysisMSFeatureDatabaseUploadTask(
-				project, 
+				experiment, 
 				dataFile,
 				deMethod,
 				msOneMZWindow);

@@ -35,35 +35,35 @@ public class DataImportUtils {
 		return findSampleById(sampleId, MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 	}
 	
-	public static ExperimentalSample findSampleById(String sampleId, DataAnalysisProject project) {
+	public static ExperimentalSample findSampleById(String sampleId, DataAnalysisProject experiment) {
 		
-		if(project == null || project.getExperimentDesign() == null || 
+		if(experiment == null || experiment.getExperimentDesign() == null || 
 				sampleId == null || sampleId.isEmpty()) 
 			return null;
 
-		return project.getExperimentDesign().getSampleById(sampleId);
+		return experiment.getExperimentDesign().getSampleById(sampleId);
 	}
 	
 	public static ExperimentalSample findSampleByName(String sampleName) {
 		return findSampleByName(sampleName, MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 	}
 		
-	public static ExperimentalSample findSampleByName(String sampleName, DataAnalysisProject project) {
+	public static ExperimentalSample findSampleByName(String sampleName, DataAnalysisProject experiment) {
 		
-		if(project == null || project.getExperimentDesign() == null || 
+		if(experiment == null || experiment.getExperimentDesign() == null || 
 				sampleName == null || sampleName.isEmpty()) 
 			return null;
 
-		return project.getExperimentDesign().getSampleByName(sampleName);
+		return experiment.getExperimentDesign().getSampleByName(sampleName);
 	}
 	
 	public static ExperimentalSample getSampleFromFileName(String fileName) {		
 		return getSampleFromFileName(fileName, MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 	}
 	
-	public static ExperimentalSample getSampleFromFileName(String fileName, DataAnalysisProject project) {
+	public static ExperimentalSample getSampleFromFileName(String fileName, DataAnalysisProject experiment) {
 		
-		if(project == null || project.getExperimentDesign() == null || 
+		if(experiment == null || experiment.getExperimentDesign() == null || 
 				fileName == null || fileName.isEmpty()) 
 			return null;
 
@@ -96,7 +96,7 @@ public class DataImportUtils {
 		if(matchedSample != null)
 			return matchedSample;
 		else 		
-			return project.getExperimentDesign().getReferenceSamples().stream().
+			return experiment.getExperimentDesign().getReferenceSamples().stream().
 					filter(s -> fileName.contains(s.getId())).findFirst().orElse(null);
 	}
 }

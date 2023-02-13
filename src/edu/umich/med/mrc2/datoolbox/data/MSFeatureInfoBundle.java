@@ -35,7 +35,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
 
@@ -349,7 +349,7 @@ public class MSFeatureInfoBundle implements Serializable {
 		String sampleId = 
 				featureElement.getAttributeValue(MsFeatureInfoBundleFields.Sample.name());
 		if(sampleId != null)
-			sample = (IDTExperimentalSample)OfflineProjectLoadCash.getExperimentalSampleById(sampleId);
+			sample = (IDTExperimentalSample)OfflineExperimentLoadCash.getExperimentalSampleById(sampleId);
 		if(sample != null)
 			stockSample = sample.getParentStockSample();
 		

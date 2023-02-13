@@ -80,8 +80,9 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 	private MsFeatureSet integratedSet;
 	private DataExportFields exportFieldNaming;
 	private XSSFWorkbook workbook;
-	private DataAnalysisProject currentProject;
-	private XSSFCellStyle rtStyle, mzStyle, ppmStyle, dataFileStyle, annotationStyle, hlinkStyle, headerStyle, percentStyle;
+	private DataAnalysisProject currentExperiment;
+	private XSSFCellStyle rtStyle, mzStyle, ppmStyle, 
+		dataFileStyle, annotationStyle, hlinkStyle, headerStyle, percentStyle;
 	private TreeSet<ExperimentalSample>activeSamples;
 	private TreeSet<ExperimentDesignFactor>activeFactors;
 	private XSSFCreationHelper createHelper;
@@ -109,10 +110,12 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 		this.assayFeatureMap = featureMap;
 		this.integratedSet = integratedSet;
 		this.exportFieldNaming = exportFieldNaming;
-		this.currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		this.currentExperiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
 
 		activeSamples =
-			currentProject.getExperimentDesign().getActiveSamplesForDesignSubset(experimentDesignSubset);
+			currentExperiment.getExperimentDesign().
+				getActiveSamplesForDesignSubset(experimentDesignSubset);
 
 		activeFactors = new TreeSet<ExperimentDesignFactor>();
 		for(ExperimentDesignLevel level : experimentDesignSubset.getDesignMap())
@@ -625,7 +628,7 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 
 		//	Add sample columns
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap =
-				DataExportUtils.createSampleFileMapForDataPipeline(currentProject, experimentDesignSubset, pipeline, exportFieldNaming);
+				DataExportUtils.createSampleFileMapForDataPipeline(currentExperiment, experimentDesignSubset, pipeline, exportFieldNaming);
 
 		HashMap<DataFile, Integer> fileColumnMap =
 				DataExportUtils.createFileColumnMap(sampleFileMap, columnCount);
@@ -642,7 +645,7 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 		// TODO Add statistics columns - recalculate values for exported design?
 
 		//	Add data
-		Matrix dataMatrix = currentProject.getDataMatrixForDataPipeline(pipeline);
+		Matrix dataMatrix = currentExperiment.getDataMatrixForDataPipeline(pipeline);
 		long[] coordinates = new long[2];
 
 		total = exportArray.length;
@@ -889,15 +892,8 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 		//	TODO this is a placeholder untill data integration is re-written to use data pipelines
 		TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>sampleFileMap = 
 				new TreeMap<ExperimentalSample, TreeMap<DataPipeline, DataFile[]>>();
-		
-//		TreeMap<ExperimentalSample, TreeMap<Assay, DataFile[]>> sampleFileMap =
-//				DataExportUtils.createSampleFileMap(
-//						currentProject,
-//						experimentDesignSubset,
-//						integratedSet,
-//						exportFieldNaming);
 
-		taskDescription = "Writing integrated report data for the project";
+		taskDescription = "Writing integrated report data for the experiment";
 		total = exportArray.length;
 		processed = 0;
 

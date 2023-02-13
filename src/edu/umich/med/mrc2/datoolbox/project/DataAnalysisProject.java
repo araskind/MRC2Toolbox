@@ -144,7 +144,7 @@ public class DataAnalysisProject implements Serializable {
 		initNewProject();		
 	}
 	
-	public void updateProjectLocation(File newProjectFile) {
+	public void updateExperimentLocation(File newProjectFile) {
 		
 		projectFile = newProjectFile;
 		projectDirectory = newProjectFile.getParentFile();
@@ -200,7 +200,7 @@ public class DataAnalysisProject implements Serializable {
 		return projectFile;
 	}
 	
-	public File getProjectDirectory() {
+	public File getExperimentDirectory() {
 		return projectDirectory;
 	}
 

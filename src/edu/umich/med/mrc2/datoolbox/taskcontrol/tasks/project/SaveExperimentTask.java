@@ -64,17 +64,17 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
 public class SaveExperimentTask extends AbstractTask {
 
-	private DataAnalysisProject projectToSave;
-	private File projectFile;
+	private DataAnalysisProject experimentToSave;
+	private File experimentFile;
 	private HashMap<MsFeature, LinkedList<MsFeatureListener>> featureListeners;
 	private HashMap<MsFeatureSet, LinkedList<FeatureSetListener>> featureSetListeners;
 	private HashMap<ExperimentDesignSubset, LinkedList<ExperimentDesignSubsetListener>> designSetListeners;
 	private HashSet<ExperimentDesignListener> designListeners;
 
-	public SaveExperimentTask(DataAnalysisProject cefAnalyzerProject) {
+	public SaveExperimentTask(DataAnalysisProject experiment) {
 
-		this.projectToSave = cefAnalyzerProject;
-		projectFile = projectToSave.getProjectFile();
+		this.experimentToSave = experiment;
+		experimentFile = experimentToSave.getProjectFile();
 		total = 100;
 		processed = 0;
 	}
@@ -84,38 +84,35 @@ public class SaveExperimentTask extends AbstractTask {
 
 		setStatus(TaskStatus.PROCESSING);
 		long startTime = System.currentTimeMillis();
-		projectToSave.setLastModified(new Date());
-//		projectToSave.createMetaDataMaps();
+		experimentToSave.setLastModified(new Date());
 		backUpListeners();
 
-		// Save project file
+		// Save experiment file
 		try {
 			processed = 10;
-			taskDescription = "Parsing project code ... ";
-			XStream projectXstream = initXstream();
-			File xmlFile = Paths.get(projectFile.getParentFile().getAbsolutePath(), 
-					projectToSave.getName() + ".xml").toFile();
+			taskDescription = "Parsing experiment code ... ";
+			XStream experimentXstream = initXstream();
+			File xmlFile = Paths.get(experimentFile.getParentFile().getAbsolutePath(), 
+					experimentToSave.getName() + ".xml").toFile();
 	        RandomAccessFile raf = new RandomAccessFile(xmlFile.getAbsolutePath(), "rw");
 	        FileOutputStream fout = new FileOutputStream(raf.getFD());	        
 			BufferedOutputStream bout = new BufferedOutputStream(fout);
-			projectXstream.toXML(projectToSave, bout);
+			experimentXstream.toXML(experimentToSave, bout);
 			bout.close();
 			fout.close();
 			raf.close();
-			
-//			String xmlString = projectXstream.toXML(projectToSave);
-//			byte[] contentInBytes = xmlString.getBytes();
+
 			processed = 50;		
 			if(xmlFile.exists()) {
 				
 				taskDescription = "Compressing XML file";
 				processed = 60;
-		        OutputStream archiveStream = new FileOutputStream(projectFile);
+		        OutputStream archiveStream = new FileOutputStream(experimentFile);
 		        ZipArchiveOutputStream archive =
 		        	(ZipArchiveOutputStream) new ArchiveStreamFactory().
 		        	createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
 		        archive.setUseZip64(Zip64Mode.Always);
-		        ZipArchiveEntry entry = new ZipArchiveEntry(projectToSave.getName());
+		        ZipArchiveEntry entry = new ZipArchiveEntry(experimentToSave.getName());
 		        archive.putArchiveEntry(entry);
 
 		        BufferedInputStream input = new BufferedInputStream(new FileInputStream(xmlFile));
@@ -129,7 +126,7 @@ public class SaveExperimentTask extends AbstractTask {
 		        processed = 99;
 		        
 				long endTime = System.currentTimeMillis();
-				System.out.println("Project save time : " 
+				System.out.println("Experiment save time : " 
 						+ Math.round((endTime - startTime) / 1000) + " seconds");
 			}
 			processed = 100;
@@ -145,18 +142,18 @@ public class SaveExperimentTask extends AbstractTask {
 	
 	private void saveDataMatrixes() {
 		
-		for (DataPipeline dp : projectToSave.getDataPipelines()) {
+		for (DataPipeline dp : experimentToSave.getDataPipelines()) {
 
-			if (projectToSave.getDataMatrixForDataPipeline(dp) != null) {
+			if (experimentToSave.getDataMatrixForDataPipeline(dp) != null) {
 
-				taskDescription = "Saving data matrix for  " + projectToSave.getName() +
+				taskDescription = "Saving data matrix for  " + experimentToSave.getName() +
 						"(" + dp.getName() + ")";
 				processed = 50;
-				File dataMatrixFile = Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
-						projectToSave.getDataMatrixFileNameForDataPipeline(dp)).toFile();
+				File dataMatrixFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
+						experimentToSave.getDataMatrixFileNameForDataPipeline(dp)).toFile();
 				try {
 					Matrix dataMatrix = Matrix.Factory
-							.linkToArray(projectToSave.getDataMatrixForDataPipeline(dp).
+							.linkToArray(experimentToSave.getDataMatrixForDataPipeline(dp).
 									toDoubleArray());
 					dataMatrix.save(dataMatrixFile);
 					processed = 80;
@@ -164,17 +161,17 @@ public class SaveExperimentTask extends AbstractTask {
 					e.printStackTrace();
 					setStatus(TaskStatus.ERROR);
 				}
-				if(projectToSave.getFeatureMatrixFileNameForDataPipeline(dp) != null
-						&& projectToSave.getFeatureMatrixForDataPipeline(dp) != null) {
+				if(experimentToSave.getFeatureMatrixFileNameForDataPipeline(dp) != null
+						&& experimentToSave.getFeatureMatrixForDataPipeline(dp) != null) {
 					
-					taskDescription = "Saving feature matrix for  " + projectToSave.getName() +
+					taskDescription = "Saving feature matrix for  " + experimentToSave.getName() +
 							"(" + dp.getName() + ")";
 					
-					File featureMatrixFile = Paths.get(projectToSave.getProjectDirectory().getAbsolutePath(), 
-							projectToSave.getFeatureMatrixFileNameForDataPipeline(dp)).toFile();
+					File featureMatrixFile = Paths.get(experimentToSave.getExperimentDirectory().getAbsolutePath(), 
+							experimentToSave.getFeatureMatrixFileNameForDataPipeline(dp)).toFile();
 					try {
 						Matrix featureMatrix = Matrix.Factory
-								.linkToArray(projectToSave.getFeatureMatrixForDataPipeline(dp).toObjectArray());
+								.linkToArray(experimentToSave.getFeatureMatrixForDataPipeline(dp).toObjectArray());
 						featureMatrix.save(featureMatrixFile);
 						processed = 100;
 					} catch (IOException e) {
@@ -196,9 +193,9 @@ public class SaveExperimentTask extends AbstractTask {
 				LinkedList<ExperimentDesignSubsetListener>>();
 		designListeners = new HashSet<ExperimentDesignListener>();
 
-		for (DataPipeline dp : projectToSave.getDataPipelines()) {
+		for (DataPipeline dp : experimentToSave.getDataPipelines()) {
 
-			for (MsFeature f : projectToSave.getMsFeaturesForDataPipeline(dp)) {
+			for (MsFeature f : experimentToSave.getMsFeaturesForDataPipeline(dp)) {
 
 				if (!f.getFeatureListeners().isEmpty()) {
 
@@ -208,7 +205,7 @@ public class SaveExperimentTask extends AbstractTask {
 					f.removeAllListeners();
 				}
 			}
-			for (MsFeatureSet set : projectToSave.getMsFeatureSetsForDataPipeline(dp)) {
+			for (MsFeatureSet set : experimentToSave.getMsFeatureSetsForDataPipeline(dp)) {
 
 				if (!set.getListeners().isEmpty()) {
 
@@ -220,7 +217,7 @@ public class SaveExperimentTask extends AbstractTask {
 				}
 			}
 		}
-		for (ExperimentDesignSubset dset : projectToSave.getExperimentDesign().getDesignSubsets()) {
+		for (ExperimentDesignSubset dset : experimentToSave.getExperimentDesign().getDesignSubsets()) {
 
 			if (!dset.getEventListeners().isEmpty()) {
 
@@ -231,8 +228,8 @@ public class SaveExperimentTask extends AbstractTask {
 				dset.removeAllListeners();
 			}
 		}
-		designListeners.addAll(projectToSave.getExperimentDesign().getListeners());
-		projectToSave.getExperimentDesign().removeAllListeners();
+		designListeners.addAll(experimentToSave.getExperimentDesign().getListeners());
+		experimentToSave.getExperimentDesign().removeAllListeners();
 	}
 
 	private XStream initXstream() {
@@ -266,12 +263,12 @@ public class SaveExperimentTask extends AbstractTask {
 		for (Entry<ExperimentDesignSubset, LinkedList<ExperimentDesignSubsetListener>> entry : designSetListeners.entrySet())
 			entry.getValue().stream().forEach(l -> entry.getKey().addListener(l));
 
-		designListeners.stream().forEach(l -> projectToSave.getExperimentDesign().addListener(l));
+		designListeners.stream().forEach(l -> experimentToSave.getExperimentDesign().addListener(l));
 	}
 
 	@Override
 	public Task cloneTask() {
 
-		return new SaveExperimentTask(projectToSave);
+		return new SaveExperimentTask(experimentToSave);
 	}
 }

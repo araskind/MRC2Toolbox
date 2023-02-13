@@ -52,7 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTPepSearchOutputFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -239,7 +239,7 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 			//	Library spectrum
 			if(mrcLibId != null) {
 				
-				MsMsLibraryFeature libFeature = OfflineProjectLoadCash.getMsMsLibraryFeatureById(mrcLibId);
+				MsMsLibraryFeature libFeature = OfflineExperimentLoadCash.getMsMsLibraryFeatureById(mrcLibId);
 				if(libFeature.getSpectrum() != null)
 					libMsMsString = libFeature.getSpectrumAsPythonArray();
 				
@@ -316,14 +316,14 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 				sorted().collect(Collectors.toList());
 		total = uniqueMSMSLibraryIds.size();
 		processed = 0;	
-		OfflineProjectLoadCash.reset();
+		OfflineExperimentLoadCash.reset();
 		Connection conn = ConnectionManager.getConnection();
 		for(String libId : uniqueMSMSLibraryIds) {
 			
 			MsMsLibraryFeature libFeature = 
 					MSMSLibraryUtils.getMsMsLibraryFeatureById(libId, conn);
 			if(libFeature != null)
-				OfflineProjectLoadCash.addMsMsLibraryFeature(libFeature);
+				OfflineExperimentLoadCash.addMsMsLibraryFeature(libFeature);
 			
 			processed++;
 		}	

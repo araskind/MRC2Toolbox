@@ -73,7 +73,7 @@ public class BinnerClustersImportTask extends AbstractTask {
 	private File binnerDataFile;
 	private File postprocessorDataFile;
 	private HashSet<MsFeatureCluster> clusterList;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private DataPipeline dataPipeline;
 	private Matrix dataMatrix;
 	private ArrayList<String> unassignedFeatures;
@@ -86,10 +86,10 @@ public class BinnerClustersImportTask extends AbstractTask {
 		this.postprocessorDataFile = postprocessorDataFile;
 
 		clusterList = new HashSet<MsFeatureCluster>();
-		currentProject = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
-		dataPipeline = currentProject.getActiveDataPipeline();
+		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		dataPipeline = currentExperiment.getActiveDataPipeline();
 		taskDescription = "Loading Binner-generated clusters";
-		dataMatrix = currentProject.getDataMatrixForDataPipeline(dataPipeline);
+		dataMatrix = currentExperiment.getDataMatrixForDataPipeline(dataPipeline);
 		Matrix featureMatrix = dataMatrix.getMetaDataDimensionMatrix(0);
 		unassignedFeatures = new ArrayList<String>();
 		clusteredFeatures = new TreeSet<MsFeature>(new MsFeatureComparator(SortProperty.Name));
@@ -199,7 +199,7 @@ public class BinnerClustersImportTask extends AbstractTask {
 			for(PostProcessorAnnotation ppa : entry.getValue()) {
 
 				MsFeature newFeature =
-					currentProject.getMsFeatureByBinnerNameMzRt(
+					currentExperiment.getMsFeatureByBinnerNameMzRt(
 							ppa.getBa().getFeatureName(),
 							dataPipeline, 
 							ppa.getBa().getBinnerMz(), 
@@ -505,7 +505,7 @@ public class BinnerClustersImportTask extends AbstractTask {
 			for(BinnerAnnotation ba : entry.getValue()) {
 
 				MsFeature newFeature =
-					currentProject.getMsFeatureByBinnerNameMzRt(
+					currentExperiment.getMsFeatureByBinnerNameMzRt(
 							ba.getFeatureName(), dataPipeline, ba.getBinnerMz(), ba.getBinnerRt());
 
 				if (newFeature != null) {
@@ -641,7 +641,7 @@ public class BinnerClustersImportTask extends AbstractTask {
 
 	private void resetFeatureAssignmentStatus() {
 
-		for (MsFeature cf : currentProject.getMsFeaturesForDataPipeline(dataPipeline)) {
+		for (MsFeature cf : currentExperiment.getMsFeaturesForDataPipeline(dataPipeline)) {
 			cf.setActive(true);
 			cf.setBinnerAnnotation(null);
 		}

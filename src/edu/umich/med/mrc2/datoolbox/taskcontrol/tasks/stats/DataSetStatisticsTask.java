@@ -35,14 +35,14 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 public class DataSetStatisticsTask extends AbstractTask {
 
 	private DataPipeline dataPipeline;
-	private DataAnalysisProject currentProject;
+	private DataAnalysisProject currentExperiment;
 	private Collection<DataFileStatisticalSummary> statsList;
 
 	public DataSetStatisticsTask(
-			DataAnalysisProject currentProject, DataPipeline dataPipeline) {
-
+			DataAnalysisProject experiment, DataPipeline dataPipeline) {
+		
+		this.currentExperiment = experiment;
 		this.dataPipeline = dataPipeline;
-		this.currentProject = currentProject;
 	}
 	
 	@Override
@@ -51,7 +51,7 @@ public class DataSetStatisticsTask extends AbstractTask {
 		setStatus(TaskStatus.PROCESSING);
 		taskDescription = "Calculating statistics for all samples in " + 
 				dataPipeline.getName();
-		total = currentProject.getDataFilesForAcquisitionMethod(
+		total = currentExperiment.getDataFilesForAcquisitionMethod(
 				dataPipeline.getAcquisitionMethod()).size();
 		processed = 0;
 		statsList = new ArrayList<DataFileStatisticalSummary>();
@@ -67,7 +67,7 @@ public class DataSetStatisticsTask extends AbstractTask {
 
 	private void calculateStatistics() {
 
-		for (DataFile file : currentProject.getDataFilesForAcquisitionMethod(
+		for (DataFile file : currentExperiment.getDataFilesForAcquisitionMethod(
 				dataPipeline.getAcquisitionMethod())) {
 
 			DataFileStatisticalSummary fileSummary = 
@@ -80,7 +80,7 @@ public class DataSetStatisticsTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-		return new DataSetStatisticsTask(currentProject, dataPipeline);
+		return new DataSetStatisticsTask(currentExperiment, dataPipeline);
 	}
 
 	public Collection<DataFileStatisticalSummary> getStatsList() {

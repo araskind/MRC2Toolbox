@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineProjectLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.AvgMSFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
@@ -446,7 +446,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 				fileElement.getAttributeValue(DataFileFields.Sample.name());
 		if(sampleId != null)
 			parentSample = 
-					OfflineProjectLoadCash.getExperimentalSampleById(sampleId);
+					OfflineExperimentLoadCash.getExperimentalSampleById(sampleId);
 		
 		enabled = true;
 		chromatograms = new ArrayList<ExtractedChromatogram>();
