@@ -186,28 +186,12 @@ public class DocumentAnnotationDialog extends JDialog implements ActionListener,
 		rootPane.setDefaultButton(saveButton);
 
 		loadPreferences();
-//		initChooser();
 		pack();
 	}
-
-//	private void initChooser() {
-//
-//		chooser = new ImprovedFileChooser();
-//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-//		chooser.addActionListener(this);
-//		chooser.setAcceptAllFileFilterUsed(true);
-//		chooser.setMultiSelectionEnabled(false);
-//		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-//		chooser.setCurrentDirectory(baseDirectory);
-//		chooser.setApproveButtonText("Attach document");
-//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Word files", "doc", "docx"));
-//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("PowerPoint files", "ppt", "pptx"));
-//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Excel files", "xls", "xlsx"));
-//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("PDF files", "pdf"));
-//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("Image files", "png", "jpg", "jpeg", "tiff", "gif", "bmp"));
-//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("SDF structure files", "sdf"));
-//		chooser.addChoosableFileFilter(new FileNameExtensionFilter("MOL files", "mol"));
-//	}
+	
+	public void setSaveButtonText(String text) {
+		saveButton.setText(text);
+	}
 
 	public void loadAnnotation(ObjectAnnotation annotation) {
 
@@ -232,22 +216,6 @@ public class DocumentAnnotationDialog extends JDialog implements ActionListener,
 
 		if(e.getActionCommand().equals(BROWSE_COMMAND))
 			selectLinkedFile();
-			
-//			chooser.showOpenDialog(this);
-//
-//		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
-//
-//			File inputFile = chooser.getSelectedFile();
-//			baseDirectory = inputFile.getParentFile();
-//			sourceFileTextField.setText(chooser.getSelectedFile().getAbsolutePath());
-//			documentTitleTextField.setText(FilenameUtils.getBaseName(inputFile.getName()));
-//			
-//			Icon ftIcon = GuiUtils.getDocumentFormatIcon(
-//					DocumentFormat.getFormatByFileExtension(
-//							FilenameUtils.getExtension(inputFile.getName())), 64);
-//			fileTypeLabel.setIcon(ftIcon);
-//			savePreferences();
-//		}
 	}
 	
 	private void selectLinkedFile() {

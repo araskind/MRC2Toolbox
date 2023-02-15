@@ -64,8 +64,8 @@ import edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering.BinnerDataImpor
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.column.DockableChromatographicColumnManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.DockableAcquisitionMethodManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.mobph.DockableMobilePhaseManagerPanel;
-import edu.umich.med.mrc2.datoolbox.gui.idtlims.data.IDTrackerMultiFileMSMSDataImportDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idtlims.data.IDtrackerAverageMsOneImportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.dataimport.IDTrackerMultiFileMSMSDataImportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.dataimport.IDtrackerAverageMsOneImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.design.DockableIDTrackerExperimentDesignEditorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.DockableDataExtractionMethodManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.experiment.IDTrackerExperimentDialog;
@@ -843,7 +843,8 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		
 		LIMSSamplePreparation selectedPrep = samplePrepManagerPanel.getSelectedPrep();
 		
-		if(selectedPrep == null || !IDTDataCash.getExperimentForSamplePrep(selectedPrep).equals(experiment)) {
+		if(selectedPrep == null 
+				|| !IDTDataCash.getExperimentForSamplePrep(selectedPrep).equals(experiment)) {
 			samplePrepManagerPanel.clearCurrentPrepData();
 			instrumentSequenceManagerPanel.clearPanel();
 		}

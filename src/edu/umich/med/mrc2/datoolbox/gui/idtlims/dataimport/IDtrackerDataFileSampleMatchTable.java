@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idtlims.data;
+package edu.umich.med.mrc2.datoolbox.gui.idtlims.dataimport;
 
 import java.io.File;
 import java.util.ArrayList;

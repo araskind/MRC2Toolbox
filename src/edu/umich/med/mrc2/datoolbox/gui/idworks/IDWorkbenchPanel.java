@@ -87,6 +87,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
@@ -174,6 +175,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -2963,7 +2965,14 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void finalizeIdTrackerExperimentLoad(IDTrackerExperimentDataFetchTask task) {
 
-		loadMsMsSearchData(task.getSelectedFeatures());
+		LIMSExperiment experiment = task.getIdTrackerExperiment();
+		StatusBar.setExperimentName(experiment.toString());
+		
+		activeFeatureCollection = new MsFeatureInfoBundleCollection(
+				"Features for experiment " + experiment.toString());		
+		activeFeatureCollection.addFeatures(task.getSelectedFeatures());
+		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 	}
 
 	private void finalizeIDTrackerMSMSClusterDataExportTask(IDTrackerMSMSClusterDataExportTask task) {
@@ -3884,5 +3893,16 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	public MSMSClusterDataSet getActiveMSMSClusterDataSet() {
 		return activeMSMSClusterDataSet;
 	}
+	
+	@Override
+	public void switchDataPipeline(
+			DataAnalysisProject experiment, DataPipeline newDataPipeline) {
 
+		super.switchDataPipeline(experiment, newDataPipeline);
+
+		if(experiment == null && newDataPipeline == null)
+			clearPanel();		
+	}
 }
+
+

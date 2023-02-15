@@ -69,7 +69,7 @@ public class DatabaseExperimentSelectorDialog extends JDialog implements ActionL
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle("Search ID tracker data by experiment");
 		setIconImage(((ImageIcon)openIcon).getImage());
-		setPreferredSize(new Dimension(800, 800));
+		setPreferredSize(new Dimension(640, 480));
 		
 		experimentsTable = new IDTrackerExperimentListingTable();
 		experimentsTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

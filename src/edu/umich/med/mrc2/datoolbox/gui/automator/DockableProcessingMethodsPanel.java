@@ -232,31 +232,6 @@ public class DockableProcessingMethodsPanel extends DefaultSingleCDockable
 			recentFiles.add(inputFile);
 			savePreferences();
 		}
-		
-//		JFileChooser chooser = new ImprovedFileChooser();
-//		File inputFile = null;
-//		chooser.setAcceptAllFileFilterUsed(false);
-//		chooser.setMultiSelectionEnabled(false);
-//		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-//		chooser.setDialogTitle("Select data analysis method:");	
-//		chooser.setCurrentDirectory(methodsBaseDirectory);
-//		if (chooser.showOpenDialog(MRC2ToolBoxCore.getMainWindow()) == JFileChooser.APPROVE_OPTION) {
-//
-//			inputFile = chooser.getSelectedFile();
-//			if(!inputFile.isDirectory() || !inputFile.getName().endsWith(".m")) {
-//				MessageDialog.showErrorMsg(inputFile.getName() + " is not a valid Agilent method!", chooser);
-//				return;
-//			}
-//			methodsBaseDirectory = inputFile.getParentFile();
-//			if (command.equals(MainActionCommands.BROWSE_FOR_POSITIVE_MODE_METHOD.getName())) 
-//				posMethodTextField.setText(inputFile.getAbsolutePath());				
-//			
-//			if (command.equals(MainActionCommands.BROWSE_FOR_NEGATIVE_MODE_METHOD.getName())) 
-//				negMethodTextField.setText(inputFile.getAbsolutePath());					
-//			
-//			recentFiles.add(inputFile);
-//			savePreferences();			
-//		}
 	}
 	
 	public File getNegativeMethodFile() {

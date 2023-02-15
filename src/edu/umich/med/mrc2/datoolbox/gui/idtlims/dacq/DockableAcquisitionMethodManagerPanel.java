@@ -64,7 +64,7 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.AcquisitionMethodManagerPanel";
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 
-//	private AcquisitionMethodManagerToolbar toolbar;
+	private AcquisitionMethodManagerToolbar toolbar;
 	private AcquisitionMethodTable methodTable;
 	private AcquisitionMethodExtendedEditorDialog acquisitionMethodEditorDialog;
 //	private JFileChooser chooser;
@@ -77,8 +77,8 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-//		toolbar = new AcquisitionMethodManagerToolbar(this);
-//		getContentPane().add(toolbar, BorderLayout.NORTH);
+		toolbar = new AcquisitionMethodManagerToolbar(this);
+		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		methodTable = new AcquisitionMethodTable();
 		JScrollPane designScrollPane = new JScrollPane(methodTable);

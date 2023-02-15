@@ -99,30 +99,27 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<leaf id="0" nodeId="1600213801595">
-											<placeholders>
-												<placeholder>dock.single.DockableActivePrepDisplayPanel</placeholder>
-												<placeholder>dock.single.DockablePrepTable</placeholder>
-											</placeholders>
-											<placeholder-map>
-												<version>0</version>
-												<format>dock.PlaceholderList</format>
-												<entry>
-													<key shared="false">
-														<placeholder>dock.single.DockablePrepTable</placeholder>
-													</key>
-													<item key="convert" type="b">true</item>
-													<item key="convert-keys" type="a"/>
-												</entry>
-												<entry>
-													<key shared="false">
-														<placeholder>dock.single.DockableActivePrepDisplayPanel</placeholder>
-													</key>
-													<item key="convert" type="b">true</item>
-													<item key="convert-keys" type="a"/>
-												</entry>
-											</placeholder-map>
-										</leaf>
+										<node nodeId="1676488977325" orientation="HORIZONTAL" divider="0.5238480194017785">
+											<leaf id="1" nodeId="1600213801595">
+												<placeholders>
+													<placeholder>dock.single.DockablePrepTable</placeholder>
+												</placeholders>
+												<placeholder-map>
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockablePrepTable</placeholder>
+														</key>
+													</entry>
+												</placeholder-map>
+											</leaf>
+											<leaf id="0" nodeId="1676488977323">
+												<placeholders>
+													<placeholder>dock.single.DockableActivePrepDisplayPanel</placeholder>
+												</placeholders>
+											</leaf>
+										</node>
 									</content>
 								</delegate>
 							</layout>
@@ -133,63 +130,24 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockablePrepTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockablePrepTable</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableActivePrepDisplayPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableActivePrepDisplayPanel</item>
-											</entry>
-										</placeholders>
+									<layout factory="predefined" placeholder="dock.single.DockableActivePrepDisplayPanel">
+										<replacement id="dockablesingle DockableActivePrepDisplayPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableActivePrepDisplayPanel</id>
+											<area/>
+										</delegate>
 									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockablePrepTable">
-												<replacement id="dockablesingle DockablePrepTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockablePrepTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableActivePrepDisplayPanel">
-												<replacement id="dockablesingle DockableActivePrepDisplayPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableActivePrepDisplayPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockablePrepTable">
+										<replacement id="dockablesingle DockablePrepTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockablePrepTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

@@ -74,8 +74,8 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-//		toolbar = new ProtocolManagerToolbar(this);
-//		getContentPane().add(toolbar, BorderLayout.NORTH);
+		toolbar = new ProtocolManagerToolbar(this);
+		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		protocolTable = new ProtocolTable();
 		JScrollPane designScrollPane = new JScrollPane(protocolTable);

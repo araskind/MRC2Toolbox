@@ -82,6 +82,7 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.DockableChromatogramPl
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.MsConvertOutputFormat;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.RawDataConversionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msms.MSMSFeatureExtractionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisExperimentSetupDialog;
@@ -942,8 +943,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			MessageDialog.showErrorMsg("No files selected for conversion.", rawDataConversionSetupDialog);
 			return;
 		}
+		MsConvertOutputFormat format =  
+				rawDataConversionSetupDialog.getMsConvertOutputFormat();
+		
 		RawDataBatchCoversionTask task = 
-				new RawDataBatchCoversionTask(outputDir, filesToConvert);
+				new RawDataBatchCoversionTask(outputDir, filesToConvert, format);
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);		
 		rawDataConversionSetupDialog.dispose();

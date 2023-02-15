@@ -49,6 +49,8 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
+import org.apache.commons.io.FilenameUtils;
+
 import com.github.lgooddatepicker.components.DatePicker;
 
 import bibliothek.gui.dock.common.CControl;
@@ -57,6 +59,7 @@ import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
+import edu.umich.med.mrc2.datoolbox.data.enums.DocumentFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
@@ -66,6 +69,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.annotation.editors.DocumentAnnotationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepListener;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.user.UserSelectorDialog;
@@ -74,6 +78,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class SamplePrepEditorPanel extends JPanel 
 		implements ActionListener, PersistentLayout, BackedByPreferences {
@@ -85,6 +90,12 @@ public class SamplePrepEditorPanel extends JPanel
 
 	private static final File layoutConfigFile = 
 			new File(MRC2ToolBoxCore.configDir + "SamplePrepEditorDialog.layout");
+	
+	private Preferences preferences;
+	public static final String PREFS_NODE = "edu.umich.med.mrc2.cefanalyzer.gui.SamplePrepEditorPanel";
+	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
+	private File baseDirectory;	
+
 	private LIMSSamplePreparation prep;
 	private LIMSExperiment experiment;
 	private LIMSUser prepUser;
@@ -102,6 +113,7 @@ public class SamplePrepEditorPanel extends JPanel
 	private CGrid grid;
 	
 	private ExistingPrepSelectorDialog existingPrepSelectorDialog;
+	private DocumentAnnotationDialog documentAnnotationDialog;
 	private Set<SamplePrepListener> eventListeners;
 	private boolean isWizardStep;
 	
@@ -310,8 +322,11 @@ public class SamplePrepEditorPanel extends JPanel
 	public void loadPrepData(LIMSSamplePreparation samplePrep) {
 		
 		this.prep = samplePrep;
-		if(prep == null && experiment != null) {
-			prepSampleTable.setTableModelFromSamples(experiment.getExperimentDesign().getSamples());
+		if(prep == null) {
+			
+			if(experiment != null)
+				prepSampleTable.setTableModelFromSamples(
+						experiment.getExperimentDesign().getSamples());
 		}
 		else {
 			idValueLabel.setText(prep.getId());
@@ -338,9 +353,14 @@ public class SamplePrepEditorPanel extends JPanel
 			}
 			//	Load annotations
 			try {
-				documentsPanel.setModelFromAnnotations(
-						AnnotationUtils.getObjetAnnotations(AnnotatedObjectType.SAMPLE_PREP, prep.getId()));
-			} catch (Exception e) {
+				Collection<ObjectAnnotation> prepAnnotations = 
+						AnnotationUtils.getObjetAnnotations(AnnotatedObjectType.SAMPLE_PREP, prep.getId());
+				if(!prepAnnotations.isEmpty())
+					prep.getAnnotations().addAll(prep.getAnnotations());
+					
+				documentsPanel.setModelFromAnnotations(prep.getAnnotations());
+			} 
+			catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -399,7 +419,7 @@ public class SamplePrepEditorPanel extends JPanel
 		if(command.equals(MainActionCommands.ADD_DOCUMENT_DIALOG_COMMAND.getName()))
 			showAddDocumentDialog();
 
-		if(command.equals(MainActionCommands.ADD_DOCUMENT_COMMAND.getName()))
+		if(command.equals(MainActionCommands.SAVE_OBJECT_DOCUMENT_ANNOTATION_COMMAND.getName()))
 			addDocument();
 
 		if(command.equals(MainActionCommands.DELETE_DOCUMENT_COMMAND.getName()))
@@ -497,21 +517,6 @@ public class SamplePrepEditorPanel extends JPanel
 		documentsPanel.clearPanel();
 	}
 
-	private void deleteDocument() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void addDocument() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void showAddDocumentDialog() {
-		// TODO Auto-generated method stub
-
-	}
-
 	private void setNewPrepUser() {
 
 		if(userSelectorDialog.getSelectedUser() == null)
@@ -568,6 +573,84 @@ public class SamplePrepEditorPanel extends JPanel
 		prepSopSelectorDialog = new PrepSopSelectorDialog(this);
 		prepSopSelectorDialog.setLocationRelativeTo(this);
 		prepSopSelectorDialog.setVisible(true);
+	}
+	
+	private void showAddDocumentDialog() {;
+		
+		LIMSSamplePreparation annotated = prep;
+		if(prep == null) {
+			annotated =  new LIMSSamplePreparation(
+				null, 
+				getPrepName(), 
+				new Date(), 
+				MRC2ToolBoxCore.getIdTrackerUser());
+		}
+		ObjectAnnotation prepAnnotation = new ObjectAnnotation(annotated,
+			MRC2ToolBoxCore.getIdTrackerUser());	
+		documentAnnotationDialog = new DocumentAnnotationDialog(this);
+		documentAnnotationDialog.loadAnnotation(prepAnnotation);
+		documentAnnotationDialog.setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
+		documentAnnotationDialog.setSaveButtonText("Add document");
+		documentAnnotationDialog.setVisible(true);
+	}
+
+	private void addDocument() {
+			
+		ObjectAnnotation annotation = documentAnnotationDialog.getAnnotation();
+		if(annotation == null)
+			return;
+		
+		if(documentAnnotationDialog.getDocumentTitle().isEmpty()) {
+			MessageDialog.showErrorMsg("Please specify document title.", documentAnnotationDialog);
+			return;
+		}
+		Collection<ObjectAnnotation> existingAnnotations = 
+				documentsPanel.getAllAnnotations();
+		annotation.setLinkedDocumentName(documentAnnotationDialog.getDocumentTitle());
+		
+		//	Update existing annotation - unique ID is CHAR 12
+		if(annotation.getUniqueId().length() == 12) {
+			try {
+				AnnotationUtils.updateAnnotation(annotation, null);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {	//	Insert new annotation
+			if(documentAnnotationDialog.getDocumentSourceFile() == null) {
+				MessageDialog.showErrorMsg(
+						"Please specify document source file.", 
+						documentAnnotationDialog);
+				return;
+			}
+			try {
+				String extension = 
+						FilenameUtils.getExtension(
+								documentAnnotationDialog.getDocumentSourceFile().getName());
+				DocumentFormat format = 
+						DocumentFormat.getFormatByFileExtension(extension);
+				annotation.setLinkedDocumentFormat(format);
+				AnnotationUtils.insertNewAnnotation(
+						annotation, documentAnnotationDialog.getDocumentSourceFile());
+				if(prep != null)
+						prep.addAnnotation(annotation);
+				
+				existingAnnotations.add(annotation);
+			} 
+			catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		documentsPanel.setModelFromAnnotations(existingAnnotations);			
+		documentAnnotationDialog.dispose();	
+	}
+	
+	private void deleteDocument() {
+		// TODO Auto-generated method stub
+
 	}
 
 	public LIMSSamplePreparation getSamplePrep() {
@@ -668,21 +751,21 @@ public class SamplePrepEditorPanel extends JPanel
 	}
 
 	@Override
-	public void loadPreferences(Preferences preferences) {
-		// TODO Auto-generated method stub
-
+	public void loadPreferences(Preferences prefs) {
+		preferences = prefs;
+		baseDirectory =  new File(preferences.get(
+				BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
 	}
 
 	@Override
-	public void loadPreferences() {
-		// TODO Auto-generated method stub
-
+	public void loadPreferences() {		
+		loadPreferences(Preferences.userRoot().node(PREFS_NODE));
 	}
 
 	@Override
 	public void savePreferences() {
-		// TODO Auto-generated method stub
-
+		preferences = Preferences.userRoot().node(PREFS_NODE);
+		preferences.put(BASE_DIRECTORY, baseDirectory.getAbsolutePath());
 	}
 
 	@Override

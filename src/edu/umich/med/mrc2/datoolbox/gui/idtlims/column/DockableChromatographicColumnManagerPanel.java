@@ -52,7 +52,7 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 	private static final Icon addColumnIcon = GuiUtils.getIcon("addColumn", 24);
 	private static final Icon deleteColumnIcon = GuiUtils.getIcon("deleteColumn", 24);
 	
-//	private ChromatographicColumnManagerToolbar toolbar;
+	private ChromatographicColumnManagerToolbar toolbar;
 	private ChromatographicColumnTable cromatographicColumnTable;
 	private ChromatographicColumnEditorDialog cromatographicColumnEditorDialog;
 
@@ -64,8 +64,8 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-//		toolbar = new ChromatographicColumnManagerToolbar(this);
-//		getContentPane().add(toolbar, BorderLayout.NORTH);
+		toolbar = new ChromatographicColumnManagerToolbar(this);
+		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		cromatographicColumnTable = new ChromatographicColumnTable();
 		JScrollPane designScrollPane = new JScrollPane(cromatographicColumnTable);

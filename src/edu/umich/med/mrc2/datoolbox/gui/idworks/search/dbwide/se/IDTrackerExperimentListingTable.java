@@ -56,6 +56,8 @@ public class IDTrackerExperimentListingTable extends BasicTable {
 		setDefaultRenderer(LIMSExperiment.class, new LIMSExperimentRenderer());
 		columnModel.getColumnById(IDTrackerExperimentListingTableModel.EXPERIMENT_NAME_COLUMN).
 			setCellRenderer(new WordWrapCellRenderer());
+		columnModel.getColumnById(
+				IDTrackerExperimentListingTableModel.EXPERIMENT_ID_COLUMN).setMaxWidth(100);
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(LIMSExperiment.class, new LIMSExperimentFormat());
@@ -69,6 +71,8 @@ public class IDTrackerExperimentListingTable extends BasicTable {
 		model.setTableModelFromExperimentList(experimentList);
 		thf.setTable(this);
 		tca.adjustColumns();
+//		getColumnModel().getColumn(
+//				model.getColumnIndex(IDTrackerExperimentListingTableModel.EXPERIMENT_ID_COLUMN)).setWidth(80);
 	}
 	
 	public Collection<LIMSExperiment>getSelectedExperiments(){

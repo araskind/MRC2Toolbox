@@ -57,7 +57,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.expsetup.dpl.AcquisitionMethodSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodExtendedEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.DockableAcquisitionMethodDataPanel;
-import edu.umich.med.mrc2.datoolbox.gui.idtlims.data.DataAnalysisMethodSelectionDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.dataimport.DataAnalysisMethodSelectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.DataExtractionMethodEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.wizard.IDTrackerDataLoadWizard;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.wizard.IDTrackerDataLoadWizardPanel;

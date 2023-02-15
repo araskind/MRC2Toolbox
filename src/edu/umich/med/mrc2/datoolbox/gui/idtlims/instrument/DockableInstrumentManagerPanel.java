@@ -51,7 +51,7 @@ public class DockableInstrumentManagerPanel extends AbstractIDTrackerLimsPanel {
 	private static final Icon editInstrumentIcon = GuiUtils.getIcon("editInstrument", 24);	
 	private static final Icon deleteInstrumentIcon = GuiUtils.getIcon("deleteInstrument", 24);
 
-//	private InstrunmentManagerToolbar toolbar;
+	private InstrunmentManagerToolbar toolbar;
 	private InstrumentTable instrumentTable;
 	private InstrumentEditorDialog instrumentEditorDialog;
 
@@ -62,8 +62,8 @@ public class DockableInstrumentManagerPanel extends AbstractIDTrackerLimsPanel {
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-//		toolbar = new InstrunmentManagerToolbar(this);
-//		getContentPane().add(toolbar, BorderLayout.NORTH);
+		toolbar = new InstrunmentManagerToolbar(this);
+		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		instrumentTable = new InstrumentTable();
 		JScrollPane designScrollPane = new JScrollPane(instrumentTable);

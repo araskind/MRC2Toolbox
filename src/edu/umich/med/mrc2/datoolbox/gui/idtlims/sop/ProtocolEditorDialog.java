@@ -381,13 +381,13 @@ public class ProtocolEditorDialog extends JDialog implements ActionListener, Bac
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;
-		loadPreferences();
+		baseDirectory =  new File(preferences.get(
+				BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
 	}
 
 	@Override
-	public void loadPreferences() {
-		preferences = Preferences.userRoot().node(PREFS_NODE);
-		baseDirectory =  new File(preferences.get(BASE_DIRECTORY, MRC2ToolBoxConfiguration.getDefaultDataDirectory()));
+	public void loadPreferences() {		
+		loadPreferences(Preferences.userRoot().node(PREFS_NODE));
 	}
 
 	@Override

@@ -61,8 +61,8 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 		setLayout(new BorderLayout(0, 0));
 		this.idTrackerLimsManager = idTrackerLimsManager;
 
-//		toolbar = new MobilePhaseManagerToolbar(this);
-//		getContentPane().add(toolbar, BorderLayout.NORTH);
+		toolbar = new MobilePhaseManagerToolbar(this);
+		getContentPane().add(toolbar, BorderLayout.NORTH);
 		
 		mobilePhaseTable = new MobilePhaseTable();	
 		JScrollPane designScrollPane = new JScrollPane(mobilePhaseTable);

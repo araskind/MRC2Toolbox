@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.MsConvertOutputFormat;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
@@ -36,11 +37,16 @@ public class RawDataConversionTask extends AbstractTask {
 	
 	private File outputDir ;
 	private File fileToConvert;
+	private MsConvertOutputFormat format;
 
-	public RawDataConversionTask(File outputDir, File fileToConvert) {
+	public RawDataConversionTask(
+			File outputDir, 
+			File fileToConvert, 
+			MsConvertOutputFormat format) {
 		super();
 		this.outputDir = outputDir;
 		this.fileToConvert = fileToConvert;
+		this.format = format;
 	}
 
 	@Override
@@ -51,29 +57,9 @@ public class RawDataConversionTask extends AbstractTask {
 		processed = 30;		
 		setStatus(TaskStatus.PROCESSING);
 		String msConvertBinary = MRC2ToolBoxConfiguration.getMsConvertExecutableFile();
-		String parameters = "--mzML --64 -z --filter \"peakPicking vendor\" -o ";
+		String parameters = "--" + format.name() + " --64 -z --filter \"peakPicking vendor\" -o ";
 		String command = "\"" + msConvertBinary + "\" \"" + fileToConvert.getAbsolutePath() + "\" " + 
 				parameters + " \"" + outputDir.getAbsolutePath() + "\"";
-//		Runtime runtime = Runtime.getRuntime();
-//		Process process = null;
-//		try {
-//			process = runtime.exec(command);
-//			if (getStatus().equals(TaskStatus.CANCELED)) {
-//				try {
-//					process.destroyForcibly();
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//			process.waitFor();
-//			setStatus(TaskStatus.FINISHED);
-//		} catch (IOException e1) {
-//			e1.printStackTrace();
-//			setStatus(TaskStatus.ERROR);
-//		} catch (InterruptedException e2) {
-//			e2.printStackTrace();
-//			setStatus(TaskStatus.ERROR);
-//		}
 		try {
 			Runtime runtime = Runtime.getRuntime();
 			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -87,7 +73,7 @@ public class RawDataConversionTask extends AbstractTask {
 				setStatus(TaskStatus.FINISHED);
 			} else {
 				errorMessage = new String(baos.toByteArray(), StandardCharsets.UTF_8);
-				System.out.println("PepSearch error");
+				System.out.println("MsConvert error");
 				System.out.println(errorMessage);
 				System.out.println(command);
 				setStatus(TaskStatus.ERROR);
@@ -104,10 +90,8 @@ public class RawDataConversionTask extends AbstractTask {
 	
 	@Override
 	public Task cloneTask() {
-		// TODO Auto-generated method stub
-		return null;
+		return new RawDataConversionTask(outputDir, fileToConvert, format);
 	}
-
-
-
 }
+
+

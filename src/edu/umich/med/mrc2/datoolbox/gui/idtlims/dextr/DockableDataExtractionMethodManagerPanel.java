@@ -59,7 +59,7 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 	private static final Icon downloadMethodIcon = GuiUtils.getIcon("downloadDataProcessingMethod", 24);
 	private static final Icon linkToDataAcquisitionMethodIcon = GuiUtils.getIcon("linkToDataAcquisitionMethod", 24);
 
-//	private DataExtractionMethodManagerToolbar toolbar;
+	private DataExtractionMethodManagerToolbar toolbar;
 	private DataExtractionMethodTable dataExtractionMethodTable;
 	private DataExtractionMethodEditorDialog dataExtractionMethodEditorDialog;
 	private File baseDirectory;
@@ -74,8 +74,8 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-//		toolbar = new DataExtractionMethodManagerToolbar(this);
-//		getContentPane().add(toolbar, BorderLayout.NORTH);
+		toolbar = new DataExtractionMethodManagerToolbar(this);
+		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		dataExtractionMethodTable = new DataExtractionMethodTable();
 		JScrollPane designScrollPane = new JScrollPane(dataExtractionMethodTable);

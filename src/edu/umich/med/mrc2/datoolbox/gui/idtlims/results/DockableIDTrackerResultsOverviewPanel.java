@@ -71,8 +71,8 @@ public class DockableIDTrackerResultsOverviewPanel extends AbstractIDTrackerLims
 				componentIcon, "Result summaries", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
-//		toolbar = new IDTrackerResultsOverviewToolbar(this);
-//		add(toolbar, BorderLayout.NORTH);
+		toolbar = new IDTrackerResultsOverviewToolbar(this);
+		add(toolbar, BorderLayout.NORTH);
 
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);

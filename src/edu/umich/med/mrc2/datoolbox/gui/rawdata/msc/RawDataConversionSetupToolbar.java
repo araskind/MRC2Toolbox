@@ -66,11 +66,11 @@ public class RawDataConversionSetupToolbar extends CommonToolbar {
 				MainActionCommands.CLEAR_DATA_COMMAND.getName(),
 				MainActionCommands.CLEAR_DATA_COMMAND.getName(), buttonDimension);
 		
-		addSeparator(buttonDimension);
-		
-		selectOutputFolderButton = GuiUtils.addButton(this, null, selectOutputFolderIcon, commandListener,
-				MainActionCommands.SELECT_OUPUT_DIRECTORY_COMMAND.getName(),
-				MainActionCommands.SELECT_OUPUT_DIRECTORY_COMMAND.getName(), buttonDimension);
+//		addSeparator(buttonDimension);
+//		
+//		selectOutputFolderButton = GuiUtils.addButton(this, null, selectOutputFolderIcon, commandListener,
+//				MainActionCommands.SELECT_OUPUT_DIRECTORY_COMMAND.getName(),
+//				MainActionCommands.SELECT_OUPUT_DIRECTORY_COMMAND.getName(), buttonDimension);
 	}
 
 	@Override

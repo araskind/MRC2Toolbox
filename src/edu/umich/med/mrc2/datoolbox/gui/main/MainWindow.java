@@ -568,8 +568,21 @@ public class MainWindow extends JFrame
 
 	@Override
 	public void closeExperiment() {
-
-		if (currentExperiment != null || MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		
+		if (currentExperiment == null 
+				&& MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+			int selectedValue = MessageDialog.showChoiceMsg(
+					"Are you sure you want to clear the workspace?",
+					this.getContentPane());
+			if (selectedValue == JOptionPane.CANCEL_OPTION)
+				return;
+			
+			if (selectedValue == JOptionPane.YES_OPTION) {
+				clearGuiAfterExperimentClosed();
+			}
+		}
+		if (currentExperiment != null 
+				|| MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
 
 			String yesNoQuestion = "You are going to close current experiment,"
 					+ " do you want to save the results (Yes - save, No - discard)?";

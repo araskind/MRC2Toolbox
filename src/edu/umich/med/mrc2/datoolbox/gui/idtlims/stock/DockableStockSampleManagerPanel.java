@@ -61,8 +61,8 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-//		toolbar = new StockSampleManagerToolbar(this);
-//		getContentPane().add(toolbar, BorderLayout.NORTH);
+		toolbar = new StockSampleManagerToolbar(this);
+		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		stockSampleTable =  new StockSampleTable();
 		JScrollPane designScrollPane = new JScrollPane(stockSampleTable);

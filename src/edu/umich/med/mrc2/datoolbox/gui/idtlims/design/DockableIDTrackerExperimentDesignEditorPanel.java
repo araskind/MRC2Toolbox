@@ -53,7 +53,7 @@ public class DockableIDTrackerExperimentDesignEditorPanel
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 		experimentDesignEditorPanel = 
-				new IDTrackerExperimentDesignEditorPanel(false);
+				new IDTrackerExperimentDesignEditorPanel(true);
 		getContentPane().add(experimentDesignEditorPanel, BorderLayout.CENTER);
 		
 		initActions();

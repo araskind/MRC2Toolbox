@@ -19,4 +19,18 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idtlims.data;
+package edu.umich.med.mrc2.datoolbox.gui.rawdata.msc;
+
+public enum MsConvertOutputFormat {
+
+	mzML,
+	mzXML,
+	mz5,
+	mgf,
+	text,
+	ms1,
+	cms1,
+	ms2,
+	cms2,
+	;
+}

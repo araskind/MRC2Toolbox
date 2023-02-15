@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata;
 import java.io.File;
 import java.util.Collection;
 
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.MsConvertOutputFormat;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -36,11 +37,16 @@ public class RawDataBatchCoversionTask extends AbstractTask implements TaskListe
 	
 	private File outputDir ;
 	private Collection<File>filesToConvert;
+	private MsConvertOutputFormat format;
 
-	public RawDataBatchCoversionTask(File outputDir, Collection<File> filesToConvert) {
+	public RawDataBatchCoversionTask(
+			File outputDir, 
+			Collection<File> filesToConvert, 
+			MsConvertOutputFormat format) {
 		super();
 		this.outputDir = outputDir;
 		this.filesToConvert = filesToConvert;
+		this.format = format;
 	}
 
 	@Override
@@ -52,7 +58,8 @@ public class RawDataBatchCoversionTask extends AbstractTask implements TaskListe
 		try {
 			for(File rawFile : filesToConvert) {
 
-				RawDataConversionTask task = new RawDataConversionTask(outputDir, rawFile);
+				RawDataConversionTask task = 
+						new RawDataConversionTask(outputDir, rawFile, format);
 				task.addTaskListener(this);
 				MRC2ToolBoxCore.getTaskController().addTask(task);
 			}
@@ -64,7 +71,8 @@ public class RawDataBatchCoversionTask extends AbstractTask implements TaskListe
 	
 	@Override
 	public Task cloneTask() {
-		return new RawDataBatchCoversionTask(outputDir, filesToConvert);
+		return new RawDataBatchCoversionTask(
+				outputDir, filesToConvert, format);
 	}
 
 	@Override

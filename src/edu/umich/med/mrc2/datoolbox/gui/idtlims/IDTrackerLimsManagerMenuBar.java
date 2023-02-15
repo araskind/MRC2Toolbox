@@ -120,7 +120,7 @@ public class IDTrackerLimsManagerMenuBar extends CommonMenuBar {
 				importBinnerDataIcon);
 		uploadBinnerDataMenuItem.setEnabled(false);
 		
-		add(dataLoadMenu);		
+		//	add(dataLoadMenu);		
 	}
 
 	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {

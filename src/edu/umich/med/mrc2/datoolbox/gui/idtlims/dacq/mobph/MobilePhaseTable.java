@@ -26,8 +26,12 @@ import java.util.Collection;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.format.MobilePhaseFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class MobilePhaseTable extends BasicTable {
@@ -49,11 +53,18 @@ public class MobilePhaseTable extends BasicTable {
 
 		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_DESCRIPTION_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
+		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN).setMaxWidth(120);
+		
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		thf.getParserModel().setFormat(MobilePhase.class, new MobilePhaseFormat(SortProperty.ID));		
+		finalizeLayout();
 	}
 
 	public void setTableModelFromMobilePhaseCollection(Collection<MobilePhase>phases) {
+		thf.setTable(null);
 		model.setTableModelFromMobilePhaseCollection(phases);
-		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN).setWidth(80);
+		thf.setTable(this);
+		tca.adjustColumns();
 	}
 
 	public MobilePhase getSelectedMobilePhase() {
