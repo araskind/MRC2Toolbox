@@ -41,7 +41,7 @@ public class BasicIsotopicPattern implements Serializable {
 	public int getCharge() {
 		return charge;
 	}
-
+	
 	public BasicIsotopicPattern(MsPoint seedPoint) {
 
 		dataPoints = new TreeSet<MsPoint>(new MsDataPointComparator(SortProperty.MZ));
@@ -49,6 +49,7 @@ public class BasicIsotopicPattern implements Serializable {
 		charge = 1;
 	}
 
+	//	Rewrite using neutron mass and mass error in ppm adjusted for mass
 	public boolean addDataPoint(MsPoint newPoint, int newCharge) {
 
 		boolean added = false;

@@ -366,7 +366,7 @@ public class MassSpectrum implements Serializable {
 		return primaryAdduct;
 	}
 
-	public int getAbsoluteCharge() {
+	public int getAbsoluteChargeFromIsotopicPattern() {
 
 		int absCharge = 0;
 		MsPoint[] pattern = getCompletePattern();

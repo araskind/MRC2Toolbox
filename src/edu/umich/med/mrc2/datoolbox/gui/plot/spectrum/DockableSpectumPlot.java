@@ -345,9 +345,16 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		if(trueParent == null)
 			trueParent = msms.getActualParentIon();
 		
-		if(trueParent != null)
-			parentSeries.add(trueParent.getMz(), trueParent.getIntensity());
-				
+		if(trueParent != null) {
+			
+			double parentIntensity = msms.getTopIntensityForMzRange(
+					new edu.umich.med.mrc2.datoolbox.utils.Range(
+							trueParent.getMz() - 0.1d, trueParent.getMz() + 0.1d));
+			if(parentIntensity == 0.0d)
+				parentIntensity = msms.getTopIntensity() / 5.0d;
+			
+			parentSeries.add(trueParent.getMz(), parentIntensity);
+		}				
 		parentSet.addSeries(parentSeries);
 		XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
 		parentRenderer.setSeriesPaint(0, Color.RED);

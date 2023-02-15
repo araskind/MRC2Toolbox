@@ -452,6 +452,21 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 
 				adductMap.get(adduct).add(new MsPoint(msrs.getDouble("MZ"), msrs.getDouble("HEIGHT")));
 			}
+//			while(msrs.next()) {
+//				
+//				Adduct adduct = defaultAdduct;
+//				String adductId = msrs.getString("ADDUCT_ID");
+//				if(adductId == null)
+//					adductId = msrs.getString("COMPOSITE_ADDUCT_ID");
+//
+//				if(adductId != null)
+//					adduct = AdductManager.getAdductById(adductId);
+//
+//				if(!adductMap.containsKey(adduct))
+//					adductMap.put(adduct, new ArrayList<MsPoint>());
+//
+//				adductMap.get(adduct).add(new MsPoint(msrs.getDouble("MZ"), msrs.getDouble("HEIGHT")));
+//			}
 			msrs.close();
 			adductMap.entrySet().stream().
 				forEach(e -> spectrum.addSpectrumForAdduct(e.getKey(), e.getValue()));

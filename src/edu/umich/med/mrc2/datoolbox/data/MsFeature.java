@@ -635,7 +635,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			if (spectrum.getPrimaryAdduct() != null)
 				absCharge = spectrum.getPrimaryAdductAbsoluteCharge();
 			else
-				absCharge = spectrum.getAbsoluteCharge();
+				absCharge = spectrum.getAbsoluteChargeFromIsotopicPattern();
 		}
 		return absCharge;
 	}
@@ -647,7 +647,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			if (spectrum.getPrimaryAdduct() != null)
 				return spectrum.getPrimaryAdduct().getCharge();
 			else {
-				return spectrum.getAbsoluteCharge() * polarity.getSign();
+				return spectrum.getAbsoluteChargeFromIsotopicPattern() * polarity.getSign();
 			}
 		}
 		return 0;

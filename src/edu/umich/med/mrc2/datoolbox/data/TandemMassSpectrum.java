@@ -824,6 +824,31 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	public void setHasScans(boolean hasScans) {
 		this.hasScans = hasScans;
 	}
+	
+	public double getTopIntensityForMzRange(Range mzRange) {
+		
+		if(spectrum == null || spectrum.isEmpty())
+			return 0.0d;
+		
+		List<MsPoint> pointsInRange = spectrum.stream().
+				filter(p -> mzRange.contains(p.getMz())).
+				sorted(MsUtils.reverseIntensitySorter).				
+				collect(Collectors.toList());
+		if(!pointsInRange.isEmpty())
+			return pointsInRange.get(0).getIntensity();
+		
+		return 0.0d;
+	}
+	
+	public double getTopIntensity() {
+		
+		if(spectrum == null || spectrum.isEmpty())
+			return 0.0d;
+		
+		return  spectrum.stream().
+			sorted(MsUtils.reverseIntensitySorter).
+			collect(Collectors.toList()).get(0).getIntensity();
+	}
 }
 
 

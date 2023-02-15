@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1671155312463" orientation="VERTICAL" divider="0.7688022284122563">
-											<leaf id="1" nodeId="1671155290742">
+											<leaf id="0" nodeId="1671155290742">
 												<placeholders>
 													<placeholder>dock.single.DockableMSMSClusteringParametersPanel</placeholder>
 													<placeholder>dock.single.DockableFeatureListPanel</placeholder>
@@ -132,7 +132,7 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="0" nodeId="1671155312461">
+											<leaf id="1" nodeId="1671155312461">
 												<placeholders>
 													<placeholder>dock.single.DockableDataPipelinesTable</placeholder>
 												</placeholders>
@@ -147,16 +147,6 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableDataPipelinesTable">
-										<replacement id="dockablesingle DockableDataPipelinesTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableDataPipelinesTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -244,6 +234,16 @@
 											<children ignore="false"/>
 										</child>
 									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableDataPipelinesTable">
+										<replacement id="dockablesingle DockableDataPipelinesTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableDataPipelinesTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

@@ -81,6 +81,16 @@ public class IDTrackerExperimentListingTable extends BasicTable {
 		 return selectedExperiments;
 	}
 	
+	public LIMSExperiment getSelectedExperiment(){
+
+		int selectedRow = getSelectedRow();
+		if(selectedRow == -1)
+			return null;
+		 
+		return  (LIMSExperiment)model.getValueAt(convertRowIndexToModel(selectedRow),
+				 model.getColumnIndex(IDTrackerExperimentListingTableModel.EXPERIMENT_ID_COLUMN));
+	}
+	
 	public Collection<LIMSExperiment>getAllExperiments(){
 		
 		 Collection<LIMSExperiment>selectedExperiments = new  ArrayList<LIMSExperiment>();

@@ -99,25 +99,26 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600213802276" orientation="HORIZONTAL" divider="0.7592223330009971">
-											<node nodeId="1600213802278" orientation="VERTICAL" divider="0.4891416752843847">
-												<leaf id="1" nodeId="1600213802280">
-													<placeholders>
-														<placeholder>dock.single.DockableExperimentListingTable</placeholder>
-													</placeholders>
-												</leaf>
-												<leaf id="2" nodeId="1600213802282">
-													<placeholders>
-														<placeholder>dock.single.DockableLIMSDesignEditorPanel</placeholder>
-													</placeholders>
-												</leaf>
-											</node>
-											<leaf id="0" nodeId="1600213802284">
-												<placeholders>
-													<placeholder>dock.single.DockableExperimentSummaryPanel</placeholder>
-												</placeholders>
-											</leaf>
-										</node>
+										<leaf id="0" nodeId="1676324651261">
+											<placeholder-map>
+												<version>0</version>
+												<format>dock.PlaceholderList</format>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.SelectMSMSdatafiles</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+												<entry>
+													<key shared="false">
+														<placeholder>dock.single.SelectMS1datafiles</placeholder>
+													</key>
+													<item key="convert" type="b">true</item>
+													<item key="convert-keys" type="a"/>
+												</entry>
+											</placeholder-map>
+										</leaf>
 									</content>
 								</delegate>
 							</layout>
@@ -128,34 +129,63 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentSummaryPanel">
-										<replacement id="dockablesingle DockableExperimentSummaryPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentSummaryPanel</id>
-											<area/>
-										</delegate>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>1</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.SelectMSMSdatafiles</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.SelectMSMSdatafiles</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.SelectMS1datafiles</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.SelectMS1datafiles</item>
+											</entry>
+										</placeholders>
 									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
-										<replacement id="dockablesingle DockableExperimentListingTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentListingTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLIMSDesignEditorPanel">
-										<replacement id="dockablesingle DockableLIMSDesignEditorPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLIMSDesignEditorPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.SelectMSMSdatafiles">
+												<replacement id="dockablesingle SelectMSMSdatafiles"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>SelectMSMSdatafiles</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.SelectMS1datafiles">
+												<replacement id="dockablesingle SelectMS1datafiles"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>SelectMS1datafiles</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
 								</child>
 							</children>
 						</root>
@@ -185,70 +215,13 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DockableLIMSDesignEditorPanel" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableLIMSDesignEditorPanel</placeholder>
-											<backup-path>
-												<node location="LEFT" size="0.7592223330009971" id="1600213802276"/>
-												<node location="BOTTOM" size="0.5108583247156153" id="1600213802278"/>
-												<leaf id="1600213802282"/>
-											</backup-path>
-										</property>
-									</location>
-								</property>
-							</properties>
+						<entry id="single SelectMSMSdatafiles" current="dock.mode.normal">
+							<history/>
+							<properties/>
 						</entry>
-						<entry id="single DockableExperimentListingTable" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableExperimentListingTable</placeholder>
-											<backup-path>
-												<node location="LEFT" size="0.7592223330009971" id="1600213802276"/>
-												<node location="TOP" size="0.5" id="1600213802278"/>
-												<leaf id="1600213802280"/>
-											</backup-path>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single DockableExperimentSummaryPanel" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableExperimentSummaryPanel</placeholder>
-											<backup-path>
-												<node location="RIGHT" size="0.24077766699900294" id="1600213802276"/>
-												<leaf id="1600213802284"/>
-											</backup-path>
-										</property>
-									</location>
-								</property>
-							</properties>
+						<entry id="single SelectMS1datafiles" current="dock.mode.normal">
+							<history/>
+							<properties/>
 						</entry>
 					</dockables>
 					<modes>

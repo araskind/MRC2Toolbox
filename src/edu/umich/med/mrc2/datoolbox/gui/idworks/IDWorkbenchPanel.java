@@ -87,7 +87,6 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
@@ -115,7 +114,6 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClus
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.filter.MSMSClusterFilterDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary.MSMSCLusterDataSetSummaryDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.experiment.OpenIDTrackerExperimentDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerMSMSClusterDataSetExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.SiriusDataExportDialog;
@@ -238,7 +236,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private FileNameExtensionFilter xmlFilter;
 	private FileNameExtensionFilter mgfFilter;
 	private IDTrackerLimsManagerPanel idTrackerManager;
-	private OpenIDTrackerExperimentDialog openIDTrackerExperimentDialog;
+//	private OpenIDTrackerExperimentDialog openIDTrackerExperimentDialog;
 	private LIMSExperiment idTrackerExperiment;
 	private PepSearchSetupDialog pepSearchSetupDialog;
 	private NISTMSSerchSetupDialog nistMSSerchSetupDialog;
@@ -555,11 +553,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		String command = event.getActionCommand();
 
-		if (command.equals(MainActionCommands.SHOW_OPEN_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName()))
-			showOpenExperimentDialogue();
+//		if (command.equals(MainActionCommands.SHOW_OPEN_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName()))
+//			showOpenExperimentDialogue();
 
-		if (command.equals(MainActionCommands.OPEN_IDTRACKER_EXPERIMENT_COMMAND.getName()))
-			openExperiment();
+//		if (command.equals(MainActionCommands.OPEN_IDTRACKER_EXPERIMENT_COMMAND.getName()))
+//			openExperiment();
 
 		if (command.equals(MainActionCommands.ID_SETUP_DIALOG_COMMAND.getName()))
 			runIdentificationTask();
@@ -2793,55 +2791,55 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		pepSearchSetupDialog.dispose();
 	}
 
-	private void openExperiment() {
-
-		if(openIDTrackerExperimentDialog.getSelectedLimsExperiment() == null) {
-
-			MessageDialog.showErrorMsg("Please select IDTracker experiment!", this.getContentPane());
-			return;
-		}
-		idTrackerExperiment = openIDTrackerExperimentDialog.getSelectedLimsExperiment();
-
-		clearPanel();
-		Collection<LIMSSamplePreparation> preps = IDTDataCash.getExperimentSamplePrepMap().get(idTrackerExperiment);
-		if(preps != null && !preps.isEmpty()) {
-			
-			for(LIMSSamplePreparation prep : preps) {
-				Collection<DataPipeline> dataPipelines = IDTDataCash.getSamplePrepDataPipelineMap().get(prep);
-				if(dataPipelines != null && !dataPipelines.isEmpty()) {
-					
-					List<DataAcquisitionMethod> methods = 
-							dataPipelines.stream().map(p -> p.getAcquisitionMethod()).
-							distinct().collect(Collectors.toList());
-					if(!methods.isEmpty())
-						samplePrepAcquisitionMethodMap.put(prep, methods);
-				}
-			}		
-		}
-		dataAcquisitionMethods.addAll(
-				IDTDataCash.getAcquisitionMethodsForExperiment(idTrackerExperiment));
-		acquisitionDataExtractionMethodMap.clear();
-		featureSetataExtractionMethodMap.clear();
-
-		IDTrackerExperimentDataFetchTask task = 
-				new IDTrackerExperimentDataFetchTask(idTrackerExperiment);
-		task.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(task);
-		openIDTrackerExperimentDialog.dispose();
-	}
-
-	private void showOpenExperimentDialogue() {
-
-		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
-			MessageDialog.showErrorMsg("You are not logged in ID tracker!", this.getContentPane());
-			return;
-		}
-		//	TODO check if already opened experiment
-
-		openIDTrackerExperimentDialog = new OpenIDTrackerExperimentDialog(this);
-		openIDTrackerExperimentDialog.setLocationRelativeTo(this.getContentPane());
-		openIDTrackerExperimentDialog.setVisible(true);
-	}
+//	private void openExperiment() {
+//
+//		if(openIDTrackerExperimentDialog.getSelectedLimsExperiment() == null) {
+//
+//			MessageDialog.showErrorMsg("Please select IDTracker experiment!", this.getContentPane());
+//			return;
+//		}
+//		idTrackerExperiment = openIDTrackerExperimentDialog.getSelectedLimsExperiment();
+//
+//		clearPanel();
+//		Collection<LIMSSamplePreparation> preps = IDTDataCash.getExperimentSamplePrepMap().get(idTrackerExperiment);
+//		if(preps != null && !preps.isEmpty()) {
+//			
+//			for(LIMSSamplePreparation prep : preps) {
+//				Collection<DataPipeline> dataPipelines = IDTDataCash.getSamplePrepDataPipelineMap().get(prep);
+//				if(dataPipelines != null && !dataPipelines.isEmpty()) {
+//					
+//					List<DataAcquisitionMethod> methods = 
+//							dataPipelines.stream().map(p -> p.getAcquisitionMethod()).
+//							distinct().collect(Collectors.toList());
+//					if(!methods.isEmpty())
+//						samplePrepAcquisitionMethodMap.put(prep, methods);
+//				}
+//			}		
+//		}
+//		dataAcquisitionMethods.addAll(
+//				IDTDataCash.getAcquisitionMethodsForExperiment(idTrackerExperiment));
+//		acquisitionDataExtractionMethodMap.clear();
+//		featureSetataExtractionMethodMap.clear();
+//
+//		IDTrackerExperimentDataFetchTask task = 
+//				new IDTrackerExperimentDataFetchTask(idTrackerExperiment);
+//		task.addTaskListener(this);
+//		MRC2ToolBoxCore.getTaskController().addTask(task);
+//		openIDTrackerExperimentDialog.dispose();
+//	}
+//
+//	private void showOpenExperimentDialogue() {
+//
+//		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
+//			MessageDialog.showErrorMsg("You are not logged in ID tracker!", this.getContentPane());
+//			return;
+//		}
+//		//	TODO check if already opened experiment
+//
+//		openIDTrackerExperimentDialog = new OpenIDTrackerExperimentDialog(this);
+//		openIDTrackerExperimentDialog.setLocationRelativeTo(this.getContentPane());
+//		openIDTrackerExperimentDialog.setVisible(true);
+//	}
 
 
 	private void showIdTrackerManager() {
@@ -2904,7 +2902,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				MessageDialog.showInfoMsg("Results are in " + results.getAbsolutePath(), this.getContentPane());
 			}
 			if (e.getSource().getClass().equals(IDTrackerExperimentDataFetchTask.class))
-				finalizeIdTrackerExperimentLoad();
+				finalizeIdTrackerExperimentLoad((IDTrackerExperimentDataFetchTask)e.getSource());
 
 			if (e.getSource().getClass().equals(IDTMS1FeatureSearchTask.class))
 				loadMsOneSearchData(((IDTMS1FeatureSearchTask)e.getSource()).getSelectedFeatures());
@@ -2955,13 +2953,18 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				finalizeIDTMSMSClusterDataPullTask((IDTMSMSClusterDataPullTask)e.getSource());	
 			
 			if (e.getSource().getClass().equals(MSMSClusterDataSetUploadTask.class))
-				finalizeMSMSClusterDataSetUploadTask((MSMSClusterDataSetUploadTask)e.getSource());				
+				finalizeMSMSClusterDataSetUploadTask((MSMSClusterDataSetUploadTask)e.getSource());			
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			MainWindow.hideProgressDialog();
 		}
-	}		
+	}
+	
+	private void finalizeIdTrackerExperimentLoad(IDTrackerExperimentDataFetchTask task) {
+
+		loadMsMsSearchData(task.getSelectedFeatures());
+	}
 
 	private void finalizeIDTrackerMSMSClusterDataExportTask(IDTrackerMSMSClusterDataExportTask task) {
 
@@ -3339,12 +3342,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		msOneFeatureTable.getTable().
 			setTableModelFromFeatureList(featuresToLoad);
 		msOneFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
-	}
-	
-
-	private void finalizeIdTrackerExperimentLoad() {
-		// TODO Auto-generated method stub
-
 	}
 
 	private void runIdentificationTask() {

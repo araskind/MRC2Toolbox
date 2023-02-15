@@ -218,6 +218,8 @@ public class MRC2ToolBoxConfiguration {
     
     public static final String SPECTRUM_ENTROPY_NOISE_CUTOFF = "SPECTRUM_ENTROPY_NOISE_CUTOFF";
     public static final double SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT = 0.01d;
+    
+    public static final String  ONLINE_HELP_URL = "https://metidtracker.github.io/midtdocs/index.html";
 
 	//	Params
     private static NumberFormat mzFormat;

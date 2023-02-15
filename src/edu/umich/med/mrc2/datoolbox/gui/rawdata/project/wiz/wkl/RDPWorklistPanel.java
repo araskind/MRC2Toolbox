@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Objects;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -87,6 +88,7 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 	private BatchSampleAssignmentDialog batchSampleAssignmentDialog;	
 	private AcquisitionMethodAssignmentDialog acquisitionMethodAssignmentDialog;
 	private InjectionVolumeAssignmentDialog injectionVolumeAssignmentDialog;
+	private InjectionTimeAssignmentDialog injectionTimeAssignmentDialog;
 	
 	public RDPWorklistPanel(RDEMetadataWizard wizard) {
 		
@@ -159,14 +161,62 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 			
 		if (command.equals(MainActionCommands.ASSIGN_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND.getName()))
 			assignInjectionVolumeForSelectedDataFiles();
+		
+		if (command.equals(MainActionCommands.SPECIFY_INJ_TIME_FOR_SELECTED_DATA_FILES_COMMAND.getName()))
+			showInjectionTimeAssignmentDialog();
+		
+		if (command.equals(MainActionCommands.ASSIGN_INJ_TIME_FOR_SELECTED_DATA_FILES_COMMAND.getName()))
+			assignInjectionTimeForSelectedDataFiles();
+		
 						
 		if (command.equals(MainActionCommands.DELETE_DATA_FILES_COMMAND.getName()))
 			deleteSelectedFiles();		
 	}
+
+	private void showInjectionTimeAssignmentDialog() {
+
+		Collection<DataFile> selectedFiles = 
+				instrumentSequenceTable.getSelectedDataFiles();
+		if(selectedFiles.isEmpty())
+			return;
+		
+		injectionTimeAssignmentDialog = new InjectionTimeAssignmentDialog(this);
+		injectionTimeAssignmentDialog.setLocationRelativeTo(this);
+		injectionTimeAssignmentDialog.setVisible(true);
+	}
+	
+	private void assignInjectionTimeForSelectedDataFiles() {
+		
+		Collection<DataFile> selectedFiles = 
+				instrumentSequenceTable.getSelectedDataFiles();
+		if(selectedFiles.isEmpty())
+			return;
+		
+		Date injectionTime = injectionTimeAssignmentDialog.getInjectionTime();
+		if(injectionTime == null) {
+			MessageDialog.showErrorMsg(
+					"Invalid injection timestamp", injectionTimeAssignmentDialog);
+			return;
+		}
+		for(DataFile df : selectedFiles)
+			df.setInjectionTime(injectionTime);
+		
+		worklist.getTimeSortedWorklistItems().stream().
+				filter(LIMSWorklistItem.class::isInstance).
+				map(LIMSWorklistItem.class::cast).
+				filter(i -> selectedFiles.contains(i.getDataFile())).
+				forEach(i -> i.setTimeStamp(injectionTime));
+
+		instrumentSequenceTable.populateTableFromWorklistExperimentAndSamplePrep(
+				worklist, experiment, samplePrep);
+		
+		injectionTimeAssignmentDialog.dispose();
+	}
 	
 	private void showInjectionVolumeAssignmentDialog() {
-		// TODO Auto-generated method stub
-		Collection<DataFile> selectedFiles = instrumentSequenceTable.getSelectedDataFiles();
+
+		Collection<DataFile> selectedFiles = 
+				instrumentSequenceTable.getSelectedDataFiles();
 		if(selectedFiles.isEmpty())
 			return;
 		
@@ -187,6 +237,9 @@ public class RDPWorklistPanel extends RDPMetadataWizardPanel
 		if(injectionVolume == 0.0d)
 			return;
 		
+		for(DataFile df : selectedFiles)
+			df.setInjectionVolume(injectionVolume);
+			
 		worklist.getTimeSortedWorklistItems().stream().
 			filter(LIMSWorklistItem.class::isInstance).
 			map(LIMSWorklistItem.class::cast).

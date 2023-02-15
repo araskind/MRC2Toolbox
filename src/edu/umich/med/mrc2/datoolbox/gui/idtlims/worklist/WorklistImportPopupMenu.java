@@ -39,12 +39,14 @@ public class WorklistImportPopupMenu extends JPopupMenu {
 	private static final Icon assignLevelIcon = GuiUtils.getIcon("dropdown", 24);
 	private static final Icon assignAcqMethodIcon = GuiUtils.getIcon("addDataAcquisitionMethod", 24);
 	private static final Icon assignInjVolumeIcon = GuiUtils.getIcon("samplePrep", 24);	
+	private static final Icon assignInjTimeIcon = GuiUtils.getIcon("clock", 24);	
 	private static final Icon deleteIcon = GuiUtils.getIcon("delete", 24);
 		
 	private JMenuItem 
 		assignLevelsMenuItem, 
 		assignAcqMethodMenuItem, 
 		assignInjVolumeMenuItem, 
+		assignInjTimeMenuItem,
 		deleteFileMenuItem;
 
 	public WorklistImportPopupMenu(ActionListener listener) {
@@ -66,6 +68,11 @@ public class WorklistImportPopupMenu extends JPopupMenu {
 				MainActionCommands.SPECIFY_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND.getName());
 		assignInjVolumeMenuItem.setIcon(assignInjVolumeIcon);
 		
+		assignInjTimeMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.SPECIFY_INJ_TIME_FOR_SELECTED_DATA_FILES_COMMAND.getName(), listener,
+				MainActionCommands.SPECIFY_INJ_TIME_FOR_SELECTED_DATA_FILES_COMMAND.getName());
+		assignInjTimeMenuItem.setIcon(assignInjTimeIcon);
+				
 		addSeparator();
 		
 		deleteFileMenuItem = GuiUtils.addMenuItem(this,

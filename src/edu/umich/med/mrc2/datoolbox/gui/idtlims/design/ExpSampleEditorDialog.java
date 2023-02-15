@@ -353,7 +353,12 @@ public class ExpSampleEditorDialog extends JDialog  implements ActionListener, B
 			stockSampleDescriptionLabel.setText(stockSample.getSampleName() + " (" + stockSample.getSampleId() +")");
 			externalSourceIDTextField.setText(stockSample.getExternalId());
 			externalSourceNametextField.setText(stockSample.getExternalSource());
-			sampleTypeValueLabel.setText(stockSample.getLimsSampleType().getName());
+			
+			if(stockSample.getLimsSampleType() != null)
+				sampleTypeValueLabel.setText(stockSample.getLimsSampleType().getName());
+			else
+				sampleTypeValueLabel.setText(stockSample.getSampleName());
+				
 			speciesValueLabel.setText(stockSample.getSpecies().getSpeciesPrimaryName());
 			sampleNameTextField.setText("Aliquot of " + stockSample.getSampleName());
 			descriptionTextArea.setText(stockSample.getSampleDescription());

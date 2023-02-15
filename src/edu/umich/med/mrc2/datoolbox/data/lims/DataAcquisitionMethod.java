@@ -62,22 +62,6 @@ public class DataAcquisitionMethod extends AnalysisMethod implements Serializabl
 		this.createdOn = createdOn;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	/**
 	 * @return the methodDescription
 	 */

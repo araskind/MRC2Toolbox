@@ -58,6 +58,7 @@ public enum MainActionCommands {
 	NEW_RAW_DATA_EXPERIMENT_SETUP_COMMAND("New raw data analysis experiment"),
 	NEW_RAW_DATA_EXPERIMENT_COMMAND("Create new raw data analysis experiment"),
 	OPEN_RAW_DATA_EXPERIMENT_COMMAND("Open raw data analysis experiment"),
+	OPEN_RAW_DATA_EXPERIMENT_FROM_DATABASE_COMMAND("Open raw data analysis experiment from database"),
 	CLOSE_RAW_DATA_EXPERIMENT_COMMAND("Close raw data analysis experiment"),
 	SAVE_RAW_DATA_EXPERIMENT_COMMAND("Save raw data analysis experiment"),
 	EDIT_RAW_DATA_EXPERIMENT_SETUP_COMMAND("Show raw data analysis experiment editor"),
@@ -226,6 +227,8 @@ public enum MainActionCommands {
 	ASSIGN_ACQ_METHOD_FOR_SELECTED_DATA_FILES_COMMAND("Assign acquisition method for selected data files"),
 	SPECIFY_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND("Specify injection volume for selected data files"),
 	ASSIGN_INJ_VOLUME_FOR_SELECTED_DATA_FILES_COMMAND("Assign injection volume for selected data files"),
+	SPECIFY_INJ_TIME_FOR_SELECTED_DATA_FILES_COMMAND("Specify injection time for selected data files"),
+	ASSIGN_INJ_TIME_FOR_SELECTED_DATA_FILES_COMMAND("Assign injection time for selected data files"),
 	ASSIGN_BATCH_FOR_SELECTED_DATA_FILES_COMMAND("Assign batch for selected data files"),
 	LOAD_EXCEL_DATA_FOR_PREVIEW_COMMAND("Load data from Excel file into preview"),
 	CLEAR_EXCEL_IMPORT_WIZARD_COMMAND("Clear Excel import wizard"),
@@ -888,6 +891,7 @@ public enum MainActionCommands {
 
 	EDIT_PREFERENCES_COMMAND("Edit preferences"),
 	SHOW_HELP_COMMAND("Help"),
+	SHOW_WEB_HELP_COMMAND("Online help"),
 	ABOUT_BOX_COMMAND("About ..."),
 	EXIT_COMMAND("Exit"),
 
@@ -1071,7 +1075,7 @@ public enum MainActionCommands {
 
 	//	Sample type select dialog
 	SHOW_SELECT_SAMPLE_TYPE_DIALOG_COMMAND("Show \"Select sample type\" dialog"),
-	SELECT_SAMPLE_TYPE_COMMAND("Sselect sample type"),
+	SELECT_SAMPLE_TYPE_COMMAND("Select sample type"),
 	SEARCH_SAMPLE_TYPES_COMMAND("Search sample types database"),
 	
 	//	MetIDTracker data upload wizard
@@ -1097,8 +1101,7 @@ public enum MainActionCommands {
     OPEN_RAW_DATA_FILE_COMMAND("Open raw data file(s)"),
     CLOSE_RAW_DATA_FILE_COMMAND("Close raw data file(s)"),
     FINALIZE_CLOSE_RAW_DATA_FILE_COMMAND("Complete raw data file(s) closing"),
-    
-    
+       
 	//	Data extract
 	EXTRACT_CHROMATOGRAM("Extract chromatogram"),
 	EXTRACT_SPECTRUM("Extract spectrum"),
@@ -1187,7 +1190,13 @@ public enum MainActionCommands {
 	SELECT_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND("Select lookup features list from database"),
 	LOAD_LOOKUP_FEATURE_LIST_FROM_DATABASE_COMMAND("Load lookup features list from database"),
 	
-	
+	//	Manual peak integration
+	SHOW_MANUAL_INTEGRATOR_SETTINGS("Show manual integrator settings"),
+	SAVE_MANUAL_INTEGRATOR_SETTINGS("Save manual integrator settings"),
+	INTEGRATE_HIGHLIGHTED_RANGES("Integrate peaks over highlighted ranges"),
+	ACCEPT_INTEGRATION_RESULTS("Accept integration results"),
+	CLEAR_HIGHLIGHTED_RANGES("Clear highlighted integration ranges"),
+	RELOAD_ORIGINAL_CHROMATOGRAMS("Reload original chromatograms"),
 	;
 
 	private final String name;

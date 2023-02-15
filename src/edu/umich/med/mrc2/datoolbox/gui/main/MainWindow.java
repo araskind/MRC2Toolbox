@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.main;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
@@ -35,6 +36,8 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,6 +84,7 @@ import edu.umich.med.mrc2.datoolbox.gui.expsetup.ExperimentSetupDraw;
 import edu.umich.med.mrc2.datoolbox.gui.filetools.FileToolsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.organization.OrganizationManagerDialog;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.DatabaseExperimentSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.NewExperimentDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.raw.RawDataUploadPrepDialog;
@@ -239,7 +243,10 @@ public class MainWindow extends JFrame
 			openExperiment(ProjectType.DATA_ANALYSIS);
 		
 		if (command.equals(MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_COMMAND.getName()))
-			openExperiment(ProjectType.RAW_DATA_ANALYSIS);	
+			openExperiment(ProjectType.RAW_DATA_ANALYSIS);
+
+		if (command.equals(MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_FROM_DATABASE_COMMAND.getName()))
+			openRawDataExperimentFromDatabase();
 
 		if (command.equals(MainActionCommands.SHOW_MS_TOOLBOX_COMMAND.getName()))
 			showMsTools();
@@ -288,8 +295,28 @@ public class MainWindow extends JFrame
 		
 		if(command.equals(MainActionCommands.SHOW_RAW_DATA_FILE_TOOLS_COMMAND.getName()))
 			showFileToolsDialog();
+		
+		if(command.equals(MainActionCommands.SHOW_WEB_HELP_COMMAND.getName()))
+			showOnlineHelp();
 	}
 	
+	private void showOnlineHelp() {
+
+		URL url = null;
+		try {
+			url = new URL(MRC2ToolBoxConfiguration.ONLINE_HELP_URL);			
+			try {
+				if (Desktop.isDesktopSupported()) 												
+					Desktop.getDesktop().browse(url.toURI());
+				
+			} catch (Exception ex) {
+				// ex.printStackTrace();
+			}				
+		} catch (MalformedURLException e1) {
+
+		}
+	}
+
 	private void createNewRawDataAnalysisExperiment() {
 		
 		Collection<String>errors = validateRawDataAnalysisExperimentSetup();
@@ -1019,6 +1046,14 @@ public class MainWindow extends JFrame
 		}
 		else
 			initExperimentLoadTask(newExperimentType);
+	}
+	
+	private void openRawDataExperimentFromDatabase() {
+		
+		DatabaseExperimentSelectorDialog experimentSelectorDialog = 
+				new DatabaseExperimentSelectorDialog();
+		experimentSelectorDialog.setLocationRelativeTo(this.getContentPane());
+		experimentSelectorDialog.setVisible(true);
 	}
 
 	public void reloadDesign() {

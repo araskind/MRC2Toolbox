@@ -57,6 +57,7 @@ public class MainMenuBar extends CommonMenuBar {
 	private static final Icon newRdaExperimentIcon = GuiUtils.getIcon("newRawDataAnalysisProject", 24);
 	private static final Icon editRdaExperimentIcon = GuiUtils.getIcon("editRawDataAnalysisProject", 24);
 	private static final Icon openRdaExperimentIcon = GuiUtils.getIcon("openRawDataAnalysisProject", 24);
+	private static final Icon openRdaExperimentFromDbIcon = GuiUtils.getIcon("openRawDataAnalysisProjectFromDb", 24);
 	private static final Icon saveRdaExperimentIcon = GuiUtils.getIcon("saveRawDataAnalysisProject", 24);		
 	private static final Icon closeExperimentIcon = GuiUtils.getIcon("close", 24);
 	private static final Icon exitIcon = GuiUtils.getIcon("shutDown", 24);	
@@ -72,6 +73,7 @@ public class MainMenuBar extends CommonMenuBar {
 	private static final Icon assayManagerIcon = GuiUtils.getIcon("acqMethod", 24);	
 	private static final Icon preferencesIcon = GuiUtils.getIcon("preferences", 24);
 	private static final Icon helpIcon = GuiUtils.getIcon("help", 24);
+	private static final Icon webHelpIcon = GuiUtils.getIcon("webHelp", 24);
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);
 	private static final Icon aboutIcon = GuiUtils.getIcon("infoGreen", 24);
 	
@@ -90,6 +92,7 @@ public class MainMenuBar extends CommonMenuBar {
 		newIDExperimentMenuItem,
 		openExperimentMenuItem,
 		openRdaExperimentMenuItem,
+		openRdaExperimentFromDatabaseMenuItem,
 		saveExperimentMenuItem,
 		saveExperimentAsMenuItem,				
 		editIDExperimentMenuItem,		
@@ -145,6 +148,10 @@ public class MainMenuBar extends CommonMenuBar {
 		openRdaExperimentMenuItem = addItem(experimentMenu, 
 				MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_COMMAND, openRdaExperimentIcon);
 		openRdaExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK));
+		
+		openRdaExperimentFromDatabaseMenuItem = addItem(experimentMenu, 
+				MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_FROM_DATABASE_COMMAND, openRdaExperimentFromDbIcon);
+		openRdaExperimentFromDatabaseMenuItem.setAccelerator(KeyStroke.getKeyStroke('D', MASK));
 		
 		experimentMenu.addSeparator();
 		
@@ -220,8 +227,7 @@ public class MainMenuBar extends CommonMenuBar {
 		//	Help
 		helpMenu = new JMenu("Help");
 		helpMenuItem = addItem(helpMenu, 
-				MainActionCommands.SHOW_HELP_COMMAND, helpIcon);
-		helpMenuItem.setEnabled(false);
+				MainActionCommands.SHOW_WEB_HELP_COMMAND, webHelpIcon);
 		
 		aboutSoftwareMenuItem = addItem(helpMenu, 
 				MainActionCommands.ABOUT_BOX_COMMAND, aboutIcon);

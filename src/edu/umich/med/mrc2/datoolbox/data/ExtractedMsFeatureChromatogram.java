@@ -19,27 +19,27 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.renderer;
+package edu.umich.med.mrc2.datoolbox.data;
 
-import org.jfree.chart.labels.XYToolTipGenerator;
-import org.jfree.data.xy.XYDataset;
+public class ExtractedMsFeatureChromatogram extends ExtractedChromatogram {
 
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1096295455391249246L;
+	private MsFeature parentFeature;
+	
+	public ExtractedMsFeatureChromatogram(
+			DataFile dataFile, 
+			ChromatogramDefinition definition,
+			MsFeature parentFeature) {
+		super(dataFile, definition);
+		
+		this.parentFeature = parentFeature;
+	}
 
-public class ChromatogramToolTipGenerator implements XYToolTipGenerator {
-
-	@Override
-	public String generateToolTip(XYDataset dataset, int series, int item) {
-
-		final double rtValue = dataset.getXValue(series, item);
-		final double intValue = dataset.getYValue(series, item);
-			
-		final String toolTip = 
-			"<HTML><B>RT:</B> " + MRC2ToolBoxConfiguration.getRtFormat().format(rtValue)
-			+ "<BR><B>Intensity:</B> " + MRC2ToolBoxConfiguration.getIntensityFormat().format(intValue)
-			+ "<BR><B>Trace:</B> " + dataset.getSeriesKey(series);
-
-		return toolTip;
+	public MsFeature getParentFeature() {
+		return parentFeature;
 	}
 
 }

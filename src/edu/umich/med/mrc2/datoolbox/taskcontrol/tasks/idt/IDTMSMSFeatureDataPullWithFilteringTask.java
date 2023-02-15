@@ -207,6 +207,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 					total = rs.getRow();
 				  rs.beforeFirst();
 				}
+				Adduct defaultAdduct = null;
 				while (rs.next()) {
 					
 					MSFeatureInfoBundle fInCash = 
@@ -227,6 +228,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 					polarity = Polarity.getPolarityByCode(rs.getString("POLARITY"));
 					f.setPolarity(polarity);
 					f.setAnnotatedObjectType(AnnotatedObjectType.MSMS_FEATURE);
+					defaultAdduct = AdductManager.getDefaultAdductForPolarity(polarity);
 					
 					MassSpectrum spectrum = new MassSpectrum();
 					Map<Adduct, Collection<MsPoint>> adductMap =
@@ -234,23 +236,38 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 					
 					msOnePs.setString(1, id);
 					ResultSet msOneRs = msOnePs.executeQuery();
+//					while(msOneRs.next()) {
+//						
+//						String adductId = msOneRs.getString("ADDUCT_ID");
+//						if(adductId == null)
+//							adductId = msOneRs.getString("COMPOSITE_ADDUCT_ID");
+//	
+//						Adduct adduct =
+//								AdductManager.getAdductById(adductId);
+//	
+//						if(adduct == null)
+//							continue;
+//	
+//						if(!adductMap.containsKey(adduct))
+//							adductMap.put(adduct, new ArrayList<MsPoint>());
+//	
+//						adductMap.get(adduct).add(
+//								new MsPoint(msOneRs.getDouble("MZ"), msOneRs.getDouble("HEIGHT")));
+//					}
 					while(msOneRs.next()) {
 						
+						Adduct adduct = defaultAdduct;
 						String adductId = msOneRs.getString("ADDUCT_ID");
 						if(adductId == null)
 							adductId = msOneRs.getString("COMPOSITE_ADDUCT_ID");
-	
-						Adduct adduct =
-								AdductManager.getAdductById(adductId);
-	
-						if(adduct == null)
-							continue;
-	
+
+						if(adductId != null)
+							adduct = AdductManager.getAdductById(adductId);
+
 						if(!adductMap.containsKey(adduct))
 							adductMap.put(adduct, new ArrayList<MsPoint>());
-	
-						adductMap.get(adduct).add(
-								new MsPoint(msOneRs.getDouble("MZ"), msOneRs.getDouble("HEIGHT")));
+
+						adductMap.get(adduct).add(new MsPoint(msOneRs.getDouble("MZ"), msOneRs.getDouble("HEIGHT")));
 					}
 					msOneRs.close();
 					adductMap.entrySet().stream().
