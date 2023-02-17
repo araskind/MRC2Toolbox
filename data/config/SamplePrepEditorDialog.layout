@@ -99,38 +99,37 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<leaf id="0" nodeId="1650666485003">
-											<placeholders>
-												<placeholder>dock.single.DockableDocumentsPanel</placeholder>
-												<placeholder>dock.single.DockableSopPanel</placeholder>
-												<placeholder>dock.single.DockablePrepSampleTable</placeholder>
-											</placeholders>
-											<placeholder-map>
-												<version>0</version>
-												<format>dock.PlaceholderList</format>
-												<entry>
-													<key shared="false">
-														<placeholder>dock.single.DockableDocumentsPanel</placeholder>
-													</key>
-													<item key="convert" type="b">true</item>
-													<item key="convert-keys" type="a"/>
-												</entry>
-												<entry>
-													<key shared="false">
-														<placeholder>dock.single.DockableSopPanel</placeholder>
-													</key>
-													<item key="convert" type="b">true</item>
-													<item key="convert-keys" type="a"/>
-												</entry>
-												<entry>
-													<key shared="false">
-														<placeholder>dock.single.DockablePrepSampleTable</placeholder>
-													</key>
-													<item key="convert" type="b">true</item>
-													<item key="convert-keys" type="a"/>
-												</entry>
-											</placeholder-map>
-										</leaf>
+										<node nodeId="1676566535010" orientation="VERTICAL" divider="0.5">
+											<leaf id="-1" nodeId="1676566521493">
+												<placeholders>
+													<placeholder>dock.single.DockableDocumentsPanel</placeholder>
+												</placeholders>
+											</leaf>
+											<leaf id="0" nodeId="1650666485003">
+												<placeholders>
+													<placeholder>dock.single.DockableSopPanel</placeholder>
+													<placeholder>dock.single.DockablePrepSampleTable</placeholder>
+												</placeholders>
+												<placeholder-map>
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableSopPanel</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockablePrepSampleTable</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+												</placeholder-map>
+											</leaf>
+										</node>
 									</content>
 								</delegate>
 							</layout>
@@ -148,7 +147,7 @@
 											<format>dock.PlaceholderList</format>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableDocumentsPanel</placeholder>
+													<placeholder>dock.single.DockableSopPanel</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -158,20 +157,6 @@
 												</item>
 												<item key="dock.index" type="i">0</item>
 												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableDocumentsPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableSopPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableSopPanel</item>
 											</entry>
 											<entry>
@@ -184,23 +169,27 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockablePrepSampleTable</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableDocumentsPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
 												<item key="dock.index" type="i">2</item>
 												<item key="dock.id" type="i">2</item>
-												<item key="dock.placeholder" type="s">dock.single.DockablePrepSampleTable</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableDocumentsPanel</item>
 											</entry>
 										</placeholders>
 									</layout>
 									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableDocumentsPanel">
-												<replacement id="dockablesingle DockableDocumentsPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableDocumentsPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
 										<child>
 											<layout factory="predefined" placeholder="dock.single.DockableSopPanel">
 												<replacement id="dockablesingle DockableSopPanel"/>
@@ -216,6 +205,16 @@
 												<replacement id="dockablesingle DockablePrepSampleTable"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>DockablePrepSampleTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableDocumentsPanel">
+												<replacement id="dockablesingle DockableDocumentsPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableDocumentsPanel</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -264,12 +263,9 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableDocumentsPanel</placeholder>
 											<backup-path>
-												<leaf id="1650666485003"/>
+												<node location="TOP" size="0.5" id="1676566535010"/>
+												<leaf id="1676566521493"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockableDocumentsPanel</placeholder>
 										</property>
 									</location>
 								</property>

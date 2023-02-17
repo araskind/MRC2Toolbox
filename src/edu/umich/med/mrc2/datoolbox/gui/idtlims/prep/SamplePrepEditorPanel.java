@@ -116,12 +116,14 @@ public class SamplePrepEditorPanel extends JPanel
 	private DocumentAnnotationDialog documentAnnotationDialog;
 	private Set<SamplePrepListener> eventListeners;
 	private boolean isWizardStep;
+	private boolean limitEditor;
 	
 	/**
 	 * This constructor is for the creation of the new sample preparation;
 	 * @param experiment
 	 */
-	public SamplePrepEditorPanel(LIMSExperiment experiment) {
+	public SamplePrepEditorPanel(LIMSExperiment experiment, boolean limitEditor) {
+		
 		super(new BorderLayout(0, 0));
 		this.experiment = experiment;
 		if(experiment == null) {
@@ -129,18 +131,21 @@ public class SamplePrepEditorPanel extends JPanel
 					"Experiment can not be null!");
 		}	
 		this.prep = null;
-		initGui();
-		loadPrepData(prep);
 		isWizardStep = false;
+		this.limitEditor = limitEditor;
+		initGui();
+		loadPrepData(null);		
 	}
 	
 	/**
 	 * This constructor is for the editing of the existing sample preparation;
 	 * @param prep
 	 */
-	public SamplePrepEditorPanel(LIMSSamplePreparation prep) {
+	public SamplePrepEditorPanel(LIMSSamplePreparation prep, boolean limitEditor) {
+		
 		super(new BorderLayout(0, 0));
 		this.prep = prep;
+		this.limitEditor = limitEditor;
 		if(prep == null) {
 			throw new IllegalArgumentException(
 					"SamplePrep can not be null!");
@@ -154,8 +159,9 @@ public class SamplePrepEditorPanel extends JPanel
 		loadPrepData(prep);
 	}
 	
-	public SamplePrepEditorPanel() {
+	public SamplePrepEditorPanel(boolean limitEditor) {
 		super();
+		this.limitEditor = limitEditor;
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		initGui();
 	}
@@ -163,43 +169,11 @@ public class SamplePrepEditorPanel extends JPanel
 	private void initGui() {
 	
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
-		gbl_dataPanel.columnWidths = new int[]{10, 300, 50, 176, 201, 10};
-		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_dataPanel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, 0.0};
-		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_dataPanel.columnWidths = new int[]{244, 223, 176};
+		gbl_dataPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_dataPanel.columnWeights = new double[]{0.0, 1.0, 0.0};
+		gbl_dataPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		setLayout(gbl_dataPanel);
-		
-		JButton selectPrepButton = new JButton(
-				MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
-		selectPrepButton.setActionCommand(
-				MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
-		selectPrepButton.addActionListener(this);
-		
-		JLabel lblNewLabel = new JLabel("   ");
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.gridx = 1;
-		gbc_lblNewLabel.gridy = 0;
-		add(lblNewLabel, gbc_lblNewLabel);
-		selectPrepButton.setEnabled(false);
-		GridBagConstraints gbc_selectPrepButton = new GridBagConstraints();
-		gbc_selectPrepButton.anchor = GridBagConstraints.WEST;
-		gbc_selectPrepButton.insets = new Insets(0, 0, 5, 5);
-		gbc_selectPrepButton.gridx = 1;
-		gbc_selectPrepButton.gridy = 1;
-		add(selectPrepButton, gbc_selectPrepButton);
-		
-		JButton clearPanelButton = new JButton(
-				MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName());
-		clearPanelButton.setActionCommand(
-				MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName());
-		clearPanelButton.addActionListener(this);
-		GridBagConstraints gbc_clearPanelButton = new GridBagConstraints();
-		gbc_clearPanelButton.fill = GridBagConstraints.HORIZONTAL;
-		gbc_clearPanelButton.insets = new Insets(0, 0, 5, 5);
-		gbc_clearPanelButton.gridx = 4;
-		gbc_clearPanelButton.gridy = 1;
-		add(clearPanelButton, gbc_clearPanelButton);
 		
 		JLabel lblName = new JLabel("Name");
 		lblName.setForeground(Color.BLACK);
@@ -207,18 +181,18 @@ public class SamplePrepEditorPanel extends JPanel
 		GridBagConstraints gbc_lblName = new GridBagConstraints();
 		gbc_lblName.anchor = GridBagConstraints.WEST;
 		gbc_lblName.insets = new Insets(0, 0, 5, 5);
-		gbc_lblName.gridx = 1;
-		gbc_lblName.gridy = 2;
+		gbc_lblName.gridx = 0;
+		gbc_lblName.gridy = 0;
 		add(lblName, gbc_lblName);
-
+		
 		JLabel lblId = new JLabel("ID");
 		lblId.setForeground(Color.BLUE);
 		lblId.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_lblId = new GridBagConstraints();
 		gbc_lblId.anchor = GridBagConstraints.EAST;
 		gbc_lblId.insets = new Insets(0, 0, 5, 5);
-		gbc_lblId.gridx = 3;
-		gbc_lblId.gridy = 2;
+		gbc_lblId.gridx = 1;
+		gbc_lblId.gridy = 0;
 		add(lblId, gbc_lblId);
 		
 		idValueLabel = new JLabel("");
@@ -226,18 +200,18 @@ public class SamplePrepEditorPanel extends JPanel
 		idValueLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_idValueLabel = new GridBagConstraints();
 		gbc_idValueLabel.anchor = GridBagConstraints.WEST;
-		gbc_idValueLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_idValueLabel.gridx = 4;
-		gbc_idValueLabel.gridy = 2;
+		gbc_idValueLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_idValueLabel.gridx = 2;
+		gbc_idValueLabel.gridy = 0;
 		add(idValueLabel, gbc_idValueLabel);
 
 		nameTextField = new JTextField();
 		GridBagConstraints gbc_nameTextField = new GridBagConstraints();
-		gbc_nameTextField.gridwidth = 4;
-		gbc_nameTextField.insets = new Insets(0, 0, 5, 5);
+		gbc_nameTextField.gridwidth = 3;
+		gbc_nameTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_nameTextField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_nameTextField.gridx = 1;
-		gbc_nameTextField.gridy = 3;
+		gbc_nameTextField.gridx = 0;
+		gbc_nameTextField.gridy = 1;
 		add(nameTextField, gbc_nameTextField);
 		nameTextField.setColumns(10);
 		
@@ -245,69 +219,132 @@ public class SamplePrepEditorPanel extends JPanel
 		GridBagConstraints gbc_lblType = new GridBagConstraints();
 		gbc_lblType.anchor = GridBagConstraints.NORTHWEST;
 		gbc_lblType.insets = new Insets(0, 0, 5, 5);
-		gbc_lblType.gridx = 1;
-		gbc_lblType.gridy = 4;
+		gbc_lblType.gridx = 0;
+		gbc_lblType.gridy = 2;
 		add(lblType, gbc_lblType);
 
 		prepUserLabel = new JLabel("      ");
 		prepUserLabel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		GridBagConstraints gbc_prepUserLabel = new GridBagConstraints();
-		gbc_prepUserLabel.gridwidth = 2;
 		gbc_prepUserLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_prepUserLabel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_prepUserLabel.gridx = 1;
-		gbc_prepUserLabel.gridy = 5;
+		gbc_prepUserLabel.gridx = 0;
+		gbc_prepUserLabel.gridy = 3;
 		add(prepUserLabel, gbc_prepUserLabel);
 		
 		btnSelectUser = new JButton("Select user");
 		btnSelectUser.setActionCommand(MainActionCommands.SELECT_USER_DIALOG_COMMAND.getName());
 		btnSelectUser.addActionListener(this);
 		GridBagConstraints gbc_btnSelectUser = new GridBagConstraints();
-		gbc_btnSelectUser.gridwidth = 2;
 		gbc_btnSelectUser.anchor = GridBagConstraints.WEST;
 		gbc_btnSelectUser.insets = new Insets(0, 0, 5, 5);
-		gbc_btnSelectUser.gridx = 3;
-		gbc_btnSelectUser.gridy = 5;
+		gbc_btnSelectUser.gridx = 1;
+		gbc_btnSelectUser.gridy = 3;
 		add(btnSelectUser, gbc_btnSelectUser);
 		
 		JLabel lblPreparedOn = new JLabel("Prepared on");
 		GridBagConstraints gbc_lblPreparedOn = new GridBagConstraints();
 		gbc_lblPreparedOn.anchor = GridBagConstraints.WEST;
 		gbc_lblPreparedOn.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPreparedOn.gridx = 1;
-		gbc_lblPreparedOn.gridy = 6;
+		gbc_lblPreparedOn.gridx = 0;
+		gbc_lblPreparedOn.gridy = 4;
 		add(lblPreparedOn, gbc_lblPreparedOn);
 
 		datePicker = new DatePicker();
 		GridBagConstraints gbc_datePicker = new GridBagConstraints();
-		gbc_datePicker.gridwidth = 2;
 		gbc_datePicker.insets = new Insets(0, 0, 5, 5);
 		gbc_datePicker.fill = GridBagConstraints.BOTH;
-		gbc_datePicker.gridx = 1;
-		gbc_datePicker.gridy = 7;
+		gbc_datePicker.gridx = 0;
+		gbc_datePicker.gridy = 5;
 		add(datePicker, gbc_datePicker);
 
 		JPanel panel_1 = new JPanel(new BorderLayout(0, 0));
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
-		sopPanel = new DockableSopPanel(this);
 		documentsPanel = new DockableDocumentsPanel(this);
+		sopPanel = new DockableSopPanel(this);		
 		prepSampleTable =  new DockablePrepSampleTable();
-		grid.add(0, 0, 100, 100, documentsPanel, sopPanel, prepSampleTable);				
-		control.getContentArea().deploy(grid);		
-				
+		grid.add(0, 0, 100, 100, documentsPanel, sopPanel, prepSampleTable);
+
+		control.getContentArea().deploy(grid);						
 		panel_1.add(control.getContentArea(), BorderLayout.CENTER);
 		
 		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.insets = new Insets(0, 0, 0, 5);
-		gbc_panel_1.gridwidth = 4;
+		gbc_panel_1.insets = new Insets(0, 0, 5, 0);
+		gbc_panel_1.gridwidth = 3;
 		gbc_panel_1.fill = GridBagConstraints.BOTH;
-		gbc_panel_1.gridx = 1;
-		gbc_panel_1.gridy = 8;
-		add(panel_1, gbc_panel_1);
+		gbc_panel_1.gridx = 0;
+		gbc_panel_1.gridy = 6;
+		add(panel_1, gbc_panel_1);		
 		
+		if(!limitEditor) {
+			
+			JButton selectPrepButton = new JButton(
+					MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
+			selectPrepButton.setActionCommand(
+					MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName());
+			selectPrepButton.addActionListener(this);
+			selectPrepButton.setEnabled(false);
+			GridBagConstraints gbc_selectPrepButton = new GridBagConstraints();
+			gbc_selectPrepButton.fill = GridBagConstraints.HORIZONTAL;
+			gbc_selectPrepButton.insets = new Insets(0, 0, 0, 5);
+			gbc_selectPrepButton.gridx = 0;
+			gbc_selectPrepButton.gridy = 7;
+			add(selectPrepButton, gbc_selectPrepButton);
+			
+			JButton clearPanelButton = new JButton(
+					MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName());
+			clearPanelButton.setActionCommand(
+					MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName());
+			clearPanelButton.addActionListener(this);
+			GridBagConstraints gbc_clearPanelButton = new GridBagConstraints();
+			gbc_clearPanelButton.insets = new Insets(0, 0, 0, 5);
+			gbc_clearPanelButton.fill = GridBagConstraints.HORIZONTAL;
+			gbc_clearPanelButton.gridx = 1;
+			gbc_clearPanelButton.gridy = 7;
+			add(clearPanelButton, gbc_clearPanelButton);
+		}
 		loadLayout(layoutConfigFile);
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+
+		if(command.equals(MainActionCommands.ADD_SOP_PROTOCOL_DIALOG_COMMAND.getName()))
+			showAddSopDialog();
+
+		if(command.equals(MainActionCommands.ADD_SOP_PROTOCOL_COMMAND.getName()))
+			addSelectedSops();
+
+		if(command.equals(MainActionCommands.DELETE_SOP_PROTOCOL_COMMAND.getName()))
+			deleteSelectedSops();
+
+		if(command.equals(MainActionCommands.SELECT_USER_DIALOG_COMMAND.getName()))
+			showUserSelector();
+
+		if(command.equals(MainActionCommands.SELECT_USER_COMMAND.getName()))
+			setNewPrepUser();
+
+		if(command.equals(MainActionCommands.ADD_DOCUMENT_DIALOG_COMMAND.getName()))
+			showAddDocumentDialog();
+
+		if(command.equals(MainActionCommands.SAVE_OBJECT_DOCUMENT_ANNOTATION_COMMAND.getName()))
+			addDocument();
+
+		if(command.equals(MainActionCommands.DELETE_DOCUMENT_COMMAND.getName()))
+			deleteDocument();
+		
+		if(command.equals(MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName()))
+			selectExistingSamplePrep();
+		
+		if(command.equals(MainActionCommands.LOAD_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName()))
+			loadSelectedSamplePrep();
+		
+		if(command.equals(MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName()))
+			clearPanelWithWarning();
 	}
 	
 	@Override
@@ -394,45 +431,6 @@ public class SamplePrepEditorPanel extends JPanel
 		}
 		sopPanel.setTableModelFromProtocols(prep.getProtocols());
 		documentsPanel.setModelFromAnnotations(prep.getAnnotations());
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		String command = e.getActionCommand();
-
-		if(command.equals(MainActionCommands.ADD_SOP_PROTOCOL_DIALOG_COMMAND.getName()))
-			showAddSopDialog();
-
-		if(command.equals(MainActionCommands.ADD_SOP_PROTOCOL_COMMAND.getName()))
-			addSelectedSops();
-
-		if(command.equals(MainActionCommands.DELETE_SOP_PROTOCOL_COMMAND.getName()))
-			deleteSelectedSops();
-
-		if(command.equals(MainActionCommands.SELECT_USER_DIALOG_COMMAND.getName()))
-			showUserSelector();
-
-		if(command.equals(MainActionCommands.SELECT_USER_COMMAND.getName()))
-			setNewPrepUser();
-
-		if(command.equals(MainActionCommands.ADD_DOCUMENT_DIALOG_COMMAND.getName()))
-			showAddDocumentDialog();
-
-		if(command.equals(MainActionCommands.SAVE_OBJECT_DOCUMENT_ANNOTATION_COMMAND.getName()))
-			addDocument();
-
-		if(command.equals(MainActionCommands.DELETE_DOCUMENT_COMMAND.getName()))
-			deleteDocument();
-		
-		if(command.equals(MainActionCommands.SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName()))
-			selectExistingSamplePrep();
-		
-		if(command.equals(MainActionCommands.LOAD_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName()))
-			loadSelectedSamplePrep();
-		
-		if(command.equals(MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName()))
-			clearPanelWithWarning();
 	}
 
 	private void selectExistingSamplePrep() {

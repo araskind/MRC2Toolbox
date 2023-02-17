@@ -72,7 +72,7 @@ public class SamplePrepEditorDialog extends JDialog {
 	public SamplePrepEditorDialog(LIMSExperiment experiment, ActionListener actionListener) {
 		super();
 		this.actionListener = actionListener;
-		samplePrepEditorPanel = new SamplePrepEditorPanel(experiment);
+		samplePrepEditorPanel = new SamplePrepEditorPanel(experiment, false);
 		initGui();
 	}
 
@@ -86,7 +86,7 @@ public class SamplePrepEditorDialog extends JDialog {
 			ActionListener actionListener) {
 		super();	
 		this.actionListener = actionListener;
-		samplePrepEditorPanel = new SamplePrepEditorPanel(prep);
+		samplePrepEditorPanel = new SamplePrepEditorPanel(prep, false);
 		initGui();
 	}
 	

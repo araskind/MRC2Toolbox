@@ -28,7 +28,7 @@ import javax.swing.event.RowSorterListener;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 
-import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLlayoutManager;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLayoutManager;
 
 public class TableLayoutListener implements TableColumnModelListener {
 	
@@ -43,7 +43,7 @@ public class TableLayoutListener implements TableColumnModelListener {
 			table.getRowSorter().addRowSorterListener(new RowSorterListener() {
 			    @Override
 			    public void sorterChanged(RowSorterEvent e) {
-			    	TableLlayoutManager.setTableLayout(table);
+			    	TableLayoutManager.setTableLayout(table);
 			    }
 			});
 		}
@@ -51,17 +51,17 @@ public class TableLayoutListener implements TableColumnModelListener {
 
 	@Override
 	public void columnAdded(TableColumnModelEvent e) {
-		TableLlayoutManager.setTableLayout(table);
+		TableLayoutManager.setTableLayout(table);
 	}
 
 	@Override
 	public void columnRemoved(TableColumnModelEvent e) {
-		TableLlayoutManager.setTableLayout(table);
+		TableLayoutManager.setTableLayout(table);
 	}
 
 	@Override
 	public void columnMoved(TableColumnModelEvent e) {
-		TableLlayoutManager.setTableLayout(table);
+		TableLayoutManager.setTableLayout(table);
 	}
 
 	@Override

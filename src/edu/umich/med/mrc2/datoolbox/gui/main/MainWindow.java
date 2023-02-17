@@ -93,7 +93,7 @@ import edu.umich.med.mrc2.datoolbox.gui.mstools.MSToolsFrame;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.PreferencesDialog;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.SmoothingFilterManager;
-import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLlayoutManager;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLayoutManager;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExperimentOpenComponent;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisExperimentSetupDialog;
@@ -884,7 +884,12 @@ public class MainWindow extends JFrame
 		panels = new LinkedHashMap<PanelList, DockableMRC2ToolboxPanel>();
 		panelShowing = new LinkedHashMap<PanelList, Boolean>();
 		
-		TableLlayoutManager.loadLayouts();
+		try {
+			TableLayoutManager.loadLayouts();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		SmoothingFilterManager.loadFilterMap();
 		
 		for(PanelList panelType : PanelList.getPanelListForConfiguration(BuildInformation.getStartupConfiguration())) {
@@ -1597,7 +1602,7 @@ public class MainWindow extends JFrame
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		TableLlayoutManager.saveLayouts();
+		TableLayoutManager.saveLayouts();
 		SmoothingFilterManager.saveFilterMap();
 	}
 
@@ -1616,7 +1621,6 @@ public class MainWindow extends JFrame
 			}
 		}
 		saveLayout(layoutConfigFile);
-		TableLlayoutManager.saveLayouts();
 	}
 
 	@Override

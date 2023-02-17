@@ -26,246 +26,176 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map.Entry;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.CompoundBioLocation;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBCitation;
-import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBParser;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBParserJdom2;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBPathway;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.ReferenceObjectType;
 
 public class T3DBParser {
 
-	public static T3DBRecord parseRecord(Node recordDocument) throws ParserConfigurationException {
+	public static T3DBRecord parseRecord(Element recordElement) {
 
-		Element recordElement = (Element)recordDocument;
-		String id = recordElement.getElementsByTagName("accession").item(0).getFirstChild().getNodeValue();
+		Namespace ns = recordElement.getNamespace();
+		String id = recordElement.getChildText("accession", ns);
 		T3DBRecord record = new T3DBRecord(id);
-		//	Timestamps
-		try {
-			HMDBParser.parseTimeStamps(recordElement, record);
-		} catch (Exception e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
-		}
-		//	Descriptions
-		try {
-			HMDBParser.parseDescriptions(recordElement, record);
-		} catch (Exception e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-		//	Synonyms
-  		try {
-  			HMDBParser.parseSynonyms(recordElement, record);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		//	Name & IUPAC name
-		String name = recordElement.getElementsByTagName("common_name").item(0).getFirstChild().getNodeValue();
+		String name = recordElement.getChildText("name", ns);
 		record.setName(name);
 		record.getCompoundIdentity().setCommonName(name);
-
-		if (recordElement.getElementsByTagName("iupac_name").item(0).getFirstChild() != null)
-			record.setSysName(recordElement.getElementsByTagName("iupac_name").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("state").item(0).getFirstChild() != null)
-			record.setAggregateState(recordElement.getElementsByTagName("state").item(0).getFirstChild().getNodeValue());
-
-		//	Basic properties and structure
-		if (recordElement.getElementsByTagName("chemical_formula").item(0).getFirstChild() != null)
-			record.getCompoundIdentity().setFormula(
-					recordElement.getElementsByTagName("chemical_formula").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("monisotopic_moleculate_weight").item(0).getFirstChild() != null) {
-			double mz = Double.parseDouble(recordElement.getElementsByTagName("monisotopic_moleculate_weight").item(0)
-					.getFirstChild().getNodeValue());
+		
+		String sysName = recordElement.getChildText("iupac_name", ns);
+		record.setSysName(sysName);
+		record.getCompoundIdentity().setSysName(sysName);
+		record.setTraditionalIupacName(recordElement.getChildText("traditional_iupac", ns));
+		record.setAggregateState(recordElement.getChildText("state", ns));
+		record.getCompoundIdentity().setFormula(recordElement.getChildText("chemical_formula", ns));
+		record.getCompoundIdentity().setSmiles(recordElement.getChildText("smiles", ns));
+		record.getCompoundIdentity().setInChi(recordElement.getChildText("inchi", ns));
+		record.getCompoundIdentity().setInChiKey(recordElement.getChildText("inchikey", ns));
+		String mzString = recordElement.getChildText("monisotopic_molecular_weight", ns);
+		if(mzString != null && !mzString.isEmpty()) {
+			double mz = Double.parseDouble(mzString);
 			record.getCompoundIdentity().setExactMass(mz);
-		}
-		if (recordElement.getElementsByTagName("smiles").item(0).getFirstChild() != null)
-			record.getCompoundIdentity().setSmiles(
-					recordElement.getElementsByTagName("smiles").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("inchi").item(0).getFirstChild() != null)
-			record.getCompoundIdentity().setInChi(
-					recordElement.getElementsByTagName("inchi").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("inchikey").item(0).getFirstChild() != null)
-			record.getCompoundIdentity().setInChiKey(
-					recordElement.getElementsByTagName("inchikey").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("origin").item(0).getFirstChild() != null)
-			record.setOrigin(recordElement.getElementsByTagName("origin").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("status").item(0).getFirstChild() != null)
-			record.setStatus(recordElement.getElementsByTagName("status").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("route_of_exposure").item(0).getFirstChild() != null)
-			record.setRouteOfExposure(recordElement.getElementsByTagName("route_of_exposure").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("mechanism_of_toxicity").item(0).getFirstChild() != null)
-			record.setMechanismOfToxicity(recordElement.getElementsByTagName("mechanism_of_toxicity").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("metabolism").item(0).getFirstChild() != null)
-			record.setMetabolism(recordElement.getElementsByTagName("metabolism").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("toxicity").item(0).getFirstChild() != null)
-			record.setToxicity(recordElement.getElementsByTagName("toxicity").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("lethaldose").item(0).getFirstChild() != null)
-			record.setLethaldose(recordElement.getElementsByTagName("lethaldose").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("carcinogenicity").item(0).getFirstChild() != null)
-			record.setCarcinogenicity(recordElement.getElementsByTagName("carcinogenicity").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("use_source").item(0).getFirstChild() != null)
-			record.setUsage(recordElement.getElementsByTagName("use_source").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("min_risk_level").item(0).getFirstChild() != null)
-			record.setMinRiskLevel(recordElement.getElementsByTagName("min_risk_level").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("health_effects").item(0).getFirstChild() != null)
-			record.setHealthEffects(recordElement.getElementsByTagName("health_effects").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("symptoms").item(0).getFirstChild() != null)
-			record.setSymptoms(recordElement.getElementsByTagName("symptoms").item(0).getFirstChild().getNodeValue());
-
-		if (recordElement.getElementsByTagName("treatment").item(0).getFirstChild() != null)
-			record.setTreatment(recordElement.getElementsByTagName("treatment").item(0).getFirstChild().getNodeValue());
-
-		//	Categories
-  		try {
-  			parseCategories(recordElement, record);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-  		//	Types
-  		try {
-  			parseTypes(recordElement, record);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-  		// Database references
-  		try {
-  			HMDBParser.parseDatabaseReferences(recordElement, record);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-  		// Biolocations
-  		try {
-  			HMDBParser.parseBioLocations(recordElement, record);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-  		// Pathways
-  		try {
-  			HMDBParser.parsePathways(recordElement, record);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-  		//	Targets;
-  		try {
-  			parseTargets(recordElement, record);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-  		//	References;
-  		try {
-  			HMDBParser.parseReferences(recordElement, record);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		}		
+		HMDBParserJdom2.parseTimeStamps(recordElement, record, ns);
+		HMDBParserJdom2.parseDescriptions(recordElement, record, ns);
+		HMDBParserJdom2.parseSynonyms(recordElement, record, ns);
+		HMDBParserJdom2.parseDatabaseReferences(recordElement, record, ns);
+		HMDBParserJdom2.parseBiologicalProperties(recordElement, record, ns);
+		HMDBParserJdom2.parseGeneralReferences(recordElement, record, ns);
+		
+		parseToxicityProperties(recordElement, record, ns);
+  		parseCategories(recordElement, record, ns);
+  		parseTypes(recordElement, record, ns);
+  		parseTargets(recordElement, record, ns);
+  		
   		return record;
 	}
 
-	public static void parseTargets(Element recordElement, T3DBRecord record) {
-
-		NodeList normalConcentrations = recordElement.getElementsByTagName("targets");
-		if(normalConcentrations.getLength() > 0) {
-
-			Element targetsElement = (Element) normalConcentrations.item(0);
-			NodeList targetList = targetsElement.getElementsByTagName("target");
-			for(int i=0; i<targetList.getLength(); i++) {
-				T3DBTarget tgt = parseTargetElement((Element) targetList.item(i));
-				record.getTargets().add(tgt);
-			}
-		}
+	private static void parseToxicityProperties(Element recordElement, T3DBRecord record, Namespace ns) {
+		// TODO Auto-generated method stub
+//		if (recordElement.getElementsByTagName("origin").item(0).getFirstChild() != null)
+//			record.setOrigin(recordElement.getElementsByTagName("origin").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("status").item(0).getFirstChild() != null)
+//			record.setStatus(recordElement.getElementsByTagName("status").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("route_of_exposure").item(0).getFirstChild() != null)
+//			record.setRouteOfExposure(recordElement.getElementsByTagName("route_of_exposure").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("mechanism_of_toxicity").item(0).getFirstChild() != null)
+//			record.setMechanismOfToxicity(recordElement.getElementsByTagName("mechanism_of_toxicity").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("metabolism").item(0).getFirstChild() != null)
+//			record.setMetabolism(recordElement.getElementsByTagName("metabolism").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("toxicity").item(0).getFirstChild() != null)
+//			record.setToxicity(recordElement.getElementsByTagName("toxicity").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("lethaldose").item(0).getFirstChild() != null)
+//			record.setLethaldose(recordElement.getElementsByTagName("lethaldose").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("carcinogenicity").item(0).getFirstChild() != null)
+//			record.setCarcinogenicity(recordElement.getElementsByTagName("carcinogenicity").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("use_source").item(0).getFirstChild() != null)
+//			record.setUsage(recordElement.getElementsByTagName("use_source").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("min_risk_level").item(0).getFirstChild() != null)
+//			record.setMinRiskLevel(recordElement.getElementsByTagName("min_risk_level").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("health_effects").item(0).getFirstChild() != null)
+//			record.setHealthEffects(recordElement.getElementsByTagName("health_effects").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("symptoms").item(0).getFirstChild() != null)
+//			record.setSymptoms(recordElement.getElementsByTagName("symptoms").item(0).getFirstChild().getNodeValue());
+//
+//		if (recordElement.getElementsByTagName("treatment").item(0).getFirstChild() != null)
+//			record.setTreatment(recordElement.getElementsByTagName("treatment").item(0).getFirstChild().getNodeValue());
 	}
 
-	private static T3DBTarget parseTargetElement(Element targetElement) {
+	public static void parseTargets(
+			Element recordElement, T3DBRecord record, Namespace ns) {
+
+//		NodeList normalConcentrations = recordElement.getElementsByTagName("targets");
+//		if(normalConcentrations.getLength() > 0) {
+//
+//			Element targetsElement = (Element) normalConcentrations.item(0);
+//			NodeList targetList = targetsElement.getElementsByTagName("target");
+//			for(int i=0; i<targetList.getLength(); i++) {
+//				T3DBTarget tgt = parseTargetElement((Element) targetList.item(i));
+//				record.getTargets().add(tgt);
+//			}
+//		}
+	}
+
+	private static T3DBTarget parseTargetElement(Element targetElement, Namespace ns) {
 
 		T3DBTarget tgt = null;
 
-		String targetId = "";
-		Node idElement = targetElement.getElementsByTagName("target_id").item(0).getFirstChild();
-		if (idElement != null)
-			targetId = idElement.getNodeValue();
-
-		String targetName = "";
-		Node nameElement = targetElement.getElementsByTagName("name").item(0).getFirstChild();
-		if (nameElement != null)
-			targetName = nameElement.getNodeValue();
-
-		tgt = new T3DBTarget(targetId, targetName);
-
-		Node uniprotElement = targetElement.getElementsByTagName("uniprot_id").item(0).getFirstChild();
-		if (uniprotElement != null)
-			tgt.setUniprotId(uniprotElement.getNodeValue());
-
-		Node mechanismOfActionElement = targetElement.getElementsByTagName("mechanism_of_action").item(0).getFirstChild();
-		if (mechanismOfActionElement != null)
-			tgt.setMechanismOfAction(mechanismOfActionElement.getNodeValue());
-
-		// References
-		NodeList refs = targetElement.getElementsByTagName("references");
-		if(refs.getLength() > 0) {
-
-			Element refElement = (Element) refs.item(0);
-			NodeList refList = refElement.getElementsByTagName("reference");
-			for(int i=0; i<refList.getLength(); i++) {
-
-				HMDBCitation ref = HMDBParser.parseCitationElement((Element) refList.item(i));
-				tgt.getReferences().add(ref);
-			}
-		}
+//		String targetId = "";
+//		Node idElement = targetElement.getElementsByTagName("target_id").item(0).getFirstChild();
+//		if (idElement != null)
+//			targetId = idElement.getNodeValue();
+//
+//		String targetName = "";
+//		Node nameElement = targetElement.getElementsByTagName("name").item(0).getFirstChild();
+//		if (nameElement != null)
+//			targetName = nameElement.getNodeValue();
+//
+//		tgt = new T3DBTarget(targetId, targetName);
+//
+//		Node uniprotElement = targetElement.getElementsByTagName("uniprot_id").item(0).getFirstChild();
+//		if (uniprotElement != null)
+//			tgt.setUniprotId(uniprotElement.getNodeValue());
+//
+//		Node mechanismOfActionElement = targetElement.getElementsByTagName("mechanism_of_action").item(0).getFirstChild();
+//		if (mechanismOfActionElement != null)
+//			tgt.setMechanismOfAction(mechanismOfActionElement.getNodeValue());
+//
+//		// References
+//		NodeList refs = targetElement.getElementsByTagName("references");
+//		if(refs.getLength() > 0) {
+//
+//			Element refElement = (Element) refs.item(0);
+//			NodeList refList = refElement.getElementsByTagName("reference");
+//			for(int i=0; i<refList.getLength(); i++) {
+//
+//				HMDBCitation ref = HMDBParserJdom2.parseCitationElement((Element) refList.item(i));
+//				tgt.getReferences().add(ref);
+//			}
+//		}
 		return tgt;
 	}
 
-	public static void parseTypes(Element recordElement, T3DBRecord record){
+	public static void parseTypes(
+			Element recordElement, T3DBRecord record, Namespace ns){
 
-		NodeList types = recordElement.getElementsByTagName("types");
-		if(types.getLength() > 0) {
-
-			Element typeElement = (Element) types.item(0);
-			NodeList typeList = typeElement.getElementsByTagName("type");
-			for(int i=0; i<typeList.getLength(); i++)
-				record.getTypes().add(typeList.item(i).getFirstChild().getNodeValue());
-		}
+//		NodeList types = recordElement.getElementsByTagName("types");
+//		if(types.getLength() > 0) {
+//
+//			Element typeElement = (Element) types.item(0);
+//			NodeList typeList = typeElement.getElementsByTagName("type");
+//			for(int i=0; i<typeList.getLength(); i++)
+//				record.getTypes().add(typeList.item(i).getFirstChild().getNodeValue());
+//		}
 	}
 
-	public static void parseCategories(Element recordElement, T3DBRecord record){
+	public static void parseCategories(
+			Element recordElement, T3DBRecord record, Namespace ns){
 
-		NodeList categories = recordElement.getElementsByTagName("categories");
-		if(categories.getLength() > 0) {
-
-			Element categoryElement = (Element) categories.item(0);
-			NodeList catList = categoryElement.getElementsByTagName("category");
-			for(int i=0; i<catList.getLength(); i++)
-				record.getCategories().add(catList.item(i).getFirstChild().getNodeValue());
-		}
+//		NodeList categories = recordElement.getElementsByTagName("categories");
+//		if(categories.getLength() > 0) {
+//
+//			Element categoryElement = (Element) categories.item(0);
+//			NodeList catList = categoryElement.getElementsByTagName("category");
+//			for(int i=0; i<catList.getLength(); i++)
+//				record.getCategories().add(catList.item(i).getFirstChild().getNodeValue());
+//		}
 	}
 
 	/**
@@ -554,23 +484,23 @@ public class T3DBParser {
 		ps.setString(10, inchiKey);
 
 		//****//
-		String status = record.getStatus();
-		if(status == null)
-			status = "";
+//		String status = record.getStatus();
+//		if(status == null)
+//			status = "";
+//
+//		ps.setString(11, status);
+//
+//		String origin = record.getOrigin();
+//		if(origin == null)
+//			origin = "";
 
-		ps.setString(11, status);
+//		ps.setString(12, origin);
+//
+//		String aggState = record.getAggregateState();
+//		if(aggState == null)
+//			aggState = "";
 
-		String origin = record.getOrigin();
-		if(origin == null)
-			origin = "";
-
-		ps.setString(12, origin);
-
-		String aggState = record.getAggregateState();
-		if(aggState == null)
-			aggState = "";
-
-		ps.setString(13, aggState);
+//		ps.setString(13, aggState);
 
 //		DESCRIPTION
 		String description = record.getDescription();
@@ -585,84 +515,84 @@ public class T3DBParser {
 			appearance = "";
 
 		ps.setString(15, appearance);
+//
+////		ROUTE_OF_EXPOSURE
+//		String route_of_exposure = record.getRouteOfExposure();
+//		if(route_of_exposure == null)
+//			route_of_exposure = "";
+//
+//		ps.setString(16, route_of_exposure);
+//
+//
+////		MECHANISM_OF_TOXICITY
+//		String mechanism_of_toxicity = record.getMechanismOfToxicity();
+//		if(mechanism_of_toxicity == null)
+//			mechanism_of_toxicity = "";
+//
+//		ps.setString(17, mechanism_of_toxicity);
+//
+////		METABOLISM
+//		String metabolism = record.getMetabolism();
+//		if(metabolism == null)
+//			metabolism = "";
+//
+//		ps.setString(18, metabolism);
+//
+////		TOXICITY
+//		String toxicity = record.getToxicity();
+//		if(toxicity == null)
+//			toxicity = "";
+//
+//		ps.setString(19, toxicity);
+//
+////		LETHALDOSE
+//		String lethaldose = record.getLethaldose();
+//		if(lethaldose == null)
+//			lethaldose = "";
+//
+//		ps.setString(20, lethaldose);
+//
+////		CARCINOGENICITY
+//		String carcinogenicity = record.getCarcinogenicity();
+//		if(carcinogenicity == null)
+//			carcinogenicity = "";
+//
+//		ps.setString(21, carcinogenicity);
+//
+////		USE_SOURCE
+//		String use_source = record.getUsage();
+//		if(use_source == null)
+//			use_source = "";
+//
+//		ps.setString(22, use_source);
+//
+////		MIN_RISK_LEVEL
+//		String min_risk_level = record.getMinRiskLevel();
+//		if(min_risk_level == null)
+//			min_risk_level = "";
+//
+//		ps.setString(23, min_risk_level);
+//
+////		HEALTH_EFFECTS
+//		String health_effects = record.getHealthEffects();
+//		if(health_effects == null)
+//			health_effects = "";
+//
+//		ps.setString(24, health_effects);
+//
+////		SYMPTOMS
+//		String symptoms = record.getSymptoms();
+//		if(symptoms == null)
+//			symptoms = "";
+//
+//		ps.setString(25, symptoms);
+//
+////		TREATMENT
+//		String treatment = record.getTreatment();
+//		if(treatment == null)
+//			treatment = "";
 
-//		ROUTE_OF_EXPOSURE
-		String route_of_exposure = record.getRouteOfExposure();
-		if(route_of_exposure == null)
-			route_of_exposure = "";
-
-		ps.setString(16, route_of_exposure);
-
-
-//		MECHANISM_OF_TOXICITY
-		String mechanism_of_toxicity = record.getMechanismOfToxicity();
-		if(mechanism_of_toxicity == null)
-			mechanism_of_toxicity = "";
-
-		ps.setString(17, mechanism_of_toxicity);
-
-//		METABOLISM
-		String metabolism = record.getMetabolism();
-		if(metabolism == null)
-			metabolism = "";
-
-		ps.setString(18, metabolism);
-
-//		TOXICITY
-		String toxicity = record.getToxicity();
-		if(toxicity == null)
-			toxicity = "";
-
-		ps.setString(19, toxicity);
-
-//		LETHALDOSE
-		String lethaldose = record.getLethaldose();
-		if(lethaldose == null)
-			lethaldose = "";
-
-		ps.setString(20, lethaldose);
-
-//		CARCINOGENICITY
-		String carcinogenicity = record.getCarcinogenicity();
-		if(carcinogenicity == null)
-			carcinogenicity = "";
-
-		ps.setString(21, carcinogenicity);
-
-//		USE_SOURCE
-		String use_source = record.getUsage();
-		if(use_source == null)
-			use_source = "";
-
-		ps.setString(22, use_source);
-
-//		MIN_RISK_LEVEL
-		String min_risk_level = record.getMinRiskLevel();
-		if(min_risk_level == null)
-			min_risk_level = "";
-
-		ps.setString(23, min_risk_level);
-
-//		HEALTH_EFFECTS
-		String health_effects = record.getHealthEffects();
-		if(health_effects == null)
-			health_effects = "";
-
-		ps.setString(24, health_effects);
-
-//		SYMPTOMS
-		String symptoms = record.getSymptoms();
-		if(symptoms == null)
-			symptoms = "";
-
-		ps.setString(25, symptoms);
-
-//		TREATMENT
-		String treatment = record.getTreatment();
-		if(treatment == null)
-			treatment = "";
-
-		ps.setString(26, treatment);
+//		ps.setString(26, treatment);
 
 		ps.executeUpdate();
 		ps.close();

@@ -21,7 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.database.thermo;
 
-import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,22 +34,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoActivationType;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoBestHitType;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDRawDatFile;
-import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDSample;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDStudy;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDWorkflow;
 import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoIonizationType;
@@ -68,79 +54,79 @@ public class CompoundDiscovererUtils {
 		
 		ThermoCDStudy study = null;
 		
-		Document defXml = getAnalysisDefinitionDocument(conn);
-		if(defXml == null)
-			return null;
-		
-		XPathFactory factory = XPathFactory.newInstance();
-		XPath xpath = factory.newXPath();
-		XPathExpression expr = xpath.compile("//AnalysisDefinition/StudyDefinition");
-		NodeList studyNodes = (NodeList) expr.evaluate(defXml, XPathConstants.NODESET);
-		
-		Element studyElement = (Element) studyNodes.item(0);
-		study  = new ThermoCDStudy(studyElement.getAttribute("Name"));
-		study.setDescription(studyElement.getAttribute("Description"));
-		study.setDateCreated(cdTimeStampFormat.parse(studyElement.getAttribute("CreationDate")));
-		study.setLastModified(cdTimeStampFormat.parse(studyElement.getAttribute("LastChangeDate")));
-		
-		//	Read samples
-		expr = xpath.compile("//AnalysisDefinition/StudyDefinition/Samples/Sample");
-		NodeList sampleNodes = (NodeList) expr.evaluate(defXml, XPathConstants.NODESET);
-		for (int i = 0; i < sampleNodes.getLength(); i++) {
-
-			Element sampleElement = (Element) sampleNodes.item(i);		
-			ThermoCDSample sample = new ThermoCDSample(
-					sampleElement.getAttribute("Id"), 
-					sampleElement.getAttribute("Name"), 
-					sampleElement.getAttribute("FileSetId"));
-			study.addSample(sample);
-		}
-		//		Read raw data files
-		expr = xpath.compile("//AnalysisDefinition/StudyDefinition/FileSets/FileSet");
-		NodeList filesetNodes = (NodeList) expr.evaluate(defXml, XPathConstants.NODESET);
-		for (int i = 0; i < filesetNodes.getLength(); i++) {
-
-			Element filesetElement = (Element) filesetNodes.item(i);
-			String fileSetId = filesetElement.getAttribute("Id");
-			NodeList fileNodes  = filesetElement.getElementsByTagName("File");
-			for (int j = 0; j < fileNodes.getLength(); j++) {
-				
-				Element fileElement = (Element) fileNodes.item(j);
-				ThermoCDRawDatFile file = new ThermoCDRawDatFile(
-						fileElement.getAttribute("FileName"),
-						cdTimeStampFormat.parse(fileElement.getAttribute("FileTime")), 
-						Integer.parseInt(fileElement.getAttribute("FileSize").replace(" [Byte]", "")));
-				study.addFileForSample(file, fileSetId);
-			}
-		}
+//		Document defXml = getAnalysisDefinitionDocument(conn);
+//		if(defXml == null)
+//			return null;
+//		
+//		XPathFactory factory = XPathFactory.newInstance();
+//		XPath xpath = factory.newXPath();
+//		XPathExpression expr = xpath.compile("//AnalysisDefinition/StudyDefinition");
+//		NodeList studyNodes = (NodeList) expr.evaluate(defXml, XPathConstants.NODESET);
+//		
+//		Element studyElement = (Element) studyNodes.item(0);
+//		study  = new ThermoCDStudy(studyElement.getAttribute("Name"));
+//		study.setDescription(studyElement.getAttribute("Description"));
+//		study.setDateCreated(cdTimeStampFormat.parse(studyElement.getAttribute("CreationDate")));
+//		study.setLastModified(cdTimeStampFormat.parse(studyElement.getAttribute("LastChangeDate")));
+//		
+//		//	Read samples
+//		expr = xpath.compile("//AnalysisDefinition/StudyDefinition/Samples/Sample");
+//		NodeList sampleNodes = (NodeList) expr.evaluate(defXml, XPathConstants.NODESET);
+//		for (int i = 0; i < sampleNodes.getLength(); i++) {
+//
+//			Element sampleElement = (Element) sampleNodes.item(i);		
+//			ThermoCDSample sample = new ThermoCDSample(
+//					sampleElement.getAttribute("Id"), 
+//					sampleElement.getAttribute("Name"), 
+//					sampleElement.getAttribute("FileSetId"));
+//			study.addSample(sample);
+//		}
+//		//		Read raw data files
+//		expr = xpath.compile("//AnalysisDefinition/StudyDefinition/FileSets/FileSet");
+//		NodeList filesetNodes = (NodeList) expr.evaluate(defXml, XPathConstants.NODESET);
+//		for (int i = 0; i < filesetNodes.getLength(); i++) {
+//
+//			Element filesetElement = (Element) filesetNodes.item(i);
+//			String fileSetId = filesetElement.getAttribute("Id");
+//			NodeList fileNodes  = filesetElement.getElementsByTagName("File");
+//			for (int j = 0; j < fileNodes.getLength(); j++) {
+//				
+//				Element fileElement = (Element) fileNodes.item(j);
+//				ThermoCDRawDatFile file = new ThermoCDRawDatFile(
+//						fileElement.getAttribute("FileName"),
+//						cdTimeStampFormat.parse(fileElement.getAttribute("FileTime")), 
+//						Integer.parseInt(fileElement.getAttribute("FileSize").replace(" [Byte]", "")));
+//				study.addFileForSample(file, fileSetId);
+//			}
+//		}
 		return study;
 	}
 	
-	public static Document getAnalysisDefinitionDocument(Connection conn) throws Exception {
-		
-		String sql = "SELECT ANALYSISDEFINITIONXML FROM ANALYSISDEFINITION";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		String adXml = null;
-		ResultSet rs = ps.executeQuery();
-		while(rs.next())
-			adXml = rs.getString(1);
-		
-		rs.close();
-		ps.close();
-		
-		if(adXml == null || adXml.isEmpty())
-			return null;
-		
-		Document xmlDocument = null;
-		try {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			xmlDocument = dBuilder.parse(new InputSource(new StringReader(adXml)));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return xmlDocument;		
-	}
+//	public static Document getAnalysisDefinitionDocument(Connection conn) throws Exception {
+//		
+//		String sql = "SELECT ANALYSISDEFINITIONXML FROM ANALYSISDEFINITION";
+//		PreparedStatement ps = conn.prepareStatement(sql);
+//		String adXml = null;
+//		ResultSet rs = ps.executeQuery();
+//		while(rs.next())
+//			adXml = rs.getString(1);
+//		
+//		rs.close();
+//		ps.close();
+//		
+//		if(adXml == null || adXml.isEmpty())
+//			return null;
+//		
+//		Document xmlDocument = null;
+//		try {
+//			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+//			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+//			xmlDocument = dBuilder.parse(new InputSource(new StringReader(adXml)));
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return xmlDocument;		
+//	}
 	
 	public static Collection<ThermoCDWorkflow> getAnalysisWorkflows(Connection conn) throws Exception {
 		

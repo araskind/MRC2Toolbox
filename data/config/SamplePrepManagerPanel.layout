@@ -99,8 +99,8 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1676488977325" orientation="HORIZONTAL" divider="0.5238480194017785">
-											<leaf id="1" nodeId="1600213801595">
+										<node nodeId="1676573064395" orientation="HORIZONTAL" divider="0.4870946393117141">
+											<leaf id="0" nodeId="1676573010666">
 												<placeholders>
 													<placeholder>dock.single.DockablePrepTable</placeholder>
 												</placeholders>
@@ -114,9 +114,9 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="0" nodeId="1676488977323">
+											<leaf id="1" nodeId="1676573064393">
 												<placeholders>
-													<placeholder>dock.single.DockableActivePrepDisplayPanel</placeholder>
+													<placeholder>dock.single.DockableActivePrepPanel</placeholder>
 												</placeholders>
 											</leaf>
 										</node>
@@ -130,20 +130,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableActivePrepDisplayPanel">
-										<replacement id="dockablesingle DockableActivePrepDisplayPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockablePrepTable">
+										<replacement id="dockablesingle DockablePrepTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableActivePrepDisplayPanel</id>
+											<id>DockablePrepTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockablePrepTable">
-										<replacement id="dockablesingle DockablePrepTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableActivePrepPanel">
+										<replacement id="dockablesingle DockableActivePrepPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockablePrepTable</id>
+											<id>DockableActivePrepPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -190,18 +190,15 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockablePrepTable</placeholder>
 											<backup-path>
-												<leaf id="1600213801595"/>
+												<node location="LEFT" size="0.37833468067906223" id="1676573064395"/>
+												<leaf id="1676573010666"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockablePrepTable</placeholder>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableActivePrepDisplayPanel" current="dock.mode.normal">
+						<entry id="single DockableActivePrepPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -212,14 +209,11 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableActivePrepDisplayPanel</placeholder>
+											<placeholder>dock.single.DockableActivePrepPanel</placeholder>
 											<backup-path>
-												<leaf id="1600213801595"/>
+												<node location="RIGHT" size="0.6216653193209378" id="1676573064395"/>
+												<leaf id="1676573064393"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>1</index>
-											<placeholder>dock.single.DockableActivePrepDisplayPanel</placeholder>
 										</property>
 									</location>
 								</property>

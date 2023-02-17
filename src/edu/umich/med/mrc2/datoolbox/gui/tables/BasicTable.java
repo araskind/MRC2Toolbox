@@ -59,7 +59,7 @@ import javax.swing.table.TableRowSorter;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.compare.TableColumnStateComparator;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
-import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLlayoutManager;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLayoutManager;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.pref.TableColumnState;
@@ -293,7 +293,7 @@ public class BasicTable extends JTable implements ActionListener{
 		if(columnSelectorPopupMenu != null)
 			columnSelectorPopupMenu.enableAllColumnItems();
 		
-		TableLlayoutManager.setTableLayout(this);
+		TableLayoutManager.setTableLayout(this);
 	}
 
 	public void adjustAllColumns() {
@@ -516,13 +516,13 @@ public class BasicTable extends JTable implements ActionListener{
 			if(columnModel.isColumnVisible(column) != state.isVisible())
 				columnModel.setColumnVisible(column, state.isVisible());
 		}
-		TableLlayoutManager.setTableLayout(this);
+		TableLayoutManager.setTableLayout(this);
 		tablePreferencesDialog.dispose();
 	}
 	
 	public void loadSavedLayout() {
 		
-		TableColumnState[] layout = TableLlayoutManager.getTableLayout(this);
+		TableColumnState[] layout = TableLayoutManager.getTableLayout(this);
 		if(layout == null || layout.length == 0)
 			return;
 		
@@ -636,7 +636,7 @@ public class BasicTable extends JTable implements ActionListener{
 		boolean visible = aButton.getModel().isSelected();
 		TableColumn column = columnModel.getColumnById(columnName);
 		columnModel.setColumnVisible(column, visible);
-		TableLlayoutManager.setTableLayout(this);
+		TableLayoutManager.setTableLayout(this);
 	}
 	
 	public TableRowSorter<? extends TableModel>getRowSorter(){

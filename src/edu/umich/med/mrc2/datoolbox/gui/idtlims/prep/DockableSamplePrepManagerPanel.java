@@ -73,7 +73,7 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 
 	private SamplePrepManagerToolbar toolbar;
 	private DockablePrepTable samplePrepTable;
-	private DockableActivePrepDisplayPanel activePrepPanel;
+	private DockableActivePrepPanel activePrepPanel;
 	private SamplePrepEditorDialog samplePrepEditorDialog;
 	private CControl control;
 	private CGrid grid;
@@ -85,8 +85,8 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 		setCloseable(false);
 		setLayout(new BorderLayout(0, 0));
 
-		toolbar = new SamplePrepManagerToolbar(this);
-		getContentPane().add(toolbar, BorderLayout.NORTH);
+//		toolbar = new SamplePrepManagerToolbar(this);
+//		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		control = new CControl(MRC2ToolBoxCore.getMainWindow());
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
@@ -107,7 +107,7 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 					}
 				});
 		
-		activePrepPanel = new DockableActivePrepDisplayPanel();
+		activePrepPanel = new DockableActivePrepPanel();
 		grid.add(0, 0, 100, 100, samplePrepTable, activePrepPanel);
 
 		control.getContentArea().deploy(grid);

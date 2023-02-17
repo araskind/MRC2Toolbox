@@ -44,7 +44,7 @@ public class WizardSamplePrepPanel extends IDTrackerDataLoadWizardPanel {
 		
 		super(wizard);
 		
-		samplePrepEditorPanel = new SamplePrepEditorPanel();
+		samplePrepEditorPanel = new SamplePrepEditorPanel(false);
 		add(samplePrepEditorPanel, gbc_panel);
 		
 		completeStageButton.setText(

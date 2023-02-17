@@ -142,10 +142,24 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
+										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockablePrepSampleTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockablePrepSampleTable</item>
+											</entry>
 											<entry>
 												<key shared="false">
 													<placeholder>dock.single.DockableSopTable</placeholder>
@@ -156,8 +170,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
 												<item key="dock.placeholder" type="s">dock.single.DockableSopTable</item>
 											</entry>
 											<entry>
@@ -170,27 +184,23 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableDocumentsTable</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockablePrepSampleTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
 												<item key="dock.index" type="i">2</item>
 												<item key="dock.id" type="i">2</item>
-												<item key="dock.placeholder" type="s">dock.single.DockablePrepSampleTable</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableDocumentsTable</item>
 											</entry>
 										</placeholders>
 									</layout>
 									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockablePrepSampleTable">
+												<replacement id="dockablesingle DockablePrepSampleTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockablePrepSampleTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
 										<child>
 											<layout factory="predefined" placeholder="dock.single.DockableSopTable">
 												<replacement id="dockablesingle DockableSopTable"/>
@@ -206,16 +216,6 @@
 												<replacement id="dockablesingle DockableDocumentsTable"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>DockableDocumentsTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockablePrepSampleTable">
-												<replacement id="dockablesingle DockablePrepSampleTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockablePrepSampleTable</id>
 													<area/>
 												</delegate>
 											</layout>

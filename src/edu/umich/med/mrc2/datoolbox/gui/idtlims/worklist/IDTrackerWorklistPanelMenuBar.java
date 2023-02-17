@@ -88,32 +88,32 @@ public class IDTrackerWorklistPanelMenuBar extends CommonMenuBar {
 		super(listener);
 
 		// Design
-		loadMenu = new JMenu("Load");
-		loadMenu.setIcon(loadWorklistFromFileIconSmall);		
-		
-		scanDirMenuItem = addItem(loadMenu, 
-				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND, 
-				scanDirIcon);
-		scanDirAddMenuItem = addItem(loadMenu, 
-				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND, 
-				addFromDirIcon);
-		
-		loadMenu.addSeparator();
-		
-		loadWorklistMenuItem = addItem(loadMenu, 
-				MainActionCommands.LOAD_WORKLIST_COMMAND, 
-				loadWorklistFromFileIcon);
-		addWorklistMenuItem = addItem(loadMenu, 
-				MainActionCommands.ADD_WORKLIST_COMMAND, 
-				addWorklistFromFileIcon);
-		
-		loadMenu.addSeparator();
-		
-		clearWorklistMenuItem = addItem(loadMenu, 
-				MainActionCommands.CLEAR_WORKLIST_COMMAND, 
-				clearWorklistIcon);
-		
-		add(loadMenu);
+//		loadMenu = new JMenu("Load");
+//		loadMenu.setIcon(loadWorklistFromFileIconSmall);		
+//		
+//		scanDirMenuItem = addItem(loadMenu, 
+//				MainActionCommands.SCAN_DIR_SAMPLE_INFO_COMMAND, 
+//				scanDirIcon);
+//		scanDirAddMenuItem = addItem(loadMenu, 
+//				MainActionCommands.SCAN_DIR_ADD_SAMPLE_INFO_COMMAND, 
+//				addFromDirIcon);
+//		
+//		loadMenu.addSeparator();
+//		
+//		loadWorklistMenuItem = addItem(loadMenu, 
+//				MainActionCommands.LOAD_WORKLIST_COMMAND, 
+//				loadWorklistFromFileIcon);
+//		addWorklistMenuItem = addItem(loadMenu, 
+//				MainActionCommands.ADD_WORKLIST_COMMAND, 
+//				addWorklistFromFileIcon);
+//		
+//		loadMenu.addSeparator();
+//		
+//		clearWorklistMenuItem = addItem(loadMenu, 
+//				MainActionCommands.CLEAR_WORKLIST_COMMAND, 
+//				clearWorklistIcon);
+//		
+//		add(loadMenu);
 
 		exportMenu = new JMenu("Export");
 		exportMenu.setIcon(saveWorklistIconSmall);		

@@ -35,7 +35,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -110,23 +109,23 @@ public class IdProjectTreeMouseHandler extends MouseAdapter {
 		
 		experimentPopupMenu.addSeparator();
 		
-		addSamplePrepMenuItem = GuiUtils.addMenuItem(experimentPopupMenu,
-				MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName(), popupListener,
-				MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName());
-		addSamplePrepMenuItem.setIcon(addSamplePrepIcon);
+//		addSamplePrepMenuItem = GuiUtils.addMenuItem(experimentPopupMenu,
+//				MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName(), popupListener,
+//				MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName());
+//		addSamplePrepMenuItem.setIcon(addSamplePrepIcon);
 
 		//	Sample prep
-		samplePrepPopupMenu = new JPopupMenu();
+//		samplePrepPopupMenu = new JPopupMenu();
+//
+//		editSamplePrepMenuItem = GuiUtils.addMenuItem(samplePrepPopupMenu,
+//				MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName(), popupListener,
+//				MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName());
+//		editSamplePrepMenuItem.setIcon(editIcon);
 
-		editSamplePrepMenuItem = GuiUtils.addMenuItem(samplePrepPopupMenu,
-				MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName(), popupListener,
-				MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName());
-		editSamplePrepMenuItem.setIcon(editIcon);
-
-		deleteSamplePrepMenuItem = GuiUtils.addMenuItem(samplePrepPopupMenu,
-				MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName(), popupListener,
-				MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName());
-		deleteSamplePrepMenuItem.setIcon(deleteIcon);
+//		deleteSamplePrepMenuItem = GuiUtils.addMenuItem(samplePrepPopupMenu,
+//				MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName(), popupListener,
+//				MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName());
+//		deleteSamplePrepMenuItem.setIcon(deleteIcon);
 		
 //		samplePrepPopupMenu.addSeparator();
 //		
@@ -143,10 +142,10 @@ public class IdProjectTreeMouseHandler extends MouseAdapter {
 				MainActionCommands.EDIT_ACQUISITION_METHOD_DIALOG_COMMAND.getName());
 		editAcquisitionMethodMenuItem.setIcon(editIcon);
 
-		deleteAcquisitionMethodMenuItem = GuiUtils.addMenuItem(acquisitionMethodPopupMenu,
-				MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName(), popupListener,
-				MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName());
-		deleteAcquisitionMethodMenuItem.setIcon(deleteIcon);
+//		deleteAcquisitionMethodMenuItem = GuiUtils.addMenuItem(acquisitionMethodPopupMenu,
+//				MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName(), popupListener,
+//				MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName());
+//		deleteAcquisitionMethodMenuItem.setIcon(deleteIcon);
 
 		//	Data extraction
 		dataExtractionMethodPopupMenu = new JPopupMenu();
@@ -156,10 +155,10 @@ public class IdProjectTreeMouseHandler extends MouseAdapter {
 				MainActionCommands.EDIT_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName());
 		editDataExtractionMethodMenuItem.setIcon(editIcon);
 
-		deleteDataExtractionMethodMenuItem = GuiUtils.addMenuItem(dataExtractionMethodPopupMenu,
-				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName(), popupListener,
-				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName());
-		deleteDataExtractionMethodMenuItem.setIcon(deleteIcon);
+//		deleteDataExtractionMethodMenuItem = GuiUtils.addMenuItem(dataExtractionMethodPopupMenu,
+//				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName(), popupListener,
+//				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName());
+//		deleteDataExtractionMethodMenuItem.setIcon(deleteIcon);
 	}
 
 	private void handleDoubleClickEvent(MouseEvent e) {
@@ -196,8 +195,8 @@ public class IdProjectTreeMouseHandler extends MouseAdapter {
 		if (clickedObject instanceof LIMSExperiment)
 			experimentPopupMenu.show(e.getComponent(), e.getX(), e.getY());
 
-		if (clickedObject instanceof LIMSSamplePreparation)
-			samplePrepPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+//		if (clickedObject instanceof LIMSSamplePreparation)
+//			samplePrepPopupMenu.show(e.getComponent(), e.getX(), e.getY());
 
 		if (clickedObject instanceof DataAcquisitionMethod)
 			acquisitionMethodPopupMenu.show(e.getComponent(), e.getX(), e.getY());

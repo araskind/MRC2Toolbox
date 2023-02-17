@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.gui.tables.pref;
 
 import javax.swing.SortOrder;
 
+import org.jdom2.Element;
+
 public class TableColumnState {
 
 	private String columnName;
@@ -38,7 +40,10 @@ public class TableColumnState {
 		sorterPosition = -1;
 	}
 
-	public TableColumnState(String columnName, boolean isVisible, SortOrder sortOrder) {
+	public TableColumnState(
+			String columnName, 
+			boolean isVisible, 
+			SortOrder sortOrder) {
 		super();
 		this.columnName = columnName;
 		this.isVisible = isVisible;
@@ -46,7 +51,11 @@ public class TableColumnState {
 		sorterPosition = -1;
 	}
 
-	public TableColumnState(String columnName, boolean isVisible, SortOrder sortOrder, int sorterPosition) {
+	public TableColumnState(
+			String columnName, 
+			boolean isVisible, 
+			SortOrder sortOrder, 
+			int sorterPosition) {
 		super();
 		this.columnName = columnName;
 		this.isVisible = isVisible;
@@ -86,5 +95,36 @@ public class TableColumnState {
 		this.sortOrder = sortOrder;
 	}
 	
+	public Element getXmlElement() {
 	
+		Element tcsElement = 
+				new Element(TableLayoutFields.TableColumnState.name());		
+		tcsElement.setAttribute(
+				TableLayoutFields.ColumnName.name(), columnName);
+		tcsElement.setAttribute(
+				TableLayoutFields.IsVisible.name(), Boolean.toString(isVisible));
+		tcsElement.setAttribute(
+				TableLayoutFields.SortOrder.name(), sortOrder.name());
+		tcsElement.setAttribute(
+				TableLayoutFields.SorterPosition.name(), Integer.toString(sorterPosition));
+
+		return tcsElement;
+	}
+	
+	public TableColumnState(Element tcsElement) {
+		super();
+		columnName = 
+				tcsElement.getAttributeValue(TableLayoutFields.ColumnName.name());
+		isVisible = Boolean.valueOf(
+				tcsElement.getAttributeValue(TableLayoutFields.IsVisible.name()));
+		sortOrder = SortOrder.valueOf(
+				tcsElement.getAttributeValue(TableLayoutFields.SortOrder.name()));
+		sorterPosition = Integer.valueOf(
+				tcsElement.getAttributeValue(TableLayoutFields.SorterPosition.name()));
+	}
 }
+
+
+
+
+

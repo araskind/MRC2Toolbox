@@ -53,20 +53,20 @@ public class SamplePrepManagerToolbar extends CommonToolbar {
 
 		super(commandListener);
 
-		addSamplePrepButton = GuiUtils.addButton(this, null, addSamplePrepIcon, commandListener,
-				MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName(),
-				MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName(),
-				buttonDimension);
+//		addSamplePrepButton = GuiUtils.addButton(this, null, addSamplePrepIcon, commandListener,
+//				MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName(),
+//				MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName(),
+//				buttonDimension);
 
 		editSamplePrepButton = GuiUtils.addButton(this, null, editSamplePrepIcon, commandListener,
 				MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName(),
 				MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName(),
 				buttonDimension);
 
-		deleteSamplePrepButton = GuiUtils.addButton(this, null, deleteSamplePrepIcon, commandListener,
-				MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName(),
-				MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName(),
-				buttonDimension);
+//		deleteSamplePrepButton = GuiUtils.addButton(this, null, deleteSamplePrepIcon, commandListener,
+//				MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName(),
+//				MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName(),
+//				buttonDimension);
 	}
 
 	@Override

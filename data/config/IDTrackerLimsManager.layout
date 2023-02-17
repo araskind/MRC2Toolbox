@@ -149,13 +149,13 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1652718002959" orientation="HORIZONTAL" divider="0.25">
+										<node nodeId="1652718002959" orientation="HORIZONTAL" divider="0.15618101545253862">
 											<leaf id="0" nodeId="1652718002961">
 												<placeholders>
 													<placeholder>dock.single.DockableIdProjectTree</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1652718303238" orientation="VERTICAL" divider="0.5493333333333333">
+											<node nodeId="1652718303238" orientation="VERTICAL" divider="0.5862445414847162">
 												<leaf id="1" nodeId="1652718002963">
 													<placeholders>
 														<placeholder>dock.single.DockableIDTrackerResultsOverviewPanel</placeholder>

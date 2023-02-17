@@ -228,7 +228,8 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		if(experiment.getCreatedBy() == null)
 			experiment.setCreatedBy(MRC2ToolBoxCore.getIdTrackerUser());
 		
-		String instrumentId = experimentElement.getAttributeValue(ExperimentFields.Instrument.name()); 
+		String instrumentId = 
+				experimentElement.getAttributeValue(ExperimentFields.Instrument.name()); 
 		if(instrumentId != null)
 			experiment.setInstrument(IDTDataCash.getInstrumentById(instrumentId));
 		
