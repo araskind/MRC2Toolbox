@@ -24,6 +24,9 @@ package edu.umich.med.mrc2.datoolbox.dbparse.load.t3db;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.jdom2.Element;
@@ -76,8 +79,19 @@ public class T3DBParser {
   		return record;
 	}
 
-	private static void parseToxicityProperties(Element recordElement, T3DBRecord record, Namespace ns) {
-		// TODO Auto-generated method stub
+	private static void parseToxicityProperties(
+			Element recordElement, 
+			T3DBRecord record, 			
+			Namespace ns) {
+		
+		Map<T3DBToxProperties, String> toxicityProperties = record.getToxicityProperties();
+		for(T3DBToxProperties prop : T3DBToxProperties.values()) {
+			
+			String toxProp = recordElement.getChildText(prop.name(), ns);
+			if(toxProp != null)
+				toxicityProperties.put(prop, toxProp);			
+		}
+
 //		if (recordElement.getElementsByTagName("origin").item(0).getFirstChild() != null)
 //			record.setOrigin(recordElement.getElementsByTagName("origin").item(0).getFirstChild().getNodeValue());
 //
@@ -121,21 +135,39 @@ public class T3DBParser {
 	public static void parseTargets(
 			Element recordElement, T3DBRecord record, Namespace ns) {
 
-//		NodeList normalConcentrations = recordElement.getElementsByTagName("targets");
-//		if(normalConcentrations.getLength() > 0) {
-//
-//			Element targetsElement = (Element) normalConcentrations.item(0);
-//			NodeList targetList = targetsElement.getElementsByTagName("target");
-//			for(int i=0; i<targetList.getLength(); i++) {
-//				T3DBTarget tgt = parseTargetElement((Element) targetList.item(i));
-//				record.getTargets().add(tgt);
-//			}
-//		}
+		Element targetListElement = recordElement.getChild("targets", ns);
+		if(targetListElement == null)
+			return;
+		
+		List<Element> targetList = 
+				targetListElement.getChildren("target", ns);
+		if(targetList.isEmpty())
+			return;
+		
+		Collection<T3DBTarget> targets = record.getTargets();
+		for(Element te : targetList) 
+			targets.add(parseTargetElement(te, ns));	
 	}
 
 	private static T3DBTarget parseTargetElement(Element targetElement, Namespace ns) {
 
-		T3DBTarget tgt = null;
+		String targetId = targetElement.getChildText("target_id", ns);
+		String targetName = targetElement.getChildText("name", ns);
+		T3DBTarget tgt = new T3DBTarget(targetId, targetName);
+		tgt.setUniprotId(targetElement.getChildText("uniprot_id", ns));
+		tgt.setMechanismOfAction(targetElement.getChildText("mechanism_of_action", ns));
+		
+		Element targetReferencesElement = targetElement.getChild("references", ns);
+		if(targetReferencesElement != null) {
+			
+			List<Element> referenceList = 
+					targetReferencesElement.getChildren("reference", ns);
+			if(!referenceList.isEmpty()) {
+				
+				for(Element ref : referenceList)
+					tgt.getReferences().add(HMDBParserJdom2.parseCitationElement(ref, ns));			
+			}
+		}
 
 //		String targetId = "";
 //		Node idElement = targetElement.getElementsByTagName("target_id").item(0).getFirstChild();
@@ -175,6 +207,19 @@ public class T3DBParser {
 	public static void parseTypes(
 			Element recordElement, T3DBRecord record, Namespace ns){
 
+		Element typeListElement = recordElement.getChild("types", ns);
+		if(typeListElement == null)
+			return;
+		
+		List<Element> typeList = 
+				typeListElement.getChildren("type", ns);
+		if(typeList.isEmpty())
+			return;
+		
+		for(Element typeElement : typeList)
+			record.getTypes().add(typeElement.getTextTrim());
+		
+			
 //		NodeList types = recordElement.getElementsByTagName("types");
 //		if(types.getLength() > 0) {
 //
@@ -187,6 +232,18 @@ public class T3DBParser {
 
 	public static void parseCategories(
 			Element recordElement, T3DBRecord record, Namespace ns){
+		
+		Element categoryListElement = recordElement.getChild("categories", ns);
+		if(categoryListElement == null)
+			return;
+		
+		List<Element> categoryList = 
+				categoryListElement.getChildren("category", ns);
+		if(categoryList.isEmpty())
+			return;
+		
+		for(Element typeElement : categoryList)
+			record.getTypes().add(typeElement.getTextTrim());
 
 //		NodeList categories = recordElement.getElementsByTagName("categories");
 //		if(categories.getLength() > 0) {

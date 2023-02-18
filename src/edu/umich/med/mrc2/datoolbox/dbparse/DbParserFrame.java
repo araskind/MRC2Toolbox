@@ -76,7 +76,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.DrugBankParserTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.HMDBParseAndUploadTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.T3DBParserTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.T3DBParseAndUploadTask;
 
 public class DbParserFrame extends JFrame 
 		implements ActionListener, WindowListener,
@@ -377,7 +377,7 @@ public class DbParserFrame extends JFrame
 			parserTask = new HMDBParseAndUploadTask(inputFile);
 
 		if(database.equals(CompoundDatabaseEnum.T3DB))
-			parserTask = new T3DBParserTask(inputFile);
+			parserTask = new T3DBParseAndUploadTask(inputFile);
 
 		parserTask.addTaskListener(this);
 		DbParserCore.getTaskController().addTask(parserTask);
