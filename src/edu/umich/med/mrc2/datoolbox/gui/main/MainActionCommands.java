@@ -810,6 +810,8 @@ public enum MainActionCommands {
 	SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND("Select existing sample prep"),
 	LOAD_SAMPLE_PREP_FROM_DATABASE_COMMAND("Load selected sample prep data"),
 	CLEAR_SAMPLE_PREP_DEFINITION_COMMAND("Clear sample prep definition"),
+	EDIT_SAMPLE_PREP_NAME_COMMAND("Edit sample preparation name"),
+	SAVE_SAMPLE_PREP_NAME_COMMAND("Save sample preparation name"),
 	
 		
 	//	Add processing results

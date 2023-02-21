@@ -50,6 +50,10 @@ public class DockableActivePrepPanel extends DefaultSingleCDockable {
 	public void clearPanel() {
 		samplePrepEditorPanel.clearPanel();
 	}
+	
+	public SamplePrepEditorPanel getPrepEditor() {
+		return samplePrepEditorPanel;
+	}
 }
 
 

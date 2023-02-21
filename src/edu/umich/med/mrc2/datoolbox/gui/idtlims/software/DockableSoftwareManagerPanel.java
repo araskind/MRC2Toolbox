@@ -159,7 +159,7 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 			software.setDescription(softwareEditorDialog.getSoftwareDescription());
 			software.setVendor(softwareEditorDialog.getSoftwareVendor());
 			try {
-				IDTUtils.editSoftware(software);
+				IDTUtils.updateSoftware(software);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

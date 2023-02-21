@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.data.lims;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.UUID;
@@ -56,6 +57,7 @@ public class ObjectAnnotation implements Comparable<ObjectAnnotation>, Serializa
 	private DocumentFormat linkedDocumentFormat;
 	private IChemModel chemModel;
 	private String chemModelNotes;
+	private File linkedDocumentFile;
 	
 	/**
 	 * Instantiate Annotation with linked document from values stored in the database
@@ -371,6 +373,14 @@ public class ObjectAnnotation implements Comparable<ObjectAnnotation>, Serializa
 	 */
 	public void setChemModelNotes(String chemModelNotes) {
 		this.chemModelNotes = chemModelNotes;
+	}
+
+	public File getLinkedDocumentFile() {
+		return linkedDocumentFile;
+	}
+
+	public void setLinkedDocumentFile(File linkedDocumentFile) {
+		this.linkedDocumentFile = linkedDocumentFile;
 	}
 }
 

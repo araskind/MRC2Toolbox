@@ -108,6 +108,7 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 				});
 		
 		activePrepPanel = new DockableActivePrepPanel();
+		activePrepPanel.getPrepEditor().addSamplePrepListener(samplePrepTable);
 		grid.add(0, 0, 100, 100, samplePrepTable, activePrepPanel);
 
 		control.getContentArea().deploy(grid);
@@ -161,8 +162,8 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 		if(e.getActionCommand().equals(MainActionCommands.ADD_SAMPLE_PREP_COMMAND.getName()))
 			saveSamplePrepData();
 
-		if(e.getActionCommand().equals(MainActionCommands.EDIT_SAMPLE_PREP_COMMAND.getName()))
-			editExistingSamplePrep();
+//		if(e.getActionCommand().equals(MainActionCommands.EDIT_SAMPLE_PREP_COMMAND.getName()))
+//			editExistingSamplePrep();
 
 		if(e.getActionCommand().equals(MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName()))
 			deleteSamplePrep(samplePrepTable.getSelectedPrep());
@@ -229,39 +230,39 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 		}
 	}
 
-	private void editExistingSamplePrep() {
-
-		LIMSSamplePreparation prep2save = samplePrepEditorDialog.getSamplePrep();
-		if(prep2save == null)
-			return;
-
-		Collection<String>errors = samplePrepEditorDialog.vaidateSamplePrepData();
-		if(!errors.isEmpty()) {
-			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), samplePrepEditorDialog);
-			return;
-		}
-		String prepName = samplePrepEditorDialog.getPrepName();
-		LIMSUser prepUser = samplePrepEditorDialog.getPrepUser();
-		Date prepDate = samplePrepEditorDialog.getPrepDate();
-		Collection<IDTExperimentalSample>selectedSamples = samplePrepEditorDialog.getSelectedSamples();
-		Collection<LIMSProtocol>prepSops = samplePrepEditorDialog.getPrepSops();
-		Collection<ObjectAnnotation>prepAnnotations = samplePrepEditorDialog.getPrepAnnotations();
-		try {
-			IDTUtils.updateSamplePrep(prep2save, prepName, prepUser, prepDate);
-			prep2save.setName(prepName);
-			prep2save.setCreator(prepUser);
-			prep2save.setPrepDate(prepDate);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		//	TODO	Update SOP list
-
-		//	TODO	Update document list
-		
-		loadPrepData();
-		idTrackerLimsManager.updateProjetTreeNodeForObject(prep2save);
-	}
+//	private void editExistingSamplePrep() {
+//
+//		LIMSSamplePreparation prep2save = samplePrepEditorDialog.getSamplePrep();
+//		if(prep2save == null)
+//			return;
+//
+//		Collection<String>errors = samplePrepEditorDialog.vaidateSamplePrepData();
+//		if(!errors.isEmpty()) {
+//			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), samplePrepEditorDialog);
+//			return;
+//		}
+//		String prepName = samplePrepEditorDialog.getPrepName();
+//		LIMSUser prepUser = samplePrepEditorDialog.getPrepUser();
+//		Date prepDate = samplePrepEditorDialog.getPrepDate();
+//		Collection<IDTExperimentalSample>selectedSamples = samplePrepEditorDialog.getSelectedSamples();
+//		Collection<LIMSProtocol>prepSops = samplePrepEditorDialog.getPrepSops();
+//		Collection<ObjectAnnotation>prepAnnotations = samplePrepEditorDialog.getPrepAnnotations();
+//		try {
+//			IDTUtils.updateSamplePrep(prep2save, prepName, prepUser, prepDate);
+//			prep2save.setName(prepName);
+//			prep2save.setCreator(prepUser);
+//			prep2save.setPrepDate(prepDate);
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		//	TODO	Update SOP list
+//
+//		//	TODO	Update document list
+//		
+//		loadPrepData();
+//		idTrackerLimsManager.updateProjetTreeNodeForObject(prep2save);
+//	}
 
 	private void saveSamplePrepData() {
 

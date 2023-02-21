@@ -29,10 +29,13 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionListener;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
+import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepListener;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class DockablePrepTable extends DefaultSingleCDockable {
+public class DockablePrepTable extends DefaultSingleCDockable implements SamplePrepListener{
 
 	private static final Icon componentIcon = GuiUtils.getIcon("table", 16);
 	private SamplePrepTable samplePrepTable;
@@ -76,4 +79,25 @@ public class DockablePrepTable extends DefaultSingleCDockable {
 	public SamplePrepTable getTable() {
 		return samplePrepTable;
 	}
+
+	@Override
+	public void samplePrepStatusChanged(SamplePrepEvent e) {
+
+		LIMSSamplePreparation prep = e.getSource();
+		if(e.getStatus().equals(ParameterSetStatus.CHANGED))
+			samplePrepTable.updatePrepData(prep);
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

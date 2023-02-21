@@ -482,7 +482,8 @@ public class DockableObjectAnnotationPanel extends DefaultSingleCDockable
 			return;
 		
 		if(documentAnnotationDialog.getDocumentTitle().isEmpty()) {
-			MessageDialog.showErrorMsg("Please specify document title.", documentAnnotationDialog);
+			MessageDialog.showErrorMsg(
+					"Please specify document title.", documentAnnotationDialog);
 			return;
 		}
 		annotation.setLinkedDocumentName(documentAnnotationDialog.getDocumentTitle());
@@ -505,7 +506,8 @@ public class DockableObjectAnnotationPanel extends DefaultSingleCDockable
 				String extension = FilenameUtils.getExtension(documentAnnotationDialog.getDocumentSourceFile().getName());
 				DocumentFormat format = DocumentFormat.getFormatByFileExtension(extension);
 				annotation.setLinkedDocumentFormat(format);
-				AnnotationUtils.insertNewAnnotation(annotation, documentAnnotationDialog.getDocumentSourceFile());
+				annotation.setLinkedDocumentFile(documentAnnotationDialog.getDocumentSourceFile());
+				AnnotationUtils.insertNewAnnotation(annotation);
 				currentObject.addAnnotation(annotation);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

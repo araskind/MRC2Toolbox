@@ -93,7 +93,10 @@ public class SamplePrepTable extends BasicTable {
 			}
 		}
 	}
-	
+
+	public void updatePrepData(LIMSSamplePreparation prep) {
+		model.updatePrepData(prep);
+	}	
 }
 
 

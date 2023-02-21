@@ -68,4 +68,27 @@ public class SamplePrepTableModel extends BasicTableModel {
 			super.addRow(obj);
 		}
 	}
+
+	public void updatePrepData(LIMSSamplePreparation prep) {
+
+		int prepRow = getPrepRow(prep);
+		if(prepRow == -1)
+			return;
+		
+		setValueAt(prep.getId(), prepRow, getColumnIndex(PREP_COLUMN_ID_COLUMN));
+		setValueAt(prep, prepRow, getColumnIndex(SAMPLE_PREP_COLUMN));
+		setValueAt(prep.getPrepDate(), prepRow, getColumnIndex(PREP_DATE_COLUMN));
+		setValueAt(prep.getCreator(), prepRow, getColumnIndex(PREP_AUTHOR_COLUMN));
+	}
+	
+	public int getPrepRow(LIMSSamplePreparation prep) {
+
+		int col = getColumnIndex(SAMPLE_PREP_COLUMN);
+		for (int i = 0; i < getRowCount(); i++) {
+
+			if (prep.equals(getValueAt(i, col)))
+				return i;
+		}
+		return -1;
+	}
 }

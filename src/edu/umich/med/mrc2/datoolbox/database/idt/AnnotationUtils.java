@@ -36,6 +36,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import javax.swing.text.Document;
@@ -50,6 +51,7 @@ import org.openscience.cdk.io.CMLReader;
 import org.openscience.cdk.io.CMLWriter;
 import org.openscience.cdk.io.ISimpleChemObjectReader;
 
+import edu.umich.med.mrc2.datoolbox.data.AnnotatedObject;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.DocumentFormat;
@@ -62,24 +64,24 @@ import rtf.AdvancedRTFEditorKit;
 
 public class AnnotationUtils {
 
-	public static void insertNewAnnotation(ObjectAnnotation annotation, File  linkedDocumentFile) throws Exception {
+	public static void insertNewAnnotation(
+			ObjectAnnotation annotation) throws Exception {
 
 		//	Do not insert anonymous annotation
 		if(annotation.getCreateBy() == null)
 			return;
 		
 		//	Do not insert empty annotation
-		if(linkedDocumentFile == null && annotation.isEmpty())
+		if(annotation.getLinkedDocumentFile() == null && annotation.isEmpty())
 			return;
 		
 		Connection conn = ConnectionManager.getConnection();
-		insertNewAnnotation(annotation, linkedDocumentFile, conn);
+		insertNewAnnotation(annotation, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 
 	public static void insertNewAnnotation(
-			ObjectAnnotation annotation, 
-			File linkedDocumentFile, 
+			ObjectAnnotation annotation,
 			Connection conn) throws Exception {
 
 		//	Do not insert anonymous annotation
@@ -87,7 +89,7 @@ public class AnnotationUtils {
 			return;
 		
 		//	Do not insert empty annotation
-		if(linkedDocumentFile == null && annotation.isEmpty())
+		if(annotation.getLinkedDocumentFile() == null && annotation.isEmpty())
 			return;
 		
 		String annotationId = SQLUtils.getNextIdFromSequence(conn, 
@@ -97,9 +99,8 @@ public class AnnotationUtils {
 				9);
 		annotation.setUniqueId(annotationId);
 		
-		//	setNewAnnotationIdFromDatabaseSequence(annotation, conn);		
-		if(linkedDocumentFile != null) {
-			insertAnnotationWithDocumentFile(annotation, linkedDocumentFile, conn);
+		if(annotation.getLinkedDocumentFile() != null) {
+			insertAnnotationWithDocumentFile(annotation, conn);
 			return;
 		}
 		if(annotation.getRtfDocument() != null) {			
@@ -111,25 +112,6 @@ public class AnnotationUtils {
 			return;
 		}
 	}
-	
-//	private static void setNewAnnotationIdFromDatabaseSequence(
-//			ObjectAnnotation annotation, 
-//			Connection conn) throws Exception{
-//		
-//		String annotationId = null;
-//		String query = "SELECT '" + DataPrefix.OBJECT_ANNOTATION.getName()
-//				+ "' || LPAD(ID_ANNOTATION_SEQ.NEXTVAL, 9, '0') AS ANNOTATION_ID FROM DUAL";
-//
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while (rs.next()) {
-//			annotationId = rs.getString("ANNOTATION_ID");
-//			break;
-//		}
-//		rs.close();
-//		ps.close();
-//		annotation.setUniqueId(annotationId);
-//	}
 	
 	private static void insertRTFAnnotation(
 			ObjectAnnotation annotation, 
@@ -233,15 +215,17 @@ public class AnnotationUtils {
 	}
 	
 	private static void insertAnnotationWithDocumentFile(
-			ObjectAnnotation annotation, 
-			File linkedDocumentFile, 
+			ObjectAnnotation annotation,
 			Connection conn) throws Exception{
+		
+		if(annotation.getLinkedDocumentFile() == null)
+			return;
 		
 		// Upload new document to get linked document ID
 		String linkedDocumentId =  null;			
 		try {
 			linkedDocumentId = DocumentUtils.insertDocument(
-							linkedDocumentFile, 
+							annotation.getLinkedDocumentFile(), 
 							annotation.getLinkedDocumentName(), 
 							annotation.getLinkedDocumentFormat(), 
 							conn);
@@ -271,29 +255,32 @@ public class AnnotationUtils {
 		}
 	}
 
-	public static void updateAnnotation(ObjectAnnotation annotation, File linkedDocumentFile) throws Exception{
+	public static void updateAnnotation(
+			ObjectAnnotation annotation) throws Exception{
 
 		//	Do not allow anonymous edits to annotation
 		if(annotation.getLastModifiedBy() == null)
 			return;
 		
 		//	Do not insert empty annotation
-		if(linkedDocumentFile == null && annotation.isEmpty()  )
+		if(annotation.getLinkedDocumentFile() == null && annotation.isEmpty()  )
 			return;
 		
 		Connection conn = ConnectionManager.getConnection();
-		updateAnnotation(annotation, linkedDocumentFile, conn);
+		updateAnnotation(annotation, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void updateAnnotation(ObjectAnnotation annotation, File linkedDocumentFile, Connection conn) throws Exception{
+	public static void updateAnnotation(
+			ObjectAnnotation annotation, 
+			Connection conn) throws Exception{
 
 		//	Do not allow anonymous edits to annotation
 		if(annotation.getLastModifiedBy() == null)
 			return;
 		
 		//	Do not insert empty annotation
-		if(linkedDocumentFile == null && annotation.isEmpty()  )
+		if(annotation.getLinkedDocumentFile() == null && annotation.isEmpty()  )
 			return;
 		
 		//	Update RTF annotation
@@ -302,15 +289,15 @@ public class AnnotationUtils {
 			return;
 		}
 		//	Update document title
-		if(linkedDocumentFile == null && annotation.getLinkedDocumentId() != null) {
+		if(annotation.getLinkedDocumentFile() == null && annotation.getLinkedDocumentId() != null) {
 			
 			DocumentUtils.updateDocumentTitle(
 					annotation.getLinkedDocumentName(), annotation.getLinkedDocumentId(), conn);
 			return;
 		}
 		//	Add/replace linked document
-		if(linkedDocumentFile != null) {
-			updateAnnotationWithDocumentFile(annotation, linkedDocumentFile, conn);
+		if(annotation.getLinkedDocumentFile() != null) {
+			updateAnnotationWithDocumentFile(annotation, annotation.getLinkedDocumentFile(), conn);
 			return;
 		}
 		//	Update CML annotation
@@ -320,7 +307,8 @@ public class AnnotationUtils {
 		}
 	}
 	
-	private static void updateRTFAnnotation(ObjectAnnotation annotation, Connection conn) throws Exception{
+	private static void updateRTFAnnotation(
+			ObjectAnnotation annotation, Connection conn) throws Exception{
 		
 		if(annotation.getRtfDocument() == null)
 			return;
@@ -430,14 +418,16 @@ public class AnnotationUtils {
 		cmlwriter.close();
 	}
 
-	public static void deleteAnnotation(ObjectAnnotation annotation) throws Exception {
+	public static void deleteAnnotation(
+			ObjectAnnotation annotation) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		deleteAnnotation(annotation, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	public static void deleteAnnotation(ObjectAnnotation annotation, Connection conn) throws Exception {
+	public static void deleteAnnotation(
+			ObjectAnnotation annotation, Connection conn) throws Exception {
 
 		String query =
 			"DELETE FROM OBJECT_ANNOTATIONS WHERE ANNOTATION_ID = ?";
@@ -448,7 +438,8 @@ public class AnnotationUtils {
 		stmt.close();
 	}
 
-	public static Collection<ObjectAnnotation>getObjetAnnotations(AnnotatedObjectType objectType, String objectId) throws Exception{
+	public static Collection<ObjectAnnotation>getObjetAnnotations(
+			AnnotatedObjectType objectType, String objectId) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();
 		Collection<ObjectAnnotation>annotations = getObjectAnnotations(objectType, objectId, conn);
@@ -482,25 +473,20 @@ public class AnnotationUtils {
 					IDTDataCash.getUserById(rs.getString("LAST_EDITED_BY")),
 					null);
 
-//			Blob blob = rs.getBlob("ANNOTATION_RTF_DOCUMENT");
 			InputStream dbs = rs.getBinaryStream("ANNOTATION_RTF_DOCUMENT");
-			if (dbs != null) {				
-//				BufferedInputStream is = new BufferedInputStream(blob.getBinaryStream());				
+			if (dbs != null) {
 				BufferedInputStream is = new BufferedInputStream(dbs);
 				AdvancedRTFDocument doc = (AdvancedRTFDocument) editor.createDefaultDocument();
 				editor.read(is, doc, 0);
 				is.close();
-//				blob.free();
 				annotation.setRtfDocument(doc);
 			}
-//			Blob cml = rs.getBlob("CML");
 			InputStream cmls = rs.getBinaryStream("CML");
 			if (cmls != null) {
 				
 				BufferedInputStream is = new BufferedInputStream(cmls);
 				IChemModel chemModel = getChemModelFromStream(is);
-				is.close();
-//				cml.free();				
+				is.close();			
 				annotation.setChemModel(chemModel );				
 				annotation.setChemModelNotes(rs.getString("CML_NOTE"));
 			}
@@ -512,6 +498,50 @@ public class AnnotationUtils {
 		ps.close();
 		return annotations;
 	}
+	
+	public static void updateObjectAnnotationsList(
+			AnnotatedObject annotatedObject) throws Exception{
+		Connection conn = ConnectionManager.getConnection();
+		updateObjectAnnotationsList(annotatedObject, conn);
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void updateObjectAnnotationsList(
+			AnnotatedObject annotatedObject, Connection conn) throws Exception{
+		
+		String query =
+				"SELECT ANNOTATION_ID FROM OBJECT_ANNOTATIONS "
+				+ "WHERE OBJECT_TYPE = ? AND OBJECT_ID = ? ";			
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, annotatedObject.getAnnotatedObjectType().name());
+		ps.setString(2, annotatedObject.getId());
+		TreeSet<String>annotationIds = new TreeSet<String>();
+		ResultSet rs = ps.executeQuery();
+		while(rs.next())
+			annotationIds.add(rs.getString("ANNOTATION_ID"));
+		
+		TreeSet<String>objectAnnotationIds = new TreeSet<String>();
+		for(ObjectAnnotation annotation : annotatedObject.getAnnotations()) {
+			
+			if(annotation.getUniqueId().length() == 12) {
+				objectAnnotationIds.add(annotation.getUniqueId());
+			}
+			else {
+				insertNewAnnotation(annotation, conn);
+				objectAnnotationIds.add(annotation.getUniqueId());
+			}
+		}		
+		query = "DELETE FROM OBJECT_ANNOTATIONS WHERE ANNOTATION_ID = ?";			
+		ps = conn.prepareStatement(query);
+		for(String id : annotationIds) {
+			
+			if(!objectAnnotationIds.contains(id)) {
+				ps.setString(1, id);
+				ps.executeUpdate();
+			}
+		}
+		ps.close();
+	}	
 	
 	public static IChemModel getChemModelFromStream(InputStream is) throws CDKException, IOException {
 
@@ -552,7 +582,8 @@ public class AnnotationUtils {
 		return chemModel;
 	}
 	
-	public static void attachLinkedDocumentMetaData(ObjectAnnotation annotation) throws Exception{
+	public static void attachLinkedDocumentMetaData(
+			ObjectAnnotation annotation) throws Exception{
 		
 		if(annotation.getLinkedDocumentId() == null)
 			return;
@@ -562,18 +593,21 @@ public class AnnotationUtils {
 		ConnectionManager.releaseConnection(conn);		
 	}
 		
-	private static void attachLinkedDocumentMetaData(ObjectAnnotation annotation, Connection conn) throws Exception{
+	private static void attachLinkedDocumentMetaData(
+			ObjectAnnotation annotation, Connection conn) throws Exception{
 
 		if(annotation.getLinkedDocumentId() == null)
 			return;
-		
-		String query = "SELECT DOCUMENT_NAME, DOCUMENT_FORMAT FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
+	
+		String query = 
+				"SELECT DOCUMENT_NAME, DOCUMENT_FORMAT FROM DOCUMENTS WHERE DOCUMENT_ID = ?";
 		PreparedStatement  ps = conn.prepareStatement(query);
 		ps.setString(1, annotation.getLinkedDocumentId());
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 
-			annotation.setLinkedDocumentFormat(DocumentFormat.getFormatByFileExtension(rs.getString("DOCUMENT_FORMAT")));
+			annotation.setLinkedDocumentFormat(
+					DocumentFormat.getFormatByFileExtension(rs.getString("DOCUMENT_FORMAT")));
 			annotation.setLinkedDocumentName(rs.getString("DOCUMENT_NAME"));
 		}
 		rs.close();
@@ -598,14 +632,13 @@ public class AnnotationUtils {
 		ps.setString(1, annotationId);
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
-//		   Blob blob = rs.getBlob("ANN_DOCUMENT");		   
+	   
 		   InputStream ads = rs.getBinaryStream("ANN_DOCUMENT");
 		   if(ads != null) {
 			   BufferedInputStream is = new BufferedInputStream(ads);
 			   doc = (AdvancedRTFDocument) editor.createDefaultDocument();
 			   editor.read(is, doc, 0);
 			   is.close();
-//			   blob.free();
 		   }
 		}
 		rs.close();

@@ -204,7 +204,7 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 		stockSample.setExternalSource(stockSampleEditorDialog.getExternalSourceName());
 		stockSample.setLimsExperiment(stockSampleEditorDialog.getLIMSExperiment());
 		try {
-			IDTUtils.insertStockSample(stockSample);
+			IDTUtils.addStockSample(stockSample);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

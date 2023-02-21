@@ -224,7 +224,8 @@ public class RDEMetadataWizard extends JDialog
 			newExperiment.setDesign(new ExperimentDesign());
 		}	
 		else {
-			newExperiment = new LIMSExperiment(experiment.getIdTrackerExperiment());
+			newExperiment = 
+					new LIMSExperiment(experiment.getIdTrackerExperiment());
 			if(newExperiment.getCreator() == null)
 				newExperiment.setCreator(createdBy);
 		}
@@ -254,14 +255,15 @@ public class RDEMetadataWizard extends JDialog
 		RDPExperimentDesignPanel designPanel = 
 				(RDPExperimentDesignPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLES);
 		designPanel.setExperiment(newExperiment);
-	
-		if(newExperiment.getSamplePreps().isEmpty())
-			return;
-		
-		LIMSSamplePreparation prep = 
-				newExperiment.getSamplePreps().iterator().next();		
 		RDPSamplePrepPanel prepPanel = 
 				(RDPSamplePrepPanel)panels.get(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
+	
+		if(newExperiment.getSamplePreps().isEmpty()) {
+			prepPanel.setExperiment(newExperiment);
+			return;
+		}
+		LIMSSamplePreparation prep = 
+				newExperiment.getSamplePreps().iterator().next();
 		prepPanel.loadPrepDataForExperiment(prep, newExperiment);
 		
 		if(prep.getId() != null) {

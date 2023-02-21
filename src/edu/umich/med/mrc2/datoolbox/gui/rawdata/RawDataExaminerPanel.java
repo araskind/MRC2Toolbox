@@ -443,7 +443,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			allowEdit = true;
 			try {
 				existingDeMethod = 
-						IDTUtils.insertNewTrackerDataExtractionMethod(deMethod);
+						IDTUtils.addNewTrackerDataExtractionMethod(deMethod);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -657,7 +657,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	    	//	Upload new method
 			try {
 				experimentDataExtractionMethod = 
-						IDTUtils.insertNewTrackerDataExtractionMethod(ps);
+						IDTUtils.addNewTrackerDataExtractionMethod(ps);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

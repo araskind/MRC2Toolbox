@@ -49,9 +49,9 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
-import org.apache.commons.io.FilenameUtils;
-
 import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
+import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
@@ -59,7 +59,6 @@ import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
-import edu.umich.med.mrc2.datoolbox.data.enums.DocumentFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
@@ -81,7 +80,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class SamplePrepEditorPanel extends JPanel 
-		implements ActionListener, PersistentLayout, BackedByPreferences {
+		implements ActionListener, PersistentLayout, BackedByPreferences, DateChangeListener {
 
 	/**
 	 * 
@@ -117,6 +116,7 @@ public class SamplePrepEditorPanel extends JPanel
 	private Set<SamplePrepListener> eventListeners;
 	private boolean isWizardStep;
 	private boolean limitEditor;
+	private JButton editSaveNameButton;
 	
 	/**
 	 * This constructor is for the creation of the new sample preparation;
@@ -159,6 +159,9 @@ public class SamplePrepEditorPanel extends JPanel
 		loadPrepData(prep);
 	}
 	
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public SamplePrepEditorPanel(boolean limitEditor) {
 		super();
 		this.limitEditor = limitEditor;
@@ -207,13 +210,24 @@ public class SamplePrepEditorPanel extends JPanel
 
 		nameTextField = new JTextField();
 		GridBagConstraints gbc_nameTextField = new GridBagConstraints();
-		gbc_nameTextField.gridwidth = 3;
-		gbc_nameTextField.insets = new Insets(0, 0, 5, 0);
+		gbc_nameTextField.gridwidth = 2;
+		gbc_nameTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_nameTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_nameTextField.gridx = 0;
 		gbc_nameTextField.gridy = 1;
 		add(nameTextField, gbc_nameTextField);
 		nameTextField.setColumns(10);
+		
+		editSaveNameButton = new JButton("Edit");
+		editSaveNameButton.setActionCommand(
+				MainActionCommands.EDIT_SAMPLE_PREP_NAME_COMMAND.getName());
+		editSaveNameButton.addActionListener(this);
+		GridBagConstraints gbc_editSaveNameButton = new GridBagConstraints();
+		gbc_editSaveNameButton.anchor = GridBagConstraints.WEST;
+		gbc_editSaveNameButton.insets = new Insets(0, 0, 5, 0);
+		gbc_editSaveNameButton.gridx = 2;
+		gbc_editSaveNameButton.gridy = 1;
+		add(editSaveNameButton, gbc_editSaveNameButton);
 		
 		JLabel lblType = new JLabel("Prepared by");
 		GridBagConstraints gbc_lblType = new GridBagConstraints();
@@ -251,6 +265,7 @@ public class SamplePrepEditorPanel extends JPanel
 		add(lblPreparedOn, gbc_lblPreparedOn);
 
 		datePicker = new DatePicker();
+		datePicker.addDateChangeListener(this);
 		GridBagConstraints gbc_datePicker = new GridBagConstraints();
 		gbc_datePicker.insets = new Insets(0, 0, 5, 5);
 		gbc_datePicker.fill = GridBagConstraints.BOTH;
@@ -330,7 +345,7 @@ public class SamplePrepEditorPanel extends JPanel
 
 		if(command.equals(MainActionCommands.ADD_DOCUMENT_DIALOG_COMMAND.getName()))
 			showAddDocumentDialog();
-
+		
 		if(command.equals(MainActionCommands.SAVE_OBJECT_DOCUMENT_ANNOTATION_COMMAND.getName()))
 			addDocument();
 
@@ -345,8 +360,41 @@ public class SamplePrepEditorPanel extends JPanel
 		
 		if(command.equals(MainActionCommands.CLEAR_SAMPLE_PREP_DEFINITION_COMMAND.getName()))
 			clearPanelWithWarning();
+		
+		if(command.equals(MainActionCommands.EDIT_SAMPLE_PREP_NAME_COMMAND.getName())) {
+			nameTextField.setEditable(true);
+			editSaveNameButton.setText("Save");
+			editSaveNameButton.setActionCommand(
+					MainActionCommands.SAVE_SAMPLE_PREP_NAME_COMMAND.getName());
+		}
+		if(command.equals(MainActionCommands.SAVE_SAMPLE_PREP_NAME_COMMAND.getName()))
+			savePrepName();
 	}
 	
+	private void savePrepName() {
+
+		nameTextField.setEditable(false);
+		editSaveNameButton.setText("Edit");
+		editSaveNameButton.setActionCommand(
+				MainActionCommands.EDIT_SAMPLE_PREP_NAME_COMMAND.getName());
+		
+		if(prep != null) {
+			
+			prep.setName(getPrepName());
+			
+			if(prep.getId() != null) {
+
+				try {
+					IDTUtils.updateBasicSamplePrepData(prep);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				fireSamplePrepEvent(prep, ParameterSetStatus.CHANGED);
+			}
+		}
+	}
+
 	@Override
 	public void setVisible(boolean b) {
 		
@@ -358,6 +406,7 @@ public class SamplePrepEditorPanel extends JPanel
 	
 	public void loadPrepData(LIMSSamplePreparation samplePrep) {
 		
+		datePicker.removeDateChangeListener(this);
 		this.prep = samplePrep;
 		if(prep == null) {
 			
@@ -371,7 +420,8 @@ public class SamplePrepEditorPanel extends JPanel
 			prepUserLabel.setText(prep.getCreator().getInfo());
 			prepUser = prep.getCreator();
 			if (prep.getPrepDate() != null) {
-				LocalDate localDate = prep.getPrepDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				LocalDate localDate = prep.getPrepDate().
+						toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 				datePicker.setDate(localDate);
 			}
 			//	Load samples for prep
@@ -403,34 +453,51 @@ public class SamplePrepEditorPanel extends JPanel
 			}
 			fireSamplePrepEvent(prep, ParameterSetStatus.ADDED);
 		}
+		datePicker.addDateChangeListener(this);
+		updateNameEditorFromPrep();
 	}
 	
+	private void updateNameEditorFromPrep() {
+
+		if(prep == null || prep.getId() == null) {
+			nameTextField.setEditable(true);
+			editSaveNameButton.setEnabled(false);
+		}
+		else {
+			nameTextField.setEditable(false);
+			editSaveNameButton.setEnabled(true);
+		}
+	}
+
 	public void loadPrepDataForExperiment(
 			LIMSSamplePreparation samplePrep, 
 			LIMSExperiment prepExperiment) {
 		
+		datePicker.removeDateChangeListener(this);
 		this.prep = samplePrep;
 		this.experiment = prepExperiment;
 		prepSampleTable.setTableModelFromSamples(
 				experiment.getExperimentDesign().getSamples());
 		
-		if(prep == null)
-			return;
-		
-		idValueLabel.setText(prep.getId());
-		nameTextField.setText(prep.getName());
-		prepUser = prep.getCreator();
-		if(prepUser != null)
-			prepUserLabel.setText(prep.getCreator().getInfo());
-		
-		if (prep.getPrepDate() != null) {
-			LocalDate localDate = 
-					prep.getPrepDate().toInstant().
-						atZone(ZoneId.systemDefault()).toLocalDate();
-			datePicker.setDate(localDate);
+		if(prep != null) {
+			
+			idValueLabel.setText(prep.getId());
+			nameTextField.setText(prep.getName());
+			prepUser = prep.getCreator();
+			if(prepUser != null)
+				prepUserLabel.setText(prep.getCreator().getInfo());
+			
+			if (prep.getPrepDate() != null) {
+				LocalDate localDate = 
+						prep.getPrepDate().toInstant().
+							atZone(ZoneId.systemDefault()).toLocalDate();
+				datePicker.setDate(localDate);
+			}
+			sopPanel.setTableModelFromProtocols(prep.getProtocols());
+			documentsPanel.setModelFromAnnotations(prep.getAnnotations());
 		}
-		sopPanel.setTableModelFromProtocols(prep.getProtocols());
-		documentsPanel.setModelFromAnnotations(prep.getAnnotations());
+		updateNameEditorFromPrep();
+		datePicker.addDateChangeListener(this);
 	}
 
 	private void selectExistingSamplePrep() {
@@ -502,6 +569,7 @@ public class SamplePrepEditorPanel extends JPanel
 	
 	private void clearGui() {
 		
+		datePicker.removeDateChangeListener(this);
 		prepSampleTable.clearTable();;
 		idValueLabel.setText("");
 		nameTextField.setText("");
@@ -513,6 +581,7 @@ public class SamplePrepEditorPanel extends JPanel
 		datePicker.setDate(localDate);		
 		sopPanel.clearPanel();
 		documentsPanel.clearPanel();
+		datePicker.addDateChangeListener(this);
 	}
 
 	private void setNewPrepUser() {
@@ -521,7 +590,22 @@ public class SamplePrepEditorPanel extends JPanel
 			return;
 
 		prepUser = userSelectorDialog.getSelectedUser();
-		prepUserLabel.setText(prepUser.getInfo());
+		prepUserLabel.setText(prepUser.getInfo());		
+		if(prep != null) {
+			
+			prep.setCreator(prepUser);
+			
+			if(prep.getId() != null) {
+
+				try {
+					IDTUtils.updateBasicSamplePrepData(prep);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				fireSamplePrepEvent(prep, ParameterSetStatus.CHANGED);
+			}
+		}
 		userSelectorDialog.dispose();
 	}
 
@@ -535,14 +619,28 @@ public class SamplePrepEditorPanel extends JPanel
 
 	private void addSelectedSops() {
 
-		Collection<LIMSProtocol> selected = prepSopSelectorDialog.getSelectedProtocols();
-		if(selected == null)
+		Collection<LIMSProtocol> selected = 
+				prepSopSelectorDialog.getSelectedProtocols();
+		if(selected == null || selected.isEmpty())
 			return;
 
 		Collection<LIMSProtocol>protocols = new TreeSet<LIMSProtocol>();
-		if(prep != null)
+		if(prep != null) {
+			
 			protocols.addAll(prep.getProtocols());
-
+			
+			if(prep.getId() != null) {
+				
+				prep.getProtocols().addAll(selected);
+				try {
+					IDTUtils.updateSamplePrepProtocols(prep);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				fireSamplePrepEvent(prep, ParameterSetStatus.CHANGED);
+			}
+		}
 		protocols.addAll(selected);
 		sopPanel.setTableModelFromProtocols(protocols);
 		prepSopSelectorDialog.dispose();
@@ -550,20 +648,34 @@ public class SamplePrepEditorPanel extends JPanel
 
 	private void deleteSelectedSops() {
 
-		if(sopPanel.getSelectedProtocols() == null)
+		Collection<LIMSProtocol>selected = sopPanel.getSelectedProtocols();
+		if(selected == null || selected.isEmpty())
 			return;
 
-		if(MessageDialog.showChoiceWithWarningMsg(
-				"Do you want to remove selected SOPs from sample prep?", this) == JOptionPane.NO_OPTION)
-			return;
-
-		Collection<LIMSProtocol>protocols = new TreeSet<LIMSProtocol>();
-		if(prep != null)
-			protocols.addAll(prep.getProtocols());
-
-		sopPanel.getSelectedProtocols().stream().forEach(p -> protocols.remove(p));
-		sopPanel.setTableModelFromProtocols(protocols);
-		prepSopSelectorDialog.dispose();
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Do you want to remove selected SOPs from sample prep?", this);
+		if(res == JOptionPane.YES_OPTION) {
+			
+			Collection<LIMSProtocol>protocols = new TreeSet<LIMSProtocol>();
+			if(prep != null) {
+				
+				protocols.addAll(prep.getProtocols());
+				
+				if(prep.getId() != null) {
+					
+					prep.getProtocols().removeAll(selected);
+					try {
+						IDTUtils.updateSamplePrepProtocols(prep);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					fireSamplePrepEvent(prep, ParameterSetStatus.CHANGED);
+				}
+			}
+			protocols.removeAll(selected);
+			sopPanel.setTableModelFromProtocols(protocols);
+		}
 	}
 
 	private void showAddSopDialog() {
@@ -594,61 +706,115 @@ public class SamplePrepEditorPanel extends JPanel
 
 	private void addDocument() {
 			
-		ObjectAnnotation annotation = documentAnnotationDialog.getAnnotation();
-		if(annotation == null)
+		ObjectAnnotation newAnnotation = 
+				documentAnnotationDialog.getAnnotation();
+		if(newAnnotation == null)
 			return;
 		
 		if(documentAnnotationDialog.getDocumentTitle().isEmpty()) {
-			MessageDialog.showErrorMsg("Please specify document title.", documentAnnotationDialog);
+			MessageDialog.showErrorMsg(
+					"Please specify document title.", documentAnnotationDialog);
 			return;
 		}
-		Collection<ObjectAnnotation> existingAnnotations = 
-				documentsPanel.getAllAnnotations();
-		annotation.setLinkedDocumentName(documentAnnotationDialog.getDocumentTitle());
+		if(documentAnnotationDialog.getDocumentSourceFile() == null) {
+			MessageDialog.showErrorMsg(
+					"Please specify document source file.", 
+					documentAnnotationDialog);
+			return;
+		}
+		newAnnotation.setLinkedDocumentName(documentAnnotationDialog.getDocumentTitle());
+		newAnnotation.setLinkedDocumentFile(documentAnnotationDialog.getDocumentSourceFile());
 		
-		//	Update existing annotation - unique ID is CHAR 12
-		if(annotation.getUniqueId().length() == 12) {
-			try {
-				AnnotationUtils.updateAnnotation(annotation, null);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		else {	//	Insert new annotation
-			if(documentAnnotationDialog.getDocumentSourceFile() == null) {
-				MessageDialog.showErrorMsg(
-						"Please specify document source file.", 
-						documentAnnotationDialog);
-				return;
-			}
-			try {
-				String extension = 
-						FilenameUtils.getExtension(
-								documentAnnotationDialog.getDocumentSourceFile().getName());
-				DocumentFormat format = 
-						DocumentFormat.getFormatByFileExtension(extension);
-				annotation.setLinkedDocumentFormat(format);
-				AnnotationUtils.insertNewAnnotation(
-						annotation, documentAnnotationDialog.getDocumentSourceFile());
-				if(prep != null)
-						prep.addAnnotation(annotation);
+		Collection<ObjectAnnotation> annotations = new ArrayList<ObjectAnnotation>();
+		if(prep != null) {
+			
+			annotations.addAll(prep.getAnnotations());
+			
+			if(prep.getId() != null) {
 				
-				existingAnnotations.add(annotation);
-			} 
-			catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				prep.getAnnotations().add(newAnnotation);
+				try {
+					AnnotationUtils.insertNewAnnotation(newAnnotation);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				fireSamplePrepEvent(prep, ParameterSetStatus.CHANGED);
 			}
-
 		}
-		documentsPanel.setModelFromAnnotations(existingAnnotations);			
+		annotations.add(newAnnotation);
+		
+		
+//		//	Update existing annotation - unique ID is CHAR 12
+//		if(newAnnotation.getUniqueId().length() == 12) {
+//			try {
+//				newAnnotation.setLastModifiedBy(MRC2ToolBoxCore.getIdTrackerUser());
+//				AnnotationUtils.updateAnnotation(newAnnotation, null);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		else {	//	Insert new annotation
+//			if(documentAnnotationDialog.getDocumentSourceFile() == null) {
+//				MessageDialog.showErrorMsg(
+//						"Please specify document source file.", 
+//						documentAnnotationDialog);
+//				return;
+//			}
+//			try {
+//				String extension = 
+//						FilenameUtils.getExtension(
+//								documentAnnotationDialog.getDocumentSourceFile().getName());
+//				DocumentFormat format = 
+//						DocumentFormat.getFormatByFileExtension(extension);
+//				newAnnotation.setLinkedDocumentFormat(format);
+//				newAnnotation.setLinkedDocumentFile(documentAnnotationDialog.getDocumentSourceFile());
+//				AnnotationUtils.insertNewAnnotation(newAnnotation);
+//				if(prep != null)
+//						prep.addAnnotation(newAnnotation);
+//				
+//				existingAnnotations.add(newAnnotation);
+//			} 
+//			catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+		documentsPanel.setModelFromAnnotations(annotations);			
 		documentAnnotationDialog.dispose();	
 	}
 	
 	private void deleteDocument() {
-		// TODO Auto-generated method stub
 
+		Collection<ObjectAnnotation>selected = documentsPanel.getSelectedAnnotations();
+		if(selected == null || selected.isEmpty())
+			return;
+
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"Do you want to remove selected annotation documents from sample prep?", this);
+		if(res == JOptionPane.YES_OPTION) {
+			
+			Collection<ObjectAnnotation>annotations = new ArrayList<ObjectAnnotation>();
+			if(prep != null) {
+				
+				annotations.addAll(prep.getAnnotations());
+				
+				if(prep.getId() != null) {
+					
+					prep.getAnnotations().removeAll(selected);
+					try {
+						AnnotationUtils.updateObjectAnnotationsList(prep);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					fireSamplePrepEvent(prep, ParameterSetStatus.CHANGED);
+				}
+			}
+			annotations.removeAll(selected);
+			documentsPanel.setModelFromAnnotations(annotations);
+		}
 	}
 
 	public LIMSSamplePreparation getSamplePrep() {
@@ -827,5 +993,25 @@ public class SamplePrepEditorPanel extends JPanel
 		nameTextField.setEditable(b);
 		btnSelectUser.setEnabled(b);
 		datePicker.setEnabled(b);
+	}
+
+	@Override
+	public void dateChanged(DateChangeEvent event) {
+
+		if(prep != null) {
+			
+			prep.setPrepDate(getPrepDate());
+			
+			if(prep.getId() != null) {
+
+				try {
+					IDTUtils.updateBasicSamplePrepData(prep);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				fireSamplePrepEvent(prep, ParameterSetStatus.CHANGED);
+			}
+		}
 	}
 }

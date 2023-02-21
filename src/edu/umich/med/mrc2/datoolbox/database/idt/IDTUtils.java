@@ -62,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
 import edu.umich.med.mrc2.datoolbox.data.Worklist;
+import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
@@ -82,6 +83,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
+import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
@@ -702,7 +704,7 @@ public class IDTUtils {
 		return id;
 	}
 	
-	public static void editManufacturer(Manufacturer manufacturerToEdit) throws Exception{
+	public static void updateManufacturer(Manufacturer manufacturerToEdit) throws Exception{
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
@@ -792,7 +794,7 @@ public class IDTUtils {
 		return id;
 	}
 	
-	public static void editSoftware(DataProcessingSoftware itemToEdit) throws Exception{
+	public static void updateSoftware(DataProcessingSoftware itemToEdit) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();	
 		String query  =
@@ -1348,6 +1350,12 @@ public class IDTUtils {
 				prep.addPrepItem(rs.getString("SAMPLE_ID"), rs.getString("PREP_ITEM_ID"));
 
 			rs.close();
+			
+			Collection<ObjectAnnotation>prepAnnotations = 
+					AnnotationUtils.getObjectAnnotations(
+							AnnotatedObjectType.SAMPLE_PREP, prep.getId(), conn);
+			if(!prepAnnotations.isEmpty())
+				prep.getAnnotations().addAll(prepAnnotations);
 		}
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
@@ -1698,29 +1706,58 @@ public class IDTUtils {
 			ps.setString(1, prepId);
 			ps.setString(2, protocol.getSopId());
 			ps.executeUpdate();
-		}		
-		//	TODO Insert annotations
-
-		
+		}
 		ps.close();
+		if(!prep.getAnnotations().isEmpty()) {
+			
+			//	TODO check if any annotations must be deleted
+
+			for(ObjectAnnotation annotation : prep.getAnnotations()) {
+				
+				if(annotation.getUniqueId().length() == 12)
+					AnnotationUtils.updateAnnotation(annotation, conn);
+				else
+					AnnotationUtils.insertNewAnnotation(annotation, conn);
+			}
+		}		
 		ConnectionManager.releaseConnection(conn);
 		return prepId;
 	}
 
-	public static void updateSamplePrep(
-			LIMSSamplePreparation prep2save,
-			String prepName,
-			LIMSUser prepUser,
-			Date prepDate) throws Exception {
+	public static void updateBasicSamplePrepData(
+			LIMSSamplePreparation prep2save) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
-		String query = "UPDATE SAMPLE_PREPARATION SET TITLE = ?, PREP_DATE = ?, CREATOR = ? WHERE SAMPLE_PREP_ID = ?";
+		String query = "UPDATE SAMPLE_PREPARATION SET TITLE = ?,"
+				+ " PREP_DATE = ?, CREATOR = ? WHERE SAMPLE_PREP_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, prepName);
-		ps.setDate(2, new java.sql.Date(prepDate.getTime()));
-		ps.setString(3, prepUser.getId());
+		ps.setString(1, prep2save.getName());
+		ps.setDate(2, new java.sql.Date(prep2save.getPrepDate().getTime()));
+		ps.setString(3, prep2save.getCreator().getId());
 		ps.setString(4, prep2save.getId());
+		ps.executeUpdate();	
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void updateSamplePrepProtocols(
+			LIMSSamplePreparation prep2save) throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();
+		String query = "DELETE FROM SOP_SAMPLE_PREP_MAP WHERE SAMPLE_PREP_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, prep2save.getId());
 		ps.executeUpdate();
+		
+		query = 
+				"INSERT INTO SOP_SAMPLE_PREP_MAP (SAMPLE_PREP_ID, SOP_ID) VALUES (?,?)";
+		ps = conn.prepareStatement(query);		
+		ps.setString(1, prep2save.getId());
+		for(LIMSProtocol sop : prep2save.getProtocols()) {
+			ps.setString(2, sop.getSopId());
+			ps.addBatch();
+		}
+		ps.executeBatch();	
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
@@ -1751,23 +1788,6 @@ public class IDTUtils {
 		ConnectionManager.releaseConnection(conn);
 		return sampleId;
 	}
-	
-//	public static String getNewIDTSampleId(Connection conn) throws Exception {
-//		
-//		String sampleId = null;
-//		String query  =
-//				"SELECT '" + DataPrefix.ID_SAMPLE.getName() +
-//				"' || LPAD(ID_SAMPLE_SEQ.NEXTVAL, 6, '0') AS NEXT_ID FROM DUAL";
-//
-//		PreparedStatement ps = conn.prepareStatement(query);
-//		ResultSet rs = ps.executeQuery();
-//		while(rs.next())
-//			sampleId = rs.getString("NEXT_ID");
-//		
-//		rs.close();
-//		ps.close();	
-//		return sampleId;
-//	}
 
 	public static void updateIDTSample(IDTExperimentalSample sample) throws Exception {
 		
@@ -2344,7 +2364,7 @@ public class IDTUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	public static void insertStockSample(StockSample stockSample) throws Exception{
+	public static void addStockSample(StockSample stockSample) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();
 		String stockSampleId = SQLUtils.getNextIdFromSequence(conn, 
@@ -2469,7 +2489,7 @@ public class IDTUtils {
 		return methodId;
 	}
 
-	public static DataExtractionMethod insertNewTrackerDataExtractionMethod(
+	public static DataExtractionMethod addNewTrackerDataExtractionMethod(
 			MSMSExtractionParameterSet newTrackerMethod) throws Exception {
 		
 		LIMSUser sysUser = MRC2ToolBoxCore.getIdTrackerUser();

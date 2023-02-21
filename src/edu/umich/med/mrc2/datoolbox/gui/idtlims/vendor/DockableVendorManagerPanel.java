@@ -157,7 +157,7 @@ public class DockableVendorManagerPanel extends AbstractIDTrackerLimsPanel {
 			vendorToEdit.setName(vendorEditorDialog.getVendorName());	
 			vendorToEdit.setCatalogWebAddress(vendorEditorDialog.getVendorWebAddress());
 			try {
-				IDTUtils.editManufacturer(vendorToEdit);
+				IDTUtils.updateManufacturer(vendorToEdit);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

@@ -112,7 +112,7 @@ public class WizardExperimentDesignEditorPanel extends IDTrackerExperimentDesign
 		stockSample.setExternalSource(stockSampleEditorDialog.getExternalSourceName());
 		stockSample.setLimsExperiment(stockSampleEditorDialog.getLIMSExperiment());
 		try {
-			IDTUtils.insertStockSample(stockSample);
+			IDTUtils.addStockSample(stockSample);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

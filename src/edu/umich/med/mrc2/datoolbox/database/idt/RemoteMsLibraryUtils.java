@@ -21,7 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.database.idt;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -524,9 +523,8 @@ public class RemoteMsLibraryUtils {
 			if(lt.getSpectrum() != null)
 				insertSpectrum(lt, conn);
 
-			File annotationDocumentFile = null;
 			for(ObjectAnnotation annotation : lt.getAnnotations())
-				AnnotationUtils.insertNewAnnotation(annotation, annotationDocumentFile, conn);			
+				AnnotationUtils.insertNewAnnotation(annotation, conn);			
 		}
 		ConnectionManager.releaseConnection(conn);
 	}
