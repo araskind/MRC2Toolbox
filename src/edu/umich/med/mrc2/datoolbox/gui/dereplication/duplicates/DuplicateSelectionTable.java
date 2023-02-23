@@ -40,7 +40,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.FeatureSelectionTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 
 public class DuplicateSelectionTable extends FeatureSelectionTable {
 
@@ -68,7 +68,7 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 		featureSorter.setComparator(model.getColumnIndex(DuplicateSelectionTableModel.FEATURE_COLUMN),
 				new MsFeatureComparator(SortProperty.Name, SortDirection.ASC));
 
-		chmodRenderer = new ChemicalModificationRenderer();
+		chmodRenderer = new AdductRenderer();
 
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 

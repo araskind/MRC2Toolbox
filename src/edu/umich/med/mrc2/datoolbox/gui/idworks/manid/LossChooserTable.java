@@ -31,7 +31,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 
 public class LossChooserTable extends BasicTable {
@@ -51,7 +51,7 @@ public class LossChooserTable extends BasicTable {
 		setRowSorter(rowSorter);
 		
 		getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		setDefaultRenderer(Adduct.class, new ChemicalModificationRenderer());
+		setDefaultRenderer(Adduct.class, new AdductRenderer());
 		columnModel.getColumnById(AdductChooserTableModel.MASS_CORRECTION_COLUMN).
 			setCellRenderer(mzRenderer);
 

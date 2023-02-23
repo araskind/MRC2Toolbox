@@ -112,6 +112,8 @@ public class IDTrackerDataSearchDialog extends JDialog
 	
 	private Preferences preferences;
 	public static final String PREFS_NODE = IDTrackerDataSearchDialog.class.getName();
+	
+	public static final String NULL_STRING = "NULL";
 
 	public static final String POLARITY = "POLARITY";
 	public static final String BP_MZ = "BP_MZ";
@@ -598,8 +600,11 @@ public class IDTrackerDataSearchDialog extends JDialog
 		this.preferences = preferences;
 		
 		//	M/Z RT search parameters
-		Polarity polarity = Polarity.getPolarityByCode(
-				preferences.get(POLARITY, Polarity.Positive.getCode()));
+		String polarityCode = preferences.get(POLARITY, Polarity.Positive.getCode());
+		Polarity polarity = null;
+		if(!polarityCode.equals(NULL_STRING))			
+			polarity = Polarity.getPolarityByCode(polarityCode);
+		
 		mzrtSearchParametersPanel.setPolarity(polarity);
 		mzrtSearchParametersPanel.setPrecursorMz(preferences.getDouble(BP_MZ, 0.0d));
 		mzrtSearchParametersPanel.setMassErrorValue(
@@ -818,7 +823,11 @@ public class IDTrackerDataSearchDialog extends JDialog
 		preferences = Preferences.userRoot().node(PREFS_NODE);
 		
 		//	M/Z RT search parameters
-		preferences.put(POLARITY, mzrtSearchParametersPanel.getPolarity().getCode());
+		String polarityCode = NULL_STRING;
+		if(mzrtSearchParametersPanel.getPolarity() != null)
+			polarityCode = mzrtSearchParametersPanel.getPolarity().getCode();
+			
+		preferences.put(POLARITY, polarityCode);
 		
 		double bpmz = 0.0d;
 		if(mzrtSearchParametersPanel.getPrecursorMz() != null)
@@ -989,7 +998,12 @@ public class IDTrackerDataSearchDialog extends JDialog
 	public String getQueryParameterString() {
 		
 		ArrayList<String>params = new ArrayList<String>();
-		params.add(POLARITY + "|" + mzrtSearchParametersPanel.getPolarity().getCode());
+		String polarityCode = NULL_STRING;
+		
+		if(mzrtSearchParametersPanel.getPolarity() != null)
+			polarityCode = mzrtSearchParametersPanel.getPolarity().getCode();
+		
+		params.add(POLARITY + "|" + polarityCode);
 		
 		//	M/Z RT search parameters
 		String bpmz = "";
@@ -1170,7 +1184,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 			paramsMap.put(l[0], value);
 		}
 		//	M/Z RT search parameters
-		if(paramsMap.containsKey(POLARITY)) 
+		if(paramsMap.containsKey(POLARITY))
 			mzrtSearchParametersPanel.setPolarity(Polarity.getPolarityByCode(paramsMap.get(POLARITY)));
 		
 		if(paramsMap.containsKey(BP_MZ)) {	

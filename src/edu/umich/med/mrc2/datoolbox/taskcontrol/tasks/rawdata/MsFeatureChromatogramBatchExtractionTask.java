@@ -79,7 +79,8 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 		total = 100;
 		processed = 20;
 		processedFilesCount = 0;
-		for(DataFile df : rawDataFiles) {			
+		for(DataFile df : rawDataFiles) {
+			
 			MsFeatureChromatogramExtractionTask task = 
 					new MsFeatureChromatogramExtractionTask(df, featureChromatogramDefinitions);
 			task.addTaskListener(this);
@@ -95,6 +96,7 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 				new HashMap<MSFeatureInfoBundle, ChromatogramDefinition>();
 		
 		for(MSFeatureInfoBundle mfb : features) {
+			
 			Collection<Double>mzList = new TreeSet<Double>();			
 			MassSpectrum spectrum = mfb.getMsFeature().getSpectrum();
 			if(spectrum == null) {
@@ -119,7 +121,8 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 			if(!mzList.isEmpty()) {
 				ChromatogramDefinition cd = commonDefinition.clone();
 				cd.setMzList(mzList);
-				cd.recenterRtRange(mfb.getMsFeature().getRetentionTime());			
+				cd.recenterRtRange(mfb.getMsFeature().getRetentionTime());
+				cd.setPolarity(mfb.getMsFeature().getPolarity());
 				featureChromatogramDefinitions.put(mfb, cd);
 			}		
 			processed++;

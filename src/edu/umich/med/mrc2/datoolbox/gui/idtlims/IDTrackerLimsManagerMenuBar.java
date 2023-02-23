@@ -88,9 +88,10 @@ public class IDTrackerLimsManagerMenuBar extends CommonMenuBar {
 		newProjectMenuItem = addItem(limsMenu, 
 				MainActionCommands.NEW_IDTRACKER_PROJECT_DIALOG_COMMAND, 
 				newCdpIdProjectIcon);
-		newExperimentMenuItem = addItem(limsMenu, 
-				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND, 
-				newCdpIdExperimentIcon);
+		
+//		newExperimentMenuItem = addItem(limsMenu, 
+//				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND, 
+//				newCdpIdExperimentIcon);
 		
 		add(limsMenu);
 		

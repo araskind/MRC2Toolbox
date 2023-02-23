@@ -52,7 +52,6 @@ import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.enums.IntensityMeasure;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsFeatureChromatogramExtractionTarget;
-import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -69,9 +68,11 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 
 	private static final NumberFormat twoDecFormat = new DecimalFormat("###.##");
 
-	private static final String DESCRIPTION_DEFAULT = "MSMS extraction method " + 
+	public static final String DESCRIPTION_DEFAULT = "MSMS extraction method " + 
 			MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date());
-	private static final Polarity POLARITY_DEFAULT = Polarity.Positive;
+	
+//	private static final Polarity POLARITY_DEFAULT = Polarity.Positive;
+	
 	private static final double MIN_PRECURSOR_INTENSITY_DEFAULT = 0.0d;
 	private static final boolean USE_RT_RANGE_DEFAULT = false;
 	private static final double RT_BORDER_LEFT_DEFAULT = 0.0d;
@@ -102,7 +103,9 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 	private JCheckBox mergeCollisionsCheckBox;
 	private JComboBox filterWidthComboBox;
 	private JComboBox intensityMeasureComboBox;
-	private JComboBox polarityComboBox;
+	
+//	private JComboBox polarityComboBox;
+	
 	private JComboBox precursorGroupingMassErrorTypeComboBox;
 	private JFormattedTextField isolationWindowLowerTextField;
 	private JFormattedTextField isolationWindowUpperTextField;
@@ -186,25 +189,25 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_textArea.gridy = 3;
 		add(descriptionTextArea, gbc_textArea);
 				
-		JLabel lblNewLabel_11 = new JLabel("Polarity");
-		GridBagConstraints gbc_lblNewLabel_11 = new GridBagConstraints();
-		gbc_lblNewLabel_11.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_11.fill = GridBagConstraints.VERTICAL;
-		gbc_lblNewLabel_11.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_11.gridx = 0;
-		gbc_lblNewLabel_11.gridy = 4;
-		add(lblNewLabel_11, gbc_lblNewLabel_11);
-		
-		polarityComboBox = new JComboBox<Polarity>(
-				new DefaultComboBoxModel<Polarity>(
-						new Polarity[] {Polarity.Positive, Polarity.Negative}));
-		GridBagConstraints gbc_polarityComboBox = new GridBagConstraints();
-		gbc_polarityComboBox.gridwidth = 3;
-		gbc_polarityComboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_polarityComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_polarityComboBox.gridx = 1;
-		gbc_polarityComboBox.gridy = 4;
-		add(polarityComboBox, gbc_polarityComboBox);
+//		JLabel lblNewLabel_11 = new JLabel("Polarity");
+//		GridBagConstraints gbc_lblNewLabel_11 = new GridBagConstraints();
+//		gbc_lblNewLabel_11.anchor = GridBagConstraints.EAST;
+//		gbc_lblNewLabel_11.fill = GridBagConstraints.VERTICAL;
+//		gbc_lblNewLabel_11.insets = new Insets(0, 0, 5, 5);
+//		gbc_lblNewLabel_11.gridx = 0;
+//		gbc_lblNewLabel_11.gridy = 4;
+//		add(lblNewLabel_11, gbc_lblNewLabel_11);
+//		
+//		polarityComboBox = new JComboBox<Polarity>(
+//				new DefaultComboBoxModel<Polarity>(
+//						new Polarity[] {Polarity.Positive, Polarity.Negative}));
+//		GridBagConstraints gbc_polarityComboBox = new GridBagConstraints();
+//		gbc_polarityComboBox.gridwidth = 3;
+//		gbc_polarityComboBox.insets = new Insets(0, 0, 5, 5);
+//		gbc_polarityComboBox.fill = GridBagConstraints.HORIZONTAL;
+//		gbc_polarityComboBox.gridx = 1;
+//		gbc_polarityComboBox.gridy = 4;
+//		add(polarityComboBox, gbc_polarityComboBox);
 
 		limitExtractionRtCheckBox = new JCheckBox("Extract data only for retention time from");
 		GridBagConstraints gbc_limitExtractionRtCheckBox = new GridBagConstraints();
@@ -605,9 +608,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 	private void disableMS1parameters() {
 		
 		flagMinorIsotopesPrecursorsCheckBox.setEnabled(false);
-		maxChargeSpinner.setEnabled(false);
-//		xicWindowTextField.setEnabled(false);
-//		filterWidthComboBox.setEnabled(false);		
+		maxChargeSpinner.setEnabled(false);	
 	}
 	
 	public String getParameterSetName() {
@@ -628,9 +629,9 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 			return null;
 	}
 	
-	public Polarity getPolarity() {
-		return (Polarity)polarityComboBox.getSelectedItem();
-	}
+//	public Polarity getPolarity() {
+//		return (Polarity)polarityComboBox.getSelectedItem();
+//	}
 	
 	public double getMinimalPrecursorIntensity() {
 		if(minPrecursorIntensityTextField.getText().trim().isEmpty())
@@ -714,7 +715,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		
 		ChromatogramDefinition ccd = new ChromatogramDefinition(
 				ChromatogramPlotMode.XIC, 
-				getPolarity(),
+				null, //	getPolarity(),
 				1, 
 				null,
 				false, 
@@ -745,7 +746,8 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		else
 			descriptionTextArea.setText(ps.getDescription());
 		
-		polarityComboBox.setSelectedItem(ps.getPolarity());		
+		//	polarityComboBox.setSelectedItem(ps.getPolarity());	
+		
 		Range rtRange = ps.getDataExtractionRtRange();
 		if(rtRange == null) {
 			limitExtractionRtCheckBox.setSelected(false);
@@ -786,8 +788,10 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 	public void loadDefaultParameters() {
 		
 		nameTextField.setText(DESCRIPTION_DEFAULT);
-		descriptionTextArea.setText(DESCRIPTION_DEFAULT);		
-		polarityComboBox.setSelectedItem(POLARITY_DEFAULT);
+		descriptionTextArea.setText(DESCRIPTION_DEFAULT);
+		
+//		polarityComboBox.setSelectedItem(POLARITY_DEFAULT);
+		
 		minPrecursorIntensityTextField.setText(
 				Double.toString(MIN_PRECURSOR_INTENSITY_DEFAULT));
 		limitExtractionRtCheckBox.setSelected(USE_RT_RANGE_DEFAULT);
@@ -819,7 +823,9 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		MSMSExtractionParameterSet ps = new MSMSExtractionParameterSet();
 		ps.setName(getParameterSetName());
 		ps.setDescription(getDescription());
-		ps.setPolarity(getPolarity());
+		
+//		ps.setPolarity(getPolarity());
+		
 		ps.setMinPrecursorIntensity(getMinimalPrecursorIntensity());
 		ps.setDataExtractionRtRange(getDataExtractionRtRange());
 		ps.setMsmsIsolationWindowLowerBorder(getIsolationWindowLowerBorder());
@@ -848,8 +854,8 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		if(getParameterSetName().isEmpty())
 			errors.add("Please specify the name for the method.");
 		
-		if(getPolarity() == null)
-			errors.add("Polarity has to be specified");
+//		if(getPolarity() == null)
+//			errors.add("Polarity has to be specified");
 		
 		if(limitExtractionRtCheckBox.isSelected()) {
 			double lb = Double.valueOf(rtFromTextField.getText());
@@ -879,7 +885,9 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		mergeCollisionsCheckBox.setEnabled(isEnabled);
 		filterWidthComboBox.setEnabled(isEnabled);
 		intensityMeasureComboBox.setEnabled(isEnabled);
-		polarityComboBox.setEnabled(isEnabled);
+		
+//		polarityComboBox.setEnabled(isEnabled);
+		
 		precursorGroupingMassErrorTypeComboBox.setEnabled(isEnabled);
 		isolationWindowLowerTextField.setEnabled(isEnabled);
 		isolationWindowUpperTextField.setEnabled(isEnabled);

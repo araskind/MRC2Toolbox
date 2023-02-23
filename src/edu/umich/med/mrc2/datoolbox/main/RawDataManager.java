@@ -33,13 +33,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SupportedRawDataTypes;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
@@ -49,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.LCMSDataSubset;
 import umich.ms.datatypes.scan.StorageStrategy;
+import umich.ms.datatypes.scancollection.ScanIndex;
 import umich.ms.fileio.exceptions.FileParsingException;
 import umich.ms.fileio.filetypes.mzml.MZMLFile;
 import umich.ms.fileio.filetypes.mzxml.MZXMLFile;
@@ -96,10 +100,39 @@ public class RawDataManager {
 				
 				Color nextColor = ColorUtils.getColor(rawDataMap.size());
 				file.setColor(nextColor);
-				rawDataMap.put(file, data);				
+				rawDataMap.put(file, data);	
 			}
 		}
 		return rawDataMap.get(file);
+	}
+	
+	public static Polarity getPolarityForLCMSData(LCMSData data) {
+		
+		if(data == null)
+			return null;
+		
+		ScanIndex idx = data.getScans().getMapMsLevel2index().get(1);
+		if( idx == null)
+			idx = data.getScans().getMapMsLevel2index().get(2);
+		
+		if( idx == null)
+			return null;
+
+		Set<Integer> polSet = idx.getNum2scan().values().stream().
+				map(s -> s.getPolarity().getSign()).collect(Collectors.toSet());
+		
+		Polarity pol = null;
+		if(polSet.size() > 1) {
+			pol = Polarity.Neutral;
+		}
+		else {	
+			int sign = polSet.iterator().next();
+			if(sign == 1)
+				pol = Polarity.Positive;
+			if(sign == -1)
+				pol = Polarity.Negative;
+		}
+		return pol;
 	}
 	
 	public static boolean isDataSourceForInjectionLoaded(String injectionId) {

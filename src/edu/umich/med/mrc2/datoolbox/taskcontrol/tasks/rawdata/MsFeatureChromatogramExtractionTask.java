@@ -52,6 +52,7 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 	private Map<MSFeatureInfoBundle, ChromatogramDefinition>featureChromatogramDefinitions;
 	private Map<MSFeatureInfoBundle, Collection<ExtractedIonData>>chromatogramMap;
 	private TreeMap<Integer, ScanIndex>msLevel2index;
+	private Polarity dataFilePolarity;
 	
 	public MsFeatureChromatogramExtractionTask(
 			DataFile rawDataFile,
@@ -89,14 +90,30 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 	}
 	
 	private void extractCromatograms() {
-		total = featureChromatogramDefinitions.size();
+		
+		//	Filter by polarity
+		Map<MSFeatureInfoBundle, ChromatogramDefinition>filteredChromatogramDefinitions = 
+				new HashMap<MSFeatureInfoBundle, ChromatogramDefinition>();
+		if(dataFilePolarity != null && !dataFilePolarity.equals(Polarity.Neutral)) {
+			
+			featureChromatogramDefinitions.entrySet().stream().
+				filter(e -> e.getValue().getPolarity().equals(dataFilePolarity)).
+				forEach(e -> filteredChromatogramDefinitions.put(e.getKey(), e.getValue()));
+		}
+		else {
+			filteredChromatogramDefinitions.putAll(featureChromatogramDefinitions);
+		}
+		if(filteredChromatogramDefinitions.isEmpty())
+			return;
+				
+		total = filteredChromatogramDefinitions.size();
 		processed = 0;
-		for(Entry<MSFeatureInfoBundle, ChromatogramDefinition> entry : featureChromatogramDefinitions.entrySet()) {
+		for(Entry<MSFeatureInfoBundle, ChromatogramDefinition> entry : filteredChromatogramDefinitions.entrySet()) {
 			
 			if (isCanceled()) {
 				RawDataManager.removeDataSource(rawDataFile);
 				return;
-			}			
+			}
 			taskDescription = "Extracting chromatograms for " + 
 						entry.getKey().getMsFeature().toString();
 			Collection<ExtractedIonData> chromatograms = 
@@ -226,7 +243,8 @@ public class MsFeatureChromatogramExtractionTask extends AbstractTask {
 			return;
 		
 		LCMSData data = RawDataManager.getRawData(rawDataFile);
-		msLevel2index = data.getScans().getMapMsLevel2index();
+		msLevel2index = data.getScans().getMapMsLevel2index();		
+		dataFilePolarity = RawDataManager.getPolarityForLCMSData(data);
 	}
 	
 	@Override

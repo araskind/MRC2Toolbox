@@ -48,7 +48,13 @@ public class IDTrackerExperimentListingTableModel extends BasicTableModel {
 	public void setTableModelFromExperimentList(Collection<LIMSExperiment>experimentList) {
 
 		setRowCount(0);		
+		if(experimentList.isEmpty())
+			return;
+		
 		for(LIMSExperiment experiment : experimentList) {
+			
+			if(experiment == null)
+				continue;
 			
 			Object[] obj = {
 				experiment,

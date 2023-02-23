@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1676064404309" orientation="VERTICAL" divider="0.6666666666666666">
-											<leaf id="1" nodeId="1676064404566">
+											<leaf id="0" nodeId="1676064404566">
 												<placeholders>
 													<placeholder>dock.single.DockableLIMSDataPanel</placeholder>
 													<placeholder>dock.single.ProjectDetailsPanel</placeholder>
@@ -124,7 +124,7 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="0" nodeId="1676064404569">
+											<leaf id="1" nodeId="1676064404569">
 												<placeholders>
 													<placeholder>dock.single.DesignSubsetPanel</placeholder>
 													<placeholder>dock.single.FeatureSubsetPanel</placeholder>
@@ -158,65 +158,6 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
-								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.FeatureSubsetPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.FeatureSubsetPanel</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DesignSubsetPanel</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DesignSubsetPanel</item>
-											</entry>
-										</placeholders>
-									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.FeatureSubsetPanel">
-												<replacement id="dockablesingle FeatureSubsetPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>FeatureSubsetPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DesignSubsetPanel">
-												<replacement id="dockablesingle DesignSubsetPanel"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DesignSubsetPanel</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
-								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -269,6 +210,65 @@
 												<replacement id="dockablesingle DockableLIMSDataPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>DockableLIMSDataPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>1</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.FeatureSubsetPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.FeatureSubsetPanel</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DesignSubsetPanel</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DesignSubsetPanel</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.FeatureSubsetPanel">
+												<replacement id="dockablesingle FeatureSubsetPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>FeatureSubsetPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DesignSubsetPanel">
+												<replacement id="dockablesingle DesignSubsetPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DesignSubsetPanel</id>
 													<area/>
 												</delegate>
 											</layout>

@@ -615,6 +615,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 	private void extractMSMSFeatures() {
 		
+		MSMSExtractionParameterSet ps = 
+				msmsFeatureExtractionSetupDialog.getMSMSExtractionParameterSet();
+		if(ps == null)
+			return;
+		
 		if(!MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getMsMsFeatureBundles().isEmpty()) {
 			int res = MessageDialog.showChoiceWithWarningMsg(
 					"Do you want to discard previously extracted "
@@ -623,37 +628,32 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			if(res != JOptionPane.YES_OPTION) 
 				return;
 		}
-		MSMSExtractionParameterSet ps = 
-				msmsFeatureExtractionSetupDialog.getMSMSExtractionParameterSet();
-		if(ps == null)
-			return;
-		
 		cleanupForReanalysis();
 
 		//	Get existing or create new data extraction 
 		//	method based on MSMSExtractionParameterSet
 		DataExtractionMethod experimentDataExtractionMethod = null;		
-		String methodMd5 = ps.getParameterSetHash();
+		String methodMd5 = ps.getParameterSetHash();		
+		DataExtractionMethod existingMethod = 
+				IDTDataCash.getDataExtractionMethodByMd5(methodMd5);
 		
-		//	Check if existing method was changed
-		if(msmsFeatureExtractionSetupDialog.getInitialParameterSet() != null 
-				&& msmsFeatureExtractionSetupDialog.getDataExtractionMethod() != null
-				&& msmsFeatureExtractionSetupDialog.getInitialParameterSet().getParameterSetHash().equals(methodMd5)) {
-			experimentDataExtractionMethod = msmsFeatureExtractionSetupDialog.getDataExtractionMethod();
-			ps = msmsFeatureExtractionSetupDialog.getInitialParameterSet();
-		}
-		else {
-	    	DataExtractionMethod sameNameDeMethod = 
-					 IDTDataCash.getDataExtractionMethodByName(ps.getName());
-	    	if(sameNameDeMethod != null) {
-	    		
-	    		String version = " V-" + ExperimentUtils.dateTimeFormat.format(new Date());
-	    		String newName = ps.getName() + version;
-	    		String newDescription = ps.getDescription() + "\n" + version + 
-	    				"("+ MRC2ToolBoxCore.getIdTrackerUser().getFullName() + ")";	    		
-	    		ps.setName(newName);
-	    		ps.setDescription(newDescription);
-	    	}	
+		//	Insert new method
+		if(existingMethod == null) {
+			
+			if(msmsFeatureExtractionSetupDialog.getInitialParameterSet() != null) {
+				
+		    	DataExtractionMethod sameNameDeMethod = 
+						 IDTDataCash.getDataExtractionMethodByName(ps.getName());
+		    	if(sameNameDeMethod != null) {
+
+		    		String newName = "MSMS extraction method V-" + 
+		    				MRC2ToolBoxConfiguration.defaultTimeStampFormat.format(new Date());
+		    		String newDescription = "Modified from " + ps.getName() + " (" + ps.getId() +
+		    				") by "+ MRC2ToolBoxCore.getIdTrackerUser().getFullName();	    		
+		    		ps.setName(newName);
+		    		ps.setDescription(newDescription);
+		    	}
+			}
 	    	//	Upload new method
 			try {
 				experimentDataExtractionMethod = 
@@ -666,12 +666,57 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				return;
 			}
 			if(experimentDataExtractionMethod != null) {
+				
 				IDTDataCash.getDataExtractionMethods().add(experimentDataExtractionMethod);
 				ps.setId(experimentDataExtractionMethod.getId());
 				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
 					setMsmsExtractionParameterSet(ps);
+				
+				msmsFeatureExtractionSetupDialog.loadParameters(
+						ps, experimentDataExtractionMethod);
 			}
-		}		
+		}
+		else {
+			experimentDataExtractionMethod = existingMethod;
+		}
+		
+		//	Check if existing method was changed
+//		if(msmsFeatureExtractionSetupDialog.getInitialParameterSet() != null 
+//				&& msmsFeatureExtractionSetupDialog.getDataExtractionMethod() != null
+//				&& msmsFeatureExtractionSetupDialog.getInitialParameterSet().getParameterSetHash().equals(methodMd5)) {
+//			experimentDataExtractionMethod = msmsFeatureExtractionSetupDialog.getDataExtractionMethod();
+//			ps = msmsFeatureExtractionSetupDialog.getInitialParameterSet();
+//		}
+//		else {
+//	    	DataExtractionMethod sameNameDeMethod = 
+//					 IDTDataCash.getDataExtractionMethodByName(ps.getName());
+//	    	if(sameNameDeMethod != null) {
+//	    		
+//	    		String version = " V-" + ExperimentUtils.dateTimeFormat.format(new Date());
+//	    		String newName = ps.getName() + version;
+//	    		String newDescription = ps.getDescription() + "\n" + version + 
+//	    				"("+ MRC2ToolBoxCore.getIdTrackerUser().getFullName() + ")";	    		
+//	    		ps.setName(newName);
+//	    		ps.setDescription(newDescription);
+//	    	}	
+//	    	//	Upload new method
+//			try {
+//				experimentDataExtractionMethod = 
+//						IDTUtils.addNewTrackerDataExtractionMethod(ps);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//				MessageDialog.showErrorMsg("Failed to upload data analysis method for the experiment", 
+//						 this.getContentPane());
+//				return;
+//			}
+//			if(experimentDataExtractionMethod != null) {
+//				IDTDataCash.getDataExtractionMethods().add(experimentDataExtractionMethod);
+//				ps.setId(experimentDataExtractionMethod.getId());
+//				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
+//					setMsmsExtractionParameterSet(ps);
+//			}
+//		}		
 		MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().setMsmsExtractionParameterSet(ps);
 		MsMsfeatureBatchExtractionTask task = 
 				new MsMsfeatureBatchExtractionTask(

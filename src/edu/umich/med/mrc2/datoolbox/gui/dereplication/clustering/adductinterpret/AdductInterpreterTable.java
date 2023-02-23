@@ -45,7 +45,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.editors.ChemicalModificationEdito
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RowEditorModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MsFeatureSuggestedModificationRenderer;
 
@@ -79,7 +79,7 @@ public class AdductInterpreterTable extends BasicFeatureTable {
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		chmodRenderer = new ChemicalModificationRenderer();
+		chmodRenderer = new AdductRenderer();
 		ppmRenderer = new FormattedDecimalRenderer(new DecimalFormat("###.#"), true);
 		suggestedModificationRenderer = new MsFeatureSuggestedModificationRenderer();
 

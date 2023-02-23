@@ -43,7 +43,7 @@ public class RDPSamplePrepPanel extends RDPMetadataWizardPanel {
 		
 		super(wizard);
 		
-		samplePrepEditorPanel = new SamplePrepEditorPanel(false);
+		samplePrepEditorPanel = new SamplePrepEditorPanel(true);
 		samplePrepEditorPanel.setWizardStep(true);
 		add(samplePrepEditorPanel, gbc_panel);
 	}

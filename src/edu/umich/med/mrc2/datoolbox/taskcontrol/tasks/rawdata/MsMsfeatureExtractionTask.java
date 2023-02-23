@@ -670,7 +670,10 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			num2scan = data.getScans().getScansByRtSpanAtMsLevel(
 					dataExtractionRtRange.getMin(), dataExtractionRtRange.getMax(), 2);
 		
-		umich.ms.datatypes.scan.props.Polarity scanPolarity = RawDataUtils.getScanPolarity(polarity);
+		umich.ms.datatypes.scan.props.Polarity scanPolarity = null;
+		if(polarity != null && !polarity.equals(Polarity.Neutral) )
+			scanPolarity = RawDataUtils.getScanPolarity(polarity);
+		
 		Integer unloadIntervalStart = 0;
 		for(Entry<Integer, IScan> entry: num2scan.entrySet()) {
 			
@@ -679,7 +682,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				return;
 			}
 			IScan s = entry.getValue();	
-			if(!s.getPolarity().equals(scanPolarity))
+			if(scanPolarity != null && !s.getPolarity().equals(scanPolarity))
 				continue;
 				
 			int scanNum = entry.getKey();
@@ -688,7 +691,8 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				processed++;
 				continue;			
 			}			
-			MsFeature f = new MsFeature(s.getRt(), polarity);
+			MsFeature f = new MsFeature(s.getRt(), 
+					RawDataUtils.getPolarityFromScan(s.getPolarity()));
 			MassSpectrum spectrum = new MassSpectrum();
 			
 			//	TODO interpolate flanking MS1 scans
@@ -747,7 +751,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 						2, 
 						msOneParent,
 						RawDataUtils.getScanPoints(s),
-						polarity);				
+						f.getPolarity());				
 				msms.setIsolationWindow(isolationWindow);
 				if(precursor.getActivationInfo() != null) {
 					Double ach = precursor.getActivationInfo().getActivationEnergyHi();

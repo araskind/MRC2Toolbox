@@ -21,21 +21,22 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.tables.renderers;
 
+import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 
-public class ChemicalModificationRenderer extends DefaultTableCellRenderer {
+public class PolarityRenderer extends DefaultTableCellRenderer {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8120750009905302122L;
 
-	public ChemicalModificationRenderer() {
+	public PolarityRenderer() {
 
 		super();
 	}
@@ -54,9 +55,18 @@ public class ChemicalModificationRenderer extends DefaultTableCellRenderer {
 			setText("");
 			return this;
 		}
-		if (value instanceof Adduct)
-			setText(((Adduct) value).getName());
+		if (value instanceof Polarity) {
+			Polarity a = (Polarity) value;
+			setText(a.getCode());
+			if(!isSelected) {
+				
+				if(a.equals(Polarity.Positive))
+					setForeground(Color.RED);
 
+				if(a.equals(Polarity.Negative)) 
+					setForeground(Color.BLUE);
+			}
+		}
 		return this;
 	}
 }

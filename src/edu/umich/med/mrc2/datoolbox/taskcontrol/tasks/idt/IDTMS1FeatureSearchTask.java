@@ -218,7 +218,8 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 		String query = 
 				"SELECT DISTINCT F.POOLED_MS_FEATURE_ID, F.RETENTION_TIME, " +
 				"F.AREA, F.BASE_PEAK, D.SAMPLE_ID, D.EXPERIMENT_ID,  " +
-				"D.ACQ_METHOD_ID, D.EXTRACTION_METHOD_ID, T.STOCK_SAMPLE_ID, F.ID_DISABLED " +
+				"D.ACQ_METHOD_ID, D.EXTRACTION_METHOD_ID, "
+				+ "T.STOCK_SAMPLE_ID, F.ID_DISABLED, A.POLARITY " +
 				"FROM POOLED_MS1_DATA_SOURCE D, " +
 				"SAMPLE S, " +
 				"STOCK_SAMPLE T, " +
@@ -229,18 +230,22 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				"LEFT JOIN POOLED_MS1_FEATURE_ALTERNATIVE_ID AI  " +
 				"ON F.POOLED_MS_FEATURE_ID = AI.POOLED_MS_FEATURE_ID " +
 				"WHERE F.SOURCE_DATA_BUNDLE_ID = D.SOURCE_DATA_BUNDLE_ID " +
-				"AND D.ACQ_METHOD_ID = A.ACQ_METHOD_ID  " +
-				"AND A.POLARITY = ? " +
+				"AND D.ACQ_METHOD_ID = A.ACQ_METHOD_ID  " +				
 				"AND D.SAMPLE_ID = S.SAMPLE_ID  " +
 				"AND S.STOCK_SAMPLE_ID = T.STOCK_SAMPLE_ID ";
-				
+			
+		if(polarity != null && !polarity.equals(Polarity.Neutral)) {
+			
+			query += "AND A.POLARITY = ? ";
+			parameterMap.put(paramCount++, new SQLParameter(String.class, polarity.getCode()));
+		}
 		//	Account for non-primary identifications
 		if(!lookupSecondaryIds && lookupIds
 				//	&& !lookupSecondaryLibMatches //	Hanldle MS/RT libraries here
 				)
 			query += "AND (H.IS_PRIMARY IS NOT NULL OR AI.IS_PRIMARY IS NOT NULL) ";
 		
-		parameterMap.put(paramCount++, new SQLParameter(String.class, polarity.getCode()));
+//		parameterMap.put(paramCount++, new SQLParameter(String.class, polarity.getCode()));
 
 		if(!ignoreMz && monoisotopicPeakMz != null) {
 
@@ -388,7 +393,9 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 					MRC2ToolBoxConfiguration.getRtFormat().format(rt);
 
 			MsFeature f = new MsFeature(id, name, rt);
-			f.setPolarity(polarity);
+			f.setPolarity(Polarity.getPolarityByCode(rs.getString("POLARITY")));
+			
+//			f.setPolarity(polarity);
 			f.setAnnotatedObjectType(AnnotatedObjectType.MS_FEATURE_POOLED);
 			f.setIdDisabled(rs.getString("ID_DISABLED") != null);
 			
@@ -445,7 +452,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 						AdductManager.getAdductById(adductId);
 
 				if(adduct == null)
-					continue;
+					adduct = AdductManager.getDefaultAdductForPolarity(fb.getMsFeature().getPolarity());
 
 				if(!adductMap.containsKey(adduct))
 					adductMap.put(adduct, new ArrayList<MsPoint>());

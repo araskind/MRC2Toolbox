@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 
 public class AdductSelectionTable extends BasicTable {
@@ -52,7 +52,7 @@ public class AdductSelectionTable extends BasicTable {
 		setRowSorter(rowSorter);
 		
 		getTableHeader().setReorderingAllowed(false);
-		chmodRenderer = new ChemicalModificationRenderer();
+		chmodRenderer = new AdductRenderer();
 		setDefaultRenderer(Adduct.class, chmodRenderer);
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();

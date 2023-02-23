@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.data.SimpleAdduct;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 
 public class CompositeAdductComponentsTable extends BasicTable {
 
@@ -52,7 +52,7 @@ public class CompositeAdductComponentsTable extends BasicTable {
 		rowSorter = new TableRowSorter<CompositeAdductComponentsTableModel>(model);
 		setRowSorter(rowSorter);
 
-		chmodRenderer = new ChemicalModificationRenderer();
+		chmodRenderer = new AdductRenderer();
 		setDefaultRenderer(Adduct.class, chmodRenderer);
 
 		columnModel.getColumnById(CompositeAdductComponentsTableModel.MASS_CORRECTION_COLUMN)

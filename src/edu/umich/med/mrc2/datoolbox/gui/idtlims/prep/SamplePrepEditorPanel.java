@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.prefs.Preferences;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -48,6 +49,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+
+import org.apache.commons.io.FilenameUtils;
 
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
@@ -59,6 +62,8 @@ import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.DocumentFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
@@ -75,6 +80,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idtlims.user.UserSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataDefinitionStage;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -117,6 +123,9 @@ public class SamplePrepEditorPanel extends JPanel
 	private boolean isWizardStep;
 	private boolean limitEditor;
 	private JButton editSaveNameButton;
+	
+	private static final Pattern prepIdPattern = 
+			Pattern.compile(DataPrefix.SAMPLE_PREPARATION.name() +  "\\d4");
 	
 	/**
 	 * This constructor is for the creation of the new sample preparation;
@@ -382,7 +391,7 @@ public class SamplePrepEditorPanel extends JPanel
 			
 			prep.setName(getPrepName());
 			
-			if(prep.getId() != null) {
+			if(prep.getId() != null && prepIdPattern.matcher(prep.getId()).find()) {
 
 				try {
 					IDTUtils.updateBasicSamplePrepData(prep);
@@ -556,10 +565,7 @@ public class SamplePrepEditorPanel extends JPanel
 		}
 		else {
 			clearGui();
-		}	
-		//	fireSamplePrepEvent(prep, ParameterSetStatus.REMOVED);
-		//	this.prep = null;
-		//	this.experiment = null;
+		}
 	}
 	
 	public void clearPanel() {
@@ -595,7 +601,7 @@ public class SamplePrepEditorPanel extends JPanel
 			
 			prep.setCreator(prepUser);
 			
-			if(prep.getId() != null) {
+			if(prep.getId() != null && prepIdPattern.matcher(prep.getId()).find()) {
 
 				try {
 					IDTUtils.updateBasicSamplePrepData(prep);
@@ -629,7 +635,7 @@ public class SamplePrepEditorPanel extends JPanel
 			
 			protocols.addAll(prep.getProtocols());
 			
-			if(prep.getId() != null) {
+			if(prep.getId() != null && prepIdPattern.matcher(prep.getId()).find()) {
 				
 				prep.getProtocols().addAll(selected);
 				try {
@@ -661,7 +667,7 @@ public class SamplePrepEditorPanel extends JPanel
 				
 				protocols.addAll(prep.getProtocols());
 				
-				if(prep.getId() != null) {
+				if(prep.getId() != null && prepIdPattern.matcher(prep.getId()).find()) {
 					
 					prep.getProtocols().removeAll(selected);
 					try {
@@ -723,14 +729,18 @@ public class SamplePrepEditorPanel extends JPanel
 			return;
 		}
 		newAnnotation.setLinkedDocumentName(documentAnnotationDialog.getDocumentTitle());
-		newAnnotation.setLinkedDocumentFile(documentAnnotationDialog.getDocumentSourceFile());
+		File docFile = documentAnnotationDialog.getDocumentSourceFile();
+		newAnnotation.setLinkedDocumentFile(docFile);		
+		DocumentFormat docFormat = DocumentFormat.getFormatByFileExtension(
+				FilenameUtils.getExtension(docFile.getName()).toUpperCase());
+		newAnnotation.setLinkedDocumentFormat(docFormat);
 		
 		Collection<ObjectAnnotation> annotations = new ArrayList<ObjectAnnotation>();
 		if(prep != null) {
 			
 			annotations.addAll(prep.getAnnotations());
 			
-			if(prep.getId() != null) {
+			if(prep.getId() != null && prepIdPattern.matcher(prep.getId()).find()) {
 				
 				prep.getAnnotations().add(newAnnotation);
 				try {
@@ -743,44 +753,6 @@ public class SamplePrepEditorPanel extends JPanel
 			}
 		}
 		annotations.add(newAnnotation);
-		
-		
-//		//	Update existing annotation - unique ID is CHAR 12
-//		if(newAnnotation.getUniqueId().length() == 12) {
-//			try {
-//				newAnnotation.setLastModifiedBy(MRC2ToolBoxCore.getIdTrackerUser());
-//				AnnotationUtils.updateAnnotation(newAnnotation, null);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
-//		else {	//	Insert new annotation
-//			if(documentAnnotationDialog.getDocumentSourceFile() == null) {
-//				MessageDialog.showErrorMsg(
-//						"Please specify document source file.", 
-//						documentAnnotationDialog);
-//				return;
-//			}
-//			try {
-//				String extension = 
-//						FilenameUtils.getExtension(
-//								documentAnnotationDialog.getDocumentSourceFile().getName());
-//				DocumentFormat format = 
-//						DocumentFormat.getFormatByFileExtension(extension);
-//				newAnnotation.setLinkedDocumentFormat(format);
-//				newAnnotation.setLinkedDocumentFile(documentAnnotationDialog.getDocumentSourceFile());
-//				AnnotationUtils.insertNewAnnotation(newAnnotation);
-//				if(prep != null)
-//						prep.addAnnotation(newAnnotation);
-//				
-//				existingAnnotations.add(newAnnotation);
-//			} 
-//			catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
 		documentsPanel.setModelFromAnnotations(annotations);			
 		documentAnnotationDialog.dispose();	
 	}
@@ -800,7 +772,7 @@ public class SamplePrepEditorPanel extends JPanel
 				
 				annotations.addAll(prep.getAnnotations());
 				
-				if(prep.getId() != null) {
+				if(prep.getId() != null && prepIdPattern.matcher(prep.getId()).find()) {
 					
 					prep.getAnnotations().removeAll(selected);
 					try {
@@ -904,13 +876,16 @@ public class SamplePrepEditorPanel extends JPanel
 		eventListeners.remove(listener);
 	}
 	
-	public void fireSamplePrepEvent(LIMSSamplePreparation prep, ParameterSetStatus status) {
+	public void fireSamplePrepEvent(
+			LIMSSamplePreparation prep, 
+			ParameterSetStatus status) {
 
 		if(eventListeners == null){
 			eventListeners = ConcurrentHashMap.newKeySet();
 			return;
 		}
-		SamplePrepEvent event = new SamplePrepEvent(prep, status);
+		SamplePrepEvent event = new SamplePrepEvent(
+				prep, status, RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
 		eventListeners.stream().forEach(l -> l.samplePrepStatusChanged(event));		
 	}
 
@@ -1002,7 +977,7 @@ public class SamplePrepEditorPanel extends JPanel
 			
 			prep.setPrepDate(getPrepDate());
 			
-			if(prep.getId() != null) {
+			if(prep.getId() != null && prepIdPattern.matcher(prep.getId()).find()) {
 
 				try {
 					IDTUtils.updateBasicSamplePrepData(prep);

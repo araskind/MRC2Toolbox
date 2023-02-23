@@ -347,7 +347,9 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 
 		List<String> chunks = new ArrayList<String>();
 		chunks.add(mode.name());
-		chunks.add(polarity.getCode());
+		if(polarity != null)
+			chunks.add(polarity.getCode());
+		
 		chunks.add(Integer.toString(msLevel));		
 		if(mzList != null && !mzList.isEmpty()) {
 			List<String> stringList = mzList.stream().

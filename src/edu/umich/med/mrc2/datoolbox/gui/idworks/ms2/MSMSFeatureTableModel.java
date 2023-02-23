@@ -33,6 +33,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIdentificationState;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
@@ -52,6 +53,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 	public static final String COMPOUND_NAME_COLUMN = "Identification";
 	public static final String ID_LEVEL_COLUMN = "ID level";
 	public static final String ADDUCT_COLUMN = "Adduct";
+	public static final String POLARITY_COLUMN = "Polarity";
 	public static final String DATABASE_LINK_COLUMN = "DBID";
 	public static final String AMBIGUITY_COLUMN = "ID status";
 	public static final String RETENTION_COLUMN = "RT";
@@ -84,7 +86,8 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			new ColumnContext(DATABASE_LINK_COLUMN, MsFeatureIdentity.class, false),
 			new ColumnContext(AMBIGUITY_COLUMN, FeatureIdentificationState.class, false),
 			new ColumnContext(ID_LEVEL_COLUMN, MSFeatureIdentificationLevel.class, false),
-			new ColumnContext(ADDUCT_COLUMN, Adduct.class, false),			
+			new ColumnContext(ADDUCT_COLUMN, Adduct.class, false),
+			new ColumnContext(POLARITY_COLUMN, Polarity.class, false),
 			new ColumnContext(ANNOTATIONS_COLUMN, Boolean.class, false),
 			new ColumnContext(FOLLOWUP_COLUMN, Boolean.class, false),
 			new ColumnContext(RETENTION_COLUMN, Double.class, false),
@@ -170,6 +173,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 				idState, //	AMBIGUITY_COLUMN, Boolean
 				idLevel,
 				adduct,
+				cf.getPolarity(),
 				hasAnnotations,	//	ANNOTATIONS_COLUMN, Boolean
 				hasFollowup,
 				cf.getRetentionTime(),		//	RETENTION_COLUMN	Double
@@ -282,7 +286,8 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		setValueAt(cf.getPrimaryIdentity(), row, getColumnIndex(DATABASE_LINK_COLUMN));
 		setValueAt(cf.getIdentificationState(), row, getColumnIndex(AMBIGUITY_COLUMN));
 		setValueAt(idLevel, row, getColumnIndex(ID_LEVEL_COLUMN));
-		setValueAt(adduct, row, getColumnIndex(ADDUCT_COLUMN));		
+		setValueAt(adduct, row, getColumnIndex(ADDUCT_COLUMN));	
+		setValueAt(cf.getPolarity(), row, getColumnIndex(POLARITY_COLUMN));	
 		setValueAt(hasAnnotations, row, getColumnIndex(ANNOTATIONS_COLUMN));
 		setValueAt(hasFollowup, row, getColumnIndex(FOLLOWUP_COLUMN));
 		setValueAt(cf.getRetentionTime(), row, getColumnIndex(RETENTION_COLUMN));

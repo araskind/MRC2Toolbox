@@ -39,7 +39,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MsFeatureRenderer;
 
 public class MassDifferenceTable extends BasicTable {
@@ -64,7 +64,7 @@ public class MassDifferenceTable extends BasicTable {
 		rowSorter.setComparator(model.getColumnIndex(MassDifferenceTableModel.FEATURE_TWO_COLUMN),
 				new MsFeatureComparator(SortProperty.Name, SortDirection.ASC));
 
-		chmodRenderer = new ChemicalModificationRenderer();
+		chmodRenderer = new AdductRenderer();
 		cfRenderer = new MsFeatureRenderer(SortProperty.Name);
 
 		columnModel.getColumnById(MassDifferenceTableModel.DELTA_COLUMN)

@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 
 public class AdductChooserTable extends BasicTable {
@@ -52,7 +52,7 @@ public class AdductChooserTable extends BasicTable {
 		setRowSorter(rowSorter);
 		
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		setDefaultRenderer(Adduct.class, new ChemicalModificationRenderer());
+		setDefaultRenderer(Adduct.class, new AdductRenderer());
 		columnModel.getColumnById(AdductChooserTableModel.MASS_CORRECTION_COLUMN).
 			setCellRenderer(mzRenderer);
 

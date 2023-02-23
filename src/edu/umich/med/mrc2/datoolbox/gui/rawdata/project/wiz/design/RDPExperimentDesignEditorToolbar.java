@@ -43,13 +43,15 @@ public class RDPExperimentDesignEditorToolbar  extends CommonToolbar {
 	private static final Icon deleteSampleIcon = GuiUtils.getIcon("deleteSample", 32);
 	private static final Icon editSampleIcon = GuiUtils.getIcon("editSample", 32);
 	private static final Icon addStockSampleIcon = GuiUtils.getIcon("addStandardSample", 32);
+	private static final Icon prepIcon = GuiUtils.getIcon("samplePrep", 32);
 
 	@SuppressWarnings("unused")
 	private JButton
 		addSampleButton,
 		deleteSampleButton,
 		editSampleButton,
-		addRefSampleButton;
+		addRefSampleButton,
+		addSamplesAndPrepButton;
 
 	public RDPExperimentDesignEditorToolbar(ActionListener commandListener) {
 
@@ -75,6 +77,12 @@ public class RDPExperimentDesignEditorToolbar  extends CommonToolbar {
 		addRefSampleButton = GuiUtils.addButton(this, null, addStockSampleIcon, commandListener,
 				MainActionCommands.ADD_REFERENCE_SAMPLE_DIALOG_COMMAND.getName(),
 				MainActionCommands.ADD_REFERENCE_SAMPLE_DIALOG_COMMAND.getName(), buttonDimension);
+		
+//		addSeparator(buttonDimension);
+//		
+//		addSamplesAndPrepButton = GuiUtils.addButton(this, null, prepIcon, commandListener,
+//				MainActionCommands.LOAD_SAMPLES_WITH_PREP_FROM_DATABASE_COMMAND.getName(),
+//				MainActionCommands.LOAD_SAMPLES_WITH_PREP_FROM_DATABASE_COMMAND.getName(), buttonDimension);
 	}
 	
 	public void setDesignEditable(boolean editable) {

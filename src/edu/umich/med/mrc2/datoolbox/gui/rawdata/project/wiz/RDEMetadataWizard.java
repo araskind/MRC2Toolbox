@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -107,6 +108,8 @@ public class RDEMetadataWizard extends JDialog
 	private int processedFiles, fileNumber;
 	
 	private static final String NEXT_STAGE_COMMAND = "Next";
+	private static final Pattern prepIdPattern = 
+			Pattern.compile(DataPrefix.SAMPLE_PREPARATION.name() +  "\\d4");
 
 	public RDEMetadataWizard(
 			RawDataExaminerPanel parentPanel,
@@ -130,6 +133,11 @@ public class RDEMetadataWizard extends JDialog
 		getContentPane().add(stagePanel, BorderLayout.CENTER);
 		
 		initWizardPanels();
+		RDPExperimentDesignPanel designPanel = 
+				(RDPExperimentDesignPanel)panels.get(
+						RDPMetadataDefinitionStage.ADD_SAMPLES);
+		designPanel.getExperimentDesignEditorPanel().addSamplePrepListener(this);
+		
 		RDPSamplePrepPanel prepPanel = 
 				(RDPSamplePrepPanel)panels.get(
 						RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
@@ -738,28 +746,7 @@ public class RDEMetadataWizard extends JDialog
 	}
 
 	private void saveExperimentMetadata() {
-		
-//		if(!completeExperimentDefinitionStage()) {
-////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.CREATE_EXPERIMENT);
-//			return;
-//		}
-//		if(!completeSampleListDefinitionStage()) {
-////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLES);
-//			return;
-//		}
-//		if(!completeSamplePrepDefinitionStage()) {
-////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA);
-//			return;
-//		}
-//		if(!completeAnalysisMethodsDefinitionStage()) {
-////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_ACQ_DA_METHODS);
-//			return;
-//		}
-//		if(!completeWorklistVerificationStage()) {
-////			validateInputAndShowStagePanel(RDPMetadataDefinitionStage.ADD_WORKLISTS);
-//			return;
-//		}	
-		
+
 		for(int i=0; i<RDPMetadataDefinitionStage.values().length; i++) {
 			
 			RDPMetadataDefinitionStage toValidate = RDPMetadataDefinitionStage.values()[i];
@@ -835,11 +822,12 @@ public class RDEMetadataWizard extends JDialog
 			newExperiment.getSamplePreps().remove(prep);
 			for(RDPMetadataDefinitionStage panelType : RDPMetadataDefinitionStage.values()) {
 				
-				if(!panelType.equals(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)) {
+				if(panelType.equals(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)
+						&& e.getDefStage().equals(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA))
+					continue;
 					
-					panels.get(panelType).setExperiment(newExperiment);
-					panels.get(panelType).setSamplePrep(null);
-				}
+				panels.get(panelType).setExperiment(newExperiment);
+				panels.get(panelType).setSamplePrep(null);				
 			}
 			prepPanel.setPrepEditable(true);
 			designPanel.setDesignEditable(true);
@@ -855,14 +843,17 @@ public class RDEMetadataWizard extends JDialog
 			newExperiment.getSamplePreps().add(prep);
 			for(RDPMetadataDefinitionStage panelType : RDPMetadataDefinitionStage.values()) {
 				
-				if(!panelType.equals(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)) {
+				if(panelType.equals(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA)
+						&& e.getDefStage().equals(RDPMetadataDefinitionStage.ADD_SAMPLE_PREPARATION_DATA))
+					continue;
 					
-					panels.get(panelType).setExperiment(newExperiment);
-					panels.get(panelType).setSamplePrep(prep);
-				}
+				panels.get(panelType).setExperiment(newExperiment);
+				panels.get(panelType).setSamplePrep(prep);
 			}
-			if(prep.getId() != null) {
-				LIMSSamplePreparation existingPrep = IDTDataCash.getSamplePrepById(prep.getId());
+			if(prep.getId() != null && prepIdPattern.matcher(prep.getId()).find()) {
+				
+				LIMSSamplePreparation existingPrep = 
+						IDTDataCash.getSamplePrepById(prep.getId());
 				if(existingPrep != null) {
 					prepPanel.setPrepEditable(false);
 					designPanel.setDesignEditable(false);

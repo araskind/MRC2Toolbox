@@ -53,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.McMillanDeltaPercentColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.PieChartFrequencyRenderer;
@@ -86,7 +86,7 @@ public class FeatureDataTable extends BasicFeatureTable {
 				new MsFeatureIdentityComparator(SortProperty.ID));
 
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
-		chmodRenderer = new ChemicalModificationRenderer();
+		chmodRenderer = new AdductRenderer();
 		pieChartFrequencyRenderer = new PieChartFrequencyRenderer();
 
 		//	Renderers

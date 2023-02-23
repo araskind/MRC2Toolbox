@@ -25,6 +25,7 @@ import java.util.EventObject;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataDefinitionStage;
 
 public class SamplePrepEvent extends EventObject {
 
@@ -33,6 +34,7 @@ public class SamplePrepEvent extends EventObject {
 	 */
 	private static final long serialVersionUID = -69865822456165105L;
 	private ParameterSetStatus status;
+	private RDPMetadataDefinitionStage defStage;
 
 	public SamplePrepEvent(LIMSSamplePreparation source) {
 		super(source);
@@ -43,6 +45,15 @@ public class SamplePrepEvent extends EventObject {
 		super(source);
 		this.status = status;
 	}
+	
+	public SamplePrepEvent(
+			LIMSSamplePreparation source, 
+			ParameterSetStatus status, 
+			RDPMetadataDefinitionStage defStage) {
+		super(source);
+		this.status = status;
+		this.defStage = defStage;
+	}
 
 	public LIMSSamplePreparation getSource() {
 		return (LIMSSamplePreparation) this.source;
@@ -50,5 +61,9 @@ public class SamplePrepEvent extends EventObject {
 
 	public ParameterSetStatus getStatus() {
 		return status;
+	}
+
+	public RDPMetadataDefinitionStage getDefStage() {
+		return defStage;
 	}
 }

@@ -31,7 +31,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductExchangeDeltaMassRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 
 public class AdductExchangeTable extends BasicTable {
 
@@ -49,7 +49,7 @@ public class AdductExchangeTable extends BasicTable {
 
 		rowSorter = new TableRowSorter<AdductExchangeTableModel>(model);
 		setRowSorter(rowSorter);
-		setDefaultRenderer(Adduct.class, new ChemicalModificationRenderer());
+		setDefaultRenderer(Adduct.class, new AdductRenderer());
 		setDefaultRenderer(AdductExchange.class, new AdductExchangeDeltaMassRenderer());
 	
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);

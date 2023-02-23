@@ -250,6 +250,23 @@ public class RawDataUtils {
 		if(polarity.equals(Polarity.Negative))
 			return umich.ms.datatypes.scan.props.Polarity.NEGATIVE;
 		
+		if(polarity.equals(Polarity.Neutral))
+			return umich.ms.datatypes.scan.props.Polarity.NEUTRAL;
+		
+		return null;
+	}
+	
+	public static Polarity getPolarityFromScan(umich.ms.datatypes.scan.props.Polarity scanPolarity){
+		
+		if(scanPolarity.equals(umich.ms.datatypes.scan.props.Polarity.POSITIVE))
+			return Polarity.Positive;
+		
+		if(scanPolarity.equals(umich.ms.datatypes.scan.props.Polarity.NEGATIVE))
+			return Polarity.Negative;
+		
+		if(scanPolarity.equals(umich.ms.datatypes.scan.props.Polarity.NEUTRAL))
+			return Polarity.Neutral;
+		
 		return null;
 	}
 	

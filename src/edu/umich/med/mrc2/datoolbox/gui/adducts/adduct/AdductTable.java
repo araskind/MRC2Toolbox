@@ -29,7 +29,7 @@ import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 
 public class AdductTable extends BasicTable {
 
@@ -48,7 +48,7 @@ public class AdductTable extends BasicTable {
 		rowSorter = new TableRowSorter<AdductTableModel>(model);
 		setRowSorter(rowSorter);
 
-		chmodRenderer = new ChemicalModificationRenderer();
+		chmodRenderer = new AdductRenderer();
 		setDefaultRenderer(Adduct.class, chmodRenderer);
 
 		columnModel.getColumnById(AdductTableModel.MASS_CORRECTION_COLUMN)

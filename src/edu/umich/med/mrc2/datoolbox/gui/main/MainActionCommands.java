@@ -24,7 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.main;
 public enum MainActionCommands {
 
 	// Project
-	NEW_METABOLOMICS_EXPERIMENT_COMMAND("Create new metabolomics experiment"),
+	NEW_METABOLOMICS_EXPERIMENT_COMMAND("New metabolomics experiment"),
 	OPEN_METABOLOMICS_EXPERIMENT_COMMAND("Open metabolomics experiment"),
 	SAVE_EXPERIMENT_COMMAND("Save experiment"),
 	SAVE_EXPERIMENT_COPY_COMMAND("Save experiment as ..."),
@@ -812,6 +812,8 @@ public enum MainActionCommands {
 	CLEAR_SAMPLE_PREP_DEFINITION_COMMAND("Clear sample prep definition"),
 	EDIT_SAMPLE_PREP_NAME_COMMAND("Edit sample preparation name"),
 	SAVE_SAMPLE_PREP_NAME_COMMAND("Save sample preparation name"),
+	
+	LOAD_SAMPLES_WITH_PREP_FROM_DATABASE_COMMAND("Load samples with sample prep data"),
 	
 		
 	//	Add processing results

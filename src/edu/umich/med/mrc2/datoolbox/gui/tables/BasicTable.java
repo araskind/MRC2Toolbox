@@ -64,7 +64,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.pref.TableColumnState;
 import edu.umich.med.mrc2.datoolbox.gui.tables.pref.TablePreferencesDialog;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.DateTimeCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
@@ -87,7 +87,7 @@ public class BasicTable extends JTable implements ActionListener{
 	public static final Color WHITE_COLOR = Color.WHITE;
 
 	protected MsFeatureRenderer cfRenderer;
-	protected ChemicalModificationRenderer chmodRenderer;
+	protected AdductRenderer chmodRenderer;
 	protected PercentValueRenderer percentRenderer;
 	protected DateTimeCellRenderer dtRenderer;
 	protected WordWrapCellRenderer longTextRenderer;

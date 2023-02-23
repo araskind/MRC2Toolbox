@@ -89,4 +89,8 @@ public class RDPExperimentDesignPanel extends RDPMetadataWizardPanel implements 
 	public Collection<String> validateInputData() {
 		return validateExperimentDesign();
 	}
+
+	public RDPExperimentDesignEditorPanel getExperimentDesignEditorPanel() {
+		return experimentDesignEditorPanel;
+	}
 }

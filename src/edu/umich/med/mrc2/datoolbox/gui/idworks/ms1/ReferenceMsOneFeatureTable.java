@@ -60,8 +60,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalSampleRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FeatureIdentificationStateRenderer;
@@ -114,14 +114,15 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 		setDefaultRenderer(LIMSExperiment.class, new LIMSExperimentRenderer());
 		setDefaultRenderer(ExperimentalSample.class, new ExperimentalSampleRenderer(SortProperty.ID));
 		setDefaultRenderer(LIMSSampleType.class, new SampleTypeRenderer(SortProperty.Name));
+		setDefaultRenderer(Adduct.class, new AdductRenderer());
 		
 		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.COMPOUND_NAME_COLUMN).
 			setCellRenderer(new WordWrapCellRenderer());
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
 		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.DATABSE_LINK_COLUMN)
 			.setCellRenderer(msfIdRenderer);	// Database ID column
-		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.CHEM_MOD_COLUMN)
-			.setCellRenderer(new ChemicalModificationRenderer()); // Compound form column
+//		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.CHEM_MOD_COLUMN)
+//			.setCellRenderer(new AdductRenderer()); // Compound form column
 		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.RETENTION_COLUMN)
 			.setCellRenderer(rtRenderer); // Retention time
 		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.NEUTRAL_MASS_COLUMN)

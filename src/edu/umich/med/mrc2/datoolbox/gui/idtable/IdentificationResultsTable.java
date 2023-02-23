@@ -48,7 +48,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
@@ -88,7 +88,7 @@ public class IdentificationResultsTable extends BasicTable {
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
 		ppmRenderer = new FormattedDecimalRenderer(new DecimalFormat("###.#"), true);
 		scoreRenderer = new FormattedDecimalRenderer(new DecimalFormat("###.##"), true);
-		chmodRenderer = new ChemicalModificationRenderer();
+		chmodRenderer = new AdductRenderer();
 
 		columnModel.getColumnById(IdentificationResultsTableModel.DEFAULT_ID_COLUMN)
 				.setCellRenderer(new RadioButtonRenderer()); // Primary identification

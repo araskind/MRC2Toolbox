@@ -42,7 +42,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.FeatureSelectionTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 
 public class ClusterFeatureSelectionTable extends FeatureSelectionTable {
 
@@ -69,7 +69,7 @@ public class ClusterFeatureSelectionTable extends FeatureSelectionTable {
 
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-		chmodRenderer = new ChemicalModificationRenderer();
+		chmodRenderer = new AdductRenderer();
 
 		columnModel.getColumnById(ClusterFeatureSelectionTableModel.PRIMARY_COLUMN)
 				.setCellRenderer(radioRenderer); // Primary feature

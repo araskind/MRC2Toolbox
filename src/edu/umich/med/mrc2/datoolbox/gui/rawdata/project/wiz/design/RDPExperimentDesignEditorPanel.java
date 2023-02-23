@@ -24,15 +24,25 @@ package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.design;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.swing.JOptionPane;
 
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
+import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
+import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepEvent;
+import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepListener;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.design.IDTrackerExperimentDesignEditorPanel;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.prep.ExistingPrepSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.StockSampleEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDPMetadataDefinitionStage;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
 public class RDPExperimentDesignEditorPanel extends IDTrackerExperimentDesignEditorPanel {
@@ -43,6 +53,8 @@ public class RDPExperimentDesignEditorPanel extends IDTrackerExperimentDesignEdi
 	private static final long serialVersionUID = 8971145226550968788L;
 	private RDPExperimentDesignEditorToolbar toolbar;
 	private StockSampleEditorDialog stockSampleEditorDialog;
+	private ExistingPrepSelectorDialog existingPrepSelectorDialog;
+	private Set<SamplePrepListener> eventListeners;
 	
 	public RDPExperimentDesignEditorPanel() {
 		super();
@@ -66,6 +78,76 @@ public class RDPExperimentDesignEditorPanel extends IDTrackerExperimentDesignEdi
 		
 		if(command.equals(MainActionCommands.ADD_REFERENCE_SAMPLE_COMMAND.getName()))
 			addStockSample();
+		
+		if(command.equals(MainActionCommands.LOAD_SAMPLES_WITH_PREP_FROM_DATABASE_COMMAND.getName()))
+			selectExistingSamplePrep();
+		
+		if(command.equals(MainActionCommands.LOAD_SAMPLE_PREP_FROM_DATABASE_COMMAND.getName()))
+			loadSelectedSamplePrep();
+	}
+	
+	private void loadSelectedSamplePrep() {
+		
+		LIMSSamplePreparation selectedPrep = 
+				existingPrepSelectorDialog.getSelectedPrep();
+		if(selectedPrep == null)
+			return;
+		
+		fireSamplePrepEvent(selectedPrep, ParameterSetStatus.ADDED);
+		existingPrepSelectorDialog.dispose();
+	}
+	
+	public void addSamplePrepListener(SamplePrepListener listener) {
+
+		if(eventListeners == null)
+			eventListeners = ConcurrentHashMap.newKeySet();
+
+		eventListeners.add(listener);
+	}
+
+	public void removeSamplePrepListener(SamplePrepListener listener) {
+
+		if(eventListeners == null)
+			eventListeners = ConcurrentHashMap.newKeySet();
+
+		eventListeners.remove(listener);
+	}
+	
+	public void fireSamplePrepEvent(LIMSSamplePreparation prep, ParameterSetStatus status) {
+
+		if(eventListeners == null){
+			eventListeners = ConcurrentHashMap.newKeySet();
+			return;
+		}
+		SamplePrepEvent event = new SamplePrepEvent(
+				prep, status, RDPMetadataDefinitionStage.ADD_SAMPLES);
+		eventListeners.stream().forEach(l -> l.samplePrepStatusChanged(event));		
+	}
+
+	private void selectExistingSamplePrep() {
+		
+		if(experiment == null) {
+			MessageDialog.showErrorMsg(
+					"Please complete the experiment definition step first.", this);
+			return;
+		}
+		if(experiment != null && experiment.getId() != null) {
+			MessageDialog.showErrorMsg(
+					"The parent experiment is already in the database\n "
+					+ "and it's design can't be altered through this wizard.", this);
+			return;
+		}
+		
+		int res = MessageDialog.showChoiceWithWarningMsg(
+				"This operation will automatically load experiment design "
+				+ "associated with the selected sample preparation.\nProceed?",
+				this);
+		if(res != JOptionPane.YES_OPTION)
+			return;
+		
+		existingPrepSelectorDialog = new ExistingPrepSelectorDialog(this);
+		existingPrepSelectorDialog.setLocationRelativeTo(this);
+		existingPrepSelectorDialog.setVisible(true);
 	}
 	
 	private void addStockSample() {

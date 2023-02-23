@@ -45,6 +45,7 @@ import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class DataSetStatsPanel extends JPanel implements ActionListener, ItemListener {
@@ -234,6 +235,9 @@ public class DataSetStatsPanel extends JPanel implements ActionListener, ItemLis
 	private void showDataSetInfo() {
 		
 		dataSetNameLabel.setText(activeFeatureCollection.getName());
+		if(activeFeatureCollection.getOwner() == null)
+			activeFeatureCollection.setOwner(MRC2ToolBoxCore.getIdTrackerUser());
+		
 		createdByLabel.setText(activeFeatureCollection.getOwner().getInfo());
 		createdOnLabel.setText(
 				MRC2ToolBoxConfiguration.getDateTimeFormat().format(activeFeatureCollection.getDateCreated()));

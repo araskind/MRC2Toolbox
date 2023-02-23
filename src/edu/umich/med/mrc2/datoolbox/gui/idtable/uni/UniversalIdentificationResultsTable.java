@@ -66,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ChemicalModificationRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ColorCircleFlagRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
@@ -110,7 +110,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		
 		ppmRenderer = new FormattedDecimalRenderer(new DecimalFormat("###.#"), true);
 		scoreRenderer = new FormattedDecimalRenderer(new DecimalFormat("###.##"), true);
-		chmodRenderer = new ChemicalModificationRenderer();
+		chmodRenderer = new AdductRenderer();
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
 		
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN)

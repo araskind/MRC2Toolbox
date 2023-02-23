@@ -53,6 +53,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SampleTypeComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIdentificationState;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.format.AdductFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.AnalysisMethodFormat;
@@ -71,6 +72,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ColorCircleFlagRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
@@ -82,6 +84,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSExperimentRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MSFeatureIdentificationLevelColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MsFeatureInfoBundleRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.PercentValueRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.PolarityRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.SampleTypeRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
@@ -134,7 +137,9 @@ public class MSMSFeatureTable extends BasicTable {
 		setDefaultRenderer(LIMSExperiment.class, new LIMSExperimentRenderer());
 		setDefaultRenderer(ExperimentalSample.class, new ExperimentalSampleRenderer(SortProperty.ID));
 		setDefaultRenderer(LIMSSampleType.class, new SampleTypeRenderer(SortProperty.Name));
-		
+		setDefaultRenderer(Adduct.class, new AdductRenderer());
+		setDefaultRenderer(Polarity.class, new PolarityRenderer());
+						
 		columnModel.getColumnById(MSMSFeatureTableModel.COMPOUND_NAME_COLUMN).
 			setCellRenderer(new WordWrapCellRenderer());	
 
@@ -317,6 +322,7 @@ public class MSMSFeatureTable extends BasicTable {
 				idState, //	AMBIGUITY_COLUMN, Boolean
 				idLevel,
 				adduct,
+				cf.getPolarity(),
 				hasAnnotations,	//	ANNOTATIONS_COLUMN, Boolean
 				hasFollowup,
 				cf.getRetentionTime(),		//	RETENTION_COLUMN	Double
@@ -351,6 +357,7 @@ public class MSMSFeatureTable extends BasicTable {
 	    public TableUpdateTask(BasicTableModel tableModel, List<Object[]> modelData) {
 	        this.tableModel = tableModel;
 	        this.modelData = modelData;
+	        thf.setTable(null);
 	    }
 
 		@Override

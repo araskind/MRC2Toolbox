@@ -31,8 +31,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
-import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -87,12 +85,12 @@ public class IdProjectTreeMouseHandler extends MouseAdapter {
 				MainActionCommands.DELETE_IDTRACKER_PROJECT_COMMAND.getName());
 		deleteProjectMenuItem.setIcon(deleteIcon);
 		
-		projectPopupMenu.addSeparator();
-		
-		addExperimentMenuItem = GuiUtils.addMenuItem(projectPopupMenu,
-				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName(), popupListener,
-				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName());
-		addExperimentMenuItem.setIcon(newCdpIdExperimentIcon);
+//		projectPopupMenu.addSeparator();
+//		
+//		addExperimentMenuItem = GuiUtils.addMenuItem(projectPopupMenu,
+//				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName(), popupListener,
+//				MainActionCommands.NEW_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName());
+//		addExperimentMenuItem.setIcon(newCdpIdExperimentIcon);
 
 		//	Experiment
 		experimentPopupMenu = new JPopupMenu();
@@ -137,10 +135,10 @@ public class IdProjectTreeMouseHandler extends MouseAdapter {
 		acquisitionMethodPopupMenu = new JPopupMenu();
 
 		//	Data acquisition
-		editAcquisitionMethodMenuItem = GuiUtils.addMenuItem(acquisitionMethodPopupMenu,
-				MainActionCommands.EDIT_ACQUISITION_METHOD_DIALOG_COMMAND.getName(), popupListener,
-				MainActionCommands.EDIT_ACQUISITION_METHOD_DIALOG_COMMAND.getName());
-		editAcquisitionMethodMenuItem.setIcon(editIcon);
+//		editAcquisitionMethodMenuItem = GuiUtils.addMenuItem(acquisitionMethodPopupMenu,
+//				MainActionCommands.EDIT_ACQUISITION_METHOD_DIALOG_COMMAND.getName(), popupListener,
+//				MainActionCommands.EDIT_ACQUISITION_METHOD_DIALOG_COMMAND.getName());
+//		editAcquisitionMethodMenuItem.setIcon(editIcon);
 
 //		deleteAcquisitionMethodMenuItem = GuiUtils.addMenuItem(acquisitionMethodPopupMenu,
 //				MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName(), popupListener,
@@ -148,12 +146,12 @@ public class IdProjectTreeMouseHandler extends MouseAdapter {
 //		deleteAcquisitionMethodMenuItem.setIcon(deleteIcon);
 
 		//	Data extraction
-		dataExtractionMethodPopupMenu = new JPopupMenu();
-
-		editDataExtractionMethodMenuItem = GuiUtils.addMenuItem(dataExtractionMethodPopupMenu,
-				MainActionCommands.EDIT_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(), popupListener,
-				MainActionCommands.EDIT_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName());
-		editDataExtractionMethodMenuItem.setIcon(editIcon);
+//		dataExtractionMethodPopupMenu = new JPopupMenu();
+//
+//		editDataExtractionMethodMenuItem = GuiUtils.addMenuItem(dataExtractionMethodPopupMenu,
+//				MainActionCommands.EDIT_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName(), popupListener,
+//				MainActionCommands.EDIT_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName());
+//		editDataExtractionMethodMenuItem.setIcon(editIcon);
 
 //		deleteDataExtractionMethodMenuItem = GuiUtils.addMenuItem(dataExtractionMethodPopupMenu,
 //				MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName(), popupListener,
@@ -198,11 +196,11 @@ public class IdProjectTreeMouseHandler extends MouseAdapter {
 //		if (clickedObject instanceof LIMSSamplePreparation)
 //			samplePrepPopupMenu.show(e.getComponent(), e.getX(), e.getY());
 
-		if (clickedObject instanceof DataAcquisitionMethod)
-			acquisitionMethodPopupMenu.show(e.getComponent(), e.getX(), e.getY());
-
-		if (clickedObject instanceof DataExtractionMethod)
-			dataExtractionMethodPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+//		if (clickedObject instanceof DataAcquisitionMethod)
+//			acquisitionMethodPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+//
+//		if (clickedObject instanceof DataExtractionMethod)
+//			dataExtractionMethodPopupMenu.show(e.getComponent(), e.getX(), e.getY());
 	}
 
 	public void mousePressed(MouseEvent e) {

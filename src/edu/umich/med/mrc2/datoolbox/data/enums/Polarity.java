@@ -25,7 +25,8 @@ public enum Polarity {
 
 	Positive(+1, "P"),
 	Negative(-1, "N"),
-	Neutral(0, "U");
+	Neutral(0, "U"),
+	;
 
 	private final int sign;
 	private final String code;

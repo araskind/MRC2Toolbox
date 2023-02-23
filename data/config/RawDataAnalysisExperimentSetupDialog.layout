@@ -100,6 +100,10 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<leaf id="0" nodeId="1676324651261">
+											<placeholders>
+												<placeholder>dock.single.SelectMS1datafiles</placeholder>
+												<placeholder>dock.single.SelectMSMSdatafiles</placeholder>
+											</placeholders>
 											<placeholder-map>
 												<version>0</version>
 												<format>dock.PlaceholderList</format>
@@ -216,12 +220,52 @@
 				<modes>
 					<dockables>
 						<entry id="single SelectMSMSdatafiles" current="dock.mode.normal">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.SelectMSMSdatafiles</placeholder>
+											<backup-path>
+												<leaf id="1676324651261"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>0</index>
+											<placeholder>dock.single.SelectMSMSdatafiles</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 						<entry id="single SelectMS1datafiles" current="dock.mode.normal">
-							<history/>
-							<properties/>
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.SelectMS1datafiles</placeholder>
+											<backup-path>
+												<leaf id="1676324651261"/>
+											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.SelectMS1datafiles</placeholder>
+										</property>
+									</location>
+								</property>
+							</properties>
 						</entry>
 					</dockables>
 					<modes>

@@ -246,7 +246,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>5</selected>
+										<selected>4</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>

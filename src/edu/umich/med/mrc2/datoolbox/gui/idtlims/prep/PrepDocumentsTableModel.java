@@ -68,13 +68,14 @@ public class PrepDocumentsTableModel extends BasicTableModel {
 			String text = annotation.getText(100);
 			String docFormat = "RTF";
 
-			if(annotation.getLinkedDocumentId() != null)text = annotation.getLinkedDocumentName();
+			if(annotation.getLinkedDocumentId() != null) {
+				text = annotation.getLinkedDocumentName();
 				docFormat = annotation.getLinkedDocumentFormat().name();
-			
+			}			
 			Object[] obj = {
 					annotation,
 					text,
-					//	annotation.g,
+					//
 					docFormat,
 					annotation.getCreateBy(),
 					annotation.getDateCreated()

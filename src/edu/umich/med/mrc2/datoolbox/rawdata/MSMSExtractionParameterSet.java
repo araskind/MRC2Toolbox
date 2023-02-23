@@ -334,9 +334,12 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 			description = "";
 		
 		parametersElement.addContent(       		
-        		new Element(MSMSExtractionParameters.Description.name()).setText(description));					
-		parametersElement.setAttribute(
+        		new Element(MSMSExtractionParameters.Description.name()).setText(description));
+		
+		if(polarity != null)
+			parametersElement.setAttribute(
 					MSMSExtractionParameters.Polarity.name(), polarity.getCode());
+		
 		parametersElement.setAttribute(
 				MSMSExtractionParameters.MinPrecursorIntensity.name(), 
 				Double.toString(minPrecursorIntensity));
@@ -412,7 +415,9 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 //		if(description != null)
 //			chunks.add(description);
 		
-		chunks.add(polarity.getCode());
+		if(polarity != null)
+			chunks.add(polarity.getCode());
+		
 		chunks.add(MsUtils.spectrumMzExportFormat.format(minPrecursorIntensity));
 		if(dataExtractionRtRange != null)
 			chunks.add(dataExtractionRtRange.getStorableString());
@@ -421,8 +426,10 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 		chunks.add(MsUtils.spectrumMzExportFormat.format(msMsCountsCutoff));
 		chunks.add(Integer.toString(maxFragmentsCutoff));
 		chunks.add(filterIntensityMeasure.name());
+		
 		//	chunks.add(MsUtils.spectrumMzExportFormat.format(msmsIsolationWindowLowerBorder));	// ?
 		//	chunks.add(MsUtils.spectrumMzExportFormat.format(msmsIsolationWindowUpperBorder));	// ?
+		
 		chunks.add(MsUtils.spectrumMzExportFormat.format(msmsGroupingRtWindow));
 		chunks.add(MsUtils.spectrumMzExportFormat.format(precursorGroupingMassError));
 		chunks.add(precursorGroupingMassErrorType.name());

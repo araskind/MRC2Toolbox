@@ -240,7 +240,9 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		return initialParameterSet;
 	}
 
-	public void loadParameters(MSMSExtractionParameterSet ps, DataExtractionMethod deMethod2) {
+	public void loadParameters(
+			MSMSExtractionParameterSet ps, 
+			DataExtractionMethod deMethod2) {
 		this.deMethod = deMethod2;
 		initialParameterSet = ps;
 		parametersPanel.loadParameters(ps, deMethod);

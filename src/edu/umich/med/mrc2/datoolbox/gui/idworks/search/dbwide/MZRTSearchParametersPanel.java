@@ -66,7 +66,8 @@ public class MZRTSearchParametersPanel extends TrackerSearchParametersPanel {
 	private JCheckBox chckbxIgnoreMzsearch;
 	private JComboBox msDepthComboBox;	
 	private JFormattedTextField rtFromTextField;
-	private JFormattedTextField rtToTextField;	
+	private JFormattedTextField rtToTextField;
+	private JCheckBox limitPolarityCheckbox;
 
 	public MZRTSearchParametersPanel() {
 		
@@ -142,14 +143,14 @@ public class MZRTSearchParametersPanel extends TrackerSearchParametersPanel {
 		gbc_lblNewLabel_1.gridy = 1;
 		add(fragmentListTextField, gbc_lblNewLabel_1);
 
-		JLabel lblMsType = new JLabel("Polarity");
-		lblMsType.setFont(new Font("Tahoma", Font.BOLD, 12));
-		GridBagConstraints gbc_lblMsType = new GridBagConstraints();
-		gbc_lblMsType.anchor = GridBagConstraints.EAST;
-		gbc_lblMsType.insets = new Insets(0, 0, 5, 5);
-		gbc_lblMsType.gridx = 0;
-		gbc_lblMsType.gridy = 2;
-		add(lblMsType, gbc_lblMsType);
+		limitPolarityCheckbox = new JCheckBox("Limit polarity to");
+		limitPolarityCheckbox.setFont(new Font("Tahoma", Font.BOLD, 12));
+		GridBagConstraints gbc_limitPolarityCheckbox = new GridBagConstraints();
+		gbc_limitPolarityCheckbox.anchor = GridBagConstraints.EAST;
+		gbc_limitPolarityCheckbox.insets = new Insets(0, 0, 5, 5);
+		gbc_limitPolarityCheckbox.gridx = 0;
+		gbc_limitPolarityCheckbox.gridy = 2;
+		add(limitPolarityCheckbox, gbc_limitPolarityCheckbox);
 
 		polarityComboBox = new JComboBox<Polarity>(
 				new DefaultComboBoxModel<Polarity>(
@@ -318,10 +319,18 @@ public class MZRTSearchParametersPanel extends TrackerSearchParametersPanel {
 	}
 
 	public Polarity getPolarity() {
-		return (Polarity) polarityComboBox.getSelectedItem();
+		
+		if(limitPolarityCheckbox.isSelected())
+			return (Polarity) polarityComboBox.getSelectedItem();
+		else
+			return null;
 	}
 	
 	public void setPolarity(Polarity polarity) {
+		
+		if(polarity == null)
+			limitPolarityCheckbox.setSelected(false);
+			
 		polarityComboBox.setSelectedItem(polarity);
 	}
 	
@@ -385,6 +394,7 @@ public class MZRTSearchParametersPanel extends TrackerSearchParametersPanel {
 		massErrorTypeComboBox.setSelectedItem(MassErrorType.ppm);
 		collisionEnergyComboBox.setSelectedIndex(-1);
 		msDepthComboBox.setSelectedItem(MsDepth.MS2);
+		setPolarity(null);
 	}
 	
 	@Override

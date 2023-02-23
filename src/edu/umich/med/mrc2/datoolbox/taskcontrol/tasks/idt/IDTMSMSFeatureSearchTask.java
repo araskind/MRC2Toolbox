@@ -333,15 +333,17 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			"WHERE F.DATA_ANALYSIS_ID = M.DATA_ANALYSIS_ID " +
 			"AND  F2.PARENT_FEATURE_ID = F.FEATURE_ID " +
 			"AND M.INJECTION_ID = I.INJECTION_ID " +
-			"AND A.ACQ_METHOD_ID = I.ACQUISITION_METHOD_ID " +
-			"AND F.POLARITY = ? " +
+			"AND A.ACQ_METHOD_ID = I.ACQUISITION_METHOD_ID " +			
 			"AND I.PREP_ITEM_ID = P.PREP_ITEM_ID " +
 			"AND P.SAMPLE_ID = S.SAMPLE_ID " +
 			"AND S.STOCK_SAMPLE_ID = T.STOCK_SAMPLE_ID " +
 			"AND F.BASE_PEAK IS NOT NULL ";
 		
-		parameterMap.put(paramCount++, new SQLParameter(String.class, polarity.getCode()));
-		
+		if(polarity != null && !polarity.equals(Polarity.Neutral)) {
+			
+			query += "AND F.POLARITY = ? ";
+			parameterMap.put(paramCount++, new SQLParameter(String.class, polarity.getCode()));
+		}
 		if(!ignoreMz && !fragments.isEmpty()) {
 			query += "AND F2.MSMS_FEATURE_ID IN ("
 					+ "SELECT FP.MSMS_FEATURE_ID FROM MSMS_FEATURE_PEAK FP WHERE (";
@@ -489,7 +491,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		}		
 		query += ") AD ORDER BY MZ_OF_INTEREST, RETENTION_TIME";
 		
-		System.out.println(query);
+//		System.out.println(query);
 		
 		PreparedStatement ps = conn.prepareStatement(query,
 		         ResultSet.TYPE_SCROLL_INSENSITIVE ,
@@ -505,10 +507,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			
 			if(entry.getValue().getClazz().equals(Integer.class))
 				ps.setInt(entry.getKey(), (Integer)entry.getValue().getValue());
-		}
-		Adduct defaultAdduct = 
-				AdductManager.getDefaultAdductForPolarity(polarity);
-		
+		}		
 		//	MS1 query 
 		String msOneQuery =
 				"SELECT ADDUCT_ID, COMPOSITE_ADDUCT_ID, MZ, HEIGHT "
@@ -542,7 +541,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					MRC2ToolBoxConfiguration.getRtFormat().format(rt);
 
 			MsFeature f = new MsFeature(id, name, rt);
-			f.setPolarity(polarity);
+			f.setPolarity(Polarity.getPolarityByCode(rs.getString("POLARITY")));
 			f.setAnnotatedObjectType(AnnotatedObjectType.MSMS_FEATURE);
 			
 			//	TODO
@@ -554,7 +553,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			msOneRs = msOnePs.executeQuery();
 			while(msOneRs.next()) {
 				
-				Adduct adduct = defaultAdduct;
+				Adduct adduct = 
+						AdductManager.getDefaultAdductForPolarity(f.getPolarity());;
 				String adductId = msOneRs.getString("ADDUCT_ID");
 				if(adductId == null)
 					adductId = msOneRs.getString("COMPOSITE_ADDUCT_ID");
@@ -565,7 +565,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				if(!adductMap.containsKey(adduct))
 					adductMap.put(adduct, new ArrayList<MsPoint>());
 
-				adductMap.get(adduct).add(new MsPoint(msOneRs.getDouble("MZ"), msOneRs.getDouble("HEIGHT")));
+				adductMap.get(adduct).add(
+						new MsPoint(msOneRs.getDouble("MZ"), msOneRs.getDouble("HEIGHT")));
 			}
 			msOneRs.close();
 			adductMap.entrySet().stream().
