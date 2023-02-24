@@ -102,7 +102,9 @@ public class ProtocolTable extends BasicTable {
 	}
 
 	public void setTableModelFromProtocols(Collection<LIMSProtocol>protocols) {
+		thf.setTable(null);
 		model.setTableModelFromProtocols(protocols);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

@@ -30,7 +30,6 @@ import javax.swing.ListSelectionModel;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RenamableObjectEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalLevelRenderer;
 
@@ -62,7 +61,8 @@ public class LevelsTable extends BasicTable {
 
 		putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tca = new TableColumnAdjuster(this);
+
+		finalizeLayout();
 	}
 
 	public void setTableModelFromFactor(ExperimentDesignFactor factor) {

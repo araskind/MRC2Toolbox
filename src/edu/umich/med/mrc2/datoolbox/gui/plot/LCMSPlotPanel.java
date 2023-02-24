@@ -156,7 +156,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		dataPointsVisible = false;
 		annotationsVisible = true;
 		precursorMarkers = new TreeSet<Double>();
-		setRangeZoomable(false);
+		//setRangeZoomable(false);
 		addDoubleClickReset();
 	}
 
@@ -597,7 +597,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
            // drawMarkerRectangle((Graphics2D) getGraphics(), false);
 		}
 		else 
-			super.mouseReleased(e);		
+			super.mouseReleased(e);	
+		
+		if(plot.getRangeAxis().getRange().getLowerBound() > 0)
+			plot.getRangeAxis().setAutoRange(true);		
 	}
 
 	public void removeMarkers() {
@@ -607,8 +610,21 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		markerStartPoint = null;
 //		markerEndPoint = null;
 		markerRectangle = null;
+		retentionMarker = null;
 		zeroMarkers();
 		repaint();
+	}
+	
+	public void setRetentionMarker(double rt) {
+		
+		if(retentionMarker != null) {
+			retentionMarker.setValue(rt);
+		}
+		else {
+			retentionMarker = new ValueMarker(rt);
+			retentionMarker.setPaint(Color.BLUE);
+			((XYPlot) this.getPlot()).addDomainMarker(retentionMarker);
+		}
 	}
 
 	public void setDefaultMsRenderer(MassSpectrumRenderer defaultMsRenderer) {

@@ -139,7 +139,9 @@ public class LibraryFeatureTable extends BasicTable {
 	    	.map(LibraryMsFeature.class::cast)
 	    	.sorted(new MsFeatureComparator(SortProperty.Name)).collect(Collectors.toList());
 
+		thf.setTable(null);
 		model.setTableModelFromFeatureList(features);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

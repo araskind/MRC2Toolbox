@@ -52,7 +52,8 @@ public class ConcentrationsTable extends BasicTable {
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		TableColumn commentsColumn = columnModel.getColumnById(ConcentrationsTableModel.COMMENTS_COLUMN);
+		TableColumn commentsColumn = 
+				columnModel.getColumnById(ConcentrationsTableModel.COMMENTS_COLUMN);
 		commentsColumn.setCellRenderer(new WordWrapCellRenderer()); 
 		commentsColumn.setMinWidth(200);
 

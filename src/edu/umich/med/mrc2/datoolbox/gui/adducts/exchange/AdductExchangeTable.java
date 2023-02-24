@@ -80,8 +80,9 @@ public class AdductExchangeTable extends BasicTable {
 	}
 
 	public void setTableModelFromAdductExchangeList(Collection<AdductExchange> list) {
-
+		thf.setTable(null);
 		model.setTableModelFromAdductExchangeList(list);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 }

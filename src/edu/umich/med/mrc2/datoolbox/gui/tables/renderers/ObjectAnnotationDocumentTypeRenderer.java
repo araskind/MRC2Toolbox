@@ -32,20 +32,22 @@ import javax.swing.table.DefaultTableCellRenderer;
 import edu.umich.med.mrc2.datoolbox.data.enums.DocumentFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.ObjectAnnotationTable;
+import edu.umich.med.mrc2.datoolbox.gui.idtlims.annotation.AnnotationDocumentDownloader;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class ObjectAnnotationDocumentTypeRenderer extends DefaultTableCellRenderer  implements MouseListener{
+public class ObjectAnnotationDocumentTypeRenderer 
+		extends DefaultTableCellRenderer implements MouseListener{
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -5574529780890867665L;
-	private ObjectAnnotationTable parentTable;
 	private ObjectAnnotation annotation;
+	private JTable table;
 
-	public ObjectAnnotationDocumentTypeRenderer(ObjectAnnotationTable parentTable) {
+	public ObjectAnnotationDocumentTypeRenderer(JTable table) {
 		super();
-		this.parentTable = parentTable;
+		this.table = table;
 	}
 
 	@Override
@@ -69,12 +71,13 @@ public class ObjectAnnotationDocumentTypeRenderer extends DefaultTableCellRender
 
     		annotation = (ObjectAnnotation)value;
     		if(annotation.getLinkedDocumentId() != null) {
-    			Icon downloadIcon = GuiUtils.getDocumentFormatIcon(annotation.getLinkedDocumentFormat(), ObjectAnnotationTable.iconSize);
+    			Icon downloadIcon = GuiUtils.getDocumentFormatIcon(
+    					annotation.getLinkedDocumentFormat(), ObjectAnnotationTable.iconSize);
     			setIcon(downloadIcon);
     			setText(annotation.getLinkedDocumentFormat().name());
     			setToolTipText(
-//    					"Click to view " + 
-    					annotation.getLinkedDocumentName());
+    					"Click to download " + 
+    					annotation.getLinkedDocumentName());  			
     		}
     		else {
     			if(annotation.getRtfDocument() != null) {
@@ -95,8 +98,10 @@ public class ObjectAnnotationDocumentTypeRenderer extends DefaultTableCellRender
 	@Override
 	public void mouseClicked(MouseEvent e) {
 
-		if(annotation.getLinkedDocumentId() != null)
-			parentTable.downloadAnnotationDocument(annotation);
+		if(
+				//	e.getClickCount() == 2 && 
+				annotation.getLinkedDocumentId() != null)
+			AnnotationDocumentDownloader.downloadLinkedDocumentFile(annotation, table);		
 	}
 
 	@Override
@@ -122,4 +127,5 @@ public class ObjectAnnotationDocumentTypeRenderer extends DefaultTableCellRender
 		// TODO Auto-generated method stub
 
 	}
+
 }

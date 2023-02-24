@@ -440,7 +440,10 @@ public class MSMSFeatureTable extends BasicTable {
 	}
 
 	public void updateFeatureData(MSFeatureInfoBundle bundle) {
+		thf.setTable(null);
 		model.updateFeatureData(bundle);
+		thf.setTable(this);
+		adjustVariableColumns();
 	}
 
 	public void selectBundle(MSFeatureInfoBundle toSelect) {

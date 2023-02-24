@@ -70,28 +70,18 @@ public class IDtrackerDataFileSampleMatchTable  extends BasicTable {
 	
 	public void addDataFilesUsingWorklist(File[] inputFiles, Worklist worklist) {
 		
+		thf.setTable(null);
 		model.addDataFilesUsingWorklist(inputFiles, worklist);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 
 	public void setTableModelFromFiles(File[] inputFiles, LIMSExperiment experiment) {
-
+		thf.setTable(null);
 		model.setTableModelFromFiles(inputFiles, experiment);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
-
-//	public DataFile[] getActiveDataFiles() {
-//
-//		ArrayList<DataFile>files = new ArrayList<DataFile>();
-//		int enabledColumn = model.getColumnIndex(IDtrackerDataFileSampleMatchTableModel.ENABLED_COLUMN);
-//		int fileColumn = model.getColumnIndex(IDtrackerDataFileSampleMatchTableModel.DATA_FILE_COLUMN);
-//		for(int i=0; i<model.getRowCount(); i++) {
-//
-//			if((boolean) model.getValueAt(i, enabledColumn))
-//				files.add((DataFile) model.getValueAt(i, fileColumn));
-//		}
-//		return files.toArray(new DataFile[files.size()]);
-//	}
 
 	public Collection<DataFile>getDataFiles(){
 
@@ -109,7 +99,8 @@ public class IDtrackerDataFileSampleMatchTable  extends BasicTable {
 		if(getSelectedRowCount() == 0)
 			return files;
 
-		int dfIndex = model.getColumnIndex(IDtrackerDataFileSampleMatchTableModel.DATA_FILE_COLUMN);
+		int dfIndex = model.getColumnIndex(
+				IDtrackerDataFileSampleMatchTableModel.DATA_FILE_COLUMN);
 		for(int i : getSelectedRows())
 			files.add((DataFile) model.getValueAt(convertRowIndexToModel(i), dfIndex));
 
@@ -118,7 +109,8 @@ public class IDtrackerDataFileSampleMatchTable  extends BasicTable {
 
 	public boolean hasUnmatchedFiles() {
 
-		int dfIndex = model.getColumnIndex(IDtrackerDataFileSampleMatchTableModel.DATA_FILE_COLUMN);
+		int dfIndex = model.getColumnIndex(
+				IDtrackerDataFileSampleMatchTableModel.DATA_FILE_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++) {
 
 			if(((DataFile) model.getValueAt(i, dfIndex)).getParentSample() == null)
@@ -129,24 +121,30 @@ public class IDtrackerDataFileSampleMatchTable  extends BasicTable {
 
 	public void removeSelectedDataFiles() {
 
+		thf.setTable(null);
 		IntStream.of(getSelectedRows())
 	        .boxed().map(i -> convertRowIndexToModel(i))
 	        .sorted(Collections.reverseOrder())
 	        .forEach(((DefaultTableModel)getModel())::removeRow);
+		thf.setTable(this);
 	}
 
 	public Map<DataFile,DataExtractionMethod>getFileDaMethodMap(){
 
-		Map<DataFile,DataExtractionMethod>fileDaMethodMap = new TreeMap<DataFile,DataExtractionMethod>();
-		int dfIndex = getColumnIndex(IDtrackerDataFileSampleMatchTableModel.DATA_FILE_COLUMN);
-		int methodIndex = getColumnIndex(IDtrackerDataFileSampleMatchTableModel.DA_METHOD_COLUMN);
+		Map<DataFile,DataExtractionMethod>fileDaMethodMap = 
+				new TreeMap<DataFile,DataExtractionMethod>();
+		int dfIndex = getColumnIndex(
+				IDtrackerDataFileSampleMatchTableModel.DATA_FILE_COLUMN);
+		int methodIndex = getColumnIndex(
+				IDtrackerDataFileSampleMatchTableModel.DA_METHOD_COLUMN);
 //		int activeIndex = getColumnIndex(IDtrackerDataFileSampleMatchTableModel.ENABLED_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++) {
 
 //			if((boolean)model.getValueAt(i, activeIndex)) {
 
 				DataFile df = (DataFile) model.getValueAt(i, dfIndex);
-				DataExtractionMethod method = (DataExtractionMethod) model.getValueAt(i, methodIndex);
+				DataExtractionMethod method = 
+						(DataExtractionMethod) model.getValueAt(i, methodIndex);
 				if(method != null)
 					fileDaMethodMap.put(df, method);
 //			}
@@ -154,16 +152,21 @@ public class IDtrackerDataFileSampleMatchTable  extends BasicTable {
 		return fileDaMethodMap;
 	}
 
-	public void setDaMethodFoFiles(Collection<DataFile> files, DataExtractionMethod method) {
+	public void setDaMethodFoFiles(
+			Collection<DataFile> files, DataExtractionMethod method) {
 
-		int dfIndex = model.getColumnIndex(IDtrackerDataFileSampleMatchTableModel.DATA_FILE_COLUMN);
-		int methodIndex = model.getColumnIndex(IDtrackerDataFileSampleMatchTableModel.DA_METHOD_COLUMN);
+		thf.setTable(null);
+		int dfIndex = model.getColumnIndex(
+				IDtrackerDataFileSampleMatchTableModel.DATA_FILE_COLUMN);
+		int methodIndex = model.getColumnIndex(
+				IDtrackerDataFileSampleMatchTableModel.DA_METHOD_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++) {
 
 				DataFile df = (DataFile) model.getValueAt(i, dfIndex);
 				if(files.contains(df))
 					model.setValueAt(method, i, methodIndex);
 		}
+		thf.setTable(this);
 	}
 	
 	public boolean hasMissingInjectionData() {

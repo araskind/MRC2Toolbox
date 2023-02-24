@@ -104,6 +104,7 @@ public class InstrumentSequenceTable extends BasicTable {
 			LIMSExperiment experiment,
 			LIMSSamplePreparation activeSamplePrep) {
 
+		thf.setTable(null);
 		Collection<? extends ExperimentalSample>samples = new ArrayList<>();
 		if(experiment != null && experiment.getExperimentDesign() != null) {
 			samples = experiment.getExperimentDesign().getSamples();
@@ -129,6 +130,7 @@ public class InstrumentSequenceTable extends BasicTable {
 				setCellEditor(new StringSelectorEditor(prepItems, this));
 
 		model.setTableModelFromLimsWorklist(wkl);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 	

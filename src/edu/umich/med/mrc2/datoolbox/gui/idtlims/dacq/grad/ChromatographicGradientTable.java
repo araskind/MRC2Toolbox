@@ -66,7 +66,9 @@ public class ChromatographicGradientTable extends BasicTable {
 	}
 
 	public void setTableModelFromGradient(ChromatographicGradient gradient) {
+		thf.setTable(null);
 		model.setTableModelFromGradient(gradient);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 }

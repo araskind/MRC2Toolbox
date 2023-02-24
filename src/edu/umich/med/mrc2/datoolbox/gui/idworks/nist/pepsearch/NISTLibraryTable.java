@@ -31,6 +31,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 
 public class NISTLibraryTable extends BasicTable {
 
@@ -49,14 +51,27 @@ public class NISTLibraryTable extends BasicTable {
 		setRowSorter(rowSorter);
 		getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		getColumn(NISTLibraryTableModel.ACTIVE_COLUMN).setMaxWidth(80);
+		
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		finalizeLayout();
 	}
-
+	
+	public void setModelFromFiles(Map<File, Boolean> libFiles) {
+		thf.setTable(null);
+		model.setModelFromFiles(libFiles);
+		thf.setTable(this);
+	}
+	
 	public void addLibraryFile(File libFile) {
+		thf.setTable(null);
 		model.addLibraryFile(libFile);
+		thf.setTable(this);
 	}
 
 	public void removeLibraryFiles(Collection<File> libFiles) {
+		thf.setTable(null);
 		model.removeLibraryFiles(libFiles);
+		thf.setTable(this);
 	}
 
 	public Collection<File>getLibraryFiles(){
@@ -106,9 +121,7 @@ public class NISTLibraryTable extends BasicTable {
 		return libFiles;
 	}
 
-	public void setModelFromFiles(Map<File, Boolean> libFiles) {
-		model.setModelFromFiles(libFiles);
-	}
+
 }
 
 

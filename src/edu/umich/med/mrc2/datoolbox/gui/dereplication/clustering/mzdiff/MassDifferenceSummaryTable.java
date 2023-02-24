@@ -57,6 +57,9 @@ public class MassDifferenceSummaryTable extends BasicTable{
 	}
 
 	public void setModelFromBins(Collection<DoubleValueBin>bins) {
+		thf.setTable(null);
 		model.setModelFromBins(bins);
+		thf.setTable(this);
+		tca.adjustColumns();
 	}
 }

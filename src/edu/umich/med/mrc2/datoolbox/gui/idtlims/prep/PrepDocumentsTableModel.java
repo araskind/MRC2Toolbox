@@ -40,8 +40,7 @@ public class PrepDocumentsTableModel extends BasicTableModel {
 	
 	public static final String ANNOTATION_ID_COLUMN = "ID";
 	public static final String DOCUMENT_DESCRIPTION_COLUMN = "Description";
-	public static final String DOCUMENT_COLUMN = "Document";
-	public static final String DOCUMENT_FORMAT_COLUMN = "Document type";
+	public static final String FILE_DOWNLOAD_COLUMN = "Format";
 	public static final String ADDED_BY_COLUMN = "Added by";
 	public static final String ADDED_ON_COLUMN = "Added on";
 
@@ -52,10 +51,9 @@ public class PrepDocumentsTableModel extends BasicTableModel {
 
 			new ColumnContext(ANNOTATION_ID_COLUMN, ObjectAnnotation.class, false),
 			new ColumnContext(DOCUMENT_DESCRIPTION_COLUMN, String.class, false),
-			//	new ColumnContext(DOCUMENT_COLUMN, String.class, false),
-			new ColumnContext(DOCUMENT_FORMAT_COLUMN, String.class, false),
 			new ColumnContext(ADDED_BY_COLUMN, LIMSUser.class, false),
 			new ColumnContext(ADDED_ON_COLUMN, Date.class, false),
+			new ColumnContext(FILE_DOWNLOAD_COLUMN, ObjectAnnotation.class, false),
 		};
 	}
 
@@ -66,19 +64,15 @@ public class PrepDocumentsTableModel extends BasicTableModel {
 		for(ObjectAnnotation annotation : annotations) {
 			
 			String text = annotation.getText(100);
-			String docFormat = "RTF";
-
-			if(annotation.getLinkedDocumentId() != null) {
+			if(annotation.getLinkedDocumentId() != null)
 				text = annotation.getLinkedDocumentName();
-				docFormat = annotation.getLinkedDocumentFormat().name();
-			}			
+						
 			Object[] obj = {
 					annotation,
 					text,
-					//
-					docFormat,
 					annotation.getCreateBy(),
-					annotation.getDateCreated()
+					annotation.getDateCreated(),
+					annotation
 			};
 			super.addRow(obj);
 		}

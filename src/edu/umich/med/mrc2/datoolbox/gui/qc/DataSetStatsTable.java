@@ -88,8 +88,9 @@ public class DataSetStatsTable extends BasicTable {
 	}
 
 	public void setTableModelFromStatsList(Collection<DataFileStatisticalSummary> statsList) {
-
+		thf.setTable(null);
 		model.setTableModelFromDataSetStats(statsList);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 }

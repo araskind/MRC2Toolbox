@@ -86,14 +86,19 @@ public class FeatureIntensitiesTable extends BasicTable {
 	public void setTableModelFromFeatureAndPipeline(
 				MsFeature feature, DataPipeline dataPipeline) {
 
+		thf.setTable(null);
 		model.setTableModelFromFeatureAndPipeline(feature, dataPipeline);
-		sortByFeatureAndSample();
+		thf.setTable(this);
+		sortByFeatureAndSample();		
 		tca.adjustColumns();
 	}
 
 	public void setTableModelFromFeatureMap(
 			Map<DataPipeline, Collection<MsFeature>> selectedFeaturesMap) {
+		thf.setTable(null);
 		model.setTableModelFromFeatureMap(selectedFeaturesMap);
+		thf.setTable(this);
+		tca.adjustColumns();
 	}
 
 	public void sortByFeatureAndSample() {

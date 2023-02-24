@@ -72,8 +72,9 @@ public class IdExperimentSampleTable extends BasicTable {
 	}
 
 	public void setTableModelFromSamples(Collection<IDTExperimentalSample>samples) {
-
+		thf.setTable(null);
 		model.setTableModelFromSamples(samples);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

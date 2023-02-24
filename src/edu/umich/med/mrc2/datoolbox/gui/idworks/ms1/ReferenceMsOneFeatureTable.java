@@ -248,7 +248,10 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 	}
 
 	public void updateFeatureData(MSFeatureInfoBundle selectedBundle) {
+		thf.setTable(null);
 		model.updateFeatureData(selectedBundle);
+		thf.setTable(this);
+		adjustVariableColumns();
 	}
 
 	public void selectBundle(MSFeatureInfoBundle toSelect) {

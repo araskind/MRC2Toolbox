@@ -113,9 +113,10 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 			Collection<MSMSClusterDataSet> msmsClusterDataSetCollections) {
 		
 		thf.setTable(null);
-		model.setTableModelFromMSMSClusterDataSetList(msmsClusterDataSetCollections);	
+		model.setTableModelFromMSMSClusterDataSetList(msmsClusterDataSetCollections);
+		thf.setTable(this);	
 		adjustColumnWidth();
-		thf.setTable(this);
+		
 	}
 	
 	private void adjustColumnWidth() {
@@ -152,7 +153,10 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 	}
 	
 	public void updateMSMSClusterDataSetData(MSMSClusterDataSet edited) {
+		thf.setTable(null);
 		model.updateMSMSClusterDataSetData(edited);
+		thf.setTable(this);
+		adjustColumnWidth();
 	}
 }
 

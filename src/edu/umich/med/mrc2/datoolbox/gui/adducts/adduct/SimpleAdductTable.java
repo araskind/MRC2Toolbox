@@ -78,7 +78,9 @@ public class SimpleAdductTable extends BasicTable {
 	}
 	
 	public void setTableModelFromAdductList(Collection<Adduct> adducts) {
+		thf.setTable(null);
 		model.setTableModelFromAdductList(adducts);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 	

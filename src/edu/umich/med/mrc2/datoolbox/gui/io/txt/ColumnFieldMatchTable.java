@@ -69,21 +69,24 @@ public class ColumnFieldMatchTable extends BasicTable {
 
 	public void setTableModelFromFiles(File[] inputFiles, DataAcquisitionMethod acquisitionMethod) {
 
+		thf.setTable(null);
 		model.setTableModelFromFiles(inputFiles, acquisitionMethod);
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(
 						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples(), this));
-
+		thf.setTable(this);
 		tca.adjustColumns();
 		//columnModel.getColumnById(DataFileSampleMatchTableModel.ENABLED_COLUMN).setWidth(50);
 	}
 
 	public void setTableModelFromFiles(File[] inputFiles, Collection<ExperimentalSample>samples) {
 
+		thf.setTable(null);	
 		model.setTableModelFromFiles(inputFiles, null);
 		setDefaultEditor(ExperimentalSample.class,
 			new ExperimentalSampleSelectorEditor(samples, this));
 
+		thf.setTable(this);
 		tca.adjustColumns();
 		//columnModel.getColumnById(DataFileSampleMatchTableModel.ENABLED_COLUMN).setWidth(50);
 	}
@@ -137,10 +140,12 @@ public class ColumnFieldMatchTable extends BasicTable {
 
 	public void removeSelectedDataFiles() {
 
+		thf.setTable(null);
 		IntStream.of(getSelectedRows())
 	        .boxed().map(i -> convertRowIndexToModel(i))
 	        .sorted(Collections.reverseOrder())
 	        .forEach(((DefaultTableModel)getModel())::removeRow);
+		thf.setTable(this);
 	}
 
 	public void updateSampleAssignmentForDataFiles(Collection<DataFile> selectedDataFiles, ExperimentalSample sample) {

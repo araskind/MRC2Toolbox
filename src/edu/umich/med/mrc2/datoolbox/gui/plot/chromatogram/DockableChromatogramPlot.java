@@ -104,6 +104,10 @@ public class DockableChromatogramPlot extends DefaultSingleCDockable implements 
 		chromatogramPlot.showMsFeatureChromatogramBundles(xicBundles, markers,
 				chromatogramToolbar.getChromatogramRenderingType());
 	}
+	
+	public void setRetentionMarker(double rt) {
+		chromatogramPlot.setRetentionMarker(rt);
+	}
 }
 
 

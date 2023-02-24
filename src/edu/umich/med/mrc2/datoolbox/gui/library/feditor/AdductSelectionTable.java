@@ -60,8 +60,11 @@ public class AdductSelectionTable extends BasicTable {
 
 	public void loadFeatureData(LibraryMsFeature feature, Polarity polarity) {
 
-		Collection<Adduct> adducts = AdductManager.getAdductsForPolarity(polarity);
+		Collection<Adduct> adducts = 
+				AdductManager.getAdductsForPolarity(polarity);
+		thf.setTable(null);
 		model.setTableModelFromAdductListAndFeature(adducts, feature);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

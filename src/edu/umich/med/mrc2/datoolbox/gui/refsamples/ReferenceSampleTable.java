@@ -56,7 +56,9 @@ public class ReferenceSampleTable extends BasicTable {
 	}
 
 	public void loadReferenceSamples() {
+		thf.setTable(null);
 		model.loadReferenceSamples();
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

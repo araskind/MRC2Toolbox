@@ -229,10 +229,12 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 	@Override
 	public synchronized void clearTable() {
 
+		thf.setTable(null);
 		removeModelListeners();
 		super.clearTable();		
 		parentFeature = null;
 		addModelListeners();
+		thf.setTable(this);
 	}
 
 	public void setModelFromMsFeature(
@@ -275,6 +277,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 			Collection<CompoundIdSource> sorcesToExclude, 
 			boolean showUniqueIdsOnly) {
 		
+		thf.setTable(null);
 		MsFeatureIdentity selectedId = this.getSelectedIdentity();
 		
 		Collection<MsFeatureIdentity> idList = feature.getIdentifications();
@@ -290,6 +293,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		parentFeature = feature;
 		model.setParentFeature(parentFeature);
 		model.setModelFromIdList(idList, parentFeature.getPrimaryIdentity());
+		thf.setTable(this);
 		adjustVarWidthColumns();
 		if(idList.contains(selectedId))
 			selectIdentity(selectedId);
@@ -388,39 +392,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
 			//	GuiUtils.addMenuItem(idLevelMenu, level.getName(), listener, level.getName(), levelIcon);
 		}
-	}
-	
-	/**
-
-
-    setLayout( new BorderLayout() );
-
-    display = new JTextField();
-    display.setEditable( false );
-    display.setHorizontalAlignment(JTextField.RIGHT);
-    add(display, BorderLayout.NORTH);
-
-    JPanel buttonPanel = new JPanel();
-    buttonPanel.setLayout( new GridLayout(0, 5) );
-    add(buttonPanel, BorderLayout.CENTER);
-
-    for (int i = 0; i < 10; i++)
-    {
-        String text = String.valueOf(i);
-        JButton button = new JButton( text );
-        button.addActionListener( numberAction );
-        button.setBorder( new LineBorder(Color.BLACK) );
-        button.setPreferredSize( new Dimension(30, 30) );
-        buttonPanel.add( button );
-
-        InputMap inputMap = buttonPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        inputMap.put(KeyStroke.getKeyStroke(text), text);
-        inputMap.put(KeyStroke.getKeyStroke("NUMPAD" + text), text);
-        buttonPanel.getActionMap().put(text, numberAction);
-    }
-}
-*/
-	
+	}	
 }
 
 

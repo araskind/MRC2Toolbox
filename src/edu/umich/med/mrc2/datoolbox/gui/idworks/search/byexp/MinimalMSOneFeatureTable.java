@@ -52,7 +52,9 @@ public class MinimalMSOneFeatureTable extends BasicTable {
 	}
 	
 	public void setTableModelFromFeatureCollection(Collection<MinimalMSOneFeature>features) {
+		thf.setTable(null);
 		model.setTableModelFromFeatureCollection(features);
+		thf.setTable(this);
 	}
 	
 	public Collection<MinimalMSOneFeature>getSelectedFeatures(){

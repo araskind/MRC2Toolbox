@@ -90,7 +90,10 @@ public class UserTable extends BasicTable {
 	}
 
 	public void setTableModelFromUserList(Collection<LIMSUser> users) {
+		thf.setTable(null);
 		model.setTableModelFromUserList(users);
+		thf.setTable(this);
+		tca.adjustColumns();
 	}
 
 	public LIMSUser getSelectedUser() {

@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ObjectAnnotationDocumentTypeRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ObjectAnnotationRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
@@ -45,6 +46,8 @@ public class PrepDocumentsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -6975693354223437089L;
+	
+	public static final int iconSize = 24;
 	private PrepDocumentsTableModel model;
 	private LIMSUserRenderer userRenderer;
 	private MouseMotionAdapter mma;
@@ -60,7 +63,13 @@ public class PrepDocumentsTable extends BasicTable {
 
 		columnModel.getColumnById(PrepDocumentsTableModel.DOCUMENT_DESCRIPTION_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
-		setDefaultRenderer(ObjectAnnotation.class, new ObjectAnnotationRenderer(SortProperty.ID, -1));
+		columnModel.getColumnById(PrepDocumentsTableModel.ANNOTATION_ID_COLUMN)
+			.setCellRenderer(new ObjectAnnotationRenderer(SortProperty.ID, -1));
+		
+		ObjectAnnotationDocumentTypeRenderer annotationRenderer = 
+				new ObjectAnnotationDocumentTypeRenderer(this);
+		columnModel.getColumnById(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN)
+			.setCellRenderer(annotationRenderer);
 
 		userRenderer = new LIMSUserRenderer();
 		setDefaultRenderer(LIMSUser.class, userRenderer);
@@ -73,6 +82,9 @@ public class PrepDocumentsTable extends BasicTable {
 				if(columnModel.isColumnVisible(columnModel.getColumnById(PrepDocumentsTableModel.ADDED_BY_COLUMN)) &&
 					columnAtPoint(p) == columnModel.getColumnIndex(PrepDocumentsTableModel.ADDED_BY_COLUMN))
 					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				else if(columnModel.isColumnVisible(columnModel.getColumnById(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN)) &&
+						columnAtPoint(p) == columnModel.getColumnIndex(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN))
+						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				else
 					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			}
@@ -80,12 +92,15 @@ public class PrepDocumentsTable extends BasicTable {
 		addMouseMotionListener(mma);
 		addMouseListener(userRenderer);
 		addMouseMotionListener(userRenderer);
+		addMouseListener(annotationRenderer);		
 		finalizeLayout();
 	}
 
 	public void setModelFromAnnotations(Collection<ObjectAnnotation>annotations) {
 		model.setModelFromAnnotations(annotations);
-		tca.adjustColumns();
+		getColumnModel().getColumn(
+				model.getColumnIndex(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN)).setWidth(iconSize * 2);
+		tca.adjustColumn(getColumnIndex(PrepDocumentsTableModel.DOCUMENT_DESCRIPTION_COLUMN));
 	}
 
 	public Collection<ObjectAnnotation>getSelectedAnnotations() {

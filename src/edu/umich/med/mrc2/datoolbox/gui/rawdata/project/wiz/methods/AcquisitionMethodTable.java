@@ -36,6 +36,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FileBaseNameRenderer;
 
@@ -65,6 +67,9 @@ public class AcquisitionMethodTable extends BasicTable {
 		
 		columnModel.getColumnById(AcquisitionMethodTableModel.METHOD_ID_COLUMN).
 				setPreferredWidth(80);
+		
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		finalizeLayout();
 	}
 
 	public void setTableModelFromAcquisitionMethodsNames(Collection<String> methodNames) {
@@ -77,12 +82,18 @@ public class AcquisitionMethodTable extends BasicTable {
 			
 			methodFilesMap.put(methodName, existingMethod);
 		}	
+		thf.setTable(null);
 		model.setTableModelFromMethods(methodFilesMap);
+		thf.setTable(this);
+		tca.adjustColumns();
 	}
 	
 	public void setTableModelFromAcquisitionMethodsCollection(
 			Collection<? extends AnalysisMethod> methods) {
+		thf.setTable(null);
 		model.setTableModelFromMethodCollection(methods);
+		thf.setTable(this);
+		tca.adjustColumns();
 	}
 
 	public void setTableModelFromDataAnalysisMethods(
@@ -91,8 +102,11 @@ public class AcquisitionMethodTable extends BasicTable {
 		Map<String,AnalysisMethod>methodFilesMap = new TreeMap<String,AnalysisMethod>();
 		for(DataExtractionMethod mf : dataExtractionMethods)
 			methodFilesMap.put(mf.getName(), mf);
-			
+		
+		thf.setTable(null);
 		model.setTableModelFromMethods(methodFilesMap);
+		thf.setTable(this);
+		tca.adjustColumns();
 	}
 	
 	public AnalysisMethod getSelectedAnalysisMethod() {
@@ -179,7 +193,11 @@ public class AcquisitionMethodTable extends BasicTable {
 	}
 
 	public void addMethods(Collection<DataAcquisitionMethod> toAdd) {
+		
+		thf.setTable(null);
 		model.addMethods(toAdd);
+		thf.setTable(this);
+		tca.adjustColumns();
 	}
 }
 

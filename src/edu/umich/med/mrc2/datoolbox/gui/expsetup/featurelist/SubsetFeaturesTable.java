@@ -69,13 +69,16 @@ public class SubsetFeaturesTable extends BasicTable {
 
 	public void setTableModelFromFeatureSet(MsFeatureSet featureSet) {
 
+		thf.setTable(null);
 		model.setTableModelFromFeatureSet(featureSet);
+		thf.setTable(this);
 		tca.adjustColumnsExcluding(Collections.singleton(
 				columnModel.getColumnIndex(SubsetFeaturesTableModel.ORDER_COLUMN)));
 	}
 	
 	public void addFeatures(Collection<MsFeature> features) {
 		
+		thf.setTable(null);
 		Collection<MsFeature> current = getFeatures();
 		Collection<MsFeature>toAdd = features.stream().
 				filter(f -> !current.contains(f)).collect(Collectors.toSet());
@@ -85,12 +88,15 @@ public class SubsetFeaturesTable extends BasicTable {
 		current.addAll(toAdd);
 		
 		model.setTableModelFromFeatures(current);
+		thf.setTable(this);
 		tca.adjustColumnsExcluding(Collections.singleton(
 				columnModel.getColumnIndex(SubsetFeaturesTableModel.ORDER_COLUMN)));
 	}
 	
 	public void setTableModelFromFeatures(Collection<MsFeature> features) {
+		thf.setTable(null);
 		model.setTableModelFromFeatures(features);
+		thf.setTable(this);
 		tca.adjustColumnsExcluding(Collections.singleton(
 				columnModel.getColumnIndex(SubsetFeaturesTableModel.ORDER_COLUMN)));
 	}

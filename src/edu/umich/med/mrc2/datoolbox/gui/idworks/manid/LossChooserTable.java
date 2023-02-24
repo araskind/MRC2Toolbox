@@ -61,7 +61,7 @@ public class LossChooserTable extends BasicTable {
 
 	public void loadAdductsForPolarityAndFeature(Polarity polarity, MsFeature feature) {
 
-
+		thf.setTable(null);
 		model.setTableModelFromLossList(AdductManager.getNeutralLosses());		
 		if(feature != null) {
 			
@@ -80,6 +80,7 @@ public class LossChooserTable extends BasicTable {
 				}
 			}
 		}
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

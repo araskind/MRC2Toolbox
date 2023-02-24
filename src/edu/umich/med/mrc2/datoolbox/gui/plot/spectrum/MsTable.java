@@ -31,6 +31,8 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -56,8 +58,9 @@ public class MsTable extends BasicTable {
 		columnModel.getColumnById(MsTableModel.MZ_COLUMN)
 			.setCellRenderer(mzRenderer);
 		columnModel.getColumnById(MsTableModel.INTENSITY_COLUMN)
-			.setCellRenderer(new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getSpectrumIntensityFormat()));
-
+			.setCellRenderer(new FormattedDecimalRenderer(
+					MRC2ToolBoxConfiguration.getSpectrumIntensityFormat()));
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
 
@@ -65,9 +68,10 @@ public class MsTable extends BasicTable {
 
 		ArrayList<MsFeature> featureList = new ArrayList<MsFeature>();
 		featureList.add(feature);
-
+		thf.setTable(null);
 		model.setTableModelFromFeatureList(featureList, scaleMs);
 		sortByMz();
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

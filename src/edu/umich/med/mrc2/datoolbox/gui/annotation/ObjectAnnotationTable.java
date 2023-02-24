@@ -27,7 +27,6 @@ import edu.umich.med.mrc2.datoolbox.data.AnnotatedObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ObjectAnnotationDocumentTypeRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ObjectAnnotationTextPreviewRenderer;
 
@@ -57,8 +56,7 @@ public class ObjectAnnotationTable extends BasicTable {
 				.setCellRenderer(new ObjectAnnotationDocumentTypeRenderer(this));
 
 		currentObject = null;
-		tca = new TableColumnAdjuster(this);
-		tca.adjustColumns();
+		finalizeLayout();
 	}
 
 	public AnnotatedObject getCurrentFeature() {
@@ -77,10 +75,6 @@ public class ObjectAnnotationTable extends BasicTable {
 	}
 
 	public void previewAnnotationDocument(ObjectAnnotation annotation) {
-		//	TODO
-	}
-
-	public void downloadAnnotationDocument(ObjectAnnotation annotation) {
 		//	TODO
 	}
 }

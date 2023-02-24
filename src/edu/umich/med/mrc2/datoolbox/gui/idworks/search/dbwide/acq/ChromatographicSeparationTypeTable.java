@@ -50,8 +50,6 @@ public class ChromatographicSeparationTypeTable extends BasicTable {
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(ChromatographicSeparationTypeTableModel.ID_COLUMN),
 				new ChromatographicSeparationTypeComparator(SortProperty.ID));
-
-		
 		columnModel.getColumnById(ChromatographicSeparationTypeTableModel.ID_COLUMN)
 				.setCellRenderer(new ChromatographicSeparationTypeRenderer(SortProperty.ID));
 		

@@ -62,7 +62,9 @@ public class BinnerAnnotationsTable extends BasicTable {
 	}
 
 	public void setTableModelFromBinnerAdducttList(Collection<BinnerAdduct> collection) {
+		thf.setTable(null);
 		model.setTableModelFromBinnerAdductList(collection);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 	

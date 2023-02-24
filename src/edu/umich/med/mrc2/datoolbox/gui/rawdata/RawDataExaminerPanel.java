@@ -1598,6 +1598,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			xicSetupPanel.selectFiles(Collections.singleton(df));
 			msExtractorPanel.selectFiles(Collections.singleton(df));
 		}
+		chromatogramPanel.setRetentionMarker(s.getRt());
 	}
 	
 	public IScan getParentScan(IScan s) {

@@ -105,7 +105,9 @@ public class ReferenceMSOneSummaryTable extends BasicTable {
 	}
 
 	public void setTableModelFromSummaryCollection(Collection<IDTMsSummary>dataSummaries) {
+		thf.setTable(null);
 		model.setTableModelFromSummaryCollection(dataSummaries);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 }

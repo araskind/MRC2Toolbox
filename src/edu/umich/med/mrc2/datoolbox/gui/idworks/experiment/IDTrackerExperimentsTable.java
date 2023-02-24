@@ -109,7 +109,9 @@ public class IDTrackerExperimentsTable extends BasicTable {
 	}
 
 	public void setModelFromExperimentCollection(Collection<LIMSExperiment>experimentCollection) {
+		thf.setTable(null);
 		model.setModelFromExperimentCollection(experimentCollection);
+		thf.setTable(this);
 		rowSorter.sort();
 		tca.adjustColumns();
 	}

@@ -71,7 +71,9 @@ public class PrepSampleTable extends BasicTable {
 	}
 
 	public void setTableModelFromSamples(Collection<? extends ExperimentalSample>samples) {
+		thf.setTable(null);
 		model.setTableModelFromSamples(samples);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

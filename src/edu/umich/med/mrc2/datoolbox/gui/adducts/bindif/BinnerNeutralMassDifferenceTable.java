@@ -62,7 +62,8 @@ public class BinnerNeutralMassDifferenceTable extends BasicTable {
 		int column = model.getColumnIndex(BinnerNeutralMassDifferenceTableModel.NAME_COLUMN);
 		for(int i=0; i<getRowCount(); i++) {
 			
-			if(((BinnerNeutralMassDifference)model.getValueAt(convertRowIndexToModel(i), column)).equals(toSelect)) {
+			if(((BinnerNeutralMassDifference)model.getValueAt(
+					convertRowIndexToModel(i), column)).equals(toSelect)) {
 				setRowSelectionInterval(i, i);
 				scrollToSelected();
 				return;
@@ -80,9 +81,11 @@ public class BinnerNeutralMassDifferenceTable extends BasicTable {
 				model.getColumnIndex(BinnerNeutralMassDifferenceTableModel.NAME_COLUMN));
 	}
 
-	public void setTableModelFromBinnerNeutralMassDifferenceList(Collection<BinnerNeutralMassDifference> list) {
-
+	public void setTableModelFromBinnerNeutralMassDifferenceList(
+			Collection<BinnerNeutralMassDifference> list) {
+		thf.setTable(null);
 		model.setTableModelFromBinnerNeutralMassDifferenceList(list);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 }

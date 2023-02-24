@@ -51,9 +51,11 @@ public class ChromatographicColumnTable extends BasicTable {
 		setRowSorter(rowSorter);
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		setDefaultRenderer(LIMSChromatographicColumn.class, new ChromatographicColumnRenderer());
+		setDefaultRenderer(LIMSChromatographicColumn.class, 
+				new ChromatographicColumnRenderer());
 
-		rowSorter.setComparator(model.getColumnIndex(ChromatographicColumnTableModel.CHROM_COLUMN_COLUMN),
+		rowSorter.setComparator(
+				model.getColumnIndex(ChromatographicColumnTableModel.CHROM_COLUMN_COLUMN),
 				new ChromatographicColumnComparator(SortProperty.Name));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
@@ -66,7 +68,9 @@ public class ChromatographicColumnTable extends BasicTable {
 	}
 
 	public void setTableModelFromColumns(Collection<LIMSChromatographicColumn>columns) {
+		thf.setTable(null);
 		model.setTableModelFromColumns(columns);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

@@ -125,7 +125,7 @@ public class SamplePrepEditorPanel extends JPanel
 	private JButton editSaveNameButton;
 	
 	private static final Pattern prepIdPattern = 
-			Pattern.compile(DataPrefix.SAMPLE_PREPARATION.name() +  "\\d4");
+			Pattern.compile(DataPrefix.SAMPLE_PREPARATION.getName() +  "\\d{4}");
 	
 	/**
 	 * This constructor is for the creation of the new sample preparation;

@@ -72,12 +72,13 @@ public class ExtendedDataFileSampleMatchTable extends BasicTable {
 			String[] dataFileNames,
 			DataAcquisitionMethod acquisitionMethod) {
 
+		thf.setTable(null);
 		model.setTableModelFromReportData(
 			sampleIds, sampleNames, dataFileNames, acquisitionMethod);
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(
 						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples(), this));
-
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 
@@ -130,13 +131,17 @@ public class ExtendedDataFileSampleMatchTable extends BasicTable {
 
 	public void removeSelectedDataFiles() {
 
+		thf.setTable(null);
 		IntStream.of(getSelectedRows())
 	        .boxed().map(i -> convertRowIndexToModel(i))
 	        .sorted(Collections.reverseOrder())
 	        .forEach(((DefaultTableModel)getModel())::removeRow);
+		
+		thf.setTable(this);
 	}
 
-	public void updateSampleAssignmentForDataFiles(Collection<DataFile> selectedDataFiles, ExperimentalSample sample) {
+	public void updateSampleAssignmentForDataFiles(
+			Collection<DataFile> selectedDataFiles, ExperimentalSample sample) {
 
 		int dfIndex = model.getColumnIndex(ExtendedDataFileSampleMatchTableModel.DATA_FILE_COLUMN);
 		int sampleIndex = model.getColumnIndex(ExtendedDataFileSampleMatchTableModel.SAMPLE_ID_COLUMN);

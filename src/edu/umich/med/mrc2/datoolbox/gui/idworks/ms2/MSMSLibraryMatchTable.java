@@ -186,6 +186,8 @@ public class MSMSLibraryMatchTable extends BasicTable {
 	@Override
 	public synchronized void clearTable() {
 
+		thf.setTable(null);
+		
 		if(msmsMatchModelListener != null)
 			model.removeTableModelListener(msmsMatchModelListener);
 		
@@ -195,6 +197,7 @@ public class MSMSLibraryMatchTable extends BasicTable {
 			model.addTableModelListener(msmsMatchModelListener);
 		
 		selectedMsMsFeatureBundle = null;
+		thf.setTable(this);
 	}
 
 	/**

@@ -36,6 +36,6 @@ public class PrepItemsTable extends BasicTable {
 		model =  new PrepItemsTableModel();
 		setModel(model);
 
-
+		finalizeLayout();
 	}
 }

@@ -62,6 +62,7 @@ public class AdductChooserTable extends BasicTable {
 
 	public void loadAdductsForFeature(MsFeature feature) {
 
+		thf.setTable(null);
 		clearTable();
 		if(feature == null)
 			return;
@@ -91,6 +92,7 @@ public class AdductChooserTable extends BasicTable {
 				break;
 			}
 		}
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 	

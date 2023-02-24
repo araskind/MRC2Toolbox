@@ -35,7 +35,6 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.ExperimentalSampleSelectorEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
@@ -78,10 +77,10 @@ public class AssayDesignTable extends BasicTable {
 				new ExperimentalLevelRenderer());
 		
 		addColumnSelectorPopup();
-		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		tca = new TableColumnAdjuster(this);
+		//	finalizeLayout();
 		fixedWidthColumns.add(0);
 		fixedWidthColumns.add(1);
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 	}
 
 	public void setTableModelFromExperimentDesign(

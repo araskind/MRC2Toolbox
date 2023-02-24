@@ -73,7 +73,9 @@ public class CompositeAdductComponentsTable extends BasicTable {
 	}
 
 	public void setTableModelFromCompositAdduct(CompositeAdduct composite) {
+		thf.setTable(null);
 		model.setTableModelFromCompositeAdduct(composite);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 	

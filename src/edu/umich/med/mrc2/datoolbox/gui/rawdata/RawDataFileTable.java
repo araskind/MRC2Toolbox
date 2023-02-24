@@ -56,13 +56,16 @@ public class RawDataFileTable extends BasicTable {
 		
 		rowSorter = new TableRowSorter<RawDataFileTableModel>(model);
 		setRowSorter(rowSorter);
-		rowSorter.setComparator(model.getColumnIndex(ReferenceMsOneFeatureTableModel.ACQ_METHOD_ID_COLUMN),
+		rowSorter.setComparator(model.getColumnIndex(
+				ReferenceMsOneFeatureTableModel.ACQ_METHOD_ID_COLUMN),
 				new AnalysisMethodComparator(SortProperty.Name));
 
 		setDefaultRenderer(DataAcquisitionMethod.class, new AnalysisMethodRenderer());
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		thf.getParserModel().setComparator(DataAcquisitionMethod.class, new AnalysisMethodComparator(SortProperty.ID));
-		thf.getParserModel().setFormat(DataAcquisitionMethod.class, new AnalysisMethodFormat(SortProperty.ID));
+		thf.getParserModel().setComparator(DataAcquisitionMethod.class, 
+				new AnalysisMethodComparator(SortProperty.ID));
+		thf.getParserModel().setFormat(DataAcquisitionMethod.class, 
+				new AnalysisMethodFormat(SortProperty.ID));
 		finalizeLayout();
 	}
 

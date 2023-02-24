@@ -61,7 +61,9 @@ public class AdductTable extends BasicTable {
 	}
 
 	public void setTableModelFromAdductList(Collection<Adduct> collection) {
+		thf.setTable(null);
 		model.setTableModelFromAdductList(collection);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 	

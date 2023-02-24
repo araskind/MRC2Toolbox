@@ -172,23 +172,29 @@ public class IdentificationResultsTable extends BasicTable {
 	@Override
 	public synchronized void clearTable() {
 
+		thf.setTable(null);
 		removeModelListeners();
 		super.clearTable();		
 		parentFeature = null;
 		addModelListeners();
+		thf.setTable(this);
 	}
 
 	public void setModelFromMsFeature(MsFeature feature) {
 
+		thf.setTable(null);
 		removeModelListeners();
 		parentFeature = feature;
 		model.setModelFromFeature(parentFeature);
+		thf.setTable(this);
 		tca.adjustColumns();
 		addModelListeners();
+		
 	}
 	
 	public void setModelFromMsFeature(MsFeature feature, Collection<CompoundIdSource>sorcesToExclude) {
 		
+		thf.setTable(null);
 		Set<MsFeatureIdentity> idList = feature.getIdentifications();
 		if(sorcesToExclude != null)
 			idList = feature.getIdentifications().stream().
@@ -198,7 +204,8 @@ public class IdentificationResultsTable extends BasicTable {
 		parentFeature = feature;
 		model.setParentFeature(parentFeature);
 		model.setModelFromIdList(idList, parentFeature.getPrimaryIdentity());
-		tca.adjustColumns();
+		thf.setTable(this);
+		tca.adjustColumns();		
 		addModelListeners();
 	}
 	

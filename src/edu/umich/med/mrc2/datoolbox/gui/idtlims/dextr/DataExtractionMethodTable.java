@@ -100,7 +100,9 @@ public class DataExtractionMethodTable extends BasicTable {
 	}
 
 	public void setTableModelFromMethods(Collection<DataExtractionMethod> dataExtractionMethods) {
+		thf.setTable(null);
 		model.setTableModelFromMethods(dataExtractionMethods);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

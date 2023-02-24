@@ -151,7 +151,10 @@ public class FeatureCollectionsTable extends BasicTable {
 	}
 	
 	public void updateCollectionData(MsFeatureInfoBundleCollection edited) {
+		thf.setTable(null);
 		model.updateCollectionData(edited);
+		thf.setTable(this);
+		adjustColumnWidth();
 	}
 }
 

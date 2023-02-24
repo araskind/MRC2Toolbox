@@ -93,7 +93,9 @@ public class ExistingDataFilesTable extends BasicTable {
 	public void setTableModelFromExistingDataFiles(
 			Map<LIMSExperiment, Collection<DataFile>>existingDataFiles) {
 		
+		thf.setTable(null);
 		model.setTableModelFromExistingDataFiles(existingDataFiles);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 }

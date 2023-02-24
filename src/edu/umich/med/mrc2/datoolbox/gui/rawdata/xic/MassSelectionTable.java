@@ -29,6 +29,8 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -55,13 +57,16 @@ public class MassSelectionTable  extends BasicTable {
 			.setCellRenderer(mzRenderer);
 		columnModel.getColumnById(MassSelectionTableModel.INTENSITY_COLUMN)
 			.setCellRenderer(new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getSpectrumIntensityFormat()));
-		
+
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
 
 	public void setTableModelFromDataPoints(Collection<MsPoint>points) {
 
+		thf.setTable(null);
 		model.setTableModelFromDataPoints(points);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

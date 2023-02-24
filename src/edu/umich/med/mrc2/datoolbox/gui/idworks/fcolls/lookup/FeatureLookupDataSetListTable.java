@@ -145,7 +145,10 @@ public class FeatureLookupDataSetListTable extends BasicTable {
 	}
 	
 	public void updateCollectionData(FeatureLookupDataSet edited) {
+		thf.setTable(null);
 		model.updateCollectionData(edited);
+		thf.setTable(this);
+		adjustColumnWidth();
 	}
 }
 

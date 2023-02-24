@@ -137,12 +137,16 @@ public class LabNotesTable extends BasicTable {
 	}
 
 	public void setTableModelFromAnnotations(Collection<AnalysisQcEventAnnotation> annotations) {
+		thf.setTable(null);
 		model.setTableModelFromAnnotations(annotations, true);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 
 	public void addAnnotations(Collection<AnalysisQcEventAnnotation> annotations) {
+		thf.setTable(null);
 		model.setTableModelFromAnnotations(annotations, false);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

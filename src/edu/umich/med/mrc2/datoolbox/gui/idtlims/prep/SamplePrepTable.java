@@ -63,7 +63,9 @@ public class SamplePrepTable extends BasicTable {
 	}
 
 	public void setTableModelFromPreps(Collection<LIMSSamplePreparation>preps) {
+		thf.setTable(null);
 		model.setTableModelFromPreps(preps);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

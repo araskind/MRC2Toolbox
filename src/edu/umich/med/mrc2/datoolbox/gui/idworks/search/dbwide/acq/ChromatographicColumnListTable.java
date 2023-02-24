@@ -66,7 +66,9 @@ public class ChromatographicColumnListTable extends BasicTable {
 	}
 
 	public void setTableModelFromColumns(Collection<LIMSChromatographicColumn>columns) {
+		thf.setTable(null);
 		model.setTableModelFromColumns(columns);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 	

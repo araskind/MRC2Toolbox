@@ -29,6 +29,8 @@ import javax.swing.table.TableRowSorter;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MotrpacStudyRenderer;
 
 public class StudyTable extends BasicTable {
@@ -51,13 +53,14 @@ public class StudyTable extends BasicTable {
 		
 		columnModel.getColumnById(StudyTableModel.STUDY_COLUMN)
 			.setCellRenderer(new MotrpacStudyRenderer(SortProperty.ID));
-
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
 
 	public void setTableModelFromStudies(Collection<MoTrPACStudy>studies) {
-
+		thf.setTable(null);
 		model.setTableModelFromStudies(studies);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

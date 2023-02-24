@@ -38,6 +38,7 @@ public class CompoundPropertiesTable extends BasicTable {
 		setModel(model);
 		
 		// TODO Auto-generated constructor stub
+		finalizeLayout();
 	}
 
 }

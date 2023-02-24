@@ -31,6 +31,8 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.compare.ReferenceMsMsLibraryComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ReferenceMsMsLibraryRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
@@ -57,11 +59,15 @@ public class MSMSLibraryListingTable extends BasicTable {
 			.setCellRenderer(new WordWrapCellRenderer());
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
 
 	public void setTableModelFromReferenceMsMsLibraryList(Collection<ReferenceMsMsLibrary>libList) {
+		thf.setTable(null);
 		model.setTableModelFromReferenceMsMsLibraryList(libList);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 	

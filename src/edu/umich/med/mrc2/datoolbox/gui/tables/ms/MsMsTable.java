@@ -80,6 +80,7 @@ public class MsMsTable extends BasicTable {
 	
 	@Override
 	public void clearTable() {
+
 		currentMsms = null;
 		currentScan = null;
 		super.clearTable();
@@ -87,21 +88,27 @@ public class MsMsTable extends BasicTable {
 
 	public void setTableModelFromTandemMs(TandemMassSpectrum msms) {
 
+		thf.setTable(null);
 		model.setTableModelFromTandemMs(msms);
+		thf.setTable(this);
 		tca.adjustColumns();	
 		currentMsms = msms;
 		currentScan = null;
 	}
 
 	public void setTableModelFromScan(IScan scan) {
+		thf.setTable(null);
 		model.setTableModelFromScan(scan);
+		thf.setTable(this);
 		tca.adjustColumns();
 		currentMsms = null;
 		currentScan = scan;
 	}
 	
 	public void setTableModelFromDataPoints(Collection<MsPoint> points, MsPoint parent) {
+		thf.setTable(null);
 		model.setTableModelFromDataPoints(points, parent);
+		thf.setTable(this);
 		currentMsms = null;
 		currentScan = null;
 	}

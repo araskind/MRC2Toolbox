@@ -28,6 +28,8 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MotrpacSampleType;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class SampleTypeTable extends BasicTable {
@@ -50,13 +52,14 @@ public class SampleTypeTable extends BasicTable {
 		
 		columnModel.getColumnById(SampleTypeTableModel.SAMPLE_DESCRIPTION_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
-
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
 
 	public void setTableModelFromSamples(Collection<MotrpacSampleType>samples) {
-
+		thf.setTable(null);
 		model.setTableModelFromSamples(samples);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

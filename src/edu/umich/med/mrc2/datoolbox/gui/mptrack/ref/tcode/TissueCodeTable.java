@@ -30,6 +30,8 @@ import javax.swing.table.TableRowSorter;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACTissueCode;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MotrpacTissueCodeRenderer;
 
 public class TissueCodeTable extends BasicTable {
@@ -52,13 +54,14 @@ public class TissueCodeTable extends BasicTable {
 		
 		columnModel.getColumnById(TissueCodeTableModel.TISSUE_CODE_COLUMN)
 			.setCellRenderer(new MotrpacTissueCodeRenderer(SortProperty.ID));
-		
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
 
 	public void setTableModelFromTissueCodes(Collection<MoTrPACTissueCode>codes) {
-
+		thf.setTable(null);
 		model.setTableModelFromTissueCodes(codes);
+		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

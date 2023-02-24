@@ -67,7 +67,9 @@ public class FoundLookupFeaturesTable extends BasicTable {
 	
 	public void setTableModelFromMsFeatureInfoBundleClusterCollection(
 			Collection<MsFeatureInfoBundleCluster>clusters) {
+		thf.setTable(null);
 		model.setTableModelFromMsFeatureInfoBundleClusterCollection(clusters);
+		thf.setTable(this);
 		tca.adjustColumns();
 
 	}
