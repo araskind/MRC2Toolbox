@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mptrack.ref.sampletype;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MotrpacSampleType;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -48,10 +50,10 @@ public class SampleTypeTableModel extends BasicTableModel {
 	public void setTableModelFromSamples(Collection<MotrpacSampleType>samples) {
 
 		setRowCount(0);
-
-		if(samples.isEmpty())
+		if(samples == null || samples.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MotrpacSampleType sample : samples) {
 
 			Object[] obj = {
@@ -59,7 +61,8 @@ public class SampleTypeTableModel extends BasicTableModel {
 				sample,
 				sample.getDescription()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

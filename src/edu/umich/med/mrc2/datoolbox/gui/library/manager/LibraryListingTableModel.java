@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.library.manager;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -49,15 +51,20 @@ public class LibraryListingTableModel  extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromLibraryCollection(Collection<CompoundLibrary> libraryCollection) {
+	public void setTableModelFromLibraryCollection(
+			Collection<CompoundLibrary> libraryCollection) {
 
-		CompoundLibrary[] libraries = libraryCollection.toArray(new CompoundLibrary[libraryCollection.size()]);
+		CompoundLibrary[] libraries = 
+				libraryCollection.toArray(new CompoundLibrary[libraryCollection.size()]);
 		setTableModelFromLibraryList(libraries);
 	}
 
 	private void setTableModelFromLibraryList(CompoundLibrary[] libraries) {
 
 		setRowCount(0);
+		if(libraries == null || libraries.length == 0)
+			return;
+		
 		Map<String, Integer> countsMap = new TreeMap<String, Integer>();
 		try {
 			countsMap = RemoteMsLibraryUtils.getLibraryEntryCount();
@@ -65,6 +72,7 @@ public class LibraryListingTableModel  extends BasicTableModel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(CompoundLibrary l : libraries){
 
 			Object[] obj = {
@@ -72,7 +80,8 @@ public class LibraryListingTableModel  extends BasicTableModel {
 					l.getLibraryDescription(),
 					countsMap.get(l.getLibraryId())
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

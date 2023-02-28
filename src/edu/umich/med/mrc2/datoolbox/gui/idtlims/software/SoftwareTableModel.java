@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.software;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
@@ -53,9 +55,10 @@ public class SoftwareTableModel extends BasicTableModel {
 	public void setTableModelFromSoftwareList(Collection<DataProcessingSoftware>softwareItems) {
 
 		setRowCount(0);
-		if(softwareItems.isEmpty())
+		if(softwareItems == null || softwareItems.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (DataProcessingSoftware item : softwareItems) {
 
 			Object[] obj = {
@@ -64,7 +67,8 @@ public class SoftwareTableModel extends BasicTableModel {
 				item.getDescription(),
 				item.getVendor(),			
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

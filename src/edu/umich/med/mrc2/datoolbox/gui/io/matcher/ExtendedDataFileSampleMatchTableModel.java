@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.io.matcher;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,6 +93,7 @@ public class ExtendedDataFileSampleMatchTableModel extends BasicTableModel {
 		if(rows == null && dataFileNames != null)
 			rows = dataFileNames;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();		
 		for(int i=0; i<rows.length; i++) {
 
 			DataFile df = null;
@@ -119,8 +121,9 @@ public class ExtendedDataFileSampleMatchTableModel extends BasicTableModel {
 				importedSampleName,
 				sample,
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	private ExperimentalSample findSampleInString(String data) {

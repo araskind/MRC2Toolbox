@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.assay;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -48,15 +50,16 @@ public class AssayTableModel extends BasicTableModel {
 	public void setTableModelFromAssayCollection(Collection<Assay> assayCollection) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(Assay a : assayCollection) {
 
 			Object[] obj = {
 					a.getId(),
 					a
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.rawdata;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
@@ -55,8 +56,8 @@ public class RawDataFileTableModel extends BasicTableModel {
 		
 		if(files == null || files.isEmpty())
 			return;
-		
-		//TreeSet<DataFile>sortedFiles = new TreeSet<DataFile>(files);
+
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		List<DataFile> sortedFiles = 
 				files.stream().distinct().
 				sorted().collect(Collectors.toList());
@@ -66,8 +67,9 @@ public class RawDataFileTableModel extends BasicTableModel {
 					file, 
 					file.getDataAcquisitionMethod(), 
 				};
-			super.addRow(obj);
-		}		
+			rowData.add(obj);
+		}
+		addRows(rowData);
 	}
 
 	public void removeFiles(Collection<DataFile> filesToRemove) {

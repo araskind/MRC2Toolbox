@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mptrack.ref.asssay;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -47,15 +49,17 @@ public class MotrpacMinimalAssayTableModel extends BasicTableModel {
 	public void setTableModelFromAssays(Collection<MoTrPACAssay> assays) {
 
 		setRowCount(0);
-		if(assays.isEmpty())
+		if(assays == null || assays.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MoTrPACAssay assay : assays) {
 
 			Object[] obj = {
 					assay,
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

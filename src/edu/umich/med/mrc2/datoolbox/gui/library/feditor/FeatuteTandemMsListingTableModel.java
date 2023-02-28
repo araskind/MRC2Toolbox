@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.library.feditor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -45,19 +48,19 @@ public class FeatuteTandemMsListingTableModel extends BasicTableModel {
 	public void setTableModelFromFeature(MsFeature feature) {
 
 		setRowCount(0);
-		if(feature.getSpectrum() == null)
+		if(feature == null ||feature.getSpectrum() == null 
+				|| feature.getSpectrum().getTandemSpectra().isEmpty())
 			return;
 
-		if(feature.getSpectrum().getTandemSpectra().isEmpty())
-			return;
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(TandemMassSpectrum msms : feature.getSpectrum().getTandemSpectra()) {
 
-			Object[] newRow = new Object[] {
+			Object[] obj = new Object[] {
 					msms
 			};
-			super.addRow(newRow);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

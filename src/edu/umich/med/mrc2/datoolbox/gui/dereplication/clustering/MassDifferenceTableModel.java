@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -76,6 +78,7 @@ public class MassDifferenceTableModel extends BasicTableModel {
 	public void setTableModelFromFeatures(Collection<MsFeature> clusterFeatures, MsFeatureCluster activeCluster) {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		MsFeature[] features = clusterFeatures.toArray(new MsFeature[clusterFeatures.size()]);
 
 		for (int i = 0; i < features.length; i++) {
@@ -105,8 +108,9 @@ public class MassDifferenceTableModel extends BasicTableModel {
 							null,
 							null
 						};
-						super.addRow(obj);
-					} else {
+						rowData.add(obj);
+					} 
+					else {
 						for (Adduct m : mods) {
 
 							Object[] obj = { 
@@ -121,12 +125,13 @@ public class MassDifferenceTableModel extends BasicTableModel {
 									corr, 
 									m,
 									m.getDescription() };
-							super.addRow(obj);
+							rowData.add(obj);
 						}
 					}
 				}
 			}
 		}
+		addRows(rowData);
 	}
 }
 

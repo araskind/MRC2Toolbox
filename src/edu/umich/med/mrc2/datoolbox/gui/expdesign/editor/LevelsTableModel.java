@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.expdesign.editor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
@@ -46,14 +47,15 @@ public class LevelsTableModel extends BasicTableModel {
 	public void setTableModelFromFactor(ExperimentDesignFactor factor) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(ExperimentDesignLevel level : factor.getLevels()) {
 
 			Object[] obj = {
 					level
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void addLevel(ExperimentDesignLevel newLevel) {
@@ -64,9 +66,11 @@ public class LevelsTableModel extends BasicTableModel {
 		super.addRow(obj);
 	}
 
+	//	TODO ???
 	public void reload() {
 
-		ArrayList<ExperimentDesignLevel>levels = new ArrayList<ExperimentDesignLevel>();
+		ArrayList<ExperimentDesignLevel>levels = 
+				new ArrayList<ExperimentDesignLevel>();
 		int col = getColumnIndex(LEVEL_COLUMN);
 		for(int i=0; i<getRowCount(); i++)
 			levels.add((ExperimentDesignLevel) getValueAt(i, col));

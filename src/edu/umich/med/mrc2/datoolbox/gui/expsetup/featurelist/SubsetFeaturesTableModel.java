@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.expsetup.featurelist;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
@@ -59,8 +61,8 @@ public class SubsetFeaturesTableModel extends BasicTableModel {
 	public void setTableModelFromFeatures(Collection<MsFeature> features) {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		int count = 1;
-
 		for (MsFeature cf : features) {
 
 			double bp = 0;
@@ -78,8 +80,9 @@ public class SubsetFeaturesTableModel extends BasicTableModel {
 				bp,
 				charge
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 			count++;
 		}
+		addRows(rowData);
 	}
 }

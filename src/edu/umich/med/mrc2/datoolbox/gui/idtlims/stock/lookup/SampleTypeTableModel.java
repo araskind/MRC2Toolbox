@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.lookup;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -48,13 +50,18 @@ public class SampleTypeTableModel extends BasicTableModel {
 	public void setModelFromSampleTypeList(Collection<LIMSSampleType>typeList) {
 
 		setRowCount(0);
+		if(typeList == null || typeList.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(LIMSSampleType type : typeList) {
 
 			Object[] obj = {
 				type,
 				type.getName(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.adducts.adduct;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,6 +59,8 @@ public class SimpleNeutralModificationTableModel extends BasicTableModel {
 				sorted(AdductManager.adductTypeNameSorter).
 				collect(Collectors.toList());
 		
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		
 		for (Adduct ad : mods) {
 
 			Object[] obj = {
@@ -66,7 +69,8 @@ public class SimpleNeutralModificationTableModel extends BasicTableModel {
 				ad.getDescription(),
 				ad.getMassCorrection(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

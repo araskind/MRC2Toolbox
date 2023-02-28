@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.expsetup.expdesign;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -56,7 +58,7 @@ public class ExperimentalGroupsTableModel extends BasicTableModel {
 	public void setModelFromDesignSubset(ExperimentDesignSubset activeDesignSubset) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		TreeMap<ExperimentDesignFactor, TreeSet<String>> levelFactorMap =
 				new TreeMap<ExperimentDesignFactor, TreeSet<String>>();
 
@@ -73,8 +75,9 @@ public class ExperimentalGroupsTableModel extends BasicTableModel {
 				entry.getKey(),
 				StringUtils.join(entry.getValue(), ", ")
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

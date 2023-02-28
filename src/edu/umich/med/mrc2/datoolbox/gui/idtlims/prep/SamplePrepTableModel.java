@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.prep;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -56,7 +58,10 @@ public class SamplePrepTableModel extends BasicTableModel {
 	public void setTableModelFromPreps(Collection<LIMSSamplePreparation>preps) {
 
 		setRowCount(0);
+		if(preps == null || preps.isEmpty())
+			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (LIMSSamplePreparation prep : preps) {
 
 			Object[] obj = {
@@ -65,8 +70,9 @@ public class SamplePrepTableModel extends BasicTableModel {
 					prep.getPrepDate(),
 					prep.getCreator()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void updatePrepData(LIMSSamplePreparation prep) {

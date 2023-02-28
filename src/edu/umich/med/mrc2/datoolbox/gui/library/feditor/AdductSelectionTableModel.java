@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.library.feditor;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
@@ -49,14 +51,17 @@ public class AdductSelectionTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromAdductListAndFeature(Collection<Adduct> adducts, LibraryMsFeature feature) {
+	public void setTableModelFromAdductListAndFeature(
+			Collection<Adduct> adducts, LibraryMsFeature feature) {
 
 		setRowCount(0);
+		if(adducts == null || adducts.isEmpty() || feature == null)
+			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (Adduct ad : adducts) {
 
 			boolean enabled = false;
-
 			if(feature.getSpectrum()!= null) {
 
 				if(feature.getSpectrum().getAdducts().contains(ad))
@@ -68,8 +73,9 @@ public class AdductSelectionTableModel extends BasicTableModel {
 				ad.getCharge(),
 				ad.getOligomericState()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

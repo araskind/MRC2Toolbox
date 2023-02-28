@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.wizard.methods;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -51,17 +53,19 @@ public class MethodTableModel extends BasicTableModel {
 
 		setRowCount(0);
 
-		if(methodFilesMap.isEmpty())
+		if(methodFilesMap == null || methodFilesMap.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (Entry<String,AnalysisMethod> methodEntry : methodFilesMap.entrySet()) {
 
 			Object[] obj = {
 					methodEntry.getValue(),
 					methodEntry.getKey(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.adducts.adduct;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,6 +59,8 @@ public class CompositeAdductComponentsTableModel extends BasicTableModel {
 	public void setTableModelFromCompositeAdduct(CompositeAdduct composite) {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		
 		List<SimpleAdduct>losses = composite.getNeutralLosses().stream().
 				sorted(AdductManager.adductTypeNameSorter).
 				collect(Collectors.toList());
@@ -71,7 +74,7 @@ public class CompositeAdductComponentsTableModel extends BasicTableModel {
 				ad.getDescription(),
 				ad.getMassCorrection(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
 		List<SimpleAdduct>repeats = composite.getNeutralAdducts().stream().
 				sorted(AdductManager.adductTypeNameSorter).
@@ -86,13 +89,16 @@ public class CompositeAdductComponentsTableModel extends BasicTableModel {
 				ad.getDescription(),
 				ad.getMassCorrection(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 	
 	public void setTableModelFromAdductList(Collection<SimpleAdduct> adducts) {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		
 		List<SimpleAdduct>losses = adducts.stream().
 				filter(a -> a.getModificationType().equals(ModificationType.LOSS)).
 				sorted(AdductManager.adductTypeNameSorter).
@@ -107,7 +113,7 @@ public class CompositeAdductComponentsTableModel extends BasicTableModel {
 				ad.getDescription(),
 				ad.getMassCorrection(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
 		List<SimpleAdduct>repeats = adducts.stream().
 				filter(a -> a.getModificationType().equals(ModificationType.REPEAT)).
@@ -123,8 +129,9 @@ public class CompositeAdductComponentsTableModel extends BasicTableModel {
 				ad.getDescription(),
 				ad.getMassCorrection(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void setTableModelFromBinnerNeutralMassDifference(BinnerNeutralMassDifference binnerNeutralMassDifference) {
@@ -132,6 +139,8 @@ public class CompositeAdductComponentsTableModel extends BasicTableModel {
 		setRowCount(0);
 		if(binnerNeutralMassDifference == null)
 			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		
 		for (SimpleAdduct ad : binnerNeutralMassDifference.getNeutralAdducts()) {
 
@@ -142,7 +151,8 @@ public class CompositeAdductComponentsTableModel extends BasicTableModel {
 				ad.getDescription(),
 				ad.getMassCorrection(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

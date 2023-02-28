@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.qc;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
@@ -64,7 +66,10 @@ public class DataSetStatsTableModel extends BasicTableModel {
 	public void setTableModelFromDataSetStats(Collection<DataFileStatisticalSummary> statsList) {
 
 		setRowCount(0);
-
+		if(statsList == null || statsList.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (DataFileStatisticalSummary dfss : statsList) {
 
 			Object[] obj = {
@@ -82,8 +87,9 @@ public class DataSetStatsTableModel extends BasicTableModel {
 					dfss.getRsd(),
 					dfss.getSdTrimmed(),
 					dfss.getRsdTrimmed() };
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

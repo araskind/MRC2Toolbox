@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.organization;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.IdTrackerOrganization;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -61,9 +63,10 @@ public class OrganizationTableModel extends BasicTableModel {
 
 		setRowCount(0);
 
-		if(organizations.isEmpty())
+		if(organizations == null || organizations.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (IdTrackerOrganization organization : organizations) {
 
 			Object[] obj = {
@@ -75,7 +78,8 @@ public class OrganizationTableModel extends BasicTableModel {
 					organization.getContactPerson(),
 					organization.getMailingAddress(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

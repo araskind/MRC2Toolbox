@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.expsetup.featurelist;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -47,21 +50,25 @@ public class FeatureSubsetTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setModelFromProject(DataAnalysisProject currentProject, DataPipeline activeDataPipeline) {
+	public void setModelFromProject(
+			DataAnalysisProject currentProject, DataPipeline activeDataPipeline) {
 
 		setRowCount(0);
 		if (currentProject == null && activeDataPipeline == null)
 			return;
 
-		for (MsFeatureSet cfs : currentProject.getMsFeatureSetsForDataPipeline(currentProject.getActiveDataPipeline())) {
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for (MsFeatureSet cfs : currentProject.getMsFeatureSetsForDataPipeline(
+				currentProject.getActiveDataPipeline())) {
 
 			Object[] obj = new Object[] {
 				cfs.isActive(),
 				cfs,
 				cfs.getFeatures().size()
 			};
-			super.addRow(obj);
-		}	
+			rowData.add(obj);
+		}
+		addRows(rowData);
 	}
 }
 

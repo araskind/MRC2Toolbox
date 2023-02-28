@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
@@ -52,10 +54,14 @@ public class FoundLookupFeaturesTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromMsFeatureInfoBundleClusterCollection(Collection<MsFeatureInfoBundleCluster>clusters) {
+	public void setTableModelFromMsFeatureInfoBundleClusterCollection(
+			Collection<MsFeatureInfoBundleCluster>clusters) {
 
 		setRowCount(0);
+		if(clusters == null || clusters.isEmpty())
+			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsFeatureInfoBundleCluster cluster : clusters) {
 
 			MinimalMSOneFeature feature = cluster.getLookupFeature();
@@ -69,8 +75,9 @@ public class FoundLookupFeaturesTableModel extends BasicTableModel {
 					feature.getRank(),
 					cluster,
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

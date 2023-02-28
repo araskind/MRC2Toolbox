@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.expsetup.projinfo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -59,7 +61,7 @@ public class DataPipelinesTableModel extends BasicTableModel {
 	public void setTableModelFromProject(DataAnalysisProject currentProject) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (DataPipeline pipeline : currentProject.getDataPipelines()) {
 
 			boolean isActive = false;
@@ -94,8 +96,9 @@ public class DataPipelinesTableModel extends BasicTableModel {
 					hasWorklist,
 					hasLibrary
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

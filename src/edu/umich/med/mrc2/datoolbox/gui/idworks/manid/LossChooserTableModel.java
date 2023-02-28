@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.manid;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -48,15 +50,19 @@ public class LossChooserTableModel extends BasicTableModel {
 	public void setTableModelFromLossList(Collection<Adduct> losses) {
 
 		setRowCount(0);
-
+		if(losses == null || losses.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (Adduct ad : losses) {
 
 			Object[] obj = {
 				ad,
 				ad.getMassCorrection()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

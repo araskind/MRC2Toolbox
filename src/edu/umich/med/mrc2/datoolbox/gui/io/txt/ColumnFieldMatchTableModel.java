@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.io.txt;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -101,18 +102,18 @@ public class ColumnFieldMatchTableModel extends BasicTableModel {
 		return files.toArray(new DataFile[files.size()]);
 	}
 
-	public void setTableModelFromFiles(File[] inputFiles, DataAcquisitionMethod acquisitionMethod) {
+	public void setTableModelFromFiles(
+			File[] inputFiles, DataAcquisitionMethod acquisitionMethod) {
 
 		//	Add data, no cleanup, but check for dups
 		//	setRowCount(0);
 		DataFile[] presentFiles = getDataFiles();
 		boolean add = true;
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (File f : inputFiles) {
 
 			add = true;
 			String fileBaseName = FilenameUtils.removeExtension(f.getName());
-
 			for(DataFile pdf : presentFiles) {
 
 				if(fileBaseName.equals(pdf.getName())) {
@@ -121,16 +122,12 @@ public class ColumnFieldMatchTableModel extends BasicTableModel {
 				}
 			}
 			if(add) {
-
 				DataFile df = new DataFile(fileBaseName, acquisitionMethod);
 				df.setFullPath(f.getAbsolutePath());
-
 				String sampleId = "";
 				String sampleName = "";
 				ExperimentalSample matchedSample = null;
-
 				regexMatcher = sampleIdPattern.matcher(f.getName());
-
 				if (regexMatcher.find())
 					sampleId = regexMatcher.group();
 
@@ -140,7 +137,6 @@ public class ColumnFieldMatchTableModel extends BasicTableModel {
 				if (matchedSample == null) {
 
 					regexMatcher = sampleNamePattern.matcher(f.getName());
-
 					if (regexMatcher.find())
 						sampleName = regexMatcher.group();
 
@@ -154,9 +150,10 @@ public class ColumnFieldMatchTableModel extends BasicTableModel {
 					df,
 					df.getParentSample()
 				};
-				super.addRow(obj);
+				rowData.add(obj);
 			}
 		}
+		addRows(rowData);
 	}
 }
 

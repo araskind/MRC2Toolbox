@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
@@ -52,10 +54,14 @@ public class DataPipelinesTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromDataPipelineCollection(Collection<DataPipeline>pipelines) {
+	public void setTableModelFromDataPipelineCollection(
+			Collection<DataPipeline>pipelines) {
 
 		setRowCount(0);
-
+		if(pipelines == null || pipelines.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (DataPipeline pipeline : pipelines) {
 
 			Object[] obj = {
@@ -64,8 +70,9 @@ public class DataPipelinesTableModel extends BasicTableModel {
 					pipeline.getDataExtractionMethod(),
 					pipeline,
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

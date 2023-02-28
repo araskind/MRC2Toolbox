@@ -21,14 +21,15 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.acq;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-@SuppressWarnings("unused")
 public class ChromatographicColumnListTableModel extends BasicTableModel {
 
 	/**
@@ -50,10 +51,14 @@ public class ChromatographicColumnListTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromColumns(Collection<LIMSChromatographicColumn>columns) {
+	public void setTableModelFromColumns(
+			Collection<LIMSChromatographicColumn>columns) {
 
 		setRowCount(0);
-
+		if(columns == null || columns.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (LIMSChromatographicColumn column : columns) {
 
 			Object[] obj = {
@@ -61,7 +66,8 @@ public class ChromatographicColumnListTableModel extends BasicTableModel {
 				column.getChemistry(),
 				column.getManufacturer(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.refsamples;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -53,6 +56,7 @@ public class ReferenceSampleTableModel extends BasicTableModel {
 	public void loadReferenceSamples() {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(ExperimentalSample sample : ReferenceSamplesManager.getReferenceSamples()) {
 
 			Object[] obj = {
@@ -61,7 +65,8 @@ public class ReferenceSampleTableModel extends BasicTableModel {
 					sample.getName(),
 					sample.getMoTrPACQCSampleType()
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

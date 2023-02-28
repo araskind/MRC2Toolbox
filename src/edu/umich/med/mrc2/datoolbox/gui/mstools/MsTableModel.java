@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mstools;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.openscience.cdk.formula.IsotopeContainer;
 import org.openscience.cdk.formula.IsotopePattern;
@@ -52,29 +54,37 @@ public class MsTableModel extends BasicTableModel {
 	public void setTableModelFromIsotopePattern(IsotopePattern isoPattern) {
 
 		setRowCount(0);
-
+		if(isoPattern == null || isoPattern.getIsotopes().isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (IsotopeContainer dp : isoPattern.getIsotopes()) {
 
 			Object[] obj = {
 				dp.getMass(),
 				dp.getIntensity() * 100
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void setTableModelFromSimpleMs(SimpleMs ms) {
 
 		setRowCount(0);
-
+		if(ms == null || ms.getDataPoints().length == 0)
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsPoint dp : ms.getDataPoints()) {
 
 			Object[] obj = {
 				dp.getMz(),
 				dp.getIntensity()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void setTableModelFromMsPointCollection(Collection<MsPoint> msPoints) {
@@ -83,14 +93,16 @@ public class MsTableModel extends BasicTableModel {
 		if(msPoints == null || msPoints.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsPoint dp : msPoints) {
 
 			Object[] obj = {
 				dp.getMz(),
 				dp.getIntensity()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

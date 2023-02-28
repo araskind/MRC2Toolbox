@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mgf;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umich.med.mrc2.datoolbox.data.MsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsMs;
@@ -52,18 +55,20 @@ public class MsMsTableModel extends BasicTableModel {
 	public void setTableModelFromMsMsCluster(MsMsCluster featureCluster) {
 
 		setRowCount(0);
+		if(featureCluster == null)
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		String parent;
 
 		//	TODO add preferences for this value
 		//	double accuracyPpm = CaConfiguration.getMassAccuracy();
 		double accuracyPpm = 100.0d;
-
-		Range parentRange = MsUtils.createPpmMassRange(featureCluster.getParentMass(), accuracyPpm);
-
+		Range parentRange = 
+				MsUtils.createPpmMassRange(featureCluster.getParentMass(), accuracyPpm);
 		for (MsPoint dp : featureCluster.getAverageMsMs()) {
 
 			parent = "";
-
 			if (parentRange.contains(dp.getMz()))
 				parent = "Yes";
 
@@ -72,15 +77,19 @@ public class MsMsTableModel extends BasicTableModel {
 				dp.getIntensity(),
 				parent
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void setTableModelFromSimpleMsMs(SimpleMsMs msms) {
 
 		setRowCount(0);
+		if(msms == null || msms.getDataPoints().length == 0)
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		String parent;
-
 		for (MsPoint dp : msms.getDataPoints()) {
 
 			parent = "";
@@ -92,8 +101,9 @@ public class MsMsTableModel extends BasicTableModel {
 				dp.getIntensity(),
 				parent
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

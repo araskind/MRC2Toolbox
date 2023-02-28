@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.sop;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -65,7 +67,10 @@ public class ProtocolTableModel extends BasicTableModel {
 	public void setTableModelFromProtocols(Collection<LIMSProtocol>protocols) {
 
 		setRowCount(0);
+		if(protocols == null || protocols.isEmpty())
+			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (LIMSProtocol protocol : protocols) {
 
 			Object[] obj = {
@@ -78,7 +83,8 @@ public class ProtocolTableModel extends BasicTableModel {
 					protocol.getCreatedBy(),
 					protocol.getSopCategory()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.tables;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -41,19 +43,22 @@ public class PropertiesTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromPropertyMap(Map<? extends Object,? extends Object>properties) {
+	public void setTableModelFromPropertyMap(
+			Map<? extends Object,? extends Object>properties) {
 
 		setRowCount(0);
 		if(properties == null || properties.isEmpty())
 			return;
-
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (Entry<? extends Object, ? extends Object> entry : properties.entrySet()) {
 
 			Object[] obj = { 
 					entry.getKey(), 
 					entry.getValue(), 
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

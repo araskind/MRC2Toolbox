@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtable.uni;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
@@ -143,12 +145,10 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 			MsFeatureIdentity defaultId) {
 
 		setRowCount(0);
-		if(idList == null)
+		if(idList == null || idList.isEmpty())
 			return;
 
-		if(idList.isEmpty())
-			return;
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsFeatureIdentity id : idList) {
 
 			double deltaMz = 0.0d;
@@ -243,8 +243,9 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 					percolatorScore,
 					id.isQcStandard(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 	
 	private Double calculateRetentionShift(MsFeatureIdentity id) {

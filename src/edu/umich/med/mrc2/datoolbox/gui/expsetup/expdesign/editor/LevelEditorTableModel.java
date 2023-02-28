@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.expsetup.expdesign.editor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,13 +62,16 @@ public class LevelEditorTableModel extends BasicTableModel {
 		this.allowEdit = allowEdit;
 	}
 
-	public void setTableModelFromDesignSubsetFactor(ExperimentDesignSubset designSubset, ExperimentDesignFactor factor) {
+	public void setTableModelFromDesignSubsetFactor(
+			ExperimentDesignSubset designSubset, ExperimentDesignFactor factor) {
 
 		setRowCount(0);
 		allowEdit = !designSubset.isLocked();
-		ExperimentDesignLevel[] activeSet = designSubset.getOrderedDesign().get(factor);
+		ExperimentDesignLevel[] activeSet = 
+				designSubset.getOrderedDesign().get(factor);
 		List<ExperimentDesignLevel> activeList = null;
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
+				
 		//	Add active levels
 		if(activeSet != null) {
 
@@ -77,7 +81,7 @@ public class LevelEditorTableModel extends BasicTableModel {
 					//Boolean.TRUE,
 					activeLevel
 				};
-				super.addRow(obj);
+				rowData.add(obj);
 			}
 			//	Add inactive levels
 			activeList = Arrays.asList(activeSet);
@@ -89,10 +93,11 @@ public class LevelEditorTableModel extends BasicTableModel {
 						//Boolean.FALSE,
 						level
 					};
-					super.addRow(obj);
+					rowData.add(obj);
 				}
 			}
 		}
+		addRows(rowData);
 	}
 }
 

@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.worklist;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -67,7 +69,10 @@ public class InstrumentSequenceTableModel extends BasicTableModel {
 	public void setTableModelFromLimsWorklistItems(Collection<LIMSWorklistItem>items) {
 
 		setRowCount(0);
-
+		if(items == null || items.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (LIMSWorklistItem item : items) {
 
 			Object[] obj = {
@@ -79,8 +84,9 @@ public class InstrumentSequenceTableModel extends BasicTableModel {
 				item.getInjectionVolume(),
 				item.getSamplePrep(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void setTableModelFromLimsWorklist(Worklist wkl) {

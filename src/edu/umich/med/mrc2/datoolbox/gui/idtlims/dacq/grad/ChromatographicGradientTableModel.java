@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.grad;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicGradient;
@@ -59,10 +61,10 @@ public class ChromatographicGradientTableModel extends BasicTableModel {
 
 		setRowCount(0);
 		Set<ChromatographicGradientStep> steps = gradient.getGradientSteps();
-
 		if(steps.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (ChromatographicGradientStep step : steps) {
 
 			Object[] obj = {
@@ -73,8 +75,9 @@ public class ChromatographicGradientTableModel extends BasicTableModel {
 				step.getMobilePhaseStartingPercent()[3],
 				step.getFlowRate()					
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

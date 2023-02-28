@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.ms2;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -80,20 +83,24 @@ public class MSMSLibraryMatchTableModel extends BasicTableModel {
 			return;
 
 		double parentMz = 0.0d;
-		TandemMassSpectrum experimentalMsMs = cf.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
+		TandemMassSpectrum experimentalMsMs = 
+				cf.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 		if(experimentalMsMs != null) {
 
 			if(experimentalMsMs.getParent() != null)
 				parentMz = experimentalMsMs.getParent().getMz();
 		}
-		MsFeatureIdentity primary = cf.getPrimaryIdentity();
+		MsFeatureIdentity primary = cf.getPrimaryIdentity();		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(MsFeatureIdentity id : cf.getIdentifications()) {
 
-			ReferenceMsMsLibraryMatch msmslibMatch = id.getReferenceMsMsLibraryMatch();
+			ReferenceMsMsLibraryMatch msmslibMatch = 					
+					id.getReferenceMsMsLibraryMatch();
 			if(msmslibMatch == null)
 				continue;
 
-			MsMsLibraryFeature matchFeature = msmslibMatch.getMatchedLibraryFeature();
+			MsMsLibraryFeature matchFeature = 
+					msmslibMatch.getMatchedLibraryFeature();
 			ReferenceMsMsLibrary lib =
 				IDTDataCash.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
 
@@ -111,8 +118,9 @@ public class MSMSLibraryMatchTableModel extends BasicTableModel {
 				msmslibMatch.getProbability(),	//	PROBABILITY_COLUMN, Double
 				msmslibMatch.getDotProduct(),//	DOT_PRODUCT_COLUMN, Double
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void updateFeatureData(MsFeature cf) {

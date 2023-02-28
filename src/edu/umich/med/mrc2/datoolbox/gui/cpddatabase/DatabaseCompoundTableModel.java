@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpddatabase;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
@@ -57,15 +59,19 @@ public class DatabaseCompoundTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromCompoundCollection(Collection<CompoundIdentity> compoundCollection) {
+	public void setTableModelFromCompoundCollection(
+			Collection<CompoundIdentity> compoundCollection) {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		int counter = 1;
 
 		//	TODO spectra count and bio-location
 		for(CompoundIdentity id : compoundCollection){
 
-			MsFeatureIdentity msid = new MsFeatureIdentity(id, CompoundIdentificationConfidence.ACCURATE_MASS);
+			MsFeatureIdentity msid = 
+					new MsFeatureIdentity(id, 
+							CompoundIdentificationConfidence.ACCURATE_MASS);
 			Object[] obj = {
 					counter,
 					msid,
@@ -75,9 +81,10 @@ public class DatabaseCompoundTableModel extends BasicTableModel {
 					null,	//	TODO supply actual number
 					""
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 			counter++;
 		}
+		addRows(rowData);
 	}
 
 	public void updateCidData(MsFeatureIdentity id) {
@@ -86,9 +93,12 @@ public class DatabaseCompoundTableModel extends BasicTableModel {
 		if(row == -1)
 			return;
 
-		setValueAt(id.getCompoundIdentity().getCommonName(), row, getColumnIndex(COMPOUND_NAME_COLUMN));
-		setValueAt(id.getCompoundIdentity().getFormula(), row, getColumnIndex(FORMULA_COLUMN));
-		setValueAt(id.getCompoundIdentity().getExactMass(), row, getColumnIndex(MASS_COLUMN));
+		setValueAt(id.getCompoundIdentity().getCommonName(), 
+				row, getColumnIndex(COMPOUND_NAME_COLUMN));
+		setValueAt(id.getCompoundIdentity().getFormula(), 
+				row, getColumnIndex(FORMULA_COLUMN));
+		setValueAt(id.getCompoundIdentity().getExactMass(), 
+				row, getColumnIndex(MASS_COLUMN));
 
 		//	TODO other stuff - spectra etc.
 	}

@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.features;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -62,6 +64,10 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 			Collection<MsFeatureInfoBundleCollection>featureCollections) {
 
 		setRowCount(0);
+		if(featureCollections == null || featureCollections.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsFeatureInfoBundleCollection collection : featureCollections) {
 			
 			if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(collection)
@@ -76,8 +82,9 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 				collection.getDateCreated(),
 				collection.getLastModified(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 	
 	public int getFeatureCollectionRow(MsFeatureInfoBundleCollection fCol) {
@@ -98,8 +105,10 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 			return;
 		
 		setValueAt(edited, row, getColumnIndex(COLLECTION_COLUMN));
-		setValueAt(edited.getDescription(), row, getColumnIndex(DESCRIPTION_COLUMN));
-		setValueAt(FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(edited), row, getColumnIndex(NUM_FEATURES_COLUMN));
+		setValueAt(edited.getDescription(), 
+				row, getColumnIndex(DESCRIPTION_COLUMN));
+		setValueAt(FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(edited), 
+				row, getColumnIndex(NUM_FEATURES_COLUMN));
 		setValueAt(edited.getOwner(), row, getColumnIndex(OWNER_COLUMN));
 		setValueAt(edited.getDateCreated(), row, getColumnIndex(DATE_CREATED_COLUMN));
 		setValueAt(edited.getLastModified(), row, getColumnIndex(LAST_MODIFIED_COLUMN));		

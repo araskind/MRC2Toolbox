@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.manid;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
@@ -55,7 +57,10 @@ public class AdductChooserTableModel extends BasicTableModel {
 	public void setTableModelFromAdductList(Collection<Adduct> adducts) {
 
 		setRowCount(0);
-
+		if(adducts == null || adducts.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (Adduct ad : adducts) {
 
 			Object[] obj = {
@@ -65,8 +70,9 @@ public class AdductChooserTableModel extends BasicTableModel {
 				ad.getOligomericState(),
 				ad.getMassCorrection()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

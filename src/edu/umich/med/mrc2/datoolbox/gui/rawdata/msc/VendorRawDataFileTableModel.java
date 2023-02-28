@@ -22,7 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.msc;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -54,14 +56,16 @@ public class VendorRawDataFileTableModel extends BasicTableModel {
 			return;
 		
 		TreeSet<File>sortedFiles = new TreeSet<File>(files);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (File file : sortedFiles) {
 
 			Object[] obj = new Object[] { 
 					file, 
 					file.getAbsolutePath()
 				};
-			super.addRow(obj);
-		}		
+			rowData.add(obj);
+		}
+		addRows(rowData);
 	}
 }
 

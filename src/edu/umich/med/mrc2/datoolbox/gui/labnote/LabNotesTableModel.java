@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.labnote;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
@@ -68,9 +69,10 @@ public class LabNotesTableModel extends BasicTableModel {
 		if(replace)
 			setRowCount(0);
 
-		if(annotations.isEmpty())
+		if(annotations == null || annotations.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (AnalysisQcEventAnnotation annotation : annotations) {
 
 			Object[] obj = {
@@ -82,8 +84,9 @@ public class LabNotesTableModel extends BasicTableModel {
 					annotation.getInstrument(),
 					annotation,
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void removeAnnotations(Collection<AnalysisQcEventAnnotation> annotationsToRemove) {

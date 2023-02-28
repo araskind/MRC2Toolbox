@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mptrack.study.edit;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MotrpacSampleType;
@@ -51,9 +53,10 @@ public class StudyTableModel extends BasicTableModel {
 	public void setTableModelFromStudies(Collection<MoTrPACStudy> studies) {
 
 		setRowCount(0);
-		if(studies.isEmpty())
+		if(studies == null || studies.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MoTrPACStudy study : studies) {
 
 			Object[] obj = {
@@ -62,7 +65,11 @@ public class StudyTableModel extends BasicTableModel {
 					study.getDescription(),
 					study.getSubjectType().getSubjectType()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
+
+
+

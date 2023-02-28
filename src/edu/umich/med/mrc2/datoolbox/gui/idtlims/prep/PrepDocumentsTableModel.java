@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.prep;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
@@ -60,7 +62,10 @@ public class PrepDocumentsTableModel extends BasicTableModel {
 	public void setModelFromAnnotations(Collection<ObjectAnnotation>annotations) {
 
 		setRowCount(0);
-
+		if(annotations == null || annotations.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(ObjectAnnotation annotation : annotations) {
 			
 			String text = annotation.getText(100);
@@ -77,7 +82,8 @@ public class PrepDocumentsTableModel extends BasicTableModel {
 					annotation.getDateCreated(),
 					annotation
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

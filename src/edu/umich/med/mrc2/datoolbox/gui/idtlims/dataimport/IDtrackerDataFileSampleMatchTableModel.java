@@ -68,30 +68,10 @@ public class IDtrackerDataFileSampleMatchTableModel extends BasicTableModel {
 		};
 	}
 
-	public DataFile[] getDataFiles() {
-
-		ArrayList<DataFile>files = new ArrayList<DataFile>();
-		int dfColumn = getColumnIndex(DATA_FILE_COLUMN);
-		for(int i=0; i<getRowCount(); i++)
-			files.add((DataFile) getValueAt(i, dfColumn));
-
-		return files.toArray(new DataFile[files.size()]);
-	}
-
-	private Collection<String>getLoadedFileNames(){
-
-		Collection<String>loadedFileNames = new TreeSet<String>();
-		int dfColumn = getColumnIndex(DATA_FILE_COLUMN);
-		for(int i=0; i<getRowCount(); i++)
-			loadedFileNames.add(((DataFile) getValueAt(i, dfColumn)).getName());
-
-		return loadedFileNames;
-	}
-
-	public void setTableModelFromFiles(File[] inputFiles, LIMSExperiment experiment) {
+	public void setTableModelFromFiles(
+			File[] inputFiles, LIMSExperiment experiment) {
 
 		//	Add data, no cleanup, but check for dups
-		//	setRowCount(0);
 		Collection<String>loadedFileNames = getLoadedFileNames();
 		List<File> filesToAdd = Arrays.asList(inputFiles).stream().
 				filter(f -> !loadedFileNames.contains(f.getName())).
@@ -111,6 +91,7 @@ public class IDtrackerDataFileSampleMatchTableModel extends BasicTableModel {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		List<Object[]>rowData = new ArrayList<Object[]>();		
 		for(DataFile df : newDataFiles) {
 
 			Object[] obj = {
@@ -120,11 +101,13 @@ public class IDtrackerDataFileSampleMatchTableModel extends BasicTableModel {
 					df.getInjectionTime(),
 					null,
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
-	public void addDataFilesUsingWorklist(File[] inputFiles, Worklist worklist) {
+	public void addDataFilesUsingWorklist(
+			File[] inputFiles, Worklist worklist) {
 
 		Collection<String>loadedFileNames = getLoadedFileNames();
 		List<File> filesToAdd = Arrays.asList(inputFiles).stream().
@@ -146,7 +129,7 @@ public class IDtrackerDataFileSampleMatchTableModel extends BasicTableModel {
 			setFileDataFromWorklistItem(df, wlItems);
 			newDataFiles.add(df);
 		}
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(DataFile df : newDataFiles) {
 
 			Object[] obj = {
@@ -156,9 +139,9 @@ public class IDtrackerDataFileSampleMatchTableModel extends BasicTableModel {
 					df.getInjectionTime(),
 					null,
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
-		
+		addRows(rowData);
 	}
 	
 	private void setFileDataFromWorklistItem(DataFile file, Collection<LIMSWorklistItem>wlItems) {
@@ -174,4 +157,25 @@ public class IDtrackerDataFileSampleMatchTableModel extends BasicTableModel {
 		file.setDataAcquisitionMethod(fileItem.getAcquisitionMethod());
 		file.setInjectionTime(fileItem.getTimeStamp());
 	}
+	
+	public DataFile[] getDataFiles() {
+
+		ArrayList<DataFile>files = new ArrayList<DataFile>();
+		int dfColumn = getColumnIndex(DATA_FILE_COLUMN);
+		for(int i=0; i<getRowCount(); i++)
+			files.add((DataFile) getValueAt(i, dfColumn));
+
+		return files.toArray(new DataFile[files.size()]);
+	}
+
+	private Collection<String>getLoadedFileNames(){
+
+		Collection<String>loadedFileNames = new TreeSet<String>();
+		int dfColumn = getColumnIndex(DATA_FILE_COLUMN);
+		for(int i=0; i<getRowCount(); i++)
+			loadedFileNames.add(((DataFile) getValueAt(i, dfColumn)).getName());
+
+		return loadedFileNames;
+	}
 }
+

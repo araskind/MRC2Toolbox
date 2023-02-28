@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.fdata.noid;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
@@ -65,49 +67,50 @@ public class MissingIdsTableModel extends BasicTableModel{
 		};
 	}
 
-	public void setTableModelFromFeatureMap(HashMap<CompoundLibrary, Collection<MsFeature>> unidentified) {
+	public void setTableModelFromFeatureMap(
+			HashMap<CompoundLibrary, Collection<MsFeature>> unidentified) {
 
 		setRowCount(0);
+		if(unidentified.isEmpty())
+			return;
 
-		if(!unidentified.isEmpty()){
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for (Entry<CompoundLibrary, Collection<MsFeature>> entry : unidentified.entrySet()) {
 
-			for (Entry<CompoundLibrary, Collection<MsFeature>> entry : unidentified.entrySet()) {
+			for (MsFeature lf : entry.getValue()) {
 
-				for (MsFeature lf : entry.getValue()) {
+				MsFeatureIdentity identity = lf.getPrimaryIdentity();
+				String formula = "";
+				int innateCharge = 0;
 
-					MsFeatureIdentity identity = lf.getPrimaryIdentity();
-
-					String formula = "";
-					int innateCharge = 0;
-
-					if(identity != null) {
-						formula = identity.getCompoundIdentity().getFormula();
-
-						String smiles = identity.getCompoundIdentity().getSmiles();
-
-						if(smiles != null)
-							innateCharge = StringUtils.countMatches(smiles, "+") - StringUtils.countMatches(smiles, "-");
-					}
-					String compoundName = lf.getName();
-					CompoundIdentificationConfidence idc = null;
-					if(lf.getPrimaryIdentity() != null) {
-
-						compoundName = lf.getPrimaryIdentity().getName();
-						idc= lf.getPrimaryIdentity().getConfidenceLevel();
-					}
-					Object[] obj = {
-						entry.getKey(),
-						lf,
-						compoundName,
-						formula,
-						lf.getNeutralMass(),
-						lf.getRetentionTime(),
-						innateCharge,
-						idc
-					};
-					super.addRow(obj);
+				if(identity != null) {
+					
+					formula = identity.getCompoundIdentity().getFormula();
+					String smiles = identity.getCompoundIdentity().getSmiles();
+					if(smiles != null)
+						innateCharge = StringUtils.countMatches(smiles, "+") 
+								- StringUtils.countMatches(smiles, "-");
 				}
+				String compoundName = lf.getName();
+				CompoundIdentificationConfidence idc = null;
+				if(lf.getPrimaryIdentity() != null) {
+
+					compoundName = lf.getPrimaryIdentity().getName();
+					idc= lf.getPrimaryIdentity().getConfidenceLevel();
+				}
+				Object[] obj = {
+					entry.getKey(),
+					lf,
+					compoundName,
+					formula,
+					lf.getNeutralMass(),
+					lf.getRetentionTime(),
+					innateCharge,
+					idc
+				};
+				rowData.add(obj);
 			}
 		}
+		addRows(rowData);
 	}
 }

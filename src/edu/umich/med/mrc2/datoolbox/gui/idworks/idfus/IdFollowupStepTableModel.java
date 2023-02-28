@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.idfus;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -46,21 +48,23 @@ public class IdFollowupStepTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromFollowupStepList(Collection<MSFeatureIdentificationFollowupStep> followupStepList) {
+	public void setTableModelFromFollowupStepList(
+			Collection<MSFeatureIdentificationFollowupStep> followupStepList) {
 
 		setRowCount(0);
-
-		if(followupStepList.isEmpty())
+		if(followupStepList == null || followupStepList.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MSFeatureIdentificationFollowupStep step : followupStepList) {
 
 			Object[] obj = {
 				//	step.getId(),
 				step
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

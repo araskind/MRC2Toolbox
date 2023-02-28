@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -73,22 +75,33 @@ public class PepSearchParameterSetTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setModelFromObjectCollection(Collection<NISTPepSearchParameterObject> psObjects) {
+	public void setModelFromObjectCollection(
+			Collection<NISTPepSearchParameterObject> psObjects) {
 
 		setRowCount(0);
+		if(psObjects == null || psObjects.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(NISTPepSearchParameterObject pso  : psObjects) {
 			
 			String ignoreAroundPrecursor = "";
-			if(pso.isIgnorePeaksAroundPrecursor() && pso.getIgnorePeaksAroundPrecursorWindow() > 0.0d) {				
+			if(pso.isIgnorePeaksAroundPrecursor() 
+					&& pso.getIgnorePeaksAroundPrecursorWindow() > 0.0d) {				
 				ignoreAroundPrecursor = 
-						MRC2ToolBoxConfiguration.getPpmFormat().format(pso.getIgnorePeaksAroundPrecursorWindow()) + 
+						MRC2ToolBoxConfiguration.getPpmFormat().format(
+								pso.getIgnorePeaksAroundPrecursorWindow()) + 
 						pso.getIgnorePeaksAroundPrecursorAccuracyUnits().name();
 			}
-			String precursorError = MRC2ToolBoxConfiguration.getPpmFormat().format(pso.getPrecursorMzErrorValue()) + 
+			String precursorError = 
+					MRC2ToolBoxConfiguration.getPpmFormat().format(
+							pso.getPrecursorMzErrorValue()) + 
 					pso.getPrecursorMzErrorType().name();
-			String fragmentError = MRC2ToolBoxConfiguration.getPpmFormat().format(pso.getFragmentMzErrorValue()) + 
+			String fragmentError = 
+					MRC2ToolBoxConfiguration.getPpmFormat().format(
+							pso.getFragmentMzErrorValue()) + 
 					pso.getFragmentMzErrorType().name();
-			Object[] row = new Object[] {
+			Object[] obj = new Object[] {
 					pso,
 					pso.getHiResSearchOption().getDescription(),
 					pso.getHiResSearchType().getDescription(),
@@ -104,27 +117,39 @@ public class PepSearchParameterSetTableModel extends BasicTableModel {
 					pso.getMinMatchFactor(),
 					null,
 			};
-			super.addRow(row);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 	
-	public void setModelFromHitCountMap(Map<NISTPepSearchParameterObject, Long>paramCounts) {
+	public void setModelFromHitCountMap(
+			Map<NISTPepSearchParameterObject, Long>paramCounts) {
 
 		setRowCount(0);
+		if(paramCounts == null || paramCounts.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(Entry<NISTPepSearchParameterObject, Long> psoEntry  : paramCounts.entrySet()) {
 			
 			NISTPepSearchParameterObject pso = psoEntry.getKey();
 			String ignoreAroundPrecursor = "";
-			if(pso.isIgnorePeaksAroundPrecursor() && pso.getIgnorePeaksAroundPrecursorWindow() > 0.0d) {				
+			if(pso.isIgnorePeaksAroundPrecursor() 
+					&& pso.getIgnorePeaksAroundPrecursorWindow() > 0.0d) {				
 				ignoreAroundPrecursor = 
-						MRC2ToolBoxConfiguration.getPpmFormat().format(pso.getIgnorePeaksAroundPrecursorWindow()) + 
+						MRC2ToolBoxConfiguration.getPpmFormat().format(
+								pso.getIgnorePeaksAroundPrecursorWindow()) + 
 						pso.getIgnorePeaksAroundPrecursorAccuracyUnits().name();
 			}
-			String precursorError = MRC2ToolBoxConfiguration.getPpmFormat().format(pso.getPrecursorMzErrorValue()) + 
+			String precursorError = 
+					MRC2ToolBoxConfiguration.getPpmFormat().format(
+							pso.getPrecursorMzErrorValue()) + 
 					pso.getPrecursorMzErrorType().name();
-			String fragmentError = MRC2ToolBoxConfiguration.getPpmFormat().format(pso.getFragmentMzErrorValue()) + 
+			String fragmentError = 
+					MRC2ToolBoxConfiguration.getPpmFormat().format(
+							pso.getFragmentMzErrorValue()) + 
 					pso.getFragmentMzErrorType().name();
-			Object[] row = new Object[] {
+			Object[] obj = new Object[] {
 					pso,
 					pso.getHiResSearchOption().getDescription(),
 					pso.getHiResSearchType().getDescription(),
@@ -140,38 +165,11 @@ public class PepSearchParameterSetTableModel extends BasicTableModel {
 					pso.getMinMatchFactor(),
 					psoEntry.getValue(),
 			};
-			super.addRow(row);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
-
-
-
-
-//preSearchModeComboBox.setSelectedItem(PreSearchType.d);
-//searchTypeComboBox.setSelectedItem(HiResSearchType.G);
-//searchOptionComboBox.setSelectedItem(HiResSearchOption.z);
-//HiResSearchThreshold
-//hitRejectionComboBox.setSelectedItem(null);
-//chckbxReverseSearch.setSelected(false);
-//chckbxAlternativePeakMatching.setSelected(true);
-//chckbxIgnorePeaksAroundPrecursor.setSelected(true);
-//ignoreAroundPrecursorTextField.setText(MRC2ToolBoxConfiguration.getPpmFormat().format(1.6d));
-//ignoreAroundPrecursorAccuracyComboBox.setSelectedItem(MassErrorType.Da);
-//searchThresholdComboBox.setSelectedItem(HiResSearchThreshold.h);
-//pepScoreTypeComboBox.setSelectedItem(null);
-//precursorMzErrorTextField.setText(MRC2ToolBoxConfiguration.getPpmFormat().format(100.0d));
-//precursorMzErrorTypeComboBox.setSelectedItem(MassErrorType.ppm);
-//fragmentMzErrorTextField.setText(MRC2ToolBoxConfiguration.getPpmFormat().format(100.0d));
-//fragmentMzErrorTypeComboBox.setSelectedItem(MassErrorType.ppm);
-//mzRangeStartTextField.setText(MRC2ToolBoxConfiguration.getMzFormat().format(0.0d));
-//mzRangeEndTextField.setText(MRC2ToolBoxConfiguration.getMzFormat().format(2000.0d));
-//minIntensityTextField.setText(Integer.toString(1));
-//lossMwTextField.setText(MRC2ToolBoxConfiguration.getMzFormat().format(0.0d));
-//chckbxMatchPolarity.setSelected(true);
-//chckbxMatchCharge.setSelected(false);
-//chckbxSetHighPriorityProgramExecution.setSelected(true);
-//chckbxLoadLibrariesInMemory.setSelected(true);
 
 
 

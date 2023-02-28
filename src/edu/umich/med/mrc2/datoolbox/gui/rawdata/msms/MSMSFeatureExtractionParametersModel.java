@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.msms;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
@@ -43,9 +45,14 @@ public class MSMSFeatureExtractionParametersModel extends BasicTableModel {
 		};
 	}
 
-	public void setModelFromParametersList(Collection<MSMSExtractionParameterSet>parameterList) {
+	public void setModelFromParametersList(
+			Collection<MSMSExtractionParameterSet>parameterList) {
 
 		setRowCount(0);		
+		if(parameterList == null || parameterList.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MSMSExtractionParameterSet parSet : parameterList) {
 			
 			String polarityName = "Any";
@@ -57,8 +64,9 @@ public class MSMSFeatureExtractionParametersModel extends BasicTableModel {
 					parSet,
 					polarityName,
 				};
-			super.addRow(obj);
-		}		
+			rowData.add(obj);
+		}	
+		addRows(rowData);
 	}	
 }
 

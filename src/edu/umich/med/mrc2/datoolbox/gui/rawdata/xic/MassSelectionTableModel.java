@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.xic;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -48,17 +50,19 @@ public class MassSelectionTableModel extends BasicTableModel {
 	public void setTableModelFromDataPoints(Collection<MsPoint>points) {
 
 		setRowCount(0);
-		if(points == null && points.isEmpty())
+		if(points == null || points.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(MsPoint dp : points) {
 
 			Object[] obj = {
 					dp.getMz(),
 					dp.getIntensity(),
 			};
-			super.addRow(obj);
-		}		
+			rowData.add(obj);
+		}
+		addRows(rowData);
 	}
 }
 

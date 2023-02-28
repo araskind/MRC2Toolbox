@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.gui.mstools.mfgen;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.openscience.cdk.config.IsotopeFactory;
 import org.openscience.cdk.config.Isotopes;
@@ -60,8 +62,10 @@ public class ElementSelectionTableModel  extends BasicTableModel {
 	public void populateDefaultModel() throws IOException{
 
 		IsotopeFactory ifac = Isotopes.getInstance();
-		String[] elementSymbols = new String[]{"H","C","N","S","P","O","Na","K","Ca", "Mg", "Cl","I"};
+		String[] elementSymbols = 
+				new String[]{"H","C","N","S","P","O","Na","K","Ca", "Mg", "Cl","I"};
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(String element : elementSymbols){
 
 			 IIsotope elementObject = ifac.getMajorIsotope(element);
@@ -106,15 +110,15 @@ public class ElementSelectionTableModel  extends BasicTableModel {
 	            case "I":  min = 0; max = 3; enabled = false;
             		break;
 			 }
-
 			Object[] obj = {
 					enabled,
 					elementObject,
 					min,
 					max
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

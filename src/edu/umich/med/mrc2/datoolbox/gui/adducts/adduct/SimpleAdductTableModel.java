@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.adducts.adduct;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -53,6 +55,8 @@ public class SimpleAdductTableModel extends BasicTableModel {
 	public void setTableModelFromAdductList(Collection<Adduct> collection) {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
+				
 		for (Adduct ad : collection) {
 
 			Object[] obj = {
@@ -62,7 +66,8 @@ public class SimpleAdductTableModel extends BasicTableModel {
 				ad.getCharge(),
 				ad.getOligomericState(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

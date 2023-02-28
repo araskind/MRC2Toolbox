@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.io.matcher;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
@@ -53,6 +55,10 @@ public class DataFileSampleMatchTableModel extends BasicTableModel {
 	public void setModelFromSampleDataResultObjects(Set<SampleDataResultObject>objects) {
 		
 		setRowCount(0);
+		if(objects == null || objects.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(SampleDataResultObject o : objects) {
 			
 			Object[] obj = {
@@ -60,8 +66,9 @@ public class DataFileSampleMatchTableModel extends BasicTableModel {
 					o,
 					o.getSample()
 				};
-			super.addRow(obj);	
+			rowData.add(obj);	
 		}
+		addRows(rowData);
 	}
 }
 

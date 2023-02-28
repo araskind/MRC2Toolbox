@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.adducts.exchange;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -53,6 +55,7 @@ public class AdductSelectionTableModel extends BasicTableModel {
 	public void setTableModelFromAdductList(Collection<Adduct> collection) {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();		
 		for (Adduct ad : collection) {
 
 			Object[] obj = {
@@ -62,7 +65,8 @@ public class AdductSelectionTableModel extends BasicTableModel {
 				ad.getOligomericState(),
 				ad.getMassCorrection(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

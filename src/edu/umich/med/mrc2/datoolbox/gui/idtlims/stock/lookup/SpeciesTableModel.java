@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.lookup;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSBioSpecies;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -49,13 +51,18 @@ public class SpeciesTableModel extends BasicTableModel {
 	public void setModelFromSpeciesList(Collection<LIMSBioSpecies>speciesList) {
 
 		setRowCount(0);
+		if(speciesList == null || speciesList.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(LIMSBioSpecies species : speciesList) {
 
 			Object[] obj = {
 				species,
 				species.getSpeciesPrimaryName(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

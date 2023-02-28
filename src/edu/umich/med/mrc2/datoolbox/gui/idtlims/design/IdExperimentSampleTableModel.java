@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.design;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
@@ -62,10 +64,10 @@ public class IdExperimentSampleTableModel extends BasicTableModel {
 	public void setTableModelFromSamples(Collection<IDTExperimentalSample>samples) {
 
 		setRowCount(0);
-
-		if(samples.isEmpty())
+		if(samples == null || samples.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();		
 		for (IDTExperimentalSample sample : samples) {
 
 			StockSample ss = sample.getParentStockSample();
@@ -81,7 +83,10 @@ public class IdExperimentSampleTableModel extends BasicTableModel {
 				ss.getExternalSource(),
 				ss.getExternalId()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
+
+

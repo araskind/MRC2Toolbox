@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.results;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
@@ -69,9 +71,10 @@ public class ReferenceMSOneSummaryTableModel extends BasicTableModel {
 
 		setRowCount(0);
 
-		if(dataSummaries.isEmpty())
+		if(dataSummaries == null || dataSummaries.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();		
 		for (IDTMsSummary s : dataSummaries) {
 
 			Object[] obj = {
@@ -85,7 +88,11 @@ public class ReferenceMSOneSummaryTableModel extends BasicTableModel {
 					s.getDataExtractionMethod(),
 					s.getFeatureCount(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
+
+
+

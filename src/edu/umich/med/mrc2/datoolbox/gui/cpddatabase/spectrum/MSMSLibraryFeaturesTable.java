@@ -54,9 +54,8 @@ public class MSMSLibraryFeaturesTable extends BasicTable {
 		columnModel.getColumnById(MSMSLibraryFeaturesTableModel.PARENT_MZ_COLUMN)
 			.setCellRenderer(mzRenderer); // Parent mass
 
-		FormattedDecimalRenderer scoreRenderer = new FormattedDecimalRenderer(new DecimalFormat("#.##"), true);
-		columnModel.getColumnById(MSMSLibraryFeaturesTableModel.COLLISION_ENERGY_COLUMN)
-			.setCellRenderer(scoreRenderer);
+		FormattedDecimalRenderer scoreRenderer = 
+				new FormattedDecimalRenderer(new DecimalFormat("#.##"), true);
 		columnModel.getColumnById(MSMSLibraryFeaturesTableModel.ENTROPY_COLUMN)
 			.setCellRenderer(scoreRenderer);
 		

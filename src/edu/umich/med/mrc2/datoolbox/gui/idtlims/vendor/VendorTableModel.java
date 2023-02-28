@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.vendor;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -48,16 +50,18 @@ public class VendorTableModel extends BasicTableModel {
 	public void setTableModelFromManufacturers(Collection<Manufacturer>manufacturerList) {
 
 		setRowCount(0);
-		if(manufacturerList.isEmpty())
+		if(manufacturerList == null || manufacturerList.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (Manufacturer item : manufacturerList) {
 
 			Object[] obj = {
 				item,
 				item,		
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

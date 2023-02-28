@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
@@ -97,43 +99,44 @@ public class ClusterFeatureSelectionTableModel extends BasicTableModel {
 
 		currentCluster = featureCluster;
 		setRowCount(0);
-
-		if(currentCluster != null) {
-
-			for (Entry<DataPipeline, Collection<MsFeature>> entry : currentCluster.getFeatureMap().entrySet()) {
+		if(currentCluster == null) 
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for (Entry<DataPipeline, Collection<MsFeature>> entry : currentCluster.getFeatureMap().entrySet()) {
+			
+			for(MsFeature cf : entry.getValue()) {
 				
-				for(MsFeature cf : entry.getValue()) {
-					
-					String compoundName = "";
-					if(cf.getPrimaryIdentity() != null)
-						compoundName = cf.getPrimaryIdentity().getName();
+				String compoundName = "";
+				if(cf.getPrimaryIdentity() != null)
+					compoundName = cf.getPrimaryIdentity().getName();
 
-					Object[] obj = {
-						cf.equals(currentCluster.getPrimaryFeature()),
-						entry.getValue(),
-						cf.getQualityScore(),
-						cf,
-						compoundName,
-						cf.getBinnerAnnotation().getAnnotation(),
-						cf.getDefaultChemicalModification(),
-						cf.getRetentionTime(),
-						cf.getNeutralMass(),
-						cf.getMonoisotopicMz(),
-						cf.getAbsoluteObservedCharge(),
-						cf.getKmd(),
-						cf.getModifiedKmd(),
-						cf.getStatsSummary().getPooledMean(),
-						cf.getStatsSummary().getPooledRsd(),
-						cf.getStatsSummary().getPooledFrequency(),
-						cf.getStatsSummary().getSampleMean(),
-						cf.getStatsSummary().getSampleRsd(),
-						cf.getStatsSummary().getSampleFrequency(),
-						entry.getKey()
-					};
-					super.addRow(obj);
-				}
+				Object[] obj = {
+					cf.equals(currentCluster.getPrimaryFeature()),
+					entry.getValue(),
+					cf.getQualityScore(),
+					cf,
+					compoundName,
+					cf.getBinnerAnnotation().getAnnotation(),
+					cf.getDefaultChemicalModification(),
+					cf.getRetentionTime(),
+					cf.getNeutralMass(),
+					cf.getMonoisotopicMz(),
+					cf.getAbsoluteObservedCharge(),
+					cf.getKmd(),
+					cf.getModifiedKmd(),
+					cf.getStatsSummary().getPooledMean(),
+					cf.getStatsSummary().getPooledRsd(),
+					cf.getStatsSummary().getPooledFrequency(),
+					cf.getStatsSummary().getSampleMean(),
+					cf.getStatsSummary().getSampleRsd(),
+					cf.getStatsSummary().getSampleFrequency(),
+					entry.getKey()
+				};
+				rowData.add(obj);
 			}
 		}
+		addRows(rowData);	
 	}
 
 	public MsFeatureCluster getCurrentCluster() {

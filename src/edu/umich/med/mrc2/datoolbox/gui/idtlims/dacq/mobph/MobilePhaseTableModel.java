@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.mobph;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -52,6 +54,7 @@ public class MobilePhaseTableModel extends BasicTableModel {
 		if(phases.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MobilePhase phase : phases) {
 
 			if(phase == null)
@@ -61,8 +64,9 @@ public class MobilePhaseTableModel extends BasicTableModel {
 					phase,
 					phase.getName(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

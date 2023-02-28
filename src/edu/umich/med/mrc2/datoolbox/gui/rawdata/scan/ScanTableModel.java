@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.scan;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -80,7 +82,7 @@ public class ScanTableModel extends BasicTableModel {
 		scans.isAutoloadSpectra(true);
 		scans.setDefaultStorageStrategy(StorageStrategy.SOFT);		
 		Map<Integer, IScan> scanIndex = RawDataUtils.getCompleteScanMap(scans);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (Entry<Integer, IScan> entry : scanIndex.entrySet()) {
 
 			IScan sc = entry.getValue();
@@ -116,8 +118,9 @@ public class ScanTableModel extends BasicTableModel {
 					precMz,
 					precRange,
 				};
-			super.addRow(obj);
-		}		
+			rowData.add(obj);
+		}
+		addRows(rowData);
 	}	
 }
 

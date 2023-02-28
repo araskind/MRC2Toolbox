@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.lookup;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
@@ -61,6 +63,10 @@ public class FeatureLookupDataSetListTableModel extends BasicTableModel {
 			Collection<FeatureLookupDataSet>dataSetList) {
 
 		setRowCount(0);
+		if(dataSetList == null || dataSetList .isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (FeatureLookupDataSet dataSet : dataSetList) {
 
 			Object[] obj = {
@@ -71,8 +77,9 @@ public class FeatureLookupDataSetListTableModel extends BasicTableModel {
 				dataSet.getDateCreated(),
 				dataSet.getLastModified(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 	
 	public int getFeatureLookupDataSetRow(FeatureLookupDataSet dataSet) {

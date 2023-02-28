@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mptrack.ref.tcode;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACTissueCode;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -48,10 +50,10 @@ public class TissueCodeTableModel extends BasicTableModel {
 	public void setTableModelFromTissueCodes(Collection<MoTrPACTissueCode>codes) {
 
 		setRowCount(0);
-
-		if(codes.isEmpty())
+		if(codes == null || codes.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MoTrPACTissueCode code : codes) {
 
 			Object[] obj = {
@@ -59,7 +61,8 @@ public class TissueCodeTableModel extends BasicTableModel {
 				code,
 				code.getDescription()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

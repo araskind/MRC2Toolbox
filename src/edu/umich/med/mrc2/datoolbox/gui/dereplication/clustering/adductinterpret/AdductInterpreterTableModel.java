@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering.adductinterpret;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -96,7 +98,6 @@ public class AdductInterpreterTableModel extends BasicTableModel {
 			MsFeature referenceFeature,
 			Adduct referenceModification) {
 
-		setRowCount(0);
 		currentCluster = featureCluster;
 		if (currentCluster != null)
 			setTableModelFromFeatureList(
@@ -111,7 +112,8 @@ public class AdductInterpreterTableModel extends BasicTableModel {
 			Map<MsFeature, Set<Adduct>> chemModMap) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
+				
 		//	Calculate neutral mass using primary modification
 		MsFeature primary = currentCluster.getPrimaryFeature();
 		for (MsFeature cf : currentCluster.getFeatures()) {
@@ -169,9 +171,10 @@ public class AdductInterpreterTableModel extends BasicTableModel {
 					true,
 					entry.getKey()
 				};
-				super.addRow(obj);
+				rowData.add(obj);
 			}
 		}
+		addRows(rowData);
 	}
 
 	private void setTableModelFromFeatureList(
@@ -182,7 +185,7 @@ public class AdductInterpreterTableModel extends BasicTableModel {
 			Adduct referenceModification) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		neutralMass = MsUtils.calculateNeutralMass(
 				referenceFeature.getMonoisotopicMz(),
 				referenceModification);
@@ -233,9 +236,10 @@ public class AdductInterpreterTableModel extends BasicTableModel {
 					true,
 					entry.getKey()
 				};
-				super.addRow(obj);
+				rowData.add(obj);
 			}
 		}
+		addRows(rowData);
 	}
 
 	@Override

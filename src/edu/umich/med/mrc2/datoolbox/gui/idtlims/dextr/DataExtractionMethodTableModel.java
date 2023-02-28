@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
@@ -61,9 +63,10 @@ public class DataExtractionMethodTableModel extends BasicTableModel {
 
 		setRowCount(0);
 
-		if(methods.isEmpty())
+		if(methods == null || methods.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (DataExtractionMethod method : methods) {
 
 			Object[] obj = {
@@ -74,7 +77,8 @@ public class DataExtractionMethodTableModel extends BasicTableModel {
 					method.getCreatedOn(),
 					method.getSoftware(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

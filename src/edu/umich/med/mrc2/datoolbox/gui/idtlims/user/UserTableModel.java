@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.user;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.LIMSUserComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -50,12 +52,19 @@ public class UserTableModel extends BasicTableModel {
 	public void setTableModelFromUserList(Collection<LIMSUser>users) {
 
 		setRowCount(0);
-		users.stream().sorted(new LIMSUserComparator(SortProperty.Name)).forEach(user -> {
-			Object[] obj = {
-					user,
-					user.getInfo()
-				};
-				super.addRow(obj);
-		});
+		if(users == null || users.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		users.stream().
+			sorted(new LIMSUserComparator(SortProperty.Name)).
+			forEach(user -> {
+				Object[] obj = {
+						user,
+						user.getInfo()
+					};
+				rowData.add(obj);
+			});
+		addRows(rowData);
 	}
 }

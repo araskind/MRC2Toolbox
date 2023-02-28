@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.expsetup.expdesign.editor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
@@ -58,16 +60,20 @@ public class FactorEditorTableModel extends BasicTableModel {
 		allowEdit = true;
 		Set<ExperimentDesignFactor> activeSet = designSubset.getOrderedDesign().keySet();
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		
 		//	Add active factors
 		activeSet.stream().
 			filter(f -> !f.equals(ReferenceSamplesManager.getSampleControlTypeFactor())).
-			forEach(f -> super.addRow(new Object[] { f }));
+			forEach(f -> rowData.add(new Object[] { f }));
 
 		//	Add inactive factors
 		MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getFactors().stream().
 			filter(f -> !activeSet.contains(f)).
 			filter(f -> !f.equals(ReferenceSamplesManager.getSampleControlTypeFactor())).
-			forEach(f -> super.addRow(new Object[] { f }));
+			forEach(f -> rowData.add(new Object[] { f }));
+		
+		addRows(rowData);
 	}
 
 	public void setEditingAllowed(boolean allowEdit) {

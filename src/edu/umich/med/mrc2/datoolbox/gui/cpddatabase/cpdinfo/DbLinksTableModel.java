@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
@@ -51,7 +52,7 @@ public class DbLinksTableModel extends BasicTableModel {
 	public void setModelFromLinks(List<CompoundIdentity> dbLinks) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (CompoundIdentity id : dbLinks) {
 
 			if(id.getPrimaryDatabase() == null)
@@ -61,8 +62,9 @@ public class DbLinksTableModel extends BasicTableModel {
 				id.getPrimaryDatabase().getName(),
 				id
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

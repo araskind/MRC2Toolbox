@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.query;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.IDTSearchQuery;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -51,7 +53,11 @@ public class IDTrackerSearchQueryListingTableModel extends BasicTableModel {
 	
 	public void setTableModelFromQueryList(Collection<IDTSearchQuery>queryList) {
 
-		setRowCount(0);		
+		setRowCount(0);	
+		if(queryList == null || queryList.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(IDTSearchQuery query : queryList) {
 			
 			Object[] obj = {
@@ -59,7 +65,8 @@ public class IDTrackerSearchQueryListingTableModel extends BasicTableModel {
 					query.getAuthor(),
 					query.getCreatedOn(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

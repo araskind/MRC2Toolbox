@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.experiment;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -59,7 +61,10 @@ public class IDTrackerExperimentsTableModel extends BasicTableModel {
 	public void setModelFromExperimentCollection(Collection<LIMSExperiment>experimentCollection) {
 
 		setRowCount(0);
-
+		if(experimentCollection == null || experimentCollection.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(LIMSExperiment e : experimentCollection) {
 
 			LIMSUser contact = null;
@@ -74,7 +79,8 @@ public class IDTrackerExperimentsTableModel extends BasicTableModel {
 					contact,
 					e.getStartDate()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

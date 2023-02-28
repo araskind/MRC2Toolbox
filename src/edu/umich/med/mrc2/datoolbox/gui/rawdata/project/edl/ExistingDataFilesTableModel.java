@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.edl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -63,6 +65,10 @@ public class ExistingDataFilesTableModel extends BasicTableModel {
 			Map<LIMSExperiment, Collection<DataFile>>existingDataFiles) {
 
 		setRowCount(0);
+		if(existingDataFiles == null || existingDataFiles.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (Entry<LIMSExperiment, Collection<DataFile>>entry : existingDataFiles.entrySet()) {
 			
 			LIMSExperiment experiment = entry.getKey();
@@ -75,8 +81,9 @@ public class ExistingDataFilesTableModel extends BasicTableModel {
 						df.getDataAcquisitionMethod(),
 						df.getInjectionTime(),
 					};
-				super.addRow(obj);
+				rowData.add(obj);
 			}
 		}
+		addRows(rowData);
 	}
 }

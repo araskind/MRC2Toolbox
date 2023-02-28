@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpddatabase.spectrum;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
@@ -53,18 +55,20 @@ public class MSMSLibraryFeaturesTableModel extends BasicTableModel {
 			new ColumnContext(POLARITY_COLUMN, String.class, true),
 			new ColumnContext(PARENT_MZ_COLUMN, Double.class, false),
 			new ColumnContext(IONIZATION_TYPE_COLUMN, String.class, true),
-			new ColumnContext(COLLISION_ENERGY_COLUMN, Double.class, false),			
+			new ColumnContext(COLLISION_ENERGY_COLUMN, String.class, false),			
 			new ColumnContext(ENTROPY_COLUMN, Double.class, false),
 			new ColumnContext(PEAK_NUMBER_COLUMN, Integer.class, false),
 		};
 	}
 
-	public void setTableModelFromLibraryFeatureCollection(Collection<MsMsLibraryFeature> libraryFeatures) {
+	public void setTableModelFromLibraryFeatureCollection(
+			Collection<MsMsLibraryFeature> libraryFeatures) {
 
 		setRowCount(0);
 		if(libraryFeatures == null || libraryFeatures.isEmpty())
 			return;
 		
+		List<Object[]>rowData = new ArrayList<Object[]>();		
 		for(MsMsLibraryFeature lf : libraryFeatures) {
 			
 			double parentMz = 0.0d;
@@ -76,7 +80,8 @@ public class MSMSLibraryFeaturesTableModel extends BasicTableModel {
 				ionizationType = lf.getIonizationType().getDescription();
 			
 			String libName = null;
-			ReferenceMsMsLibrary refLib = IDTDataCash.getReferenceMsMsLibraryById(lf.getMsmsLibraryIdentifier());
+			ReferenceMsMsLibrary refLib = 
+					IDTDataCash.getReferenceMsMsLibraryById(lf.getMsmsLibraryIdentifier());
 			if(refLib != null)
 				libName = refLib.getName();
 			
@@ -90,7 +95,8 @@ public class MSMSLibraryFeaturesTableModel extends BasicTableModel {
 				lf.getSpectrumEntropy(),
 				lf.getSpectrum().size()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

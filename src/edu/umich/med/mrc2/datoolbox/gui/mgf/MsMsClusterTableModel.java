@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mgf;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umich.med.mrc2.datoolbox.data.MsMsCluster;
 import edu.umich.med.mrc2.datoolbox.data.SimpleMsMs;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -62,23 +65,24 @@ public class MsMsClusterTableModel extends BasicTableModel {
 	}
 
 	public MsMsCluster getCurrentCluster() {
-
 		return currentCluster;
 	}
 
 	public void reloadData() {
-
 		setTableModelFromFeatureCluster(currentCluster);
 	}
 
 	public void setTableModelFromFeatureCluster(MsMsCluster featureCluster) {
 
 		setRowCount(0);
+		if(featureCluster == null 
+				|| featureCluster.getClusterFeatures().isEmpty())
+			return;
 
 		currentCluster = featureCluster;
 		SimpleMsMs topHit = currentCluster.getBestCandidate();
 		boolean primary;
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (SimpleMsMs msms : featureCluster.getClusterFeatures()) {
 
 			primary = false;
@@ -96,10 +100,15 @@ public class MsMsClusterTableModel extends BasicTableModel {
 				msms.getTotalFragmentIntensity(),
 				msms.getDataPoints().length - 1
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
+
+
+
+
 
 
 

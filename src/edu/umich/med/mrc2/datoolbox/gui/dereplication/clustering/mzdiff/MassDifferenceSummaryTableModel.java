@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering.mzdiff;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.DoubleValueBin;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -51,6 +53,7 @@ public class MassDifferenceSummaryTableModel extends BasicTableModel {
 	public void setModelFromBins(Collection<DoubleValueBin>bins) {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(DoubleValueBin bin : bins) {
 
 			Object[] obj = {
@@ -59,7 +62,8 @@ public class MassDifferenceSummaryTableModel extends BasicTableModel {
 				bin.getStatistics().getN(),
 				bin.getStatistics().getStandardDeviation()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

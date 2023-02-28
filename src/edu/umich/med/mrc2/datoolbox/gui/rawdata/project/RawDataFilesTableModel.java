@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.project;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
@@ -50,17 +52,19 @@ public class RawDataFilesTableModel extends BasicTableModel {
 		if(clear)
 			setRowCount(0);
 		
-		if(dataFiles.length == 0)
+		if(dataFiles == null || dataFiles.length == 0)
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (File df : dataFiles) {
 
 			Object[] obj = {
 					df,
 					df.getAbsolutePath(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

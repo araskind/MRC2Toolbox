@@ -22,7 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.gui.automator;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
@@ -46,14 +48,15 @@ public class FilesTableModel extends BasicTableModel {
 	public void setTableModelFromAssayCollection(Collection<File> files) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(File a : files) {
 
 			Object[] obj = {
 					a
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

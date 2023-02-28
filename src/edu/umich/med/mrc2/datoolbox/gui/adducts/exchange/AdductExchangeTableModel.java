@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.adducts.exchange;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.AdductExchange;
@@ -52,14 +54,15 @@ public class AdductExchangeTableModel extends BasicTableModel {
 	public void setTableModelFromAdductExchangeList(Collection<AdductExchange> list) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();				
 		for (AdductExchange ex : list) {
 
 			Object[] obj = { 
 					ex.getLeavingAdduct(), 
 					ex.getComingAdduct(), 
 					ex };
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

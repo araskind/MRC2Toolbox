@@ -22,7 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -69,10 +71,20 @@ public class NISTLibraryTableModel extends BasicTableModel {
 	public void setModelFromFiles(Map<File, Boolean> libFiles) {
 
 		setRowCount(0);
+		if(libFiles == null || libFiles.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();			
 		for(Entry<File, Boolean>fd  : libFiles.entrySet()) {
+			
 			if(fd.getKey().exists())
-				super.addRow(new Object[] {fd.getValue(), fd.getKey()});
+				rowData.add(
+						new Object[] {
+							fd.getValue(), 
+							fd.getKey()
+						});
 		}
+		addRows(rowData);
 	}
 }
 

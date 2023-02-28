@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.instrument;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -60,9 +62,10 @@ public class InstrumentTableModel extends BasicTableModel {
 
 		setRowCount(0);
 
-		if(instruments.isEmpty())
+		if(instruments == null || instruments.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (LIMSInstrument instrument : instruments) {
 
 			Object[] obj = {
@@ -73,8 +76,9 @@ public class InstrumentTableModel extends BasicTableModel {
 					instrument.getChromatographicSeparationType().getDescription(),
 					instrument.getManufacturer(),instrument.getSerialNumber(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mptrack.report;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
@@ -67,7 +69,8 @@ public class MoTrPACReportTableModel extends BasicTableModel {
 		columnArray[7] = new ColumnContext(FILE_DOWNLOAD_COLUMN, MoTrPACReport.class, false);
 		int columnCount = 8;
 		for(MoTrPACReportCodeBlock block : codeBlocks) {
-			columnArray[columnCount] = new ColumnContext(block.getBlockId(), MoTrPACReportCode.class, false);
+			columnArray[columnCount] = 
+					new ColumnContext(block.getBlockId(), MoTrPACReportCode.class, false);
 			columnCount++;
 		}
 	}
@@ -75,7 +78,13 @@ public class MoTrPACReportTableModel extends BasicTableModel {
 	public void setTableModelFromReports(Collection<MoTrPACReport> reports) {
 		
 		setRowCount(0);
-		Collection<MoTrPACReportCodeBlock> codeBlocks = MoTrPACDatabaseCash.getMotrpacReportCodeBlocks();
+		if(reports == null || reports.isEmpty())
+			return;
+		
+		Collection<MoTrPACReportCodeBlock> codeBlocks = 
+				MoTrPACDatabaseCash.getMotrpacReportCodeBlocks();
+		
+		List<Object[]>rowDataList = new ArrayList<Object[]>();
 		for(MoTrPACReport report : reports) {
 			
 			Object[] rowData = new Object[8 + codeBlocks.size()];
@@ -89,13 +98,15 @@ public class MoTrPACReportTableModel extends BasicTableModel {
 			rowData[7] = report;
 			int columnCount = 8;
 			
-			Map<MoTrPACReportCodeBlock, MoTrPACReportCode> reportStage = report.getReportStage();
+			Map<MoTrPACReportCodeBlock, MoTrPACReportCode> reportStage = 
+					report.getReportStage();
 			for(MoTrPACReportCodeBlock block : codeBlocks) {
 				rowData[columnCount] = reportStage.get(block);
 				columnCount++;
 			}
-			super.addRow(rowData);
-		}	
+			rowDataList.add(rowData);
+		}
+		addRows(rowDataList);
 	}
 }
 

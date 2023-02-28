@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.expsetup.expdesign;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
@@ -47,14 +50,16 @@ public class DesignSubsetTableModel extends BasicTableModel {
 	public void setModelFromProject(DataAnalysisProject currentProject) {
 
 		setRowCount(0);
-		if(currentProject != null) {
+		if(currentProject != null) 
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for (ExperimentDesignSubset eds : currentProject.getExperimentDesign().getDesignSubsets()) {
 
-			for (ExperimentDesignSubset eds : currentProject.getExperimentDesign().getDesignSubsets()) {
-
-				Object[] obj = new Object[] { eds.isActive(), eds };
-				super.addRow(obj);
-			}
+			Object[] obj = new Object[] { eds.isActive(), eds };
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

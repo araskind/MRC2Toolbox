@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.fdata;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +104,7 @@ public class FeatureDataTableModel extends BasicTableModel {
 	public void setTableModelFromFeatureMap(Map<DataPipeline, Collection<MsFeature>> featureMap) {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		int count = 1;
 		for (Entry<DataPipeline, Collection<MsFeature>> entry : featureMap.entrySet()) {
 			
@@ -156,10 +158,11 @@ public class FeatureDataTableModel extends BasicTableModel {
 						cf.getStatsSummary().getSampleFrequency(),
 						entry.getKey()
 				};
-				super.addRow(obj);
+				rowData.add(obj);
 				count++;
 			}
 		}
+		addRows(rowData);
 	}
 
 	public void updateFeatureData(MsFeature cf) {

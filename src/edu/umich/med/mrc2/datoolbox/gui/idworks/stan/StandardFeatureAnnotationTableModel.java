@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.stan;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -46,20 +48,23 @@ public class StandardFeatureAnnotationTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromStandardFeatureAnnotationList(Collection<StandardFeatureAnnotation> annotationList) {
+	public void setTableModelFromStandardFeatureAnnotationList(
+			Collection<StandardFeatureAnnotation> annotationList) {
 
 		setRowCount(0);
-		if(annotationList.isEmpty())
+		if(annotationList == null || annotationList.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (StandardFeatureAnnotation annotation : annotationList) {
 
 			Object[] obj = {
 				annotation,
 				annotation.getText(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

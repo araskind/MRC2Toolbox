@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpddatabase.curator.struct;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentityCluster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -45,10 +48,12 @@ public class CompoundStructureTableModel extends BasicTableModel {
 	public void setModelFromCompoundIdentityCluster(CompoundIdentityCluster cluster) {
 		
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(CompoundIdentity id : cluster.getIdList()) {
 			
 			Object[] obj = { id };
-			super.addRow(obj);
-		}		
+			rowData.add(obj);
+		}
+		addRows(rowData);
 	}
 }

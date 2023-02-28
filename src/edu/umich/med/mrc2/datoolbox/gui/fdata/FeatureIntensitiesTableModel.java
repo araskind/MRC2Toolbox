@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.fdata;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -77,6 +79,7 @@ public class FeatureIntensitiesTableModel extends BasicTableModel {
 		if(project == null)
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		long[] coordinates = new long[2];
 		long[] nameCoordinates = new long[2];
 		int rowCount = 1;
@@ -111,12 +114,13 @@ public class FeatureIntensitiesTableModel extends BasicTableModel {
 								value,
 								//	iputed
 								};
-						super.addRow(obj);
+						rowData.add(obj);
 						rowCount++;
 					}
 				}
 			}
 		}
+		addRows(rowData);
 	}
 }
 

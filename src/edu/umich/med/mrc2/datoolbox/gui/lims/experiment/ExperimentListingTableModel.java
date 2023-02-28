@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.lims.experiment;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
@@ -63,9 +65,14 @@ public class ExperimentListingTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setModelFromExperimentCollection(Collection<LIMSExperiment>experimentCollection) {
+	public void setModelFromExperimentCollection(
+			Collection<LIMSExperiment>experimentCollection) {
 
 		setRowCount(0);
+		if(experimentCollection == null || experimentCollection.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(LIMSExperiment e : experimentCollection) {
 
 			LIMSUser pi = null;
@@ -88,7 +95,10 @@ public class ExperimentListingTableModel extends BasicTableModel {
 					e.getStartDate(),
 					e.getNihGrant()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
+
+

@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpddatabase.curator.ctab;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentityCluster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -60,6 +63,7 @@ public class CompoundIdentityClusterTableModel extends BasicTableModel {
 	public void setModelFromCompoundIdentityCluster(CompoundIdentityCluster cluster) {
 		
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(CompoundIdentity id : cluster.getIdList()) {
 			
 			Object[] obj = {
@@ -71,8 +75,8 @@ public class CompoundIdentityClusterTableModel extends BasicTableModel {
 					id.getExactMass(),
 					ChemInfoUtils.getChargeFromInChiKey(id.getInChiKey()),
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
-		
+		addRows(rowData);
 	}
 }

@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.library.search;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -47,7 +49,8 @@ public class LibSearchLibraryTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromLibraryCollection(Collection<CompoundLibrary> libraryCollection) {
+	public void setTableModelFromLibraryCollection(
+			Collection<CompoundLibrary> libraryCollection) {
 
 		CompoundLibrary[] libraries =
 				libraryCollection.toArray(new CompoundLibrary[libraryCollection.size()]);
@@ -57,7 +60,10 @@ public class LibSearchLibraryTableModel extends BasicTableModel {
 	private void setTableModelFromLibraryList(CompoundLibrary[] libraries) {
 
 		setRowCount(0);
-
+		if(libraries == null || libraries.length == 0)
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(CompoundLibrary l : libraries){
 
 			Object[] obj = {
@@ -65,8 +71,9 @@ public class LibSearchLibraryTableModel extends BasicTableModel {
 				l,
 				l.getLibraryDescription()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

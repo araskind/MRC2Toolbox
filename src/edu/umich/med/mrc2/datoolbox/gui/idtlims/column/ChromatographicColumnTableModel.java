@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.column;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
@@ -29,7 +31,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-@SuppressWarnings("unused")
 public class ChromatographicColumnTableModel extends BasicTableModel {
 
 	/**
@@ -60,7 +61,7 @@ public class ChromatographicColumnTableModel extends BasicTableModel {
 	public void setTableModelFromColumns(Collection<LIMSChromatographicColumn>columns) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (LIMSChromatographicColumn column : columns) {
 
 			Object[] obj = {
@@ -71,7 +72,8 @@ public class ChromatographicColumnTableModel extends BasicTableModel {
 				column.getManufacturer(),
 				column.getCatalogNumber(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

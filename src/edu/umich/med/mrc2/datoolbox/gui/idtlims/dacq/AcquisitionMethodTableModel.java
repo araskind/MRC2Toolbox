@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
@@ -69,10 +71,10 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 	public void setTableModelFromMethods(Collection<DataAcquisitionMethod>methods) {
 
 		setRowCount(0);
-
-		if(methods.isEmpty())
+		if(methods == null || methods.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (DataAcquisitionMethod method : methods) {
 
 			LIMSChromatographicColumn columnName = null;
@@ -91,8 +93,9 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 					method.getCreatedOn(),
 					method.getSoftware(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

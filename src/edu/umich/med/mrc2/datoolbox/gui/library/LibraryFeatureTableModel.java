@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.library;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -84,63 +86,60 @@ public class LibraryFeatureTableModel extends BasicTableModel {
 	public void setTableModelFromFeatureList(Collection<LibraryMsFeature> featureList) {
 
 		setRowCount(0);
+		if(featureList == null || featureList.isEmpty())
+			return;
+
+		List<Object[]>rowData = new ArrayList<Object[]>();		
 		int count = 1;
+		for (LibraryMsFeature lf : featureList) {
 
-		if(!featureList.isEmpty()){
+			MsFeatureIdentity identity = lf.getPrimaryIdentity();
+			String formula = "";
+			int innateCharge = 0;
+			if(identity != null) {
+				formula = identity.getCompoundIdentity().getFormula();
 
-			for (LibraryMsFeature lf : featureList) {
-
-				MsFeatureIdentity identity = lf.getPrimaryIdentity();
-
-				String formula = "";
-				int innateCharge = 0;
-
-				if(identity != null) {
-					formula = identity.getCompoundIdentity().getFormula();
-
-					String smiles = identity.getCompoundIdentity().getSmiles();
-					if(smiles != null)
-						innateCharge = StringUtils.countMatches(smiles, "+") - StringUtils.countMatches(smiles, "-");
-				}
-				boolean hasMs = false;
-				boolean hasMsMs = false;
-
-				if(lf.getSpectrum() != null) {
-
-					if(!lf.getSpectrum().getAdducts().isEmpty())
-						hasMs = true;
-
-					if(!lf.getSpectrum().getTandemSpectra().isEmpty())
-						hasMsMs = true;
-				}
-				String compoundName = lf.getName();
-				CompoundIdentificationConfidence idc = null;
-				if(lf.getPrimaryIdentity() != null) {
-
-					compoundName = lf.getPrimaryIdentity().getName();
-					idc= lf.getPrimaryIdentity().getConfidenceLevel();
-				}
-
-				Object[] obj = {
-					count,
-					lf.isActive(),
-					lf.isQcStandard(),
-					identity,
-					lf,
-					compoundName,
-					formula,
-					lf.getNeutralMass(),
-					lf.getRetentionTime(),
-					hasMs,
-					hasMsMs,
-					innateCharge,
-					idc,
-					!lf.getAnnotations().isEmpty()
-				};
-				super.addRow(obj);
-				count++;
+				String smiles = identity.getCompoundIdentity().getSmiles();
+				if(smiles != null)
+					innateCharge = StringUtils.countMatches(smiles, "+") - StringUtils.countMatches(smiles, "-");
 			}
-		}
+			boolean hasMs = false;
+			boolean hasMsMs = false;
+			if(lf.getSpectrum() != null) {
+
+				if(!lf.getSpectrum().getAdducts().isEmpty())
+					hasMs = true;
+
+				if(!lf.getSpectrum().getTandemSpectra().isEmpty())
+					hasMsMs = true;
+			}
+			String compoundName = lf.getName();
+			CompoundIdentificationConfidence idc = null;
+			if(lf.getPrimaryIdentity() != null) {
+
+				compoundName = lf.getPrimaryIdentity().getName();
+				idc= lf.getPrimaryIdentity().getConfidenceLevel();
+			}
+			Object[] obj = {
+				count,
+				lf.isActive(),
+				lf.isQcStandard(),
+				identity,
+				lf,
+				compoundName,
+				formula,
+				lf.getNeutralMass(),
+				lf.getRetentionTime(),
+				hasMs,
+				hasMsMs,
+				innateCharge,
+				idc,
+				!lf.getAnnotations().isEmpty()
+			};
+			rowData.add(obj);
+			count++;
+		}		
+		addRows(rowData);
 	}
 
 	public void updateFeatureData(LibraryMsFeature lf) {

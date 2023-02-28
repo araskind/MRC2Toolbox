@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
@@ -83,12 +85,10 @@ public class IdentificationResultsTableModel extends BasicTableModel {
 	public void setModelFromIdList(Set<MsFeatureIdentity> idList, MsFeatureIdentity defaultId) {
 
 		setRowCount(0);
-		if(idList == null || defaultId == null)
+		if(idList == null || idList.isEmpty() || defaultId == null)
 			return;
 
-		if(idList.isEmpty())
-			return;
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsFeatureIdentity id : idList) {
 
 			double deltaMz = MsUtils.getPpmMassErrorForIdentity(parentFeature, id);
@@ -115,8 +115,9 @@ public class IdentificationResultsTableModel extends BasicTableModel {
 				id.getConfidenceLevel().getName(),
 				id.getIdSource()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 	
 	private Double calculateRetentionShift(MsFeatureIdentity id) {

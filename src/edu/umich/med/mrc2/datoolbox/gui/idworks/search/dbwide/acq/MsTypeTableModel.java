@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.acq;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -49,17 +51,19 @@ public class MsTypeTableModel extends BasicTableModel {
 	public void setTableModelFromMsTypeList(Collection<MsType>typeList) {
 
 		setRowCount(0);
-		if(typeList.isEmpty())
+		if(typeList == null || typeList.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsType type : typeList) {
 
 			Object[] obj = {
 				type,
 				type.getDescription(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

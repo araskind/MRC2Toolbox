@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.tables.pref;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.SortOrder;
 
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -49,7 +52,10 @@ public class TablePreferencesTableModel extends BasicTableModel {
 	public void setTableModelFromColumns(TableColumnState[] columns) {
 
 		setRowCount(0);
+		if(columns == null || columns.length == 0)
+			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (TableColumnState column : columns) {
 
 			Object[] obj = {
@@ -57,7 +63,8 @@ public class TablePreferencesTableModel extends BasicTableModel {
 				column.getColumnName(),				
 				column.getSortOrder(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

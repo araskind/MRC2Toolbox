@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mstools.mfgen;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.interfaces.IMolecularFormulaSet;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
@@ -57,33 +60,35 @@ public class FormulaResultsTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setFromFormulaGeneratorResults(IMolecularFormulaSet formulas, double mz, Adduct ad) {
+	public void setFromFormulaGeneratorResults(
+			IMolecularFormulaSet formulas, double mz, Adduct ad) {
 
 		setRowCount(0);
+		if(formulas == null)
+			return;
 
-		if(formulas != null){
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for(IMolecularFormula mf : formulas.molecularFormulas()){
 
-			for(IMolecularFormula mf : formulas.molecularFormulas()){
+			if(mf.getIsotopeCount() > 0) {
 
-				if(mf.getIsotopeCount() > 0) {
-
-					String formula = MolecularFormulaManipulator.getString(mf);
-					double formulaMass = MolecularFormulaManipulator.getMajorIsotopeMass(mf);
-					double neutralMass = MsUtils.calculateNeutralMass(mz, ad);
-					double error = (neutralMass - formulaMass) / neutralMass * 1000000;
-
-					Object[] obj = {
-							formula,
-							mz,
-							formulaMass,
-							neutralMass,
-							error,
-							Math.abs(error)
-						};
-					super.addRow(obj);
-				}
+				String formula = MolecularFormulaManipulator.getString(mf);
+				double formulaMass = MolecularFormulaManipulator.getMass(
+						mf, MolecularFormulaManipulator.MonoIsotopic);
+				double neutralMass = MsUtils.calculateNeutralMass(mz, ad);
+				double error = (neutralMass - formulaMass) / neutralMass * 1000000;
+				Object[] obj = {
+						formula,
+						mz,
+						formulaMass,
+						neutralMass,
+						error,
+						Math.abs(error)
+					};
+				rowData.add(obj);
 			}
 		}
+		addRows(rowData);
 	}
 }
 

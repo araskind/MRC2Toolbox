@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
@@ -55,15 +57,16 @@ public class CompoundSynonymTableModel extends BasicTableModel {
 	public void setModelFromCompoundNameSet(CompoundNameSet nameSet) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (Entry<String, CompoundNameCategory> entry : nameSet.getSynonyms().entrySet()) {
 
 			Object[] obj = {
 				entry.getValue().equals(CompoundNameCategory.PRI),
 				entry.getKey()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

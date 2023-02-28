@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundConcentration;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -66,9 +68,10 @@ public class ConcentrationsTableModel extends BasicTableModel {
 		if(concentrations == null || concentrations.isEmpty())
 			return;
 		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(CompoundConcentration conc : concentrations) {
 			
-			Object[] rowData = {
+			Object[] obj = {
 					conc.getBiofluid(),
 					conc.getValue(),
 					conc.getUnits(),
@@ -79,8 +82,9 @@ public class ConcentrationsTableModel extends BasicTableModel {
 					conc.getFlag(),
 					conc.getType(),					
 			};
-			super.addRow(rowData);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.ms1;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
@@ -95,6 +97,10 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 	public void setTableModelFromFeatureList(Collection<MSFeatureInfoBundle> featureList) {
 
 		setRowCount(0);
+		if(featureList == null || featureList.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MSFeatureInfoBundle bundle : featureList) {
 
 			MsFeature cf = bundle.getMsFeature();
@@ -148,8 +154,9 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 				bundle.getAcquisitionMethod(),
 				bundle.getDataExtractionMethod(),
 			};
-			super.addRow(obj);
-		}
+			rowData.add(obj);
+		}		
+		addRows(rowData);
 	}
 
 	public void updateFeatureData(MSFeatureInfoBundle bundle) {

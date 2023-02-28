@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.tables.pref;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.SortOrder;
 
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -47,7 +50,10 @@ public class SorterTableModel extends BasicTableModel {
 	public void setTableModelFromColumns(TableColumnState[] columns) {
 
 		setRowCount(0);
-
+		if(columns == null || columns.length == 0)
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (TableColumnState column : columns) {
 			
 			if(column.getSortOrder().equals(SortOrder.UNSORTED))
@@ -57,8 +63,9 @@ public class SorterTableModel extends BasicTableModel {
 				column.getColumnName(),				
 				column.getSortOrder(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void addColumnToSorter(TableColumnState columnState) {

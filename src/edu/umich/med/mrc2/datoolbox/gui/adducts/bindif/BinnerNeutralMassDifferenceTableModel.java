@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.adducts.bindif;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerNeutralMassDifference;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -48,10 +50,12 @@ public class BinnerNeutralMassDifferenceTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromBinnerNeutralMassDifferenceList(Collection<BinnerNeutralMassDifference> list) {
+	public void setTableModelFromBinnerNeutralMassDifferenceList(
+			Collection<BinnerNeutralMassDifference> list) {
 
 		setRowCount(0);
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
+			
 		for (BinnerNeutralMassDifference mDif : list) {
 
 			Object[] obj = { 
@@ -59,7 +63,8 @@ public class BinnerNeutralMassDifferenceTableModel extends BasicTableModel {
 				mDif.getName(),
 				mDif.getMassCorrection(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

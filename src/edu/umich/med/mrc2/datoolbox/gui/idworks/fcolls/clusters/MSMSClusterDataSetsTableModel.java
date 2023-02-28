@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
@@ -63,6 +65,11 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 			Collection<MSMSClusterDataSet> msmsClusterDataSetCollections) {
 
 		setRowCount(0);
+		if(msmsClusterDataSetCollections == null 
+				|| msmsClusterDataSetCollections.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MSMSClusterDataSet dataSet : msmsClusterDataSetCollections) {
 
 			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
@@ -85,8 +92,9 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 				dataSet.getDateCreated(),
 				dataSet.getLastModified(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 	
 	public int getMSMSClusterDataSetRow(MSMSClusterDataSet fCol) {

@@ -21,6 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.annotation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,8 +63,10 @@ public class ObjectAnnotationTableModel extends BasicTableModel {
 			return;
 
 		List<ObjectAnnotation> sortedAnnotations =
-				feature.getAnnotations().stream().sorted(dateSorter).collect(Collectors.toList());
+				feature.getAnnotations().stream().
+				sorted(dateSorter).collect(Collectors.toList());
 
+		List<Object[]>rowData = new ArrayList<Object[]>();		
 		for (ObjectAnnotation annotation : sortedAnnotations) {
 
 			Object[] obj = {
@@ -72,8 +75,9 @@ public class ObjectAnnotationTableModel extends BasicTableModel {
 					annotation,
 //					annotation.getLastModified(),
 					};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

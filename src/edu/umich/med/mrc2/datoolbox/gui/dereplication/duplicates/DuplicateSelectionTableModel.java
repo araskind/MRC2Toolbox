@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
@@ -94,44 +96,45 @@ public class DuplicateSelectionTableModel extends BasicTableModel {
 
 		currentCluster = activeCluster;
 		setRowCount(0);
+		if(currentCluster == null) 
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for (Entry<DataPipeline, Collection<MsFeature>> entry : currentCluster.getFeatureMap().entrySet()) {
+			
+			for(MsFeature cf: entry.getValue()) {
 
-		if(currentCluster != null) {
+				String compoundName = "";
+				if(cf.getPrimaryIdentity() != null)
+					compoundName = cf.getPrimaryIdentity().getName();
 
-			for (Entry<DataPipeline, Collection<MsFeature>> entry : currentCluster.getFeatureMap().entrySet()) {
-				
-				for(MsFeature cf: entry.getValue()) {
+				Adduct chmodLibrary = null;
+				if(cf.getSpectrum() != null)
+					chmodLibrary = cf.getSpectrum().getPrimaryAdduct();
 
-					String compoundName = "";
-					if(cf.getPrimaryIdentity() != null)
-						compoundName = cf.getPrimaryIdentity().getName();
-
-					Adduct chmodLibrary = null;
-					if(cf.getSpectrum() != null)
-						chmodLibrary = cf.getSpectrum().getPrimaryAdduct();
-
-					Object[] obj = {
-						cf.equals(activeCluster.getPrimaryFeature()),
-						currentCluster.isFeatureEnabled(cf),
-						cf,
-						compoundName,
-						chmodLibrary,
-						cf.getQualityScore() / 100.0d,
-						cf.getRetentionTime(),
-						cf.getStatsSummary().getMedianObservedRetention(),
-						cf.getMonoisotopicMz(),
-						cf.getAbsoluteObservedCharge(),
-						cf.getStatsSummary().getPooledMean(),
-						cf.getStatsSummary().getPooledRsd(),
-						cf.getStatsSummary().getPooledFrequency(),
-						cf.getStatsSummary().getSampleMean(),
-						cf.getStatsSummary().getSampleRsd(),
-						cf.getStatsSummary().getSampleFrequency(),
-						entry.getKey()
-					};
-					super.addRow(obj);	
-				}
+				Object[] obj = {
+					cf.equals(activeCluster.getPrimaryFeature()),
+					currentCluster.isFeatureEnabled(cf),
+					cf,
+					compoundName,
+					chmodLibrary,
+					cf.getQualityScore() / 100.0d,
+					cf.getRetentionTime(),
+					cf.getStatsSummary().getMedianObservedRetention(),
+					cf.getMonoisotopicMz(),
+					cf.getAbsoluteObservedCharge(),
+					cf.getStatsSummary().getPooledMean(),
+					cf.getStatsSummary().getPooledRsd(),
+					cf.getStatsSummary().getPooledFrequency(),
+					cf.getStatsSummary().getSampleMean(),
+					cf.getStatsSummary().getSampleRsd(),
+					cf.getStatsSummary().getSampleFrequency(),
+					entry.getKey()
+				};
+				rowData.add(obj);
 			}
 		}
+		addRows(rowData);
 	}
 }
 

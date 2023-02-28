@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.integration;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map.Entry;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
@@ -93,48 +95,50 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 
 		currentCluster = featureCluster;
 		setRowCount(0);
-		if(currentCluster != null) {
+		if(currentCluster == null) 
+			return;
 
-			for (Entry<DataPipeline, Collection<MsFeature>> entry : currentCluster.getFeatureMap().entrySet()) {
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for (Entry<DataPipeline, Collection<MsFeature>> entry : currentCluster.getFeatureMap().entrySet()) {
+			
+			for(MsFeature cf : entry.getValue()) {
 				
-				for(MsFeature cf : entry.getValue()) {
-					
-					Adduct chmodLibrary = null;
-					if(cf.getSpectrum() != null)
-						chmodLibrary = cf.getSpectrum().getPrimaryAdduct();
+				Adduct chmodLibrary = null;
+				if(cf.getSpectrum() != null)
+					chmodLibrary = cf.getSpectrum().getPrimaryAdduct();
 
-					String compoundName = "";
-					if(cf.getPrimaryIdentity() != null) {
-						compoundName = cf.getPrimaryIdentity().getName();
-						MsRtLibraryMatch msRtMatch = cf.getPrimaryIdentity().getMsRtLibraryMatch();
-						if(msRtMatch != null) {
+				String compoundName = "";
+				if(cf.getPrimaryIdentity() != null) {
+					compoundName = cf.getPrimaryIdentity().getName();
+					MsRtLibraryMatch msRtMatch = cf.getPrimaryIdentity().getMsRtLibraryMatch();
+					if(msRtMatch != null) {
 
-							if(msRtMatch.getTopAdductMatch() !=null)
-								chmodLibrary = msRtMatch.getTopAdductMatch().getLibraryMatch();
-						}
+						if(msRtMatch.getTopAdductMatch() !=null)
+							chmodLibrary = msRtMatch.getTopAdductMatch().getLibraryMatch();
 					}
-					Object[] obj = {
-						cf.equals(currentCluster.getPrimaryFeature()),
-						entry.getValue(),
-						cf,
-						compoundName,
-						chmodLibrary,
-						entry.getKey(),
-						cf.getQualityScore() / 100.0d,
-						cf.getRetentionTime(),
-						cf.getMonoisotopicMz(),
-						cf.getAbsoluteObservedCharge(),
-						cf.getStatsSummary().getPooledMean(),
-						cf.getStatsSummary().getPooledRsd(),
-						cf.getStatsSummary().getPooledFrequency(),
-						cf.getStatsSummary().getSampleMean(),
-						cf.getStatsSummary().getSampleRsd(),
-						cf.getStatsSummary().getSampleFrequency()
-					};
-					super.addRow(obj);
 				}
+				Object[] obj = {
+					cf.equals(currentCluster.getPrimaryFeature()),
+					entry.getValue(),
+					cf,
+					compoundName,
+					chmodLibrary,
+					entry.getKey(),
+					cf.getQualityScore() / 100.0d,
+					cf.getRetentionTime(),
+					cf.getMonoisotopicMz(),
+					cf.getAbsoluteObservedCharge(),
+					cf.getStatsSummary().getPooledMean(),
+					cf.getStatsSummary().getPooledRsd(),
+					cf.getStatsSummary().getPooledFrequency(),
+					cf.getStatsSummary().getSampleMean(),
+					cf.getStatsSummary().getSampleRsd(),
+					cf.getStatsSummary().getSampleFrequency()
+				};
+				rowData.add(obj);
 			}
 		}
+		addRows(rowData);
 	}
 
 	/**

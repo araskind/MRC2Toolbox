@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.methods;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -51,45 +53,54 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 	public void setTableModelFromMethods(Map<String,AnalysisMethod>methodFilesMap) {
 
 		setRowCount(0);
-		if(methodFilesMap.isEmpty())
+		if(methodFilesMap == null || methodFilesMap.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (Entry<String,AnalysisMethod> methodEntry : methodFilesMap.entrySet()) {
 
 			Object[] obj = {
 					methodEntry.getValue(),
 					methodEntry.getKey(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 	
 	public void setTableModelFromMethodCollection(Collection<? extends AnalysisMethod>methods) {
 
 		setRowCount(0);
-		if(methods.isEmpty())
+		if(methods == null || methods.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (AnalysisMethod method : methods) {
 
 			Object[] obj = {
 					method,
 					method.getName(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 
 	public void addMethods(Collection<? extends AnalysisMethod>methods) {
+		
+		if(methods == null || methods.isEmpty())
+			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (AnalysisMethod method : methods) {
 
 			Object[] obj = {
 					method,
 					method.getName(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

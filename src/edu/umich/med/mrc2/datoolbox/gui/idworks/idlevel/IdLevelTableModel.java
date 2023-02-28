@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -58,9 +60,10 @@ public class IdLevelTableModel extends BasicTableModel {
 
 		setRowCount(0);
 
-		if(levelList.isEmpty())
+		if(levelList == null || levelList.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MSFeatureIdentificationLevel level : levelList) {
 
 			Object[] obj = {
@@ -71,8 +74,9 @@ public class IdLevelTableModel extends BasicTableModel {
 				level.getShorcut(),
 				level.isAllowToReplaceAsDefault()
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

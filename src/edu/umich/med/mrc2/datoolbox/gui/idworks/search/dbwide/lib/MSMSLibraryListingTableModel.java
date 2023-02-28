@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.lib;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -51,9 +53,10 @@ public class MSMSLibraryListingTableModel extends BasicTableModel {
 	public void setTableModelFromReferenceMsMsLibraryList(Collection<ReferenceMsMsLibrary>libList) {
 
 		setRowCount(0);
-		if(libList.isEmpty())
+		if(libList == null || libList.isEmpty())
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (ReferenceMsMsLibrary lib : libList) {
 
 			Object[] obj = {
@@ -61,8 +64,9 @@ public class MSMSLibraryListingTableModel extends BasicTableModel {
 				lib.getDescription(),
 				lib.isDecoy(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

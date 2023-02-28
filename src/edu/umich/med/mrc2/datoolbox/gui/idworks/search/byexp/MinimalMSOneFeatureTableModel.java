@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -49,10 +51,14 @@ public class MinimalMSOneFeatureTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromFeatureCollection(Collection<MinimalMSOneFeature>features) {
+	public void setTableModelFromFeatureCollection(
+			Collection<MinimalMSOneFeature>features) {
 
 		setRowCount(0);
-
+		if(features == null || features.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MinimalMSOneFeature feature : features) {
 
 			Object[] obj = {
@@ -61,8 +67,9 @@ public class MinimalMSOneFeatureTableModel extends BasicTableModel {
 					feature.getRt(),
 					feature.getRank(),
 				};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
 

@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.tables.ms;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
@@ -57,28 +59,36 @@ public class MsMsTableModel extends BasicTableModel {
 	public void setTableModelFromTandemMs(TandemMassSpectrum msms) {
 
 		setRowCount(0);
+		if(msms == null || msms.getMassSortedSpectrum().length == 0)
+			return;
+		
 		MsPoint trueParent = msms.getActualParentIon();
-
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(MsPoint p : msms.getMassSortedSpectrum()) {
 
 			String annotation = "";
 			if(p.equals(trueParent))
 				annotation = "***";
 
-			Object[] newRow = new Object[] {
+			Object[] obj = new Object[] {
 				p.getMz(),
 				p.getIntensity(),
 				annotation
 			};
-			super.addRow(newRow);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 	
 	public void setTableModelFromScan(IScan scan) {
 		
 		setRowCount(0);
+		if(scan == null)
+			return;
+		
 		Collection<MsPoint> points = RawDataUtils.getScanPoints(scan);
 		double precursorMz = RawDataUtils.getScanPrecursorMz(scan);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(MsPoint dp : points) {
 			
 			String annotation = "";
@@ -90,20 +100,27 @@ public class MsMsTableModel extends BasicTableModel {
 					dp.getIntensity(),
 					annotation,
 			};
-			super.addRow(obj);
-		}	
+			rowData.add(obj);
+		}
+		addRows(rowData);
 	}
 	
-	public void setTableModelFromDataPoints(Collection<MsPoint> points, MsPoint parent) {
+	public void setTableModelFromDataPoints(
+			Collection<MsPoint> points, MsPoint parent) {
 		
 		setRowCount(0);
-		TreeSet<MsPoint>spectrum = new TreeSet<MsPoint>(new MsDataPointComparator(SortProperty.MZ));
+		if(points == null || points.isEmpty())
+			return;
+		
+		TreeSet<MsPoint>spectrum = 
+				new TreeSet<MsPoint>(new MsDataPointComparator(SortProperty.MZ));
 		spectrum.addAll(points);
 		double parentMz = 0.0d;
 		if(parent != null) {
 			spectrum.add(parent);
 			parentMz = parent.getMz();
-		}		
+		}
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(MsPoint dp : spectrum) {
 			
 			String annotation = "";
@@ -115,8 +132,9 @@ public class MsMsTableModel extends BasicTableModel {
 					dp.getIntensity(),
 					annotation,
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}	
+		addRows(rowData);
 	}
 }
 

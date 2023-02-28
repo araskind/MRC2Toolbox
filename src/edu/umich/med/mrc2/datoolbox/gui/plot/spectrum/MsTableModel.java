@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.spectrum;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -49,9 +51,14 @@ public class MsTableModel extends BasicTableModel {
 		};
 	}
 
-	public void setTableModelFromFeatureList(Collection<MsFeature> featureList, boolean scaleMs) {
+	public void setTableModelFromFeatureList(
+			Collection<MsFeature> featureList, boolean scaleMs) {
 
 		setRowCount(0);
+		if(featureList == null || featureList.isEmpty())
+			return;
+		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsFeature cf : featureList) {
 
 			if (cf.getSpectrum() == null)
@@ -67,9 +74,10 @@ public class MsTableModel extends BasicTableModel {
 						p.getIntensity(),
 						adduct.getName()
 					};
-					super.addRow(obj);
-				}
+					rowData.add(obj);
+				}				
 			}
 		}
+		addRows(rowData);
 	}
 }

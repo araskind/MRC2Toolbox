@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.adducts.bindif;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.BinnerAdduct;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -57,6 +59,8 @@ public class BinnerAnnotationsTableModel extends BasicTableModel {
 	public void setTableModelFromBinnerAdductList(Collection<BinnerAdduct> collection) {
 
 		setRowCount(0);
+		List<Object[]>rowData = new ArrayList<Object[]>();
+				
 		for (BinnerAdduct ad : collection) {
 
 			Object[] obj = {
@@ -67,7 +71,8 @@ public class BinnerAnnotationsTableModel extends BasicTableModel {
 				ad.getTier(),
 				ad.getMass(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }

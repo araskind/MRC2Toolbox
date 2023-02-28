@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.se;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
@@ -48,9 +50,10 @@ public class IDTrackerExperimentListingTableModel extends BasicTableModel {
 	public void setTableModelFromExperimentList(Collection<LIMSExperiment>experimentList) {
 
 		setRowCount(0);		
-		if(experimentList.isEmpty())
+		if(experimentList == null || experimentList.isEmpty())
 			return;
 		
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(LIMSExperiment experiment : experimentList) {
 			
 			if(experiment == null)
@@ -60,7 +63,8 @@ public class IDTrackerExperimentListingTableModel extends BasicTableModel {
 				experiment,
 				experiment.getName(),
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 		}
+		addRows(rowData);
 	}
 }
