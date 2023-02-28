@@ -21,17 +21,14 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
@@ -43,12 +40,15 @@ import java.util.stream.Collectors;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.ItemLabelAnchor;
+import org.jfree.chart.labels.ItemLabelPosition;
 import org.jfree.chart.labels.XYToolTipGenerator;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.ValueAxisPlot;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -57,6 +57,7 @@ import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.ui.Layer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -65,11 +66,9 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedIonData;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.SmoothingPreferencesDialog;
-import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.MsDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.ContinuousCromatogramRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.DefaultSplineRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.FilledChromatogramRenderer;
@@ -79,13 +78,9 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.ChromatogramToolTipGenerato
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
-import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
-import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
-import umich.ms.datatypes.LCMSData;
-import umich.ms.datatypes.scan.IScan;
 
 
 public class LCMSPlotPanel extends MasterPlotPanel {
@@ -108,11 +103,9 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	protected transient Rectangle2D markerRectangle = null;
 	protected Point2D markerStartPoint = null;
-	//public static final Paint markerColor = new Color(150, 150, 150);
 	public static final Color markerColor = new Color(255, 0, 0, 70);
 	public static final Color markerOutlineColor = Color.RED;
-	protected static final Color invizibleMarkerColor = new Color(255, 255, 255, 0);
-	
+	protected static final Color invizibleMarkerColor = new Color(255, 255, 255, 0);	
 	protected IntervalMarker domainMarker;
 	
 	protected NumberAxis xAxis, yAxis;
@@ -126,7 +119,6 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	
 	protected Collection<ExtractedChromatogram> chromatograms;
 	protected RawDataExaminerPanel rawDataExaminerPanel;
-	//	protected MsFeatureChromatogramBundle xicBundle;
 	protected Collection<MsFeatureChromatogramBundle> xicBundles;
 	protected Collection<Double>precursorMarkers;
 	
@@ -163,65 +155,69 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	public void actionPerformed(ActionEvent event) {
 
 		String command = event.getActionCommand();
+		
 		if (command.equals(ChartPanel.ZOOM_IN_DOMAIN_COMMAND)) {
 			plot.getDomainAxis().resizeRange(1 / ZOOM_FACTOR);
 			return;
 		}
-
 		if (command.equals(ChartPanel.ZOOM_OUT_DOMAIN_COMMAND)) {
 			plot.getDomainAxis().resizeRange(ZOOM_FACTOR);
 			return;
 		}
-
 		if (command.equals(ChartPanel.ZOOM_IN_RANGE_COMMAND)) {			
-			double newTop = plot.getRangeAxis().getRange().getLength() / ZOOM_FACTOR;
-			plot.getRangeAxis().setRange(0.0d, newTop);
+			zoomInRange();
 			return;
 		}
 		if (command.equals(ChartPanel.ZOOM_OUT_RANGE_COMMAND)) {
-			double newTop = plot.getRangeAxis().getRange().getLength() * ZOOM_FACTOR;
-			plot.getRangeAxis().setRange(0.0d, newTop);
+			zoomOutRange();
 			return;
 		}
 		if (command.equals(ChartPanel.ZOOM_IN_BOTH_COMMAND)) {
-
-			double newTop = plot.getRangeAxis().getRange().getLength() / ZOOM_FACTOR;
-			plot.getRangeAxis().setRange(0.0d, newTop);
-			plot.getDomainAxis().resizeRange(1 / ZOOM_FACTOR);
+			zoomInBoth();
 			return;
 		}
 		if (command.equals(ChartPanel.ZOOM_OUT_BOTH_COMMAND)) {
-
-			double newTop = plot.getRangeAxis().getRange().getLength() * ZOOM_FACTOR;
-			plot.getRangeAxis().setRange(0.0d, newTop);
-			plot.getDomainAxis().resizeRange(ZOOM_FACTOR);
+			zoomOutBoth();
 			return;
 		}
-		if (command.equals(ChartPanel.ZOOM_RESET_DOMAIN_COMMAND))
+		if (command.equals(ChartPanel.ZOOM_RESET_DOMAIN_COMMAND)) {
 			plot.getDomainAxis().setAutoRange(true);
-
-		if (command.equals(ChartPanel.ZOOM_RESET_RANGE_COMMAND)) {
-			plot.getRangeAxis().setAutoRange(true);
 			return;
 		}
+		if (command.equals(ChartPanel.ZOOM_RESET_RANGE_COMMAND)) {
+			plot.getRangeAxis().setAutoRange(true);			
+			adjustRange();
+			return;
+		}
+		if (command.equals(ChartPanel.ZOOM_RESET_BOTH_COMMAND)) {
+			plot.getDomainAxis().setAutoRange(true);
+			plot.getRangeAxis().setAutoRange(true);
+			adjustRange();
+			return;
+		}		
 		if (command.equals(MasterPlotPanel.TOGGLE_DATA_POINTS_COMMAND)) {
 			toggleDataPoints();
 			return;
 		}
-		if (command.equals(MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName())) 
+		if (command.equals(MainActionCommands.SMOOTH_CHROMATOGRAM_COMMAND.getName())) { 
 			smoothChromatograms();
-		
-		if (command.equals(MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName())) 
+			return;
+		}
+		if (command.equals(MainActionCommands.SHOW_RAW_CHROMATOGRAM_COMMAND.getName())) {
 			showRawChromatograms();
-		
-		if (command.equals(MainActionCommands.SHOW_SMOOTHING_PREFERENCES_COMMAND.getName())) 
+			return;
+		}		
+		if (command.equals(MainActionCommands.SHOW_SMOOTHING_PREFERENCES_COMMAND.getName())) {
 			showChromatogramSmoothingPreferences();
-		
-		if (command.equals(MainActionCommands.SAVE_SMOOTHING_PREFERENCES_COMMAND.getName())) 
+			return;
+		}		
+		if (command.equals(MainActionCommands.SAVE_SMOOTHING_PREFERENCES_COMMAND.getName())) {
 			saveChromatogramSmoothingPreferences();
-		
+			return;
+		}	
 		super.actionPerformed(event);
 	}
+	
 	
 	private void smoothChromatograms() {
 
@@ -395,14 +391,14 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			xAxis.setNumberFormatOverride(MRC2ToolBoxConfiguration.getMzFormat());
 			annotationsVisible = true;
 		}
-		xAxis.setUpperMargin(0.05);
+		xAxis.setUpperMargin(0.02);
 		xAxis.setLowerMargin(0.001);
 		xAxis.setTickLabelInsets(new RectangleInsets(0, 0, 20, 20));
 
 		yAxis = (NumberAxis) plot.getRangeAxis();
 		yAxis.setNumberFormatOverride(MRC2ToolBoxConfiguration.getIntensityFormat());
-		yAxis.setUpperMargin(0.1);
-		yAxis.setLowerMargin(0.1);
+		yAxis.setUpperMargin(0.15);
+		//yAxis.setLowerMargin(0.1);
 	}
 
 	@Override
@@ -442,13 +438,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	private void initRendererForPlotType() {
 
-		if (plotType.equals(PlotType.SPECTRUM)) {
-
-			defaultMsRenderer = new MassSpectrumRenderer(Color.RED, 3.0f);
-			defaultMsLabelGenerator = new MsLabelGenerator(this);
-			defaultMsRenderer.setDefaultItemLabelGenerator(defaultMsLabelGenerator);
-			defaultMsRenderer.setDefaultItemLabelsVisible(true);
-			defaultMsRenderer.setDefaultItemLabelPaint(LCMSPlotPanel.LABEL_COLOR);
+		if (plotType.equals(PlotType.SPECTRUM)) {			
+			defaultMsRenderer = createMassSpectrumRenderer();
 		}
 		if (plotType.equals(PlotType.CHROMATOGRAM)) {
 			
@@ -467,6 +458,26 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			((XYSplineRenderer)splineRenderer).setDefaultShapesVisible(dataPointsVisible);
 			splineRenderer.setDefaultShape(DefaultSplineRenderer.dataPointsShape);
 		}
+	}
+	
+	public MassSpectrumRenderer createMassSpectrumRenderer () {
+		
+		MassSpectrumRenderer msRenderer = 
+				new MassSpectrumRenderer(Color.DARK_GRAY, 2.0f);
+		msRenderer.setDefaultItemLabelGenerator(new MsLabelGenerator(this));
+		msRenderer.setDefaultItemLabelsVisible(true);
+		msRenderer.setDefaultItemLabelPaint(LCMSPlotPanel.LABEL_COLOR);
+		ItemLabelPosition posIlp = new ItemLabelPosition(
+					ItemLabelAnchor.OUTSIDE12, 
+					TextAnchor.BOTTOM_LEFT,
+		            TextAnchor.CENTER, 0.0);
+		msRenderer.setDefaultPositiveItemLabelPosition(posIlp);
+		ItemLabelPosition negIlp = new ItemLabelPosition(
+				ItemLabelAnchor.OUTSIDE12, 
+				TextAnchor.TOP_LEFT,
+	            TextAnchor.CENTER, 0.0);
+		msRenderer.setDefaultNegativeItemLabelPosition(negIlp);
+		return msRenderer;
 	}
 
 	@Override
@@ -492,12 +503,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
                     this.markerStartPoint.getX(), 
                     ymin,
                     xmax - this.markerStartPoint.getX(), 
-                    height);
-            
-//            markerRectangle = new Rectangle2D.Double(
-//                    this.markerStartPoint.getX(), markerRectangle.getMinY(),
-//                    xmax - this.markerStartPoint.getX(), markerRectangle.getHeight());
-	        
+                    height);	        
 	        drawMarkerRectangle(g2, true);	
 	        g2.dispose();
 	        setInvizibleMarkers();
@@ -574,6 +580,37 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		}	
 	}
 	
+	protected void zoomInRange() { 
+		
+		double newTop = plot.getRangeAxis().getRange().getUpperBound() / ZOOM_FACTOR;
+		double newBottom = 0.0;
+		if(newBottom < 0)
+			newBottom = plot.getRangeAxis().getRange().getLowerBound() / ZOOM_FACTOR;
+				
+		plot.getRangeAxis().setRange(newBottom, newTop);		
+	}
+	
+	protected void zoomOutRange() { 
+		
+		double newTop = plot.getRangeAxis().getRange().getUpperBound() * ZOOM_FACTOR;
+		double newBottom = 0.0;
+		if(newBottom < 0)
+			newBottom = plot.getRangeAxis().getRange().getLowerBound() * ZOOM_FACTOR;
+				
+		plot.getRangeAxis().setRange(newBottom, newTop);
+	}
+	
+	protected void zoomInBoth() { 
+		
+		plot.getDomainAxis().resizeRange(1 / ZOOM_FACTOR);
+		zoomInRange();
+	}
+	
+	protected void zoomOutBoth() { 
+		
+		plot.getDomainAxis().resizeRange(ZOOM_FACTOR);
+		zoomOutRange();
+	}
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
@@ -599,8 +636,20 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		else 
 			super.mouseReleased(e);	
 		
-		if(plot.getRangeAxis().getRange().getLowerBound() > 0)
-			plot.getRangeAxis().setAutoRange(true);		
+		plot.getRangeAxis().setAutoRange(true);	
+		adjustRange();
+	}
+	
+	private void adjustRange() {
+		
+        org.jfree.data.Range r = 
+        		((ValueAxisPlot) plot).getDataRange(plot.getRangeAxis()); 
+        double maxIntensity = r.getUpperBound() * 1.15;
+        double minIntensity = r.getLowerBound();
+        if(minIntensity < 0.0d)
+        	minIntensity = 1.15 * minIntensity;
+        
+        plot.getRangeAxis().setRange(new org.jfree.data.Range(minIntensity, maxIntensity));
 	}
 
 	public void removeMarkers() {
@@ -654,19 +703,6 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	}
 
 	public void toggleDataPoints() {
-
-//		dataPointsVisible = !dataPointsVisible;
-//
-//		final int count = plot.getRendererCount();
-//		for (int i = 0; i < count; i++) {
-//
-//			if (plot.getRenderer(i) instanceof XYLineAndShapeRenderer) {
-//
-//				final XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer(i);
-//				renderer.setDefaultShapesVisible(dataPointsVisible);
-//			}
-//		}
-//		toolbar.toggleDataPointssIcon(dataPointsVisible);
 		
 		dataPointsVisible = !dataPointsVisible;
 		final int count = plot.getDatasetCount();	
@@ -685,21 +721,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		}
 		toolbar.toggleDataPointsIcon(dataPointsVisible);
 	}
-
-	private void updateMarker() {
-		if (marker != null) {
-			plot.removeDomainMarker(marker, Layer.FOREGROUND);
-		}
-		if (!(markerStart.isNaN() && markerEnd.isNaN())) {
-			if (markerEnd > markerStart) {
-				marker = new IntervalMarker(markerStart, markerEnd);
-				marker.setPaint(markerColor);
-				marker.setAlpha(0.5f);
-				plot.addDomainMarker(marker, Layer.FOREGROUND);
-			}
-		}
-	}
-
+	
 	@Override
 	public synchronized void removeAllDataSets() {
 
@@ -720,142 +742,6 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		xicBundles = null;		
 		if(precursorMarkers != null)
 			precursorMarkers.clear();
-	}
-	
-	/*
-	 * Mass spectra display
-	 */
-	
-	public void showScan(IScan s) {
-		
-		String labelText =  RawDataUtils.getScanLabel(s);
-		Collection<MsPoint> pattern = RawDataUtils.getScanPoints(s, 0.0d);
-		MsDataSet targetMs = new MsDataSet(pattern, false, labelText);	
-		MassSpectrumRenderer msRenderer = new MassSpectrumRenderer(Color.DARK_GRAY, 2.0f);
-		msRenderer.setDefaultItemLabelGenerator(defaultMsLabelGenerator);
-		msRenderer.setDefaultItemLabelsVisible(annotationsVisible);
-		msRenderer.setDefaultItemLabelPaint(LCMSPlotPanel.LABEL_COLOR);
-		
-		((XYPlot) this.getPlot()).setRenderer(1, msRenderer);
-		((XYPlot) this.getPlot()).setDataset(1, targetMs);
-				
-		//	Mark precursor ranges or individual precursors
-		//	Highest MS level
-		if(s.getChildScans() == null || s.getChildScans().isEmpty())
-			addParentIonDataSeriesToHighestLevelMSMSPlot(s);
-		else 	//	Show precursors in parent scan
-			addParentIonDataSeriesToParentMSMSPlot(s);		
-	}
-	
-	private void addParentIonDataSeriesToParentMSMSPlot(IScan s) {
-		
-		double size = 16.0;
-		Shape precursorMarker = new Ellipse2D.Double(-size/4.0, -size/4.0, size/2.0, size/2.0);		
-		DataFile df = rawDataExaminerPanel.getDataFileForScan(s);
-		if(df == null)
-			return;
-
-		LCMSData data = RawDataManager.getRawData(df);
-		if(data == null) 
-			return;
-			
-		XYSeriesCollection parentSet = new XYSeriesCollection();
-		XYSeries parentSeries = new XYSeries("Parent ions");
-		XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
-		parentRenderer.setSeriesPaint(0, Color.RED);
-		parentRenderer.setSeriesShape(0, precursorMarker);
-		for(Integer child : s.getChildScans()) {
-			
-			IScan childScan = data.getScans().getScanByNum(child);
-			if(childScan.getPrecursor() == null)
-				continue;
-			
-			Double precursorMz = null;
-			if (childScan.getPrecursor().getMzRangeStart() != null && childScan.getPrecursor().getMzRangeEnd() != null) {
-				
-				//	Highlight window
-		        Marker isolationWindow = 
-	        		new IntervalMarker(
-        				childScan.getPrecursor().getMzRangeStart(), 
-        				childScan.getPrecursor().getMzRangeEnd(), 
-        				Color.RED, new BasicStroke( 2.0f ), null, null, 0.5f );
-		        isolationWindow.setPaint( Color.RED );
-		        ((XYPlot) this.getPlot()).addDomainMarker(isolationWindow);					
-				
-			} else if (childScan.getPrecursor().getMzTarget() != null) {
-				precursorMz = childScan.getPrecursor().getMzTarget();
-			} else {
-				if (childScan.getPrecursor().getMzTargetMono() != null) {
-					precursorMz = childScan.getPrecursor().getMzTargetMono();
-				}
-			}
-			if(precursorMz != null) {
-				
-				double intensity = 0.0;
-				Integer precursorIndex = s.getSpectrum().findClosestMzIdx(precursorMz);
-				if(precursorIndex != null)
-					intensity = s.getSpectrum().getIntensities()[precursorIndex];
-				else
-					intensity = s.getBasePeakIntensity() / 5.0d;
-				
-				MsPoint trueParent = new MsPoint(precursorMz, intensity);
-				parentSeries.add(trueParent.getMz(), trueParent.getIntensity());			
-			}
-		}
-		if(parentSeries.getItemCount() > 0) {
-			parentSet.addSeries(parentSeries);
-			((XYPlot) this.getPlot()).setRenderer(2, parentRenderer);
-			((XYPlot) this.getPlot()).setDataset(2, parentSet);
-		}
-	}
-
-	public void addParentIonDataSeriesToHighestLevelMSMSPlot(IScan s) {
-		
-		double size = 16.0;
-		if(s.getPrecursor() != null) {
-			
-			Double precursorMz = null;
-			if (s.getPrecursor().getMzRangeStart() != null && s.getPrecursor().getMzRangeEnd() != null) {
-				
-				//	Highlight window
-		        Marker isolationWindow = 
-	        		new IntervalMarker(
-        				s.getPrecursor().getMzRangeStart(), 
-        				s.getPrecursor().getMzRangeEnd(), 
-        				Color.RED, new BasicStroke( 2.0f ), null, null, 0.5f );
-		        isolationWindow.setPaint( Color.RED );
-		        ((XYPlot) this.getPlot()).addDomainMarker(isolationWindow);					
-				return;
-				
-			} else if (s.getPrecursor().getMzTarget() != null) {
-				precursorMz = s.getPrecursor().getMzTarget();
-			} else {
-				if (s.getPrecursor().getMzTargetMono() != null) {
-					precursorMz = s.getPrecursor().getMzTargetMono();
-				}
-			}
-			if(precursorMz != null) {
-				//	Add parent ion
-				XYSeriesCollection parentSet = new XYSeriesCollection();
-				XYSeries parentSeries = new XYSeries("Parent ion");
-				
-				double intensity = 0.0;
-				Integer precursorIndex = s.getSpectrum().findClosestMzIdx(precursorMz);
-				if(precursorIndex != null)
-					intensity = s.getSpectrum().getIntensities()[precursorIndex];
-				else
-					intensity = s.getBasePeakIntensity() / 5.0d;
-				
-				MsPoint trueParent = new MsPoint(precursorMz, intensity);
-				parentSeries.add(trueParent.getMz(), trueParent.getIntensity());
-				parentSet.addSeries(parentSeries);
-				XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
-				parentRenderer.setSeriesPaint(0, Color.RED);
-				parentRenderer.setSeriesShape(0, new Ellipse2D.Double(-size/4.0, -size/4.0, size/2.0, size/2.0));
-				((XYPlot) this.getPlot()).setRenderer(2, parentRenderer);
-				((XYPlot) this.getPlot()).setDataset(2, parentSet);
-			}
-		}
 	}
 
 	public void setRawDataExaminerPanel(RawDataExaminerPanel rawDataExaminerPanel) {
@@ -926,6 +812,8 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		}	
 		((XYPlot) this.getPlot()).setDataset(dataSet);
 		((XYPlot) this.getPlot()).setRenderer(renderer);
+		plot.getDomainAxis().setAutoRange(true);
+		plot.getRangeAxis().setAutoRange(true);
 	}
 	
 	public void showMsFeatureChromatogramBundles(
@@ -1014,7 +902,9 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 				marker.setPaint(Color.RED);
 				((XYPlot) this.getPlot()).addDomainMarker(marker);
 			}
-		}	
+		}
+		plot.getDomainAxis().setAutoRange(true);
+		plot.getRangeAxis().setAutoRange(true);
 	}
 	
 	public void removeChromatogramsForFiles(Collection<DataFile>files) {
@@ -1070,6 +960,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 
 	public void setSmoothingFilter(Filter smoothingFilter) {
 		this.smoothingFilter = smoothingFilter;
+	}
+
+	public RawDataExaminerPanel getRawDataExaminerPanel() {
+		return rawDataExaminerPanel;
 	}
 	
 

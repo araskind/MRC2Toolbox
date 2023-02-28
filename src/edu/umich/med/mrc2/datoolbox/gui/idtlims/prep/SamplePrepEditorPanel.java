@@ -124,14 +124,15 @@ public class SamplePrepEditorPanel extends JPanel
 	private boolean limitEditor;
 	private JButton editSaveNameButton;
 	
-	private static final Pattern prepIdPattern = 
-			Pattern.compile(DataPrefix.SAMPLE_PREPARATION.getName() +  "\\d{4}");
+	private Pattern prepIdPattern;
 	
 	/**
 	 * This constructor is for the creation of the new sample preparation;
 	 * @param experiment
 	 */
-	public SamplePrepEditorPanel(LIMSExperiment experiment, boolean limitEditor) {
+	public SamplePrepEditorPanel(
+			LIMSExperiment experiment, 
+			boolean limitEditor) {
 		
 		super(new BorderLayout(0, 0));
 		this.experiment = experiment;
@@ -141,7 +142,8 @@ public class SamplePrepEditorPanel extends JPanel
 		}	
 		this.prep = null;
 		isWizardStep = false;
-		this.limitEditor = limitEditor;
+		this.limitEditor = limitEditor;	
+		
 		initGui();
 		loadPrepData(null);		
 	}
@@ -150,7 +152,9 @@ public class SamplePrepEditorPanel extends JPanel
 	 * This constructor is for the editing of the existing sample preparation;
 	 * @param prep
 	 */
-	public SamplePrepEditorPanel(LIMSSamplePreparation prep, boolean limitEditor) {
+	public SamplePrepEditorPanel(
+			LIMSSamplePreparation prep, 
+			boolean limitEditor) {
 		
 		super(new BorderLayout(0, 0));
 		this.prep = prep;
@@ -179,6 +183,9 @@ public class SamplePrepEditorPanel extends JPanel
 	}
 
 	private void initGui() {
+		
+		prepIdPattern = 
+				Pattern.compile("^" + DataPrefix.SAMPLE_PREPARATION.getName() +  "\\d{4}$");
 	
 		GridBagLayout gbl_dataPanel = new GridBagLayout();
 		gbl_dataPanel.columnWidths = new int[]{244, 223, 176};
@@ -669,6 +676,13 @@ public class SamplePrepEditorPanel extends JPanel
 				
 				if(prep.getId() != null && prepIdPattern.matcher(prep.getId()).find()) {
 					
+					if(selected.size() == prep.getProtocols().size()) {
+						MessageDialog.showErrorMsg(
+								"Sample preparation must have at least one SOP attached.\n"
+								+ "You are trying to remove all existing SOPs.\n"
+								+ "Please add the correct SOP first. ", this);
+						return;
+					}				
 					prep.getProtocols().removeAll(selected);
 					try {
 						IDTUtils.updateSamplePrepProtocols(prep);
@@ -959,6 +973,7 @@ public class SamplePrepEditorPanel extends JPanel
 
 	public void setWizardStep(boolean isWizardStep) {
 		this.isWizardStep = isWizardStep;
+		documentsPanel.setVisible(false);
 	}
 	
 	public void setPrepEditable(boolean b) {

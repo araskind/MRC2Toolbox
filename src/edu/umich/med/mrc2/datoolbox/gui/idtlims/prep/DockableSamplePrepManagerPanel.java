@@ -152,20 +152,21 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 		
 		if(!isConnected())
 			return;
+		
+		super.actionPerformed(e);
+		
+		String command = e.getActionCommand();
 
-		if(e.getActionCommand().equals(MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName()))
+		if(command.equals(MainActionCommands.ADD_SAMPLE_PREP_DIALOG_COMMAND.getName()))
 			showCreateNewPrepDialog(idTrackerLimsManager.getSelectedExperiment());
 		
-		if(e.getActionCommand().equals(MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName()))		
+		if(command.equals(MainActionCommands.EDIT_SAMPLE_PREP_DIALOG_COMMAND.getName()))		
 			showEditSamplePrepDialog(samplePrepTable.getSelectedPrep());
 
-		if(e.getActionCommand().equals(MainActionCommands.ADD_SAMPLE_PREP_COMMAND.getName()))
+		if(command.equals(MainActionCommands.ADD_SAMPLE_PREP_COMMAND.getName()))
 			saveSamplePrepData();
 
-//		if(e.getActionCommand().equals(MainActionCommands.EDIT_SAMPLE_PREP_COMMAND.getName()))
-//			editExistingSamplePrep();
-
-		if(e.getActionCommand().equals(MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName()))
+		if(command.equals(MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName()))
 			deleteSamplePrep(samplePrepTable.getSelectedPrep());
 	}
 
@@ -390,6 +391,13 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 	public void savePreferences() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+
+		if(command.equals(MainActionCommands.DELETE_SAMPLE_PREP_COMMAND.getName()))
+			deleteSamplePrep(samplePrepTable.getSelectedPrep());		
 	}
 }
 

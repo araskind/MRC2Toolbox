@@ -116,19 +116,41 @@ public class MsMsTable extends BasicTable {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		if (e.getActionCommand().equals(MainActionCommands.COPY_SPECTRUM_AS_TSV_COMMAND.getName()))
+		String command = e.getActionCommand();
+		
+		if (command.equals(MainActionCommands.COPY_SPECTRUM_AS_TSV_COMMAND.getName()))
 			copyMassListAsTSV(false);
 
-		if (e.getActionCommand().equals(MainActionCommands.COPY_NORMALIZED_SPECTRUM_AS_TSV_COMMAND.getName()))
+		if (command.equals(MainActionCommands.COPY_NORMALIZED_SPECTRUM_AS_TSV_COMMAND.getName()))
 			copyMassListAsTSV(true);
 		
-		if (e.getActionCommand().equals(MainActionCommands.COPY_FEATURE_WITH_METADATA_COMMAND.getName()))
+		if (command.equals(MainActionCommands.COPY_FEATURE_WITH_METADATA_COMMAND.getName()))
 			copyFeatureWithMetadata();
 			
-		if (e.getActionCommand().equals(MainActionCommands.COPY_SCAN_WITH_METADATA_COMMAND.getName()))
+		if (command.equals(MainActionCommands.COPY_SCAN_WITH_METADATA_COMMAND.getName()))
 			copyScanWithMetadata();
+		
+		if (command.equals(MainActionCommands.COPY_SELECTED_MASSES_AS_CSV_COMMAND.getName()))
+			copySelectedMassesAsCSV();
 			
 		super.actionPerformed(e);
+	}
+	
+	public void copySelectedMassesAsCSV() {
+		
+		ArrayList<String> massList = new ArrayList<String>();
+		int[] selectedRows = getSelectedRows();
+		if(selectedRows.length == 0)
+			return;
+		
+		int massColumn = model.getColumnIndex(MsOneTableModel.MZ_COLUMN);
+		for(int i : selectedRows) {
+			double mz = (double) model.getValueAt(convertRowIndexToModel(i), massColumn);
+			massList.add(MRC2ToolBoxConfiguration.getMzFormat().format(mz));
+		}
+		StringSelection stringSelection = new StringSelection(StringUtils.join(massList, ","));
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
 	}
 
 	private void copyFeatureWithMetadata() {

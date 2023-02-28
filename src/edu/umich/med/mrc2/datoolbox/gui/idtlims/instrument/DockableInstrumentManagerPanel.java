@@ -113,6 +113,8 @@ public class DockableInstrumentManagerPanel extends AbstractIDTrackerLimsPanel {
 		if(!isConnected())
 			return;
 		
+		super.actionPerformed(e);
+		
 		String command = e.getActionCommand();
 
 		if(command.equals(MainActionCommands.ADD_INSTRUMENT_DIALOG_COMMAND.getName()))
@@ -128,8 +130,13 @@ public class DockableInstrumentManagerPanel extends AbstractIDTrackerLimsPanel {
 				e.getActionCommand().equals(MainActionCommands.EDIT_INSTRUMENT_COMMAND.getName()))
 			saveInstrumentData();
 
-		if(command.equals(MainActionCommands.DELETE_INSTRUMENT_COMMAND.getName()))
-			deleteInstrument();
+		if(command.equals(MainActionCommands.DELETE_INSTRUMENT_COMMAND.getName())) {
+
+			if(instrumentTable.getSelectedInstrument() == null)
+				return;
+			
+			reauthenticateAdminCommand(MainActionCommands.DELETE_INSTRUMENT_COMMAND.getName());
+		}
 	}
 	
 	private ArrayList<String> verifyInstrumentData() {
@@ -268,6 +275,13 @@ public class DockableInstrumentManagerPanel extends AbstractIDTrackerLimsPanel {
 	public void savePreferences() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		
+		if(command.equals(MainActionCommands.DELETE_INSTRUMENT_COMMAND.getName()))
+			deleteInstrument();		
 	}
 }
 

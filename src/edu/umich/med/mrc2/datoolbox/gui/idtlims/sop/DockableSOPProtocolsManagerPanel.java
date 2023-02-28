@@ -122,17 +122,6 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 				MainActionCommands.DOWNLOAD_SOP_PROTOCOL_COMMAND.getName(), 
 				downloadProtocolIcon, this));
 	}
-	
-//	private void initChooser() {
-//
-//		chooser = new ImprovedFileChooser();
-//		chooser.setBorder(new EmptyBorder(10, 10, 10, 10));
-//		chooser.addActionListener(this);
-//		chooser.setAcceptAllFileFilterUsed(true);
-//		chooser.setMultiSelectionEnabled(false);
-//		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-//		chooser.setCurrentDirectory(baseDirectory);
-//	}
 
 	public void loadProtocolData() {
 		protocolTable.setTableModelFromProtocols(IDTDataCash.getProtocols());
@@ -144,20 +133,29 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 		if(!isConnected())
 			return;;
 
-		if(e.getActionCommand().equals(MainActionCommands.ADD_SOP_PROTOCOL_DIALOG_COMMAND.getName()))
+		super.actionPerformed(e);
+		
+		String command = e.getActionCommand();
+			
+		if(command.equals(MainActionCommands.ADD_SOP_PROTOCOL_DIALOG_COMMAND.getName()))
 			newProtocolDialog();
 
-		if(e.getActionCommand().equals(MainActionCommands.ADD_SOP_PROTOCOL_COMMAND.getName()) ||
-				e.getActionCommand().equals(MainActionCommands.EDIT_SOP_PROTOCOL_COMMAND.getName()))
+		if(command.equals(MainActionCommands.ADD_SOP_PROTOCOL_COMMAND.getName()) ||
+				command.equals(MainActionCommands.EDIT_SOP_PROTOCOL_COMMAND.getName()))
 			saveSopProtocolData();
 
-		if(e.getActionCommand().equals(MainActionCommands.EDIT_SOP_PROTOCOL_DIALOG_COMMAND.getName()))
+		if(command.equals(MainActionCommands.EDIT_SOP_PROTOCOL_DIALOG_COMMAND.getName()))
 			editProtocolDialog();
 
-		if(e.getActionCommand().equals(MainActionCommands.DELETE_SOP_PROTOCOL_COMMAND.getName()))
-			deleteProtocol();
+		if(command.equals(MainActionCommands.DELETE_SOP_PROTOCOL_COMMAND.getName())) {
 
-		if(e.getActionCommand().equals(MainActionCommands.DOWNLOAD_SOP_PROTOCOL_COMMAND.getName()))
+			if(protocolTable.getSelectedProtocol() == null)
+				return;
+			
+			reauthenticateAdminCommand(
+					MainActionCommands.DELETE_SOP_PROTOCOL_COMMAND.getName());
+		}			
+		if(command.equals(MainActionCommands.DOWNLOAD_SOP_PROTOCOL_COMMAND.getName()))
 			downloadProtocol();
 	}
 	
@@ -331,6 +329,13 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 
 	public synchronized void clearPanel() {
 		protocolTable.clearTable();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		
+		if(command.equals(MainActionCommands.DELETE_SOP_PROTOCOL_COMMAND.getName()))
+			deleteProtocol();		
 	}
 }
 

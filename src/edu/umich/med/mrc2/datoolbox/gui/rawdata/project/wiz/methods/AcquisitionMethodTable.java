@@ -63,10 +63,10 @@ public class AcquisitionMethodTable extends BasicTable {
 
 		columnModel.getColumnById(AcquisitionMethodTableModel.METHOD_NAME_COLUMN)
 				.setCellRenderer(new FileBaseNameRenderer());
-		columnModel.getColumnById(AcquisitionMethodTableModel.METHOD_ID_COLUMN).setMaxWidth(80);
-		
 		columnModel.getColumnById(AcquisitionMethodTableModel.METHOD_ID_COLUMN).
-				setPreferredWidth(80);
+			setMaxWidth(120);	
+		columnModel.getColumnById(AcquisitionMethodTableModel.METHOD_ID_COLUMN).
+				setMinWidth(80);
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();

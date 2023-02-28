@@ -62,8 +62,6 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
-import edu.umich.med.mrc2.datoolbox.utils.filter.Filter;
-import edu.umich.med.mrc2.datoolbox.utils.filter.FilterClass;
 
 public class XICSetupPanel extends JPanel implements ActionListener, ItemListener, BackedByPreferences {
 
@@ -319,26 +317,26 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		gbc_lblNewLabel.gridy = 4;
 		chromatogaramSettingsPanel.add(lblNewLabel, gbc_lblNewLabel);
 		
-		JLabel lblNewLabel_2 = new JLabel("Smoothing");
-		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 0, 5);
-		gbc_lblNewLabel_2.gridx = 0;
-		gbc_lblNewLabel_2.gridy = 5;
-		chromatogaramSettingsPanel.add(lblNewLabel_2, gbc_lblNewLabel_2);
-		
-		smoothingComboBox = new JComboBox<ChromatogramExtractionType>(
-				new DefaultComboBoxModel<ChromatogramExtractionType>(ChromatogramExtractionType.values()));
-		GridBagConstraints gbc_smoothingComboBox = new GridBagConstraints();
-		gbc_smoothingComboBox.gridwidth = 4;
-		gbc_smoothingComboBox.insets = new Insets(0, 0, 0, 5);
-		gbc_smoothingComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_smoothingComboBox.gridx = 1;
-		gbc_smoothingComboBox.gridy = 5;
-		chromatogaramSettingsPanel.add(smoothingComboBox, gbc_smoothingComboBox);
-		
-		smothingFilterSelectorPanel = new SmothingFilterSelectorPanel();
-		tabbedPane.addTab("Smoothing settings", null, smothingFilterSelectorPanel, null);
+//		JLabel lblNewLabel_2 = new JLabel("Smoothing");
+//		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+//		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
+//		gbc_lblNewLabel_2.insets = new Insets(0, 0, 0, 5);
+//		gbc_lblNewLabel_2.gridx = 0;
+//		gbc_lblNewLabel_2.gridy = 5;
+//		chromatogaramSettingsPanel.add(lblNewLabel_2, gbc_lblNewLabel_2);
+//		
+//		smoothingComboBox = new JComboBox<ChromatogramExtractionType>(
+//				new DefaultComboBoxModel<ChromatogramExtractionType>(ChromatogramExtractionType.values()));
+//		GridBagConstraints gbc_smoothingComboBox = new GridBagConstraints();
+//		gbc_smoothingComboBox.gridwidth = 4;
+//		gbc_smoothingComboBox.insets = new Insets(0, 0, 0, 5);
+//		gbc_smoothingComboBox.fill = GridBagConstraints.HORIZONTAL;
+//		gbc_smoothingComboBox.gridx = 1;
+//		gbc_smoothingComboBox.gridy = 5;
+//		chromatogaramSettingsPanel.add(smoothingComboBox, gbc_smoothingComboBox);
+//		
+//		smothingFilterSelectorPanel = new SmothingFilterSelectorPanel();
+//		tabbedPane.addTab("Smoothing settings", null, smothingFilterSelectorPanel, null);
 
 //		JPanel smoothingSettingsPanel = new JPanel();
 //		smoothingSettingsPanel.setBorder(new EmptyBorder(10, 0, 10, 10));
@@ -430,7 +428,8 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 				errors.add("No mases specified to create extracted ion chromatogram!");
 				return errors;
 			}
-			String[] mzStrings = StringUtils.split(mzTextField.getText().trim().replaceAll("[\\s+,:,;\\,]", ";"), ';');
+			String[] mzStrings = StringUtils.split(
+					mzTextField.getText().trim().replaceAll("[\\s+,:,;\\,]", ";"), ';');
 			for (String mzs : mzStrings) {
 
 				double mz = 0.0d;
@@ -438,19 +437,22 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 					mz = Double.parseDouble(mzs);
 				} catch (NumberFormatException e) {
 					errors.add(
-							"Invalid mass value(s)!\nOnly numbers, \".\" as decimal pont, and the following separator characters:\n"
-									+ "space (   )  comma ( , ) colon ( : ) and semi-colon ( ; ) are allowed");
+							"Invalid mass value(s)!\nOnly numbers, \".\" "
+							+ "as decimal pont, and the following separator characters:\n"
+							+ "space (   )  comma ( , ) colon ( : ) and semi-colon ( ; ) are allowed");
 					return errors;
 				}
 				if (mz > 0.0d)
 					mzList.add(mz);
 			}
 			if (mzList.isEmpty()) {
-				errors.add("No valid mases specified to create extracted ion chromatogram!");
+				errors.add("No valid mases specified "
+						+ "to create extracted ion chromatogram!");
 				return errors;
 			}
 			if (mzErrorTextField.getText().trim().isEmpty()) {
-				errors.add("Mass window value should be specified to create extracted ion chromatogram!");
+				errors.add("Mass window value should be specified "
+						+ "to create extracted ion chromatogram!");
 				return errors;
 			}
 		}
@@ -460,13 +462,15 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 				rtFromTextField.setText("0.00");
 
 			if (rtToTextField.getText().trim().isEmpty()) {
-				errors.add("Upper retention range can not be empty if \"Limit RT range\" option is selected!");
+				errors.add("Upper retention range can not be empty if "
+						+ "\"Limit RT range\" option is selected!");
 				return errors;
 			}
 			double fromRt = Double.parseDouble(rtFromTextField.getText().trim());
 			double toRt = Double.parseDouble(rtToTextField.getText().trim());
 			if (fromRt >= toRt) {
-				errors.add("Invalid retention time range (start RT must be smaller that end RT!");
+				errors.add("Invalid retention time range "
+						+ "(start RT must be smaller that end RT!");
 				return errors;
 			}
 		}
@@ -476,7 +480,8 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 	public ChromatogramExtractionTask createChromatogramExtractionTask() {
 
 		Collection<DataFile> files = rawDataFileTable.getSelectedFiles();
-		ChromatogramPlotMode mode = (ChromatogramPlotMode) chromTypeComboBox.getSelectedItem();
+		ChromatogramPlotMode mode = 
+				(ChromatogramPlotMode) chromTypeComboBox.getSelectedItem();
 		Polarity polarity = (Polarity) polarityComboBox.getSelectedItem();
 		int msLevel = (int) msLevelcomboBox.getSelectedItem();
 		Collection<Double> mzList = new ArrayList<Double>();
@@ -485,7 +490,8 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		boolean sumAllMassChromatograms = sumAllMassesCheckBox.isSelected();
 		if (mode.equals(ChromatogramPlotMode.XIC)) {
 
-			String[] mzStrings = StringUtils.split(mzTextField.getText().trim().replaceAll("[\\s+,:,;\\,]", ";"), ';');
+			String[] mzStrings = StringUtils.split(
+					mzTextField.getText().trim().replaceAll("[\\s+,:,;\\,]", ";"), ';');
 			for (String mzs : mzStrings) {
 
 				double mz = 0.0d;
@@ -510,11 +516,11 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 			double toRt = Double.parseDouble(rtToTextField.getText().trim());
 			rtRange = new Range(fromRt, toRt);
 		}
-		Filter smoothingFilter = smothingFilterSelectorPanel.getSmoothingFilter();
-		ChromatogramExtractionType chexType = 
-				(ChromatogramExtractionType)smoothingComboBox.getSelectedItem();
-		if(chexType.equals(ChromatogramExtractionType.RAW))
-				smoothingFilter = null;
+//		Filter smoothingFilter = smothingFilterSelectorPanel.getSmoothingFilter();
+//		ChromatogramExtractionType chexType = 
+//				(ChromatogramExtractionType)smoothingComboBox.getSelectedItem();
+//		if(chexType.equals(ChromatogramExtractionType.RAW))
+//				smoothingFilter = null;
 		
 		savePreferences();
 		ChromatogramExtractionTask xicTask = 
@@ -528,8 +534,8 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 						mzWindowValue, 
 						massErrorType, 
 						rtRange,
-						smoothingFilter,
-						chexType);
+						null,
+						ChromatogramExtractionType.RAW);
 		return xicTask;
 	}
 
@@ -581,15 +587,15 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		rtFromTextField.setText(preferences.get(RT_MIN_VALUE, RT_MIN_VALUE_DEFAULT));
 		rtToTextField.setText(preferences.get(RT_MAX_VALUE, RT_MAX_VALUE_DEFAULT));
 		
-		FilterClass fc = FilterClass.getFilterClassByName(
-				preferences.get(FILTER_CLASS, FilterClass.SAVITZKY_GOLAY_MZMINE.name()));
-		smothingFilterSelectorPanel.setFilterClass(fc);
+//		FilterClass fc = FilterClass.getFilterClassByName(
+//				preferences.get(FILTER_CLASS, FilterClass.SAVITZKY_GOLAY_MZMINE.name()));
+//		smothingFilterSelectorPanel.setFilterClass(fc);
 //		filterTypeComboBox.setSelectedItem(fc);
 		
-		ChromatogramExtractionType cexType = 
-				ChromatogramExtractionType.getChromatogramExtractionTypeByName(
-				preferences.get(CHROMATOGRAM_EXTRACTION_TYPE, ChromatogramExtractionType.SMOOTH.name()));
-		smoothingComboBox.setSelectedItem(cexType);
+//		ChromatogramExtractionType cexType = 
+//				ChromatogramExtractionType.getChromatogramExtractionTypeByName(
+//				preferences.get(CHROMATOGRAM_EXTRACTION_TYPE, ChromatogramExtractionType.SMOOTH.name()));
+//		smoothingComboBox.setSelectedItem(cexType);
 	}
 
 	@Override
@@ -613,9 +619,10 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		preferences.putBoolean(USE_RT_RANGE, chckbxLimitRtRange.isSelected());
 		preferences.put(RT_MIN_VALUE, rtFromTextField.getText().trim());
 		preferences.put(RT_MAX_VALUE, rtToTextField.getText().trim());
-		preferences.put(FILTER_CLASS, smothingFilterSelectorPanel.getFilterClass().name());
-		preferences.put(CHROMATOGRAM_EXTRACTION_TYPE, 
-				((ChromatogramExtractionType) smoothingComboBox.getSelectedItem()).name());
+		
+//		preferences.put(FILTER_CLASS, smothingFilterSelectorPanel.getFilterClass().name());
+//		preferences.put(CHROMATOGRAM_EXTRACTION_TYPE, 
+//				((ChromatogramExtractionType) smoothingComboBox.getSelectedItem()).name());
 	}
 
 	@Override

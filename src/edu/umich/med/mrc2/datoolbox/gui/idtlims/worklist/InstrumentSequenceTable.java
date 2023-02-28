@@ -156,8 +156,7 @@ public class InstrumentSequenceTable extends BasicTable {
 	}
 
 	public String getWorklistsAsString() {
-		// TODO Auto-generated method stub
-		return "";
+		return getTableDataAsString();
 	}
 
 	public Collection<ExperimentalSample> getSelectedSamples() {

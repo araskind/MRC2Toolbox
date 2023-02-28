@@ -48,10 +48,14 @@ public class MSMSFeatureExtractionParametersModel extends BasicTableModel {
 		setRowCount(0);		
 		for (MSMSExtractionParameterSet parSet : parameterList) {
 			
+			String polarityName = "Any";
+			if(parSet.getPolarity() != null)
+				polarityName = parSet.getPolarity().name();
+			
 			Object[] obj = new Object[] { 
 					parSet.getId(), 
 					parSet,
-					parSet.getPolarity().name(),
+					polarityName,
 				};
 			super.addRow(obj);
 		}		

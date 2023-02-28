@@ -112,6 +112,8 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 		if(!isConnected())
 			return;
 		
+		super.actionPerformed(e);
+		
 		String command = e.getActionCommand();
 		
 		if(command.equals(MainActionCommands.ADD_REFERENCE_SAMPLE_DIALOG_COMMAND.getName()))
@@ -129,8 +131,14 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 		if(command.equals(MainActionCommands.EDIT_REFERENCE_SAMPLE_COMMAND.getName()))
 			editStockSample();
 
-		if(command.equals(MainActionCommands.DELETE_REFERENCE_SAMPLE_COMMAND.getName()))
-			deleteSelectedSample();
+		if(command.equals(MainActionCommands.DELETE_REFERENCE_SAMPLE_COMMAND.getName())) {
+
+			if(stockSampleTable.getSelectedSample() == null)
+				return;	
+			
+			reauthenticateAdminCommand(
+					MainActionCommands.DELETE_REFERENCE_SAMPLE_COMMAND.getName());
+		}
 	}
 
 	public void loadStockSamples() {
@@ -241,5 +249,12 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 	public void savePreferences() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		
+		if(command.equals(MainActionCommands.DELETE_REFERENCE_SAMPLE_COMMAND.getName()))
+			deleteSelectedSample();		
 	}
 }

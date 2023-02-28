@@ -108,7 +108,10 @@ public class DockableVendorManagerPanel extends AbstractIDTrackerLimsPanel {
 		if(!isConnected())
 			return;
 
-		String command = e.getActionCommand();		
+		super.actionPerformed(e);
+		
+		String command = e.getActionCommand();
+		
 		if(command.equals(MainActionCommands.ADD_VENDOR_COMMAND.getName())) {
 			showVendorEditor(null);
 		}
@@ -118,8 +121,14 @@ public class DockableVendorManagerPanel extends AbstractIDTrackerLimsPanel {
 		if(command.equals(MainActionCommands.SAVE_VENDOR_DETAILS_COMMAND.getName()))
 			saveVendorDetails();
 		
-		if(command.equals(MainActionCommands.DELETE_VENDOR_COMMAND.getName()))
-			deleteVendor();		
+		if(command.equals(MainActionCommands.DELETE_VENDOR_COMMAND.getName())) {	
+
+			if(vendorTable.getSelectedVendor() == null)
+				return;
+			
+			reauthenticateAdminCommand(
+					MainActionCommands.DELETE_VENDOR_COMMAND.getName());
+		}
 	}
 	
 	private void loadVendorInEditor() {
@@ -224,5 +233,12 @@ public class DockableVendorManagerPanel extends AbstractIDTrackerLimsPanel {
 	public void loadVendorList() {
 		vendorTable.setTableModelFromManufacturers(
 				IDTDataCash.getManufacturers());
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		
+		if(command.equals(MainActionCommands.DELETE_VENDOR_COMMAND.getName()))
+			deleteVendor();		
 	}
 }

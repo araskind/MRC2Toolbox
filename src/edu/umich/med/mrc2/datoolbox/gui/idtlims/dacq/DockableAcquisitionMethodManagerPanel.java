@@ -133,6 +133,8 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 		if(!isConnected())
 			return;
 		
+		super.actionPerformed(e);
+		
 		String command = e.getActionCommand();
 
 		if(command.equals(MainActionCommands.ADD_ACQUISITION_METHOD_DIALOG_COMMAND.getName()))
@@ -148,16 +150,16 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 				e.getActionCommand().equals(MainActionCommands.EDIT_ACQUISITION_METHOD_COMMAND.getName()))
 			saveAcquisitionMethodData();
 
-		if(command.equals(MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName()))
-			deleteAcquisitionMethod();
-
+		if(command.equals(MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName())) {
+			
+			if(methodTable.getSelectedMethod() == null)
+				return;
+			
+			reauthenticateAdminCommand(MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName());
+		}
+			
 		if(command.equals(MainActionCommands.DOWNLOAD_ACQUISITION_METHOD_COMMAND.getName()))
 			downloadAcquisitionMethodFile();
-		
-//			showMethodSaveDialog();
-//
-//		if(e.getSource().equals(chooser) && e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION))
-//			downloadAcquisitionMethodFile();
 
 		if(command.equals(MainActionCommands.LINK_ACQUISITION_METHOD_TO_EXPERIMENT_COMMAND.getName()))
 			linkAcquisitionMethodToExperiment();
@@ -316,6 +318,13 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 
 	public synchronized void clearPanel() {
 		methodTable.clearTable();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+
+		if(command.equals(MainActionCommands.DELETE_ACQUISITION_METHOD_COMMAND.getName()))
+			deleteAcquisitionMethod();
 	}
 }
 

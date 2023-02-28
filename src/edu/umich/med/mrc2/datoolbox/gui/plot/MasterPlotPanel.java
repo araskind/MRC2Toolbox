@@ -76,12 +76,12 @@ public abstract class MasterPlotPanel extends ChartPanel{
 
 	protected static Color[] brewedColors;
 
-	protected static Color LABEL_COLOR = Color.darkGray;
-	protected static Color GRID_COLOR = Color.lightGray;
-	protected static Color HIGHLIGHT_OUTLINE_COLOR = new Color(255, 255, 0);
-	protected static Color HIGHLIGHT_BODY_COLOR = new Color(255, 255, 0, 20);
-	protected static Color CROSS_HAIR_COLOR = Color.gray;
-	protected static Stroke CROSS_HAIR_STROKE =
+	public static Color LABEL_COLOR = Color.darkGray;
+	public static Color GRID_COLOR = Color.lightGray;
+	public static Color HIGHLIGHT_OUTLINE_COLOR = new Color(255, 255, 0);
+	public static Color HIGHLIGHT_BODY_COLOR = new Color(255, 255, 0, 20);
+	public static Color CROSS_HAIR_COLOR = Color.gray;
+	public static Stroke CROSS_HAIR_STROKE =
 			new BasicStroke(
 					1.0F,
 					BasicStroke.CAP_BUTT,
@@ -90,13 +90,13 @@ public abstract class MasterPlotPanel extends ChartPanel{
 					new float[] { 5.0F, 3.0F },
 					0.0F);
 
-	protected static Shape DATA_POINT_SHAPE = new Ellipse2D.Double(-2.0, -2.0, 5.0, 5.0);
-	protected static RectangleInsets AXIS_OFFSET = new RectangleInsets(5.0, 5.0, 5.0, 5.0);
-	protected static Font TITLE_FONT = new Font("SansSerif", Font.BOLD, 12);
-	protected static Font SUBTITLE_FONT = new Font("SansSerif", Font.PLAIN, 11);
-	protected static Font LEGEND_FONT = new Font("SansSerif", Font.PLAIN, 11);
-	protected static double AXIS_MARGINS = 0.001;
-	protected static double TITLE_TOP_MARGIN = 1.0;
+	public static Shape DATA_POINT_SHAPE = new Ellipse2D.Double(-2.0, -2.0, 5.0, 5.0);
+	public static RectangleInsets AXIS_OFFSET = new RectangleInsets(5.0, 5.0, 5.0, 5.0);
+	public static Font TITLE_FONT = new Font("SansSerif", Font.BOLD, 12);
+	public static Font SUBTITLE_FONT = new Font("SansSerif", Font.PLAIN, 11);
+	public static Font LEGEND_FONT = new Font("SansSerif", Font.PLAIN, 11);
+	public static double AXIS_MARGINS = 0.001;
+	public static double TITLE_TOP_MARGIN = 1.0;
 	protected XYPlot plot;
 	protected JFreeChart chart;
 	protected TextTitle chartTitle, chartSubTitle;

@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.idtlims;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
@@ -31,7 +32,11 @@ import bibliothek.gui.dock.action.DockAction;
 import bibliothek.gui.dock.action.LocationHint;
 import bibliothek.gui.dock.action.actions.SimpleMenuAction;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
+import edu.umich.med.mrc2.datoolbox.gui.main.IdTrackerPasswordActionUnlockDialog;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -44,6 +49,7 @@ public abstract class AbstractIDTrackerLimsPanel extends DefaultSingleCDockable
 	protected static final Icon actionIcon = GuiUtils.getIcon("cog", 16);
 	protected DefaultDockActionSource menuActions;
 	protected IDTrackerLimsManagerPanel idTrackerLimsManager;
+	protected IdTrackerPasswordActionUnlockDialog confirmActionDialog;
 
 	public AbstractIDTrackerLimsPanel(
 			IDTrackerLimsManagerPanel idTrackerLimsManager,
@@ -70,6 +76,61 @@ public abstract class AbstractIDTrackerLimsPanel extends DefaultSingleCDockable
 		actions.add((DockAction)actionMenu);
 		intern().setActionOffers(actions);
 	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if(e.getActionCommand().equals(MainActionCommands.VERIFY_IDTRACKER_PASSWORD_COMMAND.getName()))
+			verifyAdminPassword();	
+	}
+	
+	public void verifyAdminPassword() {
+		
+		if(confirmActionDialog == null 
+				|| !confirmActionDialog.isVisible() 
+				|| !confirmActionDialog.isDisplayable())
+			return;
+				
+		LIMSUser currentUser = MRC2ToolBoxCore.getIdTrackerUser();
+		if(currentUser == null) {
+			
+			if(confirmActionDialog != null && confirmActionDialog.isVisible())
+				confirmActionDialog.dispose();
+			
+			MessageDialog.showErrorMsg("Password incorrect!", this.getContentPane());
+			return;
+		}		
+		if(!currentUser.isSuperUser()) {
+			
+			if(confirmActionDialog != null && confirmActionDialog.isVisible())
+				confirmActionDialog.dispose();
+			
+			MessageDialog.showErrorMsg(
+					"You do not have administrative priviledges.", 
+					this.getContentPane());
+			return;
+		}
+		LIMSUser user = null;	
+		try {
+			user = UserUtils.getUserLogon(
+					MRC2ToolBoxCore.getIdTrackerUser().getUserName(), 
+					confirmActionDialog.getPassword());
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		if(user == null) {
+			MessageDialog.showErrorMsg("Password incorrect!", confirmActionDialog);
+			return;
+		}
+		else {	
+			String command = confirmActionDialog.getActionCommand2confirm();
+			confirmActionDialog.dispose();
+			executeAdminCommand(command);
+		}
+	}
+	
+	protected abstract void executeAdminCommand(String command);
 
 	protected boolean isConnected() {
 		
@@ -79,9 +140,20 @@ public abstract class AbstractIDTrackerLimsPanel extends DefaultSingleCDockable
 			return false;
 		}
 		if (MRC2ToolBoxCore.getIdTrackerUser() == null) {
-			MessageDialog.showErrorMsg("You are not logged in ID tracker!", this.getContentPane());
+			MessageDialog.showErrorMsg(
+					"You are not logged in ID tracker!", 
+					this.getContentPane());
 			return false;
 		}
 		return true;
+	}
+	
+	public void reauthenticateAdminCommand(String command) {
+		
+		confirmActionDialog = 
+				new IdTrackerPasswordActionUnlockDialog(this, command);
+		confirmActionDialog.setUser(MRC2ToolBoxCore.getIdTrackerUser());
+		confirmActionDialog.setLocationRelativeTo(this.getContentPane());
+		confirmActionDialog.setVisible(true);
 	}
 }

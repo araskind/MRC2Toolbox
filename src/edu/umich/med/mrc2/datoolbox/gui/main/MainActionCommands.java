@@ -696,6 +696,7 @@ public enum MainActionCommands {
 	COPY_TABLE_DATA_COMMAND("Copy table data as TAB-separated"),
 	
 	//	Library MS table
+	COPY_SELECTED_MASSES_AS_CSV_COMMAND("Copy selected masses as CSV"),
 	COPY_MASS_LIST_AS_CSV_COMMAND("Copy complete mass list (CSV)"),
 	COPY_SELECTED_ADUCT_MASS_SUBLIST_2_AS_CSV_COMMAND("Copy top 2 masses from visible adducts (CSV)"),
 	COPY_SELECTED_ADUCT_MASS_SUBLIST_3_AS_CSV_COMMAND("Copy top 3 masses from visible adducts (CSV)"),	

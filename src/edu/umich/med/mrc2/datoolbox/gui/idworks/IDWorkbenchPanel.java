@@ -3661,10 +3661,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void showMsFeatureInfoBundle(MSFeatureInfoBundle selectedBundle) {
 		
+		final long startTime = System.currentTimeMillis();
+		
 		clearFeatureData();
 		if(selectedBundle == null)
 			return;
-
+		
 		MsFeature feature = selectedBundle.getMsFeature();		
 		MsMsLibraryFeature libFeature = null;
 		identificationsTable.setModelFromMsFeature(selectedBundle.getMsFeature());	
@@ -3678,14 +3680,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 			if(pid.getReferenceMsMsLibraryMatch() != null)
 				libFeature = pid.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature();
-		}
+		}		
 		List<MsPoint> msOne = Arrays.asList(feature.getSpectrum().getCompletePattern());
-		if(!msOne.isEmpty()) {
-//			msOnePlot.showMsForPointCollection(
-//					Arrays.asList(feature.getSpectrum().getCompletePattern()), true, "MS1 scan");
+		if(!msOne.isEmpty())
 			msOnePlot.showMsForFeature(feature, false);
-			msOneTable.setTableModelFromMsFeature(feature);
-		}
+					
 		//	Add MSMS
 		if(!feature.getSpectrum().getTandemSpectra().isEmpty()) {
 			
@@ -3704,13 +3703,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				else
 					msTwoPlot.showTandemMsWithReference(instrumentSpectrum, libFeature);
 			}
-		}
+		}		
 		//	Show annotations
 		featureAnnotationPanel.loadFeatureData(feature);		
 		identificationsTable.getTable().selectPrimaryIdentity();
 		
 		//	Show chromatogram
 		showFeatureChromatogram(selectedBundle);
+		
+		//	Last step since may take long time for noisy scans
+		if(!msOne.isEmpty())
+			msOneTable.setTableModelFromMsFeature(feature);
 	}
 	
 	private void showFeatureChromatogram(MSFeatureInfoBundle selectedBundle) {

@@ -163,6 +163,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsfdr.NISTPepSearchResultManipulator;
+import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.rawdata.PeakFinder;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cpdb.PubChemDataFetchTask;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
@@ -198,11 +199,83 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			matchMetaSci();
+			calculateTargetDecoyScores();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}	
+	
+	private static void calculateTargetDecoyScores() throws Exception {
+		
+		
+		Connection conn = ConnectionManager.getConnection();
+		String sdQuery = "SELECT SOURCE_LIB_ID, DECOY_LIB_ID"
+				+ " FROM REF_MSMS_DECOY_CROSSREF";
+		PreparedStatement sdPs = conn.prepareStatement(sdQuery);
+		
+		String msmsQuery =
+				"SELECT MZ, INTENSITY FROM REF_MSMS_LIBRARY_PEAK "
+				+ "WHERE MRC2_LIB_ID = ?";
+		PreparedStatement msmsps = conn.prepareStatement(msmsQuery);
+		
+		String updQuery = "UPDATE REF_MSMS_DECOY_CROSSREF SET MATCH_SCORE = ? "
+				+ "WHERE SOURCE_LIB_ID = ? AND DECOY_LIB_ID = ?";
+		PreparedStatement updPs = conn.prepareStatement(updQuery);
+		
+		Collection<MsPoint>sourceSpectrum = new ArrayList<MsPoint>();
+		Collection<MsPoint>decoySpectrum = new ArrayList<MsPoint>();
+		
+		String sourceId, decoyId;
+		ResultSet rs = sdPs.executeQuery();
+		ResultSet msmsrs;
+		
+		int count = 0;
+		while(rs.next()) {
+			
+			sourceSpectrum.clear();
+			decoySpectrum.clear();
+			sourceId = rs.getString("SOURCE_LIB_ID");
+			decoyId = rs.getString("DECOY_LIB_ID");
+			
+			msmsps.setString(1, sourceId);
+			msmsrs = msmsps.executeQuery();
+			while(msmsrs.next()) {
+				sourceSpectrum.add(new MsPoint(
+						msmsrs.getDouble("MZ"), msmsrs.getDouble("INTENSITY")));
+			}
+			msmsrs.close();
+			
+			msmsps.setString(1, decoyId);
+			msmsrs = msmsps.executeQuery();
+			while(msmsrs.next()) {
+				decoySpectrum.add(new MsPoint(
+						msmsrs.getDouble("MZ"), msmsrs.getDouble("INTENSITY")));
+			}
+			msmsrs.close();
+			
+			double score = MSMSScoreCalculator.calculateEntropyBasedMatchScore(			
+					sourceSpectrum, 
+					decoySpectrum,
+					MRC2ToolBoxConfiguration.getSpectrumEntropyMassError(), 
+					MRC2ToolBoxConfiguration.getSpectrumEntropyMassErrorType(),
+					MRC2ToolBoxConfiguration.getSpectrumEntropyNoiseCutoff());
+			updPs.setDouble(1, score);
+			updPs.setString(2, sourceId);
+			updPs.setString(3, decoyId);
+			updPs.executeUpdate();
+			
+			count++;
+			if(count % 500 == 0)
+				System.err.print("*");
+			if(count % 10000 == 0)
+				System.err.print("*\n");
+		}
+		rs.close();
+		updPs.close();
+		sdPs.close();
+		msmsps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
 	
 	private static void matchMetaSci() throws Exception {
 		

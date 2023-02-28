@@ -64,6 +64,9 @@ public class PrepDocumentsTableModel extends BasicTableModel {
 		for(ObjectAnnotation annotation : annotations) {
 			
 			String text = annotation.getText(100);
+			if(text.isEmpty())
+				text = annotation.getLinkedDocumentName();
+			
 			if(annotation.getLinkedDocumentId() != null)
 				text = annotation.getLinkedDocumentName();
 						

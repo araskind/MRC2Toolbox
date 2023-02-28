@@ -148,7 +148,7 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 				addWorklistFromFileIcon, this));
 		
 		menuActions.addSeparator();
-		
+				
 		menuActions.add(GuiUtils.setupButtonAction(
 				MainActionCommands.CLEAR_WORKLIST_COMMAND.getName(),
 				MainActionCommands.CLEAR_WORKLIST_COMMAND.getName(), 
@@ -175,6 +175,8 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 		if(experiment == null || activeSamplePrep == null)
 			return;
 
+		super.actionPerformed(e);
+		
 		String command = e.getActionCommand();
 
 		if (command.equals(MainActionCommands.LOAD_WORKLIST_COMMAND.getName()))
@@ -198,7 +200,8 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 		if (command.equals(MainActionCommands.COPY_WORKLIST_COMMAND.getName()))
 			copyWorklistToClipboard();
 
-		if (command.equals(MainActionCommands.CLEAR_WORKLIST_COMMAND.getName()))
+		// TODO authenticate if using with saved experiment?
+		if (command.equals(MainActionCommands.CLEAR_WORKLIST_COMMAND.getName())) 
 			clearWorklist();
 	}
 
@@ -509,6 +512,12 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 
 			return null;
 		}
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

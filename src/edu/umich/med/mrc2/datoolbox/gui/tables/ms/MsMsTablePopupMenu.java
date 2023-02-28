@@ -43,10 +43,12 @@ public class MsMsTablePopupMenu extends JPopupMenu {
 	private static final Icon copyAsMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
 	private static final Icon copyFeatureIcon = GuiUtils.getIcon("extractList", 24);
 	private static final Icon copyScanIcon = GuiUtils.getIcon("copyScan", 24);
+	private static final Icon copySelectedIcon = GuiUtils.getIcon("copySelectedToClipboard", 24);
 
-	private JMenuItem
-		copySpectrumAsTsvMenuItem,
+	private JMenuItem		
+		copySpectrumAsTsvMenuItem,		
 		copyNormalizedSpectrumAsTsvMenuItem,
+		copySelectedMassesAsCSVMenuItem,
 		copyFeatureWithMetadataMenuItem,
 		copyScanWithMetadataMenuItem;
 //		copySubMassList2MenuItem,
@@ -66,6 +68,13 @@ public class MsMsTablePopupMenu extends JPopupMenu {
 				MainActionCommands.COPY_NORMALIZED_SPECTRUM_AS_TSV_COMMAND.getName(), listener,
 				MainActionCommands.COPY_NORMALIZED_SPECTRUM_AS_TSV_COMMAND.getName());
 		copyNormalizedSpectrumAsTsvMenuItem.setIcon(copyAsMSPIcon);
+				
+		addSeparator();
+		
+		copySelectedMassesAsCSVMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.COPY_SELECTED_MASSES_AS_CSV_COMMAND.getName(), listener,
+				MainActionCommands.COPY_SELECTED_MASSES_AS_CSV_COMMAND.getName());
+		copySelectedMassesAsCSVMenuItem.setIcon(copySelectedIcon);
 		
 		addSeparator();
 		

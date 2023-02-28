@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
@@ -96,10 +97,11 @@ public class RawDataUtils {
 		
 		String name = scan.getScanCollection().getDataSource().getName();
 		lines.add("Path: " + name);
+		String dataFileName = FilenameUtils.getBaseName(name);
+		lines.add("Original data file: "+ dataFileName);
 		
 		LCMSRunInfo ri = scan.getScanCollection().getDataSource().getRunInfo();
-		if(ri.getOriginalFiles() != null && !ri.getOriginalFiles().isEmpty())
-			lines.add("Original data file: "+ ri.getOriginalFiles().get(0).name);
+//		if(ri.getOriginalFiles() != null && !ri.getOriginalFiles().isEmpty())
 		
 		if(ri.getRunStartTime() != null)
 			lines.add("Run start time: " + 

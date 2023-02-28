@@ -134,6 +134,8 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 		if(!isConnected())
 			return;
 		
+		super.actionPerformed(e);
+		
 		String command = e.getActionCommand();
 
 		if(command.equals(MainActionCommands.ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND.getName()))
@@ -149,8 +151,13 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 				command.equals(MainActionCommands.EDIT_DATA_EXTRACTION_METHOD_COMMAND.getName()))
 			saveDataExtractionMethod();
 
-		if(command.equals(MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName()))
-			deleteDataExtractionMethod();
+		if(command.equals(MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName())) {
+
+			if(dataExtractionMethodTable.getSelectedMethod() == null)
+				return;
+			
+			reauthenticateAdminCommand(MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName());
+		}
 
 		if(command.equals(MainActionCommands.DOWNLOAD_DATA_EXTRACTION_METHOD_COMMAND.getName()))
 			downloadDataExtractionMethodFile();			
@@ -305,6 +312,13 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 
 	public synchronized void clearPanel() {
 		dataExtractionMethodTable.clearTable();
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+		
+		if(command.equals(MainActionCommands.DELETE_DATA_EXTRACTION_METHOD_COMMAND.getName()))
+			deleteDataExtractionMethod();
 	}
 }
 

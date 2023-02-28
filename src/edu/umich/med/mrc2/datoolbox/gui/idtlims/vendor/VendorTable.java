@@ -55,6 +55,9 @@ public class VendorTable extends BasicTable {
 		columnModel.getColumnById(VendorTableModel.VENDOR_COLUMN).
 			setCellRenderer(new WordWrapCellRenderer());
 		
+		columnModel.getColumnById(VendorTableModel.VENDOR_COLUMN).setMaxWidth(300);
+		columnModel.getColumnById(VendorTableModel.VENDOR_COLUMN).setMinWidth(200);
+		
 		ManufacturerWebPageLinkRenderer vendorLinkRenderer = 
 				new ManufacturerWebPageLinkRenderer();
 		columnModel.getColumnById(VendorTableModel.WEB_ADDRESS_COLUMN).

@@ -113,6 +113,8 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 		
 		if(!isConnected())
 			return;
+		
+		super.actionPerformed(e);
 
 		if(e.getActionCommand().equals(MainActionCommands.ADD_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND.getName()))
 			addColumnDialog();
@@ -124,8 +126,13 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 		if(e.getActionCommand().equals(MainActionCommands.EDIT_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND.getName()))
 			editColumnDialog();
 
-		if(e.getActionCommand().equals(MainActionCommands.DELETE_CHROMATOGRAPHIC_COLUMN_COMMAND.getName()))
-			deleteCromatographicColumn();
+		if(e.getActionCommand().equals(MainActionCommands.DELETE_CHROMATOGRAPHIC_COLUMN_COMMAND.getName())) {
+			
+			if(cromatographicColumnTable.getSelectedChromatographicColumn() == null)
+				return;
+			
+			reauthenticateAdminCommand(MainActionCommands.DELETE_CHROMATOGRAPHIC_COLUMN_COMMAND.getName());
+		}
 	}
 	
 	private void addColumnDialog() {
@@ -148,7 +155,8 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 
 	private void deleteCromatographicColumn() {
 
-		LIMSChromatographicColumn column = cromatographicColumnTable.getSelectedChromatographicColumn();
+		LIMSChromatographicColumn column = 
+				cromatographicColumnTable.getSelectedChromatographicColumn();
 		if(column == null)
 			return;
 	
@@ -246,6 +254,13 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 	public void savePreferences() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+
+		if(command.equals(MainActionCommands.DELETE_CHROMATOGRAPHIC_COLUMN_COMMAND.getName()))
+			deleteCromatographicColumn();
 	}
 }
 

@@ -1666,7 +1666,8 @@ public class IDTUtils {
 				"ID_SAMPLE_PREP_SEQ",
 				DataPrefix.SAMPLE_PREPARATION,
 				"0",
-				4);		
+				4);	
+		prep.setId(prepId);
 		String query = 
 				"INSERT INTO SAMPLE_PREPARATION (SAMPLE_PREP_ID, TITLE, PREP_DATE, CREATOR) "
 				+ "VALUES (?, ?, ?, ?)";
@@ -1709,15 +1710,10 @@ public class IDTUtils {
 		}
 		ps.close();
 		if(!prep.getAnnotations().isEmpty()) {
-			
-			//	TODO check if any annotations must be deleted
 
 			for(ObjectAnnotation annotation : prep.getAnnotations()) {
-				
-				if(annotation.getUniqueId().length() == 12)
-					AnnotationUtils.updateAnnotation(annotation, conn);
-				else
-					AnnotationUtils.insertNewAnnotation(annotation, conn);
+				annotation.setAnnotatedObjectId(prepId);
+				AnnotationUtils.insertNewAnnotation(annotation, conn);
 			}
 		}		
 		ConnectionManager.releaseConnection(conn);

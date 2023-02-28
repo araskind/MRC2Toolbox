@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.tables.ms;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
@@ -64,6 +66,7 @@ public class MsOneTableModel extends BasicTableModel {
 		if(spectrum == null)
 			return;
 
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		if(spectrum.getAdducts() != null && !spectrum.getAdducts().isEmpty()) {
 			
 			for(Adduct adduct : spectrum.getAdducts()) {
@@ -77,12 +80,12 @@ public class MsOneTableModel extends BasicTableModel {
 							adduct,
 							count
 					};
-					super.addRow(obj);
+					rowData.add(obj);
 					count++;
 				}
 			}
 		}
-		else {
+		else {						
 			int count = 1;
 			for(MsPoint dp : spectrum.getCompletePattern()) {
 
@@ -92,10 +95,11 @@ public class MsOneTableModel extends BasicTableModel {
 						"",
 						count
 				};
-				super.addRow(obj);
+				rowData.add(obj);
 				count++;
-			}
+			}			
 		}
+		addRows(rowData);
 	}
 	
 	public void setTableModelFromScan(IScan scan) {
@@ -103,6 +107,7 @@ public class MsOneTableModel extends BasicTableModel {
 		setRowCount(0);
 		int count = 1;
 		Collection<MsPoint> points = RawDataUtils.getScanPoints(scan);
+		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(MsPoint dp : points) {
 
 			Object[] obj = {
@@ -111,9 +116,10 @@ public class MsOneTableModel extends BasicTableModel {
 					null,
 					count
 			};
-			super.addRow(obj);
+			rowData.add(obj);
 			count++;
 		}	
+		addRows(rowData);
 	}
 }
 

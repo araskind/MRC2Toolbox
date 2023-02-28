@@ -114,6 +114,8 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 		if(!isConnected())
 			return;
 		
+		super.actionPerformed(e);
+		
 		String command = e.getActionCommand();
 		
 		if(command.equals(MainActionCommands.ADD_MOBILE_PHASE_DIALOG_COMMAND.getName()))
@@ -133,8 +135,13 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 		if(command.equals(MainActionCommands.EDIT_MOBILE_PHASE_COMMAND.getName()))
 			editMobilePhase();
 		
-		if(command.equals(MainActionCommands.DELETE_MOBILE_PHASE_COMMAND.getName()))
-			deleteMobilePhase();		
+		if(e.getActionCommand().equals(MainActionCommands.DELETE_MOBILE_PHASE_COMMAND.getName())) {
+
+			if(mobilePhaseTable.getSelectedMobilePhase() == null)
+				return;
+			
+			reauthenticateAdminCommand(MainActionCommands.DELETE_MOBILE_PHASE_COMMAND.getName());
+		}
 	}
 	
 	private void addNewMobilePhase() {
@@ -270,6 +277,13 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 	public void savePreferences() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+
+		if(command.equals(MainActionCommands.DELETE_MOBILE_PHASE_COMMAND.getName()))
+			deleteMobilePhase();
 	}
 }
 

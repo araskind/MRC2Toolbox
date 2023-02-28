@@ -108,7 +108,10 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 		if(!isConnected())
 			return;
 
-		String command = e.getActionCommand();		
+		super.actionPerformed(e);
+		
+		String command = e.getActionCommand();	
+		
 		if(command.equals(MainActionCommands.ADD_SOFTWARE_COMMAND.getName()))
 			showSoftwareEditor(null);
 		
@@ -118,8 +121,14 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 		if(command.equals(MainActionCommands.SAVE_SOFTWARE_DETAILS_COMMAND.getName()))
 			saveSoftwareDetails();
 		
-		if(command.equals(MainActionCommands.DELETE_SOFTWARE_COMMAND.getName()))
-			deleteSoftware();		
+		if(command.equals(MainActionCommands.DELETE_SOFTWARE_COMMAND.getName())) {
+
+			if(softwareTable.getSelectedSoftware() == null)
+				return;
+			
+			reauthenticateAdminCommand(
+					MainActionCommands.DELETE_SOFTWARE_COMMAND.getName());
+		}		
 	}
 	
 	private void loadSoftwareIntoEditor() {
@@ -227,5 +236,12 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 	public void loadSoftwareList() {
 		softwareTable.setTableModelFromSoftwareList(
 				IDTDataCash.getSoftwareList());
+	}
+
+	@Override
+	protected void executeAdminCommand(String command) {
+
+		if(command.equals(MainActionCommands.DELETE_SOFTWARE_COMMAND.getName()))
+			deleteSoftware();		
 	}
 }

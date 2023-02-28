@@ -128,26 +128,31 @@ public class MsOneTable  extends BasicTable {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		String command = e.getActionCommand();
+		
+		if (command.equals(MainActionCommands.COPY_SELECTED_MASSES_AS_CSV_COMMAND.getName()))
+			copySelectedMassesAsCSV();
 
-		if (e.getActionCommand().equals(MainActionCommands.COPY_MASS_LIST_AS_CSV_COMMAND.getName()))
+		if (command.equals(MainActionCommands.COPY_MASS_LIST_AS_CSV_COMMAND.getName()))
 			copyMassListAsCSV(0);
 
-		if (e.getActionCommand().equals(MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_2_AS_CSV_COMMAND.getName()))
+		if (command.equals(MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_2_AS_CSV_COMMAND.getName()))
 			copyMassListAsCSV(2);
 
-		if (e.getActionCommand().equals(MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_3_AS_CSV_COMMAND.getName()))
+		if (command.equals(MainActionCommands.COPY_SELECTED_ADUCT_MASS_SUBLIST_3_AS_CSV_COMMAND.getName()))
 			copyMassListAsCSV(3);
 		
-		if (e.getActionCommand().equals(MainActionCommands.COPY_SPECTRUM_AS_TSV_COMMAND.getName()))
+		if (command.equals(MainActionCommands.COPY_SPECTRUM_AS_TSV_COMMAND.getName()))
 			copyMassListAsTSV(false);
 
-		if (e.getActionCommand().equals(MainActionCommands.COPY_NORMALIZED_SPECTRUM_AS_TSV_COMMAND.getName()))
+		if (command.equals(MainActionCommands.COPY_NORMALIZED_SPECTRUM_AS_TSV_COMMAND.getName()))
 			copyMassListAsTSV(true);
 		
-		if (e.getActionCommand().equals(MainActionCommands.COPY_FEATURE_WITH_METADATA_COMMAND.getName()))
+		if (command.equals(MainActionCommands.COPY_FEATURE_WITH_METADATA_COMMAND.getName()))
 			copyFeatureWithMetadata();
 			
-		if (e.getActionCommand().equals(MainActionCommands.COPY_SCAN_WITH_METADATA_COMMAND.getName()))
+		if (command.equals(MainActionCommands.COPY_SCAN_WITH_METADATA_COMMAND.getName()))
 			copyScanWithMetadata();
 			
 		super.actionPerformed(e);
@@ -176,6 +181,23 @@ public class MsOneTable  extends BasicTable {
 			clpbrd.setContents(stringSelection, null);
 		}
 	}
+	
+	public void copySelectedMassesAsCSV() {
+		
+		ArrayList<String> massList = new ArrayList<String>();
+		int[] selectedRows = getSelectedRows();
+		if(selectedRows.length == 0)
+			return;
+		
+		int massColumn = model.getColumnIndex(MsOneTableModel.MZ_COLUMN);
+		for(int i : selectedRows) {
+			double mz = (double) model.getValueAt(convertRowIndexToModel(i), massColumn);
+			massList.add(MRC2ToolBoxConfiguration.getMzFormat().format(mz));
+		}
+		StringSelection stringSelection = new StringSelection(StringUtils.join(massList, ","));
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
+	}
 
 	public void copyMassListAsCSV(int massCount) {
 
@@ -185,7 +207,7 @@ public class MsOneTable  extends BasicTable {
 
 			for (int i = 0; i < model.getRowCount(); i++) {
 
-				double mz = (double) getValueAt(i, massColumn);
+				double mz = (double) model.getValueAt(i, massColumn);
 				massList.add(MRC2ToolBoxConfiguration.getMzFormat().format(mz));
 			}
 		}
@@ -240,7 +262,8 @@ public class MsOneTable  extends BasicTable {
 				massIntensityList.add(line);
 			}		
 		}	
-		StringSelection stringSelection = new StringSelection(StringUtils.join(massIntensityList, "\n"));
+		StringSelection stringSelection = 
+				new StringSelection(StringUtils.join(massIntensityList, "\n"));
 		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clpbrd.setContents(stringSelection, null);
 	}
@@ -250,9 +273,12 @@ public class MsOneTable  extends BasicTable {
 		HashSet<Adduct>visAdducts = new HashSet<Adduct>();
 		int adductColumn = model.getColumnIndex(MsOneTableModel.ADDUCT_COLUMN);
 
-		for(int i=0; i<getRowCount(); i++)
-			visAdducts.add((Adduct) model.getValueAt(convertRowIndexToModel(i), adductColumn));
-
+		for(int i=0; i<getRowCount(); i++) {
+			
+			Object value = model.getValueAt(convertRowIndexToModel(i), adductColumn);
+			if(value != null)
+				visAdducts.add((Adduct)value);
+		}
 		return visAdducts;
 	}
 }

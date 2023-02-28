@@ -382,6 +382,10 @@ public class ObjectAnnotation implements Comparable<ObjectAnnotation>, Serializa
 	public void setLinkedDocumentFile(File linkedDocumentFile) {
 		this.linkedDocumentFile = linkedDocumentFile;
 	}
+
+	public void setAnnotatedObjectId(String annotatedObjectId) {
+		this.annotatedObjectId = annotatedObjectId;
+	}
 }
 
 

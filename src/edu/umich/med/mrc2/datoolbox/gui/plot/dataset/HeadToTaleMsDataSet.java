@@ -21,8 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.jfree.data.xy.AbstractXYDataset;
 import org.jfree.data.xy.IntervalXYDataset;
@@ -40,13 +42,13 @@ public class HeadToTaleMsDataSet  extends AbstractXYDataset implements IntervalX
 	 *
 	 */
 	private static final long serialVersionUID = 6793905715141166824L;
-	private HashMap<Integer, MsPoint[]> msSeries;
-	private HashMap<Integer, String> labels;
+	private Map<Integer, MsPoint[]> msSeries;
+	private Map<Integer, String> labels;
 
 	public HeadToTaleMsDataSet(MsFeature feature, MsFeature reference) {
 
-		msSeries = new HashMap<Integer, MsPoint[]>();
-		labels = new HashMap<Integer, String>();
+		msSeries = new TreeMap<Integer, MsPoint[]>();
+		labels = new TreeMap<Integer, String>();
 
 		MassSpectrum featureSpectrum = feature.getSpectrum();
 		MassSpectrum referenceSpectrum = reference.getSpectrum();
@@ -63,8 +65,8 @@ public class HeadToTaleMsDataSet  extends AbstractXYDataset implements IntervalX
 	//TandemMassSpectrum
 	public HeadToTaleMsDataSet(TandemMassSpectrum unk, TandemMassSpectrum reference) {
 
-		msSeries = new HashMap<Integer, MsPoint[]>();
-		labels = new HashMap<Integer, String>();
+		msSeries = new TreeMap<Integer, MsPoint[]>();
+		labels = new TreeMap<Integer, String>();
 
 		if(unk != null && reference != null) {
 
@@ -77,8 +79,8 @@ public class HeadToTaleMsDataSet  extends AbstractXYDataset implements IntervalX
 
 	public HeadToTaleMsDataSet(TandemMassSpectrum instrumentSpectrum, MsMsLibraryFeature reference) {
 
-		msSeries = new HashMap<Integer, MsPoint[]>();
-		labels = new HashMap<Integer, String>();
+		msSeries = new TreeMap<Integer, MsPoint[]>();
+		labels = new TreeMap<Integer, String>();
 
 		if(instrumentSpectrum != null && reference != null) {
 
@@ -103,6 +105,15 @@ public class HeadToTaleMsDataSet  extends AbstractXYDataset implements IntervalX
 			}
 		}
 		return massRange;
+	}
+	
+	public Range getIntensityRange() {
+		
+		double max = Arrays.asList(msSeries.get(0)).
+				stream().mapToDouble(p -> p.getIntensity()).max().getAsDouble();
+		double min = Arrays.asList(msSeries.get(1)).
+				stream().mapToDouble(p -> p.getIntensity()).max().getAsDouble();
+		return new Range(-min, max);
 	}
 
 	@Override

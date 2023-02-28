@@ -514,17 +514,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 				this.getContentPane());
 
 		if (result == JOptionPane.YES_OPTION) {
-			
-//			TODO xx
-//			try {
-//				IDTUtils.deleteProject(project);
-//				IDTDataCash.getProjects().remove(project);
-//				IDTDataCash.getExperiments().removeAll(project.getExperiments());
-//				projectTreePanel.removeObject(project);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+
 			DeleteTrackerProjectTask task = 
 					new DeleteTrackerProjectTask(project);
 			idp = new IndeterminateProgressDialog(
