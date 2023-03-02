@@ -462,21 +462,21 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 	
 	public MassSpectrumRenderer createMassSpectrumRenderer () {
 		
-		MassSpectrumRenderer msRenderer = 
+		MassSpectrumRenderer msRenderer =  
 				new MassSpectrumRenderer(Color.DARK_GRAY, 2.0f);
 		msRenderer.setDefaultItemLabelGenerator(new MsLabelGenerator(this));
 		msRenderer.setDefaultItemLabelsVisible(true);
 		msRenderer.setDefaultItemLabelPaint(LCMSPlotPanel.LABEL_COLOR);
 		ItemLabelPosition posIlp = new ItemLabelPosition(
 					ItemLabelAnchor.OUTSIDE12, 
-					TextAnchor.BOTTOM_LEFT,
-		            TextAnchor.CENTER, 0.0);
+					TextAnchor.BOTTOM_LEFT);
 		msRenderer.setDefaultPositiveItemLabelPosition(posIlp);
+		
 		ItemLabelPosition negIlp = new ItemLabelPosition(
-				ItemLabelAnchor.OUTSIDE12, 
-				TextAnchor.TOP_LEFT,
-	            TextAnchor.CENTER, 0.0);
+				ItemLabelAnchor.OUTSIDE6, 
+				TextAnchor.TOP_LEFT);
 		msRenderer.setDefaultNegativeItemLabelPosition(negIlp);
+		
 		return msRenderer;
 	}
 
@@ -644,6 +644,9 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		
         org.jfree.data.Range r = 
         		((ValueAxisPlot) plot).getDataRange(plot.getRangeAxis()); 
+        if(r == null)
+        	return;
+        	
         double maxIntensity = r.getUpperBound() * 1.15;
         double minIntensity = r.getLowerBound();
         if(minIntensity < 0.0d)

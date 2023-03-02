@@ -35,13 +35,9 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
-import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
-import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.compare.AdductComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.AnalysisMethodComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.ExperimentalSampleComparator;
@@ -54,7 +50,6 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIdentificationState;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.format.AdductFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.AnalysisMethodFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.ExperimentalSampleFormat;
@@ -90,7 +85,6 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.SampleTypeRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongTableUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.TableUpdateProgressDialog;
-import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 
 public class MSMSFeatureTable extends BasicTable {
 
@@ -243,13 +237,7 @@ public class MSMSFeatureTable extends BasicTable {
 	
 	public void setTableModelFromFeatureList(Collection<MSFeatureInfoBundle> featureList) {
 
-		thf.setTable(null);
-		List<Object[]> modelData = createModelData(featureList);
-		model.setRowCount(0);
-//		TableSwingWorker worker = new TableSwingWorker(model, modelData, this);
-//		worker.execute();
-		
-		TableUpdateTask task = new TableUpdateTask(model, modelData);
+		TableUpdateTask task = new TableUpdateTask(featureList);
 		String message = "Loading data for " + 
 				Integer.toString(featureList.size()) + " features, please wait ...";
 		idp = new TableUpdateProgressDialog(message, this, task);
@@ -257,134 +245,42 @@ public class MSMSFeatureTable extends BasicTable {
 		idp.setVisible(true);
 	}
 	
-	private List<Object[]> createModelData(Collection<MSFeatureInfoBundle> featureList) {
-		
-		List<Object[]> modelData = new ArrayList<Object[]>();
-		for (MSFeatureInfoBundle bundle : featureList) {
-
-			MsFeature cf = bundle.getMsFeature();
-			TandemMassSpectrum instrumentMsMs = 
-					cf.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
-
-			if(instrumentMsMs == null)
-				continue;
-
-			String compoundName = "";
-			LIMSSampleType limsSampleType = null;
-			if(bundle.getStockSample() != null) 
-				limsSampleType = bundle.getStockSample().getLimsSampleType();
-				
-			FeatureIdentificationState idState = cf.getIdentificationState();
-			boolean hasAnnotations = (!cf.getAnnotations().isEmpty() 
-					|| !bundle.getStandadAnnotations().isEmpty());
-			boolean hasFollowup = !bundle.getIdFollowupSteps().isEmpty();
-			MSFeatureIdentificationLevel idLevel = null;
-			Double libraryPrecursorDeltaMz = null;
-			Double neutralMassDeltaMz = null;
-			MsFeatureIdentity primaryId = cf.getPrimaryIdentity();
-			Adduct adduct = null;
-			Double entropyMsMsScore = null;
-			ReferenceMsMsLibraryMatch refMatch = null;
-			if(primaryId != null) {
-
-				if(primaryId.getCompoundIdentity() == null) {
-					System.out.println(cf.getPrimaryIdentity().
-							getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId() + " has no compound ID");
-				}
-				else {
-					compoundName = primaryId.getName();
-					double neutralMass = primaryId.getCompoundIdentity().getExactMass();
-					neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
-					refMatch = primaryId.getReferenceMsMsLibraryMatch();
-					if(refMatch != null) {
-						
-						MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
-						if(libPrecursor != null) 
-							libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
-					
-						entropyMsMsScore = refMatch.getEntropyBasedScore();
-					}
-				}
-				idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
-				adduct = primaryId.getPrimaryAdduct();
-			}
-			if(adduct == null) {
-				
-				if(cf.getSpectrum() != null) 	
-					adduct = cf.getSpectrum().getPrimaryAdduct();
-				else
-					adduct = AdductManager.getDefaultAdductForCharge(cf.getCharge());
-			}
-			Object[] obj = {
-				bundle,			//	MS_FEATURE_COLUMN	MsFeature
-				compoundName,	//	COMPOUND_NAME_COLUMN	String
-				cf.getPrimaryIdentity(),	//	DATABSE_LINK_COLUMN	MsFeatureIdentity
-				idState, //	AMBIGUITY_COLUMN, Boolean
-				idLevel,
-				adduct,
-				cf.getPolarity(),
-				hasAnnotations,	//	ANNOTATIONS_COLUMN, Boolean
-				hasFollowup,
-				cf.getRetentionTime(),		//	RETENTION_COLUMN	Double
-				instrumentMsMs.getParent().getMz(),	//	PARENT_MZ_COLUMN	Double
-				neutralMassDeltaMz,		//	NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN	Double
-				libraryPrecursorDeltaMz,	//	LIBRARY_PRECURSOR_DELTA_MZ_COLUMN	Double				
-				instrumentMsMs.getCidLevel(),	//	COLLISION_ENERGY_COLUMN	Double
-				entropyMsMsScore,
-				refMatch,
-//				score,	//	LIB_SCORE_COLUMN	Double
-//				lib,	//	MSMS_LIB_COLUMN	CompoundLibrary
-				limsSampleType,	//	SAMPLE_TYPE_COLUMN	LIMSSampleType
-				bundle.getSample(),		//	SAMPLE_COLUMN	IDTExperimentalSample
-				bundle.getExperiment(),	//	EXPERIMENT_COLUMN	LIMSExperiment
-				bundle.getAcquisitionMethod(),	//	ACQ_METHOD_ID_COLUMN	LIMSAcquisitionMethod
-				bundle.getDataExtractionMethod(),	//	DEX_METHOD_ID_COLUMN	LIMSDataExtractionMethod
-				instrumentMsMs.getParentIonPurity(),	//	PARENT_ION_PURITY_COLUMN	Double				
-				instrumentMsMs.isParentIonMinorIsotope(),	//	PARENT_ION_IS_MINOR_ISOTOPE_COLUMN	Boolean
-				instrumentMsMs.getEntropy(), //	SPECTRUM_ENTROPY_COLUMN		Double
-				instrumentMsMs.getTotalIntensity(),	//	SPECTRUM_TOTAL_INTENSITY_COLUMN	Double
-			};
-			modelData.add(obj);
-		}	
-		return modelData;
-	}
-	
 	class TableUpdateTask extends LongTableUpdateTask {
 
-	    private final BasicTableModel tableModel;
-	    private final List<Object[]> modelData;
+	    private final Collection<MSFeatureInfoBundle> featureList;
 
-	    public TableUpdateTask(BasicTableModel tableModel, List<Object[]> modelData) {
-	        this.tableModel = tableModel;
-	        this.modelData = modelData;
-	        thf.setTable(null);
+	    public TableUpdateTask(Collection<MSFeatureInfoBundle> featureList) {
+	        this.featureList = featureList;	       
 	    }
 
 		@Override
 		public BasicTableModel doInBackground() throws Exception {
 
-	        Thread.sleep(200);
-	        for (int index = 0; index < modelData.size(); index++) {
+			thf.setTable(null);
+			model.setRowCount(0);
+			List<Object[]> modelData = model.createModelData(featureList);
+			Thread.sleep(200);
+			for (int index = 0; index < modelData.size(); index++) {
 
-	        	Object[] data = modelData.get(index);
-	            publish(data);
-	            Thread.yield();
-	        }
-	        return tableModel;
-	    }
-		
-	    @Override 	
-	    protected void process(List<Object[]> chunks) {
-	        try {
-				tableModel.addRows(chunks);
+				Object[] data = modelData.get(index);
+				publish(data);
+				Thread.yield();
+			}
+			return model;
+		}
+
+		@Override
+		protected void process(List<Object[]> chunks) {
+			try {
+				model.addRows(chunks);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-	    }
-	    
-	    @Override
-	    public void done() {    	
+		}
+
+		@Override
+		public void done() {
 			try {
 				thf.setTable(MSMSFeatureTable.this);
 			} catch (Exception e) {
@@ -393,7 +289,7 @@ public class MSMSFeatureTable extends BasicTable {
 			}
 			adjustVariableColumns();
 			idp.dispose();
-	    }
+		}
 	}
 
 	public MSFeatureInfoBundle getSelectedBundle() {

@@ -134,7 +134,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 
 	@Override
 	public int compareTo(DataFile df) {
-		return this.name.compareTo(df.getName());
+		return this.name.compareToIgnoreCase(df.getName());
 	}
 
 	public DataAcquisitionMethod getDataAcquisitionMethod() {

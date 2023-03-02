@@ -276,7 +276,7 @@ public class MsOneTable  extends BasicTable {
 		for(int i=0; i<getRowCount(); i++) {
 			
 			Object value = model.getValueAt(convertRowIndexToModel(i), adductColumn);
-			if(value != null)
+			if(value != null && Adduct.class.isAssignableFrom(value.getClass()))
 				visAdducts.add((Adduct)value);
 		}
 		return visAdducts;

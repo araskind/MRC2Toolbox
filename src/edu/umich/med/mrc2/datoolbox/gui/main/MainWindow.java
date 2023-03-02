@@ -581,9 +581,7 @@ public class MainWindow extends JFrame
 				clearGuiAfterExperimentClosed();
 			}
 		}
-		if (currentExperiment != null 
-				|| MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
-
+		else {
 			String yesNoQuestion = "You are going to close current experiment,"
 					+ " do you want to save the results (Yes - save, No - discard)?";
 			int selectedValue = MessageDialog.showChooseOrCancelMsg(
@@ -609,8 +607,9 @@ public class MainWindow extends JFrame
 				saveExperiment();
 				return;
 			}
-			else
+			else {
 				clearGuiAfterExperimentClosed();
+			}
 		}
 	}
 	
@@ -1378,15 +1377,6 @@ public class MainWindow extends JFrame
 		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH).clearPanel();
 		RawDataManager.releaseAllDataSources();
 		setTitle(BuildInformation.getProgramName());
-		System.gc();
-	}
-	
-	public void clearGuiAfterRawDataAnalysisProjectClosed() {	
-		
-		MRC2ToolBoxCore.setActiveRawDataAnalysisExperiment(null);
-		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.RAW_DATA_EXAMINER).clearPanel();
-		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH).clearPanel();
-		RawDataManager.releaseAllDataSources();
 		System.gc();
 	}
 

@@ -90,6 +90,7 @@ import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.edl.ExistingDataListingD
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDEMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.scan.DockableScanPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTree;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.xic.DockableXICListingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
@@ -137,6 +138,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private DockableMsExtractorPanel msExtractorPanel;
 	private DockableRawDataFilePropertiesTable rawDataFilePropertiesTable;
 	private DockableScanPanel scanNavigationPanel;
+	private DockableXICListingPanel chromatogramListingPanel;
 	private IndeterminateProgressDialog idp;
 	private CloseRawDataFilesDialog closeRawDataFilesDialog;
 	private RawDataConversionSetupDialog rawDataConversionSetupDialog;
@@ -176,7 +178,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	
 	public RawDataExaminerPanel(){
 		
-		super("RawDataExaminerPanel", PanelList.RAW_DATA_EXAMINER.getName(), componentIcon);;
+		super("RawDataExaminerPanel", PanelList.RAW_DATA_EXAMINER.getName(), componentIcon);
 
 		menuBar = new RawDataExaminerMenuBar(this);	
 		add(menuBar, BorderLayout.NORTH);
@@ -198,12 +200,14 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		
 		scanNavigationPanel = new DockableScanPanel();
 		scanNavigationPanel.addScanSelectionListener(this);
+		chromatogramListingPanel = new DockableXICListingPanel();
+		chromatogramListingPanel.addChromatogramSelectionListener(this);
 		
 		xicSetupPanel = new DockableXICSetupPanel(this);
 		msExtractorPanel = new DockableMsExtractorPanel(this);
 
 		grid.add( 0, 0, 25, 100, dataFileTreePanel, 
-				scanNavigationPanel, rawDataFilePropertiesTable );
+				scanNavigationPanel, chromatogramListingPanel, rawDataFilePropertiesTable );
 		grid.add( 25, 0, 75, 50, chromatogramPanel );
 		grid.add( 25, 50, 50, 50, msPlotPanel, msTable, msmsPlotPanel, msmsTable);
 		grid.add( 75, 50, 25, 50, xicSetupPanel, msExtractorPanel);
@@ -817,7 +821,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			return;
 		
 		SaveStoredRawDataAnalysisExperimentTask task = 
-				new SaveStoredRawDataAnalysisExperimentTask(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment());
+				new SaveStoredRawDataAnalysisExperimentTask(
+						MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
@@ -1083,6 +1088,11 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 					df.setInjectionTime(rd.getSource().getRunInfo().getRunStartTime());
 				}				
 			}
+			List<ExtractedChromatogram> chromList = 
+					newRawFiles.stream().
+						flatMap(f -> f.getChromatograms().stream()).
+						collect(Collectors.toList());
+			chromatogramListingPanel.addChromatograms(chromList);
 			return null;
 		}
 	}
@@ -1149,6 +1159,12 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		rawDataFilePropertiesTable.clearTable();
 		
 		closeRawDataFilesDialog.dispose();
+		
+		List<ExtractedChromatogram> chromList = files.stream().
+			flatMap(f -> f.getChromatograms().stream()).
+			collect(Collectors.toList());
+		if(!chromList.isEmpty())
+			chromatogramListingPanel.removeChromatograms(chromList);
 	}
 
 	private void clearMsData(Collection<DataFile> files) {
@@ -1234,7 +1250,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private void finalizeRawDataFileOpenTask(RawDataFileOpenTask rdoTask) {
 		OpenRawDataFilesTask task = new OpenRawDataFilesTask(rdoTask.getOpenedFiles());
 		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
-		MainWindow.hideProgressDialog();
+		MainWindow.hideProgressDialog();		
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), task);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
@@ -1359,6 +1375,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				collect(Collectors.toSet());
 		xicSetupPanel.selectFiles(chromFiles);
 		msExtractorPanel.selectFiles(chromFiles);
+		chromatogramListingPanel.addChromatograms(chroms);
 	}
 	
 	public void loadRawData(Collection<DataFile>dataFiles) {
@@ -1372,8 +1389,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	@Override
 	public synchronized void clearPanel() {
 
-		dataFileTreePanel.clearPanel();
-		chromatogramPanel.clearPanel();
+		dataFileTreePanel.clearPanel();		
 		msPlotPanel.clearPanel();
 		msTable.clearTable();
 		msmsPlotPanel.clearPanel();
@@ -1382,6 +1398,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		msExtractorPanel.clearPanel();
 		rawDataFilePropertiesTable.clearTable();
 		scanNavigationPanel.clearPanel();
+		chromatogramListingPanel.clearPanel();
+		chromatogramPanel.clearPanel();
 	}
 
 	@Override
@@ -1397,6 +1415,13 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				IScan scan = scanNavigationPanel.getSelectedScan();
 				if(scan != null)
 					showScan(scan);
+			}
+			if(listener.equals(chromatogramListingPanel.getTable())) {
+				
+				Collection<ExtractedChromatogram> chroms = 
+						chromatogramListingPanel.getSelectedChromatograms();
+				if(chroms != null && !chroms.isEmpty())
+					showChromatograms(chroms);				
 			}
 		}
 	}
@@ -1483,7 +1508,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			TandemMassSpectrum msms = 
 					msFeature.getSpectrum().getExperimentalTandemSpectrum();
 			if(msms != null) {
-				msmsPlotPanel.showTandemMs(msms);;
+				msmsPlotPanel.showTandemMs(msms);
 				msmsTable.setTableModelFromTandemMs(msms);
 			}
 		}

@@ -40,6 +40,7 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.SmoothingFilterFields;
 import edu.umich.med.mrc2.datoolbox.project.store.XICDefinitionFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -195,12 +196,34 @@ public class ChromatogramDefinition  implements Serializable, Cloneable{
 		return mzList;
 	}
 	
+	public String getMzListString() {
+		
+		if(mzList.isEmpty())
+			return null;
+		
+		List<String> stringList = mzList.stream().
+				map(mz -> MRC2ToolBoxConfiguration.getMzFormat().format(mz)).
+				collect(Collectors.toList());
+		
+		return StringUtils.join(stringList, ", ");
+	}
+	
 	public Double getMzWindowValue() {
 		return mzWindowValue;
 	}
 	
 	public MassErrorType getMassErrorType() {
 		return massErrorType;
+	}
+	
+	public String getMZWindowString() {
+		
+		if(mzWindowValue == null || mzWindowValue.equals(Double.NaN) 
+				|| mzWindowValue == 0 || massErrorType == null)
+			return null;
+		else
+			return '\u00B1' + MRC2ToolBoxConfiguration.getPpmFormat().
+				format(mzWindowValue) + " " + massErrorType.name();
 	}
 	
 	public Range getRtRange() {

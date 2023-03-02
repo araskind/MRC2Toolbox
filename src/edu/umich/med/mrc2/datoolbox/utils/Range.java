@@ -59,7 +59,8 @@ public class Range implements Serializable, Comparable<Range> {
 	public Range(double min, double max) {
 		
 		if (min > max) 
-			throw (new IllegalArgumentException("Range minimum (" + min + ") must be <= maximum (" + max + ")"));
+			throw (new IllegalArgumentException(
+					"Range minimum (" + min + ") must be <= maximum (" + max + ")"));
 		
 		this.min = min;
 		this.max = max;

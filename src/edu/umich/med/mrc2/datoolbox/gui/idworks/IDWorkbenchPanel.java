@@ -3317,10 +3317,12 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			Collection<MSFeatureInfoBundle>featuresToLoad) {
 		
 		clearFeatureData();
-		msTwoFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
+		msTwoFeatureTable.getTable().
+			getSelectionModel().removeListSelectionListener(this);
 		msTwoFeatureTable.getTable().
 			setTableModelFromFeatureList(featuresToLoad);
-		msTwoFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
+		msTwoFeatureTable.getTable().
+			getSelectionModel().addListSelectionListener(this);
 	}
 
 	private void loadMsOneSearchData(Collection<MSFeatureInfoBundle> features) {
@@ -3427,11 +3429,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	public void clearFeatureData() {
-
-//		idTable.getTable().getSelectionModel().removeListSelectionListener(this);
-//		msmsLibraryMatchTable.getTable().getSelectionModel().removeListSelectionListener(this);		
-//		idTable.clearTable();
-//		msmsLibraryMatchTable.clearTable();
 		
 		identificationsTable.clearTable();
 		molStructurePanel.clearPanel();
@@ -3445,20 +3442,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		followupStepTable.clearTable();
 		standardFeatureAnnotationTable.clearTable();
 		chromatogramPanel.clearPanel();
-		//	TODO
-		
-//		idTable.getTable().getSelectionModel().addListSelectionListener(this);
-//		msmsLibraryMatchTable.getTable().getSelectionModel().addListSelectionListener(this);
 	}
-
-//	public void clearMSMSMatchData() {
-//
-//		msTwoTable.clearTable();
-//		msTwoPlot.removeAllDataSets();
-//		msMsInfoPanel.clearPanel();
-//
-//		//	TODO
-//	}
 	
 	private void clearIdentityData() {
 		

@@ -76,8 +76,8 @@ public class AssayDesignTable extends BasicTable {
 		setDefaultRenderer(ExperimentDesignLevel.class, 
 				new ExperimentalLevelRenderer());
 		
-		addColumnSelectorPopup();
-		//	finalizeLayout();
+//		addColumnSelectorPopup();
+			finalizeLayout();
 		fixedWidthColumns.add(0);
 		fixedWidthColumns.add(1);
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
