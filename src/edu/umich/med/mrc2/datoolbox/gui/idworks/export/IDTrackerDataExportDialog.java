@@ -66,6 +66,7 @@ import javax.swing.border.TitledBorder;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.IDTrackerDataExportParameters;
+import edu.umich.med.mrc2.datoolbox.data.enums.DecoyExportHandling;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
@@ -733,10 +734,20 @@ public class IDTrackerDataExportDialog extends JDialog
 		preferences.putBoolean(
 				IdentificationExportSettingsPanel.INCLUDE_HYBRID_MATCH, 
 				selectedMatchTypes.contains(MSMSMatchType.Hybrid));
-		preferences.putDouble(IdentificationExportSettingsPanel.MIN_SCORE, getMinimalMSMSScore());		
-		preferences.put(IdentificationExportSettingsPanel.SCORING_PARAMETER, getMSMSScoringParameter().name());
-		preferences.put(IdentificationExportSettingsPanel.IDS_PER_FEATURE, getFeatureIDSubset().name());		
-		preferences.putBoolean(IdentificationExportSettingsPanel.EXCLUDE_IF_NO_IDS, excludeIfNoIdsLeft());
+		preferences.putDouble(
+				IdentificationExportSettingsPanel.MIN_SCORE, getMinimalMSMSScore());		
+		preferences.put(
+				IdentificationExportSettingsPanel.SCORING_PARAMETER, 
+				getMSMSScoringParameter().name());
+		preferences.put(
+				IdentificationExportSettingsPanel.IDS_PER_FEATURE, 
+				getFeatureIDSubset().name());		
+		preferences.putBoolean(
+				IdentificationExportSettingsPanel.EXCLUDE_IF_NO_IDS, 
+				excludeIfNoIdsLeft());
+		preferences.put(
+				IdentificationExportSettingsPanel.DECOY_EXPORT_HANDLING, 
+				getDecoyExportHandling().name());		
 	}
 	
 	private void selectFeaturePropertiesListItems(
@@ -843,6 +854,10 @@ public class IDTrackerDataExportDialog extends JDialog
 		return identificationExportSettingsPanel.excludeIfNoIdsLeft();
 	}
 	
+	public DecoyExportHandling getDecoyExportHandling() {		
+		return identificationExportSettingsPanel.getDecoyExportHandling();
+	}
+	
 	public IDTrackerDataExportParameters getIDTrackerDataExportParameters() {
 		
 		IDTrackerDataExportParameters params = new IDTrackerDataExportParameters(
@@ -858,6 +873,7 @@ public class IDTrackerDataExportDialog extends JDialog
 				getFeatureIDSubset(),
 				getMSMSSearchTypes(),
 				excludeIfNoIdsLeft());
+		params.setDecoyExportHandling(getDecoyExportHandling());
 		return params;
 	}	
 	

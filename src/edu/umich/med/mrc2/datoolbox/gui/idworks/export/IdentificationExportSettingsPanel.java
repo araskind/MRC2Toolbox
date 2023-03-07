@@ -42,6 +42,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.DecoyExportHandling;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
@@ -62,6 +63,7 @@ public class IdentificationExportSettingsPanel extends JPanel {
 	public static final String INCLUDE_HYBRID_MATCH = "INCLUDE_HYBRID_MATCH";
 	public static final String IDS_PER_FEATURE = "IDS_PER_FEATURE";
 	public static final String EXCLUDE_IF_NO_IDS = "EXCLUDE_IF_NO_IDS";
+	public static final String DECOY_EXPORT_HANDLING = "DECOY_EXPORT_HANDLING";
 	
 	private JComboBox<FeatureIDSubset> featureIdSubsetComboBox;
 	private JCheckBox regularMatchCheckBox;
@@ -70,6 +72,9 @@ public class IdentificationExportSettingsPanel extends JPanel {
 	private JComboBox<MSMSScoringParameter> scoringParameterComboBox;
 	private JFormattedTextField minScoreTextField;
 	private JCheckBox excludeIfNoIdsLeftCheckBox;
+	private JLabel lblNewLabel;
+	private JComboBox decoyHitsHadlingComboBox;
+	private JLabel lblNewLabel_1;
 	
 	public IdentificationExportSettingsPanel() {
 		super();
@@ -84,9 +89,9 @@ public class IdentificationExportSettingsPanel extends JPanel {
 			
 			GridBagLayout gbl_panel_4 = new GridBagLayout();
 			gbl_panel_4.columnWidths = new int[] { 0, 0, 0, 0, 0, 0 };
-			gbl_panel_4.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-			gbl_panel_4.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-			gbl_panel_4.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+			gbl_panel_4.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
+			gbl_panel_4.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+			gbl_panel_4.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 			setLayout(gbl_panel_4);
 			
 			JLabel lblNewLabel_9 = new JLabel("IDs to export for each feature: ");
@@ -139,13 +144,38 @@ public class IdentificationExportSettingsPanel extends JPanel {
 			gbc_hybridMatchCheckBox.gridx = 3;
 			gbc_hybridMatchCheckBox.gridy = 1;
 			add(hybridMatchCheckBox, gbc_hybridMatchCheckBox);
+			
+			lblNewLabel = new JLabel("Decoy hits handling");
+			GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+			gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
+			gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+			gbc_lblNewLabel.gridx = 0;
+			gbc_lblNewLabel.gridy = 2;
+			add(lblNewLabel, gbc_lblNewLabel);
+			
+			decoyHitsHadlingComboBox = new JComboBox<DecoyExportHandling>(
+					new DefaultComboBoxModel<DecoyExportHandling>(DecoyExportHandling.values()));
+			GridBagConstraints gbc_decoyHitsHadlingComboBox = new GridBagConstraints();
+			gbc_decoyHitsHadlingComboBox.gridwidth = 2;
+			gbc_decoyHitsHadlingComboBox.insets = new Insets(0, 0, 5, 5);
+			gbc_decoyHitsHadlingComboBox.fill = GridBagConstraints.HORIZONTAL;
+			gbc_decoyHitsHadlingComboBox.gridx = 1;
+			gbc_decoyHitsHadlingComboBox.gridy = 2;
+			add(decoyHitsHadlingComboBox, gbc_decoyHitsHadlingComboBox);
+			
+			lblNewLabel_1 = new JLabel("(for primary ID only)");
+			GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+			gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
+			gbc_lblNewLabel_1.gridx = 3;
+			gbc_lblNewLabel_1.gridy = 2;
+			add(lblNewLabel_1, gbc_lblNewLabel_1);
 
 			JLabel lblNewLabel_8 = new JLabel("Scoring parameter");
 			GridBagConstraints gbc_lblNewLabel_8 = new GridBagConstraints();
 			gbc_lblNewLabel_8.anchor = GridBagConstraints.EAST;
 			gbc_lblNewLabel_8.insets = new Insets(0, 0, 5, 5);
 			gbc_lblNewLabel_8.gridx = 0;
-			gbc_lblNewLabel_8.gridy = 2;
+			gbc_lblNewLabel_8.gridy = 3;
 			add(lblNewLabel_8, gbc_lblNewLabel_8);
 
 			scoringParameterComboBox = new JComboBox<MSMSScoringParameter>(
@@ -155,7 +185,7 @@ public class IdentificationExportSettingsPanel extends JPanel {
 			gbc_scoringParameterComboBox.insets = new Insets(0, 0, 5, 5);
 			gbc_scoringParameterComboBox.fill = GridBagConstraints.HORIZONTAL;
 			gbc_scoringParameterComboBox.gridx = 1;
-			gbc_scoringParameterComboBox.gridy = 2;
+			gbc_scoringParameterComboBox.gridy = 3;
 			add(scoringParameterComboBox, gbc_scoringParameterComboBox);
 
 			JLabel lblNewLabel_2 = new JLabel("Minimal score");
@@ -163,7 +193,7 @@ public class IdentificationExportSettingsPanel extends JPanel {
 			gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
 			gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
 			gbc_lblNewLabel_2.gridx = 3;
-			gbc_lblNewLabel_2.gridy = 2;
+			gbc_lblNewLabel_2.gridy = 3;
 			add(lblNewLabel_2, gbc_lblNewLabel_2);
 
 			minScoreTextField = new JFormattedTextField(twoDecFormat);
@@ -172,7 +202,7 @@ public class IdentificationExportSettingsPanel extends JPanel {
 			gbc_minScoreTextField.insets = new Insets(0, 0, 5, 0);
 			gbc_minScoreTextField.fill = GridBagConstraints.HORIZONTAL;
 			gbc_minScoreTextField.gridx = 4;
-			gbc_minScoreTextField.gridy = 2;
+			gbc_minScoreTextField.gridy = 3;
 			add(minScoreTextField, gbc_minScoreTextField);
 			
 			excludeIfNoIdsLeftCheckBox = new JCheckBox("Exclude features from export if all IDs were filtered out");
@@ -181,7 +211,7 @@ public class IdentificationExportSettingsPanel extends JPanel {
 			gbc_excludeIfNoIdsLeftCheckBox.gridwidth = 4;
 			gbc_excludeIfNoIdsLeftCheckBox.insets = new Insets(0, 0, 0, 5);
 			gbc_excludeIfNoIdsLeftCheckBox.gridx = 0;
-			gbc_excludeIfNoIdsLeftCheckBox.gridy = 3;
+			gbc_excludeIfNoIdsLeftCheckBox.gridy = 4;
 			add(excludeIfNoIdsLeftCheckBox, gbc_excludeIfNoIdsLeftCheckBox);
 	}
 	
@@ -219,6 +249,10 @@ public class IdentificationExportSettingsPanel extends JPanel {
 	public boolean excludeIfNoIdsLeft() {
 		return excludeIfNoIdsLeftCheckBox.isSelected();
 	}
+	
+	public DecoyExportHandling getDecoyExportHandling() {		
+		return (DecoyExportHandling)decoyHitsHadlingComboBox.getSelectedItem();
+	}
 
 	public void loadPreferences(Preferences preferences) {
 		
@@ -236,14 +270,20 @@ public class IdentificationExportSettingsPanel extends JPanel {
 		if(minScore > 0)
 			minScoreTextField.setText(Double.toString(minScore));
 		
-		MSMSScoringParameter msmsScoringParameter = MSMSScoringParameter.getMSMSScoringParameterByName(
+		MSMSScoringParameter msmsScoringParameter = 
+				MSMSScoringParameter.getMSMSScoringParameterByName(
 				preferences.get(SCORING_PARAMETER, MSMSScoringParameter.ENTROPY_SCORE.name()));
 		scoringParameterComboBox.setSelectedItem(msmsScoringParameter);
 		
 		excludeIfNoIdsLeftCheckBox.setSelected(
 				preferences.getBoolean(EXCLUDE_IF_NO_IDS, false));
+		
+		DecoyExportHandling decoyExportHandling = 
+				DecoyExportHandling.getDecoyExportHandlingByName(
+						preferences.get(DECOY_EXPORT_HANDLING, DecoyExportHandling.NORMAL_ONLY.name()));		
+		decoyHitsHadlingComboBox.setSelectedItem(decoyExportHandling);
 	}
-	
+
 	public void toggleFormStatus(boolean enabled) {
 		
 		featureIdSubsetComboBox.setEnabled(enabled);
@@ -253,5 +293,6 @@ public class IdentificationExportSettingsPanel extends JPanel {
 		scoringParameterComboBox.setEnabled(enabled);
 		minScoreTextField.setEnabled(enabled);
 		excludeIfNoIdsLeftCheckBox.setEnabled(enabled);
+		decoyHitsHadlingComboBox.setEnabled(enabled);
 	}
 }

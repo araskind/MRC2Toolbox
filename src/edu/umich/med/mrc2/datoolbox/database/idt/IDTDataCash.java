@@ -870,6 +870,14 @@ public class IDTDataCash {
 		return referenceMsMsLibraries;
 	}
 	
+	public static Map<String,Boolean>getDecoyLibraryMap(){
+
+		Map<String, Boolean> decoyLibraryMap = new TreeMap<String, Boolean>();
+		getReferenceMsMsLibraryList().stream().
+			forEach(e -> decoyLibraryMap.put(e.getUniqueId(), e.isDecoy()));
+		return decoyLibraryMap;
+	}
+	
 	public static Collection<ReferenceMsMsLibrary> getPrimaryReferenceMsMsLibraryList(){
 		return getReferenceMsMsLibraryList().stream().
 				filter(l -> !l.isSubset()).

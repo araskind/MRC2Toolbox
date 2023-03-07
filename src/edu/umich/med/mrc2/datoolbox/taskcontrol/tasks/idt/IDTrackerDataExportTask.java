@@ -85,6 +85,7 @@ public class IDTrackerDataExportTask extends IDTrackerFeatureExportTask {
 		this.featureIDSubset = params.getFeatureIDSubset();	
 		this.msmsSearchTypes = params.getMsmsSearchTypes();
 		this.excludeIfNoIdsLeft = params.isExcludeFromExportWhenAllIdsFilteredOut();
+		this.decoyExportHandling = params.getDecoyExportHandling();
 		
 		this.outputFile = outputFile;
 	}

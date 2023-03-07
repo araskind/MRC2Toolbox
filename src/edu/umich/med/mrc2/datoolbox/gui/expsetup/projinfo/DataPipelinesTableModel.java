@@ -62,6 +62,9 @@ public class DataPipelinesTableModel extends BasicTableModel {
 
 		setRowCount(0);
 		List<Object[]>rowData = new ArrayList<Object[]>();
+		if(currentProject.getDataPipelines().isEmpty())
+			return;
+		
 		for (DataPipeline pipeline : currentProject.getDataPipelines()) {
 
 			boolean isActive = false;

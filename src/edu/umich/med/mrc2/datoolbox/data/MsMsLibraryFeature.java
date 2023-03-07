@@ -60,8 +60,10 @@ public class MsMsLibraryFeature implements Serializable {
 
 		super();
 		this.uniqueId = uniqueId;
-		spectrum = new TreeSet<MsPoint>(new MsDataPointComparator(SortProperty.MZ));
-		massAnnotations = new TreeMap<MsPoint,String>(new MsDataPointComparator(SortProperty.MZ));
+		spectrum = new TreeSet<MsPoint>(
+				new MsDataPointComparator(SortProperty.MZ));
+		massAnnotations = new TreeMap<MsPoint,String>(
+				new MsDataPointComparator(SortProperty.MZ));
 		properties = new TreeMap<String,String>();
 	}
 
@@ -69,8 +71,10 @@ public class MsMsLibraryFeature implements Serializable {
 		super();
 		this.uniqueId = uniqueId;
 		this.polarity = polarity;
-		spectrum = new TreeSet<MsPoint>(new MsDataPointComparator(SortProperty.MZ));
-		massAnnotations = new TreeMap<MsPoint,String>(new MsDataPointComparator(SortProperty.MZ));
+		spectrum = new TreeSet<MsPoint>(
+				new MsDataPointComparator(SortProperty.MZ));
+		massAnnotations = new TreeMap<MsPoint,String>(
+				new MsDataPointComparator(SortProperty.MZ));
 		properties = new TreeMap<String,String>();
 	}
 

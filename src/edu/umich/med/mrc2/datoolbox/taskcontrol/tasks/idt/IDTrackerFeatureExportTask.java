@@ -52,6 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.ClassyFireClassificationLevels;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.data.enums.DecoyExportHandling;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMsFeatureProperties;
@@ -84,6 +85,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 	protected boolean excludeIfNoIdsLeft;
 	protected File outputFile;
 	protected MsDepth msLevel;
+	protected DecoyExportHandling decoyExportHandling;
 	
 	protected static final String lineSeparator = System.getProperty("line.separator");
 	protected static final char columnSeparator = MRC2ToolBoxConfiguration.getTabDelimiter();
@@ -104,6 +106,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 	protected Map<String,String>refMetNames;
 	protected Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>identificationMap;
 	protected FeatureIDSubset featureIDSubset;
+	protected Map<String, Boolean> decoyLibraryMap;
 	
 	protected void getInjections(Collection<MSFeatureInfoBundle>features) throws Exception {
 		
@@ -336,6 +339,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		Collection<MSFeatureInfoBundle>featuresToMap = featuresToExport.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 				collect(Collectors.toList());
+		decoyLibraryMap = IDTDataCash.getDecoyLibraryMap();
 		total = featuresToMap.size();
 		processed = 0;
 		for(MSFeatureInfoBundle f : featuresToMap) {
@@ -352,9 +356,13 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		MsFeatureIdentity primaryId = f.getMsFeature().getPrimaryIdentity();
 		Set<MsFeatureIdentity> allIds = f.getMsFeature().getIdentifications();
 		
-		if(featureIDSubset.equals(FeatureIDSubset.PRIMARY_ONLY))
+		if(featureIDSubset.equals(FeatureIDSubset.PRIMARY_ONLY)) {
+			
+			if(decoyExportHandling.equals(DecoyExportHandling.EXPORT_ALL) 
+					||(decoyExportHandling.equals(DecoyExportHandling.DECOY_ONLY) && isDecoyHit(primaryId))
+					||(decoyExportHandling.equals(DecoyExportHandling.NORMAL_ONLY) && !isDecoyHit(primaryId)))
 			filteredIds.add(primaryId);
-		
+		}	
 		if(featureIDSubset.equals(FeatureIDSubset.ALL) 
 				|| featureIDSubset.equals(FeatureIDSubset.BEST_SCORING_ONLY))
 			filteredIds.addAll(allIds);
@@ -389,8 +397,22 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			filteredIds.clear();
 			if(topHit != null)
 				filteredIds.add(topHit);
-		}			
+		}	
 		return filteredIds;
+	}
+	
+	protected boolean isDecoyHit(MsFeatureIdentity msfId) {
+		
+		if(msfId.getReferenceMsMsLibraryMatch() == null)
+			return false;
+		
+		String libId = msfId.getReferenceMsMsLibraryMatch().
+				getMatchedLibraryFeature().getMsmsLibraryIdentifier();
+		
+		if(decoyLibraryMap.containsKey(libId))
+			return decoyLibraryMap.get(libId);
+		else
+			return false;
 	}
 	
 	protected String getFeatureProperty(

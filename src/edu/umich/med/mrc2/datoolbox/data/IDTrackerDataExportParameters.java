@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.data;
 
 import java.util.Collection;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.DecoyExportHandling;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerFeatureIdentificationProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.IDTrackerMSMSClusterProperties;
@@ -48,6 +49,7 @@ public class IDTrackerDataExportParameters {
 	private Collection<MSMSMatchType>msmsSearchTypes;
 	private boolean excludeFromExportWhenAllIdsFilteredOut;
 	private boolean exportIndividualFeatures;	//	For cluster export
+	private DecoyExportHandling decoyExportHandling;
 	
 	public IDTrackerDataExportParameters() {
 		super();
@@ -80,7 +82,8 @@ public class IDTrackerDataExportParameters {
 		this.minimalMSMSScore = minimalMSMSScore;
 		this.featureIDSubset = featureIDSubset;
 		this.msmsSearchTypes = msmsSearchTypes;
-		this.excludeFromExportWhenAllIdsFilteredOut = excludeFromExportWhenAllIdsFilteredOut;
+		this.excludeFromExportWhenAllIdsFilteredOut = 
+				excludeFromExportWhenAllIdsFilteredOut;
 	}
 	
 	//	For cluster export
@@ -219,5 +222,13 @@ public class IDTrackerDataExportParameters {
 
 	public void setExportIndividualFeatures(boolean exportIndividualFeatures) {
 		this.exportIndividualFeatures = exportIndividualFeatures;
+	}
+
+	public DecoyExportHandling getDecoyExportHandling() {
+		return decoyExportHandling;
+	}
+
+	public void setDecoyExportHandling(DecoyExportHandling decoyExportHandling) {
+		this.decoyExportHandling = decoyExportHandling;
 	}
 }
