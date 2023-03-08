@@ -36,12 +36,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
@@ -307,42 +309,94 @@ public abstract class NISTMsPepSearchTask extends AbstractTask {
 	protected void checkHitPolarity(Connection conn) throws Exception {
 		
 		taskDescription = "Checking hits for correct polarity ...";
-		total = pooList.size();
+		
+		Map<String,String>featurePolarityMap = new HashMap<String,String>();
+		Collection<String> msmsFeatureIdSet = pooList.stream().map(p -> p.getMsmsFeatureId()).
+			collect(Collectors.toCollection(TreeSet::new));
+		total = msmsFeatureIdSet.size();
 		processed = 0;
 		
-		Collection<PepSearchOutputObject> clean = new ArrayList<PepSearchOutputObject>();
-		String libSql = 
-				"SELECT POLARITY FROM REF_MSMS_LIBRARY_COMPONENT WHERE MRC2_LIB_ID = ?"  ;
-		PreparedStatement libPs = conn.prepareStatement(libSql);
 		String featureSql = 
 				"SELECT POLARITY FROM MSMS_FEATURE WHERE MSMS_FEATURE_ID = ?";
 		PreparedStatement featurePs = conn.prepareStatement(featureSql);
 		ResultSet rs = null;
+		for(String featureId : msmsFeatureIdSet) {
+			
+			featurePs.setString(1, featureId);
+			rs = featurePs.executeQuery();
+			while(rs.next())
+				featurePolarityMap.put(featureId, rs.getString(1));
+			
+			rs.close();
+			processed++;
+		}
+		Map<String,String>libraryHitPolarityMap = new HashMap<String,String>();
+		Collection<String> libraryIdSet = pooList.stream().
+				 filter(o -> Objects.nonNull(o.getMrc2libid())).
+				 map(o -> o.getMrc2libid()).
+				 collect(Collectors.toCollection(TreeSet::new));
+		total = libraryIdSet.size();
+		processed = 0;
+		
+		String libSql = 
+				"SELECT POLARITY FROM REF_MSMS_LIBRARY_COMPONENT WHERE MRC2_LIB_ID = ?"  ;
+		PreparedStatement libPs = conn.prepareStatement(libSql);
+		for(String libId : libraryIdSet) {
+			
+			libPs.setString(1, libId);
+			rs = libPs.executeQuery();
+			while(rs.next())
+				libraryHitPolarityMap.put(libId, rs.getString(1));
+			
+			rs.close();
+			processed++;
+		}		
+		Collection<PepSearchOutputObject> clean = new ArrayList<PepSearchOutputObject>();
+		total = pooList.size();
+		processed = 0;
 		for(PepSearchOutputObject poo : pooList) {
 			
-			libPs.setString(1, poo.getMrc2libid());
-			rs = libPs.executeQuery();
-			String libPol = null;
-			while(rs.next())
-				libPol = rs.getString(1);
-			
-			rs.close();
-
-			featurePs.setString(1, poo.getMsmsFeatureId());
-			rs = featurePs.executeQuery();
-			String fPol = null;
-			while(rs.next())
-				fPol = rs.getString(1);
-			
-			rs.close();
-			if(libPol.equals(fPol)) {
-				clean.add(poo);
-			}
-			else {
-				addLogLine("Polarity mismatch between " + poo.getOriginalLibid() + 
-						" for library " + poo.getLibraryName() + " and MSMS feature # " + poo.getMsmsFeatureId());
-			}
+			if(poo.getMrc2libid() != null && poo.getMsmsFeatureId() != null) {
+				
+				String libPol = libraryHitPolarityMap.get(poo.getMrc2libid());
+				String fPol = featurePolarityMap.get(poo.getMsmsFeatureId());
+				if(libPol != null && fPol != null) {
+					
+					if(libPol.equals(fPol)) {
+						clean.add(poo);
+					}
+					else {
+						addLogLine("Polarity mismatch between " + poo.getOriginalLibid() + 
+								" for library " + poo.getLibraryName() + 
+								" and MSMS feature # " + poo.getMsmsFeatureId());
+					}					
+				}
+			}			
 			processed++;
+			
+//			libPs.setString(1, poo.getMrc2libid());
+//			rs = libPs.executeQuery();
+//			String libPol = null;
+//			while(rs.next())
+//				libPol = rs.getString(1);
+//			
+//			rs.close();
+//
+//			featurePs.setString(1, poo.getMsmsFeatureId());
+//			rs = featurePs.executeQuery();
+//			String fPol = null;
+//			while(rs.next())
+//				fPol = rs.getString(1);
+//			
+//			rs.close();
+//			if(libPol.equals(fPol)) {
+//				clean.add(poo);
+//			}
+//			else {
+//				addLogLine("Polarity mismatch between " + poo.getOriginalLibid() + 
+//						" for library " + poo.getLibraryName() + " and MSMS feature # " + poo.getMsmsFeatureId());
+//			}
+//			processed++;
 		}	
 		pooList.clear();
 		pooList.addAll(clean);

@@ -122,16 +122,18 @@ public class RawDataTreeMouseHandler extends MouseAdapter implements ActionListe
 			return;
 		
 		String yesNoQuestion = "Are you sure you want to delete selected cromatograms?";
-		if(MessageDialog.showChoiceMsg(yesNoQuestion , MRC2ToolBoxCore.getMainWindow()) == JOptionPane.YES_OPTION) {
+		if(MessageDialog.showChoiceMsg(yesNoQuestion , 
+				MRC2ToolBoxCore.getMainWindow()) == JOptionPane.YES_OPTION) {
 			
+			parentPanel.removeChromatograms(selectedChromatograms);
+			parentPanel.clearChromatogramPanel();
 			for(ExtractedChromatogram ec : selectedChromatograms) {
 				
 				ec.getDataFile().getChromatograms().remove(ec);
 				DefaultMutableTreeNode chrNode = treeModel.getNodeForObject(ec);
 				if(chrNode != null)
 					treeModel.removeNodeFromParent(chrNode);
-			}
-			parentPanel.clearChromatogramPanel();
+			}			
 		}
 	}
 
@@ -147,16 +149,18 @@ public class RawDataTreeMouseHandler extends MouseAdapter implements ActionListe
 			return;
 	
 		String yesNoQuestion = "Are you sure you want to delete selected spectra?";
-		if(MessageDialog.showChoiceMsg(yesNoQuestion , MRC2ToolBoxCore.getMainWindow()) == JOptionPane.YES_OPTION) {
-			
+		if(MessageDialog.showChoiceMsg(yesNoQuestion , 
+				MRC2ToolBoxCore.getMainWindow()) == JOptionPane.YES_OPTION) {
+
+			parentPanel.removeSpectra(selectedSpectra);
+			parentPanel.clearSpectraPanel();
 			for(AverageMassSpectrum ec : selectedSpectra) {
 				
 				ec.getDataFile().getAverageSpectra().remove(ec);
 				DefaultMutableTreeNode chrNode = treeModel.getNodeForObject(ec);
 				if(chrNode != null)
 					treeModel.removeNodeFromParent(chrNode);
-			}
-			parentPanel.clearSpectraPanel();
+			}			
 		}	
 	}
 

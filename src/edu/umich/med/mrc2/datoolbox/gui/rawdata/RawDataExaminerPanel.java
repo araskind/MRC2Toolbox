@@ -89,6 +89,8 @@ import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.RawDataAnalysisExperimen
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.edl.ExistingDataListingDialog;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.project.wiz.RDEMetadataWizard;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.scan.DockableScanPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.spec.DockableMsExtractorPanel;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.spec.DockableSpectraListingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.tree.RawDataTree;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.xic.DockableXICListingPanel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
@@ -139,6 +141,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private DockableRawDataFilePropertiesTable rawDataFilePropertiesTable;
 	private DockableScanPanel scanNavigationPanel;
 	private DockableXICListingPanel chromatogramListingPanel;
+	private DockableSpectraListingPanel avgSpectraListingPanel;
 	private IndeterminateProgressDialog idp;
 	private CloseRawDataFilesDialog closeRawDataFilesDialog;
 	private RawDataConversionSetupDialog rawDataConversionSetupDialog;
@@ -203,11 +206,15 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		chromatogramListingPanel = new DockableXICListingPanel();
 		chromatogramListingPanel.addChromatogramSelectionListener(this);
 		
+		avgSpectraListingPanel = new DockableSpectraListingPanel();
+		avgSpectraListingPanel.addSpectrumSelectionListener(this);
+		
 		xicSetupPanel = new DockableXICSetupPanel(this);
 		msExtractorPanel = new DockableMsExtractorPanel(this);
 
 		grid.add( 0, 0, 25, 100, dataFileTreePanel, 
-				scanNavigationPanel, chromatogramListingPanel, rawDataFilePropertiesTable );
+				scanNavigationPanel, chromatogramListingPanel, 
+				avgSpectraListingPanel, rawDataFilePropertiesTable );
 		grid.add( 25, 0, 75, 50, chromatogramPanel );
 		grid.add( 25, 50, 50, 50, msPlotPanel, msTable, msmsPlotPanel, msmsTable);
 		grid.add( 75, 50, 25, 50, xicSetupPanel, msExtractorPanel);
@@ -1093,6 +1100,12 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 						flatMap(f -> f.getChromatograms().stream()).
 						collect(Collectors.toList());
 			chromatogramListingPanel.addChromatograms(chromList);
+			
+			List<AverageMassSpectrum> specList = newRawFiles.stream().
+				flatMap(f -> f.getAverageSpectra().stream()).
+				collect(Collectors.toList());
+			avgSpectraListingPanel.addSpectra(specList);
+						
 			return null;
 		}
 	}
@@ -1361,6 +1374,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			showAverageMassSpectrum(avgMs);
 			//	dataFileTreePanel.selectNodeForObject(avgMs);
 		}
+		avgSpectraListingPanel.addSpectra(spectra);
 	}
 	
 	public void finalizeChromatogramExtraction(ChromatogramExtractionTask task) {
@@ -1389,6 +1403,8 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	@Override
 	public synchronized void clearPanel() {
 
+		chromatogramListingPanel.clearPanel();
+		avgSpectraListingPanel.clearPanel();
 		dataFileTreePanel.clearPanel();		
 		msPlotPanel.clearPanel();
 		msTable.clearTable();
@@ -1398,7 +1414,6 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		msExtractorPanel.clearPanel();
 		rawDataFilePropertiesTable.clearTable();
 		scanNavigationPanel.clearPanel();
-		chromatogramListingPanel.clearPanel();
 		chromatogramPanel.clearPanel();
 	}
 
@@ -1423,6 +1438,13 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				if(chroms != null && !chroms.isEmpty())
 					showChromatograms(chroms);				
 			}
+			if(listener.equals(avgSpectraListingPanel.getTable())) {
+				
+				AverageMassSpectrum avgMs = 
+						avgSpectraListingPanel.getSelectedSpectrum();
+				if(avgMs != null)
+					showAverageMassSpectrum(avgMs);
+			}			
 		}
 	}
 	
@@ -1738,6 +1760,14 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	protected void executeAdminCommand(String command) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void removeChromatograms(Collection<ExtractedChromatogram>chromatograms) {		
+		chromatogramListingPanel.removeChromatograms(chromatograms);		
+	}
+	
+	public void removeSpectra(Collection<AverageMassSpectrum>spectra) {		
+		avgSpectraListingPanel.removeSpectra(spectra);		
 	}
 }
 
