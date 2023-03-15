@@ -64,6 +64,7 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 	public static final String TOP_HIT_REASSIGNMENT_OPTION = "TOP_HIT_REASSIGNMENT_OPTION";
 	public static final String COMMIT_CHANGES = "COMMIT_CHANGES";
 	public static final String USE_ENTROPY_SCORE = "USE_ENTROPY_SCORE";
+	public static final String INCLUDE_DECOYS = "INCLUDE_DECOYS";
 	public static final String PREFERENCES_NODE = "edu.umich.med.mrc2.datoolbox.ReassignDefaultMSMSLibraryHitDialog";
 	
 	private JCheckBox commitChangesCheckBox;
@@ -76,9 +77,9 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 
 		setTitle("Reassign default MSMS library matches");
 		setIconImage(((ImageIcon) reassignTopHitsIcon).getImage());
-		setPreferredSize(new Dimension(400, 200));
+		setPreferredSize(new Dimension(400, 250));
 		setModalityType(ModalityType.APPLICATION_MODAL);
-		setSize(new Dimension(400, 200));
+		setSize(new Dimension(400, 250));
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));

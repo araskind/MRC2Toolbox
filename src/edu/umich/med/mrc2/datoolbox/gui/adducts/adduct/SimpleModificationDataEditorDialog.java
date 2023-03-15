@@ -483,6 +483,10 @@ public class SimpleModificationDataEditorDialog extends JDialog
 		
 		Collection<String>errors = new ArrayList<String>();		
 		ModificationType modType = getModificationType();
+		if(modType == null) {
+			errors.add("Modification type not specified!");
+			return errors;
+		}		
 		if (getModificationName().isEmpty())
 			errors.add("Name can not be empty.");
 		

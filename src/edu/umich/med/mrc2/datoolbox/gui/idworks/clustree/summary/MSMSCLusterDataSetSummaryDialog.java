@@ -489,10 +489,10 @@ public class MSMSCLusterDataSetSummaryDialog extends JDialog implements ActionLi
 		if(e.getActionCommand().equals(MainActionCommands.COPY_LOOKUP_FEATURES_TO_CLIPBOARD_COMMAND.getName())) {
 			
 			if(((JPopupMenu) ((JMenuItem)e.getSource()).getParent()).getInvoker().equals(foundLookupFeaturesTable))
-				foundLookupFeaturesTable.copyTableDataToClipboard();
+				foundLookupFeaturesTable.copyVisibleTableRowsToClipboard();
 			
 			if(((JPopupMenu) ((JMenuItem)e.getSource()).getParent()).getInvoker().equals(notFoundLookupFeaturesTable))
-				notFoundLookupFeaturesTable.copyTableDataToClipboard();			
+				notFoundLookupFeaturesTable.copyVisibleTableRowsToClipboard();			
 		}
 	}
 }

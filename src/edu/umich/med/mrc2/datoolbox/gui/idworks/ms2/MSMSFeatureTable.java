@@ -348,7 +348,8 @@ public class MSMSFeatureTable extends BasicTable {
 		
 		for(int i=0; i<getRowCount(); i++) {
 
-			if(((MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(i), colIdx)).equals(toSelect)) {
+			if(((MSFeatureInfoBundle)model.getValueAt(
+					convertRowIndexToModel(i), colIdx)).equals(toSelect)) {
 				setRowSelectionInterval(i, i);
 				scrollToSelected();
 				break;

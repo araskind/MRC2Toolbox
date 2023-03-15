@@ -53,7 +53,7 @@ public class SpectraTable  extends BasicTable {
 		super();
 
 		model = new SpectraTableModel();
-		setModel(model);
+		setModel(model); 	
 		rowSorter = new TableRowSorter<SpectraTableModel>(model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(SpectraTableModel.DATA_FILE_COLUMN),

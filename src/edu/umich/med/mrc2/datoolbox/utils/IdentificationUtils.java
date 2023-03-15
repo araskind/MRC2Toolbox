@@ -37,8 +37,10 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.enums.DecoyExportHandling;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
 
 public class IdentificationUtils {
 	
@@ -55,14 +57,30 @@ public class IdentificationUtils {
 		for(Entry<CompoundIdentity, List<MsFeatureIdentity>> matchList : idsByCompound.entrySet()) {
 			
 			MsFeatureIdentity bestMatch = matchList.getValue().
-					stream().sorted(idQualitySorter).findFirst().orElse(null);
+					stream().filter(id -> !isDecoyHit(id)).
+					sorted(idQualitySorter).findFirst().orElse(null);
 			if(bestMatch != null)
 				bestMatchList.add(bestMatch);
 		}
-		if(feature.getPrimaryIdentity() != null && !bestMatchList.contains(feature.getPrimaryIdentity()))
+		if(feature.getPrimaryIdentity() != null && !isDecoyHit(feature.getPrimaryIdentity())
+				&& !bestMatchList.contains(feature.getPrimaryIdentity()))
 			bestMatchList.add(feature.getPrimaryIdentity());
 		
 		return bestMatchList;
+	}
+	
+	public static boolean isDecoyHit(MsFeatureIdentity msfId) {
+		
+		if(msfId.getReferenceMsMsLibraryMatch() == null)
+			return false;
+		
+		String libId = msfId.getReferenceMsMsLibraryMatch().
+				getMatchedLibraryFeature().getMsmsLibraryIdentifier();
+		
+		if(IDTDataCash.getDecoyLibraryMap().containsKey(libId))
+			return IDTDataCash.getDecoyLibraryMap().get(libId);
+		else
+			return false;
 	}
 	
 	public static Collection<MsFeatureIdentity>filterIdsOnMatchType(
@@ -82,9 +100,21 @@ public class IdentificationUtils {
 	public static MsFeatureIdentity getTopScoringIdForMatchTypes(
 			Collection<MsFeatureIdentity>toFilter,
 			Collection<MSMSMatchType>msmsSearchTypes,
-			MSMSScoringParameter msmsScoringParameter){
+			MSMSScoringParameter msmsScoringParameter, 
+			DecoyExportHandling decoyExportHandling){
 		
 		Collection<MsFeatureIdentity>toScore = filterIdsOnMatchType(toFilter, msmsSearchTypes);
+		if(toScore.isEmpty())
+			return null;
+		
+		if(decoyExportHandling.equals(DecoyExportHandling.NORMAL_ONLY))
+			toScore = toScore.stream().
+				filter(id -> !isDecoyHit(id)).collect(Collectors.toList());
+		
+		if(decoyExportHandling.equals(DecoyExportHandling.DECOY_ONLY))
+			toScore = toScore.stream().
+				filter(id -> isDecoyHit(id)).collect(Collectors.toList());
+		
 		if(toScore.isEmpty())
 			return null;
 		

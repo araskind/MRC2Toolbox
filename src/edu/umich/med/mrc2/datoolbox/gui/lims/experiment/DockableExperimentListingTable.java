@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.lims.experiment;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 
 import javax.swing.Icon;
@@ -29,9 +31,10 @@ import javax.swing.event.ListSelectionListener;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class DockableExperimentListingTable extends DefaultSingleCDockable {
+public class DockableExperimentListingTable extends DefaultSingleCDockable implements ActionListener {
 
 	private ExperimentListingTable experimentListingTable;
 	private static final Icon componentIcon = GuiUtils.getIcon("table", 16);
@@ -44,11 +47,21 @@ public class DockableExperimentListingTable extends DefaultSingleCDockable {
 		experimentListingTable = new ExperimentListingTable();
 		add(new JScrollPane(experimentListingTable));
 		experimentListingTable.getSelectionModel().addListSelectionListener(lsListener);
+		experimentListingTable.addTablePopupMenu(new LIMSTablePopupMenu(this));		
 	}
 
-	/**
-	 * @return the libraryFeatureTable
-	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		
+		if(command.equals(MainActionCommands.COPY_SELECTED_TABLE_ROWS_COMMAND.getName()))
+			experimentListingTable.copySelectedRowsToClipboard();
+		
+		if(command.equals(MainActionCommands.COPY_VISIBLE_TABLE_ROWS_COMMAND.getName()))
+			experimentListingTable.copyVisibleTableRowsToClipboard();
+	}
+	
 	public ExperimentListingTable getTable() {
 		return experimentListingTable;
 	}

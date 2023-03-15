@@ -1202,6 +1202,9 @@ public enum MainActionCommands {
 	ACCEPT_INTEGRATION_RESULTS("Accept integration results"),
 	CLEAR_HIGHLIGHTED_RANGES("Clear highlighted integration ranges"),
 	RELOAD_ORIGINAL_CHROMATOGRAMS("Reload original chromatograms"),
+	
+	COPY_VISIBLE_TABLE_ROWS_COMMAND("Copy visible rows to clipboard"),
+	COPY_SELECTED_TABLE_ROWS_COMMAND("Copy selected rows to clipboard"),
 	;
 
 	private final String name;

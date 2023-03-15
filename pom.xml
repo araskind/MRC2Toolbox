@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.2.29</version>
+	<version>1.2.30</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>
@@ -287,12 +287,14 @@ public final class BuildInformation {
 		    <groupId>org.apache.poi</groupId>
 		    <artifactId>poi-ooxml</artifactId>
 		    <version>5.2.3</version>
+		    <!-- 
         	<exclusions>
         		<exclusion>
 	                <groupId>org.apache.xmlbeans</groupId>
 	                <artifactId>xmlbeans</artifactId>
 	            </exclusion>
 			</exclusions>
+			 -->
 		</dependency>
 		<dependency>
 			<groupId>org.jsoup</groupId>

@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
@@ -416,10 +417,18 @@ public class BasicTable extends JTable implements ActionListener{
 			toggleColumnVisibility(event);
 	
 		if(event.getActionCommand().equals(MainActionCommands.COPY_TABLE_DATA_COMMAND.getName()))
-			copyTableDataToClipboard();
+			copyVisibleTableRowsToClipboard();
 	}
 	
 	public String getTableDataAsString() {
+		int [] rows = IntStream.range(0, getRowCount()).toArray();
+		return getTableDataAsString(rows);
+	}
+	
+	public String getTableDataAsString(int[] rows) {
+		
+		if(rows.length == 0)
+			return "";
 		
 		StringBuffer tableData = new StringBuffer();
 		int numCols = getColumnCount();
@@ -431,7 +440,7 @@ public class BasicTable extends JTable implements ActionListener{
 
 		tableData.append("\n");
 
-		for(int i=0;  i<getRowCount(); i++){
+		for(int i : rows){
 
 			for(int j=0; j<numCols; j++){
 
@@ -474,9 +483,21 @@ public class BasicTable extends JTable implements ActionListener{
 		return tableData.toString();
 	}
 	
-	public void copyTableDataToClipboard() {
-		
+	public void copyVisibleTableRowsToClipboard() {
+
 		String dataString = getTableDataAsString();		
+		if(dataString == null)
+			dataString = "";
+
+		StringSelection stringSelection = new StringSelection(dataString);
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
+	}
+		
+	public void copySelectedRowsToClipboard() {
+		
+		int [] rows = getSelectedRows();
+		String dataString = getTableDataAsString(rows);
 		if(dataString == null)
 			dataString = "";
 

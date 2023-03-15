@@ -43,6 +43,7 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignDisplay;
 import edu.umich.med.mrc2.datoolbox.gui.expdesign.editor.ExperimentDesignTable;
+import edu.umich.med.mrc2.datoolbox.gui.lims.experiment.LIMSTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
@@ -70,6 +71,7 @@ public class DockableLIMSDesignEditorPanel  extends DefaultSingleCDockable imple
 		getContentPane().add(designEditorToolbar, BorderLayout.NORTH);
 
 		expDesignTable = new ExperimentDesignTable();
+		expDesignTable.addTablePopupMenu(new LIMSTablePopupMenu(this));	
 		designScrollPane = new JScrollPane();
 		designScrollPane.add(expDesignTable);
 		designScrollPane.setViewportView(expDesignTable);
@@ -102,6 +104,12 @@ public class DockableLIMSDesignEditorPanel  extends DefaultSingleCDockable imple
 
 		if (command.equals(MainActionCommands.DELETE_SAMPLE_COMMAND.getName()))
 			deleteSample();
+		
+		if(command.equals(MainActionCommands.COPY_SELECTED_TABLE_ROWS_COMMAND.getName()))
+			expDesignTable.copySelectedRowsToClipboard();
+		
+		if(command.equals(MainActionCommands.COPY_VISIBLE_TABLE_ROWS_COMMAND.getName()))
+			expDesignTable.copyVisibleTableRowsToClipboard();
 	}
 
 	private void addSample() {

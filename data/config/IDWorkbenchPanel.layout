@@ -127,13 +127,13 @@
 										<node nodeId="1654996481311" orientation="VERTICAL" divider="0.6511254019292605">
 											<node nodeId="1654996481315" orientation="HORIZONTAL" divider="0.8662046908315565">
 												<node nodeId="1654997043161" orientation="HORIZONTAL" divider="0.17465753424657535">
-													<leaf id="5" nodeId="1654997043159">
+													<leaf id="4" nodeId="1654997043159">
 														<placeholders>
 															<placeholder>dock.single.IdTrackerDockableMSMSFeatureClusterTree</placeholder>
 														</placeholders>
 													</leaf>
 													<node nodeId="1666720209180" orientation="VERTICAL" divider="0.6534961251805596">
-														<leaf id="0" nodeId="1654996481318">
+														<leaf id="1" nodeId="1654996481318">
 															<placeholders>
 																<placeholder>dock.single.DockableMSMSFeatureTable</placeholder>
 																<placeholder>dock.single.DockableReferenceMsOneFeatureTable</placeholder>
@@ -157,7 +157,7 @@
 																</entry>
 															</placeholder-map>
 														</leaf>
-														<leaf id="1" nodeId="1654996481328">
+														<leaf id="0" nodeId="1654996481328">
 															<placeholders>
 																<placeholder>dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable</placeholder>
 															</placeholders>
@@ -314,7 +314,7 @@
 														</leaf>
 													</node>
 												</node>
-												<leaf id="4" nodeId="1654996947445">
+												<leaf id="5" nodeId="1654996947445">
 													<placeholders>
 														<placeholder>dock.single.IDWorkbenchPanelAnnotations</placeholder>
 														<placeholder>dock.single.DockableFollowupStepTable</placeholder>
@@ -357,6 +357,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable">
+										<replacement id="dockablesingle IDWorkbenchPanelDockableUniversalIdentificationResultsTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>IDWorkbenchPanelDockableUniversalIdentificationResultsTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>0</selected>
@@ -420,16 +430,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.IDWorkbenchPanelDockableUniversalIdentificationResultsTable">
-										<replacement id="dockablesingle IDWorkbenchPanelDockableUniversalIdentificationResultsTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>IDWorkbenchPanelDockableUniversalIdentificationResultsTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
@@ -676,6 +676,16 @@
 									</children>
 								</child>
 								<child>
+									<layout factory="predefined" placeholder="dock.single.IdTrackerDockableMSMSFeatureClusterTree">
+										<replacement id="dockablesingle IdTrackerDockableMSMSFeatureClusterTree"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>IdTrackerDockableMSMSFeatureClusterTree</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
 										<selected>3</selected>
 										<placeholders>
@@ -781,16 +791,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.IdTrackerDockableMSMSFeatureClusterTree">
-										<replacement id="dockablesingle IdTrackerDockableMSMSFeatureClusterTree"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>IdTrackerDockableMSMSFeatureClusterTree</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

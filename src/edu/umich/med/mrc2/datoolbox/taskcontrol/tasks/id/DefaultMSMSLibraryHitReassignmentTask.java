@@ -113,8 +113,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		
 		taskDescription = "Assigning default MSMS library hit";
 		total = featuresToUpdate.size();
-		processed = 0;	
-
+		processed = 0;
 		Map<String,HiResSearchOption>searchTypeMap = 
 				NISTPepSearchUtils.getSearchTypeMap(featuresToUpdate);			
 
@@ -144,7 +143,8 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 	private boolean assignTopEntropyHit(
 			MSFeatureInfoBundle bundle,
 			Map<String,HiResSearchOption>searchTypeMap,
-			Map<HiResSearchOption, Collection<MsFeatureIdentity>> hitTypeMap) {
+			Map<HiResSearchOption, 
+			Collection<MsFeatureIdentity>> hitTypeMap) {
 
 		Collection<MsFeatureIdentity>idsToRank = 
 				new TreeSet<MsFeatureIdentity>(entropyScoreComparator);
@@ -153,6 +153,10 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 		if(topHitReassignmentOption.equals(TopHitReassignmentOption.ALLOW_IN_SOURCE_HITS))
 			idsToRank.addAll(hitTypeMap.get(HiResSearchOption.u));
 		
+		if(topHitReassignmentOption.equals(TopHitReassignmentOption.ALLOW_HYBRID_HITS)) {
+			idsToRank.addAll(hitTypeMap.get(HiResSearchOption.u));
+			idsToRank.addAll(hitTypeMap.get(HiResSearchOption.y));
+		}		
 		List<MsFeatureIdentity> metlinHits = 
 				bundle.getMsFeature().getIdentifications().stream().
 				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
@@ -160,6 +164,8 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 						.getMatchedLibraryFeature().getMsmsLibraryIdentifier().equals(metlinLibId)).
 				sorted(NISTPepSearchUtils.idScoreComparator).collect(Collectors.toList());		
 		idsToRank.addAll(metlinHits);
+		
+		
 		if(idsToRank.isEmpty()) {
 			assignNISTTopHit(bundle, searchTypeMap, hitTypeMap);
 			return true;

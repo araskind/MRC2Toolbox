@@ -71,76 +71,77 @@ import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
 public class IDTDataCash {
 
-	public static Collection<LIMSUser> users = 
+	private static Collection<LIMSUser> users = 
 			new TreeSet<LIMSUser>();
-	public static Collection<IdTrackerOrganization> organizations = 
+	private static Collection<IdTrackerOrganization> organizations = 
 			new TreeSet<IdTrackerOrganization>();
-	public static Collection<LIMSProject> projects = 
+	private static Collection<LIMSProject> projects = 
 			new TreeSet<LIMSProject>();
-	public static Collection<LIMSExperiment> experiments = 
+	private static Collection<LIMSExperiment> experiments = 
 			new TreeSet<LIMSExperiment>(
 			new LIMSExperimentComparator(SortProperty.ID, SortDirection.DESC));
-	public static Collection<StockSample> stockSamples = 
+	private static Collection<StockSample> stockSamples = 
 			new TreeSet<StockSample>();
-	public static Map<LIMSExperiment, Collection<StockSample>> experimentStockSampleMap =
+	private static Map<LIMSExperiment, Collection<StockSample>> experimentStockSampleMap =
 			new TreeMap<LIMSExperiment, Collection<StockSample>>();
-	public static Collection<LIMSChromatographicColumn> chromatographicColumns = 
+	private static Collection<LIMSChromatographicColumn> chromatographicColumns = 
 			new TreeSet<LIMSChromatographicColumn>();
-	public static Collection<DataAcquisitionMethod> acquisitionMethods = 
+	private static Collection<DataAcquisitionMethod> acquisitionMethods = 
 			new TreeSet<DataAcquisitionMethod>();
-	public static Collection<DataExtractionMethod> dataExtractionMethods = 
+	private static Collection<DataExtractionMethod> dataExtractionMethods = 
 			new TreeSet<DataExtractionMethod>();
-	public static Collection<ChromatographicSeparationType> chromatographicSeparationTypes = 
+	private static Collection<ChromatographicSeparationType> chromatographicSeparationTypes = 
 			new TreeSet<ChromatographicSeparationType>();
-	public static Collection<Manufacturer> manufacturers = 
+	private static Collection<Manufacturer> manufacturers = 
 			new TreeSet<Manufacturer>();	
-	public static Collection<DataProcessingSoftware>softwareList = 
+	private static Collection<DataProcessingSoftware>softwareList = 
 			new TreeSet<DataProcessingSoftware>();
-	public static Collection<IonizationType>ionizationTypes = 
+	private static Collection<IonizationType>ionizationTypes = 
 			new TreeSet<IonizationType>();
-	public static Collection<MassAnalyzerType>massAnalyzerTypes = 
+	private static Collection<MassAnalyzerType>massAnalyzerTypes = 
 			new TreeSet<MassAnalyzerType>();
-	public static Collection<MsType>msTypes = 
+	private static Collection<MsType>msTypes = 
 			new TreeSet<MsType>();
-	public static Collection<SopCategory>sopCategories = 
+	private static Collection<SopCategory>sopCategories = 
 			new TreeSet<SopCategory>();
-	public static Collection<LIMSProtocol>protocols = 
+	private static Collection<LIMSProtocol>protocols = 
 			new TreeSet<LIMSProtocol>();
-	public static Collection<LIMSSamplePreparation>samplePreps = 
+	private static Collection<LIMSSamplePreparation>samplePreps = 
 			new TreeSet<LIMSSamplePreparation>();
-	public static Map<LIMSExperiment, Collection<LIMSSamplePreparation>> experimentSamplePrepMap =
+	private static Map<LIMSExperiment, Collection<LIMSSamplePreparation>> experimentSamplePrepMap =
 			new TreeMap<LIMSExperiment, Collection<LIMSSamplePreparation>>();	
-	public static Map<LIMSSamplePreparation, Collection<DataPipeline>> samplePrepDataPipelineMap = 
+	private static Map<LIMSSamplePreparation, Collection<DataPipeline>> samplePrepDataPipelineMap = 
 			new TreeMap<LIMSSamplePreparation, Collection<DataPipeline>>();	
-	public static Collection<String>sampleQuantityUnits = 
+	private static Collection<String>sampleQuantityUnits = 
 			new TreeSet<String>();
-	public static Collection<String>resultValueUnits = 
+	private static Collection<String>resultValueUnits = 
 			new TreeSet<String>();
-	public static Collection<LIMSInstrument>instruments = 
+	private static Collection<LIMSInstrument>instruments = 
 			new TreeSet<LIMSInstrument>();
-	public static Map<LIMSExperiment, LIMSInstrument>experimentInstrumentMap = 
+	private static Map<LIMSExperiment, LIMSInstrument>experimentInstrumentMap = 
 			new TreeMap<LIMSExperiment, LIMSInstrument>();
-	public static Collection<ReferenceMsMsLibrary>referenceMsMsLibraries = 
+	private static Collection<ReferenceMsMsLibrary>referenceMsMsLibraries = 
 			new TreeSet<ReferenceMsMsLibrary>();
-	public static Collection<NISTPepSearchParameterObject>pepSearchParameters = 
+	private static Map<String, Boolean> decoyLibraryMap = null;
+	private static Collection<NISTPepSearchParameterObject>pepSearchParameters = 
 			new TreeSet<NISTPepSearchParameterObject>();
-	public static Collection<MobilePhase>mobilePhaseList = 
+	private static Collection<MobilePhase>mobilePhaseList = 
 			new TreeSet<MobilePhase>();
-	public static Collection<MSFeatureIdentificationLevel> msFeatureIdentificationLevelList = 
+	private static Collection<MSFeatureIdentificationLevel> msFeatureIdentificationLevelList = 
 			new TreeSet<MSFeatureIdentificationLevel>();
-	public static Collection<MSFeatureIdentificationFollowupStep> msFeatureIdentificationFollowupStepList = 
+	private static Collection<MSFeatureIdentificationFollowupStep> msFeatureIdentificationFollowupStepList = 
 			new TreeSet<MSFeatureIdentificationFollowupStep>();
-	public static Collection<StandardFeatureAnnotation> standardFeatureAnnotationList = 
+	private static Collection<StandardFeatureAnnotation> standardFeatureAnnotationList = 
 			new TreeSet<StandardFeatureAnnotation>();	
-	public static Collection<MSMSDecoyGenerationMethod>msmsDecoyGenerationMethods = 
+	private static Collection<MSMSDecoyGenerationMethod>msmsDecoyGenerationMethods = 
 			new TreeSet<MSMSDecoyGenerationMethod>();	
-	public static Collection<LIMSSampleType>sampleTypes = 
+	private static Collection<LIMSSampleType>sampleTypes = 
 			new TreeSet<LIMSSampleType>();
-	public static Collection<Double>collisionEnergies = 
+	private static Collection<Double>collisionEnergies = 
 			new TreeSet<Double>();	
-	public static Collection<MSMSExtractionParameterSet>msmsExtractionParameters = 
+	private static Collection<MSMSExtractionParameterSet>msmsExtractionParameters = 
 			new HashSet<MSMSExtractionParameterSet>();
-	public static Map<LIMSExperiment, Collection<Polarity>> experimentPolarityMap = 
+	private static Map<LIMSExperiment, Collection<Polarity>> experimentPolarityMap = 
 			new TreeMap<LIMSExperiment, Collection<Polarity>>();
 	
 	public static void refreshExperimentPolarityMap() {
@@ -871,10 +872,13 @@ public class IDTDataCash {
 	}
 	
 	public static Map<String,Boolean>getDecoyLibraryMap(){
-
-		Map<String, Boolean> decoyLibraryMap = new TreeMap<String, Boolean>();
-		getReferenceMsMsLibraryList().stream().
-			forEach(e -> decoyLibraryMap.put(e.getUniqueId(), e.isDecoy()));
+		
+		if(decoyLibraryMap == null || decoyLibraryMap.isEmpty()) {
+			
+			decoyLibraryMap = new TreeMap<String, Boolean>();
+			getReferenceMsMsLibraryList().stream().
+				forEach(e -> decoyLibraryMap.put(e.getUniqueId(), e.isDecoy()));
+		}
 		return decoyLibraryMap;
 	}
 	

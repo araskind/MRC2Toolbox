@@ -106,8 +106,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 	protected Map<String,String>refMetNames;
 	protected Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>identificationMap;
 	protected FeatureIDSubset featureIDSubset;
-	protected Map<String, Boolean> decoyLibraryMap;
-	
+
 	protected void getInjections(Collection<MSFeatureInfoBundle>features) throws Exception {
 		
 		Collection<String> injectionIds = features.stream().
@@ -339,7 +338,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		Collection<MSFeatureInfoBundle>featuresToMap = featuresToExport.stream().
 				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 				collect(Collectors.toList());
-		decoyLibraryMap = IDTDataCash.getDecoyLibraryMap();
+
 		total = featuresToMap.size();
 		processed = 0;
 		for(MSFeatureInfoBundle f : featuresToMap) {
@@ -359,8 +358,10 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		if(featureIDSubset.equals(FeatureIDSubset.PRIMARY_ONLY)) {
 			
 			if(decoyExportHandling.equals(DecoyExportHandling.EXPORT_ALL) 
-					||(decoyExportHandling.equals(DecoyExportHandling.DECOY_ONLY) && isDecoyHit(primaryId))
-					||(decoyExportHandling.equals(DecoyExportHandling.NORMAL_ONLY) && !isDecoyHit(primaryId)))
+					||(decoyExportHandling.equals(DecoyExportHandling.DECOY_ONLY) 
+							&& IdentificationUtils.isDecoyHit(primaryId))
+					||(decoyExportHandling.equals(DecoyExportHandling.NORMAL_ONLY) 
+							&& !IdentificationUtils.isDecoyHit(primaryId)))
 			filteredIds.add(primaryId);
 		}	
 		if(featureIDSubset.equals(FeatureIDSubset.ALL) 
@@ -390,29 +391,27 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 		}
 		if(featureIDSubset.equals(FeatureIDSubset.BEST_SCORING_ONLY)) {
 			
-			MsFeatureIdentity topHit = IdentificationUtils.getTopScoringIdForMatchTypes(
-					filteredIds,
-					msmsSearchTypes,
-					msmsScoringParameter);
+			MsFeatureIdentity topHit = 
+					IdentificationUtils.getTopScoringIdForMatchTypes(
+							filteredIds,
+							msmsSearchTypes,
+							msmsScoringParameter,
+							decoyExportHandling);
 			filteredIds.clear();
 			if(topHit != null)
 				filteredIds.add(topHit);
 		}	
+		if(decoyExportHandling.equals(DecoyExportHandling.NORMAL_ONLY))
+			filteredIds = filteredIds.stream().
+				filter(id -> !IdentificationUtils.isDecoyHit(id)).
+				collect(Collectors.toList());
+		
+		if(decoyExportHandling.equals(DecoyExportHandling.DECOY_ONLY))
+			filteredIds = filteredIds.stream().
+				filter(id -> IdentificationUtils.isDecoyHit(id)).
+				collect(Collectors.toList());
+		
 		return filteredIds;
-	}
-	
-	protected boolean isDecoyHit(MsFeatureIdentity msfId) {
-		
-		if(msfId.getReferenceMsMsLibraryMatch() == null)
-			return false;
-		
-		String libId = msfId.getReferenceMsMsLibraryMatch().
-				getMatchedLibraryFeature().getMsmsLibraryIdentifier();
-		
-		if(decoyLibraryMap.containsKey(libId))
-			return decoyLibraryMap.get(libId);
-		else
-			return false;
 	}
 	
 	protected String getFeatureProperty(

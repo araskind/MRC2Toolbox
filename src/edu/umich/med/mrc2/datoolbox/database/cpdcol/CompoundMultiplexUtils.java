@@ -25,8 +25,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponentTmp;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
@@ -34,6 +40,154 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class CompoundMultiplexUtils {
 	
+	/*
+	 * Compound collections
+	 * */
+
+	public static Collection<CompoundCollection>getCompoundCollections() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		Collection<CompoundCollection>cpdColls = getCompoundCollections(conn) ;
+		ConnectionManager.releaseConnection(conn);
+		return cpdColls;
+	}
+
+	public static Collection<CompoundCollection>getCompoundCollections(Connection conn) throws Exception {
+	
+		Collection<CompoundCollection>compoundCollections = new HashSet<CompoundCollection>();
+		String query  = 
+				"SELECT CC_ID, CC_NAME, CC_DESCRIPTION, CC_URL FROM COMPOUND_COLLECTIONS";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			CompoundCollection cc = new CompoundCollection(
+					rs.getString("CC_ID"), 
+					rs.getString("CC_NAME"), 
+					rs.getString("CC_DESCRIPTION"),
+					rs.getString("CC_URL"));
+			compoundCollections.add(cc);
+		}
+		rs.close();
+		ps.close();
+		return compoundCollections;
+	}
+	
+	public static void addCompoundCollection(CompoundCollection newCollection) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();		
+		String query  = 
+				"INSERT INTO COMPOUND_COLLECTIONS "
+				+ "(CC_ID, CC_NAME, CC_DESCRIPTION, CC_URL) VALUES (?,?,?,?)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		String nextId = SQLUtils.getNextIdFromSequence(conn, 
+				"CPD_COLL_SEQ",
+				DataPrefix.COMPOUND_COLLECTION,
+				"0",
+				4);
+		ps.setString(1, nextId);
+		ps.setString(2, newCollection.getName());
+		String desc = newCollection.getDescription();
+		if(desc != null)
+			ps.setString(3, desc);
+		else
+			ps.setNull(3, java.sql.Types.NULL);
+		
+		String url = newCollection.getUrl();
+		if(url != null)
+			ps.setString(4, url);
+		else
+			ps.setNull(4, java.sql.Types.NULL);
+		
+		ps.executeUpdate();
+		ps.close();
+		newCollection.setId(nextId);
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void deleteCompoundCollection(CompoundCollection toDelete) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();		
+		String query  = 
+				"DELETE FROM COMPOUND_COLLECTIONS WHERE CC_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, toDelete.getId());		
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void updateCompoundCollection(CompoundCollection toUpdate) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();		
+		String query  = 
+				"UPDATE COMPOUND_COLLECTIONS SET CC_NAME = ?, "
+				+ "CC_DESCRIPTION = ?, CC_URL = ? WHERE CC_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		ps.setString(1, toUpdate.getName());
+		String desc = toUpdate.getDescription();
+		if(desc != null)
+			ps.setString(2, desc);
+		else
+			ps.setNull(2, java.sql.Types.NULL);
+		
+		String url = toUpdate.getUrl();
+		if(url != null)
+			ps.setString(3, url);
+		else
+			ps.setNull(3, java.sql.Types.NULL);
+		
+		ps.setString(4, toUpdate.getId());
+		
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	/*
+	 * Temporary components, only to process legacy data
+	 * */
+	
+	public static void insertTemporaryCCComponent(
+			CompoundCollectionComponentTmp component, Connection conn) throws Exception {
+		
+		String query  = 
+				"INSERT INTO COMPOUND_COLLECTION_COMPONENTS "
+				+ "(CC_ID, CC_COMPONENT_ID, CAS) VALUES (?,?,?)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		String nextId = SQLUtils.getNextIdFromSequence(conn, 
+				"CPD_COLL_COMP_SEQ",
+				DataPrefix.COMPOUND_COLLECTION_COMPONENT,
+				"0",
+				7);
+		ps.setString(1, component.getCollectionId());
+		ps.setString(2, nextId);
+		ps.setString(3, component.getCas());		
+		ps.executeUpdate();
+		ps.close();
+		component.setId(nextId);
+		
+		Map<CpdMetadataField, String> metadata = component.getMetadata();
+		if(!metadata.isEmpty()) {
+			
+			query  = 
+					"INSERT INTO COMPOUND_COLLECTION_COMPONENT_METADATA "
+					+ "(CC_COMPONENT_ID, FIELD_ID, FIELD_VALUE) VALUES (?,?,?)";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, component.getId());
+			for(Entry<CpdMetadataField, String> md : metadata.entrySet()) {
+
+				if(md.getValue() != null) {
+					ps.setString(2, md.getKey().getId());
+					ps.setString(3, md.getValue());
+					ps.addBatch();
+				}
+			}
+			ps.executeBatch();			
+			ps.close();
+		}
+	}	
+
 	/*
 	 * Solvent
 	 * */
@@ -97,7 +251,8 @@ public class CompoundMultiplexUtils {
 		
 		Collection<MobilePhase>solventList = new TreeSet<MobilePhase>();
 		String query = 
-				"SELECT SOLVENT_ID, SOLVENT_NAME FROM COMPOUND_MULTIPLEX_SOLVENTS ORDER BY 1";
+				"SELECT SOLVENT_ID, SOLVENT_NAME FROM "
+				+ "COMPOUND_MULTIPLEX_SOLVENTS ORDER BY 1";
 
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -112,4 +267,70 @@ public class CompoundMultiplexUtils {
 		ps.close();
 		return solventList;
 	}
+	
+	public static Collection<CpdMetadataField>getCpdMetadataFields() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		Collection<CpdMetadataField>metadataFields = getCpdMetadataFields(conn);
+		ConnectionManager.releaseConnection(conn);
+		return metadataFields;
+	}
+
+	public static Collection<CpdMetadataField> getCpdMetadataFields(Connection conn) throws Exception{
+		
+		Collection<CpdMetadataField>metadataFields = new HashSet<CpdMetadataField>();
+		String query = 
+				"SELECT FIELD_ID, FIELD_NAME FROM "
+				+ "COMPOUND_COLLECTION_METADATA_FIELDS ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			CpdMetadataField p = new CpdMetadataField(
+					rs.getString("FIELD_ID"), 
+					rs.getString("FIELD_NAME"));
+			metadataFields.add(p);
+		}
+		rs.close();
+		ps.close();
+		return metadataFields;
+	}
+	
+	public static Collection<CpdMetadataField> addCpdMetadataFields(
+			Collection<String>fields, Connection conn) throws Exception {
+		
+		Collection<CpdMetadataField>metadataFields = new HashSet<CpdMetadataField>();
+		String query = 
+				"INSERT INTO COMPOUND_COLLECTION_METADATA_FIELDS "
+				+ "(FIELD_ID, FIELD_NAME) VALUES(?,?)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		for(String field : fields){
+			
+			String nextId = SQLUtils.getNextIdFromSequence(conn, 
+					"CCC_METADATA_FIELD_SEQ",
+					DataPrefix.CCC_METADATA_FIELD,
+					"0",
+					5);
+			ps.setString(1, nextId);
+			ps.setString(2, field);
+			ps.executeUpdate();
+			CpdMetadataField f = new CpdMetadataField(nextId, field);
+			metadataFields.add(f);
+		}
+		ps.close();
+		return metadataFields;
+	}
 }
+
+
+
+
+
+
+
+
+//
+
+
+
+

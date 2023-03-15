@@ -25,6 +25,8 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -47,7 +49,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIDSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 
-public class IdentificationExportSettingsPanel extends JPanel {
+public class IdentificationExportSettingsPanel extends JPanel implements ItemListener{
 
 	/**
 	 * 
@@ -295,4 +297,35 @@ public class IdentificationExportSettingsPanel extends JPanel {
 		excludeIfNoIdsLeftCheckBox.setEnabled(enabled);
 		decoyHitsHadlingComboBox.setEnabled(enabled);
 	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+
+		//	In case "Best hit for each compound" do not allow decoys
+		if (e.getStateChange() == ItemEvent.SELECTED && e.getItem() instanceof FeatureIDSubset) {
+			
+			FeatureIDSubset selected = (FeatureIDSubset)featureIdSubsetComboBox.getSelectedItem();
+			if(selected.equals(FeatureIDSubset.BEST_FOR_EACH_COMPOUND)){
+					decoyHitsHadlingComboBox.setSelectedItem(DecoyExportHandling.NORMAL_ONLY);
+					decoyHitsHadlingComboBox.setEnabled(false);
+			}
+			else {
+				decoyHitsHadlingComboBox.setEnabled(true);
+			}
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
