@@ -34,11 +34,27 @@ public class CompoundBioLocation implements Serializable{
 	private CompoundLocationType locationType;
 	private String globalId;
 
-	public CompoundBioLocation(String locationName, CompoundLocationType locationType) {
+	public CompoundBioLocation(
+			String locationName, 
+			CompoundLocationType locationType) {
 		super();
 		this.locationName = locationName;
 		this.locationType = locationType;
 	}
+	
+	
+
+	public CompoundBioLocation(
+			String locationName, 
+			CompoundLocationType locationType, 
+			String globalId) {
+		super();
+		this.locationName = locationName;
+		this.locationType = locationType;
+		this.globalId = globalId;
+	}
+
+
 
 	/**
 	 * @return the locationName

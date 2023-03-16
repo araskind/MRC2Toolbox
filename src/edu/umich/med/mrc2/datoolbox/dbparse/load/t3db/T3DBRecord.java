@@ -23,9 +23,12 @@ package edu.umich.med.mrc2.datoolbox.dbparse.load.t3db;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
+import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBCitation;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBRecord;
 
 public class T3DBRecord extends HMDBRecord {
@@ -37,17 +40,21 @@ public class T3DBRecord extends HMDBRecord {
 	
 	private Collection<String>categories;
 	private Collection<String>types;
-	private Collection<T3DBTarget>targets;
+	private Collection<T3DBTarget>targets;	
+	private Collection<T3DBProteinTarget>proteinTargets;
+	private Map<T3DBProteinTarget,Collection<HMDBCitation>>tagetReferences;
 	private Map<T3DBToxProperties,String>toxicityProperties;
 	
 	public T3DBRecord(String primaryId) {
 		super(primaryId);
 
-		types = new ArrayList<String>();
-		categories = new ArrayList<String>();
+		types = new TreeSet<String>();
+		categories = new TreeSet<String>();
 		targets = new ArrayList<T3DBTarget>();
 		toxicityProperties = 
 				new TreeMap<T3DBToxProperties,String>();
+		proteinTargets = new ArrayList<T3DBProteinTarget>();
+		tagetReferences = new HashMap<T3DBProteinTarget,Collection<HMDBCitation>>();
 	}
 
 	public Collection<String> getCategories() {
@@ -87,6 +94,36 @@ public class T3DBRecord extends HMDBRecord {
 	public String getToxicityProperty(T3DBToxProperties property) {
 		return toxicityProperties.get(property);
 	}
+
+	public Collection<T3DBProteinTarget> getProteinTargets() {
+		return proteinTargets;
+	}
+
+	public Map<T3DBProteinTarget, Collection<HMDBCitation>> getTagetReferences() {
+		return tagetReferences;
+	}
+	
+	public void addProteinTarget(T3DBProteinTarget protTarget) {
+		proteinTargets.add(protTarget);
+	}
+	
+	public void addReferenceForProteinTarget(T3DBProteinTarget protTarget, HMDBCitation ref) {
+		
+		if(!tagetReferences.containsKey(protTarget))
+			tagetReferences.put(protTarget, new ArrayList<HMDBCitation>());
+		
+		tagetReferences.get(protTarget).add(ref);
+	}
 }
+
+
+
+
+
+
+
+
+
+
 
 

@@ -19,66 +19,42 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb;
+package edu.umich.med.mrc2.datoolbox.dbparse.load.t3db;
 
-import java.io.Serializable;
+public class T3DBToxCategory {
 
-public class HMDBPathway implements Serializable{
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4701781888008822261L;
-	
 	private String name;
-	private String smpdbId;
-	private String keggMapId;
 	private String globalId;
-
-	public HMDBPathway(
-			String name, 
-			String smpdbId, 
-			String keggMapId) {
-		this(null, name, smpdbId, keggMapId);
+	
+	public T3DBToxCategory(String name) {
+		this(null, name);
 	}
 
-	public HMDBPathway(
-			String globalId,
-			String name, 
-			String smpdbId, 
-			String keggMapId) {
-		super();		
-		this.globalId = globalId;
+	public T3DBToxCategory(String name, String globalId) {
+		super();
 		this.name = name;
-		this.smpdbId = smpdbId;
-		this.keggMapId = keggMapId;
-		
-		if(smpdbId != null && smpdbId.isEmpty())
-			this.smpdbId = null;
-		
-		if(keggMapId != null && keggMapId.isEmpty())
-			this.keggMapId = null;
+		this.globalId = globalId;
 	}
 
-	/**
-	 * @return the name
-	 */
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @return the smpdbId
-	 */
-	public String getSmpdbId() {
-		return smpdbId;
+	@Override
+	public String toString() {
+		return name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	/**
-	 * @return the keggMapId
-	 */
-	public String getKeggMapId() {
-		return keggMapId;
+	public String getGlobalId() {
+		return globalId;
+	}
+
+	public void setGlobalId(String globalId) {
+		this.globalId = globalId;
 	}
 	
     @Override
@@ -88,12 +64,4 @@ public class HMDBPathway implements Serializable{
         hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
         return hash;
     }
-
-	public String getGlobalId() {
-		return globalId;
-	}
-
-	public void setGlobalId(String globalId) {
-		this.globalId = globalId;
-	}
 }

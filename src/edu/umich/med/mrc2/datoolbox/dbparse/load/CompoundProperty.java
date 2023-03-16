@@ -23,7 +23,7 @@ package edu.umich.med.mrc2.datoolbox.dbparse.load;
 
 import java.io.Serializable;
 
-public class CompoundProperty implements Serializable {
+public class CompoundProperty implements Serializable, Cloneable {
 
 	/**
 	 * 
@@ -38,6 +38,20 @@ public class CompoundProperty implements Serializable {
 	
 	public CompoundProperty(
 			String propertyName, 
+			String propertyValue, 
+			String source, 
+			CompoundPropertyType type,
+			String globalId) {
+		super();
+		this.propertyName = propertyName;
+		this.propertyValue = propertyValue;
+		this.source = source;
+		this.type = type;
+		this.globalId = globalId;
+	}
+
+	public CompoundProperty(
+			String propertyName, 
 			String propertyValue,
 			String source,
 			CompoundPropertyType type) {
@@ -46,6 +60,16 @@ public class CompoundProperty implements Serializable {
 		this.propertyValue = propertyValue;
 		this.type = type;
 		this.source = source;
+	}
+
+	public CompoundProperty(
+			String propertyName, 
+			CompoundPropertyType type, 
+			String globalId) {
+		super();
+		this.propertyName = propertyName;
+		this.type = type;
+		this.globalId = globalId;
 	}
 
 	public String getPropertyName() {
@@ -83,5 +107,16 @@ public class CompoundProperty implements Serializable {
         hash = 53 * hash + (this.propertyName != null ? this.propertyName.hashCode() : 0)
         		+ (this.type.name() != null ? this.type.name().hashCode() : 0);
         return hash;
+    }
+    
+    @Override
+    public CompoundProperty clone() {
+    	
+    	return new CompoundProperty(			
+    			propertyName, 
+    			propertyValue, 
+    			source, 
+    			type,
+    			globalId);
     }
 }

@@ -73,35 +73,28 @@ import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class HMDBParseAndUploadTask extends AbstractTask {
 	
-	private File hmdbXmlFile;
+	protected File xmlInputFile;
 	
-	private Collection<HMDBRecord>records;
-	private Set<String>idSet;
+	protected Collection<HMDBRecord>records;
+	protected Set<String>idSet;
 	
-	private Map<Integer, CompoundBioLocation>bioLocations;
-	private Map<Integer, HMDBPathway>pathways;
-	private Map<Integer, HMDBDesease>deseases;
-	private Map<Integer, CompoundProperty>compoundProperties;
-	private Map<Integer, HMDBCitation>references;
-	private Map<Integer, HMDBProteinAssociation>proteinAssociations; 
+	protected Map<Integer, CompoundBioLocation>bioLocations;
+	protected Map<Integer, HMDBPathway>pathways;
+	protected Map<Integer, HMDBDesease>deseases;
+	protected Map<Integer, CompoundProperty>compoundProperties;
+	protected Map<Integer, HMDBCitation>references;
+	protected Map<Integer, HMDBProteinAssociation>proteinAssociations; 
 
-	private Map<Integer, String>bioLocationsIdMap;
-	private Map<Integer, String>pathwaysIdMap;
-	private Map<Integer, String>deseasesIdMap;
-	private Map<Integer, String>compoundPropertiesIdMap;
-	private Map<Integer, String>referencesIdMap;
-	private Map<Integer, String>proteinAssociationsIdMap;
-	
-//	BIOLOC_SEQ
-//	PATHWAY_SEQ
-//	DESEASE_SEQ
-//	LIT_REF_SEQ
-//	COMPOUND_PROPERTY_SEQ
-//	CONCENTRATION_SEQ
+	protected Map<Integer, String>bioLocationsIdMap;
+	protected Map<Integer, String>pathwaysIdMap;
+	protected Map<Integer, String>deseasesIdMap;
+	protected Map<Integer, String>compoundPropertiesIdMap;
+	protected Map<Integer, String>referencesIdMap;
+	protected Map<Integer, String>proteinAssociationsIdMap;
 	
 	public HMDBParseAndUploadTask(File hmdbXmlFile) {
 		super();
-		this.hmdbXmlFile = hmdbXmlFile;
+		this.xmlInputFile = hmdbXmlFile;
 		records = new TreeSet<HMDBRecord>();
 		idSet = new TreeSet<String>();
 	}
@@ -139,9 +132,9 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		setStatus(TaskStatus.FINISHED);		
 	}
 
-	private void parseFileToRecords() {
+	protected void parseFileToRecords() {
 
-		taskDescription = "Parsing HMDB XML file " + hmdbXmlFile.getName() + " ...";		
+		taskDescription = "Parsing HMDB XML file " + xmlInputFile.getName() + " ...";		
 		total = 200000;
 		processed = 0;
 		System.setProperty("javax.xml.transform.TransformerFactory",
@@ -186,7 +179,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		
 		XMLStreamReader xsr = null;
 		try {
-			xsr = xif.createXMLStreamReader(new FileReader(hmdbXmlFile));
+			xsr = xif.createXMLStreamReader(new FileReader(xmlInputFile));
 			xsr.nextTag();
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
@@ -216,8 +209,6 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 					}
 			    	if(record != null) {
 			    		records.add(record); // Put in cash and keep only ID list in memory?
-//			    		idSet.add(record.getPrimaryId());
-//			    		DbParserCore.dbUploadCache.put(record.getPrimaryId(), record);
 				    	System.out.println("Parsed - " + record.getName());
 			    	}			    	
 			    	processed++;
@@ -229,7 +220,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		}	
 	}
 	
-	private void extractRedundantData() {
+	protected void extractRedundantData() {
 		
 		taskDescription = "Extracting redundant data ...";		
 		total = records.size();
@@ -283,7 +274,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		}
 	}
 		
-	private void insertRedundantData() throws Exception{
+	protected void insertRedundantData() throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();		
 		try {
@@ -325,7 +316,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	private void uploadBiolocations(Connection conn) throws Exception{
+	protected void uploadBiolocations(Connection conn) throws Exception{
 		
 		taskDescription = "Uploading bio-location data ...";
 		total = bioLocations.size();
@@ -350,7 +341,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		ps.close();
 	}
 	
-	private void uploadPathways(Connection conn) throws Exception{
+	protected void uploadPathways(Connection conn) throws Exception{
 		
 		taskDescription = "Uploading pathway data ...";
 		total = pathways.size();
@@ -388,7 +379,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		ps.close();
 	}
 	
-	private void uploadCompoundProperties(Connection conn) throws Exception{
+	protected void uploadCompoundProperties(Connection conn) throws Exception{
 		
 		taskDescription = "Uploading compound property types ...";
 		total = compoundProperties.size();
@@ -413,7 +404,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		ps.close();
 	}
 	
-	private void uploadDeseases(Connection conn) throws Exception{
+	protected void uploadDeseases(Connection conn) throws Exception{
 		
 		taskDescription = "Uploading desease data ...";
 		total = deseases.size();
@@ -444,7 +435,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		ps.close();
 	}
 	
-	private void uploadReferences(Connection conn) throws Exception{
+	protected void uploadReferences(Connection conn) throws Exception{
 		
 		taskDescription = "Uploading literature references ...";
 		total = references.size();
@@ -477,7 +468,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		ps.close();
 	}
 		
-	private void uploadProteinAssociations(Connection conn) throws Exception{
+	protected void uploadProteinAssociations(Connection conn) throws Exception{
 
 		taskDescription = "Uploading protein associations ...";
 		total = proteinAssociations.size();
@@ -520,7 +511,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		ps.close();
 	}
 	
-	private void uploadRecordsToDatabase() throws Exception{
+	protected void uploadRecordsToDatabase() throws Exception{
 			
 		taskDescription = "Uploading HMDB records ...";
 		total = idSet.size();
@@ -588,7 +579,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		
 		//	Diseases with references
 		String diseasesQuery = 
-				"INSERT INTO COMPOUNDDB.HMDB_DESEASE_LIT_REFERENCES "
+				"INSERT INTO COMPOUNDDB.HMDB_DESEASE_LIT_REFERENCE_MAP "
 				+ "(ACCESSION, DESEASE_ID, LIT_REF_ID) "
 				+ "VALUES (?, ?, ?)";
 		PreparedStatement diseasesPs = conn.prepareStatement(diseasesQuery);		
@@ -602,7 +593,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		
 		//	General references
 		String genRefQuery = 
-				"INSERT INTO COMPOUNDDB.HMDB_GENERAL_LIT_REFERENCES "
+				"INSERT INTO COMPOUNDDB.HMDB_GENERAL_LIT_REFERENCE_MAP "
 				+ "(ACCESSION, LIT_REF_ID) "
 				+ "VALUES (?, ?)";
 		PreparedStatement genRefPs = conn.prepareStatement(genRefQuery);
@@ -713,7 +704,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		ConnectionManager.releaseConnection(conn);	
 	}
 
-	private void insertCompoundData(
+	protected void insertCompoundData(
 			HMDBRecord record, 
 			Connection conn, 
 			PreparedStatement compoundDataPs) throws Exception{
@@ -752,7 +743,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		compoundDataPs.executeUpdate();
 	}
 	
-	private void insertSynonyms(
+	protected void insertSynonyms(
 			HMDBRecord record, 
 			Connection conn, 
 			PreparedStatement synonymsPs) throws Exception{
@@ -781,7 +772,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		synonymsPs.executeBatch();
 	}
 
-	private void insertDatabaseCrossReferences(
+	protected void insertDatabaseCrossReferences(
 			HMDBRecord record, 
 			Connection conn, 
 			PreparedStatement dbCrossrefPs) throws Exception{
@@ -809,7 +800,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		dbCrossrefPs.executeBatch();
 	}
 
-	private void insertCompoundProperties(
+	protected void insertCompoundProperties(
 			HMDBRecord record, 
 			Connection conn,
 			PreparedStatement cpdPropertiesPs) throws Exception{
@@ -831,7 +822,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		cpdPropertiesPs.executeBatch();
 	}
 
-	private void insertBiolocations(
+	protected void insertBiolocations(
 			HMDBRecord record, 
 			Connection conn,
 			PreparedStatement biolocationsPs) throws Exception{
@@ -849,7 +840,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		biolocationsPs.executeBatch();
 	}
 
-	private void insertPathways(
+	protected void insertPathways(
 			HMDBRecord record, 
 			Connection conn, 
 			PreparedStatement pathwaysPs) throws Exception{
@@ -868,7 +859,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		pathwaysPs.executeBatch();
 	}
 
-	private void insertConcentrationsWithReferences(
+	protected void insertConcentrationsWithReferences(
 			HMDBRecord record, 
 			Connection conn,
 			PreparedStatement concentrationsPs, 
@@ -908,7 +899,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		concRefsPs.executeBatch();
 	}
 
-	private void insertDiseasesWithReferences(
+	protected void insertDiseasesWithReferences(
 			HMDBRecord record,
 			Connection conn,
 			PreparedStatement diseasesPs) throws Exception{
@@ -940,7 +931,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		diseasesPs.executeBatch();
 	}
 
-	private void insertProteinAssociations(
+	protected void insertProteinAssociations(
 			HMDBRecord record, 
 			Connection conn,
 			PreparedStatement protAssocPs) throws Exception{
@@ -960,7 +951,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 		protAssocPs.executeBatch();
 	}
 
-	private void insertGeneralReferences(
+	protected void insertGeneralReferences(
 			HMDBRecord record, 
 			Connection conn,
 			PreparedStatement genRefPs) throws Exception{
@@ -979,6 +970,6 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-		return new HMDBParseAndUploadTask(hmdbXmlFile);
+		return new HMDBParseAndUploadTask(xmlInputFile);
 	}
 }

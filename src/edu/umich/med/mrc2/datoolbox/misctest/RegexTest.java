@@ -157,6 +157,8 @@ import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.database.thermo.CompoundDiscovererUtils;
 import edu.umich.med.mrc2.datoolbox.database.thermo.ThermoSqliteConnectionManager;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.massbank.MassBankFileParser;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.massbank.MassBankTandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.mine.MINEMSPParser;
@@ -211,7 +213,8 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			loadMetaSciCompoundsData();
+			Collection<CompoundProperty> bl = HMDBUtils.getCompoundProperties();
+			System.err.println("");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

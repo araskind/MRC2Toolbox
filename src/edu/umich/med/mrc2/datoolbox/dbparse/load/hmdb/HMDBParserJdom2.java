@@ -42,8 +42,29 @@ public class HMDBParserJdom2 {
 		
 		Namespace ns = recordElement.getNamespace();
 		String id = recordElement.getChildText("accession", ns);
-		HMDBRecord record = new HMDBRecord(id);
+		HMDBRecord record = new HMDBRecord(id);	
+		parseCompoundIdentity(recordElement, record, ns);
+		parseDatabaseReferences(recordElement, record, ns);
+		parseTimeStamps(recordElement, record, ns);
+		parseDescriptions(recordElement, record, ns);
+		parseSynonyms(recordElement, record, ns);
+		parseBiologicalProperties(recordElement, record, ns);
+		parseExperimentalProperties(recordElement, record, ns);
+		parsePredictedProperties(recordElement, record, ns);
+		parseConcentrations(recordElement, record, ns);
+		parseDeseases(recordElement, record, ns);
+		parseProteinAssociations(recordElement, record, ns);
+		parseGeneralReferences(recordElement, record, ns);
+		return record;
+	}
+	
+	public static void parseCompoundIdentity(
+			Element recordElement, HMDBRecord record, Namespace ns) {
+		
 		String name = recordElement.getChildText("name", ns);
+		if(name == null)
+			name = recordElement.getChildText("common_name", ns);
+		
 		record.setName(name);
 		record.getCompoundIdentity().setCommonName(name);
 
@@ -61,19 +82,7 @@ public class HMDBParserJdom2 {
 		if(mzString != null && !mzString.isEmpty()) {
 			double mz = Double.parseDouble(mzString);
 			record.getCompoundIdentity().setExactMass(mz);
-		}		
-		parseDatabaseReferences(recordElement, record, ns);
-		parseTimeStamps(recordElement, record, ns);
-		parseDescriptions(recordElement, record, ns);
-		parseSynonyms(recordElement, record, ns);
-		parseBiologicalProperties(recordElement, record, ns);
-		parseExperimentalProperties(recordElement, record, ns);
-		parsePredictedProperties(recordElement, record, ns);
-		parseConcentrations(recordElement, record, ns);
-		parseDeseases(recordElement, record, ns);
-		parseProteinAssociations(recordElement, record, ns);
-		parseGeneralReferences(recordElement, record, ns);
-		return record;
+		}
 	}
 	
 	public static void parseTimeStamps(
