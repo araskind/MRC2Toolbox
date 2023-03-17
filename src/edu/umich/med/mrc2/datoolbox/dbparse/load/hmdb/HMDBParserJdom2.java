@@ -31,6 +31,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundPropertyType;
 
@@ -136,6 +137,9 @@ public class HMDBParserJdom2 {
 			Element recordElement, HMDBRecord record, Namespace ns) {
 
 		for(HMDBCrossrefFields dbRef : HMDBCrossrefFields.values()) {
+			
+			if(dbRef.getDatabase().equals(CompoundDatabaseEnum.HMDB))
+				continue;
 			
 			String dbId = recordElement.getChildText(dbRef.getName(), ns);
 			if(dbId != null && !dbId.isEmpty())

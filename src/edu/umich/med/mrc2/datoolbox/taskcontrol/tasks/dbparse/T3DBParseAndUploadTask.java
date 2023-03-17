@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -59,34 +58,34 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.CompoundBioLocation;
-import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.CompoundConcentration;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBCitation;
-import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBDesease;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBPathway;
-import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBProteinAssociation;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.t3db.T3DBParserJdom2;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.t3db.T3DBProteinTarget;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.t3db.T3DBRecord;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.t3db.T3DBToxCategory;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.t3db.T3DBToxProperties;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.t3db.T3DBToxType;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
-	
-	
-	protected Collection<T3DBRecord>records;
+		
+	private Collection<T3DBRecord>t3dbRecords;
 	private Collection<CompoundProperty>hmdbCompoundProperties;
 	private Collection<CompoundBioLocation>hmdbCompoundBioLocations;
 	private Collection<HMDBPathway>hmdbPathways;
-	private HashMap<Integer, T3DBToxType> toxTypes;
-	private HashMap<Integer, T3DBToxCategory> toxCategories;
-	private TreeMap<Integer, String> toxCategoryIdMap;
-	private TreeMap<Integer, String> toxTypeIdMap;
+	private Map<Integer, T3DBToxType> toxTypes;
+	private Map<Integer, T3DBToxCategory> toxCategories;
+	private Map<Integer, T3DBProteinTarget>proteinTargets;
+	private Map<Integer, String> toxCategoryIdMap;
+	private Map<Integer, String> toxTypeIdMap;
+	private Map<Integer, String>targetIdMap;
 	
 	public T3DBParseAndUploadTask(File t3bXmlFile) {
 		super(t3bXmlFile);
-		records = new TreeSet<T3DBRecord>();
+		t3dbRecords = new TreeSet<T3DBRecord>();
 	}
 
 	@Override
@@ -131,7 +130,7 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 	protected void parseFileToRecords() {
 
 		taskDescription = "Parsing T3DB XML file " + xmlInputFile.getName() + " ...";		
-		total = 200000;
+		total = 4000;
 		processed = 0;
 		System.setProperty("javax.xml.transform.TransformerFactory",
 				"com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
@@ -204,7 +203,7 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 						e.printStackTrace();
 					}
 			    	if(record != null) {
-			    		records.add(record);
+			    		t3dbRecords.add(record);
 				    	System.out.println("Parsed - " + record.getName());
 			    	}
 			    	processed++;
@@ -222,19 +221,19 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 		
 		hmdbCompoundProperties = 
 				HMDBUtils.getCompoundProperties(conn);
-		compoundPropertiesIdMap = new TreeMap<Integer, String>();
+		compoundPropertiesIdMap = new HashMap<Integer, String>();
 		hmdbCompoundProperties.stream().
 			forEach(l -> compoundPropertiesIdMap.put(l.hashCode(), l.getGlobalId()));
 		
 		hmdbCompoundBioLocations = 
 				HMDBUtils.getCompoundBioLocations();
-		bioLocationsIdMap = new TreeMap<Integer, String>();
+		bioLocationsIdMap = new HashMap<Integer, String>();
 		hmdbCompoundBioLocations.stream().
 			forEach(l -> bioLocationsIdMap.put(l.hashCode(), l.getGlobalId()));
 		
 		hmdbPathways = 
 				HMDBUtils.getHMDBPathways(conn);		
-		pathwaysIdMap = new TreeMap<Integer, String>();
+		pathwaysIdMap = new HashMap<Integer, String>();
 		hmdbPathways.stream().
 			forEach(l -> pathwaysIdMap.put(l.hashCode(), l.getGlobalId()));
 		
@@ -247,11 +246,13 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 	protected void extractRedundantData() {
 		
 		taskDescription = "Extracting redundant data ...";		
-		total = records.size();
+		total = t3dbRecords.size();
 		processed = 0;
 		
 		toxTypes = new HashMap<Integer, T3DBToxType>();
 		toxCategories = new HashMap<Integer, T3DBToxCategory>();
+		proteinTargets = new HashMap<Integer, T3DBProteinTarget>();
+		
 		Map<Integer, CompoundBioLocation> missingBiolocations = 
 				new HashMap<Integer, CompoundBioLocation>();
 		Map<Integer, HMDBPathway>missingPathways = 
@@ -261,7 +262,7 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 		Map<Integer, HMDBCitation>missingReferences = 
 				new HashMap<Integer, HMDBCitation>();
 				
-		for(T3DBRecord record : records) {
+		for(T3DBRecord record : t3dbRecords) {
 			
 			if(!record.getBiolocations().isEmpty()) {
 				record.getBiolocations().stream().
@@ -292,6 +293,16 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 				record.getCategories().stream().
 					forEach(a -> toxCategories.put(a.hashCode(), new T3DBToxCategory(a)));
 			
+			if(!record.getProteinTargets().isEmpty()){
+				
+				record.getProteinTargets().stream().
+					forEach(t -> proteinTargets.put(t.hashCode(), t));
+				
+				record.getTagetReferences().values().stream().
+					flatMap(r -> r.stream()).
+					filter(r -> referencesIdMap.get(r.hashCode()) == null).	
+					forEach(r -> missingReferences.put(r.hashCode(),r));
+			}
 			processed++;
 		}		
 		if(!missingBiolocations.isEmpty()) {
@@ -343,52 +354,83 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		try {
+			uploadProteinTargets(conn);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 		ConnectionManager.releaseConnection(conn);
+	}
+
+	private void uploadProteinTargets(Connection conn) throws Exception{
+		
+		taskDescription = "Uploading TOX categories ...";
+		total = proteinTargets.size();
+		processed = 0;
+		targetIdMap = new HashMap<Integer, String>();
+		String query = 
+				"INSERT INTO COMPOUNDDB.T3DB_TARGETS (TARGET_ID, NAME, "
+				+ "UNIPROT_ID, MECHANISM) VALUES(?,?,?,?)";			
+		PreparedStatement ps = conn.prepareStatement(query);			
+		for(Entry<Integer, T3DBProteinTarget> typeEntry : proteinTargets.entrySet()) {
+			
+			T3DBProteinTarget tgt = typeEntry.getValue();
+			
+			ps.setString(1, tgt.getTargetId());
+			ps.setString(2, tgt.getName());
+			ps.setString(3, tgt.getUniprotId());
+			ps.setString(4, tgt.getMechanismOfAction());
+			ps.executeUpdate();
+			targetIdMap.put(typeEntry.getValue().hashCode(), tgt.getTargetId());
+			processed++;
+		}
+		ps.close();
 	}
 
 	private void uploadToxCategories(Connection conn) throws Exception{
 
 		taskDescription = "Uploading TOX categories ...";
-		total = compoundProperties.size();
+		total = toxCategories.size();
 		processed = 0;
-		toxCategoryIdMap = new TreeMap<Integer, String>();
+		toxCategoryIdMap = new HashMap<Integer, String>();
 		String query = 
 				"INSERT INTO COMPOUNDDB.T3DB_CATEGORY "
 				+ "(CATEGORY_ID, CATEGORY_NAME) VALUES (?, ?)";			
-		PreparedStatement ps = conn.prepareStatement(query);			
-		for(Entry<Integer, T3DBToxType> typeEntry : toxTypes.entrySet()) {
+		PreparedStatement ps = conn.prepareStatement(query);	
+		for(Entry<Integer, T3DBToxCategory> categoryEntry : toxCategories.entrySet()) {
 			
 			String categoryId = SQLUtils.getNextIdFromSequence(
 					conn, "COMPOUNDDB.T3DB_TOX_CATEGORY_SEQ", 
 					DataPrefix.T3DB_TOX_CATEGORY, "0", 6);
 			ps.setString(1, categoryId);
-			ps.setString(2, typeEntry.getValue().getName());
+			ps.setString(2, categoryEntry.getValue().getName());
 			ps.executeUpdate();
-			toxCategoryIdMap.put(typeEntry.getValue().hashCode(), categoryId);
+			toxCategoryIdMap.put(categoryEntry.getValue().hashCode(), categoryId);
 			processed++;
 		}
 		ps.close();
 	}
 
 	private void uploadToxTypes(Connection conn) throws Exception{
-		// 
+		 
 		taskDescription = "Uploading TOX categories ...";
-		total = compoundProperties.size();
+		total = toxTypes.size();
 		processed = 0;
-		toxTypeIdMap = new TreeMap<Integer, String>();
+		toxTypeIdMap = new HashMap<Integer, String>();
 		String query = 
-				"INSERT INTO COMPOUNDDB.T3DB_CATEGORY "
-				+ "(CATEGORY_ID, CATEGORY_NAME) VALUES (?, ?)";			
+				"INSERT INTO COMPOUNDDB.T3DB_TOX_TYPE "
+				+ "(TYPE_ID, TYPE_NAME) VALUES (?, ?)";							
 		PreparedStatement ps = conn.prepareStatement(query);			
-		for(Entry<Integer, T3DBToxCategory> categoryEntry : toxCategories.entrySet()) {
+		for(Entry<Integer, T3DBToxType> typeEntry : toxTypes.entrySet()) {
 			
 			String typeId = SQLUtils.getNextIdFromSequence(
 					conn, "COMPOUNDDB.T3DB_TOX_TYPE_SEQ", 
 					DataPrefix.T3DB_TOX_TYPE, "0", 6);
 			ps.setString(1, typeId);
-			ps.setString(2, categoryEntry.getValue().getName());
+			ps.setString(2, typeEntry.getValue().getName());
 			ps.executeUpdate();
-			toxTypeIdMap.put(categoryEntry.getValue().hashCode(), typeId);
+			toxTypeIdMap.put(typeEntry.getValue().hashCode(), typeId);
 			processed++;
 		}
 		ps.close();
@@ -532,15 +574,34 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 		
 		//	Compound data
 		String compoundDataQuery = 
-				"INSERT INTO COMPOUNDDB.T3DB_COMPOUND_DATA " +
-				"(ACCESSION, CREATION_DATE, UPDATE_DATE, COMMON_NAME, " +
-				"IUPAC_NAME, CHEMICAL_FORMULA, MONISOTOPIC_MOLECULATE_WEIGHT, " +
-				"CAS_REGISTRY_NUMBER, SMILES, INCHI, INCHIKEY, STATUS, ORIGIN, " +
-				"AGGREGATE_STATE, APPEARANCE, ROUTE_OF_EXPOSURE, DESCRIPTION, " +
-				"MECHANISM_OF_TOXICITY, METABOLISM, TOXICITY, LETHALDOSE, " +
-				"CARCINOGENICITY, USE_SOURCE, MIN_RISK_LEVEL, " +
-				"HEALTH_EFFECTS, SYMPTOMS, TREATMENT) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				"INSERT INTO COMPOUNDDB.T3DB_COMPOUND_DATA "
+				+"(ACCESSION, "                      	// 1
+				+ "CREATION_DATE, "                  	// 2
+				+ "UPDATE_DATE, "                    	// 3
+				+ "COMMON_NAME, "                    	// 4
+				+ "CHEMICAL_FORMULA, "               	// 5
+				+ "MONISOTOPIC_MOLECULATE_WEIGHT, "  	// 6
+				+ "SMILES, "                         	// 7
+				+ "INCHI, "                          	// 8
+				+ "INCHIKEY, "                       	// 9
+				+ "STATUS, "                        	// 10
+				+ "ORIGIN, "                         	// 11
+				+ "AGGREGATE_STATE, "                	// 12
+				+ "APPEARANCE, "                     	// 13
+				+ "ROUTE_OF_EXPOSURE, "              	// 14
+				+ "DESCRIPTION, "                    	// 15
+				+ "MECHANISM_OF_TOXICITY, "          	// 16
+				+ "METABOLISM, "                    	// 17
+				+ "TOXICITY, "                       	// 18
+				+ "LETHALDOSE, "                     	// 19
+				+ "CARCINOGENICITY, "                	// 20
+				+ "USE_SOURCE, "                     	// 21
+				+ "MIN_RISK_LEVEL, "                 	// 22
+				+ "HEALTH_EFFECTS, "                 	// 23
+				+ "SYMPTOMS, "                       // 24
+				+ "TREATMENT) "                      // 25
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
+				+ "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement compoundDataPs = conn.prepareStatement(compoundDataQuery);
 		
 		//	Synonyms
@@ -578,45 +639,39 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 						+ "VALUES (?, ?)";
 		PreparedStatement pathwaysPs = conn.prepareStatement(pathwaysQuery);
 		
-		//	Targets/accession
-		String concentrationsQuery = 
-				"INSERT INTO COMPOUNDDB.HMDB_CONCENTRATIONS "
-				+ "(ACCESSION, CONC_ID, TYPE, UNITS, VALUE, "
-				+ "AGE, SEX, SUBJECT_CONDITION, COMMENTS) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-		PreparedStatement concentrationsPs = conn.prepareStatement(concentrationsQuery);
+		//	Targets map
+		String proteinTargetsQuery = 
+				"INSERT INTO COMPOUNDDB.T3DB_TARGET_MAP "
+				+ "(TARGET_ID, ACCESSION) VALUES (?, ?)";
+		PreparedStatement proteinTargetsPs = conn.prepareStatement(proteinTargetsQuery);
 		
 		//	Target references
-		String concRefsQuery = 
-				"INSERT INTO COMPOUNDDB.HMDB_CONCENTRATIONS_LIT_REFERENCES "
-				+ "(CONC_ID, LIT_REF_ID) "
-				+ "VALUES (?, ?)";
-		PreparedStatement concRefsPs = conn.prepareStatement(concRefsQuery);
-		
-		//	Diseases with references
-		String diseasesQuery = 
-				"INSERT INTO COMPOUNDDB.HMDB_DESEASE_LIT_REFERENCES "
-				+ "(ACCESSION, DESEASE_ID, LIT_REF_ID) "
+		String targetsRefsQuery = 
+				"INSERT INTO COMPOUNDDB.T3DB_TARGET_LIT_REFERENCE_MAP "
+				+ "(TARGET_ID, ACCESSION, LIT_REF_ID) "
 				+ "VALUES (?, ?, ?)";
-		PreparedStatement diseasesPs = conn.prepareStatement(diseasesQuery);		
-		
-		//	Protein associations
-		String protAssocQuery = 
-				"INSERT INTO COMPOUNDDB.HMDB_PROTEIN_ASSOCIATION_MAP "
-				+ "(ACCESSION, PROTEIN_ACCESSION) "
-				+ "VALUES (?, ?)";
-		PreparedStatement protAssocPs = conn.prepareStatement(protAssocQuery);
+		PreparedStatement targetRefsPs = conn.prepareStatement(targetsRefsQuery);
 		
 		//	General references
 		String genRefQuery = 
-				"INSERT INTO COMPOUNDDB.HMDB_GENERAL_LIT_REFERENCES "
+				"INSERT INTO COMPOUNDDB.T3DB_GENERAL_LIT_REFERENCE_MAP "
 				+ "(ACCESSION, LIT_REF_ID) "
 				+ "VALUES (?, ?)";
 		PreparedStatement genRefPs = conn.prepareStatement(genRefQuery);
 		
-		for(T3DBRecord record : records) {
-			
-//			T3DBRecord record = (T3DBRecord)DbParserCore.dbUploadCache.get(id);
+		String categoriesQuery = 
+				"INSERT INTO COMPOUNDDB.T3DB_CATEGORY_MAP "
+				+ "(ACCESSION, CATEGORY_ID) "
+				+ "VALUES (?, ?)";
+		PreparedStatement categoriesPs = conn.prepareStatement(categoriesQuery);
+
+		String typesQuery = 
+				"INSERT INTO COMPOUNDDB.T3DB_TOX_TYPE_MAP "
+				+ "(ACCESSION, TYPE_ID) "
+				+ "VALUES (?, ?)";
+		PreparedStatement typesPs = conn.prepareStatement(typesQuery);
+		
+		for(T3DBRecord record : t3dbRecords) {
 			
 			//	Compound data
 			try {
@@ -667,28 +722,10 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 				}
 			}			
 			//	Concentration with references
-			if(!record.getConcentrations().isEmpty()) {
+			if(!record.getProteinTargets().isEmpty()) {
 				try {
-					insertConcentrationsWithReferences(
-							record, conn, concentrationsPs, concRefsPs);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			//	Diseases with references
-			if(!record.getDeseases().isEmpty()) {
-				try {
-					insertDiseasesWithReferences(record, conn, diseasesPs);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}			
-			//	Protein associations
-			if(!record.getProteinAssociations().isEmpty()) {				
-				try {
-					insertProteinAssociations(record, conn, protAssocPs);
+					insertProteinTargetsWithReferences(
+							record, conn, proteinTargetsPs, targetRefsPs);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -702,7 +739,25 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}			
+			}
+			//	Categories
+			if(!record.getCategories().isEmpty()) {				
+				try {
+					insertCategories(record, conn, categoriesPs);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}	
+			//	Types
+			if(!record.getTypes().isEmpty()) {				
+				try {
+					insertTypes(record, conn, typesPs);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}	
 			processed++;
 		}
 		compoundDataPs.close();
@@ -711,11 +766,11 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 		cpdPropertiesPs.close();
 		biolocationsPs.close();
 		pathwaysPs.close();
-		concentrationsPs.close();
-		concRefsPs.close();
-		diseasesPs.close();
-		protAssocPs.close();
-		genRefPs.close();
+		proteinTargetsPs.close();
+		targetRefsPs.close();
+		genRefPs.close();		
+		categoriesPs.close();
+		typesPs.close();
 		
 		ConnectionManager.releaseConnection(conn);	
 	}
@@ -733,29 +788,111 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 			e.printStackTrace();
 		}
 		compoundDataPs.setString(1, record.getPrimaryId());
-		compoundDataPs.setString(2, record.getName());
-		compoundDataPs.setString(3, cid.getFormula());
-		compoundDataPs.setDouble(4, exactMass);
-		compoundDataPs.setString(5, cid.getSmiles());
-		compoundDataPs.setString(6, cid.getInChi());
-		compoundDataPs.setString(7, cid.getInChiKey());		
-		if(record.getAggregateState() != null)
-			compoundDataPs.setString(8, record.getAggregateState());
-		else
-			compoundDataPs.setNull(8, java.sql.Types.NULL);
+		compoundDataPs.setDate(2, 
+				new java.sql.Date(record.getDateCreated().getTime()));
+		compoundDataPs.setDate(3, 
+				new java.sql.Date(record.getLastUpdated().getTime()));
+		compoundDataPs.setString(4, record.getName());
+		compoundDataPs.setString(5, cid.getFormula());
+		compoundDataPs.setDouble(6, exactMass);
+		compoundDataPs.setString(7, cid.getSmiles());
+		compoundDataPs.setString(8, cid.getInChi());
+		compoundDataPs.setString(9, cid.getInChiKey());	
 		
-		if(record.getDescription() != null)
-			compoundDataPs.setString(9, record.getDescription());
-		else
-			compoundDataPs.setNull(9, java.sql.Types.NULL);
-		
-		if(record.getCsDescription() != null)
-			compoundDataPs.setString(10, record.getCsDescription());
+		String status = record.getToxicityProperties().get(T3DBToxProperties.status);
+		if(status != null)
+			compoundDataPs.setString(10, status);
 		else
 			compoundDataPs.setNull(10, java.sql.Types.NULL);
 		
-		compoundDataPs.setDate(11, new java.sql.Date(record.getDateCreated().getTime()));
-		compoundDataPs.setDate(12, new java.sql.Date(record.getLastUpdated().getTime()));
+		String origin = record.getToxicityProperties().get(T3DBToxProperties.origin);
+		if(origin != null)
+			compoundDataPs.setString(11, origin);
+		else
+			compoundDataPs.setNull(11, java.sql.Types.NULL);
+		
+		if(record.getAggregateState() != null)
+			compoundDataPs.setString(12, record.getAggregateState());
+		else
+			compoundDataPs.setNull(12, java.sql.Types.NULL);
+		
+		String appearance = record.getToxicityProperties().get(T3DBToxProperties.appearance);
+		if(appearance != null)
+			compoundDataPs.setString(13, appearance);
+		else
+			compoundDataPs.setNull(13, java.sql.Types.NULL);
+		
+		String route_of_exposure = record.getToxicityProperties().get(T3DBToxProperties.route_of_exposure);
+		if(route_of_exposure != null)
+			compoundDataPs.setString(14, route_of_exposure);
+		else
+			compoundDataPs.setNull(14, java.sql.Types.NULL);
+		
+		if(record.getDescription() != null)
+			compoundDataPs.setString(15, record.getDescription());
+		else
+			compoundDataPs.setNull(15, java.sql.Types.NULL);
+		
+		String mechanismOfToxicity = record.getToxicityProperties().get(T3DBToxProperties.mechanism_of_toxicity);
+		if(mechanismOfToxicity != null)
+			compoundDataPs.setString(16, mechanismOfToxicity);
+		else
+			compoundDataPs.setNull(16, java.sql.Types.NULL);
+		
+		String metabolism = record.getToxicityProperties().get(T3DBToxProperties.metabolism);
+		if(metabolism != null)
+			compoundDataPs.setString(17, metabolism);
+		else
+			compoundDataPs.setNull(17, java.sql.Types.NULL);
+		
+		String toxicity = record.getToxicityProperties().get(T3DBToxProperties.toxicity);
+		if(toxicity != null)
+			compoundDataPs.setString(18, toxicity);
+		else
+			compoundDataPs.setNull(18, java.sql.Types.NULL);
+		
+		String lethaldose = record.getToxicityProperties().get(T3DBToxProperties.lethaldose);
+		if(lethaldose != null)
+			compoundDataPs.setString(19, lethaldose);
+		else
+			compoundDataPs.setNull(19, java.sql.Types.NULL);
+		
+		String carcinogenicity = record.getToxicityProperties().get(T3DBToxProperties.carcinogenicity);
+		if(carcinogenicity != null)
+			compoundDataPs.setString(20, carcinogenicity);
+		else
+			compoundDataPs.setNull(20, java.sql.Types.NULL);
+		
+		String use_source = record.getToxicityProperties().get(T3DBToxProperties.use_source);
+		if(use_source != null)
+			compoundDataPs.setString(21, use_source);
+		else
+			compoundDataPs.setNull(21, java.sql.Types.NULL);
+		
+		String min_risk_level = record.getToxicityProperties().get(T3DBToxProperties.min_risk_level);
+		if(min_risk_level != null)
+			compoundDataPs.setString(22, min_risk_level);
+		else
+			compoundDataPs.setNull(22, java.sql.Types.NULL);
+		
+		String health_effects = record.getToxicityProperties().get(T3DBToxProperties.health_effects);
+		if(health_effects != null)
+			compoundDataPs.setString(23, health_effects);
+		else
+			compoundDataPs.setNull(23, java.sql.Types.NULL);
+		
+		String symptoms = record.getToxicityProperties().get(T3DBToxProperties.symptoms);
+		if(symptoms != null)
+			compoundDataPs.setString(24, symptoms);
+		else
+			compoundDataPs.setNull(24, java.sql.Types.NULL);
+		
+		String treatment = record.getToxicityProperties().get(T3DBToxProperties.treatment);
+		if(treatment != null)
+			compoundDataPs.setString(25, treatment);
+		else
+			compoundDataPs.setNull(25, java.sql.Types.NULL);
+		
 		compoundDataPs.executeUpdate();
 	}
 	
@@ -794,7 +931,7 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 			PreparedStatement dbCrossrefPs) throws Exception{
 
 		dbCrossrefPs.setString(1, record.getPrimaryId());
-		dbCrossrefPs.setString(2, CompoundDatabaseEnum.HMDB.name() );
+		dbCrossrefPs.setString(2, CompoundDatabaseEnum.T3DB.name() );
 		dbCrossrefPs.setString(3, record.getPrimaryId());
 		dbCrossrefPs.addBatch();
 		for(Entry<CompoundDatabaseEnum, String> dbRef : record.getCompoundIdentity().getDbIdMap().entrySet()) {
@@ -802,16 +939,6 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 			dbCrossrefPs.setString(2, dbRef.getKey().name());
 			dbCrossrefPs.setString(3, dbRef.getValue());
 			dbCrossrefPs.addBatch();
-		}
-		if(record.getSecondaryHmdbAccesions() != null 
-				&& !record.getSecondaryHmdbAccesions().isEmpty()) {
-			
-			for(String secondaryHmdbAccesion : record.getSecondaryHmdbAccesions()) {
-				
-				dbCrossrefPs.setString(2, CompoundDatabaseEnum.HMDB_SECONDARY.name());
-				dbCrossrefPs.setString(3, secondaryHmdbAccesion);
-				dbCrossrefPs.addBatch();
-			}
 		}
 		dbCrossrefPs.executeBatch();
 	}
@@ -875,96 +1002,38 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 		pathwaysPs.executeBatch();
 	}
 
-	protected void insertConcentrationsWithReferences(
+	protected void insertProteinTargetsWithReferences(
 			T3DBRecord record, 
 			Connection conn,
-			PreparedStatement concentrationsPs, 
-			PreparedStatement concRefsPs) throws Exception{
+			PreparedStatement proteinTargetsPs, 
+			PreparedStatement targetRefsPs) throws Exception{
 
-		Collection<CompoundConcentration> concentrations = record.getConcentrations();
-		concentrationsPs.setString(1, record.getPrimaryId());
-		for(CompoundConcentration conc : concentrations) {
+		Collection<T3DBProteinTarget> targets = record.getProteinTargets();
+		proteinTargetsPs.setString(2, record.getPrimaryId());
+		targetRefsPs.setString(2, record.getPrimaryId());
+		
+		for(T3DBProteinTarget target : targets) {
 			
-			String concId = SQLUtils.getNextIdFromSequence(
-					conn, "COMPOUNDDB.CONCENTRATION_SEQ", 
-					DataPrefix.CONCENTRATION, "0", 16);
+			proteinTargetsPs.setString(1, target.getTargetId());			
+			proteinTargetsPs.addBatch();
+			Collection<HMDBCitation>tgtRefs = 
+					record.getTagetReferences().get(target);
 			
-			concentrationsPs.setString(2, concId);
-			concentrationsPs.setString(3, conc.getType().name());
-			concentrationsPs.setString(4, conc.getUnits());
-			concentrationsPs.setString(5, conc.getValue());			
-			concentrationsPs.setString(6, conc.getAge());			
-			concentrationsPs.setString(7, conc.getSex());			
-			concentrationsPs.setString(8, conc.getCondition());
-			concentrationsPs.setString(9, conc.getComment());			
-			concentrationsPs.addBatch();
-			if(conc.getReferences() != null && !conc.getReferences().isEmpty()) {
+			if(tgtRefs != null && !tgtRefs.isEmpty()) {
 				
-				concRefsPs.setString(1, concId);
-				for(HMDBCitation ref : conc.getReferences()) {
+				targetRefsPs.setString(1, target.getTargetId());
+				for(HMDBCitation ref : tgtRefs) {
 					
 					String refId = referencesIdMap.get(ref.hashCode());
 					if(refId != null) {
-						concRefsPs.setString(2, refId);
-						concRefsPs.addBatch();
+						targetRefsPs.setString(3, refId);
+						targetRefsPs.addBatch();
 					}					
 				}
 			}
 		}
-		concentrationsPs.executeBatch();
-		concRefsPs.executeBatch();
-	}
-
-	protected void insertDiseasesWithReferences(
-			T3DBRecord record,
-			Connection conn,
-			PreparedStatement diseasesPs) throws Exception{
-		
-		Collection<HMDBDesease> deseases2 = record.getDeseases();
-		diseasesPs.setString(1, record.getPrimaryId());
-		for(HMDBDesease des : deseases2) {
-
-			String diseaseId = deseasesIdMap.get(des.hashCode());
-			if(diseaseId != null) {
-				
-				diseasesPs.setString(2, diseaseId);
-				if(des.getReferences() == null || des.getReferences().isEmpty()) {
-					diseasesPs.setNull(3, java.sql.Types.NULL);
-					diseasesPs.addBatch();
-				}
-				else {
-					for(HMDBCitation ref : des.getReferences()) {
-						
-						String refId = referencesIdMap.get(ref.hashCode());
-						if(refId != null) {
-							diseasesPs.setString(3, refId);
-							diseasesPs.addBatch();
-						}					
-					}
-				}
-			}
-		}				
-		diseasesPs.executeBatch();
-	}
-
-	protected void insertProteinAssociations(
-			T3DBRecord record, 
-			Connection conn,
-			PreparedStatement protAssocPs) throws Exception{
-		
-		Collection<HMDBProteinAssociation> proteinAssocs = record.getProteinAssociations();
-		protAssocPs.setString(1, record.getPrimaryId());
-		
-		for(HMDBProteinAssociation prAssoc : proteinAssocs) {
-			
-			String prAssocId = proteinAssociationsIdMap.get(prAssoc.hashCode());
-			if(prAssocId != null) {
-				
-				protAssocPs.setString(2, prAssocId);
-				protAssocPs.addBatch();
-			}
-		}
-		protAssocPs.executeBatch();
+		proteinTargetsPs.executeBatch();
+		targetRefsPs.executeBatch();
 	}
 
 	protected void insertGeneralReferences(
@@ -983,4 +1052,44 @@ public class T3DBParseAndUploadTask extends HMDBParseAndUploadTask {
 		}
 		genRefPs.executeBatch();
 	}
+	
+	private void insertTypes(
+			T3DBRecord record, 			
+			Connection conn, 
+			PreparedStatement typesPs) throws Exception{
+
+		typesPs.setString(1, record.getPrimaryId());
+		for(String type : record.getTypes()) {
+			
+			String typeId = toxTypeIdMap.get(type.hashCode());
+			if(typeId != null) {
+				typesPs.setString(2, typeId);
+				typesPs.addBatch();
+			}
+		}
+		typesPs.executeBatch();		
+	}
+
+	private void insertCategories(
+			T3DBRecord record, 
+			Connection conn, 
+			PreparedStatement categoriesPs) throws Exception{
+
+		categoriesPs.setString(1, record.getPrimaryId());
+		for(String category : record.getCategories()) {
+			
+			String catId = toxCategoryIdMap.get(category.hashCode());
+			if(catId != null) {
+				categoriesPs.setString(2, catId);
+				categoriesPs.addBatch();
+			}
+		}
+		categoriesPs.executeBatch();
+	}
 }
+
+
+
+
+
+

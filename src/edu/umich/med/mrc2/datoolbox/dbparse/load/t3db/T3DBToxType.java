@@ -30,10 +30,10 @@ public class T3DBToxType {
 		this(null, name);
 	}
 
-	public T3DBToxType(String name, String globalId) {
+	public T3DBToxType(String globalId, String name) {
 		super();
-		this.name = name;
 		this.globalId = globalId;
+		this.name = name;
 	}
 
 	public String getName() {
@@ -59,9 +59,6 @@ public class T3DBToxType {
 	
     @Override
     public int hashCode() {
-
-        int hash = 3;
-        hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
-        return hash;
+        return name.hashCode();
     }
 }

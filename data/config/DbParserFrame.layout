@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1674161748819" orientation="VERTICAL" divider="0.6150537634408603">
-											<leaf id="0" nodeId="1673574811353">
+											<leaf id="1" nodeId="1673574811353">
 												<placeholders>
 													<placeholder>dock.single.CpdDbParserOutConsole</placeholder>
 												</placeholders>
@@ -114,7 +114,7 @@
 													</entry>
 												</placeholder-map>
 											</leaf>
-											<leaf id="1" nodeId="1674161748818">
+											<leaf id="0" nodeId="1674161748818">
 												<placeholders>
 													<placeholder>dock.single.CpdDbParserErrorConsole</placeholder>
 												</placeholders>
@@ -130,20 +130,20 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.CpdDbParserOutConsole">
-										<replacement id="dockablesingle CpdDbParserOutConsole"/>
+									<layout factory="predefined" placeholder="dock.single.CpdDbParserErrorConsole">
+										<replacement id="dockablesingle CpdDbParserErrorConsole"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>CpdDbParserOutConsole</id>
+											<id>CpdDbParserErrorConsole</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.CpdDbParserErrorConsole">
-										<replacement id="dockablesingle CpdDbParserErrorConsole"/>
+									<layout factory="predefined" placeholder="dock.single.CpdDbParserOutConsole">
+										<replacement id="dockablesingle CpdDbParserOutConsole"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>CpdDbParserErrorConsole</id>
+											<id>CpdDbParserOutConsole</id>
 											<area/>
 										</delegate>
 									</layout>

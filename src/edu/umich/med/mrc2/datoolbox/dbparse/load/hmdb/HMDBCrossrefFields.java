@@ -46,6 +46,7 @@ public enum HMDBCrossrefFields {
 	CHEBI("chebi_id", CompoundDatabaseEnum.CHEBI),
 	STITCH("stitch_id", CompoundDatabaseEnum.STITCH),
 	PDB("pdb_id", CompoundDatabaseEnum.PDB),
+	HMDB("hmdb_id", CompoundDatabaseEnum.HMDB),
 	;
 
 	private final String dbName;

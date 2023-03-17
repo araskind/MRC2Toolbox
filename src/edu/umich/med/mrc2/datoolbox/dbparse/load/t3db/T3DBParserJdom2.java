@@ -21,7 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.t3db;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.jdom2.Element;
@@ -29,16 +28,19 @@ import org.jdom2.Namespace;
 
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.CompoundBioLocation;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.CompoundLocationType;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBCrossrefFields;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBParserJdom2;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBPathway;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBRecord;
 
 public class T3DBParserJdom2 extends HMDBParserJdom2 {
 
 	public static T3DBRecord parseRecord(Element recordElement) {
 		
 		Namespace ns = recordElement.getNamespace();
-		String id = recordElement.getChildText("accession", ns);
-		T3DBRecord record = new T3DBRecord(id);
+		T3DBRecord record = 
+				new T3DBRecord(recordElement.getChildText("accession", ns));
+		
 		parseCompoundIdentity(recordElement, record, ns);
 		parseDatabaseReferences(recordElement, record, ns);
 		parseTimeStamps(recordElement, record, ns);
@@ -54,6 +56,17 @@ public class T3DBParserJdom2 extends HMDBParserJdom2 {
 		return record;
 	}
 	
+	public static void parseDatabaseReferences(
+			Element recordElement, HMDBRecord record, Namespace ns) {
+
+		for(HMDBCrossrefFields dbRef : HMDBCrossrefFields.values()) {
+			
+			String dbId = recordElement.getChildText(dbRef.getName(), ns);
+			if(dbId != null && !dbId.isEmpty())
+				record.getCompoundIdentity().addDbId(dbRef.getDatabase(), dbId);				
+		}
+	}
+	
 	public static void parseTargets(
 			Element recordElement, T3DBRecord record, Namespace ns) {
 
@@ -65,19 +78,19 @@ public class T3DBParserJdom2 extends HMDBParserJdom2 {
 				targetListElement.getChildren("target", ns);
 		if(targetList.isEmpty())
 			return;
-		
-		Collection<T3DBTarget> targets = record.getTargets();
+
 		for(Element te : targetList) 
-			targets.add(parseTargetElement(te, ns));	
+			parseTargetElement(te, ns, record);	
 	}
 
-	private static T3DBTarget parseTargetElement(Element targetElement, Namespace ns) {
+	private static void parseTargetElement(Element targetElement, Namespace ns, T3DBRecord record) {
 
 		String targetId = targetElement.getChildText("target_id", ns);
 		String targetName = targetElement.getChildText("name", ns);
-		T3DBTarget tgt = new T3DBTarget(targetId, targetName);
+		T3DBProteinTarget tgt = new T3DBProteinTarget(targetId, targetName);
 		tgt.setUniprotId(targetElement.getChildText("uniprot_id", ns));
 		tgt.setMechanismOfAction(targetElement.getChildText("mechanism_of_action", ns));
+		record.addProteinTarget(tgt);
 		
 		Element targetReferencesElement = targetElement.getChild("references", ns);
 		if(targetReferencesElement != null) {
@@ -87,10 +100,10 @@ public class T3DBParserJdom2 extends HMDBParserJdom2 {
 			if(!referenceList.isEmpty()) {
 				
 				for(Element ref : referenceList)
-					tgt.getReferences().add(HMDBParserJdom2.parseCitationElement(ref, ns));			
+					record.addReferenceForProteinTarget(
+						tgt, HMDBParserJdom2.parseCitationElement(ref, ns));		
 			}
-		}
-		return tgt;
+		}		
 	}
 	
 	public static void parseT3DBDescriptions(

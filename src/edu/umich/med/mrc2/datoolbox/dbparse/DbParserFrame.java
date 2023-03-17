@@ -207,16 +207,16 @@ public class DbParserFrame extends JFrame
 			stdOutPrintStream = new PrintStream(stdOutTaos);
 			System.setOut(stdOutPrintStream);
 		}
-		try {
-			stdErrTaos = new TextAreaOutputStream(errorConsole.getConsoleTextArea());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		if (stdErrTaos != null) {
-
-			stdErrorPrintStream = new PrintStream(stdErrTaos);
-			System.setErr(stdErrorPrintStream);
-		}
+//		try {
+//			stdErrTaos = new TextAreaOutputStream(errorConsole.getConsoleTextArea());
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		if (stdErrTaos != null) {
+//
+//			stdErrorPrintStream = new PrintStream(stdErrTaos);
+//			System.setErr(stdErrorPrintStream);
+//		}
 	}
 
 	public static void unbindSystemStreams() {
@@ -394,12 +394,12 @@ public class DbParserFrame extends JFrame
 
 			unbindSystemStreams();
 			hideProgressDialog();
+		}		
+		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED) {
+			DbParserCore.getTaskController().getTaskQueue().clear();
+			unbindSystemStreams();
+			hideProgressDialog();
 		}
-		if (e.getStatus() == TaskStatus.CANCELED)
-			hideProgressDialog();
-
-		if (e.getStatus() == TaskStatus.ERROR)
-			hideProgressDialog();
 	}
 	
 	private void finalizeHMDBParseAndUploadTask(HMDBParseAndUploadTask source) {
