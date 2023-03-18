@@ -27,8 +27,11 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -93,7 +96,7 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			getPepSearchCommand();
+			extractLipidMapsFields();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -217,6 +220,37 @@ public class RunContainer {
 			e.printStackTrace();
 		}
 		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void extractLipidMapsFields() {
+		
+		Collection<String>fields = new TreeSet<String>();
+		File sdfFile = new File("E:\\DataAnalysis\\Databases\\_LATEST\\LipidMaps-2023-03-03\\structures.sdf");
+		IteratingSDFReaderFixed reader;
+		try {
+			reader = new IteratingSDFReaderFixed(new FileInputStream(sdfFile), DefaultChemObjectBuilder.getInstance());
+			int count = 1;
+			while (reader.hasNext()) {
+				
+				IAtomContainer molecule = (IAtomContainer)reader.next();
+				molecule.getProperties().forEach((k,v)->fields.add(k.toString()));
+			}
+		}		
+		catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Path outputPath = Paths.get("E:\\DataAnalysis\\Databases\\_LATEST\\LipidMaps-2023-03-03\\fields.txt");
+		try {
+			Files.write(
+					outputPath, 
+					fields, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private static void extractLipidMapsClasses() {

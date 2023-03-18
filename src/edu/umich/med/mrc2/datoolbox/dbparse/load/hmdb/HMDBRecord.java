@@ -254,10 +254,7 @@ public class HMDBRecord implements Record, Comparable<HMDBRecord>, Serializable 
 
     @Override
     public int hashCode() {
-
-        int hash = 3;
-        hash = 53 * hash + (this.primaryId != null ? this.primaryId.hashCode() : 0);
-        return hash;
+        return primaryId.hashCode();
     }
 
 	public String getTraditionalIupacName() {

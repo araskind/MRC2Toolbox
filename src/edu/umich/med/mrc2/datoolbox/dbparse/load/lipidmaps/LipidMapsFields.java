@@ -24,7 +24,7 @@ package edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps;
 public enum LipidMapsFields {
 
 	LM_ID,
-	COMMON_NAME,
+	NAME,
 	SYSTEMATIC_NAME,
 	FORMULA,
 	EXACT_MASS,

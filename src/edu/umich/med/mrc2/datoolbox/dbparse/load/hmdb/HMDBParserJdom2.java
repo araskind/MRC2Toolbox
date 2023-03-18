@@ -79,10 +79,10 @@ public class HMDBParserJdom2 {
 		record.getCompoundIdentity().setInChi(recordElement.getChildText("inchi", ns));
 		record.getCompoundIdentity().setInChiKey(recordElement.getChildText("inchikey", ns));
 		
-		String mzString = recordElement.getChildText("monisotopic_molecular_weight", ns);
-		if(mzString != null && !mzString.isEmpty()) {
-			double mz = Double.parseDouble(mzString);
-			record.getCompoundIdentity().setExactMass(mz);
+		String massString = recordElement.getChildText("monisotopic_molecular_weight", ns);
+		if(massString != null && !massString.isEmpty()) {
+			double mass = Double.parseDouble(massString);
+			record.getCompoundIdentity().setExactMass(mass);
 		}
 	}
 	

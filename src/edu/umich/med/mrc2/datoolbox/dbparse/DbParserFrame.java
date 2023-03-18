@@ -76,6 +76,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.DrugBankParserTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.HMDBParseAndUploadTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.LipidMapsParserTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.T3DBParseAndUploadTask;
 
 public class DbParserFrame extends JFrame 
@@ -329,7 +330,8 @@ public class DbParserFrame extends JFrame
 			fc.setMultiSelectionEnabled(false);
 		}
 		if(db.equals(CompoundDatabaseEnum.NATURAL_PRODUCTS_ATLAS) 
-				|| db.equals(CompoundDatabaseEnum.CHEBI)) {
+				|| db.equals(CompoundDatabaseEnum.CHEBI)
+				|| db.equals(CompoundDatabaseEnum.LIPIDMAPS)) {
 			fc.addFilter("SDF files", "SDF", "sdf");
 			fc.setMultiSelectionEnabled(false);
 		}
@@ -378,6 +380,9 @@ public class DbParserFrame extends JFrame
 
 		if(database.equals(CompoundDatabaseEnum.T3DB))
 			parserTask = new T3DBParseAndUploadTask(inputFile);
+		
+		if(database.equals(CompoundDatabaseEnum.LIPIDMAPS))
+			parserTask = new LipidMapsParserTask(inputFile);
 
 		parserTask.addTaskListener(this);
 		DbParserCore.getTaskController().addTask(parserTask);
