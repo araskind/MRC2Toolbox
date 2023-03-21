@@ -19,11 +19,10 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank;
+package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank.old;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
@@ -32,39 +31,30 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.Record;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank.DrugCategory;
 
 public class DrugBankRecord implements Record {
 
 	private String primaryId;
 	private String name;
-	private String aggregateState;
-	private Date dateCreated;
-	private Date lastUpdated;
-	
-	private CompoundIdentity compoundIdentity;
-	
+	private String unii;
+
 	private Collection<String>synonyms;
 	private Collection<DrugCategory>categories;
-	private Collection<CompoundProperty>compoundProperties;	
-	private Collection<DrugTarget>drugTargets;
+	private Collection<CompoundProperty>compoundProperties;
+	private CompoundIdentity drugIdentity;
 	private Map<DrugBankDescriptiveFields,String>descriptiveFields;
 
-	public DrugBankRecord(String id) {
+	public DrugBankRecord() {
 
-		this.primaryId = id;
 		categories = new ArrayList<DrugCategory>();
 		synonyms = new TreeSet<String>();
 		compoundProperties = new ArrayList<CompoundProperty>();
-		compoundIdentity = new CompoundIdentity();		
-		drugTargets = new ArrayList<DrugTarget>();
+		drugIdentity = new CompoundIdentity();
 
 		descriptiveFields = new HashMap<DrugBankDescriptiveFields,String>();
 		for(DrugBankDescriptiveFields f : DrugBankDescriptiveFields.values())
 			descriptiveFields.put(f, "");
-		
-//		concentrations = new ArrayList<CompoundConcentration>();
-//		deseases = new ArrayList<HMDBDesease>();
-//		pathways =  new ArrayList<HMDBPathway>();
 	}
 
 	public void addCategory(DrugCategory category){
@@ -72,7 +62,7 @@ public class DrugBankRecord implements Record {
 	}
 
 	public void addExternalIdentifier(CompoundDatabaseEnum database, String identifier){
-		compoundIdentity.addDbId(database, identifier);
+		drugIdentity.addDbId(database, identifier);
 	}
 
 	public void addProperty(CompoundProperty property){
@@ -88,8 +78,8 @@ public class DrugBankRecord implements Record {
 		return descriptiveFields.get(DrugBankDescriptiveFields.DESCRIPTION);
 	}
 
-	public CompoundIdentity getCompoundIdentity() {
-		return compoundIdentity;
+	public CompoundIdentity getDrugIdentity() {
+		return drugIdentity;
 	}
 
 	@Override
@@ -115,6 +105,10 @@ public class DrugBankRecord implements Record {
 		this.primaryId = primaryId;
 	}
 
+	public void setUnii(String unii) {
+		this.unii = unii;
+	}
+
 	@Override
 	public void setDescription(String description) {
 		descriptiveFields.put(DrugBankDescriptiveFields.DESCRIPTION, description);
@@ -128,55 +122,25 @@ public class DrugBankRecord implements Record {
 		return descriptiveFields.get(field);
 	}
 
+	/**
+	 * @return the unii
+	 */
+	public String getUnii() {
+		return unii;
+	}
+
+	/**
+	 * @return the compoundProperties
+	 */
 	public Collection<CompoundProperty> getCompoundProperties() {
 		return compoundProperties;
 	}
 
+	/**
+	 * @return the synonyms
+	 */
 	public Collection<String> getSynonyms() {
 		return synonyms;
-	}
-
-	public String getAggregateState() {
-		return aggregateState;
-	}
-
-	public void setAggregateState(String aggregateState) {
-		this.aggregateState = aggregateState;
-	}
-
-	public Date getDateCreated() {
-		return dateCreated;
-	}
-
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
-	}
-
-	public Date getLastUpdated() {
-		return lastUpdated;
-	}
-
-	public void setLastUpdated(Date lastUpdated) {
-		this.lastUpdated = lastUpdated;
-	}
-
-	public Collection<DrugCategory> getCategories() {
-		return categories;
-	}
-
-	public Collection<DrugTarget> getDrugTargets() {
-		return drugTargets;
-	}
-	
-	public String getPropertyValue(String propertyName) {
-		
-		CompoundProperty prop = compoundProperties.stream().
-			filter(p -> p.getPropertyName().equals(propertyName)).
-			findFirst().orElse(null);
-		if(prop == null)
-			return null;
-		else
-			return prop.getPropertyValue();		
 	}
 }
 

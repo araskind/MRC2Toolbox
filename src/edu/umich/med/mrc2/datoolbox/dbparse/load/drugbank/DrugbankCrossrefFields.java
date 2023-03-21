@@ -26,6 +26,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 public enum DrugbankCrossrefFields {
 
 	BINDINGDB("BindingDB", CompoundDatabaseEnum.BINDINGDB),
+	CAS("cas-number", CompoundDatabaseEnum.CAS),
 	CHEBI("ChEBI", CompoundDatabaseEnum.CHEBI),
 	CHEMBL("ChEMBL", CompoundDatabaseEnum.CHEMBL),
 	CHEMSPIDER("ChemSpider", CompoundDatabaseEnum.CHEMSPIDER),
@@ -44,9 +45,10 @@ public enum DrugbankCrossrefFields {
 	PUBCHEM("PubChem Compound", CompoundDatabaseEnum.PUBCHEM),
 	PUBCHEMSUBSTANCE("PubChem Substance", CompoundDatabaseEnum.PUBCHEMSUBSTANCE),
 	TTD("Therapeutic Targets Database", CompoundDatabaseEnum.TTD),
+	UNII("unii", CompoundDatabaseEnum.FDA_UNII),
 	UNIPROT("UniProt Accession", CompoundDatabaseEnum.UNIPROT),
 	UNIPROTKB("UniProtKB", CompoundDatabaseEnum.UNIPROTKB),
-	WIKI("Wikipedia", CompoundDatabaseEnum.WIKI),
+	WIKI("Wikipedia", CompoundDatabaseEnum.WIKI),	
 	;
 
 	private final String dbName;

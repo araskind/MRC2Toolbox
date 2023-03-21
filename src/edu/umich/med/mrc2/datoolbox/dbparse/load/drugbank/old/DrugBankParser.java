@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank;
+package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank.old;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,6 +37,9 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundPropertyType;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank.DrugBankCompoundProperties;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank.DrugBankDescriptiveFields;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank.DrugBankRecord;
 
 public class DrugBankParser {
 
@@ -44,25 +47,25 @@ public class DrugBankParser {
 
 	public static DrugBankRecord parseRecord(Element drugElement) throws XPathExpressionException {
 
-		DrugBankRecord record = new DrugBankRecord();
+		DrugBankRecord record = new DrugBankRecord(null);
 		record.setPrimaryId(getDrugBankId(drugElement));
 
 		//	Name
 		String name = drugElement.getChildText("name"); //.getElementsByTagName("name").item(0).getFirstChild().getNodeValue();
 		record.setName(name);
-		record.getDrugIdentity().setCommonName(name);
+		record.getCompoundIdentity().setCommonName(name);
 
 		//	UNII
 //		Node uniiNode = drugElement.getElementsByTagName("unii").item(0).getFirstChild();
 		String unii = drugElement.getChildText("unii");
 		if(unii != null)
-			record.getDrugIdentity().addDbId(CompoundDatabaseEnum.UNII, unii);
+			record.getCompoundIdentity().addDbId(CompoundDatabaseEnum.UNII, unii);
 
 		//	CAS ID
 		//	Node casNode = drugElement.getElementsByTagName("cas-number").item(0).getFirstChild();
 		String cas = drugElement.getChildText("cas-number");
 		if(cas != null)
-			record.getDrugIdentity().addDbId(CompoundDatabaseEnum.CAS, cas);
+			record.getCompoundIdentity().addDbId(CompoundDatabaseEnum.CAS, cas);
 
 		for(DrugBankDescriptiveFields field : DrugBankDescriptiveFields.values()) {
 
@@ -104,7 +107,7 @@ public class DrugBankParser {
 //			String identifier = (externIdNodes.item(i)).getElementsByTagName("identifier").item(0).getFirstChild().getNodeValue();
 //			DrugbankCrossrefFields cf = DrugbankCrossrefFields.getByName(eresource);
 //			if(cf != null)
-//				record.getDrugIdentity().addDbId(cf.getDatabase(), identifier);
+//				record.getCompoundIdentity().addDbId(cf.getDatabase(), identifier);
 		}
 	}
 
@@ -165,22 +168,22 @@ public class DrugBankParser {
 			String propertyValue = property.getPropertyValue();
 
 			if(propertyName.equals(DrugBankCompoundProperties.MOLECULAR_FORMULA.getName()))
-				record.getDrugIdentity().setFormula(propertyValue);
+				record.getCompoundIdentity().setFormula(propertyValue);
 
 			if(propertyName.equals(DrugBankCompoundProperties.MONOISOTOPIC_WEIGHT.getName()))
-				record.getDrugIdentity().setExactMass(Double.valueOf(propertyValue));
+				record.getCompoundIdentity().setExactMass(Double.valueOf(propertyValue));
 
 			if(propertyName.equals(DrugBankCompoundProperties.SMILES.getName()))
-				record.getDrugIdentity().setSmiles(propertyValue);
+				record.getCompoundIdentity().setSmiles(propertyValue);
 
 			if(propertyName.equals(DrugBankCompoundProperties.INCHI.getName()))
-				record.getDrugIdentity().setInChi(propertyValue);
+				record.getCompoundIdentity().setInChi(propertyValue);
 
 			if(propertyName.equals(DrugBankCompoundProperties.INCHIKEY.getName()))
-				record.getDrugIdentity().setInChiKey(propertyValue);
+				record.getCompoundIdentity().setInChiKey(propertyValue);
 
 			if(propertyName.equals(DrugBankCompoundProperties.IUPAC_NAME.getName()))
-				record.getDrugIdentity().setSysName(propertyValue);
+				record.getCompoundIdentity().setSysName(propertyValue);
 		}
 	}
 
@@ -226,14 +229,14 @@ public class DrugBankParser {
 
 		//	Mol formula
 		String formula = "";
-		if(record.getDrugIdentity().getFormula() != null)
-			formula = record.getDrugIdentity().getFormula();
+		if(record.getCompoundIdentity().getFormula() != null)
+			formula = record.getCompoundIdentity().getFormula();
 
 		ps.setString(15, formula);
 
 		//	Mass
 		String mass = "";
-		double em = record.getDrugIdentity().getExactMass();
+		double em = record.getCompoundIdentity().getExactMass();
 		if(em > 0.0d)
 			mass = mzFormat.format(em);
 
@@ -241,22 +244,22 @@ public class DrugBankParser {
 
 		//	InChi
 		String inchi = "";
-		if(record.getDrugIdentity().getInChi() != null)
-			inchi = record.getDrugIdentity().getInChi();
+		if(record.getCompoundIdentity().getInChi() != null)
+			inchi = record.getCompoundIdentity().getInChi();
 
 		ps.setString(17, inchi);
 
 		//	InChi key
 		String inchikey = "";
-		if(record.getDrugIdentity().getInChiKey() != null)
-			inchikey = record.getDrugIdentity().getInChiKey();
+		if(record.getCompoundIdentity().getInChiKey() != null)
+			inchikey = record.getCompoundIdentity().getInChiKey();
 
 		ps.setString(18, inchikey);
 
 		//	SMILES
 		String smiles = "";
-		if(record.getDrugIdentity().getSmiles() != null)
-			smiles = record.getDrugIdentity().getSmiles();
+		if(record.getCompoundIdentity().getSmiles() != null)
+			smiles = record.getCompoundIdentity().getSmiles();
 
 		ps.setString(19, smiles);
 
@@ -274,7 +277,7 @@ public class DrugBankParser {
 		ps.executeUpdate();
 
 		//	Systematic name
-		String sysname = record.getDrugIdentity().getSysName();
+		String sysname = record.getCompoundIdentity().getSysName();
 		if(sysname != null) {
 			ps.setString(2, sysname);
 			ps.setString(3, "SYS");
@@ -293,7 +296,7 @@ public class DrugBankParser {
 		ps = conn.prepareStatement(dataQuery);
 		ps.setString(1, record.getPrimaryId());
 
-		for (Entry<CompoundDatabaseEnum, String> entry : record.getDrugIdentity().getDbIdMap().entrySet()) {
+		for (Entry<CompoundDatabaseEnum, String> entry : record.getCompoundIdentity().getDbIdMap().entrySet()) {
 
 			ps.setString(2, entry.getKey().name());
 			ps.setString(3, entry.getValue());

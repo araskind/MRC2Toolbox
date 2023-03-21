@@ -39,6 +39,4 @@ public class DrugCategory {
 	public String getMeshId() {
 		return meshId;
 	}
-	
-	
 }

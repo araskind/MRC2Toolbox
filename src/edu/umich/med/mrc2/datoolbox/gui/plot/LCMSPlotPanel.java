@@ -445,18 +445,17 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 			
 			filledChromatogramRenderer = new FilledChromatogramRenderer();
 			filledChromatogramRenderer.setPlotShapes(dataPointsVisible);
-			filledChromatogramRenderer.setDefaultShape(
-					FilledChromatogramRenderer.dataPointsShape);
 			
 			linesChromatogramRenderer = new FilledChromatogramRenderer(
 					FilledChromatogramRenderer.SHAPES_AND_LINES);
 			linesChromatogramRenderer.setPlotShapes(dataPointsVisible);
 			linesChromatogramRenderer.setDefaultShape(
 					FilledChromatogramRenderer.dataPointsShape);
+			linesChromatogramRenderer.setDefaultLegendShape(
+					FilledChromatogramRenderer.dataPointsShape);
 			
 			splineRenderer = new DefaultSplineRenderer();
 			((XYSplineRenderer)splineRenderer).setDefaultShapesVisible(dataPointsVisible);
-			splineRenderer.setDefaultShape(DefaultSplineRenderer.dataPointsShape);
 		}
 	}
 	
@@ -774,7 +773,7 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		final XYToolTipGenerator toolTipGenerator = 				
 				new ChromatogramToolTipGenerator();		
 		renderer.setDefaultToolTipGenerator(toolTipGenerator);
-		renderer.setDefaultShape(FilledChromatogramRenderer.dataPointsShape);
+		//renderer.setDefaultShape(FilledChromatogramRenderer.dataPointsShape);
 		if(XYLineAndShapeRenderer.class.isAssignableFrom(renderer.getClass()))
 			((XYLineAndShapeRenderer)renderer).setDefaultShapesVisible(dataPointsVisible);	
 		

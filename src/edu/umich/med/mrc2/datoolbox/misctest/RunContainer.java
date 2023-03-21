@@ -24,6 +24,8 @@ package edu.umich.med.mrc2.datoolbox.misctest;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -38,6 +40,7 @@ import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -46,7 +49,24 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.stax.StAXSource;
+
 import org.apache.commons.io.FileUtils;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.input.DOMBuilder;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
@@ -57,6 +77,7 @@ import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
+import org.w3c.dom.Node;
 
 import edu.umich.med.mrc2.datoolbox.data.LipidMapsClassifier;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
@@ -71,6 +92,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
+import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class RunContainer {
 
@@ -96,9 +118,130 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			extractLipidMapsFields();
+			extractNatProdAtlasFields();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void extractNatProdAtlasFields() {
+		
+		Collection<String>fields = new TreeSet<String>();
+		File sdfFile = new File("E:\\DataAnalysis\\Databases\\_LATEST\\Natural Products Atlas-2022-09\\NPAtlas_download.sdf");
+		IteratingSDFReaderFixed reader;
+		try {
+			reader = new IteratingSDFReaderFixed(new FileInputStream(sdfFile), DefaultChemObjectBuilder.getInstance());
+			int count = 1;
+			while (reader.hasNext()) {
+				
+				IAtomContainer molecule = (IAtomContainer)reader.next();
+				molecule.getProperties().forEach((k,v)->fields.add(k.toString()));
+			}
+		}		
+		catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Path outputPath = Paths.get("E:\\DataAnalysis\\Databases\\_LATEST\\Natural Products Atlas-2022-09\\NPA_fields.txt");
+		try {
+			Files.write(
+					outputPath, 
+					fields, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void splitDrugBankIntoIndividualEntries() throws Exception{
+		
+		File xmlInputFile = 
+				new File("E:\\DataAnalysis\\Databases\\_LATEST"
+						+ "\\DrugBank-5.1.10-2023-01-04\\full database.xml");
+		String outDir = "E:\\DataAnalysis\\Databases\\_LATEST"
+				+ "\\DrugBank-5.1.10-2023-01-04\\DRUGS";
+		System.setProperty("javax.xml.transform.TransformerFactory",
+				"com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
+		
+		XMLInputFactory xif = null;
+		try {
+			xif = XMLInputFactory.newInstance();
+		} catch (FactoryConfigurationError e1) {
+
+			e1.printStackTrace();
+			return;
+		}
+		TransformerFactory tf = null;
+		try {
+			tf = TransformerFactory.newInstance();
+		} catch (TransformerFactoryConfigurationError e2) {
+
+			e2.printStackTrace();
+			return;
+		}		
+		Transformer t = null;
+		try {
+			t = tf.newTransformer();
+		} catch (TransformerConfigurationException e2) {
+			
+			e2.printStackTrace();
+			return;
+		}
+		t.setOutputProperty(OutputKeys.METHOD, "xml");
+		t.setOutputProperty(OutputKeys.INDENT, "yes");
+		t.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+		t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+		
+		DOMBuilder domBuider = new DOMBuilder();
+		
+		XMLStreamReader xsr = null;
+		try {
+			xsr = xif.createXMLStreamReader(new FileReader(xmlInputFile));
+			xsr.nextTag();
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (XMLStreamException e1) {
+
+			e1.printStackTrace();
+			return;
+		}
+        try {						
+			while(xsr.nextTag() == XMLStreamConstants.START_ELEMENT) {
+
+			    DOMResult result = new DOMResult();
+			    t.transform(new StAXSource(xsr), result);
+			    Node domNode = result.getNode();
+			    if(domNode.getFirstChild().getNodeName().equals("drug")){
+			    	
+			    	String drugId = null;
+				    org.jdom2.Element recordElement = 
+				    		domBuider.build((org.w3c.dom.Element)domNode.getFirstChild());
+				    Namespace ns = recordElement.getNamespace();
+				    List<Element> idList = 
+				    		recordElement.getChildren("drugbank-id", ns);
+				    
+				    for(Element idElement : idList) {
+				    	
+				    	String isPrimary = idElement.getAttributeValue("primary");
+				    	if(isPrimary != null) {
+				    		drugId = idElement.getText();
+				    		File outputFile = Paths.get(outDir, drugId + ".xml").toFile();
+				    		Document document = new Document();
+				    		
+				    		Element elemCopy = (Element)recordElement.clone();
+				    		elemCopy.detach();				    		
+				    		document.addContent(elemCopy);
+				    		XmlUtils.writeXMLDocumentToFile(document, outputFile);
+				    	}
+				    }
+			    }
+			}
+		}
+        catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

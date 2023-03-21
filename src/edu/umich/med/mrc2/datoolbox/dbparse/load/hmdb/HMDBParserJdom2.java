@@ -31,6 +31,7 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundPropertyType;
@@ -67,22 +68,23 @@ public class HMDBParserJdom2 {
 			name = recordElement.getChildText("common_name", ns);
 		
 		record.setName(name);
-		record.getCompoundIdentity().setCommonName(name);
+		CompoundIdentity cid = record.getCompoundIdentity();
+		cid.setCommonName(name);
 
 		String sysName = recordElement.getChildText("iupac_name", ns);
 		record.setSysName(sysName);
-		record.getCompoundIdentity().setSysName(sysName);
+		cid.setSysName(sysName);
 		record.setTraditionalIupacName(recordElement.getChildText("traditional_iupac", ns));
 		record.setAggregateState(recordElement.getChildText("state", ns));
-		record.getCompoundIdentity().setFormula(recordElement.getChildText("chemical_formula", ns));
-		record.getCompoundIdentity().setSmiles(recordElement.getChildText("smiles", ns));
-		record.getCompoundIdentity().setInChi(recordElement.getChildText("inchi", ns));
-		record.getCompoundIdentity().setInChiKey(recordElement.getChildText("inchikey", ns));
+		cid.setFormula(recordElement.getChildText("chemical_formula", ns));
+		cid.setSmiles(recordElement.getChildText("smiles", ns));
+		cid.setInChi(recordElement.getChildText("inchi", ns));
+		cid.setInChiKey(recordElement.getChildText("inchikey", ns));
 		
 		String massString = recordElement.getChildText("monisotopic_molecular_weight", ns);
 		if(massString != null && !massString.isEmpty()) {
 			double mass = Double.parseDouble(massString);
-			record.getCompoundIdentity().setExactMass(mass);
+			cid.setExactMass(mass);
 		}
 	}
 	

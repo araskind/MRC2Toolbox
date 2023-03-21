@@ -19,7 +19,7 @@
  *  
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank;
+package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank.old;
 
 public enum DrugBankCompoundProperties {
 
@@ -47,21 +47,23 @@ public enum DrugBankCompoundProperties {
 	RULE_OF_FIVE("Rule of Five"),
 	SMILES("SMILES"),
 	TRADITIONAL_IUPAC_NAME("Traditional IUPAC Name"),
-	VEBERS("Veber's Rule"),
 	WATER_SOLUBILITY("Water Solubility");
 	
 	private final String name;
 
 	DrugBankCompoundProperties(String name) {
+
 		this.name = name;
 	}
 
-	public String getName() {		
+	public String getName() {
+		
 		return name;
 	}
 	
 	@Override
-	public String toString() {		
+	public String toString() {
+		
 		return name;
 	}
 }

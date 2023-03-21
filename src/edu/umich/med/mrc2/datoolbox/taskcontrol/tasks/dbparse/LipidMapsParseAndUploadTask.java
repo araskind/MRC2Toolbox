@@ -46,13 +46,13 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class LipidMapsParserTask extends AbstractTask {
+public class LipidMapsParseAndUploadTask extends AbstractTask {
 
 	private File sdfInputFile;
 	private Collection<LipidMapsRecord>records;
 	private Map<Integer,LipidMapsClassificationObject>lmTaxonomyMap;
 
-	public LipidMapsParserTask(File sdfInputFile) {
+	public LipidMapsParseAndUploadTask(File sdfInputFile) {
 		super();
 		this.sdfInputFile = sdfInputFile;
 	}
@@ -275,6 +275,6 @@ public class LipidMapsParserTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-		return new LipidMapsParserTask(sdfInputFile);
+		return new LipidMapsParseAndUploadTask(sdfInputFile);
 	}
 }

@@ -21,33 +21,57 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank;
 
-public enum DrugBankDescriptiveFields {
+import java.util.ArrayList;
+import java.util.Collection;
 
-	ABSORPTION("absorption"),
-	CLEARANCE("clearance"),
-	DESCRIPTION("description"),
-	HALFLIFE("half-life"),
-	INDICATION("indication"),
-	MECHANISMOFACTION("mechanism-of-action"),
-	METABOLISM("metabolism"),
-	PHARMACODYNAMICS("pharmacodynamics"),
-	PROTEINBINDING("protein-binding"),
-	ROUTEOFELIMINATION("route-of-elimination"),
-	TOXICITY("toxicity"),
-	VOLUMEOFDISTRIBUTION("volume-of-distribution"),
-	;
-	private final String name;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBCitation;
 
-	DrugBankDescriptiveFields(String name) {
+public class DrugTarget implements Comparable<DrugTarget>{
+
+	String id;
+	String name;
+	String organizm;
+	Collection<HMDBCitation>references;
+	
+	public DrugTarget(String id, String name) {
+		super();
+		this.id = id;
 		this.name = name;
+		
+		references = new ArrayList<HMDBCitation>();
 	}
 
+	@Override
+	public int compareTo(DrugTarget o) {
+		return this.id.compareTo(o.getId());
+	}
+
+	public String getOrganizm() {
+		return organizm;
+	}
+
+	public void setOrganizm(String organizm) {
+		this.organizm = organizm;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String toString() {
+		return id;
+	}
+	
 	public String getName() {
 		return name;
 	}
 
-	@Override
-	public String toString() {
-		return name;
+	public Collection<HMDBCitation> getReferences() {
+		return references;
 	}
+	
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

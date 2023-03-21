@@ -152,7 +152,8 @@ public class FilledChromatogramRenderer extends AbstractXYItemRenderer
      */
     private GradientPaintTransformer gradientTransformer;
     
-	public static final Shape dataPointsShape = new BasicStroke(3.0f).createStrokedShape(new Ellipse2D.Double(-2, -2, 5, 5));
+	public static final Shape dataPointsShape = 
+			new BasicStroke(3.0f).createStrokedShape(new Ellipse2D.Double(-2, -2, 5, 5));
 	public static final Stroke lineStroke = new BasicStroke(1.5f);
 
     /**
@@ -162,13 +163,17 @@ public class FilledChromatogramRenderer extends AbstractXYItemRenderer
         this(AREA_AND_SHAPES);
 		setOutline(true);
 		setDefaultShape(dataPointsShape);
+		setDefaultLegendShape(dataPointsShape);
 		setDefaultOutlineStroke(lineStroke);
     }
     
     public FilledChromatogramRenderer(Color color) {
     	
     	this();
-		Paint mySpecialColor = new Color(color.getRed()/255, color.getGreen()/255, color.getBlue()/255, 0.5f);				
+		Paint mySpecialColor = 
+				new Color(color.getRed()/255, 
+						  color.getGreen()/255, 
+						  color.getBlue()/255, 0.5f);				
 		setDefaultPaint(mySpecialColor);
 		setDefaultFillPaint(mySpecialColor);
     }

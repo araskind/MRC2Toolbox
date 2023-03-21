@@ -19,11 +19,12 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank;
+package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank.old;
 
 public enum DrugBankDescriptiveFields {
 
 	ABSORPTION("absorption"),
+	//	CLASSIFICATION(""),
 	CLEARANCE("clearance"),
 	DESCRIPTION("description"),
 	HALFLIFE("half-life"),
@@ -36,6 +37,7 @@ public enum DrugBankDescriptiveFields {
 	TOXICITY("toxicity"),
 	VOLUMEOFDISTRIBUTION("volume-of-distribution"),
 	;
+
 	private final String name;
 
 	DrugBankDescriptiveFields(String name) {
