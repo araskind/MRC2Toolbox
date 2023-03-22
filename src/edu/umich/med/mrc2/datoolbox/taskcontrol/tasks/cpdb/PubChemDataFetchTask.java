@@ -148,11 +148,14 @@ public class PubChemDataFetchTask extends AbstractTask {
 					if(synonyms.length == 0)
 						synonyms = new String[] {cid};
 					
-					PubChemCompoundDescriptionBundle descBundle =  getCompoundDescription(cid);					
-					String inchiKey = molecule.getProperties().get(PubChemFields.INCHIKEY.toString()).toString();
+					PubChemCompoundDescriptionBundle descBundle =  
+							getCompoundDescription(cid);					
+					String inchiKey = molecule.getProperties().get(
+							PubChemFields.INCHIKEY.toString()).toString();
 					CompoundIdentity existingId = null;
 					try {
-						existingId = CompoundDatabaseUtils.getCompoundByInChiKey(inchiKey, conn);
+						existingId = 
+								CompoundDatabaseUtils.getCompoundByInChiKey(inchiKey, conn);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -160,7 +163,8 @@ public class PubChemDataFetchTask extends AbstractTask {
 					if(existingId == null) {
 						
 						try {
-							CompoundIdentity inserted = PubChemParser.insertPubchemRecord(molecule, synonyms, descBundle, conn);
+							CompoundIdentity inserted = 
+									PubChemParser.insertPubchemRecord(molecule, synonyms, descBundle, conn);
 							importedIds.add(inserted);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block

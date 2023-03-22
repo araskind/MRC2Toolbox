@@ -52,10 +52,10 @@ public class WebUtils {
 		} catch (IOException e) {
 			System.err.println("Error: Could not open URL connection!");
 			System.err.println(urlname);
-			throw new Exception();
+			//	throw new Exception();
 		}
 		catch(Exception e) {
-			//	Leave it alone
+			//	e.printStackTrace();
 		}
 		return stream;
 	}
@@ -115,7 +115,9 @@ public class WebUtils {
 		} catch (IOException e) {
 			System.err.println("Error: Could not open URL connection!");
 			System.err.println(urlname);
-			throw new Exception();
+			//	throw new Exception();
+		} catch (Exception e) {
+	
 		}
 		return stream;
 	}

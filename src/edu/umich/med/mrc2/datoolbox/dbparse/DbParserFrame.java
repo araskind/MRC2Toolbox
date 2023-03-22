@@ -74,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.CoconutParseAndUploadTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.DrugBankParserTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.HMDBParseAndUploadTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.LipidMapsParseAndUploadTask;
@@ -259,6 +260,7 @@ public class DbParserFrame extends JFrame
 							CompoundDatabaseEnum.LIPIDMAPS,
 							CompoundDatabaseEnum.CHEBI,
 							CompoundDatabaseEnum.NATURAL_PRODUCTS_ATLAS,
+							CompoundDatabaseEnum.COCONUT,
 					});
 		dbTypecomboBox.setModel(model);
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
@@ -332,7 +334,8 @@ public class DbParserFrame extends JFrame
 		}
 		if(db.equals(CompoundDatabaseEnum.NATURAL_PRODUCTS_ATLAS) 
 				|| db.equals(CompoundDatabaseEnum.CHEBI)
-				|| db.equals(CompoundDatabaseEnum.LIPIDMAPS)) {
+				|| db.equals(CompoundDatabaseEnum.LIPIDMAPS)
+				|| db.equals(CompoundDatabaseEnum.COCONUT)) {
 			fc.addFilter("SDF files", "SDF", "sdf");
 			fc.setMultiSelectionEnabled(false);
 		}
@@ -387,6 +390,9 @@ public class DbParserFrame extends JFrame
 
 		if(database.equals(CompoundDatabaseEnum.NATURAL_PRODUCTS_ATLAS))
 			parserTask = new NPAParseAndUploadTask(inputFile);
+		
+		if(database.equals(CompoundDatabaseEnum.COCONUT))
+			parserTask = new CoconutParseAndUploadTask(inputFile);
 		
 		parserTask.addTaskListener(this);
 		DbParserCore.getTaskController().addTask(parserTask);

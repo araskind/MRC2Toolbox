@@ -45,6 +45,7 @@ public enum CompoundDatabaseEnum {
 	CHINESE_ABSTRACTS("Chinese Abstracts", "http://europepmc.org/abstract/CBA/", ""),
 	CIL("Cambridge Isotope", "https://shop.isotope.com/productdetails.aspx?itemno=", ""),
 	CITEXPLORE("CiteXplore", "http://europepmc.org/abstract/CTX/", ""),
+	COCONUT("COlleCtion of Open Natural ProdUcTs","https://coconut.naturalproducts.net/compound/coconut_id/",""),
 	COMPTOX("CompTox Chemicals Dashboard","https://comptox.epa.gov/dashboard/chemical/details/",""),
 	CTD("CTD","", ""),
 	CUSTOM("Custom-undefined", "", ""),

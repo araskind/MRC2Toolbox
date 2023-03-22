@@ -46,6 +46,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -80,6 +81,7 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import org.w3c.dom.Node;
 
 import edu.umich.med.mrc2.datoolbox.data.LipidMapsClassifier;
+import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -92,6 +94,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
+import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 
 public class RunContainer {
@@ -118,11 +121,123 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			extractNatProdAtlasFields();
+			parseCoconutCrossref();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void parseCoconutCrossref() throws Exception{
+
+		Map<String,String>dbUrlMap = 
+				new TreeMap<String,String>();
+		Map<String,Map<String,String>>crossrefMap = 
+				new TreeMap<String,Map<String,String>>();
+		Path inputPath = Paths.get(
+				"E:\\DataAnalysis\\Databases\\_LATEST\\COCONUT-2022-01\\CSV\\uniqueNaturalProduct-xrefs.csv");
+		List<String> lines = Files.readAllLines(inputPath);
+		Pattern idPattern = Pattern.compile("^CNP\\d{7}");
+		Matcher regexMatcher = null;
+		for(int i=1; i<lines.size(); i++) {
+			
+			String line = lines.get(i);
+			regexMatcher = idPattern.matcher(line);
+			
+			if(regexMatcher.find()){
+				
+				
+				String id = regexMatcher.group();
+				String[] data = line.replace(id+",", "").replaceAll("\"", "").trim().split("\\],\\[");
+				if(data.length > 0) {
+					
+					crossrefMap.put(id, new TreeMap<String,String>());
+					for(int j=0; j<data.length; j++) {
+						String[] refData = data[j].replaceAll("\\[", "").replaceAll("\\]", "").split(",");
+						if(refData.length == 3) {
+							dbUrlMap.put(refData[0], refData[2]);
+							crossrefMap.get(id).put(refData[1], refData[0]);
+						}						
+					}
+				}
+			}
+		}
+//		List<String>dbUrlList = new ArrayList<String>();
+//		dbUrlMap.entrySet().stream().forEach(e -> dbUrlList.add(e.getKey() + "\t" + e.getValue()));
+//		Path outputPath = Paths.get("E:\\DataAnalysis\\Databases\\_LATEST\\COCONUT-2022-01\\CSV\\dbList.txt");
+//		try {
+//			Files.write(
+//					outputPath, 
+//					dbUrlList, 
+//					StandardCharsets.UTF_8, 
+//					StandardOpenOption.CREATE,
+//					StandardOpenOption.APPEND);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+		Connection conn = ConnectionManager.getConnection();
+		String crossrefQuery = "INSERT INTO COMPOUNDDB.COCONUT_CROSSREF "
+				+ "(ACCESSION, SOURCE_DB, SOURCE_DB_ID) VALUES (?, ?, ?)";
+		PreparedStatement crossrefPs = conn.prepareStatement(crossrefQuery);
+		for(Entry<String, Map<String, String>> re : crossrefMap.entrySet()) {
+			
+			crossrefPs.setString(1, re.getKey());
+			for(Entry<String, String> kv : re.getValue().entrySet()) {
+				
+				crossrefPs.setString(2, kv.getValue());
+				crossrefPs.setString(3, kv.getKey());
+				crossrefPs.addBatch();
+			}
+			crossrefPs.executeBatch();
+		}		
+		crossrefPs.close();
+		ConnectionManager.releaseConnection(conn);		
+	}
+	
+	private static void getMissingNPAData() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String sql = 
+				"SELECT ACCESSION, INCHI_KEY FROM COMPOUNDDB.NPA_COMPOUND_DATA "
+				+ "WHERE NAME = 'Not named' ORDER BY ACCESSION";	
+		PreparedStatement ps = conn.prepareStatement(sql);
+		
+		String updSql = 
+				"INSERT INTO COMPOUNDDB.NPA_SYNONYMS "
+				+ "(ACCESSION, NAME, NTYPE) VALUES(?,?,?)";	
+		PreparedStatement updPs = conn.prepareStatement(updSql);
+		
+		String updSql2 = 
+				"UPDATE COMPOUNDDB.NPA_COMPOUND_DATA SET NAME = ? WHERE ACCESSION = ?";	
+		PreparedStatement updPs2 = conn.prepareStatement(updSql2);
+		
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+
+			String accession = rs.getString("ACCESSION");
+			PubChemCompoundDescriptionBundle ib = 
+					PubChemUtils.getCompoundDescriptionByInchiKey(rs.getString("INCHI_KEY"));
+			if(ib != null && ib.getTitle() != null && !ib.getTitle().isEmpty()) {
+				
+				updPs.setString(1, accession);
+				updPs.setString(2, ib.getTitle());
+				updPs.setString(3, "PRI");
+				updPs.executeUpdate();
+				
+				updPs2.setString(2, accession);
+				updPs2.setString(1, ib.getTitle());
+				updPs2.executeUpdate();
+				
+				System.err.println(accession + " - " + ib.getTitle());
+			}
+			else {
+				System.err.println(accession + " - not found");
+			}
+		}
+		ps.close();
+		updPs.close();
+		updPs2.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	private static void extractNatProdAtlasFields() {
@@ -144,6 +259,37 @@ public class RunContainer {
 			e.printStackTrace();
 		}
 		Path outputPath = Paths.get("E:\\DataAnalysis\\Databases\\_LATEST\\Natural Products Atlas-2022-09\\NPA_fields.txt");
+		try {
+			Files.write(
+					outputPath, 
+					fields, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void extractCoconutFields() {
+		
+		Collection<String>fields = new TreeSet<String>();
+		File sdfFile = new File("E:\\DataAnalysis\\Databases\\_LATEST\\COCONUT-2022-01\\COCONUT_2022_01_2D.SDF");
+		IteratingSDFReaderFixed reader;
+		try {
+			reader = new IteratingSDFReaderFixed(new FileInputStream(sdfFile), DefaultChemObjectBuilder.getInstance());
+			int count = 1;
+			while (reader.hasNext()) {
+				
+				IAtomContainer molecule = (IAtomContainer)reader.next();
+				molecule.getProperties().forEach((k,v)->fields.add(k.toString()));
+			}
+		}		
+		catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Path outputPath = Paths.get("E:\\DataAnalysis\\Databases\\_LATEST\\COCONUT-2022-01\\coconut_fields.txt");
 		try {
 			Files.write(
 					outputPath, 
