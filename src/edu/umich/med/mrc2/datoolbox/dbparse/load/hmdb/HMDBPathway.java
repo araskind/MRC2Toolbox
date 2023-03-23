@@ -37,6 +37,12 @@ public class HMDBPathway implements Serializable{
 
 	public HMDBPathway(
 			String name, 
+			String smpdbId) {
+		this(null, name, smpdbId, null);
+	}
+	
+	public HMDBPathway(
+			String name, 
 			String smpdbId, 
 			String keggMapId) {
 		this(null, name, smpdbId, keggMapId);

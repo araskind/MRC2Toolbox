@@ -24,6 +24,8 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLInputFactory;
@@ -42,16 +44,19 @@ import org.jdom2.input.DOMBuilder;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank.DrugBankParserJdom2;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank.DrugBankRecord;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class DrugBankParserTask extends AbstractTask {
+public class DrugBankParseAndUploadTask extends AbstractTask {
 
 	private File xmlInputFile;
+	private Collection<DrugBankRecord>records;
 
 	//	TODO update connection manager if needed to re-parse the data
-	public DrugBankParserTask(File xmlInputFile) {
+	public DrugBankParseAndUploadTask(File xmlInputFile) {
 
 		this.xmlInputFile = xmlInputFile;
 		
@@ -89,27 +94,13 @@ public class DrugBankParserTask extends AbstractTask {
 		}
 		setStatus(TaskStatus.FINISHED);		
 	}
-	
-	private void extractRedundantData() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void insertRedundantData() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void uploadRecordsToDatabase() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	protected void parseFileToRecords() {
 
-		taskDescription = "Parsing T3DB XML file " + xmlInputFile.getName() + " ...";		
-		total = 4000;
+		taskDescription = "Parsing DrugBank XML file " + xmlInputFile.getName() + " ...";		
+		total = 15235;
 		processed = 0;
+		records = new ArrayList<DrugBankRecord>();
 		System.setProperty("javax.xml.transform.TransformerFactory",
 				"com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
 		
@@ -172,18 +163,19 @@ public class DrugBankParserTask extends AbstractTask {
 			    Node domNode = result.getNode();
 			    if(domNode.getFirstChild().getNodeName().equals("drug")){
 			    	
-				    org.jdom2.Element domElement = domBuider.build((Element)domNode.getFirstChild());
-//			    	T3DBRecord record = null;
+				    org.jdom2.Element domElement = 
+				    		domBuider.build((Element)domNode.getFirstChild());
+				    DrugBankRecord record = null;
 			    	try {
-//			    		record = T3DBParserJdom2.parseRecord(domElement);
+			    		record = DrugBankParserJdom2.parseRecord(domElement);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-//			    	if(record != null) {
-//			    		t3dbRecords.add(record);
-//				    	System.out.println("Parsed - " + record.getName());
-//			    	}
+			    	if(record != null) {
+			    		records.add(record);
+				    	System.out.println("Parsed - " + record.getName());
+			    	}
 			    	processed++;
 			    }
 			}
@@ -192,7 +184,24 @@ public class DrugBankParserTask extends AbstractTask {
 			e.printStackTrace();
 		}	
 	}
+	
+	private void extractRedundantData() {
+		// TODO Auto-generated method stub
+		
+	}
 
+	private void insertRedundantData() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void uploadRecordsToDatabase() {
+		// TODO Auto-generated method stub
+		//DRUG_CATEGORY_SEQ
+//		DRUG_CATEGORY("DRCAT"),
+//		DRUG_TARGET("DRTGT"),
+	}
+	
 //	private void parseRecords() {
 //
 //		taskDescription = "Parsing records...";
@@ -247,7 +256,7 @@ public class DrugBankParserTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-		return new DrugBankParserTask(xmlInputFile);
+		return new DrugBankParseAndUploadTask(xmlInputFile);
 	}
 }
 

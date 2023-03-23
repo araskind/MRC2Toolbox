@@ -71,7 +71,7 @@ public enum DrugbankCrossrefFields {
 		return database;
 	}
 
-	public static DrugbankCrossrefFields getByName(String name) {
+	public static DrugbankCrossrefFields getFieldByName(String name) {
 
 		for(DrugbankCrossrefFields v : DrugbankCrossrefFields.values()) {
 

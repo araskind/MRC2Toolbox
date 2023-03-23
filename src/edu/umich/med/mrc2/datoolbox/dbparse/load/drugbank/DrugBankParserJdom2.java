@@ -37,7 +37,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundPropertyType;
-import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBCrossrefFields;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBCitation;
 
 public class DrugBankParserJdom2 {
 	
@@ -64,18 +64,23 @@ public class DrugBankParserJdom2 {
 	    		secondaryIds.add(idElement.getText());
 	    }
 		DrugBankRecord record = new DrugBankRecord(drugId);	
+		record.getSecondaryIds().addAll(secondaryIds);
+		
 		parseExperimentalProperties(recordElement, record, ns);
 		parsePredictedProperties(recordElement, record, ns);
 		parseCompoundIdentity(recordElement, record, ns);
 		parseDatabaseReferences(recordElement, record, ns);		
 		parseTimeStamps(recordElement, record, ns);
 		parseDescriptions(recordElement, record, ns);
-		parseSynonyms(recordElement, record, ns);	
-
-//		parseGeneralReferences(recordElement, record, ns);
+		parseSynonyms(recordElement, record, ns);
+		parseDrugCategories(recordElement, record, ns);
+		parseExternalLinks(recordElement, record, ns);
+		parseDrugPathways(recordElement, record, ns);
+		parseDrugTargets(recordElement, record, ns);
+		parseGeneralReferences(recordElement, record, ns);
 		return record;
 	}
-	
+
 	public static void parseCompoundIdentity(
 			Element recordElement, DrugBankRecord record, Namespace ns) {
 		
@@ -83,19 +88,20 @@ public class DrugBankParserJdom2 {
 		record.setName(name);
 		CompoundIdentity cid = record.getCompoundIdentity();
 		cid.setCommonName(name);
-
+		cid.setSysName(record.getPropertyValue(
+				DrugBankCompoundProperties.TRADITIONAL_IUPAC_NAME.getName()));
 		record.setAggregateState(recordElement.getChildText("state", ns));
 		cid.setFormula(record.getPropertyValue(
-				DrugBankCompoundProperties.MOLECULAR_FORMULA.name()));
+				DrugBankCompoundProperties.MOLECULAR_FORMULA.getName()));
 		cid.setSmiles(record.getPropertyValue(
-				DrugBankCompoundProperties.SMILES.name()));
+				DrugBankCompoundProperties.SMILES.getName()));
 		cid.setInChi(record.getPropertyValue(
-				DrugBankCompoundProperties.INCHI.name()));
+				DrugBankCompoundProperties.INCHI.getName()));
 		cid.setInChiKey(record.getPropertyValue(
-				DrugBankCompoundProperties.INCHIKEY.name()));
+				DrugBankCompoundProperties.INCHIKEY.getName()));
 		
 		String massString = record.getPropertyValue(
-				DrugBankCompoundProperties.MONOISOTOPIC_WEIGHT.name());
+				DrugBankCompoundProperties.MONOISOTOPIC_WEIGHT.getName());
 		if(massString != null && !massString.isEmpty()) {
 			double mass = Double.parseDouble(massString);
 			cid.setExactMass(mass);
@@ -115,7 +121,7 @@ public class DrugBankParserJdom2 {
 				e.printStackTrace();
 			}
 		}
-		String dateUpdated = recordElement.getAttributeValue("created");
+		String dateUpdated = recordElement.getAttributeValue("updated");
 		if(dateUpdated != null) {
 			
 			try {
@@ -129,12 +135,16 @@ public class DrugBankParserJdom2 {
 	
 	public static void parseDescriptions(
 			Element recordElement, DrugBankRecord record, Namespace ns) {
-
-		String description = recordElement.getChildText("description", ns);
-		if(description != null && !description.isEmpty())
-			record.setDescription(StringEscapeUtils.unescapeHtml4(description));
 		
-
+		for(DrugBankDescriptiveFields field : DrugBankDescriptiveFields.values()) {
+			
+			String descriptionString = 
+					recordElement.getChildText(field.getName(), ns);
+			if(descriptionString != null && !descriptionString.isEmpty())
+				record.setDescriptiveField(
+						field, 
+						StringEscapeUtils.unescapeHtml4(descriptionString));
+		}
 	}
 	
 	public static void parseSynonyms(
@@ -154,28 +164,37 @@ public class DrugBankParserJdom2 {
 	}
 	
 	public static void parseDatabaseReferences(
-			Element recordElement, DrugBankRecord record, Namespace ns) {
+			Element recordElement, 
+			DrugBankRecord record, 
+			Namespace ns) {
 
-		for(HMDBCrossrefFields dbRef : HMDBCrossrefFields.values()) {
+		String unii = recordElement.getChildText(DrugbankCrossrefFields.UNII.getName(), ns);
+		if(unii != null && !unii.isEmpty())
+			record.getCompoundIdentity().addDbId(CompoundDatabaseEnum.FDA_UNII, unii);
 			
-			if(dbRef.getDatabase().equals(CompoundDatabaseEnum.HMDB))
-				continue;
+		String cas = recordElement.getChildText(DrugbankCrossrefFields.CAS.getName(), ns);
+		if(cas != null && !cas.isEmpty())
+			record.getCompoundIdentity().addDbId(CompoundDatabaseEnum.CAS, cas);
+		
+		record.getCompoundIdentity().addDbId(
+				CompoundDatabaseEnum.DRUGBANK, record.getPrimaryId());
+		
+		Element externalIdentifiersElement = 
+				recordElement.getChild("external-identifiers", ns);
+		if(externalIdentifiersElement == null)
+			return;
+		
+		List<Element>idList = 
+				externalIdentifiersElement.getChildren("external-identifier", ns);
+		for(Element idElement : idList) {
 			
-			String dbId = recordElement.getChildText(dbRef.getName(), ns);
-			if(dbId != null && !dbId.isEmpty())
-				record.getCompoundIdentity().addDbId(dbRef.getDatabase(), dbId);				
+			DrugbankCrossrefFields field = 
+					DrugbankCrossrefFields.getFieldByName(
+							idElement.getChildText("resource", ns));
+			String id = idElement.getChildText("identifier", ns);
+			if(field != null && id != null && !id.isEmpty())
+				record.getCompoundIdentity().addDbId(field.getDatabase(), id);
 		}
-		//	Parse secondary HMDB accessions
-		Element secondaryAccessionsListElement = 
-				recordElement.getChild("secondary_accessions", ns);
-
-//		if(secondaryAccessionsListElement != null) {
-//			
-//			List<Element> secondaryAccessionsList = 
-//					secondaryAccessionsListElement.getChildren("accession", ns);
-//			for(Element secondaryAccessionElement : secondaryAccessionsList) 		
-//				record.getSecondaryHmdbAccesions().add(secondaryAccessionElement.getText());			
-//		}
 	}
 	
 	public static void parseExperimentalProperties(
@@ -221,4 +240,195 @@ public class DrugBankParserJdom2 {
 			record.getCompoundProperties().add(cp);
 		}
 	}
+	
+	private static void parseDrugCategories(
+			Element recordElement, 
+			DrugBankRecord record, 
+			Namespace ns) {
+		Element categoriesElement = 
+				recordElement.getChild("categories", ns);
+		if(categoriesElement == null)
+			return;
+		
+		List<Element> categoryList = 
+				categoriesElement.getChildren("category", ns);
+		
+		for(Element categoryElement : categoryList) {
+			
+			String mesh = categoryElement.getChildText("mesh-id", ns);
+			if(mesh != null && mesh.isEmpty())
+				mesh = null;
+			
+			DrugCategory cp = new DrugCategory(
+					categoryElement.getChildText("category", ns), mesh);
+			record.addCategory(cp);
+		}
+	}
+
+	private static void parseExternalLinks(
+			Element recordElement, 
+			DrugBankRecord record, 
+			Namespace ns) {
+		
+		Element elListElement = 
+				recordElement.getChild("external-links", ns);
+		if(elListElement == null)
+			return;
+		
+		List<Element> elList = 
+				elListElement.getChildren("external-link", ns);
+		
+		for(Element elElement : elList) {
+						
+			DrugBankExternalLink cp = new DrugBankExternalLink(
+					elElement.getChildText("resource", ns), 
+					elElement.getChildText("url", ns));
+			record.getExternalLinks().add(cp);
+		}		
+	}
+	
+	private static void parseDrugPathways(
+			Element recordElement, 
+			DrugBankRecord 
+			record, Namespace ns) {
+		
+		Element pathwayListElement = 
+				recordElement.getChild("pathways", ns);
+		if(pathwayListElement == null)
+			return;
+		
+		List<Element> pathwayList = 
+				pathwayListElement.getChildren("pathway", ns);
+		
+		for(Element pathwayElement : pathwayList) {
+										
+			DrugPathway pw = new DrugPathway(
+					pathwayElement.getChildText("name", ns), 
+					pathwayElement.getChildText("smpdb-id", ns));
+			String category = pathwayElement.getChildText("category", ns);
+			if(category != null && !category.isEmpty())
+				pw.setCategory(category);
+			
+			Element drugListElement = 
+					pathwayElement.getChild("drugs", ns);
+			if(drugListElement != null) {
+				
+				List<Element> drugList = 
+						drugListElement.getChildren("drug", ns);
+				for(Element drugElement : drugList)
+					pw.getDrugs().add(drugElement.getChildText("drugbank-id", ns));
+			}		
+			Element enzymeListElement = 
+					pathwayElement.getChild("enzymes", ns);
+			if(enzymeListElement != null) {
+				
+				List<Element> enzymeList = 
+						enzymeListElement.getChildren("uniprot-id", ns);
+				for(Element enzymeElement : enzymeList)
+					pw.getEnzymes().add(enzymeElement.getText());
+			}		
+			record.getPathways().add(pw);
+		}
+	}
+		
+	private static void parseGeneralReferences(
+			Element recordElement, 
+			DrugBankRecord record, 
+			Namespace ns) {
+		
+		Element genrefListElement = 
+				recordElement.getChild("general-references", ns);
+		if(genrefListElement == null)
+			return;
+		
+		Element articleListElement = 
+				genrefListElement.getChild("articles", ns);
+		if(articleListElement == null)
+			return;
+		
+		List<Element> refList = 
+				articleListElement.getChildren("article", ns);
+		
+		for(Element refElement : refList) {
+						
+			HMDBCitation citation = parseCitationElement(refElement, ns);
+			record.getReferences().add(citation);
+		}	
+	}
+	
+	public static HMDBCitation parseCitationElement(
+			Element citationElement, Namespace ns) {
+		
+		String refText = citationElement.getChildText("citation", ns);
+		String pubMedId = citationElement.getChildText("pubmed-id", ns);
+		HMDBCitation citation = new HMDBCitation(refText, pubMedId);
+		String refId = citationElement.getChildText("ref-id", ns);
+		if(refId != null && !refId.isEmpty())
+			citation.setRefId(refId);
+		
+		return citation;
+	}
+	
+	private static void parseDrugTargets(
+			Element recordElement, 
+			DrugBankRecord record, 
+			Namespace ns) {
+
+		Element targetListElement = 
+				recordElement.getChild("targets", ns);
+		if(targetListElement == null)
+			return;
+		
+		List<Element> targetList = 
+				targetListElement.getChildren("target", ns);
+		
+		for(Element targetElement : targetList) {
+					
+			DrugTarget dt = new DrugTarget(
+					targetElement.getChildText("id", ns), 
+					targetElement.getChildText("name", ns));
+			String organism = targetElement.getChildText("organism", ns);
+			if(organism != null && !organism.isEmpty())
+				dt.setOrganizm(organism);
+			
+			Element actionListElement = 
+					targetElement.getChild("actions", ns);
+			if(actionListElement != null) {
+				
+				List<Element> actionList = 
+						actionListElement.getChildren("action", ns);
+				for(Element actionElement : actionList)
+					dt.getActions().add(actionElement.getText());
+			}	
+			Element refListElement = 
+					targetElement.getChild("references", ns);
+			if(refListElement != null) {
+				
+				Element articleListElement = 
+						refListElement.getChild("articles", ns);
+				if(articleListElement != null) {
+					
+					List<Element> refList = 
+							articleListElement.getChildren("article", ns);
+					
+					for(Element refElement : refList) {
+									
+						HMDBCitation citation = parseCitationElement(refElement, ns);
+						dt.getReferences().add(citation);
+					}
+				}					
+			}
+			record.getDrugTargets().add(dt);
+		}
+	}
 }
+
+
+
+
+
+
+
+
+
+

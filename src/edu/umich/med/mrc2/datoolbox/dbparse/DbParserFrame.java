@@ -75,7 +75,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.TaskProgressPanel;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.CoconutParseAndUploadTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.DrugBankParserTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.DrugBankParseAndUploadTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.HMDBParseAndUploadTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.LipidMapsParseAndUploadTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.dbparse.NPAParseAndUploadTask;
@@ -377,7 +377,7 @@ public class DbParserFrame extends JFrame
 
 		Task parserTask = null;
 		if(database.equals(CompoundDatabaseEnum.DRUGBANK))
-			parserTask = new DrugBankParserTask(inputFile);
+			parserTask = new DrugBankParseAndUploadTask(inputFile);
 
 		if(database.equals(CompoundDatabaseEnum.HMDB))
 			parserTask = new HMDBParseAndUploadTask(inputFile);

@@ -36,6 +36,7 @@ public class HMDBCitation implements Serializable{
 	private String uniqueId;
 	private String citationText;
 	private String pubmedId;
+	private String refId;
 
 	public HMDBCitation(String citationText, String pubmedId) {
 		super();
@@ -72,4 +73,12 @@ public class HMDBCitation implements Serializable{
         hash = 53 * hash + (this.citationText != null ? this.citationText.hashCode() : 0);
         return hash;
     }
+
+	public String getRefId() {
+		return refId;
+	}
+
+	public void setRefId(String refId) {
+		this.refId = refId;
+	}
 }

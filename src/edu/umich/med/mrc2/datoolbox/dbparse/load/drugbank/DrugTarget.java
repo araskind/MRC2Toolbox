@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBCitation;
 
@@ -32,6 +33,7 @@ public class DrugTarget implements Comparable<DrugTarget>{
 	String name;
 	String organizm;
 	Collection<HMDBCitation>references;
+	Collection<String>actions;
 	
 	public DrugTarget(String id, String name) {
 		super();
@@ -39,6 +41,7 @@ public class DrugTarget implements Comparable<DrugTarget>{
 		this.name = name;
 		
 		references = new ArrayList<HMDBCitation>();
+		actions = new TreeSet<String>();
 	}
 
 	@Override
@@ -74,4 +77,8 @@ public class DrugTarget implements Comparable<DrugTarget>{
     public int hashCode() {
         return id.hashCode();
     }
+
+	public Collection<String> getActions() {
+		return actions;
+	}
 }

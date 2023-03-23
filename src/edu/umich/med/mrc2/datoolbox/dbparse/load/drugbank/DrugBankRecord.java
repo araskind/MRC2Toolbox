@@ -24,14 +24,15 @@ package edu.umich.med.mrc2.datoolbox.dbparse.load.drugbank;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.Record;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBCitation;
 
 public class DrugBankRecord implements Record {
 
@@ -44,10 +45,14 @@ public class DrugBankRecord implements Record {
 	private CompoundIdentity compoundIdentity;
 	
 	private Collection<String>synonyms;
+	private Collection<String>secondaryIds;
 	private Collection<DrugCategory>categories;
 	private Collection<CompoundProperty>compoundProperties;	
 	private Collection<DrugTarget>drugTargets;
 	private Map<DrugBankDescriptiveFields,String>descriptiveFields;
+	private Collection<DrugBankExternalLink>externalLinks;
+	private Collection<DrugPathway>pathways;
+	private Collection<HMDBCitation>references;
 
 	public DrugBankRecord(String id) {
 
@@ -57,21 +62,19 @@ public class DrugBankRecord implements Record {
 		compoundProperties = new ArrayList<CompoundProperty>();
 		compoundIdentity = new CompoundIdentity();		
 		drugTargets = new ArrayList<DrugTarget>();
-
-		descriptiveFields = new HashMap<DrugBankDescriptiveFields,String>();
-		for(DrugBankDescriptiveFields f : DrugBankDescriptiveFields.values())
-			descriptiveFields.put(f, "");
-		
-//		concentrations = new ArrayList<CompoundConcentration>();
-//		deseases = new ArrayList<HMDBDesease>();
-//		pathways =  new ArrayList<HMDBPathway>();
+		externalLinks = new ArrayList<DrugBankExternalLink>();
+		descriptiveFields = new TreeMap<DrugBankDescriptiveFields,String>();		
+		secondaryIds = new TreeSet<String>();
+		pathways = new ArrayList<DrugPathway>();
+		references = new ArrayList<HMDBCitation>();
 	}
 
 	public void addCategory(DrugCategory category){
 		categories.add(category);
 	}
 
-	public void addExternalIdentifier(CompoundDatabaseEnum database, String identifier){
+	public void addExternalIdentifier(
+			CompoundDatabaseEnum database, String identifier){
 		compoundIdentity.addDbId(database, identifier);
 	}
 
@@ -177,6 +180,22 @@ public class DrugBankRecord implements Record {
 			return null;
 		else
 			return prop.getPropertyValue();		
+	}
+
+	public Collection<String> getSecondaryIds() {
+		return secondaryIds;
+	}
+
+	public Collection<DrugBankExternalLink> getExternalLinks() {
+		return externalLinks;
+	}
+
+	public Collection<DrugPathway> getPathways() {
+		return pathways;
+	}
+
+	public Collection<HMDBCitation> getReferences() {
+		return references;
 	}
 }
 
