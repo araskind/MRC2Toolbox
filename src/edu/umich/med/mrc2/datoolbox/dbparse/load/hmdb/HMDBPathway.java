@@ -89,10 +89,7 @@ public class HMDBPathway implements Serializable{
 	
     @Override
     public int hashCode() {
-
-        int hash = 3;
-        hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
-        return hash;
+        return this.name.hashCode();
     }
 
 	public String getGlobalId() {

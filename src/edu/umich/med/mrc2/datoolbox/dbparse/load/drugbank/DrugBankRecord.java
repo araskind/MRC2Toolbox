@@ -134,6 +134,18 @@ public class DrugBankRecord implements Record {
 	public Collection<CompoundProperty> getCompoundProperties() {
 		return compoundProperties;
 	}
+	
+	public String getPropertyValue(DrugBankCompoundProperties property) {
+		
+		String pn = property.getName();
+		CompoundProperty prop =  compoundProperties.stream().
+				filter(p -> p.getPropertyName().equals(pn)).
+				findFirst().orElse(null);
+		if(prop == null)
+			return null;
+		else
+			return prop.getPropertyValue();
+	}
 
 	public Collection<String> getSynonyms() {
 		return synonyms;
