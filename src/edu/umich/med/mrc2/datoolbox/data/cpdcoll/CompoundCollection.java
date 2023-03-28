@@ -21,17 +21,19 @@
 
 package edu.umich.med.mrc2.datoolbox.data.cpdcoll;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class CompoundCollection implements Comparable<CompoundCollection>{
 
 	String id;
 	String name;
 	String description;
 	String url;
+	Collection<CompoundCollectionComponentTmp>components;
 	
 	public CompoundCollection(String id, String name) {
-		super();
-		this.id = id;
-		this.name = name;
+		this(id, name, null, null);
 	}
 
 	public CompoundCollection(
@@ -41,6 +43,7 @@ public class CompoundCollection implements Comparable<CompoundCollection>{
 		this.name = name;
 		this.description = description;
 		this.url = url;
+		components = new ArrayList<CompoundCollectionComponentTmp>();
 	}
 
 	public String getId() {
@@ -111,5 +114,13 @@ public class CompoundCollection implements Comparable<CompoundCollection>{
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	
+	public void addTempComponent(CompoundCollectionComponentTmp comp) {
+		components.add(comp);
+	}
+
+	public Collection<CompoundCollectionComponentTmp> getComponents() {
+		return components;
 	}
 }

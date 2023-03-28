@@ -36,12 +36,12 @@ public class CompoundPopupMenu  extends JPopupMenu {
 	 *
 	 */
 	private static final long serialVersionUID = -4582990028092698728L;
-	private static final Icon addToLibraryIcon = GuiUtils.getIcon("databaseToLibrary", 24);
+	private static final Icon openCompoundCollectionIcon = GuiUtils.getIcon("openCompoundCollection", 24);
 	private static final Icon copyAccessionIcon = GuiUtils.getIcon("copy", 24);
 	private static final Icon copyIdentityIcon = GuiUtils.getIcon("copyWithHeader", 24);
 
 	private JMenuItem
-		addSelectedToLibraryMenuItem,
+		selectCollectionMenuItem,
 		copyAccessionMenuItem,
 		copyIdentityMenuItem;
 
@@ -49,22 +49,22 @@ public class CompoundPopupMenu  extends JPopupMenu {
 
 		super();
 
-		addSelectedToLibraryMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.ADD_TO_LIBRARY_FROM_DATABASE_DIALOG_COMMAND.getName(), listener,
-				MainActionCommands.ADD_TO_LIBRARY_FROM_DATABASE_DIALOG_COMMAND.getName());
-		addSelectedToLibraryMenuItem.setIcon(addToLibraryIcon);
+		selectCollectionMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.SELECT_COMPOUND_COLLECTION_COMMAND.getName(), listener,
+				MainActionCommands.SELECT_COMPOUND_COLLECTION_COMMAND.getName());
+		selectCollectionMenuItem.setIcon(openCompoundCollectionIcon);
 
-		addSeparator();
-
-		copyAccessionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName(), listener,
-				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName());
-		copyAccessionMenuItem.setIcon(copyAccessionIcon);
-
-		copyIdentityMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_COMPOUND_IDENTITY_COMMAND.getName(), listener,
-				MainActionCommands.COPY_COMPOUND_IDENTITY_COMMAND.getName());
-		copyIdentityMenuItem.setIcon(copyIdentityIcon);
+//		addSeparator();
+//
+//		copyAccessionMenuItem = GuiUtils.addMenuItem(this,
+//				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName(), listener,
+//				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName());
+//		copyAccessionMenuItem.setIcon(copyAccessionIcon);
+//
+//		copyIdentityMenuItem = GuiUtils.addMenuItem(this,
+//				MainActionCommands.COPY_COMPOUND_IDENTITY_COMMAND.getName(), listener,
+//				MainActionCommands.COPY_COMPOUND_IDENTITY_COMMAND.getName());
+//		copyIdentityMenuItem.setIcon(copyIdentityIcon);
 	}
 }
 

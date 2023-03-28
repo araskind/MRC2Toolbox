@@ -1205,6 +1205,9 @@ public enum MainActionCommands {
 	
 	COPY_VISIBLE_TABLE_ROWS_COMMAND("Copy visible rows to clipboard"),
 	COPY_SELECTED_TABLE_ROWS_COMMAND("Copy selected rows to clipboard"),
+	
+	SELECT_COMPOUND_COLLECTION_COMMAND("Select compound collection"),
+	LOAD_COMPOUND_COLLECTION_COMMAND("Load compound collection"),
 	;
 
 	private final String name;

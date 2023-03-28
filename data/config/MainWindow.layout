@@ -121,7 +121,6 @@
 														<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 														<placeholder>dock.single.MgfPanel</placeholder>
 														<placeholder>dock.single.DataIntegratorPanelClusterDisplayPanel</placeholder>
-														<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
 														<placeholder>dock.single.RawDataExaminerPanel</placeholder>
 														<placeholder>dock.single.CorrelationResultsPanelClusterDisplayPanel</placeholder>
 														<placeholder>dock.single.WorklistPanel</placeholder>
@@ -170,13 +169,6 @@
 														<entry>
 															<key shared="false">
 																<placeholder>dock.single.MsLibraryPanel</placeholder>
-															</key>
-															<item key="convert" type="b">true</item>
-															<item key="convert-keys" type="a"/>
-														</entry>
-														<entry>
-															<key shared="false">
-																<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
 															</key>
 															<item key="convert" type="b">true</item>
 															<item key="convert-keys" type="a"/>
@@ -246,7 +238,7 @@
 							<children ignore="false">
 								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>7</selected>
+										<selected>3</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -321,6 +313,15 @@
 												<key shared="false">
 													<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
 												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">3</item>
+												<item key="dock.id" type="i">3</item>
+												<item key="dock.placeholder" type="s">dock.single.CompoundCollectionsPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
@@ -332,8 +333,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">3</item>
-												<item key="dock.id" type="i">3</item>
+												<item key="dock.index" type="i">4</item>
+												<item key="dock.id" type="i">4</item>
 												<item key="dock.placeholder" type="s">dock.single.CompoundDatabasePanel</item>
 											</entry>
 											<entry>
@@ -346,8 +347,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">4</item>
-												<item key="dock.id" type="i">4</item>
+												<item key="dock.index" type="i">5</item>
+												<item key="dock.id" type="i">5</item>
 												<item key="dock.placeholder" type="s">dock.single.IDWorkbenchPanel</item>
 											</entry>
 											<entry>
@@ -360,8 +361,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">5</item>
-												<item key="dock.id" type="i">5</item>
+												<item key="dock.index" type="i">6</item>
+												<item key="dock.id" type="i">6</item>
 												<item key="dock.placeholder" type="s">dock.single.IDTrackerLimsManagerPanel</item>
 											</entry>
 											<entry>
@@ -384,8 +385,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">6</item>
-												<item key="dock.id" type="i">6</item>
+												<item key="dock.index" type="i">7</item>
+												<item key="dock.id" type="i">7</item>
 												<item key="dock.placeholder" type="s">dock.single.METLIMSPanel</item>
 											</entry>
 											<entry>
@@ -403,8 +404,8 @@
 													<item type="s">id</item>
 													<item type="s">placeholder</item>
 												</item>
-												<item key="dock.index" type="i">7</item>
-												<item key="dock.id" type="i">7</item>
+												<item key="dock.index" type="i">8</item>
+												<item key="dock.id" type="i">8</item>
 												<item key="dock.placeholder" type="s">dock.single.RawDataExaminerPanel</item>
 											</entry>
 											<entry>
@@ -440,6 +441,16 @@
 												<replacement id="dockablesingle MsLibraryPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
 													<id>MsLibraryPanel</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.CompoundCollectionsPanel">
+												<replacement id="dockablesingle CompoundCollectionsPanel"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>CompoundCollectionsPanel</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -588,31 +599,6 @@
 									<replacement id="dockablesingle AutomatorPanel"/>
 									<delegate id="delegate_ccontrol backup factory id">
 										<id>AutomatorPanel</id>
-										<area/>
-									</delegate>
-								</layout>
-								<children ignore="false"/>
-							</layout>
-						</child>
-						<child key="single CompoundCollectionsPanel" root="ccontrol center" location="true">
-							<location>
-								<property factory="SplitDockPlaceholderProperty">
-									<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
-									<backup-path>
-										<node location="RIGHT" size="0.7217529039070749" id="1672779742083"/>
-										<leaf id="1672779039466"/>
-									</backup-path>
-								</property>
-								<property factory="StackDockPropertyFactory">
-									<index>1</index>
-									<placeholder>dock.single.CompoundCollectionsPanel</placeholder>
-								</property>
-							</location>
-							<layout>
-								<layout factory="predefined" placeholder="dock.single.CompoundCollectionsPanel">
-									<replacement id="dockablesingle CompoundCollectionsPanel"/>
-									<delegate id="delegate_ccontrol backup factory id">
-										<id>CompoundCollectionsPanel</id>
 										<area/>
 									</delegate>
 								</layout>
@@ -831,7 +817,7 @@
 							<history/>
 							<properties/>
 						</entry>
-						<entry id="single CompoundCollectionsPanel">
+						<entry id="single CompoundCollectionsPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>

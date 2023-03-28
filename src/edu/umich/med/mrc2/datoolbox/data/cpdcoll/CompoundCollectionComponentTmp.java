@@ -24,18 +24,26 @@ package edu.umich.med.mrc2.datoolbox.data.cpdcoll;
 import java.util.Map;
 import java.util.TreeMap;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+
 public class CompoundCollectionComponentTmp {
 
 	private String id;
 	private String collectionId;
 	private String cas;
 	private Map<CpdMetadataField,String>metadata;
+	private CompoundIdentity cid;
 	
-	public CompoundCollectionComponentTmp(String collectionId, String cas) {
+	public CompoundCollectionComponentTmp(String id, String collectionId, String cas) {
 		super();
+		this.id = id;
 		this.collectionId = collectionId;
 		this.cas = cas;
 		metadata = new TreeMap<CpdMetadataField,String>();
+	}
+
+	public CompoundCollectionComponentTmp(String collectionId, String cas) {
+		this(null, collectionId, cas);
 	}
 
 	public String getId() {
@@ -56,5 +64,45 @@ public class CompoundCollectionComponentTmp {
 
 	public Map<CpdMetadataField, String> getMetadata() {
 		return metadata;
-	}	
+	}
+	
+	public void addMetadata(CpdMetadataField field, String value) {
+		metadata.put(field, value);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+		if (obj == null)
+			return false;
+
+		if (!CompoundCollectionComponentTmp.class.isAssignableFrom(obj.getClass()))
+			return false;
+
+		final CompoundCollectionComponentTmp other = (CompoundCollectionComponentTmp) obj;
+
+		if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+			return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+
+		int hash = 3;
+		hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+		return hash;
+	}
+
+	public CompoundIdentity getCid() {
+		return cid;
+	}
+
+	public void setCid(CompoundIdentity cid) {
+		this.cid = cid;
+	}
 }

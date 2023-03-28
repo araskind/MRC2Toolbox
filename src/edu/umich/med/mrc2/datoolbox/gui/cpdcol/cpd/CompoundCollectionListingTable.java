@@ -23,27 +23,17 @@ package edu.umich.med.mrc2.datoolbox.gui.cpdcol.cpd;
 
 import java.awt.Cursor;
 import java.awt.Point;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableRowSorter;
 
-import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
-import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
-import edu.umich.med.mrc2.datoolbox.gui.cpdcol.CompoundPopupMenu;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 
 public class CompoundCollectionListingTable extends BasicTable {
 
@@ -66,27 +56,16 @@ public class CompoundCollectionListingTable extends BasicTable {
 		rowSorter = new TableRowSorter<CompoundCollectionListingTableModel>(model);
 		setRowSorter(rowSorter);
 
-		rowSorter.setComparator(model.getColumnIndex(CompoundCollectionListingTableModel.ID_COLUMN),
-				new MsFeatureIdentityComparator(SortProperty.ID));
-
-		// Database ID column
-		//cidRenderer = new CompoundIdentityRenderer(CompoundIdentityField.DB_ID);
-		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
-		columnModel.getColumnById(CompoundCollectionListingTableModel.ID_COLUMN)
-			.setCellRenderer(msfIdRenderer);
-		columnModel.getColumnById(CompoundCollectionListingTableModel.MASS_COLUMN)
-			.setCellRenderer(mzRenderer); // Neutral mass
-
-		//	Database link adapter
+		//	URL adapter
 		mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
 				Point p = e.getPoint();
 
-				if(columnModel.isColumnVisible(columnModel.getColumnById(CompoundCollectionListingTableModel.ID_COLUMN))) {
+				if(columnModel.isColumnVisible(columnModel.getColumnById(CompoundCollectionListingTableModel.URL_COLUMN))) {
 
-					if (columnAtPoint(p) == columnModel.getColumnIndex(CompoundCollectionListingTableModel.ID_COLUMN))
+					if (columnAtPoint(p) == columnModel.getColumnIndex(CompoundCollectionListingTableModel.URL_COLUMN))
 						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 					else
 						setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -96,79 +75,28 @@ public class CompoundCollectionListingTable extends BasicTable {
 			}
 		};
 		addMouseMotionListener(mma);
-		addMouseListener(msfIdRenderer);
-		addMouseMotionListener(msfIdRenderer);
-
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		thf.getParserModel().setFormat(MsFeatureIdentity.class, new MsFeatureIdentityFormat(CompoundIdentityField.DB_ID));
-		thf.getParserModel().setComparator(MsFeatureIdentity.class, new MsFeatureIdentityComparator(SortProperty.ID));
 		finalizeLayout();
 	}
-
-	public void addCompoundPopupListener(ActionListener listener) {
-
-		CompoundPopupMenu popupMenu = new CompoundPopupMenu(listener);
-		setComponentPopupMenu(popupMenu);
-		addMouseListener(new MouseAdapter() {
-			private int popupRow;
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				popupRow = rowAtPoint(e.getPoint());
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				popupRow = rowAtPoint(e.getPoint());
-			}
-		});
-	}
-
-	public void setTableModelFromCompoundCollection(Collection<CompoundIdentity> compoundCollection) {
+	
+	public void setTableModelFromCompoundCollections(
+			Collection<CompoundCollection> compoundCollections) {
 
 		thf.setTable(null);
-		model.setTableModelFromCompoundCollection(compoundCollection);
+		model.setTableModelFromCompoundCollections(compoundCollections);
 		thf.setTable(this);
 		tca.adjustColumns();
 	}
 
-	public MsFeatureIdentity getSelectedIdentity() {
+	public CompoundCollection getSelectedCompoundCollection() {
 
 		int row = getSelectedRow();
 		if(row == -1)
 			return null;
 
-		return (MsFeatureIdentity) model.getValueAt(
+		return (CompoundCollection) model.getValueAt(
 				convertRowIndexToModel(row), 
-				model.getColumnIndex(CompoundCollectionListingTableModel.ID_COLUMN));
-	}
-	
-	public CompoundIdentity getSelectedCompound() {
-
-		int row = getSelectedRow();
-		if(row == -1)
-			return null;
-
-		return ((MsFeatureIdentity) model.getValueAt(
-				convertRowIndexToModel(row), 
-				model.getColumnIndex(CompoundCollectionListingTableModel.ID_COLUMN))).
-					getCompoundIdentity();
-	}
-
-	public Collection<CompoundIdentity> getListedCompounds() {
-
-		Collection<CompoundIdentity>listedCompounds = new ArrayList<CompoundIdentity>();
-		int idCol = model.getColumnIndex(CompoundCollectionListingTableModel.ID_COLUMN);
-		for(int i=0; i<getRowCount(); i++)
-			listedCompounds.add(
-				((MsFeatureIdentity) model.getValueAt(
-						convertRowIndexToModel(i), idCol)).getCompoundIdentity());
-
-		return listedCompounds;
-	}
-
-	public void updateCidData(MsFeatureIdentity id) {
-		model.updateCidData(id);
+				model.getColumnIndex(CompoundCollectionListingTableModel.COLLECTION_NAME_COLUMN));
 	}
 }
 

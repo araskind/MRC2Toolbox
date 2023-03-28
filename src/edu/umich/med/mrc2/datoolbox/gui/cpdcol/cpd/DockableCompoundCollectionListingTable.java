@@ -28,8 +28,7 @@ import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableCompoundCollectionListingTable extends DefaultSingleCDockable{
@@ -39,7 +38,8 @@ public class DockableCompoundCollectionListingTable extends DefaultSingleCDockab
 
 	public DockableCompoundCollectionListingTable() {
 
-		super("DockableCompoundCollectionListingTable", componentIcon, "Compound collection listing", null, Permissions.MIN_MAX_STACK);
+		super("DockableCompoundCollectionListingTable", componentIcon, 
+				"Compound collection listing", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0,0));
 
@@ -47,20 +47,13 @@ public class DockableCompoundCollectionListingTable extends DefaultSingleCDockab
 		add(new JScrollPane(compoundTable));
 	}
 
-	public void setTableModelFromCompoundCollection(Collection<CompoundIdentity> compoundCollection) {
-		compoundTable.setTableModelFromCompoundCollection(compoundCollection);
+	public void setTableModelFromCompoundCollections(
+			Collection<CompoundCollection> compoundCollections) {
+		compoundTable.setTableModelFromCompoundCollections(compoundCollections);
 	}
 
-	public CompoundIdentity getSelectedCompound() {
-		return compoundTable.getSelectedCompound();
-	}
-
-	public MsFeatureIdentity getSelectedIdentity() {
-		return compoundTable.getSelectedIdentity();
-	}
-
-	public void updateCidData(MsFeatureIdentity id) {
-		compoundTable.updateCidData(id);
+	public CompoundCollection getSelectedCompoundCollection() {
+		return compoundTable.getSelectedCompoundCollection();
 	}
 
 	/**
@@ -72,9 +65,5 @@ public class DockableCompoundCollectionListingTable extends DefaultSingleCDockab
 
 	public synchronized void clearTable() {
 		compoundTable.clearTable();
-	}
-
-	public Collection<CompoundIdentity> getListedCompounds() {
-		return compoundTable.getListedCompounds();
 	}
 }
