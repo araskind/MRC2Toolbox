@@ -1208,6 +1208,7 @@ public enum MainActionCommands {
 	
 	SELECT_COMPOUND_COLLECTION_COMMAND("Select compound collection"),
 	LOAD_COMPOUND_COLLECTION_COMMAND("Load compound collection"),
+	LOAD_COMPOUND_MULTIPLEXES_COMMAND("Load compound multiplex data"),
 	;
 
 	private final String name;

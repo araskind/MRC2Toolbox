@@ -31,39 +31,39 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class DockableCompoundMultiplexListingTable extends DefaultSingleCDockable{
+public class DockableCompoundMultiplexComponentsListingTable extends DefaultSingleCDockable{
 
-	private static final Icon componentIcon = GuiUtils.getIcon("table", 16);
-	private CompoundMultiplexListingTable multiplexListingTable;
+	private static final Icon componentIcon = GuiUtils.getIcon("compoundCollection", 16);
+	private CompoundMultiplexComponentsListingTable multiplexComponentsListingTable;
 
-	public DockableCompoundMultiplexListingTable() {
+	public DockableCompoundMultiplexComponentsListingTable() {
 
-		super("DockableCompoundMultiplexListingTable", componentIcon, 
-				"Compound multiplex mixtures", null, Permissions.MIN_MAX_STACK);
+		super("DockableCompoundMultiplexComponentsListingTable", componentIcon, 
+				"Compound multiplex mixture components", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		setLayout(new BorderLayout(0,0));
 
-		multiplexListingTable = new CompoundMultiplexListingTable();
-		add(new JScrollPane(multiplexListingTable));
+		multiplexComponentsListingTable = new CompoundMultiplexComponentsListingTable();
+		add(new JScrollPane(multiplexComponentsListingTable));
 	}
 
 	public void setTableModelFromCompoundMultiplexMixtureCollection(
 			Collection<CompoundMultiplexMixture> multiplexes)  {
-		multiplexListingTable.setTableModelFromCompoundMultiplexMixtureCollection(multiplexes);
+		multiplexComponentsListingTable.setTableModelFromCompoundMultiplexMixtureCollection(multiplexes);
 	}
 
 	/**
 	 * @return the compoundDatabaseTable
 	 */
-	public CompoundMultiplexListingTable getTable() {
-		return multiplexListingTable;
+	public CompoundMultiplexComponentsListingTable getTable() {
+		return multiplexComponentsListingTable;
 	}
 
 	public synchronized void clearTable() {
-		multiplexListingTable.clearTable();
+		multiplexComponentsListingTable.clearTable();
 	}
 
 	public Collection<CompoundMultiplexMixture> getSelectedMultiplexMixtures() {
-		return multiplexListingTable.getSelectedMultiplexMixtures();
+		return multiplexComponentsListingTable.getSelectedMultiplexMixtures();
 	}
 }

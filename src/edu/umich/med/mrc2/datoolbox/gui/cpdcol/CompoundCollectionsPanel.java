@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.cpdcol;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.Collection;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
@@ -32,6 +33,7 @@ import javax.swing.event.ListSelectionListener;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
@@ -49,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cpdcoll.LoadCompoundCollectionTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cpdcoll.LoadCompoundMultiplexes;
 
 public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 
@@ -61,6 +64,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 	private DockableCompoundPropertiesTable propertiesTable;
 	private DockableCompoundMultiplexListingTable compoundMultiplexListingTable;
 	private CompoundCollectionSelectorDialog compoundCollectionSelectorDialog;
+	private DockableCollectionComponentPropertiesTable componentPropertiesTable;
 		
 	public CompoundCollectionsPanel() {
 		
@@ -73,6 +77,9 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 //		compoundTable = new DockableCompoundCollectionListingTable();
 //		compoundTable.getTable().addCompoundPopupListener(this);
 //		compoundTable.getTable().getSelectionModel().addListSelectionListener(this);
+		
+		componentPropertiesTable = 
+				new DockableCollectionComponentPropertiesTable();
 
 		molStructurePanel = new DockableMolStructurePanel(
 				"CpdCollectionsPanelDockableMolStructurePanel");
@@ -80,11 +87,12 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 				"CpdCollectionCompoundPropertiesTable");
 		compoundMultiplexListingTable =  
 				new DockableCompoundMultiplexListingTable();
-		compoundMultiplexListingTable.getTable().getSelectionModel().addListSelectionListener(this);
+		compoundMultiplexListingTable.getTable().
+				getSelectionModel().addListSelectionListener(this);
 
 		grid.add(0, 0, 75, 40, 
 				//	compoundTable, 
-				compoundMultiplexListingTable);
+				compoundMultiplexListingTable, componentPropertiesTable);
 		grid.add(75, 0, 25, 40, molStructurePanel);
 		grid.add(0, 50, 100, 60, propertiesTable);
 		
@@ -105,8 +113,19 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		
 		if(command.equals(MainActionCommands.LOAD_COMPOUND_COLLECTION_COMMAND.getName()))
 			loadCompoundCollection();
+		
+		if(command.equals(MainActionCommands.LOAD_COMPOUND_MULTIPLEXES_COMMAND.getName()))
+			loadCompoundMultiplexes();
 	}
 	
+	private void loadCompoundMultiplexes() {
+
+		LoadCompoundMultiplexes task = 
+				new LoadCompoundMultiplexes();
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);	
+	}
+
 	private void selectCompoundCollection() {
 		// TODO Auto-generated method stub
 		compoundCollectionSelectorDialog = new CompoundCollectionSelectorDialog(this);
@@ -135,10 +154,12 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 
-			// Load experiment
+			// Load compound collection
 			if (e.getSource().getClass().equals(LoadCompoundCollectionTask.class))
 				finalizeCompoundCollectionLoad((LoadCompoundCollectionTask) e.getSource());
-
+			
+			if (e.getSource().getClass().equals(LoadCompoundMultiplexes.class))
+				finalizeCompoundMultiplexesLoad((LoadCompoundMultiplexes) e.getSource());
 		}
 		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -146,6 +167,17 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		}
 	}
 	
+	private void finalizeCompoundMultiplexesLoad(LoadCompoundMultiplexes task) {
+
+		Collection<CompoundMultiplexMixture> multiplexes = task.getMultiplexes();
+		loadCompoundMultiplexesData(multiplexes);
+	}
+
+	private void loadCompoundMultiplexesData(Collection<CompoundMultiplexMixture> multiplexes) {
+		// TODO Auto-generated method stub
+		//		System.out.println("***");
+	}
+
 	private void finalizeCompoundCollectionLoad(LoadCompoundCollectionTask task){
 		// TODO Auto-generated method stub
 		CompoundCollection collection = task.getCollection();
@@ -154,7 +186,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 
 	private void loadCompoundCollectionData(CompoundCollection collection) {
 		// TODO Auto-generated method stub
-		System.out.println("***");
+//		System.out.println("***");
 	}
 
 	@Override
@@ -188,6 +220,15 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 			return;
 
 		for(ListSelectionListener listener : ((DefaultListSelectionModel)e.getSource()).getListSelectionListeners()) {
+			
+			if(listener.equals(compoundMultiplexListingTable.getTable())) {
+				
+				Collection<CompoundMultiplexMixture> selectedMultiplexes = 
+						compoundMultiplexListingTable.getSelectedMultiplexMixtures();
+				if(selectedMultiplexes != null &&!selectedMultiplexes.isEmpty()) {
+					
+				}
+			}
 
 //			if(listener.equals(compoundTable.getTable())) {
 //				

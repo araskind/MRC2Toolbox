@@ -25,9 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -38,80 +36,33 @@ public class CompoundMultiplexListingTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = 3707538261469467980L;
 
-	public static final String ORDER_COLUMN = "##";
+
 	public static final String ID_COLUMN = "ID";
-	public static final String COMPOUND_NAME_COLUMN = "Name";
-	public static final String FORMULA_COLUMN = "Formula";
-	public static final String MASS_COLUMN = "Monoisotopic mass";
-	public static final String SPECTRA_COLUMN = "Spectra";
-	public static final String BIOLOCATION_COLUMN = "Bio location";
+	public static final String NAME_COLUMN = "Name";
 
 	public CompoundMultiplexListingTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ORDER_COLUMN, Integer.class, false),
-			new ColumnContext(ID_COLUMN, MsFeatureIdentity.class, false),
-			new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
-			new ColumnContext(FORMULA_COLUMN, String.class, false),
-			new ColumnContext(MASS_COLUMN, Double.class, false),
-			new ColumnContext(SPECTRA_COLUMN, Integer.class, false),
-			new ColumnContext(BIOLOCATION_COLUMN, String.class, false)
+			new ColumnContext(ID_COLUMN, String.class, false),
+			new ColumnContext(NAME_COLUMN, CompoundMultiplexMixture.class, false),
 		};
 	}
 
-	public void setTableModelFromCompoundCollection(
-			Collection<CompoundIdentity> compoundCollection) {
+	public void setTableModelFromCompoundMultiplexMixtureCollection(
+			Collection<CompoundMultiplexMixture> multiplexes) {
 
 		setRowCount(0);
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		int counter = 1;
 
-		//	TODO spectra count and bio-location
-		for(CompoundIdentity id : compoundCollection){
+		for(CompoundMultiplexMixture multiplex : multiplexes){
 
-			MsFeatureIdentity msid = 
-					new MsFeatureIdentity(id, 
-							CompoundIdentificationConfidence.ACCURATE_MASS);
 			Object[] obj = {
-					counter,
-					msid,
-					id.getCommonName(),
-					id.getFormula(),
-					id.getExactMass(),
-					null,	//	TODO supply actual number
-					""
+					multiplex.getId(),
+					multiplex,
 				};
 			rowData.add(obj);
-			counter++;
 		}
 		addRows(rowData);
-	}
-
-	public void updateCidData(MsFeatureIdentity id) {
-
-		int row = getIdentityRow(id);
-		if(row == -1)
-			return;
-
-		setValueAt(id.getCompoundIdentity().getCommonName(), 
-				row, getColumnIndex(COMPOUND_NAME_COLUMN));
-		setValueAt(id.getCompoundIdentity().getFormula(), 
-				row, getColumnIndex(FORMULA_COLUMN));
-		setValueAt(id.getCompoundIdentity().getExactMass(), 
-				row, getColumnIndex(MASS_COLUMN));
-
-		//	TODO other stuff - spectra etc.
-	}
-
-	public int getIdentityRow(MsFeatureIdentity id) {
-
-		int col = getColumnIndex(ID_COLUMN);
-		for (int i = 0; i < getRowCount(); i++) {
-
-			if (id.equals((MsFeatureIdentity)getValueAt(i, col)))
-				return i;
-		}
-		return -1;
 	}
 }
 

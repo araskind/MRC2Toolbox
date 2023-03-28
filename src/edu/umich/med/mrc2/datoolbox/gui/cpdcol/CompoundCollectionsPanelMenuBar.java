@@ -65,6 +65,8 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 	private static final Icon activeLibrariesIconSmall = GuiUtils.getIcon("duplicateLibrary", 24);	
 	
 	private static final Icon openCompoundCollectionIcon = GuiUtils.getIcon("openCompoundCollection", 24);
+	private static final Icon loadMultiplexDataIcon = GuiUtils.getIcon("loadMultiplexData", 24);
+	
 
 	// Menus
 	private JMenu
@@ -78,6 +80,7 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 	// Manage
 	private JMenuItem
 		selectCollectionMenuItem,
+		loadMultiplexDataMenuItem,
 		libraryManagerMenuItem,
 		openLibraryMenuItem,
 		closeLibraryMenuItem;
@@ -115,6 +118,11 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 		selectCollectionMenuItem = addItem(manageMenu, 
 				MainActionCommands.SELECT_COMPOUND_COLLECTION_COMMAND, 
 				openCompoundCollectionIcon);
+		selectCollectionMenuItem.setEnabled(false);
+		
+		loadMultiplexDataMenuItem = addItem(manageMenu, 
+				MainActionCommands.LOAD_COMPOUND_MULTIPLEXES_COMMAND, 
+				loadMultiplexDataIcon);
 		
 //		manageMenu.addSeparator();
 //		

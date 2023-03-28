@@ -64,6 +64,7 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXSource;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -82,16 +83,21 @@ import org.w3c.dom.Node;
 
 import edu.umich.med.mrc2.datoolbox.data.LipidMapsClassifier;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.cpdcol.CompoundMultiplexUtils;
 import edu.umich.med.mrc2.datoolbox.database.lipid.LipidOntologyUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsFields;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsParser;
+import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.MultiplexLoadTempObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
@@ -121,10 +127,164 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			parseCoconutCrossref();
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	private static void uploadMultiplexMixtures() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		for(int i=1; i<23; i++) {
+			CompoundMultiplexMixture newMixture = 
+					new CompoundMultiplexMixture(null, "MetaSci-" +
+							StringUtils.leftPad(Integer.toString(i), 2, "0"));
+			CompoundMultiplexUtils.addCompoundMultiplexMixture(newMixture, conn);			
+		}
+		ConnectionManager.releaseConnection(conn);
+	}
+
+	
+	private static void uploadMultiplexMixtureComponents() throws Exception {
+		
+		File mixtureFile = 
+				new File("E:\\Development\\MRC2Toolbox\\Database\\"
+						+ "MetaSci\\MetaSci_multiplexes4upload.txt");
+		String[][] mixtureData = 
+				DelimitedTextParser.parseTextFileWithEncoding(
+						mixtureFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		Collection<MultiplexLoadTempObject>mloList = 
+				new ArrayList<MultiplexLoadTempObject>();
+		Map<String,Collection<String>>processedComponentsSolventMap = 
+				new TreeMap<String,Collection<String>>();
+		for(int i=0; i<mixtureData.length; i++) {
+			
+			int mixNum = Integer.valueOf(mixtureData[i][0]);
+			String inchiKey = mixtureData[i][1];
+			String solventId = mixtureData[i][2];
+			double conc = Double.valueOf(mixtureData[i][3]);
+			Double xlogP = null;
+			if(mixtureData[i][4] != null && !mixtureData[i][4].isEmpty() && !mixtureData[i][4].equals("--"))
+				xlogP = Double.valueOf(mixtureData[i][4]);
+			
+			double volume = Double.valueOf(mixtureData[i][5]);
+			MultiplexLoadTempObject mlo = new MultiplexLoadTempObject(			
+					mixNum, 
+					inchiKey, 
+					solventId, 
+					conc, 
+					xlogP,
+					volume);
+			mloList.add(mlo);
+		}
+		Collection<CompoundMultiplexMixture>mixtureSet = 
+				CompoundMultiplexUtils.getCompoundMultiplexMixtureList();
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT DISTINCT CC_COMPONENT_ID FROM COMPOUND_COLLECTION_COMPONENT_METADATA "
+				+ "WHERE (FIELD_ID = ? OR FIELD_ID = ?) AND FIELD_VALUE = ? ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, "CCCMF00001");
+		ps.setString(2, "CCCMF00091");				
+		String insertQuery = 
+				"INSERT INTO COMPOUND_MULTIPLEX_MIXTURE_COMPONENTS "
+				+ "(MIX_ID, CC_COMPONENT_ID, CPD_CONC_MKM, SOLVENT_ID, XLOGP, ALIQUOTE_VOLUME) "
+				+ "VALUES(?, ?, ?, ?, ?, ?)";
+		PreparedStatement insertPs = conn.prepareStatement(insertQuery);
+		ResultSet rs = null;
+		for(MultiplexLoadTempObject mlo : mloList) {
+			
+			ps.setString(3, mlo.getName());
+			rs = ps.executeQuery();
+			String componentId = null;
+			while(rs.next()) {
+				componentId = rs.getString("CC_COMPONENT_ID");
+//				if(!processedComponentsSolventMap.containsKey(nextComponentId)) {
+//					processedComponentsSolventMap.put(nextComponentId, new TreeSet<String>());
+//					componentId = nextComponentId;
+//				}
+			}
+			rs.close();
+			if(componentId != null) {
+				
+				String mixName = "MetaSci-" +
+						StringUtils.leftPad(Integer.toString(mlo.getMixNum()), 2, "0");
+				CompoundMultiplexMixture mix = mixtureSet.stream().
+						filter(m -> m.getName().equals(mixName)).findFirst().orElse(null);
+				if(mix != null 
+						//	&& !processedComponentsSolventMap.get(componentId).contains(mlo.getSolventId())
+						) {					
+					
+					insertPs.setString(1, mix.getId());
+					insertPs.setString(2, componentId);
+					insertPs.setDouble(3, mlo.getConc());
+					insertPs.setString(4, mlo.getSolventId());
+					
+					if(mlo.getXlogp() != null && !mlo.getXlogp().equals(Double.NaN))
+						insertPs.setDouble(5, mlo.getXlogp());
+					else
+						insertPs.setNull(5, java.sql.Types.NULL);
+					
+					insertPs.setDouble(6, mlo.getVolume());
+					insertPs.executeUpdate();
+				}
+				//processedComponentsSolventMap.get(componentId).add(mlo.getSolventId());
+			}
+			else {
+				System.out.println(mlo.getName() + " not found");
+			}
+		}		
+		ps.close();
+		insertPs.close();
+		ConnectionManager.releaseConnection(conn);	
+		
+		//QRMZSPFSDQBLIX-UHFFFAOYSA-N
+
+		System.out.println("***");
+	}	
+	
+	private static void uploadMultiplexSolvents() {
+		
+		String[] solventNames = new String[] {
+				"0.1M NH4OH",
+				"0.1N NaOH",
+				"1:1 Water:Acetonitrile",
+				"1:13 Water:DMSO",
+				"1M Formic acid",
+				"1M HCl",
+				"1M NaOH",
+				"1M NH4OH",
+				"4M NH4OH in MeOH",
+				"50:50 Water/EtOH",
+				"80% EtOH",
+				"85% EtOH",
+				"87% EtOH",
+				"89% EtOH",
+				"91% EtOH",
+				"Acetic acid",
+				"Acetone",
+				"Acetonitrile",
+				"Chloroform",
+				"DMF",
+				"DMSO",
+				"EtOH",
+				"EtOH (90%)",
+				"EtOH (MeOH pref)",
+				"MeOH",
+				"Water"
+		};
+		for(String sn : solventNames) {
+			
+			
+			try {
+				CompoundMultiplexUtils.addNewSolvent(new MobilePhase(null, sn));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	

@@ -28,7 +28,7 @@ import java.util.Collection;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
-import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponentTmp;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
@@ -99,8 +99,8 @@ public class LoadCompoundCollectionTask extends AbstractTask {
 		}
 		while(rs.next()) {
 			
-			CompoundCollectionComponentTmp component = 
-					new CompoundCollectionComponentTmp(
+			CompoundCollectionComponent component = 
+					new CompoundCollectionComponent(
 							rs.getString("CC_COMPONENT_ID"), collectionId, rs.getString("CAS"));
 			CompoundIdentity cid = 
 					new CompoundIdentity(CompoundDatabaseEnum.getCompoundDatabaseByName(

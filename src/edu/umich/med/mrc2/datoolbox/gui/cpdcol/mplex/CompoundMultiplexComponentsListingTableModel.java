@@ -19,46 +19,84 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.tables;
+package edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-public class PropertiesTableModel extends BasicTableModel {
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
+import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
+
+public class CompoundMultiplexComponentsListingTableModel extends BasicTableModel {
 
 	/**
-	 * 
+	 *
 	 */
-	private static final long serialVersionUID = 5122553444280341859L;
-	public static final String PROPERTY_COLUMN = "Property";
-	public static final String VALUE_COLUMN = "Value";
+	private static final long serialVersionUID = 3707538261469467980L;
 
-	public PropertiesTableModel() {
+
+	public static final String ID_COLUMN = "ID";
+	public static final String NAME_COLUMN = "Name";
+
+	public CompoundMultiplexComponentsListingTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(PROPERTY_COLUMN, Object.class, false),
-			new ColumnContext(VALUE_COLUMN, Object.class, false)
+			new ColumnContext(ID_COLUMN, String.class, false),
+			new ColumnContext(NAME_COLUMN, CompoundMultiplexMixture.class, false),
 		};
 	}
 
-	public void setTableModelFromPropertyMap(
-			Map<? extends Object,? extends Object>properties) {
+	public void setTableModelFromCompoundMultiplexMixtureCollection(
+			Collection<CompoundMultiplexMixture> multiplexes) {
 
 		setRowCount(0);
-		if(properties == null || properties.isEmpty())
-			return;
-		
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		for (Entry<? extends Object, ? extends Object> entry : properties.entrySet()) {
 
-			Object[] obj = { 
-					entry.getKey(), 
-					entry.getValue(), 
+		for(CompoundMultiplexMixture multiplex : multiplexes){
+
+			Object[] obj = {
+					multiplex.getId(),
+					multiplex,
 				};
 			rowData.add(obj);
 		}
 		addRows(rowData);
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

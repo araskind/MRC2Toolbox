@@ -126,7 +126,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponentTmp;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
@@ -306,8 +306,8 @@ public class RegexTest {
 							cas = value;
 					}
 					if(cas != null && !cas.isEmpty()) {
-						CompoundCollectionComponentTmp ccc = 
-								new CompoundCollectionComponentTmp(collectionId, cas);
+						CompoundCollectionComponent ccc = 
+								new CompoundCollectionComponent(collectionId, cas);
 						ccc.getMetadata().putAll(metadata);
 						try {
 							CompoundMultiplexUtils.insertTemporaryCCComponent(ccc, conn);

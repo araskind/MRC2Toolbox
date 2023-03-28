@@ -31,20 +31,20 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 
-public class CompoundMultiplexListingTable extends BasicTable {
+public class CompoundMultiplexComponentsListingTable extends BasicTable {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -3817580957098149548L;
 
-	private CompoundMultiplexListingTableModel model;
+	private CompoundMultiplexComponentsListingTableModel model;
 
-	public CompoundMultiplexListingTable() {
+	public CompoundMultiplexComponentsListingTable() {
 
 		super();
 
-		model = new CompoundMultiplexListingTableModel();
+		model = new CompoundMultiplexComponentsListingTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);

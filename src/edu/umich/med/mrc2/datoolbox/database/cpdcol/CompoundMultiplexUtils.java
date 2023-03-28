@@ -31,7 +31,8 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
-import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponentTmp;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
@@ -149,7 +150,7 @@ public class CompoundMultiplexUtils {
 	 * */
 	
 	public static void insertTemporaryCCComponent(
-			CompoundCollectionComponentTmp component, Connection conn) throws Exception {
+			CompoundCollectionComponent component, Connection conn) throws Exception {
 		
 		String query  = 
 				"INSERT INTO COMPOUND_COLLECTION_COMPONENTS "
@@ -321,7 +322,62 @@ public class CompoundMultiplexUtils {
 		return metadataFields;
 	}
 	
+	public static Collection<CompoundMultiplexMixture>getCompoundMultiplexMixtureList() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();		
+		Collection<CompoundMultiplexMixture>mixtureSet = 
+				getCompoundMultiplexMixtureList(conn);
+		ConnectionManager.releaseConnection(conn);
+		return mixtureSet;
+	}
 	
+	public static Collection<CompoundMultiplexMixture>getCompoundMultiplexMixtureList(
+			Connection conn) throws Exception {
+		
+		Collection<CompoundMultiplexMixture>mixtureSet = 
+				new TreeSet<CompoundMultiplexMixture>();
+		String query  = 
+				"SELECT MIX_ID, MIX_NAME FROM COMPOUND_MULTIPLEX_MIXTURE "
+				+ "ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			CompoundMultiplexMixture p = new CompoundMultiplexMixture(
+					rs.getString("MIX_ID"), 
+					rs.getString("MIX_NAME"));
+			mixtureSet.add(p);
+		}
+		rs.close();		
+		ps.close();
+		return mixtureSet;
+	}
+	
+	public static void addCompoundMultiplexMixture(
+			CompoundMultiplexMixture newMixture) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();		
+		addCompoundMultiplexMixture(newMixture, conn);
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void addCompoundMultiplexMixture(
+			CompoundMultiplexMixture newMixture, Connection conn) throws Exception {
+		String query  = 
+				"INSERT INTO COMPOUND_MULTIPLEX_MIXTURE "
+				+ "(MIX_ID, MIX_NAME) VALUES (?,?)";
+		PreparedStatement ps = conn.prepareStatement(query);
+		String nextId = SQLUtils.getNextIdFromSequence(conn, 
+				"COMPOUND_MULTIPLEX_MIXTURE_SEQ",
+				DataPrefix.COMPOUND_MULTIPLEX_MIXTURE,
+				"0",
+				5);
+		ps.setString(1, nextId);
+		ps.setString(2, newMixture.getName());
+		ps.executeUpdate();
+		ps.close();
+		newMixture.setId(nextId);
+	}
 }
 
 

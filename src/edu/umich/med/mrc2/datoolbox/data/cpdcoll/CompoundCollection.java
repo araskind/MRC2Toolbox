@@ -30,7 +30,7 @@ public class CompoundCollection implements Comparable<CompoundCollection>{
 	String name;
 	String description;
 	String url;
-	Collection<CompoundCollectionComponentTmp>components;
+	Collection<CompoundCollectionComponent>components;
 	
 	public CompoundCollection(String id, String name) {
 		this(id, name, null, null);
@@ -43,7 +43,7 @@ public class CompoundCollection implements Comparable<CompoundCollection>{
 		this.name = name;
 		this.description = description;
 		this.url = url;
-		components = new ArrayList<CompoundCollectionComponentTmp>();
+		components = new ArrayList<CompoundCollectionComponent>();
 	}
 
 	public String getId() {
@@ -116,11 +116,11 @@ public class CompoundCollection implements Comparable<CompoundCollection>{
 		this.url = url;
 	}
 	
-	public void addTempComponent(CompoundCollectionComponentTmp comp) {
+	public void addTempComponent(CompoundCollectionComponent comp) {
 		components.add(comp);
 	}
 
-	public Collection<CompoundCollectionComponentTmp> getComponents() {
+	public Collection<CompoundCollectionComponent> getComponents() {
 		return components;
 	}
 }

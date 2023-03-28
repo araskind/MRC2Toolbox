@@ -26,7 +26,7 @@ import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 
-public class CompoundCollectionComponentTmp {
+public class CompoundCollectionComponent {
 
 	private String id;
 	private String collectionId;
@@ -34,7 +34,7 @@ public class CompoundCollectionComponentTmp {
 	private Map<CpdMetadataField,String>metadata;
 	private CompoundIdentity cid;
 	
-	public CompoundCollectionComponentTmp(String id, String collectionId, String cas) {
+	public CompoundCollectionComponent(String id, String collectionId, String cas) {
 		super();
 		this.id = id;
 		this.collectionId = collectionId;
@@ -42,7 +42,7 @@ public class CompoundCollectionComponentTmp {
 		metadata = new TreeMap<CpdMetadataField,String>();
 	}
 
-	public CompoundCollectionComponentTmp(String collectionId, String cas) {
+	public CompoundCollectionComponent(String collectionId, String cas) {
 		this(null, collectionId, cas);
 	}
 
@@ -79,10 +79,10 @@ public class CompoundCollectionComponentTmp {
 		if (obj == null)
 			return false;
 
-		if (!CompoundCollectionComponentTmp.class.isAssignableFrom(obj.getClass()))
+		if (!CompoundCollectionComponent.class.isAssignableFrom(obj.getClass()))
 			return false;
 
-		final CompoundCollectionComponentTmp other = (CompoundCollectionComponentTmp) obj;
+		final CompoundCollectionComponent other = (CompoundCollectionComponent) obj;
 
 		if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
 			return false;
