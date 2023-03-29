@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixtureComponent;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableCompoundMultiplexComponentsListingTable extends DefaultSingleCDockable{
@@ -47,9 +48,16 @@ public class DockableCompoundMultiplexComponentsListingTable extends DefaultSing
 		add(new JScrollPane(multiplexComponentsListingTable));
 	}
 
-	public void setTableModelFromCompoundMultiplexMixtureCollection(
-			Collection<CompoundMultiplexMixture> multiplexes)  {
-		multiplexComponentsListingTable.setTableModelFromCompoundMultiplexMixtureCollection(multiplexes);
+	public void setTableModelFromCompoundMultiplexMixtureComponents(
+			Collection<CompoundMultiplexMixtureComponent>components) {
+		multiplexComponentsListingTable.
+			setTableModelFromCompoundMultiplexMixtureComponents(components);
+	}
+	
+	public void setTableModelFromCompoundMultiplexMixtures(
+			Collection<CompoundMultiplexMixture> mixtures) {
+		multiplexComponentsListingTable.
+			setTableModelFromCompoundMultiplexMixtures(mixtures);
 	}
 
 	/**
@@ -63,7 +71,7 @@ public class DockableCompoundMultiplexComponentsListingTable extends DefaultSing
 		multiplexComponentsListingTable.clearTable();
 	}
 
-	public Collection<CompoundMultiplexMixture> getSelectedMultiplexMixtures() {
-		return multiplexComponentsListingTable.getSelectedMultiplexMixtures();
+	public CompoundMultiplexMixtureComponent getSelectedCompoundMultiplexMixtureComponent() {
+		return multiplexComponentsListingTable.getSelectedCompoundMultiplexMixtureComponent();
 	}
 }

@@ -21,12 +21,12 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
 
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixtureComponent;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
@@ -46,34 +46,37 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 
 		model = new CompoundMultiplexComponentsListingTableModel();
 		setModel(model);
-		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
 
-	public void setTableModelFromCompoundMultiplexMixtureCollection(
-			Collection<CompoundMultiplexMixture> multiplexes)  {
+	public void setTableModelFromCompoundMultiplexMixtureComponents(
+			Collection<CompoundMultiplexMixtureComponent>components)   {
 
 		thf.setTable(null);
-		model.setTableModelFromCompoundMultiplexMixtureCollection(multiplexes);
+		model.setTableModelFromCompoundMultiplexMixtureComponents(components);
+		thf.setTable(this);
+		tca.adjustColumns();
+	}
+	
+	public void setTableModelFromCompoundMultiplexMixtures(
+			Collection<CompoundMultiplexMixture>mixtures)   {
+
+		thf.setTable(null);
+		model.setTableModelFromCompoundMultiplexMixtures(mixtures);
 		thf.setTable(this);
 		tca.adjustColumns();
 	}
 
-	public Collection<CompoundMultiplexMixture> getSelectedMultiplexMixtures() {
+	public CompoundMultiplexMixtureComponent getSelectedCompoundMultiplexMixtureComponent() {
 
-		Collection<CompoundMultiplexMixture>selectedMultiplexMixtures = 
-				new ArrayList<CompoundMultiplexMixture>();
-		int[] selectedRows = getSelectedRows();
-		if(selectedRows.length == 0)
-			return selectedMultiplexMixtures;
-		
-		int idCol = model.getColumnIndex(CompoundMultiplexListingTableModel.NAME_COLUMN);
-		for(int i : selectedRows)
-			selectedMultiplexMixtures.add(
-				((CompoundMultiplexMixture) model.getValueAt(convertRowIndexToModel(i), idCol)));
+		int row = getSelectedRow();
+		if(row == -1)
+			return null;
 
-		return selectedMultiplexMixtures;
+		return (CompoundMultiplexMixtureComponent) model.getValueAt(convertRowIndexToModel(row), 
+				model.getColumnIndex(CompoundMultiplexComponentsListingTableModel.NAME_COLUMN));
 	}
 }
 

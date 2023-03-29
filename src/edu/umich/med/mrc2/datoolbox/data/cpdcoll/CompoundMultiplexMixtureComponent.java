@@ -87,4 +87,21 @@ public class CompoundMultiplexMixtureComponent {
 	public void setCCComponent(CompoundCollectionComponent component) {
 		this.component = component;
 	}
+	
+	@Override
+	public String toString() {
+		
+		if(component == null)
+			return cccid;
+		
+		if(component.getCid() == null)
+			return component.getCas();
+		
+		return component.getCid().getCommonName();
+	}
 }
+
+
+
+
+

@@ -99,20 +99,35 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1672780507271" orientation="VERTICAL" divider="0.4090909090909091">
-											<node nodeId="1672780507273" orientation="HORIZONTAL" divider="0.75">
-												<leaf id="0" nodeId="1672780507275">
-													<placeholders>
-														<placeholder>dock.single.DockableCompoundCollectionListingTable</placeholder>
-													</placeholders>
+										<node nodeId="1680054896325" orientation="VERTICAL" divider="0.4090909090909091">
+											<node nodeId="1680054896327" orientation="HORIZONTAL" divider="0.75">
+												<leaf id="0" nodeId="1680054896333">
+													<placeholder-map>
+														<version>0</version>
+														<format>dock.PlaceholderList</format>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableCompoundMultiplexListingTable</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+														<entry>
+															<key shared="false">
+																<placeholder>dock.single.DockableCollectionComponentPropertiesTable</placeholder>
+															</key>
+															<item key="convert" type="b">true</item>
+															<item key="convert-keys" type="a"/>
+														</entry>
+													</placeholder-map>
 												</leaf>
-												<leaf id="1" nodeId="1672780507277">
+												<leaf id="2" nodeId="1680054896335">
 													<placeholders>
 														<placeholder>dock.single.CpdCollectionsPanelDockableMolStructurePanel</placeholder>
 													</placeholders>
 												</leaf>
 											</node>
-											<leaf id="2" nodeId="1672780507279">
+											<leaf id="1" nodeId="1680054896337">
 												<placeholders>
 													<placeholder>dock.single.CpdCollectionCompoundPropertiesTable</placeholder>
 												</placeholders>
@@ -128,10 +143,69 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableCompoundCollectionListingTable">
-										<replacement id="dockablesingle DockableCompoundCollectionListingTable"/>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>1</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableCompoundMultiplexListingTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableCompoundMultiplexListingTable</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableCollectionComponentPropertiesTable</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableCollectionComponentPropertiesTable</item>
+											</entry>
+										</placeholders>
+									</layout>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableCompoundMultiplexListingTable">
+												<replacement id="dockablesingle DockableCompoundMultiplexListingTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableCompoundMultiplexListingTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.DockableCollectionComponentPropertiesTable">
+												<replacement id="dockablesingle DockableCollectionComponentPropertiesTable"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>DockableCollectionComponentPropertiesTable</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.CpdCollectionCompoundPropertiesTable">
+										<replacement id="dockablesingle CpdCollectionCompoundPropertiesTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableCompoundCollectionListingTable</id>
+											<id>CpdCollectionCompoundPropertiesTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -142,16 +216,6 @@
 										<replacement id="dockablesingle CpdCollectionsPanelDockableMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>CpdCollectionsPanelDockableMolStructurePanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.CpdCollectionCompoundPropertiesTable">
-										<replacement id="dockablesingle CpdCollectionCompoundPropertiesTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>CpdCollectionCompoundPropertiesTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -185,15 +249,19 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DockableCompoundCollectionListingTable" current="dock.mode.normal">
-							<history/>
-							<properties/>
-						</entry>
 						<entry id="single CpdCollectionCompoundPropertiesTable" current="dock.mode.normal">
 							<history/>
 							<properties/>
 						</entry>
 						<entry id="single CpdCollectionsPanelDockableMolStructurePanel" current="dock.mode.normal">
+							<history/>
+							<properties/>
+						</entry>
+						<entry id="single DockableCompoundMultiplexListingTable" current="dock.mode.normal">
+							<history/>
+							<properties/>
+						</entry>
+						<entry id="single DockableCollectionComponentPropertiesTable" current="dock.mode.normal">
 							<history/>
 							<properties/>
 						</entry>

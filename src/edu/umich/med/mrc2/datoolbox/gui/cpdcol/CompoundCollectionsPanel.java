@@ -34,10 +34,12 @@ import javax.swing.event.ListSelectionListener;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixtureComponent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
+import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.DockableCompoundMultiplexComponentsListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.DockableCompoundMultiplexListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo.DockableCompoundPropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
@@ -65,6 +67,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 	private DockableCompoundMultiplexListingTable compoundMultiplexListingTable;
 	private CompoundCollectionSelectorDialog compoundCollectionSelectorDialog;
 	private DockableCollectionComponentPropertiesTable componentPropertiesTable;
+	private DockableCompoundMultiplexComponentsListingTable multiplexComponentsListingTable;
 		
 	public CompoundCollectionsPanel() {
 		
@@ -80,19 +83,22 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		
 		componentPropertiesTable = 
 				new DockableCollectionComponentPropertiesTable();
-
 		molStructurePanel = new DockableMolStructurePanel(
 				"CpdCollectionsPanelDockableMolStructurePanel");
-		propertiesTable = new DockableCompoundPropertiesTable(
-				"CpdCollectionCompoundPropertiesTable");
 		compoundMultiplexListingTable =  
 				new DockableCompoundMultiplexListingTable();
 		compoundMultiplexListingTable.getTable().
 				getSelectionModel().addListSelectionListener(this);
+		multiplexComponentsListingTable = 
+				new DockableCompoundMultiplexComponentsListingTable();
+		multiplexComponentsListingTable.getTable().
+				getSelectionModel().addListSelectionListener(this);
+		propertiesTable = new DockableCompoundPropertiesTable(
+				"CpdCollectionCompoundPropertiesTable");
 
 		grid.add(0, 0, 75, 40, 
 				//	compoundTable, 
-				compoundMultiplexListingTable, componentPropertiesTable);
+				compoundMultiplexListingTable, componentPropertiesTable, multiplexComponentsListingTable);
 		grid.add(75, 0, 25, 40, molStructurePanel);
 		grid.add(0, 50, 100, 60, propertiesTable);
 		
@@ -176,6 +182,8 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 	private void loadCompoundMultiplexesData(Collection<CompoundMultiplexMixture> multiplexes) {
 		// TODO Auto-generated method stub
 		//		System.out.println("***");
+		compoundMultiplexListingTable.
+				setTableModelFromCompoundMultiplexMixtureCollection(multiplexes);
 	}
 
 	private void finalizeCompoundCollectionLoad(LoadCompoundCollectionTask task){
@@ -225,30 +233,22 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 				
 				Collection<CompoundMultiplexMixture> selectedMultiplexes = 
 						compoundMultiplexListingTable.getSelectedMultiplexMixtures();
-				if(selectedMultiplexes != null &&!selectedMultiplexes.isEmpty()) {
+				if(selectedMultiplexes != null && !selectedMultiplexes.isEmpty()) {
 					
+					multiplexComponentsListingTable.setTableModelFromCompoundMultiplexMixtures(selectedMultiplexes);
+					return;
+				}
+				
+			}
+			if(listener.equals(multiplexComponentsListingTable.getTable())) {
+				
+				CompoundMultiplexMixtureComponent mpc = 						
+						multiplexComponentsListingTable.getSelectedCompoundMultiplexMixtureComponent();
+				if(mpc != null) {
+					//	propertiesTable.setT
+					return;
 				}
 			}
-
-//			if(listener.equals(compoundTable.getTable())) {
-//				
-//				clearDataPanels();
-//				if (compoundTable.getSelectedCompound() != null)
-//					loadCompoundData(compoundTable.getSelectedCompound());
-//				
-//				return;
-//			}
-//			if(listener.equals(spectraTable.getTable())) {
-//				
-//				clearSpectrumDataPanels();
-//				MsMsLibraryFeature feature = spectraTable.getSelectedFeature();
-//				if(feature != null) {
-//					msTwoPlot.showTandemMs(feature);
-//					msTwoTable.setTableModelFromDataPoints(feature.getSpectrum(), feature.getParent());
-//					msmsLibraryEntryPropertiesTable.showMsMsLibraryFeatureProperties(feature);
-//				}
-//				return;
-//			}
 		}	
 	}
 	
