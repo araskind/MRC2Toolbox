@@ -34,6 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataFieldCategory;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
@@ -269,58 +270,7 @@ public class CompoundMultiplexUtils {
 		return solventList;
 	}
 	
-	public static Collection<CpdMetadataField>getCpdMetadataFields() throws Exception{
-		
-		Connection conn = ConnectionManager.getConnection();
-		Collection<CpdMetadataField>metadataFields = getCpdMetadataFields(conn);
-		ConnectionManager.releaseConnection(conn);
-		return metadataFields;
-	}
-
-	public static Collection<CpdMetadataField> getCpdMetadataFields(Connection conn) throws Exception{
-		
-		Collection<CpdMetadataField>metadataFields = new HashSet<CpdMetadataField>();
-		String query = 
-				"SELECT FIELD_ID, FIELD_NAME FROM "
-				+ "COMPOUND_COLLECTION_METADATA_FIELDS ORDER BY 1";
-		PreparedStatement ps = conn.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			
-			CpdMetadataField p = new CpdMetadataField(
-					rs.getString("FIELD_ID"), 
-					rs.getString("FIELD_NAME"));
-			metadataFields.add(p);
-		}
-		rs.close();
-		ps.close();
-		return metadataFields;
-	}
 	
-	public static Collection<CpdMetadataField> addCpdMetadataFields(
-			Collection<String>fields, Connection conn) throws Exception {
-		
-		Collection<CpdMetadataField>metadataFields = new HashSet<CpdMetadataField>();
-		String query = 
-				"INSERT INTO COMPOUND_COLLECTION_METADATA_FIELDS "
-				+ "(FIELD_ID, FIELD_NAME) VALUES(?,?)";
-		PreparedStatement ps = conn.prepareStatement(query);
-		for(String field : fields){
-			
-			String nextId = SQLUtils.getNextIdFromSequence(conn, 
-					"CCC_METADATA_FIELD_SEQ",
-					DataPrefix.CCC_METADATA_FIELD,
-					"0",
-					5);
-			ps.setString(1, nextId);
-			ps.setString(2, field);
-			ps.executeUpdate();
-			CpdMetadataField f = new CpdMetadataField(nextId, field);
-			metadataFields.add(f);
-		}
-		ps.close();
-		return metadataFields;
-	}
 	
 	public static Collection<CompoundMultiplexMixture>getCompoundMultiplexMixtureList() throws Exception {
 		
@@ -378,6 +328,93 @@ public class CompoundMultiplexUtils {
 		ps.close();
 		newMixture.setId(nextId);
 	}
+	
+	public static Collection<CpdMetadataField>getCpdMetadataFields() throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		Collection<CpdMetadataField>metadataFields = getCpdMetadataFields(conn);
+		ConnectionManager.releaseConnection(conn);
+		return metadataFields;
+	}
+
+	public static Collection<CpdMetadataField> getCpdMetadataFields(Connection conn) throws Exception{
+		
+		Collection<CpdMetadataFieldCategory>categories = 
+				getCpdMetadataFieldCategories(conn);
+		Collection<CpdMetadataField>metadataFields = 
+				new HashSet<CpdMetadataField>();
+		String query = 
+				"SELECT FIELD_ID, FIELD_NAME, FIELD_CATEGORY FROM "
+				+ "COMPOUND_COLLECTION_METADATA_FIELDS ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			
+			String categoryId = rs.getString("FIELD_CATEGORY");
+			CpdMetadataFieldCategory category = categories.stream().
+					filter(c -> c.getId().equals(categoryId)).
+					findFirst().orElse(null);
+			
+			CpdMetadataField p = new CpdMetadataField(
+					rs.getString("FIELD_ID"), 
+					rs.getString("FIELD_NAME"),
+					category);
+			metadataFields.add(p);
+		}
+		rs.close();
+		ps.close();
+		return metadataFields;
+	}
+	
+	public static Collection<CpdMetadataFieldCategory> getCpdMetadataFieldCategories(Connection conn) throws Exception{
+		
+		Collection<CpdMetadataFieldCategory>categories = new HashSet<CpdMetadataFieldCategory>();
+		String query = 
+				"SELECT CATEGORY_ID, CATEGORY_NAME FROM "
+				+ "COMPOUND_COLLECTION_METADATA_FIELD_CATEGORY ORDER BY 1";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		
+		while(rs.next()) {
+			
+			CpdMetadataFieldCategory p = new CpdMetadataFieldCategory(
+					rs.getString("CATEGORY_ID"), 
+					rs.getString("CATEGORY_NAME"));
+			categories.add(p);
+		}
+		rs.close();
+		ps.close();
+		return categories;
+	}
+
+	//
+	
+//	public static Collection<CpdMetadataField> addCpdMetadataFields(
+//			Collection<String>fields, Connection conn) throws Exception {
+//		
+//		Collection<CpdMetadataField>metadataFields = new HashSet<CpdMetadataField>();
+//		String query = 
+//				"INSERT INTO COMPOUND_COLLECTION_METADATA_FIELDS "
+//				+ "(FIELD_ID, FIELD_NAME) VALUES(?,?)";
+//		PreparedStatement ps = conn.prepareStatement(query);
+//		for(String field : fields){
+//			
+//			String nextId = SQLUtils.getNextIdFromSequence(conn, 
+//					"CCC_METADATA_FIELD_SEQ",
+//					DataPrefix.CCC_METADATA_FIELD,
+//					"0",
+//					5);
+//			ps.setString(1, nextId);
+//			ps.setString(2, field);
+//			ps.executeUpdate();
+//			CpdMetadataField f = new CpdMetadataField(nextId, field);
+//			metadataFields.add(f);
+//		}
+//		ps.close();
+//		return metadataFields;
+//	}
+	
+	
 }
 
 

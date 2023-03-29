@@ -25,7 +25,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -81,14 +80,8 @@ import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
@@ -126,8 +119,6 @@ import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.PepSearchOutputObject;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
-import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
@@ -147,7 +138,6 @@ import edu.umich.med.mrc2.datoolbox.data.thermo.ThermoCDWorkflow;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDbConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.cpdcol.CompoundMultiplexUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.DocumentUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
@@ -220,108 +210,7 @@ public class RegexTest {
 		}
 	}	
 	
-	private static void loadMetaSciCompoundsData() throws Exception {
-		
-		Workbook workbook = null;
-		String inputFile = "E:\\Development\\MRC2Toolbox\\Database\\MetaSci\\MetaSci-cpd4import.xlsx";
-		try {			
-			workbook  =  WorkbookFactory.create(new FileInputStream(inputFile));
-		} catch (EncryptedDocumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if(workbook == null)
-			return;
 
-		List<String>fields = new ArrayList<String>();
-		Map<CpdMetadataField,String>metadata = new TreeMap<CpdMetadataField,String>();
-		String collectionId = "CC0001";
-		for (Sheet sheet : workbook) {
-			
-			if(sheet.getSheetName().equals("Compounds")) {
-				
-			    int rowStart = sheet.getFirstRowNum();
-			    int rowEnd = sheet.getLastRowNum();
-			    int colEnd = getMaxColumnNumber(sheet);
-			    Row headerRow = sheet.getRow(rowStart);
-				int lastColumn = Math.max(headerRow.getLastCellNum(), colEnd);
-
-				//	Get fields
-				for (int cn = 0; cn < lastColumn; cn++) {
-					
-					Cell c = headerRow.getCell(cn, MissingCellPolicy.RETURN_BLANK_AS_NULL);
-					if (c != null) {
-
-						if(c.getCellType().equals(CellType.NUMERIC) 
-								|| c.getCellType().equals(CellType.FORMULA))
-							fields.add(Double.toString(c.getNumericCellValue()));
-
-						if(c.getCellType().equals(CellType.STRING))
-							fields.add(c.getStringCellValue().trim());
-					}
-				}
-				Connection conn = ConnectionManager.getConnection();
-				Collection<CpdMetadataField>mdFields = 
-						CompoundMultiplexUtils.addCpdMetadataFields(fields,  conn);
-				Map<Integer,CpdMetadataField>fieldMap = 
-						new TreeMap<Integer,CpdMetadataField>();
-				for(int i=0; i<fields.size(); i++) {
-					
-					String fieldName = fields.get(i);
-					CpdMetadataField mdf = mdFields.stream().
-						filter(f -> f.getName().equals(fieldName)).
-						findFirst().orElse(null);
-					if(mdf != null)
-						fieldMap.put(i,mdf);
-				}	
-				
-				for(int i=rowStart+1; i<=rowEnd; i++) {
-					
-					Row r = sheet.getRow(i);
-					metadata.clear();
-					String cas = null;
-					
-					for (int cn = 0; cn < lastColumn; cn++) {
-						
-						String value = null;
-						Cell c = r.getCell(cn, MissingCellPolicy.RETURN_BLANK_AS_NULL);
-						if (c != null) {
-							if(c.getCellType().equals(CellType.NUMERIC) 
-									|| c.getCellType().equals(CellType.FORMULA))
-								value = Double.toString(c.getNumericCellValue());
-	
-							if(c.getCellType().equals(CellType.STRING))
-								value = c.getStringCellValue().trim();
-						}
-						if(value != null)
-							metadata.put(fieldMap.get(cn), value);	
-						
-						if(fieldMap.get(cn).getName().equals("Cas"))
-							cas = value;
-					}
-					if(cas != null && !cas.isEmpty()) {
-						CompoundCollectionComponent ccc = 
-								new CompoundCollectionComponent(collectionId, cas);
-						ccc.getMetadata().putAll(metadata);
-						try {
-							CompoundMultiplexUtils.insertTemporaryCCComponent(ccc, conn);
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}					
-				}
-				ConnectionManager.releaseConnection(conn);
-			}
-		}
-	}
-	
 	private static int getMaxColumnNumber(Sheet sheet) {
 
 	    int rowStart = sheet.getFirstRowNum();
@@ -7237,6 +7126,109 @@ public class RegexTest {
 			e.printStackTrace();
 		}		
 	}
+	
+//	private static void loadMetaSciCompoundsData() throws Exception {
+//		
+//		Workbook workbook = null;
+//		String inputFile = "E:\\Development\\MRC2Toolbox\\Database\\MetaSci\\MetaSci-cpd4import.xlsx";
+//		try {			
+//			workbook  =  WorkbookFactory.create(new FileInputStream(inputFile));
+//		} catch (EncryptedDocumentException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		if(workbook == null)
+//			return;
+//
+//		List<String>fields = new ArrayList<String>();
+//		Map<CpdMetadataField,String>metadata = new TreeMap<CpdMetadataField,String>();
+//		String collectionId = "CC0001";
+//		for (Sheet sheet : workbook) {
+//			
+//			if(sheet.getSheetName().equals("Compounds")) {
+//				
+//			    int rowStart = sheet.getFirstRowNum();
+//			    int rowEnd = sheet.getLastRowNum();
+//			    int colEnd = getMaxColumnNumber(sheet);
+//			    Row headerRow = sheet.getRow(rowStart);
+//				int lastColumn = Math.max(headerRow.getLastCellNum(), colEnd);
+//
+//				//	Get fields
+//				for (int cn = 0; cn < lastColumn; cn++) {
+//					
+//					Cell c = headerRow.getCell(cn, MissingCellPolicy.RETURN_BLANK_AS_NULL);
+//					if (c != null) {
+//
+//						if(c.getCellType().equals(CellType.NUMERIC) 
+//								|| c.getCellType().equals(CellType.FORMULA))
+//							fields.add(Double.toString(c.getNumericCellValue()));
+//
+//						if(c.getCellType().equals(CellType.STRING))
+//							fields.add(c.getStringCellValue().trim());
+//					}
+//				}
+//				Connection conn = ConnectionManager.getConnection();
+//				Collection<CpdMetadataField>mdFields = 
+//						CompoundMultiplexUtils.addCpdMetadataFields(fields,  conn);
+//				Map<Integer,CpdMetadataField>fieldMap = 
+//						new TreeMap<Integer,CpdMetadataField>();
+//				for(int i=0; i<fields.size(); i++) {
+//					
+//					String fieldName = fields.get(i);
+//					CpdMetadataField mdf = mdFields.stream().
+//						filter(f -> f.getName().equals(fieldName)).
+//						findFirst().orElse(null);
+//					if(mdf != null)
+//						fieldMap.put(i,mdf);
+//				}	
+//				
+//				for(int i=rowStart+1; i<=rowEnd; i++) {
+//					
+//					Row r = sheet.getRow(i);
+//					metadata.clear();
+//					String cas = null;
+//					
+//					for (int cn = 0; cn < lastColumn; cn++) {
+//						
+//						String value = null;
+//						Cell c = r.getCell(cn, MissingCellPolicy.RETURN_BLANK_AS_NULL);
+//						if (c != null) {
+//							if(c.getCellType().equals(CellType.NUMERIC) 
+//									|| c.getCellType().equals(CellType.FORMULA))
+//								value = Double.toString(c.getNumericCellValue());
+//	
+//							if(c.getCellType().equals(CellType.STRING))
+//								value = c.getStringCellValue().trim();
+//						}
+//						if(value != null)
+//							metadata.put(fieldMap.get(cn), value);	
+//						
+//						if(fieldMap.get(cn).getName().equals("Cas"))
+//							cas = value;
+//					}
+//					if(cas != null && !cas.isEmpty()) {
+//						CompoundCollectionComponent ccc = 
+//								new CompoundCollectionComponent(collectionId, cas);
+//						ccc.getMetadata().putAll(metadata);
+//						try {
+//							CompoundMultiplexUtils.insertTemporaryCCComponent(ccc, conn);
+//						} catch (Exception e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//					}					
+//				}
+//				ConnectionManager.releaseConnection(conn);
+//			}
+//		}
+//	}
+//	
 }
 
 

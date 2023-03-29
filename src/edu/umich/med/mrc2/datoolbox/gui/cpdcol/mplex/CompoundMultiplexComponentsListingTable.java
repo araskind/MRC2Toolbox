@@ -21,15 +21,30 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex;
 
+import java.awt.Cursor;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
+import javax.swing.table.TableRowSorter;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.compare.CompoundIdentityComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.MobilePhaseComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixtureComponent;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
+import edu.umich.med.mrc2.datoolbox.data.format.CompoundIdentityFormat;
+import edu.umich.med.mrc2.datoolbox.data.format.MobilePhaseFormat;
+import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MobilePhaseRenderer;
 
 public class CompoundMultiplexComponentsListingTable extends BasicTable {
 
@@ -40,6 +55,8 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 
 	private CompoundMultiplexComponentsListingTableModel model;
 
+	private MouseMotionAdapter mma;
+
 	public CompoundMultiplexComponentsListingTable() {
 
 		super();
@@ -47,7 +64,58 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 		model = new CompoundMultiplexComponentsListingTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		
+		rowSorter = 
+				new TableRowSorter<CompoundMultiplexComponentsListingTableModel>(model);
+		setRowSorter(rowSorter);
+		rowSorter.setComparator(
+				model.getColumnIndex(CompoundMultiplexComponentsListingTableModel.SOLVENT_COLUMN),
+				new MobilePhaseComparator(SortProperty.Name));
+		rowSorter.setComparator(
+				model.getColumnIndex(CompoundMultiplexComponentsListingTableModel.ACCESSION_COLUMN),
+				new CompoundIdentityComparator(SortProperty.ID));
+		
+		setDefaultRenderer(MobilePhase.class, 
+				new MobilePhaseRenderer(SortProperty.Name));
+		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
+		setDefaultRenderer(CompoundIdentity.class, msfIdRenderer);
+		
+		//	Database link adapter
+		mma = new MouseMotionAdapter() {
+
+			public void mouseMoved(MouseEvent e) {
+
+				Point p = e.getPoint();
+
+				if(columnModel.isColumnVisible(
+						columnModel.getColumnById(CompoundMultiplexComponentsListingTableModel.ACCESSION_COLUMN))) {
+
+					if (columnAtPoint(p) == 
+							columnModel.getColumnIndex(CompoundMultiplexComponentsListingTableModel.ACCESSION_COLUMN))
+						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+					else
+						setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				}
+				else
+					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			}
+		};
+		addMouseMotionListener(mma);
+		addMouseListener(msfIdRenderer);
+		addMouseMotionListener(msfIdRenderer);
+		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		thf.getParserModel().setFormat(
+				MobilePhase.class, new MobilePhaseFormat(SortProperty.Name));
+		thf.getParserModel().setComparator(
+				MobilePhase.class, new MobilePhaseComparator(SortProperty.Name));		
+		thf.getParserModel().setFormat(
+				CompoundIdentity.class, 
+				new CompoundIdentityFormat(CompoundIdentityField.DB_ID));
+		thf.getParserModel().setComparator(
+				CompoundIdentity.class, 
+				new CompoundIdentityComparator(SortProperty.ID));
+		
 		finalizeLayout();
 	}
 

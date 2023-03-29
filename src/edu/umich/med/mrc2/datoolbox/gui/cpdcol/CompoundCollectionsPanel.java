@@ -33,15 +33,17 @@ import javax.swing.event.ListSelectionListener;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixtureComponent;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.DockableCompoundMultiplexComponentsListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.DockableCompoundMultiplexListingTable;
-import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo.DockableCompoundPropertiesTable;
+import edu.umich.med.mrc2.datoolbox.gui.cpdcol.prop.DockableCompoundCollectionComponentPropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
@@ -62,11 +64,10 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 			new File(MRC2ToolBoxCore.configDir + "CompoundCollectionsPanel.layout");
 	
 //	private DockableCompoundCollectionListingTable compoundTable;
-	private DockableMolStructurePanel molStructurePanel;
-	private DockableCompoundPropertiesTable propertiesTable;
+	private DockableMolStructurePanel sourceMolStructurePanel, primaryMolStructurePanel;
+	private DockableCompoundCollectionComponentPropertiesTable propertiesTable;
 	private DockableCompoundMultiplexListingTable compoundMultiplexListingTable;
 	private CompoundCollectionSelectorDialog compoundCollectionSelectorDialog;
-	private DockableCollectionComponentPropertiesTable componentPropertiesTable;
 	private DockableCompoundMultiplexComponentsListingTable multiplexComponentsListingTable;
 		
 	public CompoundCollectionsPanel() {
@@ -81,10 +82,13 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 //		compoundTable.getTable().addCompoundPopupListener(this);
 //		compoundTable.getTable().getSelectionModel().addListSelectionListener(this);
 		
-		componentPropertiesTable = 
-				new DockableCollectionComponentPropertiesTable();
-		molStructurePanel = new DockableMolStructurePanel(
-				"CpdCollectionsPanelDockableMolStructurePanel");
+		sourceMolStructurePanel = new DockableMolStructurePanel(
+				"CpdCollectionsPanelSourceMolStructurePanel");
+		sourceMolStructurePanel.setTitleText("Source compound structure");
+		primaryMolStructurePanel = new DockableMolStructurePanel(
+				"CpdCollectionsPanelPrimaryMolStructurePanel");
+		primaryMolStructurePanel.setTitleText("Primary compound structure");
+		
 		compoundMultiplexListingTable =  
 				new DockableCompoundMultiplexListingTable();
 		compoundMultiplexListingTable.getTable().
@@ -93,17 +97,17 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 				new DockableCompoundMultiplexComponentsListingTable();
 		multiplexComponentsListingTable.getTable().
 				getSelectionModel().addListSelectionListener(this);
-		propertiesTable = new DockableCompoundPropertiesTable(
-				"CpdCollectionCompoundPropertiesTable");
+		propertiesTable = new DockableCompoundCollectionComponentPropertiesTable();
 
 		grid.add(0, 0, 75, 40, 
 				//	compoundTable, 
-				compoundMultiplexListingTable, componentPropertiesTable, multiplexComponentsListingTable);
-		grid.add(75, 0, 25, 40, molStructurePanel);
+				compoundMultiplexListingTable, multiplexComponentsListingTable);
+		grid.add(75, 0, 25, 40, sourceMolStructurePanel, primaryMolStructurePanel);
 		grid.add(0, 50, 100, 60, propertiesTable);
 		
 		control.getContentArea().deploy(grid);
 		add(control.getContentArea(), BorderLayout.CENTER);
+		
 		initActions();
 		loadLayout(layoutConfigFile);
 		populatePanelsMenu();
@@ -235,17 +239,32 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 						compoundMultiplexListingTable.getSelectedMultiplexMixtures();
 				if(selectedMultiplexes != null && !selectedMultiplexes.isEmpty()) {
 					
+					clearDataPanels();
 					multiplexComponentsListingTable.setTableModelFromCompoundMultiplexMixtures(selectedMultiplexes);
 					return;
-				}
-				
+				}				
 			}
 			if(listener.equals(multiplexComponentsListingTable.getTable())) {
 				
 				CompoundMultiplexMixtureComponent mpc = 						
 						multiplexComponentsListingTable.getSelectedCompoundMultiplexMixtureComponent();
 				if(mpc != null) {
-					//	propertiesTable.setT
+					
+					CompoundCollectionComponent ccComponent = mpc.getCCComponent();
+					propertiesTable.setTableModelFromCompoundCollectionComponent(ccComponent);
+					
+					CpdMetadataField origSmilesEntry = ccComponent.getMetadata().keySet().stream().
+							filter(p -> p.getId().equals("CCCMF00123")).
+							findFirst().orElse(null);
+					if(origSmilesEntry != null)
+						sourceMolStructurePanel.showStructure(ccComponent.getMetadata().get(origSmilesEntry));
+					
+					CpdMetadataField primarySmilesEntry = ccComponent.getMetadata().keySet().stream().
+							filter(p -> p.getId().equals("CCCMF00127")).
+							findFirst().orElse(null);
+					if(primarySmilesEntry != null)
+						primaryMolStructurePanel.showStructure(ccComponent.getMetadata().get(primarySmilesEntry));					
+					
 					return;
 				}
 			}
@@ -258,21 +277,18 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 	
 	private void clearDataPanels() {
 
-//		narrativeDataPanel.clearPanel();
-//		synonymsTable.clearTable();
-//		dbLinksTable.clearTable();
-//		propertiesTable.clearTable();
-//		concentrationsTable.clearTable();
-//		spectraTable.clearTable();
-//		molStructurePanel.clearPanel();
-//		clearSpectrumDataPanels();
-//		clasyFireViewer.clearPanel();
+		sourceMolStructurePanel.clearPanel();
+		primaryMolStructurePanel.clearPanel();
+		propertiesTable.clearTable();
+
 	}
 
 	@Override
 	public void clearPanel() {
-		// TODO Auto-generated method stub
-
+		
+		clearDataPanels();
+		multiplexComponentsListingTable.clearTable();
+		compoundMultiplexListingTable.clearTable();
 	}
 
 	@Override
@@ -289,8 +305,6 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 
 	@Override
 	public File getLayoutFile() {
-		// TODO Auto-generated method stub
-		return null;
+		return layoutConfigFile;
 	}
-
 }

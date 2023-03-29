@@ -21,20 +21,15 @@
 
 package edu.umich.med.mrc2.datoolbox.data.cpdcoll;
 
-public class CpdMetadataField implements Comparable<CpdMetadataField>{
+public class CpdMetadataFieldCategory implements Comparable<CpdMetadataFieldCategory>{
 
-	private String id;
-	private String name;
-	private CpdMetadataFieldCategory category;
+	String id;
+	String name;
 	
-	public CpdMetadataField(
-			String id, 
-			String name,
-			CpdMetadataFieldCategory category) {
+	public CpdMetadataFieldCategory(String id, String name) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.category = category;
 	}
 
 	public String getId() {
@@ -53,10 +48,6 @@ public class CpdMetadataField implements Comparable<CpdMetadataField>{
 		this.name = name;
 	}
 	
-	public CpdMetadataFieldCategory getCategory() {
-		return category;
-	}
-	
     @Override
     public boolean equals(Object obj) {
 
@@ -66,10 +57,10 @@ public class CpdMetadataField implements Comparable<CpdMetadataField>{
         if (obj == null)
             return false;
 
-        if (!CpdMetadataField.class.isAssignableFrom(obj.getClass()))
+        if (!CpdMetadataFieldCategory.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        final CpdMetadataField other = (CpdMetadataField) obj;
+        final CpdMetadataFieldCategory other = (CpdMetadataFieldCategory) obj;
 
         if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
             return false;
@@ -86,7 +77,7 @@ public class CpdMetadataField implements Comparable<CpdMetadataField>{
     }
 
 	@Override
-	public int compareTo(CpdMetadataField o) {
+	public int compareTo(CpdMetadataFieldCategory o) {
 		return this.name.compareTo(o.getName());
 	}
 	
@@ -95,5 +86,3 @@ public class CpdMetadataField implements Comparable<CpdMetadataField>{
 		return name;
 	}
 }
-
-

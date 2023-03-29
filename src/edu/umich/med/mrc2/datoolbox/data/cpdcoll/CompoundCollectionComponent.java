@@ -39,7 +39,8 @@ public class CompoundCollectionComponent {
 		this.id = id;
 		this.collectionId = collectionId;
 		this.cas = cas;
-		metadata = new TreeMap<CpdMetadataField,String>();
+		metadata = 
+				new TreeMap<CpdMetadataField,String>(new CpdMetadataFieldComparator());
 	}
 
 	public CompoundCollectionComponent(String collectionId, String cas) {

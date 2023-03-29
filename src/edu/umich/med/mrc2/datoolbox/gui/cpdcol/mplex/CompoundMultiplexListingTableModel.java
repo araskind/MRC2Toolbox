@@ -39,12 +39,14 @@ public class CompoundMultiplexListingTableModel extends BasicTableModel {
 
 	public static final String ID_COLUMN = "ID";
 	public static final String NAME_COLUMN = "Name";
+	public static final String SIZE_COLUMN = "#Components";
 
 	public CompoundMultiplexListingTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
 			new ColumnContext(ID_COLUMN, String.class, false),
 			new ColumnContext(NAME_COLUMN, CompoundMultiplexMixture.class, false),
+			new ColumnContext(SIZE_COLUMN, Integer.class, false),
 		};
 	}
 
@@ -59,6 +61,7 @@ public class CompoundMultiplexListingTableModel extends BasicTableModel {
 			Object[] obj = {
 					multiplex.getId(),
 					multiplex,
+					multiplex.getComponents().size(),
 				};
 			rowData.add(obj);
 		}

@@ -1606,8 +1606,9 @@ public class MainWindow extends JFrame
 				File layoutFile = ((PersistentLayout)uiObject).getLayoutFile();
 				if(layoutFile == null) 
 					System.err.println("No layout file for " + ((DefaultCDockable)uiObject).getTitleText());		
-				else
+				else {
 					((PersistentLayout)uiObject).saveLayout(layoutFile);
+				}
 			}
 		}
 		saveLayout(layoutConfigFile);

@@ -19,50 +19,41 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.cpdcol;
-
-import java.util.Map;
+package edu.umich.med.mrc2.datoolbox.gui.cpdcol.prop;
 
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
-import edu.umich.med.mrc2.datoolbox.gui.tables.PropertiesTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class DockableCollectionComponentPropertiesTable extends DefaultSingleCDockable {
+public class DockableCompoundCollectionComponentPropertiesTable extends DefaultSingleCDockable {
 
-	private PropertiesTable propertiesTable;
+	private CompoundCollectionComponentPropertiesTable propertiesTable;
 	private static final Icon componentIcon = GuiUtils.getIcon("table", 16);
 
-	public DockableCollectionComponentPropertiesTable() {
+	public DockableCompoundCollectionComponentPropertiesTable() {
 
-		super("DockableCollectionComponentPropertiesTable", componentIcon, 
+		super("DockableCompoundCollectionComponentPropertiesTable", componentIcon, 
 				"Compound collection component properties", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
-		propertiesTable = new PropertiesTable();
-		propertiesTable.setPropertyValueRenderer(new WordWrapCellRenderer());
+		propertiesTable = new CompoundCollectionComponentPropertiesTable();
 		add(new JScrollPane(propertiesTable));		
 	}
 
 	/**
 	 * @return the libraryFeatureTable
 	 */
-	public PropertiesTable getTable() {
+	public CompoundCollectionComponentPropertiesTable getTable() {
 		return propertiesTable;
 	}
 
 	public synchronized void clearTable() {
 		propertiesTable.clearTable();
 	}
-	
-	public void setTableModelFromPropertyMap(Map<? extends Object,? extends Object>properties) {
-		propertiesTable.setTableModelFromPropertyMap(properties);
-	}
-	
-	public void showCompoundCollectionComponentTmpProperties(CompoundCollectionComponent component) {
-		propertiesTable.setTableModelFromPropertyMap(component.getMetadata());
+		
+	public void setTableModelFromCompoundCollectionComponent(CompoundCollectionComponent component) {
+		propertiesTable.setTableModelFromCompoundCollectionComponent(component);
 	}
 }

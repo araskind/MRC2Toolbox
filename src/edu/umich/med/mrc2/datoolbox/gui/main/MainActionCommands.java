@@ -694,6 +694,7 @@ public enum MainActionCommands {
 
 	//	Table copy
 	COPY_TABLE_DATA_COMMAND("Copy table data as TAB-separated"),
+	COPY_TABLE_SELECTED_ROWS_DATA_COMMAND("Copy selected table rows as TAB-separated"),
 	
 	//	Library MS table
 	COPY_SELECTED_MASSES_AS_CSV_COMMAND("Copy selected masses as CSV"),

@@ -416,8 +416,13 @@ public class BasicTable extends JTable implements ActionListener{
 		if(((Component) event.getSource()).getParent().equals(columnSelectorPopupMenu))
 			toggleColumnVisibility(event);
 	
-		if(event.getActionCommand().equals(MainActionCommands.COPY_TABLE_DATA_COMMAND.getName()))
+		if(command.equals(MainActionCommands.COPY_TABLE_DATA_COMMAND.getName()) 
+				|| command.equals(MainActionCommands.COPY_VISIBLE_TABLE_ROWS_COMMAND.getName()))
 			copyVisibleTableRowsToClipboard();
+		
+		if(command.equals(MainActionCommands.COPY_TABLE_SELECTED_ROWS_DATA_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_SELECTED_TABLE_ROWS_COMMAND.getName()))
+			copySelectedRowsToClipboard();
 	}
 	
 	public String getTableDataAsString() {

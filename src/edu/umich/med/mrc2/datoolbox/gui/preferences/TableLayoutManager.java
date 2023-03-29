@@ -95,6 +95,7 @@ public class TableLayoutManager {
 		if(tableLayoutFile.exists() && tableLayoutFile.canRead()) {
 			
 			tableLayouts.clear();
+			
 			SAXBuilder sax = new SAXBuilder();
 			Document doc = null;
 			try {
@@ -106,7 +107,21 @@ public class TableLayoutManager {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();					
 			}
+			
+//			Reader reader = new InputStreamReader(new FileInputStream(tableLayoutFile),"UTF-8");
+//			InputSource is = new InputSource(reader);
+//			is.setEncoding("UTF-8");
+//
+//			DocumentBuilder docBuilder = 
+//					DocumentBuilderFactory.newInstance().newDocumentBuilder();
+//			org.w3c.dom.Document document = docBuilder.parse(is);
+						
+//			org.jdom2.Element domElement = domBuider.build((org.w3c.dom.Element)document.getElementById("TableLayoutList"));			
 			Element tableLayoutsElement = doc.getRootElement();
+			
+//			DOMBuilder domBuider = new DOMBuilder();
+//			Element tableLayoutsElement = 
+//					domBuider.build((org.w3c.dom.Element)document.getDocumentElement());
 			List<Element> tableLayoutsList = 
 					tableLayoutsElement.getChildren(TableLayoutFields.TableLayout.name());
 			for(Element tableLayout : tableLayoutsList) {

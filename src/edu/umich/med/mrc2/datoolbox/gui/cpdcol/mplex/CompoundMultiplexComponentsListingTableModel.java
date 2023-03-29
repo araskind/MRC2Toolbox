@@ -47,7 +47,7 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 	public static final String ACCESSION_COLUMN = "Accession";
 	public static final String CAS_COLUMN = "CAS";	
 	public static final String SOLVENT_COLUMN = "Solvent";
-	public static final String CONCENTRATION_COLUMN = "Concentration, " +'\u00B5' + "M";
+	public static final String CONCENTRATION_COLUMN = "Concentration, uM";
 	public static final String XLOGP_COLUMN = "XLogP";
 	public static final String ALIQUOTE_VOLUME_COLUMN = "Subaliquot volume";
 
