@@ -61,16 +61,16 @@ import io.github.dan2097.jnainchi.InchiStatus;
 
 public class CompoundDatabaseScripts {
 	
-	private static String dataDir = "." + File.separator + "data" + File.separator;
-	private static String configDir = dataDir + "config" + File.separator;
-	private static org.slf4j.Logger logger;
+	public static String dataDir = "." + File.separator + "data" + File.separator;
+	public static String configDir = dataDir + "config" + File.separator;
+	public static org.slf4j.Logger logger;
 	
-	private static final String pubchemCidUrl = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
-	private static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
-	private static final SmilesParser smipar = new SmilesParser(builder);
-	private static final MDLV2000Reader molReader  = new MDLV2000Reader();
-	private static InChIGeneratorFactory igfactory;
-	private static InChIGenerator inChIGenerator;
+	public static final String pubchemCidUrl = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
+	public static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
+	public static final SmilesParser smipar = new SmilesParser(builder);
+	public static final MDLV2000Reader molReader  = new MDLV2000Reader();
+	public static InChIGeneratorFactory igfactory;
+	public static InChIGenerator inChIGenerator;
 	
 	public static void main(String[] args) {
 
@@ -93,12 +93,12 @@ public class CompoundDatabaseScripts {
 		}
 	}
 
-	private static void runScript() {
+	public static void runScript() {
 		// TODO Auto-generated method stub
 
 	}
 	
-	private static void scanCHEBIsdfForFields() {
+	public static void scanCHEBIsdfForFields() {
 
 		File chebiSDFfile = new File(
 				"E:\\DataAnalysis\\Databases\\_LATEST\\CHEBI-2023-01-01\\ChEBI_complete_3star.sdf");
@@ -131,7 +131,7 @@ public class CompoundDatabaseScripts {
 		}
 	}
 	
-	private static void generateInchiKeysFromSMILESforHMDBcompounds() throws Exception{
+	public static void generateInchiKeysFromSMILESforHMDBcompounds() throws Exception{
 		
 		igfactory = null;
 		try {
@@ -212,7 +212,7 @@ public class CompoundDatabaseScripts {
 		}
 	}
 	
-	private static void calculateHMDBFormulasAndChargesFromSmiles() throws Exception{
+	public static void calculateHMDBFormulasAndChargesFromSmiles() throws Exception{
 		
 		double toRound = 1000000.0d;
 		
@@ -267,7 +267,93 @@ public class CompoundDatabaseScripts {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
+	
+	public static void calculateMetaSciFormulasAndChargesFromSmiles() throws Exception{
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		double toRound = 1000000.0d;
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT CC_COMPONENT_ID, PRIMARY_SMILES "
+				+ "FROM COMPOUND_COLLECTION_COMPONENTS";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUND_COLLECTION_COMPONENTS "
+				+ "SET CHARGE_FROM_PRIMARY_SMILES = ?, FORMULA_FROM_PRIMARY_SMILES = ?, "
+				+ "INCHI_KEY_FROM_PRIMARY_SMILES = ?, MASS_FR0M_PRIMARY_SMILES = ? "
+				+ "WHERE CC_COMPONENT_ID = ?";
+		
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		ResultSet rs = ps.executeQuery();
 
+		int counter = 0;
+		while(rs.next()) {
+			
+			String componentId = rs.getString("CC_COMPONENT_ID");
+			String smiles = rs.getString("PRIMARY_SMILES");
+			String inchiKey = null;
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = 
+						Math.round(MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println(componentId + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println(componentId + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				updps.setInt(1, molFormula.getCharge());
+				updps.setString(2, mfFromFStringFromSmiles);
+				if(inchiKey != null)
+					updps.setString(3, inchiKey);
+				else
+					updps.setNull(3, java.sql.Types.NULL);
+				
+				updps.setDouble(4, smilesMass);
+				updps.setString(5, componentId);
+				updps.executeUpdate();
+			}
+			else {
+				System.out.println("Failed to convert SMILES for " + componentId + "\t" + smiles);
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
 }
 
 

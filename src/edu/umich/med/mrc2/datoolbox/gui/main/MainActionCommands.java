@@ -1210,6 +1210,12 @@ public enum MainActionCommands {
 	SELECT_COMPOUND_COLLECTION_COMMAND("Select compound collection"),
 	LOAD_COMPOUND_COLLECTION_COMMAND("Load compound collection"),
 	LOAD_COMPOUND_MULTIPLEXES_COMMAND("Load compound multiplex data"),
+	
+	SETUP_MULTIPLEXES_EXPORT_COMMAND("Set up compound multiplex data export"),
+	EXPORT_SELECTED_MULTIPLEXES_COMMAND("Export selected compound multiplex data"),
+	
+	EDIT_SELECTED_FIELD_COMMAND("Edit selected field"),
+	SAVE_CHANGES_COMMAND("Save changes"),
 	;
 
 	private final String name;

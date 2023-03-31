@@ -38,11 +38,12 @@ public class PropertiesTablePopupMenu extends JPopupMenu {
 	private static final long serialVersionUID = -6064748415801630180L;
 	private static final Icon copyAllIcon = GuiUtils.getIcon("copyWorklistToClipboard", 24);
 	private static final Icon copySelectedIcon = GuiUtils.getIcon("copySelectedToClipboard", 24);
-	
+	private static final Icon editIcon = GuiUtils.getIcon("edit", 24);
 
 	private JMenuItem 
 		copySelectedWithHeaderMenuItem,
-		copyAllWithHeaderMenuItem;
+		copyAllWithHeaderMenuItem,
+		editSelectedPropertyMenuItem;
 	
 	public PropertiesTablePopupMenu(ActionListener listener) {
 
@@ -56,6 +57,15 @@ public class PropertiesTablePopupMenu extends JPopupMenu {
 				MainActionCommands.COPY_VISIBLE_TABLE_ROWS_COMMAND.getName(), listener,
 				MainActionCommands.COPY_VISIBLE_TABLE_ROWS_COMMAND.getName());
 		copyAllWithHeaderMenuItem.setIcon(copyAllIcon);
+		
+		addSeparator();
+		
+		editSelectedPropertyMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.EDIT_SELECTED_FIELD_COMMAND.getName(), listener,
+				MainActionCommands.EDIT_SELECTED_FIELD_COMMAND.getName());
+		editSelectedPropertyMenuItem.setIcon(editIcon);
 	}
 }
+
+
 

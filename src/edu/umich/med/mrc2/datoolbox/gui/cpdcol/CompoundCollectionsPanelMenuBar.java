@@ -67,7 +67,6 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 	private static final Icon openCompoundCollectionIcon = GuiUtils.getIcon("openCompoundCollection", 24);
 	private static final Icon loadMultiplexDataIcon = GuiUtils.getIcon("loadMultiplexData", 24);
 	
-
 	// Menus
 	private JMenu
 		manageMenu,
@@ -99,6 +98,7 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 	
 	//	Export
 	private JMenuItem
+		exportMultiplexDataMenuItem,
 		exportMzRtLibraryMenuItem,
 		exportFilteredMzRtLibraryMenuItem,
 		exportReferenceMSMSLibraryMenuItem;
@@ -177,9 +177,14 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 //		
 //		add(importMenu);
 //		
-//		//	Export
-//		exportMenu = new JMenu("Export");
-//		exportMenu.setIcon(exportLibraryIconSmall);
+		//	Export
+		exportMenu = new JMenu("Export");
+		exportMenu.setIcon(exportLibraryIconSmall);
+		
+		exportMultiplexDataMenuItem = addItem(exportMenu, 
+				MainActionCommands.SETUP_MULTIPLEXES_EXPORT_COMMAND, 
+				exportLibraryIcon);
+		
 //		
 //		exportMzRtLibraryMenuItem = addItem(exportMenu, 
 //				MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND, 
@@ -194,7 +199,7 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 //				MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND, 
 //				libraryExportIcon);	//	TODO create different icon
 //		
-//		add(exportMenu);
+		add(exportMenu);
 //		
 //		//	Utilities
 //		utilitiesMenu = new JMenu("Utilities");

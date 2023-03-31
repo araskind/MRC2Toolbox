@@ -386,6 +386,25 @@ public class CompoundMultiplexUtils {
 		ps.close();
 		return categories;
 	}
+	
+	public static void updateMetadataFieldForComponent(
+			CompoundCollectionComponent component, 
+			CpdMetadataField field, 
+			String value) throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+			"UPDATE COMPOUND_COLLECTION_COMPONENT_METADATA "
+			+ "SET FIELD_VALUE = ? WHERE FIELD_ID = ? AND CC_COMPONENT_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, value);
+		ps.setString(2, field.getId());
+		ps.setString(3, component.getId());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);	
+		component.getMetadata().put(field, value);
+	}
 
 	//
 	

@@ -69,6 +69,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.input.DOMBuilder;
+import org.json.JSONObject;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
@@ -91,6 +92,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpdcol.CompoundMultiplexUtils;
 import edu.umich.med.mrc2.datoolbox.database.lipid.LipidOntologyUtils;
+import edu.umich.med.mrc2.datoolbox.dbparse.CompoundDatabaseScripts;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsFields;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsParser;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.MultiplexLoadTempObject;
@@ -99,6 +101,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.JSONUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
@@ -127,11 +130,18 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			
+			CompoundDatabaseScripts.calculateMetaSciFormulasAndChargesFromSmiles();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void classyFireTest() {
+
+		String url = "http://classyfire.wishartlab.com/entities/QNAYBMKLOCPYGJ-REOHCLBHSA-N.json";
+		JSONObject jso = JSONUtils.readJsonFromUrl(url);
+		System.out.println("***");
 	}
 	
 	private static void uploadMultiplexMixtures() throws Exception {

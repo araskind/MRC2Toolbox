@@ -164,27 +164,29 @@ public class BasicTable extends JTable implements ActionListener{
 	
 	public void clearTable() {
 		
-		if(thf != null) {
-			try {
-				thf.setTable(null);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-			}
-		}
+//		if(thf != null) {
+//			try {
+//				thf.setTable(null);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				//e.printStackTrace();
+//			}
+//		}
 		if(getModel().getRowCount() == 0)
 			return;
 
 		((BasicTableModel) this.getModel()).setRowCount(0);
 		
-		if(thf != null) {
-			try {
-				thf.setTable(this);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-			}
-		}
+//		if(thf != null) {
+//			try {
+//				AutoChoices mode = thf.getAutoChoices();
+//				thf = new TableFilterHeader(this, mode);
+//				//	thf.setTable(this);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				//e.printStackTrace();
+//			}
+//		}
 		if (tca != null)
 			tca.adjustColumns();
 	}

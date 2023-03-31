@@ -396,6 +396,8 @@ public class TestClass {
 	
 	private static void uploadClassyFireTaxNodesFromJson(File jsonDir) throws Exception {
 
+		//	http://classyfire.wishartlab.com/entities/PTPBWFSLLGAWPP-DHSNEXAOSA-N.json
+		
 		File[] files = jsonDir.listFiles((dir, name) -> name.endsWith(".json"));
 
 		Connection conn = ConnectionManager.getConnection();

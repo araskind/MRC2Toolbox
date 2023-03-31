@@ -41,13 +41,13 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class LoadCompoundMultiplexes extends AbstractTask {
+public class LoadCompoundMultiplexesTask extends AbstractTask {
 	
 	private Collection<CompoundMultiplexMixture>multiplexes;
 	private Collection<CpdMetadataField> metadataFields;
 	private Collection<MobilePhase>solvents;
 
-	public LoadCompoundMultiplexes() {
+	public LoadCompoundMultiplexesTask() {
 		super();
 	}
 
@@ -104,6 +104,7 @@ public class LoadCompoundMultiplexes extends AbstractTask {
 				+ "SOLVENT_ID, XLOGP, ALIQUOTE_VOLUME "
 				+ "FROM COMPOUND_MULTIPLEX_MIXTURE_COMPONENTS "
 				+ "WHERE MIX_ID = ? ORDER BY 1";
+		
 		PreparedStatement ps = conn.prepareStatement(query);
 		for(CompoundMultiplexMixture mplex : multiplexes) {
 			
@@ -145,8 +146,13 @@ public class LoadCompoundMultiplexes extends AbstractTask {
 		processed = 0;
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
-				"SELECT CC_ID, CAS, ACCESSION, NAME, SOURCE_DB FROM "
-				+ "COMPOUND_COLLECTION_COMPONENTS WHERE CC_COMPONENT_ID = ?";
+				"SELECT CC_ID, CAS, ACCESSION, NAME, SOURCE_DB,  " +
+				"PRIMARY_SMILES, PRIMARY_FORMULA, PRIMARY_MASS,  " +
+				"FORMULA_FROM_PRIMARY_SMILES, CHARGE_FROM_PRIMARY_SMILES,  " +
+				"MASS_FROM_PRIMARY_SMILES, PRIMARY_INCHI_KEY_SMILES_CONFLICT,  " +
+				"PRIMARY_SMILES_FORMULA_CONFLICT, PRIMARY_FORMULA_MASS_CONFLICT " +
+				"FROM COMPOUND_COLLECTION_COMPONENTS " + 
+				"WHERE CC_COMPONENT_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String metadataQueryuery = 
@@ -169,6 +175,25 @@ public class LoadCompoundMultiplexes extends AbstractTask {
 								rs.getString("SOURCE_DB")), rs.getString("ACCESSION"));
 				cid.setCommonName(rs.getString("NAME"));			
 				component.setCid(cid);
+				
+				component.setPrimary_smiles(rs.getString("PRIMARY_SMILES"));
+				component.setPrimary_formula(rs.getString("PRIMARY_FORMULA"));
+				if(rs.getString("PRIMARY_MASS") != null)
+					component.setPrimary_mass(Double.valueOf(rs.getString("PRIMARY_MASS")));
+				else {
+					System.err.println("Component "+ component.getId() + " has no primary mass");
+				}
+				component.setFormula_from_primary_smiles(rs.getString("FORMULA_FROM_PRIMARY_SMILES"));
+				component.setCharge_from_primary_smiles(Integer.valueOf(rs.getString("CHARGE_FROM_PRIMARY_SMILES")));
+				component.setMass_from_primary_smiles(Double.valueOf(rs.getString("MASS_FROM_PRIMARY_SMILES")));
+				
+				if(rs.getString("PRIMARY_FORMULA_MASS_CONFLICT") != null)
+					component.setPrimary_formula_mass_conflict(Double.valueOf(rs.getString("PRIMARY_FORMULA_MASS_CONFLICT")));
+				else {
+					System.err.println("Component "+ component.getId() + " has no primary formula mass conflict mass");
+				}
+				component.setPrimary_inchi_key_smiles_conflict(rs.getString("PRIMARY_INCHI_KEY_SMILES_CONFLICT"));
+				component.setPrimary_smiles_formula_conflict(rs.getString("PRIMARY_SMILES_FORMULA_CONFLICT"));			
 				
 				metadataPs.setString(1, component.getId());
 				mdrs = metadataPs.executeQuery();
@@ -195,7 +220,7 @@ public class LoadCompoundMultiplexes extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-		return new LoadCompoundMultiplexes();
+		return new LoadCompoundMultiplexesTask();
 	}
 
 	public Collection<CompoundMultiplexMixture> getMultiplexes() {

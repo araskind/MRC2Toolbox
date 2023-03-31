@@ -21,16 +21,24 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpdcol.prop;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataFieldComparator;
+import edu.umich.med.mrc2.datoolbox.database.cpdcol.CompoundMultiplexUtils;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
 public class CompoundCollectionComponentPropertiesTable extends BasicTable {
 
@@ -40,6 +48,8 @@ public class CompoundCollectionComponentPropertiesTable extends BasicTable {
 	private static final long serialVersionUID = 6761893383490446061L;
 	
 	private CompoundCollectionComponentPropertiesTableModel model;
+	private CompoundCollectionComponent compoundCollectionComponent;
+	private PropertyEditorDialog propertyEditorDialog;
 
 	public CompoundCollectionComponentPropertiesTable() {
 		super();
@@ -54,6 +64,14 @@ public class CompoundCollectionComponentPropertiesTable extends BasicTable {
 				setCellRenderer(wwr);
 		
 		addTablePopupMenu(new PropertiesTablePopupMenu(this));
+		addMouseListener(
+				new MouseAdapter() {
+					public void mouseClicked(MouseEvent e) {
+						if (e.getClickCount() == 2) {
+							editSelectedField();
+						}
+					}
+				});
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
@@ -61,10 +79,66 @@ public class CompoundCollectionComponentPropertiesTable extends BasicTable {
 
 	public void setTableModelFromCompoundCollectionComponent(
 			CompoundCollectionComponent component) {
-		thf.setTable(null);
+//		thf.setTable(null);
+		this.compoundCollectionComponent = component;
 		model.setTableModelFromCompoundCollectionComponent(component);
-		thf.setTable(this);
+//		thf.setTable(this);
 		tca.adjustColumns();
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent event) {
+		
+		super.actionPerformed(event);
+		String command = event.getActionCommand();
+		
+		if(command.equals(MainActionCommands.EDIT_SELECTED_FIELD_COMMAND.getName()))
+			editSelectedField();
+		
+		if(command.equals(MainActionCommands.SAVE_CHANGES_COMMAND.getName()))
+			saveChangesToSelectedField();		
+	}
+	
+	private void editSelectedField() {
+		
+		Entry<CpdMetadataField, String>propEntry =  getSelectedProperty();
+		if(propEntry == null)
+			return;
+		
+		propertyEditorDialog = new PropertyEditorDialog(
+				propEntry.getKey(), 
+				propEntry.getValue(), 
+				this);
+		
+		propertyEditorDialog.setLocationRelativeTo(null);
+		propertyEditorDialog.setVisible(true);
+	}
+
+	private void saveChangesToSelectedField() {
+		// TODO Auto-generated method stub
+		
+		String newValue = propertyEditorDialog.getPropertyValue();
+		if(newValue == null || newValue.isEmpty()) {
+			MessageDialog.showErrorMsg("Value can not be empty.", propertyEditorDialog);
+			return;
+		}		
+		try {
+			CompoundMultiplexUtils.updateMetadataFieldForComponent(
+					compoundCollectionComponent, 
+					propertyEditorDialog.getField(), 
+					newValue);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		setTableModelFromCompoundCollectionComponent(compoundCollectionComponent);
+		propertyEditorDialog.dispose();
+	}
+
+	public void clearTable() {
+		
+		super.clearTable();
+		compoundCollectionComponent = null;
 	}
 	
 	public Map<CpdMetadataField, String> getSelectedProperties() {
@@ -83,6 +157,24 @@ public class CompoundCollectionComponentPropertiesTable extends BasicTable {
 					(String)model.getValueAt(modelRow, valueCol));
 		}
 		return propertyMap;
+	}
+	
+	public Entry<CpdMetadataField, String> getSelectedProperty() {
+
+		int row = getSelectedRow();
+		if(row == -1)
+			return null;
+		
+		int modelRow = convertRowIndexToModel(row);
+		CpdMetadataField field = (CpdMetadataField)model.getValueAt(modelRow, 
+				model.getColumnIndex(CompoundCollectionComponentPropertiesTableModel.PROPERTY_COLUMN));
+		String value = (String)model.getValueAt(modelRow, 
+				model.getColumnIndex(CompoundCollectionComponentPropertiesTableModel.VALUE_COLUMN));
+
+		Entry<CpdMetadataField, String> tuple = 
+				new AbstractMap.SimpleEntry<CpdMetadataField, String>(field, value);
+
+		return tuple;
 	}
 
 }

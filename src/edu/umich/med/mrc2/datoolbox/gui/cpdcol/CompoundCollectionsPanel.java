@@ -22,12 +22,15 @@
 package edu.umich.med.mrc2.datoolbox.gui.cpdcol;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
+import javax.swing.JOptionPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -41,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
+import edu.umich.med.mrc2.datoolbox.gui.cpdcol.export.MultiplexExportSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.DockableCompoundMultiplexComponentsListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.DockableCompoundMultiplexListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.prop.DockableCompoundCollectionComponentPropertiesTable;
@@ -50,12 +54,14 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cpdcoll.LoadCompoundCollectionTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cpdcoll.LoadCompoundMultiplexes;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cpdcoll.LoadCompoundMultiplexesTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.cpdcoll.MultiplexDataExportTask;
 
 public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 
@@ -69,6 +75,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 	private DockableCompoundMultiplexListingTable compoundMultiplexListingTable;
 	private CompoundCollectionSelectorDialog compoundCollectionSelectorDialog;
 	private DockableCompoundMultiplexComponentsListingTable multiplexComponentsListingTable;
+	private MultiplexExportSetupDialog multiplexExportSetupDialog;
 		
 	public CompoundCollectionsPanel() {
 		
@@ -126,12 +133,63 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		
 		if(command.equals(MainActionCommands.LOAD_COMPOUND_MULTIPLEXES_COMMAND.getName()))
 			loadCompoundMultiplexes();
+		
+		if(command.equals(MainActionCommands.SETUP_MULTIPLEXES_EXPORT_COMMAND.getName()))
+			setupMultiplexDataExport();
+		
+		if(command.equals(MainActionCommands.EXPORT_SELECTED_MULTIPLEXES_COMMAND.getName()))
+			exportSelectedMultiplexData();		
+	}
+
+	private void setupMultiplexDataExport() {
+
+		Collection<CompoundMultiplexMixture> selectedMultiplexes = 
+				compoundMultiplexListingTable.getSelectedMultiplexMixtures();
+		if(selectedMultiplexes == null || selectedMultiplexes.isEmpty()) {
+			MessageDialog.showWarningMsg(
+					"Please select compound multiplexes to export", 
+					this.getContentPane());
+			return;
+		}	
+		multiplexExportSetupDialog = 
+				new MultiplexExportSetupDialog(selectedMultiplexes, this);
+		multiplexExportSetupDialog.setLocationRelativeTo(this.getContentPane());
+		multiplexExportSetupDialog.setVisible(true);
+	}
+
+	
+	private void exportSelectedMultiplexData() {
+
+		Collection<CompoundMultiplexMixture>selectedMultiplexes = 
+				multiplexExportSetupDialog.getMultiplexes();		
+		Collection<CpdMetadataField>exportFields =  
+				multiplexExportSetupDialog.getSelectedProperties();
+		if(exportFields == null || exportFields.isEmpty()) {
+			
+			MessageDialog.showErrorMsg(
+					"No fields selected for export", 
+					this.getContentPane());
+			return;
+		}
+		File outputFile = multiplexExportSetupDialog.getOutputFile();
+		if(outputFile == null) {
+			
+			MessageDialog.showErrorMsg(
+					"Output file not specified", 
+					this.getContentPane());
+			return;
+		}
+		MultiplexDataExportTask task = 
+				new MultiplexDataExportTask(
+						selectedMultiplexes, exportFields, outputFile);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);		
 	}
 	
 	private void loadCompoundMultiplexes() {
 
-		LoadCompoundMultiplexes task = 
-				new LoadCompoundMultiplexes();
+		LoadCompoundMultiplexesTask task = 
+				new LoadCompoundMultiplexesTask();
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);	
 	}
@@ -168,8 +226,11 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 			if (e.getSource().getClass().equals(LoadCompoundCollectionTask.class))
 				finalizeCompoundCollectionLoad((LoadCompoundCollectionTask) e.getSource());
 			
-			if (e.getSource().getClass().equals(LoadCompoundMultiplexes.class))
-				finalizeCompoundMultiplexesLoad((LoadCompoundMultiplexes) e.getSource());
+			if (e.getSource().getClass().equals(LoadCompoundMultiplexesTask.class))
+				finalizeCompoundMultiplexesLoad((LoadCompoundMultiplexesTask) e.getSource());
+			
+			if (e.getSource().getClass().equals(MultiplexDataExportTask.class))
+				finalizeMultiplexDataExportTask((MultiplexDataExportTask) e.getSource());		
 		}
 		if (e.getStatus() == TaskStatus.ERROR || e.getStatus() == TaskStatus.CANCELED) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -177,8 +238,8 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		}
 	}
 	
-	private void finalizeCompoundMultiplexesLoad(LoadCompoundMultiplexes task) {
-
+	private void finalizeCompoundMultiplexesLoad(LoadCompoundMultiplexesTask task) {
+		clearPanel();
 		Collection<CompoundMultiplexMixture> multiplexes = task.getMultiplexes();
 		loadCompoundMultiplexesData(multiplexes);
 	}
@@ -189,9 +250,29 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		compoundMultiplexListingTable.
 				setTableModelFromCompoundMultiplexMixtureCollection(multiplexes);
 	}
+	
+	private void finalizeMultiplexDataExportTask(MultiplexDataExportTask task) {
+		
+		File results = task.getOutputFile();
+		if(results.exists()) {
+
+			if(MessageDialog.showChoiceMsg("Export file created, do you want to open containing folder?",
+				this.getContentPane()) == JOptionPane.YES_OPTION) {
+				try {
+					Desktop.getDesktop().open(results.getParentFile());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
+		else {
+			MessageDialog.showErrorMsg("Failed to create results file", this.getContentPane());
+		}
+	}
 
 	private void finalizeCompoundCollectionLoad(LoadCompoundCollectionTask task){
-		// TODO Auto-generated method stub
+		clearPanel();
 		CompoundCollection collection = task.getCollection();
 		loadCompoundCollectionData(collection);
 	}
@@ -280,7 +361,6 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		sourceMolStructurePanel.clearPanel();
 		primaryMolStructurePanel.clearPanel();
 		propertiesTable.clearTable();
-
 	}
 
 	@Override

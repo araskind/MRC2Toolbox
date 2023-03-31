@@ -25,6 +25,7 @@ import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.text.DecimalFormat;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
@@ -44,7 +45,9 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MobilePhaseRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
 
 public class CompoundMultiplexComponentsListingTable extends BasicTable {
 
@@ -74,6 +77,11 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 		rowSorter.setComparator(
 				model.getColumnIndex(CompoundMultiplexComponentsListingTableModel.ACCESSION_COLUMN),
 				new CompoundIdentityComparator(SortProperty.ID));
+		
+		columnModel.getColumnById(CompoundMultiplexComponentsListingTableModel.CONFLICT_COLUMN)
+			.setCellRenderer(new RadioButtonRenderer());
+		columnModel.getColumnById(CompoundMultiplexComponentsListingTableModel.FORMULAS_DELTA_MASS_COLUMN)
+			.setCellRenderer(new FormattedDecimalRenderer(new DecimalFormat("###.######"), true));
 		
 		setDefaultRenderer(MobilePhase.class, 
 				new MobilePhaseRenderer(SortProperty.Name));
@@ -122,18 +130,18 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 	public void setTableModelFromCompoundMultiplexMixtureComponents(
 			Collection<CompoundMultiplexMixtureComponent>components)   {
 
-		thf.setTable(null);
+//		thf.setTable(null);
 		model.setTableModelFromCompoundMultiplexMixtureComponents(components);
-		thf.setTable(this);
+//		thf.setTable(this);
 		tca.adjustColumns();
 	}
 	
 	public void setTableModelFromCompoundMultiplexMixtures(
 			Collection<CompoundMultiplexMixture>mixtures)   {
 
-		thf.setTable(null);
+//		thf.setTable(null);
 		model.setTableModelFromCompoundMultiplexMixtures(mixtures);
-		thf.setTable(this);
+//		thf.setTable(this);
 		tca.adjustColumns();
 	}
 

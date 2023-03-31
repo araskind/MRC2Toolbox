@@ -100,13 +100,13 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1680113462818" orientation="VERTICAL" divider="0.4090909090909091">
-											<node nodeId="1680114866529" orientation="HORIZONTAL" divider="0.2669039145907473">
-												<leaf id="1" nodeId="1680114866527">
+											<node nodeId="1680114866529" orientation="HORIZONTAL" divider="0.26652452025586354">
+												<leaf id="4" nodeId="1680114866527">
 													<placeholders>
 														<placeholder>dock.single.DockableCompoundMultiplexListingTable</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="2" nodeId="1680113462823">
+												<leaf id="1" nodeId="1680113462823">
 													<placeholders>
 														<placeholder>dock.single.DockableCompoundMultiplexComponentsListingTable</placeholder>
 													</placeholders>
@@ -123,12 +123,12 @@
 											</node>
 											<node nodeId="1680114870525" orientation="HORIZONTAL" divider="0.714818763326226">
 												<node nodeId="1680114872839" orientation="HORIZONTAL" divider="0.5990660440293529">
-													<leaf id="0" nodeId="1680113462828">
+													<leaf id="2" nodeId="1680113462828">
 														<placeholders>
 															<placeholder>dock.single.DockableCompoundCollectionComponentPropertiesTable</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="4" nodeId="1680113462826">
+													<leaf id="0" nodeId="1680113462826">
 														<placeholders>
 															<placeholder>dock.single.CpdCollectionsPanelPrimaryMolStructurePanel</placeholder>
 														</placeholders>
@@ -160,20 +160,10 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableCompoundCollectionComponentPropertiesTable">
-										<replacement id="dockablesingle DockableCompoundCollectionComponentPropertiesTable"/>
+									<layout factory="predefined" placeholder="dock.single.CpdCollectionsPanelPrimaryMolStructurePanel">
+										<replacement id="dockablesingle CpdCollectionsPanelPrimaryMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableCompoundCollectionComponentPropertiesTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableCompoundMultiplexListingTable">
-										<replacement id="dockablesingle DockableCompoundMultiplexListingTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableCompoundMultiplexListingTable</id>
+											<id>CpdCollectionsPanelPrimaryMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -190,6 +180,16 @@
 									<children ignore="false"/>
 								</child>
 								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableCompoundCollectionComponentPropertiesTable">
+										<replacement id="dockablesingle DockableCompoundCollectionComponentPropertiesTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableCompoundCollectionComponentPropertiesTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="predefined" placeholder="dock.single.CpdCollectionsPanelSourceMolStructurePanel">
 										<replacement id="dockablesingle CpdCollectionsPanelSourceMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
@@ -200,10 +200,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.CpdCollectionsPanelPrimaryMolStructurePanel">
-										<replacement id="dockablesingle CpdCollectionsPanelPrimaryMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableCompoundMultiplexListingTable">
+										<replacement id="dockablesingle DockableCompoundMultiplexListingTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>CpdCollectionsPanelPrimaryMolStructurePanel</id>
+											<id>DockableCompoundMultiplexListingTable</id>
 											<area/>
 										</delegate>
 									</layout>

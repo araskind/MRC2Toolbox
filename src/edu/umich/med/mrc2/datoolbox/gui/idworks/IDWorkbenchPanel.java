@@ -972,6 +972,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private void reloadActiveMSMSClustersDataSet() {
 
 		clearMSMSFeatureData();
+		if(activeMSMSClusterDataSet == null 
+				|| activeMSMSClusterDataSet.getClusters() == null)
+			return;
+		
 		msmsFeatureClusterTreePanel.loadFeatureClusters(activeMSMSClusterDataSet.getClusters());
 		activeCluster = null;
 	}

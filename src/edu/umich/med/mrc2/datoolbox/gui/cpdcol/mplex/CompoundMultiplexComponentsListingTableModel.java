@@ -50,6 +50,11 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 	public static final String CONCENTRATION_COLUMN = "Concentration, uM";
 	public static final String XLOGP_COLUMN = "XLogP";
 	public static final String ALIQUOTE_VOLUME_COLUMN = "Subaliquot volume";
+	public static final String FORMULA_COLUMN = "Formula";	
+	public static final String SMILES_FORMULA_COLUMN = "SMILES Formula";
+	public static final String CHARGE_COLUMN = "CHARGE";
+	public static final String FORMULAS_DELTA_MASS_COLUMN = '\u0394' + " mass(?)";
+	public static final String CONFLICT_COLUMN = "Conflict";
 
 	public CompoundMultiplexComponentsListingTableModel() {
 		super();
@@ -62,8 +67,14 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 			new ColumnContext(SOLVENT_COLUMN, MobilePhase.class, false),
 			new ColumnContext(CONCENTRATION_COLUMN, Double.class, false),
 			new ColumnContext(XLOGP_COLUMN, Double.class, false),
-			new ColumnContext(ALIQUOTE_VOLUME_COLUMN, Double.class, false),
+			new ColumnContext(ALIQUOTE_VOLUME_COLUMN, Double.class, false),			
+			new ColumnContext(FORMULA_COLUMN, String.class, false),	
+			new ColumnContext(SMILES_FORMULA_COLUMN, String.class, false),	
+			new ColumnContext(CHARGE_COLUMN, Integer.class, false),			
+			new ColumnContext(FORMULAS_DELTA_MASS_COLUMN, Double.class, false),
+			new ColumnContext(CONFLICT_COLUMN, Boolean.class, false),
 		};
+		
 	}	
 
 	public void setTableModelFromCompoundMultiplexMixtureComponents(
@@ -86,6 +97,11 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 					component.getConcentrationMkm(),
 					component.getXlogp(),
 					component.getAliquoteVolume(),
+					ccComp.getPrimary_formula(),
+					ccComp.getFormula_from_primary_smiles(),
+					ccComp.getCharge_from_primary_smiles(),
+					ccComp.getPrimary_formula_mass_conflict(),
+					ccComp.hasConflict(),
 				};
 			rowData.add(obj);
 		}
@@ -114,6 +130,11 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 						component.getConcentrationMkm(),
 						component.getXlogp(),
 						component.getAliquoteVolume(),
+						ccComp.getPrimary_formula(),
+						ccComp.getFormula_from_primary_smiles(),
+						ccComp.getCharge_from_primary_smiles(),
+						ccComp.getPrimary_formula_mass_conflict(),
+						ccComp.hasConflict(),
 					};
 				rowData.add(obj);
 			}
