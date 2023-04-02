@@ -39,8 +39,10 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import javax.swing.AbstractButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -469,10 +471,17 @@ public class BasicTable extends JTable implements ActionListener{
                     
                     if (JTextArea.class.isAssignableFrom(comp.getClass()))
                     	txt = ((JTextArea) comp).getText();
+                    
+                    if(JCheckBox.class.isAssignableFrom(comp.getClass()))
+                    	txt = Boolean.toString(((JCheckBox) comp).isSelected());
+                    
+                    if(JRadioButton.class.isAssignableFrom(comp.getClass()))
+                    	txt = Boolean.toString(((JRadioButton) comp).isSelected());
                 }
                 if(txt != null) {
                 	try {
-    					tableData.append(txt.trim().replaceAll("<[^>]*>", "")); //	Strip HTML code
+                		//	Strip HTML code
+    					tableData.append(txt.trim().replaceAll("<[^>]*>", "")); 
     				} catch (Exception e) {
     					// TODO Auto-generated catch block
     					e.printStackTrace();
