@@ -183,7 +183,9 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 				new MultiplexDataExportTask(
 						selectedMultiplexes, exportFields, outputFile);
 		task.addTaskListener(this);
-		MRC2ToolBoxCore.getTaskController().addTask(task);		
+		MRC2ToolBoxCore.getTaskController().addTask(task);	
+		
+		multiplexExportSetupDialog.dispose();
 	}
 	
 	private void loadCompoundMultiplexes() {

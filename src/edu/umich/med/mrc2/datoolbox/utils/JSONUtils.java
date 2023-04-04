@@ -22,14 +22,20 @@
 package edu.umich.med.mrc2.datoolbox.utils;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.json.JSONObject;
 
 public class JSONUtils {
@@ -39,9 +45,10 @@ public class JSONUtils {
 		InputStream is = null;
 		try {
 			is = new URL(url).openStream();
-		} catch (IOException e1) {
+		} catch (Exception e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			//	e1.printStackTrace();
+			return null;
 		}
 		String jsonText = null;
 		JSONObject json = null;
@@ -75,6 +82,30 @@ public class JSONUtils {
 			}
 		}
 		return json;
+	}
+	
+	public static void writeJSON2File(JSONObject json, File jsonFile) {
+		
+		String outputString = json.toString();
+		Path outputPath = Paths.get(jsonFile.getAbsolutePath());
+		try {
+			Files.writeString(outputPath, 
+					outputString, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static File[] getJsonFileList(File jsonFolder) {
+		
+		if(jsonFolder == null || !jsonFolder.exists())
+			return null;
+		
+		FileFilter jsonFilter = new RegexFileFilter(".+\\.json$");
+		return jsonFolder.listFiles(jsonFilter);
 	}
 }
 

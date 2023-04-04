@@ -26,7 +26,6 @@ public class ClassyFireOntologyEntry {
 	private String id;
 	private String name;
 	private String description;
-	private String url;
 	private ClassyFireOntologyLevel level;
 	
 	public ClassyFireOntologyEntry() {
@@ -44,7 +43,6 @@ public class ClassyFireOntologyEntry {
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.url = url;
 		this.level = level;
 	}
 
@@ -77,14 +75,6 @@ public class ClassyFireOntologyEntry {
 		this.description = description;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
 	public ClassyFireOntologyLevel getLevel() {
 		return level;
 	}
@@ -92,6 +82,4 @@ public class ClassyFireOntologyEntry {
 	public void setLevel(ClassyFireOntologyLevel level) {
 		this.level = level;
 	}
-	
-	
 }

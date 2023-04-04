@@ -65,7 +65,7 @@ public class CCComponentMetadataFieldSelectionTable extends BasicTable {
 
 	public void setTableModelFromPropertyMap(
 			Map<CpdMetadataField,Boolean>selectedPropertiesMap) {
-		setTableModelFromPropertyMap(selectedPropertiesMap);
+		model.setTableModelFromPropertyMap(selectedPropertiesMap);
 		tca.adjustColumnsExcluding(fixedWidthColumns);
 	}
 	

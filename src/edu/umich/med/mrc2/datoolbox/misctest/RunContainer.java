@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.misctest;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -64,6 +65,8 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXSource;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -84,6 +87,9 @@ import org.w3c.dom.Node;
 
 import edu.umich.med.mrc2.datoolbox.data.LipidMapsClassifier;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
+import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireObject;
+import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireOntologyEntry;
+import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireOntologyLevel;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
@@ -92,13 +98,13 @@ import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpdcol.CompoundMultiplexUtils;
 import edu.umich.med.mrc2.datoolbox.database.lipid.LipidOntologyUtils;
-import edu.umich.med.mrc2.datoolbox.dbparse.CompoundDatabaseScripts;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsFields;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsParser;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.MultiplexLoadTempObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.ClassyFireUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.JSONUtils;
@@ -130,12 +136,174 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			CompoundDatabaseScripts.calculateMetaSciFormulasAndChargesFromSmiles();
+			parseJsonsFromClassyFireToTable();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	
+	private static void parseJsonsFromClassyFireToTable() {
+		
+		String outputName = 
+				"E:\\_Downloads\\ClassyFireJSON\\CF_CLASSIFICATION.TXT";
+		File jsonFolder = new File("E:\\_Downloads\\ClassyFireJSON");
+		File[] jsonFileList = JSONUtils.getJsonFileList(jsonFolder);
+		Collection<ClassyFireObject>cfObjetList = 
+				new ArrayList<ClassyFireObject>();
+		for(File jsonFile : jsonFileList) {
+			
+			JSONObject jso = JSONUtils.readJsonFromFile(jsonFile);			
+			ClassyFireObject cfObj = 
+					ClassyFireUtils.parseJsonToClassyFireObject(jso);			
+			cfObjetList.add(cfObj);
+		}
+		ArrayList<String>output = new ArrayList<String>();
+		String[] headerPieces = new String[] {
+				"InChIKey",
+				"SMILES",
+				"Kingdom",
+				"Superclass",
+				"Class",
+				"Subclass",
+				"Direct parent",
+				"Intermediate node 1",
+				"Intermediate node 2",
+				"Intermediate node 3",
+		};
+		char tabDelimiter = MRC2ToolBoxConfiguration.getTabDelimiter();
+		output.add(StringUtils.join(headerPieces, tabDelimiter));
+		ArrayList<String>line = new ArrayList<String>();
+		for(ClassyFireObject co : cfObjetList) {
+			
+			line.clear();
+			line.add(co.getInchiKey());
+			if(co.getSmiles() != null)
+				line.add(co.getSmiles());
+			else
+				line.add("");
+			
+			Map<ClassyFireOntologyLevel, ClassyFireOntologyEntry> classifier = co.getPrimaryClassification();
+			
+			if(classifier.get(ClassyFireOntologyLevel.KINGDOM) != null)
+				line.add(classifier.get(ClassyFireOntologyLevel.KINGDOM).getName());
+			else
+				line.add("");
+			
+			if(classifier.get(ClassyFireOntologyLevel.SUPERCLASS) != null)
+				line.add(classifier.get(ClassyFireOntologyLevel.SUPERCLASS).getName());
+			else
+				line.add("");
+			
+			if(classifier.get(ClassyFireOntologyLevel.CLASS) != null)
+				line.add(classifier.get(ClassyFireOntologyLevel.CLASS).getName());
+			else
+				line.add("");
+		
+			if(classifier.get(ClassyFireOntologyLevel.SUBCLASS) != null)
+				line.add(classifier.get(ClassyFireOntologyLevel.SUBCLASS).getName());
+			else
+				line.add("");
+			
+			if(classifier.get(ClassyFireOntologyLevel.DIRECT_PARENT) != null)
+				line.add(classifier.get(ClassyFireOntologyLevel.DIRECT_PARENT).getName());
+			else
+				line.add("");
+			
+			if(co.getIntermediateNodes().size() > 0 )
+				line.add(co.getIntermediateNodes().get(0).getName());
+			else
+				line.add("");
+			
+			if(co.getIntermediateNodes().size() > 1 )
+				line.add(co.getIntermediateNodes().get(1).getName());
+			else
+				line.add("");
+			
+			if(co.getIntermediateNodes().size() > 2 )
+				line.add(co.getIntermediateNodes().get(2).getName());
+			else
+				line.add("");
+			
+			output.add(StringUtils.join(line, tabDelimiter));
+		}
+		Path logPath = Paths.get(outputName);
+		try {
+			Files.write(logPath, 
+					output, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static void dowloadJsonsFromClassyFire() {
+		
+		File inchiKeyFile = 
+				new File("E:\\_Downloads\\ClassyFireJSON\\4ClassyFire\\allFoundOriginalWithReplacement.txt");
+		String outputBase = "E:\\_Downloads\\ClassyFireJSON";
+		File outputDir = new File(outputBase);
+		FileFilter jsonFilter = new RegexFileFilter(".+\\.json$");
+		File[] jsonFileList = outputDir.listFiles(jsonFilter);
+		ArrayList<String>processed = new ArrayList<String>();
+		for(File jsf : jsonFileList)
+			processed.add(FilenameUtils.getBaseName(jsf.getName()));
+		
+		
+		String[][] inchiKeyData = null;
+		try {
+			inchiKeyData = DelimitedTextParser.parseTextFileWithEncoding(
+							inchiKeyFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ArrayList<String>missing = new ArrayList<String>();
+		String baseUrl = "http://classyfire.wishartlab.com/entities/";
+		for(int i=0; i<inchiKeyData.length; i++) {
+			
+			String inchiKey = inchiKeyData[i][0];
+			if(processed.contains(inchiKey))
+				continue;
+			
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			JSONObject jso = JSONUtils.readJsonFromUrl(baseUrl + inchiKey+ ".json");
+			if(jso == null) {
+				missing.add(inchiKey + "\tNot found");
+				System.out.println(inchiKey + "\tNot found");
+			}
+			else if(jso != null && jso.has("error")) {
+				missing.add(inchiKey + "\t" + jso.get("error").toString());
+				System.out.println(inchiKey + "\t" + jso.get("error").toString());
+			}
+			else {
+				File outFile = Paths.get(outputBase, inchiKey + ".json").toFile();
+				JSONUtils.writeJSON2File(jso, outFile);
+			}
+		}
+		if (!missing.isEmpty()) {
+			
+			Path logPath = Paths.get("E:\\_Downloads\\ClassyFireJSON\\NotFound_InChiKeys_Found_ORIG.txt");
+			try {
+				Files.write(logPath, 
+						missing, 
+						StandardCharsets.UTF_8, 
+						StandardOpenOption.CREATE,
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	//	CompoundDatabaseScripts.calculateMetaSciFormulasAndChargesFromSmiles();
 	
 	private static void classyFireTest() {
 

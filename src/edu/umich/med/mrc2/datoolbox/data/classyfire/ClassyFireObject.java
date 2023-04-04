@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.data.classyfire;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -37,8 +38,8 @@ public class ClassyFireObject {
 	private String molecularFramework;
 	
 	private Map<ClassyFireOntologyLevel,ClassyFireOntologyEntry>primaryClassification;
-	private Collection<ClassyFireOntologyEntry>intermediateNodes;
-	private Collection<ClassyFireOntologyEntry>alternativeParents;	
+	private List<ClassyFireOntologyEntry>intermediateNodes;
+	private List<ClassyFireOntologyEntry>alternativeParents;	
 	private Collection<String>substituents;
 	private Collection<ClassyFireExternalDescriptor>externalDescriptors;
 	private Collection<String>ancestors;
@@ -110,11 +111,11 @@ public class ClassyFireObject {
 		return primaryClassification;
 	}
 
-	public Collection<ClassyFireOntologyEntry> getIntermediateNodes() {
+	public List<ClassyFireOntologyEntry> getIntermediateNodes() {
 		return intermediateNodes;
 	}
 
-	public Collection<ClassyFireOntologyEntry> getAlternativeParents() {
+	public List<ClassyFireOntologyEntry> getAlternativeParents() {
 		return alternativeParents;
 	}
 

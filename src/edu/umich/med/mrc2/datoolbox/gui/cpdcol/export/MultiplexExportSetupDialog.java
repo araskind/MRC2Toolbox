@@ -34,7 +34,12 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -51,8 +56,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.apache.commons.lang.StringUtils;
+
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
+import edu.umich.med.mrc2.datoolbox.database.cpdcol.CompoundMultiplexUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -70,6 +78,7 @@ public class MultiplexExportSetupDialog extends JDialog
 	
 	private Preferences preferences;
 	public static final String BASE_DIR = "BASE_DIR";
+	public static final String FIELDS_TOEXPORT = "FIELDS_TOEXPORT";
 	public static final String PROPERTIES_DELIMITER = "@";
 	private File baseDirectory;
 	private final String BROWSE_COMMAND = "BROWSE_FOR_OUTPUT";
@@ -88,15 +97,16 @@ public class MultiplexExportSetupDialog extends JDialog
 		setIconImage(((ImageIcon) dialogIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setSize(new Dimension(640, 800));
-		setPreferredSize(new Dimension(640, 800));
+		setPreferredSize(new Dimension(800, 800));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		JPanel dataPanel = new JPanel();
 		dataPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
-		dataPanel.setLayout(new BorderLayout(0, 0));
-		
+		dataPanel.setLayout(new BorderLayout(0, 0));		
 		fieldSelectionTable = new CCComponentMetadataFieldSelectionTable();
+		
+		
 		dataPanel.add(new JScrollPane(fieldSelectionTable), BorderLayout.CENTER);
 		
 		JPanel panel_1 = new JPanel();
@@ -212,25 +222,63 @@ public class MultiplexExportSetupDialog extends JDialog
 	
 	@Override
 	public void loadPreferences(Preferences preferences) {
-		// TODO Auto-generated method stub
+		
 		this.preferences = preferences;
 		baseDirectory =
 				new File(preferences.get(BASE_DIR, 
 						MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).
 				getAbsoluteFile();
+		
+		Collection<CpdMetadataField>fields = new HashSet<CpdMetadataField>();
+		try {
+			fields = CompoundMultiplexUtils.getCpdMetadataFields();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		String fieldsToExportString = preferences.get(FIELDS_TOEXPORT, "");
+		Map<CpdMetadataField,Boolean>fieldMap = 
+				new HashMap<CpdMetadataField,Boolean>();
+		fields.stream().forEach(f -> fieldMap.put(f, Boolean.FALSE));
+
+		if(!fieldsToExportString.isEmpty()) {
+			
+			 String[] fieldsToExportIds =  
+					 fieldsToExportString.split(PROPERTIES_DELIMITER);
+
+			 for(String fid : fieldsToExportIds) {
+				 
+				 CpdMetadataField activeField = fields.stream().
+					 filter(f -> f.getId().equals(fid)).
+					 findFirst().orElse(null);
+
+				if(activeField != null)
+					fieldMap.put(activeField, Boolean.TRUE);
+			 }
+		}
+		fieldSelectionTable.setTableModelFromPropertyMap(fieldMap);
 	}
 
 	@Override
 	public void loadPreferences() {
-		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
-		
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));		
 	}
 
 	@Override
 	public void savePreferences() {
-		// TODO Auto-generated method stub
+
 		preferences = Preferences.userNodeForPackage(this.getClass());
 		preferences.put(BASE_DIR, baseDirectory.getAbsolutePath());
+		Collection<CpdMetadataField>activeFields = 
+				fieldSelectionTable.getSelectedProperties();
+		List<String> idList = 
+				activeFields.stream().map(f -> f.getId()).
+				collect(Collectors.toList());
+		String idString = "";
+		if(!idList.isEmpty())
+			idString = StringUtils.join(idList, PROPERTIES_DELIMITER);
+		
+		preferences.put(FIELDS_TOEXPORT, idString);
 	}
 
 	public Collection<CompoundMultiplexMixture> getMultiplexes() {

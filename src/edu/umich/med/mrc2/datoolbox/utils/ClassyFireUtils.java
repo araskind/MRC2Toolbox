@@ -24,21 +24,203 @@ package edu.umich.med.mrc2.datoolbox.utils;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireExternalDescriptor;
 import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireObject;
+import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireOntologyEntry;
+import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireOntologyLevel;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 
 public class ClassyFireUtils {
 	
-	public static ClassyFireObject parseJsonToClassyFireObject(JSONObject json){
+	private static final Pattern chebiPattern = 
+			Pattern.compile("(\\(CHEBI:(\\d+)\\))$");
+	private static final Pattern lmPattern = 
+			Pattern.compile("(\\((.+)\\))$");
+	
+	public static ClassyFireObject parseJsonToClassyFireObject(JSONObject jso){
 		
-		ClassyFireObject cso = new ClassyFireObject();
+		ClassyFireObject cfObj = new ClassyFireObject();
+		Matcher regexMatcher = null;
 		
+		if(jso.has("inchikey") && !jso.get("inchikey").equals(JSONObject.NULL))
+			cfObj.setInchiKey(jso.get("inchikey").toString().replace("InChIKey=",""));
 		
-		return cso;
+		if(jso.has("smiles") && !jso.get("smiles").equals(JSONObject.NULL))
+			cfObj.setSmiles(jso.get("smiles").toString());
+		
+		if(jso.has("description") && !jso.get("description").equals(JSONObject.NULL))
+			cfObj.setDescription(jso.get("description").toString());
+		
+		if(jso.has("molecular_framework") && !jso.get("molecular_framework").equals(JSONObject.NULL))
+			cfObj.setMolecularFramework(jso.get("molecular_framework").toString());
+		
+		if(jso.has("classification_version") && !jso.get("classification_version").equals(JSONObject.NULL))
+			cfObj.setVersion(jso.get("classification_version").toString());
+		
+		//	Ontology
+		if(jso.has("kingdom") && !jso.get("kingdom").equals(JSONObject.NULL)) {
+
+			ClassyFireOntologyEntry kingdomEntry = 
+					parseEntryFromJson(jso.getJSONObject("kingdom"));
+			kingdomEntry.setLevel(ClassyFireOntologyLevel.KINGDOM);
+			cfObj.getPrimaryClassification().put(ClassyFireOntologyLevel.KINGDOM, kingdomEntry);
+		}
+		if(jso.has("superclass") && !jso.get("superclass").equals(JSONObject.NULL)) {
+
+			ClassyFireOntologyEntry superclassEntry = 
+					parseEntryFromJson(jso.getJSONObject("superclass"));
+			superclassEntry.setLevel(ClassyFireOntologyLevel.SUPERCLASS);
+			cfObj.getPrimaryClassification().put(ClassyFireOntologyLevel.SUPERCLASS, superclassEntry);
+		}	
+		if(jso.has("class") && !jso.get("class").equals(JSONObject.NULL)) {
+
+			ClassyFireOntologyEntry classEntry = 
+					parseEntryFromJson(jso.getJSONObject("class"));
+			classEntry.setLevel(ClassyFireOntologyLevel.CLASS);
+			cfObj.getPrimaryClassification().put(ClassyFireOntologyLevel.CLASS, classEntry);
+		}	
+		if(jso.has("subclass") && !jso.get("subclass").equals(JSONObject.NULL)) {
+
+			ClassyFireOntologyEntry subclassEntry = 
+					parseEntryFromJson(jso.getJSONObject("subclass"));
+			subclassEntry.setLevel(ClassyFireOntologyLevel.SUBCLASS);
+			cfObj.getPrimaryClassification().put(ClassyFireOntologyLevel.SUBCLASS, subclassEntry);		
+		}
+		if(jso.has("direct_parent") && !jso.get("direct_parent").equals(JSONObject.NULL)) {
+
+			ClassyFireOntologyEntry directParentEntry = 
+					parseEntryFromJson(jso.getJSONObject("direct_parent"));
+			directParentEntry.setLevel(ClassyFireOntologyLevel.DIRECT_PARENT);
+			cfObj.getPrimaryClassification().put(ClassyFireOntologyLevel.DIRECT_PARENT, directParentEntry);
+		}
+		if(jso.has("alternative_parents")) {
+			
+			 JSONArray altParArray = (JSONArray) jso.get("alternative_parents");
+			 for(int i=0; i<altParArray.length(); i++) {
+				 
+				 ClassyFireOntologyEntry apEntry = 
+						 	parseEntryFromJson(altParArray.getJSONObject(i));
+				 apEntry.setLevel(ClassyFireOntologyLevel.ALTERNATIVE_PARENT);
+				 cfObj.getAlternativeParents().add(apEntry);
+			 }
+		}
+		if(jso.has("intermediate_nodes")) {
+			
+			 JSONArray intermNodeArray = (JSONArray) jso.get("intermediate_nodes");
+			 for(int i=0; i<intermNodeArray.length(); i++) {
+				 
+				 ClassyFireOntologyEntry inEntry = 
+						 	parseEntryFromJson(intermNodeArray.getJSONObject(i));
+				 inEntry.setLevel(ClassyFireOntologyLevel.INTERMEDIATE_NODE);
+				 cfObj.getIntermediateNodes().add(inEntry);
+			 }
+		}
+		if(jso.has("substituents")) {
+			
+			 JSONArray subsArray = (JSONArray) jso.get("substituents");
+			 for(int i=0; i<subsArray.length(); i++) {
+				 cfObj.getSubstituents().add(subsArray.getString(i));
+			 }
+		}
+		if(jso.has("ancestors")) {
+			
+			 JSONArray ancArray = (JSONArray) jso.get("ancestors");
+			 for(int i=0; i<ancArray.length(); i++) {
+				 cfObj.getAncestors().add(ancArray.getString(i));
+			 }
+		}
+		if(jso.has("predicted_chebi_terms")) {
+			
+			 JSONArray pctArray = (JSONArray) jso.get("predicted_chebi_terms");
+			 for(int i=0; i<pctArray.length(); i++) {
+				 
+				 String ce = pctArray.getString(i);
+					regexMatcher = chebiPattern.matcher(ce);
+					
+				if(regexMatcher.find()){
+					
+					String g1 = regexMatcher.group(1);
+					String g2 = regexMatcher.group(2);
+					String ceDescription = ce.replace(g1, "").trim();
+					cfObj.getPredictedChebiTerms().put(g2, ceDescription);
+				}
+			 }
+		}
+		if(jso.has("predicted_lipidmaps_terms")) {
+			
+			 JSONArray plmArray = (JSONArray) jso.get("predicted_lipidmaps_terms");
+			 for(int i=0; i<plmArray.length(); i++) {
+				 
+				 
+				 String lm = plmArray.getString(i);
+					regexMatcher = lmPattern.matcher(lm);
+					
+				if(regexMatcher.find()){
+					
+					String g1 = regexMatcher.group(1);
+					String g2 = regexMatcher.group(2);
+					String ceDescription = lm.replace(g1, "").trim();
+					cfObj.getPredictedLipidMapsTerms().put(g2, ceDescription);
+				}
+			 }
+		}
+		if(jso.has("external_descriptors")) {
+			
+			 JSONArray pedArray = (JSONArray) jso.get("external_descriptors");
+			 for(int i=0; i<pedArray.length(); i++) {
+				 
+				 
+				 ClassyFireExternalDescriptor ed = 
+						 parseExternalDescriptorFromJson(pedArray.getJSONObject(i));
+				 cfObj.getExternalDescriptors().add(ed);
+			 }
+		}		
+		return cfObj;
+	}
+	
+	private static ClassyFireExternalDescriptor parseExternalDescriptorFromJson(JSONObject edJson) {
+		
+		String source = null;
+		String sourceId = null;
+		
+		if(edJson.has("source"))
+			source = edJson.get("source").toString();
+		
+		if(edJson.has("source_id"))
+			sourceId = edJson.get("source_id").toString();
+		
+		ClassyFireExternalDescriptor ed = 
+				new ClassyFireExternalDescriptor(source, sourceId);
+		
+		if(edJson.has("annotations")) {
+			
+			 JSONArray subsArray = (JSONArray) edJson.get("annotations");
+			 for(int i=0; i<subsArray.length(); i++) {
+				 ed.getAnnotations().add(subsArray.getString(i));
+			 }
+		}
+		return ed;
+	}
+	
+	private static ClassyFireOntologyEntry parseEntryFromJson(JSONObject ontJson) {
+		
+		ClassyFireOntologyEntry ontEntry = new ClassyFireOntologyEntry();
+		if(ontJson.has("chemont_id"))
+			ontEntry.setId(ontJson.get("chemont_id").toString().replace("CHEMONTID:", "C"));
+		
+		if(ontJson.has("name"))
+			ontEntry.setName(ontJson.get("name").toString());
+		
+		if(ontJson.has("description"))
+			ontEntry.setDescription(ontJson.get("description").toString());
+		
+		return ontEntry;
 	}
 	
 	public static void uploadClassyFireTaxNodesFromJson(File jsonDir) throws Exception {
