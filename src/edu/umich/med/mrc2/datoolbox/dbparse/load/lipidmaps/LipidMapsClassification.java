@@ -28,4 +28,14 @@ public enum LipidMapsClassification {
 	SUB_CLASS,
 	CLASS_LEVEL4,
 	;
+	
+	public static LipidMapsClassification getLipidMapsClassificationLevelByName(String name) {
+		
+		for(LipidMapsClassification c : LipidMapsClassification.values()) {
+			
+			if(c.name().equals(name))
+				return c;
+		}
+		return null;
+	}
 }

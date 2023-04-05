@@ -67,6 +67,9 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 	private static final Icon openCompoundCollectionIcon = GuiUtils.getIcon("openCompoundCollection", 24);
 	private static final Icon loadMultiplexDataIcon = GuiUtils.getIcon("loadMultiplexData", 24);
 	
+	private static final Icon searchIconSmall = GuiUtils.getIcon("find", 16);
+	private static final Icon searchIcon = GuiUtils.getIcon("searchCompounds", 24);
+	
 	// Menus
 	private JMenu
 		manageMenu,
@@ -74,7 +77,8 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 		importMenu,
 		exportMenu,
 		utilitiesMenu,
-		activeLibrariesMenu;
+		activeLibrariesMenu,
+		searchMenu;
 
 	// Manage
 	private JMenuItem
@@ -83,6 +87,10 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 		libraryManagerMenuItem,
 		openLibraryMenuItem,
 		closeLibraryMenuItem;
+	
+	//	Search
+	private JMenuItem
+		searchCompoundsByPropertiesMenuItem;
 	
 	// Edit
 	private JMenuItem
@@ -135,6 +143,16 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 		
 		add(manageMenu);
 		
+		// Search
+		searchMenu = new JMenu("Search");
+		searchMenu.setIcon(searchIconSmall);
+		
+		searchCompoundsByPropertiesMenuItem = addItem(searchMenu, 
+				MainActionCommands.SETUP_COMPOUND_PROPERTIES_SEARCH_COMMAND, 
+				searchIcon);
+		
+		add(searchMenu);
+				
 //		// Edit
 //		editFeaturesMenu = new JMenu("Edit");
 //		editFeaturesMenu.setIcon(editFeatureIconSmall);

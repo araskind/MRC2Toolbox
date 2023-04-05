@@ -23,7 +23,10 @@ package edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -31,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 
 public class LipidMapsParser {
 
@@ -264,4 +268,40 @@ public class LipidMapsParser {
 		}
 		ps.close();
 	}
+	
+	public static Collection<LipidMapsClassificationObject>getLipidMapsClasses() throws Exception {
+				
+		Collection<LipidMapsClassificationObject>lipidMapsClasses = 
+				new ArrayList<LipidMapsClassificationObject>();
+		
+		Connection conn = ConnectionManager.getConnection();		
+//		String query = 
+//				"SELECT ID, CLASS_NAME, CLASS_LEVEL FROM LIPIDMAPS_CLASS";	
+		String query = "SELECT CLASS_ID, NAME, CLASS_LEVEL FROM COMPOUNDDB.LIPIDMAPS_CLASSES";
+
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+//
+//			LipidMapsClassificationObject lco = new LipidMapsClassificationObject(
+//					LipidMapsClassification.getLipidMapsClassificationLevelByName(rs.getString("CLASS_LEVEL")), 
+//					rs.getString("ID"),
+//					rs.getString("CLASS_NAME"));
+			
+			LipidMapsClassificationObject lco = new LipidMapsClassificationObject(
+					LipidMapsClassification.getLipidMapsClassificationLevelByName(rs.getString("CLASS_LEVEL")), 
+					rs.getString("CLASS_ID"),
+					rs.getString("NAME"));
+			lipidMapsClasses.add(lco);
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return lipidMapsClasses;
+	}
 }
+
+
+
+
+

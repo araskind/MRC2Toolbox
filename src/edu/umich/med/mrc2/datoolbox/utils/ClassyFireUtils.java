@@ -41,7 +41,7 @@ public class ClassyFireUtils {
 	private static final Pattern chebiPattern = 
 			Pattern.compile("(\\(CHEBI:(\\d+)\\))$");
 	private static final Pattern lmPattern = 
-			Pattern.compile("(\\((.+)\\))$");
+			Pattern.compile("(\\(([A-Z][A-Z]\\d*)\\))$");
 	
 	public static ClassyFireObject parseJsonToClassyFireObject(JSONObject jso){
 		

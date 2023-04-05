@@ -48,6 +48,7 @@ import edu.umich.med.mrc2.datoolbox.gui.cpdcol.export.MultiplexExportSetupDialog
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.DockableCompoundMultiplexComponentsListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.DockableCompoundMultiplexListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.prop.DockableCompoundCollectionComponentPropertiesTable;
+import edu.umich.med.mrc2.datoolbox.gui.cpdcol.search.PropertySearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
@@ -76,6 +77,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 	private CompoundCollectionSelectorDialog compoundCollectionSelectorDialog;
 	private DockableCompoundMultiplexComponentsListingTable multiplexComponentsListingTable;
 	private MultiplexExportSetupDialog multiplexExportSetupDialog;
+	private PropertySearchDialog propertySearchDialog;
 		
 	public CompoundCollectionsPanel() {
 		
@@ -138,9 +140,29 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 			setupMultiplexDataExport();
 		
 		if(command.equals(MainActionCommands.EXPORT_SELECTED_MULTIPLEXES_COMMAND.getName()))
-			exportSelectedMultiplexData();		
+			exportSelectedMultiplexData();
+		
+		if(command.equals(MainActionCommands.SETUP_COMPOUND_PROPERTIES_SEARCH_COMMAND.getName()))
+			showSearchDialog();
+		
+		if(command.equals(MainActionCommands.SEARCH_COMPOUND_PROPERTIES_COMMAND.getName()))
+			searchCompoundsByProperties();
 	}
 
+	private void showSearchDialog() {
+		
+		propertySearchDialog = new PropertySearchDialog(this);
+		propertySearchDialog.setLocationRelativeTo(this.getContentPane());
+		propertySearchDialog.setVisible(true);
+	}
+	
+	private void searchCompoundsByProperties() {
+		// TODO Auto-generated method stub
+		
+		
+		propertySearchDialog.dispose();
+	}
+	
 	private void setupMultiplexDataExport() {
 
 		Collection<CompoundMultiplexMixture> selectedMultiplexes = 

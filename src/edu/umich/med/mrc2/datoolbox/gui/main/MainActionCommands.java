@@ -1214,6 +1214,9 @@ public enum MainActionCommands {
 	SETUP_MULTIPLEXES_EXPORT_COMMAND("Set up compound multiplex data export"),
 	EXPORT_SELECTED_MULTIPLEXES_COMMAND("Export selected compound multiplex data"),
 	
+	SETUP_COMPOUND_PROPERTIES_SEARCH_COMMAND("Show \"Search compounds by properties\" dialog"),
+	SEARCH_COMPOUND_PROPERTIES_COMMAND("Search compounds by properties"),
+	
 	EDIT_SELECTED_FIELD_COMMAND("Edit selected field"),
 	SAVE_CHANGES_COMMAND("Save changes"),
 	;

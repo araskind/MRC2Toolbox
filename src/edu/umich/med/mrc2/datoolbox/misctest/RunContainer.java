@@ -46,9 +46,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.xml.stream.FactoryConfigurationError;
@@ -98,6 +100,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpdcol.CompoundMultiplexUtils;
 import edu.umich.med.mrc2.datoolbox.database.lipid.LipidOntologyUtils;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassification;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassificationObject;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsFields;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsParser;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.MultiplexLoadTempObject;
@@ -136,31 +140,61 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			parseJsonsFromClassyFireToTable();
+			parseJsonsFromClassyFireWithLipidMapsToTable();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private static void parseJsonsFromClassyFireToTable() {
+	private static void parseJsonsFromClassyFireWithLipidMapsToTable() {
 		
 		String outputName = 
-				"E:\\_Downloads\\ClassyFireJSON\\CF_CLASSIFICATION.TXT";
+				"E:\\_Downloads\\ClassyFireJSON\\CF_CLASSIFICATION_WITH_LIPID_MAPS.TXT";
 		File jsonFolder = new File("E:\\_Downloads\\ClassyFireJSON");
 		File[] jsonFileList = JSONUtils.getJsonFileList(jsonFolder);
+		File inchiKeyMappingFile = 
+				new File("E:\\_Downloads\\ClassyFireJSON\\4ClassyFire\\KeyRemap.txt");
 		Collection<ClassyFireObject>cfObjetList = 
 				new ArrayList<ClassyFireObject>();
 		for(File jsonFile : jsonFileList) {
 			
 			JSONObject jso = JSONUtils.readJsonFromFile(jsonFile);			
 			ClassyFireObject cfObj = 
-					ClassyFireUtils.parseJsonToClassyFireObject(jso);			
+					ClassyFireUtils.parseJsonToClassyFireObject(jso);
+			if(cfObj.getInchiKey() == null) {
+				cfObj.setName(jsonFile.getName());
+			}
 			cfObjetList.add(cfObj);
 		}
+		Collection<LipidMapsClassificationObject> lmClasses = 
+				new ArrayList<LipidMapsClassificationObject>();
+		try {
+			lmClasses = LipidMapsParser.getLipidMapsClasses();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Map<String,LipidMapsClassificationObject> lmClassesMap = lmClasses.stream()
+			      .collect(Collectors.toMap(LipidMapsClassificationObject::getCode, Function.identity()));
+		
+		Map<String,String> inchiKeyMap = new TreeMap<String,String>();
+		
+		String[][] inchiKeyMappingData = null;
+		try {
+			inchiKeyMappingData = DelimitedTextParser.parseTextFileWithEncoding(
+							inchiKeyMappingFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(int i=1; i<inchiKeyMappingData.length; i++)
+			inchiKeyMap.put(inchiKeyMappingData[i][1], inchiKeyMappingData[i][0]);
+				
 		ArrayList<String>output = new ArrayList<String>();
 		String[] headerPieces = new String[] {
 				"InChIKey",
+				"InChIKey-original",
 				"SMILES",
 				"Kingdom",
 				"Superclass",
@@ -170,14 +204,31 @@ public class RunContainer {
 				"Intermediate node 1",
 				"Intermediate node 2",
 				"Intermediate node 3",
+				LipidMapsClassification.CATEGORY.name(),
+				LipidMapsClassification.MAIN_CLASS.name(),
+				LipidMapsClassification.SUB_CLASS.name(),
+				LipidMapsClassification.CLASS_LEVEL4.name(),
 		};
+		Map<String,Collection<String>>lipidMapsClassification = 
+				new TreeMap<String,Collection<String>>();
 		char tabDelimiter = MRC2ToolBoxConfiguration.getTabDelimiter();
 		output.add(StringUtils.join(headerPieces, tabDelimiter));
 		ArrayList<String>line = new ArrayList<String>();
 		for(ClassyFireObject co : cfObjetList) {
 			
+			if(co.getInchiKey() == null) {
+				System.out.println(co.getName());
+				continue;
+			}			
 			line.clear();
+			lipidMapsClassification.clear();			
 			line.add(co.getInchiKey());
+			String origInChiKey = inchiKeyMap.get(co.getInchiKey());
+			if(origInChiKey != null)
+				line.add(origInChiKey);
+			else
+				line.add("");
+			
 			if(co.getSmiles() != null)
 				line.add(co.getSmiles());
 			else
@@ -224,7 +275,54 @@ public class RunContainer {
 				line.add(co.getIntermediateNodes().get(2).getName());
 			else
 				line.add("");
-			
+						
+			//	LipidMaps
+			if(co.getPredictedLipidMapsTerms().isEmpty()) {
+				line.add("");
+				line.add("");
+				line.add("");
+				line.add("");
+			}
+			else {
+				for(String plt : co.getPredictedLipidMapsTerms().keySet()) {
+					
+					String family = plt.substring(0, 2);
+					if(!lipidMapsClassification.containsKey(family))
+						lipidMapsClassification.put(family, new TreeSet<String>());	
+					
+					lipidMapsClassification.get(family).add(plt);
+				}
+				for(Entry<String, Collection<String>> es : lipidMapsClassification.entrySet()) {
+										 
+					String category = "";
+					String main_class = "";
+					String sub_class = "";
+					String class_level4 = "";
+					for(String cid : es.getValue()) {
+						
+						LipidMapsClassificationObject lmco = lmClassesMap.get(cid);
+						if(lmco == null) {
+							System.out.println(cid);
+							continue;
+						}
+						if(lmco.getGroup().equals(LipidMapsClassification.CATEGORY))
+							category = lmco.getName();
+						
+						if(lmco.getGroup().equals(LipidMapsClassification.MAIN_CLASS))
+							main_class = lmco.getName();
+						
+						if(lmco.getGroup().equals(LipidMapsClassification.SUB_CLASS))
+							sub_class = lmco.getName();
+						
+						if(lmco.getGroup().equals(LipidMapsClassification.CLASS_LEVEL4))
+							class_level4 = lmco.getName();
+					}
+					line.add(category);
+					line.add(main_class);
+					line.add(sub_class);
+					line.add(class_level4);
+				}			
+			}
 			output.add(StringUtils.join(line, tabDelimiter));
 		}
 		Path logPath = Paths.get(outputName);
@@ -240,9 +338,9 @@ public class RunContainer {
 	}
 	
 	private static void dowloadJsonsFromClassyFire() {
-		
+				
 		File inchiKeyFile = 
-				new File("E:\\_Downloads\\ClassyFireJSON\\4ClassyFire\\allFoundOriginalWithReplacement.txt");
+				new File("E:\\_Downloads\\ClassyFireJSON\\4ClassyFire\\2023_0404_All_Unique_InChIKeyNotFoundCorrected.txt");
 		String outputBase = "E:\\_Downloads\\ClassyFireJSON";
 		File outputDir = new File(outputBase);
 		FileFilter jsonFilter = new RegexFileFilter(".+\\.json$");
@@ -290,7 +388,7 @@ public class RunContainer {
 		}
 		if (!missing.isEmpty()) {
 			
-			Path logPath = Paths.get("E:\\_Downloads\\ClassyFireJSON\\NotFound_InChiKeys_Found_ORIG.txt");
+			Path logPath = Paths.get("E:\\_Downloads\\ClassyFireJSON\\NotFound_InChiKeys_FullList.txt");
 			try {
 				Files.write(logPath, 
 						missing, 
