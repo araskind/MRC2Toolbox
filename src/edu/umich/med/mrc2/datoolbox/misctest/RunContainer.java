@@ -140,9 +140,101 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			parseJsonsFromClassyFireWithLipidMapsToTable();
+			classyfyWithLipidMaps();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void classyfyWithLipidMaps() throws Exception{
+		
+		String outputName = 
+				"E:\\_Downloads\\ClassyFireJSON\\CLASSIFICATION_WITH_LIPID_MAPS_ONLY.TXT";
+		File inchiKeyMappingFile = 
+				new File("E:\\_Downloads\\ClassyFireJSON\\4ClassyFire\\KeyRemap.txt");
+		String[][] inchiKeyMappingData = null;
+		try {
+			inchiKeyMappingData = DelimitedTextParser.parseTextFileWithEncoding(
+							inchiKeyMappingFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Collection<LipidMapsClassificationObject> lmClasses = 
+				new ArrayList<LipidMapsClassificationObject>();
+		try {
+			lmClasses = LipidMapsParser.getLipidMapsClasses();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		Map<String,LipidMapsClassificationObject> lmClassesMap = lmClasses.stream()
+			      .collect(Collectors.toMap(LipidMapsClassificationObject::getCode, Function.identity()));
+		
+		ArrayList<String>output = new ArrayList<String>();
+		String[] headerPieces = new String[] {
+				"InChIKey",
+				"InChIKey-original",
+				LipidMapsClassification.CATEGORY.name(),
+				LipidMapsClassification.MAIN_CLASS.name(),
+				LipidMapsClassification.SUB_CLASS.name(),
+				LipidMapsClassification.CLASS_LEVEL4.name(),
+		};		
+		char tabDelimiter = MRC2ToolBoxConfiguration.getTabDelimiter();
+		output.add(StringUtils.join(headerPieces, tabDelimiter));
+		ArrayList<String>line = new ArrayList<String>();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT CATEGORY, MAIN_CLASS, SUB_CLASS, CLASS_LEVEL4 " +
+				"FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA " +
+				"WHERE INCHI_KEY = ? ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		for(int i=1; i<inchiKeyMappingData.length; i++) {
+			
+			line.clear();		
+			line.add(inchiKeyMappingData[i][1]);
+			line.add(inchiKeyMappingData[i][0]);
+			String category = "";
+			String main_class = "";
+			String sub_class = "";
+			String class_level4 = "";
+			
+			ps.setString(1, inchiKeyMappingData[i][1]);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				
+				if(rs.getString("CATEGORY") != null)
+					category = lmClassesMap.get(rs.getString("CATEGORY")).getName();
+				
+				if(rs.getString("MAIN_CLASS") != null)
+					main_class = lmClassesMap.get(rs.getString("MAIN_CLASS")).getName();
+				
+				if(rs.getString("SUB_CLASS") != null)
+					sub_class = lmClassesMap.get(rs.getString("SUB_CLASS")).getName();
+				
+				if(rs.getString("CLASS_LEVEL4") != null)
+					class_level4 = lmClassesMap.get(rs.getString("CLASS_LEVEL4")).getName();
+			}
+			rs.close();
+			line.add(category);
+			line.add(main_class);
+			line.add(sub_class);
+			line.add(class_level4);
+			output.add(StringUtils.join(line, tabDelimiter));
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		Path logPath = Paths.get(outputName);
+		try {
+			Files.write(logPath, 
+					output, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}

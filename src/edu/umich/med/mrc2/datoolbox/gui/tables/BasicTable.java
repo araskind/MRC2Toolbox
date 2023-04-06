@@ -102,6 +102,7 @@ public class BasicTable extends JTable implements ActionListener{
 	protected JPopupMenu tablePopupMenu;
 	protected ColumnSelectorPopup columnSelectorPopupMenu;
 	protected int popupRow;
+	protected int popupCol;
 
 	protected XTableColumnModel columnModel;
 	protected TableColumnAdjuster tca;
@@ -352,14 +353,18 @@ public class BasicTable extends JTable implements ActionListener{
 		setComponentPopupMenu(tablePopupMenu);
 
 		addMouseListener(new MouseAdapter() {
+			
+
 			@Override
 			public void mousePressed(MouseEvent e) {
 				popupRow = rowAtPoint(e.getPoint());
+				popupCol = columnAtPoint(e.getPoint());
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				popupRow = rowAtPoint(e.getPoint());
+				popupCol = columnAtPoint(e.getPoint());
 			}
 		});
 	}
@@ -380,6 +385,10 @@ public class BasicTable extends JTable implements ActionListener{
 
 	public int getPopupRow() {
 		return popupRow;
+	}
+	
+	public int getPopupCol() {
+		return popupCol;
 	}
 
 	@Override
@@ -427,8 +436,11 @@ public class BasicTable extends JTable implements ActionListener{
 		if(command.equals(MainActionCommands.COPY_TABLE_SELECTED_ROWS_DATA_COMMAND.getName())
 				|| command.equals(MainActionCommands.COPY_SELECTED_TABLE_ROWS_COMMAND.getName()))
 			copySelectedRowsToClipboard();
+		
+		if(command.equals(MainActionCommands.COPY_SELECTED_VALUE_COMMAND.getName())) 
+			copySelectedValueToClipboard();	
 	}
-	
+
 	public String getTableDataAsString() {
 		int [] rows = IntStream.range(0, getRowCount()).toArray();
 		return getTableDataAsString(rows);
@@ -452,44 +464,46 @@ public class BasicTable extends JTable implements ActionListener{
 		for(int i : rows){
 
 			for(int j=0; j<numCols; j++){
+				
+				tableData.append(getCellStringValue(i,j));
 
-                final TableCellRenderer renderer = getCellRenderer(i, j);
-                final Component comp = prepareRenderer(renderer, i, j);
-                String txt = null;
-                if(comp == null) {
-                	txt = "";
-                }
-                else {
-                    if(JLabel.class.isAssignableFrom(comp.getClass()))             
-                    	txt = ((JLabel) comp).getText();
-
-                    if (JTextPane.class.isAssignableFrom(comp.getClass()))
-                    	txt = ((JTextPane) comp).getText();
-                    
-                    if (JTextField.class.isAssignableFrom(comp.getClass()))
-                    	txt = ((JTextField) comp).getText();
-                    
-                    if (JTextArea.class.isAssignableFrom(comp.getClass()))
-                    	txt = ((JTextArea) comp).getText();
-                    
-                    if(JCheckBox.class.isAssignableFrom(comp.getClass()))
-                    	txt = Boolean.toString(((JCheckBox) comp).isSelected());
-                    
-                    if(JRadioButton.class.isAssignableFrom(comp.getClass()))
-                    	txt = Boolean.toString(((JRadioButton) comp).isSelected());
-                }
-                if(txt != null) {
-                	try {
-                		//	Strip HTML code
-    					tableData.append(txt.trim().replaceAll("<[^>]*>", "")); 
-    				} catch (Exception e) {
-    					// TODO Auto-generated catch block
-    					e.printStackTrace();
-    				}
-                }
-                else {
-                	tableData.append("");
-                }
+//                final TableCellRenderer renderer = getCellRenderer(i, j);
+//                final Component comp = prepareRenderer(renderer, i, j);
+//                String txt = null;
+//                if(comp == null) {
+//                	txt = "";
+//                }
+//                else {
+//                    if(JLabel.class.isAssignableFrom(comp.getClass()))             
+//                    	txt = ((JLabel) comp).getText();
+//
+//                    if (JTextPane.class.isAssignableFrom(comp.getClass()))
+//                    	txt = ((JTextPane) comp).getText();
+//                    
+//                    if (JTextField.class.isAssignableFrom(comp.getClass()))
+//                    	txt = ((JTextField) comp).getText();
+//                    
+//                    if (JTextArea.class.isAssignableFrom(comp.getClass()))
+//                    	txt = ((JTextArea) comp).getText();
+//                    
+//                    if(JCheckBox.class.isAssignableFrom(comp.getClass()))
+//                    	txt = Boolean.toString(((JCheckBox) comp).isSelected());
+//                    
+//                    if(JRadioButton.class.isAssignableFrom(comp.getClass()))
+//                    	txt = Boolean.toString(((JRadioButton) comp).isSelected());
+//                }
+//                if(txt != null) {
+//                	try {
+//                		//	Strip HTML code
+//    					tableData.append(txt.trim().replaceAll("<[^>]*>", "")); 
+//    				} catch (Exception e) {
+//    					// TODO Auto-generated catch block
+//    					e.printStackTrace();
+//    				}
+//                }
+//                else {
+//                	tableData.append("");
+//                }
                 if(j<numCols-1)
                 	tableData.append("\t");
                 else
@@ -497,6 +511,45 @@ public class BasicTable extends JTable implements ActionListener{
 			}
 		}
 		return tableData.toString();
+	}
+	
+	private String getCellStringValue(int row, int col) {
+		
+        final TableCellRenderer renderer = getCellRenderer(row, col);
+        final Component comp = prepareRenderer(renderer, row, col);
+        String txt = null;
+        if(comp == null) {
+        	return "";
+        }
+        else {
+            if(JLabel.class.isAssignableFrom(comp.getClass()))             
+            	txt = ((JLabel) comp).getText();
+
+            if (JTextPane.class.isAssignableFrom(comp.getClass()))
+            	txt = ((JTextPane) comp).getText();
+            
+            if (JTextField.class.isAssignableFrom(comp.getClass()))
+            	txt = ((JTextField) comp).getText();
+            
+            if (JTextArea.class.isAssignableFrom(comp.getClass()))
+            	txt = ((JTextArea) comp).getText();
+            
+            if(JCheckBox.class.isAssignableFrom(comp.getClass()))
+            	txt = Boolean.toString(((JCheckBox) comp).isSelected());
+            
+            if(JRadioButton.class.isAssignableFrom(comp.getClass()))
+            	txt = Boolean.toString(((JRadioButton) comp).isSelected());
+        }
+        if(txt != null) {
+        	try {
+        		//	Strip HTML code
+				txt = txt.trim().replaceAll("<[^>]*>", ""); 
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+        return txt;
 	}
 	
 	public void copyVisibleTableRowsToClipboard() {
@@ -518,6 +571,17 @@ public class BasicTable extends JTable implements ActionListener{
 			dataString = "";
 
 		StringSelection stringSelection = new StringSelection(dataString);
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
+	}
+	
+	private void copySelectedValueToClipboard() {
+		
+		if(popupRow == -1 || popupCol == -1)
+			return;
+
+		StringSelection stringSelection = 
+				new StringSelection(getCellStringValue(popupRow, popupCol));
 		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clpbrd.setContents(stringSelection, null);
 	}

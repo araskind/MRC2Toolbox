@@ -75,6 +75,17 @@ public class CompoundMultiplexListingTable extends BasicTable {
 
 		return selectedMultiplexMixtures;
 	}
+	
+	public CompoundMultiplexMixture getSelectedMultiplexMixture() {
+		
+		int row = getSelectedRow();
+		if(row == -1)
+			return null;
+		else
+			return ((CompoundMultiplexMixture) model.getValueAt(
+					convertRowIndexToModel(row), 
+					model.getColumnIndex(CompoundMultiplexListingTableModel.NAME_COLUMN)));		
+	}
 }
 
 

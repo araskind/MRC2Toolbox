@@ -24,20 +24,25 @@ package edu.umich.med.mrc2.datoolbox.database.cpdcol;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
 
+import org.apache.commons.lang.StringUtils;
+
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixtureComponent;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataFieldCategory;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class CompoundMultiplexUtils {
@@ -405,8 +410,28 @@ public class CompoundMultiplexUtils {
 		ConnectionManager.releaseConnection(conn);	
 		component.getMetadata().put(field, value);
 	}
-
-	//
+	
+	public static String createFindByFormulaInputForMultiplex(CompoundMultiplexMixture plex) {
+		
+		ArrayList<String>output = new ArrayList<String>();
+		output.add("# Agilent TOF Formula data store");
+		output.add("# Version: 1");
+		output.add("# Formula, Mass, Cpd");
+		ArrayList<String>line = new ArrayList<String>();
+		for(CompoundMultiplexMixtureComponent component : plex.getComponents()) {
+					
+			line.clear();
+			CompoundCollectionComponent ccComponent = component.getCCComponent();
+			
+			line.add(ccComponent.getPrimary_formula());
+			line.add(MsUtils.spectrumMzExportFormat.format(ccComponent.getPrimary_mass()));
+			String name = "\"" + ccComponent.getCid().getCommonName() + 
+					" (" + ccComponent.getCid().getPrimaryDatabaseId() + ")\"";
+			line.add(name);
+			output.add(StringUtils.join(line, ","));
+		}
+		return StringUtils.join(output, "\n");
+	}
 	
 //	public static Collection<CpdMetadataField> addCpdMetadataFields(
 //			Collection<String>fields, Connection conn) throws Exception {

@@ -55,12 +55,14 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 	public static final String CHARGE_COLUMN = "CHARGE";
 	public static final String FORMULAS_DELTA_MASS_COLUMN = '\u0394' + " mass(?)";
 	public static final String CONFLICT_COLUMN = "Conflict";
+	public static final String IS_MS_READY_COLUMN = "MSReady";
 
 	public CompoundMultiplexComponentsListingTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
 			new ColumnContext(ID_COLUMN, String.class, false),
 			new ColumnContext(MIXTURE_ID_COLUMN, CompoundMultiplexMixture.class, false),
+			new ColumnContext(IS_MS_READY_COLUMN, Boolean.class, false),
 			new ColumnContext(NAME_COLUMN, CompoundMultiplexMixtureComponent.class, false),
 			new ColumnContext(ACCESSION_COLUMN, CompoundIdentity.class, false),
 			new ColumnContext(CAS_COLUMN, String.class, false),			
@@ -73,8 +75,7 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 			new ColumnContext(CHARGE_COLUMN, Integer.class, false),			
 			new ColumnContext(FORMULAS_DELTA_MASS_COLUMN, Double.class, false),
 			new ColumnContext(CONFLICT_COLUMN, Boolean.class, false),
-		};
-		
+		};		
 	}	
 
 	public void setTableModelFromCompoundMultiplexMixtureComponents(
@@ -90,6 +91,7 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 			Object[] obj = {
 					ccComp.getCollectionId(),
 					null,
+					ccComp.isMsReady(),
 					component,
 					cid,
 					ccComp.getCas(),
@@ -123,6 +125,7 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 				Object[] obj = {
 						ccComp.getCollectionId(),
 						mixture,
+						ccComp.isMsReady(),
 						component,
 						cid,
 						ccComp.getCas(),

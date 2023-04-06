@@ -26,11 +26,18 @@ import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
+import java.util.Date;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -40,6 +47,7 @@ import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixtureComponent;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
+import edu.umich.med.mrc2.datoolbox.database.cpdcol.CompoundMultiplexUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
@@ -56,7 +64,9 @@ import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -78,6 +88,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 	private DockableCompoundMultiplexComponentsListingTable multiplexComponentsListingTable;
 	private MultiplexExportSetupDialog multiplexExportSetupDialog;
 	private PropertySearchDialog propertySearchDialog;
+	private File baseExportDirectory;
 		
 	public CompoundCollectionsPanel() {
 		
@@ -147,6 +158,49 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		
 		if(command.equals(MainActionCommands.SEARCH_COMPOUND_PROPERTIES_COMMAND.getName()))
 			searchCompoundsByProperties();
+		
+		if(command.equals(MainActionCommands.EXPORT_SELECTED_MULTIPLEX_FOR_FBF_COMMAND.getName()))
+			exportSelectedMultiplexForFBF();		
+	}
+
+	private void exportSelectedMultiplexForFBF() {
+		
+		CompoundMultiplexMixture plex = 
+				compoundMultiplexListingTable.getSelectedMultiplexMixture();
+		if(plex == null)
+			return;
+		
+		String fbfString =
+				CompoundMultiplexUtils.createFindByFormulaInputForMultiplex(plex);
+		
+		if(baseExportDirectory == null)
+			baseExportDirectory = new File(MRC2ToolBoxCore.libraryDir);
+		
+		JnaFileChooser fc = new JnaFileChooser(baseExportDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CSV files", "csv", "CSV");
+		fc.setTitle("Export Multiplecx data formatted for Find by Formula search:");
+		fc.setMultiSelectionEnabled(false);
+//		fc.setSaveButtonText("Set output file");
+		String defaultFileName = plex.getName() + "_4FBF_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".csv";
+		fc.setDefaultFileName(defaultFileName);	
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File outputFile  = fc.getSelectedFile();
+			baseExportDirectory = outputFile.getParentFile();
+			
+			Path outputPath = Paths.get(outputFile.getAbsolutePath());
+			try {
+				Files.writeString(outputPath, 
+						fbfString, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}		
 	}
 
 	private void showSearchDialog() {
@@ -179,7 +233,6 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		multiplexExportSetupDialog.setVisible(true);
 	}
 
-	
 	private void exportSelectedMultiplexData() {
 
 		Collection<CompoundMultiplexMixture>selectedMultiplexes = 

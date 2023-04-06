@@ -44,6 +44,9 @@ public class CompoundCollectionComponent {
 	private String primary_smiles_formula_conflict;
 	private double primary_formula_mass_conflict;
 	
+	private String msReadySmiles;
+	private String msReadyFormula;
+	
 	public CompoundCollectionComponent(String id, String collectionId, String cas) {
 		super();
 		this.id = id;
@@ -208,5 +211,29 @@ public class CompoundCollectionComponent {
 			return true;
 		else
 			return false;
+	}
+
+	public String getMsReadySmiles() {
+		return msReadySmiles;
+	}
+
+	public void setMsReadySmiles(String msReadySmiles) {
+		this.msReadySmiles = msReadySmiles;
+	}
+
+	public String getMsReadyFormula() {
+		return msReadyFormula;
+	}
+
+	public void setMsReadyFormula(String msReadyFormula) {
+		this.msReadyFormula = msReadyFormula;
+	}
+	
+	public boolean isMsReady() {
+		
+		if(msReadySmiles == null ||msReadyFormula == null)
+			return false;		
+		else
+			return true;
 	}
 }

@@ -1206,6 +1206,7 @@ public enum MainActionCommands {
 	
 	COPY_VISIBLE_TABLE_ROWS_COMMAND("Copy visible rows to clipboard"),
 	COPY_SELECTED_TABLE_ROWS_COMMAND("Copy selected rows to clipboard"),
+	COPY_SELECTED_VALUE_COMMAND("Copy selected value"),
 	
 	SELECT_COMPOUND_COLLECTION_COMMAND("Select compound collection"),
 	LOAD_COMPOUND_COLLECTION_COMMAND("Load compound collection"),
@@ -1214,8 +1215,13 @@ public enum MainActionCommands {
 	SETUP_MULTIPLEXES_EXPORT_COMMAND("Set up compound multiplex data export"),
 	EXPORT_SELECTED_MULTIPLEXES_COMMAND("Export selected compound multiplex data"),
 	
+	EXPORT_SELECTED_MULTIPLEX_FOR_FBF_COMMAND("Export selected compound multiplex for \"Find by Formula\""),
+	
 	SETUP_COMPOUND_PROPERTIES_SEARCH_COMMAND("Show \"Search compounds by properties\" dialog"),
 	SEARCH_COMPOUND_PROPERTIES_COMMAND("Search compounds by properties"),
+	
+	EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND("Edit compound MS-ready structure"),
+	SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND("Save compound MS-ready structure"),
 	
 	EDIT_SELECTED_FIELD_COMMAND("Edit selected field"),
 	SAVE_CHANGES_COMMAND("Save changes"),

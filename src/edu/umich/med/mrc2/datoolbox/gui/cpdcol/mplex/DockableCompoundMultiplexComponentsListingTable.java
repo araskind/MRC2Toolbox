@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 
 import javax.swing.Icon;
@@ -30,12 +32,15 @@ import javax.swing.JScrollPane;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixtureComponent;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class DockableCompoundMultiplexComponentsListingTable extends DefaultSingleCDockable{
+public class DockableCompoundMultiplexComponentsListingTable 
+		extends DefaultSingleCDockable implements ActionListener{
 
 	private static final Icon componentIcon = GuiUtils.getIcon("compoundCollection", 16);
 	private CompoundMultiplexComponentsListingTable multiplexComponentsListingTable;
+	private EditMSReadyStructureDialog editMSReadyStructureDialog;
 
 	public DockableCompoundMultiplexComponentsListingTable() {
 
@@ -44,7 +49,12 @@ public class DockableCompoundMultiplexComponentsListingTable extends DefaultSing
 		setCloseable(false);
 		setLayout(new BorderLayout(0,0));
 
-		multiplexComponentsListingTable = new CompoundMultiplexComponentsListingTable();
+		multiplexComponentsListingTable = 
+				new CompoundMultiplexComponentsListingTable();
+		MultiplexListingTablePopupMenu popup = 
+				new MultiplexListingTablePopupMenu(multiplexComponentsListingTable, this);
+		multiplexComponentsListingTable.addTablePopupMenu(popup);
+
 		add(new JScrollPane(multiplexComponentsListingTable));
 	}
 
@@ -74,4 +84,48 @@ public class DockableCompoundMultiplexComponentsListingTable extends DefaultSing
 	public CompoundMultiplexMixtureComponent getSelectedCompoundMultiplexMixtureComponent() {
 		return multiplexComponentsListingTable.getSelectedCompoundMultiplexMixtureComponent();
 	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		String command = e.getActionCommand();
+		
+		if(command.equals(MainActionCommands.EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName()))
+			showStructureEditDialog();
+		
+		if(command.equals(MainActionCommands.SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName()))
+			saveMsReadyStructure();
+	}
+
+	private void showStructureEditDialog() {
+		// TODO Auto-generated method stub
+		CompoundMultiplexMixtureComponent selected = 
+				getSelectedCompoundMultiplexMixtureComponent();
+		if(selected == null)
+			return;
+		
+		editMSReadyStructureDialog = 
+				new EditMSReadyStructureDialog (selected, this);
+		editMSReadyStructureDialog.setLocationRelativeTo(this.getContentPane());
+		editMSReadyStructureDialog.setVisible(true);
+	}
+
+	private void saveMsReadyStructure() {
+		// TODO Auto-generated method stub
+		
+		
+		editMSReadyStructureDialog.dispose();
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

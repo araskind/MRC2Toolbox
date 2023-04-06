@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.cpdcol.prop;
+package edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex;
 
 import java.awt.event.ActionListener;
 
@@ -30,29 +30,31 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class PropertiesTablePopupMenu extends BasicTablePopupMenu {
+public class MultiplexListingTablePopupMenu extends BasicTablePopupMenu {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8828829260409589130L;
-	
-	protected static final Icon editIcon = GuiUtils.getIcon("edit", 24);
-	
-	protected JMenuItem
-		editSelectedPropertyMenuItem;
 
-	public PropertiesTablePopupMenu(ActionListener listener) {
-
-		super(listener);
-		addCopyBlock();
+	protected static final Icon editIcon = GuiUtils.getIcon("editLibraryFeature", 24);
+	
+	protected JMenuItem 
+		editCompoundMenuItem;
+		
+	public MultiplexListingTablePopupMenu(
+			ActionListener basicListener, 
+			ActionListener secondaryListener) {
+		super(basicListener);
+		
+		editCompoundMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName(), secondaryListener,
+				MainActionCommands.EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName());
+		editCompoundMenuItem.setIcon(editIcon);
 		
 		addSeparator();
 		
-		editSelectedPropertyMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.EDIT_SELECTED_FIELD_COMMAND.getName(), listener,
-				MainActionCommands.EDIT_SELECTED_FIELD_COMMAND.getName());
-		editSelectedPropertyMenuItem.setIcon(editIcon);
+		addCopyBlock();
 	}
 }
 

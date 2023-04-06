@@ -239,7 +239,8 @@ public class AddCustomCompoundDialog extends JDialog implements ActionListener, 
 		peptideSequenceTextField.setColumns(10);
 
 		synonymsTextArea = new JTextArea();
-		synonymsTextArea.setBorder(new TitledBorder(null, "Synonyms", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		synonymsTextArea.setBorder(new TitledBorder(null, 
+				"Synonyms", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagConstraints gbc_synonymsTextArea = new GridBagConstraints();
 		gbc_synonymsTextArea.gridwidth = 2;
 		gbc_synonymsTextArea.insets = new Insets(0, 0, 5, 5);
@@ -253,7 +254,8 @@ public class AddCustomCompoundDialog extends JDialog implements ActionListener, 
 		structureLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
 
 		JScrollPane scrollPane = new JScrollPane(structureLabel);
-		scrollPane.setBorder(new TitledBorder(null, "Structure", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		scrollPane.setBorder(new TitledBorder(null, "Structure", 
+				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		scrollPane.getViewport().setBackground(Color.WHITE);
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
@@ -265,7 +267,8 @@ public class AddCustomCompoundDialog extends JDialog implements ActionListener, 
 		dataPanel.add(scrollPane, gbc_scrollPane);
 
 		descriptionTextArea = new JTextArea();
-		descriptionTextArea.setBorder(new TitledBorder(null, "Description", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		descriptionTextArea.setBorder(new TitledBorder(null, "Description", 
+				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		GridBagConstraints gbc_descriptionTextArea = new GridBagConstraints();
 		gbc_descriptionTextArea.gridheight = 2;
 		gbc_descriptionTextArea.insets = new Insets(0, 0, 0, 5);
@@ -335,7 +338,6 @@ public class AddCustomCompoundDialog extends JDialog implements ActionListener, 
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		pack();
 	}
 

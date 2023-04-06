@@ -52,9 +52,6 @@ public class DockableCompoundMultiplexListingTable extends DefaultSingleCDockabl
 		multiplexListingTable.setTableModelFromCompoundMultiplexMixtureCollection(multiplexes);
 	}
 
-	/**
-	 * @return the compoundDatabaseTable
-	 */
 	public CompoundMultiplexListingTable getTable() {
 		return multiplexListingTable;
 	}
@@ -65,5 +62,9 @@ public class DockableCompoundMultiplexListingTable extends DefaultSingleCDockabl
 
 	public Collection<CompoundMultiplexMixture> getSelectedMultiplexMixtures() {
 		return multiplexListingTable.getSelectedMultiplexMixtures();
+	}
+	
+	public CompoundMultiplexMixture getSelectedMultiplexMixture() {
+		return multiplexListingTable.getSelectedMultiplexMixture();
 	}
 }

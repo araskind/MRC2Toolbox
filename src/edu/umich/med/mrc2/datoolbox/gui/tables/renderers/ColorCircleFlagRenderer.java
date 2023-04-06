@@ -45,10 +45,6 @@ public class ColorCircleFlagRenderer extends DefaultTableCellRenderer {
 		super();
 		setOpaque(true);
 		levelIcon = new IdLevelIcon(size, flagColor);
-//	    setVerticalTextPosition(JLabel.CENTER);
-//	    setHorizontalTextPosition(JLabel.CENTER);
-//        setHorizontalAlignment(SwingConstants.CENTER);
-//        setVerticalAlignment(SwingConstants.CENTER);
 	}
 	
 	public ColorCircleFlagRenderer(int size) {
@@ -56,10 +52,6 @@ public class ColorCircleFlagRenderer extends DefaultTableCellRenderer {
 		setIcon(null);
 		this.size = size;
 		setOpaque(true);
-//	    setVerticalTextPosition(JLabel.CENTER);
-//	    setHorizontalTextPosition(JLabel.CENTER);
-//        setHorizontalAlignment(SwingConstants.CENTER);
-//        setVerticalAlignment(SwingConstants.CENTER);
 	}
 	
 	@Override

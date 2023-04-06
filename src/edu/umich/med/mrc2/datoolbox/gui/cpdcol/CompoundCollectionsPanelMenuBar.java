@@ -69,6 +69,8 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 	
 	private static final Icon searchIconSmall = GuiUtils.getIcon("find", 16);
 	private static final Icon searchIcon = GuiUtils.getIcon("searchCompounds", 24);
+	private static final Icon exportFBFIcon = GuiUtils.getIcon("exportCollection", 24);
+	
 	
 	// Menus
 	private JMenu
@@ -109,7 +111,8 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 		exportMultiplexDataMenuItem,
 		exportMzRtLibraryMenuItem,
 		exportFilteredMzRtLibraryMenuItem,
-		exportReferenceMSMSLibraryMenuItem;
+		exportReferenceMSMSLibraryMenuItem,
+		exportFBFMenuItem;
 	
 	//	Utilities
 	private JMenuItem
@@ -202,8 +205,11 @@ public class CompoundCollectionsPanelMenuBar extends CommonMenuBar {
 		exportMultiplexDataMenuItem = addItem(exportMenu, 
 				MainActionCommands.SETUP_MULTIPLEXES_EXPORT_COMMAND, 
 				exportLibraryIcon);
+				
+		exportFBFMenuItem = addItem(exportMenu, 
+				MainActionCommands.EXPORT_SELECTED_MULTIPLEX_FOR_FBF_COMMAND, 
+				exportFBFIcon);
 		
-//		
 //		exportMzRtLibraryMenuItem = addItem(exportMenu, 
 //				MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND, 
 //				exportLibraryIcon);

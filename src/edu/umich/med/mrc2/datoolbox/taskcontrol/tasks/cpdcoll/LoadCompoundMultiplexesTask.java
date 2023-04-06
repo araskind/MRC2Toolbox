@@ -150,15 +150,17 @@ public class LoadCompoundMultiplexesTask extends AbstractTask {
 				"PRIMARY_SMILES, PRIMARY_FORMULA, PRIMARY_MASS,  " +
 				"FORMULA_FROM_PRIMARY_SMILES, CHARGE_FROM_PRIMARY_SMILES,  " +
 				"MASS_FROM_PRIMARY_SMILES, PRIMARY_INCHI_KEY_SMILES_CONFLICT,  " +
-				"PRIMARY_SMILES_FORMULA_CONFLICT, PRIMARY_FORMULA_MASS_CONFLICT " +
+				"PRIMARY_SMILES_FORMULA_CONFLICT, PRIMARY_FORMULA_MASS_CONFLICT, " +
+				"MS_READY_SMILES, MS_READY_FORMULA " +
 				"FROM COMPOUND_COLLECTION_COMPONENTS " + 
-				"WHERE CC_COMPONENT_ID = ?";
+				"WHERE CC_COMPONENT_ID = ?";		
 		PreparedStatement ps = conn.prepareStatement(query);
 		
 		String metadataQueryuery = 
 				"SELECT FIELD_ID, FIELD_VALUE FROM "
 				+ "COMPOUND_COLLECTION_COMPONENT_METADATA WHERE CC_COMPONENT_ID = ?";
 		PreparedStatement metadataPs = conn.prepareStatement(metadataQueryuery);
+		
 		ResultSet mdrs = null;
 		ResultSet rs = null;
 		for(String ccid : ccidList) {
@@ -193,7 +195,9 @@ public class LoadCompoundMultiplexesTask extends AbstractTask {
 					System.err.println("Component "+ component.getId() + " has no primary formula mass conflict mass");
 				}
 				component.setPrimary_inchi_key_smiles_conflict(rs.getString("PRIMARY_INCHI_KEY_SMILES_CONFLICT"));
-				component.setPrimary_smiles_formula_conflict(rs.getString("PRIMARY_SMILES_FORMULA_CONFLICT"));			
+				component.setPrimary_smiles_formula_conflict(rs.getString("PRIMARY_SMILES_FORMULA_CONFLICT"));	
+				component.setMsReadySmiles(rs.getString("MS_READY_SMILES"));
+				component.setMsReadyFormula(rs.getString("MS_READY_FORMULA"));
 				
 				metadataPs.setString(1, component.getId());
 				mdrs = metadataPs.executeQuery();

@@ -44,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.BooleanColorCircleFlagRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabaseLinkRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MobilePhaseRenderer;
@@ -82,6 +83,10 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 			.setCellRenderer(new RadioButtonRenderer());
 		columnModel.getColumnById(CompoundMultiplexComponentsListingTableModel.FORMULAS_DELTA_MASS_COLUMN)
 			.setCellRenderer(new FormattedDecimalRenderer(new DecimalFormat("###.######"), true));
+		
+		columnModel.getColumnById(CompoundMultiplexComponentsListingTableModel.IS_MS_READY_COLUMN)
+			.setCellRenderer(new BooleanColorCircleFlagRenderer(15));
+		
 		
 		setDefaultRenderer(MobilePhase.class, 
 				new MobilePhaseRenderer(SortProperty.Name));
