@@ -21,10 +21,14 @@
 
 package edu.umich.med.mrc2.datoolbox.data.cpdcoll;
 
+import java.util.UUID;
+
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 
 public class CompoundMultiplexMixtureComponent {
 
+	private String id;
 	private CompoundCollectionComponent component;
 	private Double concentrationMkm;
 	private MobilePhase solvent;
@@ -39,6 +43,8 @@ public class CompoundMultiplexMixtureComponent {
 			Double xlogp, 
 			Double aliquoteVolume) {
 		super();
+		id = DataPrefix.COMPOUND_MULTIPLEX_MIXTURE_COMPONENT.getName() +
+				UUID.randomUUID().toString().substring(0, 12);
 		this.cccid = cccid;
 		this.concentrationMkm = concentrationMkm;
 		this.solvent = solvent;
@@ -53,6 +59,8 @@ public class CompoundMultiplexMixtureComponent {
 			Double xlogp, 
 			Double aliquoteVolume) {
 		super();
+		id = DataPrefix.COMPOUND_MULTIPLEX_MIXTURE_COMPONENT.getName() +
+				UUID.randomUUID().toString().substring(0, 12);
 		this.component = component;
 		this.concentrationMkm = concentrationMkm;
 		this.solvent = solvent;
@@ -98,6 +106,38 @@ public class CompoundMultiplexMixtureComponent {
 			return component.getCas();
 		
 		return component.getCid().getCommonName();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+
+		if (obj == this)
+			return true;
+
+		if (obj == null)
+			return false;
+
+		if (!CompoundMultiplexMixtureComponent.class.isAssignableFrom(obj.getClass()))
+			return false;
+
+		final CompoundMultiplexMixtureComponent other = (CompoundMultiplexMixtureComponent) obj;
+
+		if ((this.id == null) ? (other.getId() != null) : !this.id.equals(other.getId()))
+			return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+
+		int hash = 3;
+		hash = 53 * hash + (this.id != null ? this.id.hashCode() : 0);
+		return hash;
+	}
+
+	public String getId() {
+		return id;
 	}
 }
 

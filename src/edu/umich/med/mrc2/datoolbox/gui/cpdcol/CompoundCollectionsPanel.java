@@ -81,7 +81,8 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 			new File(MRC2ToolBoxCore.configDir + "CompoundCollectionsPanel.layout");
 	
 //	private DockableCompoundCollectionListingTable compoundTable;
-	private DockableMolStructurePanel sourceMolStructurePanel, primaryMolStructurePanel;
+	private DockableMolStructurePanel 
+		sourceMolStructurePanel, primaryMolStructurePanel, msReadyMolStructurePanel;
 	private DockableCompoundCollectionComponentPropertiesTable propertiesTable;
 	private DockableCompoundMultiplexListingTable compoundMultiplexListingTable;
 	private CompoundCollectionSelectorDialog compoundCollectionSelectorDialog;
@@ -108,6 +109,9 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		primaryMolStructurePanel = new DockableMolStructurePanel(
 				"CpdCollectionsPanelPrimaryMolStructurePanel");
 		primaryMolStructurePanel.setTitleText("Primary compound structure");
+		msReadyMolStructurePanel = new DockableMolStructurePanel(
+				"CpdCollectionsPanelMSReadyMolStructurePanel");
+		msReadyMolStructurePanel.setTitleText("MSReady compound structure");
 		
 		compoundMultiplexListingTable =  
 				new DockableCompoundMultiplexListingTable();
@@ -122,7 +126,8 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		grid.add(0, 0, 75, 40, 
 				//	compoundTable, 
 				compoundMultiplexListingTable, multiplexComponentsListingTable);
-		grid.add(75, 0, 25, 40, sourceMolStructurePanel, primaryMolStructurePanel);
+		grid.add(75, 0, 25, 40, sourceMolStructurePanel, 
+				primaryMolStructurePanel, msReadyMolStructurePanel);
 		grid.add(0, 50, 100, 60, propertiesTable);
 		
 		control.getContentArea().deploy(grid);
@@ -160,7 +165,10 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 			searchCompoundsByProperties();
 		
 		if(command.equals(MainActionCommands.EXPORT_SELECTED_MULTIPLEX_FOR_FBF_COMMAND.getName()))
-			exportSelectedMultiplexForFBF();		
+			exportSelectedMultiplexForFBF();	
+		
+		if(command.equals(MainActionCommands.EXPORT_SELECTED_MULTIPLEX_FOR_PCDL_IMPORT_COMMAND.getName()))
+			exportSelectedMultiplexForPCDLImport();
 	}
 
 	private void exportSelectedMultiplexForFBF() {
@@ -179,7 +187,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		JnaFileChooser fc = new JnaFileChooser(baseExportDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("CSV files", "csv", "CSV");
-		fc.setTitle("Export Multiplecx data formatted for Find by Formula search:");
+		fc.setTitle("Export Multiplex data formatted for Find by Formula search:");
 		fc.setMultiSelectionEnabled(false);
 //		fc.setSaveButtonText("Set output file");
 		String defaultFileName = plex.getName() + "_4FBF_" + 
@@ -203,6 +211,50 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 		}		
 	}
 
+	private void exportSelectedMultiplexForPCDLImport() {
+		
+		CompoundMultiplexMixture plex = 
+				compoundMultiplexListingTable.getSelectedMultiplexMixture();
+		if(plex == null)
+			return;
+		
+		String pcdlString =
+				CompoundMultiplexUtils.createPCDLImportInputForMultiplex(plex);
+		
+		if(pcdlString == null) {
+			MessageDialog.showErrorMsg("Failed to create PCDL import file", this.getContentPane());
+			return;
+		}		
+		if(baseExportDirectory == null)
+			baseExportDirectory = new File(MRC2ToolBoxCore.libraryDir);
+		
+		JnaFileChooser fc = new JnaFileChooser(baseExportDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CSV files", "csv", "CSV");
+		fc.setTitle("Export Multiplex data formatted for PCDL import:");
+		fc.setMultiSelectionEnabled(false);
+//		fc.setSaveButtonText("Set output file");
+		String defaultFileName = plex.getName() + "_4PCDL_" + 
+				MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()) + ".csv";
+		fc.setDefaultFileName(defaultFileName);	
+		if (fc.showSaveDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File outputFile  = fc.getSelectedFile();
+			baseExportDirectory = outputFile.getParentFile();
+			
+			Path outputPath = Paths.get(outputFile.getAbsolutePath());
+			try {
+				Files.writeString(outputPath, 
+						pcdlString, 
+						StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, 
+						StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}		
+	}
+	
 	private void showSearchDialog() {
 		
 		propertySearchDialog = new PropertySearchDialog(this);
@@ -408,6 +460,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 						multiplexComponentsListingTable.getSelectedCompoundMultiplexMixtureComponent();
 				if(mpc != null) {
 					
+					clearDataPanels();
 					CompoundCollectionComponent ccComponent = mpc.getCCComponent();
 					propertiesTable.setTableModelFromCompoundCollectionComponent(ccComponent);
 					
@@ -421,7 +474,10 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 							filter(p -> p.getId().equals("CCCMF00127")).
 							findFirst().orElse(null);
 					if(primarySmilesEntry != null)
-						primaryMolStructurePanel.showStructure(ccComponent.getMetadata().get(primarySmilesEntry));					
+						primaryMolStructurePanel.showStructure(ccComponent.getMetadata().get(primarySmilesEntry));
+					
+					if(ccComponent.getMsReadySmiles() != null)
+						msReadyMolStructurePanel.showStructure(ccComponent.getMsReadySmiles());
 					
 					return;
 				}
@@ -437,6 +493,7 @@ public class CompoundCollectionsPanel extends DockableMRC2ToolboxPanel {
 
 		sourceMolStructurePanel.clearPanel();
 		primaryMolStructurePanel.clearPanel();
+		msReadyMolStructurePanel.clearPanel();
 		propertiesTable.clearTable();
 	}
 

@@ -123,7 +123,7 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 				CompoundCollectionComponent ccComp = component.getCCComponent();
 				CompoundIdentity cid = ccComp.getCid();
 				Object[] obj = {
-						ccComp.getCollectionId(),
+						ccComp.getId(),
 						mixture,
 						ccComp.isMsReady(),
 						component,
@@ -143,6 +143,36 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 			}
 		}
 		addRows(rowData);
+	}
+
+	public void updateComponentData(CompoundMultiplexMixtureComponent component) {
+
+		int col = getColumnIndex(NAME_COLUMN);
+		for(int i=0; i<getRowCount(); i++) {
+			
+			if(getValueAt(i, col).equals(component)) {
+				
+				CompoundCollectionComponent ccComp = component.getCCComponent();
+				CompoundIdentity cid = ccComp.getCid();
+				
+				setValueAt(ccComp.getId(), i, getColumnIndex(ID_COLUMN));
+//				setValueAt(cid, i, getColumnIndex(MIXTURE_ID_COLUMN));
+				setValueAt(ccComp.isMsReady(), i, getColumnIndex(IS_MS_READY_COLUMN));
+				setValueAt(component, i, getColumnIndex(NAME_COLUMN));
+				setValueAt(cid, i, getColumnIndex(ACCESSION_COLUMN));
+				setValueAt(ccComp.getCas(), i, getColumnIndex(CAS_COLUMN));				
+				setValueAt(component.getSolvent(), i, getColumnIndex(SOLVENT_COLUMN));
+				setValueAt(component.getConcentrationMkm(), i, getColumnIndex(CONCENTRATION_COLUMN));
+				setValueAt(component.getXlogp(), i, getColumnIndex(XLOGP_COLUMN));
+				setValueAt(component.getAliquoteVolume(), i, getColumnIndex(ALIQUOTE_VOLUME_COLUMN));
+				setValueAt(ccComp.getPrimary_formula(), i, getColumnIndex(FORMULA_COLUMN));
+				setValueAt(ccComp.getFormula_from_primary_smiles(), i, getColumnIndex(SMILES_FORMULA_COLUMN));
+				setValueAt(ccComp.getCharge_from_primary_smiles(), i, getColumnIndex(CHARGE_COLUMN));
+				setValueAt(ccComp.getPrimary_formula_mass_conflict(), i, getColumnIndex(FORMULAS_DELTA_MASS_COLUMN));
+				setValueAt(ccComp.hasConflict(), i, getColumnIndex(CONFLICT_COLUMN));
+				return;
+			}
+		}
 	}
 }
 

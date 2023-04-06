@@ -32,6 +32,11 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IMolecularFormula;
+import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smiles.SmilesParser;
+import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollection;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundCollectionComponent;
@@ -39,9 +44,12 @@ import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixtureComponent;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataFieldCategory;
+import edu.umich.med.mrc2.datoolbox.data.cpdcoll.PCDLImportFields;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.utils.MolFormulaUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
@@ -421,16 +429,130 @@ public class CompoundMultiplexUtils {
 		for(CompoundMultiplexMixtureComponent component : plex.getComponents()) {
 					
 			line.clear();
-			CompoundCollectionComponent ccComponent = component.getCCComponent();
-			
-			line.add(ccComponent.getPrimary_formula());
-			line.add(MsUtils.spectrumMzExportFormat.format(ccComponent.getPrimary_mass()));
+			CompoundCollectionComponent ccComponent = component.getCCComponent();			
+			line.add(ccComponent.getMsReadyFormula().replaceAll("[\\[,\\],\\+,\\-]", ""));
+			double mass = MolFormulaUtils.calculateExactMonoisotopicMass(ccComponent.getMsReadyFormula());
+			line.add(MsUtils.spectrumMzExportFormat.format(mass));
 			String name = "\"" + ccComponent.getCid().getCommonName() + 
 					" (" + ccComponent.getCid().getPrimaryDatabaseId() + ")\"";
 			line.add(name);
 			output.add(StringUtils.join(line, ","));
 		}
 		return StringUtils.join(output, "\n");
+	}
+	
+	public static String createPCDLImportInputForMultiplex(CompoundMultiplexMixture plex) {
+		
+		ArrayList<String>output = new ArrayList<String>();
+		ArrayList<String>line = new ArrayList<String>();
+		
+		//	Header
+		line.add(PCDLImportFields.NAME.getName());
+		line.add(PCDLImportFields.FORMULA.getName());
+		line.add(PCDLImportFields.MASS.getName());
+		line.add(PCDLImportFields.ANION.getName());
+		line.add(PCDLImportFields.CATION.getName());
+		line.add(PCDLImportFields.CAS.getName());
+		line.add(PCDLImportFields.HMDB.getName());
+		line.add(PCDLImportFields.PUBCHEM.getName());
+		//line.add(PCDLImportFields.SMILES.getName());
+		output.add(StringUtils.join(line, ","));
+		
+		SmilesParser smipar = new SmilesParser(SilentChemObjectBuilder.getInstance());
+		for(CompoundMultiplexMixtureComponent component : plex.getComponents()) {					
+
+			line.clear();
+			CompoundCollectionComponent ccComponent = component.getCCComponent();
+			if(ccComponent.getMsReadySmiles() == null || ccComponent.getMsReadySmiles().isEmpty()) {
+				System.err.println(
+						"SMILES string absent for ccComponent ID " + ccComponent.getId() +
+						"; omitting from output");
+				continue;
+			}			
+			int charge = 0;
+			double smilesMass = 0.0d;
+			String mfFromFStringFromSmiles = "";
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(ccComponent.getMsReadySmiles());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				smilesMass = MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic);					
+				charge = molFormula.getCharge();
+			}
+			else {
+				System.err.println("Error parsing SMILES for ccComponent ID " + ccComponent.getId());
+				System.err.println(ccComponent.getMsReadySmiles());
+				return null;
+			}
+			line.add("\"" + ccComponent.getCid().getCommonName() + "\"");
+			line.add(mfFromFStringFromSmiles.replaceAll("[\\[,\\],\\+,\\-]", ""));
+			line.add(MsUtils.spectrumMzExportFormat.format(smilesMass));
+			String anionString = "";
+			if(charge < 0)
+				anionString = "1";
+			
+			line.add(anionString);
+			
+			String cationString = "";
+			if(charge > 0)
+				cationString = "1";
+			
+			line.add(cationString);
+			
+			String casString = "";
+			if(ccComponent.getCas() != null && !ccComponent.getCas().isEmpty())
+				casString = ccComponent.getCas();
+			
+			line.add(casString);
+			
+			String hmdbString = 
+					ccComponent.getCid().getDbId(CompoundDatabaseEnum.HMDB);
+			
+			if(hmdbString != null && !hmdbString.isEmpty())
+				line.add(hmdbString.replace("HMDB00", "HMDB"));
+			else
+				line.add("");
+			
+			String pubchemString = 
+					ccComponent.getCid().getDbId(CompoundDatabaseEnum.PUBCHEM);
+			
+			if(pubchemString != null && !pubchemString.isEmpty())
+				line.add(pubchemString);
+			else
+				line.add("");
+			
+//			line.add(ccComponent.getMsReadySmiles());
+			output.add(StringUtils.join(line, ","));
+		}
+		return StringUtils.join(output, "\n");
+	}
+	
+	public static void updateMsReadyData(
+			CompoundMultiplexMixtureComponent component, 
+			String smiles, 
+			String formula) throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE COMPOUND_COLLECTION_COMPONENTS  " +
+				"SET MS_READY_SMILES = ?, MS_READY_FORMULA = ?  " +
+				"WHERE CC_COMPONENT_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);		
+		ps.setString(1, smiles);
+		ps.setString(2, formula);
+		ps.setString(3, component.getCCComponent().getId());
+		ps.executeUpdate();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 //	public static Collection<CpdMetadataField> addCpdMetadataFields(

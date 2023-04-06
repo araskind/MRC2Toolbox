@@ -231,7 +231,7 @@ public class CompoundCollectionComponent {
 	
 	public boolean isMsReady() {
 		
-		if(msReadySmiles == null ||msReadyFormula == null)
+		if(msReadySmiles == null || msReadyFormula == null)
 			return false;		
 		else
 			return true;

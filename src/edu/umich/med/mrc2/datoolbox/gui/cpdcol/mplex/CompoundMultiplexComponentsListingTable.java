@@ -159,6 +159,10 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 		return (CompoundMultiplexMixtureComponent) model.getValueAt(convertRowIndexToModel(row), 
 				model.getColumnIndex(CompoundMultiplexComponentsListingTableModel.NAME_COLUMN));
 	}
+
+	public void updateComponentData(CompoundMultiplexMixtureComponent mmComponent) {
+		model.updateComponentData(mmComponent);
+	}
 }
 
 

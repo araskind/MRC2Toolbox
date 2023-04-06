@@ -94,7 +94,7 @@ public class MolFormulaUtils {
 	public static double calculateExactMonoisotopicMass(String formulaString) {
 		
 		IMolecularFormula formula = MolecularFormulaManipulator.getMolecularFormula(formulaString, builder);			
-		return MolecularFormulaManipulator.getMajorIsotopeMass(formula);
+		return MolecularFormulaManipulator.getMass(formula, MolecularFormulaManipulator.MonoIsotopic);
 	}
 	
 	public static Integer getCarbonCounts(String formulaString) {

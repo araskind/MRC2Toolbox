@@ -291,8 +291,11 @@ public class EditMSReadyStructureDialog extends JDialog implements ActionListene
 		return smilesTextField.getText().trim();
 	}
 	
+	public String getFormula(){
+		return formulaTextField.getText().trim();
+	}
+	
 	public CompoundMultiplexMixtureComponent getMmComponent() {
 		return mmComponent;
 	}
-
 }

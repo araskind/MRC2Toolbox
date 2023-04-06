@@ -29,11 +29,15 @@ import java.util.Collection;
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
 
+import org.apache.commons.lang3.StringUtils;
+
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixtureComponent;
+import edu.umich.med.mrc2.datoolbox.database.cpdcol.CompoundMultiplexUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
 public class DockableCompoundMultiplexComponentsListingTable 
 		extends DefaultSingleCDockable implements ActionListener{
@@ -112,8 +116,35 @@ public class DockableCompoundMultiplexComponentsListingTable
 
 	private void saveMsReadyStructure() {
 		// TODO Auto-generated method stub
-		
-		
+		Collection<String> errors = 
+				editMSReadyStructureDialog.validateInputData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), editMSReadyStructureDialog);
+			return;
+		}
+		CompoundMultiplexMixtureComponent mComponent = 
+				editMSReadyStructureDialog.getMmComponent();
+		String smiles = editMSReadyStructureDialog.getSmiles();
+		String formula = editMSReadyStructureDialog.getFormula();
+		try {
+			CompoundMultiplexUtils.updateMsReadyData(
+					editMSReadyStructureDialog.getMmComponent(), smiles, formula);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		mComponent.getCCComponent().setMsReadySmiles(smiles);
+		mComponent.getCCComponent().setMsReadyFormula(formula);
+		multiplexComponentsListingTable.updateComponentData(editMSReadyStructureDialog.getMmComponent());
+		try {
+			int row = multiplexComponentsListingTable.getSelectedRow();
+			multiplexComponentsListingTable.clearSelection();
+			multiplexComponentsListingTable.setRowSelectionInterval(row, row);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			//	e.printStackTrace();
+		}		
 		editMSReadyStructureDialog.dispose();
 	}
 }

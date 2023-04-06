@@ -1216,6 +1216,7 @@ public enum MainActionCommands {
 	EXPORT_SELECTED_MULTIPLEXES_COMMAND("Export selected compound multiplex data"),
 	
 	EXPORT_SELECTED_MULTIPLEX_FOR_FBF_COMMAND("Export selected compound multiplex for \"Find by Formula\""),
+	EXPORT_SELECTED_MULTIPLEX_FOR_PCDL_IMPORT_COMMAND("Export selected compound multiplex for import into PCDL library"),
 	
 	SETUP_COMPOUND_PROPERTIES_SEARCH_COMMAND("Show \"Search compounds by properties\" dialog"),
 	SEARCH_COMPOUND_PROPERTIES_COMMAND("Search compounds by properties"),
