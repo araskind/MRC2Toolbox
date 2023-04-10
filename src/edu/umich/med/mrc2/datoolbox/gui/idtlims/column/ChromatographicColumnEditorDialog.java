@@ -51,7 +51,7 @@ import javax.swing.border.EmptyBorder;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
@@ -143,7 +143,7 @@ public class ChromatographicColumnEditorDialog extends JDialog {
 		dataPanel.add(lblType, gbc_lblType);
 
 		separationTypeComboBox = new JComboBox(new SortedComboBoxModel<ChromatographicSeparationType>(
-				IDTDataCash.getChromatographicSeparationTypes()));
+				IDTDataCache.getChromatographicSeparationTypes()));
 
 		GridBagConstraints gbc_separationTypeComboBox = new GridBagConstraints();
 		gbc_separationTypeComboBox.insets = new Insets(0, 0, 5, 0);
@@ -178,7 +178,7 @@ public class ChromatographicColumnEditorDialog extends JDialog {
 		dataPanel.add(lblManufacturer, gbc_lblManufacturer);
 
 		manufacturerComboBox = new JComboBox(new SortedComboBoxModel<Manufacturer>(
-				IDTDataCash.getManufacturers()));
+				IDTDataCache.getManufacturers()));
 		GridBagConstraints gbc_manufacturerComboBox = new GridBagConstraints();
 		gbc_manufacturerComboBox.insets = new Insets(0, 0, 5, 0);
 		gbc_manufacturerComboBox.fill = GridBagConstraints.HORIZONTAL;

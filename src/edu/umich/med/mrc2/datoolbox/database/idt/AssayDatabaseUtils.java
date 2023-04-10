@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class AssayDatabaseUtils {
@@ -53,7 +53,7 @@ public class AssayDatabaseUtils {
 					rs.getString("ASSAY_NAME"),	
 					rs.getString("ALTERNATE_NAME"));
 			InstrumentPlatform ip = 
-					LIMSDataCash.getInstrumentPlatformById(rs.getString("PLATFORM_ID"));
+					LIMSDataCache.getInstrumentPlatformById(rs.getString("PLATFORM_ID"));
 			assay.setInstrumentPlatform(ip);
 			assays.add(assay);
 		}
@@ -76,7 +76,7 @@ public class AssayDatabaseUtils {
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 						
-			Assay assay = LIMSDataCash.getAssayById(rs.getString("ASSAY_ID"));
+			Assay assay = LIMSDataCache.getAssayById(rs.getString("ASSAY_ID"));
 			if(assay != null)
 				assays.add(assay);
 		}

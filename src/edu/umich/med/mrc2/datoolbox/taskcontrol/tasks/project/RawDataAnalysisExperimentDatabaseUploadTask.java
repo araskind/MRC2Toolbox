@@ -50,7 +50,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSClusteringDBUtils;
 import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
@@ -91,9 +91,9 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 		taskDescription = "Refreshing method list ...";
 		total = 100;
 		processed = 20;
-		IDTDataCash.refreshDataExtractionMethodList();
+		IDTDataCache.refreshDataExtractionMethodList();
 		//	String metodId = experiment.getMsmsExtractionParameterSet().getId();
-		deMethod = IDTDataCash.getDataExtractionMethodByMd5(
+		deMethod = IDTDataCache.getDataExtractionMethodByMd5(
 				experiment.getMsmsExtractionParameterSet().getParameterSetHash());
 		if(deMethod == null) {
 			errorMessage = "Data extraction method not defined!";
@@ -130,9 +130,9 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 		processed = 20;
 		
 		String expId = experiment.getIdTrackerExperiment().getId();
-		IDTDataCash.refreshExperimentList();
-		IDTDataCash.refreshExperimentSamplePrepMap();
-		if(IDTDataCash.getExperimentById(expId) != null) {
+		IDTDataCache.refreshExperimentList();
+		IDTDataCache.refreshExperimentSamplePrepMap();
+		if(IDTDataCache.getExperimentById(expId) != null) {
 			
 			try {
 				IDTUtils.deleteExperiment(experiment.getIdTrackerExperiment());
@@ -181,7 +181,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 			e.printStackTrace();
 			return false;
 		}
-		IDTDataCash.refreshSamplePrepDataPipelineMap();
+		IDTDataCache.refreshSamplePrepDataPipelineMap();
 		return true;
 	}
 
@@ -196,17 +196,17 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 		for(LIMSSamplePreparation prep : experiment.getIdTrackerExperiment().getSamplePreps()) {
 			
 			if(prep.getId() != null 
-					&& IDTDataCash.getSamplePrepById(prep.getId()) != null) {
+					&& IDTDataCache.getSamplePrepById(prep.getId()) != null) {
 				continue;
 			}
 			try {
 				IDTUtils.addNewSamplePrepWithSopsAndAnnotations(prep, samples);	
-				IDTDataCash.getSamplePreps().add(prep);
-				if(IDTDataCash.getExperimentSamplePrepMap().get(experiment.getIdTrackerExperiment()) == null)
-					IDTDataCash.getExperimentSamplePrepMap().
+				IDTDataCache.getSamplePreps().add(prep);
+				if(IDTDataCache.getExperimentSamplePrepMap().get(experiment.getIdTrackerExperiment()) == null)
+					IDTDataCache.getExperimentSamplePrepMap().
 						put(experiment.getIdTrackerExperiment(), new TreeSet<LIMSSamplePreparation>());
 				
-				IDTDataCash.getExperimentSamplePrepMap().get(experiment.getIdTrackerExperiment()).add(prep);
+				IDTDataCache.getExperimentSamplePrepMap().get(experiment.getIdTrackerExperiment()).add(prep);
 					
 			}
 			catch (Exception e) {
@@ -256,7 +256,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 		if(newExperiment.getId() != null) {
 			
 			LIMSExperiment existing = 
-					IDTDataCash.getExperimentById(newExperiment.getId());
+					IDTDataCache.getExperimentById(newExperiment.getId());
 			if(existing != null)
 				return true;
 		}			
@@ -269,7 +269,7 @@ public class RawDataAnalysisExperimentDatabaseUploadTask extends AbstractTask im
 		}
 		if(experimentId != null) {
 			newExperiment.setId(experimentId);
-			IDTDataCash.getExperiments().add(newExperiment);
+			IDTDataCache.getExperiments().add(newExperiment);
 			newExperiment.getProject().getExperiments().add(newExperiment);
 			return true;
 		}

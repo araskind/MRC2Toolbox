@@ -39,7 +39,7 @@ import edu.umich.med.mrc2.datoolbox.data.AnnotatedObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.AnalysisMethodComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.store.SamplePreparationFields;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 
@@ -342,7 +342,7 @@ public class LIMSSamplePreparation implements
 		String userId = 
 				prepElement.getAttributeValue(SamplePreparationFields.Creator.name());
 		if(userId != null)
-			creator = IDTDataCash.getUserById(userId);
+			creator = IDTDataCache.getUserById(userId);
 
 		Element protocolsElement =
 				prepElement.getChild(SamplePreparationFields.Protocols.name());
@@ -351,7 +351,7 @@ public class LIMSSamplePreparation implements
 			String[]protocolIds = protocolsElement.getText().split(",");
 			for(String protocolId : protocolIds) {
 				
-				LIMSProtocol protocol = IDTDataCash.getProtocolById(protocolId);
+				LIMSProtocol protocol = IDTDataCache.getProtocolById(protocolId);
 				if(protocol != null)
 					protocols.add(protocol);
 			}		

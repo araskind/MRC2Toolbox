@@ -40,8 +40,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
 import edu.umich.med.mrc2.datoolbox.project.store.AvgMSFields;
 import edu.umich.med.mrc2.datoolbox.project.store.DataFileFields;
@@ -103,7 +103,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		injectionId = injection.getId();
 		injectionTime = injection.getTimeStamp();
 		acquisitionMethod = 
-				IDTDataCash.getAcquisitionMethodById(injection.getAcquisitionMethodId());
+				IDTDataCache.getAcquisitionMethodById(injection.getAcquisitionMethodId());
 		prepItemId = injection.getPrepItemId();
 		initFields();
 	}
@@ -412,7 +412,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 		String acqMethodId = 
 				fileElement.getAttributeValue(DataFileFields.AcqMethod.name());
 		if(acqMethodId != null)
-			acquisitionMethod = IDTDataCash.getAcquisitionMethodById(acqMethodId);
+			acquisitionMethod = IDTDataCache.getAcquisitionMethodById(acqMethodId);
 		
 		String colorCode = 
 				fileElement.getAttributeValue(DataFileFields.Color.name());
@@ -446,7 +446,7 @@ public class DataFile implements Comparable<DataFile>, Serializable {
 				fileElement.getAttributeValue(DataFileFields.Sample.name());
 		if(sampleId != null)
 			parentSample = 
-					OfflineExperimentLoadCash.getExperimentalSampleById(sampleId);
+					OfflineExperimentLoadCache.getExperimentalSampleById(sampleId);
 		
 		enabled = true;
 		chromatograms = new ArrayList<ExtractedChromatogram>();

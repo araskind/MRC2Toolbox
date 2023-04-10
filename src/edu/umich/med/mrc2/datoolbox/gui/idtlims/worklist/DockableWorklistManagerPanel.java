@@ -52,7 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -237,7 +237,7 @@ public class DockableWorklistManagerPanel extends AbstractIDTrackerLimsPanel imp
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		IDTDataCash.refreshSamplePrepDataPipelineMap();
+		IDTDataCache.refreshSamplePrepDataPipelineMap();
 		idTrackerLimsManager.reloadProjectTree();
 		instrumentSequenceImportDialog.dispose();
 		loadPrepWorklist(activeSamplePrep, experiment);

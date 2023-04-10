@@ -43,7 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -72,7 +72,7 @@ public class StockSampleSelectorDialog extends JDialog {
 		dataPanel.setLayout(new BorderLayout(0, 0));
 
 		stockSampleTable = new StockSampleTable();
-		stockSampleTable.setTableModelFromSamples(IDTDataCash.getStockSamples());
+		stockSampleTable.setTableModelFromSamples(IDTDataCache.getStockSamples());
 		stockSampleTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {

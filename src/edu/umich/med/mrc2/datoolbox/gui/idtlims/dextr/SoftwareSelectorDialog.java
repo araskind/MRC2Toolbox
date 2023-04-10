@@ -47,7 +47,7 @@ import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.software.SoftwareTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -80,7 +80,7 @@ public class SoftwareSelectorDialog extends JDialog {
 		getContentPane().add(dataPanel, BorderLayout.CENTER);
 		
 		softwareTable = new SoftwareTable();
-		Collection<DataProcessingSoftware> softwareList = IDTDataCash.getSoftwareList();
+		Collection<DataProcessingSoftware> softwareList = IDTDataCache.getSoftwareList();
 		if(softwareType != null) {
 			softwareList = softwareList.stream().
 				filter(s -> s.getSoftwareType().equals(softwareType)).

@@ -39,7 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -124,7 +124,7 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 	}
 
 	public void loadProtocolData() {
-		protocolTable.setTableModelFromProtocols(IDTDataCash.getProtocols());
+		protocolTable.setTableModelFromProtocols(IDTDataCache.getProtocols());
 	}
 
 	@Override
@@ -226,7 +226,7 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			IDTDataCash.refreshProtocols();
+			IDTDataCache.refreshProtocols();
 			loadProtocolData();
 		}
 	}
@@ -304,7 +304,7 @@ public class DockableSOPProtocolsManagerPanel extends AbstractIDTrackerLimsPanel
 				}
 			}
 		}
-		IDTDataCash.refreshProtocols();
+		IDTDataCache.refreshProtocols();
 		loadProtocolData();
 		protocolEditorDialog.dispose();
 	}

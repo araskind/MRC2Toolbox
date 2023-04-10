@@ -42,7 +42,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdLevelUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEventListener;
@@ -80,7 +80,7 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 		idLevelTable = new IdLevelTable();
 		getContentPane().add(new JScrollPane(idLevelTable), BorderLayout.CENTER);
 		idLevelTable.setTableModelFromLevelList(
-				IDTDataCash.getMsFeatureIdentificationLevelList());
+				IDTDataCache.getMsFeatureIdentificationLevelList());
 		
 		eventListeners = ConcurrentHashMap.newKeySet();
 		pack();
@@ -149,9 +149,9 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		IDTDataCash.refreshMsFeatureIdentificationLevelList();
+		IDTDataCache.refreshMsFeatureIdentificationLevelList();
 		idLevelTable.setTableModelFromLevelList(
-				IDTDataCash.getMsFeatureIdentificationLevelList());
+				IDTDataCache.getMsFeatureIdentificationLevelList());
 		idLevelEditorDialog.dispose();
 		fireIdentificationLevelEvent();
 	}
@@ -176,9 +176,9 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 				e.printStackTrace();
 			}
 		}
-		IDTDataCash.refreshMsFeatureIdentificationLevelList();
+		IDTDataCache.refreshMsFeatureIdentificationLevelList();
 		idLevelTable.setTableModelFromLevelList(
-				IDTDataCash.getMsFeatureIdentificationLevelList());
+				IDTDataCache.getMsFeatureIdentificationLevelList());
 		idLevelEditorDialog.dispose();
 		fireIdentificationLevelEvent();
 	}
@@ -202,14 +202,14 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 		if(level == null) {
 			
 			MSFeatureIdentificationLevel sameRank = 
-				IDTDataCash.getMsFeatureIdentificationLevelList().stream().
+				IDTDataCache.getMsFeatureIdentificationLevelList().stream().
 				filter(s -> (s.getRank() == rank)).findFirst().orElse(null);
 			
 			if(sameRank != null)
 				errors.add("Level with the same rank already exists.");
 			
 			MSFeatureIdentificationLevel sameName = 
-					IDTDataCash.getMsFeatureIdentificationLevelList().stream().
+					IDTDataCache.getMsFeatureIdentificationLevelList().stream().
 					filter(s -> s.getName().equals(name)).findFirst().orElse(null);
 			
 			if(sameName != null)
@@ -218,7 +218,7 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 			if(shortcut != null) {
 				
 				MSFeatureIdentificationLevel sameShortcut = 
-						IDTDataCash.getMsFeatureIdentificationLevelList().stream().
+						IDTDataCache.getMsFeatureIdentificationLevelList().stream().
 						filter(s -> Objects.nonNull(s.getShorcut())).
 						filter(s -> s.getShorcut().equals(shortcut)).
 						findFirst().orElse(null);		
@@ -229,7 +229,7 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 		else {	//	Existing status
 			String currentId = level.getId();
 			MSFeatureIdentificationLevel sameRank = 
-					IDTDataCash.getMsFeatureIdentificationLevelList().stream().
+					IDTDataCache.getMsFeatureIdentificationLevelList().stream().
 					filter(s -> !s.getId().equals(currentId)).
 					filter(s -> (s.getRank() == rank)).findFirst().orElse(null);
 				
@@ -237,7 +237,7 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 				errors.add("Different status with the same rank already exists.");
 			
 			MSFeatureIdentificationLevel sameName = 
-					IDTDataCash.getMsFeatureIdentificationLevelList().stream().
+					IDTDataCache.getMsFeatureIdentificationLevelList().stream().
 					filter(s -> !s.getId().equals(currentId)).
 					filter(s -> s.getName().equals(name)).findFirst().orElse(null);
 			
@@ -247,7 +247,7 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 			if(shortcut != null) {
 				
 				MSFeatureIdentificationLevel sameShortcut = 
-						IDTDataCash.getMsFeatureIdentificationLevelList().stream().
+						IDTDataCache.getMsFeatureIdentificationLevelList().stream().
 						filter(s -> Objects.nonNull(s.getShorcut())).
 						filter(s -> !s.getId().equals(currentId)).
 						filter(s -> s.getShorcut().equals(shortcut)).
@@ -285,9 +285,9 @@ public class IdLevelManagerDialog extends JDialog implements ActionListener{
 				e.printStackTrace();
 			}
 		}
-		IDTDataCash.refreshMsFeatureIdentificationLevelList();
+		IDTDataCache.refreshMsFeatureIdentificationLevelList();
 		idLevelTable.setTableModelFromLevelList(
-				IDTDataCash.getMsFeatureIdentificationLevelList());
+				IDTDataCache.getMsFeatureIdentificationLevelList());
 		
 		fireIdentificationLevelEvent();
 	}

@@ -48,7 +48,7 @@ import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACReportCode;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACReportCodeBlock;
 import edu.umich.med.mrc2.datoolbox.database.idt.DocumentUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDbUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.IdTrackerPasswordActionUnlockDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -205,7 +205,7 @@ public class DockableMoTrPACReportListingPanel extends DefaultSingleCDockable
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
-		MoTrPACDatabaseCash.refreshReportList();
+		MoTrPACDatabaseCache.refreshReportList();
 		parentPanel.showReportListing();
 		motrpacReportUploadDialog.dispose();
 	}
@@ -255,7 +255,7 @@ public class DockableMoTrPACReportListingPanel extends DefaultSingleCDockable
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			MoTrPACDatabaseCash.refreshReportList();
+			MoTrPACDatabaseCache.refreshReportList();
 			parentPanel.showReportListing();
 		}
 		confirmActionDialog.dispose();
@@ -287,7 +287,7 @@ public class DockableMoTrPACReportListingPanel extends DefaultSingleCDockable
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		MoTrPACDatabaseCash.refreshReportList();
+		MoTrPACDatabaseCache.refreshReportList();
 		parentPanel.showReportListing();
 		motrpacReportUploadDialog.dispose();
 	}
@@ -303,7 +303,7 @@ public class DockableMoTrPACReportListingPanel extends DefaultSingleCDockable
 			reportDefinitionKey += stage.getKey().getBlockId() + stage.getValue().getOptionName();
 		
 		final String rdk = reportDefinitionKey;
-		List<MoTrPACReport> reportGroup = MoTrPACDatabaseCash.getMoTrPACReports().stream().
+		List<MoTrPACReport> reportGroup = MoTrPACDatabaseCache.getMoTrPACReports().stream().
 			filter(r -> r.getReportDefinitionKey().equals(rdk)).
 			collect(Collectors.toList());
 		

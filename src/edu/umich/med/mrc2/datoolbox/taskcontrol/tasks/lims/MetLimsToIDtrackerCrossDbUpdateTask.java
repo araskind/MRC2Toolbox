@@ -57,9 +57,9 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSample;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSStorageLocation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.MetLIMSConnectionManager;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -348,9 +348,9 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 
 	private Collection<LIMSClient> getLimsClientList(Connection metlimsConn) throws Exception {
 		
-		LIMSDataCash.refreshLimsOrganizationList();
+		LIMSDataCache.refreshLimsOrganizationList();
 		Collection<LIMSUser> userList = UserUtils.getCompleteUserList();
-		LIMSDataCash.refreshLimsOrganizationList();
+		LIMSDataCache.refreshLimsOrganizationList();
 		Collection<LIMSClient> clients = new TreeSet<LIMSClient>();
 		String sql  =
 				"SELECT CLIENT_ID, DEPTORDIV, LAB, ORGANIZATION_ID,  " +
@@ -367,7 +367,7 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 					null);
 		
 			LIMSOrganization organization =
-					LIMSDataCash.getLIMSOrganizationById(rs.getString("ORGANIZATION_ID"));			
+					LIMSDataCache.getLIMSOrganizationById(rs.getString("ORGANIZATION_ID"));			
 			if(organization == null) {
 				System.out.println("No LIMS organization for client ID " + client.getId());
 				//	throw new Exception("No LIMS organization for client ID " + client.getId());
@@ -547,8 +547,8 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 	
 	private void updateProjectData(Connection metlimsConn, Connection idTrackerConn) throws Exception {
 		
-		LIMSDataCash.refreshLimsOrganizationList();
-		LIMSDataCash.refreshLimsClientList();
+		LIMSDataCache.refreshLimsOrganizationList();
+		LIMSDataCache.refreshLimsClientList();
 		Collection<LIMSProject>existingLimsProjects = LIMSUtils.getLimsProjectList(idTrackerConn);
 		Collection<LIMSProject>metLimsProjects = getMetLimsProjectList(metlimsConn);
 		Collection<LIMSProject>newLMetlimsProjects = metLimsProjects.stream().
@@ -590,7 +590,7 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 
-			LIMSClient client = LIMSDataCash.getLIMSClientById(rs.getString("CLIENT_ID"));
+			LIMSClient client = LIMSDataCache.getLIMSClientById(rs.getString("CLIENT_ID"));
 			LIMSProject project = new LIMSProject(
 					rs.getString("PROJECT_ID"),
 					rs.getString("PROJECT_NAME"),
@@ -609,7 +609,7 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 
 	private void updateExperimentData(Connection metlimsConn, Connection idTrackerConn) throws Exception {
 		
-		LIMSDataCash.refreshProjectList();
+		LIMSDataCache.refreshProjectList();
 
 		Collection<LIMSExperiment>existingLimsExperiments = 
 				LIMSUtils.getExperimentList("EX00000", idTrackerConn);
@@ -704,9 +704,9 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 			experiment.setNihGrant(rs.getString("NIH_GRANT_NUMBER"));
 			experiment.setChear(rs.getBoolean("IS_CHEAR"));			
 			LIMSProject project = 
-					LIMSDataCash.getProjectById(rs.getString("PROJECT_ID"));
+					LIMSDataCache.getProjectById(rs.getString("PROJECT_ID"));
 			experiment.setProject(project);
-			LIMSUser creator = IDTDataCash.getUserById(rs.getString("CREATOR"));
+			LIMSUser creator = IDTDataCache.getUserById(rs.getString("CREATOR"));
 			experiment.setCreator(creator);
 			metlimsExperimentList.add(experiment);
 		}
@@ -1026,7 +1026,7 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 		Collection<LIMSInstrument>metlimsInstruments = 
 				getMetlimsAnalyticalInstrumentList(metlimsConn);
 		Set<String> idtInstrumentIds = 
-				LIMSDataCash.getAnalyticalInstruments().stream().
+				LIMSDataCache.getAnalyticalInstruments().stream().
 					map(i -> i.getInstrumentId()).collect(Collectors.toSet());		
 		Collection<LIMSInstrument>newInstruments = 
 				metlimsInstruments.stream().
@@ -1081,9 +1081,9 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			ChromatographicSeparationType separationType = 
-					LIMSDataCash.getChromatographicSeparationTypeById(rs.getString("TYPE"));
+					LIMSDataCache.getChromatographicSeparationTypeById(rs.getString("TYPE"));
 			InstrumentPlatform instrumentPlatform = 
-					LIMSDataCash.getInstrumentPlatformByManufacturer(rs.getString("MANUFACTURER"));			
+					LIMSDataCache.getInstrumentPlatformByManufacturer(rs.getString("MANUFACTURER"));			
 			
 			LIMSInstrument instrument = new LIMSInstrument(			
 					rs.getString("INSTRUMENT_ID"),
@@ -1105,7 +1105,7 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 	private void updateAssayList(Connection metlimsConn, Connection idTrackerConn) throws Exception {
 		
 		Collection<Assay>metlimsAssaysList = getMetlimsAssaysList(metlimsConn);
-		Collection<Assay>idtAssaysList = LIMSDataCash.getAssays();
+		Collection<Assay>idtAssaysList = LIMSDataCache.getAssays();
 		Set<Assay> newAssays = metlimsAssaysList.stream().
 				filter(a -> !idtAssaysList.contains(a)).collect(Collectors.toSet());
 		
@@ -1147,7 +1147,7 @@ public class MetLimsToIDtrackerCrossDbUpdateTask extends AbstractTask {
 					rs.getString("ASSAY_ID"), 
 					rs.getString("ASSAY_NAME"), 
 					rs.getString("ALTERNATE_NAME"));
-			InstrumentPlatform ip = LIMSDataCash.getInstrumentPlatformById(rs.getString("PLATFORM_ID"));
+			InstrumentPlatform ip = LIMSDataCache.getInstrumentPlatformById(rs.getString("PLATFORM_ID"));
 			newAssay.setInstrumentPlatform(ip);
 			assays.add(newAssay);
 		}

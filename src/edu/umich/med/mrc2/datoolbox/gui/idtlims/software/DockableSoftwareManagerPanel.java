@@ -35,7 +35,7 @@ import javax.swing.JScrollPane;
 import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -173,8 +173,8 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 				e.printStackTrace();
 			}
 		}
-		IDTDataCash.refreshSoftwareList();
-		softwareTable.setTableModelFromSoftwareList(IDTDataCash.getSoftwareList());
+		IDTDataCache.refreshSoftwareList();
+		softwareTable.setTableModelFromSoftwareList(IDTDataCache.getSoftwareList());
 		softwareEditorDialog.dispose();
 	}
 
@@ -203,8 +203,8 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		IDTDataCash.refreshSoftwareList();
-		softwareTable.setTableModelFromSoftwareList(IDTDataCash.getSoftwareList());
+		IDTDataCache.refreshSoftwareList();
+		softwareTable.setTableModelFromSoftwareList(IDTDataCache.getSoftwareList());
 	}
 
 	private void showSoftwareEditor(DataProcessingSoftware softwareItem) {
@@ -235,7 +235,7 @@ public class DockableSoftwareManagerPanel extends AbstractIDTrackerLimsPanel {
 
 	public void loadSoftwareList() {
 		softwareTable.setTableModelFromSoftwareList(
-				IDTDataCash.getSoftwareList());
+				IDTDataCache.getSoftwareList());
 	}
 
 	@Override

@@ -210,7 +210,7 @@ public class FeatureLookupDataSetUtils {
 					rs.getString("FLDS_ID"), 
 					rs.getString("NAME"), 
 					rs.getString("DESCRIPTION"), 
-					IDTDataCash.getUserById(rs.getString("CREATED_BY")), 
+					IDTDataCache.getUserById(rs.getString("CREATED_BY")), 
 					new Date(rs.getTimestamp("DATE_CREATED").getTime()),
 					new Date(rs.getTimestamp("LAST_MODIFIED").getTime()));
 			

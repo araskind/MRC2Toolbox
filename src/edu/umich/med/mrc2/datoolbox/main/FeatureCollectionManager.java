@@ -35,7 +35,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInformationBundleColle
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureCollectionUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTMSMSFeatureDataPullTask;
-import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCacheUtils;
 
 public class FeatureCollectionManager {
 	
@@ -110,11 +110,11 @@ public class FeatureCollectionManager {
 		Set<String> unAttachedIdList = idList.stream().
 				filter(i -> !attachedIdList.contains(i)).collect(Collectors.toSet());
 		
-		//	Check cash data
+		//	Check cache data
 		Set<String>missingIds = new TreeSet<String>();
 		for(String id : unAttachedIdList) {
 			MSFeatureInfoBundle cachedFeature = 
-					DiskCashUtils.retrieveMSFeatureInfoBundleFromCache(id);
+					DiskCacheUtils.retrieveMSFeatureInfoBundleFromCache(id);
 			if(cachedFeature == null)
 				missingIds.add(id);
 			else
@@ -139,7 +139,7 @@ public class FeatureCollectionManager {
 	
 	public static Collection<MSFeatureInfoBundle>getLoadedMSMSFeaturesByIds(Collection<String>msmsIds){
 		return msmsIds.stream().
-				map(id -> DiskCashUtils.retrieveMSFeatureInfoBundleFromCache(id)).
+				map(id -> DiskCacheUtils.retrieveMSFeatureInfoBundleFromCache(id)).
 				filter(f -> Objects.nonNull(f)).collect(Collectors.toSet());
 	}
 	

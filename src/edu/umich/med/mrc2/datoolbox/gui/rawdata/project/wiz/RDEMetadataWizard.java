@@ -64,7 +64,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepListener;
@@ -276,7 +276,7 @@ public class RDEMetadataWizard extends JDialog
 		
 		if(prep.getId() != null) {
 			LIMSSamplePreparation existingPrep = 
-					IDTDataCash.getSamplePrepById(prep.getId());
+					IDTDataCache.getSamplePrepById(prep.getId());
 			if(existingPrep != null){
 				designPanel.setDesignEditable(false);
 				prepPanel.setPrepEditable(false);
@@ -394,7 +394,7 @@ public class RDEMetadataWizard extends JDialog
 
 		if(experiment.getIdTrackerExperiment() != null) {
 			LIMSExperiment existingExperiment = 
-					IDTDataCash.getExperimentById(experiment.getIdTrackerExperiment().getId());
+					IDTDataCache.getExperimentById(experiment.getIdTrackerExperiment().getId());
 			if(existingExperiment != null) {
 				MessageDialog.showWarningMsg(
 						"Experiment \"" + existingExperiment.getName() + "\"\n"
@@ -566,7 +566,7 @@ public class RDEMetadataWizard extends JDialog
 		else {
 			//	Sample prep not in database
 			if(samplePrep.getId() != null 
-					&& IDTDataCash.getSamplePrepById(samplePrep.getId()) == null) {
+					&& IDTDataCache.getSamplePrepById(samplePrep.getId()) == null) {
 				
 				samplePrep.setName(prepPanel.getPrepName());
 				samplePrep.setPrepDate(prepPanel.getPrepDate());
@@ -853,7 +853,7 @@ public class RDEMetadataWizard extends JDialog
 			if(prep.getId() != null && prepIdPattern.matcher(prep.getId()).find()) {
 				
 				LIMSSamplePreparation existingPrep = 
-						IDTDataCash.getSamplePrepById(prep.getId());
+						IDTDataCache.getSamplePrepById(prep.getId());
 				if(existingPrep != null) {
 					prepPanel.setPrepEditable(false);
 					designPanel.setDesignEditable(false);

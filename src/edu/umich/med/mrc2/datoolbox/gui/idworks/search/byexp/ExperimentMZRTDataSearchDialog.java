@@ -63,7 +63,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
@@ -127,7 +127,7 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 		grid = new CGrid(control);
 		
 		experimentsTable = new DockableExperimentsTable(this);
-		experimentsTable.setTableModelFromExperimentList(IDTDataCash.getExperiments());
+		experimentsTable.setTableModelFromExperimentList(IDTDataCache.getExperiments());
 		experimentsTable.addFormChangeListener(this);
 		
 		dataPipelinesTable = new DockableDataPipelinesTable();
@@ -222,21 +222,21 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 		public Void doInBackground() {
 
 			try {
-				IDTDataCash.refreshUserList();
-				IDTDataCash.refreshOrganizationList();
-				IDTDataCash.refreshProjectList();
-				IDTDataCash.refreshExperimentList();
-				IDTDataCash.refreshStockSampleList();
-				IDTDataCash.refreshExperimentStockSampleMap();
-				IDTDataCash.refreshExperimentPolarityMap();
-				IDTDataCash.refreshManufacturers();
-				IDTDataCash.refreshExperimentSamplePrepMap();
-				IDTDataCash.refreshSamplePrepDataPipelineMap();
+				IDTDataCache.refreshUserList();
+				IDTDataCache.refreshOrganizationList();
+				IDTDataCache.refreshProjectList();
+				IDTDataCache.refreshExperimentList();
+				IDTDataCache.refreshStockSampleList();
+				IDTDataCache.refreshExperimentStockSampleMap();
+				IDTDataCache.refreshExperimentPolarityMap();
+				IDTDataCache.refreshManufacturers();
+				IDTDataCache.refreshExperimentSamplePrepMap();
+				IDTDataCache.refreshSamplePrepDataPipelineMap();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			experimentsTable.setTableModelFromExperimentList(IDTDataCash.getExperiments());
+			experimentsTable.setTableModelFromExperimentList(IDTDataCache.getExperiments());
 			return null;
 		}
 	}
@@ -369,7 +369,7 @@ public class ExperimentMZRTDataSearchDialog extends JDialog
 		for(LIMSExperiment experiment : selectedExperiments) {
 			
 			Collection<DataPipeline> pipelines = 
-					IDTDataCash.getDataPipelinesForExperiment(experiment);
+					IDTDataCache.getDataPipelinesForExperiment(experiment);
 			if(pipelines != null)
 				allPipelines.addAll(pipelines);
 		}

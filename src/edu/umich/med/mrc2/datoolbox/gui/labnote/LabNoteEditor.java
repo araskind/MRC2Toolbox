@@ -67,8 +67,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.QcEventType;
 import edu.umich.med.mrc2.datoolbox.data.lims.AnalysisQcEventAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.rtf.DockableRTFEditor;
@@ -197,7 +197,7 @@ public class LabNoteEditor extends JDialog implements ActionListener, ItemListen
 		experimentComboBox.setMinimumSize(new Dimension(100, 25));
 		experimentComboBox.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		experimentComboBox.setModel(
-			new SortedComboBoxModel<LIMSExperiment>(LIMSDataCash.getExperiments()));
+			new SortedComboBoxModel<LIMSExperiment>(LIMSDataCache.getExperiments()));
 		experimentComboBox.setSize(new Dimension(250, 25));
 		experimentComboBox.setMaximumSize(new Dimension(250, 25));
 		experimentComboBox.setSelectedIndex(-1);
@@ -219,7 +219,7 @@ public class LabNoteEditor extends JDialog implements ActionListener, ItemListen
 		panel_1.add(lblAssay, gbc_lblAssay);
 
 		assayComboBox = new JComboBox(
-				new SortedComboBoxModel<Assay>(LIMSDataCash.getAssays()));
+				new SortedComboBoxModel<Assay>(LIMSDataCache.getAssays()));
 		assayComboBox.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		assayComboBox.setSelectedIndex(-1);
 		assayComboBox.setMaximumSize(new Dimension(300, 25));
@@ -262,7 +262,7 @@ public class LabNoteEditor extends JDialog implements ActionListener, ItemListen
 		panel_1.add(lblInstrument, gbc_lblInstrument);
 
 		instrumentComboBox =
-			new JComboBox(new SortedComboBoxModel<LIMSInstrument>(IDTDataCash.getInstrumentList()));
+			new JComboBox(new SortedComboBoxModel<LIMSInstrument>(IDTDataCache.getInstrumentList()));
 		instrumentComboBox.setSelectedIndex(-1);
 		instrumentComboBox.setMinimumSize(new Dimension(70, 25));
 		instrumentComboBox.setMaximumSize(new Dimension(100, 25));

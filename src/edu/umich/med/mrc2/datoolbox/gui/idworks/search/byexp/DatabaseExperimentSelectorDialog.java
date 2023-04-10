@@ -44,7 +44,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.se.IDTrackerExperimentListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
@@ -74,7 +74,7 @@ public class DatabaseExperimentSelectorDialog extends JDialog implements ActionL
 		experimentsTable = new IDTrackerExperimentListingTable();
 		experimentsTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		getContentPane().add(new JScrollPane(experimentsTable), BorderLayout.CENTER);
-		experimentsTable.setTableModelFromExperimentList(IDTDataCash.getExperiments());
+		experimentsTable.setTableModelFromExperimentList(IDTDataCache.getExperiments());
 
 		
 		JPanel panel_1 = new JPanel();

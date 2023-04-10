@@ -39,7 +39,7 @@ import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACReport;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACTissueCode;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
@@ -412,7 +412,7 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 			return;
 		}
 		Collection<MoTrPACReport>filteredReports = 
-				MoTrPACDatabaseCash.getFilteredMoTrPACReports(study, experiment, assay, tissueCode);
+				MoTrPACDatabaseCache.getFilteredMoTrPACReports(study, experiment, assay, tissueCode);
 		reportListingPanel.loadReports(filteredReports);
 	}
 	

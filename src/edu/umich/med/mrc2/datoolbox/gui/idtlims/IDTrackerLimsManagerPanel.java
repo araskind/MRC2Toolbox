@@ -53,9 +53,9 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSClient;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
@@ -557,16 +557,11 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 			this.experiment = experiment;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public Void doInBackground() {
 
 			try {
 				IDTUtils.deleteExperiment(experiment);
-//				experiment.getProject().getExperiments().remove(experiment);
-//				IDTDataCash.getExperiments().remove(experiment);
-//				//	projectTreePanel.removeObject(experiment);
-//				projectTreePanel.loadIdTrackerData();
 				refreshIdTrackerdata();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -585,8 +580,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		public DeleteTrackerProjectTask(LIMSProject project) {
 			this.project = project;
 		}
-
-		@SuppressWarnings("unchecked")
+		
 		@Override
 		public Void doInBackground() {
 
@@ -675,7 +669,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	}
 	
 	public void refreshVendorList() {
-		IDTDataCash.refreshManufacturers();
+		IDTDataCache.refreshManufacturers();
 		vendorManagerPanel.loadVendorList();
 	}
 
@@ -694,7 +688,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		if (projectDialog.getProject() == null) {
 			
 			LIMSClient client = 
-					LIMSDataCash.getLIMSClientForUser(MRC2ToolBoxCore.getIdTrackerUser());
+					LIMSDataCache.getLIMSClientForUser(MRC2ToolBoxCore.getIdTrackerUser());
 
 			LIMSProject newProject = new LIMSProject(
 					projectDialog.getProjectName(),
@@ -704,7 +698,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 			try {
 				String projectId = IDTUtils.addNewProject(newProject);
 				newProject.setId(projectId);
-				IDTDataCash.getProjects().add(newProject);
+				IDTDataCache.getProjects().add(newProject);
 				projectTreePanel.addObject(newProject);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -756,8 +750,8 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 				IDTUtils.setInstrumentForExperiment(
 						newExperiment, experimentDialog.getInstrument());
 						
-				IDTDataCash.getExperiments().add(newExperiment);
-				IDTDataCash.getExperimentInstrumentMap().put(
+				IDTDataCache.getExperiments().add(newExperiment);
+				IDTDataCache.getExperimentInstrumentMap().put(
 						newExperiment, experimentDialog.getInstrument());
 				
 				experimentDialog.getExperimentProject().getExperiments().add(newExperiment);
@@ -777,7 +771,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 				
 				IDTUtils.updateInstrumentForExperiment(
 						experimentDialog.getExperiment(), experimentDialog.getInstrument());
-				IDTDataCash.getExperimentInstrumentMap().put(
+				IDTDataCache.getExperimentInstrumentMap().put(
 						experimentDialog.getExperiment(), experimentDialog.getInstrument());
 				
 				LIMSExperiment experiment = experimentDialog.getExperiment();
@@ -834,7 +828,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		LIMSSamplePreparation selectedPrep = samplePrepManagerPanel.getSelectedPrep();
 		
 		if(selectedPrep == null 
-				|| !IDTDataCash.getExperimentForSamplePrep(selectedPrep).equals(experiment)) {
+				|| !IDTDataCache.getExperimentForSamplePrep(selectedPrep).equals(experiment)) {
 			samplePrepManagerPanel.clearCurrentPrepData();
 			instrumentSequenceManagerPanel.clearPanel();
 		}
@@ -854,7 +848,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		samplePrepManagerPanel.clearCurrentPrepData();
 		instrumentSequenceManagerPanel.clearPanel();				
 		samplePrepManagerPanel.selectSamplePrep(prep);		
-		LIMSExperiment experiment = IDTDataCash.getExperimentForSamplePrep(prep);
+		LIMSExperiment experiment = IDTDataCache.getExperimentForSamplePrep(prep);
 
 		// Load parent experiment
 		if (experiment != null) {
@@ -871,7 +865,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 		if(prep == null)
 			return;
 		
-		LIMSExperiment experiment = IDTDataCash.getExperimentForSamplePrep(prep);
+		LIMSExperiment experiment = IDTDataCache.getExperimentForSamplePrep(prep);
 		if (experiment != null) {
 
 			if (designEditor.getExperiment() == null || !designEditor.getExperiment().equals(experiment))

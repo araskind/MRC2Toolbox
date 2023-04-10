@@ -56,7 +56,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PieChartDrawingSupplier;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
@@ -210,7 +210,7 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 		 String[]libNames = new String[libIdSet.size()];
 		 int libCount = 0;
 		 for(String libId : libIdSet) {
-			 libNames[libCount] = IDTDataCash.getReferenceMsMsLibraryNameById(libId);
+			 libNames[libCount] = IDTDataCache.getReferenceMsMsLibraryNameById(libId);
 			 libCount++;
 		 }
 		 double[][] data = new double[matchTypes.size()][libIdSet.size()];
@@ -321,7 +321,7 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 			dataset.setValue("Annotated", annotated);
 			pieChartColorList.add(Color.GREEN);
 			dataset.setValue("Tentative ID", identified.size() - annotated);
-			pieChartColorList.add(IDTDataCash.getMSFeatureIdentificationLevelById("IDS002").getColorCode());
+			pieChartColorList.add(IDTDataCache.getMSFeatureIdentificationLevelById("IDS002").getColorCode());
 			dataset.setValue("Unknowns", activeFeatureCollection.getFeatures().size() - identified.size());
 			pieChartColorList.add(Color.RED);
 			return dataset;

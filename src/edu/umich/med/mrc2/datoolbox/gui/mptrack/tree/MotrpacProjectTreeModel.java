@@ -35,7 +35,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 
 public class MotrpacProjectTreeModel extends DefaultTreeModel {
 
@@ -145,7 +145,7 @@ public class MotrpacProjectTreeModel extends DefaultTreeModel {
 
 			LIMSSamplePreparation prep = (LIMSSamplePreparation)object;
 			for (Entry<LIMSExperiment, Collection<LIMSSamplePreparation>> entry :
-					IDTDataCash.getExperimentSamplePrepMap().entrySet()) {
+					IDTDataCache.getExperimentSamplePrepMap().entrySet()) {
 
 				DefaultMutableTreeNode experimentNode = treeObjects.get(entry.getKey());
 				if(experimentNode != null && entry.getValue().contains(prep))
@@ -157,7 +157,7 @@ public class MotrpacProjectTreeModel extends DefaultTreeModel {
 			DataAcquisitionMethod acqMethod = (DataAcquisitionMethod)object;
 			//	TODO
 //			for (Entry<LIMSSamplePreparation, Collection<DataAcquisitionMethod>> entry :
-//					IDTDataCash.getSamplePrepAcquisitionMethodMap().entrySet()) {
+//					IDTDataCache.getSamplePrepAcquisitionMethodMap().entrySet()) {
 //
 //				DefaultMutableTreeNode prepNode = findNodeForObject(entry.getKey());
 //				if(prepNode != null && entry.getValue().contains(acqMethod))
@@ -169,7 +169,7 @@ public class MotrpacProjectTreeModel extends DefaultTreeModel {
 			DataExtractionMethod dexMethod = (DataExtractionMethod)object;
 			//	TODO
 //			for (Entry<DataAcquisitionMethod, Collection<DataExtractionMethod>> entry :
-//					IDTDataCash.getAcquisitionDataExtractionMethodMap().entrySet()) {
+//					IDTDataCache.getAcquisitionDataExtractionMethodMap().entrySet()) {
 //
 //				DefaultMutableTreeNode acqNode = findNodeForObject(entry.getKey());
 //				if(acqNode != null && entry.getValue().contains(dexMethod))

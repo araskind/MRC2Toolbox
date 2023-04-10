@@ -79,7 +79,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -401,13 +401,13 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 			
 			MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 			bundle.setAcquisitionMethod(
-				IDTDataCash.getAcquisitionMethodById(rs.getString("ACQ_METHOD_ID")));
+				IDTDataCache.getAcquisitionMethodById(rs.getString("ACQ_METHOD_ID")));
 			bundle.setDataExtractionMethod(
-				IDTDataCash.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
+				IDTDataCache.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
 			bundle.setExperiment(
-				IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID")));
+				IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID")));
 			StockSample stockSample =
-				IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+				IDTDataCache.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 			bundle.setStockSample(stockSample);
 			IDTExperimentalSample sample =
 				IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);
@@ -525,7 +525,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				
 				String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 				if(statusId != null) 
-					id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));			
+					id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));			
 
 				id.setUniqueId(rs.getString("MATCH_ID"));
 				id.setMsRtLibraryMatch(match);
@@ -595,12 +595,12 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 					id.setPrimary(true);
 
 				id.setUniqueId(rs.getString("IDENTIFICATION_ID"));
-				LIMSUser assignedBy = IDTDataCash.getUserById(rs.getString("ID_SOURCE"));
+				LIMSUser assignedBy = IDTDataCache.getUserById(rs.getString("ID_SOURCE"));
 				id.setAssignedBy(assignedBy);
 				id.setAssignedOn(new Date(rs.getDate("ASSIGNED_ON").getTime()));
 				String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 				if(statusId != null) 
-					id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
+					id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));
 				
 				String adductId = rs.getString("ADDUCT_ID");
 				if(adductId == null)
@@ -670,7 +670,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 			stAnRs = stAnPs.executeQuery();
 			while(stAnRs.next()) {
 				StandardFeatureAnnotation newAnnotation = 
-						 IDTDataCash.getStandardFeatureAnnotationById(stAnRs.getString("STANDARD_ANNOTATION_ID"));
+						 IDTDataCache.getStandardFeatureAnnotationById(stAnRs.getString("STANDARD_ANNOTATION_ID"));
 				 if(newAnnotation != null)
 					 fb.addStandardFeatureAnnotation(newAnnotation);
 			}
@@ -686,8 +686,8 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 							fb.getMsFeature().getId(),
 							rs.getDate("CREATED_ON"), 
 							rs.getDate("LAST_EDITED_ON"),
-							IDTDataCash.getUserById(rs.getString("CREATED_BY")),
-							IDTDataCash.getUserById(rs.getString("LAST_EDITED_BY")),
+							IDTDataCache.getUserById(rs.getString("CREATED_BY")),
+							IDTDataCache.getUserById(rs.getString("LAST_EDITED_BY")),
 							null);
 
 //					Blob blob = rs.getBlob("ANNOTATION_RTF_DOCUMENT");
@@ -768,7 +768,7 @@ public class IDTMS1FeatureSearchTask extends AbstractTask {
 				rs = ps.executeQuery();
 				while(rs.next()) {
 					 MSFeatureIdentificationFollowupStep newStep = 
-							 IDTDataCash.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
+							 IDTDataCache.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
 					 if(newStep != null)
 						 fb.addIdFollowupStep(newStep);
 				}

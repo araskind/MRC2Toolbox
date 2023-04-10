@@ -42,7 +42,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 
 public class IdProjectTreeModel extends DefaultTreeModel {
 
@@ -84,37 +84,6 @@ public class IdProjectTreeModel extends DefaultTreeModel {
 			throw new IllegalStateException("This method must be called from Swing thread");
 		
 		addObject(project);
-//		Set<LIMSExperiment> experiments = project.getExperiments();
-//		
-//		for(LIMSExperiment experiment : experiments)
-//			addObject(experiment);
-//		
-//		List<LIMSSamplePreparation> preps =
-//				IDTDataCash.getExperimentSamplePrepMap().entrySet().
-//				stream().filter(e -> experiments.contains(e.getKey())).
-//				flatMap(e -> e.getValue().stream()).
-//				sorted().collect(Collectors.toList());
-//		
-//		for(LIMSSamplePreparation prep : preps)
-//			addObject(prep);
-//		
-//		List<DataAcquisitionMethod> acqMmethods = 
-//			IDTDataCash.getSamplePrepAcquisitionMethodMap().entrySet().
-//			stream().filter(e -> preps.contains(e.getKey())).
-//			flatMap(e -> e.getValue().stream()).
-//			sorted().collect(Collectors.toList());
-//		
-//		for(DataAcquisitionMethod acqMmethod : acqMmethods)
-//			addObject(acqMmethod);
-//		
-//		List<DataExtractionMethod> daMethods = 
-//				IDTDataCash.getAcquisitionDataExtractionMethodMap().entrySet().
-//				stream().filter(e -> acqMmethods.contains(e.getKey())).
-//				flatMap(e -> e.getValue().stream()).
-//				sorted().collect(Collectors.toList());
-//		
-//		for(DataExtractionMethod daMethod : daMethods)
-//			addObject(daMethod);
 
 		DefaultMutableTreeNode projectNode = treeObjects.get(project);
 		for(LIMSExperiment experiment : project.getExperiments()) {
@@ -122,7 +91,7 @@ public class IdProjectTreeModel extends DefaultTreeModel {
 			final DefaultMutableTreeNode experimentNode = new DefaultMutableTreeNode(experiment);
 			insertNodeInto(experimentNode, projectNode, getChildCount(projectNode));
 			
-			Collection<LIMSSamplePreparation> expPreps = IDTDataCash.getExperimentSamplePrepMap().get(experiment);
+			Collection<LIMSSamplePreparation> expPreps = IDTDataCache.getExperimentSamplePrepMap().get(experiment);
 			if(expPreps != null)
 				expPreps.stream().forEach(p -> experiment.getSamplePreps().add(p));
 			
@@ -130,7 +99,7 @@ public class IdProjectTreeModel extends DefaultTreeModel {
 
 				final DefaultMutableTreeNode prepNode = new DefaultMutableTreeNode(prep);
 				insertNodeInto(prepNode, experimentNode, getChildCount(experimentNode));
-				Collection<DataPipeline> dataPipelines = IDTDataCash.getDataPipelinesForSamplePrep(prep);
+				Collection<DataPipeline> dataPipelines = IDTDataCache.getDataPipelinesForSamplePrep(prep);
 				if(dataPipelines != null) {
 					
 					dataPipelines.stream().
@@ -152,7 +121,7 @@ public class IdProjectTreeModel extends DefaultTreeModel {
 						}
 					}					
 				}
-//					dataPipelines.stream().forEach(m -> prep.getAssays().add(m));
+//				dataPipelines.stream().forEach(m -> prep.getAssays().add(m));
 //							
 //				for(DataAcquisitionMethod acqMethod : prep.getAssays()) {
 //
@@ -160,7 +129,7 @@ public class IdProjectTreeModel extends DefaultTreeModel {
 //					insertNodeInto(assayNode, prepNode, getChildCount(prepNode));	
 //					
 					//	TODO get pairs for specific experiment
-//					for(DataExtractionMethod daMethod : IDTDataCash.getAcquisitionDataExtractionMethodMap().get(acqMethod)) {
+//					for(DataExtractionMethod daMethod : IDTDataCache.getAcquisitionDataExtractionMethodMap().get(acqMethod)) {
 //
 //						final DefaultMutableTreeNode daNode = new DefaultMutableTreeNode(daMethod);
 //						insertNodeInto(daNode, assayNode, getChildCount(assayNode));
@@ -197,7 +166,7 @@ public class IdProjectTreeModel extends DefaultTreeModel {
 
 			LIMSSamplePreparation prep = (LIMSSamplePreparation)object;
 			for (Entry<LIMSExperiment, Collection<LIMSSamplePreparation>> entry :
-					IDTDataCash.getExperimentSamplePrepMap().entrySet()) {
+					IDTDataCache.getExperimentSamplePrepMap().entrySet()) {
 
 				DefaultMutableTreeNode experimentNode = treeObjects.get(entry.getKey());
 				if(experimentNode != null && entry.getValue().contains(prep))
@@ -209,7 +178,7 @@ public class IdProjectTreeModel extends DefaultTreeModel {
 //
 //			DataAcquisitionMethod acqMethod = (DataAcquisitionMethod)object;			
 //			for (Entry<LIMSSamplePreparation, Collection<DataAcquisitionMethod>> entry :
-//					IDTDataCash.getSamplePrepAcquisitionMethodMap().entrySet()) {
+//					IDTDataCache.getSamplePrepAcquisitionMethodMap().entrySet()) {
 //
 //				DefaultMutableTreeNode prepNode = findNodeForObject(entry.getKey());
 //				if(prepNode != null && entry.getValue().contains(acqMethod)) {
@@ -225,7 +194,7 @@ public class IdProjectTreeModel extends DefaultTreeModel {
 //
 //			DataExtractionMethod dexMethod = (DataExtractionMethod)object;
 //			for (Entry<DataAcquisitionMethod, Collection<DataExtractionMethod>> entry :
-//					IDTDataCash.getAcquisitionDataExtractionMethodMap().entrySet()) {
+//					IDTDataCache.getAcquisitionDataExtractionMethodMap().entrySet()) {
 //
 //				DefaultMutableTreeNode acqNode = findNodeForObject(entry.getKey());
 //				if(acqNode != null && entry.getValue().contains(dexMethod))

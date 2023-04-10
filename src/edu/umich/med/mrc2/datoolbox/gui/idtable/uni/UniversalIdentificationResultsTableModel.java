@@ -38,7 +38,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -187,7 +187,7 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 			MsMsLibraryFeature matchFeature = null;
 			if(msmslibMatch != null) {
 				matchFeature = msmslibMatch.getMatchedLibraryFeature();
-				lib = IDTDataCash.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
+				lib = IDTDataCache.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
 				collisionEnergyValue = matchFeature.getCollisionEnergyValue();
 				entropyBasedScore = msmslibMatch.getEntropyBasedScore();
 				forwardScore = msmslibMatch.getForwardScore();

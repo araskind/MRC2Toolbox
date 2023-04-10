@@ -56,7 +56,7 @@ import javax.swing.border.EtchedBorder;
 import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -314,13 +314,13 @@ public class SoftwareEditorDialog extends JDialog implements ActionListener {
 			
 			if(softwareItem == null) {
 				
-				exisingSoftware = IDTDataCash.getSoftwareList().stream().
+				exisingSoftware = IDTDataCache.getSoftwareList().stream().
 					filter(s -> s.getName().equals(name)).
 					findFirst().orElse(null);			
 			}
 			else {
 				String id = softwareItem.getId();
-				exisingSoftware = IDTDataCash.getSoftwareList().stream().
+				exisingSoftware = IDTDataCache.getSoftwareList().stream().
 						filter(s -> !s.getId().equals(id)).
 						filter(s -> s.getName().equals(name)).
 						findFirst().orElse(null);	

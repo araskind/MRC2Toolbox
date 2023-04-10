@@ -36,7 +36,7 @@ import org.apache.commons.lang.StringUtils;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDbUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.study.edit.MoTrPACStudyEditorFrame;
@@ -105,7 +105,7 @@ public class DockableMoTrPACStudyManagerPanel extends DefaultSingleCDockable imp
 
 	public void loadStudies() {
 		studiesTable.setTableModelFromStudies(
-				MoTrPACDatabaseCash.getMotrpacStudyList());
+				MoTrPACDatabaseCache.getMotrpacStudyList());
 	}
 
 	private void deleteSelectedStudy() {
@@ -127,7 +127,7 @@ public class DockableMoTrPACStudyManagerPanel extends DefaultSingleCDockable imp
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			MoTrPACDatabaseCash.refreshMotrpacStudyList();
+			MoTrPACDatabaseCache.refreshMotrpacStudyList();
 			loadStudies();
 		}
 	}
@@ -149,7 +149,7 @@ public class DockableMoTrPACStudyManagerPanel extends DefaultSingleCDockable imp
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-		MoTrPACDatabaseCash.refreshMotrpacStudyList();
+		MoTrPACDatabaseCache.refreshMotrpacStudyList();
 		loadStudies();
 		motrpacStudyEditorDialog.dispose();	
 	}
@@ -171,7 +171,7 @@ public class DockableMoTrPACStudyManagerPanel extends DefaultSingleCDockable imp
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		MoTrPACDatabaseCash.refreshMotrpacStudyList();
+		MoTrPACDatabaseCache.refreshMotrpacStudyList();
 		loadStudies();
 		motrpacStudyEditorDialog.dispose();	
 	}

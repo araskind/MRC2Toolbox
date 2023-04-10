@@ -36,7 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
@@ -104,7 +104,7 @@ public class LIMSWorklistImportTask extends WorklistTask {
 	private void setSampleAndMethodInformation() {
 		
 		Collection<DataAcquisitionMethod> methods = 
-				IDTDataCash.getAcquisitionMethods();
+				IDTDataCache.getAcquisitionMethods();
 		TreeSet<ExperimentalSample> samples = 
 				limsExperiment.getExperimentDesign().getSamples();
 		

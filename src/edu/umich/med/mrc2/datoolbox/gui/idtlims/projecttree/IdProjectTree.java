@@ -36,7 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 
 public class IdProjectTree extends JTree {
 
@@ -71,7 +71,7 @@ public class IdProjectTree extends JTree {
 			public void run() {
 
 				getModel().clearModel();
-				IDTDataCash.getProjects().stream().sorted().forEach(p -> getModel().addProject(p));
+				IDTDataCache.getProjects().stream().sorted().forEach(p -> getModel().addProject(p));
 				expandTreeUpToLevel(1);				
 			}
 		};

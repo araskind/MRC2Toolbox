@@ -183,7 +183,7 @@ public class IdentificationUtils {
 			
 			String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 			if(statusId != null) 
-				id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));			
+				id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));			
 
 			id.setUniqueId(rs.getString("MATCH_ID"));
 			id.setMsRtLibraryMatch(match);
@@ -341,12 +341,12 @@ public class IdentificationUtils {
 				id.setPrimary(true);
 
 			id.setUniqueId(rs.getString("IDENTIFICATION_ID"));
-			LIMSUser assignedBy = IDTDataCash.getUserById(rs.getString("ID_SOURCE"));
+			LIMSUser assignedBy = IDTDataCache.getUserById(rs.getString("ID_SOURCE"));
 			id.setAssignedBy(assignedBy);
 			id.setAssignedOn(new Date(rs.getDate("ASSIGNED_ON").getTime()));
 			String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 			if(statusId != null) 
-				id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
+				id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));
 			
 			String adductId = rs.getString("ADDUCT_ID");
 			if(adductId == null)
@@ -545,7 +545,7 @@ public class IdentificationUtils {
 
 			String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 			if(statusId != null) 
-				id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
+				id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));
 			
 			featureIdentities.add(id);
 		}
@@ -603,7 +603,7 @@ public class IdentificationUtils {
 
 			String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 			if(statusId != null) 
-				id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
+				id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));
 			
 			featureIdentities.add(id);
 		}
@@ -761,12 +761,12 @@ public class IdentificationUtils {
 				id.setPrimary(true);
 
 			id.setUniqueId(rs.getString("IDENTIFICATION_ID"));
-			LIMSUser assignedBy = IDTDataCash.getUserById(rs.getString("ASSIGNED_BY"));
+			LIMSUser assignedBy = IDTDataCache.getUserById(rs.getString("ASSIGNED_BY"));
 			id.setAssignedBy(assignedBy);
 			id.setAssignedOn(new Date(rs.getDate("ASSIGNED_ON").getTime()));
 			String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 			if(statusId != null) 
-				id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
+				id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));
 			
 			String adductId = rs.getString("ADDUCT_ID");
 			if(adductId == null)
@@ -995,7 +995,7 @@ public class IdentificationUtils {
 			boolean updateDefaultId,
 			Connection conn) throws Exception {
 
-		ReferenceMsMsLibrary refLib = IDTDataCash.getReferenceMsMsLibraryByCode(poo.getLibraryName());
+		ReferenceMsMsLibrary refLib = IDTDataCache.getReferenceMsMsLibraryByCode(poo.getLibraryName());
 		if(refLib == null) {
 			//	TODO handle better
 			System.out.println("Unknown library " + poo.getLibraryName());

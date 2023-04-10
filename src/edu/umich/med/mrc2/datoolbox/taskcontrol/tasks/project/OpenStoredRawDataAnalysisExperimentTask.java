@@ -52,10 +52,10 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
@@ -223,7 +223,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		
 		String userId = experimentElement.getAttributeValue(ExperimentFields.UserId.name()); 
 		if(userId != null)
-			experiment.setCreatedBy(IDTDataCash.getUserById(userId)); 
+			experiment.setCreatedBy(IDTDataCache.getUserById(userId)); 
 		
 		if(experiment.getCreatedBy() == null)
 			experiment.setCreatedBy(MRC2ToolBoxCore.getIdTrackerUser());
@@ -231,7 +231,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		String instrumentId = 
 				experimentElement.getAttributeValue(ExperimentFields.Instrument.name()); 
 		if(instrumentId != null)
-			experiment.setInstrument(IDTDataCash.getInstrumentById(instrumentId));
+			experiment.setInstrument(IDTDataCache.getInstrumentById(instrumentId));
 		
 		Element msmsParamsElement = 
 				experimentElement.getChild(MSMSExtractionParameters.MSMSExtractionParameterSet.name());
@@ -257,7 +257,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		uniqueSampleIds.addAll(ExperimentUtils.getIdList(sampleIdIdList));
 				
 		try {
-			populateDatabaseCashData();
+			populateDatabaseCacheData();
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);			
@@ -321,9 +321,9 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 		}
 	}
 	
-	private void populateDatabaseCashData() throws Exception {
+	private void populateDatabaseCacheData() throws Exception {
 		
-		OfflineExperimentLoadCash.reset();
+		OfflineExperimentLoadCache.reset();
 		Connection conn = ConnectionManager.getConnection();
 		if(!uniqueCompoundIds.isEmpty()) {
 			try {
@@ -362,7 +362,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 	
 	private void getCompoundIdentities(Connection conn) throws Exception {
 		
-		taskDescription = "Populating compound data cash ...";
+		taskDescription = "Populating compound data cache ...";
 		total = uniqueCompoundIds.size();
 		processed = 0;
 		
@@ -371,7 +371,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			CompoundIdentity compId = 
 					CompoundDatabaseUtils.getCompoundById(cid, conn);
 			if(compId != null)
-				OfflineExperimentLoadCash.addCompoundIdentity(compId);
+				OfflineExperimentLoadCache.addCompoundIdentity(compId);
 			
 			processed++;
 		}		
@@ -379,7 +379,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 
 	private void getMSMSLibraryEntries(Connection conn) throws Exception {
 		
-		taskDescription = "Populating MSMS library data cash ...";
+		taskDescription = "Populating MSMS library data cache ...";
 		total = uniqueMSMSLibraryIds.size();
 		processed = 0;		
 		for(String libId : uniqueMSMSLibraryIds) {
@@ -387,7 +387,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			MsMsLibraryFeature libFeature = 
 					MSMSLibraryUtils.getMsMsLibraryFeatureById(libId, conn);
 			if(libFeature != null)
-				OfflineExperimentLoadCash.addMsMsLibraryFeature(libFeature);
+				OfflineExperimentLoadCache.addMsMsLibraryFeature(libFeature);
 			
 			processed++;
 		}	
@@ -396,14 +396,14 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 	private void getMSRTLibraryEntries(Connection conn) throws Exception {
 		
 		// TODO Auto-generated method stub
-		taskDescription = "Populating MS-RT library data cash ...";
+		taskDescription = "Populating MS-RT library data cache ...";
 		total = uniqueMSRTLibraryIds.size();
 		processed = 0;		
 		for(String libId : uniqueMSRTLibraryIds) {
 			
 			LibraryMsFeatureDbBundle bundle = null;	
 			if(bundle != null)
-				OfflineExperimentLoadCash.addLibraryMsFeatureDbBundle(bundle);
+				OfflineExperimentLoadCache.addLibraryMsFeatureDbBundle(bundle);
 			
 			processed++;
 		}
@@ -415,7 +415,7 @@ public class OpenStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 				IDTUtils.getExperimentalSamples(uniqueSampleIds, conn);
 		
 		for(IDTExperimentalSample sample :samples)
-			OfflineExperimentLoadCash.addExperimentalSample(sample);		
+			OfflineExperimentLoadCache.addExperimentalSample(sample);		
 	}
 
 	@Override

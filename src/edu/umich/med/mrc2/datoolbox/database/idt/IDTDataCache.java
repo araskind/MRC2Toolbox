@@ -69,7 +69,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
-public class IDTDataCash {
+public class IDTDataCache {
 
 	private static Collection<LIMSUser> users = 
 			new TreeSet<LIMSUser>();
@@ -1146,7 +1146,7 @@ public class IDTDataCash {
 
 		Collection<DataAcquisitionMethod>acqMethods = new ArrayList<DataAcquisitionMethod>();
 		Collection<LIMSSamplePreparation> preps =
-				IDTDataCash.getExperimentSamplePrepMap().get(experiment);
+				IDTDataCache.getExperimentSamplePrepMap().get(experiment);
 
 		if(preps == null || preps.isEmpty())
 			return acqMethods;
@@ -1155,10 +1155,6 @@ public class IDTDataCash {
 				stream().filter(p -> preps.contains(p.getKey())).
 				flatMap(p -> p.getValue().stream()).
 				map(p -> p.getAcquisitionMethod()).collect(Collectors.toSet());
-
-//		IDTDataCash.getSamplePrepAcquisitionMethodMap().entrySet().
-//			stream().filter(e -> preps.contains(e.getKey())).flatMap(e -> e.getValue().stream()).
-//			distinct().sorted().collect(Collectors.toList());
 	}
 
 	public static ReferenceMsMsLibrary getReferenceMsMsLibraryByCode(String code) {

@@ -44,7 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.UserAffiliation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.user.UserTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -84,9 +84,9 @@ public class UserManagerDialog extends JDialog implements ActionListener {
 		JScrollPane scrollPane = new JScrollPane();
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 		userTable = new UserTable();
-		IDTDataCash.refreshUserList();
+		IDTDataCache.refreshUserList();
 		try {
-			userTable.setTableModelFromUserList(IDTDataCash.getUsers(UserAffiliation.STAFF));
+			userTable.setTableModelFromUserList(IDTDataCache.getUsers(UserAffiliation.STAFF));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -172,9 +172,9 @@ public class UserManagerDialog extends JDialog implements ActionListener {
 		cpp.setLocationRelativeTo(this);
 		cpp.setVisible(true);
 		
-		IDTDataCash.refreshUserList();
+		IDTDataCache.refreshUserList();
 		try {			
-			userTable.setTableModelFromUserList(IDTDataCash.getUsers(UserAffiliation.STAFF));
+			userTable.setTableModelFromUserList(IDTDataCache.getUsers(UserAffiliation.STAFF));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -218,9 +218,9 @@ public class UserManagerDialog extends JDialog implements ActionListener {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}		
-		IDTDataCash.refreshUserList();
+		IDTDataCache.refreshUserList();
 		try {			
-			userTable.setTableModelFromUserList(IDTDataCash.getUsers(UserAffiliation.STAFF));
+			userTable.setTableModelFromUserList(IDTDataCache.getUsers(UserAffiliation.STAFF));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -249,9 +249,9 @@ public class UserManagerDialog extends JDialog implements ActionListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			IDTDataCash.refreshUserList();
+			IDTDataCache.refreshUserList();
 			try {			
-				userTable.setTableModelFromUserList(IDTDataCash.getUsers(UserAffiliation.STAFF));
+				userTable.setTableModelFromUserList(IDTDataCache.getUsers(UserAffiliation.STAFF));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

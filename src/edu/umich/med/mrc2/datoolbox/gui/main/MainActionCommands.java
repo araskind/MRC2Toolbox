@@ -1107,6 +1107,8 @@ public enum MainActionCommands {
     OPEN_RAW_DATA_FILE_COMMAND("Open raw data file(s)"),
     CLOSE_RAW_DATA_FILE_COMMAND("Close raw data file(s)"),
     FINALIZE_CLOSE_RAW_DATA_FILE_COMMAND("Complete raw data file(s) closing"),
+    
+    IMPORT_MS1_DATA_FROM_CEF_COMMAND("Import MS1 data from CEF file"),
        
 	//	Data extract
 	EXTRACT_CHROMATOGRAM("Extract chromatogram"),

@@ -86,7 +86,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
@@ -133,7 +133,7 @@ public class IDTUtils {
 
 			String projectId = rs.getString("PROJECT_ID");
 			LIMSProject project =
-				IDTDataCash.getProjects().stream().
+				IDTDataCache.getProjects().stream().
 				filter(u -> u.getId().equals(projectId)).findFirst().get();
 
 			if(project != null) {
@@ -150,7 +150,7 @@ public class IDTUtils {
 
 	public static Collection<? extends LIMSProject> getProjectList() throws Exception{
 
-		LIMSDataCash.refreshLimsClientList();
+		LIMSDataCache.refreshLimsClientList();
 		Collection<LIMSProject> projects = new TreeSet<LIMSProject>();
 		Connection conn = ConnectionManager.getConnection();
 		String query  =
@@ -160,7 +160,7 @@ public class IDTUtils {
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 
-			LIMSClient client = LIMSDataCash.getLIMSClientById(rs.getString("CLIENT_ID"));
+			LIMSClient client = LIMSDataCache.getLIMSClientById(rs.getString("CLIENT_ID"));
 			LIMSProject project = new LIMSProject(
 					rs.getString("PROJECT_ID"),
 					rs.getString("PROJECT_NAME"),
@@ -183,8 +183,8 @@ public class IDTUtils {
 		if(sysUser == null)
 			return null;
 
-		LIMSDataCash.refreshLimsClientList();
-		LIMSClient client = LIMSDataCash.getLIMSClientForUser(sysUser);
+		LIMSDataCache.refreshLimsClientList();
+		LIMSClient client = LIMSDataCache.getLIMSClientForUser(sysUser);
 		newProject.setClient(client);
 		Connection conn = ConnectionManager.getConnection();
 		String id = SQLUtils.getNextIdFromSequence(conn, 
@@ -350,7 +350,7 @@ public class IDTUtils {
 
 		ExperimentDesign design = new ExperimentDesign();
 		Connection conn = ConnectionManager.getConnection();
-		Collection<StockSample> stockSamples = IDTDataCash.getStockSamples();
+		Collection<StockSample> stockSamples = IDTDataCache.getStockSamples();
 
 		String query =
 			"SELECT DISTINCT SAMPLE_ID, SAMPLE_NAME, USER_DESCRIPTION, DATE_CREATED, " +
@@ -423,7 +423,7 @@ public class IDTUtils {
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 
-			StockSample stockSample = IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+			StockSample stockSample = IDTDataCache.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 			sample = new IDTExperimentalSample(
 					sampleId,
 					rs.getString("SAMPLE_NAME"),
@@ -454,7 +454,7 @@ public class IDTUtils {
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
 
-				StockSample stockSample = IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+				StockSample stockSample = IDTDataCache.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 				IDTExperimentalSample sample = new IDTExperimentalSample(
 						sampleId,
 						rs.getString("SAMPLE_NAME"),
@@ -502,7 +502,7 @@ public class IDTUtils {
 			
 			String limsExperimentId = rs.getString("LIMS_EXPERIMENT_ID");
 			if(limsExperimentId != null)
-				sample.setLimsExperiment(LIMSDataCash.getExperimentById(limsExperimentId));
+				sample.setLimsExperiment(LIMSDataCache.getExperimentById(limsExperimentId));
 
 			stockSamples.add(sample);		
 		}
@@ -570,7 +570,7 @@ public class IDTUtils {
 		
 		TreeSet<String>expIds = new TreeSet<String>();
 		Collection<LIMSSamplePreparation> preps = 
-				IDTDataCash.getExperimentSamplePrepMap().get(experiment);
+				IDTDataCache.getExperimentSamplePrepMap().get(experiment);
 		
 		Collection<LIMSSamplePreparation>prepsToDelete = 
 				new HashSet<LIMSSamplePreparation>();
@@ -632,7 +632,7 @@ public class IDTUtils {
 			String userId = rs.getString("CREATED_BY");
 			LIMSUser createBy = null;
 			if(userId != null)
-				createBy = IDTDataCash.getUserById(userId);
+				createBy = IDTDataCache.getUserById(userId);
 
 			DataExtractionMethod method = new DataExtractionMethod(
 					rs.getString("EXTRACTION_METHOD_ID"),
@@ -643,7 +643,7 @@ public class IDTUtils {
 			
 			String softwareId = rs.getString("SOFTWARE_ID");
 			if(softwareId != null)
-				method.setSoftware(IDTDataCash.getSoftwareById(softwareId));
+				method.setSoftware(IDTDataCache.getSoftwareById(softwareId));
 			
 			String md5 = rs.getString("METHOD_MD5");
 			if(md5 != null)
@@ -745,7 +745,7 @@ public class IDTUtils {
 		while (rs.next()) {
 			
 			Manufacturer vendor = 
-					IDTDataCash.getManufacturerById(rs.getString("MANUFACTURER_ID"));
+					IDTDataCache.getManufacturerById(rs.getString("MANUFACTURER_ID"));
 			SoftwareType type = SoftwareType.getSoftwareTypeByName(rs.getString("SOFTWARE_TYPE"));
 			
 			DataProcessingSoftware item = new DataProcessingSoftware(
@@ -1064,13 +1064,13 @@ public class IDTUtils {
 		while(rs.next()) {
 
 			LIMSExperiment experiment =
-					IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+					IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
 			if(experiment != null) {
 				if(!prepMap.containsKey(experiment))
 					prepMap.put(experiment, new TreeSet<LIMSSamplePreparation>());
 
 				LIMSSamplePreparation prep =
-						IDTDataCash.getSamplePrepById(rs.getString("SAMPLE_PREP_ID"));
+						IDTDataCache.getSamplePrepById(rs.getString("SAMPLE_PREP_ID"));
 				if(prep != null)
 					prepMap.get(experiment).add(prep);
 			}
@@ -1097,13 +1097,13 @@ public class IDTUtils {
 		while(rs.next()) {
 
 			LIMSSamplePreparation prep =
-					IDTDataCash.getSamplePrepById(rs.getString("SAMPLE_PREP_ID"));
+					IDTDataCache.getSamplePrepById(rs.getString("SAMPLE_PREP_ID"));
 			if(prep != null) {
 				if(!prepMap.containsKey(prep))
 					prepMap.put(prep, new TreeSet<DataAcquisitionMethod>());
 
 				DataAcquisitionMethod acq =
-						IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID"));
+						IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID"));
 				if(acq != null)
 					prepMap.get(prep).add(acq);
 			}
@@ -1133,13 +1133,13 @@ public class IDTUtils {
 		while(rs.next()) {
 
 			DataAcquisitionMethod acq =
-					IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID"));
+					IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID"));
 			if(acq != null) {
 				if(!methodMap.containsKey(acq))
 					methodMap.put(acq, new TreeSet<DataExtractionMethod>());
 
 				DataExtractionMethod dex =
-						IDTDataCash.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID"));
+						IDTDataCache.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID"));
 				if(dex != null)
 					methodMap.get(acq).add(dex);
 			}
@@ -1169,15 +1169,15 @@ public class IDTUtils {
 		while(rs.next()) {
 
 			LIMSSamplePreparation prep =
-					IDTDataCash.getSamplePrepById(rs.getString("SAMPLE_PREP_ID"));
+					IDTDataCache.getSamplePrepById(rs.getString("SAMPLE_PREP_ID"));
 			if(prep != null) {
 				if(!prepMap.containsKey(prep))
 					prepMap.put(prep, new TreeSet<DataPipeline>());
 
 				DataAcquisitionMethod acq =
-						IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID"));
+						IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID"));
 				DataExtractionMethod daMethod = 
-						IDTDataCash.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID"));
+						IDTDataCache.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID"));
 				if(acq != null && daMethod != null) 
 					prepMap.get(prep).add(new DataPipeline(acq, daMethod));				
 			}
@@ -1271,7 +1271,7 @@ public class IDTUtils {
 			if(rs.getDate("DATE_CRERATED") != null)
 				createdOn = new Date(rs.getDate("DATE_CRERATED").getTime());
 
-			LIMSUser user = IDTDataCash.getUserById(rs.getString("CREATED_BY"));
+			LIMSUser user = IDTDataCache.getUserById(rs.getString("CREATED_BY"));
 
 			LIMSProtocol protocol = new LIMSProtocol(
 					rs.getString("SOP_ID"),
@@ -1282,7 +1282,7 @@ public class IDTUtils {
 					createdOn,
 					user);
 
-			SopCategory sopCategory = IDTDataCash.getSopSopCategoryById(rs.getString("SOP_CATEGORY"));
+			SopCategory sopCategory = IDTDataCache.getSopSopCategoryById(rs.getString("SOP_CATEGORY"));
 			protocol.setSopCategory(sopCategory);
 			protocols.add(protocol);
 		}
@@ -1322,7 +1322,7 @@ public class IDTUtils {
 			if(rs.getDate("PREP_DATE") != null)
 				createdOn = new Date(rs.getDate("PREP_DATE").getTime());
 
-			LIMSUser user = IDTDataCash.getUserById(rs.getString("CREATOR"));
+			LIMSUser user = IDTDataCache.getUserById(rs.getString("CREATOR"));
 			LIMSSamplePreparation samplePrep = new LIMSSamplePreparation(
 					rs.getString("SAMPLE_PREP_ID"),
 					rs.getString("TITLE"),
@@ -1332,7 +1332,7 @@ public class IDTUtils {
 			if(sopMap.get(samplePrep.getId()) != null) {
 
 				sopMap.get(samplePrep.getId()).stream().
-					forEach(m -> samplePrep.addProtocol(IDTDataCash.getProtocolById(m)));
+					forEach(m -> samplePrep.addProtocol(IDTDataCache.getProtocolById(m)));
 			}
 			samplePreps.add(samplePrep);
 		}
@@ -1550,7 +1550,7 @@ public class IDTUtils {
 
 		Connection conn = ConnectionManager.getConnection();
 		Collection<IDTExperimentalSample> prepSamples = new TreeSet<IDTExperimentalSample>();
-		Collection<StockSample> stockSamples = IDTDataCash.getStockSamples();
+		Collection<StockSample> stockSamples = IDTDataCache.getStockSamples();
 		String query =
 			"SELECT DISTINCT S.SAMPLE_ID, S.SAMPLE_NAME, S.USER_DESCRIPTION, S.DATE_CREATED, " +
 			"S.STOCK_SAMPLE_ID FROM SAMPLE S, PREPARED_SAMPLE P WHERE S.SAMPLE_ID = P.SAMPLE_ID " +
@@ -1590,7 +1590,7 @@ public class IDTUtils {
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 
-			LIMSProtocol sop = IDTDataCash.getProtocolById(rs.getString("SOP_ID"));
+			LIMSProtocol sop = IDTDataCache.getProtocolById(rs.getString("SOP_ID"));
 			if(sop != null)
 				protocols.add(sop);
 		}
@@ -1834,7 +1834,7 @@ public class IDTUtils {
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 
-			DataAcquisitionMethod method = IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID"));
+			DataAcquisitionMethod method = IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID"));
 			DataFile df = new DataFile(rs.getString("DATA_FILE_NAME"), method);
 			LIMSWorklistItem item = new LIMSWorklistItem(df);
 			item.setSamplePrep(prep);
@@ -1932,7 +1932,7 @@ public class IDTUtils {
 			ps.setString(1, fileName);
 			rs = ps.executeQuery();
 			while(rs.next()) {
-				DataAcquisitionMethod method = IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID"));
+				DataAcquisitionMethod method = IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID"));
 				Date timeStamp = new Date(rs.getDate("INJECTION_TIMESTAMP").getTime());
 				df.setDataAcquisitionMethod(method);
 				df.setInjectionTime(timeStamp);
@@ -2089,9 +2089,9 @@ public class IDTUtils {
 					rs.getString("SOURCE_DATA_BUNDLE_ID"),
 					rs.getInt("NUM_FEATURES"));
 
-			summary.setExperiment(IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID")));
+			summary.setExperiment(IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID")));
 			String stockId = rs.getString("STOCK_SAMPLE_ID");
-			StockSample ss = IDTDataCash.getStockSamples().stream().
+			StockSample ss = IDTDataCache.getStockSamples().stream().
 					filter(s -> s.getSampleId().equals(stockId)).findFirst().get();
 			IDTExperimentalSample sample = new IDTExperimentalSample(
 					rs.getString("SAMPLE_ID"),
@@ -2101,9 +2101,9 @@ public class IDTUtils {
 					ss);
 			summary.setSample(sample);
 			summary.setDataExtractionMethod(
-					IDTDataCash.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
+					IDTDataCache.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
 			summary.setAcquisitionMethod(
-					IDTDataCash.getAcquisitionMethodById(rs.getString("ACQ_METHOD_ID")));
+					IDTDataCache.getAcquisitionMethodById(rs.getString("ACQ_METHOD_ID")));
 
 			summaryList.add(summary);
 		}
@@ -2160,9 +2160,9 @@ public class IDTUtils {
 		while (rs.next()) {
 
 			IDTMsSummary summary = new IDTMsSummary(rs.getInt("NUM_FEATURES"));
-			summary.setExperiment(IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID")));
+			summary.setExperiment(IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID")));
 			String stockId = rs.getString("STOCK_SAMPLE_ID");
-			StockSample ss = IDTDataCash.getStockSamples().stream().
+			StockSample ss = IDTDataCache.getStockSamples().stream().
 					filter(s -> s.getSampleId().equals(stockId)).findFirst().get();
 			IDTExperimentalSample sample = new IDTExperimentalSample(
 					rs.getString("SAMPLE_ID"),
@@ -2172,9 +2172,9 @@ public class IDTUtils {
 					ss);
 			summary.setSample(sample);
 			summary.setDataExtractionMethod(
-					IDTDataCash.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
+					IDTDataCache.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
 			summary.setAcquisitionMethod(
-					IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
+					IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
 			summary.setCollisionEnergy(rs.getDouble("COLLISION_ENERGY"));
 			summaryList.add(summary);
 		}
@@ -2502,7 +2502,7 @@ public class IDTUtils {
 				"0",
 				4);	
 		DataProcessingSoftware trackerSoft = 
-				IDTDataCash.getSoftwareByName(MRC2ToolBoxCore.trackerSoftwareName);
+				IDTDataCache.getSoftwareByName(MRC2ToolBoxCore.trackerSoftwareName);
 		
 		DataExtractionMethod newMethod  = new DataExtractionMethod(
 				id,
@@ -2603,7 +2603,7 @@ public class IDTUtils {
 		Collection<MSMSExtractionParameterSet>paramSets = 
 				new ArrayList<MSMSExtractionParameterSet>();
 		DataProcessingSoftware trackerSoft = 
-				IDTDataCash.getSoftwareByName(MRC2ToolBoxCore.trackerSoftwareName);
+				IDTDataCache.getSoftwareByName(MRC2ToolBoxCore.trackerSoftwareName);
 		if(trackerSoft != null) {
 			
 			String query = 
@@ -2671,12 +2671,12 @@ public class IDTUtils {
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			
-			LIMSExperiment e = IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+			LIMSExperiment e = IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
 			if(e != null) {
 				if(!experimentStockSampleMap.containsKey(e))
 					experimentStockSampleMap.put(e,  new TreeSet<StockSample>());
 				
-				StockSample s = IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+				StockSample s = IDTDataCache.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 				if(s != null)
 					experimentStockSampleMap.get(e).add(s);
 			}			
@@ -2705,8 +2705,8 @@ public class IDTUtils {
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			
-			LIMSExperiment e = IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
-			LIMSInstrument i = IDTDataCash.getInstrumentById(rs.getString("INSTRUMENT_ID"));
+			LIMSExperiment e = IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
+			LIMSInstrument i = IDTDataCache.getInstrumentById(rs.getString("INSTRUMENT_ID"));
 			if(e != null && i != null) 
 				experimentInstrumentMap.put(e, i);			
 		}
@@ -2742,7 +2742,7 @@ public class IDTUtils {
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			
-			LIMSExperiment e = IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+			LIMSExperiment e = IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
 			if(e != null) {
 				if(!experimentPolarityMap.containsKey(e))
 					experimentPolarityMap.put(e,  new TreeSet<Polarity>());

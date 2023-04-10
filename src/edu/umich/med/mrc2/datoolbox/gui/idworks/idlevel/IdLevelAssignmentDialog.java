@@ -47,7 +47,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
@@ -93,7 +93,7 @@ public class IdLevelAssignmentDialog extends JDialog {
 		panel_1.add(lblTitle, gbc_lblTitle);
 		
 		Collection<MSFeatureIdentificationLevel> levelList 
-			= IDTDataCash.getMsFeatureIdentificationLevelList();
+			= IDTDataCache.getMsFeatureIdentificationLevelList();
 		comboBox = new JComboBox<MSFeatureIdentificationLevel>();
 		comboBox.setModel(new SortedComboBoxModel<MSFeatureIdentificationLevel>(levelList));
 		comboBox.setRenderer(new IdLevelListCellRenderer());

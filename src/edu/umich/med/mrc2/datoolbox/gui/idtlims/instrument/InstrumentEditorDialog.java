@@ -52,7 +52,7 @@ import javax.swing.border.EmptyBorder;
 import edu.umich.med.mrc2.datoolbox.data.MassAnalyzerType;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
@@ -199,7 +199,7 @@ public class InstrumentEditorDialog extends JDialog{
 		dataPanel.add(lblMsType, gbc_lblMsType);
 
 		separationTypeComboBox = new JComboBox(
-				new SortedComboBoxModel<ChromatographicSeparationType>(IDTDataCash.getChromatographicSeparationTypes()));
+				new SortedComboBoxModel<ChromatographicSeparationType>(IDTDataCache.getChromatographicSeparationTypes()));
 		GridBagConstraints gbc_msTypeComboBox = new GridBagConstraints();
 		gbc_msTypeComboBox.gridwidth = 2;
 		gbc_msTypeComboBox.insets = new Insets(0, 0, 5, 0);
@@ -234,7 +234,7 @@ public class InstrumentEditorDialog extends JDialog{
 		dataPanel.add(lblMassAnalyzer, gbc_lblMassAnalyzer);
 
 		massAnalyzerComboBox =
-				new JComboBox(new SortedComboBoxModel<MassAnalyzerType>(IDTDataCash.getMassAnalyzerTypes()));
+				new JComboBox(new SortedComboBoxModel<MassAnalyzerType>(IDTDataCache.getMassAnalyzerTypes()));
 		GridBagConstraints gbc_massAnalyzerComboBox = new GridBagConstraints();
 		gbc_massAnalyzerComboBox.gridwidth = 2;
 		gbc_massAnalyzerComboBox.fill = GridBagConstraints.HORIZONTAL;

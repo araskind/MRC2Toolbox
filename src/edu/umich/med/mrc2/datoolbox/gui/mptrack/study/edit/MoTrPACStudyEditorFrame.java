@@ -54,7 +54,7 @@ import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACTissueCode;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MotracSubjectType;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.gui.lims.experiment.DockableExperimentListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
@@ -354,7 +354,7 @@ public class MoTrPACStudyEditorFrame  extends  JFrame
 		if(studyCode.isEmpty())
 			errors.add("Study code not specified.");
 		else {
-			MoTrPACStudy existingStudyWithSameCode = MoTrPACDatabaseCash.getMotrpacStudyList().
+			MoTrPACStudy existingStudyWithSameCode = MoTrPACDatabaseCache.getMotrpacStudyList().
 					stream().filter(s -> s.getCode().equals(studyCode)).findFirst().orElse(null);
 			if(existingStudyWithSameCode != null) {
 				

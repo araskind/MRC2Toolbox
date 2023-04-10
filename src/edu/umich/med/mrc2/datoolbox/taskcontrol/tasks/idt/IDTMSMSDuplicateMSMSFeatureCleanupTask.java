@@ -53,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTMsDataUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
@@ -324,13 +324,13 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 			IDTMsDataUtils.attachMS1SpectrumForMsMs(f, conn);
 			MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 			bundle.setAcquisitionMethod(
-				IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
+				IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
 			bundle.setDataExtractionMethod(
-				IDTDataCash.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
+				IDTDataCache.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
 			bundle.setExperiment(
-				IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID")));
+				IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID")));
 			StockSample stockSample =
-				IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+				IDTDataCache.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 			bundle.setStockSample(stockSample);
 			IDTExperimentalSample sample =
 				IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);
@@ -405,7 +405,7 @@ public class IDTMSMSDuplicateMSMSFeatureCleanupTask extends AbstractTask {
 			return;
 		
 		for(String id : pepSearchParIds)
-			IDTDataCash.getNISTPepSearchParameterObjectById(id);		
+			IDTDataCache.getNISTPepSearchParameterObjectById(id);		
 	}
 	
 	private void attachMsMsManualIdentities() throws Exception {

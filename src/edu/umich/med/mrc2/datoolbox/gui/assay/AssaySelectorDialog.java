@@ -43,7 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -73,9 +73,9 @@ public class AssaySelectorDialog extends JDialog  {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		assayMethodsTable = new AssayTable();
-		LIMSDataCash.refreshAssayList();		
+		LIMSDataCache.refreshAssayList();		
 		assayMethodsTable.setTableModelFromAssayCollection(
-					LIMSDataCash.getAssays());
+					LIMSDataCache.getAssays());
 		assayMethodsTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {

@@ -50,7 +50,7 @@ import javax.swing.border.TitledBorder;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
@@ -119,7 +119,7 @@ public class DAMethodAssignmentDialog extends JDialog{
 		panel.add(lblFactor, gbc_lblBatch);
 
 		daMethodComboBox = new JComboBox<DataExtractionMethod>(
-				new SortedComboBoxModel(IDTDataCash.getDataExtractionMethods()));
+				new SortedComboBoxModel(IDTDataCache.getDataExtractionMethods()));
 		daMethodComboBox.setSelectedIndex(-1);
 		GridBagConstraints gbc_fCombo = new GridBagConstraints();
 		gbc_fCombo.insets = new Insets(0, 0, 5, 0);

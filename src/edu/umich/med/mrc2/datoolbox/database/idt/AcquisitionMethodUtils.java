@@ -292,7 +292,7 @@ public class AcquisitionMethodUtils {
 			String userId = rs.getString("CREATED_BY");
 			LIMSUser createdBy = null;
 			if(userId != null)
-				createdBy = IDTDataCash.getUserById(userId);
+				createdBy = IDTDataCache.getUserById(userId);
 			
 			Date createdOn = null;
 			if(rs.getDate("CREATED_ON") != null)
@@ -306,13 +306,13 @@ public class AcquisitionMethodUtils {
 					createdOn);
 
 			method.setPolarity(Polarity.getPolarityByCode(rs.getString("POLARITY")));
-			method.setCreatedBy(IDTDataCash.getUserById(rs.getString("CREATED_BY")));
-			method.setColumn(IDTDataCash.getColumnById(rs.getString("COLUMN_ID")));
-			method.setIonizationType(IDTDataCash.getIonizationTypeById(rs.getString("IONIZATION_TYPE")));
-			method.setMassAnalyzerType(IDTDataCash.getMassAnalyzerTypeById(rs.getString("MASS_ANALYZER")));
-			method.setMsType(IDTDataCash.getMsTypeById(rs.getString("MS_TYPE")));
-			method.setSeparationType(IDTDataCash.getChromatographicSeparationTypeById(rs.getString("SEPARATION_TYPE")));
-			method.setSoftware(IDTDataCash.getSoftwareById(rs.getString("SOFTWARE_ID")));
+			method.setCreatedBy(IDTDataCache.getUserById(rs.getString("CREATED_BY")));
+			method.setColumn(IDTDataCache.getColumnById(rs.getString("COLUMN_ID")));
+			method.setIonizationType(IDTDataCache.getIonizationTypeById(rs.getString("IONIZATION_TYPE")));
+			method.setMassAnalyzerType(IDTDataCache.getMassAnalyzerTypeById(rs.getString("MASS_ANALYZER")));
+			method.setMsType(IDTDataCache.getMsTypeById(rs.getString("MS_TYPE")));
+			method.setSeparationType(IDTDataCache.getChromatographicSeparationTypeById(rs.getString("SEPARATION_TYPE")));
+			method.setSoftware(IDTDataCache.getSoftwareById(rs.getString("SOFTWARE_ID")));
 
 			methodList.add(method);
 		}
@@ -406,11 +406,11 @@ public class AcquisitionMethodUtils {
 
 			String sepType = rs.getString("SEPARATION_TYPE");
 			ChromatographicSeparationType chromatographicSeparationType =
-				IDTDataCash.getChromatographicSeparationTypes().stream().
+				IDTDataCache.getChromatographicSeparationTypes().stream().
 				filter(t -> t.getId().equals(sepType)).findFirst().orElse(null);
 			column.setSeparationType(chromatographicSeparationType);
 			Manufacturer manufacturer = 
-					IDTDataCash.getManufacturerById(rs.getString("MANUFACTURER_ID"));
+					IDTDataCache.getManufacturerById(rs.getString("MANUFACTURER_ID"));
 			column.setManufacturer(manufacturer);
 			chromatographicColumnsList.add(column);
 		}
@@ -609,9 +609,9 @@ public class AcquisitionMethodUtils {
 		while (rs.next()) {
 			
 			MassAnalyzerType massAnalyzerType = 
-					IDTDataCash.getMassAnalyzerTypeById(rs.getString("MASS_ANALYZER"));
+					IDTDataCache.getMassAnalyzerTypeById(rs.getString("MASS_ANALYZER"));
 			ChromatographicSeparationType separationType = 
-					IDTDataCash.getChromatographicSeparationTypeById(rs.getString("SEPARATION_TYPE"));
+					IDTDataCache.getChromatographicSeparationTypeById(rs.getString("SEPARATION_TYPE"));
 
 			LIMSInstrument st = new LIMSInstrument(
 					rs.getString("INSTRUMENT_ID"),

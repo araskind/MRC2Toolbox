@@ -50,7 +50,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.gui.assay.AssaySelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEventListener;
@@ -270,7 +270,7 @@ public class DataPipelineDefinitionPanel extends JPanel
 	@SuppressWarnings("unchecked")
 	private void populateMotrpacAssayComboBox() {
 		
-		Collection<MoTrPACAssay> mpAssays = MoTrPACDatabaseCash.getMotrpacAssayList();
+		Collection<MoTrPACAssay> mpAssays = MoTrPACDatabaseCache.getMotrpacAssayList();
 		DefaultComboBoxModel<MoTrPACAssay>model = 
 				new DefaultComboBoxModel<MoTrPACAssay>(mpAssays.toArray(new MoTrPACAssay[mpAssays.size()]));
 		motrpacAssayCodeComboBox.setModel(model);

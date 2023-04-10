@@ -52,7 +52,7 @@ import org.apache.commons.lang3.StringUtils;
 import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.expsetup.dpl.AcquisitionMethodSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodExtendedEditorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.DockableAcquisitionMethodDataPanel;
@@ -283,7 +283,7 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 //			methodId = IDTUtils.addNewDataExtractionMethod(
 //					selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
 //			selectedMethod.setId(methodId);
-//			IDTDataCash.getDataExtractionMethods().add(selectedMethod);
+//			IDTDataCache.getDataExtractionMethods().add(selectedMethod);
 //			dataExtractionMethods.add(selectedMethod);
 //		} catch (Exception e) {
 //			// TODO Auto-generated catch block
@@ -407,7 +407,7 @@ public class RDPMethodsPanel extends RDPMetadataWizardPanel
 		try {
 			AcquisitionMethodUtils.addNewAcquisitionMethod(
 					selectedMethod, methodData.getMethodFile());
-			IDTDataCash.getAcquisitionMethods().add(selectedMethod);
+			IDTDataCache.getAcquisitionMethods().add(selectedMethod);
 			dataAcquisitionMethods.add(selectedMethod);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

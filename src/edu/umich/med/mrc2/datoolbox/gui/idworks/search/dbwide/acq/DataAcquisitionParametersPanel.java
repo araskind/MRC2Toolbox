@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodTable;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.DataExtractionMethodTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
@@ -186,13 +186,13 @@ public class DataAcquisitionParametersPanel extends TrackerSearchParametersPanel
 	public void populateTablesFromDatabase() {
 		
 		chromatographicSeparationTypeTable.setTableModelFromChromatographicSeparationTypeList(
-					IDTDataCash.getChromatographicSeparationTypes());
-		msTypeTable.setTableModelFromMsTypeList(IDTDataCash.getMsTypes());
+					IDTDataCache.getChromatographicSeparationTypes());
+		msTypeTable.setTableModelFromMsTypeList(IDTDataCache.getMsTypes());
 		chromatographicColumnListTable.setTableModelFromColumns(
-					IDTDataCash.getChromatographicColumns());	
+					IDTDataCache.getChromatographicColumns());	
 		
-		acquisitionMethodTable.setTableModelFromAcquisitionMethods(IDTDataCash.getAcquisitionMethods());
-		dataExtractionMethodTable.setTableModelFromMethods(IDTDataCash.getDataExtractionMethods());
+		acquisitionMethodTable.setTableModelFromAcquisitionMethods(IDTDataCache.getAcquisitionMethods());
+		dataExtractionMethodTable.setTableModelFromMethods(IDTDataCache.getDataExtractionMethods());
 		
 		chromatographicSeparationTypeTable.getSelectionModel().addListSelectionListener(this);
 		msTypeTable.getSelectionModel().addListSelectionListener(this);

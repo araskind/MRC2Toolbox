@@ -40,7 +40,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DecoyExportHandling;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 
 public class IdentificationUtils {
 	
@@ -77,8 +77,8 @@ public class IdentificationUtils {
 		String libId = msfId.getReferenceMsMsLibraryMatch().
 				getMatchedLibraryFeature().getMsmsLibraryIdentifier();
 		
-		if(IDTDataCash.getDecoyLibraryMap().containsKey(libId))
-			return IDTDataCash.getDecoyLibraryMap().get(libId);
+		if(IDTDataCache.getDecoyLibraryMap().containsKey(libId))
+			return IDTDataCache.getDecoyLibraryMap().get(libId);
 		else
 			return false;
 	}

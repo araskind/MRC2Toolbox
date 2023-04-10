@@ -57,7 +57,7 @@ import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.DockableDataPipelinesTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.byexp.DockableExperimentsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
@@ -241,7 +241,7 @@ public class DatasetSummaryDialog extends JDialog
 			for(LIMSExperiment experiment : selectedExperiments) {
 				
 				Collection<DataPipeline> pipelines = 
-						IDTDataCash.getDataPipelinesForExperiment(experiment);
+						IDTDataCache.getDataPipelinesForExperiment(experiment);
 				if(pipelines != null)
 					allPipelines.addAll(pipelines);
 			}

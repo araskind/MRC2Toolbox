@@ -34,7 +34,7 @@ import javax.swing.JScrollPane;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.database.idt.ChromatographyUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -171,8 +171,8 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 			e.printStackTrace();
 		}
 		mobilePhaseEditorDialog.dispose();
-		IDTDataCash.refreshMobilePhaseList();
-		mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCash.getMobilePhaseList());
+		IDTDataCache.refreshMobilePhaseList();
+		mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCache.getMobilePhaseList());
 	}
 
 	private void editMobilePhase() {
@@ -212,8 +212,8 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 			e.printStackTrace();
 		}
 		mobilePhaseEditorDialog.dispose();
-		IDTDataCash.refreshMobilePhaseList();
-		mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCash.getMobilePhaseList());
+		IDTDataCache.refreshMobilePhaseList();
+		mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCache.getMobilePhaseList());
 		
 	}
 
@@ -237,8 +237,8 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			IDTDataCash.refreshMobilePhaseList();
-			mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCash.getMobilePhaseList());
+			IDTDataCache.refreshMobilePhaseList();
+			mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCache.getMobilePhaseList());
 		}	
 	}
 
@@ -254,7 +254,7 @@ public class DockableMobilePhaseManagerPanel extends AbstractIDTrackerLimsPanel 
 	}
 
 	public void loadMobilePhases() {
-		mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCash.getMobilePhaseList());
+		mobilePhaseTable.setTableModelFromMobilePhaseCollection(IDTDataCache.getMobilePhaseList());
 	}
 
 	public synchronized void clearPanel() {

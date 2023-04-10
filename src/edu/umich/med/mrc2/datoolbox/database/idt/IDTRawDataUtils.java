@@ -104,13 +104,13 @@ public class IDTRawDataUtils {
 			while(rs.next()) {
 				
 				LIMSExperiment experiment = 
-						IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+						IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
 				if(experiment != null) {
 					
 					if(!existingDataFiles.containsKey(experiment))
 						existingDataFiles.put(experiment, new TreeSet<DataFile>());
 					
-					DataAcquisitionMethod acqMethod = IDTDataCash.getAcquisitionMethodById(
+					DataAcquisitionMethod acqMethod = IDTDataCache.getAcquisitionMethodById(
 							rs.getString("ACQUISITION_METHOD_ID"));
 					
 					DataFile existingDataFile = 

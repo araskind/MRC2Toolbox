@@ -44,7 +44,7 @@ import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.UserAffiliation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -69,7 +69,7 @@ public class UserSelectorDialog extends JDialog {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		userTable = new UserTable();
-		userTable.setTableModelFromUserList(IDTDataCash.getUsers(UserAffiliation.STAFF));
+		userTable.setTableModelFromUserList(IDTDataCache.getUsers(UserAffiliation.STAFF));
 		userTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {

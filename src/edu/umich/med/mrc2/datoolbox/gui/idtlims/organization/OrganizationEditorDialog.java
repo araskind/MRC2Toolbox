@@ -52,7 +52,7 @@ import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.IdTrackerOrganization;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.user.UserSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -376,7 +376,7 @@ public class OrganizationEditorDialog extends JDialog implements ActionListener{
 			
 			if(this.organization == null) {
 				IdTrackerOrganization existing = 
-						IDTDataCash.getOrganizations().stream().
+						IDTDataCache.getOrganizations().stream().
 							filter(o -> o.getName().equals(name)).
 							findFirst().orElse(null);
 				if(existing != null) 
@@ -385,7 +385,7 @@ public class OrganizationEditorDialog extends JDialog implements ActionListener{
 			else {
 				String id = organization.getId();
 				IdTrackerOrganization existing = 
-						IDTDataCash.getOrganizations().stream().
+						IDTDataCache.getOrganizations().stream().
 							filter(o -> !o.getId().equals(id)).
 							filter(o -> o.getName().equals(name)).
 							findFirst().orElse(null);

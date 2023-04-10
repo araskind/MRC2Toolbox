@@ -141,7 +141,7 @@ import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDbConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.DocumentUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
@@ -468,7 +468,7 @@ public class RegexTest {
 	
 	private static void getMSMSparamsTest() throws Exception {
 		
-		IDTDataCash.refreshSoftwareList();
+		IDTDataCache.refreshSoftwareList();
 		IDTUtils.getMSMSExtractionParameters();
 	}
 	
@@ -1885,7 +1885,7 @@ public class RegexTest {
 		
 		ArrayList<String>emptyMSMS = new ArrayList<String>();
 		
-		for(LIMSExperiment experiment : IDTDataCash.getExperiments()) {
+		for(LIMSExperiment experiment : IDTDataCache.getExperiments()) {
 			
 			ps.setString(2, experiment.getId());
 			System.out.println("\nProcessing experiment " + experiment.getId());

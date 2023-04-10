@@ -64,7 +64,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.RefMetClassificationLevels;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
@@ -684,7 +684,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			if(msmslibMatch != null) {
 				
 				matchFeature = msmslibMatch.getMatchedLibraryFeature();
-				lib = IDTDataCash.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
+				lib = IDTDataCache.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
 				collisionEnergyValue = matchFeature.getCollisionEnergyValue();
 				forwardScore = msmslibMatch.getForwardScore();
 				reverseScore = msmslibMatch.getReverseScore();

@@ -43,7 +43,7 @@ import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.TrackerSearchParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -111,7 +111,7 @@ public class LibrarySearchPanel extends TrackerSearchParametersPanel {
 		
 		msmsLibraryListingTable = new MSMSLibraryListingTable();		
 		msmsLibraryListingTable.setTableModelFromReferenceMsMsLibraryList(
-				IDTDataCash.getPrimaryReferenceMsMsLibraryList());
+				IDTDataCache.getPrimaryReferenceMsMsLibraryList());
 		msmsLibraryListingTable.getSelectionModel().addListSelectionListener(this);
 		JScrollPane scrollPane = new JScrollPane(msmsLibraryListingTable);
 		scrollPane.setBorder(

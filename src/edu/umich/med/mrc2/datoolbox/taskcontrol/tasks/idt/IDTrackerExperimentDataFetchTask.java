@@ -44,13 +44,13 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCacheUtils;
 
 public class IDTrackerExperimentDataFetchTask extends IDTMSMSFeatureSearchTask {
 
@@ -135,7 +135,7 @@ public class IDTrackerExperimentDataFetchTask extends IDTMSMSFeatureSearchTask {
 
 		Map<String,DataAcquisitionMethod>acqMethodsMap = 
 				new TreeMap<String,DataAcquisitionMethod>();		
-		IDTDataCash.getAcquisitionMethodsForExperiment(idTrackerExperiment).
+		IDTDataCache.getAcquisitionMethodsForExperiment(idTrackerExperiment).
 			stream().forEach(m -> acqMethodsMap.put(m.getId(), m));
 		
 		Map<String,DataExtractionMethod>daMethodsMap = 
@@ -153,10 +153,10 @@ public class IDTrackerExperimentDataFetchTask extends IDTMSMSFeatureSearchTask {
 		Adduct defaultAdduct = null;
 		while (rs.next()) {
 			
-			MSFeatureInfoBundle fInCash = 
-					DiskCashUtils.retrieveMSFeatureInfoBundleFromCache(rs.getString("MSMS_FEATURE_ID"));
-			if(fInCash != null) {
-				cashedFeatures.add(fInCash);
+			MSFeatureInfoBundle fInCache = 
+					DiskCacheUtils.retrieveMSFeatureInfoBundleFromCache(rs.getString("MSMS_FEATURE_ID"));
+			if(fInCache != null) {
+				cachedFeatures.add(fInCache);
 				processed++;
 				continue;				
 			}	
@@ -222,12 +222,12 @@ public class IDTrackerExperimentDataFetchTask extends IDTMSMSFeatureSearchTask {
 			
 			String daId = rs.getString("EXTRACTION_METHOD_ID");
 			if(!daMethodsMap.containsKey(daId))
-				daMethodsMap.put(daId, IDTDataCash.getDataExtractionMethodById(daId));
+				daMethodsMap.put(daId, IDTDataCache.getDataExtractionMethodById(daId));
 			
 			bundle.setDataExtractionMethod(daMethodsMap.get(daId));
 			bundle.setExperiment(idTrackerExperiment);
 			StockSample stockSample =
-				IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+				IDTDataCache.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 			bundle.setStockSample(stockSample);
 			IDTExperimentalSample sample =
 				IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);

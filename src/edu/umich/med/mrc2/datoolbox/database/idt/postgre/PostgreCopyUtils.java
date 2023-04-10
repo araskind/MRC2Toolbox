@@ -46,9 +46,9 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 
 public class PostgreCopyUtils {
 
@@ -66,7 +66,7 @@ public class PostgreCopyUtils {
 	
 	public static void copyLimsExperiments() throws Exception {
 		
-		Collection<LIMSExperiment> experiments = LIMSDataCash.getExperiments();
+		Collection<LIMSExperiment> experiments = LIMSDataCache.getExperiments();
 		Connection pgConnection =  getPostGreConnection();
 		String insSql =
 				"INSERT INTO LIMS_EXPERIMENT (EXPERIMENT_ID, EXPERIMENT_NAME, PROJECT_ID,  " +
@@ -439,7 +439,7 @@ public class PostgreCopyUtils {
 		
 		Connection mrcConnection = ConnectionManager.getConnection();
 		Connection pgConnection =  getPostGreConnection();
-		Collection<DataAcquisitionMethod> methods = IDTDataCash.getAcquisitionMethods();		
+		Collection<DataAcquisitionMethod> methods = IDTDataCache.getAcquisitionMethods();		
 		String query  =
 				"INSERT INTO DATA_ACQUISITION_METHOD (ACQ_METHOD_ID, METHOD_NAME, " +
 				"METHOD_DESCRIPTION, POLARITY, CREATED_BY, CREATED_ON, IONIZATION_TYPE, " +
@@ -535,7 +535,7 @@ public class PostgreCopyUtils {
 		
 		Connection mrcConnection = ConnectionManager.getConnection();
 		Connection pgConnection =  getPostGreConnection();
-		Collection<DataExtractionMethod> methods = IDTDataCash.getDataExtractionMethods();		
+		Collection<DataExtractionMethod> methods = IDTDataCache.getDataExtractionMethods();		
 		String query  =
 				"INSERT INTO DATA_EXTRACTION_METHOD (EXTRACTION_METHOD_ID, METHOD_NAME, " +
 				"METHOD_DESCRIPTION, CREATED_BY, CREATED_ON) " +

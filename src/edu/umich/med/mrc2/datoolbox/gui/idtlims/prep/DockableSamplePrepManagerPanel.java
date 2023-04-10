@@ -50,7 +50,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -140,7 +140,7 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 	}
 	
 	public void loadPrepData() {		
-		samplePrepTable.setTableModelFromPreps(IDTDataCash.getSamplePreps());
+		samplePrepTable.setTableModelFromPreps(IDTDataCache.getSamplePreps());
 	}
 	
 	public LIMSSamplePreparation getSelectedPrep() {
@@ -192,7 +192,7 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 		if(prep == null)
 			return;
 		
-		if(IDTDataCash.getExperimentForSamplePrep(prep) == null) {
+		if(IDTDataCache.getExperimentForSamplePrep(prep) == null) {
 			MessageDialog.showErrorMsg(
 					"Can not find parent experiment for the selected sample prep!", 
 					this.getContentPane());
@@ -225,7 +225,7 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			IDTDataCash.refreshSamplePreps();
+			IDTDataCache.refreshSamplePreps();
 			loadPrepData();
 			idTrackerLimsManager.reloadProjectTree();
 		}
@@ -284,12 +284,12 @@ public class DockableSamplePrepManagerPanel extends AbstractIDTrackerLimsPanel
 
 		String newPrepId = null;
 		Map<LIMSExperiment, Collection<LIMSSamplePreparation>> espMap = 
-				IDTDataCash.getExperimentSamplePrepMap();
+				IDTDataCache.getExperimentSamplePrepMap();
 		LIMSExperiment experiment = samplePrepEditorDialog.getExperiment();	
 		try {
 			newPrepId = IDTUtils.addNewSamplePrep(prep2save, selectedSamples, prepSops);
 			prep2save.setId(newPrepId);
-			IDTDataCash.getSamplePreps().add(prep2save);
+			IDTDataCache.getSamplePreps().add(prep2save);
 			if(!espMap.containsKey(experiment))			
 				espMap.put(experiment, new TreeSet<LIMSSamplePreparation>());
 				

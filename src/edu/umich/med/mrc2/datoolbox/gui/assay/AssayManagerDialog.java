@@ -42,7 +42,7 @@ import javax.swing.WindowConstants;
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.idt.AssayDatabaseUtils;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -75,9 +75,9 @@ public class AssayManagerDialog extends JDialog implements ActionListener {
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		assayMethodsTable = new AssayTable();
-		LIMSDataCash.refreshAssayList();		
+		LIMSDataCache.refreshAssayList();		
 		assayMethodsTable.setTableModelFromAssayCollection(
-					LIMSDataCash.getAssays());
+					LIMSDataCache.getAssays());
 		JScrollPane scrollPane = new JScrollPane(assayMethodsTable);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 
@@ -128,9 +128,9 @@ public class AssayManagerDialog extends JDialog implements ActionListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		LIMSDataCash.refreshAssayList();		
+		LIMSDataCache.refreshAssayList();		
 		assayMethodsTable.setTableModelFromAssayCollection(
-					LIMSDataCash.getAssays());
+					LIMSDataCache.getAssays());
 		assayEditorDialog.dispose();
 	}
 
@@ -149,9 +149,9 @@ public class AssayManagerDialog extends JDialog implements ActionListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		LIMSDataCash.refreshAssayList();		
+		LIMSDataCache.refreshAssayList();		
 		assayMethodsTable.setTableModelFromAssayCollection(
-					LIMSDataCash.getAssays());
+					LIMSDataCache.getAssays());
 		assayEditorDialog.dispose();
 	}
 
@@ -196,9 +196,9 @@ public class AssayManagerDialog extends JDialog implements ActionListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			LIMSDataCash.refreshAssayList();		
+			LIMSDataCache.refreshAssayList();		
 			assayMethodsTable.setTableModelFromAssayCollection(
-						LIMSDataCash.getAssays());
+						LIMSDataCache.getAssays());
 		}	
 	}
 }

@@ -54,7 +54,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.se.IDTrackerExperimentListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
@@ -191,7 +191,7 @@ public class MoTrPACStudyExperimentEditorDialog extends JDialog implements Actio
 	private void loadStudyExperiments(Collection<LIMSExperiment>assignedExperiments) {
 		
 		Collection<LIMSExperiment>availableExperiments = 
-				LIMSDataCash.getExperiments().stream().
+				LIMSDataCache.getExperiments().stream().
 				filter(e -> !assignedExperiments.contains(e)).
 				collect(Collectors.toList());
 		

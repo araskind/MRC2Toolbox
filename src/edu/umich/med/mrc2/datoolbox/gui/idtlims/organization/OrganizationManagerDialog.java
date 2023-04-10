@@ -44,7 +44,7 @@ import javax.swing.WindowConstants;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.IdTrackerOrganization;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -77,9 +77,9 @@ public class OrganizationManagerDialog extends JDialog implements ActionListener
 		toolbar  = new OrganizationManagerToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
-		IDTDataCash.refreshOrganizationList();
+		IDTDataCache.refreshOrganizationList();
 		organizationTable = new OrganizationTable();
-		organizationTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());
+		organizationTable.setTableModelFromOrganizations(IDTDataCache.getOrganizations());
 		organizationTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {
@@ -150,8 +150,8 @@ public class OrganizationManagerDialog extends JDialog implements ActionListener
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-		IDTDataCash.refreshOrganizationList();
-		organizationTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());			
+		IDTDataCache.refreshOrganizationList();
+		organizationTable.setTableModelFromOrganizations(IDTDataCache.getOrganizations());			
 		organizationEditorDialog.dispose();
 	}
 
@@ -187,8 +187,8 @@ public class OrganizationManagerDialog extends JDialog implements ActionListener
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		IDTDataCash.refreshOrganizationList();
-		organizationTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());			
+		IDTDataCache.refreshOrganizationList();
+		organizationTable.setTableModelFromOrganizations(IDTDataCache.getOrganizations());			
 		organizationEditorDialog.dispose();
 	}
 
@@ -207,9 +207,9 @@ public class OrganizationManagerDialog extends JDialog implements ActionListener
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			IDTDataCash.refreshOrganizationList();
+			IDTDataCache.refreshOrganizationList();
 			try {			
-				organizationTable.setTableModelFromOrganizations(IDTDataCash.getOrganizations());
+				organizationTable.setTableModelFromOrganizations(IDTDataCache.getOrganizations());
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

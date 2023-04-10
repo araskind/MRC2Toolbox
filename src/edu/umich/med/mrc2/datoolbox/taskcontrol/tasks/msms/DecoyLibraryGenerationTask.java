@@ -64,7 +64,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -495,7 +495,7 @@ public class DecoyLibraryGenerationTask extends AbstractTask implements TaskList
 					SpectrumSource.getSpectrumSourceByName(
 							rs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
 			feature.setIonizationType(
-					IDTDataCash.getIonizationTypeById(
+					IDTDataCache.getIonizationTypeById(
 					rs.getString(MSMSComponentTableFields.IONIZATION_TYPE.name())));
 			feature.setCollisionEnergyValue(
 					rs.getString(MSMSComponentTableFields.COLLISION_ENERGY.name()));

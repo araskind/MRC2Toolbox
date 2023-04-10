@@ -43,7 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
-import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCacheUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
@@ -135,7 +135,7 @@ public class MSMSLibraryUtils {
 
 	public static MsMsLibraryFeature getMsMsLibraryFeatureById(String mrc2msmsId) throws Exception {
 
-		MsMsLibraryFeature f = DiskCashUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
+		MsMsLibraryFeature f = DiskCacheUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
 		if(f != null)
 			return f;
 		
@@ -150,7 +150,7 @@ public class MSMSLibraryUtils {
 			Connection conn) throws Exception {
 
 		MsMsLibraryFeature feature = 
-				DiskCashUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
+				DiskCacheUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
 		if(feature != null)
 			return feature;
 		
@@ -181,7 +181,7 @@ public class MSMSLibraryUtils {
 					SpectrumSource.getSpectrumSourceByName(
 							rs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
 			feature.setIonizationType(
-					IDTDataCash.getIonizationTypeById(
+					IDTDataCache.getIonizationTypeById(
 					rs.getString(MSMSComponentTableFields.IONIZATION_TYPE.name())));
 			feature.setCollisionEnergyValue(
 					rs.getString(MSMSComponentTableFields.COLLISION_ENERGY.name()));
@@ -200,7 +200,7 @@ public class MSMSLibraryUtils {
 				}
 			}
 			ReferenceMsMsLibrary refLib =
-					IDTDataCash.getReferenceMsMsLibraryByPrimaryLibraryId(
+					IDTDataCache.getReferenceMsMsLibraryByPrimaryLibraryId(
 							rs.getString(MSMSComponentTableFields.LIBRARY_NAME.name()));
 			feature.setMsmsLibraryIdentifier(refLib.getUniqueId());
 
@@ -316,7 +316,7 @@ public class MSMSLibraryUtils {
 		while(rs.next()) {
 
 			String mrc2msmsId = rs.getString("MRC2_LIB_ID");
-			feature = DiskCashUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
+			feature = DiskCacheUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
 			if(feature != null)
 				break;
 			
@@ -326,7 +326,7 @@ public class MSMSLibraryUtils {
 			feature.setSpectrumSource(
 					SpectrumSource.getSpectrumSourceByName(
 							rs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
-			feature.setIonizationType(IDTDataCash.getIonizationTypeById(
+			feature.setIonizationType(IDTDataCache.getIonizationTypeById(
 					rs.getString(MSMSComponentTableFields.IONIZATION_TYPE.name())));
 			feature.setCollisionEnergyValue(
 					rs.getString(MSMSComponentTableFields.COLLISION_ENERGY.name()));

@@ -62,7 +62,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureChromatogramBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTRawDataUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -378,8 +378,41 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		
 		if(command.equals(MainActionCommands.SEND_EXPERIMENT_DATA_TO_DATABASE_COMMAND.getName()))
 			saveExperimentToDatabaseAsNewExperiment();		
+		
+		if(command.equals(MainActionCommands.IMPORT_MS1_DATA_FROM_CEF_COMMAND.getName()))
+			importMS1DataFromCEFFile();		
 	}
 	
+	private void importMS1DataFromCEFFile() {
+		
+		RawDataAnalysisExperiment activeExperiment = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
+		if(activeExperiment == null)
+			return;
+		
+		if (activeExperiment.getMSOneDataFiles().isEmpty() 
+				&& activeExperiment.getMSMSDataFiles().isEmpty()) {
+			MessageDialog.showErrorMsg("No data files in the current experiment");
+			return;
+		}
+		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
+		fc.setMode(JnaFileChooser.Mode.Files);
+		fc.addFilter("CEF files", "cef", "CEF");
+		fc.setTitle("Select library file");
+		fc.setMultiSelectionEnabled(false);
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
+			
+			File inputFile = fc.getSelectedFile();
+			if (inputFile.exists() && inputFile.canRead()) {
+
+				//	TODO
+				
+				baseDirectory = inputFile.getParentFile();
+				savePreferences();
+			}
+		}
+	}
+
 	private void setExperimentDataUploadParameters() {
 		
 		RawDataAnalysisExperiment activeExperiment = 
@@ -395,7 +428,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(activeExperiment.getIdTrackerExperiment() != null 
 				&& activeExperiment.getIdTrackerExperiment().getId() != null) {
 			
-			LIMSExperiment existingExperiment = IDTDataCash.getExperimentById(
+			LIMSExperiment existingExperiment = IDTDataCache.getExperimentById(
 					activeExperiment.getIdTrackerExperiment().getId());
 			if(existingExperiment != null) {
 				MessageDialog.showErrorMsg("Current experiment already uploaded to database as\n"
@@ -445,7 +478,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}	
 		String methodMd5 = deMethod.getParameterSetHash();
 		DataExtractionMethod existingDeMethod = 
-				 IDTDataCash.getDataExtractionMethodByMd5(methodMd5);
+				 IDTDataCache.getDataExtractionMethodByMd5(methodMd5);
 		
 		boolean allowEdit = false;
 			 
@@ -463,7 +496,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				return;
 			}
 	    }	
-	    IDTDataCash.getDataExtractionMethods().add(existingDeMethod);
+	    IDTDataCache.getDataExtractionMethods().add(existingDeMethod);
 		rawDataAnalysisExperimentDatabaseUploadDialog = 
 				new RawDataAnalysisExperimentDatabaseUploadDialog(this);
 		rawDataAnalysisExperimentDatabaseUploadDialog.setDataExtractionMethod(existingDeMethod, allowEdit);
@@ -513,7 +546,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		if(experiment.getIdTrackerExperiment() != null 
 				&& experiment.getIdTrackerExperiment().getId() != null) {
 			
-			LIMSExperiment existingExperiment = IDTDataCash.getExperimentById(
+			LIMSExperiment existingExperiment = IDTDataCache.getExperimentById(
 					experiment.getIdTrackerExperiment().getId());
 			if(existingExperiment != null) {
 				MessageDialog.showErrorMsg("Current project already uploaded to database as\n"
@@ -541,7 +574,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 
 		if(idtExperiment != null && idtExperiment.getId() != null) {
 			
-			LIMSExperiment exiting = IDTDataCash.getExperimentById(idtExperiment.getId());
+			LIMSExperiment exiting = IDTDataCache.getExperimentById(idtExperiment.getId());
 			if(exiting != null) {
 				
 				MessageDialog.showWarningMsg(
@@ -617,7 +650,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getMsmsExtractionParameterSet();
 		if(ps != null) {
 			DataExtractionMethod deMethod = 
-					IDTDataCash.getDataExtractionMethodById(ps.getId());
+					IDTDataCache.getDataExtractionMethodById(ps.getId());
 			msmsFeatureExtractionSetupDialog.loadParameters(ps, deMethod);
 		}		
 		msmsFeatureExtractionSetupDialog.setLocationRelativeTo(this.getContentPane());
@@ -646,7 +679,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		DataExtractionMethod experimentDataExtractionMethod = null;		
 		String methodMd5 = ps.getParameterSetHash();		
 		DataExtractionMethod existingMethod = 
-				IDTDataCash.getDataExtractionMethodByMd5(methodMd5);
+				IDTDataCache.getDataExtractionMethodByMd5(methodMd5);
 		
 		//	Insert new method
 		if(existingMethod == null) {
@@ -654,7 +687,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			if(msmsFeatureExtractionSetupDialog.getInitialParameterSet() != null) {
 				
 		    	DataExtractionMethod sameNameDeMethod = 
-						 IDTDataCash.getDataExtractionMethodByName(ps.getName());
+						 IDTDataCache.getDataExtractionMethodByName(ps.getName());
 		    	if(sameNameDeMethod != null) {
 
 		    		String newName = "MSMS extraction method V-" + 
@@ -678,7 +711,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			}
 			if(experimentDataExtractionMethod != null) {
 				
-				IDTDataCash.getDataExtractionMethods().add(experimentDataExtractionMethod);
+				IDTDataCache.getDataExtractionMethods().add(experimentDataExtractionMethod);
 				ps.setId(experimentDataExtractionMethod.getId());
 				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
 					setMsmsExtractionParameterSet(ps);
@@ -700,7 +733,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 //		}
 //		else {
 //	    	DataExtractionMethod sameNameDeMethod = 
-//					 IDTDataCash.getDataExtractionMethodByName(ps.getName());
+//					 IDTDataCache.getDataExtractionMethodByName(ps.getName());
 //	    	if(sameNameDeMethod != null) {
 //	    		
 //	    		String version = " V-" + ExperimentUtils.dateTimeFormat.format(new Date());
@@ -722,7 +755,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 //				return;
 //			}
 //			if(experimentDataExtractionMethod != null) {
-//				IDTDataCash.getDataExtractionMethods().add(experimentDataExtractionMethod);
+//				IDTDataCache.getDataExtractionMethods().add(experimentDataExtractionMethod);
 //				ps.setId(experimentDataExtractionMethod.getId());
 //				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
 //					setMsmsExtractionParameterSet(ps);

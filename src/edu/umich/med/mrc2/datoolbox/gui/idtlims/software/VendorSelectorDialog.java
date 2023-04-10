@@ -44,7 +44,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.vendor.VendorTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -78,7 +78,7 @@ public class VendorSelectorDialog extends JDialog {
 		
 		vendorTable = new VendorTable();
 		vendorTable.setTableModelFromManufacturers(
-				IDTDataCash.getManufacturers());
+				IDTDataCache.getManufacturers());
 		vendorTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {

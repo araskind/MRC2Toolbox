@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -102,7 +102,7 @@ public class MSMSLibraryMatchTableModel extends BasicTableModel {
 			MsMsLibraryFeature matchFeature = 
 					msmslibMatch.getMatchedLibraryFeature();
 			ReferenceMsMsLibrary lib =
-				IDTDataCash.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
+				IDTDataCache.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
 
 			Object[] obj = {
 				id.equals(primary), // DEFAULT_ID_COLUMN, Boolean

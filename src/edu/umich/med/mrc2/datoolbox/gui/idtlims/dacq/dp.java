@@ -48,7 +48,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 
@@ -226,7 +226,7 @@ public class dp extends JPanel implements ItemListener, ActionListener {
 		dataPanel.add(lblMsType, gbc_lblMsType);
 
 		msTypeComboBox = new JComboBox(
-				new SortedComboBoxModel<MsType>(IDTDataCash.getMsTypes()));
+				new SortedComboBoxModel<MsType>(IDTDataCache.getMsTypes()));
 		GridBagConstraints gbc_msTypeComboBox = new GridBagConstraints();
 		gbc_msTypeComboBox.gridwidth = 2;
 		gbc_msTypeComboBox.insets = new Insets(0, 0, 5, 0);
@@ -245,7 +245,7 @@ public class dp extends JPanel implements ItemListener, ActionListener {
 
 		separationTypeComboBox = new JComboBox(
 				new SortedComboBoxModel<ChromatographicSeparationType>(
-						IDTDataCash.getChromatographicSeparationTypes()));
+						IDTDataCache.getChromatographicSeparationTypes()));
 		separationTypeComboBox.addItemListener(this);
 		GridBagConstraints gbc_separationTypeomboBox = new GridBagConstraints();
 		gbc_separationTypeomboBox.insets = new Insets(0, 0, 5, 5);
@@ -264,7 +264,7 @@ public class dp extends JPanel implements ItemListener, ActionListener {
 
 		columnComboBox = new JComboBox(
 				new SortedComboBoxModel<LIMSChromatographicColumn>(
-						IDTDataCash.getChromatographicColumns()));
+						IDTDataCache.getChromatographicColumns()));
 		GridBagConstraints gbc_columnComboBox = new GridBagConstraints();
 		gbc_columnComboBox.insets = new Insets(0, 0, 5, 0);
 		gbc_columnComboBox.gridwidth = 2;
@@ -282,7 +282,7 @@ public class dp extends JPanel implements ItemListener, ActionListener {
 		dataPanel.add(lblIonization, gbc_lblIonization);
 
 		ionizationTypeComboBox =
-				new JComboBox(new SortedComboBoxModel<IonizationType>(IDTDataCash.getIonizationTypes()));
+				new JComboBox(new SortedComboBoxModel<IonizationType>(IDTDataCache.getIonizationTypes()));
 		GridBagConstraints gbc_ionizationTypeComboBox = new GridBagConstraints();
 		gbc_ionizationTypeComboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_ionizationTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
@@ -299,7 +299,7 @@ public class dp extends JPanel implements ItemListener, ActionListener {
 		dataPanel.add(lblMassAnalyzer, gbc_lblMassAnalyzer);
 
 		massAnalyzerComboBox =
-				new JComboBox(new SortedComboBoxModel<MassAnalyzerType>(IDTDataCash.getMassAnalyzerTypes()));
+				new JComboBox(new SortedComboBoxModel<MassAnalyzerType>(IDTDataCache.getMassAnalyzerTypes()));
 		GridBagConstraints gbc_massAnalyzerComboBox = new GridBagConstraints();
 		gbc_massAnalyzerComboBox.gridwidth = 2;
 		gbc_massAnalyzerComboBox.insets = new Insets(0, 0, 5, 0);

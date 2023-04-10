@@ -33,7 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.design.IDTrackerExperimentDesignEditorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.StockSampleEditorDialog;
@@ -116,7 +116,7 @@ public class WizardExperimentDesignEditorPanel extends IDTrackerExperimentDesign
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		IDTDataCash.refreshStockSampleList();
+		IDTDataCache.refreshStockSampleList();
 		stockSampleEditorDialog.dispose();
 	}
 

@@ -34,7 +34,7 @@ import org.jdom2.Element;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.store.FeatureLookupDataSetFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MinimalMSOneFeatureFields;
@@ -255,7 +255,7 @@ public class FeatureLookupDataSet implements Comparable<FeatureLookupDataSet>{
 		}		
 		String userId =  xmlElement.getAttributeValue(FeatureLookupDataSetFields.CreatedBy.name());
 		if(userId != null)
-			this.createdBy = IDTDataCash.getUserById(userId);
+			this.createdBy = IDTDataCache.getUserById(userId);
 		else
 			this.createdBy = MRC2ToolBoxCore.getIdTrackerUser();
 		

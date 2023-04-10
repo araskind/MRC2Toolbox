@@ -158,7 +158,7 @@ public class StandardAnnotationUtils {
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			StandardFeatureAnnotation newAnnotation = 
-					 IDTDataCash.getStandardFeatureAnnotationById(rs.getString("STANDARD_ANNOTATION_ID"));
+					 IDTDataCache.getStandardFeatureAnnotationById(rs.getString("STANDARD_ANNOTATION_ID"));
 			 if(newAnnotation != null)
 				 fib.addStandardFeatureAnnotation(newAnnotation);
 		}
@@ -220,7 +220,7 @@ public class StandardAnnotationUtils {
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			StandardFeatureAnnotation newAnnotation = 
-					 IDTDataCash.getStandardFeatureAnnotationById(rs.getString("STANDARD_ANNOTATION_ID"));
+					 IDTDataCache.getStandardFeatureAnnotationById(rs.getString("STANDARD_ANNOTATION_ID"));
 			 if(newAnnotation != null)
 				 fib.addStandardFeatureAnnotation(newAnnotation);
 		}

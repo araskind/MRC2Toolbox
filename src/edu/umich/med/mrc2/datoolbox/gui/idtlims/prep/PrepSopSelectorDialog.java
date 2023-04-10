@@ -45,7 +45,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.sop.ProtocolTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -73,7 +73,7 @@ public class PrepSopSelectorDialog extends JDialog {
 
 		protocolTable = new ProtocolTable();
 		protocolTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		protocolTable.setTableModelFromProtocols(IDTDataCash.getProtocols());
+		protocolTable.setTableModelFromProtocols(IDTDataCache.getProtocols());
 		protocolTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {

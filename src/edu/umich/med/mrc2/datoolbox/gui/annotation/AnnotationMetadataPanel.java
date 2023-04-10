@@ -39,7 +39,7 @@ import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 
 public class AnnotationMetadataPanel extends JPanel {
 	/**
@@ -184,7 +184,7 @@ public class AnnotationMetadataPanel extends JPanel {
 	        if(l.getName() == null)
 	        	return;
 	        
-			LIMSUser user = IDTDataCash.getUserById(l.getName());
+			LIMSUser user = IDTDataCache.getUserById(l.getName());
 			if(user == null)
 				return;
 			

@@ -36,7 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -178,7 +178,7 @@ public class DockableInstrumentManagerPanel extends AbstractIDTrackerLimsPanel {
 		else {
 			updateInstrumentData();
 		}
-		IDTDataCash.refreshInstrumentList();
+		IDTDataCache.refreshInstrumentList();
 		loadInstruments();
 		instrumentEditorDialog.dispose();
 	}
@@ -220,7 +220,7 @@ public class DockableInstrumentManagerPanel extends AbstractIDTrackerLimsPanel {
 	}
 
 	public void loadInstruments() {
-		instrumentTable.setTableModelFromInstrumentList(IDTDataCash.getInstrumentList());
+		instrumentTable.setTableModelFromInstrumentList(IDTDataCache.getInstrumentList());
 	}
 
 	private void deleteInstrument() {
@@ -243,7 +243,7 @@ public class DockableInstrumentManagerPanel extends AbstractIDTrackerLimsPanel {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			IDTDataCash.refreshInstrumentList();
+			IDTDataCache.refreshInstrumentList();
 			loadInstruments();
 		}
 	}

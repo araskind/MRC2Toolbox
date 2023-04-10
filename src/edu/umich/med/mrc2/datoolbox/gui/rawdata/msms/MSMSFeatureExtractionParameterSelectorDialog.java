@@ -43,7 +43,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
@@ -78,7 +78,7 @@ public class MSMSFeatureExtractionParameterSelectorDialog extends JDialog implem
 		JScrollPane scroll = new JScrollPane(msmsFeatureExtractionParametersTable);
 		getContentPane().add(scroll, BorderLayout.CENTER);
 		msmsFeatureExtractionParametersTable.setModelFromParametersList(
-				IDTDataCash.getMsmsExtractionParameters());
+				IDTDataCache.getMsmsExtractionParameters());
 		msmsFeatureExtractionParametersTable.getSelectionModel().addListSelectionListener(this);
 		
 		JPanel panel_2 = new JPanel();
@@ -117,7 +117,7 @@ public class MSMSFeatureExtractionParameterSelectorDialog extends JDialog implem
 					msmsFeatureExtractionParametersTable.getSelectedMSMSExtractionParameterSet();
 			if(parSet != null) {
 				DataExtractionMethod deMethod = 
-						IDTDataCash.getDataExtractionMethodById(parSet.getId());
+						IDTDataCache.getDataExtractionMethodById(parSet.getId());
 				parametersPanel.loadParameters(parSet, deMethod);
 			}
 		}

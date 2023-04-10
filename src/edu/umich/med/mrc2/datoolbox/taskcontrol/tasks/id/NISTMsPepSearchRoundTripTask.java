@@ -66,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -157,7 +157,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		}
 		if(pooList.size() > 0) {
 			
-			IDTDataCash.refreshNISTPepSearchParameters();
+			IDTDataCache.refreshNISTPepSearchParameters();
 			if(skipResultsUpload) {
 				try {
 					updateOfflineFeatureIdentifications();
@@ -278,7 +278,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 		Map<String,HiResSearchOption>searchTypeMap = 
 				NISTPepSearchUtils.getSearchTypeMap(featuresToSearch);			
 		MSFeatureIdentificationLevel tentativeLevel = 
-				IDTDataCash.getMSFeatureIdentificationLevelById("IDS002");
+				IDTDataCache.getMSFeatureIdentificationLevelById("IDS002");
 				
 		for(MSFeatureInfoBundle bundle : featuresToSearch) {
 			
@@ -678,7 +678,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 
 				String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 				if(statusId != null) 
-					id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
+					id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));
 				
 				if(id.isPrimary())
 					msf.setPrimaryIdentity(id);

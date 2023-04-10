@@ -76,7 +76,7 @@ public class LIMSUtils {
 	
 	public static Collection<LIMSProject> getLimsProjectList(Connection conn) throws Exception {		
 		
-		LIMSDataCash.refreshLimsClientList();
+		LIMSDataCache.refreshLimsClientList();
 		Collection<LIMSProject> projects = new TreeSet<LIMSProject>();
 		String query  =
 			"SELECT PROJECT_ID, PROJECT_NAME, CLIENT_ID, PROJECT_DESCRIPTION, CONTACTPERSON_ID, "
@@ -86,7 +86,7 @@ public class LIMSUtils {
 		ResultSet rs = ps.executeQuery();
 		while (rs.next()) {
 			
-			LIMSClient client = LIMSDataCash.getLIMSClientById(rs.getString("CLIENT_ID"));
+			LIMSClient client = LIMSDataCache.getLIMSClientById(rs.getString("CLIENT_ID"));
 			LIMSProject project = new LIMSProject(
 					rs.getString("PROJECT_ID"),
 					rs.getString("PROJECT_NAME"),
@@ -154,7 +154,7 @@ public class LIMSUtils {
 					rs.getTimestamp("DATE_INITIATED"));
 			experiment.setNihGrant(rs.getString("NIH_GRANT_NUMBER"));
 			LIMSProject project = 
-					LIMSDataCash.getProjectById(rs.getString("PROJECT_ID"));
+					LIMSDataCache.getProjectById(rs.getString("PROJECT_ID"));
 			experiment.setProject(project);
 			experiments.add(experiment);
 		}
@@ -819,7 +819,7 @@ public class LIMSUtils {
 	public static Collection<LIMSClient> getClientList(Connection conn) throws Exception{
 
 		Collection<LIMSUser> userList = UserUtils.getCompleteUserList(conn);
-		LIMSDataCash.refreshLimsOrganizationList();
+		LIMSDataCache.refreshLimsOrganizationList();
 		Collection<LIMSClient> clients = new TreeSet<LIMSClient>();
 		String sql  =
 			"SELECT CLIENT_ID, NAME, ADDRESS, DEPARTMENT_OR_DIVISION, LABORATORY, "
@@ -835,7 +835,7 @@ public class LIMSUtils {
 					rs.getString("LABORATORY"),
 					rs.getString("ADDRESS"));
 								
-			client.setOrganization(LIMSDataCash.getLIMSOrganizationById(rs.getString("ORGANIZATION_ID")));
+			client.setOrganization(LIMSDataCache.getLIMSOrganizationById(rs.getString("ORGANIZATION_ID")));
 			String piId = rs.getString("PRINCIPAL_INVESTIGATOR_ID");
 			LIMSUser pi = userList.stream().
 					filter(e -> e.getId().equals(piId)).findFirst().orElse(null);

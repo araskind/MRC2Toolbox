@@ -35,7 +35,7 @@ import javax.swing.JScrollPane;
 import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -171,7 +171,7 @@ public class DockableVendorManagerPanel extends AbstractIDTrackerLimsPanel {
 				e.printStackTrace();
 			}
 		}
-		IDTDataCash.refreshManufacturers();
+		IDTDataCache.refreshManufacturers();
 		loadVendorList();
 		vendorEditorDialog.dispose();
 	}
@@ -232,7 +232,7 @@ public class DockableVendorManagerPanel extends AbstractIDTrackerLimsPanel {
 
 	public void loadVendorList() {
 		vendorTable.setTableModelFromManufacturers(
-				IDTDataCash.getManufacturers());
+				IDTDataCache.getManufacturers());
 	}
 
 	@Override

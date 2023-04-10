@@ -43,7 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -70,7 +70,7 @@ public class ExistingPrepSelectorDialog extends JDialog {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		samplePrepTable = new SamplePrepTable();
-		samplePrepTable.setTableModelFromPreps(IDTDataCash.getSamplePreps());
+		samplePrepTable.setTableModelFromPreps(IDTDataCache.getSamplePreps());
 		samplePrepTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {

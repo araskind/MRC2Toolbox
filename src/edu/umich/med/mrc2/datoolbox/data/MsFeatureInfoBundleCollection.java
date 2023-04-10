@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.store.FeatureCollectionFields;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
@@ -313,7 +313,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		}		
 		String userId =  xmlElement.getAttributeValue(FeatureCollectionFields.UserId.name());
 		if(userId != null)
-			this.owner = IDTDataCash.getUserById(userId);
+			this.owner = IDTDataCache.getUserById(userId);
 		
 		features = new TreeSet<MSFeatureInfoBundle>(
 				new MsFeatureInfoBundleComparator(SortProperty.Name));

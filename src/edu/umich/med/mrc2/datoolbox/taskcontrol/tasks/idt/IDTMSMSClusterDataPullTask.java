@@ -71,7 +71,7 @@ public class IDTMSMSClusterDataPullTask extends IDTMSMSFeatureDataPullTask {
 			setStatus(TaskStatus.ERROR);
 		}
 		try {
-			getCashedFeatures();
+			getCachedFeatures();
 		}
 		catch (Exception e) {
 			setStatus(TaskStatus.ERROR);

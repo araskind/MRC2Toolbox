@@ -88,7 +88,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DataPipelineEventListener;
@@ -389,7 +389,7 @@ public class MultiFileDataImportDialog extends JDialog
 		try {
 			IDTUtils.addNewDataExtractionMethod(
 					selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
-			IDTDataCash.getDataExtractionMethods().add(selectedMethod);
+			IDTDataCache.getDataExtractionMethods().add(selectedMethod);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -432,7 +432,7 @@ public class MultiFileDataImportDialog extends JDialog
 		try {
 			AcquisitionMethodUtils.addNewAcquisitionMethod(
 					newMethod, methodData.getMethodFile());
-			IDTDataCash.getAcquisitionMethods().add(newMethod);		
+			IDTDataCache.getAcquisitionMethods().add(newMethod);		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

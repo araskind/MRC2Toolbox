@@ -34,7 +34,7 @@ import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentalSampleFields;
@@ -497,7 +497,7 @@ public class ExperimentalSample implements Comparable<ExperimentalSample>, Seria
 			String daqMethodId = 
 					dfmElement.getAttributeValue(ExperimentalSampleFields.AcqMethodId.name());
 			DataAcquisitionMethod method = 
-					IDTDataCash.getAcquisitionMethodById(daqMethodId);
+					IDTDataCache.getAcquisitionMethodById(daqMethodId);
 			String[] fileNames = dfmElement.getText().split(",");			
 			if(method != null && fileNames.length > 0) {
 				

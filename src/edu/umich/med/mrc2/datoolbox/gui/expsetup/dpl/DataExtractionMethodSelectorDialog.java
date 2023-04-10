@@ -43,7 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.DataExtractionMethodTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -70,7 +70,7 @@ public class DataExtractionMethodSelectorDialog extends JDialog {
 		
 		dataExtractionMethodTable = new DataExtractionMethodTable();
 		dataExtractionMethodTable.setTableModelFromMethods(
-				IDTDataCash.getDataExtractionMethods());
+				IDTDataCache.getDataExtractionMethods());
 		dataExtractionMethodTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {

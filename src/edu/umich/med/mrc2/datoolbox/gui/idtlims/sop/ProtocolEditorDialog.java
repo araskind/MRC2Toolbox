@@ -53,7 +53,7 @@ import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -246,7 +246,7 @@ public class ProtocolEditorDialog extends JDialog implements ActionListener, Bac
 		dataPanel.add(lblManufacturer, gbc_lblManufacturer);
 
 		sopCategoryComboBox = new JComboBox(new SortedComboBoxModel<SopCategory>(
-				IDTDataCash.getSopCategories()));
+				IDTDataCache.getSopCategories()));
 		GridBagConstraints gbc_sopCategoryComboBox = new GridBagConstraints();
 		gbc_sopCategoryComboBox.gridwidth = 2;
 		gbc_sopCategoryComboBox.insets = new Insets(0, 0, 5, 5);

@@ -28,7 +28,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
-public class DiskCashUtils {
+public class DiskCacheUtils {
 
     public static void putMSFeatureInfoBundleInCache( MSFeatureInfoBundle bundle ) {
         String key = bundle.getMSFeatureId();

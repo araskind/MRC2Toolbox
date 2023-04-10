@@ -51,7 +51,7 @@ import javax.swing.border.EmptyBorder;
 import edu.umich.med.mrc2.datoolbox.data.enums.UserAffiliation;
 import edu.umich.med.mrc2.datoolbox.data.lims.IdTrackerOrganization;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.utils.CommonFormFieldVerifier;
@@ -179,7 +179,7 @@ public class UserEditorDialog extends JDialog {
 		gbc_lblNewLabel.gridy = 3;
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 		
-		Collection<IdTrackerOrganization> organizations = IDTDataCash.getOrganizations();
+		Collection<IdTrackerOrganization> organizations = IDTDataCache.getOrganizations();
 		organizationComboBox = new JComboBox<IdTrackerOrganization>(
 				new DefaultComboBoxModel<IdTrackerOrganization>(
 						organizations.toArray(new IdTrackerOrganization[organizations.size()])));
@@ -298,7 +298,7 @@ public class UserEditorDialog extends JDialog {
 			UserAffiliation aff = UserAffiliation.getUserAffiliationByName(user.getAffiliation());
 			affiliationComboBox.setSelectedItem(aff);
 			
-			IdTrackerOrganization organization = IDTDataCash.getOrganizations().stream().
+			IdTrackerOrganization organization = IDTDataCache.getOrganizations().stream().
 					filter(o -> o.getId().equals(user.getOrganizationId())).
 					findFirst().orElse(null);
 			organizationComboBox.setSelectedItem(organization);

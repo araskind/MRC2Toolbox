@@ -48,8 +48,8 @@ import edu.umich.med.mrc2.datoolbox.data.motrpac.MotracSubjectType;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MotrpacSampleType;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.DocumentUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class MoTrPACDbUtils {
@@ -70,7 +70,7 @@ public class MoTrPACDbUtils {
 		while (rs.next()) {
 			
 			MotracSubjectType subjectType = 
-					MoTrPACDatabaseCash.getMotracSubjectTypeByName(rs.getString("SUBJECT_TYPE"));
+					MoTrPACDatabaseCache.getMotracSubjectTypeByName(rs.getString("SUBJECT_TYPE"));
 			MoTrPACStudy study = new MoTrPACStudy(
 					rs.getString("STUDY_ID"), 
 					rs.getString("STUDY_CODE"), 
@@ -99,7 +99,7 @@ public class MoTrPACDbUtils {
 		while(rs.next()) {
 			
 			String exId = rs.getString("EXPERIMENT_ID");
-			LIMSExperiment experiment = LIMSDataCash.getExperimentById(exId);
+			LIMSExperiment experiment = LIMSDataCache.getExperimentById(exId);
 			if(experiment != null)				
 				study.addExperiment(experiment);			
 		}
@@ -119,7 +119,7 @@ public class MoTrPACDbUtils {
 		while(rs.next()) {
 			
 			String assayId = rs.getString("ASSAY_ID");
-			MoTrPACAssay assay = MoTrPACDatabaseCash.getMotrpacAssayById(assayId);
+			MoTrPACAssay assay = MoTrPACDatabaseCache.getMotrpacAssayById(assayId);
 			if(assay != null)				
 				study.addAssay(assay);			
 		}
@@ -142,7 +142,7 @@ public class MoTrPACDbUtils {
 			while(rs.next()) {
 				
 				String tissueCode = rs.getString("TISSUE_CODE");
-				MoTrPACTissueCode code = MoTrPACDatabaseCash.getMotrpacTissueCodeById(tissueCode);
+				MoTrPACTissueCode code = MoTrPACDatabaseCache.getMotrpacTissueCodeById(tissueCode);
 				if(tissueCode != null)				
 					study.addTissueForExperiment(experiment, code);			
 			}
@@ -299,7 +299,7 @@ public class MoTrPACDbUtils {
 		while (rs.next()) {
 			
 			MotracSubjectType subjectType = 
-					MoTrPACDatabaseCash.getMotracSubjectTypeByName(rs.getString("SUBJECT_TYPE"));
+					MoTrPACDatabaseCache.getMotracSubjectTypeByName(rs.getString("SUBJECT_TYPE"));
 			study = new MoTrPACStudy(
 					rs.getString("STUDY_ID"), 
 					rs.getString("STUDY_CODE"), 
@@ -800,7 +800,7 @@ public class MoTrPACDbUtils {
 				
 			String id = rs.getString("MOTRPAC_REPORT_ID");
 			Date dateCreated = new java.util.Date(rs.getDate("DATE_CREATED").getTime());
-			LIMSUser createBy = IDTDataCash.getUserById(rs.getString("RESEARCHER_ID"));
+			LIMSUser createBy = IDTDataCache.getUserById(rs.getString("RESEARCHER_ID"));
 			DocumentFormat linkedDocumentFormat = 
 					DocumentFormat.getFormatByFileExtension(rs.getString("DOCUMENT_FORMAT"));
 			
@@ -813,13 +813,13 @@ public class MoTrPACDbUtils {
 					linkedDocumentFormat);
 			
 			report.setVersionNumber(rs.getInt("VERSION_NUMBER"));
-			MoTrPACStudy study = MoTrPACDatabaseCash.getMotrpacStudyById(rs.getString("STUDY_ID"));
+			MoTrPACStudy study = MoTrPACDatabaseCache.getMotrpacStudyById(rs.getString("STUDY_ID"));
 			report.setStudy(study);
-			LIMSExperiment experiment = LIMSDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+			LIMSExperiment experiment = LIMSDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
 			report.setExperiment(experiment);		
-			MoTrPACAssay assay = MoTrPACDatabaseCash.getMotrpacAssayById(rs.getString("ASSAY_ID"));
+			MoTrPACAssay assay = MoTrPACDatabaseCache.getMotrpacAssayById(rs.getString("ASSAY_ID"));
 			report.setAssay(assay);
-			MoTrPACTissueCode tissue = MoTrPACDatabaseCash.getMotrpacTissueCodeById(rs.getString("TISSUE_CODE"));
+			MoTrPACTissueCode tissue = MoTrPACDatabaseCache.getMotrpacTissueCodeById(rs.getString("TISSUE_CODE"));
 			report.setTissueCode(tissue);
 			
 			stagePs.setString(1, id);
@@ -827,7 +827,7 @@ public class MoTrPACDbUtils {
 			while(stageRs.next()) {
 
 				MoTrPACReportCodeBlock block = 
-						MoTrPACDatabaseCash.getMoTrPACReportCodeBlockById(stageRs.getString("BLOCK_ID"));
+						MoTrPACDatabaseCache.getMoTrPACReportCodeBlockById(stageRs.getString("BLOCK_ID"));
 				MoTrPACReportCode code = block.getMoTrPACReportCodeByName(stageRs.getString("OPTION_NAME"));
 				report.setReportStageBlock(block, code);
 			}

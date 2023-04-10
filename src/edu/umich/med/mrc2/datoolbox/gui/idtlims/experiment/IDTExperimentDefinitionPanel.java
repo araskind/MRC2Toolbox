@@ -44,7 +44,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSOrganization;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.instrument.InstrumentSelectionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
@@ -154,7 +154,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		add(lblName, gbc_lblName);
 
 		projectComboBox = new JComboBox(
-				new SortedComboBoxModel<LIMSProject>(IDTDataCash.getProjects()));
+				new SortedComboBoxModel<LIMSProject>(IDTDataCache.getProjects()));
 		GridBagConstraints gbc_projectComboBox = new GridBagConstraints();
 		gbc_projectComboBox.gridwidth = 3;
 		gbc_projectComboBox.insets = new Insets(0, 0, 5, 0);
@@ -299,7 +299,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 		notesTextArea.setText(experiment.getNotes());
 
 		if(instrument == null)
-			instrument = IDTDataCash.getInstrumentForExperiment(experiment);
+			instrument = IDTDataCache.getInstrumentForExperiment(experiment);
 		
 		if(instrument != null)
 			instrumentTextField.setText(instrument.toString());
@@ -309,7 +309,7 @@ public class IDTExperimentDefinitionPanel extends JPanel implements ActionListen
 			organization = experiment.getProject().getOrganization();
 		
 		if(organization == null && experiment.getCreator() != null)
-			organization = IDTDataCash.getOrganizationForUser(experiment.getCreator());
+			organization = IDTDataCache.getOrganizationForUser(experiment.getCreator());
 				
 		if(organization != null)
 			organizationDataLabel.setText(organization.getOrganizationInfo());

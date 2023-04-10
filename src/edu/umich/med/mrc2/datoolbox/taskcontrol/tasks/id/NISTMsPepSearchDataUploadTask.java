@@ -52,7 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTPepSearchOutputFields;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -239,7 +239,7 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 			//	Library spectrum
 			if(mrcLibId != null) {
 				
-				MsMsLibraryFeature libFeature = OfflineExperimentLoadCash.getMsMsLibraryFeatureById(mrcLibId);
+				MsMsLibraryFeature libFeature = OfflineExperimentLoadCache.getMsMsLibraryFeatureById(mrcLibId);
 				if(libFeature.getSpectrum() != null)
 					libMsMsString = libFeature.getSpectrumAsPythonArray();
 				
@@ -310,20 +310,20 @@ public class NISTMsPepSearchDataUploadTask extends NISTMsPepSearchTask {
 	
 	private void getMSMSLibraryEntries() throws Exception {
 		
-		taskDescription = "Populating MSMS library data cash ...";
+		taskDescription = "Populating MSMS library data cache ...";
 		List<String> uniqueMSMSLibraryIds = pooList.stream().
 				map(p -> p.getMrc2libid()).distinct().
 				sorted().collect(Collectors.toList());
 		total = uniqueMSMSLibraryIds.size();
 		processed = 0;	
-		OfflineExperimentLoadCash.reset();
+		OfflineExperimentLoadCache.reset();
 		Connection conn = ConnectionManager.getConnection();
 		for(String libId : uniqueMSMSLibraryIds) {
 			
 			MsMsLibraryFeature libFeature = 
 					MSMSLibraryUtils.getMsMsLibraryFeatureById(libId, conn);
 			if(libFeature != null)
-				OfflineExperimentLoadCash.addMsMsLibraryFeature(libFeature);
+				OfflineExperimentLoadCache.addMsMsLibraryFeature(libFeature);
 			
 			processed++;
 		}	

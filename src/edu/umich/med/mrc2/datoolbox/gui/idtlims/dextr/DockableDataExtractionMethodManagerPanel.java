@@ -39,7 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -125,7 +125,7 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 	}
 
 	public void loadMethods() {
-		dataExtractionMethodTable.setTableModelFromMethods(IDTDataCash.getDataExtractionMethods());
+		dataExtractionMethodTable.setTableModelFromMethods(IDTDataCache.getDataExtractionMethods());
 	}
 
 	@Override
@@ -228,7 +228,7 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 			try {
 				IDTUtils.addNewDataExtractionMethod(
 						selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
-				IDTDataCash.getDataExtractionMethods().add(selectedMethod);
+				IDTDataCache.getDataExtractionMethods().add(selectedMethod);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -257,7 +257,7 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 				e.printStackTrace();
 			}
 		}
-		IDTDataCash.refreshDataExtractionMethodList();
+		IDTDataCache.refreshDataExtractionMethodList();
 		loadMethods();
 		dataExtractionMethodEditorDialog.dispose();
 	}
@@ -287,7 +287,7 @@ public class DockableDataExtractionMethodManagerPanel extends AbstractIDTrackerL
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			IDTDataCash.refreshDataExtractionMethodList();
+			IDTDataCache.refreshDataExtractionMethodList();
 			loadMethods();
 		}
 	}

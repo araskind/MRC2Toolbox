@@ -56,7 +56,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTPepSearchOutputColumnCode;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.NISTPepSearchOutputFields;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
@@ -238,7 +238,7 @@ public class NISTPepSearchUtils {
 		for(Entry<String, Long> e : countsByLibrary.entrySet()) {
 			
 			ReferenceMsMsLibrary refLib = 
-					IDTDataCash.getReferenceMsMsLibraryByCode(e.getKey());
+					IDTDataCache.getReferenceMsMsLibraryByCode(e.getKey());
 			if(refLib == null) 
 				resultSummary.add("Unknown library " + e.getKey());
 		}
@@ -255,7 +255,7 @@ public class NISTPepSearchUtils {
 		
 		for(String name : libNames) {
 			
-			ReferenceMsMsLibrary refLib = IDTDataCash.getReferenceMsMsLibraryByCode(name);
+			ReferenceMsMsLibrary refLib = IDTDataCache.getReferenceMsMsLibraryByCode(name);
 			if(refLib != null) 
 				refLibMap.put(name, refLib);				
 		}
@@ -765,7 +765,7 @@ public class NISTPepSearchUtils {
 					new TreeMap<String,HiResSearchOption>();
 		for(String spId : searchParamSet) {
 			NISTPepSearchParameterObject pepSearchParams = 
-					IDTDataCash.getNISTPepSearchParameterObjectById(spId);
+					IDTDataCache.getNISTPepSearchParameterObjectById(spId);
 			searchTypeMap.put(spId, pepSearchParams.getHiResSearchOption());
 		}
 		return searchTypeMap;
@@ -819,7 +819,7 @@ public class NISTPepSearchUtils {
 			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 			map(f -> f.getMsFeature().getPrimaryIdentity()).
 			filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
-			map(id -> IDTDataCash.getNISTPepSearchParameterObjectById(
+			map(id -> IDTDataCache.getNISTPepSearchParameterObjectById(
 					id.getReferenceMsMsLibraryMatch().getSearchParameterSetId())).
 						filter(o -> Objects.nonNull(o)).
 //			filter(o -> o.getHiResSearchOption().equals(HiResSearchOption.z)).

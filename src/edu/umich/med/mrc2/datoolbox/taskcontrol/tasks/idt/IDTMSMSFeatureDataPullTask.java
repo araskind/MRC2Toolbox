@@ -43,13 +43,13 @@ import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCacheUtils;
 
 public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 
@@ -65,14 +65,14 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		
 		setStatus(TaskStatus.PROCESSING);		
 		try {
-			getCashedFeatures();
+			getCachedFeatures();
 		}
 		catch (Exception e) {
 			setStatus(TaskStatus.ERROR);
 			e.printStackTrace();
 		}
 		if(featureIds.isEmpty()) {
-			features.addAll(cashedFeatures);
+			features.addAll(cachedFeatures);
 			setStatus(TaskStatus.FINISHED);
 			return;
 		}
@@ -98,7 +98,7 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		}
 	}
 	
-	protected void getCashedFeatures() {
+	protected void getCachedFeatures() {
 		
 		if(featureIds == null || featureIds.isEmpty())
 			return;
@@ -106,19 +106,19 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 		taskDescription = "Getting feature data from IDTracker database";
 		total = featureIds.size();
 		processed = 0;
-		Set<String>cashedIds = new HashSet<String>();
+		Set<String>cachedIds = new HashSet<String>();
 		for(String msmsId : featureIds) {
 			
-			MSFeatureInfoBundle fInCash = 
-					DiskCashUtils.retrieveMSFeatureInfoBundleFromCache(msmsId);
-			if(fInCash != null) {
-				cashedFeatures.add(fInCash);
-				cashedIds.add(msmsId);					
+			MSFeatureInfoBundle fInCache = 
+					DiskCacheUtils.retrieveMSFeatureInfoBundleFromCache(msmsId);
+			if(fInCache != null) {
+				cachedFeatures.add(fInCache);
+				cachedIds.add(msmsId);					
 			}
 			processed++;
 		}
-		if(!cashedIds.isEmpty())
-			featureIds.removeAll(cashedIds);
+		if(!cachedIds.isEmpty())
+			featureIds.removeAll(cachedIds);
 	}
 
 	protected void getMsMsFeatures() throws Exception {
@@ -206,13 +206,13 @@ public class IDTMSMSFeatureDataPullTask extends IDTMSMSFeatureSearchTask {
 				
 				MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 				bundle.setAcquisitionMethod(
-					IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
+					IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
 				bundle.setDataExtractionMethod(
-					IDTDataCash.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
+					IDTDataCache.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
 				bundle.setExperiment(
-					IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID")));
+					IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID")));
 				StockSample stockSample =
-					IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+					IDTDataCache.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 				bundle.setStockSample(stockSample);
 				IDTExperimentalSample sample =
 					IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);

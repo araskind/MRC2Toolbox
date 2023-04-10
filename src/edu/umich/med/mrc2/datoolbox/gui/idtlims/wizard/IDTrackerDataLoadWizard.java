@@ -66,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProtocol;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSWorklistItem;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.wizard.design.WizardExperimentDesignPanel;
@@ -548,7 +548,7 @@ public class IDTrackerDataLoadWizard extends JDialog implements ActionListener, 
 			WizardExperimentDefinitionPanel experimentPanel = 
 					(WizardExperimentDefinitionPanel)panels.get(IDTrackerDataUploadStage.CREATE_EXPERIMENT);			
 			experimentPanel.getExperimentProject().getExperiments().add(newExperiment);
-			IDTDataCash.getExperiments().add(newExperiment);			
+			IDTDataCache.getExperiments().add(newExperiment);			
 			IDTUtils.setInstrumentForExperiment(
 					newExperiment, experimentPanel.getInstrument());			
 		} catch (Exception e) {
@@ -579,7 +579,7 @@ public class IDTrackerDataLoadWizard extends JDialog implements ActionListener, 
 		
 		LIMSSamplePreparation prep2save = getSamplePrep();
 		Map<LIMSExperiment, Collection<LIMSSamplePreparation>> espMap = 
-				IDTDataCash.getExperimentSamplePrepMap();	
+				IDTDataCache.getExperimentSamplePrepMap();	
 		Collection<IDTExperimentalSample>samples = 
 				newExperiment.getExperimentDesign().getSamples().stream().
 				filter(IDTExperimentalSample.class::isInstance).
@@ -587,9 +587,9 @@ public class IDTrackerDataLoadWizard extends JDialog implements ActionListener, 
 				collect(Collectors.toList());
 		try {
 			IDTUtils.addNewSamplePrepWithSopsAndAnnotations(prep2save, samples);
-			IDTDataCash.getSamplePreps().add(prep2save);
-			IDTDataCash.getExperimentSamplePrepMap().put(newExperiment, new TreeSet<LIMSSamplePreparation>());
-			IDTDataCash.getExperimentSamplePrepMap().get(newExperiment).add(prep2save);
+			IDTDataCache.getSamplePreps().add(prep2save);
+			IDTDataCache.getExperimentSamplePrepMap().put(newExperiment, new TreeSet<LIMSSamplePreparation>());
+			IDTDataCache.getExperimentSamplePrepMap().get(newExperiment).add(prep2save);
 			WizardSamplePrepPanel prepPanel = 
 					(WizardSamplePrepPanel)panels.get(IDTrackerDataUploadStage.ADD_SAMPLE_PREPARATION_DATA);
 			prepPanel.loadPrepDataForExperiment(prep2save, newExperiment);
@@ -613,7 +613,7 @@ public class IDTrackerDataLoadWizard extends JDialog implements ActionListener, 
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		IDTDataCash.refreshSamplePrepDataPipelineMap();
+		IDTDataCache.refreshSamplePrepDataPipelineMap();
 	}
 	
 	private void initMSMSdataLoad() {

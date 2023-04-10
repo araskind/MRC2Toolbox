@@ -55,7 +55,7 @@ import javax.swing.border.EmptyBorder;
 import edu.umich.med.mrc2.datoolbox.data.enums.SoftwareType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -408,7 +408,7 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 		
 		//	Check if method file was already used
 		if(getMethodFile() != null) {
-			existingFileMethod = IDTDataCash.getDataExtractionMethodByName(getMethodFile().getName());
+			existingFileMethod = IDTDataCache.getDataExtractionMethodByName(getMethodFile().getName());
 			if(existingFileMethod != null)
 				errors.add("Method file \"" + getMethodFile().getName() + "\" is already in the database.");
 		}
@@ -416,13 +416,13 @@ public class DataExtractionMethodEditorDialog extends JDialog implements ActionL
 		if(!getMethodName().isEmpty()) {
 			
 			if(method == null) {	//	New method 
-				existingFileMethod = IDTDataCash.getDataExtractionMethodByName(getMethodName());
+				existingFileMethod = IDTDataCache.getDataExtractionMethodByName(getMethodName());
 				if(existingFileMethod != null)
 					errors.add("Method \"" + getMethodName() + "\" is already in the database.");
 			}
 			else {
 				String newName = getMethodName();
-				existingFileMethod = IDTDataCash.getDataExtractionMethods().stream().
+				existingFileMethod = IDTDataCache.getDataExtractionMethods().stream().
 					filter(m -> !m.equals(method)).
 					filter(m -> m.getName().equals(newName)).
 					findFirst().orElse(null);

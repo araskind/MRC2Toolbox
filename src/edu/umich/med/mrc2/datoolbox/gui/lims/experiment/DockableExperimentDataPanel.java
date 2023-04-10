@@ -38,7 +38,7 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.lims.experiment.design.DockableLIMSDesignEditorPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
@@ -86,8 +86,6 @@ public class DockableExperimentDataPanel  extends DefaultSingleCDockable
 		add(control.getContentArea(), BorderLayout.CENTER);
 
 		loadLayout(layoutConfigFile);
-
-		//	experimentListingTable.setModelFromExperimentCollection(LIMSDataCash.getExperiments());
 	}
 
 	public void loadExperimentList(Collection<LIMSExperiment>experimentList) {
@@ -96,11 +94,7 @@ public class DockableExperimentDataPanel  extends DefaultSingleCDockable
 		idp = new IndeterminateProgressDialog("Uptating table data ...", experimentListingTable.getContentPane(), task);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
-
-//		clearPanel();
-//		experimentListingTable.setModelFromExperimentCollection(experimentList);
 	}
-
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -232,7 +226,7 @@ public class DockableExperimentDataPanel  extends DefaultSingleCDockable
 				experimentListingTable.setModelFromExperimentCollection(experimentList);
 			}
 			else {
-				experimentListingTable.setModelFromExperimentCollection(LIMSDataCash.getExperiments());
+				experimentListingTable.setModelFromExperimentCollection(LIMSDataCache.getExperiments());
 			}
 			return null;
 		}

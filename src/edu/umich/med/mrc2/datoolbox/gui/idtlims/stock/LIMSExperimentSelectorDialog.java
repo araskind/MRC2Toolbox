@@ -43,7 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.lims.experiment.ExperimentListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -73,7 +73,7 @@ public class LIMSExperimentSelectorDialog extends JDialog {
 		dataPanel.setLayout(new BorderLayout(0, 0));
 
 		experimentListingTable = new ExperimentListingTable();
-		experimentListingTable.setModelFromExperimentCollection(LIMSDataCash.getExperiments());
+		experimentListingTable.setModelFromExperimentCollection(LIMSDataCache.getExperiments());
 		experimentListingTable.addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {

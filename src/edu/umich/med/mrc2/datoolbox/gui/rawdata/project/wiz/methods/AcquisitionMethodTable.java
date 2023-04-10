@@ -34,7 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.AnalysisMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
@@ -78,7 +78,7 @@ public class AcquisitionMethodTable extends BasicTable {
 		for(String methodName : methodNames) {
 			
 			DataAcquisitionMethod existingMethod = 
-					IDTDataCash.getAcquisitionMethodByName(methodName);
+					IDTDataCache.getAcquisitionMethodByName(methodName);
 			
 			methodFilesMap.put(methodName, existingMethod);
 		}	

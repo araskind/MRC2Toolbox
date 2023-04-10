@@ -36,7 +36,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -105,7 +105,7 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 	}
 	
 	public void loadColumnData() {
-		cromatographicColumnTable.setTableModelFromColumns(IDTDataCash.getChromatographicColumns());
+		cromatographicColumnTable.setTableModelFromColumns(IDTDataCache.getChromatographicColumns());
 	}
 
 	@Override
@@ -176,7 +176,7 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			IDTDataCash.refreshChromatographicColumnList();
+			IDTDataCache.refreshChromatographicColumnList();
 			loadColumnData();
 		}
 	}
@@ -229,7 +229,7 @@ public class DockableChromatographicColumnManagerPanel extends AbstractIDTracker
 				e.printStackTrace();
 			}
 		}
-		IDTDataCash.refreshChromatographicColumnList();;
+		IDTDataCache.refreshChromatographicColumnList();;
 		loadColumnData();
 		cromatographicColumnEditorDialog.dispose();
 	}

@@ -63,7 +63,7 @@ import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.lib.MSMSLibraryListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -138,7 +138,7 @@ public class ReferenceMSMSLibraryExportDialog extends JDialog implements ActionL
 		libraryListingTable = new MSMSLibraryListingTable();
 		libraryListingTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		libraryListingTable.setTableModelFromReferenceMsMsLibraryList(
-				IDTDataCash.getReferenceMsMsLibraryList());
+				IDTDataCache.getReferenceMsMsLibraryList());
 		JScrollPane scrollPane = new JScrollPane(libraryListingTable);
 		
 //		JScrollPane scrollPane = new JScrollPane();

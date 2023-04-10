@@ -33,8 +33,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsRtLibraryMatchFields;
@@ -408,7 +408,7 @@ public class MsFeatureIdentity implements Serializable {
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Id.name());		
 		String cid = msfIdElement.getAttributeValue(MsFeatureIdentityFields.CID.name());
 		if(cid != null)
-			compoundIdentity = OfflineExperimentLoadCash.getCompoundIdentityByAccession(cid);
+			compoundIdentity = OfflineExperimentLoadCache.getCompoundIdentityByAccession(cid);
 		
 		compoundIdName = msfIdElement.getAttributeValue(MsFeatureIdentityFields.Name.name());	
 		String idSourceString = 
@@ -425,7 +425,7 @@ public class MsFeatureIdentity implements Serializable {
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.IdLevel.name());
 		if(identificationLevelString != null)
 			identificationLevel = 
-				IDTDataCash.getMSFeatureIdentificationLevelById(identificationLevelString);
+				IDTDataCache.getMSFeatureIdentificationLevelById(identificationLevelString);
 		
 		isPrimary = Boolean.parseBoolean(
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Prim.name()));
@@ -457,7 +457,7 @@ public class MsFeatureIdentity implements Serializable {
 		String userId = 
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.User.name());
 		if(userId != null)
-			assignedBy = IDTDataCash.getUserById(userId);
+			assignedBy = IDTDataCache.getUserById(userId);
 		
 		String primaryAdductId = 
 				msfIdElement.getAttributeValue(MsFeatureIdentityFields.Adduct.name());

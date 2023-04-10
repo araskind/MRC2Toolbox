@@ -21,8 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.mp;
 
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -48,7 +48,7 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 		try {
 			try {
 				taskDescription = "Getting user data ...";
-				LIMSDataCash.refreshUserList();;
+				LIMSDataCache.refreshUserList();;
 				processed = processed + 10;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -56,7 +56,7 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Getting organization data ...";
-				LIMSDataCash.refreshOrganizationList();
+				LIMSDataCache.refreshOrganizationList();
 				processed = processed + 10;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -64,7 +64,7 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Getting project data ...";
-				LIMSDataCash.refreshProjectList();
+				LIMSDataCache.refreshProjectList();
 				processed = processed + 10;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -72,7 +72,7 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Getting experiment data ...";
-				LIMSDataCash.refreshExperimentList();
+				LIMSDataCache.refreshExperimentList();
 				processed = processed + 10;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -80,7 +80,7 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC subject type list";
-				MoTrPACDatabaseCash.refreshMotrpacSubjectTypes();
+				MoTrPACDatabaseCache.refreshMotrpacSubjectTypes();
 				processed = processed + 1;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -88,7 +88,7 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC study list";
-				MoTrPACDatabaseCash.refreshMotrpacStudyList();
+				MoTrPACDatabaseCache.refreshMotrpacStudyList();
 				processed = processed + 10;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -96,7 +96,7 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC assay list";
-				MoTrPACDatabaseCash.refreshMotrpacAssayList();
+				MoTrPACDatabaseCache.refreshMotrpacAssayList();
 				processed = processed + 10;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -104,7 +104,7 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC sample type list";
-				MoTrPACDatabaseCash.refreshMotrpacSampleTypeList();
+				MoTrPACDatabaseCache.refreshMotrpacSampleTypeList();
 				processed = processed + 10;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -112,7 +112,7 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC tissue code list";
-				MoTrPACDatabaseCash.refreshMotrpacTissueCodeList();
+				MoTrPACDatabaseCache.refreshMotrpacTissueCodeList();
 				processed = processed + 10;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -120,7 +120,7 @@ public class MotrpacLimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Refreshing MoTrPAC report list";
-				MoTrPACDatabaseCash.refreshReportList();
+				MoTrPACDatabaseCache.refreshReportList();
 				processed = 100;
 			} catch (Exception e) {
 				e.printStackTrace();

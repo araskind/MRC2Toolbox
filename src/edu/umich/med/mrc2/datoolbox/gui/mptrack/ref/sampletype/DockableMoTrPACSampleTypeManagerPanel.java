@@ -32,7 +32,7 @@ import javax.swing.JScrollPane;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MotrpacSampleType;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDbUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -87,7 +87,7 @@ public class DockableMoTrPACSampleTypeManagerPanel extends DefaultSingleCDockabl
 
 	public void loadSampleTypes() {
 		sampleTypeTable.setTableModelFromSamples(
-				MoTrPACDatabaseCash.getMotrpacSampleTypeList());
+				MoTrPACDatabaseCache.getMotrpacSampleTypeList());
 	}
 
 	private void deleteSelectedSampleType() {
@@ -109,7 +109,7 @@ public class DockableMoTrPACSampleTypeManagerPanel extends DefaultSingleCDockabl
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			MoTrPACDatabaseCash.refreshMotrpacSampleTypeList();
+			MoTrPACDatabaseCache.refreshMotrpacSampleTypeList();
 			loadSampleTypes();
 		}
 	}
@@ -133,12 +133,12 @@ public class DockableMoTrPACSampleTypeManagerPanel extends DefaultSingleCDockabl
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-//		IDTDataCash.refreshSampleTypeList();
-//		sampleTypeTable.setTableModelFromSamples(IDTDataCash.getSampleTypes());
+//		IDTDataCache.refreshSampleTypeList();
+//		sampleTypeTable.setTableModelFromSamples(IDTDataCache.getSampleTypes());
 //		sampleTypeTable.selectSample(stockSample);
 //		stockSampleEditorDialog.dispose();
 		
-		MoTrPACDatabaseCash.refreshMotrpacSampleTypeList();
+		MoTrPACDatabaseCache.refreshMotrpacSampleTypeList();
 		loadSampleTypes();
 	}
 
@@ -161,12 +161,12 @@ public class DockableMoTrPACSampleTypeManagerPanel extends DefaultSingleCDockabl
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-//		IDTDataCash.refreshSampleTypeList();
-//		sampleTypeTable.setTableModelFromSamples(IDTDataCash.getSampleTypes());
+//		IDTDataCache.refreshSampleTypeList();
+//		sampleTypeTable.setTableModelFromSamples(IDTDataCache.getSampleTypes());
 //		sampleTypeTable.selectSample(stockSample);
 //		stockSampleEditorDialog.dispose();
 		
-		MoTrPACDatabaseCash.refreshMotrpacSampleTypeList();
+		MoTrPACDatabaseCache.refreshMotrpacSampleTypeList();
 		loadSampleTypes();
 	}
 

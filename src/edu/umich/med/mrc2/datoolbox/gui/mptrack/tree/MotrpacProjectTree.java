@@ -72,7 +72,7 @@ public class MotrpacProjectTree extends JTree {
 				//	TODO pull Motrpac studies
 				
 				
-				//	IDTDataCash.getProjects().stream().sorted().forEach(p -> getModel().addProject(p));
+				//	IDTDataCache.getProjects().stream().sorted().forEach(p -> getModel().addProject(p));
 				expandTreeUpToLevel(2);
 			}
 		};

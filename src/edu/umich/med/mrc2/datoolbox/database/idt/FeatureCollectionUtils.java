@@ -73,7 +73,7 @@ public class FeatureCollectionUtils {
 			
 			LIMSUser owner = null;
 			if(rs.getString("OWNER") != null)
-				owner = IDTDataCash.getUserById(rs.getString("OWNER"));
+				owner = IDTDataCache.getUserById(rs.getString("OWNER"));
 			
 			MsFeatureInfoBundleCollection newCollection = 
 					new MsFeatureInfoBundleCollection(

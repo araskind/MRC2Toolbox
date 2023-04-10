@@ -52,7 +52,7 @@ import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -203,7 +203,7 @@ public class StandardFeatureAnnotationAssignmentDialog extends JDialog implement
 
 		Collection<StandardFeatureAnnotation> usedSteps = bundle.getStandadAnnotations();
 		Collection<StandardFeatureAnnotation> availableSteps =  
-				IDTDataCash.getStandardFeatureAnnotationList().stream().
+				IDTDataCache.getStandardFeatureAnnotationList().stream().
 				filter(s -> !usedSteps.contains(s)).collect(Collectors.toSet());
 		
 		availableStandardFeatureAnnotationList.setModel(

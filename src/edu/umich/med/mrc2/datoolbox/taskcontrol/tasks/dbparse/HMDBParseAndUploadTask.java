@@ -208,7 +208,7 @@ public class HMDBParseAndUploadTask extends AbstractTask {
 						e.printStackTrace();
 					}
 			    	if(record != null) {
-			    		records.add(record); // Put in cash and keep only ID list in memory?
+			    		records.add(record); // Put in cache and keep only ID list in memory?
 				    	System.out.println("Parsed - " + record.getName());
 			    	}			    	
 			    	processed++;

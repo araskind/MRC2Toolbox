@@ -34,7 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACTissueCode;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MotracSubjectType;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MotrpacSampleType;
 
-public class MoTrPACDatabaseCash {
+public class MoTrPACDatabaseCache {
 
 	@SuppressWarnings("unused")
 	private static Collection<MotracSubjectType> motrpacSubjetTypes = 

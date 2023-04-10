@@ -45,7 +45,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundNameScope;
 import edu.umich.med.mrc2.datoolbox.data.enums.InChiKeyPortion;
 import edu.umich.med.mrc2.datoolbox.data.enums.StringMatchFidelity;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCacheUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 import edu.umich.med.mrc2.datoolbox.utils.TextUtils;
 
@@ -285,7 +285,7 @@ public class CompoundDatabaseUtils {
 
 	public static CompoundIdentity getCompoundById(String accession) throws Exception {
 		
-		CompoundIdentity identity = DiskCashUtils.retrieveCompoundIdentityFromCache(accession);
+		CompoundIdentity identity = DiskCacheUtils.retrieveCompoundIdentityFromCache(accession);
 		if(identity != null)
 			return identity;
 		
@@ -298,7 +298,7 @@ public class CompoundDatabaseUtils {
 
 	public static CompoundIdentity getCompoundById(String accession, Connection conn) throws Exception{
 
-		CompoundIdentity identity = DiskCashUtils.retrieveCompoundIdentityFromCache(accession);
+		CompoundIdentity identity = DiskCacheUtils.retrieveCompoundIdentityFromCache(accession);
 		if(identity != null)
 			return identity;
 		
@@ -503,7 +503,7 @@ public class CompoundDatabaseUtils {
 		while (rs.next()){
 
 			CompoundIdentity pcId = 
-					DiskCashUtils.retrieveCompoundIdentityFromCache(rs.getString("ACCESSION"));
+					DiskCacheUtils.retrieveCompoundIdentityFromCache(rs.getString("ACCESSION"));
 			if(pcId != null) {
 				idList.add(pcId);
 				continue;
@@ -679,7 +679,7 @@ public class CompoundDatabaseUtils {
 		ps.close();
 		CompoundIdentity inserted = 
 				CompoundDatabaseUtils.getCompoundById(newCompound.getPrimaryDatabaseId(), conn);
-		DiskCashUtils.putCompoundIdentityInCache(inserted);
+		DiskCacheUtils.putCompoundIdentityInCache(inserted);
 		ConnectionManager.releaseConnection(conn);
 		return inserted;
 	}

@@ -99,7 +99,7 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.ColorUtils;
@@ -109,7 +109,7 @@ import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCacheUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
@@ -150,7 +150,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	protected boolean lookupSecondaryIds;
 	protected boolean lookupSecondaryLibMatches;
 	protected Collection<MSFeatureInfoBundle>features;
-	protected Collection<MSFeatureInfoBundle>cashedFeatures;
+	protected Collection<MSFeatureInfoBundle>cachedFeatures;
 	
 	protected Collection<String>compoundIds;
 	protected Collection<String>msmsLibraryIds;
@@ -227,7 +227,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 
 	public IDTMSMSFeatureSearchTask() {
 		features = new ArrayList<MSFeatureInfoBundle>();
-		cashedFeatures = new HashSet<MSFeatureInfoBundle>();
+		cachedFeatures = new HashSet<MSFeatureInfoBundle>();
 	}
 
 	@Override
@@ -525,11 +525,11 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		}
 		while (rs.next()) {
 
-			MSFeatureInfoBundle fInCash = 
-					DiskCashUtils.retrieveMSFeatureInfoBundleFromCache(
+			MSFeatureInfoBundle fInCache = 
+					DiskCacheUtils.retrieveMSFeatureInfoBundleFromCache(
 							rs.getString("FEATURE_ID"));
-			if(fInCash != null) {
-				cashedFeatures.add(fInCash);
+			if(fInCache != null) {
+				cachedFeatures.add(fInCache);
 				processed++;
 				continue;				
 			}
@@ -576,13 +576,13 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			
 			MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 			bundle.setAcquisitionMethod(
-				IDTDataCash.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
+				IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
 			bundle.setDataExtractionMethod(
-				IDTDataCash.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
+				IDTDataCache.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID")));
 			bundle.setExperiment(
-				IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID")));
+				IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID")));
 			StockSample stockSample =
-				IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+				IDTDataCache.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 			bundle.setStockSample(stockSample);
 			IDTExperimentalSample sample =
 				IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);
@@ -818,7 +818,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 								SpectrumSource.getSpectrumSourceByName(
 										lfrs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
 						feature.setIonizationType(
-								IDTDataCash.getIonizationTypeById(
+								IDTDataCache.getIonizationTypeById(
 										lfrs.getString(MSMSComponentTableFields.IONIZATION_TYPE.name())));
 						feature.setCollisionEnergyValue(
 								lfrs.getString(MSMSComponentTableFields.COLLISION_ENERGY.name()));
@@ -837,7 +837,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 							}
 						}
 						ReferenceMsMsLibrary refLib =
-								IDTDataCash.getReferenceMsMsLibraryByPrimaryLibraryId(
+								IDTDataCache.getReferenceMsMsLibraryByPrimaryLibraryId(
 										lfrs.getString(MSMSComponentTableFields.LIBRARY_NAME.name()));
 						feature.setMsmsLibraryIdentifier(refLib.getUniqueId());
 
@@ -893,7 +893,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 
 					String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 					if(statusId != null) 
-						id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
+						id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));
 					
 					if(id.isPrimary() && !fb.getMsFeature().isIdDisabled())
 						fb.getMsFeature().setPrimaryIdentity(id);
@@ -980,7 +980,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 
 				String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 				if(statusId != null) 
-					id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
+					id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));
 				
 				if(id.isPrimary() && !fb.getMsFeature().isIdDisabled())
 					fb.getMsFeature().setPrimaryIdentity(id);
@@ -1053,7 +1053,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				
 		for(String cid : compoundIds) {
 			
-			CompoundIdentity identity = DiskCashUtils.retrieveCompoundIdentityFromCache(cid);
+			CompoundIdentity identity = DiskCacheUtils.retrieveCompoundIdentityFromCache(cid);
 			if(identity != null) {
 				compoundMap.put(cid, identity);
 				processed++;
@@ -1076,7 +1076,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						rs.getString("SMILES"));
 				identity.setInChiKey(rs.getString("INCHI_KEY"));
 				compoundMap.put(cid, identity);
-				DiskCashUtils.putCompoundIdentityInCache(identity);
+				DiskCacheUtils.putCompoundIdentityInCache(identity);
 			}
 			rs.close();
 			processed++;
@@ -1113,7 +1113,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		
 		for(String mrc2msmsId : msmsLibraryIds) {
 			
-			MsMsLibraryFeature feature = DiskCashUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
+			MsMsLibraryFeature feature = DiskCacheUtils.retrieveMsMsLibraryFeatureFromCache(mrc2msmsId);
 			if(feature != null) {
 				msmsLibraryFeatureMap.put(mrc2msmsId, feature);
 				processed++;
@@ -1131,7 +1131,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						SpectrumSource.getSpectrumSourceByName(
 								lfrs.getString(MSMSComponentTableFields.SPECTRUM_SOURCE.name())));
 				feature.setIonizationType(
-						IDTDataCash.getIonizationTypeById(
+						IDTDataCache.getIonizationTypeById(
 								lfrs.getString(MSMSComponentTableFields.IONIZATION_TYPE.name())));
 				feature.setCollisionEnergyValue(
 						lfrs.getString(MSMSComponentTableFields.COLLISION_ENERGY.name()));
@@ -1150,7 +1150,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					}
 				}
 				ReferenceMsMsLibrary refLib =
-						IDTDataCash.getReferenceMsMsLibraryByPrimaryLibraryId(
+						IDTDataCache.getReferenceMsMsLibraryByPrimaryLibraryId(
 								lfrs.getString(MSMSComponentTableFields.LIBRARY_NAME.name()));
 				feature.setMsmsLibraryIdentifier(refLib.getUniqueId());
 
@@ -1173,7 +1173,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 					feature.setCompoundIdentity(compoundMap.get(lfrs.getString("ACCESSION")));
 				
 				msmsLibraryFeatureMap.put(mrc2msmsId, feature);
-				DiskCashUtils.putMsMsLibraryFeatureInCache(feature);
+				DiskCacheUtils.putMsMsLibraryFeatureInCache(feature);
 			}
 			lfrs.close();
 			processed++;
@@ -1194,7 +1194,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			return;
 		
 		for(String id : pepSearchParIds)
-			IDTDataCash.getNISTPepSearchParameterObjectById(id);		
+			IDTDataCache.getNISTPepSearchParameterObjectById(id);		
 	}
 	
 	protected void attachMsMsManualIdentities() throws Exception {
@@ -1233,12 +1233,12 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						id.setPrimary(true);
 
 					id.setUniqueId(rs.getString("IDENTIFICATION_ID"));
-					LIMSUser assignedBy = IDTDataCash.getUserById(rs.getString("ASSIGNED_BY"));
+					LIMSUser assignedBy = IDTDataCache.getUserById(rs.getString("ASSIGNED_BY"));
 					id.setAssignedBy(assignedBy);
 					id.setAssignedOn(new Date(rs.getDate("ASSIGNED_ON").getTime()));
 					String statusId = rs.getString("IDENTIFICATION_LEVEL_ID");
 					if(statusId != null) 
-						id.setIdentificationLevel(IDTDataCash.getMSFeatureIdentificationLevelById(statusId));
+						id.setIdentificationLevel(IDTDataCache.getMSFeatureIdentificationLevelById(statusId));
 					
 					String adductId = rs.getString("ADDUCT_ID");
 					if(adductId == null)
@@ -1430,7 +1430,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 			stAnRs = stAnPs.executeQuery();
 			while(stAnRs.next()) {
 				StandardFeatureAnnotation newAnnotation = 
-						 IDTDataCash.getStandardFeatureAnnotationById(stAnRs.getString("STANDARD_ANNOTATION_ID"));
+						 IDTDataCache.getStandardFeatureAnnotationById(stAnRs.getString("STANDARD_ANNOTATION_ID"));
 				 if(newAnnotation != null)
 					 fb.addStandardFeatureAnnotation(newAnnotation);
 			}
@@ -1446,8 +1446,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 							fb.getMsFeature().getId(),
 							rs.getDate("CREATED_ON"), 
 							rs.getDate("LAST_EDITED_ON"),
-							IDTDataCash.getUserById(rs.getString("CREATED_BY")),
-							IDTDataCash.getUserById(rs.getString("LAST_EDITED_BY")),
+							IDTDataCache.getUserById(rs.getString("CREATED_BY")),
+							IDTDataCache.getUserById(rs.getString("LAST_EDITED_BY")),
 							null);
 
 //					Blob blob = rs.getBlob("ANNOTATION_RTF_DOCUMENT");
@@ -1527,7 +1527,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				rs = ps.executeQuery();
 				while(rs.next()) {
 					 MSFeatureIdentificationFollowupStep newStep = 
-							 IDTDataCash.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
+							 IDTDataCache.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
 					 if(newStep != null)
 						 fb.addIdFollowupStep(newStep);
 				}
@@ -1543,7 +1543,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	
 	protected void putDataInCache() {		
 		features.stream().
-			forEach(f -> DiskCashUtils.putMSFeatureInfoBundleInCache(f));
+			forEach(f -> DiskCacheUtils.putMSFeatureInfoBundleInCache(f));
 	}
 	
 	protected void applyAdditionalFilters() {
@@ -1589,8 +1589,8 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 	
 	protected void finalizeFeatureList() {
 		
-		if(!cashedFeatures.isEmpty()) {
-			features.addAll(cashedFeatures);
+		if(!cachedFeatures.isEmpty()) {
+			features.addAll(cachedFeatures);
 			features = features.stream().distinct().collect(Collectors.toSet());
 		}
 	}

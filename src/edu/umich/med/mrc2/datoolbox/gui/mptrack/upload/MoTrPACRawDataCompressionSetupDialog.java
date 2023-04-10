@@ -46,7 +46,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -78,7 +78,7 @@ public class MoTrPACRawDataCompressionSetupDialog extends JDialog implements Act
 		JTabbedPane tabbedPane = new JTabbedPane();
 		getContentPane().add(tabbedPane, BorderLayout.CENTER);
 		assayPanelMap = new TreeMap<MoTrPACAssay,CompressionSetupPanel>();
-		for(MoTrPACAssay assay : MoTrPACDatabaseCash.getMotrpacAssayList()) {
+		for(MoTrPACAssay assay : MoTrPACDatabaseCache.getMotrpacAssayList()) {
 			
 			CompressionSetupPanel assayPanel = new CompressionSetupPanel(assay, this);
 			assayPanelMap.put(assay, assayPanel);

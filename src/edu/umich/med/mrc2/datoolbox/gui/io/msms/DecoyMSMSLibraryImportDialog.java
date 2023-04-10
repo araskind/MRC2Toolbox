@@ -63,7 +63,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSMSDecoyGenerationMethod;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -156,7 +156,7 @@ public class DecoyMSMSLibraryImportDialog extends JDialog
 		panel_1.add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		Collection<MSMSDecoyGenerationMethod>decoyMethods = 
-				IDTDataCash.getMsmsDecoyGenerationMethodList();
+				IDTDataCache.getMsmsDecoyGenerationMethodList();
 		DefaultComboBoxModel dgmodel = 
 				new DefaultComboBoxModel<MSMSDecoyGenerationMethod>(
 						decoyMethods.toArray(new MSMSDecoyGenerationMethod[decoyMethods.size()]));
@@ -179,7 +179,7 @@ public class DecoyMSMSLibraryImportDialog extends JDialog
 		gbc_appendCheckBox.gridy = 2;
 		panel_1.add(appendCheckBox, gbc_appendCheckBox);
 		
-		Collection<ReferenceMsMsLibrary>decoys = IDTDataCash.getDecoyLibraries();
+		Collection<ReferenceMsMsLibrary>decoys = IDTDataCache.getDecoyLibraries();
 		DefaultComboBoxModel model = 
 				new DefaultComboBoxModel<ReferenceMsMsLibrary>(decoys.toArray(new ReferenceMsMsLibrary[decoys.size()]));
 		libraryComboBox = new JComboBox(model);
@@ -382,7 +382,7 @@ public class DecoyMSMSLibraryImportDialog extends JDialog
 				errors.add("Library description has to be specified.");
 			
 			ReferenceMsMsLibrary existisngLib = 
-					IDTDataCash.getReferenceMsMsLibraryByName(libraryName);
+					IDTDataCache.getReferenceMsMsLibraryByName(libraryName);
 			if(existisngLib != null) 
 				errors.add("Referemce library \"" + libraryName + "\" already exists.");
 		}			

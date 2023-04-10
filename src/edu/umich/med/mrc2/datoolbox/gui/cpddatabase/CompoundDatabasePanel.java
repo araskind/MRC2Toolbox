@@ -53,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundNameCategory;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoleculeProperties;
-import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -910,18 +910,6 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		idp = new IndeterminateProgressDialog("Fetching compound data ...", this.getContentPane(), task);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);
-		
-//		molStructurePanel.showStructure(cpd.getSmiles());
-//		narrativeDataPanel.loadCompoundData(cpd);
-//		synonymsTable.loadCompoundData(cpd);
-//		dbLinksTable.loadCompoundData(cpd);
-//
-//		//	TODO properties
-//		concentrationsTable.setModelFromConcentrations(
-//				CompoundDatabaseCash.getConcentrationsForCompound(cpd));
-//		
-//		spectraTable.setTableModelFromLibraryFeatureCollection(
-//				CompoundDatabaseCash.getMSMSLibraryEntriesForCompound(cpd));
 	}
 
 	private void fetchPubChemData() {
@@ -1014,10 +1002,10 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 
 					//	TODO properties
 					concentrationsTable.setModelFromConcentrations(
-							CompoundDatabaseCash.getConcentrationsForCompound(cpd));
+							CompoundDatabaseCache.getConcentrationsForCompound(cpd));
 					
 					spectraTable.setTableModelFromLibraryFeatureCollection(
-							CompoundDatabaseCash.getMSMSLibraryEntriesForCompound(cpd));
+							CompoundDatabaseCache.getMSMSLibraryEntriesForCompound(cpd));
 					
 					clasyFireViewer.showCompoundData(cpd.getPrimaryDatabaseId());
 				}

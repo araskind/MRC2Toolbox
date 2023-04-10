@@ -38,7 +38,7 @@ import javax.swing.WindowConstants;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -75,7 +75,7 @@ public class IdFollowupStepManagerDialog extends JDialog implements ActionListen
 		idFollowupStepTable = new IdFollowupStepTable();
 		getContentPane().add(new JScrollPane(idFollowupStepTable), BorderLayout.CENTER);
 		idFollowupStepTable.setTableModelFromFollowupStepList(
-				IDTDataCash.getMsFeatureIdentificationFollowupStepList());
+				IDTDataCache.getMsFeatureIdentificationFollowupStepList());
 		
 		pack();
 	}
@@ -129,9 +129,9 @@ public class IdFollowupStepManagerDialog extends JDialog implements ActionListen
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		IDTDataCash.refreshMsFeatureIdentificationFollowupStepList();
+		IDTDataCache.refreshMsFeatureIdentificationFollowupStepList();
 		idFollowupStepTable.setTableModelFromFollowupStepList(
-				IDTDataCash.getMsFeatureIdentificationFollowupStepList());
+				IDTDataCache.getMsFeatureIdentificationFollowupStepList());
 		idFollowupStepEditorDialog.dispose();
 	}
 
@@ -152,9 +152,9 @@ public class IdFollowupStepManagerDialog extends JDialog implements ActionListen
 				e.printStackTrace();
 			}
 		}
-		IDTDataCash.refreshMsFeatureIdentificationFollowupStepList();
+		IDTDataCache.refreshMsFeatureIdentificationFollowupStepList();
 		idFollowupStepTable.setTableModelFromFollowupStepList(
-				IDTDataCash.getMsFeatureIdentificationFollowupStepList());
+				IDTDataCache.getMsFeatureIdentificationFollowupStepList());
 		idFollowupStepEditorDialog.dispose();
 	}
 	
@@ -171,7 +171,7 @@ public class IdFollowupStepManagerDialog extends JDialog implements ActionListen
 		if(step == null) {
 			
 			MSFeatureIdentificationFollowupStep sameName = 
-					IDTDataCash.getMsFeatureIdentificationFollowupStepList().stream().
+					IDTDataCache.getMsFeatureIdentificationFollowupStepList().stream().
 					filter(s -> s.getName().equals(name)).findFirst().orElse(null);
 			
 			if(sameName != null)
@@ -180,7 +180,7 @@ public class IdFollowupStepManagerDialog extends JDialog implements ActionListen
 		else {	//	Existing status
 			String currentId = step.getId();
 			MSFeatureIdentificationFollowupStep sameName = 
-					IDTDataCash.getMsFeatureIdentificationFollowupStepList().stream().
+					IDTDataCache.getMsFeatureIdentificationFollowupStepList().stream().
 					filter(s -> !s.getId().equals(currentId)).
 					filter(s -> s.getName().equals(name)).findFirst().orElse(null);
 			
@@ -212,9 +212,9 @@ public class IdFollowupStepManagerDialog extends JDialog implements ActionListen
 				e.printStackTrace();
 			}
 		}
-		IDTDataCash.refreshMsFeatureIdentificationFollowupStepList();
+		IDTDataCache.refreshMsFeatureIdentificationFollowupStepList();
 		idFollowupStepTable.setTableModelFromFollowupStepList(
-				IDTDataCash.getMsFeatureIdentificationFollowupStepList());
+				IDTDataCache.getMsFeatureIdentificationFollowupStepList());
 	}
 }
 

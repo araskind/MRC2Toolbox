@@ -45,7 +45,7 @@ import javax.swing.border.EtchedBorder;
 import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -145,7 +145,7 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 			return;
 		
 		initialParameterSet = parSet;
-		deMethod = IDTDataCash.getDataExtractionMethodById(parSet.getId());
+		deMethod = IDTDataCache.getDataExtractionMethodById(parSet.getId());
 		parametersPanel.loadParameters(initialParameterSet, deMethod);		
 		msmsFeatureExtractionParameterSelectorDialog.dispose();
 	}
@@ -174,23 +174,23 @@ public class MSMSFeatureExtractionSetupDialog extends JDialog  implements Action
 		String paramSetId = preferences.get(LAST_USED_METHOD_ID, null);
 		if(paramSetId != null && !paramSetId.isEmpty()) {
 			
-			DataExtractionMethod cashedMethod = 
-					IDTDataCash.getDataExtractionMethodById(paramSetId);
+			DataExtractionMethod cachedMethod = 
+					IDTDataCache.getDataExtractionMethodById(paramSetId);
 			
-			if(cashedMethod != null) {
+			if(cachedMethod != null) {
 				
-				initialParameterSet = IDTDataCash.getMSMSExtractionParameterSetById(cashedMethod.getId());
+				initialParameterSet = IDTDataCache.getMSMSExtractionParameterSetById(cachedMethod.getId());
 				
 				if(initialParameterSet != null) {					
-					deMethod = cashedMethod;
+					deMethod = cachedMethod;
 					parametersPanel.loadParameters(initialParameterSet, deMethod);
 					return;
 				}
 			}
 		}
-		else if(!IDTDataCash.getMsmsExtractionParameters().isEmpty()) {
-			initialParameterSet = IDTDataCash.getMsmsExtractionParameters().iterator().next();
-			deMethod = IDTDataCash.getDataExtractionMethodById(initialParameterSet.getId());
+		else if(!IDTDataCache.getMsmsExtractionParameters().isEmpty()) {
+			initialParameterSet = IDTDataCache.getMsmsExtractionParameters().iterator().next();
+			deMethod = IDTDataCache.getDataExtractionMethodById(initialParameterSet.getId());
 			parametersPanel.loadParameters(initialParameterSet, deMethod);
 			savePreferences();
 			return;

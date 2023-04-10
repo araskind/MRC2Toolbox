@@ -60,7 +60,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.ChromatographicSeparationType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataProcessingSoftware;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSChromatographicColumn;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr.SoftwareSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -146,7 +146,7 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 			separationTypeComboBox.setSelectedItem(method.getSeparationType());
 
 			Collection<LIMSChromatographicColumn> columnSet =
-					IDTDataCash.getChromatographicColumns().stream().
+					IDTDataCache.getChromatographicColumns().stream().
 					filter(c -> c.getSeparationType().equals(method.getSeparationType())).
 					collect(Collectors.toList());
 
@@ -319,7 +319,7 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		dataPanel.add(lblMsType, gbc_lblMsType);
 
 		msTypeComboBox = new JComboBox(
-				new SortedComboBoxModel<MsType>(IDTDataCash.getMsTypes()));
+				new SortedComboBoxModel<MsType>(IDTDataCache.getMsTypes()));
 		GridBagConstraints gbc_msTypeComboBox = new GridBagConstraints();
 		gbc_msTypeComboBox.gridwidth = 2;
 		gbc_msTypeComboBox.insets = new Insets(0, 0, 5, 0);
@@ -338,7 +338,7 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 
 		separationTypeComboBox = new JComboBox(
 				new SortedComboBoxModel<ChromatographicSeparationType>(
-						IDTDataCash.getChromatographicSeparationTypes()));
+						IDTDataCache.getChromatographicSeparationTypes()));
 		separationTypeComboBox.addItemListener(this);
 		GridBagConstraints gbc_separationTypeomboBox = new GridBagConstraints();
 		gbc_separationTypeomboBox.insets = new Insets(0, 0, 5, 5);
@@ -357,7 +357,7 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 
 		columnComboBox = new JComboBox(
 				new SortedComboBoxModel<LIMSChromatographicColumn>(
-						IDTDataCash.getChromatographicColumns()));
+						IDTDataCache.getChromatographicColumns()));
 		GridBagConstraints gbc_columnComboBox = new GridBagConstraints();
 		gbc_columnComboBox.insets = new Insets(0, 0, 5, 0);
 		gbc_columnComboBox.gridwidth = 2;
@@ -375,7 +375,7 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		dataPanel.add(lblIonization, gbc_lblIonization);
 
 		ionizationTypeComboBox =
-				new JComboBox(new SortedComboBoxModel<IonizationType>(IDTDataCash.getIonizationTypes()));
+				new JComboBox(new SortedComboBoxModel<IonizationType>(IDTDataCache.getIonizationTypes()));
 		GridBagConstraints gbc_ionizationTypeComboBox = new GridBagConstraints();
 		gbc_ionizationTypeComboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_ionizationTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
@@ -392,7 +392,7 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		dataPanel.add(lblMassAnalyzer, gbc_lblMassAnalyzer);
 
 		massAnalyzerComboBox =
-				new JComboBox(new SortedComboBoxModel<MassAnalyzerType>(IDTDataCash.getMassAnalyzerTypes()));
+				new JComboBox(new SortedComboBoxModel<MassAnalyzerType>(IDTDataCache.getMassAnalyzerTypes()));
 		GridBagConstraints gbc_massAnalyzerComboBox = new GridBagConstraints();
 		gbc_massAnalyzerComboBox.gridwidth = 2;
 		gbc_massAnalyzerComboBox.insets = new Insets(0, 0, 5, 0);
@@ -496,7 +496,7 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 
 				ChromatographicSeparationType sType = getChromatographicSeparationType();
 				Collection<LIMSChromatographicColumn> columnSet =
-						IDTDataCash.getChromatographicColumns().stream().
+						IDTDataCache.getChromatographicColumns().stream().
 						filter(c -> c.getSeparationType().equals(sType)).
 						collect(Collectors.toList());
 
@@ -559,7 +559,7 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		
 		//	Check if method file was already used
 		if(getMethodFile() != null) {
-			existingFileMethod = IDTDataCash.getAcquisitionMethodByName(getMethodFile().getName());
+			existingFileMethod = IDTDataCache.getAcquisitionMethodByName(getMethodFile().getName());
 			if(existingFileMethod != null)
 				errors.add("Method file \"" + getMethodFile().getName() + "\" is already in the database.");
 		}
@@ -567,13 +567,13 @@ public class DockableAcquisitionMethodDataPanel extends DefaultSingleCDockable
 		if(!getMethodName().isEmpty()) {
 			
 			if(method == null) {	//	New method 
-				existingFileMethod = IDTDataCash.getAcquisitionMethodByName(getMethodName());
+				existingFileMethod = IDTDataCache.getAcquisitionMethodByName(getMethodName());
 				if(existingFileMethod != null)
 					errors.add("Method \"" + getMethodName() + "\" is already in the database.");
 			}
 			else {
 				String newName = getMethodName();
-				existingFileMethod = IDTDataCash.getAcquisitionMethods().stream().
+				existingFileMethod = IDTDataCache.getAcquisitionMethods().stream().
 					filter(m -> !m.equals(method)).
 					filter(m -> m.getName().equals(newName)).
 					findFirst().orElse(null);

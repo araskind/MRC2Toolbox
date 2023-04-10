@@ -77,7 +77,7 @@ import com.github.lgooddatepicker.components.DatePicker;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACTissueCode;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.ref.asssay.MotrpacAssayTable;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.ref.tcode.TissueCodeTable;
@@ -174,7 +174,7 @@ public class CreateUploadDirectoryStructureDialog extends JDialog
 		panel.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		Collection<MoTrPACStudy> studyList = 
-				MoTrPACDatabaseCash.getMotrpacStudyList();
+				MoTrPACDatabaseCache.getMotrpacStudyList();
 		studyCodeComboBox = new JComboBox<MoTrPACStudy>(
 				new DefaultComboBoxModel<MoTrPACStudy>(
 						studyList.toArray(new MoTrPACStudy[studyList.size()])));

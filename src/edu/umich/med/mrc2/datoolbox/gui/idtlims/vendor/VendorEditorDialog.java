@@ -52,7 +52,7 @@ import javax.swing.border.EmptyBorder;
 import org.apache.commons.validator.routines.UrlValidator;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -225,10 +225,10 @@ public class VendorEditorDialog extends JDialog {
 		if(!getVendorName().isEmpty()) {
 			
 			if(manufacturer == null) {							
-				sameName = IDTDataCash.getManufacturerByName(getVendorName());
+				sameName = IDTDataCache.getManufacturerByName(getVendorName());
 			}
 			else{
-				sameName = IDTDataCash.getManufacturers().stream().
+				sameName = IDTDataCache.getManufacturers().stream().
 					filter(m -> !m.getId().equals(manufacturer.getId())).
 					filter(m -> m.getName().equals(manufacturer.getName())).
 					findFirst().orElse(null);

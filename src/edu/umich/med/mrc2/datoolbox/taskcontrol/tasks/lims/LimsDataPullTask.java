@@ -21,7 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.lims;
 
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -49,7 +49,7 @@ public class LimsDataPullTask extends AbstractTask {
 		try {
 			try {
 				taskDescription = "Getting user data ...";
-				LIMSDataCash.refreshUserList();;
+				LIMSDataCache.refreshUserList();;
 				processed = 25;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -57,7 +57,7 @@ public class LimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Getting organization data ...";
-				LIMSDataCash.refreshOrganizationList();
+				LIMSDataCache.refreshOrganizationList();
 				processed = 50;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -65,7 +65,7 @@ public class LimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Getting project data ...";
-				LIMSDataCash.refreshProjectList();
+				LIMSDataCache.refreshProjectList();
 				processed = 75;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -73,7 +73,7 @@ public class LimsDataPullTask extends AbstractTask {
 			}
 			try {
 				taskDescription = "Getting experiment data ...";
-				LIMSDataCash.refreshExperimentList();
+				LIMSDataCache.refreshExperimentList();
 				processed = 100;
 			} catch (Exception e) {
 				e.printStackTrace();

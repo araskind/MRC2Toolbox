@@ -43,7 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -70,7 +70,7 @@ public class InstrumentSelectionDialog extends JDialog {
 		instrumentTable = new InstrumentTable();
 		JScrollPane designScrollPane = new JScrollPane(instrumentTable);
 		getContentPane().add(designScrollPane, BorderLayout.CENTER);
-		instrumentTable.setTableModelFromInstrumentList(IDTDataCash.getInstrumentList());
+		instrumentTable.setTableModelFromInstrumentList(IDTDataCache.getInstrumentList());
 		
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();

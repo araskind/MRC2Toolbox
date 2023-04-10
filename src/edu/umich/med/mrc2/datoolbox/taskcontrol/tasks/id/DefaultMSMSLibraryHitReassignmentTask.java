@@ -36,7 +36,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.tophit.TopHitReassignmentOption;
@@ -73,11 +73,11 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 	public void run() {
 		
 		setStatus(TaskStatus.PROCESSING);
-		IDTDataCash.refreshNISTPepSearchParameters();
+		IDTDataCache.refreshNISTPepSearchParameters();
 		metlinLibId = 
-				IDTDataCash.getReferenceMsMsLibraryByName("Metlin_AMRT_PCDL").getUniqueId();	
+				IDTDataCache.getReferenceMsMsLibraryByName("Metlin_AMRT_PCDL").getUniqueId();	
 		tentativeLevel = 
-				IDTDataCash.getMSFeatureIdentificationLevelById("IDS002");
+				IDTDataCache.getMSFeatureIdentificationLevelById("IDS002");
 		try {
 			featuresToUpdate = 
 				NISTPepSearchUtils.removeLockedFeatures(featuresToUpdate);

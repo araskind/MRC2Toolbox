@@ -469,8 +469,8 @@ public class AnnotationUtils {
 					objectId,
 					rs.getDate("CREATED_ON"), 
 					rs.getDate("LAST_EDITED_ON"),
-					IDTDataCash.getUserById(rs.getString("CREATED_BY")),
-					IDTDataCash.getUserById(rs.getString("LAST_EDITED_BY")),
+					IDTDataCache.getUserById(rs.getString("CREATED_BY")),
+					IDTDataCache.getUserById(rs.getString("LAST_EDITED_BY")),
 					null);
 
 			InputStream dbs = rs.getBinaryStream("ANNOTATION_RTF_DOCUMENT");

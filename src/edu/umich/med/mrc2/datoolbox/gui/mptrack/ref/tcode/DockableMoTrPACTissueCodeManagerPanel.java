@@ -32,7 +32,7 @@ import javax.swing.JScrollPane;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACTissueCode;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDbUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -88,7 +88,7 @@ public class DockableMoTrPACTissueCodeManagerPanel extends DefaultSingleCDockabl
 
 	public void loadTissueCodes() {
 		tissueCodesTable.setTableModelFromTissueCodes(
-				MoTrPACDatabaseCash.getMotrpacTissueCodeList());
+				MoTrPACDatabaseCache.getMotrpacTissueCodeList());
 	}
 
 	private void deleteSelectedTissueCode() {
@@ -110,7 +110,7 @@ public class DockableMoTrPACTissueCodeManagerPanel extends DefaultSingleCDockabl
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			MoTrPACDatabaseCash.refreshMotrpacTissueCodeList();
+			MoTrPACDatabaseCache.refreshMotrpacTissueCodeList();
 			loadTissueCodes();
 		}
 	}
@@ -134,12 +134,12 @@ public class DockableMoTrPACTissueCodeManagerPanel extends DefaultSingleCDockabl
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-//		IDTDataCash.refreshSampleTypeList();
-//		sampleTypeTable.setTableModelFromSamples(IDTDataCash.getSampleTypes());
+//		IDTDataCache.refreshSampleTypeList();
+//		sampleTypeTable.setTableModelFromSamples(IDTDataCache.getSampleTypes());
 //		sampleTypeTable.selectSample(stockSample);
 //		stockSampleEditorDialog.dispose();
 		
-		MoTrPACDatabaseCash.refreshMotrpacTissueCodeList();
+		MoTrPACDatabaseCache.refreshMotrpacTissueCodeList();
 		loadTissueCodes();
 	}
 
@@ -162,12 +162,12 @@ public class DockableMoTrPACTissueCodeManagerPanel extends DefaultSingleCDockabl
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-//		IDTDataCash.refreshSampleTypeList();
-//		sampleTypeTable.setTableModelFromSamples(IDTDataCash.getSampleTypes());
+//		IDTDataCache.refreshSampleTypeList();
+//		sampleTypeTable.setTableModelFromSamples(IDTDataCache.getSampleTypes());
 //		sampleTypeTable.selectSample(stockSample);
 //		stockSampleEditorDialog.dispose();
 		
-		MoTrPACDatabaseCash.refreshMotrpacTissueCodeList();
+		MoTrPACDatabaseCache.refreshMotrpacTissueCodeList();
 		loadTissueCodes();
 	}
 

@@ -34,7 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACReport;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACReportCode;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACReportCodeBlock;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACTissueCode;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -57,7 +57,7 @@ public class MoTrPACReportTableModel extends BasicTableModel {
 	public MoTrPACReportTableModel() {
 
 		super();
-		Collection<MoTrPACReportCodeBlock> codeBlocks = MoTrPACDatabaseCash.getMotrpacReportCodeBlocks();
+		Collection<MoTrPACReportCodeBlock> codeBlocks = MoTrPACDatabaseCache.getMotrpacReportCodeBlocks();
 		columnArray = new ColumnContext[8 + codeBlocks.size()];
 		columnArray[0] = new ColumnContext(DOCUMENT_NAME_COLUMN, String.class, false);	
 		columnArray[1] = new ColumnContext(DOCUMENT_VERSION_COLUMN, Integer.class, false);
@@ -82,7 +82,7 @@ public class MoTrPACReportTableModel extends BasicTableModel {
 			return;
 		
 		Collection<MoTrPACReportCodeBlock> codeBlocks = 
-				MoTrPACDatabaseCash.getMotrpacReportCodeBlocks();
+				MoTrPACDatabaseCache.getMotrpacReportCodeBlocks();
 		
 		List<Object[]>rowDataList = new ArrayList<Object[]>();
 		for(MoTrPACReport report : reports) {

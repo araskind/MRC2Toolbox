@@ -50,7 +50,7 @@ import javax.swing.border.TitledBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.fc.ImprovedFileChooser;
@@ -113,7 +113,7 @@ public class NewIDTrackerBasedExperimentDialog extends JDialog implements Action
 		panel.add(chooser, gbc_parentDirTextField);
 
 		idTrackerExperimentsTable = new IDTrackerExperimentsTable();
-		idTrackerExperimentsTable.setModelFromExperimentCollection(IDTDataCash.getExperiments());
+		idTrackerExperimentsTable.setModelFromExperimentCollection(IDTDataCache.getExperiments());
 		JScrollPane scrollPane = new JScrollPane(idTrackerExperimentsTable);
 		scrollPane.setBorder(
 			new TitledBorder(UIManager.getBorder("TitledBorder.border"),

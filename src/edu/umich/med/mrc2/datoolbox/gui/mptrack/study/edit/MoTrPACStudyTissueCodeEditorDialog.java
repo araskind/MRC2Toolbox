@@ -52,7 +52,7 @@ import javax.swing.border.EmptyBorder;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACTissueCode;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.ref.tcode.TissueCodeTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
@@ -189,7 +189,7 @@ public class MoTrPACStudyTissueCodeEditorDialog extends JDialog implements Actio
 	public void loadTissueCodes(Collection<MoTrPACTissueCode> experimentTissueCodes) {
 		
 		Collection<MoTrPACTissueCode>availableCodes = 
-				MoTrPACDatabaseCash.getMotrpacTissueCodeList().stream().
+				MoTrPACDatabaseCache.getMotrpacTissueCodeList().stream().
 				filter(f -> !experimentTissueCodes.contains(f) ).
 				collect(Collectors.toList());
 		

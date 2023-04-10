@@ -32,7 +32,7 @@ import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MotracSubjectType;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 
 public class MoTrPACStudyDefinitionPanel extends JPanel {
@@ -66,7 +66,7 @@ public class MoTrPACStudyDefinitionPanel extends JPanel {
 		studyCodeTextField.setColumns(10);
 		
 		SortedComboBoxModel<MotracSubjectType> model = 
-				new SortedComboBoxModel<MotracSubjectType>(MoTrPACDatabaseCash.getMotrpacSubjectTypeList());
+				new SortedComboBoxModel<MotracSubjectType>(MoTrPACDatabaseCache.getMotrpacSubjectTypeList());
 		subjectTypeComboBox = new JComboBox(model);
 		subjectTypeComboBox.setSelectedIndex(-1);
 		GridBagConstraints gbc_subjectTypeComboBox = new GridBagConstraints();

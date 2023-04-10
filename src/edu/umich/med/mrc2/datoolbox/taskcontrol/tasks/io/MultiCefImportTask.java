@@ -93,7 +93,7 @@ public class MultiCefImportTask extends AbstractTask implements TaskListener{
 	private Map<String, List<Double>>retentionMap;
 	private Map<String, List<Double>>mzMap;
 	private HashMap<DataFile, HashSet<SimpleMsFeature>> featureDataPers;
-	private File cashFile;
+	private File cacheFile;
 	private File tmpCefDirectory;
 
 	public MultiCefImportTask(

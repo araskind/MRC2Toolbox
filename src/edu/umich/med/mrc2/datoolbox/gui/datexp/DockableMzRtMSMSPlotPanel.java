@@ -47,7 +47,7 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.dataset.MSMSFeatureInfoBundleDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.tooltip.MSMSFeatureInfoBundleTooltipGenerator;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
@@ -170,7 +170,7 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 						renderer.setSeriesPaint(i, Color.BLACK);
 					
 					else {
-						MSFeatureIdentificationLevel level = IDTDataCash.getMSFeatureIdentificationLevelByName(seriesName);
+						MSFeatureIdentificationLevel level = IDTDataCache.getMSFeatureIdentificationLevelByName(seriesName);
 						if(level != null)
 							renderer.setSeriesPaint(i, level.getColorCode());
 					}					

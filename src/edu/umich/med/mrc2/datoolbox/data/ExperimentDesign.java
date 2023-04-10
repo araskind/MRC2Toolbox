@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignFactorListener;
@@ -720,8 +720,8 @@ public class ExperimentDesign implements ExperimentDesignFactorListener, Seriali
 				
 				sampleSet.add(sample);
 				
-				if(OfflineExperimentLoadCash.getExperimentalSampleById(sample.getId()) == null)
-					OfflineExperimentLoadCash.addExperimentalSample(sample);
+				if(OfflineExperimentLoadCache.getExperimentalSampleById(sample.getId()) == null)
+					OfflineExperimentLoadCache.addExperimentalSample(sample);
 			}
 		}
 		List<Element> subsetListElements = 

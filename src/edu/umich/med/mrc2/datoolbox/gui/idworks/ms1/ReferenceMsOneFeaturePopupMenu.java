@@ -29,7 +29,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
@@ -148,7 +148,7 @@ public class ReferenceMsOneFeaturePopupMenu extends JPopupMenu implements Identi
 	
 	private void populateIdLevelMenu() {
 		
-		for(MSFeatureIdentificationLevel level : IDTDataCash.getMsFeatureIdentificationLevelList()) {
+		for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
 			
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
 			GuiUtils.addMenuItem(
@@ -160,7 +160,7 @@ public class ReferenceMsOneFeaturePopupMenu extends JPopupMenu implements Identi
 	public void refreshIdLevelMenu() {
 				
 		idLevelMenu.removeAll();
-		IDTDataCash.refreshMsFeatureIdentificationLevelList();
+		IDTDataCache.refreshMsFeatureIdentificationLevelList();
 		populateIdLevelMenu();
 	}
 

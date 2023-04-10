@@ -32,7 +32,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
@@ -185,7 +185,7 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 	
 	private void populateIdLevelMenu() {
 		
-		for(MSFeatureIdentificationLevel level : IDTDataCash.getMsFeatureIdentificationLevelList()) {
+		for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
 			
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
 			JMenuItem levelItem = GuiUtils.addMenuItem(
@@ -201,7 +201,7 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 	public void refreshIdLevelMenu() {
 				
 		idLevelMenu.removeAll();
-		IDTDataCash.refreshMsFeatureIdentificationLevelList();
+		IDTDataCache.refreshMsFeatureIdentificationLevelList();
 		populateIdLevelMenu();
 	}
 

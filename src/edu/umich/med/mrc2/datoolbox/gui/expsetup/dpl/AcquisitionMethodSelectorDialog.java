@@ -43,7 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -105,7 +105,7 @@ public class AcquisitionMethodSelectorDialog extends JDialog {
 		rootPane.setDefaultButton(btnSave);
 
 		acquisitionMethodTable.setTableModelFromAcquisitionMethods(
-				IDTDataCash.getAcquisitionMethods());
+				IDTDataCache.getAcquisitionMethods());
 		pack();
 	}
 	

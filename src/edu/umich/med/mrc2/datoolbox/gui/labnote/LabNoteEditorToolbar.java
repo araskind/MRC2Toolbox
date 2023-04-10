@@ -40,7 +40,7 @@ import com.github.lgooddatepicker.components.DatePicker;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -88,7 +88,7 @@ public class LabNoteEditorToolbar extends CommonToolbar implements ItemListener{
 		experimentComboBox = new JComboBox();
 		experimentComboBox.setFont(new Font("Tahoma", Font.BOLD, 12));
 		experimentComboBox.setModel(
-				new SortedComboBoxModel<LIMSExperiment>(LIMSDataCash.getExperiments()));
+				new SortedComboBoxModel<LIMSExperiment>(LIMSDataCache.getExperiments()));
 		experimentComboBox.setMaximumSize(new Dimension(250, 25));
 		experimentComboBox.setSelectedIndex(-1);
 		experimentComboBox.addItemListener(this);

@@ -60,7 +60,7 @@ import edu.umich.med.mrc2.datoolbox.data.format.CompoundIdentityFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.ReferenceMsMsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.ReferenceMsMsLibraryMatchTypeFormat;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
@@ -387,7 +387,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 	        }
 	    };
 	    
-		for(MSFeatureIdentificationLevel level : IDTDataCash.getMsFeatureIdentificationLevelList()) {
+		for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
 			
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
 			//	GuiUtils.addMenuItem(idLevelMenu, level.getName(), listener, level.getName(), levelIcon);

@@ -71,7 +71,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSamplePreparation;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.editors.DocumentAnnotationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.communication.SamplePrepEvent;
@@ -163,7 +163,7 @@ public class SamplePrepEditorPanel extends JPanel
 			throw new IllegalArgumentException(
 					"SamplePrep can not be null!");
 		}
-		this.experiment = IDTDataCash.getExperimentForSamplePrep(prep);
+		this.experiment = IDTDataCache.getExperimentForSamplePrep(prep);
 		if(experiment == null) {
 			throw new IllegalArgumentException(
 					"Can not find experiment for selected sample prep!");

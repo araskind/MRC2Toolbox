@@ -95,7 +95,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdLevelUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
@@ -692,7 +692,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.ASSIGN_ID_LEVEL_COMMAND.getName()))
 			setIdLevelForIdentification();
 		
-		for(MSFeatureIdentificationLevel level : IDTDataCash.getMsFeatureIdentificationLevelList()) {
+		for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
 			
 			if (command.equals(level.getName()) 
 					|| command.equals(MSFeatureIdentificationLevel.SET_PRIMARY + level.getName())) {
@@ -1200,7 +1200,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		Map<String, String> properties = feature.getProperties();
 		properties.put(MSMSComponentTableFields.MRC2_LIB_ID.getName(), feature.getUniqueId());
 		ReferenceMsMsLibrary refLib =
-				IDTDataCash.getReferenceMsMsLibraryById(feature.getMsmsLibraryIdentifier());
+				IDTDataCache.getReferenceMsMsLibraryById(feature.getMsmsLibraryIdentifier());
 		
 		if((refLib.getPrimaryLibraryId().equals(NISTReferenceLibraries.nist_msms.name()) || 
 				refLib.getPrimaryLibraryId().equals(NISTReferenceLibraries.hr_msms_nist.name()))
@@ -1530,7 +1530,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void mergeDuplicateMsMsFeatures() {
 		
-		LIMSExperiment experiment = IDTDataCash.getExperimentById("IDX0065");
+		LIMSExperiment experiment = IDTDataCache.getExperimentById("IDX0065");
 		IDTMSMSDuplicateMSMSFeatureCleanupTask task = 
 				new IDTMSMSDuplicateMSMSFeatureCleanupTask(Polarity.Positive, experiment);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
@@ -1774,7 +1774,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		
 		MSFeatureIdentificationLevel idLevel = 
-				IDTDataCash.getMSFeatureIdentificationLevelByName(idLevelName);
+				IDTDataCache.getMSFeatureIdentificationLevelByName(idLevelName);
 		if(idLevel == null && identity.getIdentificationLevel() == null)
 			return;
 		
@@ -1820,7 +1820,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
         ActionMap msTwoFeatureTableActionMap = 
         		msTwoFeatureTable.getTable().getActionMap();
         
-        for(MSFeatureIdentificationLevel level : IDTDataCash.getMsFeatureIdentificationLevelList()) {
+        for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
         	
         	if(level.getShorcut() != null) {
         		
@@ -1915,7 +1915,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private void setPrimaryIdLevelForMultipleSelectedFeatures(String idLevelName) {
 
 		MSFeatureIdentificationLevel idLevel = 
-				IDTDataCash.getMSFeatureIdentificationLevelByName(idLevelName);
+				IDTDataCache.getMSFeatureIdentificationLevelByName(idLevelName);
 		
 		if(!msOneFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
 			
@@ -2535,7 +2535,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		}	
 		manualId.setAssignedBy(MRC2ToolBoxCore.getIdTrackerUser());
-		manualId.setIdentificationLevel(IDTDataCash.getTopMSFeatureIdentificationLevel());
+		manualId.setIdentificationLevel(IDTDataCache.getTopMSFeatureIdentificationLevel());
 				
 		if(msOneFeatureTable.getSelectedBundle() != null) {
 			
@@ -2796,57 +2796,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		pepSearchSetupDialog.savePreferences();
 		pepSearchSetupDialog.dispose();
 	}
-
-//	private void openExperiment() {
-//
-//		if(openIDTrackerExperimentDialog.getSelectedLimsExperiment() == null) {
-//
-//			MessageDialog.showErrorMsg("Please select IDTracker experiment!", this.getContentPane());
-//			return;
-//		}
-//		idTrackerExperiment = openIDTrackerExperimentDialog.getSelectedLimsExperiment();
-//
-//		clearPanel();
-//		Collection<LIMSSamplePreparation> preps = IDTDataCash.getExperimentSamplePrepMap().get(idTrackerExperiment);
-//		if(preps != null && !preps.isEmpty()) {
-//			
-//			for(LIMSSamplePreparation prep : preps) {
-//				Collection<DataPipeline> dataPipelines = IDTDataCash.getSamplePrepDataPipelineMap().get(prep);
-//				if(dataPipelines != null && !dataPipelines.isEmpty()) {
-//					
-//					List<DataAcquisitionMethod> methods = 
-//							dataPipelines.stream().map(p -> p.getAcquisitionMethod()).
-//							distinct().collect(Collectors.toList());
-//					if(!methods.isEmpty())
-//						samplePrepAcquisitionMethodMap.put(prep, methods);
-//				}
-//			}		
-//		}
-//		dataAcquisitionMethods.addAll(
-//				IDTDataCash.getAcquisitionMethodsForExperiment(idTrackerExperiment));
-//		acquisitionDataExtractionMethodMap.clear();
-//		featureSetataExtractionMethodMap.clear();
-//
-//		IDTrackerExperimentDataFetchTask task = 
-//				new IDTrackerExperimentDataFetchTask(idTrackerExperiment);
-//		task.addTaskListener(this);
-//		MRC2ToolBoxCore.getTaskController().addTask(task);
-//		openIDTrackerExperimentDialog.dispose();
-//	}
-//
-//	private void showOpenExperimentDialogue() {
-//
-//		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
-//			MessageDialog.showErrorMsg("You are not logged in ID tracker!", this.getContentPane());
-//			return;
-//		}
-//		//	TODO check if already opened experiment
-//
-//		openIDTrackerExperimentDialog = new OpenIDTrackerExperimentDialog(this);
-//		openIDTrackerExperimentDialog.setLocationRelativeTo(this.getContentPane());
-//		openIDTrackerExperimentDialog.setVisible(true);
-//	}
-
 
 	private void showIdTrackerManager() {
 
@@ -3787,7 +3736,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(parId == null)
 			return;
 			
-		NISTPepSearchParameterObject pepSearchParams = IDTDataCash.getNISTPepSearchParameterObjectById(parId);
+		NISTPepSearchParameterObject pepSearchParams = IDTDataCache.getNISTPepSearchParameterObjectById(parId);
 		pepSearchParameterListingPanel.loadNISTPepSearchParameterObject(pepSearchParams);
 	}
 

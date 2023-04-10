@@ -21,7 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt;
 
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
 import edu.umich.med.mrc2.datoolbox.main.FeatureLookupDataSetManager;
 import edu.umich.med.mrc2.datoolbox.main.MSMSClusterDataSetManager;
@@ -52,131 +52,131 @@ public class IDTrackerDataPullTask extends AbstractTask {
 
 		try {
 			taskDescription = "Refreshing user list";
-			IDTDataCash.refreshUserList();
+			IDTDataCache.refreshUserList();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing organization list";
-			IDTDataCash.refreshOrganizationList();
+			IDTDataCache.refreshOrganizationList();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing project list";
-			IDTDataCash.refreshProjectList();
+			IDTDataCache.refreshProjectList();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing experimenty list";
-			IDTDataCash.refreshExperimentList();
+			IDTDataCache.refreshExperimentList();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing stock sample list";
-			IDTDataCash.refreshStockSampleList();
+			IDTDataCache.refreshStockSampleList();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing experiment/stock sample map";
-			IDTDataCash.refreshExperimentStockSampleMap();
+			IDTDataCache.refreshExperimentStockSampleMap();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing experiment polarity map ";
-			IDTDataCash.refreshExperimentPolarityMap();
+			IDTDataCache.refreshExperimentPolarityMap();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing manufacturers list ";
-			IDTDataCash.refreshManufacturers();
+			IDTDataCache.refreshManufacturers();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing manufacturers list ";
-			IDTDataCash.refreshSoftwareList();
+			IDTDataCache.refreshSoftwareList();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing ionization types";
-			IDTDataCash.refreshIonizationTypes();
+			IDTDataCache.refreshIonizationTypes();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing mass analyzer list";
-			IDTDataCash.refreshMassAnalyzers();
+			IDTDataCache.refreshMassAnalyzers();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing MS Type list ";
-			IDTDataCash.refreshMsTypes();
+			IDTDataCache.refreshMsTypes();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing instrument list";
-			IDTDataCash.refreshInstrumentList();
+			IDTDataCache.refreshInstrumentList();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing experiment / instrument map";
-			IDTDataCash.refreshExperimentInstrumentMap();
+			IDTDataCache.refreshExperimentInstrumentMap();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing chromatographic separation types";
-			IDTDataCash.refreshChromatographicSeparationTypes();
+			IDTDataCache.refreshChromatographicSeparationTypes();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing chromatographic column list ";
-			IDTDataCash.refreshChromatographicColumnList();
+			IDTDataCache.refreshChromatographicColumnList();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing acquisition method list ";
-			IDTDataCash.refreshAcquisitionMethodList();
+			IDTDataCache.refreshAcquisitionMethodList();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing data extraction method list ";
-			IDTDataCash.refreshDataExtractionMethodList();
+			IDTDataCache.refreshDataExtractionMethodList();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing SOP categories";
-			IDTDataCash.refreshSopCategories();
+			IDTDataCache.refreshSopCategories();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing protocol list ";
-			IDTDataCash.refreshProtocols();
+			IDTDataCache.refreshProtocols();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing sample preparation list ";
-			IDTDataCash.refreshSamplePreps();
+			IDTDataCache.refreshSamplePreps();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing experiment/sample prep map";
-			IDTDataCash.refreshExperimentSamplePrepMap();
+			IDTDataCache.refreshExperimentSamplePrepMap();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing sample prep / data pipeline map";
-			IDTDataCash.refreshSamplePrepDataPipelineMap();
+			IDTDataCache.refreshSamplePrepDataPipelineMap();
 			processed = processed + 3;
 
 //			taskDescription = "Refreshing Acquisition/Data Extraction method map";
-//			IDTDataCash.refreshAcquisitionDataExtractionMethodMap();
+//			IDTDataCache.refreshAcquisitionDataExtractionMethodMap();
 //			processed = processed + 3;
 
 			taskDescription = "Refreshing measurement unit list";
-			IDTDataCash.refreshUnits();
+			IDTDataCache.refreshUnits();
 			processed = processed + 3;
 
 			taskDescription = "Refreshing common MSMS library list ";
-			IDTDataCash.refreshReferenceMsMsLibraryList();
+			IDTDataCache.refreshReferenceMsMsLibraryList();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing MS feature identification follow-up step list";
-			IDTDataCash.refreshMsFeatureIdentificationFollowupStepList();
+			IDTDataCache.refreshMsFeatureIdentificationFollowupStepList();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing standard feature annotation list";
-			IDTDataCash.refreshStandardFeatureAnnotationList();
+			IDTDataCache.refreshStandardFeatureAnnotationList();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing MSMS decoy generation methods list";
-			IDTDataCash.refreshMSMSDecoyGenerationMethodList();
+			IDTDataCache.refreshMSMSDecoyGenerationMethodList();
 			processed = processed + 3;		
 						
 			taskDescription = "Refreshing MS feature identification level list";
-			IDTDataCash.refreshMsFeatureIdentificationLevelList();
+			IDTDataCache.refreshMsFeatureIdentificationLevelList();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing mobile phase list ";
-			IDTDataCash.refreshMobilePhaseList();
+			IDTDataCache.refreshMobilePhaseList();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing NIST PepSearch parameters list ";
-			IDTDataCash.refreshNISTPepSearchParameters();
+			IDTDataCache.refreshNISTPepSearchParameters();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing feature collection list ";
@@ -184,11 +184,11 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing sample type list ";
-			IDTDataCash.refreshSampleTypes();
+			IDTDataCache.refreshSampleTypes();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing collision energies list ";
-			IDTDataCash.refreshCollisionEnergies();
+			IDTDataCache.refreshCollisionEnergies();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing MSMS clustering parameters list";
@@ -196,7 +196,7 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing MSMS extraction parameters ";
-			IDTDataCash.refreshMSMSExtractionParameters();
+			IDTDataCache.refreshMSMSExtractionParameters();
 			processed = processed + 3;
 			
 			taskDescription = "Refreshing fetaure collection data ";

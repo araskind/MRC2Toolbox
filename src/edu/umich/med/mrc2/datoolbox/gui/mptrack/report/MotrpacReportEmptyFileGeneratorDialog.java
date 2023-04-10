@@ -76,7 +76,7 @@ import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACReportCode;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACReportCodeBlock;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACTissueCode;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -153,7 +153,7 @@ public class MotrpacReportEmptyFileGeneratorDialog extends JDialog implements Ac
 		dataPanel.add(lblName, gbc_lblName);
 
 		studyComboBox = new JComboBox(
-				new SortedComboBoxModel<MoTrPACStudy>(MoTrPACDatabaseCash.getMotrpacStudyList()));
+				new SortedComboBoxModel<MoTrPACStudy>(MoTrPACDatabaseCache.getMotrpacStudyList()));
 		studyComboBox.setSelectedIndex(-1);
 		GridBagConstraints gbc_studyComboBox = new GridBagConstraints();
 		gbc_studyComboBox.gridwidth = 5;
@@ -194,7 +194,7 @@ public class MotrpacReportEmptyFileGeneratorDialog extends JDialog implements Ac
 		dataPanel.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
 		assayComboBox = new JComboBox(
-				new SortedComboBoxModel<MoTrPACAssay>(MoTrPACDatabaseCash.getMotrpacAssayList()));
+				new SortedComboBoxModel<MoTrPACAssay>(MoTrPACDatabaseCache.getMotrpacAssayList()));
 		assayComboBox.setSelectedIndex(-1);
 		GridBagConstraints gbc_assayComboBox = new GridBagConstraints();
 		gbc_assayComboBox.gridwidth = 5;
@@ -226,7 +226,7 @@ public class MotrpacReportEmptyFileGeneratorDialog extends JDialog implements Ac
 		rowCount++;
 		
 		Collection<MoTrPACReportCodeBlock> codeBlocks = 
-				MoTrPACDatabaseCash.getMotrpacReportCodeBlocks();
+				MoTrPACDatabaseCache.getMotrpacReportCodeBlocks();
 		codeSelectors = new ArrayList<MotrpacReportCodeSelectorPanel>();
 		for(MoTrPACReportCodeBlock block : codeBlocks) {
 

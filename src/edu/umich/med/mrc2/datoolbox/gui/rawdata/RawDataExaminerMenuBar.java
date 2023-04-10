@@ -52,13 +52,17 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 	private static final Icon dataFileToolsIconSmall= GuiUtils.getIcon("dataFileTools", 16);
 	private static final Icon addMetaDataIcon = GuiUtils.getIcon("addMetadata", 24);
 	private static final Icon sendExperimentToDatabaseIcon = GuiUtils.getIcon("xml2Database", 24);
-	private static final Icon sendExperimentToDatabaseIconSmall = GuiUtils.getIcon("xml2Database", 16);
+	private static final Icon sendExperimentToDatabaseIconSmall = GuiUtils.getIcon("xml2Database", 16);	
+	private static final Icon importFromCEFIcon = GuiUtils.getIcon("importFromXML", 24);
+	private static final Icon importIconSmall = GuiUtils.getIcon("importFromXML", 16);
+	
 
 	// Menus
 	private JMenu
 		msmsMenu,
 		dbLinkageMenu,
-		rawDataMenu;
+		rawDataMenu,
+		importMenu;
 
 	// MSMS items
 	private JMenuItem
@@ -70,13 +74,18 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		addMetadataMenuItem,
 		sendExperimentToTrackerMenuItem;
 
-	// Raw data
+	// Raw data items
 	private JMenuItem
 		openRawFilesMenuItem,
 		closeRawFilesMenuItem,
 		msConvertSetupMenuItem,
 		indexRawDataRepositoryMenuItem,
 		rawDataToolsMenuItem;
+	
+	// Import items
+	private JMenuItem
+		importMS1ResultsFromCEFMenuItem;
+	//importMenu
 
 	public RawDataExaminerMenuBar(ActionListener listener) {
 
@@ -109,7 +118,9 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 		
 		add(dbLinkageMenu);
 		
+		//	Raw data
 		rawDataMenu = new JMenu("Raw data tools");
+		rawDataMenu.setIcon(dataFileToolsIconSmall);
 		
 		openRawFilesMenuItem = addItem(rawDataMenu, 
 				MainActionCommands.OPEN_RAW_DATA_FILE_COMMAND, 
@@ -119,9 +130,7 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 				closeDataFileIcon);
 		
 		rawDataMenu.addSeparator();
-		rawDataMenu.setIcon(dataFileToolsIconSmall);
 		
-		//	RAw data
 		msConvertSetupMenuItem = addItem(rawDataMenu, 
 				MainActionCommands.SETUP_RAW_DATA_CONVERSION_COMMAND, 
 				msConvertIcon);
@@ -133,6 +142,16 @@ public class RawDataExaminerMenuBar extends CommonMenuBar {
 				dataFileToolsIcon);
 		
 		add(rawDataMenu);
+		
+		//	Raw data
+		importMenu = new JMenu("Import");
+		importMenu.setIcon(importIconSmall);
+		
+		importMS1ResultsFromCEFMenuItem = addItem(importMenu, 
+				MainActionCommands.IMPORT_MS1_DATA_FROM_CEF_COMMAND, 
+				importFromCEFIcon);
+		
+		add(importMenu);
 	}
 
 	public void updateMenuFromExperiment(

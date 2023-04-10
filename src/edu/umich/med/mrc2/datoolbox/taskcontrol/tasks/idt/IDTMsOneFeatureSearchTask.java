@@ -54,7 +54,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.AnnotationUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTMsDataUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
@@ -335,11 +335,11 @@ public class IDTMsOneFeatureSearchTask extends IDTFeatureSearchTask {
 			MsFeatureDataSource source = new MsFeatureDataSource(rs.getString("SOURCE_DATA_BUNDLE_ID"));
 			IDTExperimentalSample sample = IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"),  conn);
 			source.setSample(sample);
-			LIMSExperiment experiment = IDTDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+			LIMSExperiment experiment = IDTDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
 			source.setExperiment(experiment);
-			DataAcquisitionMethod acquisitionMethod = IDTDataCash.getAcquisitionMethodById(rs.getString("ACQ_METHOD_ID"));
+			DataAcquisitionMethod acquisitionMethod = IDTDataCache.getAcquisitionMethodById(rs.getString("ACQ_METHOD_ID"));
 			source.setAcquisitionMethod(acquisitionMethod);
-			DataExtractionMethod dataExtractionMethod = IDTDataCash.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID"));
+			DataExtractionMethod dataExtractionMethod = IDTDataCache.getDataExtractionMethodById(rs.getString("EXTRACTION_METHOD_ID"));
 			source.setDataExtractionMethod(dataExtractionMethod);
 			sources.add(source);
 		}

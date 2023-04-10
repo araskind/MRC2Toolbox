@@ -40,7 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -208,7 +208,7 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			IDTDataCash.getAcquisitionMethods().add(selectedMethod);
+			IDTDataCache.getAcquisitionMethods().add(selectedMethod);
 		}
 		else {
 			if(methodData.getMethodFile() != null) {
@@ -238,7 +238,7 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 	}
 
 	public void loadAcquisitionMethods() {
-		methodTable.setTableModelFromAcquisitionMethods(IDTDataCash.getAcquisitionMethods());
+		methodTable.setTableModelFromAcquisitionMethods(IDTDataCache.getAcquisitionMethods());
 	}
 
 	private void deleteAcquisitionMethod() {
@@ -260,7 +260,7 @@ public class DockableAcquisitionMethodManagerPanel extends AbstractIDTrackerLims
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			IDTDataCash.refreshAcquisitionMethodList();
+			IDTDataCache.refreshAcquisitionMethodList();
 			loadAcquisitionMethods();
 		}
 	}

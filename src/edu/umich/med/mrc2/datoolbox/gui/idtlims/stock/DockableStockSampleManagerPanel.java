@@ -35,7 +35,7 @@ import javax.swing.JScrollPane;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.StockSample;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.AbstractIDTrackerLimsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
@@ -142,7 +142,7 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 	}
 
 	public void loadStockSamples() {
-		stockSampleTable.setTableModelFromSamples(IDTDataCash.getStockSamples());
+		stockSampleTable.setTableModelFromSamples(IDTDataCache.getStockSamples());
 	}
 
 	private void deleteSelectedSample() {
@@ -165,8 +165,8 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			IDTDataCash.refreshStockSampleList();
-			stockSampleTable.setTableModelFromSamples(IDTDataCash.getStockSamples());
+			IDTDataCache.refreshStockSampleList();
+			stockSampleTable.setTableModelFromSamples(IDTDataCache.getStockSamples());
 		}
 	}
 
@@ -190,8 +190,8 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		IDTDataCash.refreshStockSampleList();
-		stockSampleTable.setTableModelFromSamples(IDTDataCash.getStockSamples());
+		IDTDataCache.refreshStockSampleList();
+		stockSampleTable.setTableModelFromSamples(IDTDataCache.getStockSamples());
 		stockSampleTable.selectSample(stockSample);
 		stockSampleEditorDialog.dispose();
 	}
@@ -216,8 +216,8 @@ public class DockableStockSampleManagerPanel extends AbstractIDTrackerLimsPanel 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		IDTDataCash.refreshStockSampleList();
-		stockSampleTable.setTableModelFromSamples(IDTDataCash.getStockSamples());
+		IDTDataCache.refreshStockSampleList();
+		stockSampleTable.setTableModelFromSamples(IDTDataCache.getStockSamples());
 		stockSampleTable.selectSample(stockSample);
 		stockSampleEditorDialog.dispose();
 	}

@@ -75,7 +75,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTSearchQueryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeEvent;
@@ -660,7 +660,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 			
 			for(String id : levelUids) {
 				MSFeatureIdentificationLevel level = 
-						IDTDataCash.getMSFeatureIdentificationLevelById(id);
+						IDTDataCache.getMSFeatureIdentificationLevelById(id);
 				if(level != null)
 					levelsToSelect.add(level);
 			}
@@ -674,7 +674,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 			
 			for(String id : stepsUids) {
 				MSFeatureIdentificationFollowupStep step = 
-						IDTDataCash.getMSFeatureIdentificationFollowupStepById(id);
+						IDTDataCache.getMSFeatureIdentificationFollowupStepById(id);
 				if(step != null)
 					followupStepsToSelect.add(step);
 			}
@@ -709,7 +709,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 			
 			for(String id : experimentsUids) {
 				
-				LIMSExperiment experiment = IDTDataCash.getExperimentById(id);
+				LIMSExperiment experiment = IDTDataCache.getExperimentById(id);
 				if(experiment != null)
 					experimentsToSelect.add(experiment);
 			}
@@ -726,7 +726,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 			for(String id : cstUids) {
 				
 				ChromatographicSeparationType cst = 
-						IDTDataCash.getChromatographicSeparationTypeById(id);
+						IDTDataCache.getChromatographicSeparationTypeById(id);
 				if(cst != null)
 					cstToSelect.add(cst);
 			}
@@ -740,7 +740,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 			
 			for(String id : ccolumnUids) {
 				
-				LIMSChromatographicColumn column = IDTDataCash.getColumnById(id);
+				LIMSChromatographicColumn column = IDTDataCache.getColumnById(id);
 				if(column != null)
 					columnsToSelect.add(column);
 			}
@@ -753,7 +753,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 			
 			for(String id : mstUids) {
 				
-				MsType mstype = IDTDataCash.getMsTypeById(id);
+				MsType mstype = IDTDataCache.getMsTypeById(id);
 				if(mstype != null)
 					msTypesToSelect.add(mstype);
 			}
@@ -768,7 +768,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 			for(String id : daqMethodsUids) {
 				
 				DataAcquisitionMethod aqMethod = 
-						IDTDataCash.getAcquisitionMethodById(id);
+						IDTDataCache.getAcquisitionMethodById(id);
 				if(aqMethod != null)
 					daqMethodsToSelect.add(aqMethod);
 			}
@@ -783,7 +783,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 			for(String id : dataAnalysisUids) {
 				
 				DataExtractionMethod dataAnalysisMethod = 
-						IDTDataCash.getDataExtractionMethodById(id);
+						IDTDataCache.getDataExtractionMethodById(id);
 				if(dataAnalysisMethod != null)
 					dataAnalysisMethodsToSelect.add(dataAnalysisMethod);
 			}
@@ -800,7 +800,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 			
 			for(String id : msmsLibsUids) {
 				
-				ReferenceMsMsLibrary msmsLib = IDTDataCash.getReferenceMsMsLibraryById(id);
+				ReferenceMsMsLibrary msmsLib = IDTDataCache.getReferenceMsMsLibraryById(id);
 				if(msmsLib != null)
 					msmsLibsToSelect.add(msmsLib);
 			}
@@ -1269,7 +1269,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 				
 				for(String id : levelUids) {
 					MSFeatureIdentificationLevel level = 
-							IDTDataCash.getMSFeatureIdentificationLevelById(id);
+							IDTDataCache.getMSFeatureIdentificationLevelById(id);
 					if(level != null)
 						levelsToSelect.add(level);
 				}
@@ -1287,7 +1287,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 				
 				for(String id : stepsUids) {
 					MSFeatureIdentificationFollowupStep step = 
-							IDTDataCash.getMSFeatureIdentificationFollowupStepById(id);
+							IDTDataCache.getMSFeatureIdentificationFollowupStepById(id);
 					if(step != null)
 						followupStepsToSelect.add(step);
 				}
@@ -1329,7 +1329,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 				
 				for(String id : experimentsUids) {
 					
-					LIMSExperiment experiment = IDTDataCash.getExperimentById(id);
+					LIMSExperiment experiment = IDTDataCache.getExperimentById(id);
 					if(experiment != null)
 						experimentsToSelect.add(experiment);
 				}
@@ -1349,7 +1349,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 				for(String id : cstUids) {
 					
 					ChromatographicSeparationType cst = 
-							IDTDataCash.getChromatographicSeparationTypeById(id);
+							IDTDataCache.getChromatographicSeparationTypeById(id);
 					if(cst != null)
 						cstToSelect.add(cst);
 				}
@@ -1366,7 +1366,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 				
 				for(String id : ccolumnUids) {
 					
-					LIMSChromatographicColumn column = IDTDataCash.getColumnById(id);
+					LIMSChromatographicColumn column = IDTDataCache.getColumnById(id);
 					if(column != null)
 						columnsToSelect.add(column);
 				}
@@ -1382,7 +1382,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 				
 				for(String id : mstUids) {
 					
-					MsType mstype = IDTDataCash.getMsTypeById(id);
+					MsType mstype = IDTDataCache.getMsTypeById(id);
 					if(mstype != null)
 						msTypesToSelect.add(mstype);
 				}
@@ -1400,7 +1400,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 				for(String id : acqMethodUids) {
 					
 					DataAcquisitionMethod acqMethod = 
-							IDTDataCash.getAcquisitionMethodById(id);
+							IDTDataCache.getAcquisitionMethodById(id);
 					if(acqMethod != null)
 						acqMethodsToSelect.add(acqMethod);
 				}
@@ -1418,7 +1418,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 				for(String id : dataAnalysisMethodUids) {
 					
 					DataExtractionMethod dataAnalysisMethod = 
-							IDTDataCash.getDataExtractionMethodById(id);
+							IDTDataCache.getDataExtractionMethodById(id);
 					if(dataAnalysisMethod != null)
 						dataAnalysisMethodsToSelect.add(dataAnalysisMethod);
 				}
@@ -1442,7 +1442,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 				
 				for(String id : msmsLibsUids) {
 					
-					ReferenceMsMsLibrary msmsLib = IDTDataCash.getReferenceMsMsLibraryById(id);
+					ReferenceMsMsLibrary msmsLib = IDTDataCache.getReferenceMsMsLibraryById(id);
 					if(msmsLib != null)
 						msmsLibsToSelect.add(msmsLib);
 				}

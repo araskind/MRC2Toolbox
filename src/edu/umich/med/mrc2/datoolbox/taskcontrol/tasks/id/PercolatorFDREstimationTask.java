@@ -53,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
@@ -197,7 +197,7 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 		
 		Map<String,String>libraryIdNameMap = new TreeMap<String,String>();
 		for(String id : libIds) {
-			ReferenceMsMsLibrary lib = IDTDataCash.getReferenceMsMsLibraryById(id);
+			ReferenceMsMsLibrary lib = IDTDataCache.getReferenceMsMsLibraryById(id);
 			if(lib != null)
 				libraryIdNameMap.put(id, lib.getPrimaryLibraryId());
 		}		

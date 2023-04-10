@@ -27,7 +27,7 @@ import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -81,7 +81,7 @@ public class MSMSLibraryFeaturesTableModel extends BasicTableModel {
 			
 			String libName = null;
 			ReferenceMsMsLibrary refLib = 
-					IDTDataCash.getReferenceMsMsLibraryById(lf.getMsmsLibraryIdentifier());
+					IDTDataCache.getReferenceMsMsLibraryById(lf.getMsmsLibraryIdentifier());
 			if(refLib != null)
 				libName = refLib.getName();
 			

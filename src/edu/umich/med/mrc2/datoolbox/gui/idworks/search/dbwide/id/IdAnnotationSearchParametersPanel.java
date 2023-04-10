@@ -54,7 +54,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.IdentifierSearchOptions;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idfus.IdFollowupStepTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.TrackerSearchParametersPanel;
@@ -229,7 +229,7 @@ public class IdAnnotationSearchParametersPanel extends TrackerSearchParametersPa
 		
 		idLevelListTable = new IdLevelListTable();
 		idLevelListTable.setTableModelFromLevelList(
-				IDTDataCash.getMsFeatureIdentificationLevelList());
+				IDTDataCache.getMsFeatureIdentificationLevelList());
 		idLevelListTable.getSelectionModel().addListSelectionListener(this);
 		JScrollPane scrollPane = new JScrollPane(idLevelListTable);
 //		JScrollPane scrollPane = new JScrollPane();
@@ -246,7 +246,7 @@ public class IdAnnotationSearchParametersPanel extends TrackerSearchParametersPa
 		idFollowupStepTable = new IdFollowupStepTable();
 		idFollowupStepTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		idFollowupStepTable.setTableModelFromFollowupStepList(
-				IDTDataCash.getMsFeatureIdentificationFollowupStepList());
+				IDTDataCache.getMsFeatureIdentificationFollowupStepList());
 		idFollowupStepTable.getSelectionModel().addListSelectionListener(this);
 		JScrollPane scrollPane_1 = new JScrollPane(idFollowupStepTable);
 //		JScrollPane scrollPane_1 = new JScrollPane();

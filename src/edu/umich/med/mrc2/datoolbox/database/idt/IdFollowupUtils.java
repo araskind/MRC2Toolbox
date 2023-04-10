@@ -159,7 +159,7 @@ public class IdFollowupUtils {
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			 MSFeatureIdentificationFollowupStep newStep = 
-					 IDTDataCash.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
+					 IDTDataCache.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
 			 if(newStep != null)
 				 fib.addIdFollowupStep(newStep);
 		}
@@ -218,7 +218,7 @@ public class IdFollowupUtils {
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			 MSFeatureIdentificationFollowupStep newStep = 
-					 IDTDataCash.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
+					 IDTDataCache.getMSFeatureIdentificationFollowupStepById(rs.getString("FOLLOWUP_STEP_ID"));
 			 if(newStep != null)
 				 fib.addIdFollowupStep(newStep);
 		}

@@ -51,7 +51,7 @@ import javax.swing.border.EmptyBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACAssay;
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
-import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCash;
+import edu.umich.med.mrc2.datoolbox.database.mp.MoTrPACDatabaseCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.mptrack.ref.asssay.MotrpacMinimalAssayTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.CommonToolbar;
@@ -186,7 +186,7 @@ public class MoTrPACStudyAssayEditorDialog extends JDialog implements ActionList
 	public void loadAssays(Collection<MoTrPACAssay> assays) {
 		
 		Collection<MoTrPACAssay>availableAssays = 
-				MoTrPACDatabaseCash.getMotrpacAssayList().stream().
+				MoTrPACDatabaseCache.getMotrpacAssayList().stream().
 				filter(f -> !assays.contains(f) ).
 				collect(Collectors.toList());
 		

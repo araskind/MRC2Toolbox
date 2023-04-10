@@ -32,35 +32,35 @@ import edu.umich.med.mrc2.datoolbox.data.compare.CompoundIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
 
-public class CompoundDatabaseCash {
+public class CompoundDatabaseCache {
 
-	private static Map<CompoundIdentity,Collection<CompoundConcentration>>compoundConcentrationCash = 
+	private static Map<CompoundIdentity,Collection<CompoundConcentration>>compoundConcentrationCache = 
 			new TreeMap<CompoundIdentity,Collection<CompoundConcentration>>(
 					new CompoundIdentityComparator(SortProperty.ID));
 	
-	private static Map<CompoundIdentity,Collection<MsMsLibraryFeature>>compoundMMSMSCash = 
+	private static Map<CompoundIdentity,Collection<MsMsLibraryFeature>>compoundMMSMSCache = 
 			new TreeMap<CompoundIdentity,Collection<MsMsLibraryFeature>>(
 					new CompoundIdentityComparator(SortProperty.ID));
 	
 	public static void addConcentrationsForCompound(
 			CompoundIdentity id, Collection<CompoundConcentration>concentrations) {
 		
-		if(compoundConcentrationCash == null)
-			compoundConcentrationCash = 
+		if(compoundConcentrationCache == null)
+			compoundConcentrationCache = 
 				new TreeMap<CompoundIdentity,Collection<CompoundConcentration>>(
 						new CompoundIdentityComparator(SortProperty.ID));
 		
-		compoundConcentrationCash.put(id, concentrations);
+		compoundConcentrationCache.put(id, concentrations);
 	}
 	
 	public static Collection<CompoundConcentration>getConcentrationsForCompound(CompoundIdentity id){
 		
-		if(compoundConcentrationCash == null)
-			compoundConcentrationCash = 
+		if(compoundConcentrationCache == null)
+			compoundConcentrationCache = 
 				new TreeMap<CompoundIdentity,Collection<CompoundConcentration>>(
 						new CompoundIdentityComparator(SortProperty.ID));
 		
-		if(!compoundConcentrationCash.containsKey(id)) {
+		if(!compoundConcentrationCache.containsKey(id)) {
 			
 			Collection<CompoundConcentration>concentrations = null;
 			try {
@@ -70,28 +70,28 @@ public class CompoundDatabaseCash {
 				e.printStackTrace();
 			}
 			if(concentrations != null)
-				compoundConcentrationCash.put(id, concentrations);
+				compoundConcentrationCache.put(id, concentrations);
 		}	
-		return compoundConcentrationCash.get(id);
+		return compoundConcentrationCache.get(id);
 	}
 	
 	public static void addMSMSLibraryEntriesForCompound(
 			CompoundIdentity id, Collection<MsMsLibraryFeature>msmsLibEntries) {
 		
-		if(compoundMMSMSCash == null)
-			compoundMMSMSCash = new TreeMap<CompoundIdentity,Collection<MsMsLibraryFeature>>(
+		if(compoundMMSMSCache == null)
+			compoundMMSMSCache = new TreeMap<CompoundIdentity,Collection<MsMsLibraryFeature>>(
 					new CompoundIdentityComparator(SortProperty.ID));
 		
-		compoundMMSMSCash.put(id, msmsLibEntries);
+		compoundMMSMSCache.put(id, msmsLibEntries);
 	}
 	
 	public static Collection<MsMsLibraryFeature>getMSMSLibraryEntriesForCompound(CompoundIdentity id){
 		
-		if(compoundMMSMSCash == null)
-			compoundMMSMSCash = new TreeMap<CompoundIdentity,Collection<MsMsLibraryFeature>>(
+		if(compoundMMSMSCache == null)
+			compoundMMSMSCache = new TreeMap<CompoundIdentity,Collection<MsMsLibraryFeature>>(
 					new CompoundIdentityComparator(SortProperty.ID));
 		
-		if(!compoundMMSMSCash.containsKey(id)) {
+		if(!compoundMMSMSCache.containsKey(id)) {
 			
 			Collection<MsMsLibraryFeature>msmsLibEntries = null;
 			try {
@@ -103,17 +103,17 @@ public class CompoundDatabaseCash {
 			if(msmsLibEntries != null) {
 				
 				if(!msmsLibEntries.isEmpty())
-					compoundMMSMSCash.put(id, msmsLibEntries);
+					compoundMMSMSCache.put(id, msmsLibEntries);
 			}
 		}	
-		return compoundMMSMSCash.get(id);
+		return compoundMMSMSCache.get(id);
 	}
 	
-	public static void clearCash() {
-		compoundConcentrationCash = 
+	public static void clearCache() {
+		compoundConcentrationCache = 
 				new TreeMap<CompoundIdentity,Collection<CompoundConcentration>>(
 						new CompoundIdentityComparator(SortProperty.ID));
-		compoundMMSMSCash = 
+		compoundMMSMSCache = 
 				new TreeMap<CompoundIdentity,Collection<MsMsLibraryFeature>>(
 						new CompoundIdentityComparator(SortProperty.ID));
 	}

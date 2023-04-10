@@ -30,7 +30,7 @@ import java.util.TreeSet;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
 import edu.umich.med.mrc2.datoolbox.project.store.ExperimentDesignFields;
 import edu.umich.med.mrc2.datoolbox.project.store.LIMSExperimentFields;
@@ -373,7 +373,7 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 				experimentElement.getAttributeValue(
 						LIMSExperimentFields.ProjectId.name());
 		if(projectId != null)
-			project = IDTDataCash.getProjectById(projectId);
+			project = IDTDataCache.getProjectById(projectId);
 		
 		startDate = new Date();
 		String startDateString = 
@@ -389,7 +389,7 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 		String userId = 
 				experimentElement.getAttributeValue(LIMSExperimentFields.UserId.name());
 		if(userId != null)
-			creator = IDTDataCash.getUserById(userId);
+			creator = IDTDataCache.getUserById(userId);
 		
 		//	ExperimentDesign
 		Element experimentDesignElement =

@@ -33,7 +33,7 @@ import javax.swing.event.ListSelectionEvent;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -212,9 +212,9 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		LIMSDataCash.getExperiments().remove(activeExperiment);
+		LIMSDataCache.getExperiments().remove(activeExperiment);
 		clearPanel();		
-		experimentDataPanel.loadExperimentList(LIMSDataCash.getExperiments());
+		experimentDataPanel.loadExperimentList(LIMSDataCache.getExperiments());
 	}
 
 	private void syncMrc2limsAndMetlims() {
@@ -264,7 +264,7 @@ public class METLIMSPanel extends DockableMRC2ToolboxPanel {
 			if (e.getSource().getClass().equals(LimsDataPullTask.class)) {
 
 				clearPanel();
-				experimentDataPanel.loadExperimentList(LIMSDataCash.getExperiments());
+				experimentDataPanel.loadExperimentList(LIMSDataCache.getExperiments());
 			}
 //			if(e.getSource().getClass().equals(MetLimsToMrc2limsDataTransferTask.class)) {
 //				refreshLimsData();

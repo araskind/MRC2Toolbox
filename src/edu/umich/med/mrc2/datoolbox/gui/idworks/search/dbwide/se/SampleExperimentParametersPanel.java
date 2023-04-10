@@ -36,7 +36,7 @@ import javax.swing.JScrollPane;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSSampleType;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.stock.lookup.SampleTypeTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.IDTrackerDataSearchDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.TrackerSearchParametersPanel;
@@ -115,9 +115,9 @@ public class SampleExperimentParametersPanel extends TrackerSearchParametersPane
 	public void populateTablesFromDatabase() {
 		
 		experimentListingTable.setTableModelFromExperimentList(
-					IDTDataCash.getExperiments());
+					IDTDataCache.getExperiments());
 		sampleTypeTable.setModelFromSampleTypeList(
-					IDTDataCash.getSampleTypeList());
+					IDTDataCache.getSampleTypeList());
 		
 		experimentListingTable.getSelectionModel().addListSelectionListener(this);
 		sampleTypeTable.getSelectionModel().addListSelectionListener(this);

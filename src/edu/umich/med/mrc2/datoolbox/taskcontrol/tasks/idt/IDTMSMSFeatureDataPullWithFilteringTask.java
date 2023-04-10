@@ -51,7 +51,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -59,7 +59,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.utils.DiskCashUtils;
+import edu.umich.med.mrc2.datoolbox.utils.DiskCacheUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -210,10 +210,10 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 				Adduct defaultAdduct = null;
 				while (rs.next()) {
 					
-					MSFeatureInfoBundle fInCash = 
-							DiskCashUtils.retrieveMSFeatureInfoBundleFromCache(rs.getString("MSMS_FEATURE_ID"));
-					if(fInCash != null) {
-						cashedFeatures.add(fInCash);
+					MSFeatureInfoBundle fInCache = 
+							DiskCacheUtils.retrieveMSFeatureInfoBundleFromCache(rs.getString("MSMS_FEATURE_ID"));
+					if(fInCache != null) {
+						cachedFeatures.add(fInCache);
 						processed++;
 						continue;				
 					}	
@@ -280,7 +280,7 @@ public class IDTMSMSFeatureDataPullWithFilteringTask extends IDTMSMSFeatureDataP
 					bundle.setDataExtractionMethod(pipeline.getDataExtractionMethod());
 					bundle.setExperiment(experiment);
 					StockSample stockSample =
-						IDTDataCash.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
+						IDTDataCache.getStockSampleById(rs.getString("STOCK_SAMPLE_ID"));
 					bundle.setStockSample(stockSample);
 					IDTExperimentalSample sample =
 						IDTUtils.getExperimentalSampleById(rs.getString("SAMPLE_ID"), conn);

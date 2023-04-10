@@ -45,7 +45,7 @@ import javax.swing.event.ListSelectionListener;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.communication.DockableParametersPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.se.IDTrackerExperimentListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -127,7 +127,7 @@ public class DockableExperimentsTable extends DockableParametersPanel {
 			Collection<Polarity>polarities = new TreeSet<Polarity>();
 			for(LIMSExperiment experiment : getSelectedExperiments()) {
 				
-				Collection<Polarity>ep = IDTDataCash.getPolaritiesForExperiment(experiment);
+				Collection<Polarity>ep = IDTDataCache.getPolaritiesForExperiment(experiment);
 				if(ep != null && !ep.isEmpty())
 					polarities.addAll(ep);
 			}

@@ -41,7 +41,7 @@ import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.AssayDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 
-public class LIMSDataCash {
+public class LIMSDataCache {
 
 	private static Collection<LIMSUser>users = 
 			new TreeSet<LIMSUser>();

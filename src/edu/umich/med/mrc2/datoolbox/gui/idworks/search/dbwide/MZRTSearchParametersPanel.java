@@ -44,7 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
@@ -275,7 +275,7 @@ public class MZRTSearchParametersPanel extends TrackerSearchParametersPanel {
 	public void populateCollisionEnergySelectorFromDatabase() {
 			collisionEnergyComboBox.setModel(
 					new SortedComboBoxModel<Double>(
-							IDTDataCash.getCollisionEnergiesList()));
+							IDTDataCache.getCollisionEnergiesList()));
 	}
 	
 	public Double getPrecursorMz() {

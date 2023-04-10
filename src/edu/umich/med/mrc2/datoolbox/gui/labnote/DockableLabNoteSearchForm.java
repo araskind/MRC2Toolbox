@@ -58,8 +58,8 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
@@ -309,22 +309,22 @@ public class DockableLabNoteSearchForm extends DefaultSingleCDockable
 			return;
 		}		
 		LIMSInstrument[] instruments =
-				IDTDataCash.getInstrumentList().stream().
+				IDTDataCache.getInstrumentList().stream().
 				toArray(size -> new LIMSInstrument[size]);
 		instrumentComboBox.setModel(
 				new DefaultComboBoxModel<LIMSInstrument>(instruments));
 		instrumentComboBox.setSelectedIndex(-1);
 		
 		experimentComboBox.setModel(
-				new SortedComboBoxModel<LIMSExperiment>(LIMSDataCash.getExperiments()));
+				new SortedComboBoxModel<LIMSExperiment>(LIMSDataCache.getExperiments()));
 		experimentComboBox.setSelectedIndex(-1);
 		experimentComboBox.addItemListener(this);
 		
 		assayComboBox.setModel(
-				new SortedComboBoxModel<Assay>(LIMSDataCash.getAssays()));
+				new SortedComboBoxModel<Assay>(LIMSDataCache.getAssays()));
 		assayComboBox.setSelectedIndex(-1);
 		
-		List<LIMSUser> staff = LIMSDataCash.getUsers().stream().filter(u -> u.getAffiliation().equals("STAFF"))
+		List<LIMSUser> staff = LIMSDataCache.getUsers().stream().filter(u -> u.getAffiliation().equals("STAFF"))
 				.collect(Collectors.toList());
 		SortedComboBoxModel<LIMSUser> userModel = new SortedComboBoxModel<LIMSUser>(staff);
 		userComboBox.setModel(userModel);

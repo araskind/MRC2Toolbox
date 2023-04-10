@@ -34,7 +34,7 @@ import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Assay;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCash;
+import edu.umich.med.mrc2.datoolbox.database.lims.LIMSDataCache;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 
 public class LIMSReportingUtils {
@@ -47,7 +47,7 @@ public class LIMSReportingUtils {
 		if(parentDirectory == null)
 			return null;
 
-		LIMSExperiment experiment = LIMSDataCash.getExperimentById(experimentId);
+		LIMSExperiment experiment = LIMSDataCache.getExperimentById(experimentId);
 		if(experiment == null)
 			return null;
 

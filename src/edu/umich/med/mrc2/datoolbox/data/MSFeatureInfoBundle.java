@@ -34,8 +34,8 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
-import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.database.idt.OfflineExperimentLoadCache;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureFields;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureInfoBundleFields;
 
@@ -334,22 +334,22 @@ public class MSFeatureInfoBundle implements Serializable {
 		String acqMethodId = 
 				featureElement.getAttributeValue(MsFeatureInfoBundleFields.AcqMethod.name());
 		if(acqMethodId != null)
-			acquisitionMethod = IDTDataCash.getAcquisitionMethodById(acqMethodId);
+			acquisitionMethod = IDTDataCache.getAcquisitionMethodById(acqMethodId);
 
 		String daMethodId = 
 				featureElement.getAttributeValue(MsFeatureInfoBundleFields.DaMethod.name());
 		if(daMethodId != null)
-			dataExtractionMethod = IDTDataCash.getDataExtractionMethodById(daMethodId);
+			dataExtractionMethod = IDTDataCache.getDataExtractionMethodById(daMethodId);
 		
 		String experimentId = 
 				featureElement.getAttributeValue(MsFeatureInfoBundleFields.Exp.name());
 		if(experimentId != null)
-			experiment = IDTDataCash.getExperimentById(experimentId);
+			experiment = IDTDataCache.getExperimentById(experimentId);
 		
 		String sampleId = 
 				featureElement.getAttributeValue(MsFeatureInfoBundleFields.Sample.name());
 		if(sampleId != null)
-			sample = (IDTExperimentalSample)OfflineExperimentLoadCash.getExperimentalSampleById(sampleId);
+			sample = (IDTExperimentalSample)OfflineExperimentLoadCache.getExperimentalSampleById(sampleId);
 		if(sample != null)
 			stockSample = sample.getParentStockSample();
 		
@@ -364,7 +364,7 @@ public class MSFeatureInfoBundle implements Serializable {
 			String[]fusList = idFollowupStepsString.split("@");
 			for(String fusId : fusList) {
 				MSFeatureIdentificationFollowupStep fus = 
-						IDTDataCash.getMSFeatureIdentificationFollowupStepById(fusId);
+						IDTDataCache.getMSFeatureIdentificationFollowupStepById(fusId);
 				if(fus != null)
 					idFollowupSteps.add(fus);
 			}		
@@ -377,7 +377,7 @@ public class MSFeatureInfoBundle implements Serializable {
 			String[]stAnList = stAnStepsString.split("@");
 			for(String stAnId : stAnList) {
 				StandardFeatureAnnotation stan = 
-						IDTDataCash.getStandardFeatureAnnotationById(stAnId);
+						IDTDataCache.getStandardFeatureAnnotationById(stAnId);
 				if(stan != null)
 					standadAnnotations.add(stan);
 			}		

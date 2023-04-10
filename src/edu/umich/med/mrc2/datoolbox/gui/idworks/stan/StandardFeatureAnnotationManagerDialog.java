@@ -38,7 +38,7 @@ import javax.swing.WindowConstants;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.StandardAnnotationUtils;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -75,7 +75,7 @@ public class StandardFeatureAnnotationManagerDialog extends JDialog implements A
 		standardFeatureAnnotationTable = new StandardFeatureAnnotationTable();
 		getContentPane().add(new JScrollPane(standardFeatureAnnotationTable), BorderLayout.CENTER);
 		standardFeatureAnnotationTable.setTableModelFromStandardFeatureAnnotationList(
-				IDTDataCash.getStandardFeatureAnnotationList());
+				IDTDataCache.getStandardFeatureAnnotationList());
 		
 		pack();
 	}
@@ -140,9 +140,9 @@ public class StandardFeatureAnnotationManagerDialog extends JDialog implements A
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		IDTDataCash.refreshStandardFeatureAnnotationList();
+		IDTDataCache.refreshStandardFeatureAnnotationList();
 		standardFeatureAnnotationTable.setTableModelFromStandardFeatureAnnotationList(
-				IDTDataCash.getStandardFeatureAnnotationList());
+				IDTDataCache.getStandardFeatureAnnotationList());
 		standardFeatureAnnotationEditorDialog.dispose();
 	}
 
@@ -163,9 +163,9 @@ public class StandardFeatureAnnotationManagerDialog extends JDialog implements A
 				e.printStackTrace();
 			}
 		}
-		IDTDataCash.refreshStandardFeatureAnnotationList();
+		IDTDataCache.refreshStandardFeatureAnnotationList();
 		standardFeatureAnnotationTable.setTableModelFromStandardFeatureAnnotationList(
-				IDTDataCash.getStandardFeatureAnnotationList());
+				IDTDataCache.getStandardFeatureAnnotationList());
 		standardFeatureAnnotationEditorDialog.dispose();
 	}
 	
@@ -186,7 +186,7 @@ public class StandardFeatureAnnotationManagerDialog extends JDialog implements A
 			
 			String id = annotation.getId();
 			StandardFeatureAnnotation sameCode = 
-					IDTDataCash.getStandardFeatureAnnotationList().stream().
+					IDTDataCache.getStandardFeatureAnnotationList().stream().
 					filter(s -> !s.getId().equals(id)).
 					filter(s -> s.getCode().equals(code)).
 					findFirst().orElse(null);
@@ -196,7 +196,7 @@ public class StandardFeatureAnnotationManagerDialog extends JDialog implements A
 		}
 		else {
 			StandardFeatureAnnotation sameCode = 
-					IDTDataCash.getStandardFeatureAnnotationList().stream().
+					IDTDataCache.getStandardFeatureAnnotationList().stream().
 					filter(s -> s.getCode().equals(code)).
 					findFirst().orElse(null);
 			
@@ -229,9 +229,9 @@ public class StandardFeatureAnnotationManagerDialog extends JDialog implements A
 				e.printStackTrace();
 			}
 		}
-		IDTDataCash.refreshStandardFeatureAnnotationList();
+		IDTDataCache.refreshStandardFeatureAnnotationList();
 		standardFeatureAnnotationTable.setTableModelFromStandardFeatureAnnotationList(
-				IDTDataCash.getStandardFeatureAnnotationList());
+				IDTDataCache.getStandardFeatureAnnotationList());
 	}
 }
 

@@ -391,7 +391,7 @@ public class MSMSScoreCalculator {
 //			ReferenceMsMsLibraryMatch match) {
 //
 //		NISTPepSearchParameterObject params = 
-//				IDTDataCash.getNISTPepSearchParameterObjectById(match.getSearchParameterSetId());
+//				IDTDataCache.getNISTPepSearchParameterObjectById(match.getSearchParameterSetId());
 //		if(params == null) {
 //			return calculateEntropyBasedMatchScore(			
 //					msms.getSpectrum(), 

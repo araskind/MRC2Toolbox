@@ -52,7 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSInstrument;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 import rtf.AdvancedRTFDocument;
@@ -294,18 +294,18 @@ public class QCAnnotationUtils {
 			if(rs.getDate("LAST_EDITED_ON") != null)
 				lastModified = new Date(rs.getDate("LAST_EDITED_ON").getTime());
 
-			LIMSUser createdBy = LIMSDataCash.getUserById(rs.getString("CREATED_BY"));
+			LIMSUser createdBy = LIMSDataCache.getUserById(rs.getString("CREATED_BY"));
 			LIMSUser lastModifiedBy = createdBy;
 			if(rs.getString("LAST_EDITED_BY") != null)
-				lastModifiedBy = LIMSDataCash.getUserById(rs.getString("LAST_EDITED_BY"));
+				lastModifiedBy = LIMSDataCache.getUserById(rs.getString("LAST_EDITED_BY"));
 
 			LIMSInstrument limsInstrument = null;
 			if(rs.getString("INSTRUMENT_ID") != null)
-				limsInstrument = IDTDataCash.getInstrumentById(rs.getString("INSTRUMENT_ID"));
+				limsInstrument = IDTDataCache.getInstrumentById(rs.getString("INSTRUMENT_ID"));
 
 			LIMSExperiment limsExperiment = null;
 			if(rs.getString("EXPERIMENT_ID") != null)
-				limsExperiment = LIMSDataCash.getExperimentById(rs.getString("EXPERIMENT_ID"));
+				limsExperiment = LIMSDataCache.getExperimentById(rs.getString("EXPERIMENT_ID"));
 
 			ExperimentalSample limsSample = null;
 			if(rs.getString("SAMPLE_ID") != null)
@@ -313,7 +313,7 @@ public class QCAnnotationUtils {
 
 			Assay limsAssay = null;
 			if(rs.getString("ASSAY_ID") != null)
-				limsAssay = LIMSDataCash.getAssayById(rs.getString("ASSAY_ID"));
+				limsAssay = LIMSDataCache.getAssayById(rs.getString("ASSAY_ID"));
 
 			QcEventType limsCategory = null;
 			if(rs.getString("EVENT_TYPE") != null)

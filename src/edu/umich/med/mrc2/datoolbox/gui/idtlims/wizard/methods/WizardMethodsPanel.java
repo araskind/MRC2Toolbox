@@ -52,7 +52,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.WorklistImportType;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataExtractionMethod;
 import edu.umich.med.mrc2.datoolbox.database.idt.AcquisitionMethodUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.gui.expsetup.dpl.AcquisitionMethodSelectorDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq.AcquisitionMethodExtendedEditorDialog;
@@ -276,7 +276,7 @@ public class WizardMethodsPanel extends IDTrackerDataLoadWizardPanel
 		try {
 			IDTUtils.addNewDataExtractionMethod(
 					selectedMethod, dataExtractionMethodEditorDialog.getMethodFile());
-			IDTDataCash.getDataExtractionMethods().add(selectedMethod);
+			IDTDataCache.getDataExtractionMethods().add(selectedMethod);
 			dataExtractionMethods.add(selectedMethod);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -398,7 +398,7 @@ public class WizardMethodsPanel extends IDTrackerDataLoadWizardPanel
 		try {
 			AcquisitionMethodUtils.addNewAcquisitionMethod(
 					selectedMethod, methodData.getMethodFile());
-			IDTDataCash.getAcquisitionMethods().add(selectedMethod);
+			IDTDataCache.getAcquisitionMethods().add(selectedMethod);
 			dataAcquisitionMethods.add(selectedMethod);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

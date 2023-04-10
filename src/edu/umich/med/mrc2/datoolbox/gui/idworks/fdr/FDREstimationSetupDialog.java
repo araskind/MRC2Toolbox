@@ -55,7 +55,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PepSearchParameterSetTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.PepSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -206,7 +206,7 @@ public class FDREstimationSetupDialog extends JDialog
 			return selectedDecoys;
 		
 		List<String> availableDecoyNames = 
-				IDTDataCash.getReferenceMsMsLibraryList().stream().
+				IDTDataCache.getReferenceMsMsLibraryList().stream().
 				filter(l -> l.isDecoy()).map(d -> d.getSearchOutputCode()).
 				sorted().collect(Collectors.toList());
 
@@ -227,7 +227,7 @@ public class FDREstimationSetupDialog extends JDialog
 			errors.add("Please select PepSearch parameter set.");
 			
 		List<ReferenceMsMsLibrary> availableDecoys = 
-				IDTDataCash.getReferenceMsMsLibraryList().stream().
+				IDTDataCache.getReferenceMsMsLibraryList().stream().
 				filter(l -> l.isDecoy()).sorted().collect(Collectors.toList());
 		
 		if(getSelectedDecoyLibraries().isEmpty()) {

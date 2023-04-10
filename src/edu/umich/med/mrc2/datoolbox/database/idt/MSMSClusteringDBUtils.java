@@ -162,7 +162,7 @@ public class MSMSClusteringDBUtils {
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			
-			LIMSUser createdBy = IDTDataCash.getUserById(rs.getString("CREATED_BY"));
+			LIMSUser createdBy = IDTDataCache.getUserById(rs.getString("CREATED_BY"));
 			MSMSClusterDataSet ds = new MSMSClusterDataSet(
 					rs.getString("CDS_ID"), 
 					rs.getString("NAME"), 

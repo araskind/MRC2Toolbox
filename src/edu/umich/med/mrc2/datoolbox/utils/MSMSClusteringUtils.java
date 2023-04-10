@@ -43,7 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
-import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCash;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.nist.pepsearch.HiResSearchOption;
 
 public class MSMSClusteringUtils {
@@ -83,7 +83,7 @@ public class MSMSClusteringUtils {
 		Collection<MsFeatureIdentity>hybridIdsToRank = 
 				new TreeSet<MsFeatureIdentity>(NISTPepSearchUtils.idScoreComparator);
 		String metlinLibId = 
-				IDTDataCash.getReferenceMsMsLibraryByName("Metlin_AMRT_PCDL").getUniqueId();
+				IDTDataCache.getReferenceMsMsLibraryByName("Metlin_AMRT_PCDL").getUniqueId();
 			
 		Map<String,HiResSearchOption>searchTypeMap = 
 				NISTPepSearchUtils.getSearchTypeMap(cluster.getComponents());	
