@@ -38,6 +38,11 @@
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.DockableMiscCalculationsPanel</placeholder>
+												</key>
+											</entry>
 										</placeholders>
 									</content>
 								</delegate>
@@ -99,24 +104,53 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<leaf id="0" nodeId="1602552805051">
-											<placeholders>
-												<placeholder>dock.single.DockableFormulaGenerator</placeholder>
-												<placeholder>dock.single.DockableIsotopicPatternCalculator</placeholder>
-												<placeholder>dock.single.DockableMiscCalculationsPanel</placeholder>
-											</placeholders>
-											<placeholder-map>
-												<version>0</version>
-												<format>dock.PlaceholderList</format>
-												<entry>
-													<key shared="false">
-														<placeholder>dock.single.DockableFormulaGenerator</placeholder>
-													</key>
-													<item key="convert" type="b">true</item>
-													<item key="convert-keys" type="a"/>
-												</entry>
-											</placeholder-map>
-										</leaf>
+										<node nodeId="1681236465927" orientation="HORIZONTAL" divider="0.6731266149870802">
+											<leaf id="0" nodeId="1681236465925">
+												<placeholders>
+													<placeholder>dock.single.DockableIsotopicPatternCalculator</placeholder>
+												</placeholders>
+												<placeholder-map>
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableIsotopicPatternCalculator</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableMiscCalculationsPanel</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableFormulaGenerator</placeholder>
+														</key>
+														<item key="convert" type="b">true</item>
+														<item key="convert-keys" type="a"/>
+													</entry>
+												</placeholder-map>
+											</leaf>
+											<leaf id="-1" nodeId="1602552805051">
+												<placeholders>
+													<placeholder>dock.single.DockableFormulaGenerator</placeholder>
+													<placeholder>dock.single.DockableMiscCalculationsPanel</placeholder>
+												</placeholders>
+												<placeholder-map>
+													<version>0</version>
+													<format>dock.PlaceholderList</format>
+													<entry>
+														<key shared="false">
+															<placeholder>dock.single.DockableFormulaGenerator</placeholder>
+														</key>
+													</entry>
+												</placeholder-map>
+											</leaf>
+										</node>
 									</content>
 								</delegate>
 							</layout>
@@ -148,7 +182,7 @@
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableFormulaGenerator</placeholder>
+													<placeholder>dock.single.DockableMiscCalculationsPanel</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -158,11 +192,11 @@
 												</item>
 												<item key="dock.index" type="i">1</item>
 												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableFormulaGenerator</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableMiscCalculationsPanel</item>
 											</entry>
 											<entry>
 												<key shared="false">
-													<placeholder>dock.single.DockableMiscCalculationsPanel</placeholder>
+													<placeholder>dock.single.DockableFormulaGenerator</placeholder>
 												</key>
 												<item key="convert" type="b">true</item>
 												<item key="convert-keys" type="a">
@@ -172,7 +206,7 @@
 												</item>
 												<item key="dock.index" type="i">2</item>
 												<item key="dock.id" type="i">2</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableMiscCalculationsPanel</item>
+												<item key="dock.placeholder" type="s">dock.single.DockableFormulaGenerator</item>
 											</entry>
 										</placeholders>
 									</layout>
@@ -188,20 +222,20 @@
 											<children ignore="false"/>
 										</child>
 										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableFormulaGenerator">
-												<replacement id="dockablesingle DockableFormulaGenerator"/>
+											<layout factory="predefined" placeholder="dock.single.DockableMiscCalculationsPanel">
+												<replacement id="dockablesingle DockableMiscCalculationsPanel"/>
 												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableFormulaGenerator</id>
+													<id>DockableMiscCalculationsPanel</id>
 													<area/>
 												</delegate>
 											</layout>
 											<children ignore="false"/>
 										</child>
 										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableMiscCalculationsPanel">
-												<replacement id="dockablesingle DockableMiscCalculationsPanel"/>
+											<layout factory="predefined" placeholder="dock.single.DockableFormulaGenerator">
+												<replacement id="dockablesingle DockableFormulaGenerator"/>
 												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableMiscCalculationsPanel</id>
+													<id>DockableFormulaGenerator</id>
 													<area/>
 												</delegate>
 											</layout>
@@ -300,12 +334,9 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableFormulaGenerator</placeholder>
 											<backup-path>
+												<node location="RIGHT" size="0.32687338501291985" id="1681236465927"/>
 												<leaf id="1602552805051"/>
 											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>1</index>
-											<placeholder>dock.single.DockableFormulaGenerator</placeholder>
 										</property>
 									</location>
 								</property>
@@ -314,6 +345,7 @@
 						<entry id="single DockableMiscCalculationsPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.maximized</mode>
+								<mode>dock.mode.minimized</mode>
 								<mode>dock.mode.normal</mode>
 							</history>
 							<properties>
@@ -329,6 +361,19 @@
 										</property>
 									</location>
 								</property>
+								<property id="dock.mode.minimized">
+									<mode>dock.mode.minimized</mode>
+									<root>ccontrol north</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="flap dock">
+											<index>0</index>
+											<holding>true</holding>
+											<size>400</size>
+											<placeholder>dock.single.DockableMiscCalculationsPanel</placeholder>
+										</property>
+									</location>
+								</property>
 								<property id="dock.mode.normal">
 									<mode>dock.mode.normal</mode>
 									<root>ccontrol center</root>
@@ -337,11 +382,12 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.DockableMiscCalculationsPanel</placeholder>
 											<backup-path>
+												<node location="RIGHT" size="0.32687338501291985" id="1681236465927"/>
 												<leaf id="1602552805051"/>
 											</backup-path>
 										</property>
 										<property factory="StackDockPropertyFactory">
-											<index>2</index>
+											<index>1</index>
 											<placeholder>dock.single.DockableMiscCalculationsPanel</placeholder>
 										</property>
 									</location>

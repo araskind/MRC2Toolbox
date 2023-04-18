@@ -68,6 +68,7 @@ public class SimpleAdductTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }

@@ -131,7 +131,8 @@ public class MassDifferenceTableModel extends BasicTableModel {
 				}
 			}
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

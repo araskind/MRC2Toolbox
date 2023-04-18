@@ -84,7 +84,8 @@ public class NISTLibraryTableModel extends BasicTableModel {
 							fd.getKey()
 						});
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

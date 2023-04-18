@@ -138,8 +138,9 @@ public class LibraryFeatureTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 			count++;
-		}		
-		addRows(rowData);
+		}
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void updateFeatureData(LibraryMsFeature lf) {

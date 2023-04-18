@@ -107,7 +107,8 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 				};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void setTableModelFromCompoundMultiplexMixtures(
@@ -142,7 +143,8 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 				rowData.add(obj);
 			}
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void updateComponentData(CompoundMultiplexMixtureComponent component) {

@@ -83,6 +83,7 @@ public class SubsetFeaturesTableModel extends BasicTableModel {
 			rowData.add(obj);
 			count++;
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }

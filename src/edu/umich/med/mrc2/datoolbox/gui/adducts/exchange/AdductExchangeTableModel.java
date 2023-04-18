@@ -63,6 +63,7 @@ public class AdductExchangeTableModel extends BasicTableModel {
 					ex };
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }

@@ -92,7 +92,8 @@ public class SpectraTableModel extends BasicTableModel {
 		for(AverageMassSpectrum spec : spectra) 
 			rowData.add(createRowData(spec));
 		
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

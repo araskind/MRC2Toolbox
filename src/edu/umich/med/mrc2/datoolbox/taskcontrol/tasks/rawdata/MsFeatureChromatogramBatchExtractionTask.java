@@ -117,6 +117,11 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 				
 				if(spectrum.getPrimaryAdduct() != null)					
 					mzList.add(spectrum.getPrimaryAdductBasePeakMz());
+				else {
+					double bpmz = spectrum.getBasePeakMz();
+					if(bpmz > 0)
+						mzList.add(bpmz);
+				}
 			}
 			if(!mzList.isEmpty()) {
 				ChromatogramDefinition cd = commonDefinition.clone();

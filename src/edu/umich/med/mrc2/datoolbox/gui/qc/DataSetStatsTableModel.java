@@ -89,7 +89,8 @@ public class DataSetStatsTableModel extends BasicTableModel {
 					dfss.getRsdTrimmed() };
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

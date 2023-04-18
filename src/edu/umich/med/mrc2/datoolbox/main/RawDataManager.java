@@ -75,7 +75,8 @@ public class RawDataManager {
 	
 	public static LCMSData getRawData(DataFile file) {
 		
-		if(rawDataMap.get(file) == null) {
+		LCMSData rds = rawDataMap.get(file);
+		if(rds == null) {
 			
 			File rdf = new File(file.getFullPath());
 			if(!rdf.exists()) {
@@ -89,21 +90,33 @@ public class RawDataManager {
 				return null;
 			
 			file.setFullPath(rdf.getAbsolutePath());
-			LCMSData data = null;
 			try {
-				data = createDataSource(new File(file.getFullPath()));
+				rds = createDataSource(new File(file.getFullPath()));
 			} catch (FileParsingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if(data != null) {
+			if(rds != null) {
 				
 				Color nextColor = ColorUtils.getColor(rawDataMap.size());
 				file.setColor(nextColor);
-				rawDataMap.put(file, data);	
+				rawDataMap.put(file, rds);	
 			}
 		}
-		return rawDataMap.get(file);
+		else {
+			if(rds.getScans() != null && rds.getScans().isEmpty()) {
+				
+				try {
+					rds.load(LCMSDataSubset.STRUCTURE_ONLY, MRC2ToolBoxCore.getMainWindow());
+				} catch (FileParsingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}		
+				rds.getScans().isAutoloadSpectra(true);
+				rds.getScans().setDefaultStorageStrategy(StorageStrategy.SOFT);
+			}
+		}
+		return rds;
 	}
 	
 	public static Polarity getPolarityForLCMSData(LCMSData data) {

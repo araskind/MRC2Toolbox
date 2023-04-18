@@ -114,7 +114,8 @@ public class ChromatogramTableModel extends BasicTableModel {
 		for(ExtractedChromatogram chr : chromatograms) 
 			rowData.add(createRowData(chr));
 		
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

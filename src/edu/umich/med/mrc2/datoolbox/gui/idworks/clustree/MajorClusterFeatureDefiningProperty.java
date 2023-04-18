@@ -19,42 +19,20 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.data.enums;
+package edu.umich.med.mrc2.datoolbox.gui.idworks.clustree;
 
-public enum BinnerField {
+public enum MajorClusterFeatureDefiningProperty {
 
-	INDEX("Index"),
-	FEATURE("Feature"),
-	MZ("m/z"),
-	RT("RT"),
-	INTENSITY("Median Intensity"),
-	MASS_ERROR("Mass Error"),
-	KMD("KMD"),
-	ANNOTATION("Annotations"),
-	OTHER_ANNOTATION_IN_GROUP("Other Annotations In Group"),
-	DERIVATIONS("Derivations"),
-	FEATURE_GROUP_NUMBER("Feature Group Number"),
-	CHARGE_CARRIER("Charge Carrier"),
-	ADDITIONAL_ADDUCTS("Adduct/NL"),
-	ISOTOPES("Isotopes"),
-	OTHER_ISOTOPES_IN_GROUP("Other Isotopes In Group"),
-	DERIVED_MW("Derived Molecular Mass"),
-	BIN("Bin"),
-	CLUSTER("Corr Cluster"),
-	REBIN_SUBCLUSTER("Rebin Subcluster"),
-	RT_SUBCLUSTER("RT Subcluster"),
-	METABOLITE_NAME("Metabolite_name"),
-	BINNER_NAME("Binner name"),
-	NEUTRAL_MASS("Neutral mass"),
-	RT_EXPECTED("RT expected"),
-	MONOISOTOPIC_MZ("Monoisotopic M/Z"),
-	CHARGE("Charge"),
+	LARGEST_AREA("Largest total peak area"),
+	HIGHEST_MSMS_SCORE("Highest MSMS score (regular matches only)"),
+	HIGHEST_MSMS_SCORE_WITH_IN_SOURCE("Highest MSMS score (regular and in-source matches)"),
+	SMALLEST_MASS_ERROR("Smallest mass error for parent ion"),
 	;
 
 	private final String name;
 
-	BinnerField(String field) {
-		this.name = field;
+	MajorClusterFeatureDefiningProperty(String name) {
+		this.name = name;
 	}
 
 	public String getName() {
@@ -63,5 +41,15 @@ public enum BinnerField {
 	
 	public String toString() {
 		return name;
+	}
+	
+	public static MajorClusterFeatureDefiningProperty getPropertyByName(String propName) {
+		
+		for(MajorClusterFeatureDefiningProperty p : MajorClusterFeatureDefiningProperty.values()) {
+			
+			if(p.name().equals(propName))
+				return p;
+		}
+		return null;
 	}
 }

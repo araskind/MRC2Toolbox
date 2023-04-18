@@ -91,7 +91,8 @@ public class CompositeAdductComponentsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 	
 	public void setTableModelFromAdductList(Collection<SimpleAdduct> adducts) {
@@ -131,7 +132,8 @@ public class CompositeAdductComponentsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void setTableModelFromBinnerNeutralMassDifference(BinnerNeutralMassDifference binnerNeutralMassDifference) {
@@ -153,6 +155,7 @@ public class CompositeAdductComponentsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }

@@ -28,7 +28,6 @@ import java.awt.event.InputEvent;
 import javax.swing.Icon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
@@ -37,10 +36,11 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class UniversalIdentificationResultsTablePopupMenu 
-		extends JPopupMenu implements IdentificationLevelEventListener {
+		extends BasicTablePopupMenu implements IdentificationLevelEventListener {
 
 	/**
 	 *
@@ -71,12 +71,14 @@ public class UniversalIdentificationResultsTablePopupMenu
 		copyAsArrayMenuItem;
 	
 	private JMenu idLevelMenu;
-	private ActionListener listener;
+	private ActionListener alistener;
 
-	public UniversalIdentificationResultsTablePopupMenu(ActionListener listener) {
+	public UniversalIdentificationResultsTablePopupMenu(
+			ActionListener listener,
+			ActionListener copyListener) {
 
-		super();
-		this.listener = listener;
+		super(copyListener);
+		this.alistener = listener;
 		
 		idLevelMenu = new JMenu("Set ID confidence level");
 		idLevelMenu.setIcon(setIdLevelIcon);
@@ -122,6 +124,10 @@ public class UniversalIdentificationResultsTablePopupMenu
 		
 		addSeparator();
 		
+		addCopyBlock();
+		
+		addSeparator();
+		
 		copySpectrumAsMSPMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.COPY_LIBRARY_SPECTRUM_AS_MSP_COMMAND.getName(), listener,
 				MainActionCommands.COPY_LIBRARY_SPECTRUM_AS_MSP_COMMAND.getName());
@@ -139,7 +145,7 @@ public class UniversalIdentificationResultsTablePopupMenu
 			
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
 			JMenuItem levelItem = 
-					GuiUtils.addMenuItem(idLevelMenu, level.getName(), listener, level.getName(), levelIcon);
+					GuiUtils.addMenuItem(idLevelMenu, level.getName(), alistener, level.getName(), levelIcon);
 			if(level.getShorcut() != null)
 				levelItem.setAccelerator(KeyStroke.getKeyStroke(level.getShorcut().charAt(0), MASK | InputEvent.SHIFT_DOWN_MASK));
 		}

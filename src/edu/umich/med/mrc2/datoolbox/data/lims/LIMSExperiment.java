@@ -237,7 +237,15 @@ public class LIMSExperiment implements Serializable, Comparable<LIMSExperiment>{
 
 	@Override
 	public int compareTo(LIMSExperiment o) {
-		return id.compareTo(o.getId());
+		
+		if(this.id == null && o.getId() == null)
+			return 0;
+		else if(this.id == null && o.getId() != null)
+			return -1;
+		else if(this.id != null && o.getId() == null)
+			return 1;
+		else
+			return id.compareTo(o.getId());
 	}
 
 	/**

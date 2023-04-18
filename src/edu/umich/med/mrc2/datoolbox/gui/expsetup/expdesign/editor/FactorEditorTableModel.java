@@ -73,7 +73,8 @@ public class FactorEditorTableModel extends BasicTableModel {
 			filter(f -> !f.equals(ReferenceSamplesManager.getSampleControlTypeFactor())).
 			forEach(f -> rowData.add(new Object[] { f }));
 		
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void setEditingAllowed(boolean allowEdit) {

@@ -54,6 +54,7 @@ public class CompoundStructureTableModel extends BasicTableModel {
 			Object[] obj = { id };
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }

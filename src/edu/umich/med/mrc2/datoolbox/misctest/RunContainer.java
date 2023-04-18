@@ -104,6 +104,8 @@ import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassificati
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassificationObject;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsFields;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsParser;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTMSPParser;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTTandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.MultiplexLoadTempObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
@@ -140,11 +142,60 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			classyfyWithLipidMaps();
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static void setNIST20asEntrySource() throws Exception{
+		
+		String mspDirectoryPath = "E:\\DataAnalysis\\Databases\\NIST\\NIST20-export\\EXPORT\\MSP";
+		List<File>mspFiles = null;
+		try {
+			mspFiles = Files.find(Paths.get(mspDirectoryPath), 1,
+					(filePath, fileAttr) -> filePath.toString().toLowerCase().endsWith(".msp") && fileAttr.isRegularFile()).
+					map(p -> p.toFile()).collect(Collectors.toList());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE REF_MSMS_LIBRARY_COMPONENT SET LIBRARY_NAME = ? "
+				+ "WHERE LIBRARY_NAME = ? AND ORIGINAL_LIBRARY_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, "hr_msms_nist");
+		ps.setString(2, "nist_msms");
+		for(File msp : mspFiles) {
+			
+			System.out.println("Starting to process " + FilenameUtils.getBaseName(msp.getName()));
+			try {
+				List<List<String>> mspChunks = NISTMSPParser.parseInputMspFile(msp);
+				int count = 1;
+				for(List<String> msmsChunk : mspChunks) {
+					
+					NISTTandemMassSpectrum msms = NISTMSPParser.parseNistMspDataSource(msmsChunk);
+					if(msms.getNistNum() > 0) {
+						ps.setString(3, Integer.toString(msms.getNistNum()));
+						ps.executeUpdate();
+					}
+					count++;
+					if(count % 50 == 0)
+						System.out.print(".");
+					
+					if(count % 5000 == 0)
+						System.out.println(".");
+				}
+				System.out.println(FilenameUtils.getBaseName(msp.getName()) + " was processed.");
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	private static void classyfyWithLipidMaps() throws Exception{

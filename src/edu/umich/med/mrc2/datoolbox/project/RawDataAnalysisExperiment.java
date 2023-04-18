@@ -373,6 +373,16 @@ public class RawDataAnalysisExperiment extends Project {
 				collect(Collectors.toList());
 	}
 	
+	public Collection<MSFeatureInfoBundle>getMsOneFeatureBundles(){
+		
+		return msFeatureMap.values().stream().
+				flatMap(v -> v.stream()).
+				filter(f -> Objects.nonNull(f.getMsFeature().getSpectrum())).
+				filter(f -> Objects.isNull(f.getMsFeature().getSpectrum().getExperimentalTandemSpectrum())).
+				sorted(new MsFeatureInfoBundleComparator(SortProperty.RT)).
+				collect(Collectors.toList());
+	}
+	
 	public Collection<MSFeatureInfoBundle>getFeatureBundlesForIds(Collection<String>idList){
 		
 		return msFeatureMap.values().stream().

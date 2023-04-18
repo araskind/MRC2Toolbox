@@ -65,7 +65,8 @@ public class SorterTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void addColumnToSorter(TableColumnState columnState) {

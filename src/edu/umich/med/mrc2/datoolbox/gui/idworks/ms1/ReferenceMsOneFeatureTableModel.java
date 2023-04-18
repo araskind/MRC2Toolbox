@@ -115,6 +115,10 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 					hasMsms = true;
 			}
 			String compoundName = "";
+			LIMSSampleType limsSampleType = null;
+			if(bundle.getStockSample() != null) 
+				limsSampleType = bundle.getStockSample().getLimsSampleType();
+			
 			MSFeatureIdentificationLevel idLevel = null;
 			if(cf.getPrimaryIdentity() != null) {
 				compoundName = cf.getPrimaryIdentity().getName();
@@ -150,13 +154,14 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 				cf.getModifiedKmd(),
 				bundle.getExperiment(),
 				bundle.getSample(),
-				bundle.getStockSample().getLimsSampleType(),
+				limsSampleType,
 				bundle.getAcquisitionMethod(),
 				bundle.getDataExtractionMethod(),
 			};
 			rowData.add(obj);
-		}		
-		addRows(rowData);
+		}	
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void updateFeatureData(MSFeatureInfoBundle bundle) {

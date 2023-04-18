@@ -103,7 +103,8 @@ public class IDtrackerDataFileSampleMatchTableModel extends BasicTableModel {
 				};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void addDataFilesUsingWorklist(
@@ -141,7 +142,8 @@ public class IDtrackerDataFileSampleMatchTableModel extends BasicTableModel {
 				};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 	
 	private void setFileDataFromWorklistItem(DataFile file, Collection<LIMSWorklistItem>wlItems) {

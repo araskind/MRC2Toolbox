@@ -674,12 +674,14 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		if(neutralMass > 0.0d)
 			return neutralMass;
 
-		if(primaryIdentity != null)
+		if(primaryIdentity != null && primaryIdentity.getCompoundIdentity() != null)
 			return primaryIdentity.getCompoundIdentity().getExactMass();
 
 		if (spectrum != null && spectrum.getPrimaryAdduct() != null) {
-			MsPoint[] ms = spectrum.getMsForAdduct(spectrum.getPrimaryAdduct());
-			neutralMass = MsUtils.getNeutralMass(ms[0], spectrum.getPrimaryAdduct());		
+			
+			MsPoint[] ms = spectrum.getMsForAdduct(spectrum.getPrimaryAdduct());			
+			if(ms != null)
+				neutralMass = MsUtils.getNeutralMass(ms[0], spectrum.getPrimaryAdduct());		
 		}
 		return neutralMass;
 	}

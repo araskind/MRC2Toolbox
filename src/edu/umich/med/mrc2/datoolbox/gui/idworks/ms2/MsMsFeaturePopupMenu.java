@@ -28,7 +28,6 @@ import java.awt.event.InputEvent;
 import javax.swing.Icon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
@@ -37,9 +36,10 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLevelEventListener {
+public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements IdentificationLevelEventListener {
 
 	/**
 	 *
@@ -50,8 +50,8 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 	
 	private static final Icon nistPepMsIcon = GuiUtils.getIcon("NISTMS-pep", 24);
 	private static final Icon manualIdentificationIcon = GuiUtils.getIcon("manualIdentification", 24);
-	private static final Icon copySelectedIcon = GuiUtils.getIcon("copy", 24);
-	private static final Icon copySelectedWithHeaderIcon = GuiUtils.getIcon("copyWithHeader", 24);
+//	private static final Icon copySelectedIcon = GuiUtils.getIcon("copy", 24);
+//	private static final Icon copySelectedWithHeaderIcon = GuiUtils.getIcon("copyWithHeader", 24);
 	private static final Icon disablePrimaryIdIcon = GuiUtils.getIcon("multipleIdsDisabled", 24);
 	private static final Icon clearIdentificationsIcon = GuiUtils.getIcon("clearIdentifications", 24);
 	private static final Icon fusEditIcon = GuiUtils.getIcon("editIdFollowupStep", 24);
@@ -83,12 +83,14 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 			copyAsArrayMenuItem;
 	
 	private JMenu idLevelMenu;
-	private ActionListener listener;
+	private ActionListener alistener;
 
-	public MsMsFeaturePopupMenu(ActionListener listener) {
+	public MsMsFeaturePopupMenu(
+			ActionListener listener,
+			ActionListener copyListener) {
 
-		super();
-		this.listener = listener;
+		super(copyListener);
+		this.alistener = listener;
 
 		setupNISTPepSearchMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.NIST_MS_PEPSEARCH_SETUP_COMMAND.getName(), listener,
@@ -144,19 +146,23 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 				MainActionCommands.REMOVE_SELECTED_FROM_ACTIVE_MSMS_FEATURE_COLLECTION.getName());
 		removeFromActiveCollectionMenuItem.setIcon(removeFromActiveCollectionIcon);
 		
-		this.addSeparator();
+		addSeparator();
 
-		copySelectedMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_SELECTED_MS2_ROWS_COMMAND.getName(), listener,
-				MainActionCommands.COPY_SELECTED_MS2_ROWS_COMMAND.getName());
-		copySelectedMenuItem.setIcon(copySelectedIcon);
-		copySelectedMenuItem.setEnabled(false);
-
-		copySelectedWithHeaderMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND.getName(), listener,
-				MainActionCommands.COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND.getName());
-		copySelectedWithHeaderMenuItem.setIcon(copySelectedWithHeaderIcon);
-		copySelectedWithHeaderMenuItem.setEnabled(false);
+		addCopyBlock();
+		
+//		copySelectedMenuItem = GuiUtils.addMenuItem(this,
+//				MainActionCommands.COPY_SELECTED_MS2_ROWS_COMMAND.getName(), listener,
+//				MainActionCommands.COPY_SELECTED_MS2_ROWS_COMMAND.getName());
+//		copySelectedMenuItem.setIcon(copySelectedIcon);
+//		copySelectedMenuItem.setEnabled(false);
+//
+//		copySelectedWithHeaderMenuItem = GuiUtils.addMenuItem(this,
+//				MainActionCommands.COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND.getName(), listener,
+//				MainActionCommands.COPY_SELECTED_MS2_ROWS_WITH_HEADER_COMMAND.getName());
+//		copySelectedWithHeaderMenuItem.setIcon(copySelectedWithHeaderIcon);
+//		copySelectedWithHeaderMenuItem.setEnabled(false);
+		
+		addSeparator();
 		
 		copySpectrumAsMSPMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.COPY_FEATURE_SPECTRUM_AS_MSP_COMMAND.getName(), listener,
@@ -189,7 +195,7 @@ public class MsMsFeaturePopupMenu extends JPopupMenu implements IdentificationLe
 			
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
 			JMenuItem levelItem = GuiUtils.addMenuItem(
-					idLevelMenu, level.getName(), listener, 
+					idLevelMenu, level.getName(), alistener, 
 					MSFeatureIdentificationLevel.SET_PRIMARY + level.getName(), levelIcon);
 			if(level.getShorcut() != null)
 				levelItem.setAccelerator(

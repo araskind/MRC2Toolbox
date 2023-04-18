@@ -78,6 +78,7 @@ public class MsTableModel extends BasicTableModel {
 				}				
 			}
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }

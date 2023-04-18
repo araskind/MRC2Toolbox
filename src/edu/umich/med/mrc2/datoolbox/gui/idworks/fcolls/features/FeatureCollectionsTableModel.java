@@ -84,7 +84,8 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 	
 	public int getFeatureCollectionRow(MsFeatureInfoBundleCollection fCol) {

@@ -25,8 +25,6 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -122,10 +120,12 @@ public class MassSpectrum implements Serializable {
 			if(entry.getValue() == null || entry.getValue().isEmpty())
 				continue;
 
-			MsPoint basePeak =
-				Collections.max(entry.getValue(), Comparator.comparing(MsPoint::getIntensity));
+			MsPoint basePeak = 
+					entry.getValue().stream().
+					sorted(MsUtils.reverseIntensitySorter).
+					findFirst().orElse(null);			
 
-			if(basePeak.getIntensity() > maxIntensity) {
+			if(basePeak != null && basePeak.getIntensity() > maxIntensity) {
 				maxIntensity = basePeak.getIntensity();
 				primaryAdduct = entry.getKey();
 			}

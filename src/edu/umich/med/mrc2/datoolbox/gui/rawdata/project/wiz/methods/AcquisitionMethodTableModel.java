@@ -65,7 +65,8 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 	
 	public void setTableModelFromMethodCollection(Collection<? extends AnalysisMethod>methods) {
@@ -83,7 +84,8 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void addMethods(Collection<? extends AnalysisMethod>methods) {
@@ -100,7 +102,8 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

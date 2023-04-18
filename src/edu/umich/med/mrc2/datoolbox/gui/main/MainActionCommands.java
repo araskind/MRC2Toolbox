@@ -976,6 +976,10 @@ public enum MainActionCommands {
 	RELOAD_ACTIVE_MS_ONE_FEATURES("Reload complete active MS1 feature set"),
 	CLEAR_IDTRACKER_WORKBENCH_PANEL("Clear workbench"),
 	
+	SETUP_MAJOR_CLUSTER_FEATURE_EXTRACTION_COMMAND("Set up major cluster feature extraction"),
+	EXTRACT_MAJOR_CLUSTER_FEATURES_COMMAND("Extract major cluster features"),
+	
+	
 	//	NIST-MS / PEP-search / Sirius commands
 	NIST_MS_PEPSEARCH_SETUP_COMMAND("Set up NIST MSMS pepsearch"),
 	NIST_MS_OFFLINE_PEPSEARCH_SETUP_COMMAND("Set up offline NIST MSMS pepsearch"),

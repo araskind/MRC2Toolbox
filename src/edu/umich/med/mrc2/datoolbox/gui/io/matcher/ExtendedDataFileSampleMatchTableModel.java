@@ -123,7 +123,8 @@ public class ExtendedDataFileSampleMatchTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	private ExperimentalSample findSampleInString(String data) {

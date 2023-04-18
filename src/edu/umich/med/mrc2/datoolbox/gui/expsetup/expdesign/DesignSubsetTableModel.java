@@ -59,7 +59,8 @@ public class DesignSubsetTableModel extends BasicTableModel {
 			Object[] obj = new Object[] { eds.isActive(), eds };
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

@@ -113,6 +113,8 @@ import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.UniversalIdentificationResul
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClusterTree;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MSMSFeatureClusterTree;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureExtractionSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.filter.MSMSClusterFilterDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.summary.MSMSCLusterDataSetSummaryDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.export.IDTrackerDataExportDialog;
@@ -284,6 +286,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private MSMSClusterDataSetEditorDialog msmsClusterDataSetEditorDialog;	
 	private IDTrackerMSMSClusterDataSetExportDialog idTrackerMSMSClusterDataSetExportDialog;
 	private MSMSClusterFilterDialog msmsClusterFilterDialog;
+	private MajorClusterFeatureExtractionSetupDialog majorClusterFeatureExtractionSetupDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -325,11 +328,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		add(menuBar, BorderLayout.NORTH);
 
 		msOneFeatureTable = new DockableReferenceMsOneFeatureTable(this);
-		referenceMsOneFeaturePopupMenu = new ReferenceMsOneFeaturePopupMenu(this);
+		referenceMsOneFeaturePopupMenu = 
+				new ReferenceMsOneFeaturePopupMenu(this, msOneFeatureTable.getTable());
 		msOneFeatureTable.getTable().addTablePopupMenu(referenceMsOneFeaturePopupMenu);
 
 		msTwoFeatureTable = new DockableMSMSFeatureTable(this);
-		msmsFeaturePopupMenu = new MsMsFeaturePopupMenu(this);
+		msmsFeaturePopupMenu = 
+				new MsMsFeaturePopupMenu(this, msTwoFeatureTable.getTable());
 		msTwoFeatureTable.getTable().addTablePopupMenu(msmsFeaturePopupMenu);
 				
 		identificationsTable = new DockableUniversalIdentificationResultsTable(
@@ -338,7 +343,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		identificationsTable.getTable().setIdentificationTableModelListener(
 				new IdentificationTableModelListener(this));
 		
-		idTablePopupMenu = new UniversalIdentificationResultsTablePopupMenu(this);
+		idTablePopupMenu = 
+				new UniversalIdentificationResultsTablePopupMenu(this, identificationsTable.getTable());
 		identificationsTable.getTable().addTablePopupMenu(idTablePopupMenu);
 		
 		initIdTableActions();
@@ -827,6 +833,31 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND.getName()))
 			showMSMSClustersSummary();
 		
+		if (command.equals(MainActionCommands.SETUP_MAJOR_CLUSTER_FEATURE_EXTRACTION_COMMAND.getName()))
+			majorClusterFeatureExtractionSetup();
+		
+		if (command.equals(MainActionCommands.EXTRACT_MAJOR_CLUSTER_FEATURES_COMMAND.getName()))
+			extractMajorClusterFeatures();
+	}
+
+	private void majorClusterFeatureExtractionSetup() {
+
+		if(activeMSMSClusterDataSet == null || activeMSMSClusterDataSet.getClusters().isEmpty())
+			return;
+		
+		majorClusterFeatureExtractionSetupDialog = 
+				new MajorClusterFeatureExtractionSetupDialog(this);
+		majorClusterFeatureExtractionSetupDialog.setLocationRelativeTo(this.getContentPane());
+		majorClusterFeatureExtractionSetupDialog.setVisible(true);
+	}
+	
+	private void extractMajorClusterFeatures() {
+		// TODO Auto-generated method stub
+		MajorClusterFeatureDefiningProperty mcfp = 
+				majorClusterFeatureExtractionSetupDialog.getMajorClusterFeatureDefiningProperty();
+		
+		
+		majorClusterFeatureExtractionSetupDialog.dispose();
 	}
 	
 	private void showActiveDataSetSummary() {
@@ -3771,7 +3802,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		return activeFeatureCollection;
 	}
 
-	public void loadFeaturesFromRawDataExperiment(RawDataAnalysisExperiment activeRawDataAnalysisProject) {
+	public void loadFeaturesFromRawDataExperiment(
+			RawDataAnalysisExperiment activeRawDataAnalysisProject) {
 		
 		clearPanel();		
 		FeatureCollectionManager.activeExperimentFeatureSet.clearCollection();
@@ -3780,7 +3812,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		activeRawDataAnalysisProject.addMsFeatureInfoBundleCollection(
 				FeatureCollectionManager.activeExperimentFeatureSet);
 		activeFeatureCollection = FeatureCollectionManager.activeExperimentFeatureSet;
-		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());			
+		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+		
+		Collection<MSFeatureInfoBundle> msOneData = 
+				activeRawDataAnalysisProject.getMsOneFeatureBundles();
+		if(msOneData != null && !msOneData.isEmpty())
+			safelyLoadMSOneFeatures(msOneData);
+		
 		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 	}
 

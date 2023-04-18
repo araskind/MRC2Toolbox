@@ -75,12 +75,17 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon saveClusterDataSetIcon = GuiUtils.getIcon("saveCluster", 24);
 	private static final Icon clearWorkbenchIcon = GuiUtils.getIcon("clearWorklist", 24);
 	private static final Icon calcStatsIcon = GuiUtils.getIcon("calcStats", 24);
-	
+	private static final Icon clusterIconSmall = GuiUtils.getIcon("cluster", 16);
+	private static final Icon clusterIcon = GuiUtils.getIcon("cluster", 24);
+	private static final Icon filterClustersIcon = GuiUtils.getIcon("filter", 24);
+	private static final Icon reloadClusterTreeIcon = GuiUtils.getIcon("rerun", 24);
+	private static final Icon clusteringSummaryIcon = GuiUtils.getIcon("summary", 24);	
 
 	// Menus
 	private JMenu
 		databaseSearchMenu,
 		librarySearchMenu,
+		clusterMenu,
 		annotationManagersMenu,
 		featureCollectionsMenu,
 		explorationMenu,
@@ -90,11 +95,9 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private JMenuItem
 		databaseSearchMenuItem,
 		experimentSearchMenuItem,
-		activeDataSetSearchMenuItem,
 		findMSMSFeaturesMenuItem,
 		filterMSMSFeaturesMenuItem,
-		resetFeatureFiltersMenuItem,
-		reloadActivClusterSetFeaturesMenuItem,
+		resetFeatureFiltersMenuItem,		
 		clearWorkbenchMenuItem;
 
 	// Library search
@@ -105,6 +108,15 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		defaultMatchReassignMenuItem,
 		entropyMenuItem,
 		fdrMenuItem;
+	
+	//	Clustering
+	private JMenuItem
+		activeDataSetSearchMenuItem,
+		reloadActiveClusterSetFeaturesMenuItem,
+		extractMajorClusterFeaturesMenuItem,
+		filterClustersMenuItem,
+		reloadClusterTreeMenuItem,
+		clusteringSummaryMenuItem;
 
 	// Annotation managers
 	private JMenuItem
@@ -145,16 +157,13 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		experimentSearchMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.SHOW_IDTRACKER_BY_EXPERIMENT_MZ_RT_SEARCH_DIALOG_COMMAND, 
 				searchExperimentIcon);
-				
-		activeDataSetSearchMenuItem = addItem(databaseSearchMenu, 
-				MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND, 
-				searchIdActiveDataSetIcon);
 
 		databaseSearchMenu.addSeparator();
 		
 		filterMSMSFeaturesMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.SHOW_FEATURE_FILTER_COMMAND, 
 				filterIcon);
+		
 //		findMSMSFeaturesMenuItem = addItem(databaseSearchMenu, 
 //				MainActionCommands.SHOW_FEATURE_SEARCH_BY_RT_ID_COMMAND, 
 //				findMSMSFeaturesIcon);
@@ -164,10 +173,6 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		resetFeatureFiltersMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES, 
 				reloadIcon);
-		
-		reloadActivClusterSetFeaturesMenuItem = addItem(databaseSearchMenu, 
-				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES, 
-				reloadClusterSetFeaturesIcon);
 		
 		clearWorkbenchMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.CLEAR_IDTRACKER_WORKBENCH_PANEL, 
@@ -209,6 +214,39 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		fdrMenuItem.setEnabled(false);
 		
 		add(librarySearchMenu);
+		
+		clusterMenu = new JMenu("Clustering");
+		clusterMenu.setIcon(clusterIconSmall);
+				
+		activeDataSetSearchMenuItem = addItem(clusterMenu, 
+				MainActionCommands.SHOW_ACTIVE_DATA_SET_MZ_RT_SEARCH_DIALOG_COMMAND, 
+				clusterIcon);
+		
+		extractMajorClusterFeaturesMenuItem = addItem(clusterMenu, 
+				MainActionCommands.SETUP_MAJOR_CLUSTER_FEATURE_EXTRACTION_COMMAND, 
+				searchIdActiveDataSetIcon);
+		
+		clusterMenu.addSeparator();
+		
+		filterClustersMenuItem = addItem(clusterMenu, 
+				MainActionCommands.SHOW_MSMS_CLUSTER_FILTER_COMMAND, 
+				filterClustersIcon);
+		
+		clusteringSummaryMenuItem = addItem(clusterMenu, 
+				MainActionCommands.SHOW_MSMS_CLUSTERS_SUMMARY_COMMAND, 
+				clusteringSummaryIcon);
+		
+		clusterMenu.addSeparator();
+		
+		reloadClusterTreeMenuItem = addItem(clusterMenu, 
+				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTERS_SET_COMMAND, 
+				reloadClusterSetFeaturesIcon);
+		
+		reloadActiveClusterSetFeaturesMenuItem = addItem(clusterMenu, 
+				MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES, 
+				reloadClusterSetFeaturesIcon);
+		
+		add(clusterMenu);
 		
 		// Annotation managers
 		annotationManagersMenu = new JMenu("Manage annotations");

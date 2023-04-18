@@ -651,6 +651,9 @@ public class LCMSPlotPanel extends MasterPlotPanel {
         if(minIntensity < 0.0d)
         	minIntensity = 1.15 * minIntensity;
         
+        if(minIntensity == 0 && maxIntensity == 0)
+        	return;
+        
         plot.getRangeAxis().setRange(new org.jfree.data.Range(minIntensity, maxIntensity));
 	}
 
@@ -895,8 +898,10 @@ public class LCMSPlotPanel extends MasterPlotPanel {
 		}
 		((XYPlot) this.getPlot()).setDataset(dataSet);	
 		((XYPlot) this.getPlot()).setRenderer(renderer);		
-		precursorMarkers.addAll(markers);
+		
 		if(markers != null && !markers.isEmpty()) {
+			
+			precursorMarkers.addAll(markers);
 			
 			for(double markerPosition : markers) {
 				

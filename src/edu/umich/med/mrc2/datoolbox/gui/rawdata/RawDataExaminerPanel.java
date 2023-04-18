@@ -51,9 +51,11 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.AverageMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.ChromatogramDefinition;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExtractedChromatogram;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
@@ -114,6 +116,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.RawDataAnalysisExp
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.project.SaveStoredRawDataAnalysisExperimentTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ExperimentRawDataFileOpenTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ImportMS1DataFromCEFTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MassSpectraAveragingTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.MsMsfeatureBatchExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataBatchCoversionTask;
@@ -391,10 +394,28 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			return;
 		
 		if (activeExperiment.getMSOneDataFiles().isEmpty() 
-				&& activeExperiment.getMSMSDataFiles().isEmpty()) {
-			MessageDialog.showErrorMsg("No data files in the current experiment");
+				//	&& activeExperiment.getMSMSDataFiles().isEmpty()
+				) {
+			MessageDialog.showErrorMsg("No MS1 data files in the current experiment");
 			return;
-		}
+		}		
+		MSMSExtractionParameterSet ps = activeExperiment.getMsmsExtractionParameterSet();
+		if (ps == null) {
+			MessageDialog.showErrorMsg("No MS2 data extraction parameters in the experiment");
+			return;
+		}			
+		ChromatogramDefinition ccd = new ChromatogramDefinition(
+				ChromatogramPlotMode.XIC, 
+				null, //	getPolarity(),
+				1, 
+				null,
+				false, 
+				ps.getPrecursorGroupingMassError(),				
+				ps.getPrecursorGroupingMassErrorType(),  
+				new Range(3.0d - ps.getChromatogramExtractionWindow(), 
+						3.0d + ps.getChromatogramExtractionWindow()),
+				null);
+		
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("CEF files", "cef", "CEF");
@@ -405,10 +426,21 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			File inputFile = fc.getSelectedFile();
 			if (inputFile.exists() && inputFile.canRead()) {
 
-				//	TODO
-				
 				baseDirectory = inputFile.getParentFile();
 				savePreferences();
+				
+				String cefName = FileNameUtils.getBaseName(inputFile.getName());
+				DataFile df = activeExperiment.getMSOneDataFiles().stream().
+						filter(f -> FileNameUtils.getBaseName(f.getName()).equals(cefName)).
+						findFirst().orElse(null);
+				if (df == null) {
+					MessageDialog.showErrorMsg("Data file \"" + cefName + "\" not found in the experiment");
+					return;
+				}	
+				
+				ImportMS1DataFromCEFTask task = new ImportMS1DataFromCEFTask(inputFile, df, ccd);
+				task.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(task);
 			}
 		}
 	}
@@ -1260,10 +1292,33 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			
 			if (e.getSource().getClass().equals(RawDataAnalysisExperimentDatabaseUploadTask.class))
 				finalizeRawDataAnalysisExperimentDatabaseUploadTask(
-						(RawDataAnalysisExperimentDatabaseUploadTask)e.getSource());		
+						(RawDataAnalysisExperimentDatabaseUploadTask)e.getSource());	
+			
+			if (e.getSource().getClass().equals(ImportMS1DataFromCEFTask.class))
+				finalizeImportMS1DataFromCEFTask((ImportMS1DataFromCEFTask)e.getSource());		
 		}
 	}
 	
+	private void finalizeImportMS1DataFromCEFTask(ImportMS1DataFromCEFTask task) {
+		
+		RawDataAnalysisExperiment experiment = 
+				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
+		
+		experiment.addMsFeaturesForDataFile(
+				task.getDataFile(), task.getFeatureBundles());
+		
+		experiment.getChromatogramMap().putAll(task.getChromMap());
+		
+		IDWorkbenchPanel workbench = 
+				(IDWorkbenchPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH);
+		
+		workbench.safelyLoadMSOneFeatures(experiment.getMsOneFeatureBundles());
+		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.ID_WORKBENCH);
+		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
+	}
+
 	private void finalizeRawDataAnalysisExperimentDatabaseUploadTask(
 			RawDataAnalysisExperimentDatabaseUploadTask task) {
 		
@@ -1656,7 +1711,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 			msmsTable.clearTable();
 			
 			IScan next = s.getScanCollection().getNextScan(s.getNum());
-			if(next.getMsLevel() == 2) {
+			if(next != null && next.getMsLevel() == 2) {
 				msmsPlotPanel.showScan(next);
 				msmsTable.setTableModelFromScan(next);
 			}

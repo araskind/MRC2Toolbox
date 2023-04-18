@@ -30,6 +30,7 @@ import javax.swing.JScrollPane;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.tables.PropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -45,8 +46,10 @@ public class DockableMSMSLibraryEntryPropertiesTable extends DefaultSingleCDocka
 		setCloseable(false);
 		propertiesTable = new PropertiesTable();
 		propertiesTable.setPropertyValueRenderer(new WordWrapCellRenderer());
-		add(new JScrollPane(propertiesTable));
-		
+		BasicTablePopupMenu popup = new BasicTablePopupMenu(propertiesTable);
+		popup.addCopyBlock();
+		propertiesTable.addTablePopupMenu(popup);
+		add(new JScrollPane(propertiesTable));		
 	}
 
 	/**

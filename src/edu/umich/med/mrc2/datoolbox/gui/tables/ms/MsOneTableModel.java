@@ -99,7 +99,8 @@ public class MsOneTableModel extends BasicTableModel {
 				count++;
 			}			
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 	
 	public void setTableModelFromScan(IScan scan) {
@@ -118,8 +119,9 @@ public class MsOneTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 			count++;
-		}	
-		addRows(rowData);
+		}
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

@@ -79,7 +79,8 @@ public class MsMsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void setTableModelFromSimpleMsMs(SimpleMsMs msms) {
@@ -103,7 +104,8 @@ public class MsMsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

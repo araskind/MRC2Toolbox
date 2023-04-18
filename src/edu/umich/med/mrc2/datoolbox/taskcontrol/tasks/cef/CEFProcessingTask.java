@@ -370,6 +370,9 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			MsFeatureIdentity msid = null;
 			String name = molElement.getAttributeValue("name");
 			String molecularFormula = molElement.getAttributeValue("formula");
+			if(molecularFormula != null)
+				molecularFormula = molecularFormula.replaceAll("\\s+","");
+			
 			if(name == null || name.isEmpty())	{
 				
 				CompoundIdentity mfId = new CompoundIdentity(molecularFormula, molecularFormula);

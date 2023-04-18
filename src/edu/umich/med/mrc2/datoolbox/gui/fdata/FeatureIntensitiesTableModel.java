@@ -120,7 +120,8 @@ public class FeatureIntensitiesTableModel extends BasicTableModel {
 				}
 			}
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

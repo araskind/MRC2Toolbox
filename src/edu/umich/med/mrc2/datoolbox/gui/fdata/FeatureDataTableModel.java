@@ -162,7 +162,8 @@ public class FeatureDataTableModel extends BasicTableModel {
 				count++;
 			}
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void updateFeatureData(MsFeature cf) {

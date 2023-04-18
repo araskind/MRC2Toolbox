@@ -525,20 +525,26 @@ public class BasicTable extends JTable implements ActionListener{
             if(JLabel.class.isAssignableFrom(comp.getClass()))             
             	txt = ((JLabel) comp).getText();
 
-            if (JTextPane.class.isAssignableFrom(comp.getClass()))
+            else if (JTextPane.class.isAssignableFrom(comp.getClass()))
             	txt = ((JTextPane) comp).getText();
             
-            if (JTextField.class.isAssignableFrom(comp.getClass()))
+            else if (JTextField.class.isAssignableFrom(comp.getClass()))
             	txt = ((JTextField) comp).getText();
             
-            if (JTextArea.class.isAssignableFrom(comp.getClass()))
+            else if (JTextArea.class.isAssignableFrom(comp.getClass()))
             	txt = ((JTextArea) comp).getText();
             
-            if(JCheckBox.class.isAssignableFrom(comp.getClass()))
+            else if(JCheckBox.class.isAssignableFrom(comp.getClass()))
             	txt = Boolean.toString(((JCheckBox) comp).isSelected());
             
-            if(JRadioButton.class.isAssignableFrom(comp.getClass()))
+            else if(JRadioButton.class.isAssignableFrom(comp.getClass()))
             	txt = Boolean.toString(((JRadioButton) comp).isSelected());
+            
+            else {
+            	Object o = getValueAt(row, col);
+            	if(o != null)
+            		txt = o.toString();
+            }
         }
         if(txt != null) {
         	try {

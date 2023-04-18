@@ -77,7 +77,8 @@ public class MsMsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 	
 	public void setTableModelFromScan(IScan scan) {
@@ -102,7 +103,8 @@ public class MsMsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 	
 	public void setTableModelFromDataPoints(
@@ -133,8 +135,9 @@ public class MsMsTableModel extends BasicTableModel {
 					annotation,
 			};
 			rowData.add(obj);
-		}	
-		addRows(rowData);
+		}
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

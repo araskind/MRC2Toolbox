@@ -69,7 +69,8 @@ public class RawDataFileTableModel extends BasicTableModel {
 				};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void removeFiles(Collection<DataFile> filesToRemove) {

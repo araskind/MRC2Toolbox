@@ -84,7 +84,8 @@ public class DatabaseCompoundTableModel extends BasicTableModel {
 			rowData.add(obj);
 			counter++;
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void updateCidData(MsFeatureIdentity id) {

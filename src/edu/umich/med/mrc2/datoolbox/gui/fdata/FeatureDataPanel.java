@@ -183,7 +183,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		featureDataTable = new DockableFeatureDataTable(
 				"FeatureDataPanelDockableFeatureDataTable", "Feature listing");
-		featureDataTable.getTable().addTablePopupMenu(new FeaturePopupMenu(this));
+		featureDataTable.getTable().addTablePopupMenu(
+				new FeaturePopupMenu(this, featureDataTable.getTable()));
 		featureDataTable.getTable().getSelectionModel().addListSelectionListener(this);
 
 		dataPlot = new DockableDataPlot(

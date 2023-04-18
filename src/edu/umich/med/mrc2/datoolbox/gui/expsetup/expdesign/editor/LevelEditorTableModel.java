@@ -97,7 +97,8 @@ public class LevelEditorTableModel extends BasicTableModel {
 				}
 			}
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 

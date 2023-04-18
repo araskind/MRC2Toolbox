@@ -66,7 +66,8 @@ public class MsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void setTableModelFromSimpleMs(SimpleMs ms) {
@@ -84,7 +85,8 @@ public class MsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 
 	public void setTableModelFromMsPointCollection(Collection<MsPoint> msPoints) {
@@ -102,7 +104,8 @@ public class MsTableModel extends BasicTableModel {
 			};
 			rowData.add(obj);
 		}
-		addRows(rowData);
+		if(!rowData.isEmpty())
+			addRows(rowData);
 	}
 }
 
