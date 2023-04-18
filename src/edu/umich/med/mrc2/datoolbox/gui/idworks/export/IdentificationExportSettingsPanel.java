@@ -76,7 +76,6 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 	private JCheckBox excludeIfNoIdsLeftCheckBox;
 	private JLabel lblNewLabel;
 	private JComboBox decoyHitsHadlingComboBox;
-	private JLabel lblNewLabel_1;
 	
 	public IdentificationExportSettingsPanel() {
 		super();
@@ -90,9 +89,9 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 					new EmptyBorder(10, 10, 10, 10)));
 			
 			GridBagLayout gbl_panel_4 = new GridBagLayout();
-			gbl_panel_4.columnWidths = new int[] { 0, 0, 0, 0, 0, 0 };
+			gbl_panel_4.columnWidths = new int[] { 0, 189, 189, 0, 0, 0 };
 			gbl_panel_4.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
-			gbl_panel_4.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+			gbl_panel_4.columnWeights = new double[] { 0.0, 1.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
 			gbl_panel_4.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 			setLayout(gbl_panel_4);
 			
@@ -108,8 +107,8 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 					new JComboBox<FeatureIDSubset>(
 							new DefaultComboBoxModel<FeatureIDSubset>(FeatureIDSubset.values()));
 			GridBagConstraints gbc_featureIdSubsetComboBox = new GridBagConstraints();
-			gbc_featureIdSubsetComboBox.gridwidth = 3;
-			gbc_featureIdSubsetComboBox.insets = new Insets(0, 0, 5, 5);
+			gbc_featureIdSubsetComboBox.gridwidth = 4;
+			gbc_featureIdSubsetComboBox.insets = new Insets(0, 0, 5, 0);
 			gbc_featureIdSubsetComboBox.fill = GridBagConstraints.HORIZONTAL;
 			gbc_featureIdSubsetComboBox.gridx = 1;
 			gbc_featureIdSubsetComboBox.gridy = 0;
@@ -130,7 +129,7 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 			gbc_regularMatchCheckBox.gridx = 1;
 			gbc_regularMatchCheckBox.gridy = 1;
 			add(regularMatchCheckBox, gbc_regularMatchCheckBox);
-
+			
 			inSourceCheckBox = new JCheckBox("In-source match");
 			GridBagConstraints gbc_inSourceCheckBox = new GridBagConstraints();
 			gbc_inSourceCheckBox.insets = new Insets(0, 0, 5, 5);
@@ -158,17 +157,17 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 			decoyHitsHadlingComboBox = new JComboBox<DecoyExportHandling>(
 					new DefaultComboBoxModel<DecoyExportHandling>(DecoyExportHandling.values()));
 			GridBagConstraints gbc_decoyHitsHadlingComboBox = new GridBagConstraints();
-			gbc_decoyHitsHadlingComboBox.gridwidth = 2;
+			gbc_decoyHitsHadlingComboBox.gridwidth = 3;
 			gbc_decoyHitsHadlingComboBox.insets = new Insets(0, 0, 5, 5);
 			gbc_decoyHitsHadlingComboBox.fill = GridBagConstraints.HORIZONTAL;
 			gbc_decoyHitsHadlingComboBox.gridx = 1;
 			gbc_decoyHitsHadlingComboBox.gridy = 2;
 			add(decoyHitsHadlingComboBox, gbc_decoyHitsHadlingComboBox);
 			
-			lblNewLabel_1 = new JLabel("(for primary ID only)");
+			JLabel lblNewLabel_1 = new JLabel("(for primary ID only)");
 			GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-			gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
-			gbc_lblNewLabel_1.gridx = 3;
+			gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 0);
+			gbc_lblNewLabel_1.gridx = 4;
 			gbc_lblNewLabel_1.gridy = 2;
 			add(lblNewLabel_1, gbc_lblNewLabel_1);
 
@@ -189,7 +188,7 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 			gbc_scoringParameterComboBox.gridx = 1;
 			gbc_scoringParameterComboBox.gridy = 3;
 			add(scoringParameterComboBox, gbc_scoringParameterComboBox);
-
+			
 			JLabel lblNewLabel_2 = new JLabel("Minimal score");
 			GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
 			gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
@@ -210,8 +209,7 @@ public class IdentificationExportSettingsPanel extends JPanel implements ItemLis
 			excludeIfNoIdsLeftCheckBox = new JCheckBox("Exclude features from export if all IDs were filtered out");
 			GridBagConstraints gbc_excludeIfNoIdsLeftCheckBox = new GridBagConstraints();
 			gbc_excludeIfNoIdsLeftCheckBox.anchor = GridBagConstraints.WEST;
-			gbc_excludeIfNoIdsLeftCheckBox.gridwidth = 4;
-			gbc_excludeIfNoIdsLeftCheckBox.insets = new Insets(0, 0, 0, 5);
+			gbc_excludeIfNoIdsLeftCheckBox.gridwidth = 5;
 			gbc_excludeIfNoIdsLeftCheckBox.gridx = 0;
 			gbc_excludeIfNoIdsLeftCheckBox.gridy = 4;
 			add(excludeIfNoIdsLeftCheckBox, gbc_excludeIfNoIdsLeftCheckBox);

@@ -23,6 +23,8 @@ package edu.umich.med.mrc2.datoolbox.data.msclust;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -36,7 +38,13 @@ import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureInfoBundleComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsscore.MSMSScoreCalculator;
 import edu.umich.med.mrc2.datoolbox.project.store.MsFeatureIdentityFields;
@@ -396,6 +404,87 @@ public class MsFeatureInfoBundleCluster {
 		return components.stream().
 			filter(c -> c.getMsFeature().getIdentifications().contains(primaryIdentity)).
 			findFirst().orElse(null);
+	}
+	
+	public MSFeatureInfoBundle getMSFeatureInfoBundleWithLargestMSMSArea() {
+		
+		return components.stream().
+				sorted(new MsFeatureInfoBundleComparator(SortProperty.msmsIntensity, SortDirection.DESC)).
+				findFirst().orElse(null);
+	}
+	
+	public MSFeatureInfoBundle getMSFeatureInfoBundleWithHihgestMSMSScore(boolean includeInSourceHits) {
+		
+		MsFeatureIdentity bestId = null;
+		List<MsFeatureIdentity> allIds = components.stream().
+				flatMap(c -> c.getMsFeature().getIdentifications().stream()).
+				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+				collect(Collectors.toList());
+		if(includeInSourceHits) {
+			bestId = allIds.stream().
+				filter(id -> !id.getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Hybrid)).
+				sorted(new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC)).
+				findFirst().orElse(null);
+		}
+		else {
+			bestId = allIds.stream().
+					filter(id -> id.getReferenceMsMsLibraryMatch().getMatchType().equals(MSMSMatchType.Regular)).
+					sorted(new MsFeatureIdentityComparator(SortProperty.msmsEntropyScore, SortDirection.DESC)).
+					findFirst().orElse(null);
+		}
+		if(bestId != null) {
+			
+			final MsFeatureIdentity lookupId = bestId;
+			return components.stream().
+					filter(c -> c.getMsFeature().getIdentifications().contains(lookupId)).
+					findFirst().orElse(null);
+		}
+		else
+			return null;
+	}
+	
+	public MSFeatureInfoBundle getMSFeatureInfoBundleWithSmallestParentIonMassError() {
+		
+		if(lookupFeature == null)
+			return null;
+		
+		double mz = lookupFeature.getMz();		
+		double initError = 1000.0d;
+		MSFeatureInfoBundle bestHit = null;
+		for(MSFeatureInfoBundle b : components) {
+			
+			TandemMassSpectrum msms = 
+					b.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+			if(msms != null && msms.getParent() != null) {
+				
+				double error = Math.abs(msms.getParent().getMz() - mz);
+				if(error < initError) {
+					initError = error;
+					bestHit = b;
+				}
+			}			
+		}		
+		return bestHit;
+	}
+	
+	public MSFeatureInfoBundle getDefiningFeature(MajorClusterFeatureDefiningProperty property) {
+		
+		if(property.equals(MajorClusterFeatureDefiningProperty.LARGEST_AREA))
+			return getMSFeatureInfoBundleWithLargestMSMSArea();
+		
+		if(property.equals(MajorClusterFeatureDefiningProperty.HIGHEST_MSMS_SCORE))
+			return getMSFeatureInfoBundleWithHihgestMSMSScore(false);
+		
+		if(property.equals(MajorClusterFeatureDefiningProperty.HIGHEST_MSMS_SCORE_WITH_IN_SOURCE))
+			return getMSFeatureInfoBundleWithHihgestMSMSScore(true);
+		
+		if(property.equals(MajorClusterFeatureDefiningProperty.SMALLEST_MASS_ERROR))
+			return getMSFeatureInfoBundleWithSmallestParentIonMassError();
+		
+		if(property.equals(MajorClusterFeatureDefiningProperty.CURRENT_PRIMARY_ID))
+				return getMSFeatureInfoBundleForPrimaryId();
+		
+		return null;
 	}
 }
 

@@ -55,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.RefMetClassificationLevels;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
@@ -63,6 +64,7 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 	private MSMSClusterDataSet msmsClusterDataSet;
 	private Collection<IDTrackerMSMSClusterProperties> msmsClusterPropertyList;	
 	private boolean exportIndividualFeatureData;
+	private MajorClusterFeatureDefiningProperty mcfdp;
 
 	public IDTrackerMSMSClusterDataExportTask(
 			MSMSClusterDataSet msmsClusterDataSet,
@@ -81,8 +83,9 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 		this.minimalMSMSScore = params.getMinimalMSMSScore(); 
 		this.featureIdSubset = params.getFeatureIDSubset(); 
 		this.msmsSearchTypes = params.getMsmsSearchTypes(); 
-		this.excludeIfNoIdsLeft = params.isExcludeFromExportWhenAllIdsFilteredOut();		
-		this.outputFile = outputFile;
+		this.excludeIfNoIdsLeft = params.isExcludeFromExportWhenAllIdsFilteredOut();	
+		this.mcfdp = params.getMajorClusterFeatureDefiningProperty();
+		this.outputFile = outputFile;		
 	}
 
 	@Override
@@ -293,17 +296,25 @@ public class IDTrackerMSMSClusterDataExportTask extends IDTrackerFeatureExportTa
 				idMap.put(bundle, filterIdentities(bundle));			
 		}
 		else {
-			MsFeatureIdentity primId = cluster.getPrimaryIdentity();
-			
-			if(primId != null) {
+			if(mcfdp == null) {
 				
-				MSFeatureInfoBundle idBundle = cluster.getMSFeatureInfoBundleForPrimaryId();				
-				if(idBundle != null) {
+				MsFeatureIdentity primId = cluster.getPrimaryIdentity();
+				
+				if(primId != null) {
 					
-					Collection<MsFeatureIdentity> filteredBundleIds = filterIdentities(idBundle);
-					if(filteredBundleIds.contains(primId))
-						idMap.put(idBundle, Collections.singleton(primId));
+					MSFeatureInfoBundle idBundle = cluster.getMSFeatureInfoBundleForPrimaryId();				
+					if(idBundle != null) {
+						
+						Collection<MsFeatureIdentity> filteredBundleIds = filterIdentities(idBundle);
+						if(filteredBundleIds.contains(primId))
+							idMap.put(idBundle, Collections.singleton(primId));
+					}
 				}
+			}
+			else {
+				MSFeatureInfoBundle idBundle = cluster.getDefiningFeature(mcfdp);
+				if(idBundle != null && idBundle.getMsFeature().getPrimaryIdentity() != null)
+					idMap.put(idBundle, Collections.singleton(idBundle.getMsFeature().getPrimaryIdentity()));
 			}
 		}		
 		return idMap;

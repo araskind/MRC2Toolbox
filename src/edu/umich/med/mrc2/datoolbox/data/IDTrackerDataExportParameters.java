@@ -32,6 +32,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MSMSMatchType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSScoringParameter;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.MajorClusterFeatureDefiningProperty;
 
 public class IDTrackerDataExportParameters {
 
@@ -50,6 +51,7 @@ public class IDTrackerDataExportParameters {
 	private boolean excludeFromExportWhenAllIdsFilteredOut;
 	private boolean exportIndividualFeatures;	//	For cluster export
 	private DecoyExportHandling decoyExportHandling;
+	private MajorClusterFeatureDefiningProperty majorClusterFeatureDefiningProperty;
 	
 	public IDTrackerDataExportParameters() {
 		super();
@@ -83,7 +85,7 @@ public class IDTrackerDataExportParameters {
 		this.featureIDSubset = featureIDSubset;
 		this.msmsSearchTypes = msmsSearchTypes;
 		this.excludeFromExportWhenAllIdsFilteredOut = 
-				excludeFromExportWhenAllIdsFilteredOut;
+				excludeFromExportWhenAllIdsFilteredOut;		
 	}
 	
 	//	For cluster export
@@ -97,7 +99,8 @@ public class IDTrackerDataExportParameters {
 			double minimalMSMSScore, 
 			FeatureIDSubset featureIDSubset,
 			Collection<MSMSMatchType> msmsSearchTypes,
-			boolean excludeFromExportWhenAllIdsFilteredOut) {
+			boolean excludeFromExportWhenAllIdsFilteredOut,
+			MajorClusterFeatureDefiningProperty majorClusterFeatureDefiningProperty) {
 		super();
 		this.msLevel = msLevel;
 		this.msmsClusterPropertyList = msmsClusterPropertyList;
@@ -109,6 +112,7 @@ public class IDTrackerDataExportParameters {
 		this.featureIDSubset = featureIDSubset;
 		this.msmsSearchTypes = msmsSearchTypes;
 		this.excludeFromExportWhenAllIdsFilteredOut = excludeFromExportWhenAllIdsFilteredOut;
+		this.majorClusterFeatureDefiningProperty = majorClusterFeatureDefiningProperty;
 	}
 
 	public MsDepth getMsLevel() {
@@ -230,5 +234,14 @@ public class IDTrackerDataExportParameters {
 
 	public void setDecoyExportHandling(DecoyExportHandling decoyExportHandling) {
 		this.decoyExportHandling = decoyExportHandling;
+	}
+
+	public MajorClusterFeatureDefiningProperty getMajorClusterFeatureDefiningProperty() {
+		return majorClusterFeatureDefiningProperty;
+	}
+
+	public void setMajorClusterFeatureDefiningProperty(
+			MajorClusterFeatureDefiningProperty majorClusterFeatureDefiningProperty) {
+		this.majorClusterFeatureDefiningProperty = majorClusterFeatureDefiningProperty;
 	}
 }

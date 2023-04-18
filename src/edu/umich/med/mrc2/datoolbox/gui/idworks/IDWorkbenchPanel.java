@@ -852,12 +852,28 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	}
 	
 	private void extractMajorClusterFeatures() {
-		// TODO Auto-generated method stub
+
 		MajorClusterFeatureDefiningProperty mcfp = 
 				majorClusterFeatureExtractionSetupDialog.getMajorClusterFeatureDefiningProperty();
 		
+		if(activeMSMSClusterDataSet == null || activeMSMSClusterDataSet.getClusters().isEmpty())
+			return;
 		
-		majorClusterFeatureExtractionSetupDialog.dispose();
+		Collection<MSFeatureInfoBundle>definingFeatures = new ArrayList<MSFeatureInfoBundle>();
+
+		for(MsFeatureInfoBundleCluster cluster : activeMSMSClusterDataSet.getClusters()) {
+			
+			MSFeatureInfoBundle b = cluster.getDefiningFeature(mcfp);
+			if(b != null)
+				definingFeatures.add(b);
+		}
+		if(majorClusterFeatureExtractionSetupDialog.includeIdentifiedOnly()) {
+			definingFeatures = definingFeatures.stream().
+				filter(b -> b.getMsFeature().isIdentified()).
+				collect(Collectors.toList());
+		}
+		majorClusterFeatureExtractionSetupDialog.dispose();	
+		safelyLoadMSMSFeatures(definingFeatures);
 	}
 	
 	private void showActiveDataSetSummary() {
@@ -892,26 +908,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MessageDialog.showErrorMsg(
 					StringUtils.join(errors), idTrackerMSMSClusterDataSetExportDialog);
 			return;
-		}
-//		Collection<IDTrackerMSMSClusterProperties>msmsClusterProperties = 
-//				idTrackerMSMSClusterDataSetExportDialog.getSelectedMSMSClusterProperties();
-//		Collection<IDTrackerMsFeatureProperties> msmsFeatureProperties = 
-//				idTrackerMSMSClusterDataSetExportDialog.getSelectedFeatureProperties();
-//		Collection<IDTrackerFeatureIdentificationProperties> identificationProperties = 
-//				idTrackerMSMSClusterDataSetExportDialog.getSelectedIdentificationProperties();		
-//		boolean exportIndividualFeatureData = 
-//				idTrackerMSMSClusterDataSetExportDialog.exportIndividualFeatureData();
-//		MSMSScoringParameter scoringParam = 
-//				idTrackerMSMSClusterDataSetExportDialog.getMSMSScoringParameter();
-//		double minimalMSMSScore = 
-//				idTrackerMSMSClusterDataSetExportDialog.getMinimalMSMSScore();
-//		FeatureIDSubset idSubset = 
-//				idTrackerMSMSClusterDataSetExportDialog.getFeatureIDSubset();
-//		Collection<MSMSMatchType>msmsSearchTypes = 
-//				idTrackerMSMSClusterDataSetExportDialog.getMSMSSearchTypes();
-//		boolean excludeIfNoIdsLeft = 
-//				idTrackerMSMSClusterDataSetExportDialog.excludeIfNoIdsLeft();
-		
+		}	
 		IDTrackerDataExportParameters params = 
 				idTrackerMSMSClusterDataSetExportDialog.getIDTrackerDataExportParameters();
 		IDTrackerMSMSClusterDataExportTask task = 

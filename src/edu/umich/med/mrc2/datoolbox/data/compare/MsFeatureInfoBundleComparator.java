@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.data.compare;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 
 public class MsFeatureInfoBundleComparator extends ObjectCompatrator<MSFeatureInfoBundle> {
 
@@ -77,6 +78,21 @@ public class MsFeatureInfoBundleComparator extends ObjectCompatrator<MSFeatureIn
 				return result;
 			else
 				return -result;
+			
+		case msmsIntensity:
+			if(o1.getMsFeature().getSpectrum() != null && o2.getMsFeature().getSpectrum() != null 
+				&& o1.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null
+				&& o2.getMsFeature().getSpectrum().getExperimentalTandemSpectrum() != null) {
+					TandemMassSpectrum msmsOne = o1.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+					TandemMassSpectrum msmsTwo = o2.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
+					result = Double.compare(msmsOne.getTotalIntensity(), msmsTwo.getTotalIntensity());
+					if (direction == SortDirection.ASC)
+						return result;
+					else
+						return -result;
+			}
+			else
+				return 0;
 
 		case RT:
 			result = Double.compare(o1.getMsFeature().getRetentionTime(), o2.getMsFeature().getRetentionTime());

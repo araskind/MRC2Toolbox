@@ -36,6 +36,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -57,14 +58,15 @@ public class MajorClusterFeatureExtractionSetupDialog extends JDialog implements
 	 * 
 	 */
 	private static final long serialVersionUID = -4663123308816746383L;
-
 	private static final Icon filterIcon = GuiUtils.getIcon("filterCluster", 32);
-	
-	private Preferences preferences;
 
 	private JComboBox mfpComboBox;
+	private JCheckBox identifiedOnlyCheckBox;
 	public static final String PREFS_NODE = 
 			"edu.umich.med.mrc2.datoolbox.gui.MajorClusterFeatureExtractionSetupDialog";
+	private Preferences preferences;
+	private static final String FEATURE_DEFINING_PROPERTY = "FEATURE_DEFINING_PROPERTY";
+	private static final String IDENTIFIED_ONLY = "IDENTIFIED_ONLY";
 	
 	public MajorClusterFeatureExtractionSetupDialog(ActionListener listener) {
 		super();
@@ -80,9 +82,9 @@ public class MajorClusterFeatureExtractionSetupDialog extends JDialog implements
 		getContentPane().add(panel_1, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[]{0, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0};
 		gbl_panel_1.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
 		JLabel lblNewLabel = new JLabel("Major Cluster Feature Defining Property");
@@ -97,10 +99,18 @@ public class MajorClusterFeatureExtractionSetupDialog extends JDialog implements
 				new DefaultComboBoxModel<MajorClusterFeatureDefiningProperty>(
 						MajorClusterFeatureDefiningProperty.values()));
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
+		gbc_comboBox.insets = new Insets(0, 0, 5, 0);
 		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBox.gridx = 0;
 		gbc_comboBox.gridy = 1;
 		panel_1.add(mfpComboBox, gbc_comboBox);
+		
+		identifiedOnlyCheckBox = new JCheckBox("Identified only");
+		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
+		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_chckbxNewCheckBox.gridx = 0;
+		gbc_chckbxNewCheckBox.gridy = 2;
+		panel_1.add(identifiedOnlyCheckBox, gbc_chckbxNewCheckBox);
 		
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -142,8 +152,10 @@ public class MajorClusterFeatureExtractionSetupDialog extends JDialog implements
 	public MajorClusterFeatureDefiningProperty getMajorClusterFeatureDefiningProperty() {
 		return (MajorClusterFeatureDefiningProperty)mfpComboBox.getSelectedItem();
 	}
-
-	private static final String FEATURE_DEFINING_PROPERTY = "FEATURE_DEFINING_PROPERTY";
+	
+	public boolean includeIdentifiedOnly() {
+		return identifiedOnlyCheckBox.isSelected();
+	}
 	
 	@Override
 	public void loadPreferences() {
@@ -159,6 +171,7 @@ public class MajorClusterFeatureExtractionSetupDialog extends JDialog implements
 				MajorClusterFeatureDefiningProperty.getPropertyByName(
 				preferences.get(FEATURE_DEFINING_PROPERTY, MajorClusterFeatureDefiningProperty.LARGEST_AREA.name()));
 		mfpComboBox.setSelectedItem(met);
+		identifiedOnlyCheckBox.setSelected(preferences.getBoolean(IDENTIFIED_ONLY, false));		
 	}
 
 	@Override
@@ -169,6 +182,8 @@ public class MajorClusterFeatureExtractionSetupDialog extends JDialog implements
 				getMajorClusterFeatureDefiningProperty();
 		if(met == null)
 			met = MajorClusterFeatureDefiningProperty.LARGEST_AREA;
+		
 		preferences.put(FEATURE_DEFINING_PROPERTY, met.name());
+		preferences.putBoolean(IDENTIFIED_ONLY, identifiedOnlyCheckBox.isSelected());
 	}
 }
