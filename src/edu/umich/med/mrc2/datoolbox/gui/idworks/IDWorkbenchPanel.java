@@ -735,7 +735,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.SHOW_IDTRACKER_DATA_EXPLORER_PLOT.getName()))	
 			showIDTrackerDataExplorerDialog();
 		
-		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName())) //reloadCompleteActiveMSMSFeatureSet();
+		if (command.equals(MainActionCommands.RELOAD_COMPLETE_DATA_SET_COMMAND.getName()))
+			reloadCompleteDataSet();
+		
+		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES.getName()))
 			reloadActiveMSMSFeatureCollection();
 		
 		if (command.equals(MainActionCommands.RELOAD_ACTIVE_MSMS_CLUSTER_SET_FEATURES.getName()))	
@@ -1461,6 +1464,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 						allFeatures, 
 						reassignDefaultMSMSLibraryHitDialog.getTopHitReassignmentOption(),
 						reassignDefaultMSMSLibraryHitDialog.useEntropyScore(),
+						reassignDefaultMSMSLibraryHitDialog.ignoreDecoys(),
 						reassignDefaultMSMSLibraryHitDialog.commitChangesTodatabase());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
@@ -3052,7 +3056,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		activeCluster = null;
 	}
 	
-	private void finalizeIDTMSMSFeatureDataPullWithFilteringTask(IDTMSMSFeatureDataPullWithFilteringTask task) {
+	private void finalizeIDTMSMSFeatureDataPullWithFilteringTask(
+			IDTMSMSFeatureDataPullWithFilteringTask task) {
 		
 		if(task.getMsmsClusterDataSet() != null)
 			loadMSMSClusterDataSetInGUI(task.getMsmsClusterDataSet());
@@ -3235,6 +3240,31 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 		else {
 			 reloadActiveMSMSFeatureCollection();
+		}
+	}
+	
+	private void reloadCompleteDataSet() {
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+			
+			activeFeatureCollection = FeatureCollectionManager.activeExperimentFeatureSet;
+			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
+			
+			Collection<MSFeatureInfoBundle> msOneData = 
+					MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getMsOneFeatureBundles();
+			if(msOneData != null && !msOneData.isEmpty())
+				safelyLoadMSOneFeatures(msOneData);
+			
+			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
+		}
+		else {
+			//	MSMS search data 
+			if(FeatureCollectionManager.msmsSearchResults != null 
+					&& !FeatureCollectionManager.msmsSearchResults.isEmpty()) {
+				
+				loadMsMsSearchData(FeatureCollectionManager.msmsSearchResults.getFeatures());
+			}			
+			//	TODO MS1 search data?
 		}
 	}
 	

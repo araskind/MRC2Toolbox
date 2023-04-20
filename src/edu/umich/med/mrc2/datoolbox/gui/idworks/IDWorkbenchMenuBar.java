@@ -67,6 +67,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon fdrIcon = GuiUtils.getIcon("fdr", 24);	
 	private static final Icon reassignTopHitsIcon = GuiUtils.getIcon("recalculateScores", 24);
 	private static final Icon filterIcon = GuiUtils.getIcon("filter", 24);
+	private static final Icon resetFilterIcon = GuiUtils.getIcon("resetFilter", 24);	
 	private static final Icon reloadIcon = GuiUtils.getIcon("rerun", 24);
 	private static final Icon reloadClusterSetFeaturesIcon = GuiUtils.getIcon("reloadClusterSetFeatures", 24);
 	private static final Icon findMSMSFeaturesIcon = GuiUtils.getIcon("findMSMSFeatures", 24);
@@ -97,7 +98,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		experimentSearchMenuItem,
 		findMSMSFeaturesMenuItem,
 		filterMSMSFeaturesMenuItem,
-		resetFeatureFiltersMenuItem,		
+		resetFeatureFiltersMenuItem,
+		reloadCompleteFeatureSetMenuItem,
 		clearWorkbenchMenuItem;
 
 	// Library search
@@ -170,9 +172,13 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		
 		databaseSearchMenu.addSeparator();
 		
+		reloadCompleteFeatureSetMenuItem = addItem(databaseSearchMenu, 
+				MainActionCommands.RELOAD_COMPLETE_DATA_SET_COMMAND, 
+				reloadIcon);
+		
 		resetFeatureFiltersMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.RELOAD_ACTIVE_MSMS_FEATURES, 
-				reloadIcon);
+				resetFilterIcon);
 		
 		clearWorkbenchMenuItem = addItem(databaseSearchMenu, 
 				MainActionCommands.CLEAR_IDTRACKER_WORKBENCH_PANEL, 

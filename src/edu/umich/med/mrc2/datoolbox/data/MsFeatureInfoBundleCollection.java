@@ -323,6 +323,10 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		featureIds = new TreeSet<String>(Arrays.asList(featureIdIdList.split(",")));
 		annotations = new TreeSet<ObjectAnnotation>();
 	}
+	
+	public boolean isEmpty() {
+		return features.isEmpty();
+	}
 }
 
 

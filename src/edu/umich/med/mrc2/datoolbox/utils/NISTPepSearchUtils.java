@@ -773,7 +773,8 @@ public class NISTPepSearchUtils {
 	
 	public static Map<HiResSearchOption,Collection<MsFeatureIdentity>>getSearchTypeIdentityMap(
 			MsFeature feature, 
-			Map<String,HiResSearchOption>searchTypeMap) {
+			Map<String,HiResSearchOption>searchTypeMap,
+			boolean ignoreDecoys) {
 		
 		Map<HiResSearchOption,Collection<MsFeatureIdentity>>typeMap = 
 				new TreeMap<HiResSearchOption,Collection<MsFeatureIdentity>>();
@@ -783,6 +784,11 @@ public class NISTPepSearchUtils {
 		List<MsFeatureIdentity> nistSearchHits = feature.getIdentifications().stream().
 			filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch())).
 			filter(i -> Objects.nonNull(i.getReferenceMsMsLibraryMatch().getSearchParameterSetId())).
+			collect(Collectors.toList());
+		
+		if(ignoreDecoys)
+			nistSearchHits =  nistSearchHits.stream().
+			filter(i -> !i.getReferenceMsMsLibraryMatch().isDecoyMatch()).
 			collect(Collectors.toList());
 		
 		for(MsFeatureIdentity hit : nistSearchHits) {

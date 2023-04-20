@@ -1370,7 +1370,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().setChromatogramMap(task.getChromatogramMap());
 		MessageDialog.showInfoMsg(StringUtils.join(log, "\n"), this.getContentPane());
 		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(
-				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getMSMSDataFiles(), false);
+				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getDataFiles(), false);
 		idp = new IndeterminateProgressDialog("Loading raw data tree ...", this.getContentPane(), ordTask);
 		idp.setLocationRelativeTo(this.getContentPane());
 		idp.setVisible(true);

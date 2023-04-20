@@ -64,12 +64,14 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 	public static final String TOP_HIT_REASSIGNMENT_OPTION = "TOP_HIT_REASSIGNMENT_OPTION";
 	public static final String COMMIT_CHANGES = "COMMIT_CHANGES";
 	public static final String USE_ENTROPY_SCORE = "USE_ENTROPY_SCORE";
-	public static final String INCLUDE_DECOYS = "INCLUDE_DECOYS";
-	public static final String PREFERENCES_NODE = "edu.umich.med.mrc2.datoolbox.ReassignDefaultMSMSLibraryHitDialog";
+	public static final String IGNORE_DECOYS = "IGNORE_DECOYS";
+	public static final String PREFERENCES_NODE = 
+			"edu.umich.med.mrc2.datoolbox.ReassignDefaultMSMSLibraryHitDialog";
 	
 	private JCheckBox commitChangesCheckBox;
 	private JCheckBox useEntropyScoreCheckBox;
 	private JComboBox topHitRuleComboBox;
+	private JCheckBox ignoreDecoysCheckBox;
 	
 	public ReassignDefaultMSMSLibraryHitDialog(ActionListener listener) {
 
@@ -89,9 +91,9 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 		getContentPane().add(setupPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_setupPanel = new GridBagLayout();
 		gbl_setupPanel.columnWidths = new int[]{0, 0};
-		gbl_setupPanel.rowHeights = new int[]{0, 0, 0, 0, 0};
+		gbl_setupPanel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
 		gbl_setupPanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gbl_setupPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_setupPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		setupPanel.setLayout(gbl_setupPanel);
 		
 		JLabel lblNewLabel = new JLabel("Top hit selection rule:");
@@ -121,11 +123,19 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 		gbc_useEntropyScoreCheckBox.gridy = 2;
 		setupPanel.add(useEntropyScoreCheckBox, gbc_useEntropyScoreCheckBox);
 		
+		ignoreDecoysCheckBox = new JCheckBox("Ignore decoy library hits");
+		GridBagConstraints gbc_ignoreDecoysCheckBox = new GridBagConstraints();
+		gbc_ignoreDecoysCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_ignoreDecoysCheckBox.insets = new Insets(0, 0, 5, 0);
+		gbc_ignoreDecoysCheckBox.gridx = 0;
+		gbc_ignoreDecoysCheckBox.gridy = 3;
+		setupPanel.add(ignoreDecoysCheckBox, gbc_ignoreDecoysCheckBox);
+		
 		commitChangesCheckBox = new JCheckBox("Commit changes to database");
 		GridBagConstraints gbc_commitChangesCheckBox = new GridBagConstraints();
 		gbc_commitChangesCheckBox.anchor = GridBagConstraints.WEST;
 		gbc_commitChangesCheckBox.gridx = 0;
-		gbc_commitChangesCheckBox.gridy = 3;
+		gbc_commitChangesCheckBox.gridy = 4;
 		setupPanel.add(commitChangesCheckBox, gbc_commitChangesCheckBox);
 
 		JPanel panel = new JPanel();
@@ -167,6 +177,10 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 		return useEntropyScoreCheckBox.isSelected();
 	}
 	
+	public boolean ignoreDecoys() {
+		return ignoreDecoysCheckBox.isSelected();
+	}
+	
 	public TopHitReassignmentOption getTopHitReassignmentOption() {
 		return (TopHitReassignmentOption)topHitRuleComboBox.getSelectedItem();
 	}
@@ -179,6 +193,7 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 	@Override
 	public void loadPreferences(Preferences preferences) {
 		
+		ignoreDecoysCheckBox.setSelected(preferences.getBoolean(IGNORE_DECOYS, true));
 		useEntropyScoreCheckBox.setSelected(preferences.getBoolean(USE_ENTROPY_SCORE, true));
 		commitChangesCheckBox.setSelected(preferences.getBoolean(COMMIT_CHANGES, true));
 		TopHitReassignmentOption top =TopHitReassignmentOption.getTopHitReassignmentOptionByName(
@@ -192,6 +207,7 @@ public class ReassignDefaultMSMSLibraryHitDialog extends JDialog
 		
 		Preferences preferences = Preferences.userRoot().node(PREFERENCES_NODE);
 		
+		preferences.putBoolean(IGNORE_DECOYS, ignoreDecoysCheckBox.isSelected());
 		preferences.putBoolean(COMMIT_CHANGES, commitChangesCheckBox.isSelected());
 		preferences.putBoolean(USE_ENTROPY_SCORE, useEntropyScoreCheckBox.isSelected());
 		preferences.put(TOP_HIT_REASSIGNMENT_OPTION, getTopHitReassignmentOption().name());

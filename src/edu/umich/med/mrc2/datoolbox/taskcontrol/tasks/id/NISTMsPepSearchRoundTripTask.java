@@ -287,7 +287,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 				continue;
 			}		
 			Map<HiResSearchOption,Collection<MsFeatureIdentity>>hitTypeMap = 
-					NISTPepSearchUtils.getSearchTypeIdentityMap(bundle.getMsFeature(), searchTypeMap);
+					NISTPepSearchUtils.getSearchTypeIdentityMap(bundle.getMsFeature(), searchTypeMap, false);
 			
 			MsFeatureIdentity topNormalHit = null;
 			MsFeatureIdentity topInSourceHit = null;

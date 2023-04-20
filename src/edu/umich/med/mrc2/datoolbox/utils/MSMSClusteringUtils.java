@@ -93,7 +93,7 @@ public class MSMSClusteringUtils {
 		for(MsFeature msf : msFeatures) {
 			
 			Map<HiResSearchOption,Collection<MsFeatureIdentity>>hitTypeMap = 
-					NISTPepSearchUtils.getSearchTypeIdentityMap(msf, searchTypeMap);				
+					NISTPepSearchUtils.getSearchTypeIdentityMap(msf, searchTypeMap, true);				
 			idsToRank.addAll(hitTypeMap.get(HiResSearchOption.z));
 			idsToRank.addAll(hitTypeMap.get(HiResSearchOption.u));
 			hybridIdsToRank.addAll(hitTypeMap.get(HiResSearchOption.y));

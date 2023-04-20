@@ -50,6 +50,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 	private Collection<MSFeatureInfoBundle>featuresToUpdate;
 	private TopHitReassignmentOption topHitReassignmentOption;
 	private boolean useEntropyScore;
+	private boolean ignoreDecoys;
 	private boolean commitChangesToDatabase;
 	private String metlinLibId;
 	private MSFeatureIdentificationLevel tentativeLevel;
@@ -61,11 +62,13 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 			Collection<MSFeatureInfoBundle> featuresToExport,
 			TopHitReassignmentOption topHitReassignmentOption, 
 			boolean useEntropyScore,
+			boolean ignoreDecoys,
 			boolean commitChangesToDatabase) {
 		super();
 		this.featuresToUpdate = featuresToExport;
 		this.topHitReassignmentOption = topHitReassignmentOption;
 		this.useEntropyScore = useEntropyScore;
+		this.ignoreDecoys = ignoreDecoys;
 		this.commitChangesToDatabase = commitChangesToDatabase;
 	}
 
@@ -124,7 +127,8 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 					continue;
 			}
 			Map<HiResSearchOption,Collection<MsFeatureIdentity>>hitTypeMap = 
-					NISTPepSearchUtils.getSearchTypeIdentityMap(bundle.getMsFeature(), searchTypeMap);				
+					NISTPepSearchUtils.getSearchTypeIdentityMap(
+							bundle.getMsFeature(), searchTypeMap, ignoreDecoys);				
 			if(useEntropyScore) {				
 				if(assignTopEntropyHit(bundle, searchTypeMap, hitTypeMap))
 					continue;			
@@ -294,6 +298,7 @@ public class DefaultMSMSLibraryHitReassignmentTask extends AbstractTask {
 				 featuresToUpdate,
 				 topHitReassignmentOption,
 				 useEntropyScore,
+				 ignoreDecoys,
 				 commitChangesToDatabase);
 	}
 }
