@@ -30,10 +30,16 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -53,6 +59,7 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
+import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureLookupDataSetUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FormChangeListener;
@@ -248,7 +255,7 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 			
 			File inputFile = fc.getSelectedFile();
 			baseDirectory = inputFile.getParentFile();
-			readFeaturesFromInputFile(inputFile);
+			importFromFile(inputFile);
 		}
 	}
 
@@ -318,6 +325,38 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 			return null;
 		}
 	}
+		
+	private void importFromFile(File inputFile) {
+	
+		ReadFeaturesFromInputFileTask task = 
+				new ReadFeaturesFromInputFileTask(inputFile);
+		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+				"Getting features for lookup data set ...", this, task);
+		idp.setLocationRelativeTo(this);
+		idp.setVisible(true);
+	}
+	
+	class ReadFeaturesFromInputFileTask extends LongUpdateTask {
+		
+		private File inputFile;
+
+		public ReadFeaturesFromInputFileTask(File inputFile) {
+			super();
+			this.inputFile = inputFile;
+		}
+		
+		@Override
+		public Void doInBackground() {
+			
+			try {
+				readFeaturesFromInputFile(inputFile);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}		
+	}
 
 	private void readFeaturesFromInputFile(File inputFile) {
 		
@@ -351,25 +390,33 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 		int rtIndex = -1;
 		int nameIndex = -1;
 		int rankIndex = -1;
+		int smilesIndex = -1;
+		int inchiKeyIndex = -1;
+		
 		for(int i=0; i<featureData[0].length; i++) {
 			
-			if(featureData[0][i].toLowerCase().equals("mz") 
-					|| featureData[0][i].toLowerCase().equals("m/z"))
+			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.mz.name()))
 				mzIndex = i;
 			
-			if(featureData[0][i].toLowerCase().equals("rt"))
+			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.rt.name()))
 				rtIndex = i;
 			
-			if(featureData[0][i].toLowerCase().equals("name"))
+			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.name.name()))
 				nameIndex = i;
 			
-			if(featureData[0][i].toLowerCase().equals("rank"))
+			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.rank.name()))
 				rankIndex = i;
+			
+			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.smiles.name()))
+				smilesIndex = i;
+			
+			if(featureData[0][i].equalsIgnoreCase(FeatureListImportFields.inchiKey.name()))
+				inchiKeyIndex = i;
 		}
-		if(mzIndex == -1 && rtIndex == -1 && nameIndex == -1) {
+		if((mzIndex == -1 || rtIndex == -1) && nameIndex == -1) {
 			MessageDialog.showErrorMsg("Invalid file format.\n"
 					+ "First line must include \"MZ\", \"RT\" and/or "
-					+ "\"Name\" columns, \"Rank\" column is optional", 
+					+ "\"Name\" columns\n\"Rank\", \"SMILES\" and \"InChiKey\" columns are optional", 
 					this);
 			return;
 		}
@@ -381,12 +428,19 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 					double mz = Double.parseDouble(featureData[i][mzIndex]);
 					double rt = Double.parseDouble(featureData[i][rtIndex]);
 					MinimalMSOneFeature f = new MinimalMSOneFeature(mz, rt);
+					
 					if(nameIndex >= 0)
 						f.setName(featureData[i][nameIndex]);
 					
 					if(rankIndex >= 0)
 						f.setRank(Double.parseDouble(featureData[i][rankIndex]));
 					
+					if(smilesIndex >= 0)
+						f.setSmiles(featureData[i][smilesIndex]);
+					
+					if(inchiKeyIndex >= 0)
+						f.setInchiKey(featureData[i][inchiKeyIndex]);
+										
 					features.add(f);
 				} catch (NumberFormatException e) {
 					// TODO Auto-generated catch block
@@ -410,6 +464,12 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 							if(rankIndex >= 0)
 								f.setRank(Double.parseDouble(featureData[i][rankIndex]));
 							
+							if(smilesIndex >= 0)
+								f.setSmiles(featureData[i][smilesIndex]);
+							
+							if(inchiKeyIndex >= 0)
+								f.setInchiKey(featureData[i][inchiKeyIndex]);
+							
 							features.add(f);
 						} catch (NumberFormatException e) {
 							// TODO Auto-generated catch block
@@ -420,11 +480,59 @@ public class FeatureListImportPanel extends JPanel implements ActionListener, Ta
 			}
 		}
 		if(features != null) {
+			
+			try {
+				getMissingSmiles(features);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
 			featureTable.setTableModelFromFeatureCollection(features);
 			fireFormChangeEvent(ParameterSetStatus.CHANGED);
 		}
 	}
 	
+	private void getMissingSmiles(Collection<MinimalMSOneFeature> features) throws Exception{
+		
+		List<MinimalMSOneFeature> featuresToUpdate = features.stream().
+				filter(f -> Objects.nonNull(f.getInchiKey())).
+				filter(f -> Objects.isNull(f.getSmiles())).
+				collect(Collectors.toList());
+		if(featuresToUpdate.isEmpty())
+			return;
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT SMILES FROM COMPOUND_DATA WHERE INCHI_KEY = ?";
+		String query2d = "SELECT SMILES FROM COMPOUND_DATA WHERE INCHI_KEY_CONNECT = ?";
+		
+		PreparedStatement ps = conn.prepareStatement(query);
+		PreparedStatement ps2d = conn.prepareStatement(query2d);
+		ResultSet rs = null;
+		for(MinimalMSOneFeature f : featuresToUpdate) {
+			
+			ps.setString(1, f.getInchiKey());
+			rs = ps.executeQuery();
+			while(rs.next()) {
+				f.setSmiles(rs.getString("SMILES"));
+				break;
+			}
+			rs.close();
+			if(f.getSmiles() == null) {
+				
+				ps2d.setString(1, f.getInchiKey().substring(0, 14));
+				rs = ps2d.executeQuery();
+				while(rs.next()) {
+					f.setSmiles(rs.getString("SMILES"));
+					break;
+				}
+				rs.close();
+			}
+		}
+		ps.close();
+		ps2d.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+
 	public Collection<MinimalMSOneFeature>getSelectedFeatures(){
 		return featureTable.getSelectedFeatures();
 	}

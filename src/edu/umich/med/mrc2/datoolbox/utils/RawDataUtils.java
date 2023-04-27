@@ -48,6 +48,11 @@ import umich.ms.datatypes.scancollection.IScanCollection;
 import umich.ms.datatypes.scancollection.ScanIndex;
 import umich.ms.datatypes.spectrum.ISpectrum;
 import umich.ms.fileio.exceptions.FileParsingException;
+import umich.ms.fileio.filetypes.LCMSDataSource;
+import umich.ms.fileio.filetypes.mzml.MZMLFile;
+import umich.ms.fileio.filetypes.mzml.MZMLRunInfo;
+import umich.ms.fileio.filetypes.mzml.jaxb.CVParamType;
+import umich.ms.fileio.filetypes.mzml.jaxb.SampleListType;
 
 public class RawDataUtils {
 
@@ -301,5 +306,24 @@ public class RawDataUtils {
 			markers.add(msFeature.getRetentionTime());
 		
 		return markers;
+	}
+	
+	public static String getSampleName(LCMSData data) {
+		
+		LCMSDataSource<?> source = data.getSource();
+		String sampleName = "";
+		if(MZMLFile.class.isAssignableFrom(source.getClass())) {
+			SampleListType sl = 
+					((MZMLRunInfo)((MZMLFile)data.getSource()).getRunInfo()).getParsedInfo().getSampleList();
+			if(!sl.getSample().isEmpty()) {
+				
+				for (CVParamType cvParam : sl.getSample().get(0).getCvParam()){
+					
+					if(cvParam.getAccession().equals("MS:1000002"))						
+						sampleName = cvParam.getValue();					
+				}
+			}
+		}
+		return sampleName;
 	}
 }

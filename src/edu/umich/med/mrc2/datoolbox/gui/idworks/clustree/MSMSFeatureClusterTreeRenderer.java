@@ -55,6 +55,9 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 
 	static final Color defaultColor = Color.BLACK;
 	static final Color lockedColor = Color.BLUE;
+	private static final String selectedColorString = "white";
+	private static final String lockedColorString = "blue";
+	private static final String lookupColorString = "green";
 
 	private static final Border border = BorderFactory.createEmptyBorder(1, 1, 1, 1);
 
@@ -88,12 +91,42 @@ public class MSMSFeatureClusterTreeRenderer extends DefaultTreeCellRenderer {
 				label.setIcon(namedClusterIcon);
 			else
 				label.setIcon(clusterIcon);
-
-			if (cluster.isLocked())
-				label.setForeground(lockedColor);
-
-			label.setFont(bigFont);
+			
+			String lockedClusterColorString = lockedColorString;
+			String luColorString = lookupColorString;
+			if(sel) {
+				lockedClusterColorString = selectedColorString;
+				luColorString = selectedColorString;
+			}
+			String labelText = "<html>";
+			if (cluster.isLocked()) {
+				//	label.setForeground(lockedColor);
+				labelText+= "<font style=\"font-weight:bold; font-size: 1.2em; color:" 
+						+ lockedClusterColorString + "\">" + cluster.toString() + "</font>";
+			}
+			else {
+				labelText+= "<font style=\"font-weight:bold; font-size: 1.2em\">" + cluster.toString() + "</font>";
+			}
+			//label.setFont(bigFont);
+			if(cluster.getLookupFeature() != null)
+				labelText+= "<br><font style=\"color:" 
+						+ luColorString + "; font-size: 1.1em\">" + cluster.getLookupFeature().getName();
+				
+			label.setText(labelText);
 		}
 		return label;
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -105,7 +105,9 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 					forEach(b -> b.setInjectionId(injectionId));
 				
 				msFeatureMap.put(task.getRawDataFile(), task.getMsFeatureInfoBundles());
-				processed++;
+				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
+				processed++;				
+				
 				if(processed == msmsDataFiles.size()) {
 					
 					initChromatogramExtraction();

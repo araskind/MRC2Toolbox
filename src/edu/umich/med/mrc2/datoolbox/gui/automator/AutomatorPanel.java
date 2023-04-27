@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskControlListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -344,7 +345,9 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 					} catch (InterruptedException e) {
 
 					}
-					Task newTask = new QualAutomationDataProcessingTask(df, positiveModeMethod, qualAutomationBinary);
+					Task newTask = new QualAutomationDataProcessingTask(
+							df, positiveModeMethod, qualAutomationBinary);
+					newTask.addTaskListener(this);
 					MRC2ToolBoxCore.getTaskController().addTask(newTask, TaskPriority.HIGH);
 				}
 				try {
@@ -362,7 +365,9 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 					} catch (InterruptedException e) {
 
 					}
-					Task newTask = new QualAutomationDataProcessingTask(df, negativeModeMethod, qualAutomationBinary);
+					Task newTask = new QualAutomationDataProcessingTask(
+							df, negativeModeMethod, qualAutomationBinary);
+					newTask.addTaskListener(this);
 					MRC2ToolBoxCore.getTaskController().addTask(newTask, TaskPriority.HIGH);
 				}
 			}
@@ -406,8 +411,15 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 
 	@Override
 	public void statusChanged(TaskEvent e) {
-		// TODO Auto-generated method stub
 
+		if (e.getStatus() == TaskStatus.FINISHED) {
+			
+			((AbstractTask)e.getSource()).removeTaskListener(this);
+			
+			if (e.getSource().getClass().equals(QualAutomationDataProcessingTask.class)){
+				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask((AbstractTask)e.getSource());
+			}
+		}		
 	}
 
 	@Override

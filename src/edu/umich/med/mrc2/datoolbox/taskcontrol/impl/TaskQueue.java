@@ -161,9 +161,13 @@ public class TaskQueue extends AbstractTableModel {
 	synchronized int getNumOfWaitingTasks() {
 		int numOfWaitingTasks = 0;
 		for (int i = 0; i < size; i++) {
-			TaskStatus status = queue[i].getActualTask().getStatus();
-			if ((status == TaskStatus.PROCESSING) || (status == TaskStatus.WAITING))
-				numOfWaitingTasks++;
+			
+			if(queue[i] != null) {
+				
+				TaskStatus status = queue[i].getActualTask().getStatus();
+				if ((status == TaskStatus.PROCESSING) || (status == TaskStatus.WAITING))
+					numOfWaitingTasks++;
+			}
 		}
 		return numOfWaitingTasks;
 	}
@@ -245,13 +249,15 @@ public class TaskQueue extends AbstractTableModel {
 					newQueue.add(wt);
 			}
 		}
-		WrappedTask[] nQueue = new WrappedTask[queue.length];
+//		WrappedTask[] nQueue = new WrappedTask[queue.length];
+//
+//		for (int i = 0; i < newQueue.size(); i++)
+//			nQueue[i] = newQueue.get(i);
 
-		for (int i = 0; i < newQueue.size(); i++)
-			nQueue[i] = newQueue.get(i);
-
-		queue = nQueue;
-
+//		queue = nQueue;
+		
+		queue = newQueue.toArray(new WrappedTask[newQueue.size()]);
+		size = queue.length;
 		fireTableDataChanged();
 	}
 }

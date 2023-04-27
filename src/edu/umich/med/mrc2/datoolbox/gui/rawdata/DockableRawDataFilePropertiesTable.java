@@ -35,6 +35,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.PropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.lcmsrun.LCMSRunInfo;
 import umich.ms.datatypes.lcmsrun.MsSoftware;
@@ -91,6 +92,8 @@ public class DockableRawDataFilePropertiesTable extends DefaultSingleCDockable {
 			//	e.printStackTrace();
 		}
 		properties.put("Start timestamp", timestamp);
+		properties.put("Sample name", RawDataUtils.getSampleName(data));
+		
 		for(Entry<String, Instrument> entry : instruments.entrySet()) {			
 			properties.put("Instrument " + entry.getKey(), entry.getValue().getManufacturer() + " " + entry.getValue().getModel());
 		}

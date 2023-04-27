@@ -74,8 +74,9 @@ public class FeatureLookupDataSetUtils {
 		
 		//	Add features
 		query = "INSERT INTO FEATURE_LOOKUP_DATA_SET_COMPONENT "
-				+ "(COMPONENT_ID, FLDS_ID, NAME, MZ, RT, RANK) "
-				+ "VALUES (?, ?, ?, ?, ?, ?)";
+				+ "(COMPONENT_ID, FLDS_ID, NAME, MZ, RT, RANK, SMILES, INCHI_KEY) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		
 		ps = conn.prepareStatement(query);
 		ps.setString(2, dataSet.getId());
 		int counter = 0;
@@ -92,6 +93,17 @@ public class FeatureLookupDataSetUtils {
 			ps.setDouble(4, f.getMz());
 			ps.setDouble(5, f.getRt());
 			ps.setDouble(6, f.getRank());
+			
+			if(f.getSmiles() != null)
+				ps.setString(7, f.getSmiles());
+			else
+				ps.setNull(7,  java.sql.Types.NULL);
+			
+			if(f.getInchiKey() != null)
+				ps.setString(8, f.getInchiKey());
+			else
+				ps.setNull(8,  java.sql.Types.NULL);
+			
 			ps.addBatch();
 			counter++;
 			
@@ -136,8 +148,8 @@ public class FeatureLookupDataSetUtils {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = "INSERT INTO FEATURE_LOOKUP_DATA_SET_COMPONENT "
-				+ "(COMPONENT_ID, FLDS_ID, NAME, MZ, RT, RANK) "
-				+ "VALUES (?, ?, ?, ?, ?, ?)";
+				+ "(COMPONENT_ID, FLDS_ID, NAME, MZ, RT, RANK, SMILES, INCHI_KEY) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ps.setString(2, dataSet.getId());
 		int counter = 0;
@@ -154,6 +166,17 @@ public class FeatureLookupDataSetUtils {
 			ps.setDouble(4, f.getMz());
 			ps.setDouble(5, f.getRt());
 			ps.setDouble(6, f.getRank());
+			
+			if(f.getSmiles() != null)
+				ps.setString(7, f.getSmiles());
+			else
+				ps.setNull(7,  java.sql.Types.NULL);
+			
+			if(f.getInchiKey() != null)
+				ps.setString(8, f.getInchiKey());
+			else
+				ps.setNull(8,  java.sql.Types.NULL);
+			
 			ps.addBatch();
 			counter++;
 			
@@ -235,7 +258,7 @@ public class FeatureLookupDataSetUtils {
 			FeatureLookupDataSet dataSet, Connection conn) throws Exception {
 		
 		String query = 
-				"SELECT COMPONENT_ID, NAME, MZ, RT, RANK "
+				"SELECT COMPONENT_ID, NAME, MZ, RT, RANK, SMILES, INCHI_KEY "
 				+ "FROM FEATURE_LOOKUP_DATA_SET_COMPONENT "
 				+ "WHERE FLDS_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);	
@@ -248,7 +271,9 @@ public class FeatureLookupDataSetUtils {
 							rs.getString("NAME"), 
 							rs.getDouble("MZ"), 
 							rs.getDouble("RT"), 
-							rs.getDouble("RANK"));						
+							rs.getDouble("RANK"),
+							rs.getString("SMILES"),
+							rs.getString("INCHI_KEY"));						
 			dataSet.getFeatures().add(feature);
 		}
 		rs.close();

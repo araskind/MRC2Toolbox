@@ -30,6 +30,7 @@ import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class MinimalMSOneFeatureTable extends BasicTable {
 
@@ -46,6 +47,11 @@ public class MinimalMSOneFeatureTable extends BasicTable {
 		setModel(model);
 		rowSorter = new TableRowSorter<MinimalMSOneFeatureTableModel>(model);
 		setRowSorter(rowSorter);
+		
+		columnModel.getColumnById(MinimalMSOneFeatureTableModel.SMILES_COLUMN).
+			setCellRenderer(new WordWrapCellRenderer());
+		columnModel.getColumnById(MinimalMSOneFeatureTableModel.INCHI_KEY_COLUMN).
+			setCellRenderer(new WordWrapCellRenderer());
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);	
 		finalizeLayout();

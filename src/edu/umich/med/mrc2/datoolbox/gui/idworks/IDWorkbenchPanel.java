@@ -222,6 +222,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private DockableReferenceMsOneFeatureTable msOneFeatureTable;
 	private DockableMSMSFeatureTable msTwoFeatureTable;
 	private DockableMolStructurePanel molStructurePanel;
+	private DockableMolStructurePanel referenceMolStructurePanel;
 	private DockablePepSearchParameterListingPanel pepSearchParameterListingPanel;
 	private DockableObjectAnnotationPanel featureAnnotationPanel;
 	private DockableSpectumPlot msOnePlot;
@@ -350,7 +351,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		initIdTableActions();
 		
 		molStructurePanel = new DockableMolStructurePanel(
-				"IDWorkbenchPanelDockableMolStructurePanel");
+				"IDWorkbenchPanelDockableMolStructurePanel", "ID structure");
+		referenceMolStructurePanel  = new DockableMolStructurePanel(
+				"IDWorkbenchPanelDockableRefMolStructurePanel", "Reference structure");
 		clasyFireViewer = new DockableCompoundClasyFireViewer();
 		
 		chromatogramPanel =  new DockableChromatogramPlot(
@@ -389,8 +392,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		grid.add(0, 0, 80, 30, msOneFeatureTable, msTwoFeatureTable
 				, msmsFeatureClusterTreePanel
 				);
-		grid.add(80, 0, 20, 30, molStructurePanel, clasyFireViewer,
-				chromatogramPanel);
+		grid.add(80, 0, 20, 30, molStructurePanel, referenceMolStructurePanel, 
+				clasyFireViewer, chromatogramPanel);
 		grid.add(0, 30, 100, 20, identificationsTable);
 //		grid.add(0, 50, 50, 50, narrativeDataPanel, synonymsTable,
 //				propertiesTable, concentrationsTable, spectraTable);
@@ -3423,6 +3426,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		msOneFeatureTable.getTable().clearTable();
 		msTwoFeatureTable.getTable().clearTable();
+		referenceMolStructurePanel.clearPanel();
 		clearFeatureData();
 		clearDataMaps();
 		clearMSMSClusterData();
@@ -3867,6 +3871,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			activeCluster = cluster;
 			safelyLoadMSMSFeatures(cluster.getComponents());
 			showMultipleFeatureChromatograms(cluster.getComponents());
+			
+			referenceMolStructurePanel.clearPanel();
+			
+			if(cluster.getLookupFeature() != null && cluster.getLookupFeature().getSmiles() != null)
+				referenceMolStructurePanel.showStructure(cluster.getLookupFeature().getSmiles());			
 		}
 		if (tree.getClickedObject() instanceof MSFeatureInfoBundle) {
 			
@@ -3878,6 +3887,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					
 					activeCluster = cluster;
 					safelyLoadMSMSFeatures(cluster.getComponents());
+					
+					if(cluster.getLookupFeature() != null && cluster.getLookupFeature().getSmiles() != null)
+						referenceMolStructurePanel.showStructure(cluster.getLookupFeature().getSmiles());
 				}			
 				msTwoFeatureTable.selectBundle((MSFeatureInfoBundle)tree.getClickedObject());
 			}
@@ -3887,6 +3899,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	public void clearMSMSClusterData() {
 		msmsFeatureClusterTreePanel.resetTree();
 		activeMSMSClusterDataSet = null;
+		referenceMolStructurePanel.clearPanel();
 	}
 
 	@Override

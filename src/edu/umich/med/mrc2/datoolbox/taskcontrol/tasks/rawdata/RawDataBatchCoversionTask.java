@@ -26,7 +26,6 @@ import java.util.Collection;
 
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.msc.MsConvertOutputFormat;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
-import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -83,11 +82,12 @@ public class RawDataBatchCoversionTask extends AbstractTask implements TaskListe
 			((AbstractTask)e.getSource()).removeTaskListener(this);
 			
 			if (e.getSource().getClass().equals(RawDataConversionTask.class)) {
-								
+					
+				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask((AbstractTask)e.getSource());
 				processed++;
 				if(processed == total) {
-					taskDescription = "Re-indexing raw data repository ...";
-					RawDataManager.indexRepository();
+//					taskDescription = "Re-indexing raw data repository ...";
+//					RawDataManager.indexRepository();
 					setStatus(TaskStatus.FINISHED);
 				}
 			}

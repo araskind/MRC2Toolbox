@@ -283,12 +283,15 @@ public class TaskControllerImpl implements TaskController, Runnable {
 
 		for (WrappedTask wrappedTask : getTaskQueue().getQueueSnapshot()) {
 
-			Task task = wrappedTask.getActualTask();
+			if(wrappedTask != null) {
+				
+				Task task = wrappedTask.getActualTask();
 
-			if ((task.getStatus() == TaskStatus.WAITING)
-					|| task.getStatus() == TaskStatus.PROCESSING
-					|| task.getStatus() == TaskStatus.ERROR)
-				task.cancel();
+				if ((task.getStatus() == TaskStatus.WAITING)
+						|| task.getStatus() == TaskStatus.PROCESSING
+						|| task.getStatus() == TaskStatus.ERROR)
+					task.cancel();
+			}
 		}
 		getTaskQueue().clear();
 		return;

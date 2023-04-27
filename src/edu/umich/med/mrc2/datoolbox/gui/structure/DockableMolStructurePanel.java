@@ -33,79 +33,31 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableMolStructurePanel extends DefaultSingleCDockable {
-
-//	private String smiles;
-//	private Font labelFont = new Font("Tahoma", Font.BOLD, 12);
-//	private JLabel structureLabel;
-//	private IChemObjectBuilder bldr;
-//	private SmilesParser smipar;
-//	private DepictionGenerator dptgen;
 	
 	private MolStructurePanel structurePanel;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("showKnowns", 16);
 
-	public DockableMolStructurePanel(String id) {
+	public DockableMolStructurePanel(String id, String name) {
 
-		super(id, componentIcon, "Molecular structure", null, Permissions.MIN_MAX_STACK);
+		super(id, componentIcon, name, null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 		structurePanel = new MolStructurePanel();
 		JScrollPane scrollPane = new JScrollPane(structurePanel);
 		scrollPane.getViewport().setBackground(Color.WHITE);
 		add(scrollPane, BorderLayout.CENTER);
-
-//		setLayout(new BorderLayout(0, 0));
-//
-//		structureLabel = new JLabel();
-//		structureLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-//		structureLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
-//
-//		JScrollPane scrollPane = new JScrollPane(structureLabel);
-//		scrollPane.getViewport().setBackground(Color.WHITE);
-//		add(scrollPane, BorderLayout.CENTER);
-//
-//		bldr = SilentChemObjectBuilder.getInstance();
-//		smipar = new SmilesParser(bldr);
-//		dptgen = new DepictionGenerator().withAtomColors();
+	}
+	
+	public DockableMolStructurePanel(String id) {
+		this(id, "Molecular structure");
 	}
 
 	public synchronized void clearPanel() {
-//		structureLabel.setIcon(null);
 		structurePanel.clearPanel();
 	}
 
 	public void showStructure(String cpdSmiles) {
-
 		structurePanel.showStructure(cpdSmiles);
-		
-//		smiles = cpdSmiles;
-//		structureLabel.setIcon(null);
-//
-//		Depiction dpic = null;
-//		IAtomContainer mol = null;
-//
-//		if (smiles != null && !smiles.isEmpty() && !smiles.equals("NoSmile")) {
-//
-//			try {
-//				mol = smipar.parseSmiles(smiles);
-//			} catch (Exception e1) {
-//				e1.printStackTrace();
-//			}
-//			if (mol != null) {
-//				try {
-//					dpic = dptgen.depict(mol);
-//				}
-//				catch (CDKException e) {
-//
-//					// e.printStackTrace();
-//				}
-//			}
-//			if (dpic != null) {
-//				structureLabel.setIcon(new ImageIcon(dpic.toImg()));
-//				structureLabel.setHorizontalAlignment(SwingConstants.CENTER);
-//				structureLabel.setVerticalAlignment(SwingConstants.CENTER);
-//			}
-//		}
 	}
 	
 	public void showStructure(IAtomContainer mol) {

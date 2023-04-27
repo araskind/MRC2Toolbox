@@ -90,6 +90,7 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 	
 	private void createFeatureChromatogramDefinitions() {
 		
+		taskDescription = "Creating chromatogram definitions ... ";
 		total = features.size();
 		processed = 0;
 		featureChromatogramDefinitions = 
@@ -145,7 +146,9 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 				MsFeatureChromatogramExtractionTask task = (MsFeatureChromatogramExtractionTask)e.getSource();
 				fileChromatogramMap.put(task.getRawDataFile(), task.getChromatogramMap());				
 				//	createMsFeatureChromatogramBundles(task);
+				MRC2ToolBoxCore.getTaskController().getTaskQueue().removeTask(task);
 				processedFilesCount++;
+				
 				if(processedFilesCount == rawDataFiles.size()) {
 					createMsFeatureChromatogramBundles();
 					setStatus(TaskStatus.FINISHED);
@@ -156,9 +159,13 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 
 	private void createMsFeatureChromatogramBundles() {
 		
+		taskDescription = "Finalizing chromatogram extraction ... ";
+
 		for(Entry<DataFile, Map<MSFeatureInfoBundle, Collection<ExtractedIonData>>> e : fileChromatogramMap.entrySet()) {
 			
 			Map<MSFeatureInfoBundle, Collection<ExtractedIonData>> fileChromatograms = e.getValue();
+			total = fileChromatograms.size();
+			processed = 0;
 			DataFile df = e.getKey();
 			for(Entry<MSFeatureInfoBundle, Collection<ExtractedIonData>> entry : fileChromatograms.entrySet()) {
 				
@@ -176,6 +183,7 @@ public class MsFeatureChromatogramBatchExtractionTask extends AbstractTask imple
 					// TODO Auto-generated catch block
 					ex.printStackTrace();
 				}
+				processed++;
 			}
 		}
 	}

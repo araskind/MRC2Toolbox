@@ -155,7 +155,8 @@ public class ExtendedMSPExportTask extends AbstractTask {
 				if(tandemMs.getSpectrum().isEmpty())
 					continue;
 
-				writer.append(MSPField.NAME.getName() + ": " + msf.getId() + "\n");
+				//	writer.append(MSPField.NAME.getName() + ": " + msf.getId() + "\n");
+				writer.append(MSPField.NAME.getName() + ": " + tandemMs.getId() + "\n");
 				writer.append("Feature name: " + msf.getName() + "\n");
 				if(msf.isIdentified()) {
 					CompoundIdentity cid = msf.getPrimaryIdentity().getCompoundIdentity();

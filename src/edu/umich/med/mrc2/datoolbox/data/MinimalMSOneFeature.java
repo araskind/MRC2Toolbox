@@ -27,7 +27,6 @@ import java.util.UUID;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.MinimalMSOneFeatureFields;
 
 public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOneFeature> {
@@ -42,43 +41,46 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 	private double mz;
 	private double rt;
 	private double rank;
-
+	private String smiles;
+	private String inchiKey;
+	
 	public MinimalMSOneFeature(double mz, double rt) {
-		super();
-		this.id = DataPrefix.LOOKUP_FEATURE.getName() + 
-				UUID.randomUUID().toString().substring(0, 12);
-		this.mz = mz;
-		this.rt = rt;
-		this.name = MRC2ToolBoxConfiguration.getMzFormat().format(mz) + "_"
-				+ MRC2ToolBoxConfiguration.getRtFormat().format(rt);
+		this(null, null, mz, rt, 0.0d, null, null);
 	}
 
 	public MinimalMSOneFeature(String name, double mz, double rt) {
-		super();
-		this.id = DataPrefix.LOOKUP_FEATURE.getName() + 
-				UUID.randomUUID().toString().substring(0, 12);
-		this.name = name;
-		this.mz = mz;
-		this.rt = rt;
+		this(null, name, mz, rt, 0.0d, null, null);
 	}
 
 	public MinimalMSOneFeature(String name, double mz, double rt, double rank) {
-		super();
-		this.id = DataPrefix.LOOKUP_FEATURE.getName() + 
-				UUID.randomUUID().toString().substring(0, 12);
-		this.name = name;
-		this.mz = mz;
-		this.rt = rt;
-		this.rank = rank;
+		this(null, null, mz, rt, rank, null, null);
 	}
 
 	public MinimalMSOneFeature(String id, String name, double mz, double rt, double rank) {
+		this(id, name, mz, rt, rank, null, null);
+	}
+
+	public MinimalMSOneFeature(
+			String dbid,
+			String name, 
+			double mz, 
+			double rt, 
+			double rank, 
+			String smiles, 
+			String inchiKey) {
 		super();
-		this.id = id;
+		if(dbid == null)
+			this.id = DataPrefix.LOOKUP_FEATURE.getName() + 
+			UUID.randomUUID().toString().substring(0, 12);
+		else
+			this.id = dbid;
+		
 		this.name = name;
 		this.mz = mz;
 		this.rt = rt;
 		this.rank = rank;
+		this.smiles = smiles;
+		this.inchiKey = inchiKey;
 	}
 
 	public String getName() {
@@ -184,5 +186,21 @@ public class MinimalMSOneFeature implements Serializable, Comparable<MinimalMSOn
 				featureElement.getAttributeValue(MinimalMSOneFeatureFields.RT.name()));
 		rank = Double.parseDouble(
 				featureElement.getAttributeValue(MinimalMSOneFeatureFields.Rank.name()));
+	}
+
+	public String getSmiles() {
+		return smiles;
+	}
+
+	public void setSmiles(String smiles) {
+		this.smiles = smiles;
+	}
+
+	public String getInchiKey() {
+		return inchiKey;
+	}
+
+	public void setInchiKey(String inchiKey) {
+		this.inchiKey = inchiKey;
 	}
 }
