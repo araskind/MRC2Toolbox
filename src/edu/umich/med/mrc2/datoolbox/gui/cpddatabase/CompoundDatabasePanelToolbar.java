@@ -51,6 +51,7 @@ public class CompoundDatabasePanelToolbar extends CommonToolbar {
 	private static final Icon addCompoundIcon = GuiUtils.getIcon("addCompound", 32);
 	private static final Icon findCompoundListIcon = GuiUtils.getIcon("findList", 32);
 	private static final Icon curateCompoundIcon = GuiUtils.getIcon("curateCompound", 32);
+	private static final Icon curateMsReadyCompoundIcon = GuiUtils.getIcon("curateMsReadyCompound", 32);
 
 	@SuppressWarnings("unused")
 	private JButton
@@ -65,7 +66,8 @@ public class CompoundDatabasePanelToolbar extends CommonToolbar {
 		pubChemImportButton,
 		addCompoundButton,
 		findCompoundListButton,
-		curateCompoundButton;
+		curateCompoundButton,
+		curateMsReadyCompoundButton;
 
 	public CompoundDatabasePanelToolbar(ActionListener commandListener) {
 
@@ -134,6 +136,11 @@ public class CompoundDatabasePanelToolbar extends CommonToolbar {
 				MainActionCommands.SHOW_COMPOUND_DATABASE_CURATOR.getName(),
 				buttonDimension);
 		curateCompoundButton.setEnabled(false);
+		
+		curateMsReadyCompoundButton = GuiUtils.addButton(this, null, curateMsReadyCompoundIcon, commandListener,
+				MainActionCommands.SHOW_MS_READY_COMPOUND_CURATOR.getName(),
+				MainActionCommands.SHOW_MS_READY_COMPOUND_CURATOR.getName(),
+				buttonDimension);
 	}
 
 	@Override

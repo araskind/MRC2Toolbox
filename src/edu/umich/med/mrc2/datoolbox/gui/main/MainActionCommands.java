@@ -940,6 +940,10 @@ public enum MainActionCommands {
 	
 	//	Compound curator
 	SHOW_COMPOUND_DATABASE_CURATOR("Show compound database curator"),
+	SHOW_MS_READY_COMPOUND_CURATOR("Show MS-ready compound curator"),
+	FETCH_COMPOUND_DATA_FOR_CURATION("Fetch compound data for curation"),
+	VALIDATE_MS_READY_STRUCTURE("Validate MS-ready structure"),
+	SAVE_MS_READY_STRUCTURE("Save MS-ready structure"),
 
 	//	Synonym editor
 	ADD_SYNONYM_DIALOG_COMMAND("Add synonym dialog"),

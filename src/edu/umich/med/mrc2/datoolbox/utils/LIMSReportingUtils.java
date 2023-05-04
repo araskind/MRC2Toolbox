@@ -40,6 +40,7 @@ import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 public class LIMSReportingUtils {
 
 	public static final String UNTARGETED_ASSAY_ID = "A003";
+	public static final String LIPIDOMICS_ASSAY_ID = "A004";
 	public static final String CENTRAL_CARBON_METABOLISM_ASSAY_ID = "A049";
 
 	public static Path createExperimentDataDirectoryStructure(String experimentId, File parentDirectory) throws Exception {
@@ -69,15 +70,14 @@ public class LIMSReportingUtils {
 				Files.createDirectory(Paths.get(assayDirPath.toString(), "Design"));
 				Files.createDirectory(Paths.get(assayDirPath.toString(), "Documents"));
 				Files.createDirectory(Paths.get(assayDirPath.toString(), "Report"));
-				Files.createDirectory(Paths.get(assayDirPath.toString(), "Methods"));
+				Files.createDirectory(Paths.get(assayDirPath.toString(), "Methods"));				
 
 				//	Folders specific for untargeted assay
 				if(assay.getId().equals(UNTARGETED_ASSAY_ID)) {
 
-					//	TIC
-//					Files.createDirectories(Paths.get(assayDirPath.toString(), "TIC", "POS"));
-//					Files.createDirectories(Paths.get(assayDirPath.toString(), "TIC", "NEG"));
-
+					Files.createDirectory(Paths.get(assayDirPath.toString(), "BatchMatch"));
+					Files.createDirectory(Paths.get(assayDirPath.toString(), "QCaNVaS"));
+					
 					//	Raw data
 					Files.createDirectory(Paths.get(rawDataPath.toString(), "POS"));
 					Files.createDirectory(Paths.get(rawDataPath.toString(), "NEG"));
@@ -94,7 +94,17 @@ public class LIMSReportingUtils {
 					Files.createDirectories(Paths.get(assayDirPath.toString(), "Recursion libraries", "POS"));
 					Files.createDirectories(Paths.get(assayDirPath.toString(), "Recursion libraries", "NEG"));
 				}
+				if(assay.getId().equals(LIPIDOMICS_ASSAY_ID)) {
+					
+					Files.createDirectory(Paths.get(rawDataPath.toString(), "POS"));
+					Files.createDirectory(Paths.get(rawDataPath.toString(), "NEG"));
+
+				}
 				if(assay.getId().equals(CENTRAL_CARBON_METABOLISM_ASSAY_ID)) {
+					
+					Files.createDirectory(Paths.get(assayDirPath.toString(), "BatchMatch"));
+					Files.createDirectory(Paths.get(assayDirPath.toString(), "QCaNVaS"));
+					
 					//	Raw data
 					Files.createDirectory(Paths.get(rawDataPath.toString(), "NEG"));
 

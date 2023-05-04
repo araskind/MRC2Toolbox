@@ -614,6 +614,23 @@ public class NISTPepSearchResultManipulator {
 		headerChunks.add(PercolatorIputFields.Peptide.name());
 		headerChunks.add(PercolatorIputFields.Proteins.name());
 		
+//		SpecId
+//		Label
+//		ScanNr
+//		ExpMass
+//		retentiontime
+//		rank
+//		score
+//		delta_score
+//		probability
+//		abs_mass_error
+//		msms_entropy_score
+//		dot_product
+//		abs_delta_rt
+//		Peptide
+//		Proteins
+
+		
 		final Writer writer = new BufferedWriter(new FileWriter(outputFile));
 		writer.append(StringUtils.join(headerChunks, "\t") + "\n");
 		

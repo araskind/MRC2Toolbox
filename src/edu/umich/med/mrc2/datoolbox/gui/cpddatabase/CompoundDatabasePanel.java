@@ -71,6 +71,7 @@ import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.curator.CompoundDatabaseCura
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.dataimport.AddCustomCompoundDialog;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.dataimport.AddPubchemCompoundsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.dataimport.DatabaseCompoundImportDialog;
+import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.CompoundMsReadyCuratorFrame;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.spectrum.DockableSpectraTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSLibraryEntryPropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableMsMsTable;
@@ -124,6 +125,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	private SynonymTableModelListener synMoldelListener;
 	private BatchCompoundDatabaseSearchDialog batchCompoundDatabaseSearchDialog;
 	private CompoundDatabaseCuratorFrame compoundDatabaseCuratorFrame;
+	private CompoundMsReadyCuratorFrame compoundMsReadyCuratorFrame;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("pubChem", 16);
 	private static final Icon clearSearchIcon = GuiUtils.getIcon("clearSearch", 24);
@@ -360,8 +362,19 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 			batchSearchCompoundDatabase();
 		
 		if(command.equals(MainActionCommands.SHOW_COMPOUND_DATABASE_CURATOR.getName()))
-			showCompoundDatabaseCurator();		
+			showCompoundDatabaseCurator();	
+		
+		if(command.equals(MainActionCommands.SHOW_MS_READY_COMPOUND_CURATOR.getName()))
+			showMsReadyCompoundCurator();		
 	}
+	
+	private void showMsReadyCompoundCurator() {
+		
+		compoundMsReadyCuratorFrame = new CompoundMsReadyCuratorFrame();
+		compoundMsReadyCuratorFrame.setLocationRelativeTo(this.getContentPane());
+		//	compoundMsReadyCuratorFrame.setVisible(true);
+		compoundMsReadyCuratorFrame.toFront();
+	}	
 	
 	private void editCompoundDatabaseEntry() {
 		// TODO Auto-generated method stub

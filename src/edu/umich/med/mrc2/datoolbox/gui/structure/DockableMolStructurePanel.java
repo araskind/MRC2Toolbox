@@ -56,8 +56,8 @@ public class DockableMolStructurePanel extends DefaultSingleCDockable {
 		structurePanel.clearPanel();
 	}
 
-	public void showStructure(String cpdSmiles) {
-		structurePanel.showStructure(cpdSmiles);
+	public IAtomContainer showStructure(String cpdSmiles) {
+		return structurePanel.showStructure(cpdSmiles);
 	}
 	
 	public void showStructure(IAtomContainer mol) {

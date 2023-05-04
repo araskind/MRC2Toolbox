@@ -71,7 +71,7 @@ import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 
-public class PercolatorFDREstimationTask extends AbstractTask implements TaskListener {
+public class PercolatorFDREstimationTask extends NISTMsPepSearchTask implements TaskListener {
 	
 	private Collection<MSFeatureInfoBundle>featureList;
 	private NISTPepSearchParameterObject searchParameters;
@@ -237,7 +237,7 @@ public class PercolatorFDREstimationTask extends AbstractTask implements TaskLis
 		
 		Collection<PepSearchOutputObject>decoyHits = 
 				parseDecoySearchResults();
-				
+					
 		if(decoyHits == null) {
 			setStatus(TaskStatus.ERROR);
 			return;

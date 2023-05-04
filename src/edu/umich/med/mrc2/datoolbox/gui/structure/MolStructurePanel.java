@@ -100,35 +100,36 @@ public class MolStructurePanel extends JPanel {
 		}
 	}
 
-	public void showStructure(String cpdSmiles) {
+	public IAtomContainer showStructure(String cpdSmiles) {
 
 		smiles = cpdSmiles;
 		structureLabel.setIcon(null);
 
 		Depiction dpic = null;
 		IAtomContainer mol = null;
-		if (smiles != null && !smiles.isEmpty() && !smiles.equals("NoSmile")) {
+		if (smiles == null || smiles.isEmpty() || smiles.equals("NoSmile")) 
+			return null;
 
+		try {
+			mol = smipar.parseSmiles(smiles);
+			//	IMolecularFormula molFormula = MolecularFormulaManipulator.getMolecularFormula(mol);
+			//	System.out.println("Charge: " + Integer.toString(molFormula.getCharge()));
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		if (mol != null) {
 			try {
-				mol = smipar.parseSmiles(smiles);
-				//	IMolecularFormula molFormula = MolecularFormulaManipulator.getMolecularFormula(mol);
-				//	System.out.println("Charge: " + Integer.toString(molFormula.getCharge()));
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
-			if (mol != null) {
-				try {
-					dpic = dptgen.depict(mol);
-				} catch (CDKException e) {
-					// e.printStackTrace();
-				}
-			}
-			if (dpic != null) {
-				structureLabel.setIcon(new ImageIcon(dpic.toImg()));
-				structureLabel.setHorizontalAlignment(SwingConstants.CENTER);
-				structureLabel.setVerticalAlignment(SwingConstants.CENTER);
+				dpic = dptgen.depict(mol);
+			} catch (CDKException e) {
+				// e.printStackTrace();
 			}
 		}
+		if (dpic != null) {
+			structureLabel.setIcon(new ImageIcon(dpic.toImg()));
+			structureLabel.setHorizontalAlignment(SwingConstants.CENTER);
+			structureLabel.setVerticalAlignment(SwingConstants.CENTER);
+		}		
+		return mol;
 	}
 	
 	public boolean smilesStringIsValid(String smiles) {

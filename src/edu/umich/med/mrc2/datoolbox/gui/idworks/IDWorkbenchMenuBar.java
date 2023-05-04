@@ -217,7 +217,7 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		fdrMenuItem = addItem(librarySearchMenu, 
 				MainActionCommands.SETUP_FDR_ESTIMATION_FOR_LIBRARY_MATCHES, 
 				fdrIcon);
-		fdrMenuItem.setEnabled(false);
+		//	fdrMenuItem.setEnabled(false);
 		
 		add(librarySearchMenu);
 		

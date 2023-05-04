@@ -99,24 +99,47 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600213802276" orientation="HORIZONTAL" divider="0.7592223330009971">
-											<node nodeId="1600213802278" orientation="VERTICAL" divider="0.4891416752843847">
-												<leaf id="1" nodeId="1600213802280">
-													<placeholders>
-														<placeholder>dock.single.DockableExperimentListingTable</placeholder>
-													</placeholders>
-												</leaf>
-												<leaf id="2" nodeId="1600213802282">
-													<placeholders>
-														<placeholder>dock.single.DockableLIMSDesignEditorPanel</placeholder>
-													</placeholders>
-												</leaf>
-											</node>
-											<leaf id="0" nodeId="1600213802284">
+										<node nodeId="1683143594703" orientation="VERTICAL" divider="0.3023516237402016">
+											<leaf id="1" nodeId="1683143594701">
 												<placeholders>
-													<placeholder>dock.single.DockableExperimentSummaryPanel</placeholder>
+													<placeholder>dock.single.DockableCompoundCurationListingTable</placeholder>
 												</placeholders>
 											</leaf>
+											<node nodeId="1683143600149" orientation="HORIZONTAL" divider="0.48588537211291705">
+												<node nodeId="1683143610498" orientation="VERTICAL" divider="0.3386685815314293">
+													<leaf id="0" nodeId="1683143590154">
+														<placeholders>
+															<placeholder>dock.single.OriginalStructuralDescriptorsPanel</placeholder>
+														</placeholders>
+													</leaf>
+													<leaf id="4" nodeId="1683143610496">
+														<placeholders>
+															<placeholder>dock.single.CompoundMsReadyCuratorPrimaryMolStructurePanel</placeholder>
+														</placeholders>
+													</leaf>
+												</node>
+												<node nodeId="1683143629587" orientation="VERTICAL" divider="0.33532006802019604">
+													<leaf id="2" nodeId="1683143600147">
+														<placeholders>
+															<placeholder>dock.single.MSReadyStructuralDescriptorsPanel</placeholder>
+														</placeholders>
+													</leaf>
+													<leaf id="3" nodeId="1683143571112">
+														<placeholders>
+															<placeholder>dock.single.CompoundMsReadyCuratorMSReadyMolStructurePanel</placeholder>
+														</placeholders>
+														<placeholder-map>
+															<version>0</version>
+															<format>dock.PlaceholderList</format>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.CompoundMsReadyCuratorMSReadyMolStructurePanel</placeholder>
+																</key>
+															</entry>
+														</placeholder-map>
+													</leaf>
+												</node>
+											</node>
 										</node>
 									</content>
 								</delegate>
@@ -128,30 +151,50 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentSummaryPanel">
-										<replacement id="dockablesingle DockableExperimentSummaryPanel"/>
+									<layout factory="predefined" placeholder="dock.single.OriginalStructuralDescriptorsPanel">
+										<replacement id="dockablesingle OriginalStructuralDescriptorsPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentSummaryPanel</id>
+											<id>OriginalStructuralDescriptorsPanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
-										<replacement id="dockablesingle DockableExperimentListingTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableCompoundCurationListingTable">
+										<replacement id="dockablesingle DockableCompoundCurationListingTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentListingTable</id>
+											<id>DockableCompoundCurationListingTable</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLIMSDesignEditorPanel">
-										<replacement id="dockablesingle DockableLIMSDesignEditorPanel"/>
+									<layout factory="predefined" placeholder="dock.single.MSReadyStructuralDescriptorsPanel">
+										<replacement id="dockablesingle MSReadyStructuralDescriptorsPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLIMSDesignEditorPanel</id>
+											<id>MSReadyStructuralDescriptorsPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.CompoundMsReadyCuratorMSReadyMolStructurePanel">
+										<replacement id="dockablesingle CompoundMsReadyCuratorMSReadyMolStructurePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>CompoundMsReadyCuratorMSReadyMolStructurePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.CompoundMsReadyCuratorPrimaryMolStructurePanel">
+										<replacement id="dockablesingle CompoundMsReadyCuratorPrimaryMolStructurePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>CompoundMsReadyCuratorPrimaryMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -185,7 +228,7 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DockableLIMSDesignEditorPanel" current="dock.mode.normal">
+						<entry id="single MSReadyStructuralDescriptorsPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -196,18 +239,19 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableLIMSDesignEditorPanel</placeholder>
+											<placeholder>dock.single.MSReadyStructuralDescriptorsPanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.7592223330009971" id="1600213802276"/>
-												<node location="BOTTOM" size="0.5108583247156153" id="1600213802278"/>
-												<leaf id="1600213802282"/>
+												<node location="LEFT" size="0.6129261363636364" id="1683143590156"/>
+												<node location="BOTTOM" size="0.3964165733482643" id="1683143594703"/>
+												<node location="RIGHT" size="0.6260162601626016" id="1683143600149"/>
+												<leaf id="1683143600147"/>
 											</backup-path>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableExperimentListingTable" current="dock.mode.normal">
+						<entry id="single CompoundMsReadyCuratorMSReadyMolStructurePanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -218,18 +262,17 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableExperimentListingTable</placeholder>
+											<placeholder>dock.single.CompoundMsReadyCuratorMSReadyMolStructurePanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.7592223330009971" id="1600213802276"/>
-												<node location="TOP" size="0.5" id="1600213802278"/>
-												<leaf id="1600213802280"/>
+												<node location="RIGHT" size="0.38707386363636365" id="1683143590156"/>
+												<leaf id="1683143571112"/>
 											</backup-path>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableExperimentSummaryPanel" current="dock.mode.normal">
+						<entry id="single OriginalStructuralDescriptorsPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -240,10 +283,56 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableExperimentSummaryPanel</placeholder>
+											<placeholder>dock.single.OriginalStructuralDescriptorsPanel</placeholder>
 											<backup-path>
-												<node location="RIGHT" size="0.24077766699900294" id="1600213802276"/>
-												<leaf id="1600213802284"/>
+												<node location="LEFT" size="0.6129261363636364" id="1683143590156"/>
+												<leaf id="1683143590154"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single CompoundMsReadyCuratorPrimaryMolStructurePanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.CompoundMsReadyCuratorPrimaryMolStructurePanel</placeholder>
+											<backup-path>
+												<node location="LEFT" size="0.6129261363636364" id="1683143590156"/>
+												<node location="BOTTOM" size="0.3964165733482643" id="1683143594703"/>
+												<node location="LEFT" size="0.3739837398373984" id="1683143600149"/>
+												<node location="BOTTOM" size="0.5710227272727273" id="1683143610498"/>
+												<leaf id="1683143610496"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single DockableCompoundCurationListingTable" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.DockableCompoundCurationListingTable</placeholder>
+											<backup-path>
+												<node location="LEFT" size="0.6129261363636364" id="1683143590156"/>
+												<node location="TOP" size="0.6035834266517357" id="1683143594703"/>
+												<leaf id="1683143594701"/>
 											</backup-path>
 										</property>
 									</location>

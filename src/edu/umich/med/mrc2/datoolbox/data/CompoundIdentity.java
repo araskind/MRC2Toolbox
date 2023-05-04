@@ -54,6 +54,7 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 	private String inChiKey;
 	private HashMap<CompoundDatabaseEnum, String> dbIdMap;
 	private CompoundDatabaseEnum primaryDatabase;	
+	private int charge;
 
 	public CompoundIdentity(){
 		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
@@ -394,6 +395,14 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 					dbIdMap.put(entry.getKey(), entry.getValue());
 			}
 		}
+	}
+
+	public int getCharge() {
+		return charge;
+	}
+
+	public void setCharge(int charge) {
+		this.charge = charge;
 	}
 }
 

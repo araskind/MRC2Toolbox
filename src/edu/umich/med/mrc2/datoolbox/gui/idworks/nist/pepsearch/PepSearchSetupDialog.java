@@ -34,6 +34,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.nio.file.Paths;
@@ -92,7 +94,7 @@ import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.msmsfdr.NISTPepSearchResultManipulator;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class PepSearchSetupDialog extends JDialog implements ActionListener, BackedByPreferences{
+public class PepSearchSetupDialog extends JDialog implements ActionListener, ItemListener, BackedByPreferences{
 
 	/**
 	 *
@@ -322,6 +324,7 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 		ButtonGroup inputSourceButtongroup = new ButtonGroup();
 		fileSource = new JRadioButton("File", true);
 		internalSource = new JRadioButton("Internal");
+		internalSource.addItemListener(this);
 		inputSourceButtongroup.add(fileSource);
 		inputSourceButtongroup.add(internalSource);
 
@@ -1965,6 +1968,26 @@ public class PepSearchSetupDialog extends JDialog implements ActionListener, Bac
 
 	public JPanel getCommandPreviewPanel() {
 		return commandPreviewPanel;
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+
+		if (e.getSource().equals(internalSource)) { 
+			
+			if(e.getStateChange() == ItemEvent.SELECTED) {
+				
+				featureSubsetComboBox.setEnabled(true);
+				inputFileTextField.setEnabled(false);
+				inputFileBrowseButton.setEnabled(false);
+			}
+			if(e.getStateChange() == ItemEvent.DESELECTED) {
+				
+				featureSubsetComboBox.setEnabled(false);
+				inputFileTextField.setEnabled(true);
+				inputFileBrowseButton.setEnabled(true);
+			}
+		}
 	}
 }
 

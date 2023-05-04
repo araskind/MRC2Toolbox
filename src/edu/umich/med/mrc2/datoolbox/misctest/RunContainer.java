@@ -154,10 +154,10 @@ public class RunContainer {
 	}
 	
 	private static void readThermoWorklistFromJson() {
-
+		
 		String outputName = 
-				"Y:\\Charles\\2023-03-15 F2 plasma RPLC\\RPLCpos\\All\\JSON\\2023-03-15 F2 plasma RPLC-POS manifest.TXT";
-		File jsonFolder = new File("Y:\\Charles\\2023-03-15 F2 plasma RPLC\\RPLCpos\\All\\JSON");
+				"Y:\\Charles\\2023-03-15 F2 plasma RPLC\\RPLCneg\\All\\JSON\\2023-03-15 F2 plasma RPLC-NEG manifest.TXT";
+		File jsonFolder = new File("Y:\\Charles\\2023-03-15 F2 plasma RPLC\\RPLCneg\\All\\JSON");
 		File[] jsonFileList = JSONUtils.getJsonFileList(jsonFolder);
 		Collection<ThermoRawMetadata>metadataList = 
 				new ArrayList<ThermoRawMetadata>();

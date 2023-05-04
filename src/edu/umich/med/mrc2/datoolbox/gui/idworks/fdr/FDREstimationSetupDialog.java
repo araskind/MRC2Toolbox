@@ -97,8 +97,10 @@ public class FDREstimationSetupDialog extends JDialog
 		JPanel pepSearchParameterListingPanel = new JPanel(new BorderLayout(0,0));
 		pepSearchParameterSetTable = new PepSearchParameterSetTable();
 		pepSearchParameterSetTable.getSelectionModel().addListSelectionListener(this);
-		pepSearchParameterListingPanel.add(new JScrollPane(pepSearchParameterSetTable), BorderLayout.CENTER);
-		tabbedPane.addTab("Select PepSearch Parameter Set", null, pepSearchParameterListingPanel, null);
+		pepSearchParameterListingPanel.add(
+				new JScrollPane(pepSearchParameterSetTable), BorderLayout.CENTER);
+		tabbedPane.addTab("Select PepSearch Parameter Set", 
+				null, pepSearchParameterListingPanel, null);
 		
 		pepSearchSetupDialog = new PepSearchSetupDialog();
 		JPanel searchOptionsPanel = pepSearchSetupDialog.getSearchOptionsPanel();

@@ -153,6 +153,7 @@ public class DockableCompoundDatabaseSearchPanel extends DefaultSingleCDockable 
 		nameFidelityButtonGroup.add(rdbtnExactMatchOnly);
 
 		if(MRC2ToolBoxConfiguration.getDatabaseType().equals(DatabseDialect.Oracle)) {
+			
 			chckbxAllowSpellingErrors = new JRadioButton("Allow spelling errors");
 			GridBagConstraints gbc_chckbxAllowSpellingErrors = new GridBagConstraints();
 			gbc_chckbxAllowSpellingErrors.gridwidth = 2;
