@@ -942,9 +942,10 @@ public enum MainActionCommands {
 	SHOW_COMPOUND_DATABASE_CURATOR("Show compound database curator"),
 	SHOW_MS_READY_COMPOUND_CURATOR("Show MS-ready compound curator"),
 	FETCH_COMPOUND_DATA_FOR_CURATION("Fetch compound data for curation"),
-	VALIDATE_MS_READY_STRUCTURE("Validate MS-ready structure"),
-	SAVE_MS_READY_STRUCTURE("Save MS-ready structure"),
-
+	VALIDATE_MS_READY_STRUCTURE("Validate MS-ready structure"),	
+	EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND("Edit compound MS-ready structure"),
+	SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND("Save compound MS-ready structure"),
+	
 	//	Synonym editor
 	ADD_SYNONYM_DIALOG_COMMAND("Add synonym dialog"),
 	ADD_SYNONYM_COMMAND("Add synonym"),
@@ -1232,11 +1233,11 @@ public enum MainActionCommands {
 	SETUP_COMPOUND_PROPERTIES_SEARCH_COMMAND("Show \"Search compounds by properties\" dialog"),
 	SEARCH_COMPOUND_PROPERTIES_COMMAND("Search compounds by properties"),
 	
-	EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND("Edit compound MS-ready structure"),
-	SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND("Save compound MS-ready structure"),
-	
 	EDIT_SELECTED_FIELD_COMMAND("Edit selected field"),
 	SAVE_CHANGES_COMMAND("Save changes"),
+	
+	COPY_SMILES_COMMAND("Copy SMILES"),
+	PASTE_SMILES_COMMAND("Paste SMILES"),
 	;
 
 	private final String name;

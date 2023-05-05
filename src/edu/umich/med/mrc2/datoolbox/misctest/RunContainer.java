@@ -40,6 +40,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -75,15 +76,25 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.jdom2.input.DOMBuilder;
 import org.json.JSONObject;
+import org.openscience.cdk.Atom;
 import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
+import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.io.MDLV2000Reader;
+import org.openscience.cdk.isomorphism.Mappings;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smarts.SmartsPattern;
+import org.openscience.cdk.smiles.SmiFlavor;
+import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
+import org.openscience.cdk.tools.CDKHydrogenAdder;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import org.w3c.dom.Node;
 
@@ -146,10 +157,65 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			readThermoWorklistFromJson();
+			fixChargedLipid();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	private static void fixChargedLipid() throws InvalidSmilesException {
+
+		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+		SmilesGenerator smilesGenerator = new SmilesGenerator(SmiFlavor.Isomeric);
+		IAtomContainer atomContainer = sp.parseSmiles(
+				"[H]C1=C(OC(CCCCCCCCCCC(OCC(OC(CCCCCCCCCCC2=C(C(C)=C(O2)CCCCC)C)=O)COP(O)(OCC[N+](C)(C)C)=O)=O)=C1C)CCCCC");
+		
+		try {
+			AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
+		} catch (CDKException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		try {
+			CDKHydrogenAdder.getInstance(atomContainer.getBuilder()).addImplicitHydrogens(atomContainer);
+		} catch (CDKException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		SmartsPattern phosCholPattern = SmartsPattern.create("OP(OCC[N+](C)(C)C)(OC)=O");
+		SmartsPattern poPattern = SmartsPattern.create("[P]O");
+
+		int[] phosCholMapping = phosCholPattern.match(atomContainer);
+		Mappings poMappings = poPattern.matchAll(atomContainer);
+		if (phosCholMapping.length > 0 && poMappings.count() > 0) {
+			
+			for(int[] poMapping : poMappings) {
+				
+				int[] intersect = Arrays.stream(phosCholMapping).distinct()
+						.filter(x -> Arrays.stream(poMapping).anyMatch(y -> y == x)).toArray();
+				for (int i : intersect) {
+					
+					IAtom atom = atomContainer.getAtom(i);
+					
+					if (atom.getSymbol().equals("O") && atom.getImplicitHydrogenCount() == 1) {
+
+						IAtom hydroxyl = new Atom("O");
+						  hydroxyl.setImplicitHydrogenCount(0);
+						  hydroxyl.setFormalCharge(-1);
+						AtomContainerManipulator.replaceAtomByAtom(atomContainer, atom, hydroxyl);
+						String smiles = "";		
+						try {
+							smiles = smilesGenerator.create(atomContainer);
+						} catch (CDKException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}	
+						System.out.println(smiles);
+						return;
+					}
+				}
+			}
 		}
 	}
 	

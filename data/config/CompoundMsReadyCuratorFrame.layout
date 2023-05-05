@@ -99,32 +99,41 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1683143594703" orientation="VERTICAL" divider="0.3023516237402016">
+										<node nodeId="1683143594703" orientation="VERTICAL" divider="0.4153713298791019">
 											<leaf id="1" nodeId="1683143594701">
 												<placeholders>
 													<placeholder>dock.single.DockableCompoundCurationListingTable</placeholder>
 												</placeholders>
 											</leaf>
-											<node nodeId="1683143600149" orientation="HORIZONTAL" divider="0.48588537211291705">
-												<node nodeId="1683143610498" orientation="VERTICAL" divider="0.3386685815314293">
-													<leaf id="0" nodeId="1683143590154">
+											<node nodeId="1683143600149" orientation="HORIZONTAL" divider="0.5121495327102804">
+												<node nodeId="1683143610498" orientation="VERTICAL" divider="0.3614814814814815">
+													<leaf id="2" nodeId="1683143590154">
 														<placeholders>
 															<placeholder>dock.single.OriginalStructuralDescriptorsPanel</placeholder>
 														</placeholders>
+														<placeholder-map>
+															<version>0</version>
+															<format>dock.PlaceholderList</format>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.OriginalStructuralDescriptorsPanel</placeholder>
+																</key>
+															</entry>
+														</placeholder-map>
 													</leaf>
-													<leaf id="4" nodeId="1683143610496">
+													<leaf id="3" nodeId="1683143610496">
 														<placeholders>
 															<placeholder>dock.single.CompoundMsReadyCuratorPrimaryMolStructurePanel</placeholder>
 														</placeholders>
 													</leaf>
 												</node>
-												<node nodeId="1683143629587" orientation="VERTICAL" divider="0.33532006802019604">
-													<leaf id="2" nodeId="1683143600147">
+												<node nodeId="1683225988254" orientation="VERTICAL" divider="0.3585185185185184">
+													<leaf id="0" nodeId="1683225988252">
 														<placeholders>
 															<placeholder>dock.single.MSReadyStructuralDescriptorsPanel</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="3" nodeId="1683143571112">
+													<leaf id="4" nodeId="1683143571112">
 														<placeholders>
 															<placeholder>dock.single.CompoundMsReadyCuratorMSReadyMolStructurePanel</placeholder>
 														</placeholders>
@@ -151,10 +160,10 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.OriginalStructuralDescriptorsPanel">
-										<replacement id="dockablesingle OriginalStructuralDescriptorsPanel"/>
+									<layout factory="predefined" placeholder="dock.single.MSReadyStructuralDescriptorsPanel">
+										<replacement id="dockablesingle MSReadyStructuralDescriptorsPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>OriginalStructuralDescriptorsPanel</id>
+											<id>MSReadyStructuralDescriptorsPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -171,20 +180,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.MSReadyStructuralDescriptorsPanel">
-										<replacement id="dockablesingle MSReadyStructuralDescriptorsPanel"/>
+									<layout factory="predefined" placeholder="dock.single.OriginalStructuralDescriptorsPanel">
+										<replacement id="dockablesingle OriginalStructuralDescriptorsPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>MSReadyStructuralDescriptorsPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.CompoundMsReadyCuratorMSReadyMolStructurePanel">
-										<replacement id="dockablesingle CompoundMsReadyCuratorMSReadyMolStructurePanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>CompoundMsReadyCuratorMSReadyMolStructurePanel</id>
+											<id>OriginalStructuralDescriptorsPanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -195,6 +194,16 @@
 										<replacement id="dockablesingle CompoundMsReadyCuratorPrimaryMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>CompoundMsReadyCuratorPrimaryMolStructurePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.CompoundMsReadyCuratorMSReadyMolStructurePanel">
+										<replacement id="dockablesingle CompoundMsReadyCuratorMSReadyMolStructurePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>CompoundMsReadyCuratorMSReadyMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -241,11 +250,15 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.MSReadyStructuralDescriptorsPanel</placeholder>
 											<backup-path>
-												<node location="LEFT" size="0.6129261363636364" id="1683143590156"/>
-												<node location="BOTTOM" size="0.3964165733482643" id="1683143594703"/>
-												<node location="RIGHT" size="0.6260162601626016" id="1683143600149"/>
-												<leaf id="1683143600147"/>
+												<node location="BOTTOM" size="0.5513626834381551" id="1683143594703"/>
+												<node location="LEFT" size="0.5121495327102804" id="1683143600149"/>
+												<node location="TOP" size="0.4379905808477238" id="1683143610498"/>
+												<leaf id="1683143590154"/>
 											</backup-path>
+										</property>
+										<property factory="StackDockPropertyFactory">
+											<index>1</index>
+											<placeholder>dock.single.MSReadyStructuralDescriptorsPanel</placeholder>
 										</property>
 									</location>
 								</property>

@@ -34,12 +34,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
@@ -55,16 +58,14 @@ import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
-import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.interfaces.IAtomType;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
-import org.openscience.cdk.tools.manipulator.AtomTypeManipulator;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import bibliothek.gui.dock.common.CControl;
@@ -75,6 +76,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.cpd.CompoundCurationPopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.cpd.DockableCompoundCurationListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
@@ -117,11 +119,14 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	private static final IChemObjectBuilder bldr = SilentChemObjectBuilder.getInstance();
 	private static final CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(bldr);
 	private static final CDKHydrogenAdder adder = CDKHydrogenAdder.getInstance(bldr);
+	private static final SmilesGenerator smilesGenerator = new SmilesGenerator(SmiFlavor.Isomeric);
 	
 	private InChIGeneratorFactory igfactory;
 	private InChIGenerator inChIGenerator;
-	private SmilesGenerator smilesGenerator;
 	private Aromaticity aromaticity;
+	
+	private CompoundIdentity selectedIdentity;
+	private Map<CompoundIdentity,CompoundIdentity>curatedCompounds;
 	
 	public CompoundMsReadyCuratorFrame() throws HeadlessException {
 
@@ -139,8 +144,12 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		control.setTheme(ThemeMap.KEY_ECLIPSE_THEME);
 		grid = new CGrid(control);
 
-		compoundCurationListingTable = new DockableCompoundCurationListingTable();
-		compoundCurationListingTable.getTable().getSelectionModel().addListSelectionListener(this);
+		compoundCurationListingTable = 
+				new DockableCompoundCurationListingTable();
+		compoundCurationListingTable.getTable().
+			getSelectionModel().addListSelectionListener(this);
+		compoundCurationListingTable.getTable().
+			addTablePopupMenu(new CompoundCurationPopupMenu(this));
 		
 		originalMolStructurePanel = new DockableMolStructurePanel(
 				"CompoundMsReadyCuratorPrimaryMolStructurePanel");
@@ -170,9 +179,6 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		loadLayout(layoutConfigFile);
 		loadPreferences();
 		
-		smilesGenerator = 
-				new SmilesGenerator(SmiFlavor.Canonical|SmiFlavor.UseAromaticSymbols);
-
 		aromaticity = new Aromaticity(
 				ElectronDonation.cdk(),
                 Cycles.or(Cycles.all(), Cycles.all(6)));
@@ -183,6 +189,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		curatedCompounds = new HashMap<CompoundIdentity,CompoundIdentity>();
 		
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -204,8 +211,8 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 //		};
 //		btnCancel.addActionListener(al);
 
-		JButton btnSave = new JButton(MainActionCommands.SAVE_MS_READY_STRUCTURE.getName());
-		btnSave.setActionCommand(MainActionCommands.SAVE_MS_READY_STRUCTURE.getName());
+		JButton btnSave = new JButton(MainActionCommands.SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName());
+		btnSave.setActionCommand(MainActionCommands.SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName());
 		btnSave.addActionListener(this);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
@@ -237,6 +244,8 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		originalMolStructurePanel.clearPanel();
 		msReadyMolStructurePanel.clearPanel();
 		compoundCurationListingTable.getTable().getSelectionModel().addListSelectionListener(this);
+		selectedIdentity = null;
+		curatedCompounds.clear();
 	}
 	
 	private void fetchCompoundDataForCuration() {
@@ -278,9 +287,11 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					e.printStackTrace();
 				}
 			}
-			if(compoundCollection != null && !compoundCollection.isEmpty())
+			if(compoundCollection != null && !compoundCollection.isEmpty()) {
 				compoundCurationListingTable.setTableModelFromCompoundCollection(compoundCollection);
-			
+				curatedCompounds.clear();
+				compoundCollection.stream().forEach(c -> curatedCompounds.put(c, null));
+			}			
 			return null;
 		}
 	}
@@ -328,36 +339,34 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	private Collection<String> validateMsReadyStructure() {
 		
 		Collection<String>errors = new ArrayList<String>();
-		if(msReadyStructuralDescriptorsPanel.getSmiles().isEmpty())
+		String smiles = msReadyStructuralDescriptorsPanel.getSmiles();
+		if(smiles.isEmpty())
 			errors.add("Please enter SMILES string for MS-ready form");
 		
-		IAtomContainer mol = 
-				msReadyMolStructurePanel.showStructure(
-						msReadyStructuralDescriptorsPanel.getSmiles());	
+		IAtomContainer mol = msReadyMolStructurePanel.showStructure(smiles);	
 		if(mol == null) {
 			errors.add("SMILES string not valid.");
 			return errors;
 		}
 		else {
-			for (IAtom atom : mol.atoms()) {
-				
-				IAtomType type = null;
-				try {
-					type = matcher.findMatchingAtomType(mol, atom);
-				} catch (CDKException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if (type != null) {
-					AtomTypeManipulator.configure(atom, type);
-				}
+			try {
+				AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(mol);
+			} catch (CDKException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
 			}
 			try {
-				adder.addImplicitHydrogens(mol);
+				CDKHydrogenAdder.getInstance(mol.getBuilder()).addImplicitHydrogens(mol);
+			} catch (CDKException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+			try {
+				smiles = smilesGenerator.create(mol);
 			} catch (CDKException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}			   
+			}						   
 			IMolecularFormula molFormula = 
 					MolecularFormulaManipulator.getMolecularFormula(mol);			
 			String mfFromFStringFromSmiles = 
@@ -365,7 +374,9 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 			double smilesMass = MolecularFormulaManipulator.getMass(
 							molFormula, MolecularFormulaManipulator.MonoIsotopic);	
 			
+			msReadyStructuralDescriptorsPanel.setSmiles(smiles);
 			msReadyStructuralDescriptorsPanel.setFormula(mfFromFStringFromSmiles);
+			msReadyStructuralDescriptorsPanel.setCharge(molFormula.getCharge());
 			msReadyStructuralDescriptorsPanel.setMass(smilesMass);			
 			try {
 				inChIGenerator = igfactory.getInChIGenerator(mol);
@@ -410,12 +421,20 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 			if(mfid == null)
 				return;
 			
-			CompoundIdentity cid = mfid.getCompoundIdentity();			
-			originalMolStructurePanel.showStructure(cid.getSmiles());
-			originalStructuralDescriptorsPanel.loadCompoundIdentity(cid);
+			selectedIdentity = mfid.getCompoundIdentity();			
+			originalMolStructurePanel.showStructure(selectedIdentity.getSmiles());
+			originalStructuralDescriptorsPanel.loadCompoundIdentity(selectedIdentity);
+			
 			msReadyMolStructurePanel.clearPanel();
-			msReadyStructuralDescriptorsPanel.clearPanel();			
-			msReadyStructuralDescriptorsPanel.setSmiles(cid.getSmiles());
+			msReadyStructuralDescriptorsPanel.clearPanel();	
+			
+			CompoundIdentity curatedId = curatedCompounds.get(selectedIdentity);
+			if(curatedId != null) {
+				msReadyStructuralDescriptorsPanel.loadCompoundIdentity(curatedId);
+				msReadyMolStructurePanel.showStructure(curatedId.getSmiles());
+			}
+			else
+				msReadyStructuralDescriptorsPanel.setSmiles(selectedIdentity.getSmiles());
 		}
 	}
 	
@@ -427,7 +446,55 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					StringUtils.join(errors, "\n"), this.getContentPane());
 			return;
 		}
-		//	TODO
+		if(msReadyStructuralDescriptorsPanel.getCharge() != 0) {
+			
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"MS-ready form still contains charge, save anyway?", this.getContentPane());
+			if(res != JOptionPane.YES_OPTION)
+				return;
+		}
+		if(toolbar.getSelectedDatabase().equals(CompoundDatabaseEnum.HMDB)) {
+			try {
+				updateHMDBCompoundData();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		CompoundIdentity curatedId =  new CompoundIdentity(
+				selectedIdentity.getPrimaryDatabase(), 
+				selectedIdentity.getPrimaryDatabaseId(),
+				selectedIdentity.getName(), 					
+				selectedIdentity.getSysName(), 
+				msReadyStructuralDescriptorsPanel.getFormula(), 
+				msReadyStructuralDescriptorsPanel.getMass(), 
+				msReadyStructuralDescriptorsPanel.getSmiles());
+		curatedId.setInChiKey(msReadyStructuralDescriptorsPanel.getInchiKey());
+		curatedId.setCharge(msReadyStructuralDescriptorsPanel.getCharge());
+		curatedCompounds.put(selectedIdentity, curatedId);
+	}
+	
+	private void updateHMDBCompoundData() throws Exception{
+		
+		String query = 
+				"UPDATE COMPOUNDDB.HMDB_COMPOUND_DATA " +
+				"SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?,  " +
+				"MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?,  " +
+				"MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? " +
+				"WHERE ACCESSION = ? ";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, msReadyStructuralDescriptorsPanel.getFormula());	//	MS_READY_MOL_FORMULA
+		ps.setDouble(2, msReadyStructuralDescriptorsPanel.getMass());		//	MS_READY_EXACT_MASS
+		ps.setString(3, msReadyStructuralDescriptorsPanel.getSmiles());		//	MS_READY_SMILES
+		ps.setString(4, msReadyStructuralDescriptorsPanel.getInchiKey());	//	MS_READY_INCHI_KEY
+		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
+		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
+		ps.setString(7, selectedIdentity.getPrimaryDatabaseId());			//	ACCESSION
+		
+		ps.executeUpdate();
+		ps.close();		
+		ConnectionManager.releaseConnection(conn);
 	}
 	
 	@Override
@@ -500,12 +567,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	@Override
 	public void toFront() {
 	  super.setVisible(true);
-	  int state = super.getExtendedState();
-	  state &= ~JFrame.ICONIFIED;
-	  super.setExtendedState(state);
-	  super.setAlwaysOnTop(true);
 	  super.toFront();
 	  super.requestFocus();
-	  super.setAlwaysOnTop(false);
 	}
 }

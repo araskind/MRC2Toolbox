@@ -24,7 +24,16 @@ package edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 
+import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -36,9 +45,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class CompoundStructuralDescriptorsPanel extends JPanel {
+public class CompoundStructuralDescriptorsPanel extends JPanel implements ActionListener {
 	
 	/**
 	 * 
@@ -50,14 +60,16 @@ public class CompoundStructuralDescriptorsPanel extends JPanel {
 	private JTextArea smilesTextArea;
 	private JFormattedTextField massTextField;
 	private JSpinner chargeSpinner;
+	private JButton copySmilesButton;
+	private JButton pasteSmilesButton;
 	
 	public CompoundStructuralDescriptorsPanel() {
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0, 0, 0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0};
+		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
 		gridBagLayout.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		setLayout(gridBagLayout);
 		
 		JLabel lblNewLabel = new JLabel("Formula");
@@ -132,20 +144,39 @@ public class CompoundStructuralDescriptorsPanel extends JPanel {
 		JLabel lblNewLabel_4 = new JLabel("SMILES");
 		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
 		gbc_lblNewLabel_4.anchor = GridBagConstraints.BASELINE_TRAILING;
-		gbc_lblNewLabel_4.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_4.gridx = 0;
 		gbc_lblNewLabel_4.gridy = 3;
 		add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
 		smilesTextArea = new JTextArea();
+		smilesTextArea.setLineWrap(true);
 		smilesTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		GridBagConstraints gbc_textArea = new GridBagConstraints();
+		gbc_textArea.insets = new Insets(0, 0, 5, 0);
 		gbc_textArea.gridwidth = 3;
-		gbc_textArea.insets = new Insets(0, 0, 0, 5);
 		gbc_textArea.fill = GridBagConstraints.BOTH;
 		gbc_textArea.gridx = 1;
 		gbc_textArea.gridy = 3;
 		add(smilesTextArea, gbc_textArea);
+		
+		copySmilesButton = new JButton(MainActionCommands.COPY_SMILES_COMMAND.getName());
+		copySmilesButton.setActionCommand(MainActionCommands.COPY_SMILES_COMMAND.getName());
+		copySmilesButton.addActionListener(this);
+		GridBagConstraints gbc_copySmilesButton = new GridBagConstraints();
+		gbc_copySmilesButton.insets = new Insets(0, 0, 0, 5);
+		gbc_copySmilesButton.gridx = 1;
+		gbc_copySmilesButton.gridy = 4;
+		add(copySmilesButton, gbc_copySmilesButton);
+		
+		pasteSmilesButton = new JButton(MainActionCommands.PASTE_SMILES_COMMAND.getName());
+		pasteSmilesButton.setActionCommand(MainActionCommands.PASTE_SMILES_COMMAND.getName());
+		pasteSmilesButton.addActionListener(this);
+		GridBagConstraints gbc_pasteSmilesButton = new GridBagConstraints();
+		gbc_pasteSmilesButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_pasteSmilesButton.gridx = 3;
+		gbc_pasteSmilesButton.gridy = 4;
+		add(pasteSmilesButton, gbc_pasteSmilesButton);
 	}
 	
 	public String getFormula() {
@@ -229,6 +260,42 @@ public class CompoundStructuralDescriptorsPanel extends JPanel {
 		massTextField.setText("");
 		chargeSpinner.setValue(0);
 		smilesTextArea.setText("");
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		if(command.equals(MainActionCommands.COPY_SMILES_COMMAND.getName()))
+			copySmiles();
+			
+		if(command.equals(MainActionCommands.PASTE_SMILES_COMMAND.getName()))
+			pasteSmiles();			
+	}
+
+	private void copySmiles() {
+		
+		StringSelection stringSelection = new StringSelection(getSmiles());
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clpbrd.setContents(stringSelection, null);
+	}
+
+	private void pasteSmiles() {
+
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		Object contents = clpbrd.getContents(null);
+		if(contents != null) {
+			
+			String smiles = null;
+			try {
+				smiles = (String) clpbrd.getData(DataFlavor.stringFlavor);
+			} catch (UnsupportedFlavorException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(smiles != null && !smiles.isEmpty())
+				setSmiles(smiles);
+		}
 	}
 }
 
