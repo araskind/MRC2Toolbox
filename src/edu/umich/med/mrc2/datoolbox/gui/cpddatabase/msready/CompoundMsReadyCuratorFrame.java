@@ -89,6 +89,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
+import edu.umich.med.mrc2.datoolbox.utils.MSReadyUtils;
 import io.github.dan2097.jnainchi.InchiStatus;
 
 public class CompoundMsReadyCuratorFrame extends JFrame
@@ -288,9 +289,15 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 				}
 			}
 			if(compoundCollection != null && !compoundCollection.isEmpty()) {
-				compoundCurationListingTable.setTableModelFromCompoundCollection(compoundCollection);
+				
 				curatedCompounds.clear();
-				compoundCollection.stream().forEach(c -> curatedCompounds.put(c, null));
+				//	compoundCollection.stream().forEach(c -> curatedCompounds.put(c, null));
+//				Adjust phosphocholines
+				compoundCollection.stream().
+					forEach(c -> curatedCompounds.put(c, 
+							MSReadyUtils.neutralizePhosphoCholine(c)));
+				
+				compoundCurationListingTable.setTableModelFromCompoundCollection(compoundCollection);
 			}			
 			return null;
 		}
@@ -323,7 +330,6 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		rs.close();
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
-		
 		return idList;
 	}
 	
