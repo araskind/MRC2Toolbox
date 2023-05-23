@@ -125,7 +125,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	private SynonymTableModelListener synMoldelListener;
 	private BatchCompoundDatabaseSearchDialog batchCompoundDatabaseSearchDialog;
 	private CompoundDatabaseCuratorFrame compoundDatabaseCuratorFrame;
-	private CompoundMsReadyCuratorFrame compoundMsReadyCuratorFrame;
+	private static CompoundMsReadyCuratorFrame compoundMsReadyCuratorFrame;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("pubChem", 16);
 	private static final Icon clearSearchIcon = GuiUtils.getIcon("clearSearch", 24);
@@ -370,9 +370,17 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	
 	private void showMsReadyCompoundCurator() {
 		
+		if(compoundMsReadyCuratorFrame != null) {
+			
+			if(!compoundMsReadyCuratorFrame.isVisible())
+				compoundMsReadyCuratorFrame.setVisible(true);
+			
+			compoundMsReadyCuratorFrame.toFront();
+			return;
+		}		
 		compoundMsReadyCuratorFrame = new CompoundMsReadyCuratorFrame();
 		compoundMsReadyCuratorFrame.setLocationRelativeTo(this.getContentPane());
-		//	compoundMsReadyCuratorFrame.setVisible(true);
+		compoundMsReadyCuratorFrame.setVisible(true);
 		compoundMsReadyCuratorFrame.toFront();
 	}	
 	

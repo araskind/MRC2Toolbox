@@ -78,26 +78,33 @@ import org.jdom2.input.DOMBuilder;
 import org.json.JSONObject;
 import org.openscience.cdk.Atom;
 import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.aromaticity.Aromaticity;
+import org.openscience.cdk.aromaticity.ElectronDonation;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
+import org.openscience.cdk.inchi.InChIToStructure;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObjectBuilder;
 import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.io.MDLV2000Reader;
+import org.openscience.cdk.isomorphism.IsomorphismTester;
 import org.openscience.cdk.isomorphism.Mappings;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smarts.SmartsPattern;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
+import org.openscience.cdk.tautomers.InChITautomerGenerator;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import org.w3c.dom.Node;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.LipidMapsClassifier;
 import edu.umich.med.mrc2.datoolbox.data.PubChemCompoundDescriptionBundle;
 import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireObject;
@@ -105,6 +112,7 @@ import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireOntologyEntry;
 import edu.umich.med.mrc2.datoolbox.data.classyfire.ClassyFireOntologyLevel;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CompoundMultiplexMixture;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -125,13 +133,17 @@ import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.MultiplexLoadTempObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.met.MoleculeEquivalence;
 import edu.umich.med.mrc2.datoolbox.utils.ClassyFireUtils;
+import edu.umich.med.mrc2.datoolbox.utils.CompoundStructureUtils;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
 import edu.umich.med.mrc2.datoolbox.utils.JSONUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MSReadyUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
+import io.github.dan2097.jnainchi.InchiStatus;
 
 public class RunContainer {
 
@@ -143,9 +155,12 @@ public class RunContainer {
 	public static final String pubchemCidUrl = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
 	private static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
 	private static final SmilesParser smipar = new SmilesParser(builder);
+	private static final SmilesGenerator smilesGenerator = new SmilesGenerator(SmiFlavor.Isomeric);
+	private static final InChITautomerGenerator tautgen = new InChITautomerGenerator(InChITautomerGenerator.KETO_ENOL);
 	private static final MDLV2000Reader mdlReader = new MDLV2000Reader();
 	private static InChIGeneratorFactory igfactory;
 	private static InChIGenerator inChIGenerator;
+	private static Aromaticity aromaticity;
 	private static final DecimalFormat intensityFormat = new DecimalFormat("###");
 
 	public static void main(String[] args) {
@@ -157,11 +172,382 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			fixChargedLipid();
+			testSMilesInchiMatcher();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void testSMilesInchiMatcher() {
+		
+		String smiles = "O=C1C=CC(O)(C=C1Br)CC(=O)N";
+		String inchi = "InChI=1S/C8H8BrNO3/c9-5-3-8(13,4-7(10)12)2-1-6(5)11/h1-3,13H,4H2,(H2,10,12)";
+		
+		boolean match = CompoundStructureUtils.doSmilesMatchInchi(smiles, inchi);
+		System.out.println(Boolean.toString(match));
+	}
+	
+	private static void markCoconutSmilesInchiMismatches() throws Exception {
+		
+		initCDKFunctions();
+		IsomorphismTester imTester = new IsomorphismTester();
+		Collection<CompoundIdentity>compounds = fetchCoconutDataForCuration();
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE COMPOUNDDB.COCONUT_COMPOUND_DATA " +
+				"SET SMILES_INCHI_MISMATCH = 'Y' WHERE ACCESSION = ? ";	
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		for(CompoundIdentity cid : compounds) {
+			
+			//	From InChi
+			IAtomContainer inchiAtomContainer = null;
+			try {
+				inchiAtomContainer = convertInchi2Mol(cid.getInChi());
+			} catch (CDKException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(inchiAtomContainer == null) {
+				System.out.println("\nFailed to parse InChi for " + cid.getPrimaryDatabaseId());
+				continue;
+			}
+			try {
+				AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(inchiAtomContainer);
+			} catch (CDKException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+			try {
+				CDKHydrogenAdder.getInstance(inchiAtomContainer.getBuilder()).addImplicitHydrogens(inchiAtomContainer);
+			} catch (CDKException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+			//	From SMILES
+			IAtomContainer smilesAtomContainer = null;
+			try {
+				smilesAtomContainer = smipar.parseSmiles(cid.getSmiles());
+			} catch (InvalidSmilesException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(smilesAtomContainer == null) {				
+				System.out.println("\nFailed to parse SMILES for " + cid.getPrimaryDatabaseId());
+				continue;
+			}			
+			try {
+				AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(smilesAtomContainer);
+			} catch (CDKException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+			try {
+				CDKHydrogenAdder.getInstance(smilesAtomContainer.getBuilder()).addImplicitHydrogens(smilesAtomContainer);
+			} catch (CDKException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+	        MoleculeEquivalence eq = 
+	        		new MoleculeEquivalence(smilesAtomContainer, inchiAtomContainer);	        
+			boolean isEquivalent = eq.areEquivalent();
+			if(isEquivalent) {
+				continue;
+			}
+			else {
+				List<IAtomContainer>tautomers = new ArrayList<IAtomContainer>();
+				try {
+					tautomers = tautgen.getTautomers(smilesAtomContainer);
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (CloneNotSupportedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(!tautomers.isEmpty()) {
+					
+					for(IAtomContainer tautomer : tautomers) {
+						
+				        MoleculeEquivalence teq = 
+				        		new MoleculeEquivalence(tautomer, inchiAtomContainer);
+				        if(teq.areEquivalent()) {
+				        	isEquivalent = true;
+				        	break;
+				        }
+					}					
+				}
+			}
+	        if (!isEquivalent) {
+				System.out.println("SMILES: " + cid.getSmiles() +"\tInChi: " + cid.getInChi());
+				ps.setString(1, cid.getPrimaryDatabaseId());
+				ps.executeUpdate();
+			}
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}	
+	
+	private static void insetCoconutAnnotationLevels() throws Exception {
+		
+		File mappingFile = 
+				new File("E:\\DataAnalysis\\Databases\\_LATEST\\COCONUT-2022-01\\CSV\\coconut_annotation_levels.txt");
+		String[][] mappingData = null;
+		try {
+			mappingData = DelimitedTextParser.parseTextFileWithEncoding(
+							mappingFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE COMPOUNDDB.COCONUT_COMPOUND_DATA " +
+				"SET ANNOT_LEVEL = ? WHERE ACCESSION = ? ";		
+		PreparedStatement ps = conn.prepareStatement(query);
+		int count = 0;
+		for(String[]md : mappingData) {
+			ps.setInt(1, Integer.valueOf(md[1]));
+			ps.setString(2, md[0]);
+			ps.addBatch();
+			count++;
+			if (count % 1000 == 0)
+				ps.executeBatch();
+		}
+		ps.executeBatch();
+		ps.close();	
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private static void calculateCoconutCompoundDataFromInChi() throws Exception {
+			
+			initCDKFunctions();
+			int count = 0;
+			Connection conn = ConnectionManager.getConnection();
+			String smilesQuery = 
+				"UPDATE COMPOUNDDB.COCONUT_COMPOUND_DATA " +
+				"SET CDK_SMILES = ?, CDK_FORMULA = ?, CDK_MASS = ?, "
+				+ "CDK_INCHI_KEY = ?, CDK_INCHI_KEY2D = ?"
+				+ " WHERE ACCESSION = ?";	
+		
+			PreparedStatement smilesPs = conn.prepareStatement(smilesQuery);
+			
+			Collection<CompoundIdentity>compounds = fetchCoconutDataForCuration();
+			for(CompoundIdentity cid : compounds) {
+				
+				IAtomContainer atomContainer = null;
+				try {
+					atomContainer = convertInchi2Mol(cid.getInChi());
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(atomContainer == null)
+					continue;
+
+				try {
+					AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
+				} catch (CDKException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				try {
+					CDKHydrogenAdder.getInstance(atomContainer.getBuilder()).addImplicitHydrogens(atomContainer);
+				} catch (CDKException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				String smiles = "";		
+				try {
+					smiles = smilesGenerator.create(atomContainer);
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(atomContainer);			
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic);
+				
+				String inchiKey = "";
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(atomContainer);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+//					if (inchiStatus.equals(InchiStatus.WARNING)) {
+//						System.out.println("InChI warning: " + inChIGenerator.getMessage());
+//					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+//						System.out.println("InChI failed: [" + inChIGenerator.getMessage() + "]");
+//					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} 
+				catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}	
+				if(smiles != null && !smiles.isEmpty() && inchiKey != null && !inchiKey.isEmpty()) {
+					
+					smilesPs.setString(1, smiles);
+					smilesPs.setString(2, mfFromFStringFromSmiles);
+					smilesPs.setDouble(3, smilesMass);
+					smilesPs.setString(4, inchiKey);
+					smilesPs.setString(5, inchiKey.substring(0, 14));
+					smilesPs.setString(6, cid.getPrimaryDatabaseId());
+					smilesPs.executeUpdate();
+				}
+				else {
+					System.out.println("Conversion failed: " + cid.getPrimaryDatabaseId());
+				}			
+				count++;
+				if(count % 50 == 0)
+					System.out.print(".");
+				
+				if(count % 5000 == 0)
+					System.out.println(".");
+			}	
+			smilesPs.close();
+	}
+	
+	private static void cleanupCoconutCompoundData() throws Exception {
+		
+		initCDKFunctions();
+		int count = 0;
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE COMPOUNDDB.COCONUT_COMPOUND_DATA " +
+				"SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?,  " +
+				"MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?,  " +
+				"MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? " +
+				"WHERE ACCESSION = ? ";		
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String smilesQuery = 
+				"UPDATE COMPOUNDDB.COCONUT_COMPOUND_DATA " +
+				"SET CDK_SMILES = ?, CDK_FORMULA = ?, CDK_MASS = ?, "
+				+ "CDK_INCHI_KEY = ?, CDK_INCHI_KEY2D = ?"
+				+ " WHERE ACCESSION = ?";	
+		PreparedStatement smilesPs = conn.prepareStatement(smilesQuery);
+		
+		Collection<CompoundIdentity>compounds = fetchCoconutDataForCuration();
+		for(CompoundIdentity cid : compounds) {
+			
+			CompoundIdentity fixed = neutralizeSmiles(cid);
+			if(fixed.getCharge() == 0) {
+				
+				ps.setString(1, fixed.getFormula());	//	MS_READY_MOL_FORMULA
+				ps.setDouble(2, fixed.getExactMass());		//	MS_READY_EXACT_MASS
+				ps.setString(3, fixed.getSmiles());		//	MS_READY_SMILES
+				ps.setString(4, fixed.getInChiKey());	//	MS_READY_INCHI_KEY
+				ps.setString(5, fixed.getInChiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
+				ps.setInt(6, fixed.getCharge());		//	MS_READY_CHARGE
+				ps.setString(7, fixed.getPrimaryDatabaseId());			//	ACCESSION		
+				ps.executeUpdate();
+			}
+			smilesPs.setString(1, fixed.getSmiles());
+			smilesPs.setString(2, fixed.getFormula());
+			smilesPs.setDouble(3, fixed.getExactMass());
+			smilesPs.setString(4, fixed.getInChiKey());
+			smilesPs.setString(5, fixed.getInChiKey().substring(0, 14));
+			smilesPs.setString(6, fixed.getPrimaryDatabaseId());
+			smilesPs.executeUpdate();
+			
+			count++;
+			if(count % 50 == 0)
+				System.out.print(".");
+			
+			if(count % 5000 == 0)
+				System.out.println(".");
+		}
+		ps.close();	
+		smilesPs.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private  static CompoundIdentity neutralizeSmiles(CompoundIdentity charged) {
+		
+		CompoundIdentity fixed = MSReadyUtils.neutralizePhosphoCholine(charged);
+		if(fixed != null)
+			return fixed;
+		
+		fixed = MSReadyUtils.neutralizeSmiles(charged);
+		if(fixed != null)
+			return fixed;
+		else
+			return charged;
+	}
+	
+	private static void initCDKFunctions() {
+		
+		aromaticity = new Aromaticity(
+				ElectronDonation.cdk(),
+                Cycles.or(Cycles.all(), Cycles.all(6)));
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static IAtomContainer convertInchi2Mol(String inchi) throws CDKException {
+
+		if (inchi == null)
+			throw new NullPointerException("Given InChI is null");
+		if (inchi.isEmpty())
+			throw new IllegalArgumentException("Empty string given as InChI");
+
+		final InChIToStructure converter = igfactory.getInChIToStructure(inchi, builder);
+		if (converter.getStatus() == InchiStatus.SUCCESS || converter.getStatus() == InchiStatus.WARNING) {
+			return converter.getAtomContainer();
+		} else {
+			System.out.println("Error while parsing InChI:\n'" + inchi + "'\n-> " + converter.getMessage());
+			final IAtomContainer a = converter.getAtomContainer();
+			if (a != null)
+				return a;
+			else
+				throw new CDKException(converter.getMessage());
+		}
+	}
+	
+	private static Collection<CompoundIdentity> fetchCoconutDataForCuration() throws Exception{
+
+		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
+		Connection conn = ConnectionManager.getConnection();
+		String query =
+			"SELECT ACCESSION, NAME, MOLECULAR_FORMULA, CDK_MASS, SMILES, INCHI " +
+			"FROM COMPOUNDDB.COCONUT_COMPOUND_DATA D "
+			+ "WHERE SMILES IS NOT NULL AND INCHI IS NOT NULL ORDER BY 1";
+ 		
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()){
+
+			CompoundIdentity identity = new CompoundIdentity(
+					CompoundDatabaseEnum.COCONUT, 
+					rs.getString("ACCESSION"),
+					rs.getString("NAME"), 					
+					rs.getString("NAME"), 
+					rs.getString("MOLECULAR_FORMULA"), 
+					rs.getDouble("CDK_MASS"), 
+					rs.getString("SMILES"));
+			identity.setInChi(rs.getString("INCHI"));
+			idList.add(identity);
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return idList;		
+	}
+	
+	private static void fixChargedPyrrole() {
+		
+		CompoundIdentity charged = new CompoundIdentity();
+		charged.setSmiles("O=C(CC(=O)C1C(=CC=2N=C[CH-]C2C1CCCCC=3C=CC=C(O)C3)CNC4=NC=C[CH-]4)CCC5=CC(OC6CCCC6)=C(O)C(=C5)CNC");
+		CompoundIdentity fixed = MSReadyUtils.neutralizeSmiles(charged);
+		System.out.println(fixed.getSmiles());
 	}
 	
 	private static void fixChargedLipid() throws InvalidSmilesException {

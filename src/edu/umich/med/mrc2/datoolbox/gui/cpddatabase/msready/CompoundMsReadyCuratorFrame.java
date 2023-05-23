@@ -68,6 +68,7 @@ import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import ambit2.tautomers.processor.StructureStandardizer;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
@@ -78,6 +79,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.cpd.CompoundCurationPopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.cpd.DockableCompoundCurationListingTable;
+import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.std.CompoundStandardizerSettingsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -116,6 +118,9 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	
 	private DockableCompoundStructuralDescriptorsPanel originalStructuralDescriptorsPanel;
 	private DockableCompoundStructuralDescriptorsPanel msReadyStructuralDescriptorsPanel;
+	
+	private CompoundStandardizerSettingsDialog compoundStandardizerSettingsDialog;
+	private TautomerGeneratorSettingsDialog tautomerGeneratorSettingsDialog;
 		
 	private static final IChemObjectBuilder bldr = SilentChemObjectBuilder.getInstance();
 	private static final CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(bldr);
@@ -125,6 +130,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	private InChIGeneratorFactory igfactory;
 	private InChIGenerator inChIGenerator;
 	private Aromaticity aromaticity;
+	private StructureStandardizer structureStandardizer;
 	
 	private CompoundIdentity selectedIdentity;
 	private Map<CompoundIdentity,CompoundIdentity>curatedCompounds;
@@ -234,8 +240,46 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		
 		if(command.equals(MainActionCommands.SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName()))
 			saveMsReadyStructure();
+		
+		if(command.equals(MainActionCommands.EDIT_COMPOUND_STANDARDIZER_SETTINGS_COMMAND.getName()))
+			editCompoundStandardizerSettings();
+		
+		if(command.equals(MainActionCommands.SAVE_COMPOUND_STANDARDIZER_SETTINGS_COMMAND.getName()))
+			saveCompoundStandardizerSettings();
+		
+		if(command.equals(MainActionCommands.EDIT_TAUTOMER_GENERATOR_SETTINGS_COMMAND.getName()))
+			editTautomerGeneratorSettings();
+		
+		if(command.equals(MainActionCommands.SAVE_TAUTOMER_GENERATOR_SETTINGS_COMMAND.getName()))
+			saveTautomerGeneratorSettings();
 	}
 	
+	private void editCompoundStandardizerSettings() {
+
+		compoundStandardizerSettingsDialog = new CompoundStandardizerSettingsDialog(this);
+		compoundStandardizerSettingsDialog.setLocationRelativeTo(this.getContentPane());
+		compoundStandardizerSettingsDialog.setVisible(true);
+	}
+
+	private void saveCompoundStandardizerSettings() {
+		// TODO Auto-generated method stub
+		
+		compoundStandardizerSettingsDialog.dispose();
+	}
+
+	private void editTautomerGeneratorSettings() {
+
+		tautomerGeneratorSettingsDialog = new TautomerGeneratorSettingsDialog(this);
+		tautomerGeneratorSettingsDialog.setLocationRelativeTo(this.getContentPane());
+		tautomerGeneratorSettingsDialog.setVisible(true);
+	}
+
+	private void saveTautomerGeneratorSettings() {
+		// TODO Auto-generated method stub
+		
+		tautomerGeneratorSettingsDialog.dispose();
+	}
+
 	private void clearPanel() {
 		
 		compoundCurationListingTable.getTable().getSelectionModel().removeListSelectionListener(this);
@@ -288,14 +332,94 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 					e.printStackTrace();
 				}
 			}
+			if(db.equals(CompoundDatabaseEnum.DRUGBANK)) {
+				
+				try {					
+					compoundCollection = fetchDrugBankDataForCuration();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(db.equals(CompoundDatabaseEnum.FOODB)) {
+				
+				try {					
+					compoundCollection = fetchFooDbDataForCuration();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(db.equals(CompoundDatabaseEnum.T3DB)) {
+				
+				try {					
+					compoundCollection = fetchT3DbDataForCuration();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(db.equals(CompoundDatabaseEnum.LIPIDMAPS)) {
+				
+				try {					
+					compoundCollection = fetchLipidMapsDataForCuration();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(db.equals(CompoundDatabaseEnum.COCONUT)) {
+				
+				try {					
+					compoundCollection = fetchCoconutDataForCuration();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			if(compoundCollection != null && !compoundCollection.isEmpty()) {
 				
 				curatedCompounds.clear();
-				//	compoundCollection.stream().forEach(c -> curatedCompounds.put(c, null));
-//				Adjust phosphocholines
-				compoundCollection.stream().
-					forEach(c -> curatedCompounds.put(c, 
-							MSReadyUtils.neutralizePhosphoCholine(c)));
+
+				Collection<CompoundIdentity>cleanedCompounds = new ArrayList<CompoundIdentity>();
+				for(CompoundIdentity cid : compoundCollection) {
+					
+					curatedCompounds.put(cid, null);
+					CompoundIdentity pl = MSReadyUtils.neutralizePhosphoCholine(cid);
+					if(pl != null) {
+						
+						if(db.equals(CompoundDatabaseEnum.COCONUT) && pl.getCharge() == 0) {
+							try {
+								updateCoconutCompoundData(pl);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							cleanedCompounds.add(cid);
+						}
+						else {
+							curatedCompounds.put(cid, pl);
+						}
+					}
+					CompoundIdentity pyr = MSReadyUtils.neutralizeSmiles(cid);
+					if(pyr != null) {
+						
+						if(db.equals(CompoundDatabaseEnum.COCONUT) && pyr.getCharge() == 0) {
+							try {
+								updateCoconutCompoundData(pyr);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							cleanedCompounds.add(cid);
+						}
+						else {
+							curatedCompounds.put(cid, pyr);
+						}
+					}
+				}
+				if(!cleanedCompounds.isEmpty())
+					compoundCollection.removeAll(cleanedCompounds);
 				
 				compoundCurationListingTable.setTableModelFromCompoundCollection(compoundCollection);
 			}			
@@ -331,6 +455,159 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 		return idList;
+	}
+	
+	private Collection<CompoundIdentity> fetchDrugBankDataForCuration() throws Exception{
+		
+		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
+		Connection conn = ConnectionManager.getConnection();
+		String query =
+			"SELECT ACCESSION, COMMON_NAME, FORMULA_FROM_SMILES, EXACT_MASS, SMILES, INCHI_KEY, CHARGE " +
+			"FROM COMPOUNDDB.DRUGBANK_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL AND SMILES IS NOT NULL";
+
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()){
+
+			CompoundIdentity identity = new CompoundIdentity(
+					CompoundDatabaseEnum.DRUGBANK, 
+					rs.getString("ACCESSION"),
+					rs.getString("COMMON_NAME"), 					
+					rs.getString("COMMON_NAME"), 
+					rs.getString("FORMULA_FROM_SMILES"), 
+					rs.getDouble("EXACT_MASS"), 
+					rs.getString("SMILES"));
+			identity.setInChiKey(rs.getString("INCHI_KEY"));
+			identity.setCharge(rs.getInt("CHARGE"));
+			idList.add(identity);
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return idList;
+	}
+	
+	private Collection<CompoundIdentity> fetchFooDbDataForCuration() throws Exception{
+		
+		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
+		Connection conn = ConnectionManager.getConnection();
+		String query =
+			"SELECT PUBLIC_ID, NAME, FORMULA_FROM_SMILES, MOLDB_MONO_MASS, MOLDB_SMILES, MOLDB_INCHIKEY, CHARGE " +
+			"FROM COMPOUNDDB.FOODB_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL AND MOLDB_SMILES IS NOT NULL";
+	
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()){
+
+			CompoundIdentity identity = new CompoundIdentity(
+					CompoundDatabaseEnum.FOODB, 
+					rs.getString("PUBLIC_ID"),
+					rs.getString("NAME"), 					
+					rs.getString("NAME"), 
+					rs.getString("FORMULA_FROM_SMILES"), 
+					rs.getDouble("MOLDB_MONO_MASS"), 
+					rs.getString("MOLDB_SMILES"));
+			identity.setInChiKey(rs.getString("MOLDB_INCHIKEY"));
+			identity.setCharge(rs.getInt("CHARGE"));
+			idList.add(identity);
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return idList;
+	}
+	
+	private Collection<CompoundIdentity> fetchT3DbDataForCuration() throws Exception{
+
+		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
+		Connection conn = ConnectionManager.getConnection();
+		String query =
+			"SELECT ACCESSION, COMMON_NAME, FORMULA_FROM_SMILES, MASS_FROM_SMILES, SMILES, INCHIKEY, CHARGE " +
+			"FROM COMPOUNDDB.T3DB_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL AND SMILES IS NOT NULL";
+	
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()){
+
+			CompoundIdentity identity = new CompoundIdentity(
+					CompoundDatabaseEnum.T3DB, 
+					rs.getString("ACCESSION"),
+					rs.getString("COMMON_NAME"), 					
+					rs.getString("COMMON_NAME"), 
+					rs.getString("FORMULA_FROM_SMILES"), 
+					rs.getDouble("MASS_FROM_SMILES"), 
+					rs.getString("SMILES"));
+			identity.setInChiKey(rs.getString("INCHIKEY"));
+			identity.setCharge(rs.getInt("CHARGE"));
+			idList.add(identity);
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return idList;
+	}
+
+	private Collection<CompoundIdentity> fetchLipidMapsDataForCuration() throws Exception{
+
+		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
+		Connection conn = ConnectionManager.getConnection();
+		String query =
+			"SELECT LMID, COMMON_NAME, SYSTEMATIC_NAME, MOLECULAR_FORMULA, EXACT_MASS, SMILES, INCHI_KEY, CHARGE " +
+			"FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL AND SMILES IS NOT NULL";
+	
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()){
+
+			CompoundIdentity identity = new CompoundIdentity(
+					CompoundDatabaseEnum.LIPIDMAPS, 
+					rs.getString("LMID"),
+					rs.getString("COMMON_NAME"), 					
+					rs.getString("SYSTEMATIC_NAME"), 
+					rs.getString("MOLECULAR_FORMULA"), 
+					rs.getDouble("EXACT_MASS"), 
+					rs.getString("SMILES"));
+			identity.setInChiKey(rs.getString("INCHI_KEY"));
+			identity.setCharge(rs.getInt("CHARGE"));
+			if(rs.getString("COMMON_NAME") == null)
+				identity.setCommonName(rs.getString("SYSTEMATIC_NAME"));
+			
+			idList.add(identity);
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return idList;
+	}
+
+	private Collection<CompoundIdentity> fetchCoconutDataForCuration() throws Exception{
+
+		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
+		Connection conn = ConnectionManager.getConnection();
+		String query =
+			"SELECT ACCESSION, NAME, CDK_FORMULA, CDK_MASS, CDK_SMILES, CDK_INCHI_KEY, CHARGE " +
+			"FROM COMPOUNDDB.COCONUT_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL AND CDK_SMILES IS NOT NULL";
+		
+		PreparedStatement ps = conn.prepareStatement(query);
+		ResultSet rs = ps.executeQuery();
+		while (rs.next()){
+
+			CompoundIdentity identity = new CompoundIdentity(
+					CompoundDatabaseEnum.COCONUT, 
+					rs.getString("ACCESSION"),
+					rs.getString("NAME"), 					
+					rs.getString("NAME"), 
+					rs.getString("CDK_FORMULA"), 
+					rs.getDouble("CDK_MASS"), 
+					rs.getString("CDK_SMILES"));
+			identity.setInChiKey(rs.getString("CDK_INCHI_KEY"));
+			identity.setCharge(rs.getInt("CHARGE"));
+			idList.add(identity);
+		}
+		rs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+		return idList;		
 	}
 	
 	private void validateMsReadyStructureAndShowErrors() {
@@ -467,6 +744,46 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 				e.printStackTrace();
 			}
 		}
+		if(toolbar.getSelectedDatabase().equals(CompoundDatabaseEnum.DRUGBANK)) {
+			try {
+				updateDrugBankCompoundData();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if(toolbar.getSelectedDatabase().equals(CompoundDatabaseEnum.FOODB)) {
+			try {
+				updateFooDbCompoundData();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if(toolbar.getSelectedDatabase().equals(CompoundDatabaseEnum.T3DB)) {
+			try {
+				updateT3DbCompoundData();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if(toolbar.getSelectedDatabase().equals(CompoundDatabaseEnum.LIPIDMAPS)) {
+			try {
+				updateLipidMapsCompoundData();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if(toolbar.getSelectedDatabase().equals(CompoundDatabaseEnum.COCONUT)) {
+			try {
+				updateCoconutCompoundData();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		CompoundIdentity curatedId =  new CompoundIdentity(
 				selectedIdentity.getPrimaryDatabase(), 
 				selectedIdentity.getPrimaryDatabaseId(),
@@ -497,6 +814,144 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
 		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
 		ps.setString(7, selectedIdentity.getPrimaryDatabaseId());			//	ACCESSION
+		
+		ps.executeUpdate();
+		ps.close();		
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private void updateDrugBankCompoundData() throws Exception{
+		
+		String query = 
+				"UPDATE COMPOUNDDB.DRUGBANK_COMPOUND_DATA " +
+				"SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?,  " +
+				"MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?,  " +
+				"MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? " +
+				"WHERE ACCESSION = ? ";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, msReadyStructuralDescriptorsPanel.getFormula());	//	MS_READY_MOL_FORMULA
+		ps.setDouble(2, msReadyStructuralDescriptorsPanel.getMass());		//	MS_READY_EXACT_MASS
+		ps.setString(3, msReadyStructuralDescriptorsPanel.getSmiles());		//	MS_READY_SMILES
+		ps.setString(4, msReadyStructuralDescriptorsPanel.getInchiKey());	//	MS_READY_INCHI_KEY
+		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
+		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
+		ps.setString(7, selectedIdentity.getPrimaryDatabaseId());			//	ACCESSION
+		
+		ps.executeUpdate();
+		ps.close();		
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private void updateFooDbCompoundData() throws Exception{
+		
+		String query = 
+				"UPDATE COMPOUNDDB.FOODB_COMPOUND_DATA " +
+				"SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?,  " +
+				"MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?,  " +
+				"MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? " +
+				"WHERE PUBLIC_ID = ? ";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, msReadyStructuralDescriptorsPanel.getFormula());	//	MS_READY_MOL_FORMULA
+		ps.setDouble(2, msReadyStructuralDescriptorsPanel.getMass());		//	MS_READY_EXACT_MASS
+		ps.setString(3, msReadyStructuralDescriptorsPanel.getSmiles());		//	MS_READY_SMILES
+		ps.setString(4, msReadyStructuralDescriptorsPanel.getInchiKey());	//	MS_READY_INCHI_KEY
+		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
+		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
+		ps.setString(7, selectedIdentity.getPrimaryDatabaseId());			//	ACCESSION
+		
+		ps.executeUpdate();
+		ps.close();		
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private void updateT3DbCompoundData() throws Exception{
+
+		String query = 
+				"UPDATE COMPOUNDDB.T3DB_COMPOUND_DATA " +
+				"SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?,  " +
+				"MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?,  " +
+				"MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? " +
+				"WHERE ACCESSION = ? ";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, msReadyStructuralDescriptorsPanel.getFormula());	//	MS_READY_MOL_FORMULA
+		ps.setDouble(2, msReadyStructuralDescriptorsPanel.getMass());		//	MS_READY_EXACT_MASS
+		ps.setString(3, msReadyStructuralDescriptorsPanel.getSmiles());		//	MS_READY_SMILES
+		ps.setString(4, msReadyStructuralDescriptorsPanel.getInchiKey());	//	MS_READY_INCHI_KEY
+		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
+		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
+		ps.setString(7, selectedIdentity.getPrimaryDatabaseId());			//	ACCESSION
+		
+		ps.executeUpdate();
+		ps.close();		
+		ConnectionManager.releaseConnection(conn);
+	}
+
+	private void updateLipidMapsCompoundData() throws Exception{
+
+		String query = 
+				"UPDATE COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA " +
+				"SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?,  " +
+				"MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?,  " +
+				"MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? " +
+				"WHERE LMID = ? ";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, msReadyStructuralDescriptorsPanel.getFormula());	//	MS_READY_MOL_FORMULA
+		ps.setDouble(2, msReadyStructuralDescriptorsPanel.getMass());		//	MS_READY_EXACT_MASS
+		ps.setString(3, msReadyStructuralDescriptorsPanel.getSmiles());		//	MS_READY_SMILES
+		ps.setString(4, msReadyStructuralDescriptorsPanel.getInchiKey());	//	MS_READY_INCHI_KEY
+		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
+		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
+		ps.setString(7, selectedIdentity.getPrimaryDatabaseId());			//	ACCESSION
+		
+		ps.executeUpdate();
+		ps.close();		
+		ConnectionManager.releaseConnection(conn);
+	}
+
+	private void updateCoconutCompoundData() throws Exception{
+
+		String query = 
+				"UPDATE COMPOUNDDB.COCONUT_COMPOUND_DATA " +
+				"SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?,  " +
+				"MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?,  " +
+				"MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? " +
+				"WHERE ACCESSION = ? ";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, msReadyStructuralDescriptorsPanel.getFormula());	//	MS_READY_MOL_FORMULA
+		ps.setDouble(2, msReadyStructuralDescriptorsPanel.getMass());		//	MS_READY_EXACT_MASS
+		ps.setString(3, msReadyStructuralDescriptorsPanel.getSmiles());		//	MS_READY_SMILES
+		ps.setString(4, msReadyStructuralDescriptorsPanel.getInchiKey());	//	MS_READY_INCHI_KEY
+		ps.setString(5, msReadyStructuralDescriptorsPanel.getInchiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
+		ps.setInt(6, msReadyStructuralDescriptorsPanel.getCharge());		//	MS_READY_CHARGE
+		ps.setString(7, selectedIdentity.getPrimaryDatabaseId());			//	ACCESSION
+		
+		ps.executeUpdate();
+		ps.close();		
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	private void updateCoconutCompoundData(CompoundIdentity cid) throws Exception{
+
+		String query = 
+				"UPDATE COMPOUNDDB.COCONUT_COMPOUND_DATA " +
+				"SET MS_READY_MOL_FORMULA = ?, MS_READY_EXACT_MASS = ?,  " +
+				"MS_READY_SMILES = ?, MS_READY_INCHI_KEY = ?,  " +
+				"MS_READY_INCHI_KEY2D = ?, MS_READY_CHARGE = ? " +
+				"WHERE ACCESSION = ? ";
+		Connection conn = ConnectionManager.getConnection();
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, cid.getFormula());	//	MS_READY_MOL_FORMULA
+		ps.setDouble(2, msReadyStructuralDescriptorsPanel.getMass());		//	MS_READY_EXACT_MASS
+		ps.setString(3, cid.getSmiles());		//	MS_READY_SMILES
+		ps.setString(4, cid.getInChiKey());	//	MS_READY_INCHI_KEY
+		ps.setString(5, cid.getInChiKey().substring(0, 14));	//	MS_READY_INCHI_KEY2D
+		ps.setInt(6, cid.getCharge());		//	MS_READY_CHARGE
+		ps.setString(7, cid.getPrimaryDatabaseId());			//	ACCESSION
 		
 		ps.executeUpdate();
 		ps.close();		
@@ -570,10 +1025,10 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		//	TODO
 	}
 
-	@Override
-	public void toFront() {
-	  super.setVisible(true);
-	  super.toFront();
-	  super.requestFocus();
-	}
+//	@Override
+//	public void toFront() {
+//	  super.setVisible(true);
+//	  super.toFront();
+//	  super.requestFocus();
+//	}
 }

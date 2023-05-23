@@ -220,6 +220,9 @@ public class MRC2ToolBoxConfiguration {
     public static final double SPECTRUM_ENTROPY_NOISE_CUTOFF_DEFAULT = 0.01d;
     
     public static final String  ONLINE_HELP_URL = "https://metidtracker.github.io/midtdocs/index.html";
+      
+    public static final String COMPOUND_STANDARDIZER_PREFERENCES_NODE = "MRC2ToolBoxConfiguration.compoundStandardizerPreferences";
+    public static final String TAUTOMER_GENERATOR_PREFERENCES_NODE = "MRC2ToolBoxConfiguration.tautomerGeneratorpreferences";
 
 	//	Params
     private static NumberFormat mzFormat;

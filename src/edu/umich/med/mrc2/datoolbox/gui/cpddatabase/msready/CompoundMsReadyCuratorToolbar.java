@@ -44,14 +44,14 @@ public class CompoundMsReadyCuratorToolbar extends CommonToolbar {
 	private static final long serialVersionUID = -1934511837376564647L;
 	
 	private static final Icon simpleDataPullIcon = GuiUtils.getIcon("downloadDocument", 32);
-//	private static final Icon editIdStatusIcon = GuiUtils.getIcon("editIdStatus", 32);
-//	private static final Icon deleteIdStatusIcon = GuiUtils.getIcon("deleteIdStatus", 32);	
+	private static final Icon cpdStdIcon = GuiUtils.getIcon("standardCompound", 32);
+	private static final Icon tautomerIcon = GuiUtils.getIcon("tautomerSettings", 32);
 	
 	@SuppressWarnings("unused")
 	private JButton
 		simpleDataPullButton,
-		editIdStatusButton,
-		deleteIdStatusButton;
+		editCompoundStandardizerSettingsButton,
+		editTautomerGeneratorSettingsButton;
 
 	private JComboBox<CompoundDatabaseEnum> dbTypecomboBox;
 
@@ -60,7 +60,8 @@ public class CompoundMsReadyCuratorToolbar extends CommonToolbar {
 		super(commandListener);
 		
 		dbTypecomboBox = new JComboBox<CompoundDatabaseEnum>();
-		dbTypecomboBox.setPreferredSize(new Dimension(200, 25));
+		dbTypecomboBox.setMaximumSize(new Dimension(250, 30));
+		//dbTypecomboBox.setPreferredSize(new Dimension(200, 25));
 		DefaultComboBoxModel<CompoundDatabaseEnum> model = 
 				new DefaultComboBoxModel<CompoundDatabaseEnum>(
 					new CompoundDatabaseEnum[] {
@@ -69,30 +70,29 @@ public class CompoundMsReadyCuratorToolbar extends CommonToolbar {
 							CompoundDatabaseEnum.FOODB,
 							CompoundDatabaseEnum.T3DB,
 							CompoundDatabaseEnum.LIPIDMAPS,
-							CompoundDatabaseEnum.CHEBI,
-							CompoundDatabaseEnum.NATURAL_PRODUCTS_ATLAS,
+//							CompoundDatabaseEnum.CHEBI,
+//							CompoundDatabaseEnum.NATURAL_PRODUCTS_ATLAS,
 							CompoundDatabaseEnum.COCONUT,
 					});
 		dbTypecomboBox.setModel(model);
 		
 		add(dbTypecomboBox);
-		
-		addSeparator();
 
 		simpleDataPullButton = GuiUtils.addButton(this, null, simpleDataPullIcon, commandListener,
 				MainActionCommands.FETCH_COMPOUND_DATA_FOR_CURATION.getName(),
 				MainActionCommands.FETCH_COMPOUND_DATA_FOR_CURATION.getName(),
 				buttonDimension);
+		addSeparator();
 
-//		editIdStatusButton = GuiUtils.addButton(this, null, editIdStatusIcon, commandListener,
-//				MainActionCommands.EDIT_ID_LEVEL_DIALOG_COMMAND.getName(),
-//				MainActionCommands.EDIT_ID_LEVEL_DIALOG_COMMAND.getName(),
-//				buttonDimension);
-//
-//		deleteIdStatusButton = GuiUtils.addButton(this, null, deleteIdStatusIcon, commandListener,
-//				MainActionCommands.DELETE_ID_LEVEL_COMMAND.getName(),
-//				MainActionCommands.DELETE_ID_LEVEL_COMMAND.getName(),
-//				buttonDimension);
+		editCompoundStandardizerSettingsButton = GuiUtils.addButton(this, null, cpdStdIcon, commandListener,
+				MainActionCommands.EDIT_COMPOUND_STANDARDIZER_SETTINGS_COMMAND.getName(),
+				MainActionCommands.EDIT_COMPOUND_STANDARDIZER_SETTINGS_COMMAND.getName(),
+				buttonDimension);
+
+		editTautomerGeneratorSettingsButton = GuiUtils.addButton(this, null, tautomerIcon, commandListener,
+				MainActionCommands.EDIT_TAUTOMER_GENERATOR_SETTINGS_COMMAND.getName(),
+				MainActionCommands.EDIT_TAUTOMER_GENERATOR_SETTINGS_COMMAND.getName(),
+				buttonDimension);
 	}
 	
 	public CompoundDatabaseEnum getSelectedDatabase() {

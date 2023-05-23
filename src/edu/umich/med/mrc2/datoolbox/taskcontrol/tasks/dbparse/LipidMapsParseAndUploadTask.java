@@ -156,7 +156,7 @@ public class LipidMapsParseAndUploadTask extends AbstractTask {
 		
 		String dataQuery =
 				"INSERT INTO COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA " +
-				"(LMID, SYSTEMATIC_NAME, COMMON_NAME, MOLECULAR_FORMULA, EXACT_MASS, " +
+				"(LMID, COMMON_NAME, SYSTEMATIC_NAME, MOLECULAR_FORMULA, EXACT_MASS, " +
 				"INCHI, INCHI_KEY, SMILES, CATEGORY, MAIN_CLASS, "
 				+ "SUB_CLASS, CLASS_LEVEL4, ABBREVIATION) " +
 				"VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

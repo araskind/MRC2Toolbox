@@ -1238,6 +1238,12 @@ public enum MainActionCommands {
 	
 	COPY_SMILES_COMMAND("Copy SMILES"),
 	PASTE_SMILES_COMMAND("Paste SMILES"),
+	
+	EDIT_COMPOUND_STANDARDIZER_SETTINGS_COMMAND("Edit Compound Standardizer settings"),
+	SAVE_COMPOUND_STANDARDIZER_SETTINGS_COMMAND("Save Compound Standardizer settings"),
+	
+	EDIT_TAUTOMER_GENERATOR_SETTINGS_COMMAND("Edit Tautomer Generator settings"),
+	SAVE_TAUTOMER_GENERATOR_SETTINGS_COMMAND("Save Tautomer Generator settings"),
 	;
 
 	private final String name;

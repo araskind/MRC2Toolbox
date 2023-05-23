@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.2.36</version>
+	<version>1.2.37</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>
@@ -154,19 +154,45 @@ public final class BuildInformation {
 	</build>
 	<repositories>
 		<repository>
-			<id>org.geotools</id>
-			<url>http://maven.geomajas.org/</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<id>central</id>
+			<name>Maven Repository Switchboard</name>
+			<url>https://repo1.maven.org/maven2</url>
 		</repository>
+		<!---->
 		<repository>
+			<id>org.geotools</id>
+			<url>https://repo.osgeo.org/repository/release/</url>
+		</repository>	
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
 			<id>bedatadriven</id>
 			<name>bedatadriven public repo</name>
 			<url>https://nexus.bedatadriven.com/content/groups/public/</url>
 		</repository>
+		<!--  
 		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
 			<id>jcenter</id>
 			<name>jcenter public repo</name>
 			<url>http://jcenter.bintray.com/</url>
 		</repository>
+		-->
 		<repository>
 			<id>w3c</id>
 			<url>http://dist.wso2.org/maven2/</url>
@@ -175,11 +201,6 @@ public final class BuildInformation {
 			<id>sonatype-oss-snapshots</id>
 			<name>Sonatype OSS Maven Repository for Staging Snapshots</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</repository>
-		<repository>
-			<id>wso2</id>
-			<name>WSO2 Dist Repository</name>
-			<url>http://dist.wso2.org/maven2</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -216,10 +237,11 @@ public final class BuildInformation {
 			<artifactId>commons-compress</artifactId>
 			<version>1.21</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.6</version>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		    <version>3.12.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -318,9 +340,9 @@ public final class BuildInformation {
 		    <version>2.1.0</version>
 		</dependency>	
 		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-brewer</artifactId>
-			<version>22.0</version>
+		  <groupId>org.geotools</groupId>
+		  <artifactId>gt-brewer</artifactId>
+		  <version>29.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.inet.jortho</groupId>
@@ -494,5 +516,22 @@ public final class BuildInformation {
 		    <artifactId>owl</artifactId>
 		    <version>1.02</version>
 		</dependency>
+<!---->
+		<dependency>
+		  <groupId>ambit</groupId>
+		  <artifactId>ambit2-tautomers</artifactId>
+		  <version>4.1.0-SNAPSHOT</version>
+		  <exclusions>
+		    <exclusion>
+		      <groupId>xml-apis</groupId>
+		      <artifactId>xml-apis</artifactId>
+		    </exclusion>
+        <exclusion>
+            <groupId>javax.xml.stream</groupId>
+            <artifactId>stax-api</artifactId>
+        </exclusion>
+		  </exclusions>
+		</dependency>
+		
 	</dependencies>
 </project>

@@ -162,4 +162,120 @@ public class MSReadyUtils {
 		}
 		return null;
 	}
+	
+	public static CompoundIdentity neutralizeSmiles(CompoundIdentity charged) {
+		
+		if(charged.getSmiles() == null || charged.getSmiles().isEmpty())
+			return null;
+		
+//		if(!charged.getSmiles().contains("[C-]") && !charged.getSmiles().contains("[CH-]") 
+//				&& !charged.getSmiles().contains("[C+]"))
+//			return null;
+		
+		if(!charged.getSmiles().contains("-]") && !charged.getSmiles().contains("+]"))
+			return null;
+		
+		//[NH2+]
+		String fixedSmiles = charged.getSmiles().
+				replaceAll("\\[C-\\]", "[CH]").
+				replaceAll("\\[O-\\]", "[OH]").
+				replaceAll("\\[CH-\\]", "[CH2]").
+				replaceAll("\\[C\\+\\]", "[CH]").
+				replaceAll("\\[CH\\+\\]", "[CH2]").
+				replaceAll("\\[N-]", "[NH]").
+				replaceAll("\\[NH\\+\\]", "[N]").
+				replaceAll("\\[FH\\+\\]", "[F]").
+				replaceAll("\\[NH2\\+\\]", "[NH]").
+				replaceAll("\\[OH2\\+\\]", "[OH]").
+				replaceAll("\\[NH3\\+\\]", "[NH2]");
+		
+		IAtomContainer atomContainer = null;
+		try {
+			atomContainer = smilesParser.parseSmiles(fixedSmiles);
+		} catch (InvalidSmilesException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(atomContainer == null)
+			return null;
+		
+		try {
+			AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
+		} catch (CDKException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		try {
+			CDKHydrogenAdder.getInstance(atomContainer.getBuilder()).addImplicitHydrogens(atomContainer);
+		} catch (CDKException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+//		SmartsPattern chargedPyrrolePattern = SmartsPattern.create("[CH-]");
+//		Mappings poMappings = chargedPyrrolePattern.matchAll(atomContainer);
+//		if(poMappings.count() == 0)
+//			return null;
+//		
+//		for(int[] poMapping : poMappings) {
+//
+//			for (int i : poMapping) {
+//				
+//				IAtom atom = atomContainer.getAtom(i);			
+//				if (atom.getSymbol().equals("C") && Math.round(atom.getCharge()) == -1)
+//					atom.setFormalCharge(0);
+//			}
+//		}
+//		try {
+//			CDKHydrogenAdder.getInstance(atomContainer.getBuilder()).addImplicitHydrogens(atomContainer);
+//		} catch (CDKException e2) {
+//			// TODO Auto-generated catch block
+//			e2.printStackTrace();
+//		}
+		String smiles = "";		
+		try {
+			smiles = smilesGenerator.create(atomContainer);
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		IMolecularFormula molFormula = 
+				MolecularFormulaManipulator.getMolecularFormula(atomContainer);			
+		String mfFromFStringFromSmiles = 
+				MolecularFormulaManipulator.getString(molFormula);	
+		double smilesMass = MolecularFormulaManipulator.getMass(
+						molFormula, MolecularFormulaManipulator.MonoIsotopic);
+		
+		CompoundIdentity curatedId =  new CompoundIdentity(
+				charged.getPrimaryDatabase(), 
+				charged.getPrimaryDatabaseId(),
+				charged.getName(), 					
+				charged.getSysName(), 
+				mfFromFStringFromSmiles, 
+				smilesMass, 
+				smiles);
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			inChIGenerator = igfactory.getInChIGenerator(atomContainer);
+			InchiStatus inchiStatus = inChIGenerator.getStatus();
+			if (inchiStatus.equals(InchiStatus.WARNING)) {
+				System.out.println("InChI warning: " + inChIGenerator.getMessage());
+			} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+				System.out.println("InChI failed: [" + inChIGenerator.getMessage() + "]");
+			}
+			String inchiKey = inChIGenerator.getInchiKey();
+			curatedId.setInChiKey(inchiKey);
+		} 
+		catch (CDKException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}					
+		curatedId.setCharge(molFormula.getCharge());
+		return curatedId;
+	}	
 }

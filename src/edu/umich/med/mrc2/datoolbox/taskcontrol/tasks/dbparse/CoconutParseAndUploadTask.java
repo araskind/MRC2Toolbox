@@ -74,7 +74,7 @@ public class CoconutParseAndUploadTask extends AbstractTask {
 	private void parseFileToRecords() {
 
 		taskDescription = 
-				"Parsing LipidMaps SDF file " + 
+				"Parsing Coconut SDF file " + 
 						sdfInputFile.getName() + " ...";		
 		total = 500000;
 		processed = 0;

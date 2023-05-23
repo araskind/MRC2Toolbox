@@ -86,7 +86,7 @@ public class CompoundDatabaseScripts {
 		logger.info("Statring the program");
 		MRC2ToolBoxConfiguration.initConfiguration();		
 		try {
-			scanCHEBIsdfForFields();
+			createCoconutSMILESBasedData();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -222,7 +222,7 @@ public class CompoundDatabaseScripts {
 		
 		String updQuery = "UPDATE COMPOUNDDB.HMDB_COMPOUND_DATA "
 				+ "SET CHARGE = ?, FORMULA_FROM_SMILES = ?, "
-				+ "MASS_FR0M_SMILES = ? WHERE ACCESSION = ?";
+				+ "MASS_FROM_SMILES = ? WHERE ACCESSION = ?";
 		PreparedStatement updps = conn.prepareStatement(updQuery);		
 		ResultSet rs = ps.executeQuery();
 
@@ -276,8 +276,7 @@ public class CompoundDatabaseScripts {
 		} catch (CDKException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
+		}		
 		double toRound = 1000000.0d;
 		
 		Connection conn = ConnectionManager.getConnection();
@@ -288,7 +287,7 @@ public class CompoundDatabaseScripts {
 		
 		String updQuery = "UPDATE COMPOUND_COLLECTION_COMPONENTS "
 				+ "SET CHARGE_FROM_PRIMARY_SMILES = ?, FORMULA_FROM_PRIMARY_SMILES = ?, "
-				+ "INCHI_KEY_FROM_PRIMARY_SMILES = ?, MASS_FR0M_PRIMARY_SMILES = ? "
+				+ "INCHI_KEY_FROM_PRIMARY_SMILES = ?, MASS_FROM_PRIMARY_SMILES = ? "
 				+ "WHERE CC_COMPONENT_ID = ?";
 		
 		PreparedStatement updps = conn.prepareStatement(updQuery);		
@@ -354,6 +353,563 @@ public class CompoundDatabaseScripts {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
+	
+	public static void createDrugBankSMILESBasedData() throws Exception{
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		double toRound = 1000000.0d;
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT ACCESSION, SMILES, MOL_FORMULA"
+				+ " FROM COMPOUNDDB.DRUGBANK_COMPOUND_DATA"
+				+ " WHERE SMILES IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUNDDB.DRUGBANK_COMPOUND_DATA "
+				+ "SET CHARGE = ?, FORMULA_FROM_SMILES = ?, "
+				+ "MASS_FROM_SMILES = ?, INCHI_KEY_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FS2D = ?, FORMULA_CONFLICT = ? WHERE ACCESSION = ?";
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		ResultSet rs = ps.executeQuery();
+
+		int counter = 0;
+		while(rs.next()) {
+			
+			String smiles = rs.getString("SMILES");
+			String accession = rs.getString("ACCESSION");						
+			String dbFormula = rs.getString("MOL_FORMULA");
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = 
+						Math.round(MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+				String inchiKey = null;
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				updps.setInt(1, molFormula.getCharge());
+				updps.setString(2, mfFromFStringFromSmiles);
+				updps.setDouble(3, smilesMass);
+				if(inchiKey != null) {
+					updps.setString(4, inchiKey);
+					updps.setString(5, inchiKey.substring(0, 14));
+				}
+				else {
+					updps.setNull(4, java.sql.Types.NULL);
+					updps.setNull(5, java.sql.Types.NULL);
+				}
+				if(!dbFormula.equals(mfFromFStringFromSmiles)) {
+					updps.setString(6, "Y");
+				}
+				else {
+					updps.setNull(6, java.sql.Types.NULL);
+				}
+				updps.setString(7, accession);				
+				updps.executeUpdate();
+			}
+			else {
+				System.out.println("Failed to convert SMILES for " + accession + "\t" + smiles);
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void createFooDbSMILESBasedData() throws Exception{
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		double toRound = 1000000.0d;		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT PUBLIC_ID, MOLDB_SMILES"
+				+ " FROM COMPOUNDDB.FOODB_COMPOUND_DATA"
+				+ " WHERE MOLDB_SMILES IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUNDDB.FOODB_COMPOUND_DATA "
+				+ "SET CHARGE = ?, FORMULA_FROM_SMILES = ?, "
+				+ "MASS_FROM_SMILES = ?, INCHI_KEY_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FS2D = ? WHERE PUBLIC_ID = ?";
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		ResultSet rs = ps.executeQuery();
+
+		int counter = 0;
+		while(rs.next()) {
+			
+			String smiles = rs.getString("MOLDB_SMILES");
+			String accession = rs.getString("PUBLIC_ID");						
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = 
+						Math.round(MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+				String inchiKey = null;
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				updps.setInt(1, molFormula.getCharge());
+				updps.setString(2, mfFromFStringFromSmiles);
+				updps.setDouble(3, smilesMass);
+				if(inchiKey != null) {
+					updps.setString(4, inchiKey);
+					updps.setString(5, inchiKey.substring(0, 14));
+				}
+				else {
+					updps.setNull(4, java.sql.Types.NULL);
+					updps.setNull(5, java.sql.Types.NULL);
+				}
+				updps.setString(6, accession);				
+				updps.executeUpdate();
+			}
+			else {
+				System.out.println("Failed to convert SMILES for " + accession + "\t" + smiles);
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void createLipidMapsSMILESBasedData() throws Exception{
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		double toRound = 1000000.0d;
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT LMID, SMILES, MOLECULAR_FORMULA"
+				+ " FROM COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA"
+				+ " WHERE SMILES IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUNDDB.LIPIDMAPS_COMPOUND_DATA "
+				+ "SET CHARGE = ?, FORMULA_FROM_SMILES = ?, "
+				+ "MASS_FROM_SMILES = ?, INCHI_KEY_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FS2D = ?, FORMULA_CONFLICT = ? WHERE LMID = ?";
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		ResultSet rs = ps.executeQuery();
+
+		int counter = 0;
+		while(rs.next()) {
+			
+			String smiles = rs.getString("SMILES");
+			String accession = rs.getString("LMID");						
+			String dbFormula = rs.getString("MOLECULAR_FORMULA");
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = 
+						Math.round(MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+				String inchiKey = null;
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				updps.setInt(1, molFormula.getCharge());
+				updps.setString(2, mfFromFStringFromSmiles);
+				updps.setDouble(3, smilesMass);
+				if(inchiKey != null) {
+					updps.setString(4, inchiKey);
+					updps.setString(5, inchiKey.substring(0, 14));
+				}
+				else {
+					updps.setNull(4, java.sql.Types.NULL);
+					updps.setNull(5, java.sql.Types.NULL);
+				}
+				if(!dbFormula.equals(mfFromFStringFromSmiles)) {
+					updps.setString(6, "Y");
+				}
+				else {
+					updps.setNull(6, java.sql.Types.NULL);
+				}
+				updps.setString(7, accession);				
+				updps.executeUpdate();
+			}
+			else {
+				System.out.println("Failed to convert SMILES for " + accession + "\t" + smiles);
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void createNPASMILESBasedData() throws Exception{
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		double toRound = 1000000.0d;
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT ACCESSION, SMILES, FORMULA"
+				+ " FROM COMPOUNDDB.NPA_COMPOUND_DATA"
+				+ " WHERE SMILES IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUNDDB.NPA_COMPOUND_DATA "
+				+ "SET CHARGE = ?, FORMULA_FROM_SMILES = ?, "
+				+ "MASS_FROM_SMILES = ?, INCHI_KEY_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FS2D = ?, FORMULA_CONFLICT = ? WHERE ACCESSION = ?";
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		ResultSet rs = ps.executeQuery();
+
+		int counter = 0;
+		while(rs.next()) {
+			
+			String smiles = rs.getString("SMILES");
+			String accession = rs.getString("ACCESSION");						
+			String dbFormula = rs.getString("FORMULA");
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = 
+						Math.round(MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+				String inchiKey = null;
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				updps.setInt(1, molFormula.getCharge());
+				updps.setString(2, mfFromFStringFromSmiles);
+				updps.setDouble(3, smilesMass);
+				if(inchiKey != null) {
+					updps.setString(4, inchiKey);
+					updps.setString(5, inchiKey.substring(0, 14));
+				}
+				else {
+					updps.setNull(4, java.sql.Types.NULL);
+					updps.setNull(5, java.sql.Types.NULL);
+				}
+				if(!dbFormula.equals(mfFromFStringFromSmiles)) {
+					updps.setString(6, "Y");
+				}
+				else {
+					updps.setNull(6, java.sql.Types.NULL);
+				}
+				updps.setString(7, accession);				
+				updps.executeUpdate();
+			}
+			else {
+				System.out.println("Failed to convert SMILES for " + accession + "\t" + smiles);
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void createT3DBSMILESBasedData() throws Exception{
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		double toRound = 1000000.0d;
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT ACCESSION, SMILES, CHEMICAL_FORMULA"
+				+ " FROM COMPOUNDDB.T3DB_COMPOUND_DATA"
+				+ " WHERE SMILES IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUNDDB.T3DB_COMPOUND_DATA "
+				+ "SET CHARGE = ?, FORMULA_FROM_SMILES = ?, "
+				+ "MASS_FROM_SMILES = ?, INCHI_KEY_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FS2D = ?, FORMULA_CONFLICT = ? WHERE ACCESSION = ?";
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		ResultSet rs = ps.executeQuery();
+
+		int counter = 0;
+		while(rs.next()) {
+			
+			String smiles = rs.getString("SMILES");
+			String accession = rs.getString("ACCESSION");						
+			String dbFormula = rs.getString("CHEMICAL_FORMULA");
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = 
+						Math.round(MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+				String inchiKey = null;
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				updps.setInt(1, molFormula.getCharge());
+				updps.setString(2, mfFromFStringFromSmiles);
+				updps.setDouble(3, smilesMass);
+				if(inchiKey != null) {
+					updps.setString(4, inchiKey);
+					updps.setString(5, inchiKey.substring(0, 14));
+				}
+				else {
+					updps.setNull(4, java.sql.Types.NULL);
+					updps.setNull(5, java.sql.Types.NULL);
+				}
+				if(dbFormula == null || !dbFormula.equals(mfFromFStringFromSmiles)) {
+					updps.setString(6, "Y");
+				}
+				else {
+					updps.setNull(6, java.sql.Types.NULL);
+				}
+				updps.setString(7, accession);				
+				updps.executeUpdate();
+			}
+			else {
+				System.out.println("Failed to convert SMILES for " + accession + "\t" + smiles);
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void createCoconutSMILESBasedData() throws Exception{
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		double toRound = 1000000.0d;
+
+		Connection conn = ConnectionManager.getConnection();
+		String query = "SELECT ACCESSION, SMILES, MOLECULAR_FORMULA"
+				+ " FROM COMPOUNDDB.COCONUT_COMPOUND_DATA"
+				+ " WHERE SMILES IS NOT NULL";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String updQuery = "UPDATE COMPOUNDDB.COCONUT_COMPOUND_DATA "
+				+ "SET CHARGE = ?, FORMULA_FROM_SMILES = ?, "
+				+ "MASS_FROM_SMILES = ?, INCHI_KEY_FROM_SMILES = ?, "
+				+ "INCHI_KEY_FS2D = ?, FORMULA_CONFLICT = ? WHERE ACCESSION = ?";
+		PreparedStatement updps = conn.prepareStatement(updQuery);		
+		ResultSet rs = ps.executeQuery();
+
+		int counter = 0;
+		while(rs.next()) {
+			
+			String smiles = rs.getString("SMILES");
+			String accession = rs.getString("ACCESSION");						
+			String dbFormula = rs.getString("MOLECULAR_FORMULA");
+			IAtomContainer mol = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(mol != null) {
+				IMolecularFormula molFormula = 
+						MolecularFormulaManipulator.getMolecularFormula(mol);
+				String mfFromFStringFromSmiles = 
+						MolecularFormulaManipulator.getString(molFormula);	
+				double smilesMass = 
+						Math.round(MolecularFormulaManipulator.getMass(
+								molFormula, MolecularFormulaManipulator.MonoIsotopic) * toRound)/toRound;	
+				String inchiKey = null;
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
+				updps.setInt(1, molFormula.getCharge());
+				updps.setString(2, mfFromFStringFromSmiles);
+				updps.setDouble(3, smilesMass);
+				if(inchiKey != null) {
+					updps.setString(4, inchiKey);
+					updps.setString(5, inchiKey.substring(0, 14));
+				}
+				else {
+					updps.setNull(4, java.sql.Types.NULL);
+					updps.setNull(5, java.sql.Types.NULL);
+				}
+				if(dbFormula == null || !dbFormula.equals(mfFromFStringFromSmiles)) {
+					updps.setString(6, "Y");
+				}
+				else {
+					updps.setNull(6, java.sql.Types.NULL);
+				}
+				updps.setString(7, accession);				
+				updps.executeUpdate();
+			}
+			else {
+				System.out.println("Failed to convert SMILES for " + accession + "\t" + smiles);
+			}
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		updps.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	//
 }
 
 
