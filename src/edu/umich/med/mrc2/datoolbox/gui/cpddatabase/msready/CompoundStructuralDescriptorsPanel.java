@@ -63,13 +63,14 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 	private JButton copySmilesButton;
 	private JButton pasteSmilesButton;
 	
-	public CompoundStructuralDescriptorsPanel() {
+	public CompoundStructuralDescriptorsPanel(boolean enablePaste) {
+		
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{0, 0, 0, 0, 0};
-		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
-		gridBagLayout.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.columnWidths = new int[]{87, 0, 0, 0, 0, 0};
+		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		setLayout(gridBagLayout);
 		
 		JLabel lblNewLabel = new JLabel("Formula");
@@ -82,7 +83,7 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 		
 		formulaTextField = new JTextField();
 		GridBagConstraints gbc_formulaTextField = new GridBagConstraints();
-		gbc_formulaTextField.gridwidth = 3;
+		gbc_formulaTextField.gridwidth = 4;
 		gbc_formulaTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_formulaTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_formulaTextField.gridx = 1;
@@ -100,6 +101,7 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 		
 		massTextField = new JFormattedTextField(MRC2ToolBoxConfiguration.getMzFormat());
 		GridBagConstraints gbc_massTextField = new GridBagConstraints();
+		gbc_massTextField.gridwidth = 2;
 		gbc_massTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_massTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_massTextField.gridx = 1;
@@ -110,7 +112,7 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
 		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_3.gridx = 2;
+		gbc_lblNewLabel_3.gridx = 3;
 		gbc_lblNewLabel_3.gridy = 1;
 		add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
@@ -119,7 +121,7 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 		GridBagConstraints gbc_chargeTextField = new GridBagConstraints();
 		gbc_chargeTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_chargeTextField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_chargeTextField.gridx = 3;
+		gbc_chargeTextField.gridx = 4;
 		gbc_chargeTextField.gridy = 1;
 		add(chargeSpinner, gbc_chargeTextField);
 		
@@ -133,7 +135,7 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 		
 		inchiKeyTextField = new JTextField();
 		GridBagConstraints gbc_inchiKeyTextField = new GridBagConstraints();
-		gbc_inchiKeyTextField.gridwidth = 3;
+		gbc_inchiKeyTextField.gridwidth = 4;
 		gbc_inchiKeyTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_inchiKeyTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_inchiKeyTextField.gridx = 1;
@@ -143,7 +145,7 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 		
 		JLabel lblNewLabel_4 = new JLabel("SMILES");
 		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
-		gbc_lblNewLabel_4.anchor = GridBagConstraints.BASELINE_TRAILING;
+		gbc_lblNewLabel_4.anchor = GridBagConstraints.BASELINE_LEADING;
 		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_4.gridx = 0;
 		gbc_lblNewLabel_4.gridy = 3;
@@ -154,10 +156,10 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 		smilesTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		GridBagConstraints gbc_textArea = new GridBagConstraints();
 		gbc_textArea.insets = new Insets(0, 0, 5, 0);
-		gbc_textArea.gridwidth = 3;
+		gbc_textArea.gridwidth = 5;
 		gbc_textArea.fill = GridBagConstraints.BOTH;
-		gbc_textArea.gridx = 1;
-		gbc_textArea.gridy = 3;
+		gbc_textArea.gridx = 0;
+		gbc_textArea.gridy = 4;
 		add(smilesTextArea, gbc_textArea);
 		
 		copySmilesButton = new JButton(MainActionCommands.COPY_SMILES_COMMAND.getName());
@@ -165,18 +167,21 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 		copySmilesButton.addActionListener(this);
 		GridBagConstraints gbc_copySmilesButton = new GridBagConstraints();
 		gbc_copySmilesButton.insets = new Insets(0, 0, 0, 5);
-		gbc_copySmilesButton.gridx = 1;
-		gbc_copySmilesButton.gridy = 4;
+		gbc_copySmilesButton.gridx = 0;
+		gbc_copySmilesButton.gridy = 5;
 		add(copySmilesButton, gbc_copySmilesButton);
 		
-		pasteSmilesButton = new JButton(MainActionCommands.PASTE_SMILES_COMMAND.getName());
-		pasteSmilesButton.setActionCommand(MainActionCommands.PASTE_SMILES_COMMAND.getName());
-		pasteSmilesButton.addActionListener(this);
-		GridBagConstraints gbc_pasteSmilesButton = new GridBagConstraints();
-		gbc_pasteSmilesButton.fill = GridBagConstraints.HORIZONTAL;
-		gbc_pasteSmilesButton.gridx = 3;
-		gbc_pasteSmilesButton.gridy = 4;
-		add(pasteSmilesButton, gbc_pasteSmilesButton);
+		if(enablePaste) {
+			pasteSmilesButton = new JButton(MainActionCommands.PASTE_SMILES_COMMAND.getName());
+			pasteSmilesButton.setActionCommand(MainActionCommands.PASTE_SMILES_COMMAND.getName());
+			pasteSmilesButton.addActionListener(this);
+			GridBagConstraints gbc_pasteSmilesButton = new GridBagConstraints();
+			gbc_pasteSmilesButton.insets = new Insets(0, 0, 0, 5);
+			gbc_pasteSmilesButton.fill = GridBagConstraints.HORIZONTAL;
+			gbc_pasteSmilesButton.gridx = 1;
+			gbc_pasteSmilesButton.gridy = 5;
+			add(pasteSmilesButton, gbc_pasteSmilesButton);
+		}
 	}
 	
 	public String getFormula() {

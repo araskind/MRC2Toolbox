@@ -35,12 +35,12 @@ public class DockableCompoundStructuralDescriptorsPanel extends DefaultSingleCDo
 
 	private CompoundStructuralDescriptorsPanel structuralDescriptorsPanel;
 	
-	public DockableCompoundStructuralDescriptorsPanel(String id, String name) {
+	public DockableCompoundStructuralDescriptorsPanel(String id, String name, boolean enablePaste) {
 
 		super(id, componentIcon, name, null, Permissions.MIN_MAX_STACK);
 		
 		setLayout(new BorderLayout(0,0));
-		structuralDescriptorsPanel = new CompoundStructuralDescriptorsPanel();
+		structuralDescriptorsPanel = new CompoundStructuralDescriptorsPanel(enablePaste);
 		add(structuralDescriptorsPanel, BorderLayout.CENTER);
 	}
 	

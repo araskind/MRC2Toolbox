@@ -48,6 +48,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
+import ambit2.tautomers.processor.StructureStandardizer;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -281,5 +282,44 @@ public class CompoundStandardizerSettingsDialog extends JDialog implements Backe
 		preferences.putBoolean(IMPLICIT_HYDROGENS,implicitHydrogensCheckBox.isSelected());
 		preferences.putBoolean(GENERATE_2D_COORDINATES,generate2DCoordinatesCheckBox.isSelected());
 		preferences.putBoolean(STEREO_FROM_2D,generateStereofrom2DCheckBox.isSelected());
-	}	
+	}
+	
+	public StructureStandardizer getConfiguredStructureStandardizer() {
+		
+		StructureStandardizer structStd = new StructureStandardizer();
+		CompoundStandardizerSmilesFlavors smiFlavor = 
+				(CompoundStandardizerSmilesFlavors)smiFlavorComboBox.getSelectedItem();
+		structStd.setGenerateSMILES_Canonical(
+				smiFlavor.equals(CompoundStandardizerSmilesFlavors.Canonical));
+		structStd.setGenerateSMILES_Aromatic(
+				useAromaticSymbolsCheckBox.isSelected());
+		structStd.setGenerateInChI(generateInChICheckBox.isSelected());
+		structStd.setSplitFragments(splitFragmentsCheckBox.isSelected());
+		structStd.setGenerateTautomers(generateTautomersCheckBox.isSelected());
+		structStd.setNeutralise(neutraliseCheckBox.isSelected());
+		structStd.setClearIsotopes(clearIsotopesCheckBox.isSelected());
+		structStd.setImplicitHydrogens(implicitHydrogensCheckBox.isSelected());
+		structStd.setGenerate2D(generate2DCoordinatesCheckBox.isSelected());
+		structStd.setGenerateStereofrom2D(generateStereofrom2DCheckBox.isSelected());
+		
+		return structStd;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

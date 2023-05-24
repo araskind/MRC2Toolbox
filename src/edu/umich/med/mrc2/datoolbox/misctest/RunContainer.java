@@ -172,7 +172,7 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			testSMilesInchiMatcher();
+			cleanupCoconutCompoundData();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -434,6 +434,10 @@ public class RunContainer {
 		for(CompoundIdentity cid : compounds) {
 			
 			CompoundIdentity fixed = neutralizeSmiles(cid);
+			if(fixed.getInChiKey() == null) {
+				count++;
+				continue;
+			}
 			if(fixed.getCharge() == 0) {
 				
 				ps.setString(1, fixed.getFormula());	//	MS_READY_MOL_FORMULA

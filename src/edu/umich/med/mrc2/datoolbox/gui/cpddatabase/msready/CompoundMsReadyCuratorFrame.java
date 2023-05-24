@@ -68,7 +68,10 @@ import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
+import ambit2.base.data.Property;
+import ambit2.tautomers.TautomerManager;
 import ambit2.tautomers.processor.StructureStandardizer;
+import ambit2.tautomers.zwitterion.ZwitterionManager;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
@@ -80,6 +83,8 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.cpd.CompoundCurationPopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.cpd.DockableCompoundCurationListingTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.std.CompoundStandardizerSettingsDialog;
+import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.std.TautomerGeneratorSettingsDialog;
+import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.std.ZwitterIonSettingsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -121,6 +126,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	
 	private CompoundStandardizerSettingsDialog compoundStandardizerSettingsDialog;
 	private TautomerGeneratorSettingsDialog tautomerGeneratorSettingsDialog;
+	private ZwitterIonSettingsDialog zwitterIonSettingsDialog;
 		
 	private static final IChemObjectBuilder bldr = SilentChemObjectBuilder.getInstance();
 	private static final CDKAtomTypeMatcher matcher = CDKAtomTypeMatcher.getInstance(bldr);
@@ -131,6 +137,8 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	private InChIGenerator inChIGenerator;
 	private Aromaticity aromaticity;
 	private StructureStandardizer structureStandardizer;
+	private ZwitterionManager zwitterionManager;	
+	private TautomerManager tautomerManager;
 	
 	private CompoundIdentity selectedIdentity;
 	private Map<CompoundIdentity,CompoundIdentity>curatedCompounds;
@@ -167,11 +175,11 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		
 		originalStructuralDescriptorsPanel = 
 				new DockableCompoundStructuralDescriptorsPanel(
-						"OriginalStructuralDescriptorsPanel", "Original compound data");
+						"OriginalStructuralDescriptorsPanel", "Original compound data", false);
 		originalStructuralDescriptorsPanel.lockEditing(true);
 		msReadyStructuralDescriptorsPanel = 
 				new DockableCompoundStructuralDescriptorsPanel(
-						"MSReadyStructuralDescriptorsPanel", "MS-ready compound data");
+						"MSReadyStructuralDescriptorsPanel", "MS-ready compound data", true);
 		msReadyStructuralDescriptorsPanel.lockEditing(false);
 		
 		grid.add(0, 0, 1, 1,
@@ -185,10 +193,9 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		add(control.getContentArea(), BorderLayout.CENTER);
 		loadLayout(layoutConfigFile);
 		loadPreferences();
-		
+	
 		aromaticity = new Aromaticity(
-				ElectronDonation.cdk(),
-                Cycles.or(Cycles.all(), Cycles.all(6)));
+				ElectronDonation.cdk(),Cycles.cdkAromaticSet());		
 		igfactory = null;
 		try {
 			igfactory = InChIGeneratorFactory.getInstance();
@@ -197,14 +204,32 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 			e.printStackTrace();
 		}
 		curatedCompounds = new HashMap<CompoundIdentity,CompoundIdentity>();
+		compoundStandardizerSettingsDialog = new CompoundStandardizerSettingsDialog(this);
+		structureStandardizer = 
+				compoundStandardizerSettingsDialog.getConfiguredStructureStandardizer();
+		compoundStandardizerSettingsDialog.dispose();
+		
+		zwitterIonSettingsDialog = new ZwitterIonSettingsDialog(this);
+		zwitterionManager =  zwitterIonSettingsDialog.getConfiguredZwitterionManager();
+		zwitterIonSettingsDialog.dispose();
 		
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
 		getContentPane().add(panel, BorderLayout.SOUTH);
+		
+		JButton standardizeButton = new JButton(MainActionCommands.STANDARDIZE_STRUCTURE.getName());
+		standardizeButton.setActionCommand(MainActionCommands.STANDARDIZE_STRUCTURE.getName());
+		standardizeButton.addActionListener(this);
+		panel.add(standardizeButton);
+		
+		JButton tautomersButton = new JButton(MainActionCommands.GENERATE_TAUTOMERS.getName());
+		tautomersButton.setActionCommand(MainActionCommands.GENERATE_TAUTOMERS.getName());
+		tautomersButton.addActionListener(this);
+		panel.add(tautomersButton);
 
-		JButton validateButton = new JButton("Validate input");
-		validateButton.setActionCommand(MainActionCommands.VALIDATE_MS_READY_STRUCTURE.getName());
+		JButton validateButton = new JButton(MainActionCommands.GENERATE_ZWITTER_IONSS.getName());
+		validateButton.setActionCommand(MainActionCommands.GENERATE_ZWITTER_IONSS.getName());
 		validateButton.addActionListener(this);
 		panel.add(validateButton);
 		
@@ -252,8 +277,99 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		
 		if(command.equals(MainActionCommands.SAVE_TAUTOMER_GENERATOR_SETTINGS_COMMAND.getName()))
 			saveTautomerGeneratorSettings();
+		
+		if(command.equals(MainActionCommands.EDIT_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND.getName()))
+			editZwitterIonGeneratorSettings();
+		
+		if(command.equals(MainActionCommands.SAVE_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND.getName()))
+			saveZwitterIonGeneratorSettings();
+			
+		if(command.equals(MainActionCommands.STANDARDIZE_STRUCTURE.getName()))
+			standardizeStructure();
+		
+		if(command.equals(MainActionCommands.GENERATE_TAUTOMERS.getName()))
+			generateTautomers();
+		
+		if(command.equals(MainActionCommands.GENERATE_ZWITTER_IONSS.getName()))
+			generateZwitterIons();
 	}
+
+
+	private void generateZwitterIons() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void generateTautomers() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private Collection<String> standardizeStructure() {
+		
+		Collection<String>errors = new ArrayList<String>();
+		String smiles = msReadyStructuralDescriptorsPanel.getSmiles();
+		if(smiles.isEmpty()) {
+			errors.add("Please enter SMILES string for MS-ready form");
+			return errors;
+		}
+		IAtomContainer mol = msReadyMolStructurePanel.showStructure(smiles);	
+		if(mol == null) {
+			errors.add("SMILES string not valid.");
+			return errors;
+		}
+		IAtomContainer stdMol = null;
+		try {
+			stdMol = structureStandardizer.process(mol);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			MessageDialog.showErrorMsg(e.getMessage(), this.getContentPane());
+			errors.add(e.getMessage());
+			return errors;
+		}
+		if(stdMol != null) {
 	
+			smiles = (String)stdMol.getProperty(Property.getSMILESInstance());
+			if(structureStandardizer.isGenerateInChI()) {
+				msReadyStructuralDescriptorsPanel.setInchiKey(
+						(String)stdMol.getProperty(Property.opentox_InChIKey));
+			}
+			else {
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(stdMol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						System.out.println("InChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						System.out.println("InChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					msReadyStructuralDescriptorsPanel.setInchiKey(inChIGenerator.getInchiKey());
+				} 
+				catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			IMolecularFormula molFormula = 
+					MolecularFormulaManipulator.getMolecularFormula(stdMol);			
+			String mfFromFStringFromSmiles = 
+					MolecularFormulaManipulator.getString(molFormula);	
+			double smilesMass = MolecularFormulaManipulator.getMass(
+							molFormula, MolecularFormulaManipulator.MonoIsotopic);	
+			
+			msReadyStructuralDescriptorsPanel.setSmiles(smiles);
+			msReadyStructuralDescriptorsPanel.setFormula(mfFromFStringFromSmiles);
+			msReadyStructuralDescriptorsPanel.setCharge(molFormula.getCharge());
+			msReadyStructuralDescriptorsPanel.setMass(smilesMass);			
+			msReadyMolStructurePanel.showStructure(stdMol);
+		}
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\\n"), this.getContentPane());
+		}
+		return errors;
+	}
+
 	private void editCompoundStandardizerSettings() {
 
 		compoundStandardizerSettingsDialog = new CompoundStandardizerSettingsDialog(this);
@@ -262,8 +378,10 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	}
 
 	private void saveCompoundStandardizerSettings() {
-		// TODO Auto-generated method stub
 		
+		structureStandardizer = 
+				compoundStandardizerSettingsDialog.getConfiguredStructureStandardizer();
+		compoundStandardizerSettingsDialog.savePreferences();
 		compoundStandardizerSettingsDialog.dispose();
 	}
 
@@ -278,6 +396,23 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		// TODO Auto-generated method stub
 		
 		tautomerGeneratorSettingsDialog.dispose();
+	}
+	
+	
+	private void editZwitterIonGeneratorSettings() {
+		// TODO Auto-generated method stub
+		
+		zwitterIonSettingsDialog = new ZwitterIonSettingsDialog(this);
+		zwitterIonSettingsDialog.setLocationRelativeTo(this.getContentPane());
+		zwitterIonSettingsDialog.setVisible(true);
+	}
+
+	private void saveZwitterIonGeneratorSettings() {
+		// TODO Auto-generated method stub
+		
+		zwitterionManager =  zwitterIonSettingsDialog.getConfiguredZwitterionManager();
+		zwitterIonSettingsDialog.savePreferences();
+		zwitterIonSettingsDialog.dispose();
 	}
 
 	private void clearPanel() {
@@ -623,9 +758,10 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		
 		Collection<String>errors = new ArrayList<String>();
 		String smiles = msReadyStructuralDescriptorsPanel.getSmiles();
-		if(smiles.isEmpty())
+		if(smiles.isEmpty()) {
 			errors.add("Please enter SMILES string for MS-ready form");
-		
+			return errors;
+		}
 		IAtomContainer mol = msReadyMolStructurePanel.showStructure(smiles);	
 		if(mol == null) {
 			errors.add("SMILES string not valid.");

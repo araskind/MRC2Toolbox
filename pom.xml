@@ -532,6 +532,10 @@ public final class BuildInformation {
         </exclusion>
 		  </exclusions>
 		</dependency>
-		
+		<dependency>
+		  <groupId>io.github.dan2097</groupId>
+		  <artifactId>jna-inchi-all</artifactId>
+		  <version>1.2</version>
+		</dependency>		
 	</dependencies>
 </project>

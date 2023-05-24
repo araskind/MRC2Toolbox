@@ -942,6 +942,9 @@ public enum MainActionCommands {
 	SHOW_COMPOUND_DATABASE_CURATOR("Show compound database curator"),
 	SHOW_MS_READY_COMPOUND_CURATOR("Show MS-ready compound curator"),
 	FETCH_COMPOUND_DATA_FOR_CURATION("Fetch compound data for curation"),
+	STANDARDIZE_STRUCTURE("Standardize structure"),
+	GENERATE_TAUTOMERS("Generate tautomers"),
+	GENERATE_ZWITTER_IONSS("Generate zwitter-ions"),
 	VALIDATE_MS_READY_STRUCTURE("Validate MS-ready structure"),	
 	EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND("Edit compound MS-ready structure"),
 	SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND("Save compound MS-ready structure"),
@@ -1244,6 +1247,10 @@ public enum MainActionCommands {
 	
 	EDIT_TAUTOMER_GENERATOR_SETTINGS_COMMAND("Edit Tautomer Generator settings"),
 	SAVE_TAUTOMER_GENERATOR_SETTINGS_COMMAND("Save Tautomer Generator settings"),
+	
+	EDIT_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND("Edit zwitter-ion Generator settings"),
+	SAVE_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND("Save zwitter-ion Generator settings"),
+
 	;
 
 	private final String name;

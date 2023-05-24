@@ -46,12 +46,14 @@ public class CompoundMsReadyCuratorToolbar extends CommonToolbar {
 	private static final Icon simpleDataPullIcon = GuiUtils.getIcon("downloadDocument", 32);
 	private static final Icon cpdStdIcon = GuiUtils.getIcon("standardCompound", 32);
 	private static final Icon tautomerIcon = GuiUtils.getIcon("tautomerSettings", 32);
+	private static final Icon zwitterIcon = GuiUtils.getIcon("gln-zwitter", 32);
 	
 	@SuppressWarnings("unused")
 	private JButton
 		simpleDataPullButton,
 		editCompoundStandardizerSettingsButton,
-		editTautomerGeneratorSettingsButton;
+		editTautomerGeneratorSettingsButton,
+		editZwitterIonGeneratorSettingsButton;
 
 	private JComboBox<CompoundDatabaseEnum> dbTypecomboBox;
 
@@ -92,6 +94,11 @@ public class CompoundMsReadyCuratorToolbar extends CommonToolbar {
 		editTautomerGeneratorSettingsButton = GuiUtils.addButton(this, null, tautomerIcon, commandListener,
 				MainActionCommands.EDIT_TAUTOMER_GENERATOR_SETTINGS_COMMAND.getName(),
 				MainActionCommands.EDIT_TAUTOMER_GENERATOR_SETTINGS_COMMAND.getName(),
+				buttonDimension);
+		
+		editZwitterIonGeneratorSettingsButton = GuiUtils.addButton(this, null, zwitterIcon, commandListener,
+				MainActionCommands.EDIT_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND.getName(),
+				MainActionCommands.EDIT_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND.getName(),
 				buttonDimension);
 	}
 	
