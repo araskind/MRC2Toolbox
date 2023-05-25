@@ -171,17 +171,16 @@ public class CompoundStructuralDescriptorsPanel extends JPanel implements Action
 		gbc_copySmilesButton.gridy = 5;
 		add(copySmilesButton, gbc_copySmilesButton);
 		
-		if(enablePaste) {
-			pasteSmilesButton = new JButton(MainActionCommands.PASTE_SMILES_COMMAND.getName());
-			pasteSmilesButton.setActionCommand(MainActionCommands.PASTE_SMILES_COMMAND.getName());
-			pasteSmilesButton.addActionListener(this);
-			GridBagConstraints gbc_pasteSmilesButton = new GridBagConstraints();
-			gbc_pasteSmilesButton.insets = new Insets(0, 0, 0, 5);
-			gbc_pasteSmilesButton.fill = GridBagConstraints.HORIZONTAL;
-			gbc_pasteSmilesButton.gridx = 1;
-			gbc_pasteSmilesButton.gridy = 5;
-			add(pasteSmilesButton, gbc_pasteSmilesButton);
-		}
+		pasteSmilesButton = new JButton(MainActionCommands.PASTE_SMILES_COMMAND.getName());
+		pasteSmilesButton.setActionCommand(MainActionCommands.PASTE_SMILES_COMMAND.getName());
+		pasteSmilesButton.addActionListener(this);
+		GridBagConstraints gbc_pasteSmilesButton = new GridBagConstraints();
+		gbc_pasteSmilesButton.insets = new Insets(0, 0, 0, 5);
+		gbc_pasteSmilesButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_pasteSmilesButton.gridx = 1;
+		gbc_pasteSmilesButton.gridy = 5;
+		add(pasteSmilesButton, gbc_pasteSmilesButton);
+		pasteSmilesButton.setEnabled(enablePaste);
 	}
 	
 	public String getFormula() {

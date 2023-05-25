@@ -80,7 +80,8 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 	public static final String MAX_NUM_OF_BACKTRACKS = "MAX_NUM_OF_BACKTRACKS";
 	public static final String MAX_NUM_OF_TAUTOMER_REGISTRATIONS = "MAX_NUM_OF_TAUTOMER_REGISTRATIONS";
 	public static final String MAX_NUM_OF_SUBCOMBINATIONS = "MAX_NUM_OF_SUBCOMBINATIONS";
-	
+	public static final String CALCULATE_CACTVS_ENERGY_RANK = "CALCULATE_CACTVS_ENERGY_RANK";
+		
 	private JComboBox<TautomerGenerationAlgorithm> tautomerGenerationAlgorithmComboBox;
 	private JCheckBox use13ruleOnlyCheckBox;
 	private JCheckBox use15ruleCheckBox;
@@ -88,6 +89,7 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 	private JCheckBox use19ruleCheckBox;
 	private JCheckBox useRingChainRulesCheckBox;
 	private JCheckBox useChlorineRulesCheckBox;
+	private JCheckBox calculateCACTVSEnergyRankCheckBox;
 	private JSpinner maxNumOfBackTracksSpinner;
 	private JSpinner maxNumOfTautomerRegistrationsSpinner;
 	private JSpinner maxNumOfSubCombinationsSpinner;
@@ -107,9 +109,9 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 		getContentPane().add(panel_1, BorderLayout.CENTER);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
 		gbl_panel_1.columnWidths = new int[]{0, 0, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel_1.columnWeights = new double[]{0.0, 1.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
 		JLabel lblNewLabel = new JLabel("Tautomer generation algorithm");
@@ -223,7 +225,7 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 		JLabel lblNewLabel_2 = new JLabel("Max number of sub-combinations");
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_2.gridx = 0;
 		gbc_lblNewLabel_2.gridy = 9;
 		panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
@@ -232,10 +234,19 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 		maxNumOfSubCombinationsSpinner.setModel(new SpinnerNumberModel(10000, 1, 20000, 1));
 		maxNumOfSubCombinationsSpinner.setPreferredSize(new Dimension(80, 20));
 		GridBagConstraints gbc_maxNumOfSubCombinationsSpinner = new GridBagConstraints();
+		gbc_maxNumOfSubCombinationsSpinner.insets = new Insets(0, 0, 5, 0);
 		gbc_maxNumOfSubCombinationsSpinner.anchor = GridBagConstraints.WEST;
 		gbc_maxNumOfSubCombinationsSpinner.gridx = 1;
 		gbc_maxNumOfSubCombinationsSpinner.gridy = 9;
 		panel_1.add(maxNumOfSubCombinationsSpinner, gbc_maxNumOfSubCombinationsSpinner);
+		
+		calculateCACTVSEnergyRankCheckBox = new JCheckBox("Calculate CACTVS Energy Rank");
+		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
+		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_chckbxNewCheckBox.insets = new Insets(0, 0, 0, 5);
+		gbc_chckbxNewCheckBox.gridx = 0;
+		gbc_chckbxNewCheckBox.gridy = 10;
+		panel_1.add(calculateCACTVSEnergyRankCheckBox, gbc_chckbxNewCheckBox);
 		
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -304,7 +315,8 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 		
 		maxNumOfBackTracksSpinner.setValue(preferences.getInt(MAX_NUM_OF_BACKTRACKS, 5000));
 		maxNumOfTautomerRegistrationsSpinner.setValue(preferences.getInt(MAX_NUM_OF_TAUTOMER_REGISTRATIONS, 1000));
-		maxNumOfSubCombinationsSpinner.setValue(preferences.getInt(MAX_NUM_OF_SUBCOMBINATIONS, 10000));		
+		maxNumOfSubCombinationsSpinner.setValue(preferences.getInt(MAX_NUM_OF_SUBCOMBINATIONS, 10000));	
+		calculateCACTVSEnergyRankCheckBox.setSelected(preferences.getBoolean(CALCULATE_CACTVS_ENERGY_RANK, false));
 	}
 
 	@Override
@@ -328,6 +340,7 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 		preferences.putBoolean(USE_19_SHIFTS, use19ruleCheckBox.isSelected());
 		preferences.putBoolean(USE_RING_CHAIN_RULES, useRingChainRulesCheckBox.isSelected());
 		preferences.putBoolean(USE_CHLORINE_RULES, useChlorineRulesCheckBox.isSelected());
+		preferences.putBoolean(CALCULATE_CACTVS_ENERGY_RANK, calculateCACTVSEnergyRankCheckBox.isSelected());
 
 		preferences.putInt(MAX_NUM_OF_BACKTRACKS, getMaxNumOfBackTracks());
 		preferences.putInt(MAX_NUM_OF_TAUTOMER_REGISTRATIONS, getMaxNumOfTautomerRegistrations());
@@ -341,6 +354,7 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 		tautomerManager.maxNumOfBackTracks = getMaxNumOfBackTracks();
 		tautomerManager.maxNumOfTautomerRegistrations = getMaxNumOfTautomerRegistrations();
 		tautomerManager.maxNumOfSubCombinations = getMaxNumOfSubCombinations();
+		tautomerManager.FlagCalculateCACTVSEnergyRank = calculateCACTVSEnergyRankCheckBox.isSelected();
 		
 		tautomerManager.getKnowledgeBase().activateChlorineRules(useChlorineRulesCheckBox.isSelected());
 		tautomerManager.getKnowledgeBase().activateRingChainRules(useRingChainRulesCheckBox.isSelected());
@@ -348,7 +362,7 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 		tautomerManager.getKnowledgeBase().use17ShiftRules(use17ruleCheckBox.isSelected());
 		tautomerManager.getKnowledgeBase().use19ShiftRules(use19ruleCheckBox.isSelected());
 		tautomerManager.getKnowledgeBase().use13ShiftRulesOnly(use13ruleOnlyCheckBox.isSelected());
-		
+			
 		try {
 			tautomerManager.setEnergyRanking(new EnergyRanking());
 		} catch (Exception e) {

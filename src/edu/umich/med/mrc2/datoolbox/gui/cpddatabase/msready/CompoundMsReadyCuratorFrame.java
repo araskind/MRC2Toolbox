@@ -35,6 +35,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
 
@@ -69,6 +70,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import ambit2.base.data.Property;
+import ambit2.tautomers.TautomerConst.GAT;
 import ambit2.tautomers.TautomerManager;
 import ambit2.tautomers.processor.StructureStandardizer;
 import ambit2.tautomers.zwitterion.ZwitterionManager;
@@ -125,7 +127,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	private DockableCompoundStructuralDescriptorsPanel msReadyStructuralDescriptorsPanel;
 	
 	private CompoundStandardizerSettingsDialog compoundStandardizerSettingsDialog;
-	private TautomerGeneratorSettingsDialog tautomerGeneratorSettingsDialog;
+	private TautomerGeneratorSettingsDialog tautomerGeneratorSettingsDialog;	
 	private ZwitterIonSettingsDialog zwitterIonSettingsDialog;
 		
 	private static final IChemObjectBuilder bldr = SilentChemObjectBuilder.getInstance();
@@ -139,6 +141,7 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	private StructureStandardizer structureStandardizer;
 	private ZwitterionManager zwitterionManager;	
 	private TautomerManager tautomerManager;
+	private GAT tautomerGeneratorAlgorithm;
 	
 	private CompoundIdentity selectedIdentity;
 	private Map<CompoundIdentity,CompoundIdentity>curatedCompounds;
@@ -212,6 +215,11 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		zwitterIonSettingsDialog = new ZwitterIonSettingsDialog(this);
 		zwitterionManager =  zwitterIonSettingsDialog.getConfiguredZwitterionManager();
 		zwitterIonSettingsDialog.dispose();
+		
+		tautomerGeneratorSettingsDialog = new TautomerGeneratorSettingsDialog(this);
+		tautomerManager = tautomerGeneratorSettingsDialog.getConfiguredTautomerManager();
+		tautomerGeneratorAlgorithm = tautomerGeneratorSettingsDialog.getAlgorithm();
+		tautomerGeneratorSettingsDialog.dispose();
 		
 		JPanel panel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
@@ -300,9 +308,67 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		
 	}
 
-	private void generateTautomers() {
-		// TODO Auto-generated method stub
+	private Collection<String> generateTautomers() {
+
+		Collection<String>errors = new ArrayList<String>();
+		String smiles = msReadyStructuralDescriptorsPanel.getSmiles();
+		if(smiles.isEmpty()) {
+			errors.add("Please enter SMILES string for MS-ready form");
+			return errors;
+		}
+		IAtomContainer mol = msReadyMolStructurePanel.showStructure(smiles);	
+		if(mol == null) {
+			errors.add("SMILES string not valid.");
+			return errors;
+		}
+		List<IAtomContainer> res = new ArrayList<IAtomContainer>();
 		
+
+		try {
+			tautomerManager.setStructure(mol);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			switch (tautomerGeneratorAlgorithm) {
+				case Comb_Pure:
+					res = tautomerManager.generateTautomers();
+					break;
+
+				case Comb_Improved:
+					res = tautomerManager.generateTautomers_ImprovedCombApproach();
+					break;
+
+				case Incremental:
+					res = tautomerManager.generateTautomersIncrementaly();
+					break;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(res.isEmpty() || res.size() == 1) {
+			MessageDialog.showWarningMsg("No tautomers detected", this.getContentPane());
+			return errors;
+		}
+		if(res.size() > 1) {
+			
+			int count = 1;
+			for(IAtomContainer taut : res) {
+				
+				String tautSmiles = "";
+				try {
+					tautSmiles = smilesGenerator.create(taut);
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("#" + count + ": " + tautSmiles);
+				count++;
+			}
+		}		
+		return errors;
 	}
 
 	private Collection<String> standardizeStructure() {
@@ -394,11 +460,12 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 
 	private void saveTautomerGeneratorSettings() {
 		// TODO Auto-generated method stub
-		
+		tautomerManager = tautomerGeneratorSettingsDialog.getConfiguredTautomerManager();
+		tautomerGeneratorAlgorithm = tautomerGeneratorSettingsDialog.getAlgorithm();
+		tautomerGeneratorSettingsDialog.savePreferences();
 		tautomerGeneratorSettingsDialog.dispose();
 	}
-	
-	
+		
 	private void editZwitterIonGeneratorSettings() {
 		// TODO Auto-generated method stub
 		
