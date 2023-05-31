@@ -199,9 +199,9 @@ public class IDTrackerDataPullTask extends AbstractTask {
 			IDTDataCache.refreshMSMSExtractionParameters();
 			processed = processed + 3;
 			
-			taskDescription = "Refreshing fetaure collection data ";
-			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
-			processed = processed + 3;
+//			taskDescription = "Refreshing fetaure collection data ";
+//			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
+//			processed = processed + 3;
 			
 			taskDescription = "Refreshing featue lookup data sets ";
 			FeatureLookupDataSetManager.refreshFeatureLookupDataSetList();

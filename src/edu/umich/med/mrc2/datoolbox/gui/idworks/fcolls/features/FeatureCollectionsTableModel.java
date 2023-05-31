@@ -77,7 +77,7 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 			Object[] obj = {
 				collection,
 				collection.getDescription(),
-				FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(collection),
+				collection.getCollectionSize(), //  FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(collection),
 				collection.getOwner(),
 				collection.getDateCreated(),
 				collection.getLastModified(),

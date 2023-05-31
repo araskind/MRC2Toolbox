@@ -317,6 +317,8 @@ public enum MainActionCommands {
 	EDIT_CLUSTER_COMMAND("Edit cluster"),
 	CREATE_XIC_METHOD_COMMAND("Create XIC method for selected cluster"),
 	CREATE_XIC_METHOD_SET_COMMAND("Create Qual XIC methods for all clusters"),
+	SHOW_DATA_CLEANUP_DIALOG_COMMAND("Show data cleanup dialog"),
+	CLEANUP_FEATURE_DATA_COMMAND("Cleanup feature data"),
 
 	// Correlations
 	SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND("Correlation analysis setup"),
@@ -399,11 +401,13 @@ public enum MainActionCommands {
 	// Feature statistics panel commands
 	CALC_FEATURES_STATS_COMMAND("Calculate features stats"),
 	CLEAN_EMPTY_FEATURES_COMMAND("Remove features with no data"),
-	SHOW_KNOWN_FEATURES_COMMAND(	"Show known features only"),
-	SHOW_UNKNOWN_FEATURES_COMMAND(	"Show unknown features only"),
-	SHOW_QC_FEATURES_COMMAND(	"Show quality control features only"),
+	SHOW_KNOWN_FEATURES_COMMAND("Show known features only"),
+	SHOW_UNKNOWN_FEATURES_COMMAND("Show unknown features only"),
+	SHOW_QC_FEATURES_COMMAND("Show quality control features only"),
+	RESET_FEATURE_FILTERS_COMMAND("Reset feature filters"),
 	SHOW_FEATURES_ASSIGNED_TO_CLUSTERS_COMMAND(	"Show features assigned to clusters"),
-	SHOW_FEATURES_NOT_ASSIGNED_TO_CLUSTERS_COMMAND(	"Show features NOT assigned to clusters or assigned to single-feature clusters"),
+	SHOW_FEATURES_NOT_ASSIGNED_TO_CLUSTERS_COMMAND(	
+			"Show features NOT assigned to clusters or assigned to single-feature clusters"),
 	SHOW_IMPUTE_DIALOG_COMMAND(	"Show data imputation dialog"),
 	SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND("Library search setup"),
 	SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND("Databse search setup"),

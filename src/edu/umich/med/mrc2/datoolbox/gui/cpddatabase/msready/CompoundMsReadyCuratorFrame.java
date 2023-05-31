@@ -303,9 +303,53 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 	}
 
 
-	private void generateZwitterIons() {
-		// TODO Auto-generated method stub
-		
+	private Collection<String> generateZwitterIons() {
+
+		Collection<String>errors = new ArrayList<String>();
+		String smiles = msReadyStructuralDescriptorsPanel.getSmiles();
+		if(smiles.isEmpty()) {
+			errors.add("Please enter SMILES string for MS-ready form");
+			return errors;
+		}
+		IAtomContainer mol = msReadyMolStructurePanel.showStructure(smiles);	
+		if(mol == null) {
+			errors.add("SMILES string not valid.");
+			return errors;
+		}
+		List<IAtomContainer> res = new ArrayList<IAtomContainer>();
+		try {
+			zwitterionManager.setStructure(mol);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			res = zwitterionManager.generateZwitterions();		
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(res.isEmpty()) {
+			MessageDialog.showWarningMsg("No zwitter ions detected", this.getContentPane());
+			return errors;
+		}
+		if(res.size() > 0) {
+			
+			int count = 1;
+			for(IAtomContainer taut : res) {
+				
+				String tautSmiles = "";
+				try {
+					tautSmiles = smilesGenerator.create(taut);
+				} catch (CDKException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("#" + count + ": " + tautSmiles);
+				count++;
+			}
+		}		
+		return errors;	
 	}
 
 	private Collection<String> generateTautomers() {
@@ -322,8 +366,6 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 			return errors;
 		}
 		List<IAtomContainer> res = new ArrayList<IAtomContainer>();
-		
-
 		try {
 			tautomerManager.setStructure(mol);
 		} catch (Exception e) {

@@ -57,17 +57,14 @@ public class FeatureCollectionUtils {
 		Map<MsFeatureInfoBundleCollection, Set<String>>featureCollectionsMap = 
 				new HashMap<MsFeatureInfoBundleCollection, Set<String>>();
 		String query =
-				"SELECT COLLECTION_ID, COLLECTION_NAME, DESCRIPTION, "
-				+ "OWNER, DATE_CREATED, DATE_MODIFIED "
-				+ "FROM MSMS_FEATURE_COLLECTION ORDER BY COLLECTION_ID";
+				"SELECT C.COLLECTION_ID, C.COLLECTION_NAME, C.DESCRIPTION, "
+				+ "C.OWNER, C.DATE_CREATED, C.DATE_MODIFIED, COUNT(O.MS_FEATURE_ID) AS COLLECTION_SIZE "
+				+ "FROM MSMS_FEATURE_COLLECTION C, MSMS_FEATURE_COLLECTION_COMPONENT O "
+				+ "WHERE C.COLLECTION_ID = O.COLLECTION_ID "
+				+ "GROUP BY C.COLLECTION_ID, C.COLLECTION_NAME, "
+				+ "C.DESCRIPTION, C.OWNER, C.DATE_CREATED, C.DATE_MODIFIED "
+				+ "ORDER BY C.COLLECTION_ID";
 		PreparedStatement ps = conn.prepareStatement(query);
-		
-		String compQuery = 
-				"SELECT MS_FEATURE_ID FROM MSMS_FEATURE_COLLECTION_COMPONENT "
-				+ "WHERE COLLECTION_ID = ?";
-		
-		PreparedStatement compPs = conn.prepareStatement(compQuery);
-		
 		ResultSet rs = ps.executeQuery();
 		while(rs.next()) {
 			
@@ -83,19 +80,40 @@ public class FeatureCollectionUtils {
 						new Date(rs.getDate("DATE_CREATED").getTime()),
 						new Date(rs.getDate("DATE_MODIFIED").getTime()),
 						owner);
-			compPs.setString(1, newCollection.getId());
-			ResultSet compRs = compPs.executeQuery();
-			Set<String>componetFeatureIds = new TreeSet<String>();
-			while(compRs.next())
-				componetFeatureIds.add(compRs.getString("MS_FEATURE_ID"));
-			
-			compRs.close();			
-			featureCollectionsMap.put(newCollection, componetFeatureIds);
+			newCollection.setCollectionSize(rs.getInt("COLLECTION_SIZE"));
+		
+			featureCollectionsMap.put(newCollection, new TreeSet<String>());
 		}
 		rs.close();
 		ps.close();
-		compPs.close();
 		return featureCollectionsMap;
+	}
+	
+	public static Set<String>getFeatureIdsForMsFeatureInfoBundleCollection(
+			String collectionId) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		Set<String>idSet = getFeatureIdsForMsFeatureInfoBundleCollection(collectionId, conn);
+		ConnectionManager.releaseConnection(conn);
+		return idSet;
+	}
+	
+	public static Set<String>getFeatureIdsForMsFeatureInfoBundleCollection(
+			String collectionId, Connection conn) throws Exception {
+		
+		Set<String>featureIdSet = new TreeSet<String>();
+		String compQuery = 
+				"SELECT MS_FEATURE_ID FROM MSMS_FEATURE_COLLECTION_COMPONENT "
+				+ "WHERE COLLECTION_ID = ?";
+		
+		PreparedStatement compPs = conn.prepareStatement(compQuery);
+		compPs.setString(1, collectionId);
+		ResultSet compRs = compPs.executeQuery();
+		while(compRs.next())
+			featureIdSet.add(compRs.getString("MS_FEATURE_ID"));
+		
+		compRs.close();	
+		return featureIdSet;
 	}
 	
 	public static String addNewMsFeatureInformationBundleCollection(

@@ -86,7 +86,7 @@ public class ZwitterIonSettingsDialog extends JDialog implements BackedByPrefere
 
 	public ZwitterIonSettingsDialog(ActionListener listener) {
 		super();
-		setTitle("Compound Standardizer Settings");
+		setTitle("Zwitter-ion Generator Settings");
 		setIconImage(((ImageIcon) dialogIcon).getImage());
 		setPreferredSize(new Dimension(350, 400));
 		setSize(new Dimension(640, 480));

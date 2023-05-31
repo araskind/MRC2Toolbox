@@ -78,6 +78,7 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon exportMwTabIcon = GuiUtils.getIcon("mwTabReport", 24);
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);	
 	private static final Icon exportMzRtStatsIcon = GuiUtils.getIcon("exportMZRT", 24);
+	private static final Icon featureCleanupIcon = GuiUtils.getIcon("clearAnnotation", 24);
 		
 	// Menus
 	private JMenu
@@ -107,7 +108,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		resetFilterMenuItem,
 		showOnlyKnownsMenuItem,
 		showOnlyUnknownsMenuItem,
-		showQcStandardsMenuItem;
+		showQcStandardsMenuItem,
+		dataCleanupMenuItem;
 	
 	// Identification items
 	private JMenuItem
@@ -198,8 +200,14 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		searchMenu.addSeparator();
 		
 		resetFilterMenuItem = addItem(searchMenu, 
-				MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND, 
+				MainActionCommands.RESET_FEATURE_FILTERS_COMMAND, 
 				resetFilterIcon);
+		
+		searchMenu.addSeparator();
+		
+		dataCleanupMenuItem = addItem(searchMenu, 
+				MainActionCommands.SHOW_DATA_CLEANUP_DIALOG_COMMAND, 
+				featureCleanupIcon);
 		
 		add(searchMenu);
 		

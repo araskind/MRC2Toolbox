@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
@@ -177,6 +178,12 @@ public class ReferenceSamplesManager {
 			}
 		}
 		return referenceSamples;
+	}
+	
+	public static Collection<ExperimentalSample>getReferencePoolSamples(){
+		
+		return getReferenceSamples().stream().
+				filter(s -> s.isIncloodeInPoolStats()).collect(Collectors.toList());
 	}
 
 	public static boolean isReferenceSample(ExperimentalSample sample) {

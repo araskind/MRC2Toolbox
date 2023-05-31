@@ -106,6 +106,19 @@ public class FeatureCollectionManager {
 			return null;
 		
 		Set<String> idList = featureCollectionsMSIDMap.get(mbColl);
+		if(idList == null || idList.isEmpty()) {
+			try {
+				idList = 
+					FeatureCollectionUtils.getFeatureIdsForMsFeatureInfoBundleCollection(
+							mbColl.getId());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if(idList == null || idList.isEmpty())
+			return null;
+		
 		Collection<String> attachedIdList = mbColl.getMSMSFeatureIds();
 		Set<String> unAttachedIdList = idList.stream().
 				filter(i -> !attachedIdList.contains(i)).collect(Collectors.toSet());

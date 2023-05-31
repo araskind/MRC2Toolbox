@@ -143,6 +143,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private DataExportDialog exportDialog;
 	private MWTabExportDialog mwTabExportDialog;
 	private IntegratedReportDialog integratedReportDialog;
+	private FeatureDataCleanupDialog featureDataCleanupDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -382,7 +383,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			if (command.equals(MainActionCommands.FILTER_FEATURES_COMMAND.getName()))
 				filterFeatureTable();
 
-			if (command.equals(MainActionCommands.RESET_FILTER_CLUSTERS_COMMAND.getName()))
+			if (command.equals(MainActionCommands.RESET_FEATURE_FILTERS_COMMAND.getName()))
 				resetFeatureTable();
 
 			if (command.equals(MainActionCommands.SHOW_KNOWN_FEATURES_COMMAND.getName()))
@@ -463,10 +464,30 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				showMwTabReportDialog();
 			
 			if (command.equals(MainActionCommands.EXPORT_RESULTS_TO_EXCEL_COMMAND.getName()))
-				showIntegratedReportDialog();			
+				showIntegratedReportDialog();
+			
+			if (command.equals(MainActionCommands.SHOW_DATA_CLEANUP_DIALOG_COMMAND.getName()))
+				showDataCleanupDialog();
+			
+			if (command.equals(MainActionCommands.CLEANUP_FEATURE_DATA_COMMAND.getName()))
+				cleanupFeatureData();		
 		}	
 	}
+
+	private void showDataCleanupDialog() {
+		// TODO Auto-generated method stub
+		featureDataCleanupDialog = new FeatureDataCleanupDialog(this);
+		featureDataCleanupDialog.setLocationRelativeTo(this.getContentPane());
+		featureDataCleanupDialog.setVisible(true);
+	}
 	
+	private void cleanupFeatureData() {
+		// TODO Auto-generated method stub
+		
+		
+		featureDataCleanupDialog.dispose();
+	}
+
 	private void showIntegratedReportDialog() {
 		
 		currentExperiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();

@@ -61,6 +61,7 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	private Collection<MSFeatureInfoBundle>features;
 	private Collection<String>featureIds;
 	private TreeSet<ObjectAnnotation> annotations;
+	private int collectionSize;
 	
 	public MsFeatureInfoBundleCollection(String name) {
 		super();
@@ -104,8 +105,10 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 		
 		if(!features.isEmpty())
 			return features.size();
-		else
+		else if(featureIds != null && !featureIds.isEmpty())
 			return featureIds.size();
+		else
+			return collectionSize;
 	}
 	
 	public int getLoadedMSMSFeatureCount() {
@@ -326,6 +329,10 @@ public class MsFeatureInfoBundleCollection implements Serializable {
 	
 	public boolean isEmpty() {
 		return features.isEmpty();
+	}
+
+	public void setCollectionSize(int collectionSize) {
+		this.collectionSize = collectionSize;
 	}
 }
 

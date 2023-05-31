@@ -1500,6 +1500,7 @@ public class MainWindow extends JFrame
 			currentExperiment.getExperimentDesign().getDesignSubsets().
 				forEach(ss -> ss.addListener(entry.getValue()));			
 		}
+		showPanel(PanelList.FEATURE_DATA);
 	}
 
 	public static DbParserFrame getDbParserFrame() {
