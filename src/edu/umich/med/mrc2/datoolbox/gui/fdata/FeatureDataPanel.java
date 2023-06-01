@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +47,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ujmp.core.Matrix;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
@@ -59,6 +62,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataImputationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureFilter;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.DockableObjectAnnotationPanel;
@@ -70,6 +74,8 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.DatabaseSearchSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.datexp.DataExplorerPlotFrame;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.duplicates.DuplicateMergeDialog;
+import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
+import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureDataCleanupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.noid.MissingIdentificationsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableIdentificationResultsTable;
@@ -89,7 +95,9 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DockableDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ms.DockableMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
+import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -129,7 +137,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private DuplicateMergeDialog duplicateMergeDialog;
 	private MissingIdentificationsDialog missingIdentificationsDialog;
 
-	private MsFeatureSet activeSet;
+	private MsFeatureSet activeMsFeatureSet;
 	private Map<DataPipeline, Collection<MsFeature>> selectedFeaturesMap;
 	private Collection<CompoundLibrary> libsToLoad;
 	private Collection<CompoundLibrary> missingLookupLibs;
@@ -220,7 +228,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		dataImputationSetupDialog = new DataImputationSetupDialog(this);
 		duplicateMergeDialog = new DuplicateMergeDialog(this);
 		selectedFeaturesMap = new TreeMap<DataPipeline, Collection<MsFeature>>();
-		activeSet = null;
+		activeMsFeatureSet = null;
 		activeFeatureFilter = FeatureFilter.ALL_FEATURES;
 	}
 
@@ -467,25 +475,153 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				showIntegratedReportDialog();
 			
 			if (command.equals(MainActionCommands.SHOW_DATA_CLEANUP_DIALOG_COMMAND.getName()))
-				showDataCleanupDialog();
+				showFeatureSetCleanupDialog();
 			
 			if (command.equals(MainActionCommands.CLEANUP_FEATURE_DATA_COMMAND.getName()))
-				cleanupFeatureData();		
+				cleanUpFeatureSet();		
 		}	
 	}
 
-	private void showDataCleanupDialog() {
-		// TODO Auto-generated method stub
-		featureDataCleanupDialog = new FeatureDataCleanupDialog(this);
+	private void showFeatureSetCleanupDialog() {
+
+		if(activeMsFeatureSet == null || activeMsFeatureSet.getFeatures().isEmpty() 
+				|| activeDataPipeline == null)
+			return;
+		
+		featureDataCleanupDialog = new FeatureDataCleanupDialog(this, activeMsFeatureSet);
 		featureDataCleanupDialog.setLocationRelativeTo(this.getContentPane());
 		featureDataCleanupDialog.setVisible(true);
 	}
 	
-	private void cleanupFeatureData() {
-		// TODO Auto-generated method stub
-		
+	private void cleanUpFeatureSet() {
+
+		Collection<String> errors = featureDataCleanupDialog.validateParameters();
+		if(!errors.isEmpty()) {
+			
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), featureDataCleanupDialog);
+			return;
+		}			
+		CleanUpFeatureSetTask task = new CleanUpFeatureSetTask(
+				featureDataCleanupDialog.getFeatureCleanupParameters(),
+				featureDataCleanupDialog.getActiveMsFeatureSet(),
+				featureDataCleanupDialog.getFilteredFeatureSetName());
 		
 		featureDataCleanupDialog.dispose();
+		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+				"Cleaning up active feature set set ...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
+	class CleanUpFeatureSetTask extends LongUpdateTask {
+		
+		private FeatureCleanupParameters fcp;
+		private MsFeatureSet inputMsFeatureSet;
+		private MsFeatureSet cleanMsFeatureSet;
+		private String newFeatureSetName;
+				
+		public CleanUpFeatureSetTask(
+				FeatureCleanupParameters fcp, 
+				MsFeatureSet inputMsFeatureSet,
+				String newFeatureSetName) {
+			super();
+			this.fcp = fcp;
+			this.inputMsFeatureSet = inputMsFeatureSet;
+			this.newFeatureSetName = newFeatureSetName;
+		}
+		
+		@Override
+		public Void doInBackground() {
+
+			Collection<MsFeature> cleaned = new HashSet<MsFeature>();	
+			cleaned.addAll(inputMsFeatureSet.getFeatures());
+			// Filter features
+			try {
+				//	By pooled frequency
+				if(fcp.isFilterByPooledFrequency())					
+					cleaned = filterByPooledRepresentation(cleaned);
+													
+				//	By mass defect
+				if(fcp.isFilterByMassDefect()) {
+					
+					final double mdRtCutof = fcp.getMassDefectFilterRTCutoff();
+					final double mdMassCutof = fcp.getMdFilterMassDefectValue();
+					Collection<MsFeature>hm = 
+							cleaned.stream().
+							filter(f -> f.getRetentionTime() < mdRtCutof).
+							filter(f -> f.getAbsoluteMassDefectForPrimaryAdduct() > mdMassCutof).
+							collect(Collectors.toSet());					
+					if(!hm.isEmpty())
+						cleaned.removeAll(hm);
+				}				
+				//	By high mass
+				if(fcp.isFilterHighMassBelowRT()) {
+					
+					final double hmRtCutof = fcp.getHighMassFilterRTCutoff();
+					final double hmMassCutof = fcp.getHighMassFilterMassValue();
+					Collection<MsFeature>hm = 
+							cleaned.stream().
+							filter(f -> f.getRetentionTime() < hmRtCutof).
+							filter(f -> f.getSpectrum().getPrimaryAdductBasePeakMz() > hmMassCutof).
+							collect(Collectors.toSet());					
+					if(!hm.isEmpty())
+						cleaned.removeAll(hm);
+				}
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+			cleanMsFeatureSet = new MsFeatureSet(newFeatureSetName, cleaned);
+			return null;
+		}
+		
+	    @Override
+	    public void done() {
+	    	
+	    	super.done();
+	    	if(cleanMsFeatureSet.getFeatures().isEmpty()) {
+	    		MessageDialog.showWarningMsg("All features were removd by filtering!");
+	    		return;
+	    	}
+	    	else {
+	    		MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
+	    			addFeatureSetForDataPipeline(cleanMsFeatureSet, activeDataPipeline);
+				setTableModelFromFeatureSet(cleanMsFeatureSet);
+	    	}
+	    }
+	    
+	    private Collection<MsFeature>filterByPooledRepresentation(Collection<MsFeature> input){
+	    	
+	    	Collection<MsFeature>filtered = new HashSet<MsFeature>();
+			HashMap<DataFile,Long>fileCoordinates = new HashMap<DataFile,Long>();
+			Matrix assayData = currentExperiment.getDataMatrixForDataPipeline(activeDataPipeline);
+			final DataAcquisitionMethod method = activeDataPipeline.getAcquisitionMethod();
+			Set<DataFile> pooledDataFiles = fcp.getSelectedPooledSamples().stream().
+					flatMap(s -> s.getDataFilesForMethod(method).stream()).
+					collect(Collectors.toSet());
+			
+			int totalPoolCount = pooledDataFiles.size();
+			double repCutoff = (double)fcp.getPooledFrequencyCutoff() / 100.0d;
+			long[] dataCoordinates = new long[2];
+			for (DataFile df : pooledDataFiles) 
+				fileCoordinates.put(df, assayData.getRowForLabel(df));
+						
+			for (MsFeature cf : input) {
+
+				int hitCount = 0;
+				dataCoordinates[1] = assayData.getColumnForLabel(cf);
+				for (DataFile df : pooledDataFiles) {
+
+					dataCoordinates[0] = fileCoordinates.get(df);
+					if(assayData.getAsDouble(dataCoordinates) > 0)
+						hitCount++;					
+				}
+				if((double)hitCount / (double)totalPoolCount > repCutoff)
+					filtered.add(cf);
+			}			
+			return filtered;			
+	    }
 	}
 
 	private void showIntegratedReportDialog() {
@@ -1043,9 +1179,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 	private void removeSelectedFeaturesFromActiveSubset() {
 
-		if (activeSet.isLocked()) {
+		if (activeMsFeatureSet.isLocked()) {
 
-			MessageDialog.showWarningMsg("Data set \"" + activeSet.getName() + 
+			MessageDialog.showWarningMsg("Data set \"" + activeMsFeatureSet.getName() + 
 							"\" is locked and can not be modified", 
 							this.getContentPane());
 			return;
@@ -1059,7 +1195,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 					this.getContentPane());
 
 			if (approve == JOptionPane.YES_OPTION)
-				activeSet.removeFeatures(selected);
+				activeMsFeatureSet.removeFeatures(selected);
 		}
 	}
 
@@ -1095,16 +1231,16 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 	public void setTableModelFromFeatureSet(MsFeatureSet activeFeatureSetForMethod) {
 		
-		if(activeFeatureSetForMethod.equals(activeSet))
+		if(activeFeatureSetForMethod.equals(activeMsFeatureSet))
 			return;
 		
 		featureDataTable.clearTable();
-		if(activeSet != null)
-			activeSet.removeListener(this);
+		if(activeMsFeatureSet != null)
+			activeMsFeatureSet.removeListener(this);
 
-		activeSet = activeFeatureSetForMethod;
-		activeSet.addListener(this);
-		setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, activeSet.getFeatures()));
+		activeMsFeatureSet = activeFeatureSetForMethod;
+		activeMsFeatureSet.addListener(this);
+		setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, activeMsFeatureSet.getFeatures()));
 	}
 
 	public void showFeatureData(MsFeature selectedFeature) {
@@ -1221,8 +1357,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		ParameterSetStatus status = e.getStatus();
 		if (status.equals(ParameterSetStatus.CHANGED)) {
 		
-			if(activeSet != null) {
-				if(activeSet.equals(source)) {
+			if(activeMsFeatureSet != null) {
+				if(activeMsFeatureSet.equals(source)) {
 					clearPanel();
 					setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, source.getFeatures()));
 				}
@@ -1231,30 +1367,30 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		if (status.equals(ParameterSetStatus.CREATED)) {
 
 			clearPanel();
-			activeSet = source;
+			activeMsFeatureSet = source;
 			setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, source.getFeatures()));
 		}
 		if (status.equals(ParameterSetStatus.DELETED)) {
 
-			if(activeSet != null) {
-				if(activeSet.equals(source))
+			if(activeMsFeatureSet != null) {
+				if(activeMsFeatureSet.equals(source))
 					clearPanel();
 			}			
 		}
 		if (status.equals(ParameterSetStatus.ENABLED)) {
 		
-			if(!activeSet.equals(source)) {
+			if(!activeMsFeatureSet.equals(source)) {
 				
 				clearPanel();
-				activeSet = source;
+				activeMsFeatureSet = source;
 				setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, source.getFeatures()));
 			}
 
 		}
 		if (status.equals(ParameterSetStatus.DISABLED)) {
 			
-			if(activeSet != null) {
-				if(activeSet.equals(source))
+			if(activeMsFeatureSet != null) {
+				if(activeMsFeatureSet.equals(source))
 					clearPanel();
 			}	
 		}

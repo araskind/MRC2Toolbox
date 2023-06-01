@@ -1020,6 +1020,19 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	public void setHeight(double height) {
 		this.height = height;
 	}
+	
+	public double getAbsoluteMassDefectForPrimaryAdduct() {
+		
+		if(spectrum.getPrimaryAdduct() == null)
+			return 0.0d;
+		
+		double neutralMass = MsUtils.getNeutralMassForAdduct(
+				spectrum.getPrimaryAdductBasePeakMz(), spectrum.getPrimaryAdduct());
+		
+		//	return Math.abs(neutralMass - (double)Math.round(neutralMass));
+		
+		return neutralMass % 1;
+	}
 }
 
 

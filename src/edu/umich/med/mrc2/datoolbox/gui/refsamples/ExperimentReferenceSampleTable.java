@@ -87,7 +87,7 @@ public class ExperimentReferenceSampleTable extends BasicTable {
 
 			ExperimentalSample currentSample =
 					(ExperimentalSample)model.getValueAt(convertRowIndexToModel(i), idColumn);
-			if(toSelect.contains(toSelect))
+			if(toSelect.contains(currentSample))
 				addRowSelectionInterval(i, i);		
 		}
 	}

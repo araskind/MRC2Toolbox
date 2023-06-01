@@ -27,8 +27,10 @@ import java.util.List;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.MoTrPACQCSampleType;
+import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 
 public class ExperimentReferenceSampleTableModel extends BasicTableModel {
@@ -61,6 +63,8 @@ public class ExperimentReferenceSampleTableModel extends BasicTableModel {
 		if(design == null || design.getSamples().isEmpty())
 			return;
 		
+		DataAcquisitionMethod method = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
+				getActiveDataPipeline().getAcquisitionMethod();
 		List<Object[]>rowData = new ArrayList<Object[]>();
 		for(ExperimentalSample sample : ReferenceSamplesManager.getReferenceSamples()) {
 			
@@ -68,10 +72,10 @@ public class ExperimentReferenceSampleTableModel extends BasicTableModel {
 			if(refSample != null) {
 				
 				Object[] obj = {
-						sample,
-						sample.getName(),
-						sample.getMoTrPACQCSampleType(),
-						sample.getDataFiles().length,
+						refSample,
+						refSample.getName(),
+						refSample.getMoTrPACQCSampleType(),
+						refSample.getDataFilesForMethod(method).size(),
 					};
 				rowData.add(obj);
 			}

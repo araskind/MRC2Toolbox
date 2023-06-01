@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.fdata;
+package edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -30,6 +30,8 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
@@ -44,6 +46,7 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
@@ -51,6 +54,8 @@ import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 
+import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.refsamples.ExperimentReferenceSampleTable;
@@ -87,26 +92,32 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 	private JFormattedTextField highMassRtCutoffTextField;
 	private JFormattedTextField highMassValueTextField;
 	
-	private ExperimentReferenceSampleTable referenceSampleTable;	
+	private ExperimentReferenceSampleTable referenceSampleTable;
+	private MsFeatureSet activeMsFeatureSet;
+	private JTextField filteredFeatureSetNameTextField;
 	
-	public FeatureDataCleanupDialog(ActionListener listener) {
+	public FeatureDataCleanupDialog(
+			ActionListener listener, 
+			MsFeatureSet activeMsFeatureSet) {
 		
 		super();
-		setTitle("Cleanup features");
+		setTitle("Cleanup features for " + activeMsFeatureSet.getName());
 		setIconImage(((ImageIcon) featureCleanupIcon).getImage());
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setSize(new Dimension(550, 400));
-		setPreferredSize(new Dimension(520, 350));
+		setPreferredSize(new Dimension(520, 450));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		
+		this.activeMsFeatureSet = activeMsFeatureSet;
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{0, 0, 0, 87, 0};
-		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
-		gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 		
 		pooledFrequencyFilterCheckBox = new JCheckBox("Remove features present in less than ");
@@ -201,7 +212,7 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 		highMassBelowRTCheckBox = new JCheckBox("Remove any features with RT < ");
 		GridBagConstraints gbc_massBelowRTCheckBox = new GridBagConstraints();
 		gbc_massBelowRTCheckBox.anchor = GridBagConstraints.EAST;
-		gbc_massBelowRTCheckBox.insets = new Insets(0, 0, 0, 5);
+		gbc_massBelowRTCheckBox.insets = new Insets(0, 0, 5, 5);
 		gbc_massBelowRTCheckBox.gridx = 0;
 		gbc_massBelowRTCheckBox.gridy = 4;
 		panel.add(highMassBelowRTCheckBox, gbc_massBelowRTCheckBox);
@@ -211,7 +222,7 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 		highMassRtCutoffTextField.setColumns(5);
 		highMassRtCutoffTextField.setPreferredSize(new Dimension(50, 20));
 		GridBagConstraints gbc_highMassRtCutoffTextField = new GridBagConstraints();
-		gbc_highMassRtCutoffTextField.insets = new Insets(0, 0, 0, 5);
+		gbc_highMassRtCutoffTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_highMassRtCutoffTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_highMassRtCutoffTextField.gridx = 1;
 		gbc_highMassRtCutoffTextField.gridy = 4;
@@ -220,7 +231,7 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 		JLabel lblMinAndMass = new JLabel("min.        and M/Z > ");
 		GridBagConstraints gbc_lblMinAndMass = new GridBagConstraints();
 		gbc_lblMinAndMass.anchor = GridBagConstraints.WEST;
-		gbc_lblMinAndMass.insets = new Insets(0, 0, 0, 5);
+		gbc_lblMinAndMass.insets = new Insets(0, 0, 5, 5);
 		gbc_lblMinAndMass.gridx = 2;
 		gbc_lblMinAndMass.gridy = 4;
 		panel.add(lblMinAndMass, gbc_lblMinAndMass);
@@ -230,10 +241,30 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 		highMassValueTextField.setPreferredSize(new Dimension(80, 20));
 		highMassValueTextField.setColumns(10);
 		GridBagConstraints gbc_highMassBelowRtTextField = new GridBagConstraints();
+		gbc_highMassBelowRtTextField.insets = new Insets(0, 0, 5, 0);
 		gbc_highMassBelowRtTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_highMassBelowRtTextField.gridx = 3;
 		gbc_highMassBelowRtTextField.gridy = 4;
 		panel.add(highMassValueTextField, gbc_highMassBelowRtTextField);
+		
+		JLabel lblNewLabel_3 = new JLabel("Filtered feature set name:");
+		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
+		gbc_lblNewLabel_3.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_3.gridx = 0;
+		gbc_lblNewLabel_3.gridy = 5;
+		panel.add(lblNewLabel_3, gbc_lblNewLabel_3);
+		
+		filteredFeatureSetNameTextField = new JTextField();
+		filteredFeatureSetNameTextField.setText(activeMsFeatureSet.getName() + " cleaned");		
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.gridwidth = 4;
+		gbc_textField.insets = new Insets(0, 0, 0, 5);
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField.gridx = 0;
+		gbc_textField.gridy = 6;
+		panel.add(filteredFeatureSetNameTextField, gbc_textField);
+		filteredFeatureSetNameTextField.setColumns(10);
 				
 		JPanel buttonPanel = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) buttonPanel.getLayout();
@@ -268,7 +299,105 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 		savePreferences();
 		super.dispose();
 	}
+	
+	public boolean filterByPooledFrequency() {
+		return pooledFrequencyFilterCheckBox.isSelected();
+	}
+	
+	public int getPooledFrequencyCutoff() {
+		return (int)pooledFrequencySpinner.getValue();
+	}
+	
+	public Collection<ExperimentalSample> getSelectedPooledSamples() {
+		return referenceSampleTable.getSelectedSamples();
+	}
+	
+	public boolean filterByMassDefect() {
+		return massDefectBelowRTCheckBox.isSelected();
+	}
+	
+	public Double getMassDefectFilterRTCutoff() {
+		
+		if(massDefectFilterRTCutoffTextField.getText().trim().isEmpty())
+			return 0.0d;
+		else
+			return Double.valueOf(massDefectFilterRTCutoffTextField.getText());
+	}
 
+	public Double getMDFilterMassDefectValue() {
+		
+		if(mdFilterMassDefectValueTextField.getText().trim().isEmpty())
+			return 0.0d;
+		else
+			return Double.valueOf(mdFilterMassDefectValueTextField.getText());
+	}
+	
+	public boolean filterHighMassBelowRT() {
+		return highMassBelowRTCheckBox.isSelected();
+	}
+	
+	public Double getHighMassFilterRTCutoff() {
+		
+		if(highMassRtCutoffTextField.getText().trim().isEmpty())
+			return 0.0d;
+		else
+			return Double.valueOf(highMassRtCutoffTextField.getText());
+	}
+
+	public Double getHighMassFilterMassValue() {
+				
+		if(highMassValueTextField.getText().trim().isEmpty())
+			return 0.0d;
+		else
+			return Double.valueOf(highMassValueTextField.getText());
+	}
+	
+	public String getFilteredFeatureSetName() {
+		return filteredFeatureSetNameTextField.getText().trim();
+	}
+	
+	public FeatureCleanupParameters getFeatureCleanupParameters() {
+		
+		return new FeatureCleanupParameters(
+				filterByPooledFrequency(),
+				getPooledFrequencyCutoff(),
+				getSelectedPooledSamples(),
+				filterByMassDefect(),
+				getMassDefectFilterRTCutoff(),
+				getMDFilterMassDefectValue(),
+				filterHighMassBelowRT(),
+				getHighMassFilterRTCutoff(),
+				getHighMassFilterMassValue());
+	}
+	
+	public Collection<String>validateParameters(){
+		
+		Collection<String>errors= new ArrayList<String>();
+		if(filterByPooledFrequency() && getSelectedPooledSamples().isEmpty()) 
+			errors.add("Please select one or more pooled sample types");
+		
+		if(filterByMassDefect()) {
+			
+			if(getMassDefectFilterRTCutoff() <= 0.0d)
+				errors.add("Please specify RT cutoff for mass defect filtering");
+			
+			if(getMDFilterMassDefectValue() <= 0.0d)
+				errors.add("Please specify mass defect value for filtering");
+		}
+		if(filterHighMassBelowRT()) {
+			
+			if(getHighMassFilterRTCutoff() <= 0.0d)
+				errors.add("Please specify RT cutoff for high mass filtering");
+			
+			if(getHighMassFilterMassValue() <= 0.0d)
+				errors.add("Please specify mass value for high mass filtering");
+		}	
+		if(getFilteredFeatureSetName().isEmpty())
+			errors.add("Please specify the name for the cleaned feature set");
+		
+		return errors;
+	}
+	
 	@Override
 	public void loadPreferences(Preferences prefs) {
 		
@@ -301,13 +430,42 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 	@Override
 	public void savePreferences() {
 		
-		preferences = Preferences.userRoot().node(FeatureDataCleanupDialog.class.getName());
+		if(!validateParameters().isEmpty())
+			return;
+		
+		preferences = Preferences.userRoot().node(
+				FeatureDataCleanupDialog.class.getName());
+		
 		preferences.putBoolean(FILTER_BY_POOL_FREQUENCY, 
 				pooledFrequencyFilterCheckBox.isSelected());
 		preferences.putInt(POOL_FREQUENCY_CUTOFF, 
 				(int)pooledFrequencySpinner.getValue());
-		preferences.getBoolean(FILTER_BY_MASS_DEFECT_BELOW_RT, 
+		
+		preferences.putBoolean(FILTER_BY_MASS_DEFECT_BELOW_RT, 
 				massDefectBelowRTCheckBox.isSelected());
+		
+		if(getMassDefectFilterRTCutoff() > 0.0d)
+			preferences.putDouble(MASS_DEFECT_FILTER_RT_CUTOFF, 
+					getMassDefectFilterRTCutoff());
+		
+		if(getMDFilterMassDefectValue() > 0.0d)
+			preferences.getDouble(MASS_DEFECT_FILTER_DEFECT_CUTOFF, 
+					getMDFilterMassDefectValue());
+		
+		preferences.putBoolean(FILTER_BY_HIGH_MASS_BELOW_RT, 
+				highMassBelowRTCheckBox.isSelected());
+		
+		if(getHighMassFilterRTCutoff() > 0.0d)
+			preferences.putDouble(HIGH_MASS_FILTER_RT_CUTOFF, 
+					getHighMassFilterRTCutoff());
+		
+		if(getHighMassFilterMassValue() > 0.0d)
+			preferences.getDouble(HIGH_MASS_FILTER_MASS_CUTOFF, 
+					getHighMassFilterMassValue());
+	}
+
+	public MsFeatureSet getActiveMsFeatureSet() {
+		return activeMsFeatureSet;
 	}
 }
 

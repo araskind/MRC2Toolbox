@@ -25,7 +25,9 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EventListener;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
@@ -44,7 +46,8 @@ public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>
 //	protected ParameterSetStatus status;
 	protected Set<FeatureSetListener> eventListeners;
 	protected boolean nameIsValid;
-	private boolean suppressEvents;
+	protected boolean suppressEvents;
+	protected Map<String,Object>properties;
 	
 	public FeatureSet(String name) {
 
@@ -52,10 +55,13 @@ public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>
 		active = false;
 //		status = ParameterSetStatus.CREATED;
 		eventListeners = ConcurrentHashMap.newKeySet();
+		properties = new TreeMap<String,Object>();
 	}
 	
 	public abstract boolean containsFeature(MsFeature feature);
+	
 	public abstract void removeFeature(MsFeature featureToRemove);
+	
 	public abstract void removeFeatures(Collection<MsFeature> featuresToRemove);
 	
 	public void removeFeatures(MsFeature[] featuresToRemove) {
@@ -186,4 +192,23 @@ public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>
 	public void setSuppressEvents(boolean suppressEvents) {
 		this.suppressEvents = suppressEvents;
 	}
+	
+	public void setProperty(String name, Object value) {
+		
+		if(name != null && !name.isEmpty() && value != null)
+			properties.put(name, value);	
+	}
+	
+	public Object getProperty(String name) {
+		
+		if(name == null || name.isEmpty())
+			return null;
+		else
+			return properties.get(name);		
+	}
 }
+
+
+
+
+

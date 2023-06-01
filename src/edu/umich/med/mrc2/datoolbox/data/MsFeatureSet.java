@@ -35,6 +35,7 @@ public class MsFeatureSet extends FeatureSet implements Serializable {
 	private static final long serialVersionUID = -7634310759074576227L;
 	private Collection<MsFeature>features;
 
+
 	public MsFeatureSet(String name) {
 
 		super(name);
