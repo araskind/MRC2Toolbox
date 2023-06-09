@@ -714,14 +714,9 @@ public class DataAnalysisProject implements Serializable {
 
 	public void setActiveFeatureSetForDataPipeline(
 			MsFeatureSet activeSet, DataPipeline pipeline) {
-		
-//		Set<MsFeatureSet> dpSets = featureSetMap.get(pipeline);
-//		dpSets.stream().forEach(s -> s.setActive(false));
-//		activeSet.setActive(true);
-//		if(!dpSets.contains(activeSet))
-//			dpSets.add(activeSet);
-//		
-		if(getActiveFeatureSetForDataPipeline(pipeline).equals(activeSet))
+
+		MsFeatureSet currentActiveSet = getActiveFeatureSetForDataPipeline(pipeline);
+		if(currentActiveSet != null && currentActiveSet.equals(activeSet))
 			return;
 		
 		featureSetMap.get(pipeline).add(activeSet);

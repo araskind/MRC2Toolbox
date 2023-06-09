@@ -82,6 +82,7 @@ public class ExperimentReferenceSampleTable extends BasicTable {
 
 	public void selectSampleRows(Collection<ExperimentalSample>toSelect) {
 
+		clearSelection();
 		int idColumn = getColumnIndex(ReferenceSampleTableModel.SAMPLE_ID_COLUMN);
 		for(int i=0; i<getRowCount(); i++) {
 

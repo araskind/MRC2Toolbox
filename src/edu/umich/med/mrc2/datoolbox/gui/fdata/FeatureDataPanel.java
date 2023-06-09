@@ -60,6 +60,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataImputationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureFilter;
+import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSetProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
@@ -116,6 +117,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.CalculateStatisticsT
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.ImputeMissingDataTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.RemoveEmptyFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MetabolomicsProjectUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -585,9 +587,14 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	    		return;
 	    	}
 	    	else {
+	    		cleanMsFeatureSet.setProperty(FeatureSetProperties.FILTERING_PARAMETERS, fcp);
 	    		MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
 	    			addFeatureSetForDataPipeline(cleanMsFeatureSet, activeDataPipeline);
-				setTableModelFromFeatureSet(cleanMsFeatureSet);
+	    		
+	    		MainWindow.getExperimentSetupDraw().getFeatureSubsetPanel().addSetListeners(cleanMsFeatureSet);
+	    		
+	    		 MetabolomicsProjectUtils.switchActiveMsFeatureSet(cleanMsFeatureSet);
+				//	setTableModelFromFeatureSet(cleanMsFeatureSet);
 	    	}
 	    }
 	    
@@ -1393,6 +1400,16 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				if(activeMsFeatureSet.equals(source))
 					clearPanel();
 			}	
+		}
+		if(MainWindow.getDataExplorerPlotDialog().isVisible()) {
+			
+			if(activeMsFeatureSet == null || status.equals(ParameterSetStatus.DISABLED)) {
+				MainWindow.getDataExplorerPlotDialog().clearPanels();
+			}
+			else {
+				MainWindow.getDataExplorerPlotDialog().loadMzRtFromFeatureCollection(
+						activeMsFeatureSet.getName(), activeMsFeatureSet.getFeatures());
+			}
 		}
 	}
 

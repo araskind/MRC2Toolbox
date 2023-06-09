@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSetProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetListener;
@@ -47,7 +48,7 @@ public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>
 	protected Set<FeatureSetListener> eventListeners;
 	protected boolean nameIsValid;
 	protected boolean suppressEvents;
-	protected Map<String,Object>properties;
+	protected Map<FeatureSetProperties,Object>properties;
 	
 	public FeatureSet(String name) {
 
@@ -55,7 +56,7 @@ public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>
 		active = false;
 //		status = ParameterSetStatus.CREATED;
 		eventListeners = ConcurrentHashMap.newKeySet();
-		properties = new TreeMap<String,Object>();
+		properties = new TreeMap<FeatureSetProperties,Object>();
 	}
 	
 	public abstract boolean containsFeature(MsFeature feature);
@@ -193,18 +194,22 @@ public abstract class FeatureSet implements Serializable, Comparable<FeatureSet>
 		this.suppressEvents = suppressEvents;
 	}
 	
-	public void setProperty(String name, Object value) {
+	public void setProperty(FeatureSetProperties property, Object value) {
 		
-		if(name != null && !name.isEmpty() && value != null)
-			properties.put(name, value);	
+		if(property != null && value != null)
+			properties.put(property, value);	
 	}
 	
-	public Object getProperty(String name) {
+	public Object getProperty(FeatureSetProperties property) {
 		
-		if(name == null || name.isEmpty())
+		if(property == null)
 			return null;
 		else
-			return properties.get(name);		
+			return properties.get(property);		
+	}
+
+	public Map<FeatureSetProperties, Object> getProperties() {
+		return properties;
 	}
 }
 

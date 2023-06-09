@@ -21,42 +21,60 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.nist;
 
-public enum NISTmspField {
-
-	CAS("CAS#"),
-	COLLISION_ENERGY("Collision_energy"),
-	COLLISION_GAS("Collision_gas"),
-	COMMENTS("Comments"),
-	DB_NUM("DB#"),
-	EXACT_MASS("ExactMass"),
-	FORMULA("Formula"),
-	INCHI_KEY("InChIKey"),
-	INSTRUMENT("Instrument"),
-	INSTRUMENT_TYPE("Instrument_type"),
-	IN_SOURCE_VOLTAGE("In-source_voltage"),
-	IONIZATION("Ionization"),
-	ION_MODE("Ion_mode"),
-	MSN_PATHWAY("msN_pathway"),
-	MW("MW"),
-	NAME("Name"),
-	NIST_NUMBER("NIST#"),
-	NOTES("Notes"),
-	NUM_PEAKS("Num Peaks"),
-	PEPTIDE_SEQUENCE("Peptide_sequence"),
-	PEPTIDE_MODS("Peptide_mods"),
-	PRECURSORMZ("PrecursorMZ"),
-	PRECURSOR_TYPE("Precursor_type"),
-	PRESSURE("Pressure"),
-	RELATED_CAS("Related_CAS#"),
-	SAMPLE_INLET("Sample_inlet"),
-	SPECIAL_FRAGMENTATION("Special_fragmentation"),
-	SPECTRUM_TYPE("Spectrum_type"),
-	SYNONYM("Synon"),
-	;
+public enum NISTPeptideMSPField {
 	
+	NAME("Name"),
+	MW("MW"),
+	COMMENTS("Comment"),
+	NUM_PEAKS("Num Peaks"),
+	Charge("Charge"),
+	DUScorr("DUScorr"),
+	Dot_cons("Dot_cons"),
+	Dotbest("Dotbest"),
+	Dotfull("Dotfull"),
+	Dottheory("Dottheory"),
+	FTResolution("FTResolution"),
+	Filter("Filter"),
+	Flags("Flags"),
+	Fullname("Fullname"),
+	HCD("HCD"),
+	Inst("Inst"),
+	Max2med_orig("Max2med_orig"),
+	Missing("Missing"),
+	Mods("Mods"),
+	Mz_av("Mz_av"),
+	Mz_diff("Mz_diff"),
+	Mz_exact("Mz_exact"),
+	Naa("Naa"),
+	Nrep("Nrep"),
+	Nreps("Nreps"),
+	Organism("Organism"),
+	Origfile("Origfile"),
+	Parent("Parent"),
+	Parent_med("Parent_med"),
+	Pep("Pep"),
+	Pfin("Pfin"),
+	Pfract("Pfract"),
+	Precursor1MaxAb("Precursor1MaxAb"),
+	PrecursorMonoisoMZ("PrecursorMonoisoMZ"),
+	Probcorr("Probcorr"),
+	Protein("Protein"),
+	Pseq("Pseq"),
+	Purity("Purity"),
+	Sample("Sample"),
+	Scan("Scan"),
+	Se("Se"),
+	Spec("Spec"),
+	Tfratio("Tfratio"),
+	Unassign_all("Unassign_all"),
+	Unassigned("Unassigned"),
+	ms1PrecursorAb("ms1PrecursorAb"),
+	ms2IsolationWidth("ms2IsolationWidth"),
+	;
+
 	private final String name;
 
-	NISTmspField(String field) {
+	NISTPeptideMSPField(String field) {
 		this.name = field;
 	}
 

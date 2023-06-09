@@ -36,24 +36,30 @@ public class NISTTandemMassSpectrum extends TandemMassSpectrum {
 	 *
 	 */
 	private static final long serialVersionUID = -2895139470741792217L;
-	private Collection<String>synonyms;
-	private int dbnum;
-	private int nistNum;
-	private double exactMass;
-	private Map<NISTmspField,String>properties;
-	private Collection<MsPoint>precursors;
-	private String peptideModifications;
-	private String peptideSequence;
-	private Collection<String>notes;
+	protected Collection<String>synonyms;
+	protected int dbnum;
+	protected int nistNum;
+	protected double exactMass;
+	protected Map<NISTmspField,String>properties;
+	protected Collection<MsPoint>precursors;
+	protected String peptideModifications;
+	protected String peptideSequence;
+	protected Collection<String>notes;
 
 	public NISTTandemMassSpectrum(Polarity polarity) {
+		this(polarity, true);
+	}
+	
+	public NISTTandemMassSpectrum(Polarity polarity, boolean initAllProperties) {
 
 		super(polarity);
 		synonyms = new ArrayList<String>();
 		properties = new TreeMap<NISTmspField,String>();
-		for(NISTmspField field : NISTmspField.values())
-			properties.put(field, "");
-
+		
+		if(initAllProperties) {
+			for(NISTmspField field : NISTmspField.values())
+				properties.put(field, "");
+		}
 		precursors = new ArrayList<MsPoint>();
 		notes = new ArrayList<String>();
 	}
@@ -99,6 +105,10 @@ public class NISTTandemMassSpectrum extends TandemMassSpectrum {
 	 */
 	public Map<NISTmspField, String> getProperties() {
 		return properties;
+	}
+	
+	public String getProperty(NISTmspField property) {
+		return properties.get(property);
 	}
 
 	/**

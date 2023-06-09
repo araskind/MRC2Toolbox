@@ -21,42 +21,16 @@
 
 package edu.umich.med.mrc2.datoolbox.dbparse.load.nist;
 
-public enum NISTmspField {
+public enum NISTARUSmspCommentField {
 
-	CAS("CAS#"),
-	COLLISION_ENERGY("Collision_energy"),
-	COLLISION_GAS("Collision_gas"),
-	COMMENTS("Comments"),
-	DB_NUM("DB#"),
-	EXACT_MASS("ExactMass"),
-	FORMULA("Formula"),
-	INCHI_KEY("InChIKey"),
-	INSTRUMENT("Instrument"),
-	INSTRUMENT_TYPE("Instrument_type"),
-	IN_SOURCE_VOLTAGE("In-source_voltage"),
-	IONIZATION("Ionization"),
-	ION_MODE("Ion_mode"),
-	MSN_PATHWAY("msN_pathway"),
-	MW("MW"),
-	NAME("Name"),
-	NIST_NUMBER("NIST#"),
-	NOTES("Notes"),
-	NUM_PEAKS("Num Peaks"),
-	PEPTIDE_SEQUENCE("Peptide_sequence"),
-	PEPTIDE_MODS("Peptide_mods"),
-	PRECURSORMZ("PrecursorMZ"),
-	PRECURSOR_TYPE("Precursor_type"),
-	PRESSURE("Pressure"),
-	RELATED_CAS("Related_CAS#"),
-	SAMPLE_INLET("Sample_inlet"),
-	SPECIAL_FRAGMENTATION("Special_fragmentation"),
-	SPECTRUM_TYPE("Spectrum_type"),
-	SYNONYM("Synon"),
+	Spectrum("Spectrum"),
+	Nreps("Nreps"),
+	RT("RT"),
 	;
-	
+
 	private final String name;
 
-	NISTmspField(String field) {
+	NISTARUSmspCommentField(String field) {
 		this.name = field;
 	}
 

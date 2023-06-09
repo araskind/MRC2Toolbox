@@ -128,6 +128,8 @@ import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsClassificati
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsFields;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.lipidmaps.LipidMapsParser;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTMSPParser;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTPeptideMSPParser;
+import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTPeptideTandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.nist.NISTTandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.gui.cpdcol.mplex.MultiplexLoadTempObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -172,10 +174,38 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			cleanupCoconutCompoundData();
+			Files.createDirectories(Paths.get("Y:\\DataAnalysis\\_Reports\\LongPath\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAA"
+					+ "AAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFF"
+					+ "FFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+			//	parseLibraryFile();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	private static void parseLibraryFile() {
+
+		File libraryFile = 
+				new File("E:\\DataAnalysis\\Databases\\NIST\\NIST peptide library"
+						+ "\\Mouse\\Mouse HCD Library 2014-11-24\\cptac2_mouse_hcd_selected.msp");
+		List<List<String>> mspChunks = NISTMSPParser.parseInputMspFile(libraryFile);
+		Collection<NISTPeptideTandemMassSpectrum>msmsDataSet = 
+				new ArrayList<NISTPeptideTandemMassSpectrum>();
+		
+		for(List<String> chunk : mspChunks) {
+
+			NISTPeptideTandemMassSpectrum msms = null;
+			try {
+				msms = NISTPeptideMSPParser.parseNistMspDataSource(chunk);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if(msms != null) {	
+				
+				System.out.println("************");
+				msmsDataSet.add(msms);				
+			}
 		}
 	}
 	

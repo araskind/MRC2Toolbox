@@ -208,7 +208,7 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 			editedSet.addFeatures(Arrays.asList(selected));
 	}
 
-	private void addSetListeners(MsFeatureSet newSet) {
+	public void addSetListeners(MsFeatureSet newSet) {
 
 		newSet.addListener(this);
 		newSet.addListener((FeatureSetListener) 
@@ -259,7 +259,9 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 			
 			currentExperiment.getMsFeatureSetsForDataPipeline(activeDataPipeline).remove(setToDelete);
 			if(setToDelete.isActive())
-				activateDefaultSet();			
+				activateDefaultSet();
+			
+			featureSetTable.setModelFromProject(currentExperiment, activeDataPipeline);
 		}
 	}
 

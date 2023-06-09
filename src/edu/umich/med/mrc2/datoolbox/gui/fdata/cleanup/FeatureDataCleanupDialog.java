@@ -91,11 +91,12 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 	private JCheckBox highMassBelowRTCheckBox;
 	private JFormattedTextField highMassRtCutoffTextField;
 	private JFormattedTextField highMassValueTextField;
+	private JTextField filteredFeatureSetNameTextField;
 	
 	private ExperimentReferenceSampleTable referenceSampleTable;
 	private MsFeatureSet activeMsFeatureSet;
-	private JTextField filteredFeatureSetNameTextField;
-	
+	private JButton btnSave;
+		
 	public FeatureDataCleanupDialog(
 			ActionListener listener, 
 			MsFeatureSet activeMsFeatureSet) {
@@ -281,7 +282,7 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 		};
 		btnCancel.addActionListener(al);
 
-		JButton btnSave = new JButton(MainActionCommands.CLEANUP_FEATURE_DATA_COMMAND.getName());
+		btnSave = new JButton(MainActionCommands.CLEANUP_FEATURE_DATA_COMMAND.getName());
 		btnSave.setActionCommand(MainActionCommands.CLEANUP_FEATURE_DATA_COMMAND.getName());
 		btnSave.addActionListener(listener);
 		buttonPanel.add(btnSave);
@@ -396,6 +397,34 @@ public class FeatureDataCleanupDialog extends JDialog implements BackedByPrefere
 			errors.add("Please specify the name for the cleaned feature set");
 		
 		return errors;
+	}
+	
+	public void loadParameters(FeatureCleanupParameters parameterObject) {
+		
+		pooledFrequencyFilterCheckBox.setSelected(parameterObject.isFilterByPooledFrequency());
+		pooledFrequencySpinner.setValue(parameterObject.getPooledFrequencyCutoff());
+		massDefectBelowRTCheckBox.setSelected(parameterObject.isFilterByMassDefect());
+		massDefectFilterRTCutoffTextField.setText(Double.toString(parameterObject.getMassDefectFilterRTCutoff()));
+		mdFilterMassDefectValueTextField.setText(Double.toString(parameterObject.getMdFilterMassDefectValue()));
+		highMassBelowRTCheckBox.setSelected(parameterObject.isFilterHighMassBelowRT());
+		highMassRtCutoffTextField.setText(Double.toString(parameterObject.getHighMassFilterRTCutoff()));
+		highMassValueTextField.setText(Double.toString(parameterObject.getHighMassFilterMassValue()));		
+		referenceSampleTable.selectSampleRows(parameterObject.getSelectedPooledSamples());
+	}
+	
+	public void setEditable(boolean editable) {
+		
+		pooledFrequencyFilterCheckBox.setEnabled(editable);
+		pooledFrequencySpinner.setEnabled(editable);
+		massDefectBelowRTCheckBox.setEnabled(editable);
+		massDefectFilterRTCutoffTextField.setEnabled(editable);
+		mdFilterMassDefectValueTextField.setEnabled(editable);
+		highMassBelowRTCheckBox.setEnabled(editable);
+		highMassRtCutoffTextField.setEnabled(editable);
+		highMassValueTextField.setEnabled(editable);
+		filteredFeatureSetNameTextField.setEnabled(editable);
+		referenceSampleTable.setEnabled(editable);
+		btnSave.setEnabled(editable);
 	}
 	
 	@Override

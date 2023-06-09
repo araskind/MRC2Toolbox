@@ -19,48 +19,33 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.dbparse.load.nist;
+package edu.umich.med.mrc2.datoolbox.data.enums;
 
-public enum NISTmspField {
+public enum  FeatureSetProperties {
 
-	CAS("CAS#"),
-	COLLISION_ENERGY("Collision_energy"),
-	COLLISION_GAS("Collision_gas"),
-	COMMENTS("Comments"),
-	DB_NUM("DB#"),
-	EXACT_MASS("ExactMass"),
-	FORMULA("Formula"),
-	INCHI_KEY("InChIKey"),
-	INSTRUMENT("Instrument"),
-	INSTRUMENT_TYPE("Instrument_type"),
-	IN_SOURCE_VOLTAGE("In-source_voltage"),
-	IONIZATION("Ionization"),
-	ION_MODE("Ion_mode"),
-	MSN_PATHWAY("msN_pathway"),
-	MW("MW"),
-	NAME("Name"),
-	NIST_NUMBER("NIST#"),
-	NOTES("Notes"),
-	NUM_PEAKS("Num Peaks"),
-	PEPTIDE_SEQUENCE("Peptide_sequence"),
-	PEPTIDE_MODS("Peptide_mods"),
-	PRECURSORMZ("PrecursorMZ"),
-	PRECURSOR_TYPE("Precursor_type"),
-	PRESSURE("Pressure"),
-	RELATED_CAS("Related_CAS#"),
-	SAMPLE_INLET("Sample_inlet"),
-	SPECIAL_FRAGMENTATION("Special_fragmentation"),
-	SPECTRUM_TYPE("Spectrum_type"),
-	SYNONYM("Synon"),
-	;
-	
+	FILTERING_PARAMETERS("Filtering parameters");
+
 	private final String name;
 
-	NISTmspField(String field) {
-		this.name = field;
+	FeatureSetProperties(String name) {
+		this.name = name;
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	public String toString() {
+		return name;
+	}
+	
+	public static FeatureSetProperties getFeatureSetPropertyByName(String name) {
+		
+		for(FeatureSetProperties p : FeatureSetProperties.values()) {
+			
+			if(p.getName().equals(name))
+				return p;
+		}		
+		return null;
 	}
 }

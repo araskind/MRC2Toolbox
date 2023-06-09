@@ -44,7 +44,7 @@ public class FeatureSubsetTableModel extends BasicTableModel {
 	public FeatureSubsetTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ACTIVE_COLUMN, Boolean.class, true),
+			new ColumnContext(ACTIVE_COLUMN, Boolean.class, false),
 			new ColumnContext(FEATURES_SUBSET_COLUMN, MsFeatureSet.class, false),
 			new ColumnContext(NUM_FEATURES_COLUMN, Integer.class, false)
 		};

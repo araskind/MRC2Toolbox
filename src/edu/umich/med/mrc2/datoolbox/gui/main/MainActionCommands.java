@@ -503,6 +503,7 @@ public enum MainActionCommands {
 	UNLINK_FEATURE_SUBSET_COMMAND(	"Unlink feature subset"),
 	LOCK_FEATURE_SUBSET_COMMAND("Lock selected feature subset"),
 	UNLOCK_FEATURE_SUBSET_COMMAND("Unlock selected feature subset"),
+	SET_ACTIVE_FEATURE_SUBSET_COMMAND("Set as active feature subset"),
 
 	// Design subset commands
 	SHOW_DESIGN_SUBSET_DIALOG_COMMAND("Show design subset dialog"),

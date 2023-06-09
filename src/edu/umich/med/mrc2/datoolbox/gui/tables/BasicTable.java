@@ -765,6 +765,16 @@ public class BasicTable extends JTable implements ActionListener{
             }
         };
     }
+	
+	
+	@Override
+	public void setEnabled(boolean b) {
+		
+		if(thf != null)
+			thf.setEnabled(b);
+			
+		super.setEnabled(b);
+	}
 }
 
 
