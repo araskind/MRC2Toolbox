@@ -89,6 +89,7 @@ public class MoTrPACUtils {
 		// File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
 		//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
+			//	createMoTrPACFileManifests4PreCovidAdipose();
 			createMoTrPACFileManifests4PreCovidAdipose();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -122,7 +123,8 @@ public class MoTrPACUtils {
 			File parentDirectory,
 			String batchId,
 			String processedFolderId,
-			String manifestDate) {
+			String manifestDate,
+			boolean processRawFiles) {
 		List<String>assayTypes = 
 				new ArrayList<String>(Arrays.asList("IONPNEG", "RPNEG", "RPPOS"));
 		
@@ -137,7 +139,8 @@ public class MoTrPACUtils {
 							parentDirectory,
 							batchId,
 							processedFolderId,
-							manifestDate);
+							manifestDate,
+							processRawFiles);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -152,7 +155,8 @@ public class MoTrPACUtils {
 			File parentDirectory,
 			String batchId,
 			String processedFolderId,
-			String manifestDate) throws IOException {
+			String manifestDate,
+			boolean processRawFiles) throws IOException {
 		
 		StringBuffer checkSumData = new StringBuffer();
 		checkSumData.append("file_name,md5\n");
@@ -196,16 +200,20 @@ public class MoTrPACUtils {
 			String localPath = processedFolderId + File.separator + filePath.toFile().getName();
 			checkSumData.append(localPath + "," + zipHash + "\n");
 		}
-		Path rawDirPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW");
-		pathList = Files.find(rawDirPath,
-				1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".zip"))).
-			collect(Collectors.toList());
-		for(Path filePath : pathList) {
-			String zipHash = DigestUtils.sha256Hex(
-					new FileInputStream(filePath.toString()));
-			String localPath = filePath.toFile().getName().replace(".zip", "");
-			checkSumData.append(localPath + "," + zipHash + "\n");
+		if(processRawFiles) {
+			
+			Path rawDirPath = Paths.get(parentDirectory.getAbsolutePath(), tissue, assay, batchId, "RAW");
+			pathList = Files.find(rawDirPath,
+					1, (filePath, fileAttr) -> (filePath.toString().toLowerCase().endsWith(".zip"))).
+				collect(Collectors.toList());
+			for(Path filePath : pathList) {
+				String zipHash = DigestUtils.sha256Hex(
+						new FileInputStream(filePath.toString()));
+				String localPath = filePath.toFile().getName().replace(".zip", "");
+				checkSumData.append(localPath + "," + zipHash + "\n");
+			}
 		}
+
 		File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), 
 				tissue, assay, batchId, "file_manifest_" + manifestDate + ".csv").toFile();
 		FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
@@ -419,7 +427,8 @@ public class MoTrPACUtils {
 				parentDirectory,
 				batchDateIdentifier,
 				processingDateIdentifier,
-				"20230202");
+				"20230617",
+				false);
 	}
 	
 	private static void createMotrpacDataUploadDirectoryStructure4PreCovidPlasma() {
@@ -440,8 +449,8 @@ public class MoTrPACUtils {
 	private static void createMotrpacDataUploadDirectoryStructure4PreCovidMuscle() {
 		
 		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T06"));
-		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - ADU870 10063 Clinical "
-				+ "Skeletal Muscle Samples Pre COVID 2 19 2021\\4Upload\\_4BIC");
+		File parentDirectory = new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle "
+				+ "PreCOVID-20210219\\4Upload\\_4BIC\\_BACKUP_20230617\\");
 		String batchDateIdentifier = "20220404";
 		String processingDateIdentifier = "20220404";
 		String studyPhase = "HUMAN-PRECOVID";
@@ -457,16 +466,16 @@ public class MoTrPACUtils {
 		
 		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T06"));
 		File parentDirectory = 
-				new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle "
-						+ "PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
-		String batchDateIdentifier = "BATCH1_20220404";
-		String processingDateIdentifier = "PROCESSED_20220404";
+				new File("Y:\\DataAnalysis\\_Reports\\EX01094 - MoTrPAC Muscle PreCOVID-20210219\\4Upload\\_4BIC\\HUMAN");
+		String batchDateIdentifier = "BATCH1_20221014";
+		String processingDateIdentifier = "PROCESSED_20221014";
 		createMoTrPACFileManifest(
 				tissueTypes, 
 				parentDirectory,
 				batchDateIdentifier,
 				processingDateIdentifier,
-				"20220208");
+				"20230617",
+				false);
 	}
 		
 	private static void createMoTrPACFileManifests4PreCovidPlasma() {
@@ -475,13 +484,14 @@ public class MoTrPACUtils {
 		File parentDirectory = 
 				new File("Y:\\DataAnalysis\\_Reports\\EX01190 - MoTrPAC\\4BIC\\HUMAN");
 		String batchDateIdentifier = "BATCH1_20230124";
-		String processingDateIdentifier = "PROCESSED_20230124";
+		String processingDateIdentifier = "PROCESSED_20230616";
 		createMoTrPACFileManifest(
 				tissueTypes, 
 				parentDirectory,
 				batchDateIdentifier,
 				processingDateIdentifier,
-				"20230127");
+				"20230616",
+				false);
 	}
 	
 	private static void compressMoTrPACPreCovidMuscleRawDataFiles() throws IOException {
