@@ -114,4 +114,36 @@ public class FIOUtils {
 		}
 		return result;
 	}
+	
+	public static List<Path> findFilesByName(Path path, String fileName) {
+
+		if (!Files.isDirectory(path)) {
+			throw new IllegalArgumentException("Path must be a directory!");
+		}
+		List<Path> result = null;
+		try (Stream<Path> walk = Files.walk(path)) {
+			result = walk.filter(p -> !Files.isDirectory(p))
+					.filter(p -> p.getName(p.getNameCount()-1).toString().toLowerCase().equals(fileName))
+					.collect(Collectors.toList());
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
+//	try (Stream<Path> walkStream = Files.walk(Paths.get("your search directory"))) {
+//	    walkStream.filter(p -> p.toFile().isFile()).forEach(f -> {
+//	        if (f.toString().endsWith("file to be searched")) {
+//	            System.out.println(f + " found!");
+//	        }
+//	    });
+//	}
 }
+
+
+
+
+
+
+
