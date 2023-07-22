@@ -237,9 +237,9 @@ public class MoTrPACDataTrackingPanel extends DockableMRC2ToolboxPanel implement
 		
 		if(!tasks.isEmpty()) {
 			
-			for(AgilentDataCompressionTask task : tasks)
+			for(AgilentDataCompressionTask task : tasks) {
 				MRC2ToolBoxCore.getTaskController().addTask(task);
-			
+			}			
 			motrpacRawDataCompressionSetupDialog.dispose();
 		}			
 	}

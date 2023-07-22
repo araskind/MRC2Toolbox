@@ -35,6 +35,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
@@ -49,14 +53,20 @@ import org.openscience.cdk.interfaces.IMolecularFormula;
 import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
+import org.openscience.cdk.smiles.SmiFlavor;
+import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import org.slf4j.LoggerFactory;
 
+import ambit2.tautomers.TautomerManager;
+import ambit2.tautomers.ranking.EnergyRanking;
+import ambit2.tautomers.zwitterion.ZwitterionManager;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.FilePreferencesFactory;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.CompoundStructureUtils;
 import io.github.dan2097.jnainchi.InchiStatus;
 
 public class CompoundDatabaseScripts {
@@ -86,13 +96,233 @@ public class CompoundDatabaseScripts {
 		logger.info("Statring the program");
 		MRC2ToolBoxConfiguration.initConfiguration();		
 		try {
-			createCoconutSMILESBasedData();
+			generateTautomersAndZwitterIonsForCompoundDatabase("T3DB_COMPOUND_DATA", "T3DB");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	
+	public static void generateTautomersAndZwitterIonsForCompoundDatabase(
+			String sourceTable, String sourceDb) throws Exception {
+		
+		igfactory = null;
+		try {
+			igfactory = InChIGeneratorFactory.getInstance();
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		SmilesGenerator smilesGenerator = new SmilesGenerator(SmiFlavor.Isomeric);
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT ACCESSION, MS_READY_SMILES FROM "
+				+ "COMPOUNDDB." + sourceTable + " WHERE MS_READY_SMILES IS NOT NULL "
+				//	+ "AND ACCESSION > 'DB13742' "
+				+ "ORDER BY ACCESSION";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String insertQuery = 
+				"INSERT INTO COMPOUNDDB.COMPOUND_TAUTOMERS "
+				+ "(ACCESSION, TAUTOMER_SMILES, TAUTOMER_INCHI_KEY, DB_SOURCE) VALUES (?, ?, ?, ?)";
+		PreparedStatement insertPs = conn.prepareStatement(insertQuery);
+		
+		ArrayList<String>errorLog = new ArrayList<String>();
+		Map<String,String>tautomerDataMap = new TreeMap<String,String>();
+		int counter = 0;
+		ResultSet rs = ps.executeQuery();
+		
+		TautomerManager tautomerManager = new TautomerManager();		
+		tautomerManager.maxNumOfBackTracks = 20;
+		tautomerManager.maxNumOfTautomerRegistrations = 100;
+		tautomerManager.maxNumOfSubCombinations = 1000;
+		tautomerManager.FlagCalculateCACTVSEnergyRank = false;
+		tautomerManager.getKnowledgeBase().activateChlorineRules(false);
+		tautomerManager.getKnowledgeBase().activateRingChainRules(false);
+		tautomerManager.getKnowledgeBase().use15ShiftRules(true);
+		tautomerManager.getKnowledgeBase().use17ShiftRules(true);
+		tautomerManager.getKnowledgeBase().use19ShiftRules(false);
+		tautomerManager.getKnowledgeBase().use13ShiftRulesOnly(false);		
+		try {
+			tautomerManager.setEnergyRanking(new EnergyRanking());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		ZwitterionManager zwitterionManager = new ZwitterionManager();
+		zwitterionManager.FlagUseCarboxylicGroups = true;
+		zwitterionManager.FlagUseSulfonicAndSulfinicGroups = true;
+		zwitterionManager.FlagUsePhosphoricGroups = true;
+		zwitterionManager.FlagUsePrimaryAmines = true;
+		zwitterionManager.FlagUseSecondaryAmines = true;
+		zwitterionManager.FlagUseTertiaryAmines = true;
+		zwitterionManager.FlagFilterDuplicates = true;		
+		zwitterionManager.MaxNumberOfZwitterionicPairs = 10;
+		zwitterionManager.MaxNumberOfRegisteredZwitterions = 100;
+		
+		while(rs.next()) {
 
+			tautomerDataMap.clear();
+			String accession = rs.getString("ACCESSION");
+			String smiles = rs.getString("MS_READY_SMILES");
+			IAtomContainer mol = null;
+			String inchiKey = null;
+			try {
+				mol = smipar.parseSmiles(smiles);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+			if(mol != null) {
+				
+				try {
+					inChIGenerator = igfactory.getInChIGenerator(mol);
+					InchiStatus inchiStatus = inChIGenerator.getStatus();
+					if (inchiStatus.equals(InchiStatus.WARNING)) {
+						errorLog.add(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+					} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+						errorLog.add(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+					}
+					inchiKey = inChIGenerator.getInchiKey();
+				} catch (CDKException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			if(inchiKey != null) {
+				tautomerDataMap.put(smiles, inchiKey);
+			}
+			else {
+				errorLog.add("Failed to convert SMILES to INCHI KEY for " + accession + "\t" + smiles);
+			}
+			//	Generate tautomers
+			List<IAtomContainer> res = new ArrayList<IAtomContainer>();
+			try {
+				tautomerManager.setStructure(mol);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				res = tautomerManager.generateTautomersIncrementaly();				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(res.size() > 1) {
+				
+				for(IAtomContainer taut : res) {
+					
+					CompoundStructureUtils.finalizeHydrogens(taut);
+					String tautSmiles = null;
+					String tautInChiKey = null;
+					try {
+						tautSmiles = smilesGenerator.create(taut);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					if(tautSmiles != null) {
+						try {
+							inChIGenerator = igfactory.getInChIGenerator(taut);
+							InchiStatus inchiStatus = inChIGenerator.getStatus();
+							if (inchiStatus.equals(InchiStatus.WARNING)) {
+								errorLog.add(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+							} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+								errorLog.add(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+							}
+							tautInChiKey = inChIGenerator.getInchiKey();
+						} catch (CDKException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					if(tautSmiles != null && tautInChiKey != null)
+						tautomerDataMap.put(tautSmiles, tautInChiKey);					
+				}
+			}
+			//	Generate zwitterions
+			res = new ArrayList<IAtomContainer>();
+			try {
+				zwitterionManager.setStructure(mol);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				res = zwitterionManager.generateZwitterions();		
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(res.size() > 0) {
+				
+				for(IAtomContainer taut : res) {
+					
+					CompoundStructureUtils.finalizeHydrogens(taut);
+					String zwiSmiles = null;
+					String zwiInChiKey = null;
+					try {
+						zwiSmiles = smilesGenerator.create(taut);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					if(zwiSmiles != null) {
+						
+						try {
+							inChIGenerator = igfactory.getInChIGenerator(taut);
+							InchiStatus inchiStatus = inChIGenerator.getStatus();
+							if (inchiStatus.equals(InchiStatus.WARNING)) {
+								errorLog.add(accession + "\tInChI warning: " + inChIGenerator.getMessage());
+							} else if (!inchiStatus.equals(InchiStatus.SUCCESS)) {
+								errorLog.add(accession + "\tInChI failed: [" + inChIGenerator.getMessage() + "]");
+							}
+							zwiInChiKey = inChIGenerator.getInchiKey();
+						} catch (CDKException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					if(zwiSmiles != null && zwiInChiKey != null)
+						tautomerDataMap.put(zwiSmiles, zwiInChiKey);					
+				}
+			}
+			//	Insert tautomer/zwitterion data
+			insertPs.setString(1, accession);
+			insertPs.setString(4, sourceDb);
+			for(Entry<String,String>td : tautomerDataMap.entrySet()) {
+				
+				insertPs.setString(2, td.getKey());
+				insertPs.setString(3, td.getValue());
+				insertPs.addBatch();
+			}
+			insertPs.executeBatch();
+			counter++;
+			if(counter % 1000 == 0)
+				System.out.print(".");
+			if(counter % 30000 == 0)
+				System.out.print(".\n");
+		}
+		rs.close();
+		ps.close();
+		insertPs.close();
+		ConnectionManager.releaseConnection(conn);
+		
+		Path outputPath = Paths.get(
+				"E:\\DataAnalysis\\Databases\\_LATEST\\" + sourceDb + "_tautomersLog.txt");
+		try {
+			Files.write(outputPath, 
+					errorLog, 
+					StandardCharsets.UTF_8,
+					StandardOpenOption.CREATE, 
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void runScript() {
 		// TODO Auto-generated method stub
 

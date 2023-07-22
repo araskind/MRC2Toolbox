@@ -309,14 +309,21 @@ public class TautomerGeneratorSettingsDialog extends JDialog implements BackedBy
 		use15ruleCheckBox.setSelected(preferences.getBoolean(USE_15_SHIFTS, true));
 		use17ruleCheckBox.setSelected(preferences.getBoolean(USE_17_SHIFTS, true));
 		use19ruleCheckBox.setSelected(preferences.getBoolean(USE_19_SHIFTS, false));
-		useRingChainRulesCheckBox.setSelected(preferences.getBoolean(USE_RING_CHAIN_RULES, false));
-		useChlorineRulesCheckBox.setSelected(preferences.getBoolean(USE_CHLORINE_RULES, false));
-		use13ruleOnlyCheckBox.setSelected(preferences.getBoolean(USE_13_SHIFTS_ONLY, false));
+		useRingChainRulesCheckBox.setSelected(
+				preferences.getBoolean(USE_RING_CHAIN_RULES, false));
+		useChlorineRulesCheckBox.setSelected(
+				preferences.getBoolean(USE_CHLORINE_RULES, false));
+		use13ruleOnlyCheckBox.setSelected(
+				preferences.getBoolean(USE_13_SHIFTS_ONLY, false));
 		
-		maxNumOfBackTracksSpinner.setValue(preferences.getInt(MAX_NUM_OF_BACKTRACKS, 5000));
-		maxNumOfTautomerRegistrationsSpinner.setValue(preferences.getInt(MAX_NUM_OF_TAUTOMER_REGISTRATIONS, 1000));
-		maxNumOfSubCombinationsSpinner.setValue(preferences.getInt(MAX_NUM_OF_SUBCOMBINATIONS, 10000));	
-		calculateCACTVSEnergyRankCheckBox.setSelected(preferences.getBoolean(CALCULATE_CACTVS_ENERGY_RANK, false));
+		maxNumOfBackTracksSpinner.setValue(
+				preferences.getInt(MAX_NUM_OF_BACKTRACKS, 5000));
+		maxNumOfTautomerRegistrationsSpinner.setValue(
+				preferences.getInt(MAX_NUM_OF_TAUTOMER_REGISTRATIONS, 1000));
+		maxNumOfSubCombinationsSpinner.setValue(
+				preferences.getInt(MAX_NUM_OF_SUBCOMBINATIONS, 10000));	
+		calculateCACTVSEnergyRankCheckBox.setSelected(
+				preferences.getBoolean(CALCULATE_CACTVS_ENERGY_RANK, false));
 	}
 
 	@Override

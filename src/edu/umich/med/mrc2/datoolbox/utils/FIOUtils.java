@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -139,6 +140,27 @@ public class FIOUtils {
 //	        }
 //	    });
 //	}
+	
+	public static void findFilesByNameRecursively(File sourceDir, String fileName, Set<File> results) {
+
+		if (!sourceDir.isDirectory()) 
+			throw new IllegalArgumentException("Source must be a directory!");
+		
+		if (sourceDir.canRead()) {
+
+			for (File temp : sourceDir.listFiles()) {
+				if (temp.isDirectory()) {
+					findFilesByNameRecursively(temp, fileName, results);
+				} else {
+					if (fileName.equals(temp.getName())) {
+						results.add(temp);
+					}
+				}
+			}
+		} else {
+			throw new IllegalArgumentException(sourceDir.getAbsoluteFile() + "Permission Denied");
+		}
+	}	
 }
 
 

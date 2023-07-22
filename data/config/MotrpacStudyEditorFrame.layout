@@ -111,7 +111,7 @@
 												</placeholders>
 											</leaf>
 											<node nodeId="1625257371605" orientation="VERTICAL" divider="0.45454545454545453">
-												<leaf id="2" nodeId="1625257355424">
+												<leaf id="0" nodeId="1625257355424">
 													<placeholders>
 														<placeholder>dock.single.DockableExperimentListingTable</placeholder>
 													</placeholders>
@@ -125,7 +125,7 @@
 														</entry>
 													</placeholder-map>
 												</leaf>
-												<leaf id="0" nodeId="1625257364278">
+												<leaf id="2" nodeId="1625257364278">
 													<placeholders>
 														<placeholder>dock.single.DockableMoTrPACTissueCodeListingPanel</placeholder>
 													</placeholders>
@@ -142,10 +142,10 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACTissueCodeListingPanel">
-										<replacement id="dockablesingle DockableMoTrPACTissueCodeListingPanel"/>
+									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
+										<replacement id="dockablesingle DockableExperimentListingTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableMoTrPACTissueCodeListingPanel</id>
+											<id>DockableExperimentListingTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -162,10 +162,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableExperimentListingTable">
-										<replacement id="dockablesingle DockableExperimentListingTable"/>
+									<layout factory="predefined" placeholder="dock.single.DockableMoTrPACTissueCodeListingPanel">
+										<replacement id="dockablesingle DockableMoTrPACTissueCodeListingPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableExperimentListingTable</id>
+											<id>DockableMoTrPACTissueCodeListingPanel</id>
 											<area/>
 										</delegate>
 									</layout>

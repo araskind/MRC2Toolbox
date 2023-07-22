@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.mp;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -35,6 +36,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -53,6 +55,7 @@ public class AgilentDataCompressionTask extends AbstractTask {
 	private File destinationDir;
 	private Collection<Path>rawFilesPathList;
 	private String assayName;
+	private Collection<String>fileCheckSums;
 		
 	public AgilentDataCompressionTask(
 			File inputFileList, 
@@ -64,6 +67,7 @@ public class AgilentDataCompressionTask extends AbstractTask {
 		this.rawDataDirectories = rawDataDirectories;
 		this.destinationDir = destinationDir;
 		this.assayName = assayName;
+		fileCheckSums = new ArrayList<String>();
 	}
 
 	@Override
@@ -90,6 +94,12 @@ public class AgilentDataCompressionTask extends AbstractTask {
 		}
 		try {
 			writeLog();
+		} catch (Exception e) {
+			e.printStackTrace();
+			setStatus(TaskStatus.ERROR);
+		}
+		try {
+			writeCheckSumFile();
 		} catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
@@ -174,9 +184,20 @@ public class AgilentDataCompressionTask extends AbstractTask {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if(destination.exists())
+				if(destination.exists()) {
+					
 					processedFileNames.add(rawFileName);
-				
+					
+					//	Checksum
+					String zipHash = "";
+					try {
+						zipHash = DigestUtils.sha256Hex(new FileInputStream(destination));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					fileCheckSums.add("RAW/" + destination.getName() + "," + zipHash);
+				}
 				processed++;
 			}			
 		}
@@ -204,6 +225,22 @@ public class AgilentDataCompressionTask extends AbstractTask {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	private void writeCheckSumFile() {
+		
+		Path checkSumPath = 
+				Paths.get(destinationDir.getAbsolutePath(), "raw_data_checksums.txt");
+		try {
+			Files.write(
+					checkSumPath, 
+					fileCheckSums, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	

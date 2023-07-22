@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,6 +46,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -67,6 +69,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXSource;
 
+import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.RegexFileFilter;
@@ -174,12 +177,54 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			Files.createDirectories(Paths.get("Y:\\DataAnalysis\\_Reports\\LongPath\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAA"
-					+ "AAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFF"
-					+ "FFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA\\FFFFFFFFFFFFFFFFFFFFFFFFF\\AAAAAAAAAAAAAAAAAAAAAAAAAAA"));
-			//	parseLibraryFile();
+			copyQcanvasResults();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void copyQcanvasResults() {
+		
+		Path sourceFolderPath = 
+				Paths.get("O:\\_QCANVAS\\EX01263\\Kidney-POS-named-rep");		
+		String destinationFolder = "Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\QCeval";
+		Set<File> results = new TreeSet<File>();
+		FIOUtils.findFilesByNameRecursively(sourceFolderPath.toFile(), "normalized_by_SERRF_with_blanks_and_NAs.csv", results);			
+		
+//		List<Path> dataFilePathList = FIOUtils.findFilesByName(sourceFolderPath,
+//				"normalized_by_SERRF_with_blanks_and_NAs.csv");
+		List<String> readInString = new ArrayList<String>();
+		List<String> dfString = new ArrayList<String>();
+		int counter = 1;
+		for (File dataFile : results) {
+			
+			String newFileName = 
+					FileNameUtils.getBaseName(dataFile.getName()) + "-" + counter + ".csv";			
+			try {
+				Files.copy(Paths.get(dataFile.getAbsolutePath()), 
+						Paths.get(destinationFolder, newFileName),
+					      StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String datName = "data" + counter;
+			dfString.add("\"" + datName + "\" = " + datName);
+			String readFileString = datName + " <- read.csv('" + newFileName + "', check.names=FALSE, row.names = 1)";
+			readInString.add(readFileString);
+			counter++;
+		}
+		readInString.add("ld <- list(" + StringUtils.join(dfString, ",") + ")");
+		Path readInFilePath = Paths.get("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\QCeval\\readIn.R");
+		try {
+			Files.write(
+					readInFilePath, 
+					readInString, 
+					StandardCharsets.UTF_8, 
+					StandardOpenOption.CREATE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -642,8 +687,10 @@ public class RunContainer {
 	private static void readThermoWorklistFromJson() {
 		
 		String outputName = 
-				"Y:\\Charles\\2023-03-15 F2 plasma RPLC\\RPLCneg\\All\\JSON\\2023-03-15 F2 plasma RPLC-NEG manifest.TXT";
-		File jsonFolder = new File("Y:\\Charles\\2023-03-15 F2 plasma RPLC\\RPLCneg\\All\\JSON");
+				"E:\\DataAnalysis\\MSMS\\Thermo\\2022_1202_CDiff_HSST3_20min_Runs_Final_Redo"
+				+ "\\NEG\\JSON\\2022_1202_CDiff_HSST3_20min_Runs_Final_Redo_manifest_NEG.TXT";
+		File jsonFolder = new File("E:\\DataAnalysis\\MSMS\\Thermo\\"
+				+ "2022_1202_CDiff_HSST3_20min_Runs_Final_Redo\\NEG\\JSON");
 		File[] jsonFileList = JSONUtils.getJsonFileList(jsonFolder);
 		Collection<ThermoRawMetadata>metadataList = 
 				new ArrayList<ThermoRawMetadata>();

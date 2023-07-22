@@ -829,8 +829,12 @@ public class CompoundMsReadyCuratorFrame extends JFrame
 		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
 		Connection conn = ConnectionManager.getConnection();
 		String query =
-			"SELECT ACCESSION, NAME, CDK_FORMULA, CDK_MASS, CDK_SMILES, CDK_INCHI_KEY, CHARGE " +
-			"FROM COMPOUNDDB.COCONUT_COMPOUND_DATA D WHERE MS_READY_INCHI_KEY IS NULL AND CDK_SMILES IS NOT NULL";
+			"SELECT ACCESSION, NAME, CDK_FORMULA, CDK_MASS, "
+			+ "CDK_SMILES, CDK_INCHI_KEY, CHARGE " 
+			+ "FROM COMPOUNDDB.COCONUT_COMPOUND_DATA D "
+			+ "WHERE MS_READY_INCHI_KEY IS NULL "
+			+ "AND CDK_SMILES IS NOT NULL "
+			+ "AND ANNOT_LEVEL > 2";
 		
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
