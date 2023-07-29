@@ -73,6 +73,7 @@ import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.dataimport.AddPubchemCompoun
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.dataimport.DatabaseCompoundImportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.CompoundMsReadyCuratorFrame;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.spectrum.DockableSpectraTable;
+import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.tauto.TautomerCuratorFrame;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSLibraryEntryPropertiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.DockableMsMsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
@@ -125,7 +126,8 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 	private SynonymTableModelListener synMoldelListener;
 	private BatchCompoundDatabaseSearchDialog batchCompoundDatabaseSearchDialog;
 	private CompoundDatabaseCuratorFrame compoundDatabaseCuratorFrame;
-	private static CompoundMsReadyCuratorFrame compoundMsReadyCuratorFrame;
+	private static CompoundMsReadyCuratorFrame compoundMsReadyCuratorFrame;	
+	private static TautomerCuratorFrame tautomerCuratorFrame;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("pubChem", 16);
 	private static final Icon clearSearchIcon = GuiUtils.getIcon("clearSearch", 24);
@@ -366,6 +368,25 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		
 		if(command.equals(MainActionCommands.SHOW_MS_READY_COMPOUND_CURATOR.getName()))
 			showMsReadyCompoundCurator();		
+		
+		if(command.equals(MainActionCommands.SHOW_TAUTOMER_CURATOR.getName()))
+			showTautomerCurator();	
+	}
+	
+	private void showTautomerCurator() {
+		
+		if(tautomerCuratorFrame != null) {
+			
+			if(!tautomerCuratorFrame.isVisible())
+				tautomerCuratorFrame.setVisible(true);
+			
+			tautomerCuratorFrame.toFront();
+			return;
+		}		
+		tautomerCuratorFrame = new TautomerCuratorFrame();
+		tautomerCuratorFrame.setLocationRelativeTo(this.getContentPane());
+		tautomerCuratorFrame.setVisible(true);
+		tautomerCuratorFrame.toFront();
 	}
 	
 	private void showMsReadyCompoundCurator() {

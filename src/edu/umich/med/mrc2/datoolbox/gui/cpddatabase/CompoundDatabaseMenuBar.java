@@ -56,6 +56,7 @@ public class CompoundDatabaseMenuBar extends CommonMenuBar {
 	private static final Icon findCompoundListIconSmall = GuiUtils.getIcon("findList", 16);
 	private static final Icon curateCompoundIcon = GuiUtils.getIcon("curateCompound", 24);
 	private static final Icon curateMsReadyCompoundIcon = GuiUtils.getIcon("curateMsReadyCompound", 24);
+	private static final Icon curateTautomersIcon = GuiUtils.getIcon("tautomerSettings", 32);
 	
 	// Menus
 	private JMenu
@@ -73,6 +74,7 @@ public class CompoundDatabaseMenuBar extends CommonMenuBar {
 	private JMenuItem
 		curateDbMenuItem,
 		curateMsReadyMenuItem,
+		curateTautomersMenuItem,
 		editEntryMenuItem,
 		deleteEntryMenuItem;
 
@@ -128,6 +130,10 @@ public class CompoundDatabaseMenuBar extends CommonMenuBar {
 		curateMsReadyMenuItem = addItem(editMenu, 
 				MainActionCommands.SHOW_MS_READY_COMPOUND_CURATOR, 
 				curateMsReadyCompoundIcon);
+		
+		curateTautomersMenuItem = addItem(editMenu, 
+				MainActionCommands.SHOW_TAUTOMER_CURATOR, 
+				curateTautomersIcon);
 		
 		add(editMenu);
 		

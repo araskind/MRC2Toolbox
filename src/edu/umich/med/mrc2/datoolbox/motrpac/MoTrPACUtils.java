@@ -90,11 +90,35 @@ public class MoTrPACUtils {
 		//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
 			//	createMoTrPACFileManifests4PreCovidAdipose();
-			createMoTrPACFileManifests4PreCovidAdipose();
+			createMoTrPACFileManifests4Pass1A18();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}	
+	}
+	
+	private static void createMoTrPACFileManifests4Pass1A18() {
+		
+		List<String>tissueTypes = Arrays.asList(
+				"T31",
+				"T55",
+				//"T58",
+				"T59",
+				"T66",
+				"T68",
+				"T69",
+				"T70");
+		File parentDirectory = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18");
+		String batchDateIdentifier = "BATCH1_20230710";
+		String processingDateIdentifier = "PROCESSED_20230710";
+		createMoTrPACFileManifest(
+				tissueTypes, 
+				parentDirectory,
+				batchDateIdentifier,
+				processingDateIdentifier,
+				"20230725",
+				false);
+	}
 		
 	private static void createMotrpacDataUploadDirectoryStructure(
 			List<String>tissueTypes, 
@@ -213,10 +237,10 @@ public class MoTrPACUtils {
 				checkSumData.append(localPath + "," + zipHash + "\n");
 			}
 		}
-
+		String withCorrectedSeparator = checkSumData.toString().replaceAll("\\\\", "/");
 		File manifestFile = Paths.get(parentDirectory.getAbsolutePath(), 
 				tissue, assay, batchId, "file_manifest_" + manifestDate + ".csv").toFile();
-		FileUtils.writeStringToFile(manifestFile, checkSumData.toString(), Charset.defaultCharset());
+		FileUtils.writeStringToFile(manifestFile, withCorrectedSeparator, Charset.defaultCharset());
 	}
 	
 	public static void createMoTrPACTissueAssayNoRawManifestFile(

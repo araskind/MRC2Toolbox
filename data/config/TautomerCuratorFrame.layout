@@ -99,50 +99,54 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1600213802090" orientation="VERTICAL" divider="0.6">
-											<node nodeId="1644512105067" orientation="VERTICAL" divider="0.45316198850186007">
-												<node nodeId="1644512114004" orientation="VERTICAL" divider="0.25">
-													<leaf id="2" nodeId="1600213802086">
+										<node nodeId="1690570955468" orientation="VERTICAL" divider="0.7588495575221239">
+											<node nodeId="1690570978384" orientation="VERTICAL" divider="0.6169590643274854">
+												<node nodeId="1690570997704" orientation="VERTICAL" divider="0.6372288402130967">
+													<leaf id="5" nodeId="1690570945585">
 														<placeholders>
-															<placeholder>dock.single.DockableProcessingMethodsPanel</placeholder>
+															<placeholder>dock.single.PrimaryCompoundsListingTable</placeholder>
 														</placeholders>
+														<placeholder-map>
+															<version>0</version>
+															<format>dock.PlaceholderList</format>
+															<entry>
+																<key shared="false">
+																	<placeholder>dock.single.PrimaryCompoundsListingTable</placeholder>
+																</key>
+															</entry>
+														</placeholder-map>
 													</leaf>
-													<leaf id="0" nodeId="1600213802088">
+													<leaf id="4" nodeId="1690570997702">
 														<placeholders>
-															<placeholder>dock.single.DockableInputFilesPanel</placeholder>
+															<placeholder>dock.single.TautomersListingTable</placeholder>
 														</placeholders>
 													</leaf>
 												</node>
-												<leaf id="1" nodeId="1600213802092">
+												<node nodeId="1690570984338" orientation="HORIZONTAL" divider="0.5007278020378457">
+													<leaf id="2" nodeId="1690570978382">
+														<placeholders>
+															<placeholder>dock.single.TautomerCuratorPrimaryMolStructurePanel</placeholder>
+														</placeholders>
+													</leaf>
+													<leaf id="3" nodeId="1690570984337">
+														<placeholders>
+															<placeholder>dock.single.TautomerCuratorTautomerMolStructurePanel</placeholder>
+														</placeholders>
+													</leaf>
+												</node>
+											</node>
+											<node nodeId="1690570965985" orientation="HORIZONTAL" divider="0.49890750182083027">
+												<leaf id="1" nodeId="1690570965983">
 													<placeholders>
-														<placeholder>dock.single.DockableAutomatorTaskTable</placeholder>
+														<placeholder>dock.single.OriginalStructuralDescriptorsPanel</placeholder>
+													</placeholders>
+												</leaf>
+												<leaf id="0" nodeId="1690570955466">
+													<placeholders>
+														<placeholder>dock.single.MSReadyStructuralDescriptorsPanel</placeholder>
 													</placeholders>
 												</leaf>
 											</node>
-											<leaf id="3" nodeId="1600213802094">
-												<placeholders>
-													<placeholder>dock.single.DockableAutomatorConsole</placeholder>
-													<placeholder>dock.single.DockableFailedTasksTable</placeholder>
-												</placeholders>
-												<placeholder-map>
-													<version>0</version>
-													<format>dock.PlaceholderList</format>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableFailedTasksTable</placeholder>
-														</key>
-														<item key="convert" type="b">true</item>
-														<item key="convert-keys" type="a"/>
-													</entry>
-													<entry>
-														<key shared="false">
-															<placeholder>dock.single.DockableAutomatorConsole</placeholder>
-														</key>
-														<item key="convert" type="b">true</item>
-														<item key="convert-keys" type="a"/>
-													</entry>
-												</placeholder-map>
-											</leaf>
 										</node>
 									</content>
 								</delegate>
@@ -154,93 +158,64 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableInputFilesPanel">
-										<replacement id="dockablesingle DockableInputFilesPanel"/>
+									<layout factory="predefined" placeholder="dock.single.MSReadyStructuralDescriptorsPanel">
+										<replacement id="dockablesingle MSReadyStructuralDescriptorsPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableInputFilesPanel</id>
+											<id>MSReadyStructuralDescriptorsPanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableAutomatorTaskTable">
-										<replacement id="dockablesingle DockableAutomatorTaskTable"/>
+									<layout factory="predefined" placeholder="dock.single.OriginalStructuralDescriptorsPanel">
+										<replacement id="dockablesingle OriginalStructuralDescriptorsPanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableAutomatorTaskTable</id>
+											<id>OriginalStructuralDescriptorsPanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableProcessingMethodsPanel">
-										<replacement id="dockablesingle DockableProcessingMethodsPanel"/>
+									<layout factory="predefined" placeholder="dock.single.TautomerCuratorPrimaryMolStructurePanel">
+										<replacement id="dockablesingle TautomerCuratorPrimaryMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableProcessingMethodsPanel</id>
+											<id>TautomerCuratorPrimaryMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>1</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableFailedTasksTable</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableFailedTasksTable</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.DockableAutomatorConsole</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.DockableAutomatorConsole</item>
-											</entry>
-										</placeholders>
+									<layout factory="predefined" placeholder="dock.single.TautomerCuratorTautomerMolStructurePanel">
+										<replacement id="dockablesingle TautomerCuratorTautomerMolStructurePanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>TautomerCuratorTautomerMolStructurePanel</id>
+											<area/>
+										</delegate>
 									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableFailedTasksTable">
-												<replacement id="dockablesingle DockableFailedTasksTable"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableFailedTasksTable</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.DockableAutomatorConsole">
-												<replacement id="dockablesingle DockableAutomatorConsole"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>DockableAutomatorConsole</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.TautomersListingTable">
+										<replacement id="dockablesingle TautomersListingTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>TautomersListingTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.PrimaryCompoundsListingTable">
+										<replacement id="dockablesingle PrimaryCompoundsListingTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>PrimaryCompoundsListingTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>
@@ -270,7 +245,7 @@
 				</base>
 				<modes>
 					<dockables>
-						<entry id="single DockableProcessingMethodsPanel" current="dock.mode.normal">
+						<entry id="single TautomerCuratorTautomerMolStructurePanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -281,17 +256,19 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableProcessingMethodsPanel</placeholder>
+											<placeholder>dock.single.TautomerCuratorTautomerMolStructurePanel</placeholder>
 											<backup-path>
-												<node location="BOTTOM" size="0.4304635761589404" id="1644512080532"/>
-												<leaf id="1600213802086"/>
+												<node location="TOP" size="0.7588495575221239" id="1690570955468"/>
+												<node location="BOTTOM" size="0.75" id="1690570978384"/>
+												<node location="RIGHT" size="0.10116448326055316" id="1690570984338"/>
+												<leaf id="1690570984337"/>
 											</backup-path>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableAutomatorTaskTable" current="dock.mode.normal">
+						<entry id="single MSReadyStructuralDescriptorsPanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -302,18 +279,17 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableAutomatorTaskTable</placeholder>
+											<placeholder>dock.single.MSReadyStructuralDescriptorsPanel</placeholder>
 											<backup-path>
-												<node location="RIGHT" size="0.75" id="1600213802082"/>
-												<node location="TOP" size="0.6" id="1600213802090"/>
-												<leaf id="1600213802092"/>
+												<node location="BOTTOM" size="0.75" id="1690570955468"/>
+												<leaf id="1690570955466"/>
 											</backup-path>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableAutomatorConsole" current="dock.mode.normal">
+						<entry id="single TautomerCuratorPrimaryMolStructurePanel" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -324,43 +300,18 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableAutomatorConsole</placeholder>
+											<placeholder>dock.single.TautomerCuratorPrimaryMolStructurePanel</placeholder>
 											<backup-path>
-												<node location="RIGHT" size="0.75" id="1600213802082"/>
-												<node location="BOTTOM" size="0.4" id="1600213802090"/>
-												<leaf id="1600213802094"/>
-											</backup-path>
-										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>1</index>
-											<placeholder>dock.single.DockableAutomatorConsole</placeholder>
-										</property>
-									</location>
-								</property>
-							</properties>
-						</entry>
-						<entry id="single DockableInputFilesPanel" current="dock.mode.normal">
-							<history>
-								<mode>dock.mode.normal</mode>
-							</history>
-							<properties>
-								<property id="dock.mode.normal">
-									<mode>dock.mode.normal</mode>
-									<root>ccontrol center</root>
-									<applicationDefined>false</applicationDefined>
-									<location>
-										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableInputFilesPanel</placeholder>
-											<backup-path>
-												<node location="LEFT" size="0.39612015018773467" id="1600213802082"/>
-												<leaf id="1600213802088"/>
+												<node location="TOP" size="0.7588495575221239" id="1690570955468"/>
+												<node location="BOTTOM" size="0.75" id="1690570978384"/>
+												<leaf id="1690570978382"/>
 											</backup-path>
 										</property>
 									</location>
 								</property>
 							</properties>
 						</entry>
-						<entry id="single DockableFailedTasksTable" current="dock.mode.normal">
+						<entry id="single TautomersListingTable" current="dock.mode.normal">
 							<history>
 								<mode>dock.mode.normal</mode>
 							</history>
@@ -371,16 +322,58 @@
 									<applicationDefined>false</applicationDefined>
 									<location>
 										<property factory="SplitDockPlaceholderProperty">
-											<placeholder>dock.single.DockableFailedTasksTable</placeholder>
+											<placeholder>dock.single.TautomersListingTable</placeholder>
 											<backup-path>
-												<node location="RIGHT" size="0.75" id="1600213802082"/>
-												<node location="BOTTOM" size="0.4" id="1600213802090"/>
-												<leaf id="1600213802094"/>
+												<node location="TOP" size="0.7588495575221239" id="1690570955468"/>
+												<node location="TOP" size="0.533625730994152" id="1690570978384"/>
+												<node location="BOTTOM" size="0.75" id="1690570997704"/>
+												<leaf id="1690570997702"/>
 											</backup-path>
 										</property>
-										<property factory="StackDockPropertyFactory">
-											<index>0</index>
-											<placeholder>dock.single.DockableFailedTasksTable</placeholder>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single OriginalStructuralDescriptorsPanel" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.OriginalStructuralDescriptorsPanel</placeholder>
+											<backup-path>
+												<node location="BOTTOM" size="0.75" id="1690570955468"/>
+												<node location="LEFT" size="0.49890750182083027" id="1690570965985"/>
+												<leaf id="1690570965983"/>
+											</backup-path>
+										</property>
+									</location>
+								</property>
+							</properties>
+						</entry>
+						<entry id="single PrimaryCompoundsListingTable" current="dock.mode.normal">
+							<history>
+								<mode>dock.mode.normal</mode>
+							</history>
+							<properties>
+								<property id="dock.mode.normal">
+									<mode>dock.mode.normal</mode>
+									<root>ccontrol center</root>
+									<applicationDefined>false</applicationDefined>
+									<location>
+										<property factory="SplitDockPlaceholderProperty">
+											<placeholder>dock.single.PrimaryCompoundsListingTable</placeholder>
+											<backup-path>
+												<node location="TOP" size="0.7588495575221239" id="1690570955468"/>
+												<node location="TOP" size="0.533625730994152" id="1690570978384"/>
+												<node location="TOP" size="0.25" id="1690570997704"/>
+												<leaf id="1690570945585"/>
+											</backup-path>
 										</property>
 									</location>
 								</property>

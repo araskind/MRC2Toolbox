@@ -29,6 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -147,15 +148,13 @@ import edu.umich.med.mrc2.datoolbox.utils.JSONUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MSReadyUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
 import edu.umich.med.mrc2.datoolbox.utils.PubChemUtils;
+import edu.umich.med.mrc2.datoolbox.utils.WebUtils;
 import edu.umich.med.mrc2.datoolbox.utils.XmlUtils;
 import io.github.dan2097.jnainchi.InchiStatus;
 
 public class RunContainer {
 
 	public static String dataDir = "." + File.separator + "data" + File.separator;
-	private static String dbHome = dataDir + "database" + File.separator + "CefAnalyzerDB";
-	private static String dbUser = "CefAnalyzer";
-	private static String dbPassword = "CefAnalyzer";
 
 	public static final String pubchemCidUrl = "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/";
 	private static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
@@ -177,11 +176,27 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			copyQcanvasResults();
+			testHmdbXmlFetch("HMDB0000142");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void testHmdbXmlFetch(String accession) {
+		
+		InputStream hmdbXmlStream = null;
+		try {
+			hmdbXmlStream = WebUtils.getInputStreamFromURL("https://hmdb.ca/metabolites/" + accession + ".xml");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(hmdbXmlStream == null)
+			return;
+		
+		Document xmlDocument = XmlUtils.readXmlStream(hmdbXmlStream);
+		Element errorElement = xmlDocument.getRootElement().getChild("error");
+		System.out.println("***");
 	}
 	
 	private static void copyQcanvasResults() {

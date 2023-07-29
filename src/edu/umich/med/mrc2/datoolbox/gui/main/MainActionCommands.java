@@ -954,6 +954,10 @@ public enum MainActionCommands {
 	EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND("Edit compound MS-ready structure"),
 	SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND("Save compound MS-ready structure"),
 	
+	//	Tautomer curator
+	SHOW_TAUTOMER_CURATOR("Show tautomer curator"),
+	FETCH_TAUTOMER_DATA_FOR_CURATION("Fetch tautomer data for curation"),
+	
 	//	Synonym editor
 	ADD_SYNONYM_DIALOG_COMMAND("Add synonym dialog"),
 	ADD_SYNONYM_COMMAND("Add synonym"),
