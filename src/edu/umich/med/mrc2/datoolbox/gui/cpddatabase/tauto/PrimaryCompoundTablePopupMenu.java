@@ -37,26 +37,35 @@ public class PrimaryCompoundTablePopupMenu  extends JPopupMenu {
 	 */
 	private static final long serialVersionUID = -4582990028092698728L;
 
-	private static final Icon validateIcon = GuiUtils.getIcon("checkboxFull", 24);
-	private static final Icon saveMsReadyIcon = GuiUtils.getIcon("save", 24);
+	private static final Icon markIcon = GuiUtils.getIcon("checkboxFull", 24);
+	private static final Icon unmarkIcon = GuiUtils.getIcon("checkboxEmpty", 24);
+	private static final Icon copyAccessionIcon = GuiUtils.getIcon("copy", 24);
 
 	private JMenuItem
-		validateMenuItem,
-		saveMsReadyMenuItem;
+		markAsCuratedMenuItem,
+		markNotCuratedMenuItem,
+		copyAccessionMenuItem;
 
 	public PrimaryCompoundTablePopupMenu(ActionListener listener) {
 
 		super();
+		
+		markAsCuratedMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.MARK_COMPOUND_GROUP_CURATED_COMMAND.getName(), listener,
+				MainActionCommands.MARK_COMPOUND_GROUP_CURATED_COMMAND.getName());
+		markAsCuratedMenuItem.setIcon(markIcon);
 
-		validateMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.VALIDATE_MS_READY_STRUCTURE.getName(), listener,
-				MainActionCommands.VALIDATE_MS_READY_STRUCTURE.getName());
-		validateMenuItem.setIcon(validateIcon);
+		markNotCuratedMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.MARK_COMPOUND_GROUP_NOT_CURATED_COMMAND.getName(), listener,
+				MainActionCommands.MARK_COMPOUND_GROUP_NOT_CURATED_COMMAND.getName());
+		markNotCuratedMenuItem.setIcon(unmarkIcon);
+		
+		addSeparator();
 
-		saveMsReadyMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName(), listener,
-				MainActionCommands.SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName());
-		saveMsReadyMenuItem.setIcon(saveMsReadyIcon);
+		copyAccessionMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName(), listener,
+				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName());
+		copyAccessionMenuItem.setIcon(copyAccessionIcon);
 	}
 
 }

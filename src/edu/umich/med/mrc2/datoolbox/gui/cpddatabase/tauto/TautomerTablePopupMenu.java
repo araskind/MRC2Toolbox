@@ -37,28 +37,36 @@ public class TautomerTablePopupMenu  extends JPopupMenu {
 	 */
 	private static final long serialVersionUID = -4582990028092698728L;
 
-	private static final Icon validateIcon = GuiUtils.getIcon("checkboxFull", 24);
-	private static final Icon saveMsReadyIcon = GuiUtils.getIcon("save", 24);
-
+	private static final Icon addIcon = GuiUtils.getIcon("addCompound", 24);
+	private static final Icon replaceIcon = GuiUtils.getIcon("replaceCompound", 24);
+	private static final Icon copyAccessionIcon = GuiUtils.getIcon("copy", 24);
+	
 	private JMenuItem
-		validateMenuItem,
-		saveMsReadyMenuItem;
+		addTautomerAsNewCompoundMenuItem,
+		replacePrimaryWithTautomerMenuItem,
+		copyAccessionMenuItem;
 
 	public TautomerTablePopupMenu(ActionListener listener) {
 
 		super();
 
-		validateMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.VALIDATE_MS_READY_STRUCTURE.getName(), listener,
-				MainActionCommands.VALIDATE_MS_READY_STRUCTURE.getName());
-		validateMenuItem.setIcon(validateIcon);
+		addTautomerAsNewCompoundMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.ADD_TAUTOMER_AS_NEW_COMPOUND_COMMAND.getName(), listener,
+				MainActionCommands.ADD_TAUTOMER_AS_NEW_COMPOUND_COMMAND.getName());
+		addTautomerAsNewCompoundMenuItem.setIcon(addIcon);
 
-		saveMsReadyMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName(), listener,
-				MainActionCommands.SAVE_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName());
-		saveMsReadyMenuItem.setIcon(saveMsReadyIcon);
+		replacePrimaryWithTautomerMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.REPLACE_PRIMARY_COMPOUND_WITH_TAUTOMER_COMMAND.getName(), listener,
+				MainActionCommands.REPLACE_PRIMARY_COMPOUND_WITH_TAUTOMER_COMMAND.getName());
+		replacePrimaryWithTautomerMenuItem.setIcon(replaceIcon);
+		
+		addSeparator();
+
+		copyAccessionMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.COPY_TAUTOMER_ACCESSION_COMMAND.getName(), listener,
+				MainActionCommands.COPY_TAUTOMER_ACCESSION_COMMAND.getName());
+		copyAccessionMenuItem.setIcon(copyAccessionIcon);
 	}
-
 }
 
 

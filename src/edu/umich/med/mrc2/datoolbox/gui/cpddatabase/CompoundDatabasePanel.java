@@ -615,7 +615,8 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 			return;
 
 		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-		StringSelection stringSelection = new StringSelection(compoundTable.getSelectedCompound().getPrimaryDatabaseId());
+		StringSelection stringSelection = new StringSelection(
+				compoundTable.getSelectedCompound().getPrimaryDatabaseId());
 		clpbrd.setContents(stringSelection, null);
 	}
 

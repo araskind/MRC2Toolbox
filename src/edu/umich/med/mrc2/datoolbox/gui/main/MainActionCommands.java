@@ -690,6 +690,7 @@ public enum MainActionCommands {
 	EDIT_DATABASE_ENTRY_COMMAND("Edit database entry"),
 	DELETE_DATABASE_ENTRY_COMMAND("Delete database entry"),
 	COPY_COMPOUND_ACCESSION_COMMAND("Copy accession number"),
+	COPY_TAUTOMER_ACCESSION_COMMAND("Copy tautomer accession number"),
 	COPY_COMPOUND_IDENTITY_COMMAND("Copy compound identity"),
 	COPY_COMPOUND_FORMULA_COMMAND("Copy compound formula"),
 	COPY_COMPOUND_NAME_COMMAND("Copy compound name"),
@@ -1260,6 +1261,11 @@ public enum MainActionCommands {
 	EDIT_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND("Edit zwitter-ion Generator settings"),
 	SAVE_ZWITTER_ION_GENERATOR_SETTINGS_COMMAND("Save zwitter-ion Generator settings"),
 
+	//	Tautomer curator
+	MARK_COMPOUND_GROUP_CURATED_COMMAND("Mark compound group as curated"),
+	MARK_COMPOUND_GROUP_NOT_CURATED_COMMAND("Mark compound group as NOT curated"),
+	ADD_TAUTOMER_AS_NEW_COMPOUND_COMMAND("Add selected tautomer as new compound"),
+	REPLACE_PRIMARY_COMPOUND_WITH_TAUTOMER_COMMAND("Replace primary compound with selected tautomer"),
 	;
 
 	private final String name;

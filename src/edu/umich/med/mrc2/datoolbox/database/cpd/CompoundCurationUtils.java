@@ -24,7 +24,10 @@ package edu.umich.med.mrc2.datoolbox.database.cpd;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.dbparse.integrate.HMDBIntegration;
 
 public class CompoundCurationUtils {
 	
@@ -61,4 +64,86 @@ public class CompoundCurationUtils {
 		ps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
+	
+	public static void addSelectedTautomerAsNewCompound(
+			CompoundIdentity primaryCompound, CompoundIdentity tautomer) {
+		
+		if(primaryCompound == null || tautomer == null)
+			return;
+		
+		if(tautomer.getPrimaryDatabase().equals(CompoundDatabaseEnum.HMDB)) {
+			try {
+				HMDBIntegration.copyHMDBcompoundToCompounds(tautomer.getPrimaryDatabaseId());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			removeTautomerFromCompoundGroup(
+					primaryCompound.getPrimaryDatabaseId(), tautomer.getPrimaryDatabaseId());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void replacePrimaryCompoundWithSelectedTautomer(
+			CompoundIdentity primaryCompound, CompoundIdentity tautomer) {
+
+		if(primaryCompound == null || tautomer == null)
+			return;
+		
+		try {
+			removeTautomerFromCompoundGroup(
+					primaryCompound.getPrimaryDatabaseId(), tautomer.getPrimaryDatabaseId());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			removeCompound(primaryCompound.getPrimaryDatabaseId());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(tautomer.getPrimaryDatabase().equals(CompoundDatabaseEnum.HMDB)) {
+			try {
+				HMDBIntegration.copyHMDBcompoundToCompounds(tautomer.getPrimaryDatabaseId());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void removeCompound(String compoundAccession) throws Exception{
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"DELETE FROM COMPOUNDDB.COMPOUND_DATA WHERE ACCESSION = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, compoundAccession);
+		ps.executeQuery();	 
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

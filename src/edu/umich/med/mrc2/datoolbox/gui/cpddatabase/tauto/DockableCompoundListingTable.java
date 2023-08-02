@@ -31,7 +31,6 @@ import javax.swing.JScrollPane;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.DatabaseCompoundTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -54,9 +53,9 @@ public class DockableCompoundListingTable
 			Collection<CompoundIdentity> compoundCollection) {
 		cpdTable.setTableModelFromCompoundCollection(compoundCollection);
 	}
-
-	public MsFeatureIdentity getSelectedIdentity() {
-		return cpdTable.getSelectedIdentity();
+	
+	public CompoundIdentity getSelectedCompound() {
+		return cpdTable.getSelectedCompound();
 	}
 
 	public DatabaseCompoundTable getTable() {

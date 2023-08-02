@@ -25,6 +25,9 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.HeadlessException;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -45,6 +48,7 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
@@ -64,9 +68,10 @@ import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.common.theme.ThemeMap;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
+import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundCurationUtils;
+import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.DockableCuratedDatabaseCompoundTable;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.msready.DockableCompoundStructuralDescriptorsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PersistentLayout;
@@ -75,6 +80,7 @@ import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
+import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
@@ -98,7 +104,7 @@ public class TautomerCuratorFrame extends JFrame
 	private CControl control;
 	private CGrid grid;
 	
-	private DockableCompoundListingTable primaryCompoundListingTable;
+	private DockableCuratedDatabaseCompoundTable primaryCompoundListingTable;
 	private DockableCompoundListingTable tautomerListingTable;
 	
 	private DockableCompoundStructuralDescriptorsPanel primaryStructuralDescriptorsPanel;
@@ -116,6 +122,7 @@ public class TautomerCuratorFrame extends JFrame
 	
 	private CompoundIdentity selectedIdentity;
 	private Map<CompoundIdentity,Collection<CompoundIdentity>>tautomerMap;
+	private Map<CompoundIdentity,Boolean>curationMap;
 	
 	public TautomerCuratorFrame() throws HeadlessException {
 
@@ -134,7 +141,7 @@ public class TautomerCuratorFrame extends JFrame
 		grid = new CGrid(control);
 
 		primaryCompoundListingTable = 
-				new DockableCompoundListingTable(
+				new DockableCuratedDatabaseCompoundTable(
 						"PrimaryCompoundsListingTable", "Primary compounds");
 		primaryCompoundListingTable.getTable().
 			getSelectionModel().addListSelectionListener(this);		
@@ -214,8 +221,112 @@ public class TautomerCuratorFrame extends JFrame
 			
 		if(command.equals(MainActionCommands.FETCH_COMPOUND_DATA_FOR_CURATION.getName()))
 			fetchCompoundDataForCuration();
+		
+		if(command.equals(MainActionCommands.MARK_COMPOUND_GROUP_CURATED_COMMAND.getName()))
+			markCompoundGroupCurated(true);
+		
+		if(command.equals(MainActionCommands.MARK_COMPOUND_GROUP_NOT_CURATED_COMMAND.getName()))
+			markCompoundGroupCurated(false);
+		
+		if(command.equals(MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName()))
+			copyPrimaryCompoundAccession();
+		
+		if(command.equals(MainActionCommands.ADD_TAUTOMER_AS_NEW_COMPOUND_COMMAND.getName()))
+			addSelectedTautomerAsNewCompound();
+		
+		if(command.equals(MainActionCommands.REPLACE_PRIMARY_COMPOUND_WITH_TAUTOMER_COMMAND.getName()))
+			replacePrimaryCompoundWithSelectedTautomer();
+		
+		if(command.equals(MainActionCommands.COPY_TAUTOMER_ACCESSION_COMMAND.getName()))
+			copyTautomerAccession();
 	}
 	
+	private void markCompoundGroupCurated(boolean b) {
+		
+		CompoundIdentity cid = primaryCompoundListingTable.getSelectedCompound();
+		if(cid == null)
+			return;
+		
+		try {
+			CompoundCurationUtils.setCompoundTautomerGroupCuratedFlag(cid.getPrimaryDatabaseId(), b);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		primaryCompoundListingTable.updateCidData(cid, b);
+		curationMap.put(cid, b);
+	}
+
+	private void copyPrimaryCompoundAccession() {
+
+		CompoundIdentity cid = primaryCompoundListingTable.getSelectedCompound();
+		if(cid == null)
+			return;
+		
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection stringSelection = new StringSelection(cid.getPrimaryDatabaseId());
+		clpbrd.setContents(stringSelection, null);		
+	}
+
+	private void addSelectedTautomerAsNewCompound() {
+
+		CompoundIdentity primaryCid = 
+				primaryCompoundListingTable.getSelectedCompound();
+		CompoundIdentity tautomer = 
+				tautomerListingTable.getSelectedCompound();
+		
+		if(primaryCid == null || tautomer == null)
+			return;
+		
+		CompoundCurationUtils.addSelectedTautomerAsNewCompound(primaryCid, tautomer);		
+		tautomerMap.get(primaryCid).remove(tautomer);
+		tautomerMap.put(tautomer, new TreeSet<CompoundIdentity>());
+		curationMap.put(tautomer, true);
+		primaryCompoundListingTable.setTableModelFromCompoundCollection(curationMap);
+		primaryCompoundListingTable.selectCompoundIdentity(tautomer);
+	}
+
+	private void replacePrimaryCompoundWithSelectedTautomer() {
+
+		CompoundIdentity primaryCid = 
+				primaryCompoundListingTable.getSelectedCompound();
+		CompoundIdentity tautomer = 
+				tautomerListingTable.getSelectedCompound();
+		
+		if(primaryCid == null || tautomer == null)
+			return;
+		
+		String message = 
+				"Do you want to set " + tautomer.getName() + " (" + tautomer.getPrimaryDatabaseId() + 
+				") \nas a primary compound in the tautomer group instead of\n"
+				+ primaryCid.getName() + " (" + primaryCid.getPrimaryDatabaseId() + ")?";
+		int res = MessageDialog.showChoiceWithWarningMsg(message, this.getContentPane());
+		if(res != JOptionPane.YES_OPTION)
+			return;
+		
+		CompoundCurationUtils.replacePrimaryCompoundWithSelectedTautomer(primaryCid, tautomer);
+		
+		Collection<CompoundIdentity> tautList = tautomerMap.remove(primaryCid);
+		tautList.remove(tautomer);
+		tautList.add(primaryCid);
+		tautomerMap.put(tautomer, tautList);
+		boolean curated = curationMap.remove(primaryCid);
+		curationMap.put(tautomer, curated);
+		primaryCompoundListingTable.setTableModelFromCompoundCollection(curationMap);
+		primaryCompoundListingTable.selectCompoundIdentity(tautomer);
+	}
+
+	private void copyTautomerAccession() {
+
+		CompoundIdentity cid = tautomerListingTable.getSelectedCompound();
+		if(cid == null)
+			return;
+		
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection stringSelection = new StringSelection(cid.getPrimaryDatabaseId());
+		clpbrd.setContents(stringSelection, null);	
+	}
+
 	private void clearPanel() {
 		
 		primaryCompoundListingTable.getTable().getSelectionModel().removeListSelectionListener(this);
@@ -263,7 +374,7 @@ public class TautomerCuratorFrame extends JFrame
 				e.printStackTrace();
 			}
 			if(!tautomerMap.isEmpty()) 				
-				primaryCompoundListingTable.setTableModelFromCompoundCollection(tautomerMap.keySet()) ;
+				primaryCompoundListingTable.setTableModelFromCompoundCollection(curationMap) ;
 						
 			return null;			
 		}
@@ -271,12 +382,14 @@ public class TautomerCuratorFrame extends JFrame
 	
 	private void getTautomerMap() throws Exception{
 		
+		curationMap = new TreeMap<CompoundIdentity,Boolean>();
+		Map<String,Boolean>curatedIdMap = new TreeMap<String,Boolean>();
 		Map<String,Collection<String>>cpdIdMap = new TreeMap<String,Collection<String>>();
 		Map<String,Collection<String>>dbIdMap = new TreeMap<String,Collection<String>>();
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
 				"SELECT PRIMARY_ACCESSION, PRIMARY_SOURCE_DB,  " +
-				"SECONDARY_ACCESSION, SECONDARY_SOURCE_DB  " +
+				"SECONDARY_ACCESSION, SECONDARY_SOURCE_DB, CURATED  " +
 				"FROM COMPOUNDDB.COMPOUND_GROUP";
 		PreparedStatement ps = conn.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
@@ -286,6 +399,7 @@ public class TautomerCuratorFrame extends JFrame
 			String sa = rs.getString("SECONDARY_ACCESSION");
 			String pdb = rs.getString("PRIMARY_SOURCE_DB");
 			String sdb = rs.getString("SECONDARY_SOURCE_DB");
+			boolean isCurated = (rs.getString("CURATED") != null);
 			
 			if(!cpdIdMap.containsKey(pa))
 				cpdIdMap.put(pa, new TreeSet<String>());
@@ -301,6 +415,8 @@ public class TautomerCuratorFrame extends JFrame
 				dbIdMap.put(sdb, new TreeSet<String>());
 			
 			dbIdMap.get(sdb).add(sa);
+			
+			curatedIdMap.put(pa, isCurated);
 		}
 		rs.close();
 		ps.close();
@@ -321,6 +437,9 @@ public class TautomerCuratorFrame extends JFrame
 			
 			tautomerMap.put(compoundIdMap.get(cpdEntry.getKey()), secCids);
 		}
+		for(CompoundIdentity cid : tautomerMap.keySet()) 
+			curationMap.put(cid, curatedIdMap.get(cid.getPrimaryDatabaseId()));
+		
 		ConnectionManager.releaseConnection(conn);
 	}
 	
@@ -593,14 +712,14 @@ public class TautomerCuratorFrame extends JFrame
 			//	If primary compound changed
 			if(listener.equals(primaryCompoundListingTable.getTable())) {
 				
-				MsFeatureIdentity mfid = 
-						primaryCompoundListingTable.getSelectedIdentity();
+				CompoundIdentity mfid = 
+						primaryCompoundListingTable.getSelectedCompound();
 				if(mfid == null)
 					return;
 				
-				primaryStructuralDescriptorsPanel.loadCompoundIdentity(mfid.getCompoundIdentity());
-				primaryMolStructurePanel.showStructure(mfid.getCompoundIdentity().getSmiles());
-				Collection<CompoundIdentity> tautomers = tautomerMap.get(mfid.getCompoundIdentity());
+				primaryStructuralDescriptorsPanel.loadCompoundIdentity(mfid);
+				primaryMolStructurePanel.showStructure(mfid.getSmiles());
+				Collection<CompoundIdentity> tautomers = tautomerMap.get(mfid);
 				tautomerListingTable.setTableModelFromCompoundCollection(tautomers);
 				if(tautomers.size() == 1) {
 					
@@ -612,14 +731,14 @@ public class TautomerCuratorFrame extends JFrame
 			//	If tautomer changed
 			if(listener.equals(tautomerListingTable.getTable())) {
 				
-				MsFeatureIdentity mfid = 
-						tautomerListingTable.getSelectedIdentity();
+				CompoundIdentity mfid = 
+						tautomerListingTable.getSelectedCompound();
 				if(mfid == null)
 					return;
 				
 				tautomerStructuralDescriptorsPanel.clearPanel();
-				tautomerStructuralDescriptorsPanel.loadCompoundIdentity(mfid.getCompoundIdentity());
-				tautomerMolStructurePanel.showStructure(mfid.getCompoundIdentity().getSmiles());
+				tautomerStructuralDescriptorsPanel.loadCompoundIdentity(mfid);
+				tautomerMolStructurePanel.showStructure(mfid.getSmiles());
 			}
 		}	
 	}
