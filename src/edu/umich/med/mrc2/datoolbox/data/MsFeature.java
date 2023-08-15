@@ -1033,6 +1033,14 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		
 		return neutralMass % 1;
 	}
+	
+	public double getFractionalMassDefect() {
+		
+		if(spectrum.getPrimaryAdduct() == null)
+			return 0.0d;
+		
+		return spectrum.getPrimaryAdductBasePeakMz() % 1;
+	}
 }
 
 

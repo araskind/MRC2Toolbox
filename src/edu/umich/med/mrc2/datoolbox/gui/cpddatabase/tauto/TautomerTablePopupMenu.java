@@ -39,12 +39,14 @@ public class TautomerTablePopupMenu  extends JPopupMenu {
 
 	private static final Icon addIcon = GuiUtils.getIcon("addCompound", 24);
 	private static final Icon replaceIcon = GuiUtils.getIcon("replaceCompound", 24);
-	private static final Icon copyAccessionIcon = GuiUtils.getIcon("copy", 24);
+	private static final Icon copyAccessionIcon = GuiUtils.getIcon("copyId", 24);
+	private static final Icon copyTwoAccessionsIcon = GuiUtils.getIcon("copyWorklistToClipboard", 24);
 	
 	private JMenuItem
 		addTautomerAsNewCompoundMenuItem,
 		replacePrimaryWithTautomerMenuItem,
-		copyAccessionMenuItem;
+		copyAccessionMenuItem,
+		copyTwoAccessionsMenuItem;
 
 	public TautomerTablePopupMenu(ActionListener listener) {
 
@@ -66,6 +68,11 @@ public class TautomerTablePopupMenu  extends JPopupMenu {
 				MainActionCommands.COPY_TAUTOMER_ACCESSION_COMMAND.getName(), listener,
 				MainActionCommands.COPY_TAUTOMER_ACCESSION_COMMAND.getName());
 		copyAccessionMenuItem.setIcon(copyAccessionIcon);
+		
+		copyTwoAccessionsMenuItem = GuiUtils.addMenuItem(this,
+				MainActionCommands.COPY_PRIMARY_AND_TAUTOMER_ACCESSION_COMMAND.getName(), listener,
+				MainActionCommands.COPY_PRIMARY_AND_TAUTOMER_ACCESSION_COMMAND.getName());
+		copyTwoAccessionsMenuItem.setIcon(copyTwoAccessionsIcon);
 	}
 }
 

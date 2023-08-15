@@ -67,11 +67,12 @@ public class HMDBIntegration {
 				"INSERT INTO COMPOUNDDB.COMPOUND_DATA "
 				+ "(ACCESSION, SOURCE_DB, PRIMARY_NAME, MOL_FORMULA, EXACT_MASS, SMILES, "
 				+ "INCHI, INCHI_KEY, INCHI_KEY2D, CHARGE, MS_READY_MOL_FORMULA, "
-				+ "MS_READY_EXACT_MASS, MS_READY_SMILES, MS_READY_INCHI_KEY, MS_READY_INCHI_KEY2D) "
+				+ "MS_READY_EXACT_MASS, MS_READY_SMILES, MS_READY_INCHI_KEY, MS_READY_INCHI_KEY2D, MS_READY_CHARGE) "
 				+ "(SELECT ACCESSION, 'HMDB', NAME, FORMULA_FROM_SMILES, MASS_FROM_SMILES, "
 				+ "SMILES, INCHI, INCHI_KEY_FROM_SMILES, INCHI_KEY_FS_CONNECT, CHARGE, "
 				+ "MS_READY_MOL_FORMULA, MS_READY_EXACT_MASS, MS_READY_SMILES, MS_READY_INCHI_KEY, "
-				+ "MS_READY_INCHI_KEY2D FROM COMPOUNDDB.HMDB_COMPOUND_DATA WHERE ACCESSION = ?)";
+				+ "MS_READY_INCHI_KEY2D, MS_READY_CHARGE "
+				+ "FROM COMPOUNDDB.HMDB_COMPOUND_DATA WHERE ACCESSION = ?)";
 		PreparedStatement compoundCopyPs = conn.prepareStatement(compoundCopyQuery);
 		
 		String insertGroupQuery = 
@@ -129,6 +130,30 @@ public class HMDBIntegration {
 		sameCompoundPs.close();
 		compoundCopyPs.close();
 		insertGroupPs.close();
+		
+		//	Insert all primary compounds that have tautomers and remove secondary compounds
+		String primCpdQuery = 
+				"(ACCESSION, SOURCE_DB, PRIMARY_NAME, MOL_FORMULA, EXACT_MASS, SMILES,  " +
+				"INCHI, INCHI_KEY, INCHI_KEY2D, CHARGE, MS_READY_MOL_FORMULA,  " +
+				"MS_READY_EXACT_MASS, MS_READY_SMILES, MS_RE;ADY_INCHI_KEY, MS_READY_INCHI_KEY2D)  " +
+				"(SELECT ACCESSION, 'HMDB', NAME, FORMULA_FROM_SMILES, MASS_FROM_SMILES,  " +
+				"SMILES, INCHI, INCHI_KEY_FROM_SMILES, INCHI_KEY_FS_CONNECT, CHARGE,  " +
+				"MS_READY_MOL_FORMULA, MS_READY_EXACT_MASS, MS_READY_SMILES, MS_READY_INCHI_KEY,  " +
+				"MS_READY_INCHI_KEY2D FROM COMPOUNDDB.HMDB_COMPOUND_DATA WHERE ACCESSION IN ( " +
+				"SELECT DISTINCT L.PRIMARY_ACCESSION " +
+				"FROM COMPOUND_GROUP L  " +
+				"LEFT JOIN COMPOUND_DATA I ON L.PRIMARY_ACCESSION = I.ACCESSION " +
+				"WHERE I.ACCESSION IS NULL " +
+				"AND L.PRIMARY_ACCESSION IS NOT NULL)) ";
+		PreparedStatement primCpdPs = conn.prepareStatement(primCpdQuery);
+		primCpdPs.executeUpdate();		
+		primCpdQuery = 
+				"DELETE FROM COMPOUND_DATA WHERE ACCESSION IN ( " +
+				"SELECT DISTINCT SECONDARY_ACCESSION FROM COMPOUND_GROUP " +
+				"WHERE SECONDARY_ACCESSION IN (SELECT ACCESSION FROM COMPOUND_DATA))";
+		primCpdPs = conn.prepareStatement(primCpdQuery);
+		primCpdPs.executeUpdate();
+		primCpdPs.close();
 		ConnectionManager.releaseConnection(conn);
 		
 		//	Write out deprecated accessions
@@ -188,7 +213,7 @@ public class HMDBIntegration {
 				+ "MS_READY_INCHI_KEY2D FROM COMPOUNDDB.HMDB_COMPOUND_DATA WHERE ACCESSION = ?)";
 		PreparedStatement compoundCopyPs = conn.prepareStatement(compoundCopyQuery);
 		compoundCopyPs.setString(1, accession);
-		compoundCopyPs.executeQuery();		 
+		compoundCopyPs.executeQuery();	
 		compoundCopyPs.close();
 		ConnectionManager.releaseConnection(conn);
 	}

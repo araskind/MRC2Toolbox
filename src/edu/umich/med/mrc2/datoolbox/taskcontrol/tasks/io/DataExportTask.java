@@ -146,7 +146,16 @@ public class DataExportTask extends AbstractTask {
 		ExperimentDesign design = currentExperiment.getExperimentDesign();
 		experimentDesignSubset = design.getActiveDesignSubset();
 		activeSamples = design.getActiveSamplesForDesignSubset(experimentDesignSubset);
-		collectFeaturesForExport();
+		
+		if(msFeatureSet4export == null || msFeatureSet4export.isEmpty())
+			collectFeaturesForExport();
+		else {	//	remove empty data
+			msFeatureSet4export =
+					msFeatureSet4export.stream().
+					filter(f -> f.getAveragePeakArea()> 0.0d).
+					sorted(new MsFeatureComparator(SortProperty.RT)).
+					collect(Collectors.toList());			
+		}
 		
 		if(exportManifest)
 			writeManifestFile();
@@ -412,12 +421,13 @@ public class DataExportTask extends AbstractTask {
 	}
 
 	private void collectFeaturesForExport() {
-
+		
 		if (enableFilters) {
 
 			msFeatureSet4export =
 				currentExperiment.getActiveFeatureSetForDataPipeline(dataPipeline).
 				getFeatures().stream().
+				filter(f -> f.getAveragePeakArea()> 0.0d).
 				filter(f -> (f.getStatsSummary().getPooledFrequency() >= minPooledFrequency)).
 				filter(f -> (f.getStatsSummary().getPooledRsd() <= maxPooledRsd)).
 				sorted(new MsFeatureComparator(SortProperty.RT)).
@@ -425,7 +435,11 @@ public class DataExportTask extends AbstractTask {
 		}
 		else {
 			msFeatureSet4export =
-					currentExperiment.getActiveFeatureSetForDataPipeline(dataPipeline).getFeatures();
+					currentExperiment.getActiveFeatureSetForDataPipeline(dataPipeline).
+					getFeatures().stream().
+					filter(f -> f.getAveragePeakArea()> 0.0d).
+					sorted(new MsFeatureComparator(SortProperty.RT)).
+					collect(Collectors.toList());
 		}
 	}
 
@@ -624,12 +638,12 @@ public class DataExportTask extends AbstractTask {
 			if(msf.getSpectrum().getPrimaryAdduct() != null 
 					&& Math.abs(msf.getSpectrum().getPrimaryAdduct().getCharge()) == 1
 					&& msf.getSpectrum().getPrimaryAdduct().getOligomericState() > 1)
-				binnerMass =msf.getMonoisotopicMz();
+				binnerMass = msf.getMonoisotopicMz();
 				
 			line[columnCount] = msf.getName();
 			line[++columnCount] = compoundName;
 			line[++columnCount] = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() + 
-									mzFormat.format(msf.getNeutralMass()) + "_" + 
+									mzFormat.format(binnerMass) + "_" + 
 									rtFormat.format(msf.getRetentionTime());
 			line[++columnCount] = mzFormat.format(msf.getNeutralMass());
 			line[++columnCount] = mzFormat.format(binnerMass);
@@ -873,5 +887,13 @@ public class DataExportTask extends AbstractTask {
 				namingField,
 				exportManifest,
 				replaceSpecialCharacters);
+	}
+
+	public Collection<MsFeature> getMsFeatureSet4export() {
+		return msFeatureSet4export;
+	}
+
+	public void setMsFeatureSet4export(Collection<MsFeature> msFeatureSet4export) {
+		this.msFeatureSet4export = msFeatureSet4export;
 	}
 }

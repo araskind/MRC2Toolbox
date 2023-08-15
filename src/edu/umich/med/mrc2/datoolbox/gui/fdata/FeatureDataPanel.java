@@ -154,6 +154,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private MWTabExportDialog mwTabExportDialog;
 	private IntegratedReportDialog integratedReportDialog;
 	private FeatureDataCleanupDialog featureDataCleanupDialog;
+	
+	private boolean cleanEmtyFeatures;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -552,7 +554,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 					Collection<MsFeature>hm = 
 							cleaned.stream().
 							filter(f -> f.getRetentionTime() < mdRtCutof).
-							filter(f -> f.getAbsoluteMassDefectForPrimaryAdduct() > mdMassCutof).
+							filter(f -> f.getFractionalMassDefect() > mdMassCutof).
 							collect(Collectors.toSet());					
 					if(!hm.isEmpty())
 						cleaned.removeAll(hm);
@@ -1524,6 +1526,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MainWindow.hideProgressDialog();
 
 		//	Rerun statistics
+		cleanEmtyFeatures = true;
 		CalculateStatisticsTask statsTask = 
 				new CalculateStatisticsTask(currentExperiment, activeDataPipeline);
 		statsTask.addTaskListener(this);
@@ -1543,6 +1546,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.DESIGN).reloadDesign();
 
 		//	Rerun statistics
+		cleanEmtyFeatures = true;
 		CalculateStatisticsTask statsTask = 
 				new CalculateStatisticsTask(currentExperiment, activeDataPipeline);
 		statsTask.addTaskListener(this);
@@ -1609,6 +1613,11 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		MRC2ToolBoxCore.getMainWindow().getPreferencesDraw().switchDataPipeline(currentExperiment, activeDataPipeline);
 		currentExperiment.setStatisticsStatusForDataPipeline(activeDataPipeline, true);
 		resetFeatureTable();
+		
+		if(cleanEmtyFeatures) {			
+			cleanEmtyFeatures = false;
+			cleanEmptyFeatures();
+		}
 	}
 
 	public void findFeaturesByAdductMasses(

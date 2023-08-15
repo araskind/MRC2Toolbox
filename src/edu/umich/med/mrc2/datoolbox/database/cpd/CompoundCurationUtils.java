@@ -23,6 +23,10 @@ package edu.umich.med.mrc2.datoolbox.database.cpd;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
@@ -93,14 +97,7 @@ public class CompoundCurationUtils {
 
 		if(primaryCompound == null || tautomer == null)
 			return;
-		
-		try {
-			removeTautomerFromCompoundGroup(
-					primaryCompound.getPrimaryDatabaseId(), tautomer.getPrimaryDatabaseId());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		try {
 			removeCompound(primaryCompound.getPrimaryDatabaseId());
 		} catch (Exception e) {
@@ -115,7 +112,66 @@ public class CompoundCurationUtils {
 				e.printStackTrace();
 			}
 		}
+		try {
+			replacePrimaryCompoundWithSelectedTautomerInCompoundGroups(
+					primaryCompound.getPrimaryDatabaseId(), 
+					tautomer.getPrimaryDatabaseId());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
+	
+	public static void replacePrimaryCompoundWithSelectedTautomerInCompoundGroups(
+			String oldPrimaryAccession, String newPrimaryAccession) throws Exception{
+		
+		Map<String,String>accessionDbMap = new TreeMap<String,String>();
+		String oldPrimarySourceDb = null; 
+		String newPrimarySourceDb = null;
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"SELECT PRIMARY_ACCESSION, PRIMARY_SOURCE_DB, SECONDARY_ACCESSION, "
+				+ "SECONDARY_SOURCE_DB FROM COMPOUNDDB.COMPOUND_GROUP WHERE PRIMARY_ACCESSION = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, oldPrimaryAccession);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+
+			oldPrimarySourceDb = rs.getString("PRIMARY_SOURCE_DB");
+			if(rs.getString("SECONDARY_ACCESSION").equals(newPrimaryAccession))
+				newPrimarySourceDb = rs.getString("SECONDARY_SOURCE_DB");
+			else
+				accessionDbMap.put(
+						rs.getString("SECONDARY_ACCESSION"), 
+						rs.getString("SECONDARY_SOURCE_DB"));
+		}
+		rs.close(); 
+		accessionDbMap.put(
+				oldPrimaryAccession, 
+				oldPrimarySourceDb);
+		query = "DELETE FROM COMPOUNDDB.COMPOUND_GROUP WHERE PRIMARY_ACCESSION = ?";
+		ps = conn.prepareStatement(query);
+		ps.setString(1, oldPrimaryAccession);
+		ps.executeUpdate();
+		
+		String insertGroupQuery = 
+				"INSERT INTO COMPOUNDDB.COMPOUND_GROUP "
+				+ "(PRIMARY_ACCESSION, PRIMARY_SOURCE_DB, "
+				+ "SECONDARY_ACCESSION, SECONDARY_SOURCE_DB) VALUES(?, ?, ?, ?)";
+		PreparedStatement insertGroupPs = conn.prepareStatement(insertGroupQuery);
+		insertGroupPs.setString(1, newPrimaryAccession);		
+		insertGroupPs.setString(2, newPrimarySourceDb);
+		for(Entry<String,String>e : accessionDbMap.entrySet()) {
+			insertGroupPs.setString(3, e.getKey());
+			insertGroupPs.setString(4, e.getValue());
+			insertGroupPs.addBatch();
+		}
+		insertGroupPs.executeBatch();
+		insertGroupPs.close();
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
 	
 	public static void removeCompound(String compoundAccession) throws Exception{
 		

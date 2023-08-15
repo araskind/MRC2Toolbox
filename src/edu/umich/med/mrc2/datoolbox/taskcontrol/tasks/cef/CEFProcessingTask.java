@@ -165,7 +165,16 @@ public abstract class CEFProcessingTask extends AbstractTask {
 			feature.setHeight(location.getAttribute("y").getDoubleValue());
 		
 		parseSpectra(cpdElement, feature);
-
+		if(feature.getName().startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())) {
+			
+			name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+					MRC2ToolBoxConfiguration.getMzFormat().format(feature.getMonoisotopicMz()) + "_" +
+					MRC2ToolBoxConfiguration.getRtFormat().format(feature.getRetentionTime());
+			if(feature.getSpectrum() != null && feature.getSpectrum().getPrimaryAdduct() != null)
+				name += " " + feature.getSpectrum().getPrimaryAdduct().getName();
+			
+			feature.setName(name);
+		}
 		// Parse identifications
 		Collection<MsFeatureIdentity>identifications = 
 				parseIdentifications(feature, cpdElement, conn);

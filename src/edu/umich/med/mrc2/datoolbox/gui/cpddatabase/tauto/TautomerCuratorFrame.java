@@ -239,6 +239,9 @@ public class TautomerCuratorFrame extends JFrame
 		
 		if(command.equals(MainActionCommands.COPY_TAUTOMER_ACCESSION_COMMAND.getName()))
 			copyTautomerAccession();
+		
+		if(command.equals(MainActionCommands.COPY_PRIMARY_AND_TAUTOMER_ACCESSION_COMMAND.getName()))
+			copyTautomerAndPrimaryCompoundAccession();
 	}
 	
 	private void markCompoundGroupCurated(boolean b) {
@@ -325,6 +328,23 @@ public class TautomerCuratorFrame extends JFrame
 		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection stringSelection = new StringSelection(cid.getPrimaryDatabaseId());
 		clpbrd.setContents(stringSelection, null);	
+	}
+	
+	private void copyTautomerAndPrimaryCompoundAccession() {
+
+		CompoundIdentity cid = tautomerListingTable.getSelectedCompound();
+		if(cid == null)
+			return;
+		
+		String accessions = cid.getPrimaryDatabaseId();
+		
+		CompoundIdentity primCid = primaryCompoundListingTable.getSelectedCompound();
+		if(primCid != null)
+			accessions += "\t" + primCid.getPrimaryDatabaseId();
+		
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+		StringSelection stringSelection = new StringSelection(accessions);
+		clpbrd.setContents(stringSelection, null);		
 	}
 
 	private void clearPanel() {
@@ -432,8 +452,11 @@ public class TautomerCuratorFrame extends JFrame
 		for(Entry<String, Collection<String>> cpdEntry : cpdIdMap.entrySet()) {
 			
 			Set<CompoundIdentity>secCids = new TreeSet<CompoundIdentity>();
-			for(String sid : cpdEntry.getValue())
-				secCids.add(compoundIdMap.get(sid));
+			for(String sid : cpdEntry.getValue()) {
+				
+				if(compoundIdMap.get(sid) != null)
+					secCids.add(compoundIdMap.get(sid));
+			}
 			
 			tautomerMap.put(compoundIdMap.get(cpdEntry.getKey()), secCids);
 		}
@@ -500,8 +523,8 @@ public class TautomerCuratorFrame extends JFrame
 		Collection<CompoundIdentity>idList = new ArrayList<CompoundIdentity>();
 		Connection conn = ConnectionManager.getConnection();
 		String query =
-			"SELECT ACCESSION, NAME, FORMULA_FROM_SMILES, "
-			+ "EXACT_MASS, SMILES, INCHI_KEY_FROM_SMILES, CHARGE " +
+			"SELECT ACCESSION, NAME, MS_READY_MOL_FORMULA, "
+			+ "MS_READY_EXACT_MASS, MS_READY_SMILES, MS_READY_INCHI_KEY, MS_READY_CHARGE " +
 			"FROM COMPOUNDDB.HMDB_COMPOUND_DATA D WHERE ACCESSION = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
 		
@@ -516,11 +539,11 @@ public class TautomerCuratorFrame extends JFrame
 						rs.getString("ACCESSION"),
 						rs.getString("NAME"), 					
 						rs.getString("NAME"), 
-						rs.getString("FORMULA_FROM_SMILES"), 
-						rs.getDouble("EXACT_MASS"), 
-						rs.getString("SMILES"));
-				identity.setInChiKey(rs.getString("INCHI_KEY_FROM_SMILES"));
-				identity.setCharge(rs.getInt("CHARGE"));
+						rs.getString("MS_READY_MOL_FORMULA"), 
+						rs.getDouble("MS_READY_EXACT_MASS"), 
+						rs.getString("MS_READY_SMILES"));
+				identity.setInChiKey(rs.getString("MS_READY_INCHI_KEY"));
+				identity.setCharge(rs.getInt("MS_READY_CHARGE"));
 				idList.add(identity);
 			}
 			rs.close();
@@ -719,8 +742,11 @@ public class TautomerCuratorFrame extends JFrame
 				
 				primaryStructuralDescriptorsPanel.loadCompoundIdentity(mfid);
 				primaryMolStructurePanel.showStructure(mfid.getSmiles());
+				tautomerStructuralDescriptorsPanel.clearPanel();
+				tautomerMolStructurePanel.clearPanel();
 				Collection<CompoundIdentity> tautomers = tautomerMap.get(mfid);
 				tautomerListingTable.setTableModelFromCompoundCollection(tautomers);
+				
 				if(tautomers.size() == 1) {
 					
 					CompoundIdentity tautomer = tautomers.iterator().next();

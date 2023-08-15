@@ -21,6 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -102,6 +105,7 @@ public class RemoveEmptyFeaturesTask extends AbstractTask {
 			newDataMatrix.setMetaDataDimensionMatrix(0, newFeatureMatrix);
 			newDataMatrix.setMetaDataDimensionMatrix(1, dataMatrix.getMetaDataDimensionMatrix(1));
 			currentExperiment.setDataMatrixForDataPipeline(dataPipeline, newDataMatrix);
+			saveMsFeatureMatrix(newFeatureMatrix);
 			
 			taskDescription = "Removing features from active data pipeline libary";
 			processed = 90;
@@ -113,6 +117,31 @@ public class RemoveEmptyFeaturesTask extends AbstractTask {
 			currentExperiment.getCompoundLibraryForDataPipeline(dataPipeline).removeFeatures(libFeatures);
 		}		
 		processed = 100;
+	}
+	
+	private void saveMsFeatureMatrix(Matrix msFeatureMatrix) {
+		
+		String featureMatrixFileName = currentExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline);
+		if(featureMatrixFileName != null) {
+			
+			taskDescription = "Saving feature matrix for  " + currentExperiment.getName() +
+					"(" + currentExperiment.getName() + ")";
+			processed = 90;
+			File featureMatrixFile = 
+					Paths.get(currentExperiment.getExperimentDirectory().getAbsolutePath(), 
+					featureMatrixFileName).toFile();
+			try {
+				Matrix featureMatrix = 
+						Matrix.Factory.linkToArray(msFeatureMatrix.toObjectArray());
+				featureMatrix.save(featureMatrixFile);
+				processed = 100;
+			} catch (IOException e) {
+				e.printStackTrace();
+//					setStatus(TaskStatus.ERROR);
+			}
+			msFeatureMatrix = null;
+			System.gc();
+		}				
 	}
 }
 

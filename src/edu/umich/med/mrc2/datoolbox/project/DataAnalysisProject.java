@@ -706,6 +706,22 @@ public class DataAnalysisProject implements Serializable {
 				corrMatrixMap.put(pipeline, 
 						dataMatrixMap.get(pipeline).corrcoef(Ret.LINK, false, false));
 		}
+		for (DataPipeline pipeline : dataPipelines) {
+			
+			for(MsFeature feature : featureMap.get(pipeline)) {
+				
+				if(feature.getName().startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName())) {
+					
+					name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+							MRC2ToolBoxConfiguration.getMzFormat().format(feature.getMonoisotopicMz()) + "_" +
+							MRC2ToolBoxConfiguration.getRtFormat().format(feature.getRetentionTime());
+					if(feature.getSpectrum() != null && feature.getSpectrum().getPrimaryAdduct() != null)
+							name += " " + feature.getSpectrum().getPrimaryAdduct().getName();
+					
+					feature.setName(name);
+				}
+			}
+		}
 	}
 
 	public void setActiveDataPipeline(DataPipeline activePipeline) {

@@ -244,7 +244,10 @@ public class MainWindow extends JFrame
 		
 		if (command.equals(MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_COMMAND.getName()))
 			openExperiment(ProjectType.RAW_DATA_ANALYSIS);
-
+		
+		if (command.equals(MainActionCommands.GO_TO_EXPERIMENT_FOLDER_COMMAND.getName()))
+			goToExperimentFolder();
+		
 		if (command.equals(MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_FROM_DATABASE_COMMAND.getName()))
 			openRawDataExperimentFromDatabase();
 
@@ -300,6 +303,26 @@ public class MainWindow extends JFrame
 			showOnlineHelp();
 	}
 	
+	private void goToExperimentFolder() {
+		
+		File expDir = null;
+		if (currentExperiment != null) 			
+			expDir = currentExperiment.getExperimentDirectory();
+		
+		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) 
+			expDir = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getExperimentDirectory();
+		
+		if(expDir != null && expDir.exists()) {
+			
+			try {
+				Desktop.getDesktop().open(expDir);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+	}
+
 	private void showOnlineHelp() {
 
 		URL url = null;

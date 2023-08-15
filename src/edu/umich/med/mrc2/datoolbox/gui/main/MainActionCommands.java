@@ -63,6 +63,7 @@ public enum MainActionCommands {
 	SAVE_RAW_DATA_EXPERIMENT_COMMAND("Save raw data analysis experiment"),
 	EDIT_RAW_DATA_EXPERIMENT_SETUP_COMMAND("Show raw data analysis experiment editor"),
 	EDIT_RAW_DATA_EXPERIMENT_COMMAND("Edit raw data analysis experiment"),
+	GO_TO_EXPERIMENT_FOLDER_COMMAND("Go to experiment folder"),
 	
 	//	Raw data analysis
 	MSMS_FEATURE_EXTRACTION_SETUP_COMMAND("Set up MSMS feature extraction"),
@@ -691,6 +692,7 @@ public enum MainActionCommands {
 	DELETE_DATABASE_ENTRY_COMMAND("Delete database entry"),
 	COPY_COMPOUND_ACCESSION_COMMAND("Copy accession number"),
 	COPY_TAUTOMER_ACCESSION_COMMAND("Copy tautomer accession number"),
+	COPY_PRIMARY_AND_TAUTOMER_ACCESSION_COMMAND("Copy primary and tautomer accession number"),
 	COPY_COMPOUND_IDENTITY_COMMAND("Copy compound identity"),
 	COPY_COMPOUND_FORMULA_COMMAND("Copy compound formula"),
 	COPY_COMPOUND_NAME_COMMAND("Copy compound name"),

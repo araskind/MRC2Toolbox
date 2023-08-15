@@ -99,10 +99,10 @@
 									<root>true</root>
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
-										<node nodeId="1690570955468" orientation="VERTICAL" divider="0.7588495575221239">
-											<node nodeId="1690570978384" orientation="VERTICAL" divider="0.6169590643274854">
+										<node nodeId="1690570955468" orientation="VERTICAL" divider="0.7897196261682243">
+											<node nodeId="1690570978384" orientation="VERTICAL" divider="0.6164883892646601">
 												<node nodeId="1690570997704" orientation="VERTICAL" divider="0.6372288402130967">
-													<leaf id="0" nodeId="1690570945585">
+													<leaf id="1" nodeId="1690570945585">
 														<placeholders>
 															<placeholder>dock.single.PrimaryCompoundsListingTable</placeholder>
 														</placeholders>
@@ -116,19 +116,19 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="3" nodeId="1690570997702">
+													<leaf id="4" nodeId="1690570997702">
 														<placeholders>
 															<placeholder>dock.single.TautomersListingTable</placeholder>
 														</placeholders>
 													</leaf>
 												</node>
 												<node nodeId="1690570984338" orientation="HORIZONTAL" divider="0.5007278020378457">
-													<leaf id="1" nodeId="1690570978382">
+													<leaf id="0" nodeId="1690570978382">
 														<placeholders>
 															<placeholder>dock.single.TautomerCuratorPrimaryMolStructurePanel</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="5" nodeId="1690570984337">
+													<leaf id="3" nodeId="1690570984337">
 														<placeholders>
 															<placeholder>dock.single.TautomerCuratorTautomerMolStructurePanel</placeholder>
 														</placeholders>
@@ -136,12 +136,12 @@
 												</node>
 											</node>
 											<node nodeId="1690570965985" orientation="HORIZONTAL" divider="0.49890750182083027">
-												<leaf id="2" nodeId="1690570965983">
+												<leaf id="5" nodeId="1690570965983">
 													<placeholders>
 														<placeholder>dock.single.OriginalStructuralDescriptorsPanel</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="4" nodeId="1690570955466">
+												<leaf id="2" nodeId="1690570955466">
 													<placeholders>
 														<placeholder>dock.single.MSReadyStructuralDescriptorsPanel</placeholder>
 													</placeholders>
@@ -158,16 +158,6 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.PrimaryCompoundsListingTable">
-										<replacement id="dockablesingle PrimaryCompoundsListingTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>PrimaryCompoundsListingTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
 									<layout factory="predefined" placeholder="dock.single.TautomerCuratorPrimaryMolStructurePanel">
 										<replacement id="dockablesingle TautomerCuratorPrimaryMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
@@ -178,20 +168,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.OriginalStructuralDescriptorsPanel">
-										<replacement id="dockablesingle OriginalStructuralDescriptorsPanel"/>
+									<layout factory="predefined" placeholder="dock.single.PrimaryCompoundsListingTable">
+										<replacement id="dockablesingle PrimaryCompoundsListingTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>OriginalStructuralDescriptorsPanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.TautomersListingTable">
-										<replacement id="dockablesingle TautomersListingTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>TautomersListingTable</id>
+											<id>PrimaryCompoundsListingTable</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -212,6 +192,26 @@
 										<replacement id="dockablesingle TautomerCuratorTautomerMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>TautomerCuratorTautomerMolStructurePanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.TautomersListingTable">
+										<replacement id="dockablesingle TautomersListingTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>TautomersListingTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.OriginalStructuralDescriptorsPanel">
+										<replacement id="dockablesingle OriginalStructuralDescriptorsPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>OriginalStructuralDescriptorsPanel</id>
 											<area/>
 										</delegate>
 									</layout>

@@ -59,7 +59,8 @@ public class MainMenuBar extends CommonMenuBar {
 	private static final Icon openRdaExperimentIcon = GuiUtils.getIcon("openRawDataAnalysisProject", 24);
 	private static final Icon openRdaExperimentFromDbIcon = GuiUtils.getIcon("openRawDataAnalysisProjectFromDb", 24);
 	private static final Icon saveRdaExperimentIcon = GuiUtils.getIcon("saveRawDataAnalysisProject", 24);		
-	private static final Icon closeExperimentIcon = GuiUtils.getIcon("close", 24);
+	private static final Icon closeExperimentIcon = GuiUtils.getIcon("close", 24);	
+	private static final Icon goToExperimentFolderIcon = GuiUtils.getIcon("goToFolder", 24);	
 	private static final Icon exitIcon = GuiUtils.getIcon("shutDown", 24);	
 	private static final Icon idTrackerLoginIcon = GuiUtils.getIcon("idTrackerLogin", 24);
 	private static final Icon activeUserIcon = GuiUtils.getIcon("activeUser", 24);
@@ -96,7 +97,8 @@ public class MainMenuBar extends CommonMenuBar {
 		saveExperimentMenuItem,
 		saveExperimentAsMenuItem,				
 		editIDExperimentMenuItem,		
-		closeExperimentMenuItem,		
+		closeExperimentMenuItem,
+		goToExperimentFolderMenuItem,
 		exitMenuItem;
 
 	// Tools menu items
@@ -152,6 +154,11 @@ public class MainMenuBar extends CommonMenuBar {
 		openRdaExperimentFromDatabaseMenuItem = addItem(experimentMenu, 
 				MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_FROM_DATABASE_COMMAND, openRdaExperimentFromDbIcon);
 		openRdaExperimentFromDatabaseMenuItem.setAccelerator(KeyStroke.getKeyStroke('D', MASK));
+		
+		experimentMenu.addSeparator();
+		
+		goToExperimentFolderMenuItem = addItem(experimentMenu, 
+				MainActionCommands.GO_TO_EXPERIMENT_FOLDER_COMMAND, goToExperimentFolderIcon);
 		
 		experimentMenu.addSeparator();
 		
