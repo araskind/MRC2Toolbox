@@ -80,7 +80,8 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ItemListener{
 		addSeparator(buttonDimension);
 		add(new JLabel("Plot type: "));
 		plotTypeComboBox = new JComboBox<QcPlotType>();
-		plotTypeComboBox.setModel(new DefaultComboBoxModel(QcPlotType.values()));
+		plotTypeComboBox.setModel(
+				new DefaultComboBoxModel<QcPlotType>(QcPlotType.values()));
 		plotTypeComboBox.setSelectedItem(QcPlotType.BARCHART);
 		plotTypeComboBox.addItemListener(this);
 		plotTypeComboBox.setMaximumSize(new Dimension(120, 26));
@@ -89,7 +90,11 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ItemListener{
 		// Add file sorting options
 		add(new JLabel("  Sort files by: "));
 		fileSortComboBox = new JComboBox<FileSortingOrder>();
-		fileSortComboBox.setModel(new DefaultComboBoxModel(new FileSortingOrder[] {FileSortingOrder.NAME, FileSortingOrder.TIMESTAMP}));
+		fileSortComboBox.setModel(
+				new DefaultComboBoxModel<FileSortingOrder>(
+						new FileSortingOrder[] {
+								FileSortingOrder.NAME, 
+								FileSortingOrder.TIMESTAMP}));
 		fileSortComboBox.setSelectedItem(FileSortingOrder.NAME);
 		fileSortComboBox.addItemListener(this);
 		fileSortComboBox.setMaximumSize(new Dimension(120, 26));
@@ -98,7 +103,8 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ItemListener{
 		// Add data scale options
 		add(new JLabel("  Scale: "));
 		dataScaleComboBox = new JComboBox<DataScale>();
-		dataScaleComboBox.setModel(new DefaultComboBoxModel(DataScale.values()));
+		dataScaleComboBox.setModel(
+				new DefaultComboBoxModel<DataScale>(DataScale.values()));
 		dataScaleComboBox.setSelectedItem(DataScale.RAW);
 		dataScaleComboBox.addItemListener(this);
 		dataScaleComboBox.setMaximumSize(new Dimension(120, 26));
@@ -108,7 +114,8 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ItemListener{
 		//	QC fields
 		add(new JLabel("  Parameter: "));
 		statParameterComboBox = new JComboBox<DataSetQcField>();
-		statParameterComboBox.setModel(new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));	
+		statParameterComboBox.setModel(
+				new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));	
 		statParameterComboBox.setSelectedItem(DataSetQcField.OBSERVATIONS);
 		statParameterComboBox.addItemListener(this);
 		statParameterComboBox.setMaximumSize(new Dimension(120, 26));
@@ -147,11 +154,14 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ItemListener{
 
 				if(getQcPlotType().equals(QcPlotType.BOXPLOT)) {
 					
-					statParameterComboBox.setModel(new DefaultComboBoxModel<DataSetQcField>(new DataSetQcField[] {DataSetQcField.RAW_VALUES}));
+					statParameterComboBox.setModel(
+							new DefaultComboBoxModel<DataSetQcField>(
+									new DataSetQcField[] {DataSetQcField.RAW_VALUES}));
 					dataScaleComboBox.setSelectedItem(DataScale.RAW);
 				}
 				else {
-					statParameterComboBox.setModel(new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));
+					statParameterComboBox.setModel(
+							new DefaultComboBoxModel<DataSetQcField>(DataSetQcField.values()));
 					statParameterComboBox.removeItem(DataSetQcField.RAW_VALUES);
 					dataScaleComboBox.setSelectedItem(scale);
 				}

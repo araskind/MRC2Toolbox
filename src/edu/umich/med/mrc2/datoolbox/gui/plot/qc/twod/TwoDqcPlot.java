@@ -37,9 +37,7 @@ import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
-import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.ui.RectangleInsets;
@@ -54,6 +52,8 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBarChartDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBoxPlotDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcTimedScatterSet;
+import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.NoCategoryGapsBarRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.VaribleCategorySizeCategoryAxis;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.QcPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolTipGenerator;
 
@@ -94,18 +94,36 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 		dataSetStats = dataSetStats2;		
 		
 		if (plotType.equals(QcPlotType.BARCHART)) {
-			BarRenderer renderer = (BarRenderer) ((CategoryPlot)chart.getPlot()).getRenderer();
-			renderer.setBarPainter(new StandardBarPainter());
-			chart.getCategoryPlot().setDataset(new QcBarChartDataSet(dataSetStats, sortingOrder, qcParameter));
+//			BarRenderer renderer = (BarRenderer) ((CategoryPlot)chart.getPlot()).getRenderer();
+//			renderer.setBarPainter(new StandardBarPainter());
+//			chart.getCategoryPlot().setDataset(new QcBarChartDataSet(dataSetStats, sortingOrder, qcParameter));
+			
+			loadBarChart();
 		}
-		if ((plotType.equals(QcPlotType.LINES) || plotType.equals(QcPlotType.SCATTER)) && sortingOrder.equals(FileSortingOrder.NAME))
+		if ((plotType.equals(QcPlotType.LINES) || plotType.equals(QcPlotType.SCATTER)) 
+				&& sortingOrder.equals(FileSortingOrder.NAME))
 			chart.getXYPlot().setDataset(new QcScatterDataSet(dataSetStats, qcParameter));
 		
-		if ((plotType.equals(QcPlotType.LINES) || plotType.equals(QcPlotType.SCATTER)) && sortingOrder.equals(FileSortingOrder.TIMESTAMP))
+		if ((plotType.equals(QcPlotType.LINES) || plotType.equals(QcPlotType.SCATTER)) 
+				&& sortingOrder.equals(FileSortingOrder.TIMESTAMP))
 			chart.getXYPlot().setDataset(new QcTimedScatterSet(dataSetStats, qcParameter));
 		
 		if (plotType.equals(QcPlotType.BOXPLOT))
 			chart.getCategoryPlot().setDataset(new QcBoxPlotDataSet(dataSetStats, sortingOrder));
+	}
+	
+	private void loadBarChart() {
+		
+		QcBarChartDataSet ds = 
+				new QcBarChartDataSet(dataSetStats, sortingOrder, qcParameter);	
+		
+		NoCategoryGapsBarRenderer renderer = new NoCategoryGapsBarRenderer();
+		for(int i=0; i<ds.getRowCount(); i++)
+			renderer.setSeriesPaint(i, ds.getSeriesPaintMap().get(i));
+
+		((CategoryPlot)chart.getPlot()).setDomainAxis(new VaribleCategorySizeCategoryAxis());
+		((CategoryPlot)chart.getPlot()).setRenderer(renderer);
+		chart.getCategoryPlot().setDataset(ds);
 	}
 	
 	public void redrawPlot() {

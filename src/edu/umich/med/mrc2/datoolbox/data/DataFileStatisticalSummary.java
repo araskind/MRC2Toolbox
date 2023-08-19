@@ -76,7 +76,8 @@ public class DataFileStatisticalSummary implements Serializable {
 		properties.put(DataSetQcField.OBSERVATIONS, (int) stats.getN());
 		properties.put(DataSetQcField.MISSING, totalFeatureCount - (int) stats.getN());
 		properties.put(DataSetQcField.OUTLIERS, countOutliers(stats));
-
+		properties.put(DataSetQcField.TOTAL_AREA, stats.getSum());
+		
 		double lowerLimit = stats.getPercentile(5.0d);
 		double upperLimit = stats.getPercentile(95.0d);
 		double[] trimmedValues = DoubleStream.of(fValues).

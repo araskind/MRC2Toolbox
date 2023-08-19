@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 public enum DataSetQcField {
 
 	RAW_VALUES("Raw values"),
+	TOTAL_AREA("Total feature area"),
 	OBSERVATIONS("Observations"),
 	MISSING("Missing"),
 	OUTLIERS("Outliers"),

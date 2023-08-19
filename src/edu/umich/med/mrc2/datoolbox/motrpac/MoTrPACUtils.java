@@ -90,10 +90,26 @@ public class MoTrPACUtils {
 		//	File parentDir = new File("Y:\\DataAnalysis\\_Reports\\EX01117 - PASS 1C\\4BIC\\PASS1A-06\\_FINALS");
 		try {
 			//	createMoTrPACFileManifests4PreCovidAdipose();
-			createMoTrPACFileManifests4Pass1A18();
+			createMoTrPACFileManifests1263Heart();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+		
+	private static void createMoTrPACFileManifests1263Heart() {
+		
+		List<String>tissueTypes = new ArrayList<String>(Arrays.asList("T31"));
+		File parentDirectory = 
+				new File("Y:\\DataAnalysis\\_Reports\\EX01263 - PASS 1A 1C 18mo P20000245T C20000316E\\4BIC\\PASS1A-18");
+		String batchDateIdentifier = "BATCH1_20230710";
+		String processingDateIdentifier = "PROCESSED_20230710";
+		createMoTrPACFileManifest(
+				tissueTypes, 
+				parentDirectory,
+				batchDateIdentifier,
+				processingDateIdentifier,
+				"20230817",
+				false);
 	}
 	
 	private static void createMoTrPACFileManifests4Pass1A18() {
