@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.renderer;
+package edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category;
 
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -32,6 +32,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -69,7 +70,7 @@ import org.jfree.data.category.CategoryDataset;
 	/**
 	 * An axis that displays categories.
 	 */
-	public class VaribleCategorySizeCategoryAxis extends CategoryAxis {
+	public class VariableCategorySizeCategoryAxis extends CategoryAxis {
 
 		private static final long serialVersionUID = 2328408830527260955L;
 		
@@ -107,21 +108,21 @@ import org.jfree.data.category.CategoryDataset;
 	    private CategoryLabelPositions categoryLabelPositions;
 
 	    /** Storage for tick label font overrides (if any). */
-	    private Map tickLabelFontMap;
+	    private Map<Comparable, Font> tickLabelFontMap;
 
 	    /** Storage for tick label paint overrides (if any). */
-	    private transient Map tickLabelPaintMap;
+	    private transient Map<Comparable, Paint> tickLabelPaintMap;
 
 	    /** Storage for the category label tooltips (if any). */
-	    private Map categoryLabelToolTips;
+	    private Map<Comparable, String> categoryLabelToolTips;
 
 	    /** Storage for the category label URLs (if any). */
-	    private Map categoryLabelURLs;
+	    private Map<Comparable, String> categoryLabelURLs;
 	    
 	    /**
 	     * Creates a new category axis with no label.
 	     */
-	    public VaribleCategorySizeCategoryAxis() {
+	    public VariableCategorySizeCategoryAxis() {
 	        this(null);
 	    }
 
@@ -130,7 +131,7 @@ import org.jfree.data.category.CategoryDataset;
 	     *
 	     * @param label  the axis label ({@code null} permitted).
 	     */
-	    public VaribleCategorySizeCategoryAxis(String label) {
+	    public VariableCategorySizeCategoryAxis(String label) {
 	        super(label);
 
 	        this.lowerMargin = DEFAULT_AXIS_MARGIN;
@@ -141,10 +142,10 @@ import org.jfree.data.category.CategoryDataset;
 
 	        this.categoryLabelPositionOffset = 4;
 	        this.categoryLabelPositions = CategoryLabelPositions.STANDARD;
-	        this.tickLabelFontMap = new HashMap();
-	        this.tickLabelPaintMap = new HashMap();
-	        this.categoryLabelToolTips = new HashMap();
-	        this.categoryLabelURLs = new HashMap();
+	        this.tickLabelFontMap = new HashMap<Comparable, Font>();
+	        this.tickLabelPaintMap = new HashMap<Comparable, Paint>();
+	        this.categoryLabelToolTips = new HashMap<Comparable, String>();
+	        this.categoryLabelURLs = new HashMap<Comparable, String>();
 	    }
 
 	    /**
@@ -336,7 +337,7 @@ import org.jfree.data.category.CategoryDataset;
 	     */
 	    public Font getTickLabelFont(Comparable category) {
 	        Args.nullNotPermitted(category, "category");
-	        Font result = (Font) this.tickLabelFontMap.get(category);
+	        Font result = this.tickLabelFontMap.get(category);
 	        // if there is no specific font, use the general one...
 	        if (result == null) {
 	            result = getTickLabelFont();
@@ -375,7 +376,7 @@ import org.jfree.data.category.CategoryDataset;
 	     */
 	    public Paint getTickLabelPaint(Comparable category) {
 	        Args.nullNotPermitted(category, "category");
-	        Paint result = (Paint) this.tickLabelPaintMap.get(category);
+	        Paint result = this.tickLabelPaintMap.get(category);
 	        // if there is no specific paint, use the general one...
 	        if (result == null) {
 	            result = getTickLabelPaint();
@@ -431,7 +432,7 @@ import org.jfree.data.category.CategoryDataset;
 	     */
 	    public String getCategoryLabelToolTip(Comparable category) {
 	        Args.nullNotPermitted(category, "category");
-	        return (String) this.categoryLabelToolTips.get(category);
+	        return this.categoryLabelToolTips.get(category);
 	    }
 
 	    /**
@@ -490,7 +491,7 @@ import org.jfree.data.category.CategoryDataset;
 	     */
 	    public String getCategoryLabelURL(Comparable category) {
 	        Args.nullNotPermitted(category, "category");
-	        return (String) this.categoryLabelURLs.get(category);
+	        return this.categoryLabelURLs.get(category);
 	    }
 
 	    /**
@@ -564,8 +565,11 @@ import org.jfree.data.category.CategoryDataset;
 	     * @see #getCategoryMiddle(int, int, Rectangle2D, RectangleEdge)
 	     * @see #getCategoryEnd(int, int, Rectangle2D, RectangleEdge)
 	     */
-	    public double getCategoryStart(int category, int categoryCount, 
-	            Rectangle2D area, RectangleEdge edge) {
+	    public double getCategoryStart(
+	    		int category, 
+	    		CategoryDataset dataSet, 
+	            Rectangle2D area, 
+	            RectangleEdge edge) {
 
 	        double result = 0.0;
 	        if ((edge == RectangleEdge.TOP) || (edge == RectangleEdge.BOTTOM)) {
@@ -575,12 +579,18 @@ import org.jfree.data.category.CategoryDataset;
 	                || (edge == RectangleEdge.RIGHT)) {
 	            result = area.getMinY() + area.getHeight() * getLowerMargin();
 	        }
-
-	        double categorySize = calculateCategorySize(categoryCount, area, edge);
-	        double categoryGapWidth = calculateCategoryGapSize(categoryCount, area,
-	                edge);
-
-	        result = result + category * (categorySize + categoryGapWidth);
+	        int[]categoryItemCounts = getCategoryItemCounts(dataSet);
+	        int totalCounts = Arrays.stream(categoryItemCounts).sum();
+	        double categoryGapWidth = 
+	        		calculateCategoryGapSize(categoryItemCounts.length, area, edge);
+	        for(int i=0; i<category; i++) {
+	        	
+		        double categorySize = calculateCategorySize(
+		        		categoryItemCounts[i], totalCounts, area, edge);
+		        result = result + categorySize + categoryGapWidth;
+//		        if(i > 0)
+//		        	result +=  categoryGapWidth;
+	        }
 	        return result;
 	    }
 
@@ -597,16 +607,21 @@ import org.jfree.data.category.CategoryDataset;
 	     * @see #getCategoryStart(int, int, Rectangle2D, RectangleEdge)
 	     * @see #getCategoryEnd(int, int, Rectangle2D, RectangleEdge)
 	     */
-	    public double getCategoryMiddle(int category, int categoryCount,
-	            Rectangle2D area, RectangleEdge edge) {
+	    public double getCategoryMiddle(
+	    		int category, 
+	    		CategoryDataset dataSet, 
+	            Rectangle2D area, 
+	            RectangleEdge edge) {
 
-	        if (category < 0 || category >= categoryCount) {
+	        if (category < 0 || category >= dataSet.getColumnCount()) {
 	            throw new IllegalArgumentException("Invalid category index: "
 	                    + category);
 	        }
-	        return getCategoryStart(category, categoryCount, area, edge)
-	               + calculateCategorySize(categoryCount, area, edge) / 2;
-
+	        int[]categoryItemCounts = getCategoryItemCounts(dataSet);
+	        int totalCounts = Arrays.stream(categoryItemCounts).sum();
+	        
+	        return getCategoryStart(category, dataSet, area, edge)
+	               + calculateCategorySize(categoryItemCounts[category], totalCounts, area, edge) / 2;
 	    }
 
 	    /**
@@ -622,11 +637,35 @@ import org.jfree.data.category.CategoryDataset;
 	     * @see #getCategoryStart(int, int, Rectangle2D, RectangleEdge)
 	     * @see #getCategoryMiddle(int, int, Rectangle2D, RectangleEdge)
 	     */
-	    public double getCategoryEnd(int category, int categoryCount,
-	            Rectangle2D area, RectangleEdge edge) {
-	        return getCategoryStart(category, categoryCount, area, edge)
-	               + calculateCategorySize(categoryCount, area, edge);
+	    public double getCategoryEnd(
+	    		int category, 
+	    		CategoryDataset dataSet,
+	            Rectangle2D area, 
+	            RectangleEdge edge) {	    	
+	        int[]categoryItemCounts = getCategoryItemCounts(dataSet);
+	        int totalCounts = Arrays.stream(categoryItemCounts).sum();
+	        
+	        return getCategoryStart(category, dataSet, area, edge)
+	               + calculateCategorySize(categoryItemCounts[category], totalCounts, area, edge);
 	    }
+	    
+	    public static int[]getCategoryItemCounts(CategoryDataset dataSet){
+	    	
+	    	int[]valueCounts = new int[dataSet.getColumnCount()];
+	    	int categoryCount = 0;
+	    	for(Object columnKey : dataSet.getColumnKeys()) {
+	    		
+	    		int categoryValueCount = 0;
+		    	for(Object rowKey : dataSet.getRowKeys()) {
+		    		
+		    		if(dataSet.getValue((Comparable)rowKey, (Comparable)columnKey) != null)
+		    			categoryValueCount++;
+		    	}
+		    	valueCounts[categoryCount] = categoryValueCount;
+		    	categoryCount++;
+	    	}
+	    	return valueCounts;
+	    }	    	    
 
 	    /**
 	     * A convenience method that returns the axis coordinate for the centre of
@@ -728,7 +767,10 @@ import org.jfree.data.category.CategoryDataset;
 	     *
 	     * @return The category size.
 	     */
-	    protected double calculateCategorySize(int categoryCount, Rectangle2D area,
+	    protected double calculateCategorySize(
+	    		int categoryItemCount, 
+	    		int totalItemCount,
+	    		Rectangle2D area,
 	            RectangleEdge edge) {
 	        double result;
 	        double available = 0.0;
@@ -740,10 +782,10 @@ import org.jfree.data.category.CategoryDataset;
 	                || (edge == RectangleEdge.RIGHT)) {
 	            available = area.getHeight();
 	        }
-	        if (categoryCount > 1) {
+	        if (categoryItemCount < totalItemCount) {
 	            result = available * (1 - getLowerMargin() - getUpperMargin()
 	                     - getCategoryMargin());
-	            result = result / categoryCount;
+	            result = result * categoryItemCount / totalItemCount;
 	        }
 	        else {
 	            result = available * (1 - getLowerMargin() - getUpperMargin());
@@ -761,8 +803,10 @@ import org.jfree.data.category.CategoryDataset;
 	     *
 	     * @return The category gap width.
 	     */
-	    protected double calculateCategoryGapSize(int categoryCount, 
-	            Rectangle2D area, RectangleEdge edge) {
+	    protected double calculateCategoryGapSize(
+	    		int categoryCount, 
+	            Rectangle2D area, 
+	            RectangleEdge edge) {
 
 	        double result = 0.0;
 	        double available = 0.0;
@@ -776,7 +820,8 @@ import org.jfree.data.category.CategoryDataset;
 	        }
 
 	        if (categoryCount > 1) {
-	            result = available * getCategoryMargin() / (categoryCount - 1);
+	            //	result = available * getCategoryMargin() / (categoryCount - 1);
+	            result = available * getCategoryMargin() / categoryCount;
 	        }
 	        return result;
 	    }
@@ -916,24 +961,44 @@ import org.jfree.data.category.CategoryDataset;
 	     *
 	     * @return The updated axis state (never {@code null}).
 	     */
-	    protected AxisState drawCategoryLabels(Graphics2D g2, Rectangle2D plotArea,
-	            Rectangle2D dataArea, RectangleEdge edge, AxisState state,
+	    protected AxisState drawCategoryLabels(
+	    		Graphics2D g2, 
+	    		Rectangle2D plotArea,
+	            Rectangle2D dataArea, 
+	            RectangleEdge edge, 
+	            AxisState state,
 	            PlotRenderingInfo plotState) {
 
 	        Args.nullNotPermitted(state, "state");
 	        if (!isTickLabelsVisible()) {
 	            return state;
 	        }
-	 
-	        List ticks = refreshTicks(g2, state, plotArea, edge);
+	        Plot p = getPlot();
+	        if (p == null) {
+	            return null;
+	        }
+	        CategoryPlot plot = (CategoryPlot) p;
+	        CategoryDataset dataSet = plot.getDataset();
+	        double categoryGapWidth = 
+	        		calculateCategoryGapSize(dataSet.getColumnCount(), dataArea, edge);
+	        
+	        List<Tick> ticks = refreshTicks(g2, state, plotArea, edge);
 	        state.setTicks(ticks);
 	        int categoryIndex = 0;
-	        Iterator iterator = ticks.iterator();
+	        Iterator<Tick> iterator = ticks.iterator();
 	        while (iterator.hasNext()) {
 	            CategoryTick tick = (CategoryTick) iterator.next();
 	            g2.setFont(getTickLabelFont(tick.getCategory()));
 	            g2.setPaint(getTickLabelPaint(tick.getCategory()));
-
+	            
+	            int catIndex = 0;
+	        	for(int i=0; i<dataSet.getColumnCount(); i++) {
+	        		
+	        		if(dataSet.getColumnKeys().get(i).equals(tick.getCategory())) {
+	        			catIndex = i;
+	        			break;
+	        		}
+	        	}
 	            CategoryLabelPosition position
 	                    = this.categoryLabelPositions.getLabelPosition(edge);
 	            double x0 = 0.0;
@@ -941,34 +1006,34 @@ import org.jfree.data.category.CategoryDataset;
 	            double y0 = 0.0;
 	            double y1 = 0.0;
 	            if (edge == RectangleEdge.TOP) {
-	                x0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, 
-	                        edge);
-	                x1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea, 
-	                        edge);
+	                x0 = getCategoryStart(catIndex, dataSet, dataArea, 
+	                        edge) + categoryGapWidth/2;
+	                x1 = getCategoryEnd(catIndex, dataSet, dataArea, 
+	                        edge) + categoryGapWidth/2;
 	                y1 = state.getCursor() - this.categoryLabelPositionOffset;
 	                y0 = y1 - state.getMax();
 	            }
 	            else if (edge == RectangleEdge.BOTTOM) {
-	                x0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, 
-	                        edge);
-	                x1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea, 
-	                        edge);
+	                x0 = getCategoryStart(catIndex, dataSet, dataArea, 
+	                        edge) + categoryGapWidth/2;
+	                x1 = getCategoryEnd(catIndex, dataSet, dataArea, 
+	                        edge) + categoryGapWidth/2;
 	                y0 = state.getCursor() + this.categoryLabelPositionOffset;
 	                y1 = y0 + state.getMax();
 	            }
 	            else if (edge == RectangleEdge.LEFT) {
-	                y0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, 
-	                        edge);
-	                y1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea,
-	                        edge);
+	                y0 = getCategoryStart(catIndex, dataSet, dataArea, 
+	                        edge) + categoryGapWidth/2;
+	                y1 = getCategoryEnd(catIndex, dataSet, dataArea,
+	                        edge) + categoryGapWidth/2;
 	                x1 = state.getCursor() - this.categoryLabelPositionOffset;
 	                x0 = x1 - state.getMax();
 	            }
 	            else if (edge == RectangleEdge.RIGHT) {
-	                y0 = getCategoryStart(categoryIndex, ticks.size(), dataArea, 
-	                        edge);
-	                y1 = getCategoryEnd(categoryIndex, ticks.size(), dataArea,
-	                        edge);
+	                y0 = getCategoryStart(catIndex, dataSet, dataArea, 
+	                        edge) + categoryGapWidth/2 + categoryGapWidth/2;
+	                y1 = getCategoryEnd(catIndex, dataSet, dataArea,
+	                        edge) + categoryGapWidth/2;
 	                x0 = state.getCursor() + this.categoryLabelPositionOffset;
 	                x1 = x0 - state.getMax();
 	            }
@@ -1028,10 +1093,13 @@ import org.jfree.data.category.CategoryDataset;
 	     * @return A list of ticks.
 	     */
 	    @Override
-	    public List refreshTicks(Graphics2D g2, AxisState state, 
-	            Rectangle2D dataArea, RectangleEdge edge) {
-
-	        List ticks = new java.util.ArrayList();
+	    public List<Tick> refreshTicks(
+	    		Graphics2D g2, 
+	    		AxisState state, 
+	            Rectangle2D dataArea, 
+	            RectangleEdge edge) {
+	        
+	        List<Tick> ticks = new java.util.ArrayList<Tick>();
 
 	        // sanity check for data area...
 	        if (dataArea.getHeight() <= 0.0 || dataArea.getWidth() < 0.0) {
@@ -1039,34 +1107,45 @@ import org.jfree.data.category.CategoryDataset;
 	        }
 
 	        CategoryPlot plot = (CategoryPlot) getPlot();
+	        CategoryDataset dataSet = plot.getDataset();
 	        List categories = plot.getCategoriesForAxis(this);
+	        int[]categoryItemCounts = getCategoryItemCounts(dataSet);
+	        int totalCounts = Arrays.stream(categoryItemCounts).sum();
 	        double max = 0.0;
-
+	        
 	        if (categories != null) {
+	        		        	
 	            CategoryLabelPosition position
 	                    = this.categoryLabelPositions.getLabelPosition(edge);
 	            float r = this.maximumCategoryLabelWidthRatio;
 	            if (r <= 0.0) {
 	                r = position.getWidthRatio();
 	            }
-
-	            float l;
-	            if (position.getWidthType() == CategoryLabelWidthType.CATEGORY) {
-	                l = (float) calculateCategorySize(categories.size(), dataArea,
-	                        edge);
-	            }
-	            else {
-	                if (RectangleEdge.isLeftOrRight(edge)) {
-	                    l = (float) dataArea.getWidth();
-	                }
-	                else {
-	                    l = (float) dataArea.getHeight();
-	                }
-	            }
 	            int categoryIndex = 0;
-	            Iterator iterator = categories.iterator();
-	            while (iterator.hasNext()) {
-	                Comparable category = (Comparable) iterator.next();
+	            for(Object cat : categories) {
+	            	
+		        	int catIndex = 0;
+		        	for(int i=0; i<dataSet.getColumnCount(); i++) {
+		        		
+		        		if(dataSet.getColumnKeys().get(i).equals(cat)) {
+		        			catIndex = i;
+		        			break;
+		        		}
+		        	}
+	            	
+	            	Comparable category = (Comparable)cat;
+		            float l;
+		            if (position.getWidthType() == CategoryLabelWidthType.CATEGORY) {
+		                l = (float) calculateCategorySize(categoryItemCounts[catIndex], totalCounts, dataArea, edge);
+		            }
+		            else {
+		                if (RectangleEdge.isLeftOrRight(edge)) {
+		                    l = (float) dataArea.getWidth();
+		                }
+		                else {
+		                    l = (float) dataArea.getHeight();
+		                }
+		            }
 	                g2.setFont(getTickLabelFont(category));
 	                TextBlock label = createLabel(category, l * r, edge, g2);
 	                if (edge == RectangleEdge.TOP || edge == RectangleEdge.BOTTOM) {
@@ -1084,10 +1163,29 @@ import org.jfree.data.category.CategoryDataset;
 	                ticks.add(tick);
 	                categoryIndex = categoryIndex + 1;
 	            }
+//	            Iterator iterator = categories.iterator();
+//	            while (iterator.hasNext()) {
+//	                Comparable category = (Comparable) iterator.next();
+//	                g2.setFont(getTickLabelFont(category));
+//	                TextBlock label = createLabel(category, l * r, edge, g2);
+//	                if (edge == RectangleEdge.TOP || edge == RectangleEdge.BOTTOM) {
+//	                    max = Math.max(max, calculateTextBlockHeight(label,
+//	                            position, g2));
+//	                }
+//	                else if (edge == RectangleEdge.LEFT
+//	                        || edge == RectangleEdge.RIGHT) {
+//	                    max = Math.max(max, calculateTextBlockWidth(label,
+//	                            position, g2));
+//	                }
+//	                Tick tick = new CategoryTick(category, label,
+//	                        position.getLabelAnchor(),
+//	                        position.getRotationAnchor(), position.getAngle());
+//	                ticks.add(tick);
+//	                categoryIndex = categoryIndex + 1;
+//	            }
 	        }
 	        state.setMax(max);
 	        return ticks;
-
 	    }
 
 	    /**
@@ -1107,6 +1205,7 @@ import org.jfree.data.category.CategoryDataset;
 	            return;
 	        }
 	        CategoryPlot plot = (CategoryPlot) p;
+	        CategoryDataset dataSet = plot.getDataset();
 	        double il = getTickMarkInsideLength();
 	        double ol = getTickMarkOutsideLength();
 	        Line2D line = new Line2D.Double();
@@ -1116,51 +1215,102 @@ import org.jfree.data.category.CategoryDataset;
 	        Object saved = g2.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL);
 	        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, 
 	                RenderingHints.VALUE_STROKE_NORMALIZE);
-	        if (edge.equals(RectangleEdge.TOP)) {
-	            Iterator iterator = categories.iterator();
-	            while (iterator.hasNext()) {
-	                Comparable key = (Comparable) iterator.next();
-	                double x = getCategoryMiddle(key, categories, dataArea, edge);
+	        
+	        for(Object category : categories) {
+	        	
+	        	int categoryIndex = 0;
+	        	for(int i=0; i<dataSet.getColumnCount(); i++) {
+	        		
+	        		if(dataSet.getColumnKeys().get(i).equals(category)) {
+	        			categoryIndex = i;
+	        			break;
+	        		}
+	        	}
+	        	 double categoryGapWidth = 
+		 	        		calculateCategoryGapSize(categories.size(), dataArea, edge);
+	        	double x = getCategoryMiddle(categoryIndex, dataSet, dataArea, edge) + categoryGapWidth / 2;
+	        	double y = x;
+
+	        	 
+	        	if (edge.equals(RectangleEdge.TOP)) {
 	                line.setLine(x, cursor, x, cursor + il);
 	                g2.draw(line);
 	                line.setLine(x, cursor, x, cursor - ol);
-	                g2.draw(line);
-	            }
-	            state.cursorUp(ol);
-	        } else if (edge.equals(RectangleEdge.BOTTOM)) {
-	            Iterator iterator = categories.iterator();
-	            while (iterator.hasNext()) {
-	                Comparable key = (Comparable) iterator.next();
-	                double x = getCategoryMiddle(key, categories, dataArea, edge);
+	                g2.draw(line);	               
+	        	}
+	        	else if (edge.equals(RectangleEdge.BOTTOM)) {	        		
 	                line.setLine(x, cursor, x, cursor - il);
 	                g2.draw(line);
 	                line.setLine(x, cursor, x, cursor + ol);
-	                g2.draw(line);
-	            }
-	            state.cursorDown(ol);
-	        } else if (edge.equals(RectangleEdge.LEFT)) {
-	            Iterator iterator = categories.iterator();
-	            while (iterator.hasNext()) {
-	                Comparable key = (Comparable) iterator.next();
-	                double y = getCategoryMiddle(key, categories, dataArea, edge);
+	                g2.draw(line);	                
+	        	}
+	        	else if (edge.equals(RectangleEdge.LEFT)) {
 	                line.setLine(cursor, y, cursor + il, y);
 	                g2.draw(line);
 	                line.setLine(cursor, y, cursor - ol, y);
 	                g2.draw(line);
-	            }
-	            state.cursorLeft(ol);
-	        } else if (edge.equals(RectangleEdge.RIGHT)) {
-	            Iterator iterator = categories.iterator();
-	            while (iterator.hasNext()) {
-	                Comparable key = (Comparable) iterator.next();
-	                double y = getCategoryMiddle(key, categories, dataArea, edge);
+	        	}
+	        	else if (edge.equals(RectangleEdge.RIGHT)) {
 	                line.setLine(cursor, y, cursor - il, y);
 	                g2.draw(line);
 	                line.setLine(cursor, y, cursor + ol, y);
-	                g2.draw(line);
-	            }
-	            state.cursorRight(ol);
+	                g2.draw(line);	                
+	        	}
 	        }
+	        if (edge.equals(RectangleEdge.TOP))
+	        	 state.cursorUp(ol);
+	        else if (edge.equals(RectangleEdge.BOTTOM))
+	        	state.cursorDown(ol);
+	        else if (edge.equals(RectangleEdge.LEFT))
+	        	state.cursorLeft(ol);
+	        else if (edge.equals(RectangleEdge.RIGHT))
+	        	state.cursorRight(ol);
+	        
+//	        if (edge.equals(RectangleEdge.TOP)) {
+//	            Iterator iterator = categories.iterator();
+//	            while (iterator.hasNext()) {
+//	                Comparable key = (Comparable) iterator.next();
+//	                double x = getCategoryMiddle(key, categories, dataArea, edge);
+//	                line.setLine(x, cursor, x, cursor + il);
+//	                g2.draw(line);
+//	                line.setLine(x, cursor, x, cursor - ol);
+//	                g2.draw(line);
+//	            }
+//	            state.cursorUp(ol);
+//	        } else if (edge.equals(RectangleEdge.BOTTOM)) {
+//	            Iterator iterator = categories.iterator();
+//	            while (iterator.hasNext()) {
+//	                Comparable key = (Comparable) iterator.next();
+//	                double x = getCategoryMiddle(key, categories, dataArea, edge);
+//	                line.setLine(x, cursor, x, cursor - il);
+//	                g2.draw(line);
+//	                line.setLine(x, cursor, x, cursor + ol);
+//	                g2.draw(line);
+//	            }
+//	            state.cursorDown(ol);
+//	        } else if (edge.equals(RectangleEdge.LEFT)) {
+//	            Iterator iterator = categories.iterator();
+//	            while (iterator.hasNext()) {
+//	                Comparable key = (Comparable) iterator.next();
+//	                double y = getCategoryMiddle(key, categories, dataArea, edge);
+//	                line.setLine(cursor, y, cursor + il, y);
+//	                g2.draw(line);
+//	                line.setLine(cursor, y, cursor - ol, y);
+//	                g2.draw(line);
+//	            }
+//	            state.cursorLeft(ol);
+//	        } else if (edge.equals(RectangleEdge.RIGHT)) {
+//	            Iterator iterator = categories.iterator();
+//	            while (iterator.hasNext()) {
+//	                Comparable key = (Comparable) iterator.next();
+//	                double y = getCategoryMiddle(key, categories, dataArea, edge);
+//	                line.setLine(cursor, y, cursor - il, y);
+//	                g2.draw(line);
+//	                line.setLine(cursor, y, cursor + ol, y);
+//	                g2.draw(line);
+//	            }
+//	            state.cursorRight(ol);
+//	        }
 	        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, saved);
 	    }
 
@@ -1236,11 +1386,11 @@ import org.jfree.data.category.CategoryDataset;
 	     */
 	    @Override
 	    public Object clone() throws CloneNotSupportedException {
-	    	VaribleCategorySizeCategoryAxis clone = (VaribleCategorySizeCategoryAxis) super.clone();
-	        clone.tickLabelFontMap = new HashMap(this.tickLabelFontMap);
-	        clone.tickLabelPaintMap = new HashMap(this.tickLabelPaintMap);
-	        clone.categoryLabelToolTips = new HashMap(this.categoryLabelToolTips);
-	        clone.categoryLabelURLs = new HashMap(this.categoryLabelToolTips);
+	    	VariableCategorySizeCategoryAxis clone = (VariableCategorySizeCategoryAxis) super.clone();
+	        clone.tickLabelFontMap = new HashMap<Comparable, Font>(this.tickLabelFontMap);
+	        clone.tickLabelPaintMap = new HashMap<Comparable, Paint>(this.tickLabelPaintMap);
+	        clone.categoryLabelToolTips = new HashMap<Comparable, String>(this.categoryLabelToolTips);
+	        clone.categoryLabelURLs = new HashMap<Comparable, String>(this.categoryLabelToolTips);
 	        return clone;
 	    }
 
@@ -1256,13 +1406,13 @@ import org.jfree.data.category.CategoryDataset;
 	        if (obj == this) {
 	            return true;
 	        }
-	        if (!(obj instanceof VaribleCategorySizeCategoryAxis)) {
+	        if (!(obj instanceof VariableCategorySizeCategoryAxis)) {
 	            return false;
 	        }
 	        if (!super.equals(obj)) {
 	            return false;
 	        }
-	        VaribleCategorySizeCategoryAxis that = (VaribleCategorySizeCategoryAxis) obj;
+	        VariableCategorySizeCategoryAxis that = (VariableCategorySizeCategoryAxis) obj;
 	        if (that.lowerMargin != this.lowerMargin) {
 	            return false;
 	        }
@@ -1351,13 +1501,13 @@ import org.jfree.data.category.CategoryDataset;
 	     *
 	     * @see #writePaintMap(Map, ObjectOutputStream)
 	     */
-	    private Map readPaintMap(ObjectInputStream in)
+	    private Map<Comparable, Paint> readPaintMap(ObjectInputStream in)
 	            throws IOException, ClassNotFoundException {
 	        boolean isNull = in.readBoolean();
 	        if (isNull) {
 	            return null;
 	        }
-	        Map result = new HashMap();
+	        Map<Comparable, Paint> result = new HashMap<Comparable, Paint>();
 	        int count = in.readInt();
 	        for (int i = 0; i < count; i++) {
 	            Comparable category = (Comparable) in.readObject();
@@ -1378,21 +1528,21 @@ import org.jfree.data.category.CategoryDataset;
 	     *
 	     * @see #readPaintMap(ObjectInputStream)
 	     */
-	    private void writePaintMap(Map map, ObjectOutputStream out)
+	    private void writePaintMap(Map<Comparable, Paint> map, ObjectOutputStream out)
 	            throws IOException {
 	        if (map == null) {
 	            out.writeBoolean(true);
 	        }
 	        else {
 	            out.writeBoolean(false);
-	            Set keys = map.keySet();
+	            Set<Comparable> keys = map.keySet();
 	            int count = keys.size();
 	            out.writeInt(count);
-	            Iterator iterator = keys.iterator();
+	            Iterator<Comparable> iterator = keys.iterator();
 	            while (iterator.hasNext()) {
-	                Comparable key = (Comparable) iterator.next();
+	                Comparable key = iterator.next();
 	                out.writeObject(key);
-	                SerialUtils.writePaint((Paint) map.get(key), out);
+	                SerialUtils.writePaint(map.get(key), out);
 	            }
 	        }
 	    }
@@ -1406,7 +1556,7 @@ import org.jfree.data.category.CategoryDataset;
 	     *
 	     * @return A boolean.
 	     */
-	    private boolean equalPaintMaps(Map map1, Map map2) {
+	    private boolean equalPaintMaps(Map<Comparable, Paint> map1, Map<Comparable, Paint> map2) {
 	        if (map1.size() != map2.size()) {
 	            return false;
 	        }
@@ -1415,11 +1565,26 @@ import org.jfree.data.category.CategoryDataset;
 	        while (iterator.hasNext()) {
 	            Map.Entry entry = (Map.Entry) iterator.next();
 	            Paint p1 = (Paint) entry.getValue();
-	            Paint p2 = (Paint) map2.get(entry.getKey());
+	            Paint p2 = map2.get(entry.getKey());
 	            if (!PaintUtils.equal(p1, p2)) {
 	                return false;
 	            }
 	        }
 	        return true;
 	    }
+	   
 }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

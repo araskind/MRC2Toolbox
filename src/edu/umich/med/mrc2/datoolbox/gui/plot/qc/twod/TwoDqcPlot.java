@@ -32,6 +32,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.StandardCategoryToolTipGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.Plot;
@@ -52,8 +53,8 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBarChartDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBoxPlotDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcTimedScatterSet;
-import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.NoCategoryGapsBarRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.VaribleCategorySizeCategoryAxis;
+import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.QcPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolTipGenerator;
 
@@ -117,11 +118,12 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 		QcBarChartDataSet ds = 
 				new QcBarChartDataSet(dataSetStats, sortingOrder, qcParameter);	
 		
-		NoCategoryGapsBarRenderer renderer = new NoCategoryGapsBarRenderer();
+		VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
+        renderer.setDefaultToolTipGenerator(new StandardCategoryToolTipGenerator());
 		for(int i=0; i<ds.getRowCount(); i++)
 			renderer.setSeriesPaint(i, ds.getSeriesPaintMap().get(i));
 
-		((CategoryPlot)chart.getPlot()).setDomainAxis(new VaribleCategorySizeCategoryAxis());
+		((CategoryPlot)chart.getPlot()).setDomainAxis(new VariableCategorySizeCategoryAxis());
 		((CategoryPlot)chart.getPlot()).setRenderer(renderer);
 		chart.getCategoryPlot().setDataset(ds);
 	}

@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.renderer;
+package edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category;
 
 /* ===========================================================
  * JFreeChart : a free chart library for the Java(tm) platform
@@ -78,14 +78,14 @@ import org.jfree.chart.ui.RectangleEdge;
  * @see GradientBarPainter
  */
 
-public class NoCategoryGapBarPainter implements Serializable {
+public class VariableCategorySizeBarPainter implements Serializable {
 
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 3153360808650208698L;
 
-    public NoCategoryGapBarPainter() {
+    public VariableCategorySizeBarPainter() {
     	
     }
 
@@ -100,7 +100,7 @@ public class NoCategoryGapBarPainter implements Serializable {
      * @param base  indicates which side of the rectangle is the base of the
      *              bar.
      */
-    public void paintBar(Graphics2D g2, NoCategoryGapsBarRenderer renderer, int row,
+    public void paintBar(Graphics2D g2, VariableCategorySizeBarRenderer renderer, int row,
             int column, RectangularShape bar, RectangleEdge base) {
 
         Paint itemPaint = renderer.getItemPaint(row, column);
@@ -137,7 +137,7 @@ public class NoCategoryGapBarPainter implements Serializable {
      *              bar.
      * @param pegShadow  peg the shadow to the base of the bar?
      */
-    public void paintBarShadow(Graphics2D g2, NoCategoryGapsBarRenderer renderer, int row,
+    public void paintBarShadow(Graphics2D g2, VariableCategorySizeBarRenderer renderer, int row,
             int column, RectangularShape bar, RectangleEdge base,
             boolean pegShadow) {
 
@@ -222,7 +222,7 @@ public class NoCategoryGapBarPainter implements Serializable {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof NoCategoryGapBarPainter)) {
+        if (!(obj instanceof VariableCategorySizeBarPainter)) {
             return false;
         }
         return true;

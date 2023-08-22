@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.plot.renderer;
+package edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category;
 
 
 /* ===========================================================
@@ -73,6 +73,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.jfree.chart.LegendItem;
@@ -110,7 +111,7 @@ import org.jfree.data.category.CategoryDataset;
  * <img src="doc-files/BarChartDemo1.svg" alt="BarChartDemo1.svg">
  */
 
-public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
+public class VariableCategorySizeBarRenderer extends AbstractCategoryItemRenderer
         implements Cloneable, PublicCloneable, Serializable {
 
     /** For serialization. */
@@ -128,15 +129,16 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
     /**
      * The default bar painter assigned to each new instance of this renderer.
      */
-    private static NoCategoryGapBarPainter defaultBarPainter = new NoCategoryGapBarPainter();
+    private static VariableCategorySizeBarPainter defaultBarPainter = new VariableCategorySizeBarPainter();
 
+    private int rendererIndex;
     /**
      * Returns the default bar painter.
      *
      * @return The default bar painter.
      */
-    public static NoCategoryGapBarPainter getDefaultBarPainter() {
-        return NoCategoryGapsBarRenderer.defaultBarPainter;
+    public static VariableCategorySizeBarPainter getDefaultBarPainter() {
+        return VariableCategorySizeBarRenderer.defaultBarPainter;
     }
 
     /**
@@ -144,7 +146,7 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
      *
      * @param painter  the painter ({@code null} not permitted).
      */
-    public static void setDefaultBarPainter(NoCategoryGapBarPainter painter) {
+    public static void setDefaultBarPainter(VariableCategorySizeBarPainter painter) {
         Args.nullNotPermitted(painter, "painter");
         defaultBarPainter = painter;
     }
@@ -226,7 +228,7 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
     /**
      * The bar painter (never {@code null}).
      */
-    private NoCategoryGapBarPainter barPainter;
+    private VariableCategorySizeBarPainter barPainter;
 
     /**
      * The flag that controls whether or not shadows are drawn for the bars.
@@ -251,7 +253,7 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
     /**
      * Creates a new bar renderer with default settings.
      */
-    public NoCategoryGapsBarRenderer() {
+    public VariableCategorySizeBarRenderer() {
         super();
         this.base = 0.0;
         this.includeBaseInRange = true;
@@ -525,7 +527,7 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
      *
      * @see #setBarPainter(BarPainter)
      */
-    public NoCategoryGapBarPainter getBarPainter() {
+    public VariableCategorySizeBarPainter getBarPainter() {
         return this.barPainter;
     }
 
@@ -537,7 +539,7 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
      *
      * @see #getBarPainter()
      */
-    public void setBarPainter(NoCategoryGapBarPainter painter) {
+    public void setBarPainter(VariableCategorySizeBarPainter painter) {
         Args.nullNotPermitted(painter, "painter");
         this.barPainter = painter;
         fireChangeEvent();
@@ -669,6 +671,7 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
             Rectangle2D dataArea, CategoryPlot plot, int rendererIndex,
             PlotRenderingInfo info) {
 
+    	this.rendererIndex = rendererIndex;
         CategoryItemRendererState state = super.initialise(g2, dataArea, plot,
                 rendererIndex, info);
 
@@ -696,7 +699,8 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
                                      int rendererIndex,
                                      CategoryItemRendererState state) {
 
-        CategoryAxis domainAxis = getDomainAxis(plot, rendererIndex);
+    	VariableCategorySizeCategoryAxis domainAxis = 
+    			(VariableCategorySizeCategoryAxis)getDomainAxis(plot, rendererIndex);
         CategoryDataset dataset = plot.getDataset(rendererIndex);
          if (dataset != null) {
 //            int columns = dataset.getColumnCount();
@@ -759,11 +763,11 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
     		CategoryPlot plot, 
             PlotOrientation orientation, 
             Rectangle2D dataArea, 
-            VaribleCategorySizeCategoryAxis domainAxis, 
+            VariableCategorySizeCategoryAxis domainAxis, 
             CategoryItemRendererState state,
             int row, 
             int column) {
-        // calculate bar width...
+    	CategoryDataset dataset = plot.getDataset(rendererIndex);
         double space;
         if (orientation == PlotOrientation.HORIZONTAL) {
             space = dataArea.getHeight();
@@ -771,24 +775,19 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
         else {
             space = dataArea.getWidth();
         }
-        double barW0 = domainAxis.getCategoryStart(column, getColumnCount(),
+        int[]categoryItemCounts = 
+        		VariableCategorySizeCategoryAxis.getCategoryItemCounts(dataset);
+        int totalCounts = Arrays.stream(categoryItemCounts).sum();
+        double seriesGap = space * getItemMargin() / totalCounts;
+        
+        double barW0 = domainAxis.getCategoryStart(column, dataset,
                 dataArea, plot.getDomainAxisEdge());
-        int seriesCount = state.getVisibleSeriesCount() >= 0
-                ? state.getVisibleSeriesCount() : getRowCount();
-        int categoryCount = getColumnCount();
-        if (seriesCount > 1) {
-            double seriesGap = space * getItemMargin()
-                               / (categoryCount * (seriesCount - 1));
-            double seriesW = calculateSeriesWidth(space, domainAxis,
-                    categoryCount, seriesCount);
-            barW0 = barW0 + row * (seriesW + seriesGap)
-                          + (seriesW / 2.0) - (state.getBarWidth() / 2.0);
+        int valueIndexInCategory = 0;
+        for(int i=0; i<=row; i++) {
+        	if(dataset.getValue(i, column) != null)
+        		valueIndexInCategory++;
         }
-        else {
-            barW0 = domainAxis.getCategoryMiddle(column, getColumnCount(),
-                    dataArea, plot.getDomainAxisEdge()) - state.getBarWidth()
-                    / 2.0;
-        }
+        barW0 = barW0 + valueIndexInCategory * (state.getBarWidth() + seriesGap);
         return barW0;
     }
 
@@ -944,7 +943,7 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
 
         final double value = dataValue.doubleValue();
         PlotOrientation orientation = plot.getOrientation();
-        double barW0 = calculateBarW0(plot, orientation, dataArea, (VaribleCategorySizeCategoryAxis)domainAxis,
+        double barW0 = calculateBarW0(plot, orientation, dataArea, (VariableCategorySizeCategoryAxis)domainAxis,
                 state, visibleRow, column);
         double[] barL0L1 = calculateBarL0L1(value);
         if (barL0L1 == null) {
@@ -1279,10 +1278,10 @@ public class NoCategoryGapsBarRenderer extends AbstractCategoryItemRenderer
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof NoCategoryGapsBarRenderer)) {
+        if (!(obj instanceof VariableCategorySizeBarRenderer)) {
             return false;
         }
-        NoCategoryGapsBarRenderer that = (NoCategoryGapsBarRenderer) obj;
+        VariableCategorySizeBarRenderer that = (VariableCategorySizeBarRenderer) obj;
         if (this.base != that.base) {
             return false;
         }
