@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 
 import javax.swing.Icon;
@@ -29,13 +31,15 @@ import javax.swing.Icon;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
-public class Dockable2DQCPanel extends DefaultSingleCDockable{
+public class Dockable2DQCPanel extends DefaultSingleCDockable implements ActionListener{
 
 	private TwoDqcPlot plotPanel;
 	private TwoDqcPlotToolbar plotToolbar;
+	private DataPlotControlsPanel dataPlotControlsPanel;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("poxplot", 16);
 
@@ -47,9 +51,14 @@ public class Dockable2DQCPanel extends DefaultSingleCDockable{
 		setLayout(new BorderLayout(0, 0));
 		plotPanel = new TwoDqcPlot();
 		add(plotPanel, BorderLayout.CENTER);
-		plotToolbar = new TwoDqcPlotToolbar(plotPanel);
+		plotToolbar = new TwoDqcPlotToolbar(this);
 		add(plotToolbar, BorderLayout.NORTH);
+
+		dataPlotControlsPanel = new DataPlotControlsPanel(plotPanel);
+		add(dataPlotControlsPanel, BorderLayout.EAST);
+		
 		plotPanel.updateParametersFromToolbar();
+		//	TODO update from control panel
 	}
 
 	public void loadDataSetStats(Collection<DataFileStatisticalSummary> dataSetStats2) {
@@ -63,5 +72,19 @@ public class Dockable2DQCPanel extends DefaultSingleCDockable{
 	public void updateGuiFromExperimentAndDataPipeline(
 			DataAnalysisProject experiment, DataPipeline activeDataPipeline) {
 		plotPanel.removeAllDataSets();
+	}
+
+	public TwoDqcPlot getPlotPanel() {
+		return plotPanel;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setSidePanelVisible(boolean b) {
+		dataPlotControlsPanel.setVisible(b);
 	}
 }

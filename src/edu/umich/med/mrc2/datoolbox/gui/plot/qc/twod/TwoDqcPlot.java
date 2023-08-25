@@ -45,9 +45,12 @@ import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
+import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBarChartDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBoxPlotDataSet;
@@ -55,10 +58,12 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcTimedScatterSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControl;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.QcPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolTipGenerator;
 
-public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemListener {
+public class TwoDqcPlot extends MasterPlotPanel 
+	implements DataPlotControl, ActionListener, ItemListener {
 	
 	/**
 	 * 
@@ -68,6 +73,11 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 	private FileSortingOrder sortingOrder;
 	private DataScale dataScale;
 	private DataSetQcField qcParameter;
+	protected PlotDataGrouping groupingType;
+	protected ExperimentDesignFactor category;
+	protected ExperimentDesignFactor subCategory;
+	protected ExperimentDesignSubset activeDesign;
+	
 	private TwoDqcPlotToolbar toolbar;
 	private Collection<DataFileStatisticalSummary> dataSetStats;
 	private Plot activePlot;
@@ -85,8 +95,7 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 	/**
 	 * @param toolbar the toolbar to set
 	 */
-	public void setToolbar(TwoDqcPlotToolbar toolbar) {
-		
+	public void setToolbar(TwoDqcPlotToolbar toolbar) {		
 		this.toolbar = toolbar;
 	}
 	
@@ -94,13 +103,9 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 		
 		dataSetStats = dataSetStats2;		
 		
-		if (plotType.equals(QcPlotType.BARCHART)) {
-//			BarRenderer renderer = (BarRenderer) ((CategoryPlot)chart.getPlot()).getRenderer();
-//			renderer.setBarPainter(new StandardBarPainter());
-//			chart.getCategoryPlot().setDataset(new QcBarChartDataSet(dataSetStats, sortingOrder, qcParameter));
-			
+		if (plotType.equals(QcPlotType.BARCHART))			
 			loadBarChart();
-		}
+		
 		if ((plotType.equals(QcPlotType.LINES) || plotType.equals(QcPlotType.SCATTER)) 
 				&& sortingOrder.equals(FileSortingOrder.NAME))
 			chart.getXYPlot().setDataset(new QcScatterDataSet(dataSetStats, qcParameter));
@@ -130,8 +135,7 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 	
 	public void redrawPlot() {
 
-		removeAllDataSets();
-		
+		removeAllDataSets();		
 		if (dataSetStats != null)
 			loadDataSetStats(dataSetStats);		
 	}	
@@ -153,8 +157,6 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 	public void actionPerformed(ActionEvent event) {
 
 		String command = event.getActionCommand();
-		
-		
 		if (command.equals(ChartPanel.ZOOM_IN_RANGE_COMMAND)) {
 
 			if (activePlot instanceof CategoryPlot) {
@@ -381,4 +383,36 @@ public class TwoDqcPlot extends MasterPlotPanel implements ActionListener, ItemL
 		toolbar.toggleLegendIcon(legendVisible);
 	}
 
+	@Override
+	public FileSortingOrder getSortingOrder() {
+		return sortingOrder;		
+	}
+
+	@Override
+	public void setSortingOrder(FileSortingOrder sortingOrder) {
+		this.sortingOrder = sortingOrder;
+		redrawPlot();
+	}
+
+	@Override
+	public PlotDataGrouping getGroupingType() {
+		return groupingType;
+	}
+
+	@Override
+	public void setGroupingType(PlotDataGrouping groupingType) {
+		this.groupingType = groupingType;
+		redrawPlot();
+	}
+
+	@Override
+	public DataScale getDataScale() {
+		return dataScale;
+	}
+
+	@Override
+	public void setDataScale(DataScale dataScale) {
+		this.dataScale = dataScale;
+		redrawPlot();
+	}
 }

@@ -76,7 +76,8 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.TimedScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListener {
+public class MultiPanelDataPlot extends MasterPlotPanel 
+	implements ActionListener, DataPlotControl {
 
 	/**
 	 * 
@@ -702,38 +703,47 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 		toolbar.toggleDataPointsIcon(dataPointsVisible);
 	}
 
-	public void setDataScale(DataScale dataScale) {
-		this.dataScale = dataScale;
-	}
-
-	public void setPlotType(StatsPlotType plotType) {
-		this.plotType = plotType;
-	}
-
-	public void setSortingOrder(FileSortingOrder sortingOrder) {
-		this.sortingOrder = sortingOrder;
-	}
-
 	@Override
 	public void removeAllDataSets() {
-
 		clearPlotMatrix();
-	}
-
-	public FileSortingOrder getSortingOrder() {
-		return sortingOrder;
-	}
-
-	public PlotDataGrouping getGroupingType() {
-		return groupingType;
 	}
 
 	public StatsPlotType getPlotType() {
 		return plotType;
 	}
 
+	public void setPlotType(StatsPlotType plotType) {
+		this.plotType = plotType;
+	}
+	
+	@Override
+	public FileSortingOrder getSortingOrder() {
+		return sortingOrder;
+	}
+	
+	@Override
+	public void setSortingOrder(FileSortingOrder sortingOrder) {
+		this.sortingOrder = sortingOrder;
+	}
+
+	@Override
+	public PlotDataGrouping getGroupingType() {
+		return groupingType;
+	}
+
+	@Override
+	public void setGroupingType(PlotDataGrouping groupingType) {
+		this.groupingType = groupingType;
+	}
+	
+	@Override
 	public DataScale getDataScale() {
 		return dataScale;
+	}
+	
+	@Override
+	public void setDataScale(DataScale dataScale) {
+		this.dataScale = dataScale;
 	}
 
 	@Override
@@ -749,6 +759,8 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 		}
 		toolbar.toggleLegendIcon(legendVisible);
 	}
+
+
 
 
 }

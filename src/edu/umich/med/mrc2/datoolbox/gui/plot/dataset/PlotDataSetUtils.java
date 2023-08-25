@@ -313,7 +313,8 @@ public class PlotDataSetUtils {
 		}
 		//	Filter level combinations to exclude non-existent
 		Collection<ExperimentalSample> samples =
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamplesForDesignSubset(activeDesign);
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
+					getExperimentDesign().getSamplesForDesignSubset(activeDesign);
 
 		for(Set<ExperimentDesignLevel>levelSet : seriesSet) {
 

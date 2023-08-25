@@ -398,6 +398,16 @@ public enum MainActionCommands {
 	SORT_BY_CLUSTER_NAME_COMMAND(	"Sort by cluster name"),
 	SORT_BY_RT_COMMAND("Sort by retention"),
 	SORT_BY_RANK_COMMAND("Sort by rank"),
+	SORT_BY_FILE_NAME_COMMAND("Sort by file name"),
+	SORT_BY_INJECTION_TIME_COMMAND("Sort by injection time"),
+	
+	//	Chart color options
+	COLOR_BY_FILE_NAME_COMMAND("Color by file"),
+	COLOR_BY_SAMPLE_TYPE_COMMAND("Color by sample type"),
+	
+	//	Chart side panel
+	SHOW_CHART_SIDE_PANEL_COMMAND("Show chart side panel"),
+	HIDE_CHART_SIDE_PANEL_COMMAND("Hide chart side panel"),
 
 	// Feature statistics panel commands
 	CALC_FEATURES_STATS_COMMAND("Calculate features stats"),

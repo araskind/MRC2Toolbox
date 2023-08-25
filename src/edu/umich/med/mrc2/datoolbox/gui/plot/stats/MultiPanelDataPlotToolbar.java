@@ -291,6 +291,7 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListen
 			updatePlot();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void populateCategories(ExperimentDesignSubset activeSubset) {
 
 		ExperimentDesignFactor[] factors = new ExperimentDesignFactor[0];
@@ -357,7 +358,6 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListen
 	}
 
 	public void setPlotScale(DataScale scale) {
-
 		dataScaleComboBox.setSelectedItem(scale);
 	}
 
@@ -372,6 +372,7 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListen
 	}
 
 	// Do not allow ignore design with BoxPlot
+	@SuppressWarnings("unchecked")
 	private void updatePlotGroupingOptions() {
 
 		PlotDataGrouping grouping = getDataGroupingType();
@@ -379,7 +380,8 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListen
 
 		if (plotType.equals(StatsPlotType.BOXPLOT_BY_FEATURE) || plotType.equals(StatsPlotType.BOXPLOT_BY_GROUP)) {
 
-			groupByComboBox.setModel(new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
+			groupByComboBox.setModel(
+					new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
 			groupByComboBox.removeItem(PlotDataGrouping.IGNORE_DESIGN);
 			groupByComboBox.setSelectedItem(PlotDataGrouping.EACH_FACTOR);
 			categoryComboBox.setSelectedIndex(-1);
@@ -389,7 +391,8 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListen
 		}
 		if (plotType.equals(StatsPlotType.BARCHART)) {
 
-			groupByComboBox.setModel(new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
+			groupByComboBox.setModel(
+					new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
 			groupByComboBox.setSelectedItem(grouping);
 		}
 		if (plotType.equals(StatsPlotType.LINES) || plotType.equals(StatsPlotType.SCATTER)) {
@@ -404,7 +407,8 @@ public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListen
 
 		PlotDataGrouping grouping = getDataGroupingType();
 
-		if (grouping.equals(PlotDataGrouping.IGNORE_DESIGN) || grouping.equals(PlotDataGrouping.EACH_FACTOR)
+		if (grouping.equals(PlotDataGrouping.IGNORE_DESIGN) 
+				|| grouping.equals(PlotDataGrouping.EACH_FACTOR)
 				|| !groupByComboBox.isEnabled()) {
 
 			categoryComboBox.setSelectedIndex(-1);
