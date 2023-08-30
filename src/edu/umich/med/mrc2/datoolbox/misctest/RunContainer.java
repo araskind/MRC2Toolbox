@@ -176,11 +176,37 @@ public class RunContainer {
 		MRC2ToolBoxConfiguration.initConfiguration();
 
 		try {
-			testHmdbXmlFetch("HMDB0000142");
+			copyRawData();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private static void copyRawData() {
+		
+		Path destinationPath = Paths.get("Y:\\_QUALTMP\\2022_0421_Rat_FM_RPLCSemiPrep_HSST3_Fractions_Pos");			
+		Path sourcePath = Paths.get("R:\\Metabolomics-BRCF\\Shared\\UserBackup\\Brady\\Data\\2022_0421_Rat_FM_RPLCSemiPrep_HSST3_Fractions_Pos");
+		List<Path> pathList = new ArrayList<Path>();
+		try {
+			pathList = Files.find(sourcePath,
+					2, (filePath, fileAttr) -> (filePath.toString().matches(".+HSST3_Pos_Fraction_.._ID_.+"))).
+				collect(Collectors.toList());
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		for(Path rdp : pathList) {
+			
+			String rawFileName = FilenameUtils.getName(rdp.toString());
+			Path newRdp = Paths.get(destinationPath.toString(), rawFileName);
+			try {
+				Files.copy(rdp, newRdp);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}				
 	}
 	
 	private static void testHmdbXmlFetch(String accession) {

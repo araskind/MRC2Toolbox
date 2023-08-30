@@ -290,10 +290,17 @@ public class IDTrackerDataExportTask extends IDTrackerFeatureExportTask {
 									for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
 										line.add("");
 								}
+								Collection<String> altParents = classyFireAlternativeParents.get(accession);
+								if(altParents != null) 
+									line.add(StringUtils.join(altParents, " | "));								
+								else
+									line.add("");
 							}
 							else {
 								for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
 									line.add("");
+								
+								line.add("");	//	Alt parents
 							}
 						}
 						else {
@@ -334,6 +341,8 @@ public class IDTrackerDataExportTask extends IDTrackerFeatureExportTask {
 				
 				for(ClassyFireClassificationLevels cfLevel : ClassyFireClassificationLevels.values())
 					header.add(cfLevel.getName());	
+				
+				header.add("Alternative parents");
 			}
 			else {
 				header.add(idField.getName());

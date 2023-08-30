@@ -102,6 +102,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 	protected Collection<Injection>injections;
 	protected Map<String,Map<RefMetClassificationLevels,String>>refMetClassifications;
 	protected Map<String,Map<ClassyFireClassificationLevels,String>>classyFireClassifications;
+	protected Map<String,Collection<String>>classyFireAlternativeParents;
 	protected Map<String,String>systematicNames;
 	protected Map<String,String>refMetNames;
 	protected Map<MSFeatureInfoBundle, Collection<MsFeatureIdentity>>identificationMap;
@@ -235,6 +236,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 				
 		classyFireClassifications = 
 				new TreeMap<String,Map<ClassyFireClassificationLevels,String>>();
+		classyFireAlternativeParents = new TreeMap<String,Collection<String>>();
 		if(accessions == null || accessions.isEmpty())
 			return;
 		
@@ -247,6 +249,12 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 			+ "FROM CLASSYFIRE_CLASSIFICATION WHERE ACCESSION = ?";
 		PreparedStatement ps = conn.prepareStatement(sql);
 		
+		String apsql =
+				"SELECT N.NAME FROM CLASSYFIRE_ALTERNATIVE_PARENTS P, "
+				+ "CLASSYFIRE_TAX_NODES N WHERE P.ACCESSION = ? "
+				+ "AND P.TAX_ID = N.CHEMONT_ID";
+		PreparedStatement apps = conn.prepareStatement(apsql);
+			
 		String cfSql = "SELECT NAME FROM CLASSYFIRE_TAX_NODES WHERE CHEMONT_ID = ?";
 		PreparedStatement cfPs = conn.prepareStatement(cfSql);
 		
@@ -290,11 +298,21 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 					cfRs.close();
 				}
 			}
-			classyFireClassifications.put(accession, classifiers);			
+			classyFireClassifications.put(accession, classifiers);	
+			
+			Collection<String>altParents = new TreeSet<String>();
+			apps.setString(1, accession);
+			rs = apps.executeQuery();
+			while(rs.next())
+				altParents.add(rs.getString("NAME"));
+				
+			rs.close();
+			classyFireAlternativeParents.put(accession, altParents);	
 			processed++;
 		}
 		ps.close();
 		cfPs.close();
+		apps.close();
 		ConnectionManager.releaseConnection(conn);
 	}
 		
