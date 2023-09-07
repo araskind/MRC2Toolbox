@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.data.compare;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 
 public class MsFeatureComparator extends ObjectCompatrator<MsFeature> {
@@ -46,88 +47,116 @@ public class MsFeatureComparator extends ObjectCompatrator<MsFeature> {
 
 		switch (property) {
 		
-		case ID:
-			result = o1.getId().compareTo(o2.getId());
-			if (direction == SortDirection.ASC)
-				return result;
-			else
-				return -result;
-
-		case Name:
-			result = o1.getName().compareTo(o2.getName());
-			if (direction == SortDirection.ASC)
-				return result;
-			else
-				return -result;
-
-		case MZ:
-			result = Double.compare(o1.getMonoisotopicMz(), o2.getMonoisotopicMz());
-			if (result == 0)
-				result = Double.compare(o1.getBasePeakMz(), o2.getBasePeakMz());
-			if (result == 0)
-				result = o1.toString().compareTo(o2.toString());
-
-			if (direction == SortDirection.ASC)
-				return result;
-			else
-				return -result;
-
-		case Area:
-			result = Double.compare(o1.getAveragePeakArea(), o2.getAveragePeakArea());
-			if (direction == SortDirection.ASC)
-				return result;
-			else
-				return -result;
-
-		case RT:
-			result = Double.compare(o1.getRetentionTime(), o2.getRetentionTime());
-			if (result == 0)
-				result = o1.toString().compareTo(o2.toString());
-
-			if (direction == SortDirection.ASC)
-				return result;
-			else
-				return -result;
-			
-		case msmsIntensity:
-			if(o1.getSpectrum() != null && o2.getSpectrum() != null 
-					&& o1.getSpectrum().getExperimentalTandemSpectrum() != null
-					&& o2.getSpectrum().getExperimentalTandemSpectrum() != null) {
-				TandemMassSpectrum msmsOne = o1.getSpectrum().getExperimentalTandemSpectrum();
-				TandemMassSpectrum msmsTwo = o2.getSpectrum().getExperimentalTandemSpectrum();
-				result = Double.compare(msmsOne.getTotalIntensity(), msmsTwo.getTotalIntensity());
+			case ID:
+				result = o1.getId().compareTo(o2.getId());
 				if (direction == SortDirection.ASC)
 					return result;
 				else
 					return -result;
-			}
-			else
-				return 0;
-
-		case pimaryId:
-			result = 0;
-			if (o1.getPrimaryIdentity() != null && o2.getPrimaryIdentity() != null)
-				result = o1.getPrimaryIdentity().getName().compareTo(o2.getPrimaryIdentity().getName());
-
-			if (o1.getPrimaryIdentity() != null && o2.getPrimaryIdentity() == null)
-				result = o1.getPrimaryIdentity().getName().compareTo(o2.getName());
-
-			if (o1.getPrimaryIdentity() == null && o2.getPrimaryIdentity() != null)
-				result = o1.getName().compareTo(o2.getPrimaryIdentity().getName());
-
-			if (o1.getPrimaryIdentity() == null && o2.getPrimaryIdentity() == null) {
+	
+			case Name:
 				result = o1.getName().compareTo(o2.getName());
-
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+	
+			case MZ:
+				result = Double.compare(o1.getMonoisotopicMz(), o2.getMonoisotopicMz());
+				if (result == 0)
+					result = Double.compare(o1.getBasePeakMz(), o2.getBasePeakMz());
 				if (result == 0)
 					result = o1.toString().compareTo(o2.toString());
-			}
-			if (direction == SortDirection.ASC)
-				return result;
-			else
-				return -result;
-
-		default:
-			break;
+	
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+	
+			case Area:
+				result = Double.compare(o1.getAveragePeakArea(), o2.getAveragePeakArea());
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+	
+			case RT:
+				result = Double.compare(o1.getRetentionTime(), o2.getRetentionTime());
+				if (result == 0)
+					result = o1.toString().compareTo(o2.toString());
+	
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+				
+			case msmsIntensity:
+				if(o1.getSpectrum() != null && o2.getSpectrum() != null 
+						&& o1.getSpectrum().getExperimentalTandemSpectrum() != null
+						&& o2.getSpectrum().getExperimentalTandemSpectrum() != null) {
+					TandemMassSpectrum msmsOne = o1.getSpectrum().getExperimentalTandemSpectrum();
+					TandemMassSpectrum msmsTwo = o2.getSpectrum().getExperimentalTandemSpectrum();
+					result = Double.compare(msmsOne.getTotalIntensity(), msmsTwo.getTotalIntensity());
+					if (direction == SortDirection.ASC)
+						return result;
+					else
+						return -result;
+				}
+				else
+					return 0;
+	
+			case pimaryId:
+				result = 0;
+				if (o1.getPrimaryIdentity() != null && o2.getPrimaryIdentity() != null)
+					result = o1.getPrimaryIdentity().getName().compareTo(o2.getPrimaryIdentity().getName());
+	
+				if (o1.getPrimaryIdentity() != null && o2.getPrimaryIdentity() == null)
+					result = o1.getPrimaryIdentity().getName().compareTo(o2.getName());
+	
+				if (o1.getPrimaryIdentity() == null && o2.getPrimaryIdentity() != null)
+					result = o1.getName().compareTo(o2.getPrimaryIdentity().getName());
+	
+				if (o1.getPrimaryIdentity() == null && o2.getPrimaryIdentity() == null) {
+					result = o1.getName().compareTo(o2.getName());
+	
+					if (result == 0)
+						result = o1.toString().compareTo(o2.toString());
+				}
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+	
+			case BasePeakMZ:
+				
+				result = Double.compare(o1.getBasePeakMz(), o2.getBasePeakMz());
+				
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;	
+				
+			case ParentIonMZ:
+				
+				if(o1.getSpectrum() != null && o2.getSpectrum() != null 
+					&& o1.getSpectrum().getExperimentalTandemSpectrum() != null
+					&& o2.getSpectrum().getExperimentalTandemSpectrum() != null) {
+					MsPoint msmsOneParent = o1.getSpectrum().getExperimentalTandemSpectrum().getParent();
+					MsPoint msmsTwoParent = o2.getSpectrum().getExperimentalTandemSpectrum().getParent();
+					result = 0;
+					if(msmsOneParent != null && msmsTwoParent != null)
+						result = Double.compare(msmsOneParent.getMz(), msmsTwoParent.getMz());
+					
+					if (direction == SortDirection.ASC)
+						return result;
+					else
+						return -result;
+				}
+				else
+					return 0;
+				
+			default:
+				break;
 		}
 		throw (new IllegalStateException());
 	}

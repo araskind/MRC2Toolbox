@@ -85,6 +85,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 	private static final boolean REMOVE_MASSES_ABOVE_PARENT_DEFAULT = true;
 	private static final boolean REMOVE_MASSES_BELOW_COUNT_DEFAULT = false;
 	private static final double MINIMAL_COUNTS_DEFAULT = 0.0d;
+	private static final double MINIMAL_PURITY_DEFAULT = 0.7d;
 	private static final boolean LEAVE_MAX_FRAGMENTS_DEFAULT = false;
 	private static final int MAX_FRAGMENTS_COUNT_DEFAULT = 30;	
 	private static final IntensityMeasure INTENSITY_MEASURE_DEFAULT = IntensityMeasure.ABSOLUTE;
@@ -122,15 +123,17 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 	private JTextArea descriptionTextArea;
 	private JTextField nameTextField;
 	private JLabel methodIdLabel;
+	private JLabel lblNewLabel_11;
+	private JSpinner precursorPuritySpinner;
 	
 	public MSMSFeatureExtractionParametersPanel() {
 		super();
 
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{176, 68, 0, 78, 0, 0};
-		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel.columnWeights = new double[]{1.0, 1.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		setLayout(gbl_panel);
 		setBorder(new EmptyBorder(10, 10, 10, 10));
 		
@@ -267,13 +270,32 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_minPrecursorIntensityTextField.gridx = 1;
 		gbc_minPrecursorIntensityTextField.gridy = 6;
 		add(minPrecursorIntensityTextField, gbc_minPrecursorIntensityTextField);
+		
+		lblNewLabel_11 = new JLabel("Minimal precursor purity, %");
+		GridBagConstraints gbc_lblNewLabel_11 = new GridBagConstraints();
+		gbc_lblNewLabel_11.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_11.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_11.gridx = 0;
+		gbc_lblNewLabel_11.gridy = 7;
+		add(lblNewLabel_11, gbc_lblNewLabel_11);
+		
+		precursorPuritySpinner = new JSpinner();
+		precursorPuritySpinner.setModel(new SpinnerNumberModel(75, 10, 100, 1));
+		precursorPuritySpinner.setPreferredSize(new Dimension(80, 20));
+		precursorPuritySpinner.setMinimumSize(new Dimension(80, 20));
+		GridBagConstraints gbc_precursorPuritySpinner = new GridBagConstraints();
+		gbc_precursorPuritySpinner.anchor = GridBagConstraints.WEST;
+		gbc_precursorPuritySpinner.insets = new Insets(0, 0, 5, 5);
+		gbc_precursorPuritySpinner.gridx = 1;
+		gbc_precursorPuritySpinner.gridy = 7;
+		add(precursorPuritySpinner, gbc_precursorPuritySpinner);
 
 		JLabel lblRtAlignmentWindow = new JLabel("Precursor isolation window (if not in data)");
 		GridBagConstraints gbc_lblRtAlignmentWindow = new GridBagConstraints();
 		gbc_lblRtAlignmentWindow.anchor = GridBagConstraints.EAST;
 		gbc_lblRtAlignmentWindow.insets = new Insets(0, 0, 5, 5);
 		gbc_lblRtAlignmentWindow.gridx = 0;
-		gbc_lblRtAlignmentWindow.gridy = 7;
+		gbc_lblRtAlignmentWindow.gridy = 8;
 		add(lblRtAlignmentWindow, gbc_lblRtAlignmentWindow);
 		
 		JLabel lblNewLabel_4 = new JLabel("Below precursor M/Z");
@@ -281,7 +303,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_4.gridx = 0;
-		gbc_lblNewLabel_4.gridy = 8;
+		gbc_lblNewLabel_4.gridy = 9;
 		add(lblNewLabel_4, gbc_lblNewLabel_4);
 		
 		isolationWindowLowerTextField = 
@@ -291,7 +313,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_precursorRtAlignTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_precursorRtAlignTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_precursorRtAlignTextField.gridx = 1;
-		gbc_precursorRtAlignTextField.gridy = 8;
+		gbc_precursorRtAlignTextField.gridy = 9;
 		add(isolationWindowLowerTextField, gbc_precursorRtAlignTextField);
 		
 		JLabel lblNewLabel_3 = new JLabel("Da");
@@ -299,7 +321,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_lblNewLabel_3.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_3.gridx = 2;
-		gbc_lblNewLabel_3.gridy = 8;
+		gbc_lblNewLabel_3.gridy = 9;
 		add(lblNewLabel_3, gbc_lblNewLabel_3);
 		
 		JLabel lblNewLabel_5 = new JLabel("Above precursor M/Z");
@@ -307,7 +329,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_5.gridx = 0;
-		gbc_lblNewLabel_5.gridy = 9;
+		gbc_lblNewLabel_5.gridy = 10;
 		add(lblNewLabel_5, gbc_lblNewLabel_5);
 		
 		isolationWindowUpperTextField = 
@@ -317,14 +339,14 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_precursorMzAlignTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_precursorMzAlignTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_precursorMzAlignTextField.gridx = 1;
-		gbc_precursorMzAlignTextField.gridy = 9;
+		gbc_precursorMzAlignTextField.gridy = 10;
 		add(isolationWindowUpperTextField, gbc_precursorMzAlignTextField);
 		
 		JLabel lblNewLabel_6 = new JLabel("Da");
 		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
 		gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_6.gridx = 2;
-		gbc_lblNewLabel_6.gridy = 9;
+		gbc_lblNewLabel_6.gridy = 10;
 		add(lblNewLabel_6, gbc_lblNewLabel_6);
 		
 		JPanel panel_3 = new JPanel();
@@ -338,7 +360,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_panel_3.insets = new Insets(0, 0, 5, 0);
 		gbc_panel_3.fill = GridBagConstraints.BOTH;
 		gbc_panel_3.gridx = 0;
-		gbc_panel_3.gridy = 10;
+		gbc_panel_3.gridy = 11;
 		add(panel_3, gbc_panel_3);
 		GridBagLayout gbl_panel_3 = new GridBagLayout();
 		gbl_panel_3.columnWidths = new int[]{0, 87, 0, 0, 0};
@@ -438,7 +460,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_panel.gridwidth = 5;
 		gbc_panel.fill = GridBagConstraints.BOTH;
 		gbc_panel.gridx = 0;
-		gbc_panel.gridy = 11;
+		gbc_panel.gridy = 12;
 		add(panel, gbc_panel);
 
 		GridBagLayout gbl_panel_9 = new GridBagLayout();
@@ -526,7 +548,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		gbc_panel_4.gridwidth = 5;
 		gbc_panel_4.fill = GridBagConstraints.BOTH;
 		gbc_panel_4.gridx = 0;
-		gbc_panel_4.gridy = 12;
+		gbc_panel_4.gridy = 13;
 		add(panel_4, gbc_panel_4);
 		
 		GridBagLayout gbl_panel_4 = new GridBagLayout();
@@ -638,6 +660,12 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 			return 0.0d;
 		else
 			return Double.valueOf(minPrecursorIntensityTextField.getText());
+	}
+	
+	public double getMinimalPrecursorPurity() {
+		
+		double precursorPurity = (int)precursorPuritySpinner.getValue() / 100.0d;
+		return precursorPurity;
 	}
 	
 	public double getIsolationWindowLowerBorder() {
@@ -759,7 +787,10 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 			rtFromTextField.setText(Double.toString(rtRange.getMin()));
 			rtToTextField.setText(Double.toString(rtRange.getMax()));
 		}
-		minPrecursorIntensityTextField.setText(Double.toString(ps.getMinPrecursorIntensity()));		
+		minPrecursorIntensityTextField.setText(Double.toString(ps.getMinPrecursorIntensity()));	
+		int precursorPurity = (int) Math.ceil(ps.getMinPrecursorPurity() * 100);
+		precursorPuritySpinner.setValue(precursorPurity);
+		
 		isolationWindowLowerTextField.setText(Double.toString(ps.getMsmsIsolationWindowLowerBorder()));
 		isolationWindowUpperTextField.setText(Double.toString(ps.getMsmsIsolationWindowUpperBorder()));
 		
@@ -794,6 +825,10 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		
 		minPrecursorIntensityTextField.setText(
 				Double.toString(MIN_PRECURSOR_INTENSITY_DEFAULT));
+		
+		int precursorPurity = (int) Math.ceil(MINIMAL_PURITY_DEFAULT * 100);
+		precursorPuritySpinner.setValue(precursorPurity);
+		
 		limitExtractionRtCheckBox.setSelected(USE_RT_RANGE_DEFAULT);
 		rtFromTextField.setText(Double.toString(RT_BORDER_LEFT_DEFAULT));
 		rtToTextField.setText(Double.toString(RT_BORDER_RIGHT_DEFAULT));
@@ -827,6 +862,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 //		ps.setPolarity(getPolarity());
 		
 		ps.setMinPrecursorIntensity(getMinimalPrecursorIntensity());
+		ps.setMinPrecursorPurity(getMinimalPrecursorPurity());
 		ps.setDataExtractionRtRange(getDataExtractionRtRange());
 		ps.setMsmsIsolationWindowLowerBorder(getIsolationWindowLowerBorder());
 		ps.setMsmsIsolationWindowUpperBorder(getIsolationWindowUpperBorder());	
@@ -892,6 +928,7 @@ public class MSMSFeatureExtractionParametersPanel extends JPanel {
 		isolationWindowLowerTextField.setEnabled(isEnabled);
 		isolationWindowUpperTextField.setEnabled(isEnabled);
 		minPrecursorIntensityTextField.setEnabled(isEnabled);
+		precursorPuritySpinner.setEnabled(isEnabled);
 		minimalCountsTextField.setEnabled(isEnabled);
 		msmsGroupRtWindowTextField.setEnabled(isEnabled);
 		precursorGroupingMassErrorTextField.setEnabled(isEnabled);

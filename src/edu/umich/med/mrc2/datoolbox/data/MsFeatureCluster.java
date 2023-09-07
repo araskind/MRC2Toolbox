@@ -98,7 +98,10 @@ public class MsFeatureCluster implements Serializable {
 		
 		chargeMismatch = clusterFeatures.get(pipeline).stream().
 				map(f -> f.getCharge()).distinct().count() > 1;
-	}
+				
+		if(primaryFeature == null)
+			primaryFeature = cf;
+	}	
 
 	public Collection<Double>getMassDifferencesWithinRange(
 			Range differenceRange,
@@ -314,6 +317,109 @@ public class MsFeatureCluster implements Serializable {
 				findFirst().isPresent();
 	}
 	
+	public boolean matchesPrimaryFeature(
+			MsFeature cf, 
+			DataPipeline pipeline,
+			double massAccuracy, 
+			double rtWindow) {
+		
+		if(clusterFeatures.get(pipeline) == null)
+			return false;
+		
+		if(primaryFeature == null)
+			return false;
+
+		return MsUtils.matchesFeature(
+				primaryFeature, cf, massAccuracy, rtWindow, true);
+	}
+	
+	public boolean matchesPrimaryFeatureOnBasePeakMz(
+			MsFeature cf, 
+			DataPipeline pipeline,
+			double massAccuracy, 
+			MassErrorType massErrorType) {
+		
+		if(clusterFeatures.get(pipeline) == null)
+			return false;
+		
+		if(primaryFeature == null 
+				|| primaryFeature.getSpectrum() == null 
+				|| primaryFeature.getSpectrum().getBasePeak() == null)
+			return false;
+		
+		if(cf == null 
+				|| cf.getSpectrum() == null 
+				|| cf.getSpectrum().getBasePeak() == null)
+			return false;
+		
+		Range testRange = MsUtils.createMassRange(
+				primaryFeature.getSpectrum().getBasePeak().getMz(), massAccuracy, massErrorType);
+
+		return testRange.contains(cf.getSpectrum().getBasePeak().getMz());
+	}
+	
+	public Range getBasePeakMzRange(DataPipeline pipeline) {
+		
+		if(primaryFeature == null 
+				|| primaryFeature.getSpectrum() == null 
+				|| primaryFeature.getSpectrum().getBasePeak() == null)
+			return null;
+		
+		Range bpRange = new Range(primaryFeature.getSpectrum().getBasePeak().getMz());
+		for(MsFeature cf : clusterFeatures.get(pipeline)) {
+			
+			if( cf.getSpectrum() != null && cf.getSpectrum().getBasePeak() != null)
+				bpRange.extendRange(cf.getSpectrum().getBasePeak().getMz());
+		}		
+		return bpRange;
+	}
+	
+	public boolean matchesPrimaryFeatureOnMSMSParentIonMz(
+			MsFeature cf, 
+			DataPipeline pipeline,
+			double massAccuracy, 
+			MassErrorType massErrorType) {
+		
+		if(clusterFeatures.get(pipeline) == null)
+			return false;
+		
+		if(primaryFeature == null 
+				|| primaryFeature.getSpectrum() == null 
+				|| primaryFeature.getSpectrum().getExperimentalTandemSpectrum() == null
+				|| primaryFeature.getSpectrum().getExperimentalTandemSpectrum().getParent() == null)
+			return false;
+		
+		if(cf == null 
+				|| cf.getSpectrum().getExperimentalTandemSpectrum() == null
+				|| cf.getSpectrum().getExperimentalTandemSpectrum().getParent() == null)
+			return false;
+		
+		Range testRange = MsUtils.createMassRange(
+				primaryFeature.getSpectrum().getExperimentalTandemSpectrum().getParent().getMz(), massAccuracy, massErrorType);
+
+		return testRange.contains(cf.getSpectrum().getExperimentalTandemSpectrum().getParent().getMz());
+	}
+	
+	public Range getMSMSParentIonMzRange(DataPipeline pipeline) {
+		
+		if(primaryFeature == null
+				|| primaryFeature.getSpectrum() == null 
+				|| primaryFeature.getSpectrum().getExperimentalTandemSpectrum() == null
+				|| primaryFeature.getSpectrum().getExperimentalTandemSpectrum().getParent() == null)
+			return null;
+		
+		Range bpRange = new Range(
+				primaryFeature.getSpectrum().getExperimentalTandemSpectrum().getParent().getMz());
+		for(MsFeature cf : clusterFeatures.get(pipeline)) {
+			
+			if( cf.getSpectrum() != null 
+					&& cf.getSpectrum().getExperimentalTandemSpectrum() != null
+					&& cf.getSpectrum().getExperimentalTandemSpectrum().getParent() != null)
+				bpRange.extendRange(cf.getSpectrum().getExperimentalTandemSpectrum().getParent().getMz());
+		}		
+		return bpRange;
+	}
+	
 	public boolean nameMatches(
 			MsFeature cf, 
 			DataPipeline pipeline) {
@@ -349,6 +455,19 @@ public class MsFeatureCluster implements Serializable {
 				flatMap(c -> c.stream()).
 				filter(f -> MsUtils.matchesOnMSMSParentIon(f, cf, massAccuracy, massErrorType, rtWindow, true)).
 				findFirst().isPresent();
+	}
+	
+	public boolean matchesPrimaryFeatureOnMSMSParentIonMzRt(
+			MsFeature cf, 
+			double massAccuracy, 
+			MassErrorType massErrorType,
+			double rtWindow) {
+		
+		if(primaryFeature != null)
+			return MsUtils.matchesOnMSMSParentIon(
+					primaryFeature, cf, massAccuracy, massErrorType, rtWindow, true);
+		else
+			return false;
 	}
 	
 	public boolean matchesOnCollisionEnergy(MsFeature cf) {

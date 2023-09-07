@@ -71,6 +71,7 @@ public class MRC2ToolBoxConfiguration {
 	public static String metLimsPassword;
 	public static String metLimsHost;
 	public static String metLimsSid;
+	public static String metLimsServiceName;
 
 	//	Preferences object
 	private static Preferences prefs = 
@@ -289,6 +290,9 @@ public class MRC2ToolBoxConfiguration {
 						
 			if(properties.get("metLimsSid") != null)
 				metLimsSid = (String)properties.get("metLimsSid");		
+			
+			if(properties.get("metLimsServiceName") != null)
+				metLimsServiceName = (String)properties.get("metLimsServiceName");			
 		}
 	}
 	

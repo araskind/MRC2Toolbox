@@ -48,5 +48,9 @@ public enum SortProperty {
 	resultFile,
 	spectrumEntropy,
 	msmsIntensity,
-	Rank;
+	Rank,
+	BasePeakMZ,
+	ParentIonMZ,
+	rangeMidpoint,
+	frequency;
 }

@@ -19,33 +19,46 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.rawdata;
+package edu.umich.med.mrc2.datoolbox.data;
 
-public enum MSMSExtractionParameters {
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-	MSMSExtractionParameterSet,
-	ID,
-	Name,
-	Description,
-	Polarity,
-	MinPrecursorIntensity,
-	MinPrecursorPurity,
-	DataExtractionRtRange,
-	RemoveAllMassesAboveParent,
-	MsMsCountsCutoff,
-	MaxFragmentsCutoff,
-	FilterIntensityMeasure,
-	MsmsIsolationWindowLowerBorder,
-	MsmsIsolationWindowUpperBorder,	
-	MsmsGroupingRtWindow,
-	PrecursorGroupingMassError,
-	PrecursorGroupingMassErrorType,
-	FlagMinorIsotopesPrecursors,
-	MaxPrecursorCharge,
-	SmoothingFilterWidth,
-	ChromatogramExtractionWindow,
-	MsFeatureChromatogramExtractionTarget,
-	MergeCollisionEnergies,
-	SpectrumSimilarityCutoffForMerging,
-	;
+public class MzFrequencyObject {
+	
+	private MsFeatureCluster featureCluster;
+	private Range mzRange;
+	private double frequency;
+	
+	public MzFrequencyObject(MsFeatureCluster featureCluster) {
+		super();
+		this.featureCluster = featureCluster;
+	}
+
+	public Range getMzRange() {
+		return mzRange;
+	}
+
+	public void setMzRange(Range mzRange) {
+		this.mzRange = mzRange;
+	}
+
+	public double getFrequency() {
+		return frequency;
+	}
+
+	public void setFrequency(double frequency) {
+		this.frequency = frequency;
+	}
+
+	public MsFeatureCluster getFeatureCluster() {
+		return featureCluster;
+	}
+	
+	public int getFeatureCount() {
+		return featureCluster.getFeatures().size();
+	}
+	
+	public Range getRTRange() {
+		return featureCluster.getRtRange();
+	}
 }

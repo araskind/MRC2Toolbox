@@ -1440,7 +1440,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 		}
 		MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().updateExperimentLocation(
 				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getExperimentFile());
-		Collection<DataFile> filesToLoad = new ArrayList<DataFile>();
+		Collection<DataFile> filesToLoad = new TreeSet<DataFile>();
 		filesToLoad.addAll(task.getExperiment().getMSMSDataFiles());
 		filesToLoad.addAll(task.getExperiment().getMSOneDataFiles());		
 		OpenRawDataFilesTask ordTask = new OpenRawDataFilesTask(filesToLoad);

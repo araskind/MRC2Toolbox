@@ -203,9 +203,18 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 
 	private void setPlotMargins(MsDataSet msDataSet) {
 
-		activeMsDataSet = msDataSet;
-
-		((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setAutoRange(true);
+		activeMsDataSet = msDataSet;	
+		edu.umich.med.mrc2.datoolbox.utils.Range massRange = activeMsDataSet.getMassRange();
+		if(massRange.getSize() < 6) {
+			Range plotMassRange = new Range(
+					massRange.getAverage() - 3.0d * massRange.getSize(),
+					massRange.getAverage() + 3.0d * massRange.getSize());
+			((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setRange(plotMassRange);
+		}
+		else {
+			((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setAutoRange(true);
+		}
+		
 		double maxIntensity = 
 				msDataSet.getHighestIntensityInRange(activeMsDataSet.getMassRange());
 		((XYPlot) spectrumPlot.getPlot()).getRangeAxis().

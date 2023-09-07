@@ -1278,6 +1278,10 @@ public enum MainActionCommands {
 	MARK_COMPOUND_GROUP_NOT_CURATED_COMMAND("Mark compound group as NOT curated"),
 	ADD_TAUTOMER_AS_NEW_COMPOUND_COMMAND("Add selected tautomer as new compound"),
 	REPLACE_PRIMARY_COMPOUND_WITH_TAUTOMER_COMMAND("Replace primary compound with selected tautomer"),
+	
+	//	M/Z frequency
+	SET_UP_MZ_FREQUENCY_ANALYSIS_COMMAND("Set up M/Z frequency analysis"),
+	RUN_MZ_FREQUENCY_ANALYSIS_COMMAND("Run M/Z frequency analysis"),
 	;
 
 	private final String name;

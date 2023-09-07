@@ -80,7 +80,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	private static final Icon clusterIcon = GuiUtils.getIcon("cluster", 24);
 	private static final Icon filterClustersIcon = GuiUtils.getIcon("filter", 24);
 	private static final Icon reloadClusterTreeIcon = GuiUtils.getIcon("rerun", 24);
-	private static final Icon clusteringSummaryIcon = GuiUtils.getIcon("summary", 24);	
+	private static final Icon clusteringSummaryIcon = GuiUtils.getIcon("summary", 24);
+	private static final Icon mzFrequencyIcon = GuiUtils.getIcon("mzFrequency", 24);
 
 	// Menus
 	private JMenu
@@ -134,7 +135,8 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 	//	Explore
 	private JMenuItem
 		bubblePlotMenuItem,
-		dataSetSummaryMenuItem;
+		dataSetSummaryMenuItem,
+		mzFrequencyMenuItem;
 	
 	//	Export
 	private JMenuItem
@@ -297,6 +299,10 @@ public class IDWorkbenchMenuBar extends CommonMenuBar {
 		dataSetSummaryMenuItem = addItem(explorationMenu, 
 				MainActionCommands.SHOW_ACTIVE_DATA_SET_SUMMARY_COMMAND, 
 				calcStatsIcon);
+		
+		mzFrequencyMenuItem = addItem(explorationMenu, 
+				MainActionCommands.SET_UP_MZ_FREQUENCY_ANALYSIS_COMMAND, 
+				mzFrequencyIcon);
 
 		add(explorationMenu);
 		

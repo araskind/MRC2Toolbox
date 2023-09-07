@@ -63,6 +63,9 @@ public class TaskQueue extends AbstractTableModel {
 
 	synchronized void addWrappedTask(WrappedTask task) {
 
+		if(queue.length == 0)
+			queue = new WrappedTask[DEFAULT_CAPACITY];
+		
 		// If the queue is full, make a bigger queue
 		if (size == queue.length) {
 

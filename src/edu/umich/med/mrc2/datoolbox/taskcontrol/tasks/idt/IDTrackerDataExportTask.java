@@ -190,7 +190,7 @@ public class IDTrackerDataExportTask extends IDTrackerFeatureExportTask {
 	
 				for (MsFeatureCluster fClust : clusters) {
 					
-					if (fClust.matchesOnMSMSParentIon(cf.getMsFeature(), 
+					if (fClust.matchesPrimaryFeatureOnMSMSParentIonMzRt(cf.getMsFeature(), 
 							redundantMzWindow, redMzErrorType, redundantRTWindow)) {
 	
 						fClust.addFeature(cf.getMsFeature(), exportDataPipeline);

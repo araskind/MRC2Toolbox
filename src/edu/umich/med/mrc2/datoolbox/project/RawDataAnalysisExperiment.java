@@ -35,6 +35,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.compress.utils.FileNameUtils;
@@ -90,22 +91,8 @@ public class RawDataAnalysisExperiment extends Project {
 
 		super(experimentName, experimentDescription, parentDirectory);
 		initNewExperiment(parentDirectory);
-		this.createdBy = createdBy;
 		initFields();
-	}
-	
-	public RawDataAnalysisExperiment(RawDataAnalysisExperiment activeExperiment) {
-		
-		super(activeExperiment);
-
-		this.exportsDirectory = activeExperiment.getExportsDirectory();
-		this.rawDataDirectory = activeExperiment.getRawDataDirectory();		
-		this.msmsDataFiles = new TreeSet<DataFile>();
-		this.msmsDataFiles.addAll(activeExperiment.getMSMSDataFiles());
-		this.msOneDataFiles = new TreeSet<DataFile>();
-		this.msmsDataFiles.addAll(activeExperiment.getMSOneDataFiles());
-		this.createdBy = activeExperiment.getCreatedBy();
-		initFields();
+		this.createdBy = createdBy;		
 	}
 	
 	public RawDataAnalysisExperiment(
@@ -186,8 +173,8 @@ public class RawDataAnalysisExperiment extends Project {
 				null, 
 				dateCreated);
 		idTrackerExperiment.setCreator(createdBy);		
-		msmsDataFiles = new TreeSet<DataFile>();
-		msOneDataFiles = new TreeSet<DataFile>();
+		msmsDataFiles = ConcurrentHashMap.newKeySet();
+		msOneDataFiles = ConcurrentHashMap.newKeySet();
 		injections = new HashSet<Injection>();
 		msFeatureMap = new TreeMap<DataFile, Collection<MSFeatureInfoBundle>>();
 		chromatogramMap = new HashMap<String, MsFeatureChromatogramBundle>();

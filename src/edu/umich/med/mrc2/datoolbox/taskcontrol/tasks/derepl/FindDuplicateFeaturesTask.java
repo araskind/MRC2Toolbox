@@ -100,7 +100,7 @@ public class FindDuplicateFeaturesTask extends AbstractTask {
 
 			for (MsFeatureCluster fClust : clusters) {
 
-				if (fClust.matches(cf, dataPipeline, massAccuracy, rtWindow)) {
+				if (fClust.matchesPrimaryFeature(cf, dataPipeline, massAccuracy, rtWindow)) {
 
 					fClust.addFeature(cf, dataPipeline);
 					assigned.add(cf);

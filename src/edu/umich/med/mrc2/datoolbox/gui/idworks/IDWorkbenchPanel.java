@@ -73,6 +73,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
+import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
@@ -80,6 +81,7 @@ import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSComponentTableFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsDepth;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -160,6 +162,8 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.main.StatusBar;
+import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisResultsDialog;
+import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.DockableChromatogramPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
@@ -205,6 +209,8 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ExtendedMSPExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataLoadForInjectionsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.RawDataRepositoryIndexingTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyAnalysisTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyType;
 import edu.umich.med.mrc2.datoolbox.utils.MsFeatureStatsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NISTPepSearchUtils;
@@ -288,6 +294,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	private IDTrackerMSMSClusterDataSetExportDialog idTrackerMSMSClusterDataSetExportDialog;
 	private MSMSClusterFilterDialog msmsClusterFilterDialog;
 	private MajorClusterFeatureExtractionSetupDialog majorClusterFeatureExtractionSetupDialog;
+	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
 	
 	private static final Icon searchIdTrackerIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon searchExperimentIcon = GuiUtils.getIcon("searchIdExperiment", 24);
@@ -844,11 +851,52 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if (command.equals(MainActionCommands.EXTRACT_MAJOR_CLUSTER_FEATURES_COMMAND.getName()))
 			extractMajorClusterFeatures();
+		
+		if (command.equals(MainActionCommands.SET_UP_MZ_FREQUENCY_ANALYSIS_COMMAND.getName()))
+			setUpMSMSParentIonFrequencyAnalysis();
+				
+		if (command.equals(MainActionCommands.RUN_MZ_FREQUENCY_ANALYSIS_COMMAND.getName()))
+			runMSMSParentIonFrequencyAnalysis();		
+	}
+
+	private void setUpMSMSParentIonFrequencyAnalysis() {
+		
+		if(msTwoFeatureTable.getTable().getModel().getRowCount() == 0)
+			return;
+
+		mzFrequencyAnalysisSetupDialog = 
+				new MzFrequencyAnalysisSetupDialog(this, "Analyze MSMS parent ion frequency");
+		mzFrequencyAnalysisSetupDialog.setLocationRelativeTo(this.getContentPane());
+		mzFrequencyAnalysisSetupDialog.setVisible(true);
+	}
+
+	private void runMSMSParentIonFrequencyAnalysis() {
+
+		double massWindowSize = 
+				mzFrequencyAnalysisSetupDialog.getMZWindow();
+		MassErrorType massWindowType = 
+				mzFrequencyAnalysisSetupDialog.getMassErrorType();
+		if(massWindowType == null || massWindowSize == 0) {
+			MessageDialog.showErrorMsg("Invalid parameters!", mzFrequencyAnalysisSetupDialog);
+			return;
+		}
+		mzFrequencyAnalysisSetupDialog.dispose();
+		Collection<MsFeature> featuresToProcess = 
+				msTwoFeatureTable.getBundles(TableRowSubset.ALL).stream().
+				map(b -> b.getMsFeature()).collect(Collectors.toList());
+		MzFrequencyAnalysisTask task = new MzFrequencyAnalysisTask(
+				featuresToProcess, 
+				MzFrequencyType.MSMS_PARENT_FREQUENCY,
+				massWindowSize, 
+				massWindowType);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);		
 	}
 
 	private void majorClusterFeatureExtractionSetup() {
 
-		if(activeMSMSClusterDataSet == null || activeMSMSClusterDataSet.getClusters().isEmpty())
+		if(activeMSMSClusterDataSet == null 
+				|| activeMSMSClusterDataSet.getClusters().isEmpty())
 			return;
 		
 		majorClusterFeatureExtractionSetupDialog = 
@@ -2943,7 +2991,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				finalizeIDTMSMSClusterDataPullTask((IDTMSMSClusterDataPullTask)e.getSource());	
 			
 			if (e.getSource().getClass().equals(MSMSClusterDataSetUploadTask.class))
-				finalizeMSMSClusterDataSetUploadTask((MSMSClusterDataSetUploadTask)e.getSource());			
+				finalizeMSMSClusterDataSetUploadTask((MSMSClusterDataSetUploadTask)e.getSource());	
+			
+			if (e.getSource().getClass().equals(MzFrequencyAnalysisTask.class))
+				finalizeMzFrequencyAnalysisTask((MzFrequencyAnalysisTask)e.getSource());	
 		}
 		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
 			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
@@ -2951,6 +3002,19 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
+	private void finalizeMzFrequencyAnalysisTask(MzFrequencyAnalysisTask task) {
+
+		Collection<MzFrequencyObject>mzFrequencyObjects = task.getMzFrequencyObjects();
+		String binningParameter = 
+				MRC2ToolBoxConfiguration.getPpmFormat().format(task.getMassWindowSize()) 
+				+ " " + task.getMassWindowType().name();
+		
+		MzFrequencyAnalysisResultsDialog resultsDialog = 
+				new MzFrequencyAnalysisResultsDialog(this, mzFrequencyObjects, binningParameter);
+		resultsDialog.setLocationRelativeTo(this.getContentPane());
+		resultsDialog.setVisible(true);
+	}
+
 	private void finalizeIdTrackerExperimentLoad(IDTrackerExperimentDataFetchTask task) {
 
 		LIMSExperiment experiment = task.getIdTrackerExperiment();

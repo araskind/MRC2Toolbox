@@ -40,9 +40,10 @@ public class MetLIMSConnectionManager {
 		} else {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			Connection connection = null;
+			//jdbc:oracle:thin:@//oracle.hostserver2.mydomain.ca:1522/ABCD
 			connection = DriverManager.getConnection(
 				"jdbc:oracle:thin:@"+ MRC2ToolBoxConfiguration.metLimsHost + 
-					":1521:" + MRC2ToolBoxConfiguration.metLimsSid,
+					":1521/" + MRC2ToolBoxConfiguration.metLimsServiceName,
 				MRC2ToolBoxConfiguration.metLimsUser, 
 				MRC2ToolBoxConfiguration.metLimsPassword);
 			return connection;

@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.data.lims;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -69,6 +70,17 @@ public class DataPipeline implements Serializable, Comparable<DataPipeline>{
 		this.assay = assay;
 		this.acquisitionMethod = acquisitionMethod;
 		this.dataExtractionMethod = dataExtractionMethod;
+	}
+	
+	//	Mock pipeline for feature clusters
+	public DataPipeline() {
+		
+		this.name = "DP";
+		this.assay = new Assay("Assay1", "Assay1");
+		this.acquisitionMethod = 
+				new DataAcquisitionMethod("DQM", "DQM", null, null, new Date());
+		this.dataExtractionMethod = 
+				new DataExtractionMethod("DAM", "DAM", null, null, new Date());
 	}
 
 	public String getName() {

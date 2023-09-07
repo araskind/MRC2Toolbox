@@ -52,6 +52,7 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 	private String description;
 	private Polarity polarity;
 	private double minPrecursorIntensity;
+	private double minPrecursorPurity;
 	private Range dataExtractionRtRange;
 	private boolean removeAllMassesAboveParent;
 	private double msMsCountsCutoff;
@@ -91,7 +92,8 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 			int smoothingFilterWidth,
 			double chromatogramExtractionWindow,
 			boolean mergeCollisionEnergies,
-			double spectrumSimilarityCutoffForMerging) {
+			double spectrumSimilarityCutoffForMerging,
+			double minPrecursorPurity) {
 		super();
 		this.id = DataPrefix.MSMS_EXTRACTION_PARAMETER_SET.getName() +
 				UUID.randomUUID().toString().substring(0, 12);
@@ -115,6 +117,7 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 		this.chromatogramExtractionWindow = chromatogramExtractionWindow;
 		this.mergeCollisionEnergies = mergeCollisionEnergies;
 		this.spectrumSimilarityCutoffForMerging = spectrumSimilarityCutoffForMerging;
+		this.minPrecursorPurity = minPrecursorPurity;
 	}
 
 	public MSMSExtractionParameterSet() {
@@ -344,6 +347,10 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 				MSMSExtractionParameters.MinPrecursorIntensity.name(), 
 				Double.toString(minPrecursorIntensity));
 		
+		parametersElement.setAttribute(
+				MSMSExtractionParameters.MinPrecursorPurity.name(), 
+				Double.toString(minPrecursorPurity));
+				
 		if(dataExtractionRtRange != null)
 			parametersElement.setAttribute(
 					MSMSExtractionParameters.DataExtractionRtRange.name(), 
@@ -483,7 +490,15 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 		
 		this.minPrecursorIntensity = Double.parseDouble(
 				parametersElement.getAttributeValue(
-						MSMSExtractionParameters.MinPrecursorIntensity.name()));		
+						MSMSExtractionParameters.MinPrecursorIntensity.name()));	
+		
+		String mppString = parametersElement.getAttributeValue(
+				MSMSExtractionParameters.MinPrecursorPurity.name());
+		if(mppString != null)
+			this.minPrecursorPurity = Double.parseDouble(mppString);	
+		else
+			this.minPrecursorPurity = 0.75;
+		
 		String rtRangeString = parametersElement.getAttributeValue(
 				MSMSExtractionParameters.DataExtractionRtRange.name());
 		if(rtRangeString != null)
@@ -598,6 +613,14 @@ public class MSMSExtractionParameterSet implements Comparable<MSMSExtractionPara
 	@Override
 	public int compareTo(MSMSExtractionParameterSet o) {
 		return id.compareTo(o.getId());
+	}
+
+	public double getMinPrecursorPurity() {
+		return minPrecursorPurity;
+	}
+
+	public void setMinPrecursorPurity(double minPrecursorPurity) {
+		this.minPrecursorPurity = minPrecursorPurity;
 	}
 }
 

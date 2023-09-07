@@ -19,33 +19,11 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.rawdata;
+package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats;
 
-public enum MSMSExtractionParameters {
+public enum MzFrequencyType {
 
-	MSMSExtractionParameterSet,
-	ID,
-	Name,
-	Description,
-	Polarity,
-	MinPrecursorIntensity,
-	MinPrecursorPurity,
-	DataExtractionRtRange,
-	RemoveAllMassesAboveParent,
-	MsMsCountsCutoff,
-	MaxFragmentsCutoff,
-	FilterIntensityMeasure,
-	MsmsIsolationWindowLowerBorder,
-	MsmsIsolationWindowUpperBorder,	
-	MsmsGroupingRtWindow,
-	PrecursorGroupingMassError,
-	PrecursorGroupingMassErrorType,
-	FlagMinorIsotopesPrecursors,
-	MaxPrecursorCharge,
-	SmoothingFilterWidth,
-	ChromatogramExtractionWindow,
-	MsFeatureChromatogramExtractionTarget,
-	MergeCollisionEnergies,
-	SpectrumSimilarityCutoffForMerging,
+	MS1_BASEPEAK_FREQUENCY,
+	MSMS_PARENT_FREQUENCY,
 	;
 }

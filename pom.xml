@@ -13,7 +13,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.umich.mrc2</groupId>
 	<artifactId>MRC2ToolBox</artifactId>
-	<version>1.2.41</version>
+	<version>1.2.45</version>
 	<name>MRC2ToolBox</name>
 	<description>Metabolomics data analysis</description>
 	<properties>
@@ -536,6 +536,12 @@ public final class BuildInformation {
 		  <groupId>io.github.dan2097</groupId>
 		  <artifactId>jna-inchi-all</artifactId>
 		  <version>1.2</version>
-		</dependency>		
+		</dependency>	
+		<!-- https://mvnrepository.com/artifact/org.piccolo2d/piccolo2d-core -->
+		<dependency>
+		    <groupId>org.piccolo2d</groupId>
+		    <artifactId>piccolo2d-core</artifactId>
+		    <version>1.3.1</version>
+		</dependency>			
 	</dependencies>
 </project>

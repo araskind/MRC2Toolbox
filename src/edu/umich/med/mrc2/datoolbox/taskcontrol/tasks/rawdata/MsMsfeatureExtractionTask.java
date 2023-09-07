@@ -81,6 +81,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 	private DataFile rawDataFile;
 	private Polarity polarity;
 	private double minPrecursorIntensity;
+	private double minPrecursorPurity;
 	private Range dataExtractionRtRange;
 	private boolean removeAllMassesAboveParent;
 	private double msMsCountsCutoff;
@@ -112,6 +113,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 		this.rawDataFile = rawDataFile;	
 		this.polarity = ps.getPolarity();
 		this.minPrecursorIntensity = ps.getMinPrecursorIntensity();
+		this.minPrecursorPurity = ps.getMinPrecursorPurity(); 
 		this.dataExtractionRtRange = ps.getDataExtractionRtRange();
 		this.removeAllMassesAboveParent = ps.isRemoveAllMassesAboveParent();
 		this.msMsCountsCutoff = ps.getMsMsCountsCutoff();
@@ -580,7 +582,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 			}
 			for (MsFeatureCluster fClust : clusters) {
 				
-				if (!fClust.matchesOnMSMSParentIon(cf,
+				if (!fClust.matchesPrimaryFeatureOnMSMSParentIonMzRt(cf,
 						precursorGroupingMassError, 
 						precursorGroupingMassErrorType, 
 						msmsGroupingRtWindow))
@@ -595,8 +597,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 							cf, precursorGroupingMassError, precursorGroupingMassErrorType);
 					if(maxScore < spectrumSimilarityCutoff)
 						continue;
-				}
-					
+				}					
 				fClust.addFeature(cf, dataPipeline);
 				assigned.add(cf);
 				break;
@@ -743,7 +744,7 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 						msOneParent.getMz(), precursorGroupingMassError, precursorGroupingMassErrorType);
 				MsPoint parent = msmsPoints.stream().
 						filter(p -> parentMzRange.contains(p.getMz())).
-						sorted(MsUtils.mzSorter).findFirst().orElse(null);
+						sorted(MsUtils.reverseIntensitySorter).findFirst().orElse(null);
 				if(parent == null)
 					parent = msOneParent;
 						
@@ -785,7 +786,9 @@ public class MsMsfeatureExtractionTask extends AbstractTask {
 				}				
 				spectrum.addTandemMs(msms);		
 				f.setSpectrum(spectrum);
-				features.add(f);
+				
+				if(msms.getParentIonPurity() > minPrecursorPurity)
+					features.add(f);
 			}
 			if(entry.getKey() % 50 == 0) {
 				unloadProcessedScans(unloadIntervalStart,

@@ -19,33 +19,33 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.rawdata;
+package edu.umich.med.mrc2.datoolbox.data.compare;
 
-public enum MSMSExtractionParameters {
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-	MSMSExtractionParameterSet,
-	ID,
-	Name,
-	Description,
-	Polarity,
-	MinPrecursorIntensity,
-	MinPrecursorPurity,
-	DataExtractionRtRange,
-	RemoveAllMassesAboveParent,
-	MsMsCountsCutoff,
-	MaxFragmentsCutoff,
-	FilterIntensityMeasure,
-	MsmsIsolationWindowLowerBorder,
-	MsmsIsolationWindowUpperBorder,	
-	MsmsGroupingRtWindow,
-	PrecursorGroupingMassError,
-	PrecursorGroupingMassErrorType,
-	FlagMinorIsotopesPrecursors,
-	MaxPrecursorCharge,
-	SmoothingFilterWidth,
-	ChromatogramExtractionWindow,
-	MsFeatureChromatogramExtractionTarget,
-	MergeCollisionEnergies,
-	SpectrumSimilarityCutoffForMerging,
-	;
+public class RangeMidPoitComparator extends ObjectCompatrator<Range> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5168254146932066483L;
+	
+	public RangeMidPoitComparator(SortDirection direction) {
+		super(null, direction);
+	}
+	
+	public RangeMidPoitComparator() {
+		super(null, SortDirection.ASC);
+	}
+
+	@Override
+	public int compare(Range o1, Range o2) {
+
+		int result = Double.compare(o1.getAverage(), o2.getAverage());
+		
+		if (direction == SortDirection.ASC)
+			return result;
+		else
+			return -result;
+	}
 }
