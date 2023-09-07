@@ -25,9 +25,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MzFrequencyDataTableModel extends BasicTableModel {
 
@@ -36,52 +37,40 @@ public class MzFrequencyDataTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = 3265763908033362302L;
 
-	public static final String TYPE_COLUMN = "Type";
-	public static final String CHEM_MOD_COLUMN = "Name";
-	public static final String CEF_NOTATION_COLUMN = "CEF notation";
-	public static final String DESCRIPTION_COLUMN = "Description";
-	public static final String CHARGE_COLUMN = "Charge";
-	public static final String OLIGOMER_COLUMN = "Oligomer";
-	public static final String ADDED_GROUP_COLUMN = "Added";
-	public static final String REMOVED_GROUP_COLUMN = "Removed";
-	public static final String MASS_CORRECTION_COLUMN = '\u0394' + " mass";
-	public static final String MASS_CORRECTION_ABS_COLUMN = '\u0394' + " mass abs.";
+	public static final String AVG_MZ_COLUMN = "M/Z (Avg)";
+	public static final String MZ_RANGE_COLUMN = "M/Z range";
+	public static final String RT_RANGE_COLUMN = "RT range";
+	public static final String RT_RSD_COLUMN = "RT RSD, %";
+	public static final String FEATURE_COUNT_COLUMN = "#Features";
+	public static final String FREQUENCY_COLUMN = "Frequency, %";
 
 	public MzFrequencyDataTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(TYPE_COLUMN, String.class, false),
-			new ColumnContext(CHEM_MOD_COLUMN, Adduct.class, false),
-			new ColumnContext(CEF_NOTATION_COLUMN, String.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(OLIGOMER_COLUMN, Integer.class, false),
-			new ColumnContext(ADDED_GROUP_COLUMN, String.class, false),
-			new ColumnContext(REMOVED_GROUP_COLUMN, String.class, false),
-			new ColumnContext(MASS_CORRECTION_COLUMN, Double.class, false),
-			new ColumnContext(MASS_CORRECTION_ABS_COLUMN, Double.class, false)
+			new ColumnContext(AVG_MZ_COLUMN, MzFrequencyObject.class, false),
+			new ColumnContext(MZ_RANGE_COLUMN, Range.class, false),
+			new ColumnContext(RT_RANGE_COLUMN, Range.class, false),
+			new ColumnContext(RT_RSD_COLUMN, Double.class, false),
+			new ColumnContext(FEATURE_COUNT_COLUMN, Integer.class, false),
+			new ColumnContext(FREQUENCY_COLUMN, Double.class, false),
 		};
 	}
 
-	public void setTableModelFromAdductList(Collection<Adduct> collection) {
+	public void setTableModelFromMzFrequencyObjectCollection(Collection<MzFrequencyObject> collection) {
 
 		setRowCount(0);
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		for (Adduct ad : collection) {
+		for (MzFrequencyObject mzfo : collection) {
 
 			Object[] obj = {
 
-				ad.getModificationType().getName(),
-				ad,
-				ad.getCefNotation(),
-				ad.getDescription(),
-				ad.getCharge(),
-				ad.getOligomericState(),
-				ad.getAddedGroup(),
-				ad.getRemovedGroup(),
-				ad.getMassCorrection(),
-				(double) Math.abs(ad.getMassCorrection())
+				mzfo,
+				mzfo.getMzRange(),
+				mzfo.getRTRange(),
+				mzfo.getRtRSD() * 100.0d,
+				mzfo.getFeatureCount(),
+				mzfo.getFrequency() * 100.0d,
 			};
 			rowData.add(obj);
 		}

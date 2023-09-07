@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MzFrequencyObject {
@@ -44,6 +46,19 @@ public class MzFrequencyObject {
 
 	public double getFrequency() {
 		return frequency;
+	}
+	
+	public double getRtRSD() {
+		
+		if(featureCluster.getFeatures().size() < 2)
+			return 0.0;
+		
+		DescriptiveStatistics ds = new DescriptiveStatistics();
+		featureCluster.getFeatures().stream().
+			forEach(f -> ds.addValue(f.getRetentionTime()));
+
+				
+		return ds.getStandardDeviation() / ds.getMean();
 	}
 
 	public void setFrequency(double frequency) {

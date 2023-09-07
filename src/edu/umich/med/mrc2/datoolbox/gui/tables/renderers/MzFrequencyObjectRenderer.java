@@ -22,48 +22,48 @@
 package edu.umich.med.mrc2.datoolbox.gui.tables.renderers;
 
 import java.awt.Component;
-import java.text.NumberFormat;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class FormattedRangeRenderer extends DefaultTableCellRenderer {
+public class MzFrequencyObjectRenderer extends DefaultTableCellRenderer {
 
 	/**
-	 * 
+	 *
 	 */
-	private static final long serialVersionUID = -8306476298547644045L;
-	
-	private NumberFormat doubleFormat;
-	
-	public FormattedRangeRenderer(NumberFormat doubleFormat) {
-		
+	private static final long serialVersionUID = -2087166348421295714L;
+	private SortProperty field;
+
+	public MzFrequencyObjectRenderer(SortProperty field) {
 		super();
-		this.doubleFormat = doubleFormat;
+		this.field = field;
 	}
 
 	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-			int row, int column) {
-
-    	Component rendererComponent = 
-    			table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
+	public Component getTableCellRendererComponent(
+			JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+		
+		Component rendererComponent = 
+				table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
 		setForeground(rendererComponent.getForeground());
 		setBackground(rendererComponent.getBackground());
 		setFont(rendererComponent.getFont());
-		
-		if(value == null) {
+
+		if(value == null){
 			setText("");
 			return this;
 		}
-		if(Range.class.isAssignableFrom(value.getClass())) {			
-			Range r = (Range)value;
-			setText(r.getFormattedString(doubleFormat));
-		}
-		else {
-			setText("");
+		if (value instanceof MzFrequencyObject) {
+
+			MzFrequencyObject mzfo = (MzFrequencyObject) value;
+			if(field.equals(SortProperty.MZ))
+				setText(MRC2ToolBoxConfiguration.getMzFormat().format(mzfo.getMzRange().getAverage()));
+			else
+				setText("");
 		}
 		return this;
 	}

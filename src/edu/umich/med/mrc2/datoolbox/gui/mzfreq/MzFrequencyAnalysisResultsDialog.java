@@ -79,6 +79,7 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 		
 		table = new MzFrequencyDataTable();
 		panel_1.add(new JScrollPane(table), BorderLayout.CENTER);
+		table.setTableModelFromMzFrequencyObjectCollection(mzFrequencyObjects);
 		
 		loadPreferences();
 		pack();

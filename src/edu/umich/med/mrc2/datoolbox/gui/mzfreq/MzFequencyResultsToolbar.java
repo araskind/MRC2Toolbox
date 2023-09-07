@@ -49,52 +49,53 @@ public class MzFequencyResultsToolbar extends CommonToolbar {
 
 	@SuppressWarnings("unused")
 	private JButton
-		newModificationButton,
-		newCompositeModificationButton,
-		editModificationButton,
-		deleteModificationButton,
-		importModificationsButton,
+//		newModificationButton,
+//		newCompositeModificationButton,
+//		editModificationButton,
+//		deleteModificationButton,
+//		importModificationsButton,
 		exportModificationsButton;
 
 	public MzFequencyResultsToolbar(ActionListener listener) {
 
 		super(listener);
 
-		newModificationButton = GuiUtils.addButton(this, null, newModificationIcon, listener,
+		exportModificationsButton = GuiUtils.addButton(this, null, newModificationIcon, listener,
 				MainActionCommands.NEW_MODIFICATION_COMMAND.getName(),
 				MainActionCommands.NEW_MODIFICATION_COMMAND.getName(),
 				buttonDimension);
 		
-		newCompositeModificationButton = GuiUtils.addButton(this, null, newCompositeModificationIcon, listener,
-				MainActionCommands.NEW_COMPOSITE_MODIFICATION_COMMAND.getName(),
-				MainActionCommands.NEW_COMPOSITE_MODIFICATION_COMMAND.getName(),
-				buttonDimension);
-
-		editModificationButton = GuiUtils.addButton(this, null, editModificationIcon, listener,
-				MainActionCommands.EDIT_MODIFICATION_COMMAND.getName(),
-				MainActionCommands.EDIT_MODIFICATION_COMMAND.getName(),
-				buttonDimension);
-
-		deleteModificationButton = GuiUtils.addButton(this, null, deleteModificationIcon, listener,
-				MainActionCommands.DELETE_MODIFICATION_COMMAND.getName(),
-				MainActionCommands.DELETE_MODIFICATION_COMMAND.getName(),
-				buttonDimension);
+//		newCompositeModificationButton = GuiUtils.addButton(this, null, newCompositeModificationIcon, listener,
+//				MainActionCommands.NEW_COMPOSITE_MODIFICATION_COMMAND.getName(),
+//				MainActionCommands.NEW_COMPOSITE_MODIFICATION_COMMAND.getName(),
+//				buttonDimension);
+//
+//		editModificationButton = GuiUtils.addButton(this, null, editModificationIcon, listener,
+//				MainActionCommands.EDIT_MODIFICATION_COMMAND.getName(),
+//				MainActionCommands.EDIT_MODIFICATION_COMMAND.getName(),
+//				buttonDimension);
+//
+//		deleteModificationButton = GuiUtils.addButton(this, null, deleteModificationIcon, listener,
+//				MainActionCommands.DELETE_MODIFICATION_COMMAND.getName(),
+//				MainActionCommands.DELETE_MODIFICATION_COMMAND.getName(),
+//				buttonDimension);
 
 		addSeparator(buttonDimension);
 
-		importModificationsButton = GuiUtils.addButton(this, null, importModificationIcon, listener,
-				MainActionCommands.IMPORT_MODIFICATIONS_COMMAND.getName(),
-				MainActionCommands.IMPORT_MODIFICATIONS_COMMAND.getName(),
-				buttonDimension);
-
-		exportModificationsButton = GuiUtils.addButton(this, null, exportModificationIcon, listener,
-				MainActionCommands.EXPORT_MODIFICATIONS_COMMAND.getName(),
-				MainActionCommands.EXPORT_MODIFICATIONS_COMMAND.getName(),
-				buttonDimension);
+//		importModificationsButton = GuiUtils.addButton(this, null, importModificationIcon, listener,
+//				MainActionCommands.IMPORT_MODIFICATIONS_COMMAND.getName(),
+//				MainActionCommands.IMPORT_MODIFICATIONS_COMMAND.getName(),
+//				buttonDimension);
+//
+//		exportModificationsButton = GuiUtils.addButton(this, null, exportModificationIcon, listener,
+//				MainActionCommands.EXPORT_MODIFICATIONS_COMMAND.getName(),
+//				MainActionCommands.EXPORT_MODIFICATIONS_COMMAND.getName(),
+//				buttonDimension);
 	}
 
 	@Override
-	public void updateGuiFromExperimentAndDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
+	public void updateGuiFromExperimentAndDataPipeline(
+			DataAnalysisProject project, DataPipeline newDataPipeline) {
 		// TODO Auto-generated method stub
 
 	}

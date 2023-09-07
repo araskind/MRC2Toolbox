@@ -21,15 +21,22 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mzfreq;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.table.TableRowSorter;
 
-import edu.umich.med.mrc2.datoolbox.data.Adduct;
+import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
+import edu.umich.med.mrc2.datoolbox.data.compare.MzFrequencyObjectComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.format.MzFrequencyObjectFormat;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedRangeRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MzFrequencyObjectRenderer;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
 public class MzFrequencyDataTable extends BasicTable {
 
@@ -46,56 +53,65 @@ public class MzFrequencyDataTable extends BasicTable {
 		setModel(model);
 		
 		rowSorter = new TableRowSorter<MzFrequencyDataTableModel>(model);
+		rowSorter.setComparator(model.getColumnIndex(MzFrequencyDataTableModel.AVG_MZ_COLUMN),
+				new MzFrequencyObjectComparator(SortProperty.rangeMidpoint));
 		setRowSorter(rowSorter);
 
-		chmodRenderer = new AdductRenderer();
-		setDefaultRenderer(Adduct.class, chmodRenderer);
-
-		columnModel.getColumnById(MzFrequencyDataTableModel.MASS_CORRECTION_COLUMN)
-				.setCellRenderer(mzRenderer);
-		columnModel.getColumnById(MzFrequencyDataTableModel.MASS_CORRECTION_ABS_COLUMN)
-				.setCellRenderer(mzRenderer);
-
+		columnModel.getColumnById(MzFrequencyDataTableModel.AVG_MZ_COLUMN)
+				.setCellRenderer(new MzFrequencyObjectRenderer(SortProperty.MZ));	
+		columnModel.getColumnById(MzFrequencyDataTableModel.MZ_RANGE_COLUMN)
+				.setCellRenderer(new FormattedRangeRenderer(MRC2ToolBoxConfiguration.getMzFormat()));
+		columnModel.getColumnById(MzFrequencyDataTableModel.RT_RANGE_COLUMN)
+				.setCellRenderer(new FormattedRangeRenderer(MRC2ToolBoxConfiguration.getRtFormat()));
+		
+		FormattedDecimalRenderer ppmRenderer = new FormattedDecimalRenderer(
+				MRC2ToolBoxConfiguration.getPpmFormat());
+		columnModel.getColumnById(MzFrequencyDataTableModel.RT_RSD_COLUMN)
+			.setCellRenderer(ppmRenderer);
+		columnModel.getColumnById(MzFrequencyDataTableModel.FREQUENCY_COLUMN)
+				.setCellRenderer(ppmRenderer);
+		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		thf.getParserModel().setFormat(MzFrequencyObject.class, 
+				new MzFrequencyObjectFormat(SortProperty.rangeMidpoint));
+		thf.getParserModel().setComparator(MzFrequencyObject.class, 
+				new MzFrequencyObjectComparator(SortProperty.rangeMidpoint));
 		finalizeLayout();
 	}
 
-	public void setTableModelFromAdductList(Collection<Adduct> collection) {
+	public void setTableModelFromMzFrequencyObjectCollection(
+			Collection<MzFrequencyObject> collection) {
 		thf.setTable(null);
-		model.setTableModelFromAdductList(collection);
+		model.setTableModelFromMzFrequencyObjectCollection(collection);
 		thf.setTable(this);
 		tca.adjustColumns();
 	}
 	
-	public Adduct getSelectedModification() {
+	public MzFrequencyObject getSelectedMzFrequencyObject() {
 		
 		int row = getSelectedRow();
 		if(row == -1)
 			return null;
 		
-		return (Adduct)getValueAt(row, getColumnIndex(MzFrequencyDataTableModel.CHEM_MOD_COLUMN));		
+		return (MzFrequencyObject)model.getValueAt(
+				convertRowIndexToModel(row), 
+				model.getColumnIndex(MzFrequencyDataTableModel.AVG_MZ_COLUMN));		
 	}
 	
-	public void removeAdduct(Adduct adduct) {
+	public Collection<MzFrequencyObject> getSelectedMzFrequencyObjects() {
 		
-		int column = model.getColumnIndex(MzFrequencyDataTableModel.CHEM_MOD_COLUMN);
-		for(int i=0; i<model.getRowCount(); i++) {
-			if(adduct.equals(model.getValueAt(i, column))) {
-				model.removeRow(i);
-				return;
-			}
-		}		
-	}
-
-	public void selectAdduct(Adduct adduct) {
+		Collection<MzFrequencyObject>selected = new ArrayList<MzFrequencyObject>();
+		int[] rows = getSelectedRows();
+		if(rows.length == 0)
+			return selected;
 		
-		int column = getColumnIndex(MzFrequencyDataTableModel.CHEM_MOD_COLUMN);
-		for(int i=0; i<getRowCount(); i++) {
-			if(adduct.equals(getValueAt(i, column))) {
-				setRowSelectionInterval(i, i);
-				scrollToSelected();
-				return;
-			}
+		int col = model.getColumnIndex(MzFrequencyDataTableModel.AVG_MZ_COLUMN);
+		for(int row : rows) {
+			
+			MzFrequencyObject mzfo = 
+					(MzFrequencyObject)model.getValueAt(convertRowIndexToModel(row), col);			
+			selected.add(mzfo);
 		}		
+		return selected;	
 	}
 }
