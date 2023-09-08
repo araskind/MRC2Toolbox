@@ -121,7 +121,7 @@ public class AddFeaturesToCollectionDialog extends JDialog implements ActionList
 	
 	private void populateCollectiosTable() {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			
 			FeatureCollectionManager.refreshMsFeatureInfoBundleCollections();
 			featureCollectionsTable.setTableModelFromFeatureCollectionList(
@@ -129,7 +129,7 @@ public class AddFeaturesToCollectionDialog extends JDialog implements ActionList
 		}
 		else {
 			featureCollectionsTable.setTableModelFromFeatureCollectionList(
-					MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
+					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
 					getEditableMsFeatureInfoBundleCollections());			
 		}
 		featureCollectionsTable.clearSelection();
@@ -151,7 +151,7 @@ public class AddFeaturesToCollectionDialog extends JDialog implements ActionList
 			MessageDialog.showErrorMsg("Please select collection to add features.", this);
 			return;
 		}
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			FeatureCollectionManager.addFeaturesToCollection(selectedCollection, featuresToAdd);
 		else
 			selectedCollection.addFeatures(featuresToAdd);

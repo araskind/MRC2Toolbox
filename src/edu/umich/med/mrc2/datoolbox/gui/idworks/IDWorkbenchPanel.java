@@ -706,7 +706,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			showIdLevelAssignmentDialog();
 		
 		if (command.equals(MainActionCommands.ASSIGN_ID_LEVEL_COMMAND.getName()))
-			setIdLevelForIdentification();
+			setIdLevelForSelectedIdentification();
 		
 		for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
 			
@@ -760,10 +760,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND.getName()))	
 			showFeatureCollectionManager();	
 		
-		if(command.equals(MainActionCommands.CREATE_NEW_MSMS_FEATURE_COLLECTION_FROM_SELECTED.getName()))
+		if(command.equals(MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName()))
 			createNewMsmsFeatureCollectionFromSelectedFeatures(msTwoFeatureTable.getBundles(TableRowSubset.SELECTED));
 		
-		if (command.equals(MainActionCommands.ADD_SELECTED_TO_EXISTING_MSMS_FEATURE_COLLECTION.getName()))
+		if (command.equals(MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName()))
 			addSelectedFeaturesToExistingMsMsFeatureCollection(msTwoFeatureTable.getBundles(TableRowSubset.SELECTED));
 		
 		if (command.equals(MainActionCommands.REMOVE_SELECTED_FROM_ACTIVE_MSMS_FEATURE_COLLECTION.getName()))
@@ -1084,7 +1084,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		
 		activeCluster.setPrimaryIdentity(newId);		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			
 			try {
 				MSMSClusteringDBUtils.updateMSMSClusterPrimaryIdentity(activeCluster);
@@ -1117,7 +1117,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		dataSet.setFeatureLookupDataSet(
 				msmsClusterDataSetEditorDialog.getFeatureLookupDataSet());
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			
 			MSMSClusterDataSetUploadTask task = 
 					new MSMSClusterDataSetUploadTask(dataSet);
@@ -1137,7 +1137,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(activeMSMSClusterDataSet == null)
 			return;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			
 			MessageDialog.showErrorMsg(
 					"This option is not available for offline experiments", 
@@ -1496,7 +1496,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 		reassignDefaultMSMSLibraryHitDialog = new ReassignDefaultMSMSLibraryHitDialog(this);
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 			reassignDefaultMSMSLibraryHitDialog.blockCommitToDatabase();
 		
 		reassignDefaultMSMSLibraryHitDialog.setLocationRelativeTo(this.getContentPane());
@@ -1628,7 +1628,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void showTrackerSearchDialog() {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			MessageDialog.showWarningMsg(
 					"Please close active raw data analysis experiment first.", 
 					this.getContentPane());
@@ -1641,7 +1641,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void showTrackerSearchByExperimentMzRtDialog(){
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			MessageDialog.showWarningMsg(
 					"Please close active raw data analysis experiment first.", 
 					this.getContentPane());
@@ -1728,7 +1728,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void loadRawDataForCurrentMsMsFeatureSet() {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			MessageDialog.showWarningMsg(
 					"Please close active raw data analysis experiment first.", 
 					this.getContentPane());
@@ -1922,7 +1922,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
         }
  	}
 	
-	private void runIdLevelUpdate(String idLevelCommand) {
+	public void runIdLevelUpdate(String idLevelCommand) {
 		
     	UpdateIdLevelTask task = new UpdateIdLevelTask(idLevelCommand);
     	idp = new IndeterminateProgressDialog(
@@ -1994,72 +1994,133 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return null;
 		}
 	}
+	
+	public void setPrimaryIdLevelForMultipleFeatures(
+			MSFeatureIdentificationLevel idLevel, 
+			int msLevel,
+			Collection<MsFeature>msmsFeatures,
+			boolean updateSelectedOnly) {
 		
-	private void setPrimaryIdLevelForMultipleSelectedFeatures(String idLevelName) {
+		for(MsFeature msf : msmsFeatures) {
+			
+			MsFeatureIdentity identity = msf.getPrimaryIdentity();
+			if(identity == null)
+				continue;				
 
-		MSFeatureIdentificationLevel idLevel = 
-				IDTDataCache.getMSFeatureIdentificationLevelByName(idLevelName);
-		
-		if(!msOneFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
+			if(idLevel == null && identity.getIdentificationLevel() == null)
+				continue;
 			
-			
-			for(MSFeatureInfoBundle fib : msOneFeatureTable.getBundles(TableRowSubset.SELECTED)) {
+			if(idLevel != null && identity.getIdentificationLevel() != null) {
 				
-				MsFeatureIdentity identity = fib.getMsFeature().getPrimaryIdentity();
-				if(identity == null)
-					continue;				
-
-				if(idLevel == null && identity.getIdentificationLevel() == null)
+				if(idLevel.equals(identity.getIdentificationLevel())) 
 					continue;
+			}
+			identity.setIdentificationLevel(idLevel);
+			if(msLevel == 1) {
 				
-				if(idLevel != null && identity.getIdentificationLevel() != null) {
-					
-					if(idLevel.equals(identity.getIdentificationLevel())) 
-						continue;
-				}
-				identity.setIdentificationLevel(idLevel);
 				try {
 					IdLevelUtils.setIdLevelForReferenceMS1FeatureIdentification(identity);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				//	updateMSFeatures(fib);
 			}
-			updateSelectedMSFeatures();
-			return;
-		}
-		if(!msTwoFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
-			
-			for(MSFeatureInfoBundle fib : msTwoFeatureTable.getBundles(TableRowSubset.SELECTED)) {
+			if(msLevel == 2) {
 				
-				MsFeatureIdentity identity = fib.getMsFeature().getPrimaryIdentity();
-				if(identity == null)
-					continue;				
-
-				if(idLevel == null && identity.getIdentificationLevel() == null)
-					continue;
-				
-				if(idLevel != null && identity.getIdentificationLevel() != null) {
-					
-					if(idLevel.equals(identity.getIdentificationLevel())) 
-						continue;
-				}
-				identity.setIdentificationLevel(idLevel);
 				try {
 					IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				//updateMSMSFeature(fib);
 			}
-			updateSelectedMSMSFeatures();
+		}
+		if(msLevel == 1) {
+			
+			if(updateSelectedOnly)
+				updateSelectedMSFeatures();
+			else
+				reloadCompleteActiveMSOneFeatureSet();	//	TODO when MS1 features are handled
+		}
+		if(msLevel == 2) {
+			
+			if(updateSelectedOnly)
+				updateSelectedMSMSFeatures();
+			else
+				reloadActiveMSMSFeatureCollection();
+		}
+	}
+		
+	private void setPrimaryIdLevelForMultipleSelectedFeatures(String idLevelName) {
+
+		MSFeatureIdentificationLevel idLevel = 
+				IDTDataCache.getMSFeatureIdentificationLevelByName(idLevelName);
+		
+		if(!msOneFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {			
+			
+//			for(MSFeatureInfoBundle fib : msOneFeatureTable.getBundles(TableRowSubset.SELECTED)) {
+//				
+//				MsFeatureIdentity identity = fib.getMsFeature().getPrimaryIdentity();
+//				if(identity == null)
+//					continue;				
+//
+//				if(idLevel == null && identity.getIdentificationLevel() == null)
+//					continue;
+//				
+//				if(idLevel != null && identity.getIdentificationLevel() != null) {
+//					
+//					if(idLevel.equals(identity.getIdentificationLevel())) 
+//						continue;
+//				}
+//				identity.setIdentificationLevel(idLevel);
+//				try {
+//					IdLevelUtils.setIdLevelForReferenceMS1FeatureIdentification(identity);
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				//	updateMSFeatures(fib);
+//			}
+//			updateSelectedMSFeatures();
+			
+			setPrimaryIdLevelForMultipleFeatures(idLevel, 1,
+					msOneFeatureTable.getTableFeatures(TableRowSubset.SELECTED), true);
+			return;
+		}
+		if(!msTwoFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
+			
+//			for(MSFeatureInfoBundle fib : msTwoFeatureTable.getBundles(TableRowSubset.SELECTED)) {
+//				
+//				MsFeatureIdentity identity = fib.getMsFeature().getPrimaryIdentity();
+//				if(identity == null)
+//					continue;				
+//
+//				if(idLevel == null && identity.getIdentificationLevel() == null)
+//					continue;
+//				
+//				if(idLevel != null && identity.getIdentificationLevel() != null) {
+//					
+//					if(idLevel.equals(identity.getIdentificationLevel())) 
+//						continue;
+//				}
+//				identity.setIdentificationLevel(idLevel);
+//				try {
+//					IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity);
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				//updateMSMSFeature(fib);
+//			}
+//			updateSelectedMSMSFeatures();
+			
+			setPrimaryIdLevelForMultipleFeatures(idLevel, 2,
+					msTwoFeatureTable.getTableFeatures(TableRowSubset.SELECTED), true);
 			return;
 		}
 	}
 
-	private void setIdLevelForIdentification() {
+	private void setIdLevelForSelectedIdentification() {
 
 		MsFeatureIdentity identity = identificationsTable.getSelectedIdentity();
 		if(identity == null)
@@ -2136,7 +2197,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 					try {
 						IdFollowupUtils.setIdFollowupStepsForMS1Feature(fib);
 					} catch (Exception e) {
@@ -2155,7 +2216,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getIdFollowupSteps().clear();
 				fib.getIdFollowupSteps().addAll(followupStepAssignmentDialog.getUsedFollowupSteps());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 					try {
 						IdFollowupUtils.setIdFollowupStepsForMSMSFeature(fib);
 					} catch (Exception e) {
@@ -2197,7 +2258,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 					try {
 						StandardAnnotationUtils.setStandardFeatureAnnotationsForMS1Feature(fib);
 					} catch (Exception e) {
@@ -2216,7 +2277,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 				fib.getStandadAnnotations().clear();
 				fib.getStandadAnnotations().addAll(standardFeatureAnnotationAssignmentDialog.getUsedAnnotations());
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 					try {
 						StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(fib);
 					} catch (Exception e) {
@@ -2249,7 +2310,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(featuresToAdd.isEmpty())
 			return;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			
 			if(FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().isEmpty()) {
 				MessageDialog.showWarningMsg("No custom collections defined yet.\n"
@@ -2258,7 +2319,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			}
 		}
 		else {
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getEditableMsFeatureInfoBundleCollections().isEmpty()) {
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getEditableMsFeatureInfoBundleCollections().isEmpty()) {
 				MessageDialog.showWarningMsg("No custom collections defined for the experiment yet.\n"
 						+ "Use \"Create new feature collection\" option instead.", this.getContentPane());
 				return;
@@ -2275,7 +2336,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(activeFeatureCollection == null || activeFeatureCollection.getFeatures().isEmpty())
 			return;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 						
 			if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(activeFeatureCollection)) {
 				MessageDialog.showWarningMsg("Collection \"" + activeFeatureCollection.getName() + 
@@ -2294,7 +2355,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			}
 		}
 		else {
-			if(!MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
+			if(!MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
 					getEditableMsFeatureInfoBundleCollections().contains(activeFeatureCollection)) {
 				MessageDialog.showWarningMsg("Collection \"" + activeFeatureCollection.getName() + 
 						"\" can not be edited.", this.getContentPane());
@@ -2355,7 +2416,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			String yesNoQuestion = "Do you want to remove all identifications for " + feature.getName() + "?";
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 					try {
 						IdentificationUtils.clearReferenceMS1FeatureLibraryMatches(feature.getId());
 					} catch (Exception e) {
@@ -2379,7 +2440,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 				if(msms != null) {
-					if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 						try {					
 							IdentificationUtils.clearMSMSFeatureLibraryMatches(msms.getId());
 						} catch (Exception e) {
@@ -2416,7 +2477,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					
 				MsFeature msOneFeature = bundle.getMsFeature();
 				msOneFeature.disablePrimaryIdentity();
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 					try {
 						IdentificationUtils.disableReferenceMS1FeaturePrimaryIdentity(msOneFeature.getId());
 					} catch (Exception e) {
@@ -2432,7 +2493,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				
 				MsFeature msTwoFeature = bundle.getMsFeature();
 				msTwoFeature.disablePrimaryIdentity();
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 					try {
 						String msmsId = msTwoFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL).getId();
 						IdentificationUtils.disableMSMSFeaturePrimaryIdentity(msmsId);
@@ -2519,7 +2580,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			if(MessageDialog.showChoiceWithWarningMsg(yesNoQuestion, this.getContentPane()) == JOptionPane.YES_OPTION) {
 				
 				if(id.getMsRtLibraryMatch() != null) {
-					if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 						try {
 							IdentificationUtils.removeReferenceMS1FeatureLibraryMatch(id);
 						} catch (Exception e) {
@@ -2529,7 +2590,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					}
 				}
 				else {
-					if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 						try {
 							IdentificationUtils.removeReferenceMS1FeatureManualId(id);
 						} catch (Exception e) {
@@ -2559,7 +2620,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				if(msms != null) {
 					
 					if(id.getReferenceMsMsLibraryMatch() != null) {
-						if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+						if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 							try {					
 								IdentificationUtils.removeMSMSFeatureLibraryMatch(id);
 							} catch (Exception e) {
@@ -2569,7 +2630,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 						}
 					}
 					else {
-						if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+						if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 							try {
 								IdentificationUtils.removeMSMSFeatureManualIdentification(id);
 							} catch (Exception e) {
@@ -2623,7 +2684,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(msOneFeatureTable.getSelectedBundle() != null) {
 			
 			MsFeature feature = msOneFeatureTable.getSelectedBundle().getMsFeature();		
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 				try {
 					IdentificationUtils.addReferenceMS1FeatureManualId(feature.getId(), manualId);
 				} catch (Exception e) {
@@ -2640,7 +2701,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 			MsFeature feature = msTwoFeatureTable.getSelectedBundle().getMsFeature();					
 			TandemMassSpectrum msms = feature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 				try {
 					IdentificationUtils.addMSMSFeatureManualId(msms.getId(), manualId);
 				} catch (Exception e) {
@@ -2809,7 +2870,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}		
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 				task.setSkipResultsUpload(true);
 			
 			task.addTaskListener(this);
@@ -3010,7 +3071,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				+ " " + task.getMassWindowType().name();
 		
 		MzFrequencyAnalysisResultsDialog resultsDialog = 
-				new MzFrequencyAnalysisResultsDialog(this, mzFrequencyObjects, binningParameter);
+				new MzFrequencyAnalysisResultsDialog(
+						this, mzFrequencyObjects, binningParameter);
 		resultsDialog.setLocationRelativeTo(this.getContentPane());
 		resultsDialog.setVisible(true);
 	}
@@ -3057,8 +3119,8 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	private void finalizeMSMSFeatureClusteringTask(MSMSFeatureClusteringTask source) {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
-			MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
+			MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
 					getMsmsClusterDataSets().add(source.getMsmsClusterDataSet());
 		
 		loadMSMSClusterDataSetInGUI(source.getMsmsClusterDataSet());
@@ -3248,7 +3310,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		}
 		activeMSMSClusterDataSet = selectedDataSet;
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			
 			IDTMSMSClusterDataPullTask task = 
 					MSMSClusterDataSetManager.getMSMSClusterDataSetData(selectedDataSet);
@@ -3294,7 +3356,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			return;
 		}
 		activeFeatureCollection = selectedCollection;
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			IDTMSMSFeatureDataPullTask task = 
 					FeatureCollectionManager.getMsFeatureInfoBundleCollectionData(selectedCollection);
 			if(task == null) {
@@ -3312,13 +3374,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 	
 	private void reloadCompleteDataSet() {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			
 			activeFeatureCollection = FeatureCollectionManager.activeExperimentFeatureSet;
 			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 			
 			Collection<MSFeatureInfoBundle> msOneData = 
-					MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getMsOneFeatureBundles();
+					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getMsOneFeatureBundles();
 			if(msOneData != null && !msOneData.isEmpty())
 				safelyLoadMSOneFeatures(msOneData);
 			
@@ -3333,15 +3395,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			}			
 			//	TODO MS1 search data?
 		}
-	}
-	
-	private void reloadActiveMSMSFeatureCollection() {
-		
-		if(activeFeatureCollection == null)
-			return;
-		
-		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());			
-		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 	}
 
 	private void loadMsMsSearchData(Collection<MSFeatureInfoBundle> features) {
@@ -3371,7 +3424,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 
 	public void reloadCompleteActiveMSMSFeatureSet() {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			activeFeatureCollection = FeatureCollectionManager.msmsSearchResults;
 			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
@@ -3381,6 +3434,15 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 			safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());
 		}
+	}
+	
+	private void reloadActiveMSMSFeatureCollection() {
+		
+		if(activeFeatureCollection == null)
+			return;
+		
+		safelyLoadMSMSFeatures(activeFeatureCollection.getFeatures());			
+		StatusBar.setActiveFeatureCollection(activeFeatureCollection);
 	}
 	
 	private void reloadActiveMSMSClusterSetFeatures() {
@@ -3590,7 +3652,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		for(MSFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();
-			if(primaryId != null && MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+			if(primaryId != null && MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 				try {
 					IdentificationUtils.setReferenceMS1FeaturePrimaryIdentity(
 							bundle.getMsFeature().getId(),
@@ -3621,7 +3683,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		for(MSFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureIdentity primaryId = bundle.getMsFeature().getPrimaryIdentity();			
-			if(primaryId != null && MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+			if(primaryId != null && MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 				
 				TandemMassSpectrum msmsFeature = 
 						bundle.getMsFeature().getSpectrum().getExperimentalTandemSpectrum();
@@ -3783,10 +3845,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		MsFeatureChromatogramBundle msfCb = null;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null 
-				&& MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getChromatogramMap() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null 
+				&& MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getChromatogramMap() != null) {
 			
-			msfCb = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
+			msfCb = MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
 					getChromatogramMap().get(selectedBundle.getMsFeature().getId());
 		}
 		else {
@@ -3830,9 +3892,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		for(MSFeatureInfoBundle bundle : selectedBundles) {
 			
 			MsFeatureChromatogramBundle msfCb = null;			
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null 
-					&& MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getChromatogramMap() != null) {				
-				msfCb = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null 
+					&& MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getChromatogramMap() != null) {				
+				msfCb = MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
 						getChromatogramMap().get(bundle.getMsFeature().getId());
 			}
 			else {

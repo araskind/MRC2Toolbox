@@ -106,7 +106,7 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 				
 		loadLayout(layoutConfigFile);
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			featureCollectionsManager.loadDatabaseStoredCollections();
 			featureLookupDataSetManager.loadDatabaseStoredFeatureLookupDataSets();
 			featureClusterCollectionsManager.loadDatabaseStoredMSMSClusterDataSets();			
@@ -129,7 +129,7 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 	
 	private void refreshFeatureCollections() { 
 
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 			return;
 		
 		RefreshCollectionsTask task = 

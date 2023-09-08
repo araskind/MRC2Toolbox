@@ -785,7 +785,7 @@ public class RDEMetadataWizard extends JDialog
 		
 		SaveStoredRawDataAnalysisExperimentTask task = 
 				new SaveStoredRawDataAnalysisExperimentTask(
-						MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment());
+						MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment());
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}	

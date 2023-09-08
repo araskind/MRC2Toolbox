@@ -348,7 +348,7 @@ public class FeatureCollectionEditorDialog extends JDialog
 			errors.add("Name can not be empty.");
 		
 		String nameError = null;
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			nameError = validateNameAgainstDatabase(newName);
 		else
 			nameError = validateNameAgainstProject(newName);
@@ -385,7 +385,7 @@ public class FeatureCollectionEditorDialog extends JDialog
 		
 		MsFeatureInfoBundleCollection existing = null;
 		Set<MsFeatureInfoBundleCollection> projectCollections = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getFeatureCollections();
+				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getFeatureCollections();
 		if(this.featureCollection == null) {
 			existing = projectCollections.stream().
 					filter(f -> f.getName().equalsIgnoreCase(newName)).

@@ -39,59 +39,61 @@ public class MzFequencyResultsToolbar extends CommonToolbar {
 	 */
 	private static final long serialVersionUID = -7270184336598621941L;
 
-	private static final Icon newModificationIcon = GuiUtils.getIcon("newModification", 32);
-	private static final Icon newCompositeModificationIcon = GuiUtils.getIcon("newCompositeModification", 32);
-	private static final Icon editModificationIcon = GuiUtils.getIcon("editModification", 32);
-	private static final Icon deleteModificationIcon = GuiUtils.getIcon("deleteModification", 32);
-	private static final Icon importModificationIcon = GuiUtils.getIcon("loadList", 32);
-	private static final Icon exportModificationIcon = GuiUtils.getIcon("saveDuplicates", 32);
+	private static final Icon saveIcon = GuiUtils.getIcon("save", 32);
+	private static final Icon createNewCollectionIcon = GuiUtils.getIcon("newFeatureSubset", 32);
+	private static final Icon addToExistingCollectionIcon = GuiUtils.getIcon("addCollection", 32);
+	private static final Icon idFollowupStepManagerIcon = GuiUtils.getIcon("idFollowupStepManager", 32);
+	private static final Icon standardFeatureAnnotationManagerIcon = GuiUtils.getIcon("editCollection", 32);
 
 
 	@SuppressWarnings("unused")
 	private JButton
-//		newModificationButton,
-//		newCompositeModificationButton,
-//		editModificationButton,
-//		deleteModificationButton,
-//		importModificationsButton,
-		exportModificationsButton;
+		saveResultsToFileButton,
+		createNewCollectionButton,
+		addToExistingCollectionButton,
+		assignIdFollowUpStepsButton,
+		assignStandardAnnotationButton;
 
-	public MzFequencyResultsToolbar(ActionListener listener) {
+	public MzFequencyResultsToolbar(ActionListener listener, boolean enableTrackerCommands) {
 
 		super(listener);
 
-		exportModificationsButton = GuiUtils.addButton(this, null, newModificationIcon, listener,
-				MainActionCommands.NEW_MODIFICATION_COMMAND.getName(),
-				MainActionCommands.NEW_MODIFICATION_COMMAND.getName(),
+		saveResultsToFileButton = GuiUtils.addButton(this, null, saveIcon, commandListener,
+				MainActionCommands.SAVE_MZ_FREQUENCY_ANALYSIS_RESULTS_COMMAND.getName(),
+				MainActionCommands.SAVE_MZ_FREQUENCY_ANALYSIS_RESULTS_COMMAND.getName(),
 				buttonDimension);
 		
-//		newCompositeModificationButton = GuiUtils.addButton(this, null, newCompositeModificationIcon, listener,
-//				MainActionCommands.NEW_COMPOSITE_MODIFICATION_COMMAND.getName(),
-//				MainActionCommands.NEW_COMPOSITE_MODIFICATION_COMMAND.getName(),
-//				buttonDimension);
-//
-//		editModificationButton = GuiUtils.addButton(this, null, editModificationIcon, listener,
-//				MainActionCommands.EDIT_MODIFICATION_COMMAND.getName(),
-//				MainActionCommands.EDIT_MODIFICATION_COMMAND.getName(),
-//				buttonDimension);
-//
-//		deleteModificationButton = GuiUtils.addButton(this, null, deleteModificationIcon, listener,
-//				MainActionCommands.DELETE_MODIFICATION_COMMAND.getName(),
-//				MainActionCommands.DELETE_MODIFICATION_COMMAND.getName(),
-//				buttonDimension);
-
 		addSeparator(buttonDimension);
+		
+		createNewCollectionButton = GuiUtils.addButton(
+				this, null, createNewCollectionIcon, commandListener,
+				MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName(),
+				MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName(),
+				buttonDimension);
 
-//		importModificationsButton = GuiUtils.addButton(this, null, importModificationIcon, listener,
-//				MainActionCommands.IMPORT_MODIFICATIONS_COMMAND.getName(),
-//				MainActionCommands.IMPORT_MODIFICATIONS_COMMAND.getName(),
-//				buttonDimension);
-//
-//		exportModificationsButton = GuiUtils.addButton(this, null, exportModificationIcon, listener,
-//				MainActionCommands.EXPORT_MODIFICATIONS_COMMAND.getName(),
-//				MainActionCommands.EXPORT_MODIFICATIONS_COMMAND.getName(),
-//				buttonDimension);
-	}
+		addToExistingCollectionButton = GuiUtils.addButton(
+				this, null, addToExistingCollectionIcon, commandListener,
+				MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName(),
+				MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName(),
+				buttonDimension);
+
+		if(enableTrackerCommands) {
+			
+			addSeparator(buttonDimension);
+
+			assignIdFollowUpStepsButton = GuiUtils.addButton(
+					this, null, idFollowupStepManagerIcon, commandListener,
+					MainActionCommands.ADD_ID_FOLLOWUP_STEP_DIALOG_COMMAND.getName(),
+					MainActionCommands.ADD_ID_FOLLOWUP_STEP_DIALOG_COMMAND.getName(),
+					buttonDimension);
+
+			assignStandardAnnotationButton = GuiUtils.addButton(
+					this, null, standardFeatureAnnotationManagerIcon, commandListener,
+					MainActionCommands.ADD_STANDARD_FEATURE_ANNOTATION_DIALOG_COMMAND.getName(),
+					MainActionCommands.ADD_STANDARD_FEATURE_ANNOTATION_DIALOG_COMMAND.getName(),
+					buttonDimension);
+		}
+	} 
 
 	@Override
 	public void updateGuiFromExperimentAndDataPipeline(

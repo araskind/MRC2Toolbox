@@ -81,9 +81,9 @@ public class RawDataManager {
 			File rdf = new File(file.getFullPath());
 			if(!rdf.exists()) {
 				
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 				rdf = Paths.get(
-						MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getRawDataDirectory().getAbsolutePath(), 
+						MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getRawDataDirectory().getAbsolutePath(), 
 						file.getName()).toFile();
 			}
 			if(rdf == null || !rdf.exists())

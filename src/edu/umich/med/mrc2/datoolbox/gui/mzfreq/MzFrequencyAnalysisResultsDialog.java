@@ -36,7 +36,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
+import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
+import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
@@ -52,6 +58,9 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 	
 	private Preferences preferences;
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
+	
+	private DockableMRC2ToolboxPanel parentPanel;
+	private boolean enableTrackerCommands;
 	private MzFrequencyDataTable table;
 	private MzFequencyResultsToolbar toolBar;
 	
@@ -69,22 +78,112 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
+		if(actionListener instanceof DockableMRC2ToolboxPanel)
+			parentPanel = (DockableMRC2ToolboxPanel)actionListener;
+		
+		enableTrackerCommands = false;
+		if(parentPanel instanceof IDWorkbenchPanel)
+			enableTrackerCommands = true;
+		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(null);
 		getContentPane().add(panel_1, BorderLayout.CENTER);
 		panel_1.setLayout(new BorderLayout(0, 0));
 		
-		toolBar = new MzFequencyResultsToolbar(this);
+		toolBar = new MzFequencyResultsToolbar(
+				this, enableTrackerCommands);
 		panel_1.add(toolBar, BorderLayout.NORTH);
 		
 		table = new MzFrequencyDataTable();
 		panel_1.add(new JScrollPane(table), BorderLayout.CENTER);
 		table.setTableModelFromMzFrequencyObjectCollection(mzFrequencyObjects);
+		table.addTablePopupMenu(
+				new MzFrequencyTablePopupMenu(table, this, enableTrackerCommands));
 		
 		loadPreferences();
 		pack();
 	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		
+		if (command.equals(MainActionCommands.SAVE_MZ_FREQUENCY_ANALYSIS_RESULTS_COMMAND.getName())) 
+			saveMzFrequencyAnalysisResults();
+		
+		if (command.equals(MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName())) 
+			createNewFeatureCollectionFromSelected();
+		
+		if (command.equals(MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName())) 
+			addSelectedToExistingFeatureCollection();
+		
+		if (command.equals(MainActionCommands.ADD_ID_FOLLOWUP_STEP_DIALOG_COMMAND.getName())) 
+			showIdFollowupStepDialog();
+		
+		if (command.equals(MainActionCommands.ADD_ID_FOLLOWUP_STEP_COMMAND.getName())) 
+			addIdFollowupStep();
+		
+		if (command.equals(MainActionCommands.ADD_STANDARD_FEATURE_ANNOTATION_DIALOG_COMMAND.getName())) 
+			showStandardFeatureAnnotationDialog();
+		
+		if (command.equals(MainActionCommands.ADD_STANDARD_FEATURE_ANNOTATION_COMMAND.getName())) 
+			addStandardFeatureAnnotation();	
+		
+		if(enableTrackerCommands) {
+			
+			for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
+				
+				if (command.equals(level.getName()) 
+						|| command.equals(MSFeatureIdentificationLevel.SET_PRIMARY + level.getName())) {
+					
+					Collection<MsFeature>selectedFeatures = table.getMsFeaturesForSelectedLines();
+					if(!selectedFeatures.isEmpty()){
+						
+						((IDWorkbenchPanel)parentPanel).
+							setPrimaryIdLevelForMultipleFeatures(level, 2, selectedFeatures, true);
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	private void saveMzFrequencyAnalysisResults() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void createNewFeatureCollectionFromSelected() {
+		// TODO Auto-generated method stub
+		
+	}
 	
+	private void addSelectedToExistingFeatureCollection() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private void showIdFollowupStepDialog() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void addIdFollowupStep() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void showStandardFeatureAnnotationDialog() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void addStandardFeatureAnnotation() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	@Override
 	public void dispose() {
 		
@@ -95,13 +194,7 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 			super.dispose();
 		}
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	
 	@Override
 	public void loadPreferences() {
 		loadPreferences(Preferences.userNodeForPackage(this.getClass()));
@@ -118,6 +211,10 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 
 		preferences = Preferences.userNodeForPackage(this.getClass());
 		//	TODO
+	}
+
+	public void setParentPanel(DockableMRC2ToolboxPanel parentPanel) {
+		this.parentPanel = parentPanel;
 	}
 
 }

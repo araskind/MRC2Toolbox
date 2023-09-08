@@ -79,7 +79,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 	private static final Icon dataFileToolsIcon = GuiUtils.getIcon("dataFileTools", 24);	
 	private static final Icon exportMzRtStatsIcon = GuiUtils.getIcon("exportMZRT", 24);
 	private static final Icon featureCleanupIcon = GuiUtils.getIcon("clearAnnotation", 24);
-		
+	private static final Icon mzFrequencyIcon = GuiUtils.getIcon("mzFrequency", 24);
+
 	// Menus
 	private JMenu
 		loadDataMenu,
@@ -100,7 +101,8 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 
 	// Statistics items
 	private JMenuItem
-		calculateStatisticsMenuItem;
+		calculateStatisticsMenuItem,
+		mzFrequencyMenuItem;
 
 	// Search items
 	private JMenuItem
@@ -177,6 +179,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		calculateStatisticsMenuItem = addItem(statsMenu, 
 				MainActionCommands.CALC_FEATURES_STATS_COMMAND, 
 				calcStatsIcon);
+				
+		mzFrequencyMenuItem = addItem(statsMenu, 
+				MainActionCommands.SET_UP_MZ_FREQUENCY_ANALYSIS_COMMAND, 
+				mzFrequencyIcon);
 		
 		add(statsMenu);
 		

@@ -309,8 +309,8 @@ public class MainWindow extends JFrame
 		if (currentExperiment != null) 			
 			expDir = currentExperiment.getExperimentDirectory();
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) 
-			expDir = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getExperimentDirectory();
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) 
+			expDir = MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getExperimentDirectory();
 		
 		if(expDir != null && expDir.exists()) {
 			
@@ -376,8 +376,8 @@ public class MainWindow extends JFrame
 		ExperimentUtils.saveStorableRawDataAnalysisExperiment(newExperiment);
 		
 		//	Set experiment as active
-		MRC2ToolBoxCore.setActiveRawDataAnalysisExperiment(newExperiment);
-		StatusBar.setExperimentName(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getName());
+		MRC2ToolBoxCore.setActiveOfflineRawDataAnalysisExperiment(newExperiment);
+		StatusBar.setExperimentName(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName());
 		
 		//	Load raw data
 		ExperimentRawDataFileOpenTask task = 
@@ -500,7 +500,7 @@ public class MainWindow extends JFrame
 	private void logoutIdTracker() {
 		
 		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() != null 
-				|| MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+				|| MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			MessageDialog.showWarningMsg(
 					"Please close the experiment first", 
 					this.getContentPane());
@@ -593,7 +593,7 @@ public class MainWindow extends JFrame
 	public void closeExperiment() {
 		
 		if (currentExperiment == null 
-				&& MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+				&& MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			int selectedValue = MessageDialog.showChoiceMsg(
 					"Are you sure you want to clear the workspace?",
 					this.getContentPane());
@@ -618,7 +618,7 @@ public class MainWindow extends JFrame
 				if(currentExperiment != null)
 					activeExperimentType = ProjectType.DATA_ANALYSIS;
 				
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 					activeExperimentType = ProjectType.RAW_DATA_ANALYSIS;
 						
 				experimentSwitchController = new ExperimentSwitchController(
@@ -643,11 +643,11 @@ public class MainWindow extends JFrame
 			spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
 			MRC2ToolBoxCore.getTaskController().addTask(spt);
 		}
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			
 			SaveStoredRawDataAnalysisExperimentTask task = 
 					new SaveStoredRawDataAnalysisExperimentTask(
-							MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment());
+							MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment());
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}		
@@ -659,7 +659,7 @@ public class MainWindow extends JFrame
 		if(currentExperiment != null)
 			activeExperimentType = ProjectType.DATA_ANALYSIS;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 			activeExperimentType = ProjectType.RAW_DATA_ANALYSIS;
 				
 		experimentSwitchController = new ExperimentSwitchController(
@@ -693,7 +693,7 @@ public class MainWindow extends JFrame
 
 	public void exitProgram() {
 
-		if (currentExperiment != null || MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		if (currentExperiment != null || MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			
 			String yesNoQuestion = "You are going to close current experiment, "
 					+ "do you want to save the results (Yes - save, No - discard)?";
@@ -1007,7 +1007,7 @@ public class MainWindow extends JFrame
 			LIMSExperiment newLimsExperiment) {
 		
 		if (currentExperiment != null 
-				|| MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+				|| MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			
 			int selectedValue = 
 					MessageDialog.showChooseOrCancelMsg(
@@ -1019,7 +1019,7 @@ public class MainWindow extends JFrame
 			if (selectedValue == JOptionPane.YES_OPTION) {
 				
 				ProjectType activeExperimentType = ProjectType.DATA_ANALYSIS;
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 					activeExperimentType = ProjectType.RAW_DATA_ANALYSIS;
 				
 				experimentSwitchController = new ExperimentSwitchController(
@@ -1053,7 +1053,7 @@ public class MainWindow extends JFrame
 	private void openExperiment(ProjectType newExperimentType) {
 
 		if (currentExperiment != null 
-				|| MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+				|| MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 
 			int selectedValue = 
 					MessageDialog.showChooseOrCancelMsg(
@@ -1065,7 +1065,7 @@ public class MainWindow extends JFrame
 			if (selectedValue == JOptionPane.YES_OPTION) {
 
 				ProjectType activeExperimentType = ProjectType.DATA_ANALYSIS;
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null)
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
 					activeExperimentType = ProjectType.RAW_DATA_ANALYSIS;
 				
 				experimentSwitchController = new ExperimentSwitchController(
@@ -1395,7 +1395,7 @@ public class MainWindow extends JFrame
 		
 		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(null);
 		switchDataPipeline(null,  null);
-		MRC2ToolBoxCore.setActiveRawDataAnalysisExperiment(null);
+		MRC2ToolBoxCore.setActiveOfflineRawDataAnalysisExperiment(null);
 		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.RAW_DATA_EXAMINER).clearPanel();
 		MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.ID_WORKBENCH).clearPanel();
 		RawDataManager.releaseAllDataSources();
@@ -1469,7 +1469,7 @@ public class MainWindow extends JFrame
 			setGuiFromMetabolomicsProject();
 			return;
 		}
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			setGuiFromRawDataAnalysisProject();
 			return;
 		}
@@ -1477,12 +1477,12 @@ public class MainWindow extends JFrame
 	
 	private void setGuiFromRawDataAnalysisProject() {
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 
 			this.setTitle(BuildInformation.getProgramName() + " - " + 
-					MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().getName());
+					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().getName());
 			StatusBar.showRawDataAnalysisExperimentData(
-					MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment());;
+					MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment());;
 		}
 		//	TODO more
 	}

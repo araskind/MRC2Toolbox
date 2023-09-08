@@ -100,10 +100,10 @@ public class DockableMzRtMSMSPlotPanel extends DefaultSingleCDockable
 		if(command.equals(MainActionCommands.REFRESH_MSMS_FEATURE_PLOT.getName()))
 			refreshMSMSFeaturePlot();	
 		
-		if(command.equals(MainActionCommands.CREATE_NEW_MSMS_FEATURE_COLLECTION_FROM_SELECTED.getName()))
+		if(command.equals(MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName()))
 			createNewMsmsFeatureCollectionFromSelected();	
 		
-		if(command.equals(MainActionCommands.ADD_SELECTED_TO_EXISTING_MSMS_FEATURE_COLLECTION.getName()))
+		if(command.equals(MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName()))
 			addSelectedFeaturesToExistingMsMsFeatureCollection();	
 
 		if(command.equals(MainActionCommands.FILTER_SELECTED_MSMS_FEATURES_IN_TABLE.getName()))

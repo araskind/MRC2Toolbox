@@ -23,13 +23,17 @@ package edu.umich.med.mrc2.datoolbox.gui.mzfreq;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import javax.swing.table.TableRowSorter;
 
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.MzFrequencyObjectComparator;
+import edu.umich.med.mrc2.datoolbox.data.compare.RangeMidPoitComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.format.MzFrequencyObjectFormat;
+import edu.umich.med.mrc2.datoolbox.data.format.RangeFormat;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
@@ -37,6 +41,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRendere
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedRangeRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MzFrequencyObjectRenderer;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MzFrequencyDataTable extends BasicTable {
 
@@ -55,6 +60,10 @@ public class MzFrequencyDataTable extends BasicTable {
 		rowSorter = new TableRowSorter<MzFrequencyDataTableModel>(model);
 		rowSorter.setComparator(model.getColumnIndex(MzFrequencyDataTableModel.AVG_MZ_COLUMN),
 				new MzFrequencyObjectComparator(SortProperty.rangeMidpoint));
+		rowSorter.setComparator(model.getColumnIndex(MzFrequencyDataTableModel.MZ_RANGE_COLUMN),
+				new RangeMidPoitComparator());
+		rowSorter.setComparator(model.getColumnIndex(MzFrequencyDataTableModel.RT_RANGE_COLUMN),
+				new RangeMidPoitComparator());
 		setRowSorter(rowSorter);
 
 		columnModel.getColumnById(MzFrequencyDataTableModel.AVG_MZ_COLUMN)
@@ -76,6 +85,10 @@ public class MzFrequencyDataTable extends BasicTable {
 				new MzFrequencyObjectFormat(SortProperty.rangeMidpoint));
 		thf.getParserModel().setComparator(MzFrequencyObject.class, 
 				new MzFrequencyObjectComparator(SortProperty.rangeMidpoint));
+		thf.getParserModel().setFormat(Range.class, 
+				new RangeFormat(MRC2ToolBoxConfiguration.getRtFormat()));
+		thf.getParserModel().setComparator(Range.class, 
+				new RangeMidPoitComparator());
 		finalizeLayout();
 	}
 
@@ -114,4 +127,33 @@ public class MzFrequencyDataTable extends BasicTable {
 		}		
 		return selected;	
 	}
+	
+	public Collection<MsFeature>getMsFeaturesForSelectedLines(){
+		
+		Collection<MsFeature>selected = new ArrayList<MsFeature>();
+		Collection<MzFrequencyObject>mzfoCollection = getSelectedMzFrequencyObjects();
+		if(mzfoCollection.isEmpty())
+			return selected;
+		
+		selected = mzfoCollection.stream().
+				flatMap(o -> o.getFeatureCluster().getFeatures().stream()).
+				collect(Collectors.toList());
+		
+		return selected;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

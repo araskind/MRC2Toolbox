@@ -1182,8 +1182,8 @@ public enum MainActionCommands {
 	
 	//	MetIDTracker MSMS-feature plot
 	REFRESH_MSMS_FEATURE_PLOT("Refresh MSMS feature plot"),
-	CREATE_NEW_MSMS_FEATURE_COLLECTION_FROM_SELECTED("Create new collection from selected features"),
-	ADD_SELECTED_TO_EXISTING_MSMS_FEATURE_COLLECTION("Add selected features to existing collection"),
+	CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED("Create new collection from selected features"),
+	ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION("Add selected features to existing collection"),
 	FILTER_SELECTED_MSMS_FEATURES_IN_TABLE("Filter selected features in MSMS feature table"),
 	REMOVE_SELECTED_FROM_ACTIVE_MSMS_FEATURE_COLLECTION("Remove selected features from active feature collection"),
 	
@@ -1282,6 +1282,7 @@ public enum MainActionCommands {
 	//	M/Z frequency
 	SET_UP_MZ_FREQUENCY_ANALYSIS_COMMAND("Set up M/Z frequency analysis"),
 	RUN_MZ_FREQUENCY_ANALYSIS_COMMAND("Run M/Z frequency analysis"),
+	SAVE_MZ_FREQUENCY_ANALYSIS_RESULTS_COMMAND("Save M/Z frequency analysis results"),
 	;
 
 	private final String name;

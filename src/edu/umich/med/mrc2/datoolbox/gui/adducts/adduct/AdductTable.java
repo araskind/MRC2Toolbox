@@ -73,7 +73,8 @@ public class AdductTable extends BasicTable {
 		if(row == -1)
 			return null;
 		
-		return (Adduct)getValueAt(row, getColumnIndex(AdductTableModel.CHEM_MOD_COLUMN));		
+		return (Adduct)model.getValueAt(convertRowIndexToModel(row), 
+				model.getColumnIndex(AdductTableModel.CHEM_MOD_COLUMN));		
 	}
 	
 	public void removeAdduct(Adduct adduct) {
@@ -89,9 +90,9 @@ public class AdductTable extends BasicTable {
 
 	public void selectAdduct(Adduct adduct) {
 		
-		int column = getColumnIndex(AdductTableModel.CHEM_MOD_COLUMN);
+		int column = model.getColumnIndex(AdductTableModel.CHEM_MOD_COLUMN);
 		for(int i=0; i<getRowCount(); i++) {
-			if(adduct.equals(getValueAt(i, column))) {
+			if(adduct.equals(model.getValueAt(convertRowIndexToModel(i), column))) {
 				setRowSelectionInterval(i, i);
 				scrollToSelected();
 				return;

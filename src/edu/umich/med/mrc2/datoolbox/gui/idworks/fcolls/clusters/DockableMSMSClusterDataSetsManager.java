@@ -153,7 +153,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		if(selected == null)
 			return;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() != null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
 			showMsMSMSDataSetEditorDialog(selected);
 			return;
 		}		
@@ -190,7 +190,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		edited.setDescription(msmsClusterDataSetEditorDialog.getMSMSClusterDataSetDescription());
 		edited.setLastModified(new Date());
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			saveMSMSClusterDataSetChangesToProject(edited);
 		else
 			saveMSMSClusterDataSetChangesToDatabase(edited);
@@ -266,7 +266,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		if(clustersToAdd != null && !clustersToAdd.isEmpty())
 			newDataSet.getClusters().addAll(clustersToAdd);
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			createNewMSMSClusterDataSetInProject(newDataSet);
 		else
 			createNewMSMSClusterDataSetInDatabase(newDataSet);
@@ -277,7 +277,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	private void createNewMSMSClusterDataSetInProject(MSMSClusterDataSet newDataSet) {
 		
 		RawDataAnalysisExperiment project = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();		
+				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();		
 		project.getMsmsClusterDataSets().add(newDataSet);
 		if(msmsClusterDataSetEditorDialog.loadMSMSClusterDataSetIntoWorkBench()) {
 			loadMSMSClusterDataSetIntoWorkBench(newDataSet);
@@ -305,7 +305,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 		if(selected == null)
 			return;
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 			
 			if(!selected.getCreatedBy().equals(MRC2ToolBoxCore.getIdTrackerUser())
 					&& !MRC2ToolBoxCore.getIdTrackerUser().isSuperUser()) {
@@ -326,7 +326,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	
 	private void deleteMSMSClusterDataSetFromProject(MSMSClusterDataSet selected) {
 
-		RawDataAnalysisExperiment project = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();		
+		RawDataAnalysisExperiment project = MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();		
 		int res = MessageDialog.showChoiceWithWarningMsg(
 				"Are you sure you want to delete data set \"" + selected.getName() + "\"?", 
 				this.getContentPane());
@@ -417,7 +417,7 @@ public class DockableMSMSClusterDataSetsManager extends DefaultSingleCDockable i
 	public void loadMSMSClusterDataSetsForActiveProject() {
 		
 		RawDataAnalysisExperiment project = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
+				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();
 		if(project == null)
 			return;
 		

@@ -33,7 +33,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 
-public class SimpleNeutraModificationlTable extends BasicTable {
+public class SimpleNeutraModificationTable extends BasicTable {
 
 	/**
 	 *
@@ -41,7 +41,7 @@ public class SimpleNeutraModificationlTable extends BasicTable {
 	private static final long serialVersionUID = 1511489263877797538L;
 	private SimpleNeutralModificationTableModel model;
 
-	public SimpleNeutraModificationlTable() {
+	public SimpleNeutraModificationTable() {
 
 		super();
 		model = new SimpleNeutralModificationTableModel();
@@ -62,7 +62,8 @@ public class SimpleNeutraModificationlTable extends BasicTable {
 		if(row == -1)
 			return null;
 		
-		return (SimpleAdduct)getValueAt(row, getColumnIndex(SimpleNeutralModificationTableModel.CHEM_MOD_COLUMN));		
+		return (SimpleAdduct)model.getValueAt(convertRowIndexToModel(row), 
+				model.getColumnIndex(SimpleNeutralModificationTableModel.CHEM_MOD_COLUMN));		
 	}
 
 	public void setTableModelFromAdductList(Collection<Adduct> adducts) {

@@ -55,6 +55,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
+import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
@@ -62,6 +63,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataImputationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureFilter;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSetProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
+import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
@@ -91,6 +93,8 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
+import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisResultsDialog;
+import edu.umich.med.mrc2.datoolbox.gui.mzfreq.MzFrequencyAnalysisSetupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.plot.spectrum.DockableSpectumPlot;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DockableDataPlot;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
@@ -101,6 +105,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
@@ -115,6 +120,8 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibrarySearchTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.CalculateStatisticsTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.ImputeMissingDataTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyAnalysisTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.MzFrequencyType;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats.RemoveEmptyFeaturesTask;
 import edu.umich.med.mrc2.datoolbox.utils.ExperimentUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MetabolomicsProjectUtils;
@@ -156,6 +163,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private FeatureDataCleanupDialog featureDataCleanupDialog;
 	
 	private boolean cleanEmtyFeatures;
+	private MzFrequencyAnalysisSetupDialog mzFrequencyAnalysisSetupDialog;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("barChart", 16);
 	private static final Icon loadLibraryIcon = GuiUtils.getIcon("loadLibrary", 24);
@@ -482,10 +490,48 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				showFeatureSetCleanupDialog();
 			
 			if (command.equals(MainActionCommands.CLEANUP_FEATURE_DATA_COMMAND.getName()))
-				cleanUpFeatureSet();		
+				cleanUpFeatureSet();	
+			
+			if (command.equals(MainActionCommands.SET_UP_MZ_FREQUENCY_ANALYSIS_COMMAND.getName()))
+				setUpMSMSParentIonFrequencyAnalysis();
+					
+			if (command.equals(MainActionCommands.RUN_MZ_FREQUENCY_ANALYSIS_COMMAND.getName()))
+				runMSMSParentIonFrequencyAnalysis();
 		}	
 	}
 
+	private void setUpMSMSParentIonFrequencyAnalysis() {
+		
+		if(activeMsFeatureSet == null || activeMsFeatureSet.getFeatures().isEmpty() 
+				|| activeDataPipeline == null)
+			return;
+
+		mzFrequencyAnalysisSetupDialog = 
+				new MzFrequencyAnalysisSetupDialog(this, "Analyze MSMS parent ion frequency");
+		mzFrequencyAnalysisSetupDialog.setLocationRelativeTo(this.getContentPane());
+		mzFrequencyAnalysisSetupDialog.setVisible(true);
+	}
+
+	private void runMSMSParentIonFrequencyAnalysis() {
+
+		double massWindowSize = 
+				mzFrequencyAnalysisSetupDialog.getMZWindow();
+		MassErrorType massWindowType = 
+				mzFrequencyAnalysisSetupDialog.getMassErrorType();
+		if(massWindowType == null || massWindowSize == 0) {
+			MessageDialog.showErrorMsg("Invalid parameters!", mzFrequencyAnalysisSetupDialog);
+			return;
+		}
+		mzFrequencyAnalysisSetupDialog.dispose();
+		MzFrequencyAnalysisTask task = new MzFrequencyAnalysisTask(
+				activeMsFeatureSet.getFeatures(), 
+				MzFrequencyType.MS1_BASEPEAK_FREQUENCY,
+				massWindowSize, 
+				massWindowType);
+		task.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(task);		
+	}
+	
 	private void showFeatureSetCleanupDialog() {
 
 		if(activeMsFeatureSet == null || activeMsFeatureSet.getFeatures().isEmpty() 
@@ -1460,9 +1506,28 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			
 			if (e.getSource().getClass().equals(FindDuplicateNamesTask.class))
 				finalizeDuplicateNameSearch((FindDuplicateNamesTask) e.getSource());			
+		
+			if (e.getSource().getClass().equals(MzFrequencyAnalysisTask.class))
+				finalizeMzFrequencyAnalysisTask((MzFrequencyAnalysisTask)e.getSource());	
 		}
-		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR)
+		if (e.getStatus() == TaskStatus.CANCELED || e.getStatus() == TaskStatus.ERROR) {
+			MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
 			MainWindow.hideProgressDialog();
+		}
+	}
+	
+	private void finalizeMzFrequencyAnalysisTask(MzFrequencyAnalysisTask task) {
+	
+		Collection<MzFrequencyObject>mzFrequencyObjects = task.getMzFrequencyObjects();
+		String binningParameter = 
+				MRC2ToolBoxConfiguration.getPpmFormat().format(task.getMassWindowSize()) 
+				+ " " + task.getMassWindowType().name();
+		
+		MzFrequencyAnalysisResultsDialog resultsDialog = 
+				new MzFrequencyAnalysisResultsDialog(
+						this, mzFrequencyObjects, binningParameter);
+		resultsDialog.setLocationRelativeTo(this.getContentPane());
+		resultsDialog.setVisible(true);
 	}
 
 	private void finalizeDuplicateNameSearch(FindDuplicateNamesTask task) {

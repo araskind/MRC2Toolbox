@@ -132,13 +132,13 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 		this.addSeparator();
 
 		createNewCollectionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.CREATE_NEW_MSMS_FEATURE_COLLECTION_FROM_SELECTED.getName(), listener,
-				MainActionCommands.CREATE_NEW_MSMS_FEATURE_COLLECTION_FROM_SELECTED.getName());
+				MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName(), listener,
+				MainActionCommands.CREATE_NEW_FEATURE_COLLECTION_FROM_SELECTED.getName());
 		createNewCollectionMenuItem.setIcon(createNewCollectionIcon);
 
 		addToExistingCollectionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.ADD_SELECTED_TO_EXISTING_MSMS_FEATURE_COLLECTION.getName(), listener,
-				MainActionCommands.ADD_SELECTED_TO_EXISTING_MSMS_FEATURE_COLLECTION.getName());
+				MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName(), listener,
+				MainActionCommands.ADD_SELECTED_TO_EXISTING_FEATURE_COLLECTION.getName());
 		addToExistingCollectionMenuItem.setIcon(addToExistingCollectionIcon);
 		
 		removeFromActiveCollectionMenuItem = GuiUtils.addMenuItem(this,

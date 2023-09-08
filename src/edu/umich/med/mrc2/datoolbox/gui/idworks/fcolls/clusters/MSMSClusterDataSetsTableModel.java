@@ -72,7 +72,7 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MSMSClusterDataSet dataSet : msmsClusterDataSetCollections) {
 
-			if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null) {
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 				
 				if(!MSMSClusterDataSetManager.getEditableMSMSClusterDataSets().contains(dataSet)
 						&& MSMSClusterDataSetManager.getMSMSClusterDataSetSize(dataSet) == 0) {
@@ -80,7 +80,7 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 				}
 			}
 			else{
-				if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment().
+				if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment().
 							getMsmsClusterDataSets().contains(dataSet) && dataSet.getClusters().size() == 0)
 					continue;
 			}

@@ -140,7 +140,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 		edited.setDescription(msFeatureCollectionEditorDialog.getFeatureCollectionDescription());
 		edited.setLastModified(new Date());
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			saveFeatureCollectionChangesToDatabase(edited);
 		else
 			saveFeatureCollectionChangesToProject(edited);
@@ -214,7 +214,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 		if(msFeatureCollectionEditorDialog.getFeaturesToAdd() != null)
 			newCollection.addFeatures(msFeatureCollectionEditorDialog.getFeaturesToAdd());
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			createNewFeatureCollectionInDatabase(newCollection);
 		else
 			createNewFeatureCollectionInProject(newCollection);
@@ -223,7 +223,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	private void createNewFeatureCollectionInProject(MsFeatureInfoBundleCollection newCollection) {
 		
 		RawDataAnalysisExperiment project = 
-				MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();		
+				MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();		
 		project.addMsFeatureInfoBundleCollection(newCollection);
 		
 		if(msFeatureCollectionEditorDialog.loadCollectionIntoWorkBench()) {
@@ -312,7 +312,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 			return;
 		}
 		
-		if(MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment() == null)
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null)
 			deleteFeatureCollectionFromDatabase(selected);
 		else
 			deleteFeatureCollectionFromProject(selected);
@@ -320,7 +320,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	
 	private void deleteFeatureCollectionFromProject(MsFeatureInfoBundleCollection selected) {
 
-		RawDataAnalysisExperiment project = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();	
+		RawDataAnalysisExperiment project = MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();	
 		if(!project.getEditableMsFeatureInfoBundleCollections().contains(selected)) {
 			MessageDialog.showWarningMsg("Collection \"" + selected.getName() + 
 					"\" is locked and can not be deleted.", this.getContentPane());
@@ -406,7 +406,7 @@ public class DockableFeatureCollectionsManager extends DefaultSingleCDockable im
 	
 	public void loadCollectionsForActiveProject() {
 		
-		RawDataAnalysisExperiment project = MRC2ToolBoxCore.getActiveRawDataAnalysisExperiment();
+		RawDataAnalysisExperiment project = MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment();
 		if(project == null)
 			return;
 		

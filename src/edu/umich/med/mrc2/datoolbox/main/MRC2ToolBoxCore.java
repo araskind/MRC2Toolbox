@@ -91,7 +91,7 @@ public final class MRC2ToolBoxCore {
 	private static MainWindow mainWindow;
 	private static TaskControllerImpl taskController;
 	private static DataAnalysisProject currentExperiment;
-	private static RawDataAnalysisExperiment activeRawDataAnalysisExperiment;
+	private static RawDataAnalysisExperiment activeOfflineRawDataAnalysisExperiment;
 	private static Collection<CompoundLibrary>activeMsLibraries;
 	private static RenjinScriptEngine rScriptEngine;
 
@@ -411,12 +411,12 @@ public final class MRC2ToolBoxCore {
 		msmsLibraryCache.clear();
 	}
 
-	public static RawDataAnalysisExperiment getActiveRawDataAnalysisExperiment() {
-		return activeRawDataAnalysisExperiment;
+	public static RawDataAnalysisExperiment getActiveOfflineRawDataAnalysisExperiment() {
+		return activeOfflineRawDataAnalysisExperiment;
 	}
 
-	public static void setActiveRawDataAnalysisExperiment(
+	public static void setActiveOfflineRawDataAnalysisExperiment(
 			RawDataAnalysisExperiment newRawDataAnalysisExperiment) {
-		activeRawDataAnalysisExperiment = newRawDataAnalysisExperiment;
+		activeOfflineRawDataAnalysisExperiment = newRawDataAnalysisExperiment;
 	}
 }

@@ -34,7 +34,7 @@ import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 public class DockableSimpleModificationsTable extends DefaultSingleCDockable {
 
 	private static final Icon componentIcon = GuiUtils.getIcon("showKnowns", 16);
-	private SimpleNeutraModificationlTable simpleNeutraModificationlTable;
+	private SimpleNeutraModificationTable simpleNeutraModificationlTable;
 
 	public DockableSimpleModificationsTable(ModificationType modType) {
 
@@ -47,7 +47,7 @@ public class DockableSimpleModificationsTable extends DefaultSingleCDockable {
 		if (modType.equals(ModificationType.REPEAT))
 			setTitleText("Neutral adducts");
 		
-		simpleNeutraModificationlTable = new SimpleNeutraModificationlTable();
+		simpleNeutraModificationlTable = new SimpleNeutraModificationTable();
 		if(modType.equals(ModificationType.LOSS))
 			simpleNeutraModificationlTable.setTableModelFromAdductList(
 					AdductManager.getNeutralLosses());
@@ -60,7 +60,7 @@ public class DockableSimpleModificationsTable extends DefaultSingleCDockable {
 				BorderLayout.CENTER);
 	}
 
-	public SimpleNeutraModificationlTable getAdductTable() {
+	public SimpleNeutraModificationTable getAdductTable() {
 		return simpleNeutraModificationlTable;
 	}
 }
