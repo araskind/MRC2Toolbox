@@ -44,12 +44,12 @@ public enum MainActionCommands {
 	SHOW_IDTRACKER_LOGIN_COMMAND("Show MetIDTracker login"),		
 	IDTRACKER_LOGIN_COMMAND("Login to MetIDTracker"),
 	VERIFY_IDTRACKER_PASSWORD_COMMAND("Verify MetIDTracker password"),
-	CHANGE_IDTRACKER_PASSWORD_DIALOG_COMMAND("MetIDTracker password change dialog"),
-	CHANGE_IDTRACKER_PASSWORD_COMMAND("Change MetIDTracker password"),
+	CHANGE_IDTRACKER_PASSWORD_DIALOG_COMMAND("Change MetIDTracker password"),
+	CHANGE_IDTRACKER_PASSWORD_COMMAND("Save new MetIDTracker password"),
 	COPY_IDTRACKER_PASSWORD_COMMAND("Copy MetIDTracker password"),
 	IDTRACKER_LOGOUT_COMMAND("Log out from MetIDTracker"),
 	
-	SHOW_OPEN_IDTRACKER_EXPERIMENT_DIALOG_COMMAND("Show \"Open MetIDTracker experiment\" dialog"),
+	SHOW_OPEN_IDTRACKER_EXPERIMENT_DIALOG_COMMAND("Select MetIDTracker experiment to open"),
 	OPEN_IDTRACKER_EXPERIMENT_COMMAND("Open MetIDTracker experiment"),
 	CLOSE_EXPERIMENT_COMMAND("Close experiment"),
 	SELECT_EXPERIMENT_LOCATION_COMMAND("Select experiment location"),
@@ -76,19 +76,19 @@ public enum MainActionCommands {
 	DELETE_MSMS_FEATURE_EXTRACTION_METHOD_COMMAND("Delete selected MSMS feature extraction method"),
 	
 	//	User manager
-	SHOW_USER_MANAGER_COMMAND("Show User Manager"),
-	ADD_USER_DIALOG_COMMAND("Add User dialog"),
-	ADD_USER_COMMAND("Add User"),
-	EDIT_USER_DIALOG_COMMAND("Edit User dialog"),
-	EDIT_USER_COMMAND("Edit User"),
+	SHOW_USER_MANAGER_COMMAND("Show user manager"),
+	ADD_USER_DIALOG_COMMAND("Add user"),
+	ADD_USER_COMMAND("Save new user"),
+	EDIT_USER_DIALOG_COMMAND("Edit user"),
+	EDIT_USER_COMMAND("Save edited user data"),
 	DELETE_USER_COMMAND("Delete User"),
 	
 	//	Organization manager
 	SHOW_ORGANIZATION_MANAGER_COMMAND("Show Organization Manager"),
-	ADD_ORGANIZATION_DIALOG_COMMAND("Add Organization dialog"),
-	ADD_ORGANIZATION_COMMAND("Add Organization"),
-	EDIT_ORGANIZATION_DIALOG_COMMAND("Edit Organization dialog"),
-	EDIT_ORGANIZATION_COMMAND("Edit Organization"),
+	ADD_ORGANIZATION_DIALOG_COMMAND("Add Organization"),
+	ADD_ORGANIZATION_COMMAND("Save new organization"),
+	EDIT_ORGANIZATION_DIALOG_COMMAND("Edit organization"),
+	EDIT_ORGANIZATION_COMMAND("Save edited organization data"),
 	DELETE_ORGANIZATION_COMMAND("Delete Organization"),
 	SELECT_PI_COMMAND("Select principal investigator"),
 	SELECT_CONTACT_PERSON_COMMAND("Select contact person"),
@@ -173,7 +173,6 @@ public enum MainActionCommands {
 	LOOKUP_WORKLIST_DATA_IN_DATABASE("Add worklist information from database"),
 
 	//	Multi-file import
-	SHOW_DATA_PIPELINE_DEFINITION_DIALOG_COMMAND("Show data pipeline definition dialog"),
 	DEFINE_DATA_PIPELINE_COMMAND("Define data pipeline"),
 	SAVE_DATA_PIPELINE_COMMAND("Save data pipeline definition"),
 	SELECT_INPUT_LIBRARY_COMMAND("Select input library"),
@@ -185,8 +184,7 @@ public enum MainActionCommands {
 	SHOW_DATA_ACQUISITION_SELECTOR_COMMAND("Show data acquisition method selector"),
 	SELECT_DATA_ACQUISITION_METHOD_COMMAND("Select data acquisition method"),
 	SHOW_DATA_EXTRACTION_SELECTOR_COMMAND("Show data analysis method selector"),
-	SELECT_DATA_EXTRACTION_METHOD_COMMAND("Select data analysis method"),
-	
+	SELECT_DATA_EXTRACTION_METHOD_COMMAND("Select data analysis method"),	
 
 	//	Design
 	SHOW_DESIGN_TABLE_EDITOR_COMMAND("Show design editor"),
@@ -206,19 +204,19 @@ public enum MainActionCommands {
 	ADD_FACTOR_COMMAND("Add experimental factor"),
 	DELETE_FACTOR_COMMAND("Delete experimental factor"),
 	EDIT_FACTOR_COMMAND("Edit experimental factor"),
-	ADD_SAMPLE_COMMAND("Add sample"),
+	ADD_SAMPLE_COMMAND("Add sample to design"),
 	DELETE_SAMPLE_COMMAND("Delete sample"),
-	ADD_SAMPLE_DIALOG_COMMAND("Show \"Add sample\" dialog"),
-	EDIT_SAMPLE_DIALOG_COMMAND("Show \"Edit sample\" dialog"),
-	EDIT_SAMPLE_COMMAND("Edit sample"),
+	ADD_SAMPLE_DIALOG_COMMAND("Add sample"),
+	EDIT_SAMPLE_DIALOG_COMMAND("Edit sample"),
+	EDIT_SAMPLE_COMMAND("Save edited sample"),
 	SAVE_NEW_FACTOR_COMMAND("Save new factor"),
 	SAVE_EDITED_FACTOR_COMMAND("Save edited factor"),
 	SAVE_DESIGN_TO_LIMS_COMMAND("Save design to LIMS"),
 	SEND_DESIGN_TO_EXPERIMENT_COMMAND("Send design to experiment"),
 	MATCH_IMPORTED_TO_DESIGN_COMMAND("Match imported data to samples"),
 	ACCEPT_EXCEL_SAMPLE_MATCH_COMMAND("Accept sample assignment"),
-	SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND("Edit reference sample(s) dialog"),
-	EDIT_REFERENCE_SAMPLES_COMMAND("Edit reference sample(s)"),
+	SHOW_REFERENCE_SAMPLES_EDIT_DIALOG_COMMAND("Edit reference sample(s)"),
+	EDIT_REFERENCE_SAMPLES_COMMAND("Save changes to reference sample(s)"),
 	ADD_REFERENCE_SAMPLES("Add reference samples"),
 	REMOVE_REFERENCE_SAMPLES("Remove reference samples"),	
 	ENABLE_ALL_LEVELS_COMMAND("Enable all experimental groups"),
@@ -318,8 +316,8 @@ public enum MainActionCommands {
 	EDIT_CLUSTER_COMMAND("Edit cluster"),
 	CREATE_XIC_METHOD_COMMAND("Create XIC method for selected cluster"),
 	CREATE_XIC_METHOD_SET_COMMAND("Create Qual XIC methods for all clusters"),
-	SHOW_DATA_CLEANUP_DIALOG_COMMAND("Show data cleanup dialog"),
-	CLEANUP_FEATURE_DATA_COMMAND("Cleanup feature data"),
+	SHOW_DATA_CLEANUP_DIALOG_COMMAND("Cleanup feature data"),
+	CLEANUP_FEATURE_DATA_COMMAND("Run feature data cleanup"),
 
 	// Correlations
 	SHOW_CORRELATIONS_ANALYSIS_SETUP_COMMAND("Correlation analysis setup"),
@@ -385,7 +383,7 @@ public enum MainActionCommands {
 	COPY_LOOKUP_FEATURES_TO_CLIPBOARD_COMMAND("Copy lookup features toclipboard"),
 
 	// Data integration
-	DATA_INTEGRATION_DIALOG_COMMAND("Show data integration setup dialog"),
+	DATA_INTEGRATION_DIALOG_COMMAND("Data integration setup"),
 	COLLECT_IDENTIFIED_CPD_COMMAND("Collect data for identified compounds"),
 	CLEAR_IDENTIFIED_CPD_COMMAND("Clear data for identified compounds"),
 	DELETE_INTEGRATION_SET_COMMAND("Delete data integration set"),
@@ -419,7 +417,7 @@ public enum MainActionCommands {
 	SHOW_FEATURES_ASSIGNED_TO_CLUSTERS_COMMAND(	"Show features assigned to clusters"),
 	SHOW_FEATURES_NOT_ASSIGNED_TO_CLUSTERS_COMMAND(	
 			"Show features NOT assigned to clusters or assigned to single-feature clusters"),
-	SHOW_IMPUTE_DIALOG_COMMAND(	"Show data imputation dialog"),
+	SHOW_IMPUTE_DIALOG_COMMAND(	"Data imputation setup"),
 	SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND("Library search setup"),
 	SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND("Databse search setup"),
 	SEARCH_FEATURES_AGAINST_LIBRARIES_COMMAND("Search features against libraries"),
@@ -440,7 +438,7 @@ public enum MainActionCommands {
 	
 	//	MoTrPAC panel commands
 	SHOW_MOTRPAC_METADATA_REFERENCE_COMMAND("Show MoTrpPAC metadata reference"),
-	SHOW_MOTRPAC_REPORT_UPLOAD_DIALOG_COMMAND("Show MoTrpPAC report upload dialog"),
+	SHOW_MOTRPAC_REPORT_UPLOAD_DIALOG_COMMAND("MoTrpPAC report upload setup"),
 	UPLOAD_MOTRPAC_REPORT_COMMAND("Upload MoTrpPAC report"),
 	EDIT_MOTRPAC_REPORT_METADATA_COMMAND("Edit MoTrpPAC report metadata"),
 	SAVE_MOTRPAC_REPORT_METADATA_COMMAND("Save MoTrpPAC report metadata"),
@@ -461,25 +459,25 @@ public enum MainActionCommands {
 	CREATE_MANIFEST_FOR_BIC_UPLOAD_COMMAND("Create BIC upload manifest"),
 		
 	//	MoTrPAC study dialog
-	ADD_MOTRPAC_STUDY_DIALOG_COMMAND("Add MoTrPAC study dialog"),
-	ADD_MOTRPAC_STUDY_COMMAND("Add MoTrPAC study"),
-	EDIT_MOTRPAC_STUDY_DIALOG_COMMAND("Edit MoTrPAC study dialog"),
-	EDIT_MOTRPAC_STUDY_COMMAND("Edit MoTrPAC study"),
+	ADD_MOTRPAC_STUDY_DIALOG_COMMAND("Add MoTrPAC study"),
+	ADD_MOTRPAC_STUDY_COMMAND("Save new MoTrPAC study"),
+	EDIT_MOTRPAC_STUDY_DIALOG_COMMAND("Edit MoTrPAC study"),
+	EDIT_MOTRPAC_STUDY_COMMAND("Save edited MoTrPAC study"),
 	DELETE_MOTRPAC_STUDY_COMMAND("Delete MoTrPAC study"),
 	SAVE_MOTRPAC_STUDY_COMMAND("Save MoTrPAC study definition"),
 	
 	//	MoTrPAC assay manager
 	ADD_MOTRPAC_ASSAY_DIALOG_COMMAND("Add MoTrPAC assay dialog"),
-	ADD_MOTRPAC_ASSAY_COMMAND("Add MoTrPAC assay"),
-	EDIT_MOTRPAC_ASSAY_DIALOG_COMMAND("Edit MoTrPAC assay dialog"),
-	EDIT_MOTRPAC_ASSAY_COMMAND("Edit MoTrPAC assay"),
+	ADD_MOTRPAC_ASSAY_COMMAND("Save new MoTrPAC assay"),
+	EDIT_MOTRPAC_ASSAY_DIALOG_COMMAND("Edit MoTrPAC assay"),
+	EDIT_MOTRPAC_ASSAY_COMMAND("Save edited MoTrPAC assay"),
 	DELETE_MOTRPAC_ASSAY_COMMAND("Delete MoTrPAC assay"),
 	
 	//	Tisue codes manager
-	ADD_TISSUE_CODE_DIALOG_COMMAND("Add tissue code dialog"),
-	ADD_TISSUE_CODE_COMMAND("Add tissue code"),
-	EDIT_TISSUE_CODE_DIALOG_COMMAND("Edit tissue code dialog"),
-	EDIT_TISSUE_CODE_COMMAND("Edit tissue code"),
+	ADD_TISSUE_CODE_DIALOG_COMMAND("Add tissue code"),
+	ADD_TISSUE_CODE_COMMAND("Add new tissue code"),
+	EDIT_TISSUE_CODE_DIALOG_COMMAND("Edit tissue code"),
+	EDIT_TISSUE_CODE_COMMAND("Save edited tissue code"),
 	DELETE_TISSUE_CODE_COMMAND("Delete tissue code"),
 	
 	//	Study assay editor
@@ -508,7 +506,7 @@ public enum MainActionCommands {
 	DELETE_FEATURE_SUBSET_COMMAND(	"Delete selected feature subset"),
 	REMOVE_SELECTED_FEATURES_FROM_SUBSET_COMMAND(	"Remove selected features from subset"),
 	EXPORT_FEATURE_SUBSET_COMMAND(	"Export selected feature subset as library"),
-	SHOW_FEATURE_EXPORT_DIALOG_COMMAND(	"Feature subset export dialog"),
+	SHOW_FEATURE_EXPORT_DIALOG_COMMAND(	"Feature subset export setup"),
 	FINISH_FEATURE_SUBSET_EDIT_COMMAND(	"Save changes to feature subset"),
 	LINK_FEATURE_SUBSET_COMMAND(	"Link feature subset"),
 	UNLINK_FEATURE_SUBSET_COMMAND(	"Unlink feature subset"),
@@ -517,7 +515,7 @@ public enum MainActionCommands {
 	SET_ACTIVE_FEATURE_SUBSET_COMMAND("Set as active feature subset"),
 
 	// Design subset commands
-	SHOW_DESIGN_SUBSET_DIALOG_COMMAND("Show design subset dialog"),
+	SHOW_DESIGN_SUBSET_DIALOG_COMMAND("Show design subset editor"),
 	VIEW_DESIGN_SUBSET_COMMAND("View design subset"),
 	NEW_DESIGN_SUBSET_COMMAND("Create new design subset"),
 	COPY_DESIGN_SUBSET_COMMAND("Copy selected design subset"),
@@ -530,7 +528,7 @@ public enum MainActionCommands {
 
 	// Adducts/modifications
 	SHOW_CHEM_MOD_EDITOR_COMMAND("Show chemical modifications editor"),
-	SHOW_ADDUCT_EXCHANGE_EDITOR_COMMAND(	"Show adduct exchange editor"),
+	SHOW_ADDUCT_EXCHANGE_EDITOR_COMMAND("Show adduct exchange editor"),
 	NEW_MODIFICATION_COMMAND("Add new modification"),
 	NEW_COMPOSITE_MODIFICATION_COMMAND("Add new composite modification"),
 	EDIT_MODIFICATION_COMMAND("Edit selected modification"),
@@ -548,12 +546,12 @@ public enum MainActionCommands {
 	VERIFY_MODIFICATION_SMILES_COMMAND("Verify modification structure from SMILES"),
 	
 	//	Composite modification editor
-	SELECT_CHARGE_CARRIER_DIALOG_COMMAND("Show \"Select charge carrier\" dialog"),
-	SELECT_CHARGE_CARRIER_COMMAND("Select charge carrier"),
-	ADD_NEUTRAL_LOSS_DIALOG_COMMAND("Show \"Add neutral loss\" dialog"),
-	ADD_NEUTRAL_LOSS_COMMAND("Add neutral loss"),
-	ADD_NEUTRAL_ADDUCT_DIALOG_COMMAND("Show \"Add neutral adduct\" dialog"),
-	ADD_NEUTRAL_ADDUCT_COMMAND("Add neutral adduct"),
+	SELECT_CHARGE_CARRIER_DIALOG_COMMAND("Select charge carrier"),
+	SELECT_CHARGE_CARRIER_COMMAND("Set selected charge carrier"),
+	ADD_NEUTRAL_LOSS_DIALOG_COMMAND("Add neutral loss"),
+	ADD_NEUTRAL_LOSS_COMMAND("Add selected neutral loss"),
+	ADD_NEUTRAL_ADDUCT_DIALOG_COMMAND("Add neutral adduct"),
+	ADD_NEUTRAL_ADDUCT_COMMAND("Add selected neutral adduct"),
 	REMOVE_SELECTED_ADDUCT_COMMAND("Remove selected adduct"),
 	
 	//	Binner adduct editor
@@ -582,7 +580,7 @@ public enum MainActionCommands {
 	CALC_DATASET_PCA_COMMAND(	"PCA on data set samples"),
 
 	//	Annotations
-	SHOW_OBJECT_ANNOTATION_DIALOG_COMMAND("Show annotation editor dialog"),
+	SHOW_OBJECT_ANNOTATION_DIALOG_COMMAND("Show annotation editor"),
 	ADD_OBJECT_ANNOTATION_COMMAND("Add new annotation"),
 	ADD_STRUCTURAL_ANNOTATION_COMMAND("Add new structural annotation"),
 	EDIT_OBJECT_ANNOTATION_COMMAND("Edit annotation"),
@@ -599,8 +597,8 @@ public enum MainActionCommands {
 	ATTACH_DOCUMENT_ANNOTATION_COMMAND("Attach document annotation"),
 
 	//	Document upload
-	ADD_DOCUMENT_DIALOG_COMMAND("Add document dialog"),
-	ADD_DOCUMENT_COMMAND("Add document"),
+	ADD_DOCUMENT_DIALOG_COMMAND("Add document"),
+	ADD_DOCUMENT_COMMAND("Add selected document"),
 	DELETE_DOCUMENT_COMMAND("Delete document"),
 
 	// Feature identification
@@ -682,8 +680,8 @@ public enum MainActionCommands {
 	IMPORT_LIBRARY_FEATURE_RT_COMMAND("Import library feature's RT from file"),
 
 	//	Compound database
-	SHOW_DATABASE_SEARCH_COMMAND("Show database search dialog"),
-	SHOW_DATABASE_BATCH_SEARCH_COMMAND("Show \"Batch compound database search\" dialog"),
+	SHOW_DATABASE_SEARCH_COMMAND("Database search setup"),
+	SHOW_DATABASE_BATCH_SEARCH_COMMAND("Batch compound database search setup"),
 	BATCH_SEARCH_COMPOUND_DATABASE_COMMAND("Batch search compound database"),
 	SEARCH_DATABASE_COMMAND("Search compound database"),
 	SEARCH_DATABASE_BY_MZ_ADDUCT_COMMAND("Search compound database using MZ/Adduct"),
@@ -735,19 +733,19 @@ public enum MainActionCommands {
 
 	//	Assay method manager
 	SHOW_ASSAY_METHOD_MANAGER_COMMAND("Show assay method manager"),
-	ADD_ASSAY_METHOD_DIALOG_COMMAND("Add assay method dialog"),
-	ADD_ASSAY_METHOD_COMMAND("Add assay method"),
-	EDIT_ASSAY_METHOD_DIALOG_COMMAND("Edit assay method dialog"),
-	EDIT_ASSAY_METHOD_COMMAND("Edit assay method"),
+	ADD_ASSAY_METHOD_DIALOG_COMMAND("Add assay method"),
+	ADD_ASSAY_METHOD_COMMAND("Save new assay method"),
+	EDIT_ASSAY_METHOD_DIALOG_COMMAND("Edit assay method"),
+	EDIT_ASSAY_METHOD_COMMAND("Save edited assay method"),
 	DELETE_ASSAY_METHOD_COMMAND("Delete assay method"),
 	SELECT_ASSAY_COMMAND("Select assay"),
 
 	//	Reference sample editor
 	SHOW_REFERENCE_SAMPLE_MANAGER_COMMAND("Show reference sample manager"),
-	ADD_REFERENCE_SAMPLE_DIALOG_COMMAND("Add reference sample dialog"),
-	ADD_REFERENCE_SAMPLE_COMMAND("Add reference sample"),
-	EDIT_REFERENCE_SAMPLE_DIALOG_COMMAND("Edit reference sample dialog"),
-	EDIT_REFERENCE_SAMPLE_COMMAND("Edit reference sample"),
+	ADD_REFERENCE_SAMPLE_DIALOG_COMMAND("Add reference sample"),
+	ADD_REFERENCE_SAMPLE_COMMAND("Save new reference sample"),
+	EDIT_REFERENCE_SAMPLE_DIALOG_COMMAND("Edit reference sample"),
+	EDIT_REFERENCE_SAMPLE_COMMAND("Save edited reference sample"),
 	DELETE_REFERENCE_SAMPLE_COMMAND("Delete reference sample"),
 
 	//	ID sample editor
@@ -773,19 +771,19 @@ public enum MainActionCommands {
 	DELETE_VENDOR_COMMAND("Delete vendor"),
 	
 	//	Acquisition method editor
-	ADD_ACQUISITION_METHOD_DIALOG_COMMAND("Add acquisition method dialog"),
-	ADD_ACQUISITION_METHOD_COMMAND("Add acquisition method"),
-	EDIT_ACQUISITION_METHOD_DIALOG_COMMAND("Edit acquisition method dialog"),
-	EDIT_ACQUISITION_METHOD_COMMAND("Edit acquisition method"),
+	ADD_ACQUISITION_METHOD_DIALOG_COMMAND("Add acquisition method"),
+	ADD_ACQUISITION_METHOD_COMMAND("Save new acquisition method"),
+	EDIT_ACQUISITION_METHOD_DIALOG_COMMAND("Edit acquisition method"),
+	EDIT_ACQUISITION_METHOD_COMMAND("Save edited acquisition method"),
 	DELETE_ACQUISITION_METHOD_COMMAND("Delete acquisition method"),
 	DOWNLOAD_ACQUISITION_METHOD_COMMAND("Download acquisition method"),
 	LINK_ACQUISITION_METHOD_TO_EXPERIMENT_COMMAND("Add data acquisition method to experiment"),
 	
 	//	Mobile phase editor
-	ADD_MOBILE_PHASE_DIALOG_COMMAND("Add mobile phase dialog"),
-	ADD_MOBILE_PHASE_COMMAND("Add mobile phase"),
-	EDIT_MOBILE_PHASE_DIALOG_COMMAND("Edit mobile phase dialog"),
-	EDIT_MOBILE_PHASE_COMMAND("Edit mobile phase"),
+	ADD_MOBILE_PHASE_DIALOG_COMMAND("Add mobile phase"),
+	ADD_MOBILE_PHASE_COMMAND("Save new mobile phase"),
+	EDIT_MOBILE_PHASE_DIALOG_COMMAND("Edit mobile phase"),
+	EDIT_MOBILE_PHASE_COMMAND("Save edited mobile phase"),
 	DELETE_MOBILE_PHASE_COMMAND("Delete mobile phase"),
 	
 	//	Gradient step editor
@@ -793,39 +791,39 @@ public enum MainActionCommands {
 	DELETE_GRADIENT_STEP_COMMAND("Delete gradient step"),
 
 	//	Instrument editor
-	ADD_INSTRUMENT_DIALOG_COMMAND("Add instrument dialog"),
-	ADD_INSTRUMENT_COMMAND("Add instrument"),
-	EDIT_INSTRUMENT_DIALOG_COMMAND("Edit instrument dialog"),
-	EDIT_INSTRUMENT_COMMAND("Edit instrument"),
+	ADD_INSTRUMENT_DIALOG_COMMAND("Add instrument"),
+	ADD_INSTRUMENT_COMMAND("Save new instrument"),
+	EDIT_INSTRUMENT_DIALOG_COMMAND("Edit instrument"),
+	EDIT_INSTRUMENT_COMMAND("Save edited instrument"),
 	DELETE_INSTRUMENT_COMMAND("Delete instrument"),
 	SELECT_INSTRUMENT_DIALOG_COMMAND("Show instrument selector"),
 	SELECT_INSTRUMENT_COMMAND("Select instrument"),
 
 	//	Data extraction method editor
-	ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND("Add data extraction method dialog"),
-	ADD_DATA_EXTRACTION_METHOD_FROM_DATABASE_DIALOG_COMMAND("Add data extraction method from database dialog"),
-	ADD_DATA_EXTRACTION_METHOD_FROM_DATABASE_COMMAND("Add data extraction method from database"),
-	ADD_DATA_EXTRACTION_METHOD_COMMAND("Add data extraction method"),
-	EDIT_DATA_EXTRACTION_METHOD_DIALOG_COMMAND("Edit data extraction method dialog"),
-	EDIT_DATA_EXTRACTION_METHOD_COMMAND("Edit data extraction method"),
+	ADD_DATA_EXTRACTION_METHOD_DIALOG_COMMAND("Add data extraction method"),
+	ADD_DATA_EXTRACTION_METHOD_COMMAND("Save new data extraction method"),
+	EDIT_DATA_EXTRACTION_METHOD_DIALOG_COMMAND("Edit data extraction method"),
+	EDIT_DATA_EXTRACTION_METHOD_COMMAND("Save edited data extraction method"),
 	DELETE_DATA_EXTRACTION_METHOD_COMMAND("Delete data extraction method"),
-	DOWNLOAD_DATA_EXTRACTION_METHOD_COMMAND("Download data extraction method"),
+	DOWNLOAD_DATA_EXTRACTION_METHOD_COMMAND("Download data extraction method"),	
+	ADD_DATA_EXTRACTION_METHOD_FROM_DATABASE_DIALOG_COMMAND("Add data extraction method from database"),
+	ADD_DATA_EXTRACTION_METHOD_FROM_DATABASE_COMMAND("Add selected data extraction method from database"),
 	LINK_DATA_EXTRACTION_METHOD_TO_ACQUISITION_COMMAND("Add data extraction method to acquisition method"),
 	SHOW_SOFTWARE_SELECTOR_COMMAND("Show software selector"),
 	SELECT_SOFTWARE_COMMAND("Select software"),
 
 	//	Chromatographic column manager
-	ADD_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND("Add chromatographic column dialog"),
-	ADD_CHROMATOGRAPHIC_COLUMN_COMMAND("Add chromatographic column"),
-	EDIT_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND("Edit chromatographic column dialog"),
-	EDIT_CHROMATOGRAPHIC_COLUMN_COMMAND("Edit chromatographic column"),
+	ADD_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND("Add chromatographic column"),
+	ADD_CHROMATOGRAPHIC_COLUMN_COMMAND("Save new chromatographic column"),
+	EDIT_CHROMATOGRAPHIC_COLUMN_DIALOG_COMMAND("Edit chromatographic column"),
+	EDIT_CHROMATOGRAPHIC_COLUMN_COMMAND("Save edited chromatographic column"),
 	DELETE_CHROMATOGRAPHIC_COLUMN_COMMAND("Delete chromatographic column"),
 
 	//	Sample prep manager
-	ADD_SAMPLE_PREP_DIALOG_COMMAND("Add sample preparation dialog"),
-	ADD_SAMPLE_PREP_COMMAND("Add sample preparation"),
-	EDIT_SAMPLE_PREP_DIALOG_COMMAND("Edit sample preparation dialog"),
-	EDIT_SAMPLE_PREP_COMMAND("Edit sample preparation"),
+	ADD_SAMPLE_PREP_DIALOG_COMMAND("Add sample preparation"),
+	ADD_SAMPLE_PREP_COMMAND("Save new sample preparation"),
+	EDIT_SAMPLE_PREP_DIALOG_COMMAND("Edit sample preparation"),
+	EDIT_SAMPLE_PREP_COMMAND("Save edited sample preparation"),
 	DELETE_SAMPLE_PREP_COMMAND("Delete sample preparation"),
 	SELECT_SAMPLE_PREP_FROM_DATABASE_COMMAND("Select existing sample prep"),
 	LOAD_SAMPLE_PREP_FROM_DATABASE_COMMAND("Load selected sample prep data"),
@@ -837,27 +835,27 @@ public enum MainActionCommands {
 	
 		
 	//	Add processing results
-	ADD_DATA_PROCESSING_RESULTS_DIALOG_COMMAND("Show \"Add data processing results\" dialog"),
-	ADD_DATA_PROCESSING_RESULTS_COMMAND("Add data processing results"),
+	ADD_DATA_PROCESSING_RESULTS_DIALOG_COMMAND("Add data processing results"),
+	ADD_DATA_PROCESSING_RESULTS_COMMAND("Add selected data processing results"),
 
 	//	SOP protocol manager
-	ADD_SOP_PROTOCOL_DIALOG_COMMAND("Add SOP protocol dialog"),
-	ADD_SOP_PROTOCOL_COMMAND("Add SOP protocol"),
-	EDIT_SOP_PROTOCOL_DIALOG_COMMAND("Edit SOP protocol dialog"),
-	EDIT_SOP_PROTOCOL_COMMAND("Edit SOP protocol"),
+	ADD_SOP_PROTOCOL_DIALOG_COMMAND("Add SOP protocol"),
+	ADD_SOP_PROTOCOL_COMMAND("Save new SOP protocol"),
+	EDIT_SOP_PROTOCOL_DIALOG_COMMAND("Edit SOP protocol"),
+	EDIT_SOP_PROTOCOL_COMMAND("Save edited SOP protocol"),
 	DELETE_SOP_PROTOCOL_COMMAND("Delete SOP protocol"),
 	DOWNLOAD_SOP_PROTOCOL_COMMAND("Download SOP protocol"),
 	
 	//	Date selector
-	SHOW_SELECT_DATE_DIALOG_COMMAND("Select date dialog"),
-	SELECT_DATE_COMMAND("Select date"),
+	SHOW_SELECT_DATE_DIALOG_COMMAND("Select date"),
+	SELECT_DATE_COMMAND("Set selected date"),
 
 	//	ID status manager
 	SHOW_ID_LEVEL_MANAGER_DIALOG_COMMAND("Show ID level manager"),
-	ADD_ID_LEVEL_DIALOG_COMMAND("Add ID level dialog"),
-	ADD_ID_LEVEL_COMMAND("Add ID level"),
-	EDIT_ID_LEVEL_DIALOG_COMMAND("Edit ID level dialog"),
-	EDIT_ID_LEVEL_COMMAND("Edit ID level"),
+	ADD_ID_LEVEL_DIALOG_COMMAND("Add ID level"),
+	ADD_ID_LEVEL_COMMAND("Save new ID level"),
+	EDIT_ID_LEVEL_DIALOG_COMMAND("Edit ID level"),
+	EDIT_ID_LEVEL_COMMAND("Save edited ID level"),
 	DELETE_ID_LEVEL_COMMAND("Delete ID level"),
 	
 	//	Reference MSMS library export/decoy
@@ -871,22 +869,22 @@ public enum MainActionCommands {
 	
 	//	ID follow-up step manager
 	SHOW_ID_FOLLOWUP_STEP_MANAGER_DIALOG_COMMAND("Show ID follow-up step manager"),
-	ADD_ID_FOLLOWUP_STEP_DIALOG_COMMAND("Add ID follow-up step dialog"),
-	ADD_ID_FOLLOWUP_STEP_COMMAND("Add ID follow-up step"),
-	EDIT_ID_FOLLOWUP_STEP_DIALOG_COMMAND("Edit ID follow-up step dialog"),
-	EDIT_ID_FOLLOWUP_STEP_COMMAND("Edit ID follow-up step"),
+	ADD_ID_FOLLOWUP_STEP_DIALOG_COMMAND("Add new ID follow-up step"),
+	ADD_ID_FOLLOWUP_STEP_COMMAND("Save new ID follow-up step"),
+	EDIT_ID_FOLLOWUP_STEP_DIALOG_COMMAND("Edit ID follow-up step"),
+	EDIT_ID_FOLLOWUP_STEP_COMMAND("Save edited ID follow-up step"),
 	DELETE_ID_FOLLOWUP_STEP_COMMAND("Delete ID follow-up step"),
-	ASSIGN_ID_FOLLOWUP_STEPS_TO_FEATURE_DIALOG_COMMAND("Assign follow-up steps to feature"),
+	ASSIGN_ID_FOLLOWUP_STEPS_TO_FEATURE_DIALOG_COMMAND("Assign ID follow-up steps"),
 	SAVE_ID_FOLLOWUP_STEP_ASSIGNMENT_COMMAND("Save ID follow-up step assignment"),
 	
 	//	Standard feature annotation manager
 	SHOW_STANDARD_FEATURE_ANNOTATION_MANAGER_DIALOG_COMMAND("Show standard feature annotation manager"),
-	ADD_STANDARD_FEATURE_ANNOTATION_DIALOG_COMMAND("Add standard feature annotation dialog"),
-	ADD_STANDARD_FEATURE_ANNOTATION_COMMAND("Add standard feature annotation"),
-	EDIT_STANDARD_FEATURE_ANNOTATION_DIALOG_COMMAND("Edit standard feature annotation dialog"),
-	EDIT_STANDARD_FEATURE_ANNOTATION_COMMAND("Edit standard feature annotation"),
+	ADD_STANDARD_FEATURE_ANNOTATION_DIALOG_COMMAND("Add new standard feature annotation"),
+	ADD_STANDARD_FEATURE_ANNOTATION_COMMAND("Save new standard feature annotation"),
+	EDIT_STANDARD_FEATURE_ANNOTATION_DIALOG_COMMAND("Edit standard feature annotation"),
+	EDIT_STANDARD_FEATURE_ANNOTATION_COMMAND("Save edited standard feature annotation"),
 	DELETE_STANDARD_FEATURE_ANNOTATION_COMMAND("Delete standard feature annotation"),
-	ASSIGN_STANDARD_FEATURE_ANNOTATIONS_TO_FEATURE_DIALOG_COMMAND("Assign standard feature annotations to feature"),
+	ASSIGN_STANDARD_FEATURE_ANNOTATIONS_TO_FEATURE_DIALOG_COMMAND("Assign standard feature annotations"),
 	SAVE_STANDARD_FEATURE_ANNOTATION_ASSIGNMENT_COMMAND("Save standard feature annotation assignment"),
 	
 	//	MetIDTracker data explorer
@@ -906,8 +904,8 @@ public enum MainActionCommands {
 	XIC_FOR_FEATURE_COMMAND("Extract XIC for feature"),
 	
 	//	User selector
-	SELECT_USER_DIALOG_COMMAND("Show uselr selector dialog"),
-	SELECT_USER_COMMAND("Select user"),
+	SELECT_USER_DIALOG_COMMAND("Select user"),
+	SELECT_USER_COMMAND("Set selected user"),
 
 	//	Compound identification review commands
 	ACCEPT_COMPOUND_IDENTIFICATION("Accept compound identification results"),
@@ -972,10 +970,10 @@ public enum MainActionCommands {
 	FETCH_TAUTOMER_DATA_FOR_CURATION("Fetch tautomer data for curation"),
 	
 	//	Synonym editor
-	ADD_SYNONYM_DIALOG_COMMAND("Add synonym dialog"),
-	ADD_SYNONYM_COMMAND("Add synonym"),
-	EDIT_SYNONYM_DIALOG_COMMAND("Edit synonym dialog"),
-	EDIT_SYNONYM_COMMAND("Edit synonym"),
+	ADD_SYNONYM_DIALOG_COMMAND("Add synonym"),
+	ADD_SYNONYM_COMMAND("Save new synonym"),
+	EDIT_SYNONYM_DIALOG_COMMAND("Edit synonym"),
+	EDIT_SYNONYM_COMMAND("Save edited synonym"),
 	DELETE_SYNONYM_COMMAND("Delete synonym"),
 
 	//	DA method selector / reference MS1 import dialog
@@ -1110,13 +1108,13 @@ public enum MainActionCommands {
 	PARAGRAPH_EDITOR_COMMAND("Show paragraph style editor"),
 
 	//	Taxonomy select dialog
-	SHOW_SELECT_SPECIES_DIALOG_COMMAND("Show \"Select species\" dialog"),
-	SELECT_SPECIES_COMMAND("Select species"),
+	SHOW_SELECT_SPECIES_DIALOG_COMMAND("Select species"),
+	SELECT_SPECIES_COMMAND("Set selected species"),
 	SEARCH_SPECIES_COMMAND("Search taxonomy database"),
 
 	//	Sample type select dialog
-	SHOW_SELECT_SAMPLE_TYPE_DIALOG_COMMAND("Show \"Select sample type\" dialog"),
-	SELECT_SAMPLE_TYPE_COMMAND("Select sample type"),
+	SHOW_SELECT_SAMPLE_TYPE_DIALOG_COMMAND("Select sample type"),
+	SELECT_SAMPLE_TYPE_COMMAND("Set selected sample type"),
 	SEARCH_SAMPLE_TYPES_COMMAND("Search sample types database"),
 	
 	//	MetIDTracker data upload wizard
@@ -1188,35 +1186,35 @@ public enum MainActionCommands {
 	REMOVE_SELECTED_FROM_ACTIVE_MSMS_FEATURE_COLLECTION("Remove selected features from active feature collection"),
 	
 	//	Compound database curator
-	SHOW_SIMPLE_REDUNDANT_COMPOUND_DATA_PULL_DIALOG("Simple redundant compouds pull dialog"),
+	SHOW_SIMPLE_REDUNDANT_COMPOUND_DATA_PULL_DIALOG("Simple redundant compouds pull setup"),
 	PULL_REDUNDANT_COMPOUNDS_FROM_DATABASE("Pull redundant compounds from the database"),
 	
 	//	Feature collections
 	SHOW_FEATURE_COLLECTION_MANAGER_DIALOG_COMMAND("Show feature collection/MSMS cluster data set manager"),
-	ADD_FEATURE_COLLECTION_DIALOG_COMMAND("\"Create new feature collection\" dialog"),
+	ADD_FEATURE_COLLECTION_DIALOG_COMMAND("New feature collection"),
 	ADD_FEATURE_COLLECTION_COMMAND("Create new empty feature collection"),
 	ADD_FEATURE_COLLECTION_WITH_FEATURES_COMMAND("Create new feature collection with selected features"),
 	ADD_FEATURES_TO_SELECTED_COLLECTION_COMMAND("Add features to selected collection"),
-	EDIT_FEATURE_COLLECTION_DIALOG_COMMAND("\"Edit selected feature collection\" dialog"),
-	EDIT_FEATURE_COLLECTION_COMMAND("Edit selected feature collection"),
+	EDIT_FEATURE_COLLECTION_DIALOG_COMMAND("Edit selected feature collection"),
+	EDIT_FEATURE_COLLECTION_COMMAND("Save edited feature collection"),
 	DELETE_FEATURE_COLLECTION_COMMAND("Delete selected feature collection"),
 	LOAD_FEATURE_COLLECTION_COMMAND("Load selected feature collection for analysis"),
 	
 	//	Feature lookup data sets
-	ADD_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND("\"Create new feature lookup data set\" dialog"),
-	ADD_FEATURE_LOOKUP_DATA_SET_COMMAND("Create new feature lookup data set"),
-	EDIT_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND("\"Edit selected feature lookup data set\" dialog"),
-	EDIT_FEATURE_LOOKUP_DATA_SET_COMMAND("Edit selected feature lookup data set"),
+	ADD_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND("Create new feature lookup data set"),
+	ADD_FEATURE_LOOKUP_DATA_SET_COMMAND("Save new feature lookup data set"),
+	EDIT_FEATURE_LOOKUP_DATA_SET_DIALOG_COMMAND("Edit selected feature lookup data set"),
+	EDIT_FEATURE_LOOKUP_DATA_SET_COMMAND("Save edited feature lookup data set"),
 	DELETE_FEATURE_LOOKUP_DATA_SET_COMMAND("Delete selected feature lookup data set"),
 	
 	//	MSMS cluster data sets
 	SHOW_MSMS_CLUSTER_DATASET_MANAGER_DIALOG_COMMAND("Show MSMS cluster data set manager"),
-	ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("\"Save new MSMS cluster data set to database\" dialog"),
+	ADD_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("Send new MSMS cluster data set to database"),
 	ADD_MSMS_CLUSTER_DATASET_COMMAND("Save new MSMS cluster data set to database"),
 	//	ADD_MSMS_CLUSTER_DATASET_WITH_CLUSTERS_COMMAND("Create new MSMS cluster data set with selected clusters"),
 	ADD_MSMS_CLUSTERS_TO_SELECTED_DATASET_COMMAND("Add clusters to selected MSMS cluster data set"),
-	EDIT_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("\"Edit selected MSMS cluster data set\" dialog"),
-	EDIT_MSMS_CLUSTER_DATASET_COMMAND("Edit selected MSMS cluster data set"),
+	EDIT_MSMS_CLUSTER_DATASET_DIALOG_COMMAND("Edit selected MSMS cluster data set"),
+	EDIT_MSMS_CLUSTER_DATASET_COMMAND("Save edited MSMS cluster data set"),
 	DELETE_MSMS_CLUSTER_DATASET_COMMAND("Delete selected MSMS cluster data set"),
 	LOAD_MSMS_CLUSTER_DATASET_COMMAND("Load selected MSMS cluster data set for analysis"),
 	REFRESH_FEATURE_AND_CLUSTER_COLLECTIONS_COMMAND("Refresh feature and MSMS cluster collection data"),
@@ -1255,8 +1253,8 @@ public enum MainActionCommands {
 	EXPORT_SELECTED_MULTIPLEX_FOR_FBF_COMMAND("Export selected compound multiplex for \"Find by Formula\""),
 	EXPORT_SELECTED_MULTIPLEX_FOR_PCDL_IMPORT_COMMAND("Export selected compound multiplex for import into PCDL library"),
 	
-	SETUP_COMPOUND_PROPERTIES_SEARCH_COMMAND("Show \"Search compounds by properties\" dialog"),
-	SEARCH_COMPOUND_PROPERTIES_COMMAND("Search compounds by properties"),
+	SETUP_COMPOUND_PROPERTIES_SEARCH_COMMAND("Search compounds by properties"),
+	SEARCH_COMPOUND_PROPERTIES_COMMAND("Run compound search by properties"),
 	
 	EDIT_SELECTED_FIELD_COMMAND("Edit selected field"),
 	SAVE_CHANGES_COMMAND("Save changes"),

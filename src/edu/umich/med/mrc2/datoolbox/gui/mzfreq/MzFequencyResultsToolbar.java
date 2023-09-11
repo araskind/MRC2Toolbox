@@ -83,14 +83,14 @@ public class MzFequencyResultsToolbar extends CommonToolbar {
 
 			assignIdFollowUpStepsButton = GuiUtils.addButton(
 					this, null, idFollowupStepManagerIcon, commandListener,
-					MainActionCommands.ADD_ID_FOLLOWUP_STEP_DIALOG_COMMAND.getName(),
-					MainActionCommands.ADD_ID_FOLLOWUP_STEP_DIALOG_COMMAND.getName(),
+					MainActionCommands.ASSIGN_ID_FOLLOWUP_STEPS_TO_FEATURE_DIALOG_COMMAND.getName(),
+					MainActionCommands.ASSIGN_ID_FOLLOWUP_STEPS_TO_FEATURE_DIALOG_COMMAND.getName(),
 					buttonDimension);
 
 			assignStandardAnnotationButton = GuiUtils.addButton(
 					this, null, standardFeatureAnnotationManagerIcon, commandListener,
-					MainActionCommands.ADD_STANDARD_FEATURE_ANNOTATION_DIALOG_COMMAND.getName(),
-					MainActionCommands.ADD_STANDARD_FEATURE_ANNOTATION_DIALOG_COMMAND.getName(),
+					MainActionCommands.ASSIGN_STANDARD_FEATURE_ANNOTATIONS_TO_FEATURE_DIALOG_COMMAND.getName(),
+					MainActionCommands.ASSIGN_STANDARD_FEATURE_ANNOTATIONS_TO_FEATURE_DIALOG_COMMAND.getName(),
 					buttonDimension);
 		}
 	} 

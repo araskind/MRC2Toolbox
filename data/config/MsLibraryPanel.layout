@@ -101,18 +101,18 @@
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213797663" orientation="VERTICAL" divider="0.4684959349593496">
 											<node nodeId="1637181838881" orientation="HORIZONTAL" divider="0.7894736842105263">
-												<leaf id="0" nodeId="1600213797667">
+												<leaf id="1" nodeId="1600213797667">
 													<placeholders>
 														<placeholder>dock.single.MsLibraryPanelDockableLibraryFeatureTable</placeholder>
 													</placeholders>
 												</leaf>
-												<leaf id="1" nodeId="1600213797669">
+												<leaf id="2" nodeId="1600213797669">
 													<placeholders>
 														<placeholder>dock.single.MsLibraryPanelDockableMolStructurePanel</placeholder>
 													</placeholders>
 												</leaf>
 											</node>
-											<leaf id="2" nodeId="1600213797671">
+											<leaf id="0" nodeId="1600213797671">
 												<placeholders>
 													<placeholder>dock.single.DockableLibraryFeatureEditorPanel</placeholder>
 												</placeholders>
@@ -128,6 +128,16 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
+									<layout factory="predefined" placeholder="dock.single.DockableLibraryFeatureEditorPanel">
+										<replacement id="dockablesingle DockableLibraryFeatureEditorPanel"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>DockableLibraryFeatureEditorPanel</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="predefined" placeholder="dock.single.MsLibraryPanelDockableLibraryFeatureTable">
 										<replacement id="dockablesingle MsLibraryPanelDockableLibraryFeatureTable"/>
 										<delegate id="delegate_ccontrol backup factory id">
@@ -142,16 +152,6 @@
 										<replacement id="dockablesingle MsLibraryPanelDockableMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
 											<id>MsLibraryPanelDockableMolStructurePanel</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.DockableLibraryFeatureEditorPanel">
-										<replacement id="dockablesingle DockableLibraryFeatureEditorPanel"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>DockableLibraryFeatureEditorPanel</id>
 											<area/>
 										</delegate>
 									</layout>

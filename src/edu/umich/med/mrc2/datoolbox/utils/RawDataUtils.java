@@ -315,7 +315,7 @@ public class RawDataUtils {
 		if(MZMLFile.class.isAssignableFrom(source.getClass())) {
 			SampleListType sl = 
 					((MZMLRunInfo)((MZMLFile)data.getSource()).getRunInfo()).getParsedInfo().getSampleList();
-			if(!sl.getSample().isEmpty()) {
+			if(sl != null && sl.getSample() != null && !sl.getSample().isEmpty()) {
 				
 				for (CVParamType cvParam : sl.getSample().get(0).getCvParam()){
 					

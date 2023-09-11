@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
@@ -199,7 +200,40 @@ public class StandardAnnotationUtils {
 		}
 		ps.close();
 	}
+	
+	public static void setStandardFeatureAnnotationsForMSMSFeature(
+			MsFeature msf, Collection<StandardFeatureAnnotation>annotations) throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();
+		setStandardFeatureAnnotationsForMSMSFeature(msf, annotations, conn);
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void setStandardFeatureAnnotationsForMSMSFeature(
+			MsFeature msf, Collection<StandardFeatureAnnotation>annotations, Connection conn) throws Exception {
+
+		String query =
+				"DELETE FROM MSMS_FEATURE_STANDARD_ANNOTATIONS " +
+				"WHERE MSMS_PARENT_FEATURE_ID = ? ";
+		PreparedStatement ps = conn.prepareStatement(query);
+		ps.setString(1, msf.getId());
+		ps.executeUpdate();
 		
+		if(!annotations.isEmpty()) {
+			
+			query =
+					"INSERT INTO MSMS_FEATURE_STANDARD_ANNOTATIONS ("
+					+ "MSMS_PARENT_FEATURE_ID, STANDARD_ANNOTATION_ID) VALUES(?, ?)";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, msf.getId());
+			for(StandardFeatureAnnotation annotation : annotations) {
+				ps.setString(2, annotation.getId());
+				ps.addBatch();
+			}
+			ps.executeBatch();
+		}
+		ps.close();
+	}
 	public static void attachStandardFeatureAnnotationsToMS1Feature(
 			MSFeatureInfoBundle fib) throws Exception {
 
