@@ -64,6 +64,7 @@ import bibliothek.gui.dock.action.actions.SimpleButtonAction;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.IDTrackerDataExportParameters;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MinimalMSOneFeature;
@@ -77,6 +78,7 @@ import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.data.NISTPepSearchParameterObject;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ReferenceMsMsLibraryMatch;
+import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSubsetByIdentification;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSMSComponentTableFields;
@@ -2227,6 +2229,66 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}
 	}
 	
+	public void setIDFollowUpStepsForMultipleFeatures(
+			Collection<MSFeatureIdentificationFollowupStep>followUpSteps, 
+			int msLevel,
+			Collection<MsFeature>msFeatures,
+			boolean updateSelectedOnly) {
+
+		Collection<MSFeatureInfoBundle>featureBundles = null;
+		if(msLevel == 1) 
+			featureBundles = getMsFeatureBundlesForFeatures(msFeatures, 1);
+		
+		if(msLevel == 2) 
+			featureBundles = getMsFeatureBundlesForFeatures(msFeatures, 2);
+
+		for(MSFeatureInfoBundle fib : featureBundles) {
+			
+			fib.getIdFollowupSteps().clear();
+			fib.getIdFollowupSteps().addAll(followUpSteps);
+			
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
+				
+				if(msLevel == 1) {
+					
+					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
+						try {
+							IdFollowupUtils.setIdFollowupStepsForMS1Feature(fib);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}					
+				}
+				if(msLevel == 2) {
+					
+					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
+						try {
+							IdFollowupUtils.setIdFollowupStepsForMSMSFeature(fib);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		if(msLevel == 1) {
+			
+			if(updateSelectedOnly)
+				updateSelectedMSFeatures();
+			else
+				reloadCompleteActiveMSOneFeatureSet();	//	TODO when MS1 features are handled
+		}
+		if(msLevel == 2) {
+			
+			if(updateSelectedOnly)
+				updateSelectedMSMSFeatures();
+			else
+				reloadActiveMSMSFeatureCollection();
+		}
+	}
+	
 	private void showFeatureStandardAnnotationManager() {
 		
 		if(msOneFeatureTable.getSelectedBundle() == null 
@@ -2286,6 +2348,94 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			standardFeatureAnnotationAssignmentDialog.dispose();
 			return;
 		}
+	}
+	
+	public void setStandardAnnotationsForMultipleFeatures(
+			Collection<StandardFeatureAnnotation>annotations, 
+			int msLevel,
+			Collection<MsFeature>msFeatures,
+			boolean updateSelectedOnly) {
+
+		Collection<MSFeatureInfoBundle>featureBundles = null;
+		if(msLevel == 1) 
+			featureBundles = getMsFeatureBundlesForFeatures(msFeatures, 1);
+		
+		if(msLevel == 2) 
+			featureBundles = getMsFeatureBundlesForFeatures(msFeatures, 2);
+
+		for(MSFeatureInfoBundle fib : featureBundles) {
+			
+			fib.getStandadAnnotations().clear();
+			fib.getStandadAnnotations().addAll(annotations);
+			
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
+				
+				if(msLevel == 1) {
+					
+					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
+						try {
+							StandardAnnotationUtils.setStandardFeatureAnnotationsForMS1Feature(fib);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+				if(msLevel == 2) {
+					
+					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
+						try {
+							StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(fib);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		if(msLevel == 1) {
+			
+			if(updateSelectedOnly)
+				updateSelectedMSFeatures();
+			else
+				reloadCompleteActiveMSOneFeatureSet();	//	TODO when MS1 features are handled
+		}
+		if(msLevel == 2) {
+			
+			if(updateSelectedOnly)
+				updateSelectedMSMSFeatures();
+			else
+				reloadActiveMSMSFeatureCollection();
+		}
+	}
+	
+	public Collection<MSFeatureInfoBundle>getMsFeatureBundlesForFeatures(
+			Collection<MsFeature>features, int msLevel) {
+		Collection<MSFeatureInfoBundle>bundles = new ArrayList<MSFeatureInfoBundle>();
+		if(msLevel == 1) {
+			
+			Collection<MSFeatureInfoBundle> allMSOneBundles = 
+					msOneFeatureTable.getBundles(TableRowSubset.ALL);					
+			if(allMSOneBundles.isEmpty())
+				return bundles;
+			
+			return allMSOneBundles.stream().
+					filter(b -> features.contains(b.getMsFeature())).
+					collect(Collectors.toList());
+		}
+		if(msLevel == 2) {
+			
+			Collection<MSFeatureInfoBundle> allMSMSBundles = 
+					msTwoFeatureTable.getBundles(TableRowSubset.ALL);					
+			if(allMSMSBundles.isEmpty())
+				return bundles;
+			
+			return allMSMSBundles.stream().
+					filter(b -> features.contains(b.getMsFeature())).
+					collect(Collectors.toList());
+		}
+		return bundles;
 	}
 		
 	public void createNewMsmsFeatureCollectionFromSelectedFeatures(

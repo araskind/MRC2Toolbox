@@ -58,6 +58,7 @@ import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
@@ -155,15 +156,9 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 			
 		for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
 			
-			if (command.equals(level.getName()) 
-					|| command.equals(MSFeatureIdentificationLevel.SET_PRIMARY + level.getName())) {
+			if (command.equals(level.getName())) {
 				
-				Collection<MsFeature>selectedFeatures = table.getMsFeaturesForSelectedLines();
-				if(!selectedFeatures.isEmpty()){
-					
-					((IDWorkbenchPanel)parentPanel).
-						setPrimaryIdLevelForMultipleFeatures(level, 2, selectedFeatures, true);
-				}
+				setPrimaryIdLevel(level);
 				break;
 			}
 		}	
@@ -214,6 +209,20 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 		
 	}
 	
+	private void setPrimaryIdLevel(MSFeatureIdentificationLevel level) {
+
+		if(parentPanel instanceof IDWorkbenchPanel) {
+			
+			UpdateMultipleFeatureMetadataTask task = 
+					new UpdateMultipleFeatureMetadataTask(
+							table.getMsFeaturesForSelectedLines(), level, null, null);
+			IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+					"Setting primary ID level for selected MSMS features ...", this, task);
+			idp.setLocationRelativeTo(this);
+			idp.setVisible(true);
+		}
+	}
+	
 	private void showIdFollowupStepDialog() {
 		
 		Collection<MsFeature>selectedFeatures = table.getMsFeaturesForSelectedLines();
@@ -233,7 +242,16 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 		if(fuSteps == null || fuSteps.isEmpty())
 			return;
 		
-		
+		if(parentPanel instanceof IDWorkbenchPanel) {
+			
+			UpdateMultipleFeatureMetadataTask task = 
+					new UpdateMultipleFeatureMetadataTask(
+							table.getMsFeaturesForSelectedLines(), null, null, fuSteps);
+			IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+					"Adding ID followup steps to selected MSMS features ...", this, task);
+			idp.setLocationRelativeTo(this);
+			idp.setVisible(true);
+		}		
 		followupStepAssignmentDialog.dispose();
 	}
 
@@ -257,7 +275,16 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 		if(annotations == null || annotations.isEmpty())
 			return;
 		
-		
+		if(parentPanel instanceof IDWorkbenchPanel) {
+			
+			UpdateMultipleFeatureMetadataTask task = 
+					new UpdateMultipleFeatureMetadataTask(
+							table.getMsFeaturesForSelectedLines(), null, annotations, null);
+			IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+					"Adding standard annotations to selected MSMS features ...", this, task);
+			idp.setLocationRelativeTo(this);
+			idp.setVisible(true);
+		}
 		standardFeatureAnnotationAssignmentDialog.dispose();
 	}
 	
@@ -266,49 +293,52 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 		private Collection<MsFeature>features;
 		private Collection<StandardFeatureAnnotation> annotations;
 		private MSFeatureIdentificationLevel idLevel;
+		private Collection<MSFeatureIdentificationFollowupStep> fuSteps;
 		
 		public UpdateMultipleFeatureMetadataTask(
 				Collection<MsFeature>features,
 				MSFeatureIdentificationLevel idLevel,
-				Collection<StandardFeatureAnnotation> annotations) {
+				Collection<StandardFeatureAnnotation> annotations,
+				Collection<MSFeatureIdentificationFollowupStep> fuSteps) {
 			super();
 			this.features = features;
 			this.idLevel = idLevel;
 			this.annotations = annotations;
+			this.fuSteps = fuSteps;
 		}
 	
 		@Override
 		public Void doInBackground() {
 			
-			((IDWorkbenchPanel)parentPanel).toggleTableListeners(false);
+			if(features == null || features.isEmpty())
+				return null;
 			
-//			if (command.equals(MainActionCommands.ADD_ID_FOLLOWUP_STEP_COMMAND.getName())) {
-//				
-//			}
+			((IDWorkbenchPanel)parentPanel).toggleTableListeners(false);
+
 			if (annotations != null && !annotations.isEmpty()) {
 				
+				((IDWorkbenchPanel)parentPanel).setStandardAnnotationsForMultipleFeatures(
+						annotations, 
+						2,
+						features,
+						false);
 			}
 			if(idLevel != null) {
 				
+				((IDWorkbenchPanel)parentPanel).setPrimaryIdLevelForMultipleFeatures(
+						idLevel, 
+						2,
+						features,
+						false);
 			}
-//        	if(idLevelCommand.startsWith(MSFeatureIdentificationLevel.SET_PRIMARY)) {
-//				try {
-//					setPrimaryIdLevelForMultipleSelectedFeatures(
-//							idLevelCommand.replace(MSFeatureIdentificationLevel.SET_PRIMARY, ""));
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//        	}
-//			else {
-//        		try {
-//					setIdLevelForIdentification(idLevelCommand);
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}  
-//			}    	
-			
+			if(fuSteps != null && !fuSteps.isEmpty()) {
+				
+				((IDWorkbenchPanel)parentPanel).setIDFollowUpStepsForMultipleFeatures(
+						fuSteps, 
+						2,
+						features,
+						false);
+			}   				
 			((IDWorkbenchPanel)parentPanel).toggleTableListeners(true);
 			
 			return null;
