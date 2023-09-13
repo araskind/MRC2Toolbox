@@ -272,6 +272,8 @@ public class SaveStoredRawDataAnalysisExperimentTask extends AbstractTask implem
 			collect(Collectors.toList());
 			
 		uniqueCompoundIds = idList.stream().
+				filter(i -> Objects.nonNull(i.getCompoundIdentity())).
+				filter(i -> Objects.nonNull(i.getCompoundIdentity().getPrimaryDatabaseId())).
 				map(i -> i.getCompoundIdentity().getPrimaryDatabaseId()).
 				collect(Collectors.toCollection(TreeSet::new));
 		

@@ -264,11 +264,10 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 
 	public String getPrimaryDatabaseId() {
 
-		String primaryDatabaseId = "";
 		if(primaryDatabase != null)
-			primaryDatabaseId = dbIdMap.get(primaryDatabase);
-
-		return primaryDatabaseId;
+			return dbIdMap.get(primaryDatabase);
+		else
+			return null;
 	}
 
 	@Override

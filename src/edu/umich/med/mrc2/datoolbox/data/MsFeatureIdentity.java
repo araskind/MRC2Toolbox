@@ -123,10 +123,6 @@ public class MsFeatureIdentity implements Serializable {
 	}
 
 	public String getPrimaryLinkLabel() {
-		
-		if(compoundIdentity == null)
-			return null;
-		
 		return compoundIdentity.getPrimaryDatabaseId();
 	}
 
@@ -351,7 +347,7 @@ public class MsFeatureIdentity implements Serializable {
 				new Element(MsFeatureIdentityFields.MSFID.name());
 		
 		msIdElement.setAttribute(MsFeatureIdentityFields.Id.name(), uniqueId);
-		if(compoundIdentity != null) 
+		if(compoundIdentity != null && compoundIdentity.getPrimaryDatabaseId() != null) 
 			msIdElement.setAttribute(MsFeatureIdentityFields.CID.name(), 
 					compoundIdentity.getPrimaryDatabaseId());
 		

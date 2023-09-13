@@ -31,6 +31,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.main.FeatureCollectionManager;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class FeatureCollectionsTableModel extends BasicTableModel {
 
@@ -70,14 +71,15 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsFeatureInfoBundleCollection collection : featureCollections) {
 			
-			if(!FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(collection)
+			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null
+					&& !FeatureCollectionManager.getEditableMsFeatureInfoBundleCollections().contains(collection)
 					&& FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(collection) == 0) {
 				continue;
 			}
 			Object[] obj = {
 				collection,
 				collection.getDescription(),
-				collection.getCollectionSize(), //  FeatureCollectionManager.getMsFeatureInfoBundleCollectionSize(collection),
+				collection.getCollectionSize(), 
 				collection.getOwner(),
 				collection.getDateCreated(),
 				collection.getLastModified(),

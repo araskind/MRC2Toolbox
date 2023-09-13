@@ -38,7 +38,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -47,6 +47,7 @@ import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.data.StandardFeatureAnnotation;
@@ -65,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedByPreferences, ActionListener{
+public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedByPreferences, ActionListener{
 	
 	/**
 	 * 
@@ -98,7 +99,6 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 		setIconImage(((ImageIcon) mzFrequencyIcon).getImage());
 		setSize(new Dimension(800, 800));
 		setPreferredSize(new Dimension(800, 800));
-		setModalityType(ModalityType.APPLICATION_MODAL);
 		setResizable(true);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
@@ -200,13 +200,35 @@ public class MzFrequencyAnalysisResultsDialog extends JDialog implements BackedB
 	}
 
 	private void createNewFeatureCollectionFromSelected() {
-		// TODO Auto-generated method stub
+
+		Collection<MsFeature>selectedFeatures = table.getMsFeaturesForSelectedLines();
+		if(selectedFeatures == null || selectedFeatures.isEmpty())
+			return;
 		
+		if(parentPanel instanceof IDWorkbenchPanel) {
+			
+			Collection<MSFeatureInfoBundle>bundles = 
+					((IDWorkbenchPanel)parentPanel).getMsFeatureBundlesForFeatures(
+								selectedFeatures, 2);
+			((IDWorkbenchPanel)parentPanel).
+					createNewMsmsFeatureCollectionFromSelectedFeatures(bundles);
+		}
 	}
 	
 	private void addSelectedToExistingFeatureCollection() {
-		// TODO Auto-generated method stub
+
+		Collection<MsFeature>selectedFeatures = table.getMsFeaturesForSelectedLines();
+		if(selectedFeatures == null || selectedFeatures.isEmpty())
+			return;
 		
+		if(parentPanel instanceof IDWorkbenchPanel) {
+			
+			Collection<MSFeatureInfoBundle>bundles = 
+					((IDWorkbenchPanel)parentPanel).getMsFeatureBundlesForFeatures(
+								selectedFeatures, 2);
+			((IDWorkbenchPanel)parentPanel).
+				addSelectedFeaturesToExistingMsMsFeatureCollection(bundles);
+		}
 	}
 	
 	private void setPrimaryIdLevel(MSFeatureIdentificationLevel level) {

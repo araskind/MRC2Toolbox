@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.stats;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
+import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureClusterComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.MzFrequencyObjectComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -49,7 +49,8 @@ public class MzFrequencyAnalysisTask extends AbstractTask {
 	private double massWindowSize;
 	private MassErrorType massWindowType;
 	private Collection<MsFeatureCluster>mzClusters = 
-			new HashSet<MsFeatureCluster>();
+			new TreeSet<MsFeatureCluster>(
+					new MsFeatureClusterComparator(SortProperty.MZ));
 	private Collection<MzFrequencyObject>mzFrequencyObjects = 
 			new TreeSet<MzFrequencyObject>(
 					new MzFrequencyObjectComparator(SortProperty.rangeMidpoint));
@@ -186,17 +187,14 @@ public class MzFrequencyAnalysisTask extends AbstractTask {
 		boolean assigned = false;	
 		for(MsFeature cf : featuresToProcessFiltered) {
 			
-			assigned = false;			
-			for(MsFeatureCluster cluster : mzClusters) {
+			assigned = false;
+			MsFeatureCluster match = mzClusters.stream().
+					filter(c -> c.matchesPrimaryFeatureOnMSMSParentIonMz(cf, dp, massWindowSize, massWindowType)).
+					findFirst().orElse(null);
 				
-				if(cluster.matchesPrimaryFeatureOnMSMSParentIonMz(cf, dp, massWindowSize, massWindowType)) {
-					
-					cluster.addFeature(cf, dp);
-					assigned = true;
-					break;
-				}
-			}
-			if(!assigned) {
+			if(match != null) {					
+				match.addFeature(cf, dp);
+			} else {
 				MsFeatureCluster newCluster = new MsFeatureCluster();
 				newCluster.addFeature(cf, dp);
 				mzClusters.add(newCluster);

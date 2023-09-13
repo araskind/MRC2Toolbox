@@ -54,10 +54,22 @@ public class CompoundIdentityComparator extends ObjectCompatrator<CompoundIdenti
 				return -result;
 
 		case ID:
-			result = o1.getPrimaryDatabase().getName().compareTo(o2.getPrimaryDatabase().getName());
-			if(result == 0)
-				result = o1.getPrimaryDatabaseId().compareTo(o2.getPrimaryDatabaseId());
-
+			result = 0;
+			if(o1.getPrimaryDatabase() != null && o2.getPrimaryDatabase() != null) {
+				
+				result = o1.getPrimaryDatabase().getName().compareTo(o2.getPrimaryDatabase().getName());
+				if(result == 0)
+					result = o1.getPrimaryDatabaseId().compareTo(o2.getPrimaryDatabaseId());
+			}
+			else if(o1.getPrimaryDatabase() == null && o2.getPrimaryDatabase() == null) {
+				result = 0;
+			}
+			else if(o1.getPrimaryDatabase() == null && o2.getPrimaryDatabase() != null) {
+				result = -1;
+			}
+			else if(o1.getPrimaryDatabase() != null && o2.getPrimaryDatabase() == null) {
+				result = 1;
+			}
 			if (direction == SortDirection.ASC)
 				return result;
 			else

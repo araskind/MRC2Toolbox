@@ -46,7 +46,26 @@ public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIden
 		switch (property) {
 
 		case Name:
-			result = o1.getCompoundIdentity().getCommonName().compareToIgnoreCase(o2.getCompoundIdentity().getCommonName());
+			result = 0;
+			if(o1.getCompoundIdentity() != null && o2.getCompoundIdentity() != null) {
+				result = o1.getCompoundIdentity().getCommonName().
+						compareToIgnoreCase(o2.getCompoundIdentity().getCommonName());
+			}
+			else if(o1.getCompoundIdentity() == null && o2.getCompoundIdentity() == null) {
+				result = 0;
+				if(o1.getIdentityName() != null && o2.getIdentityName() != null)
+					result = o1.getIdentityName().compareToIgnoreCase(o2.getIdentityName());
+			}
+			else if(o1.getCompoundIdentity() != null && o2.getCompoundIdentity() == null) {
+				result = 1;
+				if(o2.getIdentityName() != null)
+					result = o1.getCompoundIdentity().getCommonName().compareToIgnoreCase(o2.getIdentityName());
+			}
+			else if(o1.getCompoundIdentity() == null && o2.getCompoundIdentity() != null) {
+				result = -1;
+				if(o1.getIdentityName() != null)
+					result = o1.getIdentityName().compareToIgnoreCase(o2.getCompoundIdentity().getCommonName());
+			}
 
 			if (direction == SortDirection.ASC)
 				return result;
@@ -55,13 +74,17 @@ public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIden
 
 		case ID:
 			result = 0;
-			if(o1.getPrimaryLinkLabel() != null && o2.getPrimaryLinkLabel() != null)
+			
+			if(o1.getPrimaryLinkLabel() == null && o2.getPrimaryLinkLabel() == null)
+				result = 0;
+			
+			else if(o1.getPrimaryLinkLabel() != null && o2.getPrimaryLinkLabel() != null)
 				result = o1.getPrimaryLinkLabel().compareTo(o2.getPrimaryLinkLabel());
 			
-			if(o1.getPrimaryLinkLabel() != null && o2.getPrimaryLinkLabel() == null)
+			else if(o1.getPrimaryLinkLabel() != null && o2.getPrimaryLinkLabel() == null)
 				result = 1;
 			
-			if(o1.getPrimaryLinkLabel() == null && o2.getPrimaryLinkLabel() != null)
+			else if(o1.getPrimaryLinkLabel() == null && o2.getPrimaryLinkLabel() != null)
 				result = -1;
 
 			if (direction == SortDirection.ASC)

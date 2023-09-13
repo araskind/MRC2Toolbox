@@ -263,7 +263,12 @@ public class MSMSFeatureTable extends BasicTable {
 			for (int index = 0; index < modelData.size(); index++) {
 
 				Object[] data = modelData.get(index);
-				publish(data);
+				try {
+					publish(data);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Thread.yield();
 			}
 			return model;

@@ -50,9 +50,15 @@ public class MsFeatureIdentityFormat extends Format {
 			msfid = (MsFeatureIdentity)obj;
 
 			String text = "";
-			if(msfid.getCompoundIdentity() == null)
+			if(msfid.getCompoundIdentity() == null) {
+				
+				if (idField.equals(CompoundIdentityField.NAME) 
+						|| idField.equals(CompoundIdentityField.COMMON_NAME)) {
+					if(msfid.getIdentityName() != null)
+						text = msfid.getIdentityName();
+				}					
 				return toAppendTo.append(text);
-
+			}
 			if (idField.equals(CompoundIdentityField.DB_ID))
 				text = msfid.getCompoundIdentity().getPrimaryDatabaseId();
 

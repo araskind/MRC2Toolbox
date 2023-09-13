@@ -378,12 +378,10 @@ public class MassSpectrum implements Serializable {
 	}
 
 	public int getPrimaryAdductAbsoluteCharge() {
-
 		return Math.abs(primaryAdduct.getCharge());
 	}
 
 	public boolean isEmpty(){
-
 		return msPoints.isEmpty();
 	}
 

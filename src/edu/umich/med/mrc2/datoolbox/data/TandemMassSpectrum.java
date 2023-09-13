@@ -85,6 +85,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	protected double parentIonPurity = 1.0d;
 	protected boolean hasScans;
 
+
 	public TandemMassSpectrum(
 			int depth,
 			MsPoint parent,
@@ -848,6 +849,14 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		return  spectrum.stream().
 			sorted(MsUtils.reverseIntensitySorter).
 			collect(Collectors.toList()).get(0).getIntensity();
+	}
+		
+	public double getParentScanRetentionTime() {
+		
+		if(parentScanNumber > 0 && scanRtMap.containsKey(parentScanNumber))
+			return scanRtMap.get(parentScanNumber);
+		else
+			return scanRtMap.entrySet().iterator().next().getValue();		
 	}
 }
 

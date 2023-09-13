@@ -40,6 +40,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureIdentityComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
+import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.FeatureIdentificationState;
 import edu.umich.med.mrc2.datoolbox.data.enums.KendrickUnits;
@@ -86,6 +87,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	protected ParameterSetStatus status;
 	protected Set<MsFeatureListener> eventListeners;
 	protected boolean suppressEvents;
+	
+	public static final String DEFAULT_ID_NAME = "UNKNOWN";
 	
 	// Copy constructor
 	public MsFeature(MsFeature source) {
@@ -247,15 +250,15 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		if(cid == null)
 			return false;
 
-		if(cid.getCompoundIdentity() == null)
-			return false;
-
+//		if(cid.getCompoundIdentity() == null)
+//			return false;
+//
 //		if(cid.getCompoundIdentity().getName() == null)
 //			return false;
 //
 //		if(cid.getCompoundIdentity().getName().trim().isEmpty())
 //			return false;
-
+//
 //		if(identifications.contains(cid))
 //			return true;
 //		else {
@@ -641,16 +644,11 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	}
 
 	public int getCharge() {
-
-		if (spectrum != null) {
-
-			if (spectrum.getPrimaryAdduct() != null)
-				return spectrum.getPrimaryAdduct().getCharge();
-			else {
-				return spectrum.getAbsoluteChargeFromIsotopicPattern() * polarity.getSign();
-			}
-		}
-		return 0;
+		
+		if (spectrum == null || spectrum.getPrimaryAdduct() == null)
+			return polarity.getSign();
+		else
+			return spectrum.getPrimaryAdduct().getCharge();
 	}
 
 	public double getBasePeakMz() {
@@ -850,6 +848,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			
 			if(primaryIdentity == null)
 				return FeatureIdentificationState.SINGLE_INACTIVE_ID;
+			else if(primaryIdentity.getCompoundIdentity() == null)
+				return FeatureIdentificationState.NO_IDENTIFICATION;
 			else
 				return FeatureIdentificationState.SINGLE_ACTIVE_ID;
 		}
@@ -939,6 +939,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		identifications = new HashSet<MsFeatureIdentity>();
 		annotations = new TreeSet<ObjectAnnotation>();
 		eventListeners = ConcurrentHashMap.newKeySet();
+		createDefaultPrimaryIdentity();
 
 		id = featureElement.getAttributeValue(MsFeatureFields.Id.name());
 		name = featureElement.getAttributeValue(MsFeatureFields.Name.name());
@@ -965,6 +966,9 @@ public class MsFeature implements AnnotatedObject, Serializable {
 				featureElement.getChildren(MsFeatureFields.CIDs.name());
 		if(msfIdListElements.size() > 0) {
 			
+			primaryIdentity = null;
+			identifications.clear();
+			
 			List<Element> msfIdList = 
 					msfIdListElements.get(0).getChildren(MsFeatureIdentityFields.MSFID.name());
 			for(Element msfIdElement : msfIdList) {
@@ -989,6 +993,40 @@ public class MsFeature implements AnnotatedObject, Serializable {
 				idDisabled = Boolean.parseBoolean(idDisabledString);
 			else
 				idDisabled = false;
+		}
+		else {
+			createDefaultPrimaryIdentity();
+		}
+	}
+	
+	private void createDefaultPrimaryIdentity() {
+		
+		MsFeatureIdentity defaultId = new MsFeatureIdentity(
+				null, CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
+		defaultId.setIdentityName(DEFAULT_ID_NAME);
+		setPrimaryIdentity(defaultId);
+		if(spectrum == null)
+			return;
+		
+		if(spectrum.getExperimentalTandemSpectrum() != null 
+				&& spectrum.getExperimentalTandemSpectrum().getParent() != null) {
+			
+			double rt  = spectrum.getExperimentalTandemSpectrum().getParentScanRetentionTime();			
+			String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+					MRC2ToolBoxConfiguration.defaultMzFormat.format(
+							spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
+					MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
+			primaryIdentity.setIdentityName(newName);
+			primaryIdentity.setConfidenceLevel(
+					CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);
+		}
+		else {
+			String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+					MRC2ToolBoxConfiguration.getMzFormat().format(getMonoisotopicMz()) + "_" + 
+					MRC2ToolBoxConfiguration.getRtFormat().format(getRetentionTime());
+			primaryIdentity.setIdentityName(newName);
+			primaryIdentity.setConfidenceLevel(
+					CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
 		}
 	}
 	

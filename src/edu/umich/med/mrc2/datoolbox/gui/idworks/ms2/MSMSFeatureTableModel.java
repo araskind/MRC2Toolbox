@@ -159,8 +159,9 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			if(primaryId != null) {
 
 				if(primaryId.getCompoundIdentity() == null) {
-					System.out.println(cf.getPrimaryIdentity().
-							getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId() + " has no compound ID");
+//					System.out.println(cf.getPrimaryIdentity().
+//							getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId() + " has no compound ID");
+					compoundName = primaryId.getIdentityName();
 				}
 				else {
 					compoundName = primaryId.getName();
@@ -181,10 +182,12 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			}
 			if(adduct == null) {
 				
-				if(cf.getSpectrum() != null) 	
+				if(cf.getSpectrum() != null && cf.getSpectrum().getPrimaryAdduct() != null) 	
 					adduct = cf.getSpectrum().getPrimaryAdduct();
-				else
+				else if (cf.getCharge() != 0)
 					adduct = AdductManager.getDefaultAdductForCharge(cf.getCharge());
+				else
+					adduct = AdductManager.getDefaultAdductForPolarity(cf.getPolarity());
 			}
 			Object[] obj = {
 				bundle,			//	MS_FEATURE_COLUMN	MsFeature

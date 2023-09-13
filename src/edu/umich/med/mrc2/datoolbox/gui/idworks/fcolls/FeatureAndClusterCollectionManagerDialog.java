@@ -129,9 +129,11 @@ public class FeatureAndClusterCollectionManagerDialog extends JDialog
 	
 	private void refreshFeatureCollections() { 
 
-		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null)
-			return;
-		
+		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {
+			featureCollectionsManager.loadCollectionsForActiveProject();
+			featureLookupDataSetManager.loadFeatureLookupDataSetsForActiveProject();
+			featureClusterCollectionsManager.loadMSMSClusterDataSetsForActiveProject();	
+		}
 		RefreshCollectionsTask task = 
 			new RefreshCollectionsTask();
 		idp = new IndeterminateProgressDialog(
