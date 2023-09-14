@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.IDTExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -103,7 +104,8 @@ public class IDTrackerExperimentDataFetchTask extends IDTMSMSFeatureSearchTask {
 		
 		Connection conn = ConnectionManager.getConnection();
 		String query = 
-				"SELECT DISTINCT F.FEATURE_ID, F2.MSMS_FEATURE_ID, F.POLARITY,  " +
+				"SELECT DISTINCT F.FEATURE_ID, F2.MSMS_FEATURE_ID, "
+				+ "F2.IDENTIFICATION_LEVEL_ID, F.POLARITY,  " +
 				"F.MZ_OF_INTEREST, F.RETENTION_TIME, F.HAS_CHROMATOGRAM, S.SAMPLE_ID,  " +
 				"T.STOCK_SAMPLE_ID, I.INJECTION_ID, F2.COLLISION_ENERGY, " + 
 				"A.ACQ_METHOD_ID, M.EXTRACTION_METHOD_ID  " +
@@ -216,7 +218,14 @@ public class IDTrackerExperimentDataFetchTask extends IDTMSMSFeatureSearchTask {
 			adductMap.entrySet().stream().
 				forEach(e -> spectrum.addSpectrumForAdduct(e.getKey(), e.getValue()));
 
-			f.setSpectrum(spectrum);			
+			f.setSpectrum(spectrum);	
+			if(rs.getString("IDENTIFICATION_LEVEL_ID") != null) {
+				MSFeatureIdentificationLevel level = 
+						IDTDataCache.getMSFeatureIdentificationLevelById(
+								rs.getString("IDENTIFICATION_LEVEL_ID"));
+				if(f.getPrimaryIdentity() != null)
+					f.getPrimaryIdentity().setIdentificationLevel(level);
+			}
 			MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 			bundle.setAcquisitionMethod(acqMethodsMap.get(rs.getString("ACQ_METHOD_ID")));
 			

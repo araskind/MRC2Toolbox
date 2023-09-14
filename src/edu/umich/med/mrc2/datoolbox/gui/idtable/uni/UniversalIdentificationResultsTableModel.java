@@ -151,6 +151,9 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsFeatureIdentity id : idList) {
 
+			if(id.getCompoundIdentity() == null)
+				continue;
+			
 			double deltaMz = 0.0d;
 			Double deltaRt = calculateRetentionShift(id);
 			Adduct adductMatch = id.getPrimaryAdduct();

@@ -205,9 +205,15 @@ public class IdLevelUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void setIdLevelForReferenceMS1FeatureIdentification(MsFeatureIdentity newIdentity) throws Exception {
+	public static void setIdLevelForReferenceMS1FeatureIdentification(
+			MsFeatureIdentity newIdentity) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
+		
+		//	TODO deal with unknowns
+		if(newIdentity.getCompoundIdentity() == null) {
+			
+		}
 		
 		//	Modify manuallu assigned
 		if(newIdentity.getIdSource().equals(CompoundIdSource.LIBRARY))
@@ -254,21 +260,45 @@ public class IdLevelUtils {
 		ps.close();	
 	}
 	
-	public static void setIdLevelForMSMSFeatureIdentification(MsFeatureIdentity newIdentity) throws Exception {
+	public static void setIdLevelForMSMSFeatureIdentification(
+			MsFeatureIdentity newIdentity, String msmsFeatureId) throws Exception {
 		
 		Connection conn = ConnectionManager.getConnection();
 		
-		//	Modify manuallu assigned
-		if(newIdentity.getIdSource().equals(CompoundIdSource.LIBRARY_MS2))
-			setIdLevelForMSMSFeatureLibraryMatch(newIdentity, conn);
-		
-		//	Modify MSMS library match
-		if(newIdentity.getIdSource().equals(CompoundIdSource.MANUAL))
-			setIdLevelForMSMSFeatureManualId(newIdentity, conn);
-		
+		//	If unknown
+		if(newIdentity.getCompoundIdentity() == null) {
+			setIdLevelForUnknownMSMSIdentity(newIdentity, msmsFeatureId, conn);
+		}
+		else {
+			//	Modify manually assigned
+			if(newIdentity.getIdSource().equals(CompoundIdSource.LIBRARY_MS2))
+				setIdLevelForMSMSFeatureLibraryMatch(newIdentity, conn);
+			
+			//	Modify MSMS library match
+			if(newIdentity.getIdSource().equals(CompoundIdSource.MANUAL))
+				setIdLevelForMSMSFeatureManualId(newIdentity, conn);
+		}
 		ConnectionManager.releaseConnection(conn);
 	}
 	
+	private static void setIdLevelForUnknownMSMSIdentity(
+			MsFeatureIdentity newIdentity, String msmsFeatureId, Connection conn)  throws Exception {
+		
+		String query = "UPDATE MSMS_FEATURE "
+				+ "SET IDENTIFICATION_LEVEL_ID = ? "
+				+ "WHERE MSMS_FEATURE_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		MSFeatureIdentificationLevel level = newIdentity.getIdentificationLevel();
+		String levelId = null;
+		if(level != null)
+			levelId = level.getId();
+		
+		ps.setString(1, levelId);
+		ps.setString(2, msmsFeatureId);
+		ps.executeUpdate();
+		ps.close();		
+	}
+
 	public static void setIdLevelForMSMSFeatureLibraryMatch(
 			MsFeatureIdentity newIdentity, Connection conn) throws Exception {
 		

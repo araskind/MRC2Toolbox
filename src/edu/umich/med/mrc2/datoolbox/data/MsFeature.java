@@ -91,6 +91,169 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	public static final String DEFAULT_ID_NAME = "UNKNOWN";
 	
 	// Copy constructor
+//	public MsFeature(MsFeature source) {
+//
+//		id = source.getId();
+//		name = source.getName();
+//		spectrum = source.getSpectrum();
+//		polarity = source.getPolarity();
+//		retentionTime = source.getRetentionTime();
+//		rtRange = source.getRtRange();
+//		neutralMass = source.getNeutralMass();
+//		active = source.isActive();
+//		qualityScore = source.getQualityScore();
+//		identifications = 
+//				new HashSet<MsFeatureIdentity>(source.getIdentifications());
+//		primaryIdentity = source.getPrimaryIdentity();
+//		annotatedObjectType = source.getAnnotatedObjectType();
+//		annotations = 
+//				new TreeSet<ObjectAnnotation>(source.getAnnotations());
+//
+//		defaultModification = source.getDefaultChemicalModification();
+//		suggestedModification = null;
+//		binnerAnnotation = source.getBinnerAnnotation();
+//		eventListeners = ConcurrentHashMap.newKeySet();
+//		eventListeners.addAll(source.getFeatureListeners());
+//	}
+//
+//	public MsFeature(String name, double neutralMass, double retentionTime) {
+//
+//		this.id = DataPrefix.MS_FEATURE.getName() +
+//				UUID.randomUUID().toString().substring(0, 12);
+//		this.name = name;
+//		this.neutralMass = neutralMass;
+//		this.retentionTime = retentionTime;
+//		rtRange = new Range(retentionTime);
+//
+//		spectrum = null;
+//		active = true;
+//		qualityScore = 0;
+//		identifications = new HashSet<MsFeatureIdentity>();
+//		primaryIdentity = null;
+//		annotations = new TreeSet<ObjectAnnotation>();
+//		defaultModification = null;
+//		suggestedModification = null;
+//		binnerAnnotation = null;
+//		eventListeners = ConcurrentHashMap.newKeySet();
+//	}
+//
+//	public MsFeature(String name, double retentionTime) {
+//
+//		this.id = DataPrefix.MS_FEATURE.getName() + 
+//				UUID.randomUUID().toString().substring(0, 12);
+//		this.name = name;
+//		this.retentionTime = retentionTime;
+//		rtRange = new Range(retentionTime);
+//		spectrum = null;
+//		neutralMass = 0.0d;
+//		active = true;
+//		qualityScore = 0;
+//		identifications = new HashSet<MsFeatureIdentity>();
+//		primaryIdentity = null;
+//		annotations = new TreeSet<ObjectAnnotation>();
+//		defaultModification = null;
+//		suggestedModification = null;
+//		binnerAnnotation = null;
+//		eventListeners = ConcurrentHashMap.newKeySet();
+//	}
+//
+//	public MsFeature(String id, String name, double retentionTime) {
+//
+//		this.id = id;
+//		this.name = name;
+//		this.retentionTime = retentionTime;
+//		rtRange = new Range(retentionTime);
+//		
+//		spectrum = null;
+//		neutralMass = 0.0d;
+//		active = true;
+//		qualityScore = 0;
+//		identifications = new HashSet<MsFeatureIdentity>();
+//		primaryIdentity = null;
+//		annotations = new TreeSet<ObjectAnnotation>();
+//		defaultModification = null;
+//		suggestedModification = null;
+//		binnerAnnotation = null;
+//		eventListeners = ConcurrentHashMap.newKeySet();
+//	}
+//
+//	public MsFeature(double retentionTime, Polarity polarity) {
+//		super();
+//		this.id = DataPrefix.MS_FEATURE.getName() + 
+//				UUID.randomUUID().toString().substring(0, 12);
+//		this.retentionTime = retentionTime;
+//		this.polarity = polarity;
+//		
+//		rtRange = new Range(retentionTime);
+//		spectrum = null;
+//		neutralMass = 0.0d;
+//		active = true;
+//		qualityScore = 0;
+//		identifications = new HashSet<MsFeatureIdentity>();
+//		primaryIdentity = null;
+//		annotations = new TreeSet<ObjectAnnotation>();
+//		defaultModification = null;
+//		suggestedModification = null;
+//		binnerAnnotation = null;
+//		eventListeners = ConcurrentHashMap.newKeySet();
+//	}
+
+	public MsFeature() {
+		super();
+		this.id = DataPrefix.MS_FEATURE.getName() +
+				UUID.randomUUID().toString().substring(0, 12);
+		this.spectrum = null;
+		this.active = true;
+		this.qualityScore = 0;
+		this.identifications = new HashSet<MsFeatureIdentity>();
+		this.primaryIdentity = null;
+		this.annotations = new TreeSet<ObjectAnnotation>();
+		this.defaultModification = null;
+		this.suggestedModification = null;
+		this.binnerAnnotation = null;
+		this.eventListeners = ConcurrentHashMap.newKeySet();
+		this.neutralMass = 0.0d;
+		
+		createDefaultPrimaryIdentity();
+	}
+
+	public MsFeature(
+			String name, 
+			double neutralMass, 
+			double retentionTime) {
+
+		this();
+		this.name = name;
+		this.neutralMass = neutralMass;
+		this.retentionTime = retentionTime;
+		rtRange = new Range(retentionTime);
+	}
+
+	public MsFeature(String name, double retentionTime) {
+
+		this();
+		this.name = name;
+		this.retentionTime = retentionTime;
+		rtRange = new Range(retentionTime);
+	}
+
+	public MsFeature(String id, String name, double retentionTime) {
+
+		this();
+		this.id = id;
+		this.name = name;
+		this.retentionTime = retentionTime;
+		rtRange = new Range(retentionTime);
+	}
+
+	public MsFeature(double retentionTime, Polarity polarity) {
+		this();
+		this.retentionTime = retentionTime;
+		rtRange = new Range(retentionTime);
+		this.polarity = polarity;
+	}
+	
+	// Copy constructor 
 	public MsFeature(MsFeature source) {
 
 		id = source.getId();
@@ -115,89 +278,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		eventListeners = ConcurrentHashMap.newKeySet();
 		eventListeners.addAll(source.getFeatureListeners());
 	}
-
-	public MsFeature(String name, double neutralMass, double retentionTime) {
-
-		this.id = DataPrefix.MS_FEATURE.getName() +
-				UUID.randomUUID().toString().substring(0, 12);
-		this.name = name;
-		this.neutralMass = neutralMass;
-		this.retentionTime = retentionTime;
-		rtRange = new Range(retentionTime);
-
-		spectrum = null;
-		active = true;
-		qualityScore = 0;
-		identifications = new HashSet<MsFeatureIdentity>();
-		primaryIdentity = null;
-		annotations = new TreeSet<ObjectAnnotation>();
-		defaultModification = null;
-		suggestedModification = null;
-		binnerAnnotation = null;
-		eventListeners = ConcurrentHashMap.newKeySet();
-	}
-
-	public MsFeature(String name, double retentionTime) {
-
-		this.id = DataPrefix.MS_FEATURE.getName() + 
-				UUID.randomUUID().toString().substring(0, 12);
-		this.name = name;
-		this.retentionTime = retentionTime;
-		rtRange = new Range(retentionTime);
-		spectrum = null;
-		neutralMass = 0.0d;
-		active = true;
-		qualityScore = 0;
-		identifications = new HashSet<MsFeatureIdentity>();
-		primaryIdentity = null;
-		annotations = new TreeSet<ObjectAnnotation>();
-		defaultModification = null;
-		suggestedModification = null;
-		binnerAnnotation = null;
-		eventListeners = ConcurrentHashMap.newKeySet();
-	}
-
-	public MsFeature(String id, String name, double retentionTime) {
-
-		this.id = id;
-		this.name = name;
-		this.retentionTime = retentionTime;
-		rtRange = new Range(retentionTime);
-		
-		spectrum = null;
-		neutralMass = 0.0d;
-		active = true;
-		qualityScore = 0;
-		identifications = new HashSet<MsFeatureIdentity>();
-		primaryIdentity = null;
-		annotations = new TreeSet<ObjectAnnotation>();
-		defaultModification = null;
-		suggestedModification = null;
-		binnerAnnotation = null;
-		eventListeners = ConcurrentHashMap.newKeySet();
-	}
-
-	public MsFeature(double retentionTime, Polarity polarity) {
-		super();
-		this.id = DataPrefix.MS_FEATURE.getName() + 
-				UUID.randomUUID().toString().substring(0, 12);
-		this.retentionTime = retentionTime;
-		this.polarity = polarity;
-		
-		rtRange = new Range(retentionTime);
-		spectrum = null;
-		neutralMass = 0.0d;
-		active = true;
-		qualityScore = 0;
-		identifications = new HashSet<MsFeatureIdentity>();
-		primaryIdentity = null;
-		annotations = new TreeSet<ObjectAnnotation>();
-		defaultModification = null;
-		suggestedModification = null;
-		binnerAnnotation = null;
-		eventListeners = ConcurrentHashMap.newKeySet();
-	}
-
+	
 	/*
 	 * Annotation
 	 * */
@@ -599,7 +680,48 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	}
 
 	public void setSpectrum(MassSpectrum spectrum) {
+		
 		this.spectrum = spectrum;
+		
+		if(spectrum.getExperimentalTandemSpectrum() != null) {
+			updateUnknownPrimaryIdentityBasedOnMSMS();
+		}
+		else {
+			if(primaryIdentity == null)
+				createDefaultPrimaryIdentity();
+			
+			String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+					MRC2ToolBoxConfiguration.getMzFormat().format(getMonoisotopicMz()) + "_" + 
+					MRC2ToolBoxConfiguration.getRtFormat().format(getRetentionTime());
+			primaryIdentity.setIdentityName(newName);
+			primaryIdentity.setConfidenceLevel(
+					CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
+		}		
+//		if(primaryIdentity != null 
+//				&& primaryIdentity.getIdentityName().equals(DEFAULT_ID_NAME) 
+//				&& spectrum != null) {
+//			
+//			if(spectrum.getExperimentalTandemSpectrum() != null 
+//					&& spectrum.getExperimentalTandemSpectrum().getParent() != null) {
+//				
+//				double rt  = spectrum.getExperimentalTandemSpectrum().getParentScanRetentionTime();
+//				String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+//						MRC2ToolBoxConfiguration.defaultMzFormat.format(
+//								spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
+//						MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
+//				primaryIdentity.setIdentityName(newName);
+//				primaryIdentity.setConfidenceLevel(
+//						CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);
+//			}
+//			else {
+//				String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+//						MRC2ToolBoxConfiguration.getMzFormat().format(getMonoisotopicMz()) + "_" + 
+//						MRC2ToolBoxConfiguration.getRtFormat().format(getRetentionTime());
+//				primaryIdentity.setIdentityName(newName);
+//				primaryIdentity.setConfidenceLevel(
+//						CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
+//			}
+//		}
 	}
 
 	public void setStatsSummary(MsFeatureStatisticalSummary statsSummary) {
@@ -936,10 +1058,11 @@ public class MsFeature implements AnnotatedObject, Serializable {
 
 	public MsFeature(Element featureElement) {
 		
-		identifications = new HashSet<MsFeatureIdentity>();
-		annotations = new TreeSet<ObjectAnnotation>();
-		eventListeners = ConcurrentHashMap.newKeySet();
-		createDefaultPrimaryIdentity();
+//		identifications = new HashSet<MsFeatureIdentity>();
+//		annotations = new TreeSet<ObjectAnnotation>();
+//		eventListeners = ConcurrentHashMap.newKeySet();
+//		createDefaultPrimaryIdentity();
+		this();
 
 		id = featureElement.getAttributeValue(MsFeatureFields.Id.name());
 		name = featureElement.getAttributeValue(MsFeatureFields.Name.name());
@@ -954,8 +1077,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		if(rtRangeString != null)
 			rtRange = new Range(rtRangeString);
 		
-		spectrum = new MassSpectrum(
-				featureElement.getChild(MassSpectrumFields.Spectrum.name()));	
+		setSpectrum(new MassSpectrum(
+				featureElement.getChild(MassSpectrumFields.Spectrum.name())));	
 		String qsValue = 
 				featureElement.getAttributeValue(MsFeatureFields.QS.name());
 		if(qsValue != null)
@@ -994,9 +1117,6 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			else
 				idDisabled = false;
 		}
-		else {
-			createDefaultPrimaryIdentity();
-		}
 	}
 	
 	private void createDefaultPrimaryIdentity() {
@@ -1027,6 +1147,33 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			primaryIdentity.setIdentityName(newName);
 			primaryIdentity.setConfidenceLevel(
 					CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
+		}
+	}
+	
+	public void updateUnknownPrimaryIdentityBasedOnMSMS() {
+		
+		if(primaryIdentity == null) {
+			createDefaultPrimaryIdentity();
+		}
+		else {
+			if(primaryIdentity.getCompoundIdentity() == null) {
+				
+				if(spectrum != null && spectrum.getExperimentalTandemSpectrum() != null 
+						&& spectrum.getExperimentalTandemSpectrum().getParent() != null) {
+					
+					double rt  = spectrum.getExperimentalTandemSpectrum().getParentScanRetentionTime();	
+					if(rt == 0.0d)
+						rt = retentionTime;
+					
+					String newName = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
+							MRC2ToolBoxConfiguration.defaultMzFormat.format(
+									spectrum.getExperimentalTandemSpectrum().getParent().getMz()) + "_" + 
+							MRC2ToolBoxConfiguration.defaultRtFormat.format(rt);
+					primaryIdentity.setIdentityName(newName);
+					primaryIdentity.setConfidenceLevel(
+							CompoundIdentificationConfidence.UNKNOWN_MSMS_RT);
+				}
+			}
 		}
 	}
 	

@@ -271,13 +271,15 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 		int paramCount = 1;
 		
 		String query = 
-			"SELECT DISTINCT FEATURE_ID, MSMS_FEATURE_ID, RETENTION_TIME, "
+			"SELECT DISTINCT FEATURE_ID, MSMS_FEATURE_ID, "
+			+ "IDENTIFICATION_LEVEL_ID, RETENTION_TIME, "
 			+ "MZ_OF_INTEREST, ACQUISITION_METHOD_ID, " + 
 			"EXTRACTION_METHOD_ID, EXPERIMENT_ID, STOCK_SAMPLE_ID, SAMPLE_ID, "
 			+ "INJECTION_ID, POLARITY, HAS_CHROMATOGRAM FROM (" + 
 			"SELECT F.FEATURE_ID, F.POLARITY, F.MZ_OF_INTEREST, F.RETENTION_TIME, F.HAS_CHROMATOGRAM, " +
 			"I.ACQUISITION_METHOD_ID, M.EXTRACTION_METHOD_ID, S.EXPERIMENT_ID, S.SAMPLE_ID, " +
-			"T.STOCK_SAMPLE_ID, I.INJECTION_ID, R.ACCESSION, F2.MSMS_FEATURE_ID, F2.COLLISION_ENERGY " + 
+			"T.STOCK_SAMPLE_ID, I.INJECTION_ID, R.ACCESSION, F2.MSMS_FEATURE_ID, " + 
+			"F2.COLLISION_ENERGY, F2.IDENTIFICATION_LEVEL_ID " + 
 			"FROM MSMS_PARENT_FEATURE F, " +
 			"DATA_ANALYSIS_MAP M, " +
 			"DATA_ACQUISITION_METHOD A, " +
@@ -573,7 +575,13 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 				forEach(e -> spectrum.addSpectrumForAdduct(e.getKey(), e.getValue()));
 
 			f.setSpectrum(spectrum);
-			
+			if(rs.getString("IDENTIFICATION_LEVEL_ID") != null) {
+				MSFeatureIdentificationLevel level = 
+						IDTDataCache.getMSFeatureIdentificationLevelById(
+								rs.getString("IDENTIFICATION_LEVEL_ID"));
+				if(f.getPrimaryIdentity() != null)
+					f.getPrimaryIdentity().setIdentificationLevel(level);
+			}			
 			MSFeatureInfoBundle bundle = new MSFeatureInfoBundle(f);
 			bundle.setAcquisitionMethod(
 				IDTDataCache.getAcquisitionMethodById(rs.getString("ACQUISITION_METHOD_ID")));
@@ -746,6 +754,7 @@ public class IDTMSMSFeatureSearchTask extends AbstractTask {
 						scanMapRs.close();
 					}
 					fb.getMsFeature().getSpectrum().addTandemMs(msms);
+					fb.getMsFeature().updateUnknownPrimaryIdentityBasedOnMSMS();
 				}
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block

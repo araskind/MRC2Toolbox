@@ -855,8 +855,10 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		
 		if(parentScanNumber > 0 && scanRtMap.containsKey(parentScanNumber))
 			return scanRtMap.get(parentScanNumber);
+		else if(!scanRtMap.isEmpty())					
+			return scanRtMap.entrySet().iterator().next().getValue();
 		else
-			return scanRtMap.entrySet().iterator().next().getValue();		
+			return 0.0d;
 	}
 }
 

@@ -95,7 +95,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerDataPullTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.IDTrackerMetadataPullTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.idt.MSMSSearchResultsBatchPrescanTask;
 
 public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implements ItemListener, TreeSelectionListener {
@@ -640,7 +640,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 	public void refreshIdTrackerdata() {
 		
 		clearPanel();
-		IDTrackerDataPullTask task = new IDTrackerDataPullTask();
+		IDTrackerMetadataPullTask task = new IDTrackerMetadataPullTask();
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);
 	}
@@ -940,7 +940,7 @@ public class IDTrackerLimsManagerPanel extends DockableMRC2ToolboxPanel implemen
 			if (e.getSource().getClass().equals(MSMSSearchResultsBatchPrescanTask.class))
 				finalizeCefPrescan((MSMSSearchResultsBatchPrescanTask) e.getSource());
 			
-			if (e.getSource().getClass().equals(IDTrackerDataPullTask.class))
+			if (e.getSource().getClass().equals(IDTrackerMetadataPullTask.class))
 				refreshPanelData();			
 		}
 	}

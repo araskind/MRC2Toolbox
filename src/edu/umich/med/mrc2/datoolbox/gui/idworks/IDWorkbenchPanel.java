@@ -1874,8 +1874,10 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			
 			if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 				
+				String msmsId = msTwoFeatureTable.getSelectedBundle().getMsFeature().
+						getSpectrum().getExperimentalTandemSpectrum().getId();
 				try {
-					IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity);
+					IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity, msmsId);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -2024,8 +2026,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				}
 				if(msLevel == 2) {
 					
+					String msmsId = msf.getSpectrum().getExperimentalTandemSpectrum().getId();
 					try {
-						IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity);
+						IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity, msmsId);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -2054,63 +2057,13 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		MSFeatureIdentificationLevel idLevel = 
 				IDTDataCache.getMSFeatureIdentificationLevelByName(idLevelName);
 		
-		if(!msOneFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {			
-			
-//			for(MSFeatureInfoBundle fib : msOneFeatureTable.getBundles(TableRowSubset.SELECTED)) {
-//				
-//				MsFeatureIdentity identity = fib.getMsFeature().getPrimaryIdentity();
-//				if(identity == null)
-//					continue;				
-//
-//				if(idLevel == null && identity.getIdentificationLevel() == null)
-//					continue;
-//				
-//				if(idLevel != null && identity.getIdentificationLevel() != null) {
-//					
-//					if(idLevel.equals(identity.getIdentificationLevel())) 
-//						continue;
-//				}
-//				identity.setIdentificationLevel(idLevel);
-//				try {
-//					IdLevelUtils.setIdLevelForReferenceMS1FeatureIdentification(identity);
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				//	updateMSFeatures(fib);
-//			}
-//			updateSelectedMSFeatures();
+		if(!msOneFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
 			
 			setPrimaryIdLevelForMultipleFeatures(idLevel, 1,
 					msOneFeatureTable.getTableFeatures(TableRowSubset.SELECTED), true);
 			return;
 		}
 		if(!msTwoFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
-			
-//			for(MSFeatureInfoBundle fib : msTwoFeatureTable.getBundles(TableRowSubset.SELECTED)) {
-//				
-//				MsFeatureIdentity identity = fib.getMsFeature().getPrimaryIdentity();
-//				if(identity == null)
-//					continue;				
-//
-//				if(idLevel == null && identity.getIdentificationLevel() == null)
-//					continue;
-//				
-//				if(idLevel != null && identity.getIdentificationLevel() != null) {
-//					
-//					if(idLevel.equals(identity.getIdentificationLevel())) 
-//						continue;
-//				}
-//				identity.setIdentificationLevel(idLevel);
-//				try {
-//					IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity);
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				//updateMSMSFeature(fib);
-//			}
-//			updateSelectedMSMSFeatures();
 			
 			setPrimaryIdLevelForMultipleFeatures(idLevel, 2,
 					msTwoFeatureTable.getTableFeatures(TableRowSubset.SELECTED), true);
@@ -2147,8 +2100,11 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			updateSelectedMSFeatures();			
 		}
 		if(msTwoFeatureTable.getSelectedBundle() != null) {
+			
+			String msmsId = msTwoFeatureTable.getSelectedBundle().getMsFeature().
+					getSpectrum().getExperimentalTandemSpectrum().getId();
 			try {
-				IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity);
+				IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity, msmsId);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

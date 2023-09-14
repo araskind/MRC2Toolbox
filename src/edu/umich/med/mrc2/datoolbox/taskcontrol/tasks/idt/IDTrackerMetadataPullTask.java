@@ -29,9 +29,9 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 
-public class IDTrackerDataPullTask extends AbstractTask {
+public class IDTrackerMetadataPullTask extends AbstractTask {
 
-	public IDTrackerDataPullTask() {
+	public IDTrackerMetadataPullTask() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
@@ -39,7 +39,7 @@ public class IDTrackerDataPullTask extends AbstractTask {
 	@Override
 	public Task cloneTask() {
 		// TODO Auto-generated method stub
-		return new IDTrackerDataPullTask();
+		return new IDTrackerMetadataPullTask();
 	}
 
 	@Override
