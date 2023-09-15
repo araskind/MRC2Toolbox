@@ -339,27 +339,42 @@ public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedBy
 
 			if (annotations != null && !annotations.isEmpty()) {
 				
-				((IDWorkbenchPanel)parentPanel).setStandardAnnotationsForMultipleFeatures(
-						annotations, 
-						2,
-						features,
-						false);
+				try {
+					((IDWorkbenchPanel)parentPanel).setStandardAnnotationsForMultipleFeatures(
+							annotations, 
+							2,
+							features,
+							false);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			if(idLevel != null) {
 				
-				((IDWorkbenchPanel)parentPanel).setPrimaryIdLevelForMultipleFeatures(
-						idLevel, 
-						2,
-						features,
-						false);
+				try {
+					((IDWorkbenchPanel)parentPanel).setPrimaryIdLevelForMultipleFeatures(
+							idLevel, 
+							2,
+							features,
+							false);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			if(fuSteps != null && !fuSteps.isEmpty()) {
 				
-				((IDWorkbenchPanel)parentPanel).setIDFollowUpStepsForMultipleFeatures(
-						fuSteps, 
-						2,
-						features,
-						false);
+				try {
+					((IDWorkbenchPanel)parentPanel).setIDFollowUpStepsForMultipleFeatures(
+							fuSteps, 
+							2,
+							features,
+							false);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}   				
 			((IDWorkbenchPanel)parentPanel).toggleTableListeners(true);
 			

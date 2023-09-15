@@ -103,6 +103,8 @@ public final class MRC2ToolBoxCore {
 	public static CacheAccess<Object, Object> featureChromatogramCache;
 	public static CacheAccess<Object, Object> compoundIdCache;
 	public static CacheAccess<Object, Object> msmsLibraryCache;
+	
+	public static String COMPONENT_IDENTIFIER ="COMPONENT_IDENTIFIER";
 
 	@SuppressWarnings("rawtypes")
 	private static Map<DataFile, LCMSData>rawDataMap;

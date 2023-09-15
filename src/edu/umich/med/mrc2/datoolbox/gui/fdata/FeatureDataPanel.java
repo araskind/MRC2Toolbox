@@ -1761,7 +1761,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			spectrumTable.setTableModelFromMsFeature(firstSelected);
 		}
 		idTable.setModelFromMsFeature(firstSelected);
-		if(firstSelected.getPrimaryIdentity() != null) {
+		if(firstSelected.getPrimaryIdentity() != null 
+				&& firstSelected.getPrimaryIdentity().getCompoundIdentity() != null) {
 			try {
 				molStructurePanel.showStructure(firstSelected.getPrimaryIdentity().
 						getCompoundIdentity().getSmiles());

@@ -226,6 +226,23 @@ public class IdLevelUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
+	public static void setIdLevelForReferenceMS1FeatureIdentification(
+			MsFeatureIdentity newIdentity, Connection conn) throws Exception {
+
+		//	TODO deal with unknowns
+		if(newIdentity.getCompoundIdentity() == null) {
+			
+		}
+		
+		//	Modify manuallu assigned
+		if(newIdentity.getIdSource().equals(CompoundIdSource.LIBRARY))
+			setIdLevelForReferenceMS1FeatureMSRTLibraryMatch(newIdentity, conn);
+		
+		//	Modify MSMS library match
+		if(newIdentity.getIdSource().equals(CompoundIdSource.MANUAL))
+			setIdLevelForReferenceMS1FeatureManualId(newIdentity, conn);
+	}
+	
 	public static void setIdLevelForReferenceMS1FeatureMSRTLibraryMatch(
 			MsFeatureIdentity newIdentity, Connection conn) throws Exception {
 		
@@ -237,7 +254,11 @@ public class IdLevelUtils {
 		if(level != null)
 			levelId = level.getId();
 		
-		ps.setString(1, levelId);
+		if(levelId != null)
+			ps.setString(1, levelId);
+		else
+			ps.setNull(1, java.sql.Types.NULL);
+		
 		ps.setString(2, newIdentity.getUniqueId());
 		ps.executeUpdate();
 		ps.close();		
@@ -254,7 +275,11 @@ public class IdLevelUtils {
 		if(level != null)
 			levelId = level.getId();
 		
-		ps.setString(1, levelId);
+		if(levelId != null)
+			ps.setString(1, levelId);
+		else
+			ps.setNull(1, java.sql.Types.NULL);
+		
 		ps.setString(2, newIdentity.getUniqueId());
 		ps.executeUpdate();
 		ps.close();	
@@ -281,6 +306,24 @@ public class IdLevelUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 	
+	public static void setIdLevelForMSMSFeatureIdentification(
+			MsFeatureIdentity newIdentity, String msmsFeatureId, Connection conn) throws Exception {
+		
+		//	If unknown
+		if(newIdentity.getCompoundIdentity() == null) {
+			setIdLevelForUnknownMSMSIdentity(newIdentity, msmsFeatureId, conn);
+		}
+		else {
+			//	Modify manually assigned
+			if(newIdentity.getIdSource().equals(CompoundIdSource.LIBRARY_MS2))
+				setIdLevelForMSMSFeatureLibraryMatch(newIdentity, conn);
+			
+			//	Modify MSMS library match
+			if(newIdentity.getIdSource().equals(CompoundIdSource.MANUAL))
+				setIdLevelForMSMSFeatureManualId(newIdentity, conn);
+		}
+	}
+	
 	private static void setIdLevelForUnknownMSMSIdentity(
 			MsFeatureIdentity newIdentity, String msmsFeatureId, Connection conn)  throws Exception {
 		
@@ -293,7 +336,11 @@ public class IdLevelUtils {
 		if(level != null)
 			levelId = level.getId();
 		
-		ps.setString(1, levelId);
+		if(levelId != null)
+			ps.setString(1, levelId);
+		else
+			ps.setNull(1, java.sql.Types.NULL);
+		
 		ps.setString(2, msmsFeatureId);
 		ps.executeUpdate();
 		ps.close();		
@@ -310,7 +357,11 @@ public class IdLevelUtils {
 		if(level != null)
 			levelId = level.getId();
 		
-		ps.setString(1, levelId);
+		if(levelId != null)
+			ps.setString(1, levelId);
+		else
+			ps.setNull(1, java.sql.Types.NULL);
+		
 		ps.setString(2, newIdentity.getUniqueId());
 		ps.executeUpdate();
 		ps.close();		
@@ -327,7 +378,11 @@ public class IdLevelUtils {
 		if(level != null)
 			levelId = level.getId();
 		
-		ps.setString(1, levelId);
+		if(levelId != null)
+			ps.setString(1, levelId);
+		else
+			ps.setNull(1, java.sql.Types.NULL);
+		
 		ps.setString(2, newIdentity.getUniqueId());
 		ps.executeUpdate();
 		ps.close();	

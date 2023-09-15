@@ -328,10 +328,14 @@ public class MZRTSearchParametersPanel extends TrackerSearchParametersPanel {
 	
 	public void setPolarity(Polarity polarity) {
 		
-		if(polarity == null)
+		if(polarity == null) {
 			limitPolarityCheckbox.setSelected(false);
-			
-		polarityComboBox.setSelectedItem(polarity);
+			polarityComboBox.setSelectedIndex(-1);
+		}
+		else {	
+			limitPolarityCheckbox.setSelected(true);
+			polarityComboBox.setSelectedItem(polarity);
+		}
 	}
 	
 	public MsDepth getMsDepth() {

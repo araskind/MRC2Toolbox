@@ -38,6 +38,7 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements IdentificationLevelEventListener {
 
@@ -64,7 +65,8 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 	private static final Icon removeFromActiveCollectionIcon = GuiUtils.getIcon("deleteCollection", 24);
 	private static final Icon exportMSPIcon = GuiUtils.getIcon("exportToMSP", 24);
 	private static final Icon copyAsArrayIcon = GuiUtils.getIcon("copyAsArray", 24);
-
+	private static final Icon clearIcon = GuiUtils.getIcon("clear", 24);
+	
 	private JMenuItem 
 			setupNISTPepSearchMenuItem,
 			addManualIdentificationMenuItem,
@@ -197,11 +199,21 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 			JMenuItem levelItem = GuiUtils.addMenuItem(
 					idLevelMenu, level.getName(), alistener, 
 					MSFeatureIdentificationLevel.SET_PRIMARY + level.getName(), levelIcon);
+			levelItem.putClientProperty(
+					MRC2ToolBoxCore.COMPONENT_IDENTIFIER, listener.getClass().getSimpleName());
 			if(level.getShorcut() != null)
 				levelItem.setAccelerator(
 						KeyStroke.getKeyStroke(level.getShorcut().charAt(0), 
 								MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
+		JMenuItem clearIdLevelMenuItem = GuiUtils.addMenuItem(idLevelMenu,
+				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName(), alistener,
+				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName());
+		clearIdLevelMenuItem.putClientProperty(
+				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, this.getClass().getSimpleName());
+		clearIdLevelMenuItem.setIcon(clearIcon);
+		clearIdLevelMenuItem.putClientProperty(
+				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, listener.getClass().getSimpleName());
 	}
 	
 	public void refreshIdLevelMenu() {

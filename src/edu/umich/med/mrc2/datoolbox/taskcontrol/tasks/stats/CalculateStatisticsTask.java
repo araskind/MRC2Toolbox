@@ -135,8 +135,10 @@ public class CalculateStatisticsTask extends AbstractTask {
 			for (DataFile df : dataFiles) {
 
 				dataCoordinates[0] = fileCoordinates.get(df);
+				if(dataCoordinates[0] == -1)
+					continue;
+				
 				double value = assayData.getAsDouble(dataCoordinates);
-
 				if(value > 0) {
 
 					if (pooledFiles.contains(df))

@@ -90,6 +90,9 @@ public class IdentificationResultsTableModel extends BasicTableModel {
 
 		List<Object[]>rowData = new ArrayList<Object[]>();
 		for (MsFeatureIdentity id : idList) {
+			
+			if(id == null)
+				continue;
 
 			double deltaMz = MsUtils.getPpmMassErrorForIdentity(parentFeature, id);
 			Double deltaRt = calculateRetentionShift(id);
@@ -99,14 +102,21 @@ public class IdentificationResultsTableModel extends BasicTableModel {
 				expectedRt = id.getMsRtLibraryMatch().getExpectedRetention();
 				adductMatch = id.getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
 			}
+			String formula = null;
+			Double exactMass = null;
+			if(id.getCompoundIdentity() != null) {
+				formula = id.getCompoundIdentity().getFormula();
+				exactMass = id.getCompoundIdentity().getExactMass();
+			}
+			
 			Object[] obj = {
 				id.equals(defaultId),
 				id.isQcStandard(),
 				id.getIdentityName(),
 				id.getName(),
 				id,
-				id.getCompoundIdentity().getFormula(),
-				id.getCompoundIdentity().getExactMass(),
+				formula,
+				exactMass,
 				deltaMz,
 				expectedRt,
 				deltaRt,

@@ -74,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.IdentityWordWrapCellRen
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MSFeatureIdentificationLevelColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ReferenceMsMsLibraryRenderer;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.IdentificationUtils;
 
 public class UniversalIdentificationResultsTable extends BasicTable {
@@ -82,6 +83,7 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 4342547780389381013L;
+
 	private UniversalIdentificationResultsTableModel model;
 	private FormattedDecimalRenderer ppmRenderer, scoreRenderer;
 	private MsFeature parentFeature;
@@ -91,7 +93,9 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 	public UniversalIdentificationResultsTable() {
 
 		super();
-
+		this.putClientProperty(
+				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, this.getClass().getSimpleName());
+		
 		model = new UniversalIdentificationResultsTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

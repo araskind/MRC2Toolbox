@@ -159,24 +159,22 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 			if(primaryId != null) {
 
 				if(primaryId.getCompoundIdentity() == null) {
-//					System.out.println(cf.getPrimaryIdentity().
-//							getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId() + " has no compound ID");
 					compoundName = primaryId.getIdentityName();
 				}
 				else {
 					compoundName = primaryId.getName();
 					double neutralMass = primaryId.getCompoundIdentity().getExactMass();
 					neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
-					refMatch = primaryId.getReferenceMsMsLibraryMatch();
-					if(refMatch != null) {
-						
-						MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
-						if(libPrecursor != null) 
-							libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
-					
-						entropyMsMsScore = refMatch.getEntropyBasedScore();
-					}
 				}
+				refMatch = primaryId.getReferenceMsMsLibraryMatch();
+				if(refMatch != null) {
+					
+					MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
+					if(libPrecursor != null) 
+						libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
+				
+					entropyMsMsScore = refMatch.getEntropyBasedScore();
+				}				
 				idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
 				adduct = primaryId.getPrimaryAdduct();
 			}
@@ -254,24 +252,23 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		if(primaryId != null) {
 
 			if(primaryId.getCompoundIdentity() == null) {
-				System.out.println(cf.getPrimaryIdentity().
-						getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId() + 
-						" has no compound ID");
+				compoundName = primaryId.getIdentityName();
 			}
 			else {
 				compoundName = primaryId.getName();
 				double neutralMass = primaryId.getCompoundIdentity().getExactMass();
 				neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
-				refMatch = primaryId.getReferenceMsMsLibraryMatch();
-				if(refMatch != null) {
-					
-					MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
-					if(libPrecursor != null) 
-						libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
+			}	
+			refMatch = primaryId.getReferenceMsMsLibraryMatch();
+			if(refMatch != null) {
 				
-					entropyMsMsScore = refMatch.getEntropyBasedScore();
-				}
+				MsPoint libPrecursor = refMatch.getMatchedLibraryFeature().getParent();
+				if(libPrecursor != null) 
+					libraryPrecursorDeltaMz = instrumentMsMs.getParent().getMz() - libPrecursor.getMz();					
+			
+				entropyMsMsScore = refMatch.getEntropyBasedScore();
 			}
+			
 			idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
 			adduct = primaryId.getPrimaryAdduct();
 		}

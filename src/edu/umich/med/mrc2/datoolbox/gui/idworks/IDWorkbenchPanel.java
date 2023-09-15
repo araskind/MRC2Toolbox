@@ -30,6 +30,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -98,6 +99,7 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.FeatureLookupDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusteringParameterSet;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MsFeatureInfoBundleCluster;
+import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdFollowupUtils;
@@ -573,12 +575,6 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		String command = event.getActionCommand();
 
-//		if (command.equals(MainActionCommands.SHOW_OPEN_IDTRACKER_EXPERIMENT_DIALOG_COMMAND.getName()))
-//			showOpenExperimentDialogue();
-
-//		if (command.equals(MainActionCommands.OPEN_IDTRACKER_EXPERIMENT_COMMAND.getName()))
-//			openExperiment();
-
 		if (command.equals(MainActionCommands.ID_SETUP_DIALOG_COMMAND.getName()))
 			runIdentificationTask();
 		
@@ -704,14 +700,20 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if (command.equals(MainActionCommands.ASSIGN_ID_LEVEL_COMMAND.getName()))
 			setIdLevelForSelectedIdentification();
 		
+		String componentId = (String)((JComponent)event.getSource()).getClientProperty(
+				MRC2ToolBoxCore.COMPONENT_IDENTIFIER);
+		
 		for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
 			
 			if (command.equals(level.getName()) 
 					|| command.equals(MSFeatureIdentificationLevel.SET_PRIMARY + level.getName())) {
-				runIdLevelUpdate(command);
+				runIdLevelUpdate(command, componentId);
 				break;
 			}			
 		}
+		if (command.equals(MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName()))
+			runIdLevelUpdate(command, componentId);
+						
 		if (command.equals(MainActionCommands.SHOW_IDTRACKER_DATA_EXPORT_DIALOG_COMMAND.getName()))
 			showIdTrackerDataExportDialog();
 		
@@ -1844,16 +1846,17 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(identity == null)
 			return;
 		
-		MSFeatureIdentificationLevel idLevel = 
-				IDTDataCache.getMSFeatureIdentificationLevelByName(idLevelName);
+		MSFeatureIdentificationLevel idLevel = null;
+		if(idLevelName != null)
+			idLevel = IDTDataCache.getMSFeatureIdentificationLevelByName(idLevelName);
+		
 		if(idLevel == null && identity.getIdentificationLevel() == null)
 			return;
 		
-		if(idLevel != null && identity.getIdentificationLevel() != null) {
-			
-			if(idLevel.equals(identity.getIdentificationLevel())) 
+		if(idLevel != null && identity.getIdentificationLevel() != null 
+				&& idLevel.equals(identity.getIdentificationLevel())) 
 				return;
-		}
+		
 		identity.setIdentificationLevel(idLevel);
 		if(msOneFeatureTable.getSelectedBundle() != null) {
 			
@@ -1920,9 +1923,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
         }
  	}
 	
-	public void runIdLevelUpdate(String idLevelCommand) {
+	public void runIdLevelUpdate(String idLevelCommand, String componentId) {
 		
-    	UpdateIdLevelTask task = new UpdateIdLevelTask(idLevelCommand);
+    	UpdateIdLevelTask task = new UpdateIdLevelTask(idLevelCommand, componentId);
     	idp = new IndeterminateProgressDialog(
     			"Updating identification confidence level ...", 
     			IDWorkbenchPanel.this.getContentPane(), task);
@@ -1945,49 +1948,66 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
         @Override
         public void actionPerformed(ActionEvent e) {
-        	runIdLevelUpdate(idLevelCommand);			    			
+        	
+    		String componentId = (String)((JComponent)e.getSource()).getClientProperty(
+    				MRC2ToolBoxCore.COMPONENT_IDENTIFIER);
+    		
+        	runIdLevelUpdate(idLevelCommand, componentId);			    			
     	} 
     }	
 	
 	class UpdateIdLevelTask extends LongUpdateTask {
 	
 		private String idLevelCommand;
+		private String componentId;
 		
-		public UpdateIdLevelTask(String idLevelCommand) {
+		public UpdateIdLevelTask(
+				String idLevelCommand, String componentId) {
 			super();
 			this.idLevelCommand = idLevelCommand;
+			this.componentId = componentId;
 		}
 	
 		@Override
 		public Void doInBackground() {
 			
-			identificationsTable.getTable().getSelectionModel().
+			
+			String idLevelName = idLevelCommand;
+			if(idLevelCommand.startsWith(MSFeatureIdentificationLevel.SET_PRIMARY))
+				idLevelName = idLevelCommand.replace(MSFeatureIdentificationLevel.SET_PRIMARY, "");
+			
+			if(idLevelCommand.equals(MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName()))
+				idLevelName = null;
+			
+			// If command comes from identifications table
+			if(componentId.equals(identificationsTable.getTable().
+					getClientProperty(MRC2ToolBoxCore.COMPONENT_IDENTIFIER))) {
+				
+				identificationsTable.getTable().getSelectionModel().
 						removeListSelectionListener(IDWorkbenchPanel.this);
-			msTwoFeatureTable.getTable().getSelectionModel().
-						removeListSelectionListener(IDWorkbenchPanel.this);
-	
-        	if(idLevelCommand.startsWith(MSFeatureIdentificationLevel.SET_PRIMARY)) {
-				try {
-					setPrimaryIdLevelForMultipleSelectedFeatures(
-							idLevelCommand.replace(MSFeatureIdentificationLevel.SET_PRIMARY, ""));
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-        	}
-			else {
-        		try {
-					setIdLevelForIdentification(idLevelCommand);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}  
-			}    	
-        	//identificationsTable.getTable().addModelListeners();
-        	identificationsTable.getTable().getSelectionModel().
-        				addListSelectionListener(IDWorkbenchPanel.this);
-			msTwoFeatureTable.getTable().getSelectionModel().
+							
+				setIdLevelForIdentification(idLevelName);
+				
+	        	identificationsTable.getTable().getSelectionModel().
 						addListSelectionListener(IDWorkbenchPanel.this);
+			}
+			//	If command comes from MSMS feature table
+			if(componentId.equals(msTwoFeatureTable.getTable().
+					getClientProperty(MRC2ToolBoxCore.COMPONENT_IDENTIFIER))) {
+				
+				msTwoFeatureTable.getTable().getSelectionModel().
+						removeListSelectionListener(IDWorkbenchPanel.this);
+				
+				setPrimaryIdLevelForMultipleSelectedFeatures(idLevelName);
+				
+				msTwoFeatureTable.getTable().getSelectionModel().
+						addListSelectionListener(IDWorkbenchPanel.this);
+			}
+			//	TODO If command comes from MSOne feature table
+			if(componentId.equals(msOneFeatureTable.getTable().
+					getClientProperty(MRC2ToolBoxCore.COMPONENT_IDENTIFIER))) {
+				
+			}
 			return null;
 		}
 	}
@@ -1996,8 +2016,9 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			MSFeatureIdentificationLevel idLevel, 
 			int msLevel,
 			Collection<MsFeature>msmsFeatures,
-			boolean updateSelectedOnly) {
+			boolean updateSelectedOnly) throws Exception{
 		
+		Connection conn = ConnectionManager.getConnection();
 		for(MsFeature msf : msmsFeatures) {
 			
 			MsFeatureIdentity identity = msf.getPrimaryIdentity();
@@ -2018,7 +2039,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				if(msLevel == 1) {
 					
 					try {
-						IdLevelUtils.setIdLevelForReferenceMS1FeatureIdentification(identity);
+						IdLevelUtils.setIdLevelForReferenceMS1FeatureIdentification(identity, conn);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -2028,7 +2049,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					
 					String msmsId = msf.getSpectrum().getExperimentalTandemSpectrum().getId();
 					try {
-						IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity, msmsId);
+						IdLevelUtils.setIdLevelForMSMSFeatureIdentification(identity, msmsId, conn);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -2036,6 +2057,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				}
 			}
 		}
+		ConnectionManager.releaseConnection(conn);
 		if(msLevel == 1) {
 			
 			if(updateSelectedOnly)
@@ -2059,14 +2081,24 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		
 		if(!msOneFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
 			
-			setPrimaryIdLevelForMultipleFeatures(idLevel, 1,
-					msOneFeatureTable.getTableFeatures(TableRowSubset.SELECTED), true);
+			try {
+				setPrimaryIdLevelForMultipleFeatures(idLevel, 1,
+						msOneFeatureTable.getTableFeatures(TableRowSubset.SELECTED), true);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return;
 		}
 		if(!msTwoFeatureTable.getBundles(TableRowSubset.SELECTED).isEmpty()) {
 			
-			setPrimaryIdLevelForMultipleFeatures(idLevel, 2,
-					msTwoFeatureTable.getTableFeatures(TableRowSubset.SELECTED), true);
+			try {
+				setPrimaryIdLevelForMultipleFeatures(idLevel, 2,
+						msTwoFeatureTable.getTableFeatures(TableRowSubset.SELECTED), true);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return;
 		}
 	}
@@ -2189,7 +2221,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			Collection<MSFeatureIdentificationFollowupStep>followUpSteps, 
 			int msLevel,
 			Collection<MsFeature>msFeatures,
-			boolean updateSelectedOnly) {
+			boolean updateSelectedOnly) throws Exception{
 
 		Collection<MSFeatureInfoBundle>featureBundles = null;
 		if(msLevel == 1) 
@@ -2198,6 +2230,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(msLevel == 2) 
 			featureBundles = getMsFeatureBundlesForFeatures(msFeatures, 2);
 
+		Connection conn = ConnectionManager.getConnection();
 		for(MSFeatureInfoBundle fib : featureBundles) {
 			
 			fib.getIdFollowupSteps().clear();
@@ -2209,7 +2242,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					
 					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 						try {
-							IdFollowupUtils.setIdFollowupStepsForMS1Feature(fib);
+							IdFollowupUtils.setIdFollowupStepsForMS1Feature(fib, conn);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -2220,7 +2253,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					
 					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 						try {
-							IdFollowupUtils.setIdFollowupStepsForMSMSFeature(fib);
+							IdFollowupUtils.setIdFollowupStepsForMSMSFeature(fib, conn);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -2229,6 +2262,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				}
 			}
 		}
+		ConnectionManager.releaseConnection(conn);
 		if(msLevel == 1) {
 			
 			if(updateSelectedOnly)
@@ -2310,7 +2344,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 			Collection<StandardFeatureAnnotation>annotations, 
 			int msLevel,
 			Collection<MsFeature>msFeatures,
-			boolean updateSelectedOnly) {
+			boolean updateSelectedOnly) throws Exception{
 
 		Collection<MSFeatureInfoBundle>featureBundles = null;
 		if(msLevel == 1) 
@@ -2319,6 +2353,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		if(msLevel == 2) 
 			featureBundles = getMsFeatureBundlesForFeatures(msFeatures, 2);
 
+		Connection conn = ConnectionManager.getConnection();
 		for(MSFeatureInfoBundle fib : featureBundles) {
 			
 			fib.getStandadAnnotations().clear();
@@ -2330,7 +2365,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					
 					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 						try {
-							StandardAnnotationUtils.setStandardFeatureAnnotationsForMS1Feature(fib);
+							StandardAnnotationUtils.setStandardFeatureAnnotationsForMS1Feature(fib, conn);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -2341,7 +2376,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					
 					if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() == null) {
 						try {
-							StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(fib);
+							StandardAnnotationUtils.setStandardFeatureAnnotationsForMSMSFeature(fib, conn);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -2350,6 +2385,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				}
 			}
 		}
+		ConnectionManager.releaseConnection(conn);
 		if(msLevel == 1) {
 			
 			if(updateSelectedOnly)

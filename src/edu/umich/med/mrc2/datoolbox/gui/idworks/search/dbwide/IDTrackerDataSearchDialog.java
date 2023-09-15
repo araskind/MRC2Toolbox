@@ -114,7 +114,7 @@ public class IDTrackerDataSearchDialog extends JDialog
 	public static final String PREFS_NODE = IDTrackerDataSearchDialog.class.getName();
 	
 	public static final String NULL_STRING = "NULL";
-
+	public static final String RESTRICT_POLARITY = "RESTRICT_POLARITY";
 	public static final String POLARITY = "POLARITY";
 	public static final String BP_MZ = "BP_MZ";
 	public static final String FRAGMENT_MZ_STRING = "FRAGMENT_MZ_STRING";

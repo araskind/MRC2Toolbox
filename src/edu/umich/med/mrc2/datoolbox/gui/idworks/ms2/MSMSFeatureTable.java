@@ -85,6 +85,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.SampleTypeRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.LongTableUpdateTask;
 import edu.umich.med.mrc2.datoolbox.gui.utils.TableUpdateProgressDialog;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class MSMSFeatureTable extends BasicTable {
 
@@ -99,6 +100,8 @@ public class MSMSFeatureTable extends BasicTable {
 
 	public MSMSFeatureTable() {
 		super();
+		this.putClientProperty(
+				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, this.getClass().getSimpleName());
 		model = new MSMSFeatureTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -341,10 +344,10 @@ public class MSMSFeatureTable extends BasicTable {
 	}
 
 	public void updateFeatureData(MSFeatureInfoBundle bundle) {
-		thf.setTable(null);
+//		thf.setTable(null);
 		model.updateFeatureData(bundle);
-		thf.setTable(this);
-		adjustVariableColumns();
+//		thf.setTable(this);
+//		adjustVariableColumns();
 	}
 
 	public void selectBundle(MSFeatureInfoBundle toSelect) {
