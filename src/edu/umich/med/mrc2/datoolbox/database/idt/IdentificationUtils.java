@@ -411,7 +411,7 @@ public class IdentificationUtils {
 	public static void setReferenceMS1FeaturePrimaryIdentity(
 			String featureId, MsFeatureIdentity newIdentity, Connection conn) throws Exception {
 		
-		if(newIdentity == null) {
+		if(newIdentity == null || newIdentity.getCompoundIdentity() == null) {
 			disableReferenceMS1FeaturePrimaryIdentity(featureId, conn);
 			return;
 		}
@@ -832,7 +832,7 @@ public class IdentificationUtils {
 	public static void setMSMSFeaturePrimaryIdentity(
 			String featureId, MsFeatureIdentity newIdentity, Connection conn) throws Exception {
 		
-		if(newIdentity == null) {
+		if(newIdentity == null || newIdentity.getCompoundIdentity() == null) {
 			disableMSMSFeaturePrimaryIdentity(featureId, conn);
 			return;
 		}		
@@ -1438,6 +1438,20 @@ public class IdentificationUtils {
 				+ "'IDS002' WHERE IDENTIFICATION_LEVEL_ID IS NULL AND IS_PRIMARY IS NOT NULL";
 		
 		ConnectionManager.executeUpdate(sql);
+	}
+	
+	public static void clearAllReferenceMS1FeatureIdentifications(
+			String featureId, Connection conn) throws Exception {
+		
+		clearReferenceMS1FeatureLibraryMatches(featureId, conn);
+		clearReferenceMS1FeatureManualIds(featureId, conn);
+	}
+	
+	public static void clearAllMSMSFeatureIdentifications(
+			String featureId, Connection conn) throws Exception {
+		
+		clearMSMSFeatureLibraryMatches(featureId, conn);
+		clearMSMSFeatureManualIdentifications(featureId, conn);
 	}
 }
 

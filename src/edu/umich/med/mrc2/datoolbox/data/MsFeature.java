@@ -324,56 +324,35 @@ public class MsFeature implements AnnotatedObject, Serializable {
 
 	/*
 	 * Identification
-	 * TODO go trough the logic again, are all the checks necessary?
 	 * */
 	public boolean addIdentity(MsFeatureIdentity cid) {
 
 		if(cid == null)
 			return false;
 
-//		if(cid.getCompoundIdentity() == null)
-//			return false;
-//
-//		if(cid.getCompoundIdentity().getName() == null)
-//			return false;
-//
-//		if(cid.getCompoundIdentity().getName().trim().isEmpty())
-//			return false;
-//
-//		if(identifications.contains(cid))
-//			return true;
-//		else {
-			identifications.add(cid);
-			return true;
-//		}
+		identifications.add(cid);
+		return true;
 	}
 
 	public void removeIdentity(MsFeatureIdentity cid) {
 
+		MsFeatureIdentity defaultUnknown = getDefaultPrimaryIdentity();
 		identifications.remove(cid);
 		if(cid.equals(primaryIdentity)) {
 
-			primaryIdentity = null;
-			setTopScoreIdAsDefault();
+			primaryIdentity = defaultUnknown;
+			if(primaryIdentity == null)
+				createDefaultPrimaryIdentity();
 		}
-		//	Change name to unknown if necessary
-		if(primaryIdentity == null && !name.startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName()))
-			name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-				MRC2ToolBoxConfiguration.getMzFormat().format(getMonoisotopicMz()) + "_" +
-				MRC2ToolBoxConfiguration.getRtFormat().format(retentionTime);
-
 		setStatus(ParameterSetStatus.CHANGED);
 	}
 
 	public void clearIdentification() {
 
-		identifications.clear();
-		primaryIdentity = null;
-
-		if(!name.startsWith(DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName()))
-			name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-				MRC2ToolBoxConfiguration.getMzFormat().format(getMonoisotopicMz()) + "_" +
-				MRC2ToolBoxConfiguration.getRtFormat().format(retentionTime);
+		primaryIdentity = getDefaultPrimaryIdentity();
+		identifications.clear();		
+		if(primaryIdentity == null)
+			createDefaultPrimaryIdentity();
 
 		setStatus(ParameterSetStatus.CHANGED);
 	}
@@ -412,17 +391,11 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	}
 	
 	public void disablePrimaryIdentity() {
-		
-		primaryIdentity = null;	
+
 		identifications.stream().forEach(i -> i.setPrimary(false));
-		double mz = 0.0d;
-		if(spectrum.getTandemSpectrum(SpectrumSource.EXPERIMENTAL) != null
-				&& spectrum.getTandemSpectrum(SpectrumSource.EXPERIMENTAL).getParent() != null)
-			mz = spectrum.getTandemSpectrum(SpectrumSource.EXPERIMENTAL).getParent().getMz();
-		
-		name = DataPrefix.MS_LIBRARY_UNKNOWN_TARGET.getName() +
-				MRC2ToolBoxConfiguration.getMzFormat().format(mz) + "_" +
-				MRC2ToolBoxConfiguration.getRtFormat().format(retentionTime);
+		primaryIdentity = getDefaultPrimaryIdentity();
+		if(primaryIdentity == null)
+			createDefaultPrimaryIdentity();
 
 		setStatus(ParameterSetStatus.CHANGED);
 	}
@@ -561,7 +534,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		if (defaultModification == null && newChemMod == null)
 			return;
 
-		if ((defaultModification == null && newChemMod != null) || (defaultModification != null && newChemMod == null)) {
+		if ((defaultModification == null && newChemMod != null) 
+				|| (defaultModification != null && newChemMod == null)) {
 
 			defaultModification = newChemMod;
 			setStatus(ParameterSetStatus.CHANGED);
@@ -976,7 +950,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 				return FeatureIdentificationState.SINGLE_ACTIVE_ID;
 		}
 		if(identifications.size() > 1) {
-			if(primaryIdentity == null)
+			if(primaryIdentity == null || primaryIdentity.getCompoundIdentity() == null)
 				return FeatureIdentificationState.MULTIPLE_INACTIVE_IDS;
 			else
 				return FeatureIdentificationState.MULTIPLE_ACTIVE_IDS;
@@ -1148,6 +1122,16 @@ public class MsFeature implements AnnotatedObject, Serializable {
 			primaryIdentity.setConfidenceLevel(
 					CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);
 		}
+	}
+	
+	private MsFeatureIdentity getDefaultPrimaryIdentity() {
+		
+		if(identifications == null || identifications.isEmpty())
+			return null;
+		
+		return identifications.stream().
+				filter(i -> Objects.isNull(i.getCompoundIdentity())).
+				findFirst().orElse(null);
 	}
 	
 	public void updateUnknownPrimaryIdentityBasedOnMSMS() {
