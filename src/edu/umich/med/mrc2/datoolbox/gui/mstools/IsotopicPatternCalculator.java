@@ -254,7 +254,7 @@ public class IsotopicPatternCalculator extends JPanel implements ActionListener 
 			Collection<MsPoint> msPoints = MsUtils.calculateIsotopeDistributionFromSmiles(
 					smileString, chModPanel.getSelectedModification());
 			ipTable.setTableModelFromMsPointCollection(msPoints);
-			msPlot.showMsForPointCollection(msPoints, false, "Predicted spectrum");
+			msPlot.showMsForPointCollection(msPoints, "Predicted spectrum");
 		}
 	}
 
@@ -274,7 +274,7 @@ public class IsotopicPatternCalculator extends JPanel implements ActionListener 
 			Collection<MsPoint> msPoints = MsUtils.calculateIsotopeDistribution(
 					queryFormula, chModPanel.getSelectedModification(), true);
 			ipTable.setTableModelFromMsPointCollection(msPoints);
-			msPlot.showMsForPointCollection(msPoints, false, "Predicted spectrum");
+			msPlot.showMsForPointCollection(msPoints, "Predicted spectrum");
 		}
 	}
 

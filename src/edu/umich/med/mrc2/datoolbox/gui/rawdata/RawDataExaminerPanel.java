@@ -1609,7 +1609,7 @@ public class RawDataExaminerPanel extends DockableMRC2ToolboxPanel
 	private void showMsFeatureInfoBundle(MSFeatureInfoBundle msFeatureInfoBundle) {
 
 		MsFeature msFeature = msFeatureInfoBundle.getMsFeature();
-		msPlotPanel.showMsForFeature(msFeature, false);
+		msPlotPanel.showMsForFeature(msFeature);
 		msTable.setTableModelFromMsFeature(msFeature);
 		msmsPlotPanel.clearPanel();
 		msmsTable.clearTable();

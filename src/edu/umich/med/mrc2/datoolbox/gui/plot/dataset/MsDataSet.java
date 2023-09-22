@@ -46,6 +46,8 @@ import edu.umich.med.mrc2.datoolbox.data.SimpleMsMs;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
+import umich.ms.datatypes.scan.IScan;
 
 public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 
@@ -183,6 +185,20 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 		labels.put(0, averageMassSpectrum.toString());
 		allPoints.addAll(averageMassSpectrum.getMasSpectrum().getMsPoints());
 		createNormalizedData();
+		createDataRanges();
+	}
+	
+	public MsDataSet(IScan s) {
+		
+		this();
+		spectrumSource = s;
+		Collection<MsPoint> msPoints = RawDataUtils.getScanPoints(s, 0.0d);
+		MsPoint[] points = msPoints.toArray(new MsPoint[msPoints.size()]);
+		msSeries.put(0, points);
+		msSeriesScaled.put(0, MsUtils.normalizeAndSortMsPattern(points));
+		labels.put(0, RawDataUtils.getScanLabel(s));
+		allPoints.addAll(msPoints);
+		allPointsScaled.addAll(Arrays.asList(msSeriesScaled.get(0)));
 		createDataRanges();
 	}
 	
@@ -442,6 +458,10 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 	}
 
 	public void setNormalized(boolean isNormalized) {
-		this.isNormalized = isNormalized;
+		this.isNormalized = isNormalized;		
+	}
+	
+	public void fireDatasetChanged() {
+		super.fireDatasetChanged();
 	}
 }

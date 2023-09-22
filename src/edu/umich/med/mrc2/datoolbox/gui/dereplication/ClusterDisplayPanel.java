@@ -171,7 +171,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 	}
 
 	private void showCompleteMsForCluster(MsFeatureCluster activeCluster2) {
-		spectrumPlot.showMsForFeatureList(activeCluster.getFeatures(), false);
+		spectrumPlot.showMsForFeatureList(activeCluster.getFeatures());
 	}
 
 	public void clearClusterDataPanel() {
@@ -456,7 +456,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 				stream().flatMap(c -> c.stream()).collect(Collectors.toList());
 		
 		MsFeature firstSelected = allFeatures.get(0);	
-		spectrumPlot.showMsForFeatureList(allFeatures, false);
+		spectrumPlot.showMsForFeatureList(allFeatures);
 		spectrumTable.setTableModelFromMsFeature(firstSelected);
 		idTable.setModelFromMsFeature(firstSelected);		
 		featureAnnotationPanel.loadFeatureData(firstSelected);

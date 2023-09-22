@@ -72,7 +72,6 @@ import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
-import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.scan.IScan;
 
@@ -117,6 +116,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		PREFERENCES_NODE = "mrc2.datoolbox." + id;
 		loadPreferences();
 		initButtons();
+		toggleSpectraNormalization(normalizeSpectra);
 	}
 	
 	private void initButtons() {
@@ -180,7 +180,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 	}
 	
 	private void toggleSpectraNormalization(boolean norm) {
-		// TODO Auto-generated method stub
+
 		normalizeSpectra = norm;
 		if(normalizeSpectra) {
 			
@@ -189,26 +189,19 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 			toggleSpectraNormalizationButton.setCommand(
 					MainActionCommands.SHOW_RAW_SPECTRA_COMMAND.getName());
 			toggleSpectraNormalizationButton.setIcon(normalizeSpectrumIcon);
-			showNormalizedSpectra();
 		}
 		else {
 			toggleSpectraNormalizationButton.setText(
 					MainActionCommands.SHOW_RAW_SPECTRA_COMMAND.getName());
 			toggleSpectraNormalizationButton.setCommand(
 					MainActionCommands.SHOW_NORMALIZED_SPECTRA_COMMAND.getName());
-			toggleSpectraNormalizationButton.setIcon(rawSpectrumIcon);
-			showRawSpectra();
+			toggleSpectraNormalizationButton.setIcon(rawSpectrumIcon);		
 		}
-	}
-
-	private void showRawSpectra() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void showNormalizedSpectra() {
-		// TODO Auto-generated method stub
-		
+		if(activeMsDataSet != null) {
+			
+			activeMsDataSet.setNormalized(normalizeSpectra);
+			activeMsDataSet.fireDatasetChanged();
+		}
 	}
 
 	private void togglePrecursorZoom(boolean zoom) {
@@ -313,7 +306,6 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 
 	public void showMsForFeature(MsFeature cf) {
 
-		spectrumPlot.removeAllDataSets();
 		activeMsDataSet = new MsDataSet(cf);
 		showMsDataSet(activeMsDataSet);
 		
@@ -356,7 +348,6 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 	public void showMsForFeatureList(
 			Collection<MsFeature> featureList) {
 
-		spectrumPlot.removeAllDataSets();
 		activeMsDataSet = new MsDataSet(featureList);
 		showMsDataSet(activeMsDataSet);
 	}
@@ -462,26 +453,31 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 			TandemMassSpectrum reference) {
 
 		removeAllDataSets();
-		HeadToTaleMsDataSet dataSet = 
+		activeMsDataSet = 
 				new HeadToTaleMsDataSet(msms, reference);
 		MsPoint featureParentIon = getParentIonForPlot(msms);
 		MsPoint referenceParentIon = getParentIonForPlot(reference);
 		finalizeTandemMsWithReferencePlotSetup(
-				dataSet, featureParentIon, referenceParentIon);
+				(HeadToTaleMsDataSet) activeMsDataSet, featureParentIon, referenceParentIon);
 	}
 
 	public void showTandemMsWithReference(
 			TandemMassSpectrum instrumentSpectrum, 
 			MsMsLibraryFeature libFeature) {
 
-		HeadToTaleMsDataSet dataSet = 
+		activeMsDataSet = 
 				new HeadToTaleMsDataSet(instrumentSpectrum, libFeature);
 
 		MsPoint featureParentIon = getParentIonForPlot(instrumentSpectrum);
-		MsPoint referenceParentIon = getParentIonForPlot(null);
-		
+		MsPoint referenceParentIon = libFeature.getParent();
+		if(referenceParentIon != null && normalizeSpectra) {
+			
+			referenceParentIon = new MsPoint(
+					libFeature.getParent().getMz(), 
+					libFeature.getNormalizedParentIonIntensity());
+		}		
 		finalizeTandemMsWithReferencePlotSetup(
-				dataSet, featureParentIon, referenceParentIon);
+				(HeadToTaleMsDataSet) activeMsDataSet, featureParentIon, referenceParentIon);
 		
 //		XYPlot plot = (XYPlot) spectrumPlot.getPlot();
 //
@@ -579,14 +575,14 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 	public void showScan(IScan s) {
 		
 		spectrumPlot.removeAllDataSets();
-		String labelText =  RawDataUtils.getScanLabel(s);
-		Collection<MsPoint> pattern = RawDataUtils.getScanPoints(s, 0.0d);
-		Set<MsPoint> scanPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
-		scanPoints.addAll(pattern);
-		MsDataSet targetMs = new MsDataSet(scanPoints, labelText);	
+//		String labelText =  RawDataUtils.getScanLabel(s);
+//		Collection<MsPoint> pattern = RawDataUtils.getScanPoints(s, 0.0d);
+//		Set<MsPoint> scanPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
+//		scanPoints.addAll(pattern);
+		activeMsDataSet = new MsDataSet(s);	
 		
-		((XYPlot) spectrumPlot.getPlot()).setRenderer(1, spectrumPlot.getDefaultMsRenderer());
-		((XYPlot) spectrumPlot.getPlot()).setDataset(1, targetMs);
+		((XYPlot) spectrumPlot.getPlot()).setRenderer(0, spectrumPlot.getDefaultMsRenderer());
+		((XYPlot) spectrumPlot.getPlot()).setDataset(0, activeMsDataSet);
 				
 		//	Mark precursor ranges or individual precursors
 		//	Highest MS level
@@ -595,7 +591,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		else 	//	Show precursors in parent scan
 			addParentIonDataSeriesToParentMSMSPlot(s);		
 		
-		setPlotMargins(targetMs);
+		setPlotMargins(activeMsDataSet);
 	}
 	
 	private void addParentIonDataSeriesToParentMSMSPlot(IScan s) {
@@ -654,14 +650,13 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		}
 		if(parentSeries.getItemCount() > 0) {
 			parentSet.addSeries(parentSeries);
-			((XYPlot) spectrumPlot.getPlot()).setRenderer(2, parentRenderer);
-			((XYPlot) spectrumPlot.getPlot()).setDataset(2, parentSet);
+			((XYPlot) spectrumPlot.getPlot()).setRenderer(1, parentRenderer);
+			((XYPlot) spectrumPlot.getPlot()).setDataset(1, parentSet);
 		}
 	}
 
 	public void addParentIonDataSeriesToHighestLevelMSMSPlot(IScan s) {
-		
-		double size = 16.0;
+
 		if(s.getPrecursor() != null) {
 			
 			Double precursorMz = null;
@@ -701,9 +696,9 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 				parentSet.addSeries(parentSeries);
 				XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
 				parentRenderer.setSeriesPaint(0, Color.RED);
-				parentRenderer.setSeriesShape(0, new Ellipse2D.Double(-size/4.0, -size/4.0, size/2.0, size/2.0));
-				((XYPlot) spectrumPlot.getPlot()).setRenderer(2, parentRenderer);
-				((XYPlot) spectrumPlot.getPlot()).setDataset(2, parentSet);
+				parentRenderer.setSeriesShape(0, precursorTopMarker);
+				((XYPlot) spectrumPlot.getPlot()).setRenderer(1, parentRenderer);
+				((XYPlot) spectrumPlot.getPlot()).setDataset(1, parentSet);
 			}
 		}
 	}

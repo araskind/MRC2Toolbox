@@ -4063,7 +4063,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 		}		
 		List<MsPoint> msOne = Arrays.asList(feature.getSpectrum().getCompletePattern());
 		if(!msOne.isEmpty())
-			msOnePlot.showMsForFeature(feature, false);
+			msOnePlot.showMsForFeature(feature);
 					
 		//	Add MSMS
 		if(!feature.getSpectrum().getTandemSpectra().isEmpty()) {

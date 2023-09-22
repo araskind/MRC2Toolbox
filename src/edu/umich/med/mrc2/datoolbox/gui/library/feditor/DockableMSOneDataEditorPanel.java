@@ -100,7 +100,7 @@ public class DockableMSOneDataEditorPanel extends DefaultSingleCDockable impleme
 		featureCopy = new LibraryMsFeature(activeFeature);
 		adductSelector.setPolarity(polarity);
 		adductSelector.loadFeatureData(activeFeature, polarity);
-		msPlot.showMsForLibraryFeature(activeFeature, true);
+		msPlot.showMsForLibraryFeature(activeFeature);
 		libraryMsTable.setTableModelFromMsFeature(activeFeature);
 	}
 
@@ -135,7 +135,7 @@ public class DockableMSOneDataEditorPanel extends DefaultSingleCDockable impleme
 				forEach(e -> featureCopy.getSpectrum().
 						addSpectrumForAdduct(e.getKey(), e.getValue()));
 
-			msPlot.showMsForLibraryFeature(featureCopy, true);
+			msPlot.showMsForLibraryFeature(featureCopy);
 			libraryMsTable.setTableModelFromMsFeature(featureCopy);
 		}
 	}
@@ -148,7 +148,7 @@ public class DockableMSOneDataEditorPanel extends DefaultSingleCDockable impleme
 			if (activeFeature != null) {
 
 				adductSelector.loadFeatureData(activeFeature, adductSelector.getPolarity());
-				msPlot.showMsForLibraryFeature(activeFeature, true);
+				msPlot.showMsForLibraryFeature(activeFeature);
 				libraryMsTable.setTableModelFromMsFeature(activeFeature);
 			} else {
 				clearPanel();
