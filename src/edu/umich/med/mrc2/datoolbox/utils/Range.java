@@ -78,7 +78,10 @@ public class Range implements Serializable, Comparable<Range> {
 	public Range(DoubleRange mzRange) {
 		this(mzRange.getLo(), mzRange.getHi());
 	}
-
+	
+	public Range(org.jfree.data.Range mzRange) {
+		this(mzRange.getLowerBound(), mzRange.getUpperBound());
+	}
 
 	/**
 	 * Compares two Ranges

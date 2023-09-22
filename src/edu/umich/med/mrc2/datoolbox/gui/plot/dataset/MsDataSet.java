@@ -21,13 +21,14 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.DoubleSummaryStatistics;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.jfree.data.xy.AbstractXYDataset;
 import org.jfree.data.xy.IntervalXYDataset;
@@ -52,353 +53,243 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 	 *
 	 */
 	private static final long serialVersionUID = -3102688118765527115L;
-	private Map<Integer, MsPoint[]> msSeries;
-	private Map<Integer, String> labels;
-	private double topIntensity;
-	private ArrayList<MsPoint> allPoints;
-	private Range massRange;
-	private Object spectrumSource;
-
-	public MsDataSet(LibraryMsFeature lt, boolean scaleMs) {
-		createDataSetFromLibraryTarget(lt, scaleMs);
+	protected Map<Integer, MsPoint[]> msSeries;
+	protected Map<Integer, MsPoint[]> msSeriesScaled;
+	protected boolean isNormalized;
+	protected Map<Integer, String> labels;
+	protected Collection<MsPoint> allPoints;
+	protected Collection<MsPoint> allPointsScaled;
+	protected Range massRange;
+	protected Range intensityRange;
+	protected Range intensityRangeScaled;
+	protected Object spectrumSource;
+	
+	public MsDataSet() {
+		
+		super();
+		initFields();
 	}
 
-	public MsDataSet(Collection<MsFeature> featureList, boolean scaleMs) {
+	public MsDataSet(LibraryMsFeature lt) {
+		this();
+		createDataSetFromLibraryTarget(lt);
+	}
+
+	public MsDataSet(Collection<MsFeature> featureList) {
+		
+		this();
 		spectrumSource = featureList;
-		createDataSetFromFeatureCollection(featureList, scaleMs);
+		createDataSetFromFeatureCollection(featureList);
 	}
 
-	public MsDataSet(List<SimpleMsMs> selectedFeatures, boolean scaleMs) {
+	public MsDataSet(List<SimpleMsMs> selectedFeatures) {
+		
+		this();
 		spectrumSource = selectedFeatures;
-		createDataSetFromMsCollection(selectedFeatures, scaleMs);
+		createDataSetFromMsCollection(selectedFeatures);
 	}
 
-	public MsDataSet(MsFeature selectedFeature, boolean scaleMs) {
+	public MsDataSet(MsFeature selectedFeature) {
 
+		this();
 		spectrumSource = selectedFeature;
 		
 		if(selectedFeature.getClass().equals(MsFeature.class))
-			createDataSetFromCompoundFeature(selectedFeature, scaleMs);
+			createDataSetFromCompoundFeature(selectedFeature);
 
 		if(selectedFeature.getClass().equals(LibraryMsFeature.class))
-			createDataSetFromLibraryTarget((LibraryMsFeature) selectedFeature, scaleMs);
+			createDataSetFromLibraryTarget((LibraryMsFeature) selectedFeature);
 	}
 
-	public MsDataSet(MsFeatureCluster selectedCluster, boolean scaleMs) {
+	public MsDataSet(MsFeatureCluster selectedCluster) {
+		
 		spectrumSource = selectedCluster;
-		createDataSetFromFeatureCollection(selectedCluster.getFeatures(), scaleMs);
+		createDataSetFromFeatureCollection(selectedCluster.getFeatures());
 	}
 
-	public MsDataSet(MsMsCluster selectedCluster, boolean scaleMs) {
-		createDataSetFromMsCollection(selectedCluster.getClusterFeatures(), scaleMs);
+	public MsDataSet(MsMsCluster selectedCluster) {
+		createDataSetFromMsCollection(selectedCluster.getClusterFeatures());
 	}
 
+	//	HeadToTail
 	public MsDataSet(
 			Collection<MsPoint> featurePoints,
 			Collection<MsPoint> libraryPoints,
 			String featureLabel,
-			String libraryLabel,
-			boolean scale) {
+			String libraryLabel) {
 
 		spectrumSource = featurePoints;
-		createHeadToTailDataSet(featurePoints, libraryPoints, featureLabel, libraryLabel, scale);
+		createHeadToTailDataSet(
+				featurePoints, libraryPoints, featureLabel, libraryLabel);
 	}
 
 	public MsDataSet(IsotopePattern isoPattern) {
-
+		
+		this();
 		spectrumSource = isoPattern;
-		msSeries = new TreeMap<Integer, MsPoint[]>();
-		labels = new TreeMap<Integer, String>();
-		massRange = new Range(0d);
-		allPoints = new ArrayList<MsPoint>();
-		topIntensity = 0;
-
 		MsPoint[] points = new MsPoint[isoPattern.getNumberOfIsotopes()];
 
-		for (int i = 0; i < isoPattern.getNumberOfIsotopes(); i++)
-			points[i] = new MsPoint(isoPattern.getIsotope(i).getMass(), isoPattern.getIsotope(i).getIntensity() * 100);
-
-		msSeries.put(0, points);
-		labels.put(0, "Predicted spectrum");
-
-		for (MsPoint p : points) {
-
-			allPoints.add(p);
-
-			if (p.getIntensity() > topIntensity)
-				topIntensity = p.getIntensity();
-
-			if (massRange.getAverage() == 0d)
-				massRange = new Range(p.getMz());
-			else
-				massRange.extendRange(p.getMz());
+		for (int i = 0; i < isoPattern.getNumberOfIsotopes(); i++) {
+			
+			points[i] = new MsPoint(isoPattern.getIsotope(i).getMass(), 
+					isoPattern.getIsotope(i).getIntensity() * 100);
+			
+			allPoints.add(points[i]);
 		}
+		msSeries.put(0, points);
+		labels.put(0, "Predicted spectrum");	
+		createNormalizedData();
+		createDataRanges();
 	}
 
 	public MsDataSet(TandemMassSpectrum msms) {
 
+		this();
 		spectrumSource = msms;
-		msSeries = new TreeMap<Integer, MsPoint[]>();
-		labels = new TreeMap<Integer, String>();
-		massRange = new Range(0d);
-		allPoints = new ArrayList<MsPoint>();
-		topIntensity = 0;
 
 		MsPoint[] points = msms.getMassSortedSpectrum();
-
 		msSeries.put(0, points);
 		labels.put(0, msms.getUserFriendlyId());
-
-		for (MsPoint p : points) {
-
-			allPoints.add(p);
-
-			if (p.getIntensity() > topIntensity)
-				topIntensity = p.getIntensity();
-
-			if (massRange.getAverage() == 0d)
-				massRange = new Range(p.getMz());
-			else
-				massRange.extendRange(p.getMz());
-		}
+		allPoints.addAll(msms.getSpectrum());
+		createNormalizedData();
+		createDataRanges();
 	}
 
-	public MsDataSet(Collection<MsPoint> msPoints) {
+	public MsDataSet(Set<MsPoint> msPoints) {
 
+		this();
 		spectrumSource = msPoints;
-		msSeries = new TreeMap<Integer, MsPoint[]>();
-		labels = new TreeMap<Integer, String>();
-		massRange = new Range(0d);
-		allPoints = new ArrayList<MsPoint>();
-		topIntensity = 0;
-
-		msSeries.put(0, msPoints.toArray(new MsPoint[msPoints.size()]));
+		MsPoint[] points = msPoints.toArray(new MsPoint[msPoints.size()]);
+		msSeries.put(0, points);
+		msSeriesScaled.put(0, MsUtils.normalizeAndSortMsPattern(points));
 		labels.put(0, "Predicted spectrum");
-
-		for (MsPoint p : msSeries.get(0)) {
-
-			allPoints.add(p);
-
-			if (p.getIntensity() > topIntensity)
-				topIntensity = p.getIntensity();
-
-			if (massRange.getAverage() == 0d)
-				massRange = new Range(p.getMz());
-			else
-				massRange.extendRange(p.getMz());
-		}
+		allPoints.addAll(msPoints);
+		allPointsScaled.addAll(Arrays.asList(msSeriesScaled.get(0)));
+		createDataRanges();
 	}
 
-	public MsDataSet(Collection<MsPoint> msPoints, boolean scale, String label) {
+	public MsDataSet(Set<MsPoint> msPoints, String label) {
 
-		spectrumSource = msPoints;
-		msSeries = new HashMap<Integer, MsPoint[]>();
-		labels = new HashMap<Integer, String>();
-		massRange = null;
-		allPoints = new ArrayList<MsPoint>();
-		topIntensity = 0;
-
-		MsPoint[] scaledPattern = msPoints.toArray(new MsPoint[msPoints.size()]);
-		if(scale)
-			scaledPattern = MsUtils.normalizeAndSortMsPattern(msPoints);
-
-		msSeries.put(0, scaledPattern);
+		this(msPoints);
 		labels.put(0, label);
-
-		for (MsPoint p : scaledPattern) {
-
-			allPoints.add(p);
-
-			if (p.getIntensity() > topIntensity)
-				topIntensity = p.getIntensity();
-
-			if (massRange == null)
-				massRange = new Range(p.getMz());
-			else
-				massRange.extendRange(p.getMz());
-		}
 	}
 
 	public MsDataSet(AverageMassSpectrum averageMassSpectrum) {
 		
-		spectrumSource = averageMassSpectrum;
+		this();
+		spectrumSource = averageMassSpectrum;	
+		MsPoint[] points = averageMassSpectrum.getMasSpectrum().getCompletePattern();
+		msSeries.put(0, points);
+		labels.put(0, averageMassSpectrum.toString());
+		allPoints.addAll(averageMassSpectrum.getMasSpectrum().getMsPoints());
+		createNormalizedData();
+		createDataRanges();
+	}
+	
+	private void initFields() {
+		
 		msSeries = new TreeMap<Integer, MsPoint[]>();
+		msSeriesScaled = new TreeMap<Integer, MsPoint[]>();
 		labels = new TreeMap<Integer, String>();
 		massRange = new Range(0d);
-		allPoints = new ArrayList<MsPoint>();
-		topIntensity = 0;
-		
-		msSeries.put(0, averageMassSpectrum.getMasSpectrum().getCompletePattern());
-		labels.put(0, averageMassSpectrum.toString());
-
-		for (MsPoint p : msSeries.get(0)) {
-
-			allPoints.add(p);
-
-			if (p.getIntensity() > topIntensity)
-				topIntensity = p.getIntensity();
-
-			if (massRange.getAverage() == 0d)
-				massRange = new Range(p.getMz());
-			else
-				massRange.extendRange(p.getMz());
-		}
+		allPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		allPointsScaled = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		isNormalized = false;
 	}
 
-	private void createDataSetFromCompoundFeature(MsFeature feature, boolean scaleMs) {
-
-		ArrayList<MsFeature>features = new ArrayList<MsFeature>();
-		features.add(feature);
-		createDataSetFromFeatureCollection(features, scaleMs);
+	private void createDataSetFromCompoundFeature(MsFeature feature) {
+		createDataSetFromFeatureCollection(Collections.singleton(feature));
 	}
 
-	private void createDataSetFromFeatureCollection(Collection<MsFeature> featureCollection, boolean scaleMs) {
+	private void createDataSetFromFeatureCollection(
+			Collection<MsFeature> featureCollection) {
 
-		msSeries = new HashMap<Integer, MsPoint[]>();
-		labels = new HashMap<Integer, String>();
-		massRange = new Range(0d);
-
-		allPoints = new ArrayList<MsPoint>();
 		int featureCount = 0;
-		topIntensity = 0;
-
 		for (MsFeature cf : featureCollection) {
 
 			if (cf.getSpectrum() == null)
 				continue;
 
-			MsPoint[] libPattern = cf.getSpectrum().getCompletePattern(scaleMs);
+			MsPoint[] libPattern = cf.getSpectrum().getCompletePattern(false);
 			msSeries.put(featureCount, libPattern);
 			String fName = Integer.toString(featureCount + 1) + " - " + cf.getName();
 			if(cf instanceof LibraryMsFeature)
 				fName += " - library";
 			
-			labels.put(featureCount, fName);
-			for (MsPoint p : libPattern) {
-
-				allPoints.add(p);
-				if (p.getIntensity() > topIntensity)
-					topIntensity = p.getIntensity();
-
-				if (massRange.getAverage() == 0d)
-					massRange = new Range(p.getMz());
-				else
-					massRange.extendRange(p.getMz());
-			}
+			labels.put(featureCount, fName);			
+			allPoints.addAll(cf.getSpectrum().getMsPoints());
 			featureCount++;
 		}
+		createNormalizedData();
+		createDataRanges();
 	}
 
-	private void createDataSetFromLibraryTarget(LibraryMsFeature selectedTarget, boolean scaleMs) {
-
-		msSeries = new HashMap<Integer, MsPoint[]>();
-		labels = new HashMap<Integer, String>();
-		massRange = new Range(0d);
-
-		allPoints = new ArrayList<MsPoint>();
+	private void createDataSetFromLibraryTarget(
+			LibraryMsFeature selectedTarget) {
+		
 		int featureCount = 0;
-		topIntensity = 0;
+
 		if(selectedTarget.getSpectrum() == null)
 			return;
 
 		MassSpectrum spectrum = selectedTarget.getSpectrum();
 		for(Adduct ad : spectrum.getAdducts()){
 
-			MsPoint[] ms = spectrum.getMsForAdduct(ad, scaleMs);
-			if(ms == null)
+			MsPoint[] ms = spectrum.getMsForAdduct(ad, false);
+			if(ms == null || ms.length == 0)
 				continue;
-
-			msSeries.put(featureCount, ms);
+			
+			MsPoint[] msScaled = spectrum.getMsForAdduct(ad, true);
+			msSeries.put(featureCount, msScaled);			
 			labels.put(featureCount, ad.getName());
-
-			for (MsPoint p : ms) {
-
-				allPoints.add(p);
-
-				if (p.getIntensity() > topIntensity)
-					topIntensity = p.getIntensity();
-
-				if (massRange.getAverage() == 0d)
-					massRange = new Range(p.getMz());
-				else
-					massRange.extendRange(p.getMz());
-			}
+			allPoints.addAll(spectrum.getMsPoints());
 			featureCount++;
 		}
+		createNormalizedData();
+		createDataRanges();
 	}
 
-	private void createDataSetFromMsCollection(Collection<SimpleMsMs> featureCollection, boolean scaleMs) {
+	private void createDataSetFromMsCollection(
+			Collection<SimpleMsMs> featureCollection) {
 
-		msSeries = new HashMap<Integer, MsPoint[]>();
-		labels = new HashMap<Integer, String>();
-		massRange = new Range(0d);
-
-		allPoints = new ArrayList<MsPoint>();
 		int featureCount = 0;
-		topIntensity = 0;
 
 		for (SimpleMsMs ms : featureCollection) {
 
 			msSeries.put(featureCount, ms.getDataPoints());
 			labels.put(featureCount, ms.getTitle());
-
-			for (MsPoint p : ms.getDataPoints()) {
-
-				allPoints.add(p);
-
-				if (p.getIntensity() > topIntensity)
-					topIntensity = p.getIntensity();
-
-				if (massRange.getAverage() == 0d)
-					massRange = new Range(p.getMz());
-				else
-					massRange.extendRange(p.getMz());
-			}
+			allPoints.addAll(ms.getSpectrumPoints());			
 			featureCount++;
 		}
+		createNormalizedData();
+		createDataRanges();
 	}
-
+	
 	public void createHeadToTailDataSet(
 			Collection<MsPoint> featurePoints,
 			Collection<MsPoint> libraryPoints,
 			String featureLabel,
-			String libraryLabel,
-			boolean scale) {
-
-		msSeries = new TreeMap<Integer, MsPoint[]>();
-		labels = new TreeMap<Integer, String>();
-		massRange = new Range(0d);
-		allPoints = new ArrayList<MsPoint>();
-		topIntensity = 0;
-
-		Collection<MsPoint> featurePointsScaled = new ArrayList<MsPoint>();
-		featurePointsScaled.addAll(featurePoints);
-		if(scale) {
-			double fMax = featurePoints.stream().mapToDouble(p -> p.getIntensity()).max().getAsDouble();
-			double featureScalingCoeff = 100.0d / fMax;
-			featurePointsScaled.clear();
-			featurePoints.stream().forEach(p -> featurePointsScaled.add(new MsPoint(p.getMz(), p.getIntensity() * featureScalingCoeff)));
-		}
-		allPoints.addAll(featurePointsScaled);
-		msSeries.put(0, featurePointsScaled.toArray(new MsPoint[featurePointsScaled.size()]));
+			String libraryLabel) {
+		
+		//	Feature 
+		spectrumSource = featurePoints;
+		MsPoint[] fPoints = featurePoints.toArray(new MsPoint[featurePoints.size()]);
+		msSeries.put(0, fPoints);
 		labels.put(0, featureLabel);
-
-		Collection<MsPoint> libraryPointsInvertedScaled = new ArrayList<MsPoint>();
-		libraryPoints.stream().forEach(p -> libraryPointsInvertedScaled.add(new MsPoint(p.getMz(), -p.getIntensity())));
-		if(scale) {
-			double fMax = libraryPoints.stream().mapToDouble(p -> p.getIntensity()).max().getAsDouble();
-			double featureScalingCoeff = 100.0d / fMax;
-			libraryPointsInvertedScaled.clear();
-			libraryPoints.stream().forEach(p -> libraryPointsInvertedScaled.add(
-					new MsPoint(p.getMz(), -p.getIntensity() * featureScalingCoeff)));
-		}
-		allPoints.addAll(libraryPointsInvertedScaled);
-		msSeries.put(1, libraryPointsInvertedScaled.toArray(new MsPoint[libraryPointsInvertedScaled.size()]));
+		allPoints.addAll(featurePoints);
+		
+		//	Library
+		Set<MsPoint> libraryPointsInverted = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		libraryPoints.stream().forEach(
+				p -> libraryPointsInverted.add(new MsPoint(p.getMz(), p.getIntensity() * -1.0d)));
+		MsPoint[] libPoints = 
+				libraryPointsInverted.toArray(new MsPoint[libraryPointsInverted.size()]);
+		msSeries.put(1, libPoints);
 		labels.put(1, libraryLabel);
-
-		DoubleSummaryStatistics mzStats = allPoints.stream().mapToDouble(p -> p.getMz()).summaryStatistics();
-		massRange = new Range(mzStats.getMin(), mzStats.getMax());
-		topIntensity = allPoints.stream().mapToDouble(p -> p.getIntensity()).max().getAsDouble();
+		allPoints.addAll(libraryPoints);
+		
+		createNormalizedData();
+		createDataRanges();
 	}
 
 	public Number getEndX(int series, int item) {
@@ -417,26 +308,75 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 		return getYValue(series, item);
 	}
 	
-	public double getHighestIntensityInRange(org.jfree.data.Range massRange) {
-
-		double top = 0.001;
-		for (MsPoint p : allPoints) {
-
-			if (massRange.contains(p.getMz()) && p.getIntensity() > top)
-				top = p.getIntensity();
-		}
-		return top;
+	public double getHighestIntensityInRange(org.jfree.data.Range massRange) {	
+		return getHighestIntensityInRange(new Range(massRange));
 	}
 
 	public double getHighestIntensityInRange(Range massRange) {
 
-		double top = 0.001;
-		for (MsPoint p : allPoints) {
-
-			if (massRange.contains(p.getMz()) && p.getIntensity() > top)
-				top = p.getIntensity();
+		MsPoint topPoint = null;
+		if(isNormalized) {
+			topPoint = allPointsScaled.stream().
+					filter(p -> massRange.contains(p.getMz())).
+					sorted(MsUtils.reverseIntensitySorter).
+					findFirst().orElse(null);
 		}
-		return top;
+		else {
+			topPoint = allPoints.stream().
+					filter(p -> massRange.contains(p.getMz())).
+					sorted(MsUtils.reverseIntensitySorter).
+					findFirst().orElse(null);
+		}
+		if(topPoint != null)
+			return topPoint.getIntensity();
+		else
+			return 0.001;
+	}
+	
+	protected void createDataRanges() {
+		
+		if(allPoints.isEmpty())
+			return;
+		
+		double[]mzArray = 
+				allPoints.stream().mapToDouble(p -> p.getMz()).
+				sorted().toArray();
+		massRange = 
+				new Range(mzArray[0], mzArray[mzArray.length - 1]);
+		
+		double[]intensityArray = 
+				allPoints.stream().mapToDouble(p -> p.getIntensity()).
+				sorted().toArray();
+		intensityRange = 
+				new Range(intensityArray[0], intensityArray[intensityArray.length - 1]);
+		
+		double[]intensityArrayScaled = 
+				allPointsScaled.stream().mapToDouble(p -> p.getIntensity()).
+				sorted().toArray();
+		intensityRangeScaled = 
+				new Range(intensityArrayScaled[0], 
+						intensityArrayScaled[intensityArrayScaled.length - 1]);
+	}
+	
+	protected void createNormalizedData() {
+		
+		if(allPoints.isEmpty())
+			return;
+		
+		double max = allPoints.stream().
+				mapToDouble(p -> p.getIntensity()).max().getAsDouble();
+		for(int i=0; i<msSeries.size(); i++) {
+			
+			MsPoint[]seriesPoints = msSeries.get(i);
+			MsPoint[]seriesPointsNorm = new MsPoint[seriesPoints.length];
+			for(int j=0; j<seriesPoints.length; j++) {
+				seriesPointsNorm[j] =
+						new MsPoint(seriesPoints[j].getMz(), 
+								seriesPoints[j].getIntensity() / max * 100.0d);
+				allPointsScaled.add(seriesPointsNorm[j]);
+			}
+			msSeriesScaled.put(i, seriesPointsNorm);
+		}
 	}
 
 	public int getItemCount(int series) {
@@ -444,8 +384,15 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 	}
 
 	public Range getMassRange() {
-
 		return massRange;
+	}
+	
+	public Range getIntensityRange() {
+		
+		if(isNormalized)
+			return intensityRangeScaled;
+		else
+			return intensityRange;
 	}
 
 	@Override
@@ -455,7 +402,6 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 
 	@Override
 	public Comparable<?> getSeriesKey(int series) {
-
 		return labels.get(series);
 	}
 
@@ -480,10 +426,22 @@ public class MsDataSet extends AbstractXYDataset implements IntervalXYDataset {
 	}
 
 	public Number getY(int series, int item) {
-		return msSeries.get(series)[item].getIntensity();
+		
+		if(isNormalized)
+			return msSeriesScaled.get(series)[item].getIntensity();
+		else
+			return msSeries.get(series)[item].getIntensity();
 	}
 
 	public Object getSpectrumSource() {
 		return spectrumSource;
+	}
+
+	public boolean normalized() {
+		return isNormalized;
+	}
+
+	public void setNormalized(boolean isNormalized) {
+		this.isNormalized = isNormalized;
 	}
 }

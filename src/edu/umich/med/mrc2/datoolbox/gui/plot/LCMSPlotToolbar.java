@@ -47,7 +47,7 @@ public class LCMSPlotToolbar extends PlotToolbar implements ItemListener {
 
 	protected static final Icon msHead2tailIcon = GuiUtils.getIcon("msHead2tail", 24);
 	protected static final Icon msHead2headIcon = GuiUtils.getIcon("msHead2head", 24);
-
+	
 	protected JButton toggleTailHeadButton;
 	protected JComboBox chromatogramTypeComboBox;
 	protected LCMSPlotPanel parentPlot;

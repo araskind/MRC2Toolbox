@@ -1170,6 +1170,9 @@ public enum MainActionCommands {
 	ZOOM_TO_MSMS_PRECURSOR_COMMAND("Zoom to MSMS precursor"),
 	SHOW_FULL_MS_RANGE_COMMAND("Show full spectrum range"),
 	
+	SHOW_RAW_SPECTRA_COMMAND("Show raw intensities for spectra"),
+	SHOW_NORMALIZED_SPECTRA_COMMAND("Show normalized intensities for spectra"),
+	
 	//	Mass-defect plot
 	RECALCULATE_MASS_DEFECTS_FOR_RT_RANGE("Recalculate mass defects for RT range"),
 	

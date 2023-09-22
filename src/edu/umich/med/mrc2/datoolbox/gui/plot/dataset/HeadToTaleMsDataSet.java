@@ -23,11 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
-import org.jfree.data.xy.AbstractXYDataset;
-import org.jfree.data.xy.IntervalXYDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
@@ -36,7 +31,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class HeadToTaleMsDataSet  extends AbstractXYDataset implements IntervalXYDataset {
+public class HeadToTaleMsDataSet  extends MsDataSet {
 
 	/**
 	 *
@@ -44,76 +39,89 @@ public class HeadToTaleMsDataSet  extends AbstractXYDataset implements IntervalX
 	private static final long serialVersionUID = 6793905715141166824L;
 	private Map<Integer, MsPoint[]> msSeries;
 	private Map<Integer, String> labels;
+	
+	public HeadToTaleMsDataSet() {
+		super();
+		isNormalized = true;
+	}
 
-	public HeadToTaleMsDataSet(MsFeature feature, MsFeature reference) {
+	public HeadToTaleMsDataSet(
+			MsFeature feature, 
+			MsFeature reference) {
 
-		msSeries = new TreeMap<Integer, MsPoint[]>();
-		labels = new TreeMap<Integer, String>();
-
+		this();
 		MassSpectrum featureSpectrum = feature.getSpectrum();
 		MassSpectrum referenceSpectrum = reference.getSpectrum();
 
 		if(featureSpectrum != null && referenceSpectrum != null) {
 
-			msSeries.put(0, featureSpectrum.getCompleteNormalizedPattern());
+			msSeriesScaled.put(0, featureSpectrum.getCompleteNormalizedPattern());
 			labels.put(0, feature.getName());
-			msSeries.put(1, referenceSpectrum.getCompleteNormalizedPattern());
+			msSeriesScaled.put(1, referenceSpectrum.getCompleteNormalizedPattern());
 			labels.put(1, reference.getName());
+			finalizeDataSet();
 		}
 	}
 
 	//TandemMassSpectrum
-	public HeadToTaleMsDataSet(TandemMassSpectrum unk, TandemMassSpectrum reference) {
+	public HeadToTaleMsDataSet(
+			TandemMassSpectrum unk, 
+			TandemMassSpectrum reference) {
 
-		msSeries = new TreeMap<Integer, MsPoint[]>();
-		labels = new TreeMap<Integer, String>();
-
+		this();
 		if(unk != null && reference != null) {
 
-			msSeries.put(0, unk.getNormalizedMassSortedSpectrum());
+			msSeriesScaled.put(0, unk.getNormalizedMassSortedSpectrum());
 			labels.put(0, unk.getUserFriendlyId());
-			msSeries.put(1, reference.getNormalizedMassSortedSpectrum());
+			msSeriesScaled.put(1, reference.getNormalizedMassSortedSpectrum());
 			labels.put(1, reference.getUserFriendlyId());
+			finalizeDataSet();
 		}
 	}
 
-	public HeadToTaleMsDataSet(TandemMassSpectrum instrumentSpectrum, MsMsLibraryFeature reference) {
+	public HeadToTaleMsDataSet(
+			TandemMassSpectrum instrumentSpectrum, 
+			MsMsLibraryFeature reference) {
 
-		msSeries = new TreeMap<Integer, MsPoint[]>();
-		labels = new TreeMap<Integer, String>();
-
+		this();
 		if(instrumentSpectrum != null && reference != null) {
 
-			msSeries.put(0, instrumentSpectrum.getNormalizedMassSortedSpectrum());
+			msSeriesScaled.put(0, instrumentSpectrum.getNormalizedMassSortedSpectrum());
 			labels.put(0, instrumentSpectrum.getUserFriendlyId());
-			msSeries.put(1, reference.getNormalizedMassSortedSpectrum());
+			msSeriesScaled.put(1, reference.getNormalizedMassSortedSpectrum());
 			labels.put(1, reference.getUserFriendlyId());
+			finalizeDataSet();
 		}
+	}
+	
+	private void finalizeDataSet() {
+		
+		allPointsScaled.addAll(Arrays.asList(msSeriesScaled.get(0)));
+		allPointsScaled.addAll(Arrays.asList(msSeriesScaled.get(1)));
+		
+		if(allPointsScaled.isEmpty())
+			return;
+		
+		double[]mzArray = 
+				allPointsScaled.stream().mapToDouble(p -> p.getMz()).
+				sorted().toArray();
+		massRange = 
+				new Range(mzArray[0], mzArray[mzArray.length - 1]);
+		
+		double[]intensityArrayScaled = 
+				allPointsScaled.stream().mapToDouble(p -> p.getIntensity()).
+				sorted().toArray();
+		intensityRangeScaled = 
+				new Range(intensityArrayScaled[0], 
+						intensityArrayScaled[intensityArrayScaled.length - 1]);
 	}
 
 	public Range getMassRange() {
-
-		Range massRange = new Range(0.0d);
-		for (Entry<Integer, MsPoint[]> entry : msSeries.entrySet()) {
-
-			for(MsPoint p : entry.getValue()) {
-
-				if (massRange.getAverage() == 0d)
-					massRange = new Range(p.getMz());
-				else
-					massRange.extendRange(p.getMz());
-			}
-		}
 		return massRange;
 	}
 	
 	public Range getIntensityRange() {
-		
-		double max = Arrays.asList(msSeries.get(0)).
-				stream().mapToDouble(p -> p.getIntensity()).max().getAsDouble();
-		double min = Arrays.asList(msSeries.get(1)).
-				stream().mapToDouble(p -> p.getIntensity()).max().getAsDouble();
-		return new Range(-min, max);
+		return intensityRangeScaled;
 	}
 
 	@Override
@@ -179,5 +187,10 @@ public class HeadToTaleMsDataSet  extends AbstractXYDataset implements IntervalX
 	@Override
 	public double getEndYValue(int series, int item) {
 		return getYValue(series, item);
+	}
+	
+	@Override
+	public void setNormalized(boolean isNormalized) {
+		//	This data set is always normalized
 	}
 }

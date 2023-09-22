@@ -30,6 +30,8 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
@@ -69,6 +71,7 @@ import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.RawDataManager;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.LCMSData;
 import umich.ms.datatypes.scan.IScan;
@@ -77,7 +80,9 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 
 	private static final Icon componentIcon = GuiUtils.getIcon("msms", 16);
 	private static final Icon multipleIdsIcon = GuiUtils.getIcon("multipleIds", 16);
-	private static final Icon uniqueIdsIcon = GuiUtils.getIcon("checkboxFull", 16);
+	private static final Icon uniqueIdsIcon = GuiUtils.getIcon("checkboxFull", 16);	
+	protected static final Icon normalizeSpectrumIcon = GuiUtils.getIcon("scale", 16);
+	protected static final Icon rawSpectrumIcon = GuiUtils.getIcon("noScale", 16);
 		
 	private LCMSPlotPanel spectrumPlot;
 	private LCMSPlotToolbar msPlotToolbar;
@@ -85,11 +90,16 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 	private Preferences preferences;
 	private String PREFERENCES_NODE;
 	private static final String ZOOM_TO_MSMS_PRECURSOR = "ZOOM_TO_MSMS_PRECURSOR";
+	private static final String NORMALIZE_SPECTRA = "NORMALIZE_SPECTRA";
 	private SimpleButtonAction zoomToMSMSPrecursorButton;
+	private SimpleButtonAction toggleSpectraNormalizationButton;
 	private boolean zoomToMSMSPrecursor;
+	private boolean normalizeSpectra;
 	private MsDataSet activeMsDataSet;
-	
-	private static final Shape precursorMarker = new Ellipse2D.Double(-4.0, -4.0, 8.0, 8.0);	
+	private MsPlotType msPlotType;
+	private static final double markerSize = 16.0;
+	private static final Shape precursorTopMarker = new Ellipse2D.Double(
+			-markerSize/4.0, -markerSize/4.0, markerSize/2.0, markerSize/2.0);	
 	
 	public DockableSpectumPlot(String id, String title) {
 
@@ -115,6 +125,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 				new LocationHint(LocationHint.DOCKABLE, LocationHint.LEFT));
 
 		if (zoomToMSMSPrecursor) {
+			
 			zoomToMSMSPrecursorButton = GuiUtils.setupButtonAction(
 					MainActionCommands.SHOW_FULL_MS_RANGE_COMMAND.getName(), 
 					MainActionCommands.SHOW_FULL_MS_RANGE_COMMAND.getName(), 
@@ -127,23 +138,79 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 					uniqueIdsIcon, this);
 		}
 		actions.add(zoomToMSMSPrecursorButton);
+		
+		if(normalizeSpectra) {
+			
+			toggleSpectraNormalizationButton = GuiUtils.setupButtonAction(
+					MainActionCommands.SHOW_NORMALIZED_SPECTRA_COMMAND.getName(), 
+					MainActionCommands.SHOW_RAW_SPECTRA_COMMAND.getName(), 
+					normalizeSpectrumIcon, this);
+		}
+		else {
+			toggleSpectraNormalizationButton = GuiUtils.setupButtonAction(
+					MainActionCommands.SHOW_RAW_SPECTRA_COMMAND.getName(), 
+					MainActionCommands.SHOW_NORMALIZED_SPECTRA_COMMAND.getName(), 
+					rawSpectrumIcon, this);
+		}
+		actions.add(toggleSpectraNormalizationButton);
+
 		actions.addSeparator();
 		intern().setActionOffers(actions);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		String command = e.getActionCommand();
 
-		if(e.getActionCommand().equals(LCMSPlotPanel.TOGGLE_MS_HEAD_TO_TAIL_COMMAND)) {
-
+		if(command.equals(LCMSPlotPanel.TOGGLE_MS_HEAD_TO_TAIL_COMMAND)) {
+			//	TODO
 		}
-		if(e.getActionCommand().equals(MainActionCommands.ZOOM_TO_MSMS_PRECURSOR_COMMAND.getName()))
+		if(command.equals(MainActionCommands.ZOOM_TO_MSMS_PRECURSOR_COMMAND.getName()))
 			togglePrecursorZoom(true);
 		
-		if(e.getActionCommand().equals(MainActionCommands.SHOW_FULL_MS_RANGE_COMMAND.getName()))
+		if(command.equals(MainActionCommands.SHOW_FULL_MS_RANGE_COMMAND.getName()))
 			togglePrecursorZoom(false);	
+		
+		if(command.equals(MainActionCommands.SHOW_NORMALIZED_SPECTRA_COMMAND.getName()))
+			toggleSpectraNormalization(true);
+		
+		if(command.equals(MainActionCommands.SHOW_RAW_SPECTRA_COMMAND.getName()))
+			toggleSpectraNormalization(false);	
 	}
 	
+	private void toggleSpectraNormalization(boolean norm) {
+		// TODO Auto-generated method stub
+		normalizeSpectra = norm;
+		if(normalizeSpectra) {
+			
+			toggleSpectraNormalizationButton.setText(
+					MainActionCommands.SHOW_NORMALIZED_SPECTRA_COMMAND.getName());
+			toggleSpectraNormalizationButton.setCommand(
+					MainActionCommands.SHOW_RAW_SPECTRA_COMMAND.getName());
+			toggleSpectraNormalizationButton.setIcon(normalizeSpectrumIcon);
+			showNormalizedSpectra();
+		}
+		else {
+			toggleSpectraNormalizationButton.setText(
+					MainActionCommands.SHOW_RAW_SPECTRA_COMMAND.getName());
+			toggleSpectraNormalizationButton.setCommand(
+					MainActionCommands.SHOW_NORMALIZED_SPECTRA_COMMAND.getName());
+			toggleSpectraNormalizationButton.setIcon(rawSpectrumIcon);
+			showRawSpectra();
+		}
+	}
+
+	private void showRawSpectra() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void showNormalizedSpectra() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void togglePrecursorZoom(boolean zoom) {
 
 		zoomToMSMSPrecursor = zoom;		
@@ -190,13 +257,15 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 
 	public void showMsDataSet(MsDataSet msDataSet) {
 
+		removeAllDataSets();
 		activeMsDataSet = msDataSet;
+		activeMsDataSet.setNormalized(normalizeSpectra);
 		MassSpectrumRenderer msRenderer = spectrumPlot.getDefaultMsRenderer();
 		for (int i = 0; i < msDataSet.getSeriesCount(); i++)
 			msRenderer.setSeriesPaint(i, MasterPlotPanel.getColor(i));
 
-		((XYPlot) spectrumPlot.getPlot()).setRenderer(1, msRenderer);
-		((XYPlot) spectrumPlot.getPlot()).setDataset(1, activeMsDataSet);
+		((XYPlot) spectrumPlot.getPlot()).setRenderer(0, msRenderer);
+		((XYPlot) spectrumPlot.getPlot()).setDataset(0, activeMsDataSet);
 		
 		setPlotMargins(activeMsDataSet);
 	}
@@ -216,86 +285,49 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		}
 		
 		double maxIntensity = 
-				msDataSet.getHighestIntensityInRange(activeMsDataSet.getMassRange());
+				msDataSet.getIntensityRange().getMax();
 		((XYPlot) spectrumPlot.getPlot()).getRangeAxis().
 			setRange(new Range(0.0d, maxIntensity * 1.15));
 	}
 
-	public void showMsForPointCollection(Collection<MsPoint> pattern, boolean scaleMs, String seriesLabel) {
+	public void showMsForPointCollection(
+			Collection<MsPoint> pattern, String seriesLabel) {
 
-		spectrumPlot.removeAllDataSets();
-		activeMsDataSet = new MsDataSet(pattern, scaleMs, seriesLabel);
+		Set<MsPoint> pointSet = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		pointSet.addAll(pattern);
+		activeMsDataSet = new MsDataSet(pointSet, seriesLabel);
 		showMsDataSet(activeMsDataSet);
 	}
 
 	public void showMsForCluster(MsMsCluster selectedCluster) {
 
-		spectrumPlot.removeAllDataSets();
-		activeMsDataSet = new MsDataSet(selectedCluster, false);
+		activeMsDataSet = new MsDataSet(selectedCluster);
 		showMsDataSet(activeMsDataSet);
 	}
 
 	public void showSimpleMsMs(List<SimpleMsMs> selectedFeatures) {
 
-		spectrumPlot.removeAllDataSets();
-		MsDataSet clusterMs = new MsDataSet(selectedFeatures, true);
-		showMsDataSet(clusterMs);
+		activeMsDataSet = new MsDataSet(selectedFeatures);
+		showMsDataSet(activeMsDataSet);
 	}
 
-	public void showMsForFeature(MsFeature cf, boolean scaleMs) {
+	public void showMsForFeature(MsFeature cf) {
 
 		spectrumPlot.removeAllDataSets();
-		activeMsDataSet = new MsDataSet(cf, scaleMs);
+		activeMsDataSet = new MsDataSet(cf);
 		showMsDataSet(activeMsDataSet);
 		
-		if(cf.getSpectrum() == null || cf.getSpectrum().getExperimentalTandemSpectrum() == null)
+		if(cf.getSpectrum() == null 
+				|| cf.getSpectrum().getExperimentalTandemSpectrum() == null)
 			return;
-				
-		TandemMassSpectrum msms = cf.getSpectrum().getExperimentalTandemSpectrum();
-		if(msms.getIsolationWindow() != null && msms.getIsolationWindow().getSize() > 0.0d) {
-			
-			IntervalMarker marker = new IntervalMarker(
-					msms.getIsolationWindow().getMin(), 
-					msms.getIsolationWindow().getMax());
-			marker.setPaint(LCMSPlotPanel.markerColor);
-			marker.setAlpha(0.5f);
-			((XYPlot) spectrumPlot.getPlot()).addDomainMarker(marker, Layer.FOREGROUND);
-		}
-		if(zoomToMSMSPrecursor && msms.getParent() != null)
-			zoomToInterval(msms.getParent().getMz(), 5.0d);		
+
+		addMSMSPrecursorMarker(cf.getSpectrum().getExperimentalTandemSpectrum());
 	}
 	
-	public void zoomToInterval(double center, double halfWidth) {
+	private void addMSMSPrecursorMarker(TandemMassSpectrum msms) {
 		
-		double low = center - halfWidth;
-		if(low < 0.0d)
-			low = 0.0d;
-			
-		Range mzRange = new Range(low, center + halfWidth);
-		((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setRange(mzRange);
-		double maxIntensity = activeMsDataSet.getHighestIntensityInRange(mzRange);
-		((XYPlot) spectrumPlot.getPlot()).getRangeAxis().setRange(new Range(0.0d, maxIntensity * 1.15));
-	}
-
-	public void showMsForFeatureList(Collection<MsFeature> featureList, boolean scaleMs) {
-
-		spectrumPlot.removeAllDataSets();
-		activeMsDataSet = new MsDataSet(featureList, scaleMs);
-		showMsDataSet(activeMsDataSet);
-	}
-
-	public void showMsForLibraryFeature(LibraryMsFeature lt, boolean scaleMs) {
-
-		spectrumPlot.removeAllDataSets();
-		activeMsDataSet = new MsDataSet(lt, scaleMs);
-		showMsDataSet(activeMsDataSet);
-		
-		if(lt.getSpectrum() == null || lt.getSpectrum().getExperimentalTandemSpectrum() == null)
-			return;
-		
-		//	TODO check if MSMS is set as library
-		TandemMassSpectrum msms = lt.getSpectrum().getExperimentalTandemSpectrum();
-		if(msms.getIsolationWindow() != null && msms.getIsolationWindow().getSize() > 0.0d) {
+		if(msms.getIsolationWindow() != null 
+				&& msms.getIsolationWindow().getSize() > 0.0d) {
 			
 			IntervalMarker marker = new IntervalMarker(
 					msms.getIsolationWindow().getMin(), 
@@ -306,112 +338,136 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		}
 		if(zoomToMSMSPrecursor && msms.getParent() != null)
 			zoomToInterval(msms.getParent().getMz(), 5.0d);	
+	}	
+	
+	public void zoomToInterval(double center, double halfWidth) {
+		
+		double low = center - halfWidth;
+		if(low < 0.0d)
+			low = 0.0d;
+			
+		Range mzRange = new Range(low, center + halfWidth);
+		((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setRange(mzRange);
+		double maxIntensity = activeMsDataSet.getHighestIntensityInRange(mzRange);
+		((XYPlot) spectrumPlot.getPlot()).getRangeAxis().
+				setRange(new Range(0.0d, maxIntensity * 1.15));
+	}
+
+	public void showMsForFeatureList(
+			Collection<MsFeature> featureList) {
+
+		spectrumPlot.removeAllDataSets();
+		activeMsDataSet = new MsDataSet(featureList);
+		showMsDataSet(activeMsDataSet);
+	}
+
+	public void showMsForLibraryFeature(LibraryMsFeature lt) {
+
+		activeMsDataSet = new MsDataSet(lt);
+		showMsDataSet(activeMsDataSet);
+		
+		if(lt.getSpectrum() == null 
+				|| lt.getSpectrum().getExperimentalTandemSpectrum() == null)
+			return;
+
+		addMSMSPrecursorMarker(lt.getSpectrum().getExperimentalTandemSpectrum());
 	}
 	
-	public void showTandemMs(MsMsLibraryFeature libFeature) {
+	public void showLibraryTandemMs(MsMsLibraryFeature libFeature) {
 
-		activeMsDataSet = new MsDataSet(libFeature.getSpectrum());
-		double size = 16.0;
-
+		removeAllDataSets();
+		Set<MsPoint> libraryPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		libraryPoints.addAll(libFeature.getSpectrum());
+		activeMsDataSet = new MsDataSet(libraryPoints);
+		activeMsDataSet.setNormalized(normalizeSpectra);
+		
 		//	Add MSMS points
 		MassSpectrumRenderer msRenderer = spectrumPlot.getDefaultMsRenderer();
-		msRenderer.setSeriesPaint(2, Color.BLACK);
-		((XYPlot) spectrumPlot.getPlot()).setRenderer(2, msRenderer);
-		((XYPlot) spectrumPlot.getPlot()).setDataset(2, activeMsDataSet);
+		msRenderer.setSeriesPaint(0, Color.BLACK);
+		((XYPlot) spectrumPlot.getPlot()).setRenderer(1, msRenderer);
+		((XYPlot) spectrumPlot.getPlot()).setDataset(1, activeMsDataSet);
 
 		//	Add parent ion
 		XYSeriesCollection parentSet = new XYSeriesCollection();
 		XYSeries parentSeries = new XYSeries("Parent ion");
-		MsPoint trueParent = libFeature.getParent();
-		if(trueParent != null)
-			parentSeries.add(trueParent.getMz(), trueParent.getIntensity());
-		parentSet.addSeries(parentSeries);
-		XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
-		parentRenderer.setSeriesPaint(0, Color.RED);
-		parentRenderer.setSeriesShape(0, new Ellipse2D.Double(-size/4.0, -size/4.0, size/2.0, size/2.0));
-		((XYPlot) spectrumPlot.getPlot()).setRenderer(1, parentRenderer);
-		((XYPlot) spectrumPlot.getPlot()).setDataset(1, parentSet);
-
+		MsPoint parentIon = libFeature.getParent();
+		if(parentIon != null) {
+			
+			activeMsDataSet.getMassRange().extendRange(parentIon.getMz());
+			double parentIntensity = parentIon.getIntensity();
+			if(normalizeSpectra)
+				parentIntensity = parentIntensity / libFeature.getMaxRawIntensity() * 100.0d;
+				
+			parentSeries.add(parentIon.getMz(), parentIntensity);
+			parentSet.addSeries(parentSeries);
+			XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
+			parentRenderer.setSeriesPaint(0, Color.RED);
+			parentRenderer.setSeriesShape(0, precursorTopMarker);
+			((XYPlot) spectrumPlot.getPlot()).setRenderer(0, parentRenderer);
+			((XYPlot) spectrumPlot.getPlot()).setDataset(0, parentSet);
+		}
 		setPlotMargins(activeMsDataSet);
-	}	
+	}
+	
+	private MsPoint getParentIonForPlot(TandemMassSpectrum msms) {
+
+		MsPoint parent = msms.getParent();
+		if(parent == null)
+			return null;
+		
+		if(normalizeSpectra) {
+			return new MsPoint(
+					parent.getMz(), 
+					msms.getNormalizedParentIonIntensity());
+		}
+		else {
+			return new MsPoint(
+					parent.getMz(), 
+					msms.getRawParentIonIntensity());
+		}
+	}
 
 	public void showTandemMs(TandemMassSpectrum msms) {
 
+		removeAllDataSets();
 		activeMsDataSet = new MsDataSet(msms);
-		double size = 16.0;
-
-		//	Add MSMS points
-		MassSpectrumRenderer msRenderer = spectrumPlot.getDefaultMsRenderer();
-		msRenderer.setSeriesPaint(2, Color.BLACK);
-		((XYPlot) spectrumPlot.getPlot()).setRenderer(2, msRenderer);
-		((XYPlot) spectrumPlot.getPlot()).setDataset(2, activeMsDataSet);
-
-		//	Add parent ion
-		XYSeriesCollection parentSet = new XYSeriesCollection();
-		XYSeries parentSeries = new XYSeries("Parent ion");		
-		MsPoint trueParent = msms.getParent();
-		if(trueParent == null)
-			trueParent = msms.getActualParentIon();
-		
-		if(trueParent != null) {
-			
-			double parentIntensity = msms.getTopIntensityForMzRange(
-					new edu.umich.med.mrc2.datoolbox.utils.Range(
-							trueParent.getMz() - 0.1d, trueParent.getMz() + 0.1d));
-			if(parentIntensity == 0.0d)
-				parentIntensity = msms.getTopIntensity() / 5.0d;
-			
-			parentSeries.add(trueParent.getMz(), parentIntensity);
-		}				
-		parentSet.addSeries(parentSeries);
-		XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
-		parentRenderer.setSeriesPaint(0, Color.RED);
-		parentRenderer.setSeriesShape(0, new Ellipse2D.Double(-size/4.0, -size/4.0, size/2.0, size/2.0));
-		((XYPlot) spectrumPlot.getPlot()).setRenderer(1, parentRenderer);
-		((XYPlot) spectrumPlot.getPlot()).setDataset(1, parentSet);
-
-		setPlotMargins(activeMsDataSet);
-	}
-
-	public void showTandemMsWithReference(TandemMassSpectrum msms, TandemMassSpectrum reference) {
-
-		HeadToTaleMsDataSet dataSet = 
-				new HeadToTaleMsDataSet(msms, reference);
-		XYPlot plot = (XYPlot) spectrumPlot.getPlot();
+		activeMsDataSet.setNormalized(normalizeSpectra);
 
 		//	Add MSMS points
 		MassSpectrumRenderer msRenderer = spectrumPlot.getDefaultMsRenderer();
 		msRenderer.setSeriesPaint(0, Color.BLACK);
-		msRenderer.setSeriesPaint(1, Color.RED);
-		plot.setRenderer(2, msRenderer);
-		plot.setDataset(2, dataSet);
+		((XYPlot) spectrumPlot.getPlot()).setRenderer(1, msRenderer);
+		((XYPlot) spectrumPlot.getPlot()).setDataset(1, activeMsDataSet);
 
 		//	Add parent ion
 		XYSeriesCollection parentSet = new XYSeriesCollection();
-		XYSeries parentSeries = new XYSeries("Parent ion");
-		
-		MsPoint trueParent = msms.getParent();
-		if(trueParent == null)
-			trueParent = msms.getActualParentIon();
-		
-		if(trueParent != null)
-			parentSeries.add(trueParent.getMz(), trueParent.getIntensity());
-		
-		parentSet.addSeries(parentSeries);
-		XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
-		parentRenderer.setSeriesPaint(0, Color.RED);
-		parentRenderer.setSeriesShape(0, precursorMarker);
-		plot.setRenderer(1, parentRenderer);
-		plot.setDataset(1, parentSet);
+		XYSeries parentSeries = new XYSeries("Parent ion");		
+		MsPoint parentIon = getParentIonForPlot(msms);
+		if(parentIon != null) {
+			
+			activeMsDataSet.getMassRange().extendRange(parentIon.getMz());
+			parentSeries.add(parentIon.getMz(), parentIon.getIntensity());					
+			parentSet.addSeries(parentSeries);
+			XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
+			parentRenderer.setSeriesPaint(0, Color.RED);
+			parentRenderer.setSeriesShape(0, precursorTopMarker);
+			((XYPlot) spectrumPlot.getPlot()).setRenderer(0, parentRenderer);
+			((XYPlot) spectrumPlot.getPlot()).setDataset(0, parentSet);
+		}
+		setPlotMargins(activeMsDataSet);
+	}
 
-		ValueMarker marker = new ValueMarker(0.0d);
-		marker.setPaint(Color.GRAY);
-		plot.addRangeMarker(marker);
-		spectrumPlot.restoreAutoBounds();
-		
-		edu.umich.med.mrc2.datoolbox.utils.Range iRange = dataSet.getIntensityRange();
-		((XYPlot) spectrumPlot.getPlot()).getRangeAxis().
-			setRange(new Range(iRange.getMin() * 1.15, iRange.getMax() * 1.15));
+	public void showTandemMsWithReference(
+			TandemMassSpectrum msms, 
+			TandemMassSpectrum reference) {
+
+		removeAllDataSets();
+		HeadToTaleMsDataSet dataSet = 
+				new HeadToTaleMsDataSet(msms, reference);
+		MsPoint featureParentIon = getParentIonForPlot(msms);
+		MsPoint referenceParentIon = getParentIonForPlot(reference);
+		finalizeTandemMsWithReferencePlotSetup(
+				dataSet, featureParentIon, referenceParentIon);
 	}
 
 	public void showTandemMsWithReference(
@@ -421,36 +477,99 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		HeadToTaleMsDataSet dataSet = 
 				new HeadToTaleMsDataSet(instrumentSpectrum, libFeature);
 
+		MsPoint featureParentIon = getParentIonForPlot(instrumentSpectrum);
+		MsPoint referenceParentIon = getParentIonForPlot(null);
+		
+		finalizeTandemMsWithReferencePlotSetup(
+				dataSet, featureParentIon, referenceParentIon);
+		
+//		XYPlot plot = (XYPlot) spectrumPlot.getPlot();
+//
+//		//	Add MSMS points
+//		MassSpectrumRenderer msRenderer = spectrumPlot.getDefaultMsRenderer();
+//		msRenderer.setSeriesPaint(0, Color.BLACK);
+//		msRenderer.setSeriesPaint(1, Color.RED);
+//		plot.setRenderer(2, msRenderer);
+//		plot.setDataset(2, dataSet);
+//
+//		//	Add parent ion
+//		XYSeriesCollection parentSet = new XYSeriesCollection();
+//		XYSeries parentSeries = new XYSeries("Parent ion");
+//		MsPoint trueParent = instrumentSpectrum.getActualParentIon();
+//		if(trueParent != null)
+//			parentSeries.add(trueParent.getMz(), 100.0d);
+//		parentSet.addSeries(parentSeries);
+//		XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
+//		parentRenderer.setSeriesPaint(0, Color.RED);
+//		parentRenderer.setSeriesShape(0, precursorTopMarker);
+//		plot.setRenderer(1, parentRenderer);
+//		plot.setDataset(1, parentSet);
+//
+//		ValueMarker marker = new ValueMarker(0.0d);
+//		marker.setPaint(Color.GRAY);
+//		plot.addRangeMarker(marker);
+//		spectrumPlot.restoreAutoBounds();
+//		
+//		((XYPlot) spectrumPlot.getPlot()).getRangeAxis().
+//			setRange(new Range(dataSet.getIntensityRange().getMin() * 1.15, 
+//					dataSet.getIntensityRange().getMax() * 1.15));
+	}
+	
+	private void finalizeTandemMsWithReferencePlotSetup(
+			HeadToTaleMsDataSet dataSet,
+			MsPoint featureParentIon,
+			MsPoint referenceParentIon) {
+		
 		XYPlot plot = (XYPlot) spectrumPlot.getPlot();
 
 		//	Add MSMS points
 		MassSpectrumRenderer msRenderer = spectrumPlot.getDefaultMsRenderer();
 		msRenderer.setSeriesPaint(0, Color.BLACK);
 		msRenderer.setSeriesPaint(1, Color.RED);
-		plot.setRenderer(2, msRenderer);
-		plot.setDataset(2, dataSet);
-
-		//	Add parent ion
+		plot.setRenderer(1, msRenderer);
+		plot.setDataset(1, dataSet);
+		
+		//	Add feature and reference parent ions
 		XYSeriesCollection parentSet = new XYSeriesCollection();
-		XYSeries parentSeries = new XYSeries("Parent ion");
-		MsPoint trueParent = instrumentSpectrum.getActualParentIon();
-		if(trueParent != null)
-			parentSeries.add(trueParent.getMz(), 100.0d);
-		parentSet.addSeries(parentSeries);
-		XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
-		parentRenderer.setSeriesPaint(0, Color.RED);
-		parentRenderer.setSeriesShape(0, precursorMarker);
-		plot.setRenderer(1, parentRenderer);
-		plot.setDataset(1, parentSet);
 
+		if(featureParentIon != null) {
+			dataSet.getMassRange().extendRange(featureParentIon.getMz());
+			XYSeries parentSeries = new XYSeries("Feature parent ion");
+			parentSeries.add(featureParentIon.getMz(), featureParentIon.getIntensity());			
+			parentSet.addSeries(parentSeries);
+		}	
+		if(referenceParentIon != null) {
+			dataSet.getMassRange().extendRange(referenceParentIon.getMz());
+			XYSeries refParentSeries = new XYSeries("Reference parent ion");
+			refParentSeries.add(referenceParentIon.getMz(), referenceParentIon.getIntensity());			
+			parentSet.addSeries(refParentSeries);
+		}
+		if(parentSet.getSeriesCount() > 0) {
+			
+			XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
+			
+			int featureIndex = parentSet.getSeriesIndex("Feature parent ion");
+			if(featureIndex >= 0) {
+				parentRenderer.setSeriesPaint(featureIndex, Color.RED);
+				parentRenderer.setSeriesShape(featureIndex, precursorTopMarker);
+			}
+			int refIndex = parentSet.getSeriesIndex("Reference parent ion");
+			if(refIndex >= 0) {
+				parentRenderer.setSeriesPaint(refIndex, Color.BLACK);
+				parentRenderer.setSeriesShape(refIndex, precursorTopMarker);
+			}
+			plot.setRenderer(0, parentRenderer);
+			plot.setDataset(0, parentSet);
+		}
 		ValueMarker marker = new ValueMarker(0.0d);
 		marker.setPaint(Color.GRAY);
 		plot.addRangeMarker(marker);
 		spectrumPlot.restoreAutoBounds();
-		
-		edu.umich.med.mrc2.datoolbox.utils.Range iRange = dataSet.getIntensityRange();
+
 		((XYPlot) spectrumPlot.getPlot()).getRangeAxis().
-			setRange(new Range(iRange.getMin() * 1.15, iRange.getMax() * 1.15));
+			setRange(new Range(
+					dataSet.getIntensityRange().getMin() * 1.15, 
+					dataSet.getIntensityRange().getMax() * 1.15));
 	}
 		
 	/*
@@ -462,7 +581,9 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		spectrumPlot.removeAllDataSets();
 		String labelText =  RawDataUtils.getScanLabel(s);
 		Collection<MsPoint> pattern = RawDataUtils.getScanPoints(s, 0.0d);
-		MsDataSet targetMs = new MsDataSet(pattern, false, labelText);	
+		Set<MsPoint> scanPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		scanPoints.addAll(pattern);
+		MsDataSet targetMs = new MsDataSet(scanPoints, labelText);	
 		
 		((XYPlot) spectrumPlot.getPlot()).setRenderer(1, spectrumPlot.getDefaultMsRenderer());
 		((XYPlot) spectrumPlot.getPlot()).setDataset(1, targetMs);
@@ -491,7 +612,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		XYSeries parentSeries = new XYSeries("Parent ions");
 		XYItemRenderer parentRenderer = new XYLineAndShapeRenderer(false, true);
 		parentRenderer.setSeriesPaint(0, Color.RED);
-		parentRenderer.setSeriesShape(0, precursorMarker);
+		parentRenderer.setSeriesShape(0, precursorTopMarker);
 		for(Integer child : s.getChildScans()) {
 			
 			IScan childScan = data.getScans().getScanByNum(child);
@@ -595,6 +716,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 	public void loadPreferences(Preferences prefs) {
 		preferences = prefs;
 		zoomToMSMSPrecursor = preferences.getBoolean(ZOOM_TO_MSMS_PRECURSOR, false);
+		normalizeSpectra = preferences.getBoolean(NORMALIZE_SPECTRA, false);
 	}
 
 	@Override
@@ -606,9 +728,9 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 	public void savePreferences() {
 		preferences = Preferences.userRoot().node(PREFERENCES_NODE);
 		preferences.putBoolean(ZOOM_TO_MSMS_PRECURSOR, zoomToMSMSPrecursor);  
+		preferences.putBoolean(NORMALIZE_SPECTRA, normalizeSpectra);  
 	}
 }
-
 
 
 

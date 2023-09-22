@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
@@ -35,13 +36,12 @@ public class SimpleMs implements Serializable {
 	 *
 	 */
 	private static final long serialVersionUID = -3471842324811682740L;
-	protected ArrayList<MsPoint> spectrumPoints;
+	protected Collection<MsPoint> spectrumPoints;
 	private MsPoint basePeak, monoisotopicPeak;
 	private int absCharge;
 	private Polarity polarity;
 
 	public SimpleMs() {
-
 		spectrumPoints = new ArrayList<MsPoint>();
 	}
 
@@ -178,6 +178,10 @@ public class SimpleMs implements Serializable {
 
 	public void setPolarity(Polarity polarity) {
 		this.polarity = polarity;
+	}
+
+	public Collection<MsPoint> getSpectrumPoints() {
+		return spectrumPoints;
 	}
 
 }

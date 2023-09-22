@@ -60,22 +60,14 @@ public class MsMsLibraryFeature implements Serializable {
 
 		super();
 		this.uniqueId = uniqueId;
-		spectrum = new TreeSet<MsPoint>(
-				new MsDataPointComparator(SortProperty.MZ));
-		massAnnotations = new TreeMap<MsPoint,String>(
-				new MsDataPointComparator(SortProperty.MZ));
+		spectrum = new TreeSet<MsPoint>(MsUtils.mzSorter);
+		massAnnotations = new TreeMap<MsPoint,String>(MsUtils.mzSorter);
 		properties = new TreeMap<String,String>();
 	}
 
 	public MsMsLibraryFeature(String uniqueId, Polarity polarity) {
-		super();
-		this.uniqueId = uniqueId;
+		this(uniqueId);
 		this.polarity = polarity;
-		spectrum = new TreeSet<MsPoint>(
-				new MsDataPointComparator(SortProperty.MZ));
-		massAnnotations = new TreeMap<MsPoint,String>(
-				new MsDataPointComparator(SortProperty.MZ));
-		properties = new TreeMap<String,String>();
 	}
 
 	/**
@@ -276,6 +268,32 @@ public class MsMsLibraryFeature implements Serializable {
         	return false;
 
         return true;
+	}
+	
+	public double getMaxRawIntensity() {
+		if(spectrum.isEmpty())
+			return 0.0d;
+		else
+			return spectrum.stream().
+					sorted(MsUtils.reverseIntensitySorter).
+					findFirst().get().getIntensity();		
+	}
+	
+	public double getRawParentIonIntensity() {
+		
+		if(parent == null) 
+			return 0.001d;
+		else
+			return parent.getIntensity();
+	}
+	
+	public double getNormalizedParentIonIntensity() {
+		
+		double raw = getRawParentIonIntensity();
+		if(raw > 0.001 && !spectrum.isEmpty())
+			return raw /  getMaxRawIntensity() * 100.0d;	
+		else
+			return raw;			
 	}
 
     @Override

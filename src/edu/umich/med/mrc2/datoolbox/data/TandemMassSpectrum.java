@@ -26,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -36,14 +35,12 @@ import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.store.TandemMassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.NumberArrayUtils;
@@ -255,16 +252,16 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	}
 
 	public MsPoint getActualParentIon() {
-
-		Range parentRange = MsUtils.createPpmMassRange(parent.getMz(), MRC2ToolBoxConfiguration.getMassAccuracy());
-
-		Optional<MsPoint>actualParent = spectrum.stream().filter(dp -> parentRange.contains(dp.getMz())).
-				sorted(new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC)).findFirst();
-
-		if(actualParent.isPresent())
-			return actualParent.get();
-		else
+		
+		if(parent == null)
 			return null;
+
+		Range parentRange = new Range(
+				parent.getMz() + 0.1, parent.getMz() - 0.1);
+		MsPoint actualParent = 
+				spectrum.stream().filter(dp -> parentRange.contains(dp.getMz())).
+				sorted(MsUtils.reverseIntensitySorter).findFirst().orElse(null);
+		return actualParent;
 	}
 
 	public String getUserFriendlyId() {
@@ -826,6 +823,10 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 		this.hasScans = hasScans;
 	}
 	
+	public double getTopIntensityForMzRange(org.jfree.data.Range jfRange) {
+		return getTopIntensityForMzRange(new Range(jfRange));
+	}
+	
 	public double getTopIntensityForMzRange(Range mzRange) {
 		
 		if(spectrum == null || spectrum.isEmpty())
@@ -859,6 +860,23 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 			return scanRtMap.entrySet().iterator().next().getValue();
 		else
 			return 0.0d;
+	}
+	
+	public double getRawParentIonIntensity() {
+		
+		if(parent == null) 
+			return 0.001d;
+		else
+			return parent.getIntensity();
+	}
+	
+	public double getNormalizedParentIonIntensity() {
+		
+		double raw = getRawParentIonIntensity();
+		if(raw > 0.001d && !spectrum.isEmpty())
+			return raw /  getTopIntensity() * 100.0d;	
+		else
+			return raw;			
 	}
 }
 

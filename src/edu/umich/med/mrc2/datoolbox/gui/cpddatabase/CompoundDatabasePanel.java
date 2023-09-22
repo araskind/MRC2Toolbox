@@ -907,7 +907,7 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 				clearSpectrumDataPanels();
 				MsMsLibraryFeature feature = spectraTable.getSelectedFeature();
 				if(feature != null) {
-					msTwoPlot.showTandemMs(feature);
+					msTwoPlot.showLibraryTandemMs(feature);
 					msTwoTable.setTableModelFromDataPoints(feature.getSpectrum(), feature.getParent());
 					msmsLibraryEntryPropertiesTable.showMsMsLibraryFeatureProperties(feature);
 				}
