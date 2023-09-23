@@ -30,8 +30,6 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -42,8 +40,6 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
@@ -55,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class SiriusMsExportTask extends AbstractTask {
 
@@ -198,7 +195,7 @@ public class SiriusMsExportTask extends AbstractTask {
 					writer.append(">" + SiriusMsField.MS2.getName() + " " + 
 							Double.toString(tandemMs.getCidLevel()) + "\n");
 				}
-				MsPoint[] msms = normalizeAndSortMsPatternForMsp(tandemMs.getSpectrum());
+				MsPoint[] msms = MsUtils.normalizeAndSortMsPattern(tandemMs.getSpectrum());
 				for(MsPoint point : msms) {
 
 					writer.append(
@@ -216,7 +213,8 @@ public class SiriusMsExportTask extends AbstractTask {
 	private String createComment(MSFeatureInfoBundle bundle) {
 
 		String comment = MSPField.COMMENT.getName() + ": ";
-		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(bundle.getMsFeature().getRetentionTime()) + " min. | ";
+		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(
+				bundle.getMsFeature().getRetentionTime()) + " min. | ";
 		String injId = bundle.getInjectionId();
 		if(injId != null) {
 			Injection injection = injectionMap.get(injId);
@@ -228,17 +226,6 @@ public class SiriusMsExportTask extends AbstractTask {
 		comment += "Acq. method: " + bundle.getAcquisitionMethod().getName() + "; ";
 		comment += "DA method: " + bundle.getDataExtractionMethod().getName();
 		return comment;
-	}
-
-	private MsPoint[] normalizeAndSortMsPatternForMsp(Collection<MsPoint>pattern) {
-
-		MsPoint basePeak = Collections.max(pattern, Comparator.comparing(MsPoint::getIntensity));
-		double maxIntensity  = basePeak.getIntensity();
-
-		return pattern.stream()
-				.map(dp -> new MsPoint(dp.getMz(), Math.round(dp.getIntensity()/maxIntensity*999.0d)))
-				.sorted(new MsDataPointComparator(SortProperty.MZ)).
-				toArray(size -> new MsPoint[size]);
 	}
 
 	@Override

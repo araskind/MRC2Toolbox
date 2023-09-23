@@ -1909,7 +1909,7 @@ public class RegexTest {
 					entropy = Math.round(entropy * 100000.0d)/100000.0;
 					updps.setDouble(1, entropy);
 					
-					Double mssd = MsUtils.calculateIntensityStandardDeviationForNormalizedSpectrum(spectrum, msNorm);
+					Double mssd = calculateIntensityStandardDeviationForNormalizedSpectrum(spectrum, msNorm);
 					if(mssd.equals(Double.NaN)) {
 						updps.setNull(2, java.sql.Types.NULL);
 					}
@@ -1947,6 +1947,17 @@ public class RegexTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+		
+	private static Double calculateIntensityStandardDeviationForNormalizedSpectrum(
+			Collection<MsPoint>pattern, double max) {
+		
+		MsPoint[]normSpectrum =  MsUtils.normalizeAndSortMsPattern(pattern, max);
+		DescriptiveStatistics ds = new DescriptiveStatistics();
+		for(MsPoint p : normSpectrum)
+			ds.addValue(p.getIntensity());
+		
+		return ds.getStandardDeviation();
 	}
 		
 	private static void calculateEntropyForMsmsLibraryFeatures() throws Exception {

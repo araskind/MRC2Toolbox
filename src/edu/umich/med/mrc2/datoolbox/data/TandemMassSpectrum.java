@@ -34,8 +34,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -198,19 +196,20 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 
 	public MsPoint[] getMassSortedSpectrum() {
 
-		return spectrum.stream().sorted(new MsDataPointComparator(SortProperty.MZ)).
+		return spectrum.stream().sorted(MsUtils.mzSorter).
 				toArray(size -> new MsPoint[size]);
 	}
 
 	public MsPoint[] getNormalizedMassSortedSpectrum() {
 
-		double maxIntensity = spectrum.stream().
-			sorted(MsUtils.reverseIntensitySorter).
-			findFirst().get().getIntensity();
-
-		return spectrum.stream().sorted(new MsDataPointComparator(SortProperty.MZ)).
-				map(p -> new MsPoint(p.getMz(), p.getIntensity()/maxIntensity * 1000.0d)).
-				toArray(size -> new MsPoint[size]);
+//		double maxIntensity = spectrum.stream().
+//			sorted(MsUtils.reverseIntensitySorter).
+//			findFirst().get().getIntensity();
+//
+//		return spectrum.stream().sorted(MsUtils.mzSorter).
+//				map(p -> new MsPoint(p.getMz(), p.getIntensity()/maxIntensity * 100.0d)).
+//				toArray(size -> new MsPoint[size]);
+		return MsUtils.normalizeAndSortMsPattern(spectrum);
 	}
 	
 	public MsPoint getBasePeak() {
@@ -257,7 +256,7 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 			return null;
 
 		Range parentRange = new Range(
-				parent.getMz() + 0.1, parent.getMz() - 0.1);
+				parent.getMz() - 0.1, parent.getMz() + 0.1);
 		MsPoint actualParent = 
 				spectrum.stream().filter(dp -> parentRange.contains(dp.getMz())).
 				sorted(MsUtils.reverseIntensitySorter).findFirst().orElse(null);
@@ -873,10 +872,24 @@ public class TandemMassSpectrum implements AnnotatedObject, Serializable {
 	public double getNormalizedParentIonIntensity() {
 		
 		double raw = getRawParentIonIntensity();
-		if(raw > 0.001d && !spectrum.isEmpty())
-			return raw /  getTopIntensity() * 100.0d;	
+		if(raw > 0.001d && !spectrum.isEmpty()) {
+			double norm =  raw /  getTopIntensity() 
+					* MsUtils.SPECTRUM_NORAMALIZATION_BASE_INTENSITY;	
+			if(norm > MsUtils.SPECTRUM_NORAMALIZATION_BASE_INTENSITY)
+				norm = MsUtils.SPECTRUM_NORAMALIZATION_BASE_INTENSITY;
+			
+			return norm;
+		}
 		else
 			return raw;			
+	}
+	
+	public MsPoint getNormalisedParentIon() {
+		
+		if(parent == null)
+			return null;
+		else 
+			return new MsPoint(parent.getMz(), getNormalizedParentIonIntensity());
 	}
 }
 

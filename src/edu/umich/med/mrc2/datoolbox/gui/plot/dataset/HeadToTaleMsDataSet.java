@@ -22,12 +22,10 @@
 package edu.umich.med.mrc2.datoolbox.gui.plot.dataset;
 
 import java.util.Arrays;
-import java.util.Map;
 
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
-import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
@@ -37,8 +35,6 @@ public class HeadToTaleMsDataSet  extends MsDataSet {
 	 *
 	 */
 	private static final long serialVersionUID = 6793905715141166824L;
-	private Map<Integer, MsPoint[]> msSeries;
-	private Map<Integer, String> labels;
 	
 	public HeadToTaleMsDataSet() {
 		super();
@@ -116,77 +112,35 @@ public class HeadToTaleMsDataSet  extends MsDataSet {
 						intensityArrayScaled[intensityArrayScaled.length - 1]);
 	}
 
-	public Range getMassRange() {
-		return massRange;
-	}
-	
+	@Override
 	public Range getIntensityRange() {
 		return intensityRangeScaled;
 	}
 
 	@Override
 	public int getSeriesCount() {
-		return msSeries.size();
+		return msSeriesScaled.size();
+	}
+	
+	@Override
+	public Number getX(int series, int item) {
+		return msSeriesScaled.get(series)[item].getMz();
 	}
 
 	@Override
-	public Comparable<?> getSeriesKey(int series) {
-		return labels.get(series);
-	}
-
-	public Number getStartX(int series, int item) {
-		return getX(series, item).doubleValue();
-	}
-
-	public double getStartXValue(int series, int item) {
-		return getX(series, item).doubleValue();
-	}
-
-	public Number getStartY(int series, int item) {
-		return getY(series, item);
-	}
-
-	public double getStartYValue(int series, int item) {
-		return getYValue(series, item);
-	}
-
-	public Number getX(int series, int item) {
-		return msSeries.get(series)[item].getMz();
-	}
-
 	public Number getY(int series, int item) {
 
 		if(series == 0)
-			return msSeries.get(0)[item].getIntensity();
+			return msSeriesScaled.get(0)[item].getIntensity();
 		else if(series == 1)
-			return msSeries.get(1)[item].getIntensity() * -1.0d;
+			return msSeriesScaled.get(1)[item].getIntensity() * -1.0d;
 		else
 			return 0.0d;
 	}
 
 	@Override
 	public int getItemCount(int series) {
-		return msSeries.get(series).length;
-	}
-
-	@Override
-	public Number getEndX(int series, int item) {
-		return getX(series, item).doubleValue();
-	}
-
-	@Override
-	public double getEndXValue(int series, int item) {
-		return getX(series, item).doubleValue();
-	}
-
-	@Override
-	public Number getEndY(int series, int item) {
-		return getY(series, item);
-	}
-
-	@Override
-	public double getEndYValue(int series, int item) {
-		return getYValue(series, item);
+		return msSeriesScaled.get(series).length;
 	}
 	
 	@Override

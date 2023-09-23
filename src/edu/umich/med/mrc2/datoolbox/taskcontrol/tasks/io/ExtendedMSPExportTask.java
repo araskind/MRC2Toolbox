@@ -172,20 +172,24 @@ public class ExtendedMSPExportTask extends AbstractTask {
 				writer.append(MSPField.ION_MODE.getName() + ": " + polarity + "\n");
 
 				if(tandemMs.getCidLevel() >0)
-					writer.append(MSPField.COLLISION_ENERGY.getName() + ": " + Double.toString(tandemMs.getCidLevel()) + "\n");
+					writer.append(MSPField.COLLISION_ENERGY.getName() + ": " 
+							+ Double.toString(tandemMs.getCidLevel()) + "\n");
 
 				//	RT
 				writer.append(MSPField.RETENTION_INDEX.getName() + ": " +
-						MRC2ToolBoxConfiguration.getRtFormat().format(msf.getRetentionTime()) + " min.\n");
+						MRC2ToolBoxConfiguration.getRtFormat().format(
+								msf.getRetentionTime()) + " min.\n");
 
 				//	Comments
 				writer.append(createComment(bundle));
 
 				writer.append(MSPField.PRECURSORMZ.getName() + ": " +
-					MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()) + "\n");
-				writer.append(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()) + "\n");
+					MRC2ToolBoxConfiguration.getMzFormat().format(
+							tandemMs.getParent().getMz()) + "\n");
+				writer.append(MSPField.NUM_PEAKS.getName() + ": " 
+						+ Integer.toString(tandemMs.getSpectrum().size()) + "\n");
 
-				MsPoint[] msms = MsUtils.normalizeAndSortMsPatternForMsp(tandemMs.getSpectrum());
+				MsPoint[] msms = MsUtils.normalizeAndSortMsPattern(tandemMs.getSpectrum());
 				int pointCount = 0;
 				for(MsPoint point : msms) {
 
@@ -207,7 +211,8 @@ public class ExtendedMSPExportTask extends AbstractTask {
 	private String createComment(MSFeatureInfoBundle bundle) {
 
 		String comment = MSPField.COMMENT.getName() + ": ";
-		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(bundle.getMsFeature().getRetentionTime()) + " min; ";
+		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(
+				bundle.getMsFeature().getRetentionTime()) + " min; ";
 		String injId = bundle.getInjectionId();
 		if(injId != null) {
 			Injection injection = injectionMap.get(injId);

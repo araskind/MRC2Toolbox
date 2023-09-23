@@ -144,7 +144,7 @@ public class PassatuttoDecoyExtractionTask extends AbstractTask {
 			double relInt = Double.parseDouble(decoyData[i][01]);
 			msms.add(new MsPoint(mz, relInt));
 		}
-		MsPoint[] msmsNorm = MsUtils.normalizeAndSortMsPattern(msms, 999.0d);
+		MsPoint[] msmsNorm = MsUtils.normalizeAndSortMsPattern(msms);
 		MsPoint parent = msmsNorm[msmsNorm.length - 1];
 		mspEntry.add(MSPField.PRECURSORMZ.getName() + ": "
 				+ MRC2ToolBoxConfiguration.getMzFormat().format(parent.getMz()) + "\n");

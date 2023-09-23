@@ -448,7 +448,7 @@ public class NISTMsPepSearchRoundTripTask extends NISTMsPepSearchTask {
 				MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()) + "\n");
 			writer.append(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()) + "\n");
 
-			MsPoint[] msms = MsUtils.normalizeAndSortMsPatternForMsp(tandemMs.getSpectrum());
+			MsPoint[] msms = MsUtils.normalizeAndSortMsPattern(tandemMs.getSpectrum());
 			int pointCount = 0;
 			for(MsPoint point : msms) {
 

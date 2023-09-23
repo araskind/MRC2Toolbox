@@ -29,9 +29,6 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
 
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
@@ -220,13 +217,15 @@ public class MsMsLibraryFeature implements Serializable {
 
 	public MsPoint[] getNormalizedMassSortedSpectrum() {
 
-		double maxIntensity = spectrum.stream().
-			sorted(new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC)).
-			findFirst().get().getIntensity();
-
-		return spectrum.stream().sorted(new MsDataPointComparator(SortProperty.MZ)).
-				map(p -> new MsPoint(p.getMz(), p.getIntensity()/maxIntensity * 1000.0d)).
-				toArray(size -> new MsPoint[size]);
+//		double maxIntensity = spectrum.stream().
+//			sorted(new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC)).
+//			findFirst().get().getIntensity();
+//
+//		return spectrum.stream().sorted(MsUtils.mzSorter).
+//				map(p -> new MsPoint(p.getMz(), p.getIntensity()/maxIntensity * 100.0d)).
+//				toArray(size -> new MsPoint[size]);
+		
+		return MsUtils.normalizeAndSortMsPattern(spectrum);
 	}
 
 	public String getUserFriendlyId() {
@@ -311,5 +310,16 @@ public class MsMsLibraryFeature implements Serializable {
 	
 	public String getSpectrumAsPythonArray() {		
 		return MsUtils.getSpectrumAsPythonArray(spectrum);		
+	}
+	
+
+	public MsPoint getNormalisedParentIon() {
+		
+		if(parent == null)
+			return null;
+		else
+			return new MsPoint(
+					parent.getMz(), 
+					getNormalizedParentIonIntensity());
 	}
 }

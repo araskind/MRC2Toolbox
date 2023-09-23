@@ -209,7 +209,7 @@ public class MRC2ToolBoxConfiguration {
     // MSCONVERT	    
     public static final String MS_CONVERT_EXECUTABLE_FILE = "msConvertExecutableFile";
     public static final String MS_CONVERT_EXECUTABLE_FILE_DEFAULT = "";
-    
+      
     //	Spectrum entropy
     public static final String SPECTRUM_ENTROPY_MASS_ERROR = "SPECTRUM_ENTROPY_MASS_ERROR";
     public static final double SPECTRUM_ENTROPY_MASS_ERROR_DEFAULT = 0.05d;

@@ -1395,7 +1395,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 					MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()));
 				contents.add(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()));
 
-				MsPoint[] msms = MsUtils.normalizeAndSortMsPatternForMsp(tandemMs.getSpectrum());
+				MsPoint[] msms = MsUtils.normalizeAndSortMsPattern(tandemMs.getSpectrum());
 				for(MsPoint point : msms) {
 
 					contents.add(

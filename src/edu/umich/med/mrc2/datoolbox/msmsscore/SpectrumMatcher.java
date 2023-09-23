@@ -34,9 +34,6 @@ import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.AdductMatch;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -169,7 +166,8 @@ public class SpectrumMatcher {
 
 		int matchedIsotopeCount = 1;
 		ArrayList<Double>intensityErrors = new ArrayList<Double>();
-		intensityErrors.add(Math.abs(observedNormalized[0].getIntensity() - libraryNormalized[0].getIntensity())/libraryNormalized[0].getIntensity());
+		intensityErrors.add(Math.abs(observedNormalized[0].getIntensity() 
+				- libraryNormalized[0].getIntensity())/libraryNormalized[0].getIntensity());
 		int isotopeNumber = Math.min(libraryNormalized.length, observedNormalized.length);
 
 		if(isotopeNumber > 1) {
@@ -180,13 +178,15 @@ public class SpectrumMatcher {
 				if(relaxMinorIsotopeError)
 					massErrorAdj = massError * 2;
 
-				mzRange = MsUtils.createMassRange(libraryNormalized[i].getMz(), massErrorAdj, errorType);
+				mzRange = MsUtils.createMassRange(
+						libraryNormalized[i].getMz(), massErrorAdj, errorType);
 				libIntensities[i] = libraryNormalized[i].getIntensity();
 
 				if(mzRange.contains(observedNormalized[i].getMz())) {
 
 					unkIntensities[i] = observedNormalized[i].getIntensity();
-					intensityErrors.add(Math.abs(observedNormalized[i].getIntensity() - libraryNormalized[i].getIntensity())/libraryNormalized[i].getIntensity());
+					intensityErrors.add(Math.abs(observedNormalized[i].getIntensity() 
+							- libraryNormalized[i].getIntensity())/libraryNormalized[i].getIntensity());
 					matchedIsotopeCount++;
 				}
 			}
@@ -197,7 +197,8 @@ public class SpectrumMatcher {
 		return score;
 	}
 
-	public static double getSpectraScore(double[] libIntensities, double[] unkIntensities) {
+	public static double getSpectraScore(
+			double[] libIntensities, double[] unkIntensities) {
 
 		if(libIntensities.length != unkIntensities.length)
 			return 0.0;
@@ -228,29 +229,22 @@ public class SpectrumMatcher {
 		return commonAdducts;
 	}
 
-	//	Scale data point intensity to MAX 100 and sort points by mass, return only # of most intensive isotopes
+	//	Scale data point intensity and sort points by mass, 
+	//	return only # of most intensive isotopes
 	public static MsPoint[] normalizeAndSortMsPattern(MsPoint[] pattern, int topIons) {
 
-		MsPoint basePeak = Collections.max(Arrays.asList(pattern), Comparator.comparing(MsPoint::getIntensity));
+		MsPoint basePeak = Collections.max(
+				Arrays.asList(pattern), Comparator.comparing(MsPoint::getIntensity));
 		double maxIntensity  = basePeak.getIntensity();
 
-		return Arrays.stream(pattern)
-				.map(dp -> new MsPoint(dp.getMz(), dp.getIntensity()/maxIntensity*100.0d, dp.getAdductType(), dp.getRt()))
-				.sorted(new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC)).
+		return Arrays.stream(pattern).
+				map(dp -> new MsPoint(dp.getMz(), 
+						dp.getIntensity() / maxIntensity 
+							* MsUtils.SPECTRUM_NORAMALIZATION_BASE_INTENSITY, 
+							dp.getAdductType(), dp.getRt())).
+				sorted(MsUtils.reverseIntensitySorter).
 				limit(topIons).
-				sorted(new MsDataPointComparator(SortProperty.MZ)).
-				toArray(size -> new MsPoint[size]);
-	}
-
-	//	Scale data point intensity to MAX 100 and sort points by mass
-	public static MsPoint[] normalizeAndSortMsPattern(MsPoint[] pattern) {
-
-		MsPoint basePeak = Collections.max(Arrays.asList(pattern), Comparator.comparing(MsPoint::getIntensity));
-		double maxIntensity  = basePeak.getIntensity();
-
-		return Arrays.stream(pattern)
-				.map(dp -> new MsPoint(dp.getMz(), dp.getIntensity()/maxIntensity*100.0d, dp.getAdductType(), dp.getRt()))
-				.sorted(new MsDataPointComparator(SortProperty.MZ)).
+				sorted(MsUtils.mzSorter).
 				toArray(size -> new MsPoint[size]);
 	}
 }

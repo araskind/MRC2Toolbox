@@ -189,7 +189,7 @@ public class MsMsTable extends BasicTable {
 			spectrum.add(new MsPoint(mz, intensity));
 		}
 		if(normalize)
-			pattern = MsUtils.normalizeAndSortMsPatternForMsp(spectrum);
+			pattern = MsUtils.normalizeAndSortMsPattern(spectrum);
 		else
 			pattern = spectrum.stream().
 					sorted(MsUtils.mzSorter).

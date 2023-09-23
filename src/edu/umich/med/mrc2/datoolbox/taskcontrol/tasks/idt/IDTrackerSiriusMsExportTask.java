@@ -29,17 +29,12 @@ import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
-import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.SiriusMsMsCluster;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.lims.Injection;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
@@ -103,7 +98,8 @@ public abstract class IDTrackerSiriusMsExportTask extends AbstractTask {
 	protected String createComment(MSFeatureInfoBundle bundle) {
 
 		String comment = MSPField.COMMENT.getName() + ": ";
-		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(bundle.getMsFeature().getRetentionTime()) + " min. | ";
+		comment += "RT "+ MRC2ToolBoxConfiguration.getRtFormat().format(
+				bundle.getMsFeature().getRetentionTime()) + " min. | ";
 		String injId = bundle.getInjectionId();
 		if(injId != null) {
 			Injection injection = injectionMap.get(injId);
@@ -115,17 +111,6 @@ public abstract class IDTrackerSiriusMsExportTask extends AbstractTask {
 		comment += "Acq. method: " + bundle.getAcquisitionMethod().getName() + "; ";
 		comment += "DA method: " + bundle.getDataExtractionMethod().getName();
 		return comment;
-	}
-
-	protected MsPoint[] normalizeAndSortMsPatternForMsp(Collection<MsPoint>pattern) {
-
-		MsPoint basePeak = Collections.max(pattern, Comparator.comparing(MsPoint::getIntensity));
-		double maxIntensity  = basePeak.getIntensity();
-
-		return pattern.stream()
-				.map(dp -> new MsPoint(dp.getMz(), Math.round(dp.getIntensity()/maxIntensity*999.0d)))
-				.sorted(new MsDataPointComparator(SortProperty.MZ)).
-				toArray(size -> new MsPoint[size]);
 	}
 		
 	public File getOutputFile() {

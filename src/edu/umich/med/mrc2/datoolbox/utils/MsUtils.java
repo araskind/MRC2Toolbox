@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.formula.IsotopePattern;
@@ -112,6 +111,9 @@ public class MsUtils {
 
 	public static final double SODIUM_PROTON_EXCHANGE = 21.9819;
 	public static final double CL_FORMATE_EXCHANGE = 10.0288;
+	
+    //	Spectra normalization
+    public static final double SPECTRUM_NORAMALIZATION_BASE_INTENSITY = 999.0d;
 
 	public static final IChemObjectBuilder builder = SilentChemObjectBuilder.getInstance();
 	public static final SmilesParser smipar = new SmilesParser(builder);
@@ -241,7 +243,8 @@ public class MsUtils {
 		return mzRange;
 	}
 
-	public static Range createMassRange(double mz, double accuracy, MassErrorType errorType) {
+	public static Range createMassRange(
+			double mz, double accuracy, MassErrorType errorType) {
 
 		double b1 = mz;
 		double b2 = mz;
@@ -261,7 +264,8 @@ public class MsUtils {
 		return new Range(Math.min(b1, b2), Math.max(b1, b2));
 	}
 
-	public static Range createMassRangeWithReference(double keyMass, double refMass, double massAccuracy) {
+	public static Range createMassRangeWithReference(
+			double keyMass, double refMass, double massAccuracy) {
 
 		double diff = refMass * massAccuracy / 1000000;
 		Range mzRange = new Range(keyMass - diff, keyMass + diff);
@@ -287,17 +291,20 @@ public class MsUtils {
 
 		if (!adduct.getAddedGroup().trim().isEmpty()) {
 
-			addedGroupMf = MolecularFormulaManipulator.getMolecularFormula(adduct.getAddedGroup().trim(), builder);
+			addedGroupMf = MolecularFormulaManipulator.getMolecularFormula(
+					adduct.getAddedGroup().trim(), builder);
 			if(addedGroupMf == null) {
 				System.err.println("Unable to parse " + adduct.getAddedGroup().trim());
 				return 0.0d;
 			}
-			addedMass = MolecularFormulaManipulator.getMass(addedGroupMf, MolecularFormulaManipulator.MonoIsotopic);
+			addedMass = MolecularFormulaManipulator.getMass(
+					addedGroupMf, MolecularFormulaManipulator.MonoIsotopic);
 			//	addedMass = MolecularFormulaManipulator.getMajorIsotopeMass(addedGroupMf);
 		}
 		if (!adduct.getRemovedGroup().trim().isEmpty()) {
 
-			removedGroupMf = MolecularFormulaManipulator.getMolecularFormula(adduct.getRemovedGroup().trim(), builder);
+			removedGroupMf = MolecularFormulaManipulator.getMolecularFormula(
+					adduct.getRemovedGroup().trim(), builder);
 			if(removedGroupMf == null) {
 				System.err.println("Unable to parse " + adduct.getRemovedGroup().trim());
 				return 0.0d;
@@ -379,7 +386,7 @@ public class MsUtils {
 		if (pattern.length < 3)
 			return false;
 
-		Arrays.sort(pattern, new MsDataPointComparator(SortProperty.MZ));
+		Arrays.sort(pattern, MsUtils.mzSorter);
 		Range refRange = MsUtils.createPpmMassRange(pattern[0].getMz(), massAccuracy);
 		Range clRange = new Range(refRange.getMin() + BR_ISOTOPE_DISTANCE, refRange.getMax() + BR_ISOTOPE_DISTANCE);
 		if (clRange.contains(pattern[2].getMz())
@@ -396,7 +403,7 @@ public class MsUtils {
 		if (pattern.length < 3)
 			return false;
 
-		Arrays.sort(pattern, new MsDataPointComparator(SortProperty.MZ));
+		Arrays.sort(pattern, MsUtils.mzSorter);
 		Range refRange = MsUtils.createPpmMassRange(pattern[0].getMz(), massAccuracy);
 		Range clRange = new Range(refRange.getMin() + CL_ISOTOPE_DISTANCE, refRange.getMax() + CL_ISOTOPE_DISTANCE);
 
@@ -972,12 +979,14 @@ public class MsUtils {
 
 		if(charge == 0) {
 			calculatedPattern  =  isoPattern.getIsotopes().stream().
-				map(ic -> new MsPoint(ic.getMass(), ic.getIntensity() * 1000.0d)).
+				map(ic -> new MsPoint(ic.getMass(), ic.getIntensity() 
+						* SPECTRUM_NORAMALIZATION_BASE_INTENSITY)).
 				sorted(mzSorter).collect(Collectors.toList());
 		}
 		else				
 			calculatedPattern =  isoPattern.getIsotopes().stream().
-				map(ic -> new MsPoint((ic.getMass() - MsUtils.ELECTRON_MASS * charge)/charge, ic.getIntensity() * 1000.0d)).
+				map(ic -> new MsPoint((ic.getMass() - MsUtils.ELECTRON_MASS * charge)/charge, ic.getIntensity() 
+						* SPECTRUM_NORAMALIZATION_BASE_INTENSITY)).
 				sorted(mzSorter).collect(Collectors.toList());
 		
 		if(cleanup)
@@ -1088,7 +1097,7 @@ public class MsUtils {
 			Collection<MsPoint>inputPoints, Double mzBinWidth, MassErrorType errorType) {
 		
 		MsPoint[] points = inputPoints.stream().
-				sorted(new MsDataPointComparator(SortProperty.MZ)).
+				sorted(MsUtils.mzSorter).
 				toArray(size -> new MsPoint[size]);
 		
 		ArrayList<MsPointBucket> msBins = new ArrayList<MsPointBucket>();
@@ -1155,12 +1164,15 @@ public class MsUtils {
 			IsotopePattern isoPattern = MsUtils.getIsotopePatternGenerator().getIsotopes(adductCompleteFormula);
 			if(charge == 0) {
 				return isoPattern.getIsotopes().stream().
-						map(ic -> new MsPoint(ic.getMass(), ic.getIntensity() * 1000.0d)).
+						map(ic -> new MsPoint(ic.getMass(), ic.getIntensity() 
+								* SPECTRUM_NORAMALIZATION_BASE_INTENSITY)).
 						collect(Collectors.toList());
 			}
 			else
 				return isoPattern.getIsotopes().stream().
-						map(ic -> new MsPoint((ic.getMass() - MsUtils.ELECTRON_MASS * adduct.getCharge())/charge, ic.getIntensity() * 1000.0d)).
+						map(ic -> new MsPoint((ic.getMass() - MsUtils.ELECTRON_MASS 
+								* adduct.getCharge())/charge, ic.getIntensity() 
+								* SPECTRUM_NORAMALIZATION_BASE_INTENSITY)).
 						collect(Collectors.toList());
 		}
 		else
@@ -1173,28 +1185,26 @@ public class MsUtils {
 		double maxIntensity  = basePeak.getIntensity();
 		return pattern.stream()
 				.map(dp -> new MsPoint(dp.getMz(), dp.getIntensity()/maxIntensity * max))
-				.sorted(new MsDataPointComparator(SortProperty.MZ)).
+				.sorted(MsUtils.mzSorter).
 				toArray(size -> new MsPoint[size]);
 	}
 
 	public static MsPoint[] normalizeAndSortMsPattern(Collection<MsPoint>pattern) {
-		return normalizeAndSortMsPattern(pattern, 100.0d);
+		return normalizeAndSortMsPattern(pattern, SPECTRUM_NORAMALIZATION_BASE_INTENSITY);
 	}
 	
 	public static MsPoint[] normalizeAndSortMsPattern(MsPoint[] pattern) {
-		return normalizeAndSortMsPattern(Arrays.asList(pattern), 100.0d);
-	}
-
-	public static MsPoint[] normalizeAndSortMsPatternForMsp(Collection<MsPoint>pattern) {
-		return normalizeAndSortMsPattern(pattern, 999.0d);
+		return normalizeAndSortMsPattern(
+				Arrays.asList(pattern), SPECTRUM_NORAMALIZATION_BASE_INTENSITY);
 	}
 	
-	public static Collection<Double> getMassDifferences(Collection<MsPoint>pattern, double relativeIntensityCutoff) {
+	public static Collection<Double> getMassDifferences(
+			Collection<MsPoint>pattern, double relativeIntensityCutoff) {
 		
 		MsPoint[]patternNorm =  normalizeAndSortMsPattern(pattern, 1.0d);
 		MsPoint[]filtered = Arrays.asList(patternNorm).stream().
 			filter(p -> p.getIntensity() > relativeIntensityCutoff).
-			sorted(new MsDataPointComparator(SortProperty.MZ)).
+			sorted(MsUtils.mzSorter).
 			toArray(size -> new MsPoint[size]);		
 		Collection<Double>massDiffs = new ArrayList<Double>();
 		if(filtered.length < 2)
@@ -1208,14 +1218,15 @@ public class MsUtils {
 		return massDiffs;
 	}
 	
-	public static Collection<Double> getNeutralLosses(TandemMassSpectrum msms, double relativeIntensityCutoff) {
+	public static Collection<Double> getNeutralLosses(
+			TandemMassSpectrum msms, double relativeIntensityCutoff) {
 		
 		MsPoint[]patternNorm =  normalizeAndSortMsPattern(msms.getSpectrum(), 1.0d);
 		double parentMz = msms.getParent().getMz();
 		MsPoint[]filtered = Arrays.asList(patternNorm).stream().
 			filter(p -> p.getMz() < parentMz).
 			filter(p -> p.getIntensity() > relativeIntensityCutoff).
-			sorted(new MsDataPointComparator(SortProperty.MZ)).
+			sorted(MsUtils.mzSorter).
 			toArray(size -> new MsPoint[size]);		
 		Collection<Double>massDiffs = new ArrayList<Double>();
 		if(filtered.length < 1)
@@ -1225,16 +1236,6 @@ public class MsUtils {
 			massDiffs.add(parentMz - filtered[i].getMz());			
 		
 		return massDiffs;
-	}
-	
-	public static Double calculateIntensityStandardDeviationForNormalizedSpectrum(Collection<MsPoint>pattern, double max) {
-		
-		MsPoint[]normSpectrum =  normalizeAndSortMsPattern(pattern, max);
-		DescriptiveStatistics ds = new DescriptiveStatistics();
-		for(MsPoint p : normSpectrum)
-			ds.addValue(p.getIntensity());
-		
-		return ds.getStandardDeviation();
 	}
 
 	public static Map<Adduct,Collection<MsPoint>>createIsotopicPatternCollection(
@@ -1342,7 +1343,7 @@ public class MsUtils {
 
 	public static String calculateSpectrumHash(Collection<MsPoint>spectrum){
 
-		List<String> chunks = spectrum.stream().sorted(new MsDataPointComparator(SortProperty.MZ)).
+		List<String> chunks = spectrum.stream().sorted(MsUtils.mzSorter).
 			map(p -> spectrumMzFormat.format(p.getMz()) +
 					spectrumIntensityFormat.format(p.getIntensity())).
 			collect(Collectors.toList());
@@ -1544,7 +1545,9 @@ public class MsUtils {
 		if(Math.abs(spectrum.getPrimaryAdduct().getCharge()) > 1) {
 			
 			double neutralMass= getNeutralMassForAdduct(mz, spectrum.getPrimaryAdduct());
-			mz = getAdductMz(neutralMass, AdductManager.getDefaultAdductForPolarity(spectrum.getPrimaryAdduct().getPolarity()));
+			mz = getAdductMz(neutralMass, 
+					AdductManager.getDefaultAdductForPolarity(
+							spectrum.getPrimaryAdduct().getPolarity()));
 		}
 		double mcMillanCutoff = 0.00112 * mz + 0.01953;
 		double massDefect = mz % 1;
@@ -1585,7 +1588,7 @@ public class MsUtils {
 		if(spectrum == null || spectrum.isEmpty())
 			return "";
 		
-		MsPoint[] spectrumNorm = normalizeAndSortMsPatternForMsp(spectrum);
+		MsPoint[] spectrumNorm = normalizeAndSortMsPattern(spectrum);
 		ArrayList<String>line = new ArrayList<String>();
 		for(MsPoint point : spectrumNorm) {
 			
@@ -1607,8 +1610,7 @@ public class MsUtils {
 				collect(Collectors.toList());
 	}
 	
-	public static MsPoint getBasePeak(Collection<MsPoint>inputSpectrum) {
-		
+	public static MsPoint getBasePeak(Collection<MsPoint>inputSpectrum) {		
 		return inputSpectrum.stream().sorted(reverseIntensitySorter).findFirst().orElse(null);
 	}
 }

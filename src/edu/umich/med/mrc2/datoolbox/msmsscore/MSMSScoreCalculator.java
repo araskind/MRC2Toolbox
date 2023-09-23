@@ -44,7 +44,7 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public class MSMSScoreCalculator {
 
 	public static final MsDataPointComparator mzSorter = 
-			new MsDataPointComparator(SortProperty.MZ);
+			MsUtils.mzSorter;
 	public static final MsDataPointComparator reverseIntensitySorter = 
 			new MsDataPointComparator(SortProperty.Intensity, SortDirection.DESC);
 	

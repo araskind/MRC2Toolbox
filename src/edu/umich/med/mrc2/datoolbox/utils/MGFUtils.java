@@ -31,8 +31,6 @@ import java.util.regex.Pattern;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MGFFields;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 
@@ -63,7 +61,7 @@ public class MGFUtils {
 		String msId = "";
 		MsPoint parentIon = null;
 		Collection<MsPoint> spectrum = 
-				new TreeSet<MsPoint>(new MsDataPointComparator(SortProperty.MZ));
+				new TreeSet<MsPoint>(MsUtils.mzSorter);
 		int spectrumStart = 0;
 		for (int i = 0; i < mgfBlock.length; i++) {
 

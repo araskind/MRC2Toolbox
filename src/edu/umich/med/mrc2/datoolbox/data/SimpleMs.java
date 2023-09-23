@@ -26,9 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class SimpleMs implements Serializable {
 
@@ -129,7 +128,7 @@ public class SimpleMs implements Serializable {
 			}
 		}
 		MsPoint[] sorted = spectrumPoints.toArray(new MsPoint[spectrumPoints.size()]);
-		Arrays.sort(sorted, new MsDataPointComparator(SortProperty.MZ));
+		Arrays.sort(sorted, MsUtils.mzSorter);
 		monoisotopicPeak = sorted[0];
 
 		if (spectrumPoints.size() > 1) {

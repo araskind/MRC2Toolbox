@@ -81,7 +81,8 @@ public class MsOneTable  extends BasicTable {
 		columnModel.getColumnById(MsOneTableModel.MZ_COLUMN)
 			.setCellRenderer(mzRenderer);
 		columnModel.getColumnById(MsOneTableModel.INTENSITY_COLUMN)
-			.setCellRenderer(new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getSpectrumIntensityFormat()));
+			.setCellRenderer(new FormattedDecimalRenderer(
+					MRC2ToolBoxConfiguration.getSpectrumIntensityFormat()));
 
 		addTablePopupMenu(new MsTablePopupMenu(this));
 
@@ -239,7 +240,7 @@ public class MsOneTable  extends BasicTable {
 			spectrum.add(new MsPoint(mz, intensity));
 		}
 		if(normalize)
-			pattern = MsUtils.normalizeAndSortMsPatternForMsp(spectrum);
+			pattern = MsUtils.normalizeAndSortMsPattern(spectrum);
 		else
 			pattern = spectrum.stream().
 					sorted(MsUtils.mzSorter).

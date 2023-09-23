@@ -25,8 +25,7 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
 
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class BasicIsotopicPattern implements Serializable {
@@ -44,7 +43,7 @@ public class BasicIsotopicPattern implements Serializable {
 	
 	public BasicIsotopicPattern(MsPoint seedPoint) {
 
-		dataPoints = new TreeSet<MsPoint>(new MsDataPointComparator(SortProperty.MZ));
+		dataPoints = new TreeSet<MsPoint>(MsUtils.mzSorter);
 		dataPoints.add(seedPoint);
 		charge = 1;
 	}

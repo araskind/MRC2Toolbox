@@ -45,7 +45,6 @@ import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
-import edu.umich.med.mrc2.datoolbox.msmsscore.SpectrumMatcher;
 import edu.umich.med.mrc2.datoolbox.project.store.MassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.project.store.TandemMassSpectrumFields;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
@@ -146,7 +145,7 @@ public class MassSpectrum implements Serializable {
 
 		List<MsPoint>sorted = dataPoints.stream().
 				distinct().
-				sorted(new MsDataPointComparator(SortProperty.MZ)).
+				sorted(MsUtils.mzSorter).
 				collect(Collectors.toList());
 
 		String key = DataPrefix.MS_PATTERN.getName() + UUID.randomUUID().toString().substring(0, 10);
@@ -288,14 +287,12 @@ public class MassSpectrum implements Serializable {
 	public MsPoint[] getCompletePattern() {
 
 		return msPoints.stream().
-				sorted(new MsDataPointComparator(SortProperty.MZ)).
+				sorted(MsUtils.mzSorter).
 				toArray(size -> new MsPoint[size]);
 	}
 
 	public MsPoint[] getCompleteNormalizedPattern() {
-
-		MsPoint[] pattern = msPoints.stream().toArray(size -> new MsPoint[size]);
-		return SpectrumMatcher.normalizeAndSortMsPattern(pattern);
+		return MsUtils.normalizeAndSortMsPattern(msPoints);
 	}
 
 	public MsPoint getMonoisotopicPeak() {
@@ -305,7 +302,7 @@ public class MassSpectrum implements Serializable {
 		if(!msPoints.isEmpty()) {
 
 			return msPoints.stream().
-					sorted(new MsDataPointComparator(SortProperty.MZ)).
+					sorted(MsUtils.mzSorter).
 					toArray(size -> new MsPoint[size])[0];
 		}
 		return miPeak;
@@ -331,7 +328,7 @@ public class MassSpectrum implements Serializable {
 			return null;
 
 		return adductMap.get(adduct).stream().
-			sorted(new MsDataPointComparator(SortProperty.MZ)).
+			sorted(MsUtils.mzSorter).
 			toArray(size -> new MsPoint[size]);
 	}
 
@@ -346,8 +343,7 @@ public class MassSpectrum implements Serializable {
 		if(adductMap.get(adduct).isEmpty())
 			return null;
 
-		MsPoint[] ms = adductMap.get(adduct).stream().toArray(size -> new MsPoint[size]);
-		return SpectrumMatcher.normalizeAndSortMsPattern(ms);
+		return MsUtils.normalizeAndSortMsPattern(adductMap.get(adduct));
 	}
 	
 	public double getPrimaryAdductBasePeakMz() {

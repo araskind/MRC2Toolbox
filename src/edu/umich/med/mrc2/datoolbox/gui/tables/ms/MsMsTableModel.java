@@ -28,10 +28,9 @@ import java.util.TreeSet;
 
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.RawDataUtils;
 import umich.ms.datatypes.scan.IScan;
 
@@ -115,7 +114,7 @@ public class MsMsTableModel extends BasicTableModel {
 			return;
 		
 		TreeSet<MsPoint>spectrum = 
-				new TreeSet<MsPoint>(new MsDataPointComparator(SortProperty.MZ));
+				new TreeSet<MsPoint>(MsUtils.mzSorter);
 		spectrum.addAll(points);
 		double parentMz = 0.0d;
 		if(parent != null) {

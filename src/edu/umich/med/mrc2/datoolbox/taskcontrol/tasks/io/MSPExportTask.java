@@ -28,8 +28,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,8 +35,6 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
-import edu.umich.med.mrc2.datoolbox.data.compare.MsDataPointComparator;
-import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.MSPField;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
@@ -48,6 +44,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.FIOUtils;
+import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class MSPExportTask extends AbstractTask {
 
@@ -135,7 +132,7 @@ public class MSPExportTask extends AbstractTask {
 					MRC2ToolBoxConfiguration.getMzFormat().format(tandemMs.getParent().getMz()) + "\n");
 				writer.append(MSPField.NUM_PEAKS.getName() + ": " + Integer.toString(tandemMs.getSpectrum().size()) + "\n");
 
-				MsPoint[] msms = normalizeAndSortMsPatternForMsp(tandemMs.getSpectrum());
+				MsPoint[] msms = MsUtils.normalizeAndSortMsPattern(tandemMs.getSpectrum());
 				int pointCount = 0;
 				for(MsPoint point : msms) {
 
@@ -152,17 +149,6 @@ public class MSPExportTask extends AbstractTask {
 		}
 		writer.flush();
 		writer.close();
-	}
-
-	private MsPoint[] normalizeAndSortMsPatternForMsp(Collection<MsPoint>pattern) {
-
-		MsPoint basePeak = Collections.max(pattern, Comparator.comparing(MsPoint::getIntensity));
-		double maxIntensity  = basePeak.getIntensity();
-
-		return pattern.stream()
-				.map(dp -> new MsPoint(dp.getMz(), Math.round(dp.getIntensity()/maxIntensity*999.0d)))
-				.sorted(new MsDataPointComparator(SortProperty.MZ)).
-				toArray(size -> new MsPoint[size]);
 	}
 
 	@Override

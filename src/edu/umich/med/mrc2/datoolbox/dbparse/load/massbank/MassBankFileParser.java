@@ -286,7 +286,7 @@ public class MassBankFileParser {
 					dataPoints.add(dp);
 				}
 			}
-			MsPoint[] dataPointsNorm = MsUtils.normalizeAndSortMsPattern(dataPoints, 999.0d);
+			MsPoint[] dataPointsNorm = MsUtils.normalizeAndSortMsPattern(dataPoints);
 			msmsSet.setSpectrum(Arrays.asList(dataPointsNorm));
 			//	TODO this is a stop-gap to parse old Passatutto output where precursor M/Z is written out as integer
 			//	and only M+H/M-H are used as adducts. If spectrum contains precursor within 20 ppm, the data point from spectrum will be used
