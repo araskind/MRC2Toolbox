@@ -61,7 +61,7 @@ import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.FeatureSetEvent;
@@ -87,6 +87,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ReferenceMSMSLibraryExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibEditorImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.TextLibraryImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.msms.DecoyLibraryGenerationTask;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
@@ -142,7 +143,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		initActions();
 		loadLayout(layoutConfigFile);
 		populatePanelsMenu();
-		
+		((MsLibraryPanelMenuBar)menuBar).createActiveLibraryLabelBlock();
 		baseDirectory = new File(MRC2ToolBoxCore.dataDir);
 		currentLibrary = null;
 	}
@@ -242,15 +243,9 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		
 		String command = event.getActionCommand();
 
-		if (command.equals(MainActionCommands.SHOW_LIBRARY_MANAGER_COMMAND.getName())) {
-			
-			if(libraryManager == null)
-				libraryManager = new LibraryManager(this);
-			
-			libraryManager.setLocationRelativeTo(this.getContentPane());
-			libraryManager.setVisible(true);
-		}
-
+		if (command.equals(MainActionCommands.SHOW_LIBRARY_MANAGER_COMMAND.getName()))
+			showLibraryManager();
+		
 		if (command.equals(MainActionCommands.DELETE_LIBRARY_COMMAND.getName()))
 			deleteSelectedLibrary();
 
@@ -348,6 +343,13 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 	}
 	
+	private void showLibraryManager() {
+
+		libraryManager = new LibraryManager(this);		
+		libraryManager.setLocationRelativeTo(this.getContentPane());
+		libraryManager.setVisible(true);
+	}
+
 	private void showRefMSMSLibraryExportDialog() {
 		
 		ReferenceMSMSLibraryExportDialog dialog = 
@@ -658,7 +660,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 				boolean added = false;
 				try {
-					RemoteMsLibraryUtils.loadLibraryFeature(lf, currentLibrary.getLibraryId());
+					MSRTLibraryUtils.loadLibraryFeature(lf, currentLibrary.getLibraryId());
 					added = true;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -722,7 +724,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 		//	Update data in database
 		try {
-			RemoteMsLibraryUtils.updateLibraryEntry(edited);
+			MSRTLibraryUtils.updateLibraryEntry(edited);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -760,7 +762,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 				// Remove from database
 				try {
-					RemoteMsLibraryUtils.deleteLibraryFeature(selected);
+					MSRTLibraryUtils.deleteLibraryFeature(selected);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -826,11 +828,11 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 		String libraryName = libraryManager.getLibraryInfoDialog().getLibraryName();
 		String libraryDescription = libraryManager.getLibraryInfoDialog().getLibraryDescription();
-		String libId = RemoteMsLibraryUtils.createNewLibrary(libraryName, libraryDescription);
+		String libId = MSRTLibraryUtils.createNewLibrary(libraryName, libraryDescription);
 		libraryManager.refreshLibraryListing();
 		libraryManager.hideLibInfoDialog();
 
-		for (CompoundLibrary l : RemoteMsLibraryUtils.getAllLibraries()) {
+		for (CompoundLibrary l : MSRTLibraryUtils.getAllLibraries()) {
 
 			if (l.getLibraryId().equals(libId)) {
 
@@ -852,7 +854,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 			MRC2ToolBoxCore.getActiveMsLibraries().remove(selected);
 			try {
-				RemoteMsLibraryUtils.deleteLibrary(selected);
+				MSRTLibraryUtils.deleteLibrary(selected);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -877,7 +879,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		selected.setLibraryDescription(libraryDescription);
 
 		try {
-			RemoteMsLibraryUtils.updateLibraryInfo(selected);
+			MSRTLibraryUtils.updateLibraryInfo(selected);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -898,7 +900,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		JnaFileChooser fc = new JnaFileChooser(baseDirectory);
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("CEF files", "cef", "CEF");
-		fc.addFilter("Library Editor files", "xml");		
+		fc.addFilter("Library Editor files", "xml", "XML");	
+		fc.addFilter("TAB-separated text files", "txt", "TXT", "tsv", "TSV");
 		fc.setTitle("Select library file to import");
 		fc.setMultiSelectionEnabled(false);
 		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
@@ -909,13 +912,22 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 				baseDirectory = inputFile.getParentFile();
 
 				// Read lib editor file
-				if (inputFile.getName().endsWith("mslibrary.xml")) {
+				if (inputFile.getName().toLowerCase().endsWith("mslibrary.xml")) {
 
 					LibEditorImportTask lit = new LibEditorImportTask(inputFile, currentLibrary);
 					lit.addTaskListener(this);
 					MRC2ToolBoxCore.getTaskController().addTask(lit);
 				}
 				//	TODO read CEF file
+				if (inputFile.getName().toLowerCase().endsWith(".cef")) {
+					MessageDialog.showWarningMsg("CEF library import under development.", this.getContentPane());
+				}
+				if (inputFile.getName().toLowerCase().endsWith(".txt")
+						|| inputFile.getName().toLowerCase().endsWith(".tsv")) {
+					TextLibraryImportTask task = new TextLibraryImportTask(inputFile, currentLibrary);
+					task.addTaskListener(this);
+					MRC2ToolBoxCore.getTaskController().addTask(task);
+				}
 			}
 		}
 	}
@@ -925,7 +937,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		libraryFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
 		clearPanel();
 		currentLibrary = selectedLibrary;
-		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
+		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(
+				currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
 		libraryFeatureTable.getTable().setTableModelFromCompoundLibrary(currentLibrary);
 		libraryFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
 	}
@@ -959,10 +972,9 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			((AbstractTask) e.getSource()).removeTaskListener(this);
 
 			// Import library
-			if (e.getSource().getClass().equals(LibEditorImportTask.class)) {
-				LibEditorImportTask task = (LibEditorImportTask) e.getSource();
-				loadLibrary(task.getLibrary());
-			}
+			if (e.getSource().getClass().equals(LibEditorImportTask.class))
+				loadLibrary(((LibEditorImportTask) e.getSource()).getLibrary());
+			
 			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class)) 
 				finalizeLoadDatabaseLibraryTask( (LoadDatabaseLibraryTask) e.getSource());
 		
@@ -971,9 +983,12 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			
 			if (e.getSource().getClass().equals(ReferenceMSMSLibraryExportTask.class))
 				finalizeReferenceMSMSLibraryExportTask((ReferenceMSMSLibraryExportTask)e.getSource());
+			
+			if (e.getSource().getClass().equals(TextLibraryImportTask.class))
+				loadLibrary(((TextLibraryImportTask)e.getSource()).getLibrary());
 		}
 	}
-	
+
 	private void finalizeDecoyLibraryGenerationTask(DecoyLibraryGenerationTask task) {
 		
 		File results = task.getOutputFile();
@@ -1162,7 +1177,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		// Check other libraries in the database
 		CompoundLibrary dbLibrary = null;
 		try {
-			dbLibrary = RemoteMsLibraryUtils.getLibraryForTarget(targetId);
+			dbLibrary = MSRTLibraryUtils.getLibraryForTarget(targetId);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

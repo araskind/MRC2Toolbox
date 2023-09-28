@@ -48,7 +48,6 @@ import javax.swing.border.EmptyBorder;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class LibraryInfoDialog extends JDialog {
 
@@ -70,7 +69,7 @@ public class LibraryInfoDialog extends JDialog {
 
 		setSize(new Dimension(400, 200));
 		setPreferredSize(new Dimension(400, 200));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
 		JPanel panel = new JPanel();
@@ -147,10 +146,7 @@ public class LibraryInfoDialog extends JDialog {
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
 		rootPane.setDefaultButton(saveButton);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-
 		pack();
-		setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
-		setVisible(false);
 	}
 
 	public CompoundLibrary getEditedLibrary(){

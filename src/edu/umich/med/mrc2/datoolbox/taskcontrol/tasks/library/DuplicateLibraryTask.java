@@ -31,7 +31,7 @@ import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.data.TandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -95,7 +95,7 @@ public class DuplicateLibraryTask extends AbstractTask {
 
 		String libId = null;
 		try {
-			libId = RemoteMsLibraryUtils.createNewLibrary(newLibraryName, libraryDescription);
+			libId = MSRTLibraryUtils.createNewLibrary(newLibraryName, libraryDescription);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -107,7 +107,7 @@ public class DuplicateLibraryTask extends AbstractTask {
 
 		Connection conn = ConnectionManager.getConnection();
 		Collection<LibraryMsFeatureDbBundle>bundles =
-				RemoteMsLibraryUtils.createFeatureBundlesForLibrary(sourceLibrary.getLibraryId(), conn);
+				MSRTLibraryUtils.createFeatureBundlesForLibrary(sourceLibrary.getLibraryId(), conn);
 
 		total = bundles.size();
 		processed = 0;
@@ -115,7 +115,7 @@ public class DuplicateLibraryTask extends AbstractTask {
 
 			LibraryMsFeature newTarget = fBundle.getFeature();
 			if(fBundle.getConmpoundDatabaseAccession() != null) {
-				RemoteMsLibraryUtils.attachIdentity(
+				MSRTLibraryUtils.attachIdentity(
 						newTarget, fBundle.getConmpoundDatabaseAccession(), fBundle.isQcStandard(), conn);
 
 				if(newTarget.getPrimaryIdentity() != null)
@@ -127,12 +127,12 @@ public class DuplicateLibraryTask extends AbstractTask {
 			}
 			if(!clearSpectra) {
 
-				RemoteMsLibraryUtils.attachMassSpectrum(newTarget, conn);
-				RemoteMsLibraryUtils.attachTandemMassSpectrum(newTarget, conn);
+				MSRTLibraryUtils.attachMassSpectrum(newTarget, conn);
+				MSRTLibraryUtils.attachTandemMassSpectrum(newTarget, conn);
 			}
 			if(!clearAnnotations) {
 
-				RemoteMsLibraryUtils.attachAnnotations(newTarget, conn);
+				MSRTLibraryUtils.attachAnnotations(newTarget, conn);
 
 				//	Generate new unique ID for annotations
 //				for(ObjectAnnotation annotation : newTarget.getAnnotations())
@@ -147,7 +147,7 @@ public class DuplicateLibraryTask extends AbstractTask {
 				for(TandemMassSpectrum msms : newTarget.getSpectrum().getTandemSpectra())
 					msms.setId(DataPrefix.MSMS_SPECTRUM.getName() + UUID.randomUUID().toString());
 			}
-			RemoteMsLibraryUtils.loadLibraryFeature(newTarget, libId);
+			MSRTLibraryUtils.loadLibraryFeature(newTarget, libId);
 			processed++;
 		}
 		ConnectionManager.releaseConnection(conn);

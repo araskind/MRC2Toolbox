@@ -33,6 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 
 public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary> {
@@ -49,8 +50,32 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	private Date dateCreated;
 	private Date lastModified;
 	private boolean enabled;
+	private Polarity polarity;
 
 	private Collection<LibraryMsFeature> libraryFeatures;
+
+	
+	public CompoundLibrary(
+			String id, 
+			String name, 
+			String description, 
+			DataPipeline dataPipeline, 
+			Date dateCreated,
+			Date lastModified, 
+			boolean enabled, 
+			Polarity polarity) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.dataPipeline = dataPipeline;
+		this.dateCreated = dateCreated;
+		this.lastModified = lastModified;
+		this.enabled = enabled;
+		this.polarity = polarity;
+		
+		libraryFeatures = new HashSet<LibraryMsFeature>();
+	}
 
 	public CompoundLibrary(
 			String libraryId,
@@ -60,58 +85,32 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 			Date lastModified,
 			boolean enabled){
 
-		super();
-		this.id = libraryId;
-		this.name = libraryName;
-		this.description = libraryDescription;
-		this.dateCreated = dateCreated;
-		this.lastModified = lastModified;
-		this.enabled = enabled;
-		dataPipeline = null;
-
-		libraryFeatures = new HashSet<LibraryMsFeature>();
+		this(libraryId, libraryName, libraryDescription, 
+				null, dateCreated, lastModified, enabled, null);
 	}
-
-	public CompoundLibrary(String libraryName) {
-		super();
-		this.name = libraryName;
-		description = libraryName;
-		dataPipeline = null;
-		id = DataPrefix.MS_LIBRARY.getName() + UUID.randomUUID().toString();
-		dateCreated = new Date();
-		lastModified = dateCreated;
-		enabled = true;
-		libraryFeatures = new HashSet<LibraryMsFeature>();
-	}
-
-	public CompoundLibrary(String libraryName, String libraryDescription) {
-		super();
-		this.name = libraryName;
-		this.description = libraryDescription;
-		dataPipeline = null;
-		id = DataPrefix.MS_LIBRARY.getName() + UUID.randomUUID().toString();
-		dateCreated = new Date();
-		lastModified = dateCreated;
-		enabled = true;
-		libraryFeatures = new HashSet<LibraryMsFeature>();
-	}
-
+	
 	public CompoundLibrary(
 			String libraryId,
 			String libraryName,
 			String libraryDescription,
 			DataPipeline dataPipeline) {
+		
+		this(libraryId, libraryName, libraryDescription, 
+				null, new Date(), new Date(), true, null);
+	}
 
-		super();
-		this.id = libraryId;
-		this.name = libraryName;
-		this.description = libraryDescription;
-		this.dataPipeline = dataPipeline;
-		dateCreated = new Date();
-		lastModified = dateCreated;
-		enabled = true;
+	public CompoundLibrary(String libraryName) {
+		
+		this(DataPrefix.MS_LIBRARY.getName() + UUID.randomUUID().toString(), 
+				libraryName, null, 
+				null, new Date(), new Date(), true, null);
+	}
 
-		libraryFeatures = new HashSet<LibraryMsFeature>();
+	public CompoundLibrary(String libraryName, String libraryDescription) {
+		
+		this(DataPrefix.MS_LIBRARY.getName() + UUID.randomUUID().toString(), 
+				libraryName, libraryDescription, 
+				null, new Date(), new Date(), true, null);
 	}
 
 	public void addFeature(LibraryMsFeature newFeature) {
@@ -198,7 +197,11 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 	}
 
 	public void setDataPipeline(DataPipeline dataPipeline) {
+		
 		this.dataPipeline = dataPipeline;
+		if(dataPipeline != null 
+				&& dataPipeline.getAcquisitionMethod() != null)
+			this.polarity = dataPipeline.getAcquisitionMethod().getPolarity();
 	}
 
 	public void setDateCreated(Date dateCreated) {
@@ -248,4 +251,12 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
         hash = 53 * hash + (this.name != null ? this.name.hashCode() : 0);
         return hash;
     }
+
+	public Polarity getPolarity() {
+		return polarity;
+	}
+
+	public void setPolarity(Polarity polarity) {
+		this.polarity = polarity;
+	}
 }

@@ -67,7 +67,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.annotation.DockableObjectAnnotationPanel;
 import edu.umich.med.mrc2.datoolbox.gui.clustertree.FilterTreeDialog;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
@@ -848,7 +848,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 			Collection<CompoundLibrary> libraries = new HashSet<CompoundLibrary>();
 			try {
-				libraries = RemoteMsLibraryUtils.getLibrariesForTargets(targetIds);
+				libraries = MSRTLibraryUtils.getLibrariesForTargets(targetIds);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

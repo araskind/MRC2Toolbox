@@ -59,7 +59,7 @@ import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class RemoteMsLibraryUtils {
+public class MSRTLibraryUtils {
 
 	/**
 	 * Create new library in the database
@@ -68,7 +68,8 @@ public class RemoteMsLibraryUtils {
 	 * @param libraryDescription
 	 * @return
 	 */
-	public static String createNewLibrary(String libraryName, String libraryDescription) throws Exception{
+	public static String createNewLibrary(
+			String libraryName, String libraryDescription) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();
 		String query =
@@ -507,14 +508,22 @@ public class RemoteMsLibraryUtils {
 	 * @param libId	- library ID for the parent library
 	 * @throws Exception
 	 */
-	public static void loadLibraryFeature(LibraryMsFeature lt, String libId) throws Exception {
+	public static void loadLibraryFeature(
+			LibraryMsFeature lt, String libId) throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();
+		loadLibraryFeature(lt, libId, conn);
+		ConnectionManager.releaseConnection(conn);
+	}
+	
+	public static void loadLibraryFeature(
+			LibraryMsFeature lt, String libId, Connection conn) throws Exception {
 
 		if (lt.getId().isEmpty())
 			lt.setId(DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString());
 
 		lt.setLibraryId(libId);
 
-		Connection conn = ConnectionManager.getConnection();
 		if (isTargetInDatabase(lt.getId(), conn))
 			return;
 
@@ -526,7 +535,6 @@ public class RemoteMsLibraryUtils {
 			for(ObjectAnnotation annotation : lt.getAnnotations())
 				AnnotationUtils.insertNewAnnotation(annotation, conn);			
 		}
-		ConnectionManager.releaseConnection(conn);
 	}
 
 	public static boolean isTargetInDatabase(String targetId, Connection conn) throws Exception{

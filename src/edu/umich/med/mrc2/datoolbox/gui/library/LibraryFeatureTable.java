@@ -47,7 +47,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.format.CompoundIdentificationConfidenceFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
@@ -196,7 +196,7 @@ public class LibraryFeatureTable extends BasicTable {
 				boolean isEnabled = (boolean) model.getValueAt(row, enabledColumn);
 				selectedTarget.setActive(isEnabled);
 				try {
-					RemoteMsLibraryUtils.setTargetEnabled(
+					MSRTLibraryUtils.setTargetEnabled(
 							selectedTarget.getId(),
 							selectedTarget.isActive());
 				} catch (Exception e) {
@@ -209,7 +209,7 @@ public class LibraryFeatureTable extends BasicTable {
 				boolean isQc = (boolean) model.getValueAt(row, qcColumn);
 				selectedTarget.getPrimaryIdentity().setQcStandard(isQc);
 				try {
-					RemoteMsLibraryUtils.setTargetQcStatus(
+					MSRTLibraryUtils.setTargetQcStatus(
 							selectedTarget.getId(), 
 							selectedTarget.isQcStandard());
 				} catch (Exception e) {

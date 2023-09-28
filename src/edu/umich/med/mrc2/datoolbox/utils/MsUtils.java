@@ -80,7 +80,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.ModificationType;
 import edu.umich.med.mrc2.datoolbox.data.enums.MsStringType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
@@ -749,7 +749,7 @@ public class MsUtils {
 				if(libMatch.getLibraryTargetId() != null) {
 
 					try {
-						mslf = RemoteMsLibraryUtils.getLibraryFeatureById(libMatch.getLibraryTargetId());
+						mslf = MSRTLibraryUtils.getLibraryFeatureById(libMatch.getLibraryTargetId());
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -820,7 +820,7 @@ public class MsUtils {
 				if(libMatch.getLibraryTargetId() != null) {
 
 					try {
-						mslf = RemoteMsLibraryUtils.getLibraryFeatureById(libMatch.getLibraryTargetId());
+						mslf = MSRTLibraryUtils.getLibraryFeatureById(libMatch.getLibraryTargetId());
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -883,7 +883,7 @@ public class MsUtils {
 				if(libMatch.getLibraryTargetId() != null) {
 
 					try {
-						mslf = RemoteMsLibraryUtils.getLibraryFeatureById(libMatch.getLibraryTargetId());
+						mslf = MSRTLibraryUtils.getLibraryFeatureById(libMatch.getLibraryTargetId());
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

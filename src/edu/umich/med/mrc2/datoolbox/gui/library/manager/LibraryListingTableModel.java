@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -67,7 +67,7 @@ public class LibraryListingTableModel  extends BasicTableModel {
 		
 		Map<String, Integer> countsMap = new TreeMap<String, Integer>();
 		try {
-			countsMap = RemoteMsLibraryUtils.getLibraryEntryCount();
+			countsMap = MSRTLibraryUtils.getLibraryEntryCount();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

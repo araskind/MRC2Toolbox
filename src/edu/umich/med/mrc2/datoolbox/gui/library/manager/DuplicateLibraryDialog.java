@@ -73,7 +73,7 @@ public class DuplicateLibraryDialog extends JDialog {
 
 		setSize(new Dimension(400, 200));
 		setPreferredSize(new Dimension(400, 200));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
 		JPanel panel = new JPanel();
@@ -155,7 +155,6 @@ public class DuplicateLibraryDialog extends JDialog {
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 
 		pack();
-		setVisible(false);
 	}
 
 	public void loadLibrary(CompoundLibrary library) {

@@ -53,7 +53,7 @@ import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.library.MsLibraryPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
@@ -296,7 +296,7 @@ public class DatabaseToLibraryDialog  extends JDialog implements ActionListener{
 		lf.setPrimaryIdentity(msid);
 		boolean added = false;
 		try {
-			RemoteMsLibraryUtils.loadLibraryFeature(lf, library.getLibraryId());
+			MSRTLibraryUtils.loadLibraryFeature(lf, library.getLibraryId());
 			added = true;
 		}
 		catch (Exception e) {

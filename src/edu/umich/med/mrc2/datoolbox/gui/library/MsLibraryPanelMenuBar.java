@@ -21,11 +21,14 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.library;
 
+import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 
+import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
@@ -66,6 +69,8 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 	private static final Icon utilitiesIconSmall = GuiUtils.getIcon("preferences", 16);
 	private static final Icon activeLibraryIcon = GuiUtils.getIcon("duplicateLibrary", 24);
 	private static final Icon activeLibrariesIconSmall = GuiUtils.getIcon("duplicateLibrary", 24);
+	
+	private JLabel activeLibraryLabel;
 	
 	// Menus
 	private JMenu
@@ -118,9 +123,10 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		
 		manageMenu.addSeparator();
 		
-		openLibraryMenuItem = addItem(manageMenu, 
-				MainActionCommands.SHOW_LIBRARY_LIST_COMMAND, 
-				openLibraryIcon);
+//		openLibraryMenuItem = addItem(manageMenu, 
+//				MainActionCommands.SHOW_LIBRARY_LIST_COMMAND, 
+//				openLibraryIcon);
+		
 		closeLibraryMenuItem = addItem(manageMenu, 
 				MainActionCommands.CLOSE_LIBRARY_COMMAND, 
 				closeLibraryIcon);
@@ -203,6 +209,17 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		activeLibrariesMenu.setIcon(activeLibrariesIconSmall);
 		
 		add(activeLibrariesMenu);
+
+
+	}
+	
+	public void createActiveLibraryLabelBlock() {
+		
+		super.add(Box.createHorizontalGlue());
+		super.add(new JLabel("Active library: "));
+		activeLibraryLabel = new JLabel("");
+		activeLibraryLabel.setFont(new Font("Arial", Font.BOLD, 14));
+		super.add(activeLibraryLabel);
 	}
 	
 	public void updateLibraryList(
@@ -222,6 +239,10 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 			//	cbMenuItem.setIcon(activeLibraryIcon);
 			activeLibrariesMenu.add(cbMenuItem);
 		}
+		if(selectedLibrary != null)
+			activeLibraryLabel.setText(selectedLibrary.getLibraryName());
+		else
+			activeLibraryLabel.setText("");			
 	}
 
 	public void updateMenuFromExperiment(DataAnalysisProject currentProject, DataPipeline activePipeline) {

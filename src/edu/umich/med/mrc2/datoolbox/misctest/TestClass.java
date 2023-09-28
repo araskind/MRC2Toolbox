@@ -102,7 +102,7 @@ import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDatabaseUtils;
 import edu.umich.med.mrc2.datoolbox.database.cpd.CompoundDbConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.IdentificationUtils;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.UserUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.isdb.ISDBMGFParser;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.mine.MINEMSPParser;
@@ -153,7 +153,7 @@ public class TestClass {
 			e.printStackTrace();
 		}
 		for(String accession : accessionList)
-			RemoteMsLibraryUtils.addCompoundToLobrary(accession, libraryId, conn);
+			MSRTLibraryUtils.addCompoundToLobrary(accession, libraryId, conn);
 				
 		ConnectionManager.releaseConnection(conn);
 	}

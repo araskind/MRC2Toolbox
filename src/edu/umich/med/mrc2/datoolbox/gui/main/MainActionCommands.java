@@ -640,7 +640,7 @@ public enum MainActionCommands {
 	DELETE_LIBRARY_COMMAND("Delete library"),
 	DUPLICATE_LIBRARY_COMMAND("Duplicate library"),
 	OPEN_LIBRARY_COMMAND("Open library"),
-	CLOSE_LIBRARY_COMMAND("Close library"),
+	CLOSE_LIBRARY_COMMAND("Close active library"),
 	IMPORT_COMPOUND_LIBRARY_COMMAND("Import compound library"),
 	EXPORT_COMPOUND_LIBRARY_COMMAND("Export compound library"),
 	EXPORT_FILTERED_COMPOUND_LIBRARY_COMMAND("Export filtered compound library"),

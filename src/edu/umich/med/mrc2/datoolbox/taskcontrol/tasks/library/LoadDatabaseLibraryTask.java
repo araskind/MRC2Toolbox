@@ -28,7 +28,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -59,7 +59,7 @@ public class LoadDatabaseLibraryTask extends AbstractTask {
 		setStatus(TaskStatus.PROCESSING);
 		library = null;
 		try {
-			library = RemoteMsLibraryUtils.getLibrary(libraryId);
+			library = MSRTLibraryUtils.getLibrary(libraryId);
 		} catch (Exception e1) {
 
 			e1.printStackTrace();
@@ -73,7 +73,7 @@ public class LoadDatabaseLibraryTask extends AbstractTask {
 			try {
 				Connection conn = ConnectionManager.getConnection();
 				Collection<LibraryMsFeatureDbBundle>bundles =
-						RemoteMsLibraryUtils.createFeatureBundlesForLibrary(library.getLibraryId(), conn);
+						MSRTLibraryUtils.createFeatureBundlesForLibrary(library.getLibraryId(), conn);
 
 				total = bundles.size();
 				processed = 0;
@@ -83,15 +83,15 @@ public class LoadDatabaseLibraryTask extends AbstractTask {
 					if(fBundle.getConmpoundDatabaseAccession() != null) {
 
 						LibraryMsFeature newTarget = fBundle.getFeature();
-						RemoteMsLibraryUtils.attachIdentity(
+						MSRTLibraryUtils.attachIdentity(
 								newTarget, fBundle.getConmpoundDatabaseAccession(), fBundle.isQcStandard(), conn);
 
 						if(newTarget.getPrimaryIdentity() != null) {
 
 							newTarget.getPrimaryIdentity().setConfidenceLevel(fBundle.getIdConfidence());
-							RemoteMsLibraryUtils.attachMassSpectrum(newTarget, conn);
-							RemoteMsLibraryUtils.attachTandemMassSpectrum(newTarget, conn);
-							RemoteMsLibraryUtils.attachAnnotations(newTarget, conn);
+							MSRTLibraryUtils.attachMassSpectrum(newTarget, conn);
+							MSRTLibraryUtils.attachTandemMassSpectrum(newTarget, conn);
+							MSRTLibraryUtils.attachAnnotations(newTarget, conn);
 							library.addFeature(newTarget);
 						}
 					}

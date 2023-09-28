@@ -590,7 +590,8 @@ public abstract class CEFProcessingTask extends AbstractTask {
 
 		String compoundName = "";
 		String formula = "";
-		if(lt.getPrimaryIdentity() != null) {
+		if(lt.getPrimaryIdentity() != null 
+				&& lt.getPrimaryIdentity().getCompoundIdentity() != null) {
 			compoundName = lt.getPrimaryIdentity().getName();
 			formula = lt.getPrimaryIdentity().getCompoundIdentity().getFormula();
 		}
@@ -612,6 +613,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		database.addContent(libId);
 
 		if(lt.getPrimaryIdentity() != null 
+				&& lt.getPrimaryIdentity().getCompoundIdentity() != null
 				&& lt.getPrimaryIdentity().getPrimaryLinkLabel() != null
 				&& !lt.getPrimaryIdentity().getPrimaryLinkLabel().isEmpty()){
 

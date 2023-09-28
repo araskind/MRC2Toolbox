@@ -60,7 +60,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
@@ -295,7 +295,7 @@ public class LibEditorImportTask  extends AbstractTask {
 
 	private void updateLibraryInfo() {
 		try {
-			RemoteMsLibraryUtils.updateLibraryInfo(library);
+			MSRTLibraryUtils.updateLibraryInfo(library);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -312,7 +312,7 @@ public class LibEditorImportTask  extends AbstractTask {
 		for(MsFeature lt : library.getFeatures()){
 
 			try {
-				RemoteMsLibraryUtils.loadLibraryFeature( (LibraryMsFeature) lt, libId);
+				MSRTLibraryUtils.loadLibraryFeature( (LibraryMsFeature) lt, libId);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

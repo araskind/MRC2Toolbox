@@ -42,7 +42,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
-import edu.umich.med.mrc2.datoolbox.database.idt.RemoteMsLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.library.MsLibraryPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -60,47 +60,42 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 	 *
 	 */
 	private static final long serialVersionUID = 4092462690776270043L;
+	
 	private LibraryManagerToolbar toolbar;
 	private LibraryListingTable libraryListingTable;
-	private JScrollPane scrollPane;
 	private LibraryInfoDialog libraryInfoDialog;
 	private DuplicateLibraryDialog duplicateLibraryDialog;
+	private ActionListener listener;
 
 	private static final Icon libraryManagerIcon = GuiUtils.getIcon("libraryManager", 32);
 
 	public LibraryManager(ActionListener listener) {
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Manage MS libraries", true);
+		this.listener = listener;
+		
 		setIconImage(((ImageIcon) libraryManagerIcon).getImage());
-
-		setSize(new Dimension(400, 220));
-		setPreferredSize(new Dimension(600, 300));
-		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		setSize(new Dimension(800, 640));
+		setPreferredSize(new Dimension(800, 640));
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
 		toolbar = new LibraryManagerToolbar(listener, this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		libraryListingTable = new LibraryListingTable();
-		scrollPane = new JScrollPane(libraryListingTable);
-		scrollPane.setViewportView(libraryListingTable);
-		scrollPane.setPreferredSize(libraryListingTable.getPreferredScrollableViewportSize());
-		//	scrollPane.addComponentListener(new ResizeTableAdjuster());
-
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
-
+		refreshLibraryListing();
 		libraryListingTable.addMouseListener(
 
-	        new MouseAdapter(){
+		        new MouseAdapter(){
 
-	          public void mouseClicked(MouseEvent e){
+		          public void mouseClicked(MouseEvent e){
 
-	            if (e.getClickCount() == 2)
-	            	((MsLibraryPanel)listener).openLibrary();
-	          }
-        });
-		libraryInfoDialog = new LibraryInfoDialog(this, listener);
-		duplicateLibraryDialog = new DuplicateLibraryDialog(this, this);
+		            if (e.getClickCount() == 2)
+		            	((MsLibraryPanel)listener).openLibrary();
+		          }
+	        });
+		getContentPane().add(new JScrollPane(libraryListingTable), BorderLayout.CENTER);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
@@ -110,12 +105,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		};
 		JRootPane rootPane = SwingUtilities.getRootPane(toolbar);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-
-		refreshLibraryListing();
-
 		pack();
-		setLocationRelativeTo(MRC2ToolBoxCore.getMainWindow());
-		setVisible(false);
 	}
 
 	@Override
@@ -123,38 +113,49 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 
 		String command = event.getActionCommand();
 
-		if (command.equals(MainActionCommands.NEW_LIBRARY_DIALOG_COMMAND.getName())){
+		if (command.equals(MainActionCommands.NEW_LIBRARY_DIALOG_COMMAND.getName()))
+			showNewLibraryDialog();
 
-			libraryInfoDialog.setLocationRelativeTo(this);
-			libraryInfoDialog.initNewLibrary();
-			libraryInfoDialog.setVisible(true);
-		}
-
-		if (command.equals(MainActionCommands.DUPLICATE_LIBRARY_DIALOG_COMMAND.getName())){
-
-			CompoundLibrary selected = getSelectedLibrary();
-
-			if(selected != null){
-
-				duplicateLibraryDialog.loadLibrary(selected);
-				duplicateLibraryDialog.setLocationRelativeTo(this);
-				duplicateLibraryDialog.setVisible(true);
-			}
-		}
+		if (command.equals(MainActionCommands.DUPLICATE_LIBRARY_DIALOG_COMMAND.getName()))
+			showDuplicateLibraryDialog();
+		
 		if (command.equals(MainActionCommands.DUPLICATE_LIBRARY_COMMAND.getName()))
 			duplicateLibrary();
 
-		if (command.equals(MainActionCommands.EDIT_LIBRARY_DIALOG_COMMAND.getName())){
+		if (command.equals(MainActionCommands.EDIT_LIBRARY_DIALOG_COMMAND.getName()))
+			showEditLibraryDialog();
+	}
+	
+	private void showNewLibraryDialog() {
 
-			CompoundLibrary selected = getSelectedLibrary();
+		libraryInfoDialog = new LibraryInfoDialog(this, listener);
+		libraryInfoDialog.setLocationRelativeTo(this);
+		libraryInfoDialog.initNewLibrary();
+		libraryInfoDialog.setVisible(true);
+	}
 
-			if(selected != null){
+	private void showEditLibraryDialog() {
+		
+		CompoundLibrary selected = getSelectedLibrary();
+		if(selected == null)
+			return;
 
-				libraryInfoDialog.setLocationRelativeTo(this);
-				libraryInfoDialog.loadLibraryData(selected);
-				libraryInfoDialog.setVisible(true);
-			}
-		}
+		libraryInfoDialog = new LibraryInfoDialog(this, listener);
+		libraryInfoDialog.setLocationRelativeTo(this);
+		libraryInfoDialog.loadLibraryData(selected);
+		libraryInfoDialog.setVisible(true);
+	}
+	
+	private void showDuplicateLibraryDialog() {
+		
+		CompoundLibrary selected = getSelectedLibrary();
+		if(selected == null)
+			return;
+
+		duplicateLibraryDialog = new DuplicateLibraryDialog(this, this);
+		duplicateLibraryDialog.loadLibrary(selected);
+		duplicateLibraryDialog.setLocationRelativeTo(this);
+		duplicateLibraryDialog.setVisible(true);
 	}
 
 	private void duplicateLibrary() {
@@ -163,7 +164,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		String copyName  = duplicateLibraryDialog.getLibraryName();
 		boolean libNameExists = false;
 		try {
-			libNameExists = RemoteMsLibraryUtils.libraryNameExists(copyName);
+			libNameExists = MSRTLibraryUtils.libraryNameExists(copyName);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -208,7 +209,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 
 		Collection<CompoundLibrary>libList = new TreeSet<CompoundLibrary>();
 		try {
-			libList = RemoteMsLibraryUtils.getAllLibraries();
+			libList = MSRTLibraryUtils.getAllLibraries();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
