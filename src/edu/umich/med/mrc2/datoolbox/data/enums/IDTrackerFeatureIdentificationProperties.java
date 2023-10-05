@@ -65,18 +65,19 @@ public enum IDTrackerFeatureIdentificationProperties {
 	MSMS_LIBRARY_DEFINED_ADDUCT("Parent mass adduct, as defined in MSMS library"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	IDTrackerFeatureIdentificationProperties(String name) {
-		this.name = name;
+	IDTrackerFeatureIdentificationProperties(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static IDTrackerFeatureIdentificationProperties getPropertyByName(String optionName) {

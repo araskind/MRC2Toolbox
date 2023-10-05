@@ -81,7 +81,7 @@ public class DuplicateLibraryTask extends AbstractTask {
 
 	// Duplicate the library record
 	private String createNewLibrary() {
-
+				
 		String libraryDescription = sourceLibrary.getLibraryDescription() + "\n Copy";
 
 		if(clearRt)
@@ -92,10 +92,14 @@ public class DuplicateLibraryTask extends AbstractTask {
 
 		if(clearAnnotations)
 			libraryDescription += "\nAnnotations cleared";
+		
+		CompoundLibrary newLibrary = 
+				new CompoundLibrary(newLibraryName, libraryDescription);
+		newLibrary.setPolarity(sourceLibrary.getPolarity());
 
 		String libId = null;
 		try {
-			libId = MSRTLibraryUtils.createNewLibrary(newLibraryName, libraryDescription);
+			libId = MSRTLibraryUtils.createNewLibrary(newLibrary);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

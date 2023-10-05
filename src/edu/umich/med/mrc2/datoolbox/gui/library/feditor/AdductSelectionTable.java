@@ -67,6 +67,21 @@ public class AdductSelectionTable extends BasicTable {
 		thf.setTable(this);
 		tca.adjustColumns();
 	}
+	
+	public void setTableModelFromAdductListForPolarity(Polarity polarity) {
+		
+		Collection<Adduct> adducts = 
+				AdductManager.getAdductsForPolarity(polarity);
+		setTableModelFromAdductList(adducts);
+	}
+	
+	public void setTableModelFromAdductList(Collection<Adduct> adducts) {
+		
+		thf.setTable(null);
+		model.setTableModelFromAdductList(adducts);
+		thf.setTable(this);
+		tca.adjustColumns();
+	}
 
 	public Collection<Adduct>getSelectedAdducts(){
 

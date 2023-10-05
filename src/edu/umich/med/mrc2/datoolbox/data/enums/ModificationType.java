@@ -31,19 +31,19 @@ public enum ModificationType {
 	STRUCTURAL("Structural"), 
 	ALL("All");
 
-	private final String name;
+	private final String uiName;
 
-	ModificationType(String type) {
-		this.name = type;
+	ModificationType(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static ModificationType getModificationTypeByName(String name) {

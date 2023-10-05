@@ -119,7 +119,8 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	private static final Icon libraryExportIcon = GuiUtils.getIcon("exportLibrary", 24);
 	private static final Icon libraryImportIcon = GuiUtils.getIcon("importLibraryToDb", 24);
 
-	private static final File layoutConfigFile = new File(MRC2ToolBoxCore.configDir + "MsLibraryPanel.layout");
+	private static final File layoutConfigFile = new File(
+			MRC2ToolBoxCore.configDir + "MsLibraryPanel.layout");
 
 	public MsLibraryPanel() {
 
@@ -246,23 +247,9 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		if (command.equals(MainActionCommands.SHOW_LIBRARY_MANAGER_COMMAND.getName()))
 			showLibraryManager();
 		
-		if (command.equals(MainActionCommands.DELETE_LIBRARY_COMMAND.getName()))
-			deleteSelectedLibrary();
-
 		if (command.equals(MainActionCommands.IMPORT_COMPOUND_LIBRARY_COMMAND.getName()))
 			importLibrary();
 
-		if (command.equals(MainActionCommands.EDIT_MS_LIBRARY_INFO_COMMAND.getName()))
-			editLibraryInformation();
-
-		if (command.equals(MainActionCommands.CREATE_NEW_LIBRARY_COMMAND.getName())) {
-			try {
-				createNewLibrary();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 		if (command.equals(MainActionCommands.EXPORT_COMPOUND_LIBRARY_COMMAND.getName())
 				|| command.equals(MainActionCommands.EXPORT_FILTERED_COMPOUND_LIBRARY_COMMAND.getName()))
 			exportLibrary(command);
@@ -272,9 +259,6 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 		if (command.equals(MainActionCommands.CLOSE_LIBRARY_COMMAND.getName()))
 			closeActiveLibrary();
-
-		if (command.equals(MainActionCommands.OPEN_LIBRARY_COMMAND.getName()))
-			openLibrary();
 
 		if (command.equals(MainActionCommands.UNDO_LIBRARY_FEATURE_EDIT_COMMAND.getName()))
 			undoLibraryFeatureEdit();
@@ -297,15 +281,9 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		if (command.equals(MainActionCommands.SEARCH_FEATURE_ACCESSION_IN_DATABASE_COMMAND.getName()))
 			lookupFeatureByAccessionDatabase();
 
-		if (command.equals(MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND.getName())) {
+		if (command.equals(MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND.getName()))
+			showLibraryRtImportDialog();
 
-			if(currentLibrary == null)
-				return;
-
-			libraryRtImportDialog = new LibraryRtImportDialog(this);
-			libraryRtImportDialog.setLocationRelativeTo(this.getContentPane());
-			libraryRtImportDialog.setVisible(true);
-		}
 		if (command.equals(MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_COMMAND.getName()))
 			importLibraryFeatureRtFromFile();
 
@@ -324,28 +302,41 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		if (command.equals(MainActionCommands.IMPORT_DECOY_REFERENCE_MSMS_LIBRARY_COMMAND.getName()))	
 			showDecoyMSMSLibraryImportDialog();
 		
-		if (command.equals(MainActionCommands.LOAD_SELECTED_LIBRARY_COMMAND.getName())) {
-			//	event.getSource()
-			
-			if (event.getSource() instanceof JCheckBoxMenuItem) {
-				
-				Object libObject = 
-						((JCheckBoxMenuItem)event.getSource()).getClientProperty(MsLibraryPanelMenuBar.LIBRARY_OBJECT);
-
-				if(libObject != null && libObject instanceof CompoundLibrary) {
-					
-					currentLibrary = (CompoundLibrary) libObject;
-					libraryFeatureEditorPanel.clearPanel();
-					molStructurePanel.clearPanel();
-					loadLibrary(currentLibrary);
-				}
-			}
-		}
+		if (command.equals(MainActionCommands.LOAD_SELECTED_LIBRARY_COMMAND.getName()))
+			loadLibrarySelectedFromMenu(event.getSource());
 	}
 	
+	private void loadLibrarySelectedFromMenu(Object selectionEventSource) {
+		
+		if (selectionEventSource instanceof JCheckBoxMenuItem) {
+			
+			Object libObject = 
+					((JCheckBoxMenuItem)selectionEventSource).
+						getClientProperty(MsLibraryPanelMenuBar.LIBRARY_OBJECT);
+
+			if(libObject != null && libObject instanceof CompoundLibrary) {
+				
+				currentLibrary = (CompoundLibrary) libObject;
+				libraryFeatureEditorPanel.clearPanel();
+				molStructurePanel.clearPanel();
+				reloadLibraryData(currentLibrary);
+			}
+		}
+	}	
+	
+	private void showLibraryRtImportDialog() {
+
+		if(currentLibrary == null)
+			return;
+
+		libraryRtImportDialog = new LibraryRtImportDialog(this);
+		libraryRtImportDialog.setLocationRelativeTo(this.getContentPane());
+		libraryRtImportDialog.setVisible(true);
+	}
+
 	private void showLibraryManager() {
 
-		libraryManager = new LibraryManager(this);		
+		libraryManager = new LibraryManager(this, currentLibrary);		
 		libraryManager.setLocationRelativeTo(this.getContentPane());
 		libraryManager.setVisible(true);
 	}
@@ -825,68 +816,32 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	}
 
 	private void createNewLibrary() throws Exception {
-
-		String libraryName = libraryManager.getLibraryInfoDialog().getLibraryName();
-		String libraryDescription = libraryManager.getLibraryInfoDialog().getLibraryDescription();
-		String libId = MSRTLibraryUtils.createNewLibrary(libraryName, libraryDescription);
-		libraryManager.refreshLibraryListing();
-		libraryManager.hideLibInfoDialog();
-
-		for (CompoundLibrary l : MSRTLibraryUtils.getAllLibraries()) {
-
-			if (l.getLibraryId().equals(libId)) {
-
-				currentLibrary = l;
-				MRC2ToolBoxCore.getActiveMsLibraries().add(currentLibrary);
-				break;
-			}
-		}
-	}
-
-	private void deleteSelectedLibrary() {
-
-		CompoundLibrary selected = libraryManager.getSelectedLibrary();
-
-		int approve = MessageDialog.showChoiceWithWarningMsg(
-				"Do you really want to delete the library \"" + selected.getLibraryName() + "\"?", libraryManager);
-
-		if (approve == JOptionPane.YES_OPTION) {
-
-			MRC2ToolBoxCore.getActiveMsLibraries().remove(selected);
-			try {
-				MSRTLibraryUtils.deleteLibrary(selected);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			libraryManager.refreshLibraryListing();
-		}
-		if (currentLibrary != null) {
-
-			if (currentLibrary.equals(selected))
-				clearPanel();
-		} else
-			clearPanel();
-
-		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
-	}
-
-	private void editLibraryInformation() {
-
-		CompoundLibrary selected = libraryManager.getLibraryInfoDialog().getEditedLibrary();
-		String libraryName = libraryManager.getLibraryInfoDialog().getLibraryName();
-		String libraryDescription = libraryManager.getLibraryInfoDialog().getLibraryDescription();
-		selected.setLibraryName(libraryName);
-		selected.setLibraryDescription(libraryDescription);
-
-		try {
-			MSRTLibraryUtils.updateLibraryInfo(selected);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		libraryManager.refreshLibraryListing();
-		libraryManager.hideLibInfoDialog();
-
-		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
+		
+//		CompoundLibrary newLibrary = new CompoundLibrary(libraryManager.getLibraryInfoDialog().getLibraryName());
+//
+//		String libraryName = libraryManager.getLibraryInfoDialog().getLibraryName();
+//		String libraryDescription = libraryManager.getLibraryInfoDialog().getLibraryDescription();
+//		String libId = MSRTLibraryUtils.createNewLibrary(libraryName, libraryDescription);
+//		libraryManager.refreshLibraryListing();
+//		libraryManager.hideLibInfoDialog();
+//		Collection<CompoundLibrary> libList = new ArrayList<CompoundLibrary>();
+//		
+//		try {
+//			libList = MSRTLibraryUtils.getAllLibraries();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		for (CompoundLibrary l : libList) {
+//
+//			if (l.getLibraryId().equals(libId)) {
+//
+//				currentLibrary = l;
+//				MRC2ToolBoxCore.getActiveMsLibraries().add(currentLibrary);
+//				break;
+//			}
+//		}
 	}
 
 	private void importLibrary() {
@@ -901,39 +856,49 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		fc.setMode(JnaFileChooser.Mode.Files);
 		fc.addFilter("CEF files", "cef", "CEF");
 		fc.addFilter("Library Editor files", "xml", "XML");	
-		fc.addFilter("TAB-separated text files", "txt", "TXT", "tsv", "TSV");
+		//	fc.addFilter("TAB-separated text files", "txt", "TXT", "tsv", "TSV");
 		fc.setTitle("Select library file to import");
 		fc.setMultiSelectionEnabled(false);
-		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane()))) {
-			
-			File inputFile = fc.getSelectedFile();
-			if (inputFile.exists()) {
+		if (fc.showOpenDialog(SwingUtilities.getWindowAncestor(this.getContentPane())))			
+			importLibraryFromFile(fc.getSelectedFile(), null);		
+	}
+	
+	public void importLibraryFromFile(File inputFile, Collection<Adduct> adductList) {
+		
+		if(inputFile == null || !inputFile.exists())
+			return;
+		
+		baseDirectory = inputFile.getParentFile();
 
-				baseDirectory = inputFile.getParentFile();
+		// Read lib editor file
+		if (inputFile.getName().toLowerCase().endsWith("mslibrary.xml")) {
 
-				// Read lib editor file
-				if (inputFile.getName().toLowerCase().endsWith("mslibrary.xml")) {
-
-					LibEditorImportTask lit = new LibEditorImportTask(inputFile, currentLibrary);
-					lit.addTaskListener(this);
-					MRC2ToolBoxCore.getTaskController().addTask(lit);
-				}
-				//	TODO read CEF file
-				if (inputFile.getName().toLowerCase().endsWith(".cef")) {
-					MessageDialog.showWarningMsg("CEF library import under development.", this.getContentPane());
-				}
-				if (inputFile.getName().toLowerCase().endsWith(".txt")
-						|| inputFile.getName().toLowerCase().endsWith(".tsv")) {
-					TextLibraryImportTask task = new TextLibraryImportTask(inputFile, currentLibrary);
-					task.addTaskListener(this);
-					MRC2ToolBoxCore.getTaskController().addTask(task);
-				}
-			}
+			LibEditorImportTask lit = new LibEditorImportTask(inputFile, currentLibrary);
+			lit.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(lit);
+		}
+		//	TODO read CEF file
+		if (inputFile.getName().toLowerCase().endsWith(".cef")) {
+			MessageDialog.showWarningMsg("CEF library import under development.", this.getContentPane());
+		}
+		if (inputFile.getName().toLowerCase().endsWith(".txt")
+				|| inputFile.getName().toLowerCase().endsWith(".tsv")) {
+			TextLibraryImportTask task = new TextLibraryImportTask(inputFile, currentLibrary, adductList);
+			task.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
 	}
 
-	public void loadLibrary(CompoundLibrary selectedLibrary) {
-
+	public void reloadLibraryData(CompoundLibrary selectedLibrary) {
+		
+		if(!MRC2ToolBoxCore.getActiveMsLibraries().contains(selectedLibrary)) {
+			
+			LoadDatabaseLibraryTask ldbltask = 
+					new LoadDatabaseLibraryTask(selectedLibrary.getLibraryId());
+			ldbltask.addTaskListener(this);
+			MRC2ToolBoxCore.getTaskController().addTask(ldbltask);	
+			return;
+		}
 		libraryFeatureTable.getTable().getSelectionModel().removeListSelectionListener(this);
 		clearPanel();
 		currentLibrary = selectedLibrary;
@@ -941,27 +906,22 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 				currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
 		libraryFeatureTable.getTable().setTableModelFromCompoundLibrary(currentLibrary);
 		libraryFeatureTable.getTable().getSelectionModel().addListSelectionListener(this);
+		libraryFeatureEditorPanel.setAndLockFeaturePolarity(currentLibrary.getPolarity());
 	}
 
-	public void openLibrary() {
-
-		if (libraryManager.getSelectedLibrary() != null) {
-
-			for (CompoundLibrary lib : MRC2ToolBoxCore.getActiveMsLibraries()) {
-
-				if (lib.getLibraryId().equals(libraryManager.getSelectedLibrary().getLibraryId())) {
-
-					loadLibrary(lib);
-					libraryManager.setVisible(false);
-					return;
-				}
-			}
-			LoadDatabaseLibraryTask ldbltask = new LoadDatabaseLibraryTask(
-					libraryManager.getSelectedLibrary().getLibraryId());
-			ldbltask.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(ldbltask);
-			libraryManager.setVisible(false);
+	public void openLibraryFromDatabase(CompoundLibrary selectedLibrary) {
+		
+		if(currentLibrary != null && currentLibrary.equals(selectedLibrary))
+			return;
+		
+		if(MRC2ToolBoxCore.getActiveMsLibraries().contains(selectedLibrary)) {
+			reloadLibraryData(selectedLibrary);
+			return;
 		}
+		LoadDatabaseLibraryTask ldbltask = 
+				new LoadDatabaseLibraryTask(selectedLibrary.getLibraryId());
+		ldbltask.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(ldbltask);		
 	}
 
 	@Override
@@ -973,7 +933,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 			// Import library
 			if (e.getSource().getClass().equals(LibEditorImportTask.class))
-				loadLibrary(((LibEditorImportTask) e.getSource()).getLibrary());
+				reloadLibraryData(((LibEditorImportTask) e.getSource()).getLibrary());
 			
 			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class)) 
 				finalizeLoadDatabaseLibraryTask( (LoadDatabaseLibraryTask) e.getSource());
@@ -985,7 +945,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 				finalizeReferenceMSMSLibraryExportTask((ReferenceMSMSLibraryExportTask)e.getSource());
 			
 			if (e.getSource().getClass().equals(TextLibraryImportTask.class))
-				loadLibrary(((TextLibraryImportTask)e.getSource()).getLibrary());
+				reloadLibraryData(((TextLibraryImportTask)e.getSource()).getLibrary());
 		}
 	}
 
@@ -1010,11 +970,16 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 	private void finalizeLoadDatabaseLibraryTask(LoadDatabaseLibraryTask task) {
 		
 		MRC2ToolBoxCore.getActiveMsLibraries().add(task.getLibrary());
-		loadLibrary(task.getLibrary());
-
+		reloadLibraryData(task.getLibrary());
+		showPendingFeature();
+	}
+	
+	private void showPendingFeature() {
+		
 		if (showFeaturePending && pendingFeatureId != null) {
 
-			LibraryMsFeature featureToShow = (LibraryMsFeature) currentLibrary.getFeatureById(pendingFeatureId);
+			LibraryMsFeature featureToShow = 
+					(LibraryMsFeature) currentLibrary.getFeatureById(pendingFeatureId);
 
 			if (featureToShow != null) {
 				SwingUtilities.invokeLater(() -> {
@@ -1143,7 +1108,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 				currentLibrary = (CompoundLibrary) event.getItem();
 				libraryFeatureEditorPanel.clearPanel();
 				molStructurePanel.clearPanel();
-				loadLibrary(currentLibrary);
+				reloadLibraryData(currentLibrary);
 			}
 		}
 	}
@@ -1169,7 +1134,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 
 			if (featureToShow != null) {
 
-				loadLibrary(library);
+				reloadLibraryData(library);
 				selectFeature(featureToShow);
 				return;
 			}
@@ -1191,6 +1156,23 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			MRC2ToolBoxCore.getTaskController().addTask(ldbltask);
 		} else
 			MessageDialog.showErrorMsg("Selected target not in database!");
+	}
+	
+	public void updateLibraryMenuAndLabel() {
+		((MsLibraryPanelMenuBar)menuBar).updateLibraryList(
+				currentLibrary, MRC2ToolBoxCore.getActiveMsLibraries());
+	}
+	
+	public void finalizeLibraryDeletion(CompoundLibrary deleted) {
+		
+		if (currentLibrary != null) {
+
+			if (currentLibrary.equals(deleted))
+				clearPanel();
+		} else
+			clearPanel();
+
+		updateLibraryMenuAndLabel() ;
 	}
 
 	@Override

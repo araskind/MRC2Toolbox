@@ -29,18 +29,19 @@ public enum MSMSScoringParameter {
 	PROBABILITY("Probability"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	MSMSScoringParameter(String type) {
-		this.name = type;
+	MSMSScoringParameter(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static MSMSScoringParameter getMSMSScoringParameterByName(String name) {

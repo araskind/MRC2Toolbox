@@ -28,18 +28,19 @@ public enum IdentifierSearchOptions {
 	NAME_CONTAINS("Name contains"),
 	COMPOUND_ID("Compound id is (exact match)");
 
-	private final String name;
+	private final String uiName;
 
-	IdentifierSearchOptions(String type) {
-		this.name = type;
+	IdentifierSearchOptions(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 
 	public static IdentifierSearchOptions getOptionByName(String optionName) {

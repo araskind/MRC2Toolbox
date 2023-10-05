@@ -76,13 +76,18 @@ public enum BinnerPostProcessorField {
 		VERSION_INFO("Version Info"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	BinnerPostProcessorField(String field) {
-		this.name = field;
+	BinnerPostProcessorField(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
+	}
+	
+	@Override
+	public String toString() {
+		return uiName;
 	}
 }

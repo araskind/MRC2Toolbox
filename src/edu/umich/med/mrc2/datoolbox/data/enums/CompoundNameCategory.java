@@ -30,18 +30,18 @@ public enum CompoundNameCategory {
 	BRN("Brand name"),
 	;
 	
-	private final String name;
+	private final String uiName;
 
-	CompoundNameCategory(String type) {
-		this.name = type;
+	CompoundNameCategory(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static CompoundNameCategory getCompoundNameCategoryByName(String name) {

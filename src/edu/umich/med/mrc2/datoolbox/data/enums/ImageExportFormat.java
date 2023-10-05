@@ -28,12 +28,12 @@ public enum ImageExportFormat {
 	PDF("PDF files", "pdf"),
 	SVG("SVG files", "svg");
 
-	private final String name;
+	private final String uiName;
 	private final String extension;
 
-	ImageExportFormat(String name, String extension) {
+	ImageExportFormat(String uiName, String extension) {
 
-		this.name = name;
+		this.uiName = uiName;
 		this.extension = extension;
 	}
 
@@ -42,6 +42,6 @@ public enum ImageExportFormat {
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 }

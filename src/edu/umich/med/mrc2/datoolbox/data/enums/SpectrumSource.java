@@ -28,21 +28,19 @@ public enum SpectrumSource {
 	DATABASE("Database"),
 	THEORETICAL("Theoretical");
 
-	private final String name;
+	private final String uiName;
 
-	SpectrumSource(String type) {
-
-		this.name = type;
+	SpectrumSource(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-
-		return name;
+		return uiName;
 	}
 
 	public static SpectrumSource getSpectrumSourceByName(String name) {

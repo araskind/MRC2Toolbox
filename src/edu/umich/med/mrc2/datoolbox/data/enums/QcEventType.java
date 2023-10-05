@@ -30,19 +30,19 @@ public enum QcEventType {
 	ASSAY_DEVELOPMENT("Assay development"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	QcEventType(String type) {
-		this.name = type;
+	QcEventType(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 
 	public static QcEventType getEventTypeByName(String name) {

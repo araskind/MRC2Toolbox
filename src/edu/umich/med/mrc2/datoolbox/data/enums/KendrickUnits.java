@@ -32,20 +32,21 @@ public enum KendrickUnits {
 	DOUBLE_BOND("Double bond", 0.9922111),
 	;
 
-	private final String name;
+	private final String uiName;
 	private final double multiplier;
 
-	KendrickUnits(String name, double multiplier) {
-		this.name = name;
+	KendrickUnits(String uiName, double multiplier) {
+		this.uiName = uiName;
 		this.multiplier = multiplier;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public double getMultiplier() {

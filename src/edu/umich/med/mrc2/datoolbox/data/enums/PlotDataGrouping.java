@@ -28,20 +28,18 @@ public enum PlotDataGrouping {
 	TWO_FACTORS("Two factors"),
 	EACH_FACTOR("Each factor");
 
-	private final String name;
+	private final String uiName;
 
-	PlotDataGrouping(String type) {
-
-		this.name = type;
+	PlotDataGrouping(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-
-		return name;
+		return uiName;
 	}
 	
+	@Override
 	public String toString() {
-
-		return name;
+		return uiName;
 	}
 }

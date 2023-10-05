@@ -47,14 +47,18 @@ public enum CompoundIdentificationConfidence {
 
 	private final int level;
 	private final String levelId;
-	private final String name;
+	private final String uiName;
 	private final String description;
 
-	CompoundIdentificationConfidence(int level, String levelId, String name, String description) {
+	CompoundIdentificationConfidence(
+			int level, 
+			String levelId, 
+			String uiName, 
+			String description) {
 
 		this.level = level;
 		this.levelId = levelId;
-		this.name = name;
+		this.uiName = uiName;
 		this.description = description;
 	}
 
@@ -67,9 +71,10 @@ public enum CompoundIdentificationConfidence {
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
 		return levelId;
 	}

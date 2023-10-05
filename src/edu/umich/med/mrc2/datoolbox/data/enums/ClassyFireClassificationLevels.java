@@ -30,17 +30,18 @@ public enum ClassyFireClassificationLevels {
 	DIRECT_PARENT("CF Direct parent"),
 	;
 	
-	private final String name;
+	private final String uiName;
 
-	ClassyFireClassificationLevels(String name) {
-		this.name = name;
+	ClassyFireClassificationLevels(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

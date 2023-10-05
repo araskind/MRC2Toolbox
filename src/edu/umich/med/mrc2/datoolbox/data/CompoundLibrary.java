@@ -139,11 +139,7 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 
 	@Override
 	public int compareTo(CompoundLibrary o) {
-
-		String current = name + id;
-		String newLib = o.getLibraryName() + o.getLibraryId();
-
-		return current.compareToIgnoreCase(newLib);
+		return name.compareToIgnoreCase(o.getLibraryName());
 	}
 
 	public Collection<LibraryMsFeature>getFeatures() {
@@ -258,5 +254,9 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 
 	public void setPolarity(Polarity polarity) {
 		this.polarity = polarity;
+	}
+
+	public void setLibraryId(String id) {
+		this.id = id;
 	}
 }

@@ -27,25 +27,25 @@ public enum InChiKeyPortion {
 	STRUCTURE_ONLY("Structure (no stereo)"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	InChiKeyPortion(String type) {
-		this.name = type;
+	InChiKeyPortion(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static InChiKeyPortion getInChiKeyPortionByName(String name) {
 		
 		for(InChiKeyPortion v : InChiKeyPortion.values()) {
 			
-			if(v.name.equals(name))
+			if(v.name().equals(name))
 				return v;
 		}	
 		return null;

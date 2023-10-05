@@ -30,25 +30,26 @@ public enum DataScale {
 	RANGE("Range (0-100)"), 
 	ZSCORE("Z-score");
 
-	private final String name;
+	private final String uiName;
 
-	DataScale(String type) {
-
-		this.name = type;
+	DataScale(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static DataScale getDataScaleByName(String name) {
 		
 		for(DataScale s : DataScale.values()) {
-			if(s.name.equals(name))
+			
+			if(s.getName().equals(name))
 				return s;
 		}		
 		return null;

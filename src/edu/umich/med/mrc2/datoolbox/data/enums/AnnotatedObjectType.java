@@ -40,21 +40,21 @@ public enum AnnotatedObjectType {
 	MOTRPAC_RESULTS("MoTrPAC results", DataPrefix.MOTRPAC_REPORT),
 	;
 
-	private final String name;
+	private final String uiName;
 	private final DataPrefix idPrefix;
 
-	AnnotatedObjectType(String type, DataPrefix idPrefix) {
-		this.name = type;
+	AnnotatedObjectType(String uiName, DataPrefix idPrefix) {
+		this.uiName = uiName;
 		this.idPrefix = idPrefix;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 
 	public DataPrefix getIdPrefix() {
@@ -66,16 +66,6 @@ public enum AnnotatedObjectType {
 		for(AnnotatedObjectType source : AnnotatedObjectType.values()) {
 
 			if(source.name().equals(name))
-				return source;
-		}
-		return null;
-	}
-
-	public static AnnotatedObjectType getObjectTypeByUniqueId(String uniqueId) {
-
-		for(AnnotatedObjectType source : AnnotatedObjectType.values()) {
-
-			if(uniqueId.startsWith(source.getIdPrefix().getName()))
 				return source;
 		}
 		return null;

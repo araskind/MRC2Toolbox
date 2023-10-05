@@ -26,18 +26,19 @@ public enum IntensityMeasure {
 	ABSOLUTE("Absolute, counts"), 
 	RELATIVE("Relative to base peak, %");
 
-	private final String name;
+	private final String uiName;
 
-	IntensityMeasure(String type) {
-		this.name = type;
+	IntensityMeasure(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 	
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static IntensityMeasure geIntensityMeasureByName(String type) {

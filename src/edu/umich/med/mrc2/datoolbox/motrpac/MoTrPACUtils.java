@@ -425,7 +425,7 @@ public class MoTrPACUtils {
 				continue;
 			
 			MoTrPACmetaboliteMetaDataFields field = 
-					MoTrPACmetaboliteMetaDataFields.getMoTrPACmetaboliteMetadataFieldByName(header[i].trim());
+					MoTrPACmetaboliteMetaDataFields.getMoTrPACmetaboliteMetadataFieldByUIName(header[i].trim());
 			
 			if(field != null)
 				columnMap.put(field, i);

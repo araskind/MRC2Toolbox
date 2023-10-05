@@ -35,17 +35,18 @@ public enum BinnerExportFields {
 	MZ("Monoisotopic M/Z"),
 	CHARGE("Charge");
 
-	private final String name;
+	private final String uiName;
 
-	BinnerExportFields(String type) {
-		this.name = type;
+	BinnerExportFields(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

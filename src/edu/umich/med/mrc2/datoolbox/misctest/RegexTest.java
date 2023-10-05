@@ -113,6 +113,7 @@ import com.Ostermiller.util.CSVParser;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
 import edu.umich.med.mrc2.datoolbox.data.MsMsLibraryFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsPoint;
@@ -144,11 +145,10 @@ import edu.umich.med.mrc2.datoolbox.database.idt.FeatureChromatogramUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTUtils;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSMSLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
 import edu.umich.med.mrc2.datoolbox.database.thermo.CompoundDiscovererUtils;
 import edu.umich.med.mrc2.datoolbox.database.thermo.ThermoSqliteConnectionManager;
-import edu.umich.med.mrc2.datoolbox.dbparse.load.CompoundProperty;
-import edu.umich.med.mrc2.datoolbox.dbparse.load.hmdb.HMDBUtils;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.massbank.MassBankFileParser;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.massbank.MassBankTandemMassSpectrum;
 import edu.umich.med.mrc2.datoolbox.dbparse.load.mine.MINEMSPParser;
@@ -203,12 +203,129 @@ public class RegexTest {
 				MRC2ToolBoxCore.configDir + "MRC2ToolBoxPrefs.txt");
 		MRC2ToolBoxConfiguration.initConfiguration();
 		try {
-			Collection<CompoundProperty> bl = HMDBUtils.getCompoundProperties();
-			System.err.println("");
+			batchDFileRename();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}	
+	}
+	
+	private static void batchDFileRename() {
+		
+		File sourceDirectory = new File("E:\\_Downloads\\_2_rename\\2023-10-02 Bravo Test");
+		IOFileFilter dotDfilter = 
+				FileFilterUtils.makeDirectoryOnly(new RegexFileFilter(".+\\.[dD]$"));
+		Collection<File> dotDfiles = FileUtils.listFilesAndDirs(
+				sourceDirectory,
+				DirectoryFileFilter.DIRECTORY,
+				dotDfilter);
+		File renameMapFile = new File(
+				"E:\\_Downloads\\_2_rename\\2023-10-02 Bravo Test\\rename_map.txt");
+		String[][] renameMapping = DelimitedTextParser.parseTextFile(
+				renameMapFile, MRC2ToolBoxConfiguration.getTabDelimiter());
+		Map<String,String>fileNameMap = new TreeMap<String,String>();
+		for(int i=0; i<renameMapping.length; i++)
+			fileNameMap.put(renameMapping[i][0], renameMapping[i][1]);
+			
+		for(File ddf : dotDfiles) {
+			
+			String newFileName = fileNameMap.get(ddf.getName());
+			if(newFileName == null) {
+				System.out.println("No replacement found for " + ddf.getName());
+				continue;
+			}
+			String newName = ddf.getAbsolutePath().replace(ddf.getName(), newFileName);
+			boolean sInfoRenamed = false;
+			try {
+				sInfoRenamed = renameDFileInSampleInfo(ddf, ddf.getName(), newName);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(sInfoRenamed) {
+				
+				Path source = Paths.get(ddf.getAbsolutePath());
+				try {
+					Files.move(source, source.resolveSibling(newName));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}			
+		}
+	}
+
+	private static void updateMSRTLibraryTargetIds() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE MS_LIBRARY SET LIBRARY_ID_NEW = ? WHERE LIBRARY_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		String query2 = 
+				"SELECT TARGET_ID FROM MS_LIBRARY_COMPONENT WHERE LIBRARY_ID = ?";
+		PreparedStatement ps2 = conn.prepareStatement(query2);
+		
+		String query3 = 
+				"UPDATE MS_LIBRARY_COMPONENT SET TARGET_ID_NEW = ? WHERE TARGET_ID = ?";
+		PreparedStatement ps3 = conn.prepareStatement(query3);
+		
+		
+		Collection<CompoundLibrary> libList = new ArrayList<CompoundLibrary>();			
+		try {
+			libList = MSRTLibraryUtils.getAllLibraries();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (CompoundLibrary l : libList) {
+			
+			ps2.setString(1, l.getLibraryId());
+			ResultSet rs = ps2.executeQuery();
+			while(rs.next()) {
+				
+				String newId = SQLUtils.getNextIdFromSequence(conn, 
+						"MS_RT_LIBRARY_TARGET_SEQ",
+						DataPrefix.MS_LIBRARY_TARGET,
+						"0",
+						7);
+				ps3.setString(1, newId);
+				ps3.setString(2, rs.getString(1));
+				ps3.executeUpdate();
+			}
+		}
+		ps.close();
+		ps2.close();
+		ps3.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+		
+	private static void updateMSRTLibraryIds() throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		String query = 
+				"UPDATE MS_LIBRARY SET LIBRARY_ID_NEW = ? WHERE LIBRARY_ID = ?";
+		PreparedStatement ps = conn.prepareStatement(query);
+		
+		Collection<CompoundLibrary> libList = new ArrayList<CompoundLibrary>();			
+		try {
+			libList = MSRTLibraryUtils.getAllLibraries();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (CompoundLibrary l : libList) {
+			
+			String newId = SQLUtils.getNextIdFromSequence(conn, 
+					"MS_RT_LIBRARY_SEQ",
+					DataPrefix.MS_LIBRARY,
+					"0",
+					5);
+			ps.setString(1, newId);
+			ps.setString(2, l.getLibraryId());
+			ps.executeUpdate();
+		}
+		ps.close();
+		ConnectionManager.releaseConnection(conn);
+	}
 	
 
 	private static int getMaxColumnNumber(Sheet sheet) {

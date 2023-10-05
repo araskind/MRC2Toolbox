@@ -49,7 +49,9 @@ public class DockableAductSelector extends DefaultSingleCDockable{
 
 	private static final Icon componentIcon = GuiUtils.getIcon("chemModList", 16);
 
-	public DockableAductSelector(TableModelListener adductSelectonListener, ItemListener polarityListener) {
+	public DockableAductSelector(
+			TableModelListener adductSelectonListener, 
+			ItemListener polarityListener) {
 
 		super("DockableAductSelector", componentIcon, "Adduct selector", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
@@ -100,6 +102,11 @@ public class DockableAductSelector extends DefaultSingleCDockable{
 
 	public Polarity getPolarity() {
 		return (Polarity) polarityComboBox.getSelectedItem();
+	}
+	
+	public void setAndLockFeaturePolarity(Polarity polarity) {
+		polarityComboBox.setSelectedItem(polarity);
+		polarityComboBox.setEnabled(false);
 	}
 }
 

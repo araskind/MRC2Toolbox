@@ -33,33 +33,34 @@ public enum ElementaryAdducts {
 	ACETATE("CH3COO", -1, false),
 	TRIFLUOROACETATE("CF3COO", -1, false);
 
-	private final String name;
+	private final String uiName;
 	private final int charge;
 	private final boolean allowRemoval;
 
-	ElementaryAdducts(String name, int charge, boolean allowRemoval) {
+	ElementaryAdducts(
+			String uiName, 
+			int charge, 
+			boolean allowRemoval) {
 
-		this.name = name;
+		this.uiName = uiName;
 		this.charge = charge;
 		this.allowRemoval = allowRemoval;
 	}
 
 	public boolean allowToRemove() {
-
 		return allowRemoval;
 	}
 
 	public int getCharge() {
-
 		return charge;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

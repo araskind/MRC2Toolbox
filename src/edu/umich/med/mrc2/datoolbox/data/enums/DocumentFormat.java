@@ -47,12 +47,12 @@ public enum DocumentFormat {
 	UNK("Unknown format","application/unk"),
 	;
 
-	private final String name;
+	private final String uiName;
 	private final String mime;
 
-	DocumentFormat(String name, String mime) {
+	DocumentFormat(String uiName, String mime) {
 
-		this.name = name;
+		this.uiName = uiName;
 		this.mime = mime;
 	}
 
@@ -70,11 +70,11 @@ public enum DocumentFormat {
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

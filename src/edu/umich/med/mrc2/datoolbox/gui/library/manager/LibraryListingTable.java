@@ -35,6 +35,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundLibraryRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.PolarityRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class LibraryListingTable extends BasicTable {
@@ -44,7 +45,6 @@ public class LibraryListingTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = -8952035680682723707L;
 	private LibraryListingTableModel model;
-	private CompoundLibraryRenderer compoundLibraryRenderer;
 
 	public LibraryListingTable() {
 
@@ -57,26 +57,55 @@ public class LibraryListingTable extends BasicTable {
 				new CompoundLibraryComparator(SortProperty.Name));
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		compoundLibraryRenderer = new CompoundLibraryRenderer(SortProperty.Name);
-		longTextRenderer = new WordWrapCellRenderer();
-
 		columnModel.getColumnById(LibraryListingTableModel.LIBRARY_COLUMN)
-			.setCellRenderer(compoundLibraryRenderer);
+			.setCellRenderer(new CompoundLibraryRenderer(SortProperty.Name));
 		columnModel.getColumnById(LibraryListingTableModel.DESCRIPTION_COLUMN)
-			.setCellRenderer(longTextRenderer);
-
+			.setCellRenderer(new WordWrapCellRenderer());
+		columnModel.getColumnById(LibraryListingTableModel.POLARITY_COLUMN)
+			.setCellRenderer(new PolarityRenderer());
+		
 		setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		thf.getParserModel().setFormat(CompoundLibrary.class, new CompoundLibraryFormat(SortProperty.Name));
-		thf.getParserModel().setComparator(CompoundLibrary.class, new CompoundLibraryComparator(SortProperty.Name));
+		thf.getParserModel().setFormat(CompoundLibrary.class, 
+				new CompoundLibraryFormat(SortProperty.Name));
+		thf.getParserModel().setComparator(CompoundLibrary.class, 
+				new CompoundLibraryComparator(SortProperty.Name));
 		finalizeLayout();
 	}
 
-	public void setTableModelFromLibraryCollection(Collection<CompoundLibrary> libraryCollection) {
+	public void setTableModelFromLibraryCollection(
+			Collection<CompoundLibrary> libraryCollection, 
+			CompoundLibrary activeLibrary) {
 
 		thf.setTable(null);
-		model.setTableModelFromLibraryCollection(libraryCollection);
+		model.setTableModelFromLibraryCollection(libraryCollection, activeLibrary);
 		thf.setTable(this);
 		tca.adjustColumns();
+		
+		if(activeLibrary != null)
+			selectLibrary(activeLibrary);
+	}
+	
+	public CompoundLibrary getSelectedLibrary(){
+		
+		int row = getSelectedRow();
+		if(row == -1)
+			return null;
+
+		return (CompoundLibrary) model.getValueAt(convertRowIndexToModel(row), 
+				model.getColumnIndex(LibraryListingTableModel.LIBRARY_COLUMN));
+	}
+	
+	public void selectLibrary(CompoundLibrary toSelect){
+		
+		int col = model.getColumnIndex(LibraryListingTableModel.LIBRARY_COLUMN);
+		for(int i = 0; i<model.getRowCount(); i++) {
+			
+			if(toSelect.equals(model.getValueAt(i, col))) {
+				setRowSelectionInterval(i, i);
+				scrollToSelected();
+				return;
+			}
+		}
 	}
 }

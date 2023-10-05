@@ -317,7 +317,7 @@ public class DatabaseToLibraryDialog  extends JDialog implements ActionListener{
 	private void switchToLibraryFeature(LibraryMsFeature lf, CompoundLibrary library) {
 
 		MsLibraryPanel libPanel  = (MsLibraryPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.MS_LIBRARY);
-		libPanel.loadLibrary(library);
+		libPanel.reloadLibraryData(library);
 		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.MS_LIBRARY);
 		libPanel.selectFeature(lf);
 	}

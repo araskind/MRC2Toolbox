@@ -27,18 +27,19 @@ public enum SoftwareType {
 	DATA_ANALYSIS("Data analysis"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	SoftwareType(String type) {
-		this.name = type;
+	SoftwareType(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static SoftwareType getSoftwareTypeByName(String sName) {

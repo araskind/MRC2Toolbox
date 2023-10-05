@@ -37,20 +37,19 @@ public enum DataExportFields {
 	CLIENT_SAMPLE_ID("Client sample ID"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	DataExportFields(String type) {
-
-		this.name = type;
+	DataExportFields(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static DataExportFields getDataExportFieldByName(String name) {

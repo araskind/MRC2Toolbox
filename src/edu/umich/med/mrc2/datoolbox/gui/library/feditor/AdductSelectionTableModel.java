@@ -78,6 +78,28 @@ public class AdductSelectionTableModel extends BasicTableModel {
 		if(!rowData.isEmpty())
 			addRows(rowData);
 	}
+	
+	public void setTableModelFromAdductList(
+			Collection<Adduct> adducts) {
+
+		setRowCount(0);
+		if(adducts == null || adducts.isEmpty())
+			return;
+
+		List<Object[]>rowData = new ArrayList<Object[]>();
+		for (Adduct ad : adducts) {
+
+			Object[] obj = {
+				false,
+				ad,
+				ad.getCharge(),
+				ad.getOligomericState()
+			};
+			rowData.add(obj);
+		}
+		if(!rowData.isEmpty())
+			addRows(rowData);
+	}
 }
 
 

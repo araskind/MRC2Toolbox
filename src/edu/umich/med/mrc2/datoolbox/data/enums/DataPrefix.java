@@ -100,8 +100,8 @@ public enum DataPrefix {
 	MS_FEATURE_CLUSTER("MFC_"),
 	MS_FEATURE_IDENTITY("FID_"),
 	MS_FEATURE_POOLED("MSFP_"),
-	MS_LIBRARY("CPDLIB_"),
-	MS_LIBRARY_TARGET("TGT_"),
+	MS_LIBRARY("MSRTLIB"),
+	MS_LIBRARY_TARGET("MSRTTGT"),
 	MS_LIBRARY_UNKNOWN_TARGET("UNK_"),
 	MS_PATTERN("MSP_"),
 	NEUTRAL_LOSS("NULOSS"),
@@ -123,14 +123,14 @@ public enum DataPrefix {
 	VERSION("V"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	DataPrefix(String type) {
-		this.name = type;
+	DataPrefix(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 }
 

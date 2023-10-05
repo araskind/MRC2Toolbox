@@ -39,21 +39,22 @@ public enum ThermoInstrumentSequenceFields {
 	DIL_FACTOR("Dil Factor"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	ThermoInstrumentSequenceFields(String name2) {
-		this.name = name2;
+	ThermoInstrumentSequenceFields(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
-	ThermoInstrumentSequenceFields getThermoInstrumentSequenceFieldByFieldName(String fieldName) {
+	ThermoInstrumentSequenceFields getThermoInstrumentSequenceFieldByFieldUIName(String fieldName) {
 		
 		for(ThermoInstrumentSequenceFields f : ThermoInstrumentSequenceFields.values()) {
 			if(f.getName().equals(fieldName))

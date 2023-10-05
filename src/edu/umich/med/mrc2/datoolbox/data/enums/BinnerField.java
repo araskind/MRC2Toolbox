@@ -51,17 +51,18 @@ public enum BinnerField {
 	CHARGE("Charge"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	BinnerField(String field) {
-		this.name = field;
+	BinnerField(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 	
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

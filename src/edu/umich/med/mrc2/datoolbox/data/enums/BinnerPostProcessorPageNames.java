@@ -28,17 +28,18 @@ public enum BinnerPostProcessorPageNames {
 	ISTD_AND_REDUNDANT("Internal std & redundant names"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	BinnerPostProcessorPageNames(String name) {
-		this.name = name;
+	BinnerPostProcessorPageNames(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

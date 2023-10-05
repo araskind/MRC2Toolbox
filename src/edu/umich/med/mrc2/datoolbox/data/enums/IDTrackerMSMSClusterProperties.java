@@ -35,18 +35,18 @@ public enum IDTrackerMSMSClusterProperties {
 	PRIMARY_ID_RAW_DATA_FILE("Raw data file for prim. ID"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	IDTrackerMSMSClusterProperties(String name) {
-		this.name = name;
+	IDTrackerMSMSClusterProperties(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static IDTrackerMSMSClusterProperties getPropertyByName(String optionName) {

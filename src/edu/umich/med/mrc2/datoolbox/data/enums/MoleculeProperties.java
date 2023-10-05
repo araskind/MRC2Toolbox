@@ -31,13 +31,14 @@ public enum MoleculeProperties {
 	SMILES_ISOMERIC("ISO_SMILES"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	MoleculeProperties(String name) {
-		this.name = name;
+	MoleculeProperties(String uiName) {
+		this.uiName = uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

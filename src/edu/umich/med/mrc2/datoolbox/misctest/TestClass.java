@@ -153,7 +153,7 @@ public class TestClass {
 			e.printStackTrace();
 		}
 		for(String accession : accessionList)
-			MSRTLibraryUtils.addCompoundToLobrary(accession, libraryId, conn);
+			MSRTLibraryUtils.addCompoundToLibrary(accession, libraryId, conn);
 				
 		ConnectionManager.releaseConnection(conn);
 	}

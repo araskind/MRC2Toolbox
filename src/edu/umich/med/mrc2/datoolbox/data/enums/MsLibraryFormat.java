@@ -31,12 +31,12 @@ public enum MsLibraryFormat {
 	XY_META_MGF("XY-meta MGF file", "mgf"),
 	;
 
-	private final String name;
+	private final String uiName;
 	private final String fileExtension;
 
-	MsLibraryFormat(String format, String extension) {
+	MsLibraryFormat(String uiName, String extension) {
 
-		this.name = format;
+		this.uiName = uiName;
 		this.fileExtension = extension;
 	}
 
@@ -45,12 +45,12 @@ public enum MsLibraryFormat {
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 
 	public static MsLibraryFormat getFormatByName(String name) {
@@ -65,7 +65,7 @@ public enum MsLibraryFormat {
 	public static MsLibraryFormat getFormatByDescription(String description) {
 
 		for(MsLibraryFormat f : MsLibraryFormat.values()) {
-			if(f.getName().equals(description))
+			if(f.getName().equalsIgnoreCase(description))
 				return f;
 		}
 		return null;
@@ -74,7 +74,7 @@ public enum MsLibraryFormat {
 	public static MsLibraryFormat getFormatByExtension(String extension) {
 
 		for(MsLibraryFormat f : MsLibraryFormat.values()) {
-			if(f.getFileExtension().equals(extension))
+			if(f.getFileExtension().equalsIgnoreCase(extension))
 				return f;
 		}
 		return null;

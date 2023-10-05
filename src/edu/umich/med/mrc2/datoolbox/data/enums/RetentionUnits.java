@@ -26,20 +26,18 @@ public enum RetentionUnits {
 	MINUTES("Minutes"), 
 	SECONDS("Seconds");
 
-	private final String name;
+	private final String uiName;
 
-	RetentionUnits(String type) {
-
-		this.name = type;
+	RetentionUnits(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-
-		return name;
+		return uiName;
 	}
 	
+	@Override
 	public String toString() {
-
-		return name;
+		return uiName;
 	}
 }

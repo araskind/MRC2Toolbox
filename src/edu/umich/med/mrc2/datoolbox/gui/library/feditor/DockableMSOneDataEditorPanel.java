@@ -140,6 +140,10 @@ public class DockableMSOneDataEditorPanel extends DefaultSingleCDockable impleme
 		}
 	}
 
+	public void setAndLockFeaturePolarity(Polarity polarity) {
+		adductSelector.setAndLockFeaturePolarity(polarity);
+	}
+	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 

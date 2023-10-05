@@ -32,13 +32,18 @@ public enum BinnerAnnotationFileField {
 	TIER("Tier"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	BinnerAnnotationFileField(String field) {
-		this.name = field;
+	BinnerAnnotationFileField(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
+	}
+	
+	@Override
+	public String toString() {
+		return uiName;
 	}
 }

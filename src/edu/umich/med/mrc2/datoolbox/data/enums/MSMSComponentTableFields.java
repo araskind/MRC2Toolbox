@@ -49,20 +49,21 @@ public enum MSMSComponentTableFields {
 	ENTROPY("Spectrum  entropy", MSPField.NOTES),
 	;
 
-	private final String name;
+	private final String uiName;
 	private final MSPField nistField;
 
-	MSMSComponentTableFields(String type, MSPField nistField) {
-		this.name = type;
+	MSMSComponentTableFields(String uiName, MSPField nistField) {
+		this.uiName = uiName;
 		this.nistField = nistField;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public MSPField getMSPField() {

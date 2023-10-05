@@ -43,11 +43,6 @@ public enum Polarity {
 	public String getCode() {
 		return code;
 	}
-
-	@Override
-	public String toString() {
-		return code;
-	}
 	
 	public static Polarity getPolarityByCode(String code) {
 

@@ -32,13 +32,13 @@ public enum DataImputationType {
 	BPCA(ImputationMethod.BPCA,  "Bayesian principal component analysis (BPCA)"),
 	Zero(ImputationMethod.Zero, "Zero value");
 
-	private final String name;
+	private final String uiName;
 	private final ImputationMethod method;
 
-	DataImputationType( ImputationMethod method, String name) {
-
-		this.name = name;
+	DataImputationType( ImputationMethod method, String uiName) {
+		
 		this.method = method;
+		this.uiName = uiName;
 	}
 
 	public ImputationMethod getMethod() {
@@ -46,11 +46,11 @@ public enum DataImputationType {
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

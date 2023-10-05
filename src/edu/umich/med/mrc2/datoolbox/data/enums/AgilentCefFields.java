@@ -32,17 +32,18 @@ public enum AgilentCefFields {
 	MFE_SPECTRUM("MFE"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	AgilentCefFields(String type) {
-		this.name = type;
+	AgilentCefFields(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

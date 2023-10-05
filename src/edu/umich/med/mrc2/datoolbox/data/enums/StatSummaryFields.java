@@ -32,15 +32,18 @@ public enum StatSummaryFields {
 	POOL_RSD("Pooled %RSD"), 
 	POOL_FREQUENCY("Pooled frequency"), ;
 
-	private final String name;
+	private final String uiName;
 
-	StatSummaryFields(String type) {
-
-		this.name = type;
+	StatSummaryFields(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-
-		return name;
+		return uiName;
+	}
+	
+	@Override
+	public String toString() {
+		return uiName;
 	}
 }

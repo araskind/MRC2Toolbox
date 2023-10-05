@@ -73,6 +73,7 @@ public class DuplicateLibraryDialog extends JDialog {
 
 		setSize(new Dimension(400, 200));
 		setPreferredSize(new Dimension(400, 200));
+		setModalityType(ModalityType.APPLICATION_MODAL);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 

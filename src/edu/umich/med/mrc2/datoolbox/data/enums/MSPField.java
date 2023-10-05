@@ -48,12 +48,12 @@ public enum MSPField {
 	EXACTMASS("ExactMass", false),
 	;
 
-	private final String name;
+	private final String uiName;
 	private final boolean isObligatory;
 
-	MSPField(String field, boolean obligatory) {
+	MSPField(String uiName, boolean obligatory) {
 
-		this.name = field;
+		this.uiName = uiName;
 		this.isObligatory = obligatory;
 	}
 
@@ -62,6 +62,11 @@ public enum MSPField {
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
+	}
+	
+	@Override
+	public String toString() {
+		return uiName;
 	}
 }

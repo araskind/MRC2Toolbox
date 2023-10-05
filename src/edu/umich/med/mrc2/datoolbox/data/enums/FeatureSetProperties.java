@@ -25,25 +25,26 @@ public enum  FeatureSetProperties {
 
 	FILTERING_PARAMETERS("Filtering parameters");
 
-	private final String name;
+	private final String uiName;
 
-	FeatureSetProperties(String name) {
-		this.name = name;
+	FeatureSetProperties(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static FeatureSetProperties getFeatureSetPropertyByName(String name) {
 		
 		for(FeatureSetProperties p : FeatureSetProperties.values()) {
 			
-			if(p.getName().equals(name))
+			if(p.name().equals(name))
 				return p;
 		}		
 		return null;

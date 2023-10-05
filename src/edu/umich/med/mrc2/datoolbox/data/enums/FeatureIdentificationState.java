@@ -30,17 +30,18 @@ public enum FeatureIdentificationState {
 	MULTIPLE_INACTIVE_IDS("Multiple IDs (inactive)"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	FeatureIdentificationState(String type) {
-		this.name = type;
+	FeatureIdentificationState(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

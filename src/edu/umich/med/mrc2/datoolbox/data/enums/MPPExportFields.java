@@ -31,18 +31,18 @@ public enum MPPExportFields {
 	RT("RT"),
 	CAS("CAS ID");
 	
-	private final String name;
+	private final String uiName;
 
-	MPPExportFields(String type) {
-
-		this.name = type;
+	MPPExportFields(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 	
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

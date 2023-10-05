@@ -53,18 +53,19 @@ public enum AgilentSampleInfoFields {
 	INSTRUMENTNAME("InstrumentName"),
 	COMBINEDEXPORTOUTPUTFILE("CombinedExportOutputFile");
 
-	private final String name;
+	private final String uiName;
 
-	AgilentSampleInfoFields(String name2) {
-		this.name = name2;
+	AgilentSampleInfoFields(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	AgilentSampleInfoFields getAgilentSampleInfoFieldByFieldName(String fieldName) {

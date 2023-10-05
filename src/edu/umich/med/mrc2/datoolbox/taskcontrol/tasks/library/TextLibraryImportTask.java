@@ -26,26 +26,34 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
 
 public class TextLibraryImportTask extends AbstractTask {
 
 	private File inputLibraryFile;
 	private CompoundLibrary library;
 	private Collection<CompoundIdentity>unmatchedIdentities;
+	private Collection<Adduct> adductList;
 		
-	public TextLibraryImportTask(File inputLibraryFile, CompoundLibrary library) {
+	public TextLibraryImportTask(
+			File inputLibraryFile, 
+			CompoundLibrary library, 
+			Collection<Adduct> adductList) {
 		super();
 		this.inputLibraryFile = inputLibraryFile;
 		this.library = library;
+		this.adductList = adductList;
 		unmatchedIdentities = new ArrayList<CompoundIdentity>();
 	}
 
@@ -77,6 +85,9 @@ public class TextLibraryImportTask extends AbstractTask {
 	}
 	
 	private void parseTextLibrary() {
+		
+		String[][] compoundDataArray = DelimitedTextParser.parseTextFile(
+				inputLibraryFile, MRC2ToolBoxConfiguration.getTabDelimiter());
 		
 //		CompoundIdentity identity  = new CompoundIdentity(name, formula);
 //		identity.addDbId(CompoundDatabaseEnum.CAS, casId);
@@ -135,6 +146,7 @@ public class TextLibraryImportTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-		return new TextLibraryImportTask(inputLibraryFile, library);
+		return new TextLibraryImportTask(
+				inputLibraryFile, library, adductList);
 	}
 }

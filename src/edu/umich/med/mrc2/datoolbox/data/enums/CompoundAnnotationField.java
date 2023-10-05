@@ -71,14 +71,25 @@ public enum CompoundAnnotationField {
 	MZ_ERROR_PPM("M/Z error, ppm")
 	;
 
-	private final String name;
+	private final String uiName;
 
-	CompoundAnnotationField(String type) {
-
-		this.name = type;
+	CompoundAnnotationField(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
+	}
+	
+	@Override
+	public String toString() {
+		return uiName;
 	}
 }
+
+
+
+
+
+
+

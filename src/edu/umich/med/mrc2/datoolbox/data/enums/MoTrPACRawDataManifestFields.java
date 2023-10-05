@@ -30,13 +30,18 @@ public enum MoTrPACRawDataManifestFields {
 	MOTRPAC_RAW_FILE("raw_file"),
 	;
 		
-	private final String name;
+	private final String uiName;
 
-	MoTrPACRawDataManifestFields(String name) {
-		this.name = name;
+	MoTrPACRawDataManifestFields(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
+	}
+	
+	@Override
+	public String toString() {
+		return uiName;
 	}
 }

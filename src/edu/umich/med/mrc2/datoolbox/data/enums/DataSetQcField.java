@@ -38,18 +38,19 @@ public enum DataSetQcField {
 	SD_TRIM("SD (90% trim)"),
 	RSD_TRIM("%RSD (90% trim)");
 
-	private final String name;
+	private final String uiName;
 
-	DataSetQcField(String type) {
+	DataSetQcField(String uiName) {
 
-		this.name = type;
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

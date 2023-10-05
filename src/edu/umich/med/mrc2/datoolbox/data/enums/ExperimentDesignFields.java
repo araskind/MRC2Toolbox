@@ -29,14 +29,18 @@ public enum ExperimentDesignFields {
 	BATCH("Batch")
 	;
 
-	private final String name;
+	private final String uiName;
 
-	ExperimentDesignFields(String type) {
-
-		this.name = type;
+	ExperimentDesignFields(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
+	}
+	
+	@Override
+	public String toString() {
+		return uiName;
 	}
 }

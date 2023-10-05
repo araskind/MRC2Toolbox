@@ -349,6 +349,10 @@ public class DockableLibraryFeatureEditorPanel extends DefaultSingleCDockable im
 		else
 			return Double.parseDouble(massErrorTextField.getText().trim());
 	}
+	
+	public void setAndLockFeaturePolarity(Polarity polarity) {
+		adductsPanel.setAndLockFeaturePolarity(polarity);
+	}
 
 	public synchronized void clearPanel() {
 

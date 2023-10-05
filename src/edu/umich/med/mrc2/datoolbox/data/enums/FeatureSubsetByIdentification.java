@@ -28,18 +28,19 @@ public enum FeatureSubsetByIdentification {
 	UNKNOWN_ONLY("Unknown only"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	FeatureSubsetByIdentification(String name) {
-		this.name = name;
+	FeatureSubsetByIdentification(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static FeatureSubsetByIdentification getOptionByName(String optionName) {

@@ -28,18 +28,19 @@ public enum DecoyExportHandling {
 	DECOY_ONLY("Export only DECOY library hit"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	DecoyExportHandling(String type) {
-		this.name = type;
+	DecoyExportHandling(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static DecoyExportHandling getDecoyExportHandlingByName(String name) {

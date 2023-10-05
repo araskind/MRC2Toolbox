@@ -209,8 +209,6 @@ public class MsLibraryPanelMenuBar extends CommonMenuBar {
 		activeLibrariesMenu.setIcon(activeLibrariesIconSmall);
 		
 		add(activeLibrariesMenu);
-
-
 	}
 	
 	public void createActiveLibraryLabelBlock() {

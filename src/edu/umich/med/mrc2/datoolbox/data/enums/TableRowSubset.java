@@ -28,19 +28,19 @@ public enum TableRowSubset {
 	SELECTED("Selected only"), 
 	;
 
-	private final String name;
+	private final String uiName;
 
-	TableRowSubset(String type) {
-
-		this.name = type;
+	TableRowSubset(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static TableRowSubset getSubsetByName(String name) {

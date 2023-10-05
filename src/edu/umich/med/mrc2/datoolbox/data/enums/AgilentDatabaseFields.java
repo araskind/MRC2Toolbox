@@ -34,12 +34,12 @@ public enum AgilentDatabaseFields {
 	PUBCHEM("PubChem ID", CompoundDatabaseEnum.PUBCHEM),
 	SWISS_PROT("Swiss-Prot ID", CompoundDatabaseEnum.SWISS_PROT);
 
-	private final String name;
+	private final String uiName;
 	private final CompoundDatabaseEnum internalType;
 
-	AgilentDatabaseFields(String AgilentType, CompoundDatabaseEnum internalType) {
+	AgilentDatabaseFields(String uiName, CompoundDatabaseEnum internalType) {
 
-		this.name = AgilentType;
+		this.uiName = uiName;
 		this.internalType = internalType;
 	}
 
@@ -48,9 +48,14 @@ public enum AgilentDatabaseFields {
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
+	public String toString() {
+		return uiName;
+	}
+	
 	public static CompoundDatabaseEnum getDatabaseByName(String dbName) {
 
 		for(AgilentDatabaseFields db : AgilentDatabaseFields.values()) {

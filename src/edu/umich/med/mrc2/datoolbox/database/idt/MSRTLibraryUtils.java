@@ -53,11 +53,13 @@ import edu.umich.med.mrc2.datoolbox.data.enums.AnnotatedObjectType;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.database.ConnectionManager;
 import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
+import edu.umich.med.mrc2.datoolbox.utils.SQLUtils;
 
 public class MSRTLibraryUtils {
 
@@ -68,44 +70,46 @@ public class MSRTLibraryUtils {
 	 * @param libraryDescription
 	 * @return
 	 */
-	public static String createNewLibrary(
-			String libraryName, String libraryDescription) throws Exception{
+	public static String createNewLibrary(CompoundLibrary newLibrary) throws Exception{
 
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 			"INSERT INTO MS_LIBRARY " +
-			"(LIBRARY_ID, LIBRARY_NAME, DESCRIPTION, ENABLED, DATE_CREATED, LAST_EDITED) " +
-			"VALUES (?, ?, ?, ?, ?, ?)";
+			"(LIBRARY_ID, LIBRARY_NAME, DESCRIPTION, ENABLED, "
+			+ "DATE_CREATED, LAST_EDITED, POLARITY) " +
+			"VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-		PreparedStatement stmt = conn.prepareStatement(query);
-
-		String libId = DataPrefix.MS_LIBRARY.getName() + UUID.randomUUID().toString();
+		PreparedStatement stmt = conn.prepareStatement(query);		
+		String libId = SQLUtils.getNextIdFromSequence(conn, 
+				"MS_RT_LIBRARY_SEQ",
+				DataPrefix.MS_LIBRARY,
+				"0",
+				5);
 		java.sql.Date sqlCreated = new java.sql.Date((new Date()).getTime());
-
 		stmt.setString(1, libId);
-		stmt.setString(2, libraryName);
-		stmt.setString(3, libraryDescription);
+		stmt.setString(2, newLibrary.getLibraryName());
+		stmt.setString(3, newLibrary.getLibraryDescription());
 		stmt.setString(4, "Y");
 		stmt.setDate(5, sqlCreated);
 		stmt.setDate(6, sqlCreated);
+		stmt.setString(7, newLibrary.getPolarity().getCode());
 		stmt.executeUpdate();
 		stmt.close();
 
 		ConnectionManager.releaseConnection(conn);
-
+		newLibrary.setLibraryId(libId);
 		return libId;
 	}
 
-	public static boolean libraryNameExists(String libraryNAme) throws Exception{
+	public static boolean libraryNameExists(String libraryName) throws Exception{
 
 		boolean isInDatabase = false;
 
 		Connection conn = ConnectionManager.getConnection();
 		String query = "SELECT C.LIBRARY_ID FROM MS_LIBRARY C WHERE C.LIBRARY_NAME = ?";
 		PreparedStatement stmt = conn.prepareStatement(query);
-		stmt.setString(1, libraryNAme);
+		stmt.setString(1, libraryName);
 		ResultSet rs = stmt.executeQuery();
-
 		if (rs.next())
 			isInDatabase = true;
 
@@ -138,7 +142,8 @@ public class MSRTLibraryUtils {
 		Connection conn = ConnectionManager.getConnection();
 		String query =
 			"UPDATE MS_LIBRARY L SET L.LIBRARY_NAME = ?, L.DESCRIPTION = ?, " +
-			"L.DATE_CREATED = ?, L.LAST_EDITED = ?, ENABLED = ?  WHERE L.LIBRARY_ID = ?";
+			"L.DATE_CREATED = ?, L.LAST_EDITED = ?, ENABLED = ?, POLARITY = ? " +
+			"WHERE L.LIBRARY_ID = ?";
 
 		PreparedStatement stmt = conn.prepareStatement(query);
 		stmt.setString(1, selected.getLibraryName());
@@ -150,7 +155,8 @@ public class MSRTLibraryUtils {
 			enabled = "Y";
 
 		stmt.setString(5, enabled);
-		stmt.setString(6, selected.getLibraryId());
+		stmt.setString(6, selected.getPolarity().getCode());
+		stmt.setString(7, selected.getLibraryId());
 		stmt.executeUpdate();
 		stmt.close();
 
@@ -170,13 +176,28 @@ public class MSRTLibraryUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 
+	public static void deleteLibraryFeatures(
+			Collection<LibraryMsFeature> features) throws Exception {
+
+		Connection conn = ConnectionManager.getConnection();
+
+		String query = "DELETE FROM MS_LIBRARY_COMPONENT L WHERE L.TARGET_ID = ?";
+		PreparedStatement stmt = conn.prepareStatement(query);
+		for(LibraryMsFeature f : features) {
+			stmt.setString(1, f.getId());
+			stmt.executeUpdate();
+		}
+		stmt.close();
+		ConnectionManager.releaseConnection(conn);
+	}
+	
 	public static Collection<CompoundLibrary>getAllLibraries() throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		Collection<CompoundLibrary>allLibs = new TreeSet<CompoundLibrary>();
 		String query =
 			"SELECT LIBRARY_ID, LIBRARY_NAME, DESCRIPTION, " +
-			"ENABLED, DATE_CREATED, LAST_EDITED FROM MS_LIBRARY";
+			"ENABLED, DATE_CREATED, LAST_EDITED, POLARITY FROM MS_LIBRARY";
 		PreparedStatement stmt = conn.prepareStatement(query);
 		ResultSet rs = stmt.executeQuery();
 		while(rs.next()){
@@ -184,14 +205,20 @@ public class MSRTLibraryUtils {
 			boolean enabled = true;
 			if(rs.getString("ENABLED") == null)
 				enabled = false;
+			
+			Polarity pol = null;
+			if(rs.getString("POLARITY") != null)
+				pol = Polarity.getPolarityByCode(rs.getString("POLARITY"));
 
 			CompoundLibrary newLib = new CompoundLibrary(
 					rs.getString("LIBRARY_ID"),
 					rs.getString("LIBRARY_NAME"),
 					rs.getString("DESCRIPTION"),
+					null,
 					new Date(rs.getDate("DATE_CREATED").getTime()),
 					new Date(rs.getDate("LAST_EDITED").getTime()),
-					enabled);
+					enabled,
+					pol);
 
 			allLibs.add(newLib);
 		}
@@ -229,7 +256,8 @@ public class MSRTLibraryUtils {
 		CompoundLibrary newLib = null;
 		String query =
 			"SELECT L.LIBRARY_ID, L.LIBRARY_NAME, L.DESCRIPTION, " +
-			"L.ENABLED, L.DATE_CREATED, L.LAST_EDITED FROM MS_LIBRARY L, MS_LIBRARY_COMPONENT C "
+			"L.ENABLED, L.DATE_CREATED, L.LAST_EDITED, L.POLARITY "
+			+ "FROM MS_LIBRARY L, MS_LIBRARY_COMPONENT C "
 			+ "WHERE C.LIBRARY_ID = L.LIBRARY_ID  AND C.TARGET_ID = ?";
 
 		PreparedStatement stmt = conn.prepareStatement(query);
@@ -240,14 +268,20 @@ public class MSRTLibraryUtils {
 			boolean enabled = true;
 			if(rs.getString("ENABLED").equals("N"))
 				enabled = false;
+			
+			Polarity pol = null;
+			if(rs.getString("POLARITY") != null)
+				pol = Polarity.getPolarityByCode(rs.getString("POLARITY"));
 
 			newLib = new CompoundLibrary(
 					rs.getString("LIBRARY_ID"),
 					rs.getString("LIBRARY_NAME"),
 					rs.getString("DESCRIPTION"),
+					null,
 					new Date(rs.getDate("DATE_CREATED").getTime()),
 					new Date(rs.getDate("LAST_EDITED").getTime()),
-					enabled);
+					enabled,
+					pol);
 		}
 		rs.close();
 		stmt.close();
@@ -256,7 +290,8 @@ public class MSRTLibraryUtils {
 		return newLib;
 	}
 
-	public  static Collection<CompoundLibrary> getLibrariesForTargets(Collection<String> targetIds) throws Exception {
+	public  static Collection<CompoundLibrary> getLibrariesForTargets(
+			Collection<String> targetIds) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
 		Collection<CompoundLibrary>libraries = new HashSet<CompoundLibrary>();
@@ -285,32 +320,8 @@ public class MSRTLibraryUtils {
 	public static CompoundLibrary getLibrary(String libraryId) throws Exception {
 
 		Connection conn = ConnectionManager.getConnection();
-		CompoundLibrary library = null;
-		String query =
-			"SELECT LIBRARY_ID, LIBRARY_NAME, DESCRIPTION, ENABLED, DATE_CREATED, LAST_EDITED "+
-			"FROM MS_LIBRARY WHERE LIBRARY_ID = ?";
-
-		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, libraryId);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-
-			boolean enabled = true;
-			if(rs.getString("ENABLED") == null)
-				enabled = false;
-
-			library = new CompoundLibrary(
-				rs.getString("LIBRARY_ID"),
-				rs.getString("LIBRARY_NAME"),
-				rs.getString("DESCRIPTION"),
-				new Date(rs.getDate("DATE_CREATED").getTime()),
-				new Date(rs.getDate("LAST_EDITED").getTime()),
-				enabled);
-		}
-		rs.close();
-		ps.close();
+		CompoundLibrary library = getLibrary(libraryId, conn);
 		ConnectionManager.releaseConnection(conn);
-
 		return library;
 	}
 
@@ -318,7 +329,8 @@ public class MSRTLibraryUtils {
 
 		CompoundLibrary library = null;
 		String query =
-			"SELECT LIBRARY_ID, LIBRARY_NAME, DESCRIPTION, ENABLED, DATE_CREATED, LAST_EDITED "+
+			"SELECT LIBRARY_ID, LIBRARY_NAME, DESCRIPTION, "
+			+ "ENABLED, DATE_CREATED, LAST_EDITED, POLARITY "+
 			"FROM MS_LIBRARY WHERE LIBRARY_ID = ?";
 
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -329,21 +341,28 @@ public class MSRTLibraryUtils {
 			boolean enabled = true;
 			if(rs.getString("ENABLED") == null)
 				enabled = false;
+			
+			Polarity pol = null;
+			if(rs.getString("POLARITY") != null)
+				pol = Polarity.getPolarityByCode(rs.getString("POLARITY"));
 
 			library = new CompoundLibrary(
 				rs.getString("LIBRARY_ID"),
 				rs.getString("LIBRARY_NAME"),
 				rs.getString("DESCRIPTION"),
+				null,
 				new Date(rs.getDate("DATE_CREATED").getTime()),
 				new Date(rs.getDate("LAST_EDITED").getTime()),
-				enabled);
+				enabled,
+				pol);
 		}
 		rs.close();
 		ps.close();
 		return library;
 	}
 
-	private static boolean insertNewLibraryEntry(LibraryMsFeature lt, Connection conn) throws Exception{
+	private static boolean insertNewLibraryEntry(
+			LibraryMsFeature lt, Connection conn) throws Exception{
 
 		boolean inserted = false;
 
@@ -356,7 +375,14 @@ public class MSRTLibraryUtils {
 		PreparedStatement stmt = conn.prepareStatement(query);
 		java.sql.Date sqlCreated = new java.sql.Date(lt.getDateCreated().getTime());
 		java.sql.Date sqlModified = new java.sql.Date(lt.getLastModified().getTime());
-		stmt.setString(1, lt.getId());
+		String newId = SQLUtils.getNextIdFromSequence(conn, 
+				"MS_RT_LIBRARY_TARGET_SEQ",
+				DataPrefix.MS_LIBRARY_TARGET,
+				"0",
+				7);
+		lt.setId(newId);
+		
+		stmt.setString(1, newId);
 		stmt.setString(2, lt.getPrimaryIdentity().getCompoundIdentity().getPrimaryDatabaseId());
 		stmt.setDate(3, sqlCreated);
 		stmt.setDate(4, sqlModified);
@@ -409,7 +435,8 @@ public class MSRTLibraryUtils {
 		//	Update feature
 		query =
 			"UPDATE MS_LIBRARY_COMPONENT " +
-			"SET ACCESSION = ?, LAST_MODIFIED = ?, RETENTION_TIME = ?, RT_MIN = ?, RT_MAX = ?, " +
+			"SET ACCESSION = ?, LAST_MODIFIED = ?, "
+			+ "RETENTION_TIME = ?, RT_MIN = ?, RT_MAX = ?, " +
 			"NAME = ?, ID_CONFIDENCE = ? WHERE TARGET_ID = ?";
 
 		stmt = conn.prepareStatement(query);
@@ -436,6 +463,7 @@ public class MSRTLibraryUtils {
 		ConnectionManager.releaseConnection(conn);
 	}
 
+	//	TODO use REF_MSMS ... tables?
 	private static void insertTandemSpectrum(
 			TandemMassSpectrum msms,
 			LibraryMsFeature lt,
@@ -477,7 +505,8 @@ public class MSRTLibraryUtils {
 		stmt.close();
 	}
 
-	private static void insertAdduct(String targetId, Adduct adduct, Connection conn) throws SQLException {
+	private static void insertAdduct(
+			String targetId, Adduct adduct, Connection conn) throws SQLException {
 
 		String query =
 			"INSERT INTO MS_LIBRARY_COMPONENT_ADDUCT "
@@ -519,13 +548,13 @@ public class MSRTLibraryUtils {
 	public static void loadLibraryFeature(
 			LibraryMsFeature lt, String libId, Connection conn) throws Exception {
 
-		if (lt.getId().isEmpty())
+		if (lt.getId() == null || lt.getId().isEmpty())
 			lt.setId(DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString());
-
+		else {
+			if (isTargetInDatabase(lt.getId(), conn))
+				return;
+		}
 		lt.setLibraryId(libId);
-
-		if (isTargetInDatabase(lt.getId(), conn))
-			return;
 
 		if (insertNewLibraryEntry(lt, conn)) {
 
@@ -541,7 +570,7 @@ public class MSRTLibraryUtils {
 
 		boolean isInDatabase = false;
 		String query =
-			"SELECT C.TARGET_ID FROM MS_LIBRARY_COMPONENT C WHERE C. TARGET_ID = ?";
+			"SELECT C.TARGET_ID FROM MS_LIBRARY_COMPONENT C WHERE C.TARGET_ID = ?";
 		PreparedStatement stmt = conn.prepareStatement(query);
 		stmt.setString(1, targetId);
 		ResultSet rs = stmt.executeQuery();
@@ -905,14 +934,16 @@ public class MSRTLibraryUtils {
 			newTarget.addAnnotation(annotation);
 	}
 	
-	public static void addCompoundToLobrary(String accession, String libraryId) throws Exception{
+	public static void addCompoundToLibrary(
+			String accession, String libraryId) throws Exception{
 		
 		Connection conn = ConnectionManager.getConnection();
-		addCompoundToLobrary(accession, libraryId, conn);
+		addCompoundToLibrary(accession, libraryId, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 	
-	public static void addCompoundToLobrary(String accession, String libraryId, Connection conn) throws Exception{
+	public static void addCompoundToLibrary(
+			String accession, String libraryId, Connection conn) throws Exception{
 
 		String query =
 			"INSERT INTO MS_LIBRARY_COMPONENT " +
@@ -920,11 +951,15 @@ public class MSRTLibraryUtils {
 			"VALUES (?, ?, ?, ?, ?, ?)";
 
 		PreparedStatement stmt = conn.prepareStatement(query);
-		String id = DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString();
+		String newId = SQLUtils.getNextIdFromSequence(conn, 
+				"MS_RT_LIBRARY_TARGET_SEQ",
+				DataPrefix.MS_LIBRARY_TARGET,
+				"0",
+				7);
 		java.sql.Date sqlCreated = new java.sql.Date(new Date().getTime());
 		java.sql.Date sqlModified = new java.sql.Date(new Date().getTime());
 		
-		stmt.setString(1, id);
+		stmt.setString(1, newId);
 		stmt.setString(2, accession);
 		stmt.setDate(3, sqlCreated);
 		stmt.setDate(4, sqlModified);

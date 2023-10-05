@@ -30,19 +30,18 @@ public enum GlobalDefaults {
 	UNLOCKED_SUFFIX(" unlocked"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	GlobalDefaults(String type) {
-
-		this.name = type;
+	GlobalDefaults(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

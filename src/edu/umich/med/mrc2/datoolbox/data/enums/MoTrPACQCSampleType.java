@@ -33,22 +33,22 @@ public enum MoTrPACQCSampleType {
 	QC_REFERENCE("QC-Reference"),	
 	;
 	
-	private final String name;
+	private final String uiName;
 
-	MoTrPACQCSampleType(String name) {
-		this.name = name;
+	MoTrPACQCSampleType(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 	
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
-	public static MoTrPACQCSampleType getSampleTypeByName(String sname) {
+	public static MoTrPACQCSampleType getSampleTypeByUIName(String sname) {
 		
 		for(MoTrPACQCSampleType v : MoTrPACQCSampleType.values()) {
 			

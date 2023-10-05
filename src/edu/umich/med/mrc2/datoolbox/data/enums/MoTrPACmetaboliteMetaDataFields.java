@@ -33,22 +33,22 @@ public enum MoTrPACmetaboliteMetaDataFields {
 	ALTERNATE_ID("Alternate ID"),
 	;
 	
-	private final String name;
+	private final String uiName;
 
-	MoTrPACmetaboliteMetaDataFields(String name) {
-		this.name = name;
+	MoTrPACmetaboliteMetaDataFields(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 	
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
-	public static MoTrPACmetaboliteMetaDataFields getMoTrPACmetaboliteMetadataFieldByName(String sname) {
+	public static MoTrPACmetaboliteMetaDataFields getMoTrPACmetaboliteMetadataFieldByUIName(String sname) {
 		
 		for(MoTrPACmetaboliteMetaDataFields v : MoTrPACmetaboliteMetaDataFields.values()) {
 			

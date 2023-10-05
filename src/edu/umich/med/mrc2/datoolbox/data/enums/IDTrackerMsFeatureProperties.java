@@ -47,18 +47,19 @@ public enum IDTrackerMsFeatureProperties {
 	PRECURSOR_PURITY("Prec.Purity"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	IDTrackerMsFeatureProperties(String name) {
-		this.name = name;
+	IDTrackerMsFeatureProperties(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static IDTrackerMsFeatureProperties getPropertyByName(String optionName) {

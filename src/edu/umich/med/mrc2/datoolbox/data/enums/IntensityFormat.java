@@ -26,20 +26,18 @@ public enum IntensityFormat {
 	DECIMAL("Decimal"), 
 	SCIENTIFIC("Scientific");
 
-	private final String name;
+	private final String uiName;
 
-	IntensityFormat(String type) {
-
-		this.name = type;
+	IntensityFormat(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-
-		return name;
+		return uiName;
 	}
 	
+	@Override
 	public String toString() {
-
-		return name;
+		return uiName;
 	}
 }

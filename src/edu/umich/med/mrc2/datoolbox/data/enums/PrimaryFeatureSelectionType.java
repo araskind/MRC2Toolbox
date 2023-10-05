@@ -26,19 +26,18 @@ public enum PrimaryFeatureSelectionType {
 	AUTOMATIC("Automatic selection"), 
 	AS_MARKED("As marked (honor custom assignments)");
 
-	private final String name;
+	private final String uiName;
 
-	PrimaryFeatureSelectionType(String type) {
-
-		this.name = type;
+	PrimaryFeatureSelectionType(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

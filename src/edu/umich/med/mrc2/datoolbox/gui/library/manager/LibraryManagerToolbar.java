@@ -53,7 +53,7 @@ public class LibraryManagerToolbar extends CommonToolbar {
 		duplicateLibraryButton,
 		deleteLibraryButton;
 
-	public LibraryManagerToolbar(ActionListener commandListener, ActionListener libInfoDialogListener) {
+	public LibraryManagerToolbar(ActionListener commandListener) {
 
 		super(commandListener);
 
@@ -63,15 +63,15 @@ public class LibraryManagerToolbar extends CommonToolbar {
 
 		addSeparator(buttonDimension);
 
-		newLibraryButton = GuiUtils.addButton(this, null, newLibraryIcon, libInfoDialogListener,
+		newLibraryButton = GuiUtils.addButton(this, null, newLibraryIcon, commandListener,
 				MainActionCommands.NEW_LIBRARY_DIALOG_COMMAND.getName(),
 				MainActionCommands.NEW_LIBRARY_DIALOG_COMMAND.getName(), buttonDimension);
 
-		editLibraryInfoButton = GuiUtils.addButton(this, null, editLibInfoIcon, libInfoDialogListener,
+		editLibraryInfoButton = GuiUtils.addButton(this, null, editLibInfoIcon, commandListener,
 				MainActionCommands.EDIT_LIBRARY_DIALOG_COMMAND.getName(),
 				MainActionCommands.EDIT_LIBRARY_DIALOG_COMMAND.getName(), buttonDimension);
 
-		duplicateLibraryButton = GuiUtils.addButton(this, null, duplicateLibraryIcon, libInfoDialogListener,
+		duplicateLibraryButton = GuiUtils.addButton(this, null, duplicateLibraryIcon, commandListener,
 				MainActionCommands.DUPLICATE_LIBRARY_DIALOG_COMMAND.getName(),
 				MainActionCommands.DUPLICATE_LIBRARY_DIALOG_COMMAND.getName(), buttonDimension);
 

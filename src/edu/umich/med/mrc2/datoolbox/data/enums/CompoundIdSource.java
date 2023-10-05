@@ -31,18 +31,19 @@ public enum CompoundIdSource {
 	FORMULA_GENERATOR("Mol. formula generator"),
 	UNKNOWN("Unknown");
 
-	private final String name;
+	private final String uiName;
 
-	CompoundIdSource(String type) {
-		this.name = type;
+	CompoundIdSource(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 
 	public static CompoundIdSource getIdSourceByName(String name) {

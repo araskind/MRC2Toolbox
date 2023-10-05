@@ -670,14 +670,14 @@ public enum MainActionCommands {
 	DELETE_MSMS_COMMAND("Delete selected MSMS"),
 	SELECT_MSMS_FILE_TO_IMPORT_COMMAND("Select MSMSfile to import"),
 
-	NEW_LIBRARY_FEATURE_DIAOG_COMMAND("New library feature dialog"),
+	NEW_LIBRARY_FEATURE_DIAOG_COMMAND("New library feature definition"),
 	EDIT_LIBRARY_FEATURE_DIALOG_COMMAND("Show library feature editor"),
 	NEW_LIBRARY_FEATURE_COMMAND("Create new library feature"),
 	EDIT_LIBRARY_FEATURE_COMMAND("Edit library feature"),
 	UNDO_LIBRARY_FEATURE_EDIT_COMMAND("Undo library feature edit"),
 	DELETE_LIBRARY_FEATURE_COMMAND("Delete library feature"),
 	DUPLICATE_LIBRARY_FEATURE_COMMAND("Duplicate library feature"),
-	IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND("Show library RT import dialog"),
+	IMPORT_LIBRARY_FEATURE_RT_DIALOG_COMMAND("Library RT import setup"),
 	IMPORT_LIBRARY_FEATURE_RT_COMMAND("Import library feature's RT from file"),
 
 	//	Compound database

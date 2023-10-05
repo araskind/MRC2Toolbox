@@ -138,35 +138,35 @@ public enum CompoundDatabaseEnum {
 	MRC2_MSMS("MRC2 MSMS compound data","", ""),
 	;
 
-	private final String name;
+	private final String uiName;
 	private final String dbLinkPrefix;
 	private final String dbLinkSuffix;
 
-	CompoundDatabaseEnum(String name, String dbLinkPrefix, String dbLinkSuffix) {
+	CompoundDatabaseEnum(
+			String uiName, 
+			String dbLinkPrefix, 
+			String dbLinkSuffix) {
 
-		this.name = name;
+		this.uiName = uiName;
 		this.dbLinkPrefix = dbLinkPrefix;
 		this.dbLinkSuffix = dbLinkSuffix;
 	}
 
 	public String getDbLinkPrefix() {
-
 		return dbLinkPrefix;
 	}
 
 	public String getDbLinkSuffix() {
-
 		return dbLinkSuffix;
 	}
 
 	public String getName() {
-
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 
 	public static CompoundDatabaseEnum getCompoundDatabaseByName(String name) {

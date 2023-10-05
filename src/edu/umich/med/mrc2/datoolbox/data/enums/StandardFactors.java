@@ -29,18 +29,18 @@ public enum StandardFactors {
 	SUBJECT("Subject"),
 	BATCH("Batch");
 
-	private final String name;
+	private final String uiName;
 
-	StandardFactors(String type) {
-		this.name = type;
+	StandardFactors(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

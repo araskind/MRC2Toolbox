@@ -26,20 +26,19 @@ public enum MissingExportType {
 	AZ_ZEROS("As zeros"), 
 	AS_MISSING("As missing");
 
-	private final String name;
+	private final String uiName;
 
-	MissingExportType(String type) {
-
-		this.name = type;
+	MissingExportType(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static MissingExportType getMissingExportTypeByName(String name) {

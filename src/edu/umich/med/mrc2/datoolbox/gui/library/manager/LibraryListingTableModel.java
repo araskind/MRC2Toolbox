@@ -22,15 +22,18 @@
 package edu.umich.med.mrc2.datoolbox.gui.library.manager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class LibraryListingTableModel  extends BasicTableModel {
 
@@ -38,33 +41,39 @@ public class LibraryListingTableModel  extends BasicTableModel {
 	 *
 	 */
 	private static final long serialVersionUID = 7186847992409868627L;
+	
+	public static final String LOADED_COLUMN = "Loaded";
 	public static final String LIBRARY_COLUMN = "Name";
 	public static final String DESCRIPTION_COLUMN = "Description";
+	public static final String POLARITY_COLUMN = "Polarity";
 	public static final String NUM_ENTRIES_COLUMN = "# Compounds";
 
 	public LibraryListingTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
+			new ColumnContext(LOADED_COLUMN, Boolean.class, false),
 			new ColumnContext(LIBRARY_COLUMN, CompoundLibrary.class, false),
 			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(POLARITY_COLUMN, Polarity.class, false),
 			new ColumnContext(NUM_ENTRIES_COLUMN, Integer.class, false)
 		};
 	}
 
 	public void setTableModelFromLibraryCollection(
-			Collection<CompoundLibrary> libraryCollection) {
+			Collection<CompoundLibrary> libraryCollection, CompoundLibrary activeLibrary) {
 
 		CompoundLibrary[] libraries = 
 				libraryCollection.toArray(new CompoundLibrary[libraryCollection.size()]);
-		setTableModelFromLibraryList(libraries);
+		setTableModelFromLibraryList(libraries, activeLibrary);
 	}
 
-	private void setTableModelFromLibraryList(CompoundLibrary[] libraries) {
+	private void setTableModelFromLibraryList(CompoundLibrary[] libraries, CompoundLibrary activeLibrary) {
 
 		setRowCount(0);
 		if(libraries == null || libraries.length == 0)
 			return;
 		
+		Arrays.sort(libraries);		
 		Map<String, Integer> countsMap = new TreeMap<String, Integer>();
 		try {
 			countsMap = MSRTLibraryUtils.getLibraryEntryCount();
@@ -73,14 +82,28 @@ public class LibraryListingTableModel  extends BasicTableModel {
 			e.printStackTrace();
 		}
 		List<Object[]>rowData = new ArrayList<Object[]>();
+		Collection<CompoundLibrary> activeLibs = MRC2ToolBoxCore.getActiveMsLibraries();
 		for(CompoundLibrary l : libraries){
-
-			Object[] obj = {
-					l,
-					l.getLibraryDescription(),
-					countsMap.get(l.getLibraryId())
-				};
-			rowData.add(obj);
+			
+			boolean loaded = false;
+			CompoundLibrary lib = l;
+			if(activeLibs.contains(l)) {
+				lib = activeLibs.stream().
+						filter(cl -> cl.getLibraryId().equals(l.getLibraryId())).
+						findFirst().orElse(null);
+				loaded = true;
+			}
+			if(lib != null) {
+				
+				Object[] obj = {
+						loaded,
+						lib,
+						lib.getLibraryDescription(),
+						lib.getPolarity(),
+						countsMap.get(lib.getLibraryId())
+					};
+				rowData.add(obj);
+			}
 		}
 		if(!rowData.isEmpty())
 			addRows(rowData);

@@ -27,18 +27,18 @@ public enum MWtabReportStyle {
 	METABOLOMICS_WORKBENCH("Metabolomics Workbench (complete report)"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	MWtabReportStyle(String style) {
-		this.name = style;
+	MWtabReportStyle(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 	
 	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

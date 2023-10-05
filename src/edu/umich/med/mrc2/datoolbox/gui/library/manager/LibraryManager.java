@@ -28,6 +28,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.Collection;
 import java.util.TreeSet;
 
@@ -35,16 +36,21 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.apache.commons.lang.StringUtils;
+
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.library.MsLibraryPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -65,34 +71,40 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 	private LibraryListingTable libraryListingTable;
 	private LibraryInfoDialog libraryInfoDialog;
 	private DuplicateLibraryDialog duplicateLibraryDialog;
-	private ActionListener listener;
+
+	private Collection<CompoundLibrary>libList;
+	private CompoundLibrary activeLibrary;
 
 	private static final Icon libraryManagerIcon = GuiUtils.getIcon("libraryManager", 32);
 
-	public LibraryManager(ActionListener listener) {
+	public LibraryManager(MsLibraryPanel parentPanel, CompoundLibrary activeLibrary) {
 
 		super(MRC2ToolBoxCore.getMainWindow(), "Manage MS libraries", true);
-		this.listener = listener;
 		
 		setIconImage(((ImageIcon) libraryManagerIcon).getImage());
 		setSize(new Dimension(800, 640));
 		setPreferredSize(new Dimension(800, 640));
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
+		this.activeLibrary = activeLibrary;
 
-		toolbar = new LibraryManagerToolbar(listener, this);
+		toolbar = new LibraryManagerToolbar(this);
 		getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		libraryListingTable = new LibraryListingTable();
+		libList = new TreeSet<CompoundLibrary>();
 		refreshLibraryListing();
+		
 		libraryListingTable.addMouseListener(
 
 		        new MouseAdapter(){
 
 		          public void mouseClicked(MouseEvent e){
 
-		            if (e.getClickCount() == 2)
-		            	((MsLibraryPanel)listener).openLibrary();
+		            if (e.getClickCount() == 2) {
+		            	parentPanel.openLibraryFromDatabase(getSelectedLibrary());
+		            	dispose();
+		            }
 		          }
 	        });
 		getContentPane().add(new JScrollPane(libraryListingTable), BorderLayout.CENTER);
@@ -100,7 +112,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 		ActionListener al = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setVisible(false);
+				dispose();
 			}
 		};
 		JRootPane rootPane = SwingUtilities.getRootPane(toolbar);
@@ -124,11 +136,112 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 
 		if (command.equals(MainActionCommands.EDIT_LIBRARY_DIALOG_COMMAND.getName()))
 			showEditLibraryDialog();
+		
+		if (command.equals(MainActionCommands.CREATE_NEW_LIBRARY_COMMAND.getName()))
+			createNewLibrary();
+		
+		if (command.equals(MainActionCommands.EDIT_MS_LIBRARY_INFO_COMMAND.getName()))
+			editLibraryInformation();
+		
+		if (command.equals(MainActionCommands.DELETE_LIBRARY_COMMAND.getName()))
+			deleteSelectedLibrary();
+	}
+	
+	private void createNewLibrary() {
+		
+		Collection<String>errors = libraryInfoDialog.validateLibraryData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), libraryInfoDialog);
+			return;
+		}		
+		CompoundLibrary newLibrary = 
+				new CompoundLibrary(
+						libraryInfoDialog.getLibraryName(), 
+						libraryInfoDialog.getLibraryDescription());
+		newLibrary.setPolarity(libraryInfoDialog.getPolarity());
+
+		String libId = null;
+		try {
+			libId = MSRTLibraryUtils.createNewLibrary(newLibrary);
+		} catch (Exception e1) {
+			MessageDialog.showErrorMsg("Library creation failed", libraryInfoDialog);
+			e1.printStackTrace();
+			return;
+		}		
+		refreshLibraryListing();		
+		for (CompoundLibrary l : libList) {
+
+			if (l.getLibraryId().equals(libId)) {
+
+				MRC2ToolBoxCore.getActiveMsLibraries().add(l);
+				((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
+						getPanel(PanelList.MS_LIBRARY)).reloadLibraryData(l);
+				break;
+			}
+		}
+		File inputFile = libraryInfoDialog.getInputLibraryFile();
+		Collection<Adduct> adductList = libraryInfoDialog.getSelectedAdducts();
+		if(!libraryInfoDialog.createDefaultAdducts())
+			adductList = null;
+		
+		if(inputFile != null && inputFile.exists()) {
+			((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
+					getPanel(PanelList.MS_LIBRARY)).importLibraryFromFile(inputFile, adductList);
+		}		
+		libraryInfoDialog.dispose();
+		dispose();
+	}
+	
+	private void editLibraryInformation() {
+		
+		Collection<String>errors = libraryInfoDialog.validateLibraryData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), libraryInfoDialog);
+			return;
+		}	
+		CompoundLibrary selected = libraryInfoDialog.getEditedLibrary();
+		String libraryName = libraryInfoDialog.getLibraryName();
+		String libraryDescription = libraryInfoDialog.getLibraryDescription();
+		selected.setLibraryName(libraryName);
+		selected.setLibraryDescription(libraryDescription);
+		try {
+			MSRTLibraryUtils.updateLibraryInfo(selected);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		refreshLibraryListing();
+		libraryInfoDialog.dispose();
+		((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
+				getPanel(PanelList.MS_LIBRARY)).updateLibraryMenuAndLabel();
+	}
+	
+	private void deleteSelectedLibrary() {
+
+		CompoundLibrary selected = getSelectedLibrary();
+		if(selected == null)
+			return;
+
+		int approve = MessageDialog.showChoiceWithWarningMsg(
+				"Do you really want to delete the library \"" + 
+						selected.getLibraryName() + "\"?", this);
+
+		if (approve == JOptionPane.YES_OPTION) {
+
+			MRC2ToolBoxCore.getActiveMsLibraries().remove(selected);
+			try {
+				MSRTLibraryUtils.deleteLibrary(selected);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			refreshLibraryListing();
+		}
+		((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
+				getPanel(PanelList.MS_LIBRARY)).finalizeLibraryDeletion(selected);
 	}
 	
 	private void showNewLibraryDialog() {
 
-		libraryInfoDialog = new LibraryInfoDialog(this, listener);
+		libraryInfoDialog = new LibraryInfoDialog(this);
 		libraryInfoDialog.setLocationRelativeTo(this);
 		libraryInfoDialog.initNewLibrary();
 		libraryInfoDialog.setVisible(true);
@@ -140,7 +253,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		if(selected == null)
 			return;
 
-		libraryInfoDialog = new LibraryInfoDialog(this, listener);
+		libraryInfoDialog = new LibraryInfoDialog(this);
 		libraryInfoDialog.setLocationRelativeTo(this);
 		libraryInfoDialog.loadLibraryData(selected);
 		libraryInfoDialog.setVisible(true);
@@ -184,37 +297,22 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 	}
 
 	public LibraryInfoDialog getLibraryInfoDialog(){
-
 		return libraryInfoDialog;
 	}
 
 	public CompoundLibrary getSelectedLibrary(){
-
-		CompoundLibrary selected = null;
-
-		int libCol = libraryListingTable.getColumnIndex(LibraryListingTableModel.LIBRARY_COLUMN);
-
-		if(libraryListingTable.getSelectedRow() > -1)
-			selected = (CompoundLibrary) libraryListingTable.getValueAt(libraryListingTable.getSelectedRow(), libCol);
-
-		return selected;
-	}
-
-	public void hideLibInfoDialog(){
-
-		libraryInfoDialog.setVisible(false);
+		return libraryListingTable.getSelectedLibrary();
 	}
 
 	public void refreshLibraryListing(){
 
-		Collection<CompoundLibrary>libList = new TreeSet<CompoundLibrary>();
 		try {
 			libList = MSRTLibraryUtils.getAllLibraries();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		libraryListingTable.setTableModelFromLibraryCollection(libList);
+		libraryListingTable.setTableModelFromLibraryCollection(libList, activeLibrary);
 	}
 
 	@Override

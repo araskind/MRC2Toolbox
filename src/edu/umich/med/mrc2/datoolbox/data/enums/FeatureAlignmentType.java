@@ -28,17 +28,18 @@ public enum FeatureAlignmentType {
 	IDENTIFIED_ONLY_FEATURES("Identified features only"),
 	UNIDENTIFIED_ONLY_FEATURES("Unidentified features only");
 
-	private final String name;
+	private final String uiName;
 
-	FeatureAlignmentType(String type) {
-		this.name = type;
+	FeatureAlignmentType(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 	
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

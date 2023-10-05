@@ -39,17 +39,18 @@ public enum BinnerPageNames {
 	UNANNOTATED_FEATURES("Unannotated features"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	BinnerPageNames(String name) {
-		this.name = name;
+	BinnerPageNames(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 }

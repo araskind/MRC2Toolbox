@@ -29,18 +29,19 @@ public enum FeatureIDSubset {
 	ALL("All identifications"),
 	;
 
-	private final String name;
+	private final String uiName;
 
-	FeatureIDSubset(String type) {
-		this.name = type;
+	FeatureIDSubset(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-		return name;
+		return uiName;
 	}
 
+	@Override
 	public String toString() {
-		return name;
+		return uiName;
 	}
 	
 	public static FeatureIDSubset getFeatureIDSubsetByName(String name) {

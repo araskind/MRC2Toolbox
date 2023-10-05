@@ -28,20 +28,18 @@ public enum ThreeDChartType {
 	SVG("SVG"), 
 	RANDOM_FOREST("Random forest");
 
-	private final String name;
+	private final String uiName;
 
-	ThreeDChartType(String type) {
-
-		this.name = type;
+	ThreeDChartType(String uiName) {
+		this.uiName = uiName;
 	}
 
 	public String getName() {
-
-		return name;
+		return uiName;
 	}
 	
+	@Override
 	public String toString() {
-
-		return name;
+		return uiName;
 	}
 }
