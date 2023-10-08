@@ -705,6 +705,8 @@ public enum MainActionCommands {
 	COPY_COMPOUND_IDENTITY_COMMAND("Copy compound identity"),
 	COPY_COMPOUND_FORMULA_COMMAND("Copy compound formula"),
 	COPY_COMPOUND_NAME_COMMAND("Copy compound name"),
+	COPY_COMPOUND_INCHI_KEY_COMMAND("Copy compound InChi key"),
+	COPY_COMPOUND_SMILES_COMMAND("Copy compound SMILES"),
 	
 	// Manual feature ID
 	SET_MANUAL_FEATURE_ID_COMMAND("Manually set feature identity"),

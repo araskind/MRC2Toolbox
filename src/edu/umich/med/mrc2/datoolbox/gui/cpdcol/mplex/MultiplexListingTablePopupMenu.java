@@ -27,6 +27,7 @@ import javax.swing.Icon;
 import javax.swing.JMenuItem;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -43,16 +44,14 @@ public class MultiplexListingTablePopupMenu extends BasicTablePopupMenu {
 		editCompoundMenuItem;
 		
 	public MultiplexListingTablePopupMenu(
-			ActionListener basicListener, 
-			ActionListener secondaryListener) {
-		super(basicListener);
+			ActionListener mainListener, 
+			BasicTable copyListener) {
+		super(mainListener, copyListener);
 		
 		editCompoundMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName(), secondaryListener,
+				MainActionCommands.EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName(), mainListener,
 				MainActionCommands.EDIT_COMPOUND_MS_READY_STRUCTURE_COMMAND.getName());
 		editCompoundMenuItem.setIcon(editIcon);
-		
-		addSeparator();
 		
 		addCopyBlock();
 	}

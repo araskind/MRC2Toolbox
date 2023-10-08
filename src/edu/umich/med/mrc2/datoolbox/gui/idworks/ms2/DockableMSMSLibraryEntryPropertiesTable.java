@@ -46,7 +46,7 @@ public class DockableMSMSLibraryEntryPropertiesTable extends DefaultSingleCDocka
 		setCloseable(false);
 		propertiesTable = new PropertiesTable();
 		propertiesTable.setPropertyValueRenderer(new WordWrapCellRenderer());
-		BasicTablePopupMenu popup = new BasicTablePopupMenu(propertiesTable);
+		BasicTablePopupMenu popup = new BasicTablePopupMenu(propertiesTable, propertiesTable);
 		popup.addCopyBlock();
 		propertiesTable.addTablePopupMenu(popup);
 		add(new JScrollPane(propertiesTable));		

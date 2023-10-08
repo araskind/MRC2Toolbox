@@ -122,7 +122,7 @@ public class MzFrequencyAnalysisResultsDialog extends JFrame implements BackedBy
 		panel_1.add(new JScrollPane(table), BorderLayout.CENTER);
 		table.setTableModelFromMzFrequencyObjectCollection(mzFrequencyObjects);
 		table.addTablePopupMenu(
-				new MzFrequencyTablePopupMenu(table, this, enableTrackerCommands));
+				new MzFrequencyTablePopupMenu(this, table, enableTrackerCommands));
 		
 		loadPreferences();
 		pack();

@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -73,14 +74,12 @@ public class UniversalIdentificationResultsTablePopupMenu
 		copyAsArrayMenuItem;
 	
 	private JMenu idLevelMenu;
-	private ActionListener alistener;
 
 	public UniversalIdentificationResultsTablePopupMenu(
 			ActionListener listener,
-			ActionListener copyListener) {
+			BasicTable copyListener) {
 
-		super(copyListener);
-		this.alistener = listener;
+		super(listener, copyListener);
 		
 		idLevelMenu = new JMenu("Set ID confidence level");
 		idLevelMenu.setIcon(setIdLevelIcon);
@@ -147,18 +146,18 @@ public class UniversalIdentificationResultsTablePopupMenu
 			
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
 			JMenuItem levelItem = 
-					GuiUtils.addMenuItem(idLevelMenu, level.getName(), alistener, level.getName(), levelIcon);
+					GuiUtils.addMenuItem(idLevelMenu, level.getName(), mainActionListener, level.getName(), levelIcon);
 			levelItem.putClientProperty(
-					MRC2ToolBoxCore.COMPONENT_IDENTIFIER, listener.getClass().getSimpleName());
+					MRC2ToolBoxCore.COMPONENT_IDENTIFIER, copyListener.getClass().getSimpleName());
 			if(level.getShorcut() != null)
 				levelItem.setAccelerator(KeyStroke.getKeyStroke(level.getShorcut().charAt(0), 
 						MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
 		JMenuItem clearIdLevelMenuItem = GuiUtils.addMenuItem(idLevelMenu,
-				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName(), alistener,
+				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName(), mainActionListener,
 				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName());
 		clearIdLevelMenuItem.putClientProperty(
-				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, listener.getClass().getSimpleName());
+				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, copyListener.getClass().getSimpleName());
 		clearIdLevelMenuItem.setIcon(clearIcon);
 	}
 	

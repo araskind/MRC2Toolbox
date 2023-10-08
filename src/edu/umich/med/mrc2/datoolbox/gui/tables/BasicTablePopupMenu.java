@@ -41,33 +41,42 @@ public class BasicTablePopupMenu extends JPopupMenu {
 	protected static final Icon copySelectedIcon = GuiUtils.getIcon("copySelectedToClipboard", 24);
 	protected static final Icon copyValueIcon = GuiUtils.getIcon("copy", 24);
 
-	protected ActionListener listener;
+	protected ActionListener mainActionListener;
+	protected BasicTable copyListener;
 	
 	protected JMenuItem 
 		copySelectedValueMenuItem,
 		copySelectedWithHeaderMenuItem,
 		copyAllWithHeaderMenuItem;
 	
-	public BasicTablePopupMenu(ActionListener listener2) {
+	public BasicTablePopupMenu(
+			ActionListener mainActionListener,
+			BasicTable copyListener) {
 
 		super();
-		this.listener = listener2;
+		this.mainActionListener = mainActionListener;
+		this.copyListener = copyListener;
 	}
 	
 	public void addCopyBlock() {
 		
+		if(copyListener == null)
+			return;
+		
+		addSeparator();
+		
 		copySelectedValueMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_SELECTED_VALUE_COMMAND.getName(), listener,
+				MainActionCommands.COPY_SELECTED_VALUE_COMMAND.getName(), copyListener,
 				MainActionCommands.COPY_SELECTED_VALUE_COMMAND.getName());
 		copySelectedValueMenuItem.setIcon(copyValueIcon);
 		
 		copySelectedWithHeaderMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_SELECTED_TABLE_ROWS_COMMAND.getName(), listener,
+				MainActionCommands.COPY_SELECTED_TABLE_ROWS_COMMAND.getName(), copyListener,
 				MainActionCommands.COPY_SELECTED_TABLE_ROWS_COMMAND.getName());
 		copySelectedWithHeaderMenuItem.setIcon(copySelectedIcon);
 		
 		copyAllWithHeaderMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_VISIBLE_TABLE_ROWS_COMMAND.getName(), listener,
+				MainActionCommands.COPY_VISIBLE_TABLE_ROWS_COMMAND.getName(), copyListener,
 				MainActionCommands.COPY_VISIBLE_TABLE_ROWS_COMMAND.getName());
 		copyAllWithHeaderMenuItem.setIcon(copyAllIcon);		
 	}

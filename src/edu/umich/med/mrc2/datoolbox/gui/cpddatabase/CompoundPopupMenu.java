@@ -24,13 +24,15 @@ package edu.umich.med.mrc2.datoolbox.gui.cpddatabase;
 import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class CompoundPopupMenu  extends JPopupMenu {
+public class CompoundPopupMenu  extends BasicTablePopupMenu {
 
 	/**
 	 *
@@ -39,32 +41,52 @@ public class CompoundPopupMenu  extends JPopupMenu {
 	private static final Icon addToLibraryIcon = GuiUtils.getIcon("databaseToLibrary", 24);
 	private static final Icon copyAccessionIcon = GuiUtils.getIcon("copy", 24);
 	private static final Icon copyIdentityIcon = GuiUtils.getIcon("copyWithHeader", 24);
-
+	
+	private JMenu copyPropertiesMenu;
+	
 	private JMenuItem
 		addSelectedToLibraryMenuItem,
-		copyAccessionMenuItem,
 		copyIdentityMenuItem;
 
-	public CompoundPopupMenu(ActionListener listener) {
+	public CompoundPopupMenu(			
+			ActionListener mainActionListener,
+			BasicTable copyListener) {
 
-		super();
+		super(mainActionListener, copyListener);
 
 		addSelectedToLibraryMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.ADD_TO_LIBRARY_FROM_DATABASE_DIALOG_COMMAND.getName(), listener,
+				MainActionCommands.ADD_TO_LIBRARY_FROM_DATABASE_DIALOG_COMMAND.getName(), mainActionListener,
 				MainActionCommands.ADD_TO_LIBRARY_FROM_DATABASE_DIALOG_COMMAND.getName());
 		addSelectedToLibraryMenuItem.setIcon(addToLibraryIcon);
 
 		addSeparator();
-
-		copyAccessionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName(), listener,
+		
+		copyPropertiesMenu = new JMenu("Copy compound property");
+		copyPropertiesMenu.setIcon(copyAccessionIcon);
+		GuiUtils.addMenuItem(copyPropertiesMenu,
+				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName(), mainActionListener,
 				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName());
-		copyAccessionMenuItem.setIcon(copyAccessionIcon);
+		GuiUtils.addMenuItem(copyPropertiesMenu,
+				MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName());
+		GuiUtils.addMenuItem(copyPropertiesMenu,
+				MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName());
+		GuiUtils.addMenuItem(copyPropertiesMenu,
+				MainActionCommands.COPY_COMPOUND_INCHI_KEY_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_COMPOUND_INCHI_KEY_COMMAND.getName());
+		GuiUtils.addMenuItem(copyPropertiesMenu,
+				MainActionCommands.COPY_COMPOUND_SMILES_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_COMPOUND_SMILES_COMMAND.getName());
+		
+		add(copyPropertiesMenu);
 
 		copyIdentityMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_COMPOUND_IDENTITY_COMMAND.getName(), listener,
+				MainActionCommands.COPY_COMPOUND_IDENTITY_COMMAND.getName(), mainActionListener,
 				MainActionCommands.COPY_COMPOUND_IDENTITY_COMMAND.getName());
 		copyIdentityMenuItem.setIcon(copyIdentityIcon);
+		
+		addCopyBlock();
 	}
 }
 

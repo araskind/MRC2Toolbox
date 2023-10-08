@@ -72,12 +72,17 @@ public class InformationDialog extends JDialog implements ActionListener {
 
 	private JButton closeButton;
 	private JButton copyErrorButton;
-
-	public InformationDialog(String title, String message, String details, Component parent) {
+	
+	public InformationDialog(
+			String title, 
+			String message, 
+			String details, 
+			Component parent,
+			InfoDialogType dialogType) {
 
 		super((Frame) MRC2ToolBoxCore.getMainWindow(), title, true);
 
-		initGui(InfoDialogType.INFO);
+		initGui(dialogType);
 
 		messageLabel.setText(message);
 		textArea.setText(details);
@@ -88,6 +93,15 @@ public class InformationDialog extends JDialog implements ActionListener {
 			setLocationRelativeTo(parent);
 
 		setVisible(true);
+	}
+
+	public InformationDialog(
+			String title, 
+			String message, 
+			String details, 
+			Component parent) {
+
+		this(title, message, details, parent, InfoDialogType.INFO);
 	}
 
 	public InformationDialog(String message, Throwable exception, Component parent) {

@@ -772,7 +772,15 @@ public class BasicTable extends JTable implements ActionListener{
 		
 		if(thf != null)
 			thf.setEnabled(b);
+		
+		for(int i= 0; i<getModel().getColumnCount(); i++) {
 			
+			TableCellRenderer renderer = columnModel.getColumn(i).getCellRenderer();
+			for(int j=0; j<getModel().getRowCount(); j++) {
+				if (renderer != null)
+					prepareRenderer(renderer, i, j).setEnabled(b);
+			}						
+		}			
 		super.setEnabled(b);
 	}
 }

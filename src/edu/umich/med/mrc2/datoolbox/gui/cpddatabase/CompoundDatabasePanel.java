@@ -323,9 +323,14 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		if (command.equals(MainActionCommands.DELETE_DATABASE_ENTRY_COMMAND.getName()))
 			deleteSelectedDatabaseEntry();
 
-		if (command.equals(MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName()))
-			copyCompoundAccession();
-
+		if (command.equals(MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_COMPOUND_INCHI_KEY_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_COMPOUND_SMILES_COMMAND.getName())) {
+					
+			copyCompoundProperty(command);
+		}
 		if (command.equals(MainActionCommands.COPY_COMPOUND_IDENTITY_COMMAND.getName()))
 			copyCompoundIdentity();
 
@@ -608,15 +613,35 @@ public class CompoundDatabasePanel extends DockableMRC2ToolboxPanel implements L
 		synonymsTable.loadNameSet(nameSet);
 		compoundTable.updateCidData(compoundTable.getSelectedIdentity());
 	}
-
-	private void copyCompoundAccession() {
-
-		if (compoundTable.getSelectedCompound() == null)
+	
+	private void copyCompoundProperty(String copyCommand) {
+		
+		CompoundIdentity cpd = compoundTable.getSelectedCompound();
+		if (cpd == null)
 			return;
-
-		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-		StringSelection stringSelection = new StringSelection(
-				compoundTable.getSelectedCompound().getPrimaryDatabaseId());
+		
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();		
+		StringSelection stringSelection = new StringSelection("");
+		
+		if(copyCommand.equals(MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName())
+				&& cpd.getPrimaryDatabaseId() != null)
+			stringSelection = new StringSelection(cpd.getPrimaryDatabaseId());
+			
+		if(copyCommand.equals(MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName()))
+			stringSelection = new StringSelection(cpd.getName());
+			
+		if(copyCommand.equals(MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName())
+				&& cpd.getFormula() != null)
+			stringSelection = new StringSelection(cpd.getFormula());
+			
+		if(copyCommand.equals(MainActionCommands.COPY_COMPOUND_INCHI_KEY_COMMAND.getName())
+				&& cpd.getInChiKey() != null)
+			stringSelection = new StringSelection(cpd.getInChiKey());
+			
+		if(copyCommand.equals(MainActionCommands.COPY_COMPOUND_SMILES_COMMAND.getName())
+				&& cpd.getSmiles() != null)
+			stringSelection = new StringSelection(cpd.getSmiles());
+		
 		clpbrd.setContents(stringSelection, null);
 	}
 

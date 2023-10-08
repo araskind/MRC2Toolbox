@@ -77,6 +77,8 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
 import edu.umich.med.mrc2.datoolbox.gui.structure.DockableMolStructurePanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InfoDialogType;
+import edu.umich.med.mrc2.datoolbox.gui.utils.InformationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -87,7 +89,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.io.ReferenceMSMSLibraryExportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LibEditorImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
-import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.TextLibraryImportTask;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.PCDLTextLibraryImportTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.msms.DecoyLibraryGenerationTask;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
@@ -883,7 +885,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		}
 		if (inputFile.getName().toLowerCase().endsWith(".txt")
 				|| inputFile.getName().toLowerCase().endsWith(".tsv")) {
-			TextLibraryImportTask task = new TextLibraryImportTask(inputFile, currentLibrary, adductList);
+			PCDLTextLibraryImportTask task = new PCDLTextLibraryImportTask(inputFile, currentLibrary, adductList);
 			task.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(task);
 		}
@@ -944,8 +946,35 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			if (e.getSource().getClass().equals(ReferenceMSMSLibraryExportTask.class))
 				finalizeReferenceMSMSLibraryExportTask((ReferenceMSMSLibraryExportTask)e.getSource());
 			
-			if (e.getSource().getClass().equals(TextLibraryImportTask.class))
-				reloadLibraryData(((TextLibraryImportTask)e.getSource()).getLibrary());
+			if (e.getSource().getClass().equals(PCDLTextLibraryImportTask.class)) 
+				finalizePCDLTextLibraryImportTask((PCDLTextLibraryImportTask)e.getSource());			
+		}
+	}
+
+	private void finalizePCDLTextLibraryImportTask(PCDLTextLibraryImportTask task) {
+		
+		if(!task.getUnmatchedIdList().isEmpty()) {
+			
+			ArrayList<String>errors = new ArrayList<String>();
+			errors.add("Library " + task.getLibrary().getLibraryName() + " was created,");
+			errors.add("but library data import failed.");
+			errors.add("The following compounds could not be matched to the database:");
+			for(CompoundIdentity id : task.getUnmatchedIdList()) 				
+				errors.add(id.getName() + " - " + id.getFormula());
+			
+			errors.add("Please edit the import file or add the missing compounds to the database");
+			errors.add("Then use \"Import PCDL library data from text file\" "
+					+ "command to import the data into created library");
+			InformationDialog id = new InformationDialog(
+					"Unmatched compounds", 
+					"Library data import failed", 
+					StringUtils.join(errors, "\n"), 
+					this.getContentPane(),
+					InfoDialogType.ERROR);
+			return;
+		} else {
+			MRC2ToolBoxCore.getActiveMsLibraries().add(task.getLibrary());
+			reloadLibraryData(task.getLibrary());
 		}
 	}
 

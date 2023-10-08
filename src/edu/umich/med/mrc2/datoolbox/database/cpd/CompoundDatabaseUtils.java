@@ -59,7 +59,8 @@ public class CompoundDatabaseUtils {
 		return mapped;
 	}
 
-	public static CompoundIdentity mapLibraryCompoundIdentity(CompoundIdentity cid, Connection conn) throws Exception{
+	public static CompoundIdentity mapLibraryCompoundIdentity(
+			CompoundIdentity cid, Connection conn) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -112,7 +113,13 @@ public class CompoundDatabaseUtils {
 				rs.close();
 			}
 		}
-		//	Check synonyms and formula
+		//	Check InChi key
+		if(cid.getInChiKey() != null && !cid.getInChiKey().isEmpty()) {
+			mappedId = getCompoundByInChiKey(cid.getInChiKey(), conn);
+			if(mappedId != null) 
+				return mappedId;
+		}		
+		//	Check synonyms
 		if(cid.getFormula() != null) {
 
 			if(!cid.getFormula().isEmpty()) {
@@ -121,8 +128,13 @@ public class CompoundDatabaseUtils {
 					"SELECT D.ACCESSION FROM COMPOUND_SYNONYMS S, COMPOUND_DATA D "
 					+ "WHERE UPPER(S.NAME) = ? AND D.MOL_FORMULA = ? "
 					+ "AND D.ACCESSION = S.ACCESSION");
-				ps.setString(1, cid.getName().trim().toUpperCase());
-				ps.setString(2, cid.getFormula());
+				
+				String mf = cid.getFormula();
+				if(mf.contains("[") || mf.contains("D"))
+					mf = mf.replaceAll("\\[13C\\]", "C").replaceAll("\\[15N\\]", "N").replaceAll("D", "H");
+					
+				ps.setString(1, cid.getName().toUpperCase().replace("[ISTD]", "").trim());
+				ps.setString(2, mf);
 				rs = ps.executeQuery();
 				while (rs.next()) {
 					accession = rs.getString("ACCESSION");
@@ -296,7 +308,8 @@ public class CompoundDatabaseUtils {
 		return identity;
 	}
 
-	public static CompoundIdentity getCompoundById(String accession, Connection conn) throws Exception{
+	public static CompoundIdentity getCompoundById(
+			String accession, Connection conn) throws Exception{
 
 		CompoundIdentity identity = DiskCacheUtils.retrieveCompoundIdentityFromCache(accession);
 		if(identity != null)
@@ -327,8 +340,6 @@ public class CompoundDatabaseUtils {
 		ps.close();
 		return identity;
 	}
-	
-
 
 	public static CompoundIdentity getCompoundIdentityByName(
 			String featureName) throws Exception {
@@ -347,11 +358,11 @@ public class CompoundDatabaseUtils {
 		String query =
 			"SELECT D.ACCESSION, D.SOURCE_DB, D.PRIMARY_NAME, "
 			+ "D.MOL_FORMULA, D.EXACT_MASS, D.INCHI_KEY, D.SMILES "+
-			"FROM CID_LOOKUP L, COMPOUND_DATA D WHERE L.CPD_NAME = ? "
+			"FROM CID_LOOKUP L, COMPOUND_DATA D WHERE UPPER(L.CPD_NAME) = ? "
 			+ "AND L.ACCESSION = D.ACCESSION" ;
 
 		PreparedStatement ps = conn.prepareStatement(query);
-		ps.setString(1, featureName);
+		ps.setString(1, featureName.toUpperCase());
 		ResultSet rs = ps.executeQuery();
 
 		while (rs.next()){

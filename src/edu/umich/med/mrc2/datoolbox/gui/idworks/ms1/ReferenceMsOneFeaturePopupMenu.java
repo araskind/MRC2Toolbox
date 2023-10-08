@@ -33,8 +33,10 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 
 public class ReferenceMsOneFeaturePopupMenu extends BasicTablePopupMenu implements IdentificationLevelEventListener {
 
@@ -68,15 +70,12 @@ public class ReferenceMsOneFeaturePopupMenu extends BasicTablePopupMenu implemen
 	private JMenuItem editIdStandardFeatureAnnotationMenuItem;
 	private JMenuItem goToCompoundDatabaseMenuItem;
 	private JMenuItem xicMenuItem;
-	
-	private ActionListener alistener;	
 
 	public ReferenceMsOneFeaturePopupMenu(
 			ActionListener listener,
-			ActionListener copyListener) {
+			BasicTable copyListener) {
 
-		super(copyListener);
-		this.alistener = listener;
+		super(listener, copyListener);
 
 		matchFeatureToLibraryMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.SEARCH_FEATURE_AGAINST_LIBRARY_COMMAND.getName(), listener,
@@ -155,9 +154,11 @@ public class ReferenceMsOneFeaturePopupMenu extends BasicTablePopupMenu implemen
 		for(MSFeatureIdentificationLevel level : IDTDataCache.getMsFeatureIdentificationLevelList()) {
 			
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
-			GuiUtils.addMenuItem(
-					idLevelMenu, level.getName(), alistener, 
+			JMenuItem levelItem = GuiUtils.addMenuItem(
+					idLevelMenu, level.getName(), mainActionListener, 
 					MSFeatureIdentificationLevel.SET_PRIMARY + level.getName(), levelIcon);
+			levelItem.putClientProperty(
+					MRC2ToolBoxCore.COMPONENT_IDENTIFIER, copyListener.getClass().getSimpleName());
 		}
 	}
 	

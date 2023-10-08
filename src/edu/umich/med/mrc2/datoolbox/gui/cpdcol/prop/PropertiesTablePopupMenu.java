@@ -27,6 +27,7 @@ import javax.swing.Icon;
 import javax.swing.JMenuItem;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -42,9 +43,12 @@ public class PropertiesTablePopupMenu extends BasicTablePopupMenu {
 	protected JMenuItem
 		editSelectedPropertyMenuItem;
 
-	public PropertiesTablePopupMenu(ActionListener listener) {
+	public PropertiesTablePopupMenu(
+			ActionListener listener,
+			BasicTable copyListener) {
 
-		super(listener);
+		super(listener, copyListener);
+		
 		addCopyBlock();
 		
 		addSeparator();

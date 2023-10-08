@@ -27,6 +27,7 @@ import javax.swing.Icon;
 import javax.swing.JMenuItem;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
@@ -41,8 +42,6 @@ public class FeaturePopupMenu extends BasicTablePopupMenu {
 	private static final Icon searchLibraryIcon = GuiUtils.getIcon("searchLibrary", 24);
 	private static final Icon searchDatabaseIcon = GuiUtils.getIcon("searchDatabase", 24);
 	private static final Icon textAnnotationIcon = GuiUtils.getIcon("edit", 24);
-	private static final Icon copySelectedIcon = GuiUtils.getIcon("copy", 24);
-	private static final Icon copySelectedWithHeaderIcon = GuiUtils.getIcon("copyWithHeader", 24);
 	private static final Icon mergeSelectedFeaturesIcon = GuiUtils.getIcon("merge", 24);
 	private static final Icon clearIdentificationsIcon = GuiUtils.getIcon("clearIdentifications", 24);
 
@@ -52,14 +51,12 @@ public class FeaturePopupMenu extends BasicTablePopupMenu {
 	private JMenuItem searchFeatureAgainstDatabaseMenuItem;
 	private JMenuItem clearFeatureIdentificationsMenuItem;
 	private JMenuItem textAnnotationMenuItem;
-	private JMenuItem copySelectedMenuItem;
-	private JMenuItem copySelectedWithHeaderMenuItem;
 
 	public FeaturePopupMenu(
 			ActionListener listener,
-			ActionListener copyListener) {
+			BasicTable copyListener) {
 
-		super(copyListener);
+		super(listener, copyListener);
 
 		textAnnotationMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.EDIT_FEATURE_METADATA_COMMAND.getName(), listener,
@@ -94,19 +91,7 @@ public class FeaturePopupMenu extends BasicTablePopupMenu {
 				MainActionCommands.CLEAR_SELECTED_FEATURE_IDENTIFICATION_COMMAND.getName(), listener,
 				MainActionCommands.CLEAR_SELECTED_FEATURE_IDENTIFICATION_COMMAND.getName());
 		clearFeatureIdentificationsMenuItem.setIcon(clearIdentificationsIcon);
-
-		this.addSeparator();
 		
 		addCopyBlock();
-
-//		copySelectedMenuItem = GuiUtils.addMenuItem(this,
-//				MainActionCommands.COPY_SELECTED_ROWS_COMMAND.getName(), listener,
-//				MainActionCommands.COPY_SELECTED_ROWS_COMMAND.getName());
-//		copySelectedMenuItem.setIcon(copySelectedIcon);
-//
-//		copySelectedWithHeaderMenuItem = GuiUtils.addMenuItem(this,
-//				MainActionCommands.COPY_SELECTED_ROWS_WITH_HEADER_COMMAND.getName(), listener,
-//				MainActionCommands.COPY_SELECTED_ROWS_WITH_HEADER_COMMAND.getName());
-//		copySelectedWithHeaderMenuItem.setIcon(copySelectedWithHeaderIcon);
 	}
 }

@@ -76,4 +76,27 @@ public enum PCDLFields {
 	public String toString() {
 		return pcdlName;
 	}
+	
+	public static PCDLFields getPCDLFieldByUIName(String uiName) {
+		
+		for(PCDLFields f : PCDLFields.values()) {
+			
+			if(f.getName().equals(uiName))
+				return f;
+		}		
+		return null;
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

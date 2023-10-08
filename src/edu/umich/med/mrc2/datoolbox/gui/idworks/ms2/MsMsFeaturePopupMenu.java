@@ -36,6 +36,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.IdentificationLevelEventListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -51,8 +52,6 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 	
 	private static final Icon nistPepMsIcon = GuiUtils.getIcon("NISTMS-pep", 24);
 	private static final Icon manualIdentificationIcon = GuiUtils.getIcon("manualIdentification", 24);
-//	private static final Icon copySelectedIcon = GuiUtils.getIcon("copy", 24);
-//	private static final Icon copySelectedWithHeaderIcon = GuiUtils.getIcon("copyWithHeader", 24);
 	private static final Icon disablePrimaryIdIcon = GuiUtils.getIcon("multipleIdsDisabled", 24);
 	private static final Icon clearIdentificationsIcon = GuiUtils.getIcon("clearIdentifications", 24);
 	private static final Icon fusEditIcon = GuiUtils.getIcon("editIdFollowupStep", 24);
@@ -72,8 +71,6 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 			addManualIdentificationMenuItem,
 			disablePrimaryIdMenuItem,
 			clearFeatureIdentificationsMenuItem,
-			copySelectedMenuItem,
-			copySelectedWithHeaderMenuItem,
 			editFollowupStepsMenuItem,
 			editIdStandardFeatureAnnotationMenuItem,
 			goToCompoundDatabaseMenuItem,
@@ -85,14 +82,12 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 			copyAsArrayMenuItem;
 	
 	private JMenu idLevelMenu;
-	private ActionListener alistener;
 
 	public MsMsFeaturePopupMenu(
 			ActionListener listener,
-			ActionListener copyListener) {
+			BasicTable copyListener) {
 
-		super(copyListener);
-		this.alistener = listener;
+		super(listener, copyListener);
 
 		setupNISTPepSearchMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.NIST_MS_PEPSEARCH_SETUP_COMMAND.getName(), listener,
@@ -197,23 +192,23 @@ public class MsMsFeaturePopupMenu extends BasicTablePopupMenu implements Identif
 			
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
 			JMenuItem levelItem = GuiUtils.addMenuItem(
-					idLevelMenu, level.getName(), alistener, 
+					idLevelMenu, level.getName(), mainActionListener, 
 					MSFeatureIdentificationLevel.SET_PRIMARY + level.getName(), levelIcon);
 			levelItem.putClientProperty(
-					MRC2ToolBoxCore.COMPONENT_IDENTIFIER, listener.getClass().getSimpleName());
+					MRC2ToolBoxCore.COMPONENT_IDENTIFIER, copyListener.getClass().getSimpleName());
 			if(level.getShorcut() != null)
 				levelItem.setAccelerator(
 						KeyStroke.getKeyStroke(level.getShorcut().charAt(0), 
 								MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
 		JMenuItem clearIdLevelMenuItem = GuiUtils.addMenuItem(idLevelMenu,
-				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName(), alistener,
+				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName(), mainActionListener,
 				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName());
 		clearIdLevelMenuItem.putClientProperty(
 				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, this.getClass().getSimpleName());
 		clearIdLevelMenuItem.setIcon(clearIcon);
 		clearIdLevelMenuItem.putClientProperty(
-				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, listener.getClass().getSimpleName());
+				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, copyListener.getClass().getSimpleName());
 	}
 	
 	public void refreshIdLevelMenu() {

@@ -111,7 +111,7 @@ public class CuratedDatabaseCompoundTable extends BasicTable {
 
 	public void addCompoundPopupListener(ActionListener listener) {
 
-		CompoundPopupMenu popupMenu = new CompoundPopupMenu(listener);
+		CompoundPopupMenu popupMenu = new CompoundPopupMenu(listener, this);
 		setComponentPopupMenu(popupMenu);
 		addMouseListener(new MouseAdapter() {
 			private int popupRow;

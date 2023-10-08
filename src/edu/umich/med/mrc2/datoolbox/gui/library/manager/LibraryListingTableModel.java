@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.gui.library.manager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -47,6 +48,7 @@ public class LibraryListingTableModel  extends BasicTableModel {
 	public static final String DESCRIPTION_COLUMN = "Description";
 	public static final String POLARITY_COLUMN = "Polarity";
 	public static final String NUM_ENTRIES_COLUMN = "# Compounds";
+	public static final String DATE_CREATED_COLUMN = "Created on";
 
 	public LibraryListingTableModel() {
 		super();
@@ -55,7 +57,8 @@ public class LibraryListingTableModel  extends BasicTableModel {
 			new ColumnContext(LIBRARY_COLUMN, CompoundLibrary.class, false),
 			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
 			new ColumnContext(POLARITY_COLUMN, Polarity.class, false),
-			new ColumnContext(NUM_ENTRIES_COLUMN, Integer.class, false)
+			new ColumnContext(NUM_ENTRIES_COLUMN, Integer.class, false),
+			new ColumnContext(DATE_CREATED_COLUMN, Date.class, false),
 		};
 	}
 
@@ -100,7 +103,8 @@ public class LibraryListingTableModel  extends BasicTableModel {
 						lib,
 						lib.getLibraryDescription(),
 						lib.getPolarity(),
-						countsMap.get(lib.getLibraryId())
+						countsMap.get(lib.getLibraryId()),
+						lib.getDateCreated(),
 					};
 				rowData.add(obj);
 			}

@@ -140,22 +140,20 @@ public class CompoundIdentity implements Serializable, Comparable<CompoundIdenti
 		this.formula = formula;
 		if(formula != null) {
 			
+			if(formula.contains("D"))
+				formula = formula.replaceAll("D", "[2H]");
+			
 			IMolecularFormula mf = 
 					MolecularFormulaManipulator.getMolecularFormula(
 							formula, DefaultChemObjectBuilder.getInstance());
-			exactMass = MolecularFormulaManipulator.getMajorIsotopeMass(mf);
+			exactMass = MolecularFormulaManipulator.getMass(
+					mf, MolecularFormulaManipulator.MonoIsotopic);
+			
+			this.formula = MolecularFormulaManipulator.getString(mf);
 		}
 		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
 	}
-
-	public CompoundIdentity(String commonName, String formula, double exactMass) {
-		super();
-		this.commonName = commonName;
-		this.formula = formula;
-		this.exactMass = exactMass;
-		dbIdMap = new HashMap<CompoundDatabaseEnum, String>();
-	}
-
+	
 	public void addDbId(CompoundDatabaseEnum dbSource, String id) {
 
 		if(primaryDatabase == null)

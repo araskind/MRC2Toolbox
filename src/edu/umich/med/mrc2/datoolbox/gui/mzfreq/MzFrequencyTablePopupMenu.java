@@ -34,6 +34,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelIcon;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -45,26 +46,22 @@ public class MzFrequencyTablePopupMenu extends BasicTablePopupMenu {
 	 */
 	private static final long serialVersionUID = 8828829260409589130L;
 
-	protected static final Icon editIcon = GuiUtils.getIcon("editLibraryFeature", 24);
+	private static final Icon editIcon = GuiUtils.getIcon("editLibraryFeature", 24);
 	private static final Icon setIdLevelIcon = GuiUtils.getIcon("editIdStatus", 24);
 	private static final Icon clearIcon = GuiUtils.getIcon("clear", 24);
 	
 	private static final int MASK =
 		    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 	
-	private ActionListener secondaryListener;
-	protected JMenuItem editCompoundMenuItem;
-
+	private JMenuItem editCompoundMenuItem;
 	private JMenu idLevelMenu;
 		
 	public MzFrequencyTablePopupMenu(
-			ActionListener basicListener, 
-			ActionListener secondaryListener, 
+			ActionListener listener, 
+			BasicTable copyListener, 
 			boolean enableTrackerCommands) {
-		super(basicListener);
-		
-		this.secondaryListener = secondaryListener;
-		
+		super(listener, copyListener);
+				
 		if(enableTrackerCommands) {
 			
 			idLevelMenu = new JMenu("Set ID confidence level for selected");
@@ -84,16 +81,19 @@ public class MzFrequencyTablePopupMenu extends BasicTablePopupMenu {
 			Icon levelIcon = new IdLevelIcon(24, level.getColorCode());
 			JMenuItem levelItem = 
 					GuiUtils.addMenuItem(idLevelMenu, 
-							level.getName(), secondaryListener, level.getName(), levelIcon);
+							level.getName(), mainActionListener, level.getName(), levelIcon);
+			levelItem.putClientProperty(
+					MRC2ToolBoxCore.COMPONENT_IDENTIFIER, copyListener.getClass().getSimpleName());
+			
 			if(level.getShorcut() != null)
 				levelItem.setAccelerator(KeyStroke.getKeyStroke(
 						level.getShorcut().charAt(0), MASK | InputEvent.SHIFT_DOWN_MASK));
 		}
 		JMenuItem clearIdLevelMenuItem = GuiUtils.addMenuItem(idLevelMenu,
-				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName(), secondaryListener,
+				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName(), mainActionListener,
 				MainActionCommands.CLEAR_ID_LEVEL_COMMAND.getName());
 		clearIdLevelMenuItem.putClientProperty(
-				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, this.getClass().getSimpleName());
+				MRC2ToolBoxCore.COMPONENT_IDENTIFIER, copyListener.getClass().getSimpleName());
 		clearIdLevelMenuItem.setIcon(clearIcon);
 	}
 }

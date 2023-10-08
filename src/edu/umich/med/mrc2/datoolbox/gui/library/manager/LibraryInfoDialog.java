@@ -40,7 +40,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -93,7 +92,7 @@ public class LibraryInfoDialog extends JDialog
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.datoolbox.LibraryInfoDialog"; 
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	private File baseDirectory;
-	private JCheckBox createDefaultAdductsCheckBox;
+	private JLabel createDefaultAdductsCheckBox;
 	private JScrollPane scrollPane;
 	private AdductSelectionTable adductsTable;
 	
@@ -206,7 +205,7 @@ public class LibraryInfoDialog extends JDialog
 		panel.add(btnBrowse, gbc_btnNewButton);
 		
 		createDefaultAdductsCheckBox = 
-				new JCheckBox("Create default adducts during import");
+				new JLabel("Create selected adducts during import:");
 		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
 		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
 		gbc_chckbxNewCheckBox.gridwidth = 2;
@@ -331,18 +330,18 @@ public class LibraryInfoDialog extends JDialog
 			errors.add("Library polarity must be specified");
 		
 		//	Default adducts for text library
-		if(inputLibraryFile != null) {
-			
-			if(inputLibraryFile.getName().toLowerCase().endsWith(".txt") 
-					|| inputLibraryFile.getName().toLowerCase().endsWith(".tsv")) {
-				
-				if(createDefaultAdductsCheckBox.isSelected() 
-						&& adductsTable.getSelectedAdducts().isEmpty()) {
-					errors.add("\"Create default adducts during import\" option is enabled,\n"
-							+ "but no adducts selected. Please select the adducts from the table.");
-				}
-			}
-		}
+//		if(inputLibraryFile != null) {
+//			
+//			if(inputLibraryFile.getName().toLowerCase().endsWith(".txt") 
+//					|| inputLibraryFile.getName().toLowerCase().endsWith(".tsv")) {
+//				
+//				if(createDefaultAdductsCheckBox.isSelected() 
+//						&& adductsTable.getSelectedAdducts().isEmpty()) {
+//					errors.add("\"Create default adducts during import\" option is enabled,\n"
+//							+ "but no adducts selected. Please select the adducts from the table.");
+//				}
+//			}
+//		}
 		return errors;
 	}
 
@@ -373,8 +372,8 @@ public class LibraryInfoDialog extends JDialog
 			libFileTextField.setText(inputLibraryFile.getAbsolutePath());
 			if(!inputLibraryFile.getName().toLowerCase().endsWith(".txt") 
 					&& !inputLibraryFile.getName().toLowerCase().endsWith(".tsv")) {
-				createDefaultAdductsCheckBox.setSelected(false);
-				createDefaultAdductsCheckBox.setEnabled(false);
+//				createDefaultAdductsCheckBox.setSelected(false);
+//				createDefaultAdductsCheckBox.setEnabled(false);
 				adductsTable.setEnabled(false);
 			}
 			else {
@@ -416,12 +415,16 @@ public class LibraryInfoDialog extends JDialog
 	}
 	
 	public Collection<Adduct>getSelectedAdducts(){
-		return adductsTable.getSelectedAdducts();
+		
+		if(adductsTable.getSelectedAdducts().isEmpty())
+			return null;
+		else
+			return adductsTable.getSelectedAdducts();
 	}
 	
-	public boolean createDefaultAdducts() {
-		return createDefaultAdductsCheckBox.isSelected();
-	}
+//	public boolean createDefaultAdducts() {
+//		return createDefaultAdductsCheckBox.isSelected();
+//	}
 }
 
 

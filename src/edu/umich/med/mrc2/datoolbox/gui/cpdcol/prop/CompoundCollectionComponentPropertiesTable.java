@@ -63,7 +63,7 @@ public class CompoundCollectionComponentPropertiesTable extends BasicTable {
 				CompoundCollectionComponentPropertiesTableModel.VALUE_COLUMN).
 				setCellRenderer(wwr);
 		
-		addTablePopupMenu(new PropertiesTablePopupMenu(this));
+		addTablePopupMenu(new PropertiesTablePopupMenu(this, this));
 		addMouseListener(
 				new MouseAdapter() {
 					public void mouseClicked(MouseEvent e) {

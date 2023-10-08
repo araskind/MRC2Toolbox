@@ -56,7 +56,7 @@ public class DockableCompoundMultiplexComponentsListingTable
 		multiplexComponentsListingTable = 
 				new CompoundMultiplexComponentsListingTable();
 		MultiplexListingTablePopupMenu popup = 
-				new MultiplexListingTablePopupMenu(multiplexComponentsListingTable, this);
+				new MultiplexListingTablePopupMenu(this, multiplexComponentsListingTable);
 		multiplexComponentsListingTable.addTablePopupMenu(popup);
 
 		add(new JScrollPane(multiplexComponentsListingTable));

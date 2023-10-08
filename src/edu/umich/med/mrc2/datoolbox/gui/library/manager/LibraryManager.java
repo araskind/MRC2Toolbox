@@ -94,6 +94,8 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		libraryListingTable = new LibraryListingTable();
 		libList = new TreeSet<CompoundLibrary>();
 		refreshLibraryListing();
+		libraryListingTable.addTablePopupMenu(
+				new LibraryManagerPopupMenu(this, libraryListingTable));
 		
 		libraryListingTable.addMouseListener(
 
@@ -173,16 +175,14 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 
 			if (l.getLibraryId().equals(libId)) {
 
-				MRC2ToolBoxCore.getActiveMsLibraries().add(l);
+				MRC2ToolBoxCore.getActiveMsLibraries().add(newLibrary);
 				((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
-						getPanel(PanelList.MS_LIBRARY)).reloadLibraryData(l);
+						getPanel(PanelList.MS_LIBRARY)).reloadLibraryData(newLibrary);
 				break;
 			}
 		}
 		File inputFile = libraryInfoDialog.getInputLibraryFile();
 		Collection<Adduct> adductList = libraryInfoDialog.getSelectedAdducts();
-		if(!libraryInfoDialog.createDefaultAdducts())
-			adductList = null;
 		
 		if(inputFile != null && inputFile.exists()) {
 			((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
