@@ -51,7 +51,8 @@ public class IdentificationUtils {
 		
 		Collection<MsFeatureIdentity> idList = feature.getIdentifications();			
 		Map<CompoundIdentity, List<MsFeatureIdentity>> idsByCompound = 
-				idList.stream().collect(Collectors.groupingBy(MsFeatureIdentity::getCompoundIdentity));
+				idList.stream().filter(i -> Objects.nonNull(i.getCompoundIdentity())).
+				collect(Collectors.groupingBy(MsFeatureIdentity::getCompoundIdentity));
 		
 		Collection<MsFeatureIdentity> bestMatchList = new HashSet<MsFeatureIdentity>();
 		for(Entry<CompoundIdentity, List<MsFeatureIdentity>> matchList : idsByCompound.entrySet()) {

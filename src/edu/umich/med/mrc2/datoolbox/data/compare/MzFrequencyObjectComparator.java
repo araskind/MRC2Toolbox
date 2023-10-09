@@ -61,6 +61,14 @@ public class MzFrequencyObjectComparator extends ObjectCompatrator<MzFrequencyOb
 				else
 					return -result;
 				
+			case RSD:
+				result = Double.compare(o1.getRtRSD(), o2.getRtRSD());
+	
+				if (direction == SortDirection.ASC)
+					return result;
+				else
+					return -result;
+				
 			default:
 				break;
 		}

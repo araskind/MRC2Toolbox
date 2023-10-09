@@ -140,14 +140,16 @@ public class MsMsfeatureBatchExtractionTask extends AbstractTask implements Task
 							msOneDataFiles, 
 							features, 
 							ps.getCommonChromatogramDefinition(),
-							ps.getXicTarget());
+							ps.getXicTarget(),
+							false);
 		}
 		else {
 			task = new MsFeatureChromatogramBatchExtractionTask(
 					msmsDataFiles, 
 					features, 
 					ps.getCommonChromatogramDefinition(),
-					ps.getXicTarget());
+					ps.getXicTarget(),
+					true);
 		}
 		task.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(task);

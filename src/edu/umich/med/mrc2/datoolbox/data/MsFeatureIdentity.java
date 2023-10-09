@@ -123,7 +123,11 @@ public class MsFeatureIdentity implements Serializable {
 	}
 
 	public String getPrimaryLinkLabel() {
-		return compoundIdentity.getPrimaryDatabaseId();
+		
+		if(compoundIdentity == null)
+			return null;
+		else
+			return compoundIdentity.getPrimaryDatabaseId();
 	}
 
 	public boolean isPrimary() {
@@ -308,14 +312,22 @@ public class MsFeatureIdentity implements Serializable {
 	 * @return the identificationStatus
 	 */
 	public MSFeatureIdentificationLevel getIdentificationLevel() {
-		return identificationLevel;
+		
+		if(compoundIdentity == null)
+			return null;
+		else			
+			return identificationLevel;
 	}
 
 	/**
 	 * @param identificationStatus the identificationStatus to set
 	 */
-	public void setIdentificationLevel(MSFeatureIdentificationLevel identificationStatus) {
-		this.identificationLevel = identificationStatus;
+	public void setIdentificationLevel(
+			MSFeatureIdentificationLevel identificationStatus) {
+		if(compoundIdentity == null)
+			this.identificationLevel = null;
+		else			
+			this.identificationLevel = identificationStatus;
 	}
 
 	public Adduct getPrimaryAdduct() {

@@ -39,6 +39,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedRangeRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MzFrequencyObjectRTSpreadRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MzFrequencyObjectRenderer;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -64,6 +65,8 @@ public class MzFrequencyDataTable extends BasicTable {
 				new RangeMidPoitComparator());
 		rowSorter.setComparator(model.getColumnIndex(MzFrequencyDataTableModel.RT_RANGE_COLUMN),
 				new RangeMidPoitComparator());
+		rowSorter.setComparator(model.getColumnIndex(MzFrequencyDataTableModel.RT_RSD_COLUMN),
+				new MzFrequencyObjectComparator(SortProperty.RSD));
 		setRowSorter(rowSorter);
 
 		columnModel.getColumnById(MzFrequencyDataTableModel.AVG_MZ_COLUMN)
@@ -73,11 +76,13 @@ public class MzFrequencyDataTable extends BasicTable {
 		columnModel.getColumnById(MzFrequencyDataTableModel.RT_RANGE_COLUMN)
 				.setCellRenderer(new FormattedRangeRenderer(MRC2ToolBoxConfiguration.getRtFormat()));
 		
+		columnModel.getColumnById(MzFrequencyDataTableModel.RT_RSD_COLUMN)
+			.setCellRenderer(new MzFrequencyObjectRTSpreadRenderer());
 		FormattedDecimalRenderer ppmRenderer = new FormattedDecimalRenderer(
 				MRC2ToolBoxConfiguration.getPpmFormat());
-		columnModel.getColumnById(MzFrequencyDataTableModel.RT_RSD_COLUMN)
-			.setCellRenderer(ppmRenderer);
 		columnModel.getColumnById(MzFrequencyDataTableModel.FREQUENCY_COLUMN)
+				.setCellRenderer(ppmRenderer);
+		columnModel.getColumnById(MzFrequencyDataTableModel.PERCENT_IDENTIFIED_COLUMN)
 				.setCellRenderer(ppmRenderer);
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);

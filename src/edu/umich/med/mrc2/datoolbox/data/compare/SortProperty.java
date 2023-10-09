@@ -52,5 +52,7 @@ public enum SortProperty {
 	BasePeakMZ,
 	ParentIonMZ,
 	rangeMidpoint,
-	frequency;
+	frequency,
+	RSD,
+	;
 }

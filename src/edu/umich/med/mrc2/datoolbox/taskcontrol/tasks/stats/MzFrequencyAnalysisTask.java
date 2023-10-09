@@ -27,6 +27,8 @@ import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
@@ -39,6 +41,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.Range;
 
 public class MzFrequencyAnalysisTask extends AbstractTask {
 	
@@ -55,6 +58,7 @@ public class MzFrequencyAnalysisTask extends AbstractTask {
 			new TreeSet<MzFrequencyObject>(
 					new MzFrequencyObjectComparator(SortProperty.rangeMidpoint));
 	private DataPipeline dp = new DataPipeline();
+	private Range dataSetRtRange;
 	
 	public MzFrequencyAnalysisTask(
 			Collection<MsFeature> featuresToProcess, 
@@ -104,6 +108,7 @@ public class MzFrequencyAnalysisTask extends AbstractTask {
 			for(MsFeatureCluster cluster : mzClusters) {
 				
 				MzFrequencyObject mzfo = new MzFrequencyObject(cluster);
+				mzfo.setDataSetRtRange(dataSetRtRange);
 				mzfo.setFrequency(((double)cluster.getFeatures().size()) / totalCount);
 				mzfo.setMzRange(cluster.getBasePeakMzRange(dp));
 				mzFrequencyObjects.add(mzfo);
@@ -115,6 +120,7 @@ public class MzFrequencyAnalysisTask extends AbstractTask {
 			for(MsFeatureCluster cluster : mzClusters) {
 				
 				MzFrequencyObject mzfo = new MzFrequencyObject(cluster);
+				mzfo.setDataSetRtRange(dataSetRtRange);
 				mzfo.setFrequency(((double)cluster.getFeatures().size()) / totalCount);
 				mzfo.setMzRange(cluster.getMSMSParentIonMzRange(dp));
 				mzFrequencyObjects.add(mzfo);
@@ -136,6 +142,7 @@ public class MzFrequencyAnalysisTask extends AbstractTask {
 			if(featuresToProcessFiltered.isEmpty())
 				return;
 			
+			calculateDataSetRtRange(featuresToProcessFiltered);
 			createFeatureClustersBasedOnBasePeak();
 		}
 		if(mzFrequencyType.equals(MzFrequencyType.MSMS_PARENT_FREQUENCY)) {
@@ -150,8 +157,18 @@ public class MzFrequencyAnalysisTask extends AbstractTask {
 			if(featuresToProcessFiltered.isEmpty())
 				return;
 			
+			calculateDataSetRtRange(featuresToProcessFiltered);
 			createFeatureClustersBasedOnParentIon();
 		}
+	}
+	
+	private void calculateDataSetRtRange(Collection<MsFeature>dataSet) {
+		
+		DescriptiveStatistics ds = new DescriptiveStatistics();
+		dataSet.stream().
+			forEach(f -> ds.addValue(f.getRetentionTime()));
+		
+		dataSetRtRange = new Range(ds.getMin(), ds.getMax());
 	}
 	
 	private void createFeatureClustersBasedOnBasePeak() {

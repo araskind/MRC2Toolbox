@@ -21,6 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.data;
 
+import java.util.Objects;
+
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import edu.umich.med.mrc2.datoolbox.utils.Range;
@@ -30,6 +32,7 @@ public class MzFrequencyObject {
 	private MsFeatureCluster featureCluster;
 	private Range mzRange;
 	private double frequency;
+	private Range dataSetRtRange;
 	
 	public MzFrequencyObject(MsFeatureCluster featureCluster) {
 		super();
@@ -57,8 +60,14 @@ public class MzFrequencyObject {
 		featureCluster.getFeatures().stream().
 			forEach(f -> ds.addValue(f.getRetentionTime()));
 
-				
-		return ds.getStandardDeviation() / ds.getMean();
+		double mean = ds.getMean();
+		if(dataSetRtRange != null && dataSetRtRange.getAverage() > 0.0d)
+			mean = dataSetRtRange.getAverage();
+		
+		if(mean == 0.0d)
+			return 0.0d;
+		else
+			return ds.getStandardDeviation() / mean;
 	}
 
 	public void setFrequency(double frequency) {
@@ -76,4 +85,27 @@ public class MzFrequencyObject {
 	public Range getRTRange() {
 		return featureCluster.getRtRange();
 	}
+
+	public Range getDataSetRtRange() {
+		return dataSetRtRange;
+	}
+
+	public void setDataSetRtRange(Range dataSetRtRange) {
+		this.dataSetRtRange = dataSetRtRange;
+	}
+	
+	public double getPercentIdentified() {
+		
+		long idCount = featureCluster.getFeatures().stream().
+				filter(f -> Objects.nonNull(f.getPrimaryIdentity())).
+				filter(f -> Objects.nonNull(f.getPrimaryIdentity().getCompoundIdentity())).count();
+		return ((double)idCount / (double)featureCluster.getFeatures().size()) * 100.0d;		
+	}
 }
+
+
+
+
+
+
+

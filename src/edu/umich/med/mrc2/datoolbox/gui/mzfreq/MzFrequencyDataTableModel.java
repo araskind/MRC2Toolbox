@@ -43,6 +43,7 @@ public class MzFrequencyDataTableModel extends BasicTableModel {
 	public static final String RT_RSD_COLUMN = "RT RSD, %";
 	public static final String FEATURE_COUNT_COLUMN = "#Features";
 	public static final String FREQUENCY_COLUMN = "Frequency, %";
+	public static final String PERCENT_IDENTIFIED_COLUMN = "Identified, %";
 
 	public MzFrequencyDataTableModel() {
 		super();
@@ -51,9 +52,10 @@ public class MzFrequencyDataTableModel extends BasicTableModel {
 			new ColumnContext(AVG_MZ_COLUMN, MzFrequencyObject.class, false),
 			new ColumnContext(MZ_RANGE_COLUMN, Range.class, false),
 			new ColumnContext(RT_RANGE_COLUMN, Range.class, false),
-			new ColumnContext(RT_RSD_COLUMN, Double.class, false),
+			new ColumnContext(RT_RSD_COLUMN, MzFrequencyObject.class, false),
 			new ColumnContext(FEATURE_COUNT_COLUMN, Integer.class, false),
 			new ColumnContext(FREQUENCY_COLUMN, Double.class, false),
+			new ColumnContext(PERCENT_IDENTIFIED_COLUMN, Double.class, false),
 		};
 	}
 
@@ -68,9 +70,10 @@ public class MzFrequencyDataTableModel extends BasicTableModel {
 				mzfo,
 				mzfo.getMzRange(),
 				mzfo.getRTRange(),
-				mzfo.getRtRSD() * 100.0d,
+				mzfo,
 				mzfo.getFeatureCount(),
 				mzfo.getFrequency() * 100.0d,
+				mzfo.getPercentIdentified(),
 			};
 			rowData.add(obj);
 		}

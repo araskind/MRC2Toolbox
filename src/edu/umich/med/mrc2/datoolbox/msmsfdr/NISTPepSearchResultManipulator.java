@@ -785,7 +785,7 @@ public class NISTPepSearchResultManipulator {
 		if(!execFile.exists())
 			return null;
 		
-		commandParts.add(execFile.getAbsolutePath());
+		commandParts.add("\"" + execFile.getAbsolutePath() +"\"");
 		
 		//	Pre-search type [{sdfmk[n]}]
 		commandParts.add(parametersObject.getPreSearchType().name());
@@ -903,11 +903,11 @@ public class NISTPepSearchResultManipulator {
 		}
 		//	Input file
 		commandParts.add("/INP");
-		commandParts.add(inputFile.getAbsolutePath());		
+		commandParts.add("\"" + inputFile.getAbsolutePath() + "\"");		
 		
 		//	Output file
 		commandParts.add("/OUTTAB"); 
-		commandParts.add(resultFile.getAbsolutePath());
+		commandParts.add("\"" + resultFile.getAbsolutePath() + "\"");
 
 		//	Add output options
 		//	Minimal match factor
@@ -924,7 +924,6 @@ public class NISTPepSearchResultManipulator {
 		
 		//	Inclusion list
 		commandParts.add("/" + parametersObject.getOutputInclusionOption().name());
-
 		
 		ArrayList<String>columns = new ArrayList<String>();
 		for(NISTPepSearchOutputColumnCode code : NISTPepSearchOutputColumnCode.values()) {

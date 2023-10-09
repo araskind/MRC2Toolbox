@@ -939,23 +939,24 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		
 		if(identifications.isEmpty())
 			return FeatureIdentificationState.NO_IDENTIFICATION;
+		long idCount = identifications.stream().
+				filter(i -> Objects.nonNull(i.getCompoundIdentity())).count();
 		
-		if(identifications.size() == 1) {
+		if(primaryIdentity == null || primaryIdentity.getCompoundIdentity() == null) {
 			
-			if(primaryIdentity == null)
+			if(idCount == 1)
 				return FeatureIdentificationState.SINGLE_INACTIVE_ID;
-			else if(primaryIdentity.getCompoundIdentity() == null)
-				return FeatureIdentificationState.NO_IDENTIFICATION;
-			else
-				return FeatureIdentificationState.SINGLE_ACTIVE_ID;
-		}
-		if(identifications.size() > 1) {
-			if(primaryIdentity == null || primaryIdentity.getCompoundIdentity() == null)
+			else if(idCount > 1)
 				return FeatureIdentificationState.MULTIPLE_INACTIVE_IDS;
+			else
+				return FeatureIdentificationState.NO_IDENTIFICATION;
+		}
+		else {
+			if(idCount == 1)
+				return FeatureIdentificationState.SINGLE_ACTIVE_ID;
 			else
 				return FeatureIdentificationState.MULTIPLE_ACTIVE_IDS;
 		}
-		return FeatureIdentificationState.NO_IDENTIFICATION;
 	}
 
 	public boolean isIdDisabled() {

@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213796232" orientation="HORIZONTAL" divider="0.2">
-											<leaf id="0" nodeId="1600213796234">
+											<leaf id="1" nodeId="1600213796234">
 												<placeholders>
 													<placeholder>dock.single.DataIntegratorPanelDockableClusterTree</placeholder>
 												</placeholders>
@@ -108,25 +108,25 @@
 											<node nodeId="1600213796236" orientation="VERTICAL" divider="0.5">
 												<node nodeId="1600213796238" orientation="VERTICAL" divider="0.6">
 													<node nodeId="1600213796240" orientation="HORIZONTAL" divider="0.8">
-														<leaf id="1" nodeId="1600213796242">
+														<leaf id="2" nodeId="1600213796242">
 															<placeholders>
 																<placeholder>dock.single.DockableDataIntegrationFeatureSelectionTable</placeholder>
 															</placeholders>
 														</leaf>
-														<leaf id="2" nodeId="1600213796244">
+														<leaf id="3" nodeId="1600213796244">
 															<placeholders>
 																<placeholder>dock.single.ClusterDisplayPanelDockableMolStructurePanel</placeholder>
 															</placeholders>
 														</leaf>
 													</node>
-													<leaf id="5" nodeId="1600213796246">
+													<leaf id="0" nodeId="1600213796246">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableIdentificationResultsTable</placeholder>
 														</placeholders>
 													</leaf>
 												</node>
 												<node nodeId="1600213796248" orientation="HORIZONTAL" divider="0.5">
-													<leaf id="3" nodeId="1600213796250">
+													<leaf id="4" nodeId="1600213796250">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableFeatureIntensitiesTable</placeholder>
 															<placeholder>dock.single.ClusterDisplayPanelDockableDataPlot</placeholder>
@@ -158,7 +158,7 @@
 															</entry>
 														</placeholder-map>
 													</leaf>
-													<leaf id="4" nodeId="1600213796258">
+													<leaf id="5" nodeId="1600213796258">
 														<placeholders>
 															<placeholder>dock.single.ClusterDisplayPanelDockableMsTableMS1</placeholder>
 															<placeholder>dock.single.ClusterDisplayPanelAnnotations</placeholder>
@@ -202,6 +202,16 @@
 								</layout>
 							</adjacent>
 							<children ignore="false">
+								<child>
+									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableIdentificationResultsTable">
+										<replacement id="dockablesingle ClusterDisplayPanelDockableIdentificationResultsTable"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ClusterDisplayPanelDockableIdentificationResultsTable</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
 								<child>
 									<layout factory="predefined" placeholder="dock.single.DataIntegratorPanelDockableClusterTree">
 										<replacement id="dockablesingle DataIntegratorPanelDockableClusterTree"/>
@@ -397,16 +407,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableIdentificationResultsTable">
-										<replacement id="dockablesingle ClusterDisplayPanelDockableIdentificationResultsTable"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ClusterDisplayPanelDockableIdentificationResultsTable</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>

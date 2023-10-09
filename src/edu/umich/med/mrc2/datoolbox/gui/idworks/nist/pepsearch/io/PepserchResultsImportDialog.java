@@ -287,7 +287,8 @@ public class PepserchResultsImportDialog extends JDialog
 		}
 	}
 
-	private void startResultValidationAndUpload(boolean validateOnly, boolean writeResultsFileWithSpectra) {
+	private void startResultValidationAndUpload(
+			boolean validateOnly, boolean writeResultsFileWithSpectra) {
 		
 		if(!validateOnly) {
 			int res = MessageDialog.showChoiceWithWarningMsg(

@@ -85,7 +85,8 @@ public class ImportMS1DataFromCEFTask extends CEFProcessingTask implements TaskL
 				Collections.singleton(df),
 				featureBundles, 
 				ccd,
-				MsFeatureChromatogramExtractionTarget.MS1PrimaryAdduct);
+				MsFeatureChromatogramExtractionTarget.MS1PrimaryAdduct,
+				false);
 		ceTask.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(ceTask);
 	}
