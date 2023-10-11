@@ -133,7 +133,9 @@ public class CompoundDatabaseUtils {
 				if(mf.contains("[") || mf.contains("D"))
 					mf = mf.replaceAll("\\[13C\\]", "C").replaceAll("\\[15N\\]", "N").replaceAll("D", "H");
 					
-				ps.setString(1, cid.getName().toUpperCase().replace("[ISTD]", "").trim());
+				String cleanName = 
+						cid.getName().toUpperCase().replace("[ISTD]", "").replaceAll("_.+_.+$", "").trim();
+				ps.setString(1, cleanName);
 				ps.setString(2, mf);
 				rs = ps.executeQuery();
 				while (rs.next()) {

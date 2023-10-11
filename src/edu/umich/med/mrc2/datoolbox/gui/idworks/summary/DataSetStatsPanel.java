@@ -32,7 +32,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Objects;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -244,7 +243,7 @@ public class DataSetStatsPanel extends JPanel implements ActionListener, ItemLis
 				
 		totalNumFeaturesLabel.setText(Integer.toString(activeFeatureCollection.getFeatures().size()));
 		long numIdentified = activeFeatureCollection.getFeatures().stream().
-				filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).count();
+				filter(f ->f.getMsFeature().isIdentified()).count();
 		
 		numIdentifiedFeaturesLabel.setText(Long.toString(numIdentified));
 	}
@@ -279,5 +278,4 @@ public class DataSetStatsPanel extends JPanel implements ActionListener, ItemLis
 		// TODO Auto-generated method stub
 
 	}
-
 }

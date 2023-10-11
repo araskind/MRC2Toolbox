@@ -83,9 +83,7 @@ public class LibraryManagerPopupMenu  extends BasicTablePopupMenu {
 		deleteLibraryMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.DELETE_LIBRARY_COMMAND.getName(), listener,
 				MainActionCommands.DELETE_LIBRARY_COMMAND.getName());
-		deleteLibraryMenuItem.setIcon(deleteLibraryIcon);
-		
-		addSeparator();
+		deleteLibraryMenuItem.setIcon(deleteLibraryIcon);	
 		
 		addCopyBlock();
 	}

@@ -192,7 +192,7 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 			initBarChart();
 		
 		 List<ReferenceMsMsLibraryMatch> msmsMatches = activeFeatureCollection.getFeatures().stream().
-			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+			filter(f -> f.getMsFeature().isIdentified()).
 			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
 			map(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch()).
 			collect(Collectors.toList());
@@ -255,7 +255,7 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 		for(MSMSMatchType mt : MSMSMatchType.values()) {
 			
 			double[] scores = activeFeatureCollection.getFeatures().stream().
-					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+					filter(f -> f.getMsFeature().isIdentified()).
 					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
 					filter(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getMatchType().equals(mt)).
 					mapToDouble(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getScoreOfType(item)).	
@@ -294,11 +294,10 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 		renderer.setBarPainter(new StandardXYBarPainter());
 		renderer.setDefaultPaint(Color.BLUE);		
 		double[] scores = activeFeatureCollection.getFeatures().stream().
-			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+			filter(f -> f.getMsFeature().isIdentified()).
 			filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch())).
 			mapToDouble(f -> f.getMsFeature().getPrimaryIdentity().getReferenceMsMsLibraryMatch().getScoreOfType(item)).			
 			toArray();
-
 		
 		SimpleHistogramDataset dataSet = 
 			HistogramUtils.calcHistogram(scores, item.getName(), false);
@@ -311,7 +310,7 @@ public class DataSetStatsPlotPanel extends MasterPlotPanel {
 		pieChartColorList.clear();
 		List<MSFeatureInfoBundle> identified = 
 				activeFeatureCollection.getFeatures().stream().
-					filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
+					filter(f -> f.getMsFeature().isIdentified()).
 					collect(Collectors.toList());
 
 		if (plotType.equals(DataSetSummaryPlotType.PERCENT_IDENTIFIED_ANNOTATED)) {

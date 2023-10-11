@@ -65,15 +65,18 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 	private CompoundIdentity[]matchedIdArray;
 	private CompoundIdentity[]unmatchedIdArray;
 	private Double[]retentionTimesArray;
+	private boolean validateOnly;
 			
 	public PCDLTextLibraryImportTask(
 			File inputLibraryFile, 
 			CompoundLibrary library, 
-			Collection<Adduct> adductList) {
+			Collection<Adduct> adductList,
+			boolean validateOnly) {
 		super();
 		this.inputLibraryFile = inputLibraryFile;
 		this.library = library;
 		this.adductList = adductList;
+		this.validateOnly = validateOnly;
 	}
 
 	@Override
@@ -103,6 +106,11 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 		catch (Exception e) {
 			e.printStackTrace();
 			setStatus(TaskStatus.ERROR);
+			return;
+		}
+		if(validateOnly) {
+			
+			setStatus(TaskStatus.FINISHED);
 			return;
 		}
 		if(getUnmatchedIdList().size() == 0) {
@@ -319,7 +327,7 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 	@Override
 	public Task cloneTask() {
 		return new PCDLTextLibraryImportTask(
-				inputLibraryFile, library, adductList);
+				inputLibraryFile, library, adductList, validateOnly);
 	}
 
 	public Collection<CompoundIdentity> getUnmatchedIdList() {

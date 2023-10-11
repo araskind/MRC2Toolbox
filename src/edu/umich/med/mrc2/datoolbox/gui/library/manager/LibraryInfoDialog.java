@@ -285,6 +285,21 @@ public class LibraryInfoDialog extends JDialog
 		btnBrowse.setEnabled(false);
 	}
 	
+	public void loadLibraryInfoAndDataForImport(CompoundLibrary library, File importFile){
+
+		setTitle("Edit details for library \"" + library.getLibraryName() + "\"");
+		setIconImage(((ImageIcon) editLibInfoIcon).getImage());
+		currentLibrary = library;
+		nameTextField.setText(library.getLibraryName());
+		polarityComboBox.setSelectedItem(library.getPolarity());
+		polarityComboBox.setEnabled(false);
+		textArea.setText(library.getLibraryDescription());
+		inputLibraryFile = importFile;
+		libFileTextField.setText(inputLibraryFile.getAbsolutePath());
+		btnBrowse.setEnabled(false);
+		saveButton.setActionCommand(MainActionCommands.IMPORT_PCDL_COMPOUND_LIBRARY_COMMAND.getName());		
+	}
+	
 	public CompoundLibrary getEditedLibrary(){
 		return currentLibrary;
 	}
