@@ -270,7 +270,7 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 		
 		//	MZ axis
 		edu.umich.med.mrc2.datoolbox.utils.Range massRange = activeMsDataSet.getMassRange();
-		if(massRange.getSize() < 6) {
+		if(massRange.getSize() < 6 && massRange.getSize() > 0) {
 			Range plotMassRange = new Range(
 					massRange.getAverage() - 3.0d * massRange.getSize(),
 					massRange.getAverage() + 3.0d * massRange.getSize());
@@ -280,9 +280,12 @@ public class DockableSpectumPlot extends DefaultSingleCDockable implements Actio
 			((XYPlot) spectrumPlot.getPlot()).getDomainAxis().setAutoRange(true);
 		}
 		//	Intensity axis
+		if(msDataSet.getIntensityRange() == null) {
+			((XYPlot) spectrumPlot.getPlot()).getRangeAxis().setAutoRange(true);
+			return;
+		}
 		XYPlot plot = ((XYPlot) spectrumPlot.getPlot());
 		double border  = plot.getDataRange(plot.getRangeAxis()).getUpperBound() * 1.15;
-		//	double border  = msDataSet.getIntensityRange().getMax() * 1.15;
 		if(msDataSet instanceof HeadToTaleMsDataSet) {
 			
 			((XYPlot) spectrumPlot.getPlot()).getRangeAxis().

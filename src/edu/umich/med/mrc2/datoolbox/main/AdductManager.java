@@ -326,6 +326,15 @@ public class AdductManager {
 			sorted(adductTypeNameSorter).collect(Collectors.toList());
 	}
 	
+	public static Collection<Adduct> getSimplifiedAdductListForPolarity(Polarity pol) {
+		
+		return getAdductList().stream().
+				filter(SimpleAdduct.class::isInstance).map(SimpleAdduct.class::cast).
+				filter(a -> a.getCharge() == pol.getSign()).
+				filter(a -> a.getOligomericState() == 1).
+				sorted(adductTypeNameSorter).collect(Collectors.toList());
+	}
+	
 	public static Adduct getDefaultAdductForPolarity(Polarity pol) {
 		
 		if(pol == null)

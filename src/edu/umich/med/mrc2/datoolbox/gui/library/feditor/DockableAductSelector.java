@@ -22,30 +22,24 @@
 package edu.umich.med.mrc2.datoolbox.gui.library.feditor;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.event.ItemListener;
 import java.util.Collection;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelListener;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.enums.AdductSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableAductSelector extends DefaultSingleCDockable{
 
 	private AdductSelectionTable adductsTable;
-	private JComboBox<Polarity>polarityComboBox;
+	private AdductSelectorControlPanel adductSelectorControlPanel;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("chemModList", 16);
 
@@ -57,39 +51,26 @@ public class DockableAductSelector extends DefaultSingleCDockable{
 		setCloseable(false);
 
 		setLayout(new BorderLayout(0, 0));
+		adductSelectorControlPanel = 
+				new AdductSelectorControlPanel(polarityListener);
+		adductSelectorControlPanel.setPolarity(Polarity.Neutral);
+		add(adductSelectorControlPanel, BorderLayout.NORTH);
 
 		adductsTable = new AdductSelectionTable();
 		adductsTable.getModel().addTableModelListener(adductSelectonListener);
 		add(new JScrollPane(adductsTable), BorderLayout.CENTER);
-
-		JPanel selectorPanel = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) selectorPanel.getLayout();
-		flowLayout.setAlignment(FlowLayout.LEFT);
-		selectorPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		add(selectorPanel, BorderLayout.NORTH);
-
-		JLabel lblPolarity = new JLabel("Polarity");
-		lblPolarity.setFont(new Font("Tahoma", Font.BOLD, 12));
-		selectorPanel.add(lblPolarity);
-
-		polarityComboBox = new JComboBox<Polarity>(
-				new DefaultComboBoxModel<Polarity>(new Polarity[] {
-						Polarity.Positive,
-						Polarity.Neutral,
-						Polarity.Negative}));
-
-		polarityComboBox.setSelectedItem(Polarity.Neutral);
-
-		selectorPanel.add(polarityComboBox);
-		polarityComboBox.addItemListener(polarityListener);
 	}
 
 	public void setPolarity(Polarity polarity) {
-		polarityComboBox.setSelectedItem(polarity);
+		adductSelectorControlPanel.setPolarity(polarity);
 	}
 
-	public void loadFeatureData(LibraryMsFeature activeFeature, Polarity polarity) {
-		adductsTable.loadFeatureData(activeFeature, polarity);
+	public void loadFeatureData(LibraryMsFeature activeFeature) {
+		
+		adductsTable.loadFeatureData(
+				activeFeature, 
+				adductSelectorControlPanel.getPolarity(),
+				adductSelectorControlPanel.getAdductSubset());
 	}
 
 	public synchronized void clearPanel() {
@@ -101,12 +82,19 @@ public class DockableAductSelector extends DefaultSingleCDockable{
 	}
 
 	public Polarity getPolarity() {
-		return (Polarity) polarityComboBox.getSelectedItem();
+		return adductSelectorControlPanel.getPolarity();
 	}
 	
 	public void setAndLockFeaturePolarity(Polarity polarity) {
-		polarityComboBox.setSelectedItem(polarity);
-		polarityComboBox.setEnabled(false);
+		adductSelectorControlPanel.setAndLockFeaturePolarity(polarity);
+	}
+	
+	public void setAdductSubset(AdductSubset subset) {
+		adductSelectorControlPanel.setAdductSubset(subset);
+	}
+
+	public AdductSubset getAdductSubset() {
+		return adductSelectorControlPanel.getAdductSubset();
 	}
 }
 

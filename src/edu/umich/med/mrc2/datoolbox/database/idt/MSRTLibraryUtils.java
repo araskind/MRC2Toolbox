@@ -396,10 +396,11 @@ public class MSRTLibraryUtils {
 		}
 		stmt.setDouble(6, rtMin);
 		stmt.setDouble(7, rtMax);
-		stmt.setString(8, lt.getPrimaryIdentity().getName());
+		stmt.setString(8, lt.getName());
 		stmt.setString(9, lt.getPrimaryIdentity().getConfidenceLevel().getLevelId());
 		stmt.setString(10, lt.getLibraryId());
 		stmt.setString(11, "Y");	//	Enable by default
+		
 		stmt.executeUpdate();
 		inserted = true;
 		stmt.close();
@@ -592,41 +593,53 @@ public class MSRTLibraryUtils {
 		for(TandemMassSpectrum msms : lt.getSpectrum().getTandemSpectra())
 			insertTandemSpectrum(msms, lt, conn);
 	}
-
+	
 	public static void setTargetEnabled(String targetId, boolean isEnabled) throws Exception {
-
+		
 		Connection conn = ConnectionManager.getConnection();
-		String query = "UPDATE MS_LIBRARY_COMPONENT K SET ENABLED = ? WHERE TARGET_ID = ?";
+		setTargetEnabled(targetId, isEnabled, conn);
+		ConnectionManager.releaseConnection(conn);		
+	}
+
+	public static void setTargetEnabled(
+			String targetId, boolean isEnabled, Connection conn) throws Exception {
+		
+		String query = 
+				"UPDATE MS_LIBRARY_COMPONENT K SET ENABLED = ? WHERE TARGET_ID = ?";
 		PreparedStatement stmt = conn.prepareStatement(query);
 
-		String enabled = null;
 		if(isEnabled)
-			enabled = "Y";
-
-		stmt.setString(1, enabled);
+			stmt.setString(1, "Y");
+		else
+			stmt.setNull(1,  java.sql.Types.NULL);
+		
 		stmt.setString(2, targetId);
 		stmt.executeUpdate();
-		stmt.close();
+		stmt.close();		
+	}
+	
+	public static void setTargetQcStatus(String targetId, boolean isQc) throws Exception {
+		
+		Connection conn = ConnectionManager.getConnection();
+		setTargetQcStatus(targetId, isQc, conn);
 		ConnectionManager.releaseConnection(conn);
 	}
 
-	public static void setTargetQcStatus(String targetId, boolean isQc) throws Exception {
-
-		Connection conn = ConnectionManager.getConnection();
+	public static void setTargetQcStatus(
+			String targetId, boolean isQc, Connection conn) throws Exception {
+		
 		String query =
 				"UPDATE MS_LIBRARY_COMPONENT SET IS_QC = ? WHERE TARGET_ID = ?";
 		PreparedStatement stmt = conn.prepareStatement(query);
 
-		String qc = null;
 		if(isQc)
-			qc = "Y";
-
-		stmt.setString(1, qc);
+			stmt.setString(1, "Y");
+		else
+			stmt.setNull(1,  java.sql.Types.NULL);
+		
 		stmt.setString(2, targetId);
 		stmt.executeUpdate();
 		stmt.close();
-
-		ConnectionManager.releaseConnection(conn);
 	}
 
 	public static Collection<LibraryMsFeatureDbBundle> createFeatureBundlesForLibrary(
@@ -657,10 +670,7 @@ public class MSRTLibraryUtils {
 			double rtMax = idrs.getDouble("RT_MAX");
 			feature.setRtRange(new Range(rtMin, rtMax));
 
-			boolean qcStandard = false;
-			if (idrs.getString("IS_QC") != null)
-				qcStandard = true;
-
+			boolean qcStandard = (idrs.getString("IS_QC") != null);
 			CompoundIdentificationConfidence confidenceLevel  =
 					CompoundIdentificationConfidence.getLevelById(idrs.getString("ID_CONFIDENCE"));
 			bundles.add(new LibraryMsFeatureDbBundle(
@@ -700,10 +710,7 @@ public class MSRTLibraryUtils {
 			double rtMax = idrs.getDouble("RT_MAX");
 			feature.setRtRange(new Range(rtMin, rtMax));
 
-			boolean qcStandard = false;
-			if (idrs.getString("IS_QC") != null)
-				qcStandard = true;
-
+			boolean qcStandard = (idrs.getString("IS_QC") != null);
 			CompoundIdentificationConfidence confidenceLevel  =
 					CompoundIdentificationConfidence.getLevelById(idrs.getString("ID_CONFIDENCE"));
 			bundle = new LibraryMsFeatureDbBundle(

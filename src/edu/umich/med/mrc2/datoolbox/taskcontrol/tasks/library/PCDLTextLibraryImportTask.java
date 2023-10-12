@@ -65,6 +65,7 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 	private CompoundIdentity[]matchedIdArray;
 	private CompoundIdentity[]unmatchedIdArray;
 	private Double[]retentionTimesArray;
+	private String[]entryNamesArray;
 	private boolean validateOnly;
 			
 	public PCDLTextLibraryImportTask(
@@ -163,12 +164,12 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 		matchedIdArray = new CompoundIdentity[compoundDataArray.length - 1];
 		unmatchedIdArray = new CompoundIdentity[compoundDataArray.length - 1];
 		retentionTimesArray = new Double[compoundDataArray.length - 1];
+		entryNamesArray = new String[compoundDataArray.length - 1];
 		
 		boolean dataValid = createAndValidateFieldMap(compoundDataArray[0]);
 		if(!dataValid)
 			return false;
-		
-		
+				
 		for(int i=1; i<compoundDataArray.length; i++) {
 			
 			CompoundIdentity identity = null;
@@ -182,6 +183,8 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 				e.printStackTrace();
 			}
 			if(identity != null) {
+				
+				entryNamesArray[i-1] = compoundDataArray[i][dataFieldMap.get(PCDLFields.NAME)];
 				
 				if(dataFieldMap.containsKey(PCDLFields.HMP)) {
 					
@@ -291,6 +294,10 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 
 			newTarget.setNeutralMass(cid.getExactMass());
 			newTarget.setPrimaryIdentity(mid);
+			newTarget.setName(entryNamesArray[i]);
+			if(newTarget.getName().toUpperCase().contains("[ISTD]"))
+				mid.setQcStandard(true);
+			
 			library.addFeature(newTarget);
 		}
 	}
@@ -310,6 +317,15 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 						(LibraryMsFeature) lt, libId, conn);
 			} catch (Exception e) {
 				e.printStackTrace();
+			}
+			if(lt.getName().toUpperCase().contains("[ISTD]")) {
+				
+				try {
+					MSRTLibraryUtils.setTargetQcStatus(lt.getId(), true, conn);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			processed++;
 		}

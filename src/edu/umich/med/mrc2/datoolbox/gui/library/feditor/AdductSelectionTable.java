@@ -28,6 +28,7 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
+import edu.umich.med.mrc2.datoolbox.data.enums.AdductSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
@@ -58,14 +59,38 @@ public class AdductSelectionTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void loadFeatureData(LibraryMsFeature feature, Polarity polarity) {
+	public void loadFeatureData(
+			LibraryMsFeature feature,
+			Polarity polarity, 
+			AdductSubset adductSubset) {
 
-		Collection<Adduct> adducts = 
-				AdductManager.getAdductsForPolarity(polarity);
+		Collection<Adduct> adducts = new ArrayList<Adduct>();
+		if(adductSubset.equals(AdductSubset.COMPLETE_LIST))
+			adducts = AdductManager.getAdductsForPolarity(polarity);
+		
+		if(adductSubset.equals(AdductSubset.SELECTED_ONLY))
+			adducts = feature.getSpectrum().getAdducts();
+		
+		if(adductSubset.equals(AdductSubset.MOST_COMMON))			
+			adducts = AdductManager.getSimplifiedAdductListForPolarity(polarity);
+		
 		thf.setTable(null);
 		model.setTableModelFromAdductListAndFeature(adducts, feature);
 		thf.setTable(this);
 		tca.adjustColumns();
+	}
+	
+	public void setTableModelFromAdductListForPolarityAndSubset(
+			Polarity polarity, AdductSubset adductSubset) {
+		
+		Collection<Adduct> adducts = new ArrayList<Adduct>();
+		if(adductSubset.equals(AdductSubset.COMPLETE_LIST))
+			adducts = AdductManager.getAdductsForPolarity(polarity);
+		
+		if(adductSubset.equals(AdductSubset.MOST_COMMON))			
+			adducts = AdductManager.getSimplifiedAdductListForPolarity(polarity);
+		
+		setTableModelFromAdductList(adducts);
 	}
 	
 	public void setTableModelFromAdductListForPolarity(Polarity polarity) {

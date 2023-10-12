@@ -57,6 +57,7 @@ import javax.swing.border.EtchedBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.enums.AdductSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.AdductSelectionTable;
@@ -93,8 +94,8 @@ public class LibraryInfoDialog extends JDialog
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	private File baseDirectory;
 	private JLabel createDefaultAdductsCheckBox;
-	private JScrollPane scrollPane;
 	private AdductSelectionTable adductsTable;
+	private JComboBox<AdductSubset> adductSubsetComboBox;
 	
 	public LibraryInfoDialog(ActionListener listener) {
 
@@ -110,9 +111,9 @@ public class LibraryInfoDialog extends JDialog
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{0, 151, 166, 0, 0};
-		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 
 		JLabel nameLabel = new JLabel("Name");
@@ -214,13 +215,36 @@ public class LibraryInfoDialog extends JDialog
 		gbc_chckbxNewCheckBox.gridy = 5;
 		panel.add(createDefaultAdductsCheckBox, gbc_chckbxNewCheckBox);
 		
+		JLabel lblNewLabel_2 = new JLabel("Adduct subset ");
+		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_2.gridx = 1;
+		gbc_lblNewLabel_2.gridy = 6;
+		panel.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		
+		adductSubsetComboBox = new JComboBox<AdductSubset>(
+				new DefaultComboBoxModel<AdductSubset>(
+						new AdductSubset[] {
+								AdductSubset.MOST_COMMON, 
+								AdductSubset.COMPLETE_LIST
+						}));
+		adductSubsetComboBox.setSelectedItem(AdductSubset.MOST_COMMON);
+		adductSubsetComboBox.addItemListener(this);
+		GridBagConstraints gbc_comboBox = new GridBagConstraints();
+		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
+		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
+		gbc_comboBox.gridx = 2;
+		gbc_comboBox.gridy = 6;
+		panel.add(adductSubsetComboBox, gbc_comboBox);
+		
 		adductsTable = new AdductSelectionTable();
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.gridwidth = 4;
-		gbc_scrollPane.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 6;
+		gbc_scrollPane.gridy = 7;
 		panel.add(new JScrollPane(adductsTable), gbc_scrollPane);
 
 		cancelButton = new JButton("Cancel");
@@ -228,7 +252,7 @@ public class LibraryInfoDialog extends JDialog
 		gbc_cancelButton.anchor = GridBagConstraints.WEST;
 		gbc_cancelButton.insets = new Insets(0, 0, 0, 5);
 		gbc_cancelButton.gridx = 1;
-		gbc_cancelButton.gridy = 7;
+		gbc_cancelButton.gridy = 8;
 		panel.add(cancelButton, gbc_cancelButton);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
@@ -245,7 +269,7 @@ public class LibraryInfoDialog extends JDialog
 		gbc_saveButton.gridwidth = 2;
 		gbc_saveButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_saveButton.gridx = 2;
-		gbc_saveButton.gridy = 7;
+		gbc_saveButton.gridy = 8;
 		panel.add(saveButton, gbc_saveButton);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
@@ -314,6 +338,10 @@ public class LibraryInfoDialog extends JDialog
 	
 	public Polarity getPolarity() {
 		return (Polarity)polarityComboBox.getSelectedItem();
+	}
+	
+	public AdductSubset getAdductSubset() {
+		return (AdductSubset) adductSubsetComboBox.getSelectedItem();
 	}
 
 	public Collection<String>validateLibraryData(){ 
@@ -423,9 +451,11 @@ public class LibraryInfoDialog extends JDialog
 	public void itemStateChanged(ItemEvent e) {
 
 		if (e.getStateChange() == ItemEvent.SELECTED
-				&& e.getItem() instanceof Polarity) {
+				&& (e.getItem() instanceof Polarity 
+						|| e.getItem() instanceof AdductSubset)) {
 
-			adductsTable.setTableModelFromAdductListForPolarity((Polarity)e.getItem());
+			adductsTable.setTableModelFromAdductListForPolarityAndSubset(
+					getPolarity(), getAdductSubset());
 		}
 	}
 	
