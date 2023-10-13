@@ -115,6 +115,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.CompoundDatabasePanel;
 import edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo.DockableCompoundClasyFireViewer;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.DockableUniversalIdentificationResultsTable;
+import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.IDTrackerIdentificationTableModelListener;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.UniversalIdentificationResultsTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.idtlims.IDTrackerLimsManagerPanel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.clustree.DockableMSMSFeatureClusterTree;
@@ -137,7 +138,6 @@ import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelAssignmentDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.idlevel.IdLevelManagerDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.manid.ManualIdentificationDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms1.DockableReferenceMsOneFeatureTable;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.ms1.IdentificationTableModelListener;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms1.ReferenceMsOneFeaturePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSFeatureTable;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.ms2.DockableMSMSLibraryEntryPropertiesTable;
@@ -353,7 +353,7 @@ public class IDWorkbenchPanel extends DockableMRC2ToolboxPanel
 				"IDWorkbenchPanelDockableUniversalIdentificationResultsTable", "Identifications");
 		identificationsTable.getTable().getSelectionModel().addListSelectionListener(this);
 		identificationsTable.getTable().setIdentificationTableModelListener(
-				new IdentificationTableModelListener(this));
+				new IDTrackerIdentificationTableModelListener(this));
 		
 		idTablePopupMenu = 
 				new UniversalIdentificationResultsTablePopupMenu(this, identificationsTable.getTable());

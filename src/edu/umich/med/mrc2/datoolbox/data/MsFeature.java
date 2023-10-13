@@ -362,7 +362,8 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		if(!identifications.isEmpty()) {
 
 			identifications.stream().forEach(i -> i.setPrimary(false));
-			MsFeatureIdentity[] ids = identifications.toArray(new MsFeatureIdentity[identifications.size()]);
+			MsFeatureIdentity[] ids = 
+					identifications.toArray(new MsFeatureIdentity[identifications.size()]);
 			Arrays.sort(ids, new MsFeatureIdentityComparator(SortProperty.Quality));
 			primaryIdentity = ids[0];
 			primaryIdentity.setPrimary(true);

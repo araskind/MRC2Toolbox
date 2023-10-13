@@ -61,6 +61,10 @@ public class DockableReferenceMsOneFeatureTable extends DefaultSingleCDockable {
 		return featureTable.getSelectedBundle();
 	}
 	
+	public MSFeatureInfoBundle getMSFeatureInfoBundleAtPopup() {
+		return featureTable.getMSFeatureInfoBundleAtPopup();
+	}
+	
 	public Collection<MSFeatureInfoBundle>getBundles(TableRowSubset subset){
 
 		if(subset.equals(TableRowSubset.SELECTED))

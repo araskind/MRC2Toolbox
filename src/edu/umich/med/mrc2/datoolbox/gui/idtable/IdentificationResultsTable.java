@@ -43,7 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentityField;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
-import edu.umich.med.mrc2.datoolbox.gui.idworks.ms1.IdentificationTableModelListener;
+import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.IDTrackerIdentificationTableModelListener;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
@@ -64,7 +64,7 @@ public class IdentificationResultsTable extends BasicTable {
 	private MsFeature parentFeature;
 	private IdTableModelListener modelListener;
 	private MouseMotionAdapter mma;
-	private IdentificationTableModelListener identificationTableModelListener;
+	private IDTrackerIdentificationTableModelListener identificationTableModelListener;
 
 	public IdentificationResultsTable() {
 
@@ -241,7 +241,7 @@ public class IdentificationResultsTable extends BasicTable {
 	 * @param identificationTableModelListener the identificationTableModelListener to set
 	 */
 	public void setIdentificationTableModelListener(
-			IdentificationTableModelListener identificationTableModelListener) {
+			IDTrackerIdentificationTableModelListener identificationTableModelListener) {
 		
 		model.removeTableModelListener(modelListener);
 		this.identificationTableModelListener = identificationTableModelListener;

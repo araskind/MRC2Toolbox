@@ -59,6 +59,9 @@ public class LibSearchLibraryTable extends BasicTable {
 			.setCellRenderer(wordWrapCellRenderer);
 		columnModel.getColumnById(LibSearchLibraryTableModel.DESCRIPTION_COLUMN)
 			.setCellRenderer(wordWrapCellRenderer);
+		
+		columnModel.getColumnById(LibSearchLibraryTableModel.USE_COLUMN).setMaxWidth(50);
+		fixedWidthColumns.add(getColumnIndex(LibSearchLibraryTableModel.USE_COLUMN));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
@@ -68,7 +71,7 @@ public class LibSearchLibraryTable extends BasicTable {
 		thf.setTable(null);
 		model.setTableModelFromLibraryCollection(libraryCollection);
 		thf.setTable(this);
-		tca.adjustColumns();
+		tca.adjustColumnsExcluding(fixedWidthColumns);
 	}
 
 	public List<CompoundLibrary>getSelectedLibraries(){

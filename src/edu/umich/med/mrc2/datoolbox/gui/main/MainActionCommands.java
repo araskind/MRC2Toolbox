@@ -418,10 +418,16 @@ public enum MainActionCommands {
 	SHOW_FEATURES_NOT_ASSIGNED_TO_CLUSTERS_COMMAND(	
 			"Show features NOT assigned to clusters or assigned to single-feature clusters"),
 	SHOW_IMPUTE_DIALOG_COMMAND(	"Data imputation setup"),
-	SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND("Library search setup"),
-	SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND("Databse search setup"),
-	SEARCH_FEATURES_AGAINST_LIBRARIES_COMMAND("Search features against libraries"),
-	SEARCH_FEATURES_AGAINST_DATABASES_COMMAND("Search features against databses"),
+	
+	MS_RT_LIBRARY_SEARCH_SETUP_COMMAND("MS/RT library search setup"),
+	COMPOUND_DATABASE_SEARCH_SETUP_COMMAND("Databse search setup"),
+	
+	MS_RT_LIBRARY_SEARCH_SETUP_FOR_SELECTED_COMMAND("Search selected feature(s) against MS/RT libraries"),
+	COMPOUND_DATABASE_SEARCH_SETUP_FOR_SELECTED_COMMAND("Search selected feature(s) against compound database"),
+		
+	SEARCH_FEATURE_SET_AGAINST_LIBRARIES_COMMAND("Search features against MS/RT libraries"),
+	SEARCH_FEATURE_SET_AGAINST_COMPOUND_DATABASE_COMMAND("Search features against compound database"),
+	
 	SHOW_MISSING_IDENTIFICATIONS_COMMAND("Show missing identifications"),
 	CLEAR_IDENTIFICATIONS_COMMAND("Clear feature identifications"),
 	IMPUTE_DATA_COMMAND("Impute missing data"),

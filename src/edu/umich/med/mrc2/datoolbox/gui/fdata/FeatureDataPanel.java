@@ -25,7 +25,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +51,7 @@ import org.ujmp.core.Matrix;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
+import edu.umich.med.mrc2.datoolbox.data.MSRTSearchParametersObject;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
@@ -65,6 +65,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.FeatureSetProperties;
 import edu.umich.med.mrc2.datoolbox.data.enums.GlobalDefaults;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
+import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
@@ -82,6 +83,7 @@ import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureDataCleanupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.noid.MissingIdentificationsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableIdentificationResultsTable;
+import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.DockableUniversalIdentificationResultsTable;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.MultiFileDataImportDialog;
@@ -139,6 +141,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private DockableMolStructurePanel molStructurePanel;
 	private DockableObjectAnnotationPanel featureAnnotationPanel;
 	private DockableCorrelationDataPanel correlationPanel;
+	private DockableUniversalIdentificationResultsTable identificationsTable;
 	private LibrarySearchSetupDialog librarySearchSetupDialog;
 	private DatabaseSearchSetupDialog databaseSearchSetupDialog;
 	private DataImputationSetupDialog dataImputationSetupDialog;
@@ -220,13 +223,20 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				"FeatureDataPanelDockableMsTableMS1", "MS1 table");
 		idTable = new DockableIdentificationResultsTable(
 				"DockableFeatureDataTableDockableIdentificationResultsTable", "Identifications");
+		
+		identificationsTable = new DockableUniversalIdentificationResultsTable(
+				"FeatureDataPanelUniversalIdentificationResultsTable", "Identifications");
+		identificationsTable.getTable().getSelectionModel().addListSelectionListener(this);
+//		identificationsTable.getTable().setIdentificationTableModelListener(
+//				new IdentificationTableModelListener(this));
+		
 		molStructurePanel = new DockableMolStructurePanel(
 				"FeatureDataPanelDockableMolStructurePanel");
 		featureAnnotationPanel = new DockableObjectAnnotationPanel(
 				"FeatureDataPanelAnnotations", "Annotations", 80);
 
 		grid.add(0, 0, 80, 30, featureDataTable);
-		grid.add(80, 0, 20, 30, molStructurePanel);
+		grid.add(80, 0, 20, 30, identificationsTable, molStructurePanel);
 		grid.add(0, 30, 100, 20, idTable);
 		grid.add(0, 50, 50, 50, dataPlot, featureIntensitiesTable, correlationPanel);
 		grid.add(50, 50, 50, 50, spectrumPlot, spectrumTable, featureAnnotationPanel);
@@ -313,12 +323,12 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		menuActions.addSeparator();
 		
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND.getName(), 
+				MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_COMMAND.getName(),
+				MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_COMMAND.getName(), 
 				searchLibraryIcon, this));
 		menuActions.add(GuiUtils.setupButtonAction(
-				MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND.getName(), 
+				MainActionCommands.COMPOUND_DATABASE_SEARCH_SETUP_COMMAND.getName(),
+				MainActionCommands.COMPOUND_DATABASE_SEARCH_SETUP_COMMAND.getName(), 
 				searchDatabaseIcon, this));
 		menuActions.add(GuiUtils.setupButtonAction(
 				MainActionCommands.SHOW_MISSING_IDENTIFICATIONS_COMMAND.getName(),
@@ -439,23 +449,23 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 			if (command.equals(MainActionCommands.SHOW_FEATURE_MZ_RT_BUBBLE_PLOT.getName()))
 				showBubblePlotDialog();
+			
+			if (command.equals(MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_FOR_SELECTED_COMMAND.getName()))
+				showLibrarySearchSetup(TableRowSubset.SELECTED);
 
-			if (command.equals(MainActionCommands.SEARCH_FEATURE_AGAINST_LIBRARY_COMMAND.getName()))
-				showLibrarySearchSetup(1);
+			if (command.equals(MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_COMMAND.getName()))
+				showLibrarySearchSetup(TableRowSubset.ALL);
+			
+			if (command.equals(MainActionCommands.COMPOUND_DATABASE_SEARCH_SETUP_FOR_SELECTED_COMMAND.getName()))
+				showDatabaseSearchSetup(TableRowSubset.SELECTED);
+				
+			if (command.equals(MainActionCommands.COMPOUND_DATABASE_SEARCH_SETUP_COMMAND.getName()))
+				showDatabaseSearchSetup(TableRowSubset.ALL);
 
-			if (command.equals(MainActionCommands.SEARCH_FEATURE_AGAINST_DATABASE_COMMAND.getName()))
-				searchSelectedFeatureAgainstDatabase();
-
-			if (command.equals(MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND.getName()))
-				showLibrarySearchSetup(10);
-
-			if (command.equals(MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND.getName()))
-				showDatabaseSearchSetup();
-
-			if (command.equals(MainActionCommands.SEARCH_FEATURES_AGAINST_LIBRARIES_COMMAND.getName()))
+			if (command.equals(MainActionCommands.SEARCH_FEATURE_SET_AGAINST_LIBRARIES_COMMAND.getName()))
 				runLibrarySearch();
 
-			if (command.equals(MainActionCommands.SEARCH_FEATURES_AGAINST_DATABASES_COMMAND.getName()))
+			if (command.equals(MainActionCommands.SEARCH_FEATURE_SET_AGAINST_COMPOUND_DATABASE_COMMAND.getName()))
 				runDatabaseSearch();
 
 			if (command.equals(MainActionCommands.SHOW_MISSING_IDENTIFICATIONS_COMMAND.getName()))
@@ -945,103 +955,89 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			MRC2ToolBoxCore.getTaskController().addTask(ciTask);
 		}
 	}
-
-	private void showLibrarySearchSetup(int i) {
-
-		if (librarySearchSetupDialog == null)
-			librarySearchSetupDialog = new LibrarySearchSetupDialog(this);
-
-		if (i == 1) {
-
-			if (!featureDataTable.getSelectedFeatures().isEmpty()) {
-
-				librarySearchSetupDialog.setMultipleFeaturesToSearch(featureDataTable.getSelectedFeatures());
-				librarySearchSetupDialog.updateData();
-				librarySearchSetupDialog.setLocationRelativeTo(this.getContentPane());
-				librarySearchSetupDialog.setVisible(true);
-			} else {
-				MsFeature toSearch = featureDataTable.getFeatureAtPopup();
-
-				if (toSearch != null) {
-					librarySearchSetupDialog.setSingleFeatureToSearch(toSearch);
-					librarySearchSetupDialog.updateData();
-					librarySearchSetupDialog.setLocationRelativeTo(this.getContentPane());
-					librarySearchSetupDialog.setVisible(true);
-				}
-			}
-			return;
+	
+	private Collection<MsFeature> getFeaturesToSearch(TableRowSubset rowSubset){
+		
+		if(rowSubset.equals(TableRowSubset.SELECTED)){
+			
+			if (featureDataTable.getSelectedFeatures().isEmpty())
+				return null;
+			else
+				return featureDataTable.getSelectedFeatures();
 		}
-		if (featureDataTable.hasHiddenRows()) {
-
-			int confirm = MessageDialog.showChoiceMsg(
-					"Some features in the table are hidden by filtering.\n"
-					+ "Only visible features will be submitted to search.\nProceed anyway?",
-					this.getContentPane());
-
-			if (confirm == JOptionPane.YES_OPTION) {
-
-				librarySearchSetupDialog.setMultipleFeaturesToSearch(featureDataTable.getVisibleFeatures());
-				librarySearchSetupDialog.updateData();
-				librarySearchSetupDialog.setLocationRelativeTo(this.getContentPane());
-				librarySearchSetupDialog.setVisible(true);
-			}
-		} else {
-			librarySearchSetupDialog.setMultipleFeaturesToSearch(featureDataTable.getAllFeatures());
-			librarySearchSetupDialog.updateData();
-			librarySearchSetupDialog.setLocationRelativeTo(this.getContentPane());
-			librarySearchSetupDialog.setVisible(true);
+		if(rowSubset.equals(TableRowSubset.ALL)){
+			
+			if (featureDataTable.hasHiddenRows()) {
+			
+				int confirm = MessageDialog.showChooseOrCancelMsg(
+						"Some features in the table are hidden by filtering.\n"
+						+ "Click \"Yes\" to submit only visible features to the search.\n"
+						+ "Click \"No\" to submit all features to the search.\n",
+						this.getContentPane());
+	
+				if (confirm == JOptionPane.YES_OPTION)
+					return featureDataTable.getVisibleFeatures();
+				else if(confirm == JOptionPane.NO_OPTION)
+					return featureDataTable.getAllFeatures();
+				else
+					return null;			
+			} 
+			else {
+				return featureDataTable.getAllFeatures();	
+			}		
 		}
+		return null;
 	}
 
-	private void showDatabaseSearchSetup() {
+	private void showLibrarySearchSetup(TableRowSubset rowSubset) {
+				
+		Collection<MsFeature> featuresToSearch = 
+				getFeaturesToSearch(rowSubset);
+		if(featuresToSearch == null 
+				|| featuresToSearch.isEmpty())
+			return;
 
-		if (databaseSearchSetupDialog == null)
-			databaseSearchSetupDialog = new DatabaseSearchSetupDialog(this);
+		librarySearchSetupDialog = 
+				new LibrarySearchSetupDialog(this, featuresToSearch);
+		librarySearchSetupDialog.setLocationRelativeTo(this.getContentPane());
+		librarySearchSetupDialog.setVisible(true);
+	}
 
-		databaseSearchSetupDialog.updateData();
-		databaseSearchSetupDialog.setLocationRelativeTo(this.getContentPane());
-		databaseSearchSetupDialog.setVisible(true);
+	private void showDatabaseSearchSetup(TableRowSubset rowSubset) {
+		
+		Collection<MsFeature> featuresToSearch = 
+				getFeaturesToSearch(rowSubset);
+		if(featuresToSearch == null 
+				|| featuresToSearch.isEmpty())
+			return;
+
+		//	TODO
+//		if (databaseSearchSetupDialog == null)
+//			databaseSearchSetupDialog = new DatabaseSearchSetupDialog(this);
+//
+//		databaseSearchSetupDialog.updateData();
+//		databaseSearchSetupDialog.setLocationRelativeTo(this.getContentPane());
+//		databaseSearchSetupDialog.setVisible(true);
 	}
 
 	private void runLibrarySearch() {
-
-		featureDataTable.getTable().getSelectionModel().removeListSelectionListener(this);
-		LibrarySearchTask lst = checkLibrarySearchParametes();
-
-		if (lst != null) {
-
-			lst.addTaskListener(this);
-			MRC2ToolBoxCore.getTaskController().addTask(lst);
-			librarySearchSetupDialog.setVisible(false);
-		}
-	}
-
-	private LibrarySearchTask checkLibrarySearchParametes() {
-
-		LibrarySearchTask lst = null;
-		ArrayList<String> errors = new ArrayList<String>();
-		List<CompoundLibrary> libs = librarySearchSetupDialog.getSelectedLibraries();
-		if (libs.isEmpty())
-			errors.add("No library selected.");
-
-		Set<MsFeature> featuresToSearch = librarySearchSetupDialog.getFeaturesToSearch();
-		if (featuresToSearch.isEmpty())
-			errors.add("No features selected to search against the library.");
-
-		if (!errors.isEmpty())
+		
+		Collection<String> errors = 
+				librarySearchSetupDialog.verifySearchParameters();
+		if (!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this.getContentPane());
-		else
-			lst = new LibrarySearchTask(
-					libs, 
-					featuresToSearch, 
-					librarySearchSetupDialog.getMassError(),
-					librarySearchSetupDialog.getMassErrorType(), 
-					librarySearchSetupDialog.getRetentionWindow(),
-					librarySearchSetupDialog.useCustomRtWindows(), 
-					librarySearchSetupDialog.getMaxHits(),
-					librarySearchSetupDialog.ignoreAddudctType(), 
-					librarySearchSetupDialog.relaxMassError());
-		return lst;
+			return;
+		} 
+		//	featureDataTable.getTable().getSelectionModel().removeListSelectionListener(this);
+
+		MSRTSearchParametersObject spo = 
+				librarySearchSetupDialog.getMSRTSearchParameters();
+		Collection<MsFeature> featuresToSearch = 
+				librarySearchSetupDialog.getFeaturesToSearch();
+		LibrarySearchTask lst = new LibrarySearchTask(featuresToSearch, spo);
+		lst.addTaskListener(this);
+		MRC2ToolBoxCore.getTaskController().addTask(lst);
+		librarySearchSetupDialog.dispose();
 	}
 
 	private void runDatabaseSearch() {
@@ -1266,17 +1262,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, features));
 		activeFeatureFilter = FeatureFilter.ALL_FEATURES;
 	}
-
-	private void searchSelectedFeatureAgainstDatabase() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void searchSelectedFeatureAgainstLibrary() {
-		// TODO Auto-generated method stub
-
-	}
-
+	
 	public void setTableModelFromFeatureMap(Map<DataPipeline, Collection<MsFeature>> featureMap) {
 
 		featureDataTable.getTable().getSelectionModel().removeListSelectionListener(this);

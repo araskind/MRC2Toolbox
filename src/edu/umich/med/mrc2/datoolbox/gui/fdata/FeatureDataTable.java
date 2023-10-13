@@ -158,58 +158,50 @@ public class FeatureDataTable extends BasicFeatureTable {
 		tca.adjustColumns();
 	}
 
+
+	@Override
+	public MsFeature getSelectedFeature() {
+		
+		int row = getSelectedRow();
+		if(row == -1)
+			return null;
+
+		return (MsFeature) model.getValueAt(convertRowIndexToModel(row), 
+				model.getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN));
+	}
+	
 	public MsFeature getFeatureAtPopup() {
 
-		MsFeature msf = null;
-
-		if(popupRow > -1) {
-
-			int col = getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN);
-			msf = (MsFeature) getValueAt(popupRow, col);
-		}
-		return msf;
+		if(popupRow == -1)
+			return null;
+		else
+			return (MsFeature) model.getValueAt(convertRowIndexToModel(popupRow) , 
+					model.getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN));
 	}
 
 	public synchronized void clearTable() {
 		model.setRowCount(0);
 	}
-
+	
 	public Collection<MsFeature>getSelectedFeatures() {
 
 		Collection<MsFeature>selected = new ArrayList<MsFeature>();
-		int col = getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN);
-
+		int col = model.getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN);
 		for (int i : getSelectedRows()) {
 
-			MsFeature rowFeature = (MsFeature) getValueAt(i, col);
-			selected.add(rowFeature);
+			selected.add((MsFeature) model.getValueAt(
+					convertRowIndexToModel(i), col));
 		}
-		return selected;
-	}
-
-	@Override
-	public MsFeature getSelectedFeature() {
-
-		MsFeature selected = null;
-		int col = getColumnModel().getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN);
-		int row = getSelectedRow();
-
-		if(row > -1)
-			selected = (MsFeature) model.getValueAt(convertRowIndexToModel(row), col);
-
 		return selected;
 	}
 
 	public Set<MsFeature>getVisibleFeatures(){
 
 		Set<MsFeature> visible = new HashSet<MsFeature>();
-		int col = getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN);
-
-		for (int i=0; i<getRowCount(); i++) {
-
-			MsFeature rowFeature = (MsFeature) getValueAt(i, col);
-			visible.add(rowFeature);
-		}
+		int col = model.getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN);
+		for (int i=0; i<getRowCount(); i++)
+			visible.add((MsFeature) model.getValueAt(convertRowIndexToModel(i), col));
+		
 		return visible;
 	}
 

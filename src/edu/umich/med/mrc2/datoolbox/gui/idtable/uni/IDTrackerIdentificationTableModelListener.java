@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idworks.ms1;
+package edu.umich.med.mrc2.datoolbox.gui.idtable.uni;
 
 import java.util.Collections;
 
@@ -28,19 +28,15 @@ import javax.swing.event.TableModelListener;
 
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureInfoBundle;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.UniversalIdentificationResultsTable;
-import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.UniversalIdentificationResultsTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.idworks.IDWorkbenchPanel;
 
-public class IdentificationTableModelListener  implements TableModelListener {
+public class IDTrackerIdentificationTableModelListener  implements TableModelListener {
 
 	private IDWorkbenchPanel parentPanel;
-	private UniversalIdentificationResultsTable table;
 
-	public IdentificationTableModelListener(IDWorkbenchPanel parentPanel) {
+	public IDTrackerIdentificationTableModelListener(IDWorkbenchPanel parentPanel) {
 		super();
 		this.parentPanel = parentPanel;
-		this.table = table;
 	}
 
 	public void tableChanged(TableModelEvent e) {

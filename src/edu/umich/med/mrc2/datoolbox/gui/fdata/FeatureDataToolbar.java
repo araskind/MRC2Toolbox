@@ -177,12 +177,12 @@ public class FeatureDataToolbar extends CommonToolbar {
 		addSeparator(buttonDimension);
 
 		searchLibraryButton = GuiUtils.addButton(this, null, searchLibraryIcon, commandListener,
-				MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND.getName(), buttonDimension);
+				MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_COMMAND.getName(),
+				MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_COMMAND.getName(), buttonDimension);
 
 		searchDatabaseButton = GuiUtils.addButton(this, null, searchDatabaseIcon, commandListener,
-				MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND.getName(),
-				MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND.getName(), buttonDimension);
+				MainActionCommands.COMPOUND_DATABASE_SEARCH_SETUP_COMMAND.getName(),
+				MainActionCommands.COMPOUND_DATABASE_SEARCH_SETUP_COMMAND.getName(), buttonDimension);
 
 		showMissingIdentificationsButton = GuiUtils.addButton(this, null, showMissingIdentificationsIcon, commandListener,
 				MainActionCommands.SHOW_MISSING_IDENTIFICATIONS_COMMAND.getName(),

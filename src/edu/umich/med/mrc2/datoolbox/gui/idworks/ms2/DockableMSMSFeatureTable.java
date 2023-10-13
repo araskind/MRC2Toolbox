@@ -98,6 +98,10 @@ public class DockableMSMSFeatureTable extends DefaultSingleCDockable {
 	public MSFeatureInfoBundle getSelectedBundle() {
 		return featureTable.getSelectedBundle();
 	}
+	
+	public MSFeatureInfoBundle getMSFeatureInfoBundleAtPopup() {
+		return featureTable.getMSFeatureInfoBundleAtPopup();
+	}
 
 	public void selectBundle(MSFeatureInfoBundle toSelect) {
 		featureTable.selectBundle(toSelect);

@@ -309,6 +309,15 @@ public class MSMSFeatureTable extends BasicTable {
 		return (MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(row),
 				model.getColumnIndex(MSMSFeatureTableModel.MS_FEATURE_COLUMN));
 	}
+	
+	public MSFeatureInfoBundle getMSFeatureInfoBundleAtPopup() {
+
+		if(popupRow == -1)
+			return null;
+		else
+			return (MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(popupRow),
+					model.getColumnIndex(MSMSFeatureTableModel.MS_FEATURE_COLUMN));
+	}
 
 	public Collection<MSFeatureInfoBundle> getMultipleSelectedBundles() {
 

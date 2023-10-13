@@ -217,6 +217,15 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 				model.getColumnIndex(ReferenceMsOneFeatureTableModel.MS_FEATURE_COLUMN));
 	}
 	
+	public MSFeatureInfoBundle getMSFeatureInfoBundleAtPopup() {
+
+		if(popupRow == -1)
+			return null;
+		else
+			return (MSFeatureInfoBundle)model.getValueAt(convertRowIndexToModel(popupRow),
+					model.getColumnIndex(ReferenceMsOneFeatureTableModel.MS_FEATURE_COLUMN));
+	}
+	
 	public Collection<MSFeatureInfoBundle>getMultipleSelectedBundles() {
 
 		Collection<MSFeatureInfoBundle>selected = new ArrayList<MSFeatureInfoBundle>();

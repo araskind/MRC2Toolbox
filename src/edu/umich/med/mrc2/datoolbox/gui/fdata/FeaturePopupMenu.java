@@ -78,13 +78,13 @@ public class FeaturePopupMenu extends BasicTablePopupMenu {
 		this.addSeparator();
 
 		matchFeatureToLibraryMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.SEARCH_FEATURE_AGAINST_LIBRARY_COMMAND.getName(), listener,
-				MainActionCommands.SEARCH_FEATURE_AGAINST_LIBRARY_COMMAND.getName());
+				MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_FOR_SELECTED_COMMAND.getName(), listener,
+				MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_FOR_SELECTED_COMMAND.getName());
 		matchFeatureToLibraryMenuItem.setIcon(searchLibraryIcon);
 
 		searchFeatureAgainstDatabaseMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.SEARCH_FEATURE_AGAINST_DATABASE_COMMAND.getName(), listener,
-				MainActionCommands.SEARCH_FEATURE_AGAINST_DATABASE_COMMAND.getName());
+				MainActionCommands.COMPOUND_DATABASE_SEARCH_SETUP_FOR_SELECTED_COMMAND.getName(), listener,
+				MainActionCommands.COMPOUND_DATABASE_SEARCH_SETUP_FOR_SELECTED_COMMAND.getName());
 		searchFeatureAgainstDatabaseMenuItem.setIcon(searchDatabaseIcon);
 
 		clearFeatureIdentificationsMenuItem = GuiUtils.addMenuItem(this,

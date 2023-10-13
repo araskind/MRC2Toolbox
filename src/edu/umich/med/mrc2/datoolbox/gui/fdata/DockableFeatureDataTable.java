@@ -42,6 +42,7 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.IndeterminateProgressDialog;
@@ -75,6 +76,16 @@ public class DockableFeatureDataTable extends DefaultSingleCDockable{
 
 	public synchronized void clearTable() {
 		featureDataTable.clearTable();
+	}
+	
+	public Collection<MsFeature>getFeaturees(TableRowSubset subset){
+		
+		if(subset.equals(TableRowSubset.SELECTED))
+			return featureDataTable.getSelectedFeatures();
+		else if(subset.equals(TableRowSubset.FILTERED))
+			return featureDataTable.getVisibleFeatures();
+		else
+			return featureDataTable.getAllFeatures();
 	}
 
 	public Collection<MsFeature>getSelectedFeatures() {

@@ -140,16 +140,15 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 		this.libraryId = libraryId;
 	}
 
-	public Range getLibraryMatchRtRange(double rtWindow, boolean useCustomRange) {
+	public Range getLibraryMatchRtRange(
+			double rtWindow, boolean useCustomRange) {
 
-		Range libmatchRange = new Range(0.0d);
-		//if(this.retentionTime > 0.0d);
-			libmatchRange = new Range(retentionTime - rtWindow, retentionTime  + rtWindow);
-
-		if(useCustomRange && this.getRtRange().getSize() > 0.0d)
-			libmatchRange = new Range(rtRange);
-
-		return libmatchRange;
+		if(useCustomRange && rtRange.getSize() > 0.0d)
+			return rtRange;
+		else
+			return new Range(
+					retentionTime - rtWindow, 
+					retentionTime  + rtWindow);
 	}
 	
 	@Override

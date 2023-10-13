@@ -222,10 +222,10 @@ public class FeatureDataPanelMenuBar extends CommonMenuBar {
 		identificationMenu.setIcon(searchLibraryIconSmall);
 		
 		searchLibraryMenuItem = addItem(identificationMenu, 
-				MainActionCommands.SHOW_FEATURES_AGAINST_LIBRARIES_DIALOG_COMMAND, 
+				MainActionCommands.MS_RT_LIBRARY_SEARCH_SETUP_COMMAND, 
 				searchLibraryIcon);
 		searchDatabaseMenuItem = addItem(identificationMenu, 
-				MainActionCommands.SHOW_FEATURES_AGAINST_DATABASES_DIALOG_COMMAND, 
+				MainActionCommands.COMPOUND_DATABASE_SEARCH_SETUP_COMMAND, 
 				searchDatabaseIcon);
 		
 		identificationMenu.addSeparator();

@@ -39,7 +39,6 @@ public class LoadDatabaseLibraryTask extends AbstractTask {
 	private String libraryId;
 
 	public LoadDatabaseLibraryTask(String libraryId) {
-
 		this.libraryId = libraryId;
 	}
 
