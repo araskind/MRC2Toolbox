@@ -37,10 +37,8 @@ import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
-import edu.umich.med.mrc2.datoolbox.data.MassSpectrum;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
-import edu.umich.med.mrc2.datoolbox.data.MsPoint;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundDatabaseEnum;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdentificationConfidence;
 import edu.umich.med.mrc2.datoolbox.data.enums.PCDLFields;
@@ -52,7 +50,6 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.utils.DelimitedTextParser;
-import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class PCDLTextLibraryImportTask extends AbstractTask {
 
@@ -277,23 +274,13 @@ public class PCDLTextLibraryImportTask extends AbstractTask {
 				processed++;
 				continue;
 			}
+			LibraryMsFeature newTarget = 
+					new LibraryMsFeature(cid.getName(), null, retentionTimesArray[i]);
 			MsFeatureIdentity mid = new MsFeatureIdentity(
 					cid, CompoundIdentificationConfidence.ACCURATE_MASS_RT);
-			
-			MassSpectrum spectrum = new MassSpectrum();
-			
-			if(adductList != null && !adductList.isEmpty()) {
-				
-				Map<Adduct, Collection<MsPoint>> adductMap =
-						MsUtils.createIsotopicPatternCollection(cid, adductList);
-				adductMap.entrySet().stream().
-					forEach(e -> spectrum.addSpectrumForAdduct(e.getKey(), e.getValue()));
-			}
-			LibraryMsFeature newTarget = 
-					new LibraryMsFeature(cid.getName(), spectrum, retentionTimesArray[i]);
-
-			newTarget.setNeutralMass(cid.getExactMass());
 			newTarget.setPrimaryIdentity(mid);
+			MSRTLibraryUtils.generateMassSpectrumFromAdducts(newTarget, adductList);
+			newTarget.setNeutralMass(cid.getExactMass());			
 			newTarget.setName(entryNamesArray[i]);
 			if(newTarget.getName().toUpperCase().contains("[ISTD]"))
 				mid.setQcStandard(true);

@@ -98,6 +98,15 @@ public class CompoundLibrary implements Serializable, Comparable<CompoundLibrary
 		this(libraryId, libraryName, libraryDescription, 
 				null, new Date(), new Date(), true, null);
 	}
+	
+	public CompoundLibrary(
+			String libraryName,
+			String libraryDescription,
+			Polarity polarity) {
+		
+		this(null, libraryName, libraryDescription, 
+				null, new Date(), new Date(), true, polarity);
+	}
 
 	public CompoundLibrary(String libraryName) {
 		

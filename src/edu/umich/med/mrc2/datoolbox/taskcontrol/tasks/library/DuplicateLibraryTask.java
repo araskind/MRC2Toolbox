@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.UUID;
 
+import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeature;
 import edu.umich.med.mrc2.datoolbox.data.LibraryMsFeatureDbBundle;
@@ -40,25 +41,27 @@ import edu.umich.med.mrc2.datoolbox.utils.Range;
 public class DuplicateLibraryTask extends AbstractTask {
 
 	private CompoundLibrary sourceLibrary;
-	private String newLibraryName;
-	private boolean clearRt;
-	private boolean clearSpectra;
+	private CompoundLibrary newLibrary;
+	private boolean preserveSpectraOnCopy;
+	private boolean clearRt;	
 	private boolean clearAnnotations;
-
+	private Collection<Adduct> adductList;
 
 	public DuplicateLibraryTask(
 			CompoundLibrary sourceLibrary,
-			String newLibraryName,
-			boolean clearRt,
-			boolean clearAdducts,
-			boolean clearAnnotations) {
+			CompoundLibrary newLibrary,
+			boolean preserveSpectraOnCopy,
+			boolean clearRt,			
+			boolean clearAnnotations,
+			Collection<Adduct> adductList) {
 
 		super();
 		this.sourceLibrary = sourceLibrary;
-		this.newLibraryName = newLibraryName;
-		this.clearRt = clearRt;
-		this.clearSpectra = clearAdducts;
+		this.newLibrary = newLibrary;
+		this.preserveSpectraOnCopy = preserveSpectraOnCopy;
+		this.clearRt = clearRt;		
 		this.clearAnnotations = clearAnnotations;
+		this.adductList = adductList;
 	}
 
 	@Override
@@ -82,21 +85,14 @@ public class DuplicateLibraryTask extends AbstractTask {
 	// Duplicate the library record
 	private String createNewLibrary() {
 				
-		String libraryDescription = sourceLibrary.getLibraryDescription() + "\n Copy";
-
+		String libraryDescription = newLibrary.getLibraryDescription();
 		if(clearRt)
 			libraryDescription += "\nRT cleared";
-
-		if(clearSpectra)
-			libraryDescription += "\nSpectra cleared";
 
 		if(clearAnnotations)
 			libraryDescription += "\nAnnotations cleared";
 		
-		CompoundLibrary newLibrary = 
-				new CompoundLibrary(newLibraryName, libraryDescription);
-		newLibrary.setPolarity(sourceLibrary.getPolarity());
-
+		newLibrary.setLibraryDescription(libraryDescription);
 		String libId = null;
 		try {
 			libId = MSRTLibraryUtils.createNewLibrary(newLibrary);
@@ -119,6 +115,7 @@ public class DuplicateLibraryTask extends AbstractTask {
 
 			LibraryMsFeature newTarget = fBundle.getFeature();
 			if(fBundle.getConmpoundDatabaseAccession() != null) {
+				
 				MSRTLibraryUtils.attachIdentity(
 						newTarget, fBundle.getConmpoundDatabaseAccession(), fBundle.isQcStandard(), conn);
 
@@ -129,29 +126,29 @@ public class DuplicateLibraryTask extends AbstractTask {
 				newTarget.setRetentionTime(0.0d);
 				newTarget.setRtRange(new Range(0.0d));
 			}
-			if(!clearSpectra) {
+			if(!clearAnnotations)
+				MSRTLibraryUtils.attachAnnotations(newTarget, conn);
+
+			if(preserveSpectraOnCopy) {
 
 				MSRTLibraryUtils.attachMassSpectrum(newTarget, conn);
 				MSRTLibraryUtils.attachTandemMassSpectrum(newTarget, conn);
+				
+				//	Generate new unique ID for MSMS data
+				if(newTarget.getSpectrum() != null) {
+
+					for(TandemMassSpectrum msms : newTarget.getSpectrum().getTandemSpectra())
+						msms.setId(DataPrefix.MSMS_SPECTRUM.getName() + UUID.randomUUID().toString());
+				}
+			} else {
+				MSRTLibraryUtils.generateMassSpectrumFromAdducts(newTarget, adductList);								
 			}
-			if(!clearAnnotations) {
-
-				MSRTLibraryUtils.attachAnnotations(newTarget, conn);
-
-				//	Generate new unique ID for annotations
-//				for(ObjectAnnotation annotation : newTarget.getAnnotations())
-//					annotation.setUniqueId(DataPrefix.ANNOTATION.getName() + UUID.randomUUID().toString());
-			}
-			//	Generate new unique ID
-			newTarget.setId(DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString());
-
-			//	Generate new unique ID for MSMS data
-			if(newTarget.getSpectrum() != null) {
-
-				for(TandemMassSpectrum msms : newTarget.getSpectrum().getTandemSpectra())
-					msms.setId(DataPrefix.MSMS_SPECTRUM.getName() + UUID.randomUUID().toString());
-			}
-			MSRTLibraryUtils.loadLibraryFeature(newTarget, libId);
+			newTarget.setId(null);
+			MSRTLibraryUtils.loadLibraryFeature(newTarget, libId, conn);
+			if(fBundle.isQcStandard())
+				MSRTLibraryUtils.setTargetQcStatus(newTarget.getId(), true, conn);
+			
+			newLibrary.addFeature(newTarget);
 			processed++;
 		}
 		ConnectionManager.releaseConnection(conn);
@@ -162,10 +159,11 @@ public class DuplicateLibraryTask extends AbstractTask {
 
 		return new DuplicateLibraryTask(
 				sourceLibrary,
-				newLibraryName,
+				newLibrary,
+				preserveSpectraOnCopy,
 				clearRt,
-				clearSpectra,
-				clearAnnotations);
+				clearAnnotations,
+				adductList);
 	}
 }
 

@@ -385,7 +385,7 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), libraryInfoDialog);
 			return;
 		}	
-		CompoundLibrary selected = libraryInfoDialog.getEditedLibrary();
+		CompoundLibrary selected = libraryInfoDialog.getLibrary();
 		String libraryName = libraryInfoDialog.getLibraryName();
 		String libraryDescription = libraryInfoDialog.getLibraryDescription();
 		selected.setLibraryName(libraryName);

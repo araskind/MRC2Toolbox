@@ -33,7 +33,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompositeAdduct;
@@ -549,14 +548,14 @@ public class MSRTLibraryUtils {
 	public static void loadLibraryFeature(
 			LibraryMsFeature lt, String libId, Connection conn) throws Exception {
 
-		if (lt.getId() == null || lt.getId().isEmpty())
-			lt.setId(DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString());
-		else {
-			if (isTargetInDatabase(lt.getId(), conn))
-				return;
-		}
+//		if (lt.getId() == null || lt.getId().isEmpty())
+//			lt.setId(DataPrefix.MS_LIBRARY_TARGET.getName() + UUID.randomUUID().toString());
+//		else {
+//			if (isTargetInDatabase(lt.getId(), conn))
+//				return;
+//		}
+		
 		lt.setLibraryId(libId);
-
 		if (insertNewLibraryEntry(lt, conn)) {
 
 			if(lt.getSpectrum() != null)
@@ -723,8 +722,7 @@ public class MSRTLibraryUtils {
 
 	public static void attachMassSpectrum(
 			LibraryMsFeature newTarget, Connection conn) throws SQLException {
-
-		MassSpectrum spectrum = new MassSpectrum();
+		
 		String query =
 				"SELECT ADDUCT_ID, COMPOSITE_ADDUCT_ID FROM MS_LIBRARY_COMPONENT_ADDUCT "
 				+ "WHERE TARGET_ID = ?";
@@ -751,10 +749,32 @@ public class MSRTLibraryUtils {
 		}
 		msrs.close();
 		ps.close();
+		
+		generateMassSpectrumFromAdducts(newTarget, adducts);
+//		Map<Adduct, Collection<MsPoint>> adductMap =
+//				MsUtils.createIsotopicPatternCollection(
+//						newTarget.getPrimaryIdentity().getCompoundIdentity(), adducts);
+//
+//		adductMap.entrySet().stream().
+//			forEach(e -> spectrum.addSpectrumForAdduct(e.getKey(), e.getValue()));
+//
+//		newTarget.setSpectrum(spectrum);
+	}
+	
+	public static void generateMassSpectrumFromAdducts(
+			LibraryMsFeature newTarget, Collection<Adduct>adducts) {
+		
+		if(adducts == null || adducts.isEmpty())
+			return;
+		
+		if(newTarget.getPrimaryIdentity() == null 
+				|| newTarget.getPrimaryIdentity().getCompoundIdentity() == null)
+			return;
+		
 		Map<Adduct, Collection<MsPoint>> adductMap =
 				MsUtils.createIsotopicPatternCollection(
 						newTarget.getPrimaryIdentity().getCompoundIdentity(), adducts);
-
+		MassSpectrum spectrum = new MassSpectrum();
 		adductMap.entrySet().stream().
 			forEach(e -> spectrum.addSpectrumForAdduct(e.getKey(), e.getValue()));
 

@@ -199,7 +199,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), libraryInfoDialog);
 			return;
 		}	
-		CompoundLibrary selected = libraryInfoDialog.getEditedLibrary();
+		CompoundLibrary selected = libraryInfoDialog.getLibrary();
 		String libraryName = libraryInfoDialog.getLibraryName();
 		String libraryDescription = libraryInfoDialog.getLibraryDescription();
 		selected.setLibraryName(libraryName);
@@ -255,7 +255,7 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 
 		libraryInfoDialog = new LibraryInfoDialog(this);
 		libraryInfoDialog.setLocationRelativeTo(this);
-		libraryInfoDialog.loadLibraryData(selected);
+		libraryInfoDialog.loadLibraryData(selected, false);
 		libraryInfoDialog.setVisible(true);
 	}
 	
@@ -264,36 +264,41 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		CompoundLibrary selected = getSelectedLibrary();
 		if(selected == null)
 			return;
-
-		duplicateLibraryDialog = new DuplicateLibraryDialog(this, this);
-		duplicateLibraryDialog.loadLibrary(selected);
-		duplicateLibraryDialog.setLocationRelativeTo(this);
-		duplicateLibraryDialog.setVisible(true);
+//
+//		duplicateLibraryDialog = new DuplicateLibraryDialog(this, this);
+//		duplicateLibraryDialog.loadLibrary(selected);
+//		duplicateLibraryDialog.setLocationRelativeTo(this);
+//		duplicateLibraryDialog.setVisible(true);
+		
+		libraryInfoDialog = new LibraryInfoDialog(this);
+		libraryInfoDialog.setLocationRelativeTo(this);
+		libraryInfoDialog.loadLibraryData(selected, true);
+		libraryInfoDialog.setVisible(true);
 	}
 
 	private void duplicateLibrary() {
-
-		CompoundLibrary source = duplicateLibraryDialog.getLibrary();
-		String copyName  = duplicateLibraryDialog.getLibraryName();
-		boolean libNameExists = false;
-		try {
-			libNameExists = MSRTLibraryUtils.libraryNameExists(copyName);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if(libNameExists) {
-			MessageDialog.showErrorMsg("Library named \"" + copyName + " already exists!", this);
+		
+		Collection<String>errors = libraryInfoDialog.validateLibraryData();
+		if(!errors.isEmpty()) {
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), libraryInfoDialog);
 			return;
 		}
+		CompoundLibrary sourceLibrary = libraryInfoDialog.getLibrary();
+		CompoundLibrary destinationLibrary = new CompoundLibrary(
+				libraryInfoDialog.getLibraryName(),
+				libraryInfoDialog.getLibraryDescription(),
+				libraryInfoDialog.getPolarity());
 		DuplicateLibraryTask dlt = new DuplicateLibraryTask(
-				source, copyName,
-				duplicateLibraryDialog.clearRetention(),
-				duplicateLibraryDialog.clearSpectra(),
-				duplicateLibraryDialog.clearAnnotations());
-
+				sourceLibrary, 
+				destinationLibrary,
+				libraryInfoDialog.preserveSpectraOnCopy(),
+				libraryInfoDialog.clearRetention(),
+				libraryInfoDialog.clearAnnotations(),
+				libraryInfoDialog.getSelectedAdducts());
 		dlt.addTaskListener(this);
 		MRC2ToolBoxCore.getTaskController().addTask(dlt);
+		libraryInfoDialog.dispose();
 	}
 
 	public LibraryInfoDialog getLibraryInfoDialog(){
@@ -321,10 +326,8 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 		if (e.getStatus() == TaskStatus.FINISHED) {
 
 			((AbstractTask)e.getSource()).removeTaskListener(this);
-
 			if(e.getSource().getClass().equals(DuplicateLibraryTask.class)) {
 
-				duplicateLibraryDialog.setVisible(false);
 				refreshLibraryListing();
 			}
 		}

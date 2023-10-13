@@ -22,7 +22,9 @@
 package edu.umich.med.mrc2.datoolbox.gui.library.manager;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -34,12 +36,14 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -75,12 +79,14 @@ public class LibraryInfoDialog extends JDialog
 	 */
 	private static final long serialVersionUID = 7917036676205745402L;
 	private JTextField nameTextField;
-	private JTextArea textArea;
+	private JTextArea libraryDescriptionTextArea;
 	private JButton cancelButton, saveButton;
 	private CompoundLibrary currentLibrary;
 
 	private static final Icon newLibraryIcon = GuiUtils.getIcon("newLibrary", 32);
 	private static final Icon editLibInfoIcon = GuiUtils.getIcon("editLibrary", 32);
+	private static final Icon duplicateLibraryIcon = GuiUtils.getIcon("duplicateLibrary", 32);
+
 	
 	private JComboBox polarityComboBox;
 	private JTextField libFileTextField;
@@ -93,9 +99,16 @@ public class LibraryInfoDialog extends JDialog
 	public static final String PREFS_NODE = "edu.umich.med.mrc2.datoolbox.LibraryInfoDialog"; 
 	public static final String BASE_DIRECTORY = "BASE_DIRECTORY";
 	private File baseDirectory;
-	private JLabel createDefaultAdductsCheckBox;
+	private JLabel createDefaultAdductsLabel;
 	private AdductSelectionTable adductsTable;
 	private JComboBox<AdductSubset> adductSubsetComboBox;
+	private JCheckBox clearRtCheckBox;
+	private JCheckBox clearAnnotationsCheckBox;
+	private JLabel neutralPolarityWarningLabel;
+	private JCheckBox preserveSpectraOnCopyCheckBox;
+	private JLabel adductSubsetLabel;
+	private JScrollPane adductScroll;
+	private JLabel idfLabel;
 	
 	public LibraryInfoDialog(ActionListener listener) {
 
@@ -111,9 +124,9 @@ public class LibraryInfoDialog extends JDialog
 		getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{0, 151, 166, 0, 0};
-		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel.columnWeights = new double[]{0.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 
 		JLabel nameLabel = new JLabel("Name");
@@ -153,6 +166,18 @@ public class LibraryInfoDialog extends JDialog
 		gbc_polarityComboBox.gridx = 1;
 		gbc_polarityComboBox.gridy = 1;
 		panel.add(polarityComboBox, gbc_polarityComboBox);
+		
+		neutralPolarityWarningLabel = new JLabel("Create template library without spectra");
+		neutralPolarityWarningLabel.setForeground(Color.RED);
+		neutralPolarityWarningLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		GridBagConstraints gbc_neutralPolarityWarningLabel = new GridBagConstraints();
+		gbc_neutralPolarityWarningLabel.anchor = GridBagConstraints.WEST;
+		gbc_neutralPolarityWarningLabel.gridwidth = 2;
+		gbc_neutralPolarityWarningLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_neutralPolarityWarningLabel.gridx = 2;
+		gbc_neutralPolarityWarningLabel.gridy = 1;
+		panel.add(neutralPolarityWarningLabel, gbc_neutralPolarityWarningLabel);
+		neutralPolarityWarningLabel.setVisible(false);
 
 		JLabel lblDescription = new JLabel("Description");
 		GridBagConstraints gbc_lblDescription = new GridBagConstraints();
@@ -162,27 +187,27 @@ public class LibraryInfoDialog extends JDialog
 		gbc_lblDescription.gridy = 2;
 		panel.add(lblDescription, gbc_lblDescription);
 
-		textArea = new JTextArea();
-		textArea.setRows(3);
-		textArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		textArea.setLineWrap(true);
-		textArea.setWrapStyleWord(true);
+		libraryDescriptionTextArea = new JTextArea();
+		libraryDescriptionTextArea.setRows(3);
+		libraryDescriptionTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		libraryDescriptionTextArea.setLineWrap(true);
+		libraryDescriptionTextArea.setWrapStyleWord(true);
 		GridBagConstraints gbc_textArea = new GridBagConstraints();
 		gbc_textArea.gridwidth = 3;
 		gbc_textArea.insets = new Insets(0, 0, 5, 0);
 		gbc_textArea.fill = GridBagConstraints.BOTH;
 		gbc_textArea.gridx = 1;
 		gbc_textArea.gridy = 2;
-		panel.add(textArea, gbc_textArea);
+		panel.add(libraryDescriptionTextArea, gbc_textArea);
 		
-		JLabel lblNewLabel_1 = new JLabel("Import data from file:");
+		idfLabel = new JLabel("Import data from file:");
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
 		gbc_lblNewLabel_1.anchor = GridBagConstraints.WEST;
 		gbc_lblNewLabel_1.gridwidth = 2;
 		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_1.gridx = 0;
 		gbc_lblNewLabel_1.gridy = 3;
-		panel.add(lblNewLabel_1, gbc_lblNewLabel_1);
+		panel.add(idfLabel, gbc_lblNewLabel_1);
 		
 		libFileTextField = new JTextField();
 		libFileTextField.setEditable(false);
@@ -205,23 +230,35 @@ public class LibraryInfoDialog extends JDialog
 		gbc_btnNewButton.gridy = 4;
 		panel.add(btnBrowse, gbc_btnNewButton);
 		
-		createDefaultAdductsCheckBox = 
-				new JLabel("Create selected adducts during import:");
-		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
-		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_chckbxNewCheckBox.gridwidth = 2;
-		gbc_chckbxNewCheckBox.insets = new Insets(0, 0, 5, 5);
-		gbc_chckbxNewCheckBox.gridx = 0;
-		gbc_chckbxNewCheckBox.gridy = 5;
-		panel.add(createDefaultAdductsCheckBox, gbc_chckbxNewCheckBox);
+		preserveSpectraOnCopyCheckBox = 
+				new JCheckBox("Preserve spectra when creating library copy");
+		GridBagConstraints gbc_preserveSpectraOnCopyCheckBox = new GridBagConstraints();
+		gbc_preserveSpectraOnCopyCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_preserveSpectraOnCopyCheckBox.gridwidth = 3;
+		gbc_preserveSpectraOnCopyCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_preserveSpectraOnCopyCheckBox.gridx = 0;
+		gbc_preserveSpectraOnCopyCheckBox.gridy = 5;
+		panel.add(preserveSpectraOnCopyCheckBox, gbc_preserveSpectraOnCopyCheckBox);
+		preserveSpectraOnCopyCheckBox.setVisible(false);
+		preserveSpectraOnCopyCheckBox.addItemListener(this);
 		
-		JLabel lblNewLabel_2 = new JLabel("Adduct subset ");
+		createDefaultAdductsLabel = 
+				new JLabel("Create selected adducts during import / copy:");
+		GridBagConstraints gbc_createDefaultAdductsCheckBox = new GridBagConstraints();
+		gbc_createDefaultAdductsCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_createDefaultAdductsCheckBox.gridwidth = 3;
+		gbc_createDefaultAdductsCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_createDefaultAdductsCheckBox.gridx = 0;
+		gbc_createDefaultAdductsCheckBox.gridy = 6;
+		panel.add(createDefaultAdductsLabel, gbc_createDefaultAdductsCheckBox);
+		
+		adductSubsetLabel = new JLabel("Adduct subset ");
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
 		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel_2.gridx = 1;
-		gbc_lblNewLabel_2.gridy = 6;
-		panel.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		gbc_lblNewLabel_2.gridy = 7;
+		panel.add(adductSubsetLabel, gbc_lblNewLabel_2);
 		
 		adductSubsetComboBox = new JComboBox<AdductSubset>(
 				new DefaultComboBoxModel<AdductSubset>(
@@ -235,24 +272,43 @@ public class LibraryInfoDialog extends JDialog
 		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBox.gridx = 2;
-		gbc_comboBox.gridy = 6;
+		gbc_comboBox.gridy = 7;
 		panel.add(adductSubsetComboBox, gbc_comboBox);
 		
 		adductsTable = new AdductSelectionTable();
+		adductScroll = new JScrollPane(adductsTable);
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.gridwidth = 4;
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 7;
-		panel.add(new JScrollPane(adductsTable), gbc_scrollPane);
+		gbc_scrollPane.gridy = 8;
+		panel.add(adductScroll, gbc_scrollPane);
+		
+		clearRtCheckBox = new JCheckBox("Clear retention times");
+		GridBagConstraints gbc_clearRtCheckBox = new GridBagConstraints();
+		gbc_clearRtCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_clearRtCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_clearRtCheckBox.gridx = 1;
+		gbc_clearRtCheckBox.gridy = 9;
+		panel.add(clearRtCheckBox, gbc_clearRtCheckBox);
+		clearRtCheckBox.setVisible(false);
+		
+		clearAnnotationsCheckBox = new JCheckBox("Clear annotations");
+		GridBagConstraints gbc_clearAnnotationsCheckBox = new GridBagConstraints();
+		gbc_clearAnnotationsCheckBox.anchor = GridBagConstraints.WEST;
+		gbc_clearAnnotationsCheckBox.insets = new Insets(0, 0, 5, 5);
+		gbc_clearAnnotationsCheckBox.gridx = 2;
+		gbc_clearAnnotationsCheckBox.gridy = 9;
+		panel.add(clearAnnotationsCheckBox, gbc_clearAnnotationsCheckBox);
+		clearAnnotationsCheckBox.setVisible(false);
 
 		cancelButton = new JButton("Cancel");
 		GridBagConstraints gbc_cancelButton = new GridBagConstraints();
 		gbc_cancelButton.anchor = GridBagConstraints.WEST;
 		gbc_cancelButton.insets = new Insets(0, 0, 0, 5);
 		gbc_cancelButton.gridx = 1;
-		gbc_cancelButton.gridy = 8;
+		gbc_cancelButton.gridy = 10;
 		panel.add(cancelButton, gbc_cancelButton);
 
 		KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
@@ -269,7 +325,7 @@ public class LibraryInfoDialog extends JDialog
 		gbc_saveButton.gridwidth = 2;
 		gbc_saveButton.fill = GridBagConstraints.HORIZONTAL;
 		gbc_saveButton.gridx = 2;
-		gbc_saveButton.gridy = 8;
+		gbc_saveButton.gridy = 10;
 		panel.add(saveButton, gbc_saveButton);
 
 		JRootPane rootPane = SwingUtilities.getRootPane(saveButton);
@@ -292,11 +348,14 @@ public class LibraryInfoDialog extends JDialog
 		setIconImage(((ImageIcon) newLibraryIcon).getImage());
 		currentLibrary = new CompoundLibrary("New library");
 		nameTextField.setText(currentLibrary.getLibraryName());
-		textArea.setText(currentLibrary.getLibraryDescription());
+		libraryDescriptionTextArea.setText(currentLibrary.getLibraryDescription());
 		saveButton.setActionCommand(MainActionCommands.CREATE_NEW_LIBRARY_COMMAND.getName());
 	}
 
-	public void loadLibraryData(CompoundLibrary library){
+	@SuppressWarnings("unchecked")
+	public void loadLibraryData(
+			CompoundLibrary library, 
+			boolean configureForDuplication){
 
 		setTitle("Edit details for library \"" + library.getLibraryName() + "\"");
 		setIconImage(((ImageIcon) editLibInfoIcon).getImage());
@@ -304,9 +363,38 @@ public class LibraryInfoDialog extends JDialog
 		nameTextField.setText(library.getLibraryName());
 		polarityComboBox.setSelectedItem(library.getPolarity());
 		polarityComboBox.setEnabled(false);
-		textArea.setText(library.getLibraryDescription());
+		libraryDescriptionTextArea.setText(library.getLibraryDescription());
 		saveButton.setActionCommand(MainActionCommands.EDIT_MS_LIBRARY_INFO_COMMAND.getName());
 		btnBrowse.setEnabled(false);
+		if(configureForDuplication) {
+
+			setTitle("Duplicate library \"" + library.getLibraryName() + "\"");
+			setIconImage(((ImageIcon) duplicateLibraryIcon).getImage());
+			
+			nameTextField.setText(library.getLibraryName() + 
+					" Copy-" + MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()));
+			libraryDescriptionTextArea.setText(library.getLibraryDescription() + 
+					"\nCopy-" + MRC2ToolBoxConfiguration.getFileTimeStampFormat().format(new Date()));
+			
+			clearRtCheckBox.setVisible(true);			
+			clearAnnotationsCheckBox.setVisible(true);
+			preserveSpectraOnCopyCheckBox.setVisible(true);
+			
+			((DefaultComboBoxModel<Polarity>)polarityComboBox.getModel()).addElement(Polarity.Neutral);
+			polarityComboBox.setEnabled(true);
+			polarityComboBox.setSelectedItem(library.getPolarity());
+			
+			boolean isNeutral = library.getPolarity().equals(Polarity.Neutral);
+			neutralPolarityWarningLabel.setVisible(isNeutral);
+			preserveSpectraOnCopyCheckBox.setVisible(!isNeutral);
+			preserveSpectraOnCopyCheckBox.setSelected(!isNeutral);
+			toggleFileImportBlock(false);
+			saveButton.setActionCommand(MainActionCommands.DUPLICATE_LIBRARY_COMMAND.getName());
+		}
+		else {
+			toggleAdductSelector(false);
+			toggleFileImportBlock(false);
+		}
 	}
 	
 	public void loadLibraryInfoAndDataForImport(CompoundLibrary library, File importFile){
@@ -317,19 +405,20 @@ public class LibraryInfoDialog extends JDialog
 		nameTextField.setText(library.getLibraryName());
 		polarityComboBox.setSelectedItem(library.getPolarity());
 		polarityComboBox.setEnabled(false);
-		textArea.setText(library.getLibraryDescription());
+		preserveSpectraOnCopyCheckBox.setVisible(false);
+		libraryDescriptionTextArea.setText(library.getLibraryDescription());
 		inputLibraryFile = importFile;
 		libFileTextField.setText(inputLibraryFile.getAbsolutePath());
 		btnBrowse.setEnabled(false);
 		saveButton.setActionCommand(MainActionCommands.IMPORT_PCDL_COMPOUND_LIBRARY_COMMAND.getName());		
 	}
 	
-	public CompoundLibrary getEditedLibrary(){
+	public CompoundLibrary getLibrary(){
 		return currentLibrary;
 	}
 
 	public String getLibraryDescription(){
-		return textArea.getText().trim();
+		return libraryDescriptionTextArea.getText().trim();
 	}
 
 	public String getLibraryName(){
@@ -369,22 +458,11 @@ public class LibraryInfoDialog extends JDialog
 				
 			}
 		}
-		if(getPolarity() == null)
+		if(!saveButton.getActionCommand().equals(
+				MainActionCommands.DUPLICATE_LIBRARY_COMMAND.getName())				
+				&& getPolarity() == null) {
 			errors.add("Library polarity must be specified");
-		
-		//	Default adducts for text library
-//		if(inputLibraryFile != null) {
-//			
-//			if(inputLibraryFile.getName().toLowerCase().endsWith(".txt") 
-//					|| inputLibraryFile.getName().toLowerCase().endsWith(".tsv")) {
-//				
-//				if(createDefaultAdductsCheckBox.isSelected() 
-//						&& adductsTable.getSelectedAdducts().isEmpty()) {
-//					errors.add("\"Create default adducts during import\" option is enabled,\n"
-//							+ "but no adducts selected. Please select the adducts from the table.");
-//				}
-//			}
-//		}
+		}
 		return errors;
 	}
 
@@ -420,7 +498,7 @@ public class LibraryInfoDialog extends JDialog
 				adductsTable.setEnabled(false);
 			}
 			else {
-				createDefaultAdductsCheckBox.setEnabled(true);
+				createDefaultAdductsLabel.setEnabled(true);
 				adductsTable.setEnabled(true);
 			}
 			savePreferences();
@@ -449,14 +527,51 @@ public class LibraryInfoDialog extends JDialog
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-
-		if (e.getStateChange() == ItemEvent.SELECTED
-				&& (e.getItem() instanceof Polarity 
-						|| e.getItem() instanceof AdductSubset)) {
-
-			adductsTable.setTableModelFromAdductListForPolarityAndSubset(
-					getPolarity(), getAdductSubset());
+		
+		if(e.getSource().equals(preserveSpectraOnCopyCheckBox)) {
+			
+			toggleAdductSelector(!preserveSpectraOnCopyCheckBox.isSelected());
+			return;
 		}
+		if (e.getStateChange() == ItemEvent.SELECTED) {
+			
+			if((e.getItem() instanceof Polarity 
+					|| e.getItem() instanceof AdductSubset)) {
+
+				adductsTable.setTableModelFromAdductListForPolarityAndSubset(
+						getPolarity(), getAdductSubset());
+			}
+			if(e.getItem() instanceof Polarity) {
+								
+				boolean isNeutral = getPolarity().equals(Polarity.Neutral);
+				if(preserveSpectraOnCopyCheckBox.isSelected() 
+						&& (isNeutral || !getPolarity().equals(currentLibrary.getPolarity())))
+					preserveSpectraOnCopyCheckBox.setSelected(false);
+				
+				if(isNeutral || !getPolarity().equals(currentLibrary.getPolarity()))
+					preserveSpectraOnCopyCheckBox.setEnabled(false);
+				else
+					preserveSpectraOnCopyCheckBox.setEnabled(true);
+				
+				toggleAdductSelector(!isNeutral);
+				neutralPolarityWarningLabel.setVisible(isNeutral);
+			}			
+		}
+	}
+	
+	private void toggleAdductSelector(boolean visible) {
+		
+		adductSubsetComboBox.setVisible(visible);
+		adductScroll.setVisible(visible);
+		createDefaultAdductsLabel.setVisible(visible);
+		adductSubsetLabel.setVisible(visible);		
+	}
+	
+	private void toggleFileImportBlock(boolean visible) {
+		
+		idfLabel.setVisible(visible);		
+		libFileTextField.setVisible(visible);
+		btnBrowse.setVisible(visible);
 	}
 	
 	public Collection<Adduct>getSelectedAdducts(){
@@ -467,9 +582,23 @@ public class LibraryInfoDialog extends JDialog
 			return adductsTable.getSelectedAdducts();
 	}
 	
-//	public boolean createDefaultAdducts() {
-//		return createDefaultAdductsCheckBox.isSelected();
-//	}
+	public boolean clearRetention() {
+		return clearRtCheckBox.isSelected();
+	}
+	
+	public boolean clearAnnotations() {
+		return clearAnnotationsCheckBox.isSelected();
+	}
+	
+	public boolean preserveSpectraOnCopy() {
+		
+		if(preserveSpectraOnCopyCheckBox.isVisible() 
+				&& preserveSpectraOnCopyCheckBox.isEnabled())		
+			return preserveSpectraOnCopyCheckBox.isSelected();
+		else
+			return false;
+	}
+	
 }
 
 
