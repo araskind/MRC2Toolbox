@@ -28,6 +28,8 @@ import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.JScrollPane;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 
 import bibliothek.gui.dock.action.DefaultDockActionSource;
 import bibliothek.gui.dock.action.LocationHint;
@@ -38,6 +40,7 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.CompoundIdSource;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.gui.tables.XTableColumnModel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableUniversalIdentificationResultsTable 
@@ -46,14 +49,20 @@ public class DockableUniversalIdentificationResultsTable
 	private static final Icon componentIcon = GuiUtils.getIcon("text", 16);	
 	private static final Icon multipleIdsIcon = GuiUtils.getIcon("multipleIds", 16);
 	private static final Icon uniqueIdsIcon = GuiUtils.getIcon("checkboxFull", 16);
+	
+	private static final Icon msrtIcon = GuiUtils.getIcon("feature", 16);
+	private static final Icon msmsIcon = GuiUtils.getIcon("msTwo", 16);
 
 	private UniversalIdentificationResultsTable idTable;
 	
 	private Preferences preferences;
-	public static final String PREFS_NODE = "edu.umich.med.mrc2.DockableUniversalIdentificationResultsTable";
-	public static final String SHOW_UNIQUE_IDENTITY_LIBRARY_HITS = "SHOW_UNIQUE_IDENTITY_LIBRARY_HITS";
+	public static final String PREFS_NODE = 
+			"edu.umich.med.mrc2.DockableUniversalIdentificationResultsTable";
+	public static final String SHOW_UNIQUE_IDENTITY_LIBRARY_HITS = 
+			"SHOW_UNIQUE_IDENTITY_LIBRARY_HITS";
 	private boolean showUniqueIdsOnly;	
 	private SimpleButtonAction toggelUniqueIdsButton;
+	private SimpleButtonAction toggelColumnSubsetButton;
 	private Collection<CompoundIdSource>sorcesToExclude;
 
 	public DockableUniversalIdentificationResultsTable(String id, String title) {
@@ -86,6 +95,13 @@ public class DockableUniversalIdentificationResultsTable
 					multipleIdsIcon, this);
 		}
 		actions.add(toggelUniqueIdsButton);
+		
+		toggelColumnSubsetButton = GuiUtils.setupButtonAction(
+				MainActionCommands.SHOW_MS_RT_COLUMN_SUBSET.getName(), 
+				MainActionCommands.SHOW_MS_RT_COLUMN_SUBSET.getName(), 
+				msmsIcon, this);
+		actions.add(toggelColumnSubsetButton);
+		
 		actions.addSeparator();
 		intern().setActionOffers(actions);
 	}
@@ -93,6 +109,7 @@ public class DockableUniversalIdentificationResultsTable
 	public UniversalIdentificationResultsTable getTable() {
 		return idTable;
 	}
+	
 	public MsFeatureIdentity getFeatureIdAtPopup() {
 		return idTable.getFeatureIdAtPopup();
 	}
@@ -146,8 +163,49 @@ public class DockableUniversalIdentificationResultsTable
 	
 		if(command.equals(MainActionCommands.SHOW_ONLY_BEST_LIB_HIT_FOR_COMPOUND.getName()))
 			switchUniqueIdPrferences(true);
+		
+		if(command.equals(MainActionCommands.SHOW_MS_RT_COLUMN_SUBSET.getName()))
+			showMSRTColumnSubset();
+		
+		if(command.equals(MainActionCommands.SHOW_MSMS_COLUMN_SUBSET.getName()))
+			showMSMSColumnSubset();
 	}
 	
+	public void showMSRTColumnSubset() {
+		
+		showColumnList(UniversalIdentificationResultsTableModel.msRtColumnList);
+		
+		toggelColumnSubsetButton.setText(
+				MainActionCommands.SHOW_MS_RT_COLUMN_SUBSET.getName());
+		toggelColumnSubsetButton.setCommand(
+				MainActionCommands.SHOW_MSMS_COLUMN_SUBSET.getName());
+		toggelColumnSubsetButton.setIcon(msrtIcon);
+	}
+	
+	public void showMSMSColumnSubset() {
+		
+		showColumnList(UniversalIdentificationResultsTableModel.msmsColumnList);
+		
+		toggelColumnSubsetButton.setText(
+				MainActionCommands.SHOW_MSMS_COLUMN_SUBSET.getName());
+		toggelColumnSubsetButton.setCommand(
+				MainActionCommands.SHOW_MS_RT_COLUMN_SUBSET.getName());
+		toggelColumnSubsetButton.setIcon(msmsIcon);
+	}
+	
+	private void showColumnList(Collection<String> msmscolumnlist) {
+
+		XTableColumnModel colModel = 
+				(XTableColumnModel)idTable.getColumnModel();
+		TableModel model = idTable.getModel();
+		for(int i=0; i<model.getColumnCount(); i++) {
+			
+			TableColumn column = colModel.getColumnByModelIndex(i);
+			colModel.setColumnVisible(
+					column, msmscolumnlist.contains(column.getIdentifier()));
+		}
+	}
+
 	private void switchUniqueIdPrferences(boolean uniqueOnly) {
 		
 		//	TODO reload table data
@@ -176,6 +234,8 @@ public class DockableUniversalIdentificationResultsTable
 		else
 			setModelFromMsFeature(idTable.getParentFeature(), sorcesToExclude);
 	}
+	
+	
 	
 	@Override
 	public void loadPreferences(Preferences prefs) {

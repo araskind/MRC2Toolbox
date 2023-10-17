@@ -24,13 +24,15 @@ package edu.umich.med.mrc2.datoolbox.gui.library;
 import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class LibraryFeaturePopupMenu extends JPopupMenu {
+public class LibraryFeaturePopupMenu extends BasicTablePopupMenu {
 
 	/**
 	 *
@@ -46,7 +48,11 @@ public class LibraryFeaturePopupMenu extends JPopupMenu {
 	private static final Icon copyFormulaIcon = GuiUtils.getIcon("copyFormula", 24);
 	private static final Icon copyAccessionIcon = GuiUtils.getIcon("copyId", 24);
 	private static final Icon copyNameIcon = GuiUtils.getIcon("copyName", 24);
+	private static final Icon copyFeatureIcon = GuiUtils.getIcon("copyScan", 24);
 
+	private JMenu copyPropertiesMenu;
+	private JMenu copyFeaturePropertiesMenu;
+	
 	@SuppressWarnings("unused")
 	private JMenuItem
 		newFeatureMenuItem,
@@ -57,60 +63,100 @@ public class LibraryFeaturePopupMenu extends JPopupMenu {
 		searchFeatureMassAgainstDatabaseMenuItem,
 		copyFormulaMenuItem,
 		copyAccessionMenuItem,
-		copyNameMenuItem;
+		copyNameMenuItem,
+		copyInChiKeyMenuItem,
+		copySmilesMenuItem;
 
-	public LibraryFeaturePopupMenu(ActionListener listener) {
+	public LibraryFeaturePopupMenu(
+			ActionListener mainActionListener,
+			BasicTable copyListener) {
 
-		super();
+		super(mainActionListener, copyListener);
 
 		newFeatureMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.NEW_LIBRARY_FEATURE_DIAOG_COMMAND.getName(), listener,
+				MainActionCommands.NEW_LIBRARY_FEATURE_DIAOG_COMMAND.getName(), mainActionListener,
 				MainActionCommands.NEW_LIBRARY_FEATURE_DIAOG_COMMAND.getName(), 0, false,
 				newFeatureIcon);
 		newFeatureMenuItem.setEnabled(false);
 
 		duplicateFeatureMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.DUPLICATE_LIBRARY_FEATURE_COMMAND.getName(), listener,
+				MainActionCommands.DUPLICATE_LIBRARY_FEATURE_COMMAND.getName(), mainActionListener,
 				MainActionCommands.DUPLICATE_LIBRARY_FEATURE_COMMAND.getName(), 0, false,
 				duplicateIcon);
 
 		deleteFeatureMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.DELETE_LIBRARY_FEATURE_COMMAND.getName(), listener,
+				MainActionCommands.DELETE_LIBRARY_FEATURE_COMMAND.getName(), mainActionListener,
 				MainActionCommands.DELETE_LIBRARY_FEATURE_COMMAND.getName(), 0, false,
 				deleteFeatureIcon);
 
 		this.addSeparator();
 
-		copyFormulaMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName(), listener,
-				MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName());
-		copyFormulaMenuItem.setIcon(copyFormulaIcon);
+		copyPropertiesMenu = new JMenu("Copy compound property");
+		copyPropertiesMenu.setIcon(copyAccessionIcon);
 
-		copyAccessionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName(), listener,
+		copyAccessionMenuItem = GuiUtils.addMenuItem(copyPropertiesMenu,
+				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName(), mainActionListener,
 				MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName());
 		copyAccessionMenuItem.setIcon(copyAccessionIcon);
 
-		copyNameMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName(), listener,
+		copyNameMenuItem = GuiUtils.addMenuItem(copyPropertiesMenu,
+				MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName(), mainActionListener,
 				MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName());
 		copyNameMenuItem.setIcon(copyNameIcon);
+		
+		copyFormulaMenuItem = GuiUtils.addMenuItem(copyPropertiesMenu,
+				MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName());
+		copyFormulaMenuItem.setIcon(copyFormulaIcon);
+		
+		copyInChiKeyMenuItem = GuiUtils.addMenuItem(copyPropertiesMenu,
+				MainActionCommands.COPY_COMPOUND_INCHI_KEY_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_COMPOUND_INCHI_KEY_COMMAND.getName());
+		
+		copySmilesMenuItem = GuiUtils.addMenuItem(copyPropertiesMenu,
+				MainActionCommands.COPY_COMPOUND_SMILES_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_COMPOUND_SMILES_COMMAND.getName());
 
+		add(copyPropertiesMenu);
 		this.addSeparator();
+		
+		copyFeaturePropertiesMenu = new JMenu("Copy library feature property");
+		copyFeaturePropertiesMenu.setIcon(copyFeatureIcon);
+		
+		GuiUtils.addMenuItem(copyFeaturePropertiesMenu,
+				MainActionCommands.COPY_MSRT_FEATURE_ID_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_MSRT_FEATURE_ID_COMMAND.getName());
+		
+		GuiUtils.addMenuItem(copyFeaturePropertiesMenu,
+				MainActionCommands.COPY_MSRT_FEATURE_NAME_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_MSRT_FEATURE_NAME_COMMAND.getName());
+		
+		GuiUtils.addMenuItem(copyFeaturePropertiesMenu,
+				MainActionCommands.COPY_MSRT_FEATURE_RT_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_MSRT_FEATURE_RT_COMMAND.getName());
+		
+		GuiUtils.addMenuItem(copyFeaturePropertiesMenu,
+				MainActionCommands.COPY_MSRT_FEATURE_AS_SIRIUS_MS_COMMAND.getName(), mainActionListener,
+				MainActionCommands.COPY_MSRT_FEATURE_AS_SIRIUS_MS_COMMAND.getName());
 
+		add(copyFeaturePropertiesMenu);
+		this.addSeparator();
+		
 		searchDatabaseByAccessionMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.SEARCH_FEATURE_ACCESSION_IN_DATABASE_COMMAND.getName(), listener,
+				MainActionCommands.SEARCH_FEATURE_ACCESSION_IN_DATABASE_COMMAND.getName(), mainActionListener,
 				MainActionCommands.SEARCH_FEATURE_ACCESSION_IN_DATABASE_COMMAND.getName(), 0, false,
 				searchDatabaseByIdIcon);
 
 		searchFeatureFormulaAgainstDatabaseMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.SEARCH_FEATURE_FORMULA_IN_DATABASE_COMMAND.getName(), listener,
+				MainActionCommands.SEARCH_FEATURE_FORMULA_IN_DATABASE_COMMAND.getName(), mainActionListener,
 				MainActionCommands.SEARCH_FEATURE_FORMULA_IN_DATABASE_COMMAND.getName(), 0, false,
 				searchDatabaseByFormulaIcon);
 
 		searchFeatureMassAgainstDatabaseMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.SEARCH_FEATURE_MASS_IN_DATABASE_COMMAND.getName(), listener,
+				MainActionCommands.SEARCH_FEATURE_MASS_IN_DATABASE_COMMAND.getName(), mainActionListener,
 				MainActionCommands.SEARCH_FEATURE_MASS_IN_DATABASE_COMMAND.getName(), 0, false,
 				searchDatabaseByMassIcon);
+		
+		addCopyBlock();
 	}
 }

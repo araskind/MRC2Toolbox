@@ -47,6 +47,9 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.MsFeature;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
+import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
@@ -143,9 +146,38 @@ public class LoadExperimentTask extends AbstractTask {
 //				}
 			}
 			newExperiment.restoreData();
+			updateFeatureIdentifications();
 		}
 		processed = 100;
 		this.setStatus(TaskStatus.FINISHED);
+	}
+
+	private void updateFeatureIdentifications() {
+		// TODO Auto-generated method stub
+		taskDescription = "Processing identifications ... ";
+		
+		for (DataPipeline dataPipeline : newExperiment.getDataPipelines()) {
+			
+			for(MsFeature feature : newExperiment.getMsFeaturesForDataPipeline(dataPipeline)) {
+
+				MsFeatureIdentity fbfId = null;
+				for(MsFeatureIdentity id : feature.getIdentifications()) {
+					
+					if(id.getCompoundIdentity() == null 
+							|| id.getCompoundIdentity().getPrimaryDatabaseId() == null)
+						continue;
+						
+					String dbId = id.getCompoundIdentity().getPrimaryDatabaseId();
+					if(dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
+							|| dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET_OLD.getName())
+							|| dbId.startsWith(DataPrefix.MS_FEATURE.getName())) {
+						fbfId = id;
+					}
+					if(fbfId != null)
+						feature.removeIdentity(fbfId);
+				}
+			}
+		}
 	}
 
 	private void loadExperimentFile() throws ZipException, IOException {

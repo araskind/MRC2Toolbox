@@ -101,14 +101,12 @@ public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIden
 				return -result;
 
 		case Quality:	//	Default descending
-			result = 0;
-
-			if(o1.getConfidenceLevel().getLevel() < o2.getConfidenceLevel().getLevel())
-				result = -1;
-
-			if(o1.getConfidenceLevel().getLevel() > o2.getConfidenceLevel().getLevel())
-				result = 1;
-
+			result = 0;			
+			if(o1.getConfidenceLevel() != null && o2.getConfidenceLevel() != null) {
+				result = Integer.compare(
+						o1.getConfidenceLevel().getLevel(), 
+						o2.getConfidenceLevel().getLevel());
+			}
 			if(result == 0)
 				result = Double.compare(o1.getScore(), o2.getScore());
 

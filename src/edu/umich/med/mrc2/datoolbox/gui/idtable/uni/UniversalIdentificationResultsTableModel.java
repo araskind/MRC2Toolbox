@@ -22,6 +22,7 @@
 package edu.umich.med.mrc2.datoolbox.gui.idtable.uni;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -88,6 +89,47 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 	public static final String PERCOLATOR_SCORE_COLUMN = "Perc.score";
 	
 	public static final String QC_COLUMN = "QC";
+	
+	public static final Collection<String> msRtColumnList = 
+			Arrays.asList(DEFAULT_ID_COLUMN,
+						ID_LEVEL_COLUMN,
+						IDENTIFICATION_COLUMN,
+						COMPOUND_ID_COLUMN,
+						FORMULA_COLUMN,
+						NEUTRAL_MASS_COLUMN,
+						ID_SOURCE_COLUMN,
+						ID_CONFIDENCE_COLUMN,
+						ID_SCORE_COLUMN,
+						MASS_ERROR_COLUMN,
+						RETENTION_ERROR_COLUMN,
+						BEST_MATCH_ADDUCT_COLUMN,
+						MSRT_LIB_COLUMN,
+						QC_COLUMN);
+	
+	public static final Collection<String> msmsColumnList = 
+			Arrays.asList(DEFAULT_ID_COLUMN,
+					ID_LEVEL_COLUMN,
+					IDENTIFICATION_COLUMN,
+					COMPOUND_ID_COLUMN,
+					FORMULA_COLUMN,
+					NEUTRAL_MASS_COLUMN,
+					ID_SOURCE_COLUMN,
+					ID_CONFIDENCE_COLUMN,
+					ID_SCORE_COLUMN,
+					ENTROPY_BASED_SCORE_COLUMN,
+					MSMS_MATCH_TYPE_COLUMN,
+					PARENT_MZ_COLUMN,
+					MSMS_LIB_COLUMN,
+					COLLISION_ENERGY_COLUMN,
+					FWD_SCORE_COLUMN,
+					REV_SCORE_COLUMN,
+					PROBABILITY_COLUMN,
+					DOT_PRODUCT_COLUMN,
+					REVERSE_DOT_PRODUCT_COLUMN,
+					HYBRID_DOT_PRODUCT_COLUMN,
+					HYBRID_SCORE_COLUMN,
+					HYBRID_DELTA_MZ_COLUMN,
+					SPECTRUM_ENTROPY_COLUMN);
 
 	private MsFeature parentFeature;
 

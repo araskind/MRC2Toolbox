@@ -54,6 +54,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.MSRTSearchParametersObject;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
+import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.MzFrequencyObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.MsFeatureComparator;
@@ -82,7 +83,6 @@ import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureDataCleanupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.noid.MissingIdentificationsDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableIdentificationResultsTable;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.DockableUniversalIdentificationResultsTable;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
@@ -137,7 +137,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	private DockableFeatureIntensitiesTable featureIntensitiesTable;
 	private DockableSpectumPlot spectrumPlot;
 	private DockableMsTable spectrumTable;
-	private DockableIdentificationResultsTable idTable;
+	//	private DockableIdentificationResultsTable idTable;
 	private DockableMolStructurePanel molStructurePanel;
 	private DockableObjectAnnotationPanel featureAnnotationPanel;
 	private DockableCorrelationDataPanel correlationPanel;
@@ -221,12 +221,13 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				"FeatureDataPanelCorrelationDataPanel", "Feature correlation");
 		spectrumTable = new DockableMsTable(
 				"FeatureDataPanelDockableMsTableMS1", "MS1 table");
-		idTable = new DockableIdentificationResultsTable(
-				"DockableFeatureDataTableDockableIdentificationResultsTable", "Identifications");
+//		idTable = new DockableIdentificationResultsTable(
+//				"DockableFeatureDataTableDockableIdentificationResultsTable", "Identifications");
 		
 		identificationsTable = new DockableUniversalIdentificationResultsTable(
 				"FeatureDataPanelUniversalIdentificationResultsTable", "Identifications");
 		identificationsTable.getTable().getSelectionModel().addListSelectionListener(this);
+		
 //		identificationsTable.getTable().setIdentificationTableModelListener(
 //				new IdentificationTableModelListener(this));
 		
@@ -236,8 +237,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				"FeatureDataPanelAnnotations", "Annotations", 80);
 
 		grid.add(0, 0, 80, 30, featureDataTable);
-		grid.add(80, 0, 20, 30, identificationsTable, molStructurePanel);
-		grid.add(0, 30, 100, 20, idTable);
+		grid.add(80, 0, 20, 30, molStructurePanel);
+		grid.add(0, 30, 100, 20, identificationsTable);
 		grid.add(0, 50, 50, 50, dataPlot, featureIntensitiesTable, correlationPanel);
 		grid.add(50, 50, 50, 50, spectrumPlot, spectrumTable, featureAnnotationPanel);
 		grid.select(0, 50, 50, 50, dataPlot);
@@ -1117,7 +1118,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		featureIntensitiesTable.clearTable();
 		spectrumPlot.removeAllDataSets();
 		spectrumTable.clearTable();
-		idTable.clearTable();
+		identificationsTable.clearTable();
 		molStructurePanel.clearPanel();
 		featureAnnotationPanel.clearPanel();
 	}
@@ -1701,6 +1702,9 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	}
 
 	private void reviewLibrarySearchResults(LibrarySearchTask lst) {
+		
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		MainWindow.hideProgressDialog();
 
 		if (lst.getIdentifiedFeatures().isEmpty()) {
 
@@ -1714,15 +1718,47 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 	}
 
 	@Override
-	public void valueChanged(ListSelectionEvent event) {
+	public void valueChanged(ListSelectionEvent e) {
 
 		//	TODO handle identification table selection separately from feature table
-		if (event.getSource() instanceof DefaultListSelectionModel 
-				&& !event.getValueIsAdjusting()) {
+//		if (event.getSource() instanceof DefaultListSelectionModel 
+//				&& !event.getValueIsAdjusting()) {
+//
+//			clearFeatureData();
+//			switchSelectedFeatures();
+//		}
+		
+		if(e.getValueIsAdjusting() || e.getSource() == null)
+			return;
 
-			clearFeatureData();
-			switchSelectedFeatures();
+		for(ListSelectionListener listener : ((DefaultListSelectionModel)e.getSource()).getListSelectionListeners()) {
+
+			if(listener.equals(featureDataTable.getTable())) {
+				
+				clearFeatureData();
+				switchSelectedFeatures();
+				return;
+			}
+			if(listener.equals(identificationsTable.getTable())){
+				
+				showCompoundStructure(identificationsTable.getSelectedIdentity());
+				return;
+			}
 		}
+	}
+	
+	private void showCompoundStructure(MsFeatureIdentity fid) {
+		
+		if(fid == null 
+				|| fid.getCompoundIdentity() == null
+				|| fid.getCompoundIdentity().getSmiles() == null)
+			return;
+		
+		try {
+			molStructurePanel.showStructure(fid.getCompoundIdentity().getSmiles());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
 	}
 
 	private void switchSelectedFeatures() {
@@ -1746,16 +1782,17 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 					Arrays.asList(firstSelected.getSpectrum().getCompletePattern()), "Observed MS");
 			spectrumTable.setTableModelFromMsFeature(firstSelected);
 		}
-		idTable.setModelFromMsFeature(firstSelected);
-		if(firstSelected.getPrimaryIdentity() != null 
-				&& firstSelected.getPrimaryIdentity().getCompoundIdentity() != null) {
-			try {
-				molStructurePanel.showStructure(firstSelected.getPrimaryIdentity().
-						getCompoundIdentity().getSmiles());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		identificationsTable.setModelFromMsFeature(firstSelected);
+//		if(firstSelected.getPrimaryIdentity() != null 
+//				&& firstSelected.getPrimaryIdentity().getCompoundIdentity() != null) {
+//			try {
+//				molStructurePanel.showStructure(firstSelected.getPrimaryIdentity().
+//						getCompoundIdentity().getSmiles());
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+		showCompoundStructure(firstSelected.getPrimaryIdentity());
 		featureAnnotationPanel.loadFeatureData(firstSelected);
 		if (allSelected.size() > 1) {
 

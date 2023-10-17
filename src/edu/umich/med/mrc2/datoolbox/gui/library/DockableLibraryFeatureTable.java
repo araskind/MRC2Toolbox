@@ -46,7 +46,8 @@ public class DockableLibraryFeatureTable extends DefaultSingleCDockable {
 		setCloseable(false);
 
 		libraryFeatureTable = new LibraryFeatureTable();
-		libraryFeatureTable.addTablePopupMenu(new LibraryFeaturePopupMenu(listener));
+		libraryFeatureTable.addTablePopupMenu(
+				new LibraryFeaturePopupMenu(listener, libraryFeatureTable));
 		add(new JScrollPane(libraryFeatureTable));
 	}
 

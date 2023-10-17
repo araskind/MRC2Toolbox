@@ -178,19 +178,21 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		// Parse identifications
 		Collection<MsFeatureIdentity>identifications = 
 				parseIdentifications(feature, cpdElement, conn);
+		
 		if(!identifications.isEmpty()) {
-			identifications.stream().forEach(id -> feature.addIdentity(id));
 			
-			for(MsFeatureIdentity id : feature.getIdentifications()) {
+			for(MsFeatureIdentity id : identifications) {
 				
-				if(id.getCompoundIdentity() == null || id.getCompoundIdentity().getPrimaryDatabaseId() == null)
+				if(id.getCompoundIdentity() == null 
+						|| id.getCompoundIdentity().getPrimaryDatabaseId() == null)
 					continue;
 					
 				String dbId = id.getCompoundIdentity().getPrimaryDatabaseId();
 				if(!dbId.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
 						&& !dbId.startsWith(DataPrefix.MS_FEATURE.getName()))
-					feature.setPrimaryIdentity(id);
-			}		
+					feature.addIdentity(id);
+			}	
+			feature.setTopScoreIdAsDefault();
 		}
 		return feature;
 	}

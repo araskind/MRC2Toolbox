@@ -719,6 +719,12 @@ public enum MainActionCommands {
 	COPY_COMPOUND_INCHI_KEY_COMMAND("Copy compound InChi key"),
 	COPY_COMPOUND_SMILES_COMMAND("Copy compound SMILES"),
 	
+	//	MS/RT library feature
+	COPY_MSRT_FEATURE_ID_COMMAND("Copy MS/RT library feature database ID"),
+	COPY_MSRT_FEATURE_NAME_COMMAND("Copy MS/RT library feature name"),
+	COPY_MSRT_FEATURE_RT_COMMAND("Copy MS/RT library feature RT"),
+	COPY_MSRT_FEATURE_AS_SIRIUS_MS_COMMAND("Copy MS/RT library feature as SIRIUS MS"),
+	
 	// Manual feature ID
 	SET_MANUAL_FEATURE_ID_COMMAND("Manually set feature identity"),
 
@@ -1178,6 +1184,8 @@ public enum MainActionCommands {
 	//	Identification table 
 	SHOW_ONLY_BEST_LIB_HIT_FOR_COMPOUND("Show only best library hit per compound"),
 	SHOW_ALL_LIB_HITS_FOR_COMPOUND("Show all library hits for each compound"),
+	SHOW_MS_RT_COLUMN_SUBSET("Show MS/RT columns"),
+	SHOW_MSMS_COLUMN_SUBSET("Show MSMS columns"),
 	
 	//	Mass-spectrum plot
 	ZOOM_TO_MSMS_PRECURSOR_COMMAND("Zoom to MSMS precursor"),

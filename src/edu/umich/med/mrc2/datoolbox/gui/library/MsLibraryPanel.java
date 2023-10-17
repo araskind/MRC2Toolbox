@@ -300,15 +300,22 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		if (command.equals(MainActionCommands.IMPORT_LIBRARY_FEATURE_RT_COMMAND.getName()))
 			importLibraryFeatureRtFromFile();
 
-		if (command.equals(MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName()))
-			copyCompoundFormula();
-
-		if (command.equals(MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName()))
-			copyCompoundAccession();
-
-		if (command.equals(MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName()))
-			copyCompoundName();
+		if (command.equals(MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_COMPOUND_INCHI_KEY_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_COMPOUND_SMILES_COMMAND.getName())) {
+					
+			copyCompoundProperty(command);
+		}
 		
+		if (command.equals(MainActionCommands.COPY_MSRT_FEATURE_ID_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_MSRT_FEATURE_NAME_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_MSRT_FEATURE_RT_COMMAND.getName())
+				|| command.equals(MainActionCommands.COPY_MSRT_FEATURE_AS_SIRIUS_MS_COMMAND.getName())) {			
+			copyFeatureProperty(command);
+		}
+				
 		if (command.equals(MainActionCommands.EXPORT_REFERENCE_MSMS_LIBRARY_COMMAND.getName()))	
 			showRefMSMSLibraryExportDialog();
 		
@@ -455,45 +462,114 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		dialog.setLocationRelativeTo(this.getContentPane());
 		dialog.setVisible(true);
 	}
-
-	private void copyCompoundFormula() {
-
-		if (libraryFeatureTable.getTable().getSelectedFeature() == null)
+	
+	private void copyCompoundProperty(String copyCommand) {
+		
+		LibraryMsFeature feature = 
+				libraryFeatureTable.getTable().getSelectedFeature();
+		
+		if (feature == null
+				|| feature.getPrimaryIdentity() == null
+				|| feature.getPrimaryIdentity().getCompoundIdentity() == null)
 			return;
-
-		CompoundIdentity featureId = libraryFeatureTable.getTable().getSelectedFeature().
+		
+		CompoundIdentity cpd = libraryFeatureTable.getTable().getSelectedFeature().
 				getPrimaryIdentity().getCompoundIdentity();
-
-		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-		StringSelection stringSelection = new StringSelection(featureId.getFormula());
+		
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();		
+		StringSelection stringSelection = new StringSelection("");
+		
+		if(copyCommand.equals(MainActionCommands.COPY_COMPOUND_ACCESSION_COMMAND.getName())
+				&& cpd.getPrimaryDatabaseId() != null)
+			stringSelection = new StringSelection(cpd.getPrimaryDatabaseId());
+			
+		if(copyCommand.equals(MainActionCommands.COPY_COMPOUND_NAME_COMMAND.getName()))
+			stringSelection = new StringSelection(cpd.getName());
+			
+		if(copyCommand.equals(MainActionCommands.COPY_COMPOUND_FORMULA_COMMAND.getName())
+				&& cpd.getFormula() != null)
+			stringSelection = new StringSelection(cpd.getFormula());
+			
+		if(copyCommand.equals(MainActionCommands.COPY_COMPOUND_INCHI_KEY_COMMAND.getName())
+				&& cpd.getInChiKey() != null)
+			stringSelection = new StringSelection(cpd.getInChiKey());
+			
+		if(copyCommand.equals(MainActionCommands.COPY_COMPOUND_SMILES_COMMAND.getName())
+				&& cpd.getSmiles() != null)
+			stringSelection = new StringSelection(cpd.getSmiles());
+		
+		clpbrd.setContents(stringSelection, null);
+	}
+	
+	private void copyFeatureProperty(String copyCommand) {
+		
+		LibraryMsFeature feature = 
+				libraryFeatureTable.getTable().getSelectedFeature();
+		
+		if (feature == null)
+			return;
+		
+		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();		
+		StringSelection stringSelection = new StringSelection("");
+		
+		if(copyCommand.equals(MainActionCommands.COPY_MSRT_FEATURE_ID_COMMAND.getName()))
+			stringSelection = new StringSelection(feature.getId());
+		
+		if(copyCommand.equals(MainActionCommands.COPY_MSRT_FEATURE_NAME_COMMAND.getName())
+				&& feature.getName() != null)
+			stringSelection = new StringSelection(feature.getName());		
+		
+		if(copyCommand.equals(MainActionCommands.COPY_MSRT_FEATURE_RT_COMMAND.getName())
+				&& feature.getRetentionTime() > 0)
+			stringSelection = new StringSelection(
+					MRC2ToolBoxConfiguration.getRtFormat().format(feature.getRetentionTime()));
+		
+		if(copyCommand.equals(MainActionCommands.COPY_MSRT_FEATURE_AS_SIRIUS_MS_COMMAND.getName())
+				&& feature.getSpectrum() != null
+				&& feature.getSpectrum().getCompletePattern().length > 0) {
+			//	TODO
+		}		
 		clpbrd.setContents(stringSelection, null);
 	}
 
-	private void copyCompoundAccession() {
-
-		if (libraryFeatureTable.getTable().getSelectedFeature() == null)
-			return;
-
-		CompoundIdentity featureId = libraryFeatureTable.getTable().getSelectedFeature().
-				getPrimaryIdentity().getCompoundIdentity();
-
-		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-		StringSelection stringSelection = new StringSelection(featureId.getPrimaryDatabaseId());
-		clpbrd.setContents(stringSelection, null);
-	}
-
-	private void copyCompoundName() {
-
-		if (libraryFeatureTable.getTable().getSelectedFeature() == null)
-			return;
-
-		CompoundIdentity featureId = libraryFeatureTable.getTable().getSelectedFeature().
-				getPrimaryIdentity().getCompoundIdentity();
-
-		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-		StringSelection stringSelection = new StringSelection(featureId.getName());
-		clpbrd.setContents(stringSelection, null);
-	}
+//	private void copyCompoundFormula() {
+//
+//		if (libraryFeatureTable.getTable().getSelectedFeature() == null)
+//			return;
+//
+//		CompoundIdentity featureId = libraryFeatureTable.getTable().getSelectedFeature().
+//				getPrimaryIdentity().getCompoundIdentity();
+//
+//		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+//		StringSelection stringSelection = new StringSelection(featureId.getFormula());
+//		clpbrd.setContents(stringSelection, null);
+//	}
+//
+//	private void copyCompoundAccession() {
+//
+//		if (libraryFeatureTable.getTable().getSelectedFeature() == null)
+//			return;
+//
+//		CompoundIdentity featureId = libraryFeatureTable.getTable().getSelectedFeature().
+//				getPrimaryIdentity().getCompoundIdentity();
+//
+//		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+//		StringSelection stringSelection = new StringSelection(featureId.getPrimaryDatabaseId());
+//		clpbrd.setContents(stringSelection, null);
+//	}
+//
+//	private void copyCompoundName() {
+//
+//		if (libraryFeatureTable.getTable().getSelectedFeature() == null)
+//			return;
+//
+//		CompoundIdentity featureId = libraryFeatureTable.getTable().getSelectedFeature().
+//				getPrimaryIdentity().getCompoundIdentity();
+//
+//		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
+//		StringSelection stringSelection = new StringSelection(featureId.getName());
+//		clpbrd.setContents(stringSelection, null);
+//	}
 
 	private void importLibraryFeatureRtFromFile() {
 

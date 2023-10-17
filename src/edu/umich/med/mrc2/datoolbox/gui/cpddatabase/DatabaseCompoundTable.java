@@ -24,7 +24,6 @@ package edu.umich.med.mrc2.datoolbox.gui.cpddatabase;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
@@ -108,20 +107,7 @@ public class DatabaseCompoundTable extends BasicTable {
 
 		CompoundPopupMenu popupMenu = 
 				new CompoundPopupMenu(listener, this);
-		setComponentPopupMenu(popupMenu);
-		addMouseListener(new MouseAdapter() {
-			private int popupRow;
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				popupRow = rowAtPoint(e.getPoint());
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				popupRow = rowAtPoint(e.getPoint());
-			}
-		});
+		addTablePopupMenu(popupMenu);
 	}
 
 	public void setTableModelFromCompoundCollection(Collection<CompoundIdentity> compoundCollection) {
