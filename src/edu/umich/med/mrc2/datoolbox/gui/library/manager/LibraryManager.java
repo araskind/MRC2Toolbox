@@ -47,6 +47,7 @@ import org.apache.commons.lang.StringUtils;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
 import edu.umich.med.mrc2.datoolbox.gui.library.MsLibraryPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
@@ -311,13 +312,10 @@ public class LibraryManager extends JDialog implements ActionListener, TaskListe
 
 	public void refreshLibraryListing(){
 
-		try {
-			libList = MSRTLibraryUtils.getAllLibraries();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		libraryListingTable.setTableModelFromLibraryCollection(libList, activeLibrary);
+		IDTDataCache.refreshMsRtLibraryList();		
+		libList = IDTDataCache.getMsRtLibraryList();
+		libraryListingTable.setTableModelFromLibraryCollection(
+				libList, activeLibrary);
 	}
 
 	@Override

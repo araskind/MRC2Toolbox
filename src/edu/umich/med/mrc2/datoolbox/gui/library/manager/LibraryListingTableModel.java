@@ -27,11 +27,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -63,29 +62,28 @@ public class LibraryListingTableModel  extends BasicTableModel {
 	}
 
 	public void setTableModelFromLibraryCollection(
-			Collection<CompoundLibrary> libraryCollection, CompoundLibrary activeLibrary) {
+			Collection<CompoundLibrary> libraryCollection, 
+			CompoundLibrary activeLibrary) {
 
 		CompoundLibrary[] libraries = 
-				libraryCollection.toArray(new CompoundLibrary[libraryCollection.size()]);
+				libraryCollection.toArray(
+						new CompoundLibrary[libraryCollection.size()]);
 		setTableModelFromLibraryList(libraries, activeLibrary);
 	}
 
-	private void setTableModelFromLibraryList(CompoundLibrary[] libraries, CompoundLibrary activeLibrary) {
+	private void setTableModelFromLibraryList(
+			CompoundLibrary[] libraries, CompoundLibrary activeLibrary) {
 
 		setRowCount(0);
 		if(libraries == null || libraries.length == 0)
 			return;
 		
 		Arrays.sort(libraries);		
-		Map<String, Integer> countsMap = new TreeMap<String, Integer>();
-		try {
-			countsMap = MSRTLibraryUtils.getLibraryEntryCount();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Map<String, Integer> countsMap = 
+				IDTDataCache.getMsRtLibraryEntryCount();
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		Collection<CompoundLibrary> activeLibs = MRC2ToolBoxCore.getActiveMsLibraries();
+		Collection<CompoundLibrary> activeLibs = 
+				MRC2ToolBoxCore.getActiveMsLibraries();
 		for(CompoundLibrary l : libraries){
 			
 			boolean loaded = false;

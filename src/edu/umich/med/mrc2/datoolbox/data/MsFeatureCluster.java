@@ -534,7 +534,8 @@ public class MsFeatureCluster implements Serializable {
 	public String toString() {
 
 		String clusterName = "";
-		if(getPrimaryIdentity() != null)
+		if(getPrimaryIdentity() != null 
+				&& getPrimaryIdentity().getCompoundIdentity() != null)
 			clusterName = getPrimaryIdentity().getName() + " ";
 
 		clusterName += 

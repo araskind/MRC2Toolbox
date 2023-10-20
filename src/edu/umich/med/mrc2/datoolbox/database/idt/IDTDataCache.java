@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.IonizationType;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationFollowupStep;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
@@ -67,6 +68,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.Manufacturer;
 import edu.umich.med.mrc2.datoolbox.data.lims.MobilePhase;
 import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.database.lims.LIMSUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
 public class IDTDataCache {
@@ -143,6 +145,10 @@ public class IDTDataCache {
 			new HashSet<MSMSExtractionParameterSet>();
 	private static Map<LIMSExperiment, Collection<Polarity>> experimentPolarityMap = 
 			new TreeMap<LIMSExperiment, Collection<Polarity>>();
+	private static Collection<CompoundLibrary>msRtLibraryList = 
+			new TreeSet<CompoundLibrary>();	
+	private static Map<String, Integer>msRtLibraryEntryCounts = 
+			new TreeMap<String, Integer>();
 	
 	public static void refreshExperimentPolarityMap() {
 		experimentPolarityMap.clear();
@@ -1276,6 +1282,64 @@ public class IDTDataCache {
 		
 		return getMsmsExtractionParameters().stream().
 				filter(p -> p.getId().equals(id)).findFirst().orElse(null);
+	}
+
+	public static Collection<CompoundLibrary> getMsRtLibraryList() {
+		
+		if(msRtLibraryList == null)
+			msRtLibraryList =  new TreeSet<CompoundLibrary>();
+		
+		if(msRtLibraryList.isEmpty()) {
+			try {
+				msRtLibraryList.addAll(MSRTLibraryUtils.getAllLibraries());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return msRtLibraryList;
+	}
+
+	public static Map<String, Integer> getMsRtLibraryEntryCount() {
+		
+		if(msRtLibraryEntryCounts == null)
+			msRtLibraryEntryCounts =  new TreeMap<String, Integer>();
+		
+		if(msRtLibraryEntryCounts.isEmpty()) {
+			try {
+				msRtLibraryEntryCounts.putAll(MSRTLibraryUtils.getLibraryEntryCount());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return msRtLibraryEntryCounts;
+	}
+	
+	public static void refreshMsRtLibraryList() {
+		
+		msRtLibraryList.clear();
+		getMsRtLibraryList();
+		msRtLibraryEntryCounts.clear();
+		getMsRtLibraryEntryCount();
+	}
+	
+	public static CompoundLibrary getMSRTLibraryById(String id) {
+		
+		CompoundLibrary lib = MRC2ToolBoxCore.getActiveMsLibraries().stream().
+				filter(l -> l.getLibraryId().equals(id)).findFirst().orElse(null);
+		if(lib == null)
+			lib = getMsRtLibraryList().stream().
+				filter(l -> l.getLibraryId().equals(id)).findFirst().orElse(null);
+		return lib;
+	}
+	
+	public static CompoundLibrary getMSRTLibraryByName(String name) {
+		
+		CompoundLibrary lib = MRC2ToolBoxCore.getActiveMsLibraries().stream().
+				filter(l -> l.getLibraryName().equals(name)).findFirst().orElse(null);
+		if(lib == null)
+			lib = getMsRtLibraryList().stream().
+					filter(l -> l.getLibraryName().equals(name)).findFirst().orElse(null);
+		return lib;
 	}
 }
 

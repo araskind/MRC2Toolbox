@@ -22,10 +22,15 @@
 package edu.umich.med.mrc2.datoolbox.gui.library.search;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
+import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -38,14 +43,20 @@ public class LibSearchLibraryTableModel extends BasicTableModel {
 
 	public static final String USE_COLUMN = "Use";
 	public static final String LIBRARY_COLUMN = "Library name";
-	public static final String DESCRIPTION_COLUMN = "Description";
+	public static final String DESCRIPTION_COLUMN = "Description";	
+	public static final String POLARITY_COLUMN = "Polarity";
+	public static final String NUM_ENTRIES_COLUMN = "# Compounds";
+	public static final String DATE_CREATED_COLUMN = "Created on";
 
 	public LibSearchLibraryTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
 			new ColumnContext(USE_COLUMN, Boolean.class, true),
 			new ColumnContext(LIBRARY_COLUMN, CompoundLibrary.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false)
+			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(POLARITY_COLUMN, Polarity.class, false),
+			new ColumnContext(NUM_ENTRIES_COLUMN, Integer.class, false),
+			new ColumnContext(DATE_CREATED_COLUMN, Date.class, false),
 		};
 	}
 
@@ -58,20 +69,26 @@ public class LibSearchLibraryTableModel extends BasicTableModel {
 	}
 
 	private void setTableModelFromLibraryList(CompoundLibrary[] libraries) {
-
+		
 		setRowCount(0);
 		if(libraries == null || libraries.length == 0)
 			return;
 		
+		Arrays.sort(libraries);		
+		Map<String, Integer> countsMap = 
+				IDTDataCache.getMsRtLibraryEntryCount();
 		List<Object[]>rowData = new ArrayList<Object[]>();
-		for(CompoundLibrary l : libraries){
-
+		for(CompoundLibrary lib : libraries){
+				
 			Object[] obj = {
-				false,
-				l,
-				l.getLibraryDescription()
-			};
-			rowData.add(obj);
+					false,
+					lib,
+					lib.getLibraryDescription(),
+					lib.getPolarity(),
+					countsMap.get(lib.getLibraryId()),
+					lib.getDateCreated(),
+				};
+			rowData.add(obj);			
 		}
 		if(!rowData.isEmpty())
 			addRows(rowData);

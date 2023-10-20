@@ -66,7 +66,7 @@ import edu.umich.med.mrc2.datoolbox.data.MSRTSearchParametersObject;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -90,7 +90,9 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 	private Collection<MsFeature>featuresToSearch;
 	private JSpinner maxHitsSpinner;
 	private JCheckBox useCustomRtWindowsCheckBox;
+	private JCheckBox clearPrevResultsCheckBox;
 
+	public static final String CLEAR_EXISTING_RESULTS = "CLEAR_EXISTING_RESULTS";
 	public static final String MASS_ERROR_VALUE = "MASS_ERROR_VALUE";
 	public static final String MASS_ERROR_TYPE = "MASS_ERROR_TYPE";
 	public static final String RETENTION_WINDOW = "RETENTION_WINDOW";
@@ -121,17 +123,28 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 						TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0))));
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{89, 0, 52, 0, 0};
-		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
 		gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
+		
+		clearPrevResultsCheckBox = 
+				new JCheckBox("Clear existing MS/RT library search results");
+		clearPrevResultsCheckBox.setForeground(Color.RED);
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
+		gbc_lblNewLabel.gridwidth = 3;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 0;
+		panel.add(clearPrevResultsCheckBox, gbc_lblNewLabel);
 
 		JLabel lblMassError = new JLabel("Mass error");
 		GridBagConstraints gbc_lblMassError = new GridBagConstraints();
 		gbc_lblMassError.insets = new Insets(0, 0, 5, 5);
 		gbc_lblMassError.anchor = GridBagConstraints.EAST;
 		gbc_lblMassError.gridx = 0;
-		gbc_lblMassError.gridy = 0;
+		gbc_lblMassError.gridy = 1;
 		panel.add(lblMassError, gbc_lblMassError);
 
 		massErrorTextField = new JFormattedTextField(
@@ -142,7 +155,7 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		gbc_formattedTextField.insets = new Insets(0, 0, 5, 5);
 		gbc_formattedTextField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_formattedTextField.gridx = 1;
-		gbc_formattedTextField.gridy = 0;
+		gbc_formattedTextField.gridy = 1;
 		panel.add(massErrorTextField, gbc_formattedTextField);
 
 		massErrorTypeComboBox = new JComboBox<MassErrorType>(
@@ -152,7 +165,7 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBox.gridx = 2;
-		gbc_comboBox.gridy = 0;
+		gbc_comboBox.gridy = 1;
 		panel.add(massErrorTypeComboBox, gbc_comboBox);
 
 		JLabel lblRtWindow = new JLabel("RT window");
@@ -160,7 +173,7 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		gbc_lblRtWindow.anchor = GridBagConstraints.EAST;
 		gbc_lblRtWindow.insets = new Insets(0, 0, 5, 5);
 		gbc_lblRtWindow.gridx = 0;
-		gbc_lblRtWindow.gridy = 1;
+		gbc_lblRtWindow.gridy = 2;
 		panel.add(lblRtWindow, gbc_lblRtWindow);
 
 		rtWindowTextField = new JFormattedTextField(
@@ -170,7 +183,7 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		gbc_formattedTextField_1.insets = new Insets(0, 0, 5, 5);
 		gbc_formattedTextField_1.fill = GridBagConstraints.HORIZONTAL;
 		gbc_formattedTextField_1.gridx = 1;
-		gbc_formattedTextField_1.gridy = 1;
+		gbc_formattedTextField_1.gridy = 2;
 		panel.add(rtWindowTextField, gbc_formattedTextField_1);
 
 		JLabel lblMin = new JLabel("min.");
@@ -178,7 +191,7 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		gbc_lblMin.insets = new Insets(0, 0, 5, 5);
 		gbc_lblMin.anchor = GridBagConstraints.WEST;
 		gbc_lblMin.gridx = 2;
-		gbc_lblMin.gridy = 1;
+		gbc_lblMin.gridy = 2;
 		panel.add(lblMin, gbc_lblMin);
 
 		useCustomRtWindowsCheckBox = 
@@ -186,7 +199,7 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		GridBagConstraints gbc_useCustomRtWindowsCheckBox = new GridBagConstraints();
 		gbc_useCustomRtWindowsCheckBox.insets = new Insets(0, 0, 5, 0);
 		gbc_useCustomRtWindowsCheckBox.gridx = 3;
-		gbc_useCustomRtWindowsCheckBox.gridy = 1;
+		gbc_useCustomRtWindowsCheckBox.gridy = 2;
 		panel.add(useCustomRtWindowsCheckBox, gbc_useCustomRtWindowsCheckBox);
 
 		JLabel lblMaxHits = new JLabel("Max. hits");
@@ -194,7 +207,7 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		gbc_lblMaxHits.anchor = GridBagConstraints.EAST;
 		gbc_lblMaxHits.insets = new Insets(0, 0, 5, 5);
 		gbc_lblMaxHits.gridx = 0;
-		gbc_lblMaxHits.gridy = 2;
+		gbc_lblMaxHits.gridy = 3;
 		panel.add(lblMaxHits, gbc_lblMaxHits);
 
 		maxHitsSpinner = new JSpinner();
@@ -203,23 +216,22 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		gbc_maxHitsSpinner.fill = GridBagConstraints.HORIZONTAL;
 		gbc_maxHitsSpinner.insets = new Insets(0, 0, 5, 5);
 		gbc_maxHitsSpinner.gridx = 1;
-		gbc_maxHitsSpinner.gridy = 2;
+		gbc_maxHitsSpinner.gridy = 3;
 		panel.add(maxHitsSpinner, gbc_maxHitsSpinner);
 
 		ignoreAddudctTypeCheckBox = new JCheckBox("Ignore addudct type");
 		GridBagConstraints gbc_ignoreAddudctTypeCheckBox = new GridBagConstraints();
 		gbc_ignoreAddudctTypeCheckBox.insets = new Insets(0, 0, 0, 5);
 		gbc_ignoreAddudctTypeCheckBox.gridx = 1;
-		gbc_ignoreAddudctTypeCheckBox.gridy = 3;
+		gbc_ignoreAddudctTypeCheckBox.gridy = 4;
 		panel.add(ignoreAddudctTypeCheckBox, gbc_ignoreAddudctTypeCheckBox);
 
 		relaxMassErrorCheckBox = new JCheckBox("Relax mass error for minor isotopes");
 		GridBagConstraints gbc_relaxMassErrorCheckBox = new GridBagConstraints();
 		gbc_relaxMassErrorCheckBox.anchor = GridBagConstraints.WEST;
 		gbc_relaxMassErrorCheckBox.gridwidth = 2;
-		gbc_relaxMassErrorCheckBox.insets = new Insets(0, 0, 0, 5);
 		gbc_relaxMassErrorCheckBox.gridx = 2;
-		gbc_relaxMassErrorCheckBox.gridy = 3;
+		gbc_relaxMassErrorCheckBox.gridy = 4;
 		panel.add(relaxMassErrorCheckBox, gbc_relaxMassErrorCheckBox);
 		
 		getContentPane().add(panel, BorderLayout.NORTH);
@@ -276,6 +288,9 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 	public void loadPreferences(Preferences prefs) {
 
 		preferences = prefs;
+		
+		clearPrevResultsCheckBox.setSelected(
+				 preferences.getBoolean(CLEAR_EXISTING_RESULTS, Boolean.TRUE));
 
 		double massError = preferences.getDouble(MASS_ERROR_VALUE, 10.0d);
 		massErrorTextField.setText(Double.toString(massError));
@@ -300,6 +315,8 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 	public void savePreferences() {
 
 		preferences = Preferences.userNodeForPackage(this.getClass());
+		
+		preferences.putBoolean(CLEAR_EXISTING_RESULTS, clearPrevResultsCheckBox.isSelected());
 		preferences.putDouble(MASS_ERROR_VALUE, Double.parseDouble(massErrorTextField.getText()));
 		preferences.put(MASS_ERROR_TYPE, ((MassErrorType)massErrorTypeComboBox.getSelectedItem()).name());
 		preferences.putDouble(RETENTION_WINDOW, Double.parseDouble(rtWindowTextField.getText()));
@@ -320,12 +337,8 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		List<Polarity> polarityList = featuresToSearch.stream().
 				map(f -> f.getPolarity()).distinct().collect(Collectors.toList());
 
-		Collection<CompoundLibrary> allLibs = new ArrayList<CompoundLibrary>();		
-		try {
-			allLibs = MSRTLibraryUtils.getAllLibraries();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		Collection<CompoundLibrary> allLibs = 
+				IDTDataCache.getMsRtLibraryList();
 		List<CompoundLibrary> libList = allLibs.stream().
 				filter(l -> polarityList.contains(l.getPolarity())).
 				collect(Collectors.toList());
@@ -368,6 +381,10 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		return useCustomRtWindowsCheckBox.isSelected();
 	}
 	
+	public boolean clearPreviousResults() {
+		return clearPrevResultsCheckBox.isSelected();
+	}
+	
 	public Collection<String>verifySearchParameters(){
 		
 		Collection<String>errors = new ArrayList<String>();
@@ -387,6 +404,7 @@ public class LibrarySearchSetupDialog extends JDialog implements BackedByPrefere
 		
 		MSRTSearchParametersObject spo = 
 				new MSRTSearchParametersObject(
+						clearPreviousResults(),
 						getMassError(),
 						getMassErrorType(),
 						relaxMassError(),

@@ -287,10 +287,6 @@ public enum MainActionCommands {
 	EXPORT_MZRT_STATISTICS_COMMAND("Export M/Z & RT data for individual samples"),
 	SHOW_RAWA_DATA_UPLOAD_PREP_DIALOG("Prepare raw data for upload"),
 
-	//	Copy/paste/cut etc...
-	COPY_SELECTED_ROWS_COMMAND(	"Copy selected rows"),
-	COPY_SELECTED_ROWS_WITH_HEADER_COMMAND("Copy selected rows with header"),
-
 	//
 	COPY_SELECTED_MS1_ROWS_COMMAND("Copy selected MS1 features (TAB separated)"),
 	COPY_SELECTED_MS1_ROWS_WITH_HEADER_COMMAND(	"Copy selected MS1 features (TAB separated) with header"),

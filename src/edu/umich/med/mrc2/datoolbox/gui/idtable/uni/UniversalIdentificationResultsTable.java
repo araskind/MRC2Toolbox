@@ -74,6 +74,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.IdentityWordWrapCellRen
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MSFeatureIdentificationLevelColorRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ReferenceMsMsLibraryRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.utils.IdentificationUtils;
 
@@ -141,8 +142,8 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 				.setCellRenderer(chmodRenderer);
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.QC_COLUMN)
 				.setCellRenderer(new RadioButtonRenderer());
-//		columnModel.getColumnById(UniversalIdentificationResultsTableModel.COLLISION_ENERGY_COLUMN)
-//				.setCellRenderer(scoreRenderer); 
+		columnModel.getColumnById(UniversalIdentificationResultsTableModel.MSRT_LIB_COLUMN)
+				.setCellRenderer(new WordWrapCellRenderer()); 
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.ID_SCORE_COLUMN)
 				.setCellRenderer(scoreRenderer); 		
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.MSMS_LIB_COLUMN)

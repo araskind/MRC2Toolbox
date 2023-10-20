@@ -532,45 +532,6 @@ public class MsLibraryPanel extends DockableMRC2ToolboxPanel implements ItemList
 		clpbrd.setContents(stringSelection, null);
 	}
 
-//	private void copyCompoundFormula() {
-//
-//		if (libraryFeatureTable.getTable().getSelectedFeature() == null)
-//			return;
-//
-//		CompoundIdentity featureId = libraryFeatureTable.getTable().getSelectedFeature().
-//				getPrimaryIdentity().getCompoundIdentity();
-//
-//		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-//		StringSelection stringSelection = new StringSelection(featureId.getFormula());
-//		clpbrd.setContents(stringSelection, null);
-//	}
-//
-//	private void copyCompoundAccession() {
-//
-//		if (libraryFeatureTable.getTable().getSelectedFeature() == null)
-//			return;
-//
-//		CompoundIdentity featureId = libraryFeatureTable.getTable().getSelectedFeature().
-//				getPrimaryIdentity().getCompoundIdentity();
-//
-//		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-//		StringSelection stringSelection = new StringSelection(featureId.getPrimaryDatabaseId());
-//		clpbrd.setContents(stringSelection, null);
-//	}
-//
-//	private void copyCompoundName() {
-//
-//		if (libraryFeatureTable.getTable().getSelectedFeature() == null)
-//			return;
-//
-//		CompoundIdentity featureId = libraryFeatureTable.getTable().getSelectedFeature().
-//				getPrimaryIdentity().getCompoundIdentity();
-//
-//		Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-//		StringSelection stringSelection = new StringSelection(featureId.getName());
-//		clpbrd.setContents(stringSelection, null);
-//	}
-
 	private void importLibraryFeatureRtFromFile() {
 
 		Collection<String>errors = new ArrayList<String>();

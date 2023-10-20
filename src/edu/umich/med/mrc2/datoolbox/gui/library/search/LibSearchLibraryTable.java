@@ -32,6 +32,7 @@ import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.PolarityRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class LibSearchLibraryTable extends BasicTable {
@@ -42,7 +43,6 @@ public class LibSearchLibraryTable extends BasicTable {
 	private static final long serialVersionUID = 2890411818566368839L;
 
 	private LibSearchLibraryTableModel model;
-	private WordWrapCellRenderer wordWrapCellRenderer;
 
 	public LibSearchLibraryTable() {
 
@@ -53,15 +53,18 @@ public class LibSearchLibraryTable extends BasicTable {
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		wordWrapCellRenderer = new WordWrapCellRenderer();
 
 		columnModel.getColumnById(LibSearchLibraryTableModel.LIBRARY_COLUMN)
-			.setCellRenderer(wordWrapCellRenderer);
+			.setCellRenderer(new WordWrapCellRenderer());
 		columnModel.getColumnById(LibSearchLibraryTableModel.DESCRIPTION_COLUMN)
-			.setCellRenderer(wordWrapCellRenderer);
+			.setCellRenderer(new WordWrapCellRenderer());
+		columnModel.getColumnById(LibSearchLibraryTableModel.POLARITY_COLUMN)
+			.setCellRenderer(new PolarityRenderer());
 		
 		columnModel.getColumnById(LibSearchLibraryTableModel.USE_COLUMN).setMaxWidth(50);
+		columnModel.getColumnById(LibSearchLibraryTableModel.POLARITY_COLUMN).setMaxWidth(50);
 		fixedWidthColumns.add(getColumnIndex(LibSearchLibraryTableModel.USE_COLUMN));
+		fixedWidthColumns.add(getColumnIndex(LibSearchLibraryTableModel.POLARITY_COLUMN));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();

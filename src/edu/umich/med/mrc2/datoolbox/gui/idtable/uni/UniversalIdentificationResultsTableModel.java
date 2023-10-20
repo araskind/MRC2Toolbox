@@ -28,6 +28,7 @@ import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.MSFeatureIdentificationLevel;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
@@ -150,7 +151,7 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 			new ColumnContext(MASS_ERROR_COLUMN, Double.class, false),
 			new ColumnContext(RETENTION_ERROR_COLUMN, Double.class, false),
 			new ColumnContext(BEST_MATCH_ADDUCT_COLUMN, Adduct.class, false),
-			new ColumnContext(MSRT_LIB_COLUMN, String.class, false),	//	TODO replace by library class?
+			new ColumnContext(MSRT_LIB_COLUMN, CompoundLibrary.class, false),	//	TODO replace by library class?
 			//	MSMS library match						
 			new ColumnContext(MSMS_MATCH_TYPE_COLUMN, ReferenceMsMsLibraryMatch.class, false),
 			new ColumnContext(PARENT_MZ_COLUMN, Double.class, false),
@@ -199,10 +200,11 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 			double deltaMz = 0.0d;
 			Double deltaRt = calculateRetentionShift(id);
 			Adduct adductMatch = id.getPrimaryAdduct();
-			String msRtLibrary = null;
-			if(id.getMsRtLibraryMatch() != null) {
-				//	adductMatch = id.getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
-				msRtLibrary = id.getMsRtLibraryMatch().getLibraryId();	//	TODO reeplace by library object or name
+			CompoundLibrary msRtLibrary = null;		
+			if(id.getMsRtLibraryMatch() != null
+					&& id.getMsRtLibraryMatch().getLibraryId() != null) {
+				msRtLibrary = 
+						IDTDataCache.getMSRTLibraryById(id.getMsRtLibraryMatch().getLibraryId());	
 			}
 			double entropyBasedScore = 0.0d;
 			double parentMz = 0.0d;

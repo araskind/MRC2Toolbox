@@ -268,7 +268,6 @@ public class SaveExperimentTask extends AbstractTask {
 
 	@Override
 	public Task cloneTask() {
-
 		return new SaveExperimentTask(experimentToSave);
 	}
 }

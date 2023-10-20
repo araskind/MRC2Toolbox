@@ -21,27 +21,17 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.fdata;
 
-import java.awt.Component;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import javax.swing.Icon;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.table.TableCellRenderer;
-
-import org.jsoup.Jsoup;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureCluster;
-import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
@@ -78,7 +68,7 @@ public class DockableFeatureDataTable extends DefaultSingleCDockable{
 		featureDataTable.clearTable();
 	}
 	
-	public Collection<MsFeature>getFeaturees(TableRowSubset subset){
+	public Collection<MsFeature>getFeatures(TableRowSubset subset){
 		
 		if(subset.equals(TableRowSubset.SELECTED))
 			return featureDataTable.getSelectedFeatures();
@@ -86,6 +76,10 @@ public class DockableFeatureDataTable extends DefaultSingleCDockable{
 			return featureDataTable.getVisibleFeatures();
 		else
 			return featureDataTable.getAllFeatures();
+	}
+	
+	public MsFeature getSelectedFeature() {
+		return featureDataTable.getSelectedFeature();
 	}
 
 	public Collection<MsFeature>getSelectedFeatures() {
@@ -145,54 +139,6 @@ public class DockableFeatureDataTable extends DefaultSingleCDockable{
 
 		((FeatureDataTableModel) featureDataTable.getModel()).updateFeatureData(source);
 		featureDataTable.scrollToSelected();
-	}
-
-	public void copySelectedFeaturesData(boolean includeHeader) {
-
-		if (featureDataTable.getSelectedRowCount() > 0) {
-
-			StringBuffer featureData = new StringBuffer();
-			int numCols = featureDataTable.getColumnCount();
-
-			if (includeHeader) {
-
-				featureData.append(featureDataTable.getColumnName(0));
-
-				for (int i = 1; i < numCols; i++)
-					featureData.append("\t" + featureDataTable.getColumnName(i));
-
-				featureData.append("\n");
-			}
-			for (int i : featureDataTable.getSelectedRows()) {
-
-				for (int j = 0; j < numCols; j++) {
-
-					final TableCellRenderer renderer = featureDataTable.getCellRenderer(i, j);
-					final Component comp = featureDataTable.prepareRenderer(renderer, i, j);
-
-					String txt = null;
-
-					if (comp instanceof JLabel)
-						txt = ((JLabel) comp).getText();
-
-					if (comp instanceof JTextPane)
-						txt = ((JTextPane) comp).getText();
-
-					if (featureDataTable.getColumnClass(j).equals(MsFeatureIdentity.class))
-						featureData.append(Jsoup.parse(txt).text());
-					else
-						featureData.append(txt.trim());
-
-					if (j < numCols - 1)
-						featureData.append("\t");
-					else
-						featureData.append("\n");
-				}
-			}
-			StringSelection stringSelection = new StringSelection(featureData.toString());
-			Clipboard clpbrd = Toolkit.getDefaultToolkit().getSystemClipboard();
-			clpbrd.setContents(stringSelection, null);
-		}
 	}
 
 	class TableUpdateTask extends LongUpdateTask {

@@ -91,8 +91,7 @@ public final class MRC2ToolBoxCore {
 	private static MainWindow mainWindow;
 	private static TaskControllerImpl taskController;
 	private static DataAnalysisProject currentExperiment;
-	private static RawDataAnalysisExperiment activeOfflineRawDataAnalysisExperiment;
-	private static Collection<CompoundLibrary>activeMsLibraries;
+	private static RawDataAnalysisExperiment activeOfflineRawDataAnalysisExperiment;	
 	private static RenjinScriptEngine rScriptEngine;
 
 	private static LIMSUser idTrackerUser;
@@ -103,6 +102,8 @@ public final class MRC2ToolBoxCore {
 	public static CacheAccess<Object, Object> featureChromatogramCache;
 	public static CacheAccess<Object, Object> compoundIdCache;
 	public static CacheAccess<Object, Object> msmsLibraryCache;
+	
+	private static Collection<CompoundLibrary>activeMsLibraries;
 	
 	public static String COMPONENT_IDENTIFIER ="COMPONENT_IDENTIFIER";
 
@@ -204,8 +205,8 @@ public final class MRC2ToolBoxCore {
 		taskController = new TaskControllerImpl();
 		taskController.initModule();
 		taskController.setMaxRunningThreads(MRC2ToolBoxConfiguration.getMaxThreadNumber());
-		activeMsLibraries = new TreeSet<CompoundLibrary>();
 		rawDataMap = new HashMap<DataFile, LCMSData>();
+		activeMsLibraries = new TreeSet<CompoundLibrary>();
 	
 	    ClassyFireOntologyLoader ontologyLoader = 
 	    		new ClassyFireOntologyLoader();
@@ -290,11 +291,7 @@ public final class MRC2ToolBoxCore {
         dbConnectionDialog.setLocation(x, y);
         dbConnectionDialog.setVisible(true);
 	}
-
-	public static Collection<CompoundLibrary> getActiveMsLibraries() {
-		return activeMsLibraries;
-	}
-
+	
 	public static void setActiveMetabolomicsExperiment(DataAnalysisProject newExperiment) {
 		MRC2ToolBoxCore.currentExperiment = newExperiment;
 	}
@@ -420,5 +417,9 @@ public final class MRC2ToolBoxCore {
 	public static void setActiveOfflineRawDataAnalysisExperiment(
 			RawDataAnalysisExperiment newRawDataAnalysisExperiment) {
 		activeOfflineRawDataAnalysisExperiment = newRawDataAnalysisExperiment;
+	}
+
+	public static Collection<CompoundLibrary> getActiveMsLibraries() {
+		return activeMsLibraries;
 	}
 }

@@ -21,7 +21,9 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.tables.renderers;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.Insets;
 
 import javax.swing.JTable;
@@ -62,12 +64,14 @@ public class IdentityWordWrapCellRenderer extends JTextArea implements TableCell
 			return this;
 		}
 		CompoundIdentity id = null;
+		boolean isQc = false;
 		if(value instanceof CompoundIdentity)
 			id = (CompoundIdentity)value;
 		
-		if(value instanceof MsFeatureIdentity)
-			id = ((MsFeatureIdentity)value).getCompoundIdentity();
-		
+		if(value instanceof MsFeatureIdentity) {
+			id = ((MsFeatureIdentity)value).getCompoundIdentity();			
+			isQc = ((MsFeatureIdentity)value).isQcStandard();
+		}		
 		if(id == null) {
 			setText("");
 			return this;
@@ -91,6 +95,10 @@ public class IdentityWordWrapCellRenderer extends JTextArea implements TableCell
 		if (idField.equals(CompoundIdentityField.SMILES))
 			text = id.getSmiles();
 
+		if(isQc) {
+			setFont(new Font("Default", Font.BOLD, getFont().getSize()));
+			setForeground(Color.RED);
+		}
 		setText(text);
 	
         setSize(table.getColumnModel().getColumn(column).getWidth(), getPreferredSize().height);

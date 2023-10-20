@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
@@ -71,6 +72,7 @@ public class FeatureDataTableModel extends BasicTableModel {
 	public static final String SAMPLE_RSD_COLUMN = "Sample RSD";
 	public static final String SAMPLE_FREQUENCY_COLUMN = "Sample freq.";
 	public static final String DATA_PIPELINE_COLUMN = "Data pipeline";
+//	public static final String QC_COLUMN = "Data pipeline";
 
 	public FeatureDataTableModel() {
 		super();
@@ -81,6 +83,7 @@ public class FeatureDataTableModel extends BasicTableModel {
 				new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
 				new ColumnContext(DATABSE_LINK_COLUMN, MsFeatureIdentity.class, false),
 				new ColumnContext(AMBIGUITY_COLUMN, Boolean.class, false),
+//				new ColumnContext(QC_COLUMN, Boolean.class, false),
 				new ColumnContext(CHEM_MOD_OBSERVED_COLUMN, Adduct.class, false),
 				new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, Adduct.class, false),
 				new ColumnContext(RETENTION_COLUMN, Double.class, false),
@@ -128,18 +131,24 @@ public class FeatureDataTableModel extends BasicTableModel {
 					chmodObserved = cf.getSpectrum().getPrimaryAdduct();
 					mcMillanDelta = cf.getSpectrum().getMcMillanCutoffPercentDelta();
 				}
+//				boolean qc = false;
 				if(cf.getPrimaryIdentity() != null) {
 					compoundName = cf.getPrimaryIdentity().getIdentityName();
 					if(cf.getPrimaryIdentity().getMsRtLibraryMatch() != null)
 					chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
+//					qc = cf.getPrimaryIdentity().isQcStandard();
 				}
-				boolean ambig = cf.getIdentifications().size() > 1;
+				boolean ambig = cf.getIdentifications().stream().
+						filter(i -> Objects.nonNull(i.getCompoundIdentity())).count() > 1;
+				
+				
 				Object[] obj = {
 						count,
 						cf,
 						compoundName,
 						cf.getPrimaryIdentity(),
 						ambig,
+//						qc,
 						chmodObserved,
 						chmodLibrary,
 						cf.getRetentionTime(),
@@ -186,10 +195,12 @@ public class FeatureDataTableModel extends BasicTableModel {
 			charge = cf.getCharge();
 			chmodObserved = cf.getSpectrum().getPrimaryAdduct();
 		}
+//		boolean qc = false;
 		if(cf.getPrimaryIdentity() != null) {
 			compoundName = cf.getPrimaryIdentity().getIdentityName();
 			if(cf.getPrimaryIdentity().getMsRtLibraryMatch() != null)
 			chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
+//			qc = cf.getPrimaryIdentity().isQcStandard();
 		}
 		boolean ambig = cf.getIdentifications().size() > 1;
 
@@ -197,6 +208,7 @@ public class FeatureDataTableModel extends BasicTableModel {
 		setValueAt(compoundName, row, getColumnIndex(COMPOUND_NAME_COLUMN));
 		setValueAt(cf.getPrimaryIdentity(), row, getColumnIndex(DATABSE_LINK_COLUMN));
 		setValueAt(ambig, row, getColumnIndex(AMBIGUITY_COLUMN));
+//		setValueAt(qc, row, getColumnIndex(QC_COLUMN));
 		setValueAt(chmodObserved, row, getColumnIndex(CHEM_MOD_OBSERVED_COLUMN));
 		setValueAt(chmodLibrary, row, getColumnIndex(CHEM_MOD_LIBRARY_COLUMN));
 		setValueAt(cf.getRetentionTime(), row, getColumnIndex(RETENTION_COLUMN));

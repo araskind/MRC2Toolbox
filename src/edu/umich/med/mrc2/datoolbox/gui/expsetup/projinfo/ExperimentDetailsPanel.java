@@ -51,6 +51,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.expsetup.dpl.DataPipelineDefinitionDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.main.StatusBar;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.BuildInformation;
@@ -364,6 +365,7 @@ public class ExperimentDetailsPanel extends DockableMRC2ToolboxPanel {
 
 		currentExperiment.setName(nameTextArea.getText());
 		MRC2ToolBoxCore.getMainWindow().setTitle(BuildInformation.getProgramName() + " - " + currentExperiment.getName());
+		StatusBar.setExperimentName(currentExperiment.getName());
 		nameTextArea.setEditable(false);
 		nameEditButton.setText("Edit");
 		nameEditButton.setActionCommand(MainActionCommands.EDIT_EXPERIMENT_NAME_COMMAND.getName());

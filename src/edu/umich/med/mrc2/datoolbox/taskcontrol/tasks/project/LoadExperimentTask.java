@@ -153,7 +153,7 @@ public class LoadExperimentTask extends AbstractTask {
 	}
 
 	private void updateFeatureIdentifications() {
-		// TODO Auto-generated method stub
+
 		taskDescription = "Processing identifications ... ";
 		
 		for (DataPipeline dataPipeline : newExperiment.getDataPipelines()) {

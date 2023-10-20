@@ -640,7 +640,7 @@ public class MainWindow extends JFrame
 		
 		if(currentExperiment != null) {
 			SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
-			spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
+			spt.addTaskListener(this);
 			MRC2ToolBoxCore.getTaskController().addTask(spt);
 		}
 		if(MRC2ToolBoxCore.getActiveOfflineRawDataAnalysisExperiment() != null) {

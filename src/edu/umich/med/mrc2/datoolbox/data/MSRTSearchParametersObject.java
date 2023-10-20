@@ -28,6 +28,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 
 public class MSRTSearchParametersObject {
 
+	private boolean clearPreviousResults;
 	private double massError;
 	private MassErrorType massErrorType;
 	private boolean relaxMassErrorForMinorIsotopes;
@@ -38,6 +39,7 @@ public class MSRTSearchParametersObject {
 	private Collection<String>libraryIds;
 	
 	public MSRTSearchParametersObject(
+			boolean clearPreviousResults,
 			double massError, 
 			MassErrorType massErrorType,
 			boolean relaxMassErrorForMinorIsotopes, 
@@ -46,6 +48,7 @@ public class MSRTSearchParametersObject {
 			boolean useCustomRtWindow, 
 			int maxHits) {
 		super();
+		this.clearPreviousResults = clearPreviousResults;
 		this.massError = massError;
 		this.massErrorType = massErrorType;
 		this.relaxMassErrorForMinorIsotopes = relaxMassErrorForMinorIsotopes;
@@ -120,5 +123,13 @@ public class MSRTSearchParametersObject {
 	
 	public void addLibraryId(String libraryId) {
 		libraryIds.add(libraryId);
+	}
+
+	public boolean isClearPreviousResults() {
+		return clearPreviousResults;
+	}
+
+	public void setClearPreviousResults(boolean clearPreviousResults) {
+		this.clearPreviousResults = clearPreviousResults;
 	}	
 }

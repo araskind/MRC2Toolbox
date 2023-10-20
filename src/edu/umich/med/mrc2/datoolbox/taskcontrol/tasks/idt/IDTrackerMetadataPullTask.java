@@ -211,6 +211,10 @@ public class IDTrackerMetadataPullTask extends AbstractTask {
 			MSMSClusterDataSetManager.refreshMSMSClusterDataSetList();
 			processed = processed + 3;
 			
+			taskDescription = "Refreshing MS/RT library list ";
+			IDTDataCache.refreshMsRtLibraryList();
+			processed = processed + 3;
+			
 			setStatus(TaskStatus.FINISHED);
 		}
 		catch (Exception e) {

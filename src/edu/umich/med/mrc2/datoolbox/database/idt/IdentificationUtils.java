@@ -154,7 +154,7 @@ public class IdentificationUtils {
 		String query =
 			"SELECT I.ACCESSION, I.LIBRARY_ENTRY_ID, I.ADDUCT_ID, I.COMPOSITE_ADDUCT_ID,  " +
 			"I.IDENTIFICATION_CONFIDENCE, I.ID_SOURCE, I.MATCH_SCORE,  " +
-			"I.IS_PRIMARY, I.IDENTIFICATION_LEVEL_ID, I.MATCH_ID, C.RETENTION_TIME " +
+			"I.IS_PRIMARY, I.IDENTIFICATION_LEVEL_ID, I.MATCH_ID, C.RETENTION_TIME, C.LIBRARY_ID " +
 			"FROM POOLED_MS1_FEATURE_LIBRARY_MATCH I " +
 			"LEFT JOIN MS_LIBRARY_COMPONENT C ON I.LIBRARY_ENTRY_ID = C.TARGET_ID " +
 			"WHERE I.POOLED_MS_FEATURE_ID = ? ";
@@ -170,6 +170,7 @@ public class IdentificationUtils {
 			MsFeatureIdentity id = new MsFeatureIdentity(compoundIdentity, confidenceLevel);
 			id.setIdSource(CompoundIdSource.getIdSourceByName(rs.getString("ID_SOURCE")));
 			MsRtLibraryMatch match = new MsRtLibraryMatch(rs.getString("LIBRARY_ENTRY_ID"));
+			match.setLibraryId(rs.getString("LIBRARY_ID"));
 			match.setExpectedRetention(rs.getDouble("RETENTION_TIME"));
 			match.setScore(rs.getDouble("MATCH_SCORE"));
 			String adductName = rs.getString("ADDUCT_NAME");

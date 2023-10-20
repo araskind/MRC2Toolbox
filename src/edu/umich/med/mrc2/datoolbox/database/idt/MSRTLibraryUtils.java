@@ -885,7 +885,8 @@ public class MSRTLibraryUtils {
 
 		String query =
 			"SELECT D.ACCESSION, D.SOURCE_DB, D.PRIMARY_NAME, "
-			+ "D.MOL_FORMULA, D.EXACT_MASS, D.SMILES, D.INCHI_KEY, C.RETENTION_TIME, C.IS_QC " +
+			+ "D.MOL_FORMULA, D.EXACT_MASS, D.SMILES, D.INCHI_KEY, "
+			+ "C.RETENTION_TIME, C.IS_QC, C.LIBRARY_ID " +
 			"FROM COMPOUND_DATA D, MS_LIBRARY_COMPONENT C "
 			+ "WHERE D.ACCESSION = C.ACCESSION AND C.TARGET_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -912,6 +913,7 @@ public class MSRTLibraryUtils {
 						identity, CompoundIdentificationConfidence.ACCURATE_MASS_RT);
 
 				MsRtLibraryMatch libMatch = new MsRtLibraryMatch(libraryTargetId);
+				libMatch.setLibraryId(rs.getString("LIBRARY_ID"));
 				libMatch.setExpectedRetention(rs.getDouble("RETENTION_TIME"));
 				libMatch.setScore(100.0d);
 				msId.setMsRtLibraryMatch(libMatch);

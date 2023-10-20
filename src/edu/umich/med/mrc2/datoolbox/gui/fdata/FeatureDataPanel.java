@@ -84,6 +84,7 @@ import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureDataCleanupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.noid.MissingIdentificationsDialog;
 import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.DockableUniversalIdentificationResultsTable;
+import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.MetabolomicsIdentificationTableModelListener;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.MultiFileDataImportDialog;
@@ -221,15 +222,13 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				"FeatureDataPanelCorrelationDataPanel", "Feature correlation");
 		spectrumTable = new DockableMsTable(
 				"FeatureDataPanelDockableMsTableMS1", "MS1 table");
-//		idTable = new DockableIdentificationResultsTable(
-//				"DockableFeatureDataTableDockableIdentificationResultsTable", "Identifications");
 		
 		identificationsTable = new DockableUniversalIdentificationResultsTable(
 				"FeatureDataPanelUniversalIdentificationResultsTable", "Identifications");
 		identificationsTable.getTable().getSelectionModel().addListSelectionListener(this);
 		
-//		identificationsTable.getTable().setIdentificationTableModelListener(
-//				new IdentificationTableModelListener(this));
+		identificationsTable.getTable().setIdentificationTableModelListener(
+				new MetabolomicsIdentificationTableModelListener(this));
 		
 		molStructurePanel = new DockableMolStructurePanel(
 				"FeatureDataPanelDockableMolStructurePanel");
@@ -429,12 +428,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			// Feature popup
 			if (command.equals(MainActionCommands.EDIT_FEATURE_METADATA_COMMAND.getName()))
 				editFeatureMetaData();
-
-			if (command.equals(MainActionCommands.COPY_SELECTED_ROWS_COMMAND.getName()))
-				copySelectedFeaturesData(false);
-
-			if (command.equals(MainActionCommands.COPY_SELECTED_ROWS_WITH_HEADER_COMMAND.getName()))
-				copySelectedFeaturesData(true);
 
 			// if(command.equals(MainActionCommands.ADD_SELECTED_FEATURES_TO_SUBSET_COMMAND.getName()))
 			// addSelectedFeaturesToActiveSubset();
@@ -1123,10 +1116,6 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		featureAnnotationPanel.clearPanel();
 	}
 
-	private void copySelectedFeaturesData(boolean includeHeader) {
-		featureDataTable.copySelectedFeaturesData(includeHeader);
-	}
-
 	private void editFeatureMetaData() {
 
 		MsFeature feature = featureDataTable.getFeatureAtPopup();
@@ -1192,6 +1181,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		Collection<MsFeature> selected = featureDataTable.getSelectedFeatures();
 		return selected.toArray(new MsFeature[selected.size()]);
+	}
+	
+	public MsFeature getSelectedFeature() {
+		return featureDataTable.getSelectedFeature();
 	}
 
 	private void imputeMissingData() {

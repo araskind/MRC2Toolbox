@@ -63,7 +63,7 @@ import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.enums.AdductSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.Polarity;
-import edu.umich.med.mrc2.datoolbox.database.idt.MSRTLibraryUtils;
+import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.library.feditor.AdductSelectionTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
@@ -442,20 +442,14 @@ public class LibraryInfoDialog extends JDialog
 		}
 		else {
 			//	Check for name conflict
-			Collection<CompoundLibrary> libList = new ArrayList<CompoundLibrary>();			
-			try {
-				libList = MSRTLibraryUtils.getAllLibraries();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			Collection<CompoundLibrary> libList = 
+					IDTDataCache.getMsRtLibraryList();			
 			for (CompoundLibrary l : libList) {
 				
 				if(l.getLibraryName().equals(name) 
 						&& !l.getLibraryId().equals(currentLibrary.getLibraryId())) {
 					errors.add("A different library with name \"" + name + "\" already exists");
-				}
-				
+				}				
 			}
 		}
 		if(!saveButton.getActionCommand().equals(

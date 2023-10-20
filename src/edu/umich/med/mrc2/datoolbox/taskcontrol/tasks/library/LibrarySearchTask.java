@@ -53,6 +53,7 @@ import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 
+	private boolean clearPreviousResults;
 	private Collection<CompoundLibrary>targetLibraries;
 	private Collection<String>targetLibraryIds;
 	private Collection<String>librariesToLoad;
@@ -95,6 +96,8 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 	public LibrarySearchTask(
 			Collection<MsFeature> featuresToSearch, 
 			MSRTSearchParametersObject spo) {
+		
+		this.clearPreviousResults = spo.isClearPreviousResults();
 		this.targetLibraryIds = spo.getLibraryIds();
 		this.inputFeatures = featuresToSearch;
 		this.massAccuracy = spo.getMassError();
@@ -114,12 +117,39 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 		
 		setStatus(TaskStatus.PROCESSING);
 		
+		if(clearPreviousResults)
+			clearExistingMSRTSearchResults();
+		
 		//	Load all libraries
 		loadLibraries();
 		
 		if(librariesLoaded) {
 			searchLibraries();
 			setStatus(TaskStatus.FINISHED);
+		}
+	}
+
+	private void clearExistingMSRTSearchResults() {
+		
+		taskDescription = "Clearing previous search results ...";
+		total = inputFeatures.size();
+		processed = 0;
+		Collection<MsFeatureIdentity>toRemove = 
+				new ArrayList<MsFeatureIdentity>();
+		for(MsFeature f : inputFeatures) {
+
+			toRemove.clear();
+			for(MsFeatureIdentity id : f.getIdentifications()) {
+				
+				if(id.getMsRtLibraryMatch() != null)
+					toRemove.add(id);
+			}	
+			if(!toRemove.isEmpty()) {
+				
+				for(MsFeatureIdentity id : toRemove)
+					f.removeIdentity(id);
+			}
+			processed++;
 		}
 	}
 
@@ -273,7 +303,7 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 					matches,
 					mslf.getRetentionTime(),
 					mslf.getSpectrum());
-
+			rtlMatch.setLibraryId(mslf.getLibraryId());
 			match.setMsRtLibraryMatch(rtlMatch);
 		}
 		return match;

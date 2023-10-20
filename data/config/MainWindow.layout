@@ -233,12 +233,12 @@
 													</placeholders>
 												</leaf>
 												<node nodeId="1676064563113" orientation="HORIZONTAL" divider="0.28317601332593006">
-													<leaf id="1" nodeId="1676064552084">
+													<leaf id="0" nodeId="1676064552084">
 														<placeholders>
 															<placeholder>dock.single.ExperimentSetupDraw</placeholder>
 														</placeholders>
 													</leaf>
-													<leaf id="0" nodeId="1672779039466">
+													<leaf id="1" nodeId="1672779039466">
 														<placeholders>
 															<placeholder>dock.single.CompoundDatabasePanel</placeholder>
 															<placeholder>dock.single.MgfPanel</placeholder>
@@ -367,8 +367,18 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
+									<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
+										<replacement id="dockablesingle ExperimentSetupDraw"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>ExperimentSetupDraw</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
+								</child>
+								<child>
 									<layout factory="delegate_StackDockStationFactory">
-										<selected>4</selected>
+										<selected>1</selected>
 										<placeholders>
 											<version>0</version>
 											<format>dock.PlaceholderList</format>
@@ -694,16 +704,6 @@
 											<children ignore="false"/>
 										</child>
 									</children>
-								</child>
-								<child>
-									<layout factory="predefined" placeholder="dock.single.ExperimentSetupDraw">
-										<replacement id="dockablesingle ExperimentSetupDraw"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>ExperimentSetupDraw</id>
-											<area/>
-										</delegate>
-									</layout>
-									<children ignore="false"/>
 								</child>
 							</children>
 						</root>
