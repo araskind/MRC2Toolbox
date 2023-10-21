@@ -594,7 +594,7 @@ public abstract class CEFProcessingTask extends AbstractTask {
 		String formula = "";
 		if(lt.getPrimaryIdentity() != null 
 				&& lt.getPrimaryIdentity().getCompoundIdentity() != null) {
-			compoundName = lt.getPrimaryIdentity().getName();
+			compoundName = lt.getPrimaryIdentity().getCompoundName();
 			formula = lt.getPrimaryIdentity().getCompoundIdentity().getFormula();
 		}
 		else {

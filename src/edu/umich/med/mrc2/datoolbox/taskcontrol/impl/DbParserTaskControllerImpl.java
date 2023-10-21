@@ -70,7 +70,7 @@ public class DbParserTaskControllerImpl extends TaskControllerImpl {
 
 		while (true) {
 
-			int currentQueueSize = taskQueue.getNumOfWaitingTasks();
+			int currentQueueSize = taskQueue.getNumOfRunningAndWaitingTasks();
 			if (currentQueueSize != previousQueueSize) {
 				previousQueueSize = currentQueueSize;
 				for (TaskControlListener listener : listeners)

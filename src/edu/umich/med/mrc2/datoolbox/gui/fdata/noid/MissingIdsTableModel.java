@@ -95,7 +95,7 @@ public class MissingIdsTableModel extends BasicTableModel{
 				CompoundIdentificationConfidence idc = null;
 				if(lf.getPrimaryIdentity() != null) {
 
-					compoundName = lf.getPrimaryIdentity().getName();
+					compoundName = lf.getPrimaryIdentity().getCompoundName();
 					idc= lf.getPrimaryIdentity().getConfidenceLevel();
 				}
 				Object[] obj = {

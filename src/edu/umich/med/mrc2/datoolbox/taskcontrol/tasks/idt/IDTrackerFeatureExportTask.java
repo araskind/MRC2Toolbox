@@ -576,7 +576,7 @@ public abstract class IDTrackerFeatureExportTask extends AbstractTask {
 
 		compoundName = id.getIdentityName();
 		if(id.getCompoundIdentity() != null)
-			compoundName = id.getName();
+			compoundName = id.getCompoundName();
 		
 		if(compoundName == null)
 			compoundName = "";

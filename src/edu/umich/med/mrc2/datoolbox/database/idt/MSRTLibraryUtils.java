@@ -886,7 +886,7 @@ public class MSRTLibraryUtils {
 		String query =
 			"SELECT D.ACCESSION, D.SOURCE_DB, D.PRIMARY_NAME, "
 			+ "D.MOL_FORMULA, D.EXACT_MASS, D.SMILES, D.INCHI_KEY, "
-			+ "C.RETENTION_TIME, C.IS_QC, C.LIBRARY_ID " +
+			+ "C.RETENTION_TIME, C.IS_QC, C.LIBRARY_ID, C.NAME " +
 			"FROM COMPOUND_DATA D, MS_LIBRARY_COMPONENT C "
 			+ "WHERE D.ACCESSION = C.ACCESSION AND C.TARGET_ID = ?";
 		PreparedStatement ps = conn.prepareStatement(query);
@@ -912,10 +912,20 @@ public class MSRTLibraryUtils {
 				MsFeatureIdentity msId = new MsFeatureIdentity(
 						identity, CompoundIdentificationConfidence.ACCURATE_MASS_RT);
 
-				MsRtLibraryMatch libMatch = new MsRtLibraryMatch(libraryTargetId);
-				libMatch.setLibraryId(rs.getString("LIBRARY_ID"));
-				libMatch.setExpectedRetention(rs.getDouble("RETENTION_TIME"));
-				libMatch.setScore(100.0d);
+//				MsRtLibraryMatch libMatch = new MsRtLibraryMatch(libraryTargetId);
+//				libMatch.setLibraryId(rs.getString("LIBRARY_ID"));
+//				libMatch.setExpectedRetention(rs.getDouble("RETENTION_TIME"));
+//				libMatch.setScore(100.0d);
+				
+				MsRtLibraryMatch libMatch = new MsRtLibraryMatch(
+						rs.getString("LIBRARY_ID"), 			
+						libraryTargetId, 
+						rs.getString("NAME"), 
+						100.0d,
+						rs.getDouble("RETENTION_TIME"), 
+						null,
+						null);
+				
 				msId.setMsRtLibraryMatch(libMatch);
 				msId.setQcStandard(rs.getString("IS_QC") != null);
 				identityMap.put(libraryTargetId, msId);

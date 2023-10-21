@@ -109,7 +109,7 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 
 				String compoundName = "";
 				if(cf.getPrimaryIdentity() != null) {
-					compoundName = cf.getPrimaryIdentity().getName();
+					compoundName = cf.getPrimaryIdentity().getCompoundName();
 					MsRtLibraryMatch msRtMatch = cf.getPrimaryIdentity().getMsRtLibraryMatch();
 					if(msRtMatch != null) {
 

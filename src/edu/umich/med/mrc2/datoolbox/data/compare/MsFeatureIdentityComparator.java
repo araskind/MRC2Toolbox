@@ -111,9 +111,9 @@ public class MsFeatureIdentityComparator extends ObjectCompatrator<MsFeatureIden
 				result = Double.compare(o1.getScore(), o2.getScore());
 
 			if (direction == SortDirection.ASC)
-				return -result;
-			else
 				return result;
+			else
+				return -result;
 			
 		case msmsScore:
 			result = Double.compare(o1.getScore(), o2.getScore());

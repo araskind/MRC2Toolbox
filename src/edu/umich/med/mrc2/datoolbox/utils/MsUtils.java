@@ -847,7 +847,7 @@ public class MsUtils {
 				
 				MsPoint parentPeak = id.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getParent();
 				if(parentPeak == null) {
-					System.out.println("No parent peak for " + id.getName());
+					System.out.println("No parent peak for " + id.getCompoundName());
 					return 0.0d;
 				}
 				TandemMassSpectrum msms = parentFeature.getSpectrum().getExperimentalTandemSpectrum();
@@ -909,7 +909,7 @@ public class MsUtils {
 				
 				MsPoint parentPeak = id.getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getParent();
 				if(parentPeak == null) {
-					System.out.println("No parent peak for " + id.getName());
+					System.out.println("No parent peak for " + id.getCompoundName());
 					return 0.0d;
 				}
 				return calculateMassError(parentPeak.getMz(), expectedMz, errorType);				

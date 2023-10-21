@@ -286,7 +286,7 @@ public class DataExportTask extends AbstractTask {
 			String compoundName = msf.getBicMetaboliteName();
 			if(msf.isIdentified()){
 
-				compoundName = msf.getPrimaryIdentity().getName();
+				compoundName = msf.getPrimaryIdentity().getCompoundName();
 
 				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
 
@@ -526,7 +526,7 @@ public class DataExportTask extends AbstractTask {
 				if(msf.getDatabaseId(CompoundDatabaseEnum.CAS) != null)
 					casId = msf.getDatabaseId(CompoundDatabaseEnum.CAS);
 
-				compoundName = msf.getPrimaryIdentity().getName();
+				compoundName = msf.getPrimaryIdentity().getCompoundName();
 
 				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
 
@@ -623,7 +623,7 @@ public class DataExportTask extends AbstractTask {
 			String compoundName = msf.getBicMetaboliteName();
 			if(msf.isIdentified()){
 
-				compoundName = msf.getPrimaryIdentity().getName();
+				compoundName = msf.getPrimaryIdentity().getCompoundName();
 
 				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
 

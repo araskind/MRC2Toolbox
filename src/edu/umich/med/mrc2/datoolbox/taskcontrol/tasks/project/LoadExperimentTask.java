@@ -159,10 +159,10 @@ public class LoadExperimentTask extends AbstractTask {
 		for (DataPipeline dataPipeline : newExperiment.getDataPipelines()) {
 			
 			for(MsFeature feature : newExperiment.getMsFeaturesForDataPipeline(dataPipeline)) {
-
-				MsFeatureIdentity fbfId = null;
+				
 				for(MsFeatureIdentity id : feature.getIdentifications()) {
 					
+					MsFeatureIdentity fbfId = null;
 					if(id.getCompoundIdentity() == null 
 							|| id.getCompoundIdentity().getPrimaryDatabaseId() == null)
 						continue;

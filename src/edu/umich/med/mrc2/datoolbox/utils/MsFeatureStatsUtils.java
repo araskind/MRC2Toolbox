@@ -223,7 +223,7 @@ public class MsFeatureStatsUtils {
 				features = features.stream().
 						filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 						filter(f -> f.getMsFeature().getIdentifications().stream().
-								filter(i -> i.getName().toUpperCase().
+								filter(i -> i.getCompoundName().toUpperCase().
 										contains(upName)).findFirst().orElse(null) != null).
 						collect(Collectors.toList());
 			}
@@ -231,7 +231,7 @@ public class MsFeatureStatsUtils {
 				features = features.stream().
 						filter(f -> Objects.nonNull(f.getMsFeature().getPrimaryIdentity())).
 						filter(f -> f.getMsFeature().getPrimaryIdentity().
-								getName().toUpperCase().contains(upName)).
+								getCompoundName().toUpperCase().contains(upName)).
 						collect(Collectors.toList());
 			}
 			if(features.isEmpty())

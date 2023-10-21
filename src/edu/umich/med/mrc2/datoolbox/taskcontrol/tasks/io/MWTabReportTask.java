@@ -512,7 +512,7 @@ public class MWTabReportTask extends AbstractTask {
 			String compoundName = msf.getName();
 			if(msf.isIdentified()){
 
-				compoundName = msf.getPrimaryIdentity().getName();
+				compoundName = msf.getPrimaryIdentity().getCompoundName();
 				if(msf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
 
 					AdductMatch tam = msf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();

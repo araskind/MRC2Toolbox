@@ -59,7 +59,7 @@ public class MsFeatureFormat  extends Format {
 			if (idField.equals(SortProperty.pimaryId)){
 
 				if(msf.getPrimaryIdentity() != null)
-					text = msf.getPrimaryIdentity().getName();
+					text = msf.getPrimaryIdentity().getCompoundName();
 				else
 					text = msf.getName();
 			}

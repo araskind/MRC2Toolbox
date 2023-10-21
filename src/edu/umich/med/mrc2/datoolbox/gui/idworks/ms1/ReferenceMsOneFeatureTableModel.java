@@ -121,7 +121,7 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 			
 			MSFeatureIdentificationLevel idLevel = null;
 			if(cf.getPrimaryIdentity() != null) {
-				compoundName = cf.getPrimaryIdentity().getName();
+				compoundName = cf.getPrimaryIdentity().getCompoundName();
 				idLevel = cf.getPrimaryIdentity().getIdentificationLevel();
 				adduct = cf.getPrimaryIdentity().getPrimaryAdduct();
 			}
@@ -190,7 +190,7 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 						getReferenceMsMsLibraryMatch().getMatchedLibraryFeature().getUniqueId() + " has no compound ID");
 			}
 			else {
-				compoundName = cf.getPrimaryIdentity().getName();
+				compoundName = cf.getPrimaryIdentity().getCompoundName();
 			}
 			if(cf.getPrimaryIdentity().getMsRtLibraryMatch() != null) {
 				adduct = cf.getPrimaryIdentity().getMsRtLibraryMatch().

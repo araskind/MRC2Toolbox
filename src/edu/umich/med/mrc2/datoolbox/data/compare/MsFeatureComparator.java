@@ -108,13 +108,13 @@ public class MsFeatureComparator extends ObjectCompatrator<MsFeature> {
 			case pimaryId:
 				result = 0;
 				if (o1.getPrimaryIdentity() != null && o2.getPrimaryIdentity() != null)
-					result = o1.getPrimaryIdentity().getName().compareTo(o2.getPrimaryIdentity().getName());
+					result = o1.getPrimaryIdentity().getCompoundName().compareTo(o2.getPrimaryIdentity().getCompoundName());
 	
 				if (o1.getPrimaryIdentity() != null && o2.getPrimaryIdentity() == null)
-					result = o1.getPrimaryIdentity().getName().compareTo(o2.getName());
+					result = o1.getPrimaryIdentity().getCompoundName().compareTo(o2.getName());
 	
 				if (o1.getPrimaryIdentity() == null && o2.getPrimaryIdentity() != null)
-					result = o1.getName().compareTo(o2.getPrimaryIdentity().getName());
+					result = o1.getName().compareTo(o2.getPrimaryIdentity().getCompoundName());
 	
 				if (o1.getPrimaryIdentity() == null && o2.getPrimaryIdentity() == null) {
 					result = o1.getName().compareTo(o2.getName());

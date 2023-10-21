@@ -111,7 +111,7 @@ public class MsFeatureInfoBundleCluster {
 			primaryIdentity = newId;
 		
 		if(primaryIdentity != null) {
-			name = primaryIdentity.getName();
+			name = primaryIdentity.getCompoundName();
 			if(mzRtName != null)
 				name += " | " + mzRtName;
 		}
@@ -133,7 +133,7 @@ public class MsFeatureInfoBundleCluster {
 				" | RT " + MRC2ToolBoxConfiguration.getRtFormat().format(rt);
 		
 		if(primaryIdentity != null) {
-			name = primaryIdentity.getName();
+			name = primaryIdentity.getCompoundName();
 			if(mzRtName != null)
 				name += " | " + mzRtName;
 		}

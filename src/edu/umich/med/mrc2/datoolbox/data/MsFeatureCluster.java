@@ -536,7 +536,7 @@ public class MsFeatureCluster implements Serializable {
 		String clusterName = "";
 		if(getPrimaryIdentity() != null 
 				&& getPrimaryIdentity().getCompoundIdentity() != null)
-			clusterName = getPrimaryIdentity().getName() + " ";
+			clusterName = getPrimaryIdentity().getCompoundName() + " ";
 
 		clusterName += 
 				"RT " + MRC2ToolBoxConfiguration.getRtFormat().format(rtRange.getAverage()) + 

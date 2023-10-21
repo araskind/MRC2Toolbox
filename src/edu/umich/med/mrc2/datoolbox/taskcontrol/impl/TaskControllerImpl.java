@@ -173,7 +173,7 @@ public class TaskControllerImpl implements TaskController, Runnable {
 
 		while (true) {
 
-			int currentQueueSize = taskQueue.getNumOfWaitingTasks();
+			int currentQueueSize = taskQueue.getNumOfRunningAndWaitingTasks();
 			if (currentQueueSize != previousQueueSize) {
 				previousQueueSize = currentQueueSize;
 				for (TaskControlListener listener : listeners)
@@ -247,8 +247,8 @@ public class TaskControllerImpl implements TaskController, Runnable {
 		}
 	}
 
-	public void setMaxRunningThreads(int maxRunningThreads) {
-		this.maxRunningThreads = maxRunningThreads;
+	public void setMaxRunningThreads(int newMaxRunningThreads) {
+		maxRunningThreads = newMaxRunningThreads;
 	}
 
 	/**
@@ -296,4 +296,6 @@ public class TaskControllerImpl implements TaskController, Runnable {
 		getTaskQueue().clear();
 		return;
 	}
+
+
 }

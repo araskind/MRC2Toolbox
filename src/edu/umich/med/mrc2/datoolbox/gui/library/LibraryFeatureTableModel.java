@@ -117,7 +117,7 @@ public class LibraryFeatureTableModel extends BasicTableModel {
 			CompoundIdentificationConfidence idc = null;
 			if(lf.getPrimaryIdentity() != null) {
 
-				compoundName = lf.getPrimaryIdentity().getName();
+				compoundName = lf.getPrimaryIdentity().getCompoundName();
 				idc= lf.getPrimaryIdentity().getConfidenceLevel();
 			}
 			Object[] obj = {
@@ -181,7 +181,7 @@ public class LibraryFeatureTableModel extends BasicTableModel {
 		}
 		String compoundName = lf.getName();
 		if(lf.getPrimaryIdentity() != null)
-			compoundName = lf.getPrimaryIdentity().getName();
+			compoundName = lf.getPrimaryIdentity().getCompoundName();
 
 		setValueAt(lf.isActive(), row, getColumnIndex(ENABLED_COLUMN));
 		setValueAt(lf.isQcStandard(), row, getColumnIndex(QC_COLUMN));

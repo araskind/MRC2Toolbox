@@ -1460,7 +1460,7 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 				reviewLibrarySearchResults((LibrarySearchTask) e.getSource());
 
 			if (e.getSource().getClass().equals(ClearIdentificationsTask.class))
-				setTableModelFromFeatureSet(currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline));
+				resetFeatureTable();
 
 			if (e.getSource().getClass().equals(MergeDuplicateFeaturesTask.class)) {
 

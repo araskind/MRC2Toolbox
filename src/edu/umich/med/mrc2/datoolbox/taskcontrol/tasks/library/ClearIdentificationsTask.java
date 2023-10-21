@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -42,11 +41,12 @@ public class ClearIdentificationsTask  extends AbstractTask {
 	public void run() {
 
 		setStatus(TaskStatus.PROCESSING);
-
-		Set<MsFeature> featureSet =
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
-				getActiveFeatureSetForDataPipeline(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline()).
-				getFeatures().stream().filter(f -> f.isIdentified()).collect(Collectors.toSet());
+		Set<MsFeature> featureSet = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getMsFeaturesForDataPipeline(
+						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline());
+//				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
+//				getActiveFeatureSetForDataPipeline(MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline()).
+//				getFeatures().stream().filter(f -> f.isIdentified()).collect(Collectors.toSet());
 
 		total = featureSet.size();
 		processed = 0;

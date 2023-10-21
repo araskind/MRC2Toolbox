@@ -38,14 +38,18 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureInfoBundleCollection;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
+import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.project.RawDataAnalysisExperiment;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.gui.LabeledProgressBar;
 
 public class StatusBar extends JPanel implements 
@@ -63,20 +67,23 @@ public class StatusBar extends JPanel implements
 	
 	public static final String GC_COMMAND = "GC_COMMAND";
 
-	private JPanel statusTextPanel, memoryPanel;
-	private JLabel statusTextLabel;
 	private LabeledProgressBar memoryLabel;
 	private JButton gcButton;
-	private static JLabel experimentNameLabel;
-	private static JLabel featureCollectionLabel;
-	private static JLabel msmsClusterLabel;
+	private static JLabel 
+			statusTextLabel,
+			experimentNameLabel,
+			featureCollectionLabel,
+			msmsClusterLabel,
+			maxTasksLabel,
+			runningTasksLabel,
+			waitingTasksLabel;
 
 	public StatusBar() {
 
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		setBorder(new EtchedBorder());
 
-		statusTextPanel = new JPanel();
+		JPanel statusTextPanel = new JPanel();
 		statusTextPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED));
 		GridBagLayout gbl_statusTextPanel = new GridBagLayout();
 		gbl_statusTextPanel.columnWidths = new int[]{0, 0, 74, 0, 0, 0, 0};
@@ -154,18 +161,96 @@ public class StatusBar extends JPanel implements
 		gbc_msmsClusterLabel.gridx = fieldCount;
 		gbc_msmsClusterLabel.gridy = 0;
 		statusTextPanel.add(msmsClusterLabel, gbc_msmsClusterLabel);
-				
-		memoryLabel = new LabeledProgressBar();
-		memoryPanel = new JPanel();
+		
+		//	Task block
+		JPanel taskPanel = new JPanel();	
+		taskPanel.setBorder(new EmptyBorder(5, 30, 5, 30));
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
+		gridBagLayout.rowHeights = new int[]{0, 0};
+		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{0.0, Double.MIN_VALUE};
+		taskPanel.setLayout(gridBagLayout);
+		
+		JLabel lblNewLabel4 = new JLabel("Max # of tasks: ");
+		GridBagConstraints gbc_lblNewLabel4 = new GridBagConstraints();
+		gbc_lblNewLabel4.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel4.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel4.gridx = 0;
+		gbc_lblNewLabel4.gridy = 0;
+		taskPanel.add(lblNewLabel4, gbc_lblNewLabel4);
+		
+		maxTasksLabel = new JLabel(" ");
+		maxTasksLabel.setPreferredSize(new Dimension(20, 14));
+		maxTasksLabel.setMinimumSize(new Dimension(20, 14));
+		maxTasksLabel.setMaximumSize(new Dimension(30, 14));
+		maxTasksLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		GridBagConstraints gbc_maxTasksLabel = new GridBagConstraints();
+		gbc_maxTasksLabel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_maxTasksLabel.insets = new Insets(0, 0, 0, 5);
+		gbc_maxTasksLabel.gridx = 1;
+		gbc_maxTasksLabel.gridy = 0;
+		taskPanel.add(maxTasksLabel, gbc_maxTasksLabel);
+		
+		JLabel lblNewLabel5 = new JLabel("Running: ");
+		GridBagConstraints gbc_lblNewLabel5 = new GridBagConstraints();
+		gbc_lblNewLabel5.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel5.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel5.gridx = 2;
+		gbc_lblNewLabel5.gridy = 0;
+		taskPanel.add(lblNewLabel5, gbc_lblNewLabel5);
+		
+		runningTasksLabel = new JLabel(" ");
+		runningTasksLabel.setPreferredSize(new Dimension(20, 14));
+		runningTasksLabel.setMinimumSize(new Dimension(20, 14));
+		runningTasksLabel.setMaximumSize(new Dimension(30, 14));
+		runningTasksLabel.setBackground(Color.GREEN);
+		runningTasksLabel.setForeground(Color.BLACK);
+		runningTasksLabel.setOpaque(true);
+		runningTasksLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		GridBagConstraints gbc_runningTasksLabel = new GridBagConstraints();
+		gbc_runningTasksLabel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_runningTasksLabel.insets = new Insets(0, 0, 0, 5);
+		gbc_runningTasksLabel.gridx = 3;
+		gbc_runningTasksLabel.gridy = 0;
+		taskPanel.add(runningTasksLabel, gbc_runningTasksLabel);
+		
+		JLabel lblNewLabel_2 = new JLabel("Waiting: ");
+		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
+		gbc_lblNewLabel_2.gridx = 4;
+		gbc_lblNewLabel_2.gridy = 0;
+		taskPanel.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		
+		waitingTasksLabel = new JLabel(" ");
+		waitingTasksLabel.setPreferredSize(new Dimension(20, 14));
+		waitingTasksLabel.setMinimumSize(new Dimension(20, 14));
+		waitingTasksLabel.setMaximumSize(new Dimension(30, 14));
+		waitingTasksLabel.setBackground(Color.YELLOW);
+		waitingTasksLabel.setForeground(Color.BLACK);
+		waitingTasksLabel.setOpaque(true);
+		waitingTasksLabel.setFont(new Font("Tahoma", Font.BOLD, 12));
+		GridBagConstraints gbc_waitingTasksLabel = new GridBagConstraints();
+		gbc_waitingTasksLabel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_waitingTasksLabel.gridx = 5;
+		gbc_waitingTasksLabel.gridy = 0;
+		taskPanel.add(waitingTasksLabel, gbc_waitingTasksLabel);
+			
+		add(taskPanel);
+		
+		//	Memory block		
+		JPanel memoryPanel = new JPanel();
 		memoryPanel.setLayout(new BoxLayout(memoryPanel, BoxLayout.X_AXIS));
 		memoryPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED));
 		memoryPanel.add(Box
-				.createRigidArea(new Dimension(10, STATUS_BAR_HEIGHT)));
-		memoryPanel.add(memoryLabel);
+				.createRigidArea(new Dimension(10, STATUS_BAR_HEIGHT)));		
 		memoryPanel.add(Box
 				.createRigidArea(new Dimension(10, STATUS_BAR_HEIGHT)));
-
+		
+		memoryLabel = new LabeledProgressBar();
 		memoryLabel.addMouseListener(this);
+		memoryPanel.add(memoryLabel);
 		
 		gcButton = new JButton("");
 		gcButton.setIcon(garbageIcon);
@@ -178,6 +263,8 @@ public class StatusBar extends JPanel implements
 		statusTextLabel.setFont(statusBarFont);
 		statusTextLabel.setMinimumSize(new Dimension(100, STATUS_BAR_HEIGHT));
 		statusTextLabel.setPreferredSize(new Dimension(3200, STATUS_BAR_HEIGHT));
+		
+		add(taskPanel);
 				
 		gcButton.setMaximumSize(new Dimension(20, 20));
 		gcButton.setMinimumSize(new Dimension(20, 20));
@@ -278,7 +365,15 @@ public class StatusBar extends JPanel implements
 			memoryLabel.setValue(fullMem, freeMem + "MB free");
 			memoryLabel.setToolTipText("JVM memory: " + freeMem + "MB, "
 					+ totalMem + "MB total");
-
+			
+			maxTasksLabel.setText(
+					Integer.toString(MRC2ToolBoxConfiguration.getMaxThreadNumber()));
+			runningTasksLabel.setText(
+					Integer.toString(MRC2ToolBoxCore.getTaskController().
+							getTaskQueue().getNumOfTasksWithStatus(TaskStatus.PROCESSING)));
+			waitingTasksLabel.setText(
+					Integer.toString(MRC2ToolBoxCore.getTaskController().
+							getTaskQueue().getNumOfTasksWithStatus(TaskStatus.WAITING)));
 			try {
 				wait(MEMORY_LABEL_UPDATE_FREQUENCY);
 			} catch (InterruptedException e) {

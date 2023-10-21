@@ -106,7 +106,7 @@ public class DuplicateSelectionTableModel extends BasicTableModel {
 
 				String compoundName = "";
 				if(cf.getPrimaryIdentity() != null)
-					compoundName = cf.getPrimaryIdentity().getName();
+					compoundName = cf.getPrimaryIdentity().getCompoundName();
 
 				Adduct chmodLibrary = null;
 				if(cf.getSpectrum() != null)

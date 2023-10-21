@@ -72,7 +72,7 @@ public class MsFeatureRenderer extends DefaultTableCellRenderer {
 				setForeground(Color.BLACK);
 			}
 			if(msf.getPrimaryIdentity() != null && idField.equals(SortProperty.pimaryId))
-				setText(msf.getPrimaryIdentity().getName());
+				setText(msf.getPrimaryIdentity().getIdentityName());
 			else
 				setText(msf.getName());
 		}

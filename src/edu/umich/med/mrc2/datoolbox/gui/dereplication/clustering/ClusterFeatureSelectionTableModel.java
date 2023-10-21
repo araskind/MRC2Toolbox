@@ -109,7 +109,7 @@ public class ClusterFeatureSelectionTableModel extends BasicTableModel {
 				
 				String compoundName = "";
 				if(cf.getPrimaryIdentity() != null)
-					compoundName = cf.getPrimaryIdentity().getName();
+					compoundName = cf.getPrimaryIdentity().getCompoundName();
 
 				Object[] obj = {
 					cf.equals(currentCluster.getPrimaryFeature()),

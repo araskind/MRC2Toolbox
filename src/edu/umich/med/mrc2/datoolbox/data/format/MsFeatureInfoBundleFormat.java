@@ -59,7 +59,7 @@ public class MsFeatureInfoBundleFormat  extends Format {
 			if (idField.equals(SortProperty.pimaryId)){
 
 				if(msf.getMsFeature().getPrimaryIdentity() != null)
-					text = msf.getMsFeature().getPrimaryIdentity().getName();
+					text = msf.getMsFeature().getPrimaryIdentity().getCompoundName();
 				else
 					text = msf.getMsFeature().getName();
 			}

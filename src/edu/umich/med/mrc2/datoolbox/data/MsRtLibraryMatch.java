@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
+import edu.umich.med.mrc2.datoolbox.main.AdductManager;
 import edu.umich.med.mrc2.datoolbox.project.store.MsRtLibraryMatchFields;
 
 public class MsRtLibraryMatch implements Serializable {
@@ -40,15 +41,34 @@ public class MsRtLibraryMatch implements Serializable {
 	private static final long serialVersionUID = 4358335306874004672L;
 	private String libraryId;	//	TODO make sure this is always present
 	private String libraryTargetId;
+	private String libraryTargetName;
 	private double score;
 	private Set<AdductMatch>adductScoreMap;
 	private double expectedRetention = 0.0d;
 	private MassSpectrum librarySpectrum;
 
-	public MsRtLibraryMatch(String libraryTargetId) {
+	public MsRtLibraryMatch(
+			String libraryId, 			
+			String libraryTargetId, 
+			String libraryTargetName, 
+			double score,
+			double expectedRetention, 
+			MassSpectrum librarySpectrum,
+			Set<AdductMatch>adductScoreMap) {
 		super();
+		this.libraryId = libraryId;
 		this.libraryTargetId = libraryTargetId;
-		adductScoreMap = new HashSet<AdductMatch>();
+		this.libraryTargetName = libraryTargetName;
+		this.score = score;
+		this.expectedRetention = expectedRetention;
+		this.librarySpectrum = librarySpectrum;
+		this.adductScoreMap = new HashSet<AdductMatch>();
+		if(adductScoreMap != null && !adductScoreMap.isEmpty())
+			this.adductScoreMap.addAll(adductScoreMap);
+	}
+
+	public MsRtLibraryMatch(String libraryTargetId) {
+		this(null, libraryTargetId, null, 0.0d, 0.0d, null, null);		
 	}
 
 	public MsRtLibraryMatch(
@@ -56,11 +76,7 @@ public class MsRtLibraryMatch implements Serializable {
 			Set<AdductMatch> adductScoreMap,
 			double expectedRetention,
 			MassSpectrum librarySpectrum) {
-		super();
-		this.libraryTargetId = libraryTargetId;
-		this.adductScoreMap = adductScoreMap;
-		this.expectedRetention = expectedRetention;
-		this.librarySpectrum = librarySpectrum;
+		this(null, libraryTargetId, null, 0.0d, expectedRetention, librarySpectrum, adductScoreMap);
 	}
 
 	/**
@@ -187,6 +203,14 @@ public class MsRtLibraryMatch implements Serializable {
 		this.libraryId = libraryId;
 	}
 	
+	public String getLibraryTargetName() {
+		return libraryTargetName;
+	}
+
+	public void setLibraryTargetName(String libraryTargetName) {
+		this.libraryTargetName = libraryTargetName;
+	}
+	
 	public Element getXmlElement() {
 		
 		Element refMsRtElement = 
@@ -199,6 +223,10 @@ public class MsRtLibraryMatch implements Serializable {
 		if(libraryTargetId != null)
 			refMsRtElement.setAttribute(
 					MsRtLibraryMatchFields.TGID.name(), libraryTargetId);
+		
+		if(libraryTargetName != null)
+			refMsRtElement.setAttribute(
+					MsRtLibraryMatchFields.TGName.name(), libraryTargetName);
 		
 		if(score > 0.0)
 			refMsRtElement.setAttribute(
@@ -213,12 +241,53 @@ public class MsRtLibraryMatch implements Serializable {
 			refMsRtElement.setAttribute(
 					MsRtLibraryMatchFields.AdScores.name(), 
 					StringUtils.join(amList, "@"));
-		}		
+		}	
+		if(librarySpectrum != null) 
+			refMsRtElement.addContent(librarySpectrum.getXmlElement());
+		
 		return refMsRtElement;
 	}
 	
-	public MsRtLibraryMatch(Element msRtMatch) {
-		// TODO Auto-generated constructor stub
+	public MsRtLibraryMatch(Element msRtMatchElement) {
+		
+		adductScoreMap = new HashSet<AdductMatch>();
+		libraryId = msRtMatchElement.getAttributeValue(
+				MsRtLibraryMatchFields.LibId.name());
+		libraryTargetId = msRtMatchElement.getAttributeValue(
+				MsRtLibraryMatchFields.TGID.name());
+		libraryTargetName = msRtMatchElement.getAttributeValue(
+				MsRtLibraryMatchFields.TGName.name());
+		 
+		String scoreString = 
+				msRtMatchElement.getAttributeValue(MsRtLibraryMatchFields.Score.name());
+		if(scoreString != null)
+			score = Double.parseDouble(scoreString);
+
+		String adductScoreMapString = 
+				msRtMatchElement.getAttributeValue(MsRtLibraryMatchFields.AdScores.name());
+		if(adductScoreMapString != null 
+				&& !adductScoreMapString.isEmpty()) {
+			String[]adductList = adductScoreMapString.split("@");
+			for(String adductListElement : adductList) {
+				
+				String[]parts = adductListElement.split("|");
+				if(parts.length == 3) {
+					
+					Adduct libMatch = AdductManager.getAdductById(parts[0]);
+					Adduct unkMatch = AdductManager.getAdductById(parts[1]);
+					double amScore = Double.parseDouble(parts[2]);
+					if(libMatch != null && unkMatch != null) {
+						
+						AdductMatch am = new AdductMatch(libMatch, unkMatch, amScore);
+						adductScoreMap.add(am);
+					}
+				}
+			}
+		}
+		Element spectrumElement = msRtMatchElement.getChild(
+				MsRtLibraryMatchFields.TGSpectrum.name());
+		if(spectrumElement != null)
+			librarySpectrum = new MassSpectrum(spectrumElement);
 	}
 }
 

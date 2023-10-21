@@ -158,10 +158,23 @@ public class TaskQueue extends AbstractTableModel {
 		}
 		return numOfCancelledTasks;
 	}
+	
+	public synchronized int getNumOfTasksWithStatus(TaskStatus status) {
+
+		int numOfTasks = 0;
+		for (int i = 0; i < size; i++) {
+
+			queue[i].getActualTask().getStatus();
+
+			if (queue[i].getActualTask().getStatus().equals(status))
+				numOfTasks++;
+		}
+		return numOfTasks;
+	}
 
 	/* TableModel implementation */
 
-	synchronized int getNumOfWaitingTasks() {
+	synchronized int getNumOfRunningAndWaitingTasks() {
 		int numOfWaitingTasks = 0;
 		for (int i = 0; i < size; i++) {
 			

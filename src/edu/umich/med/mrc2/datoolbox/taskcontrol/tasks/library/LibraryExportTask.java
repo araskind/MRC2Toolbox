@@ -639,7 +639,7 @@ public class LibraryExportTask extends CEFProcessingTask {
 			CompoundIdentificationConfidence idc = null;
 			if(lf.getPrimaryIdentity() != null) {
 
-				compoundName = lf.getPrimaryIdentity().getName();
+				compoundName = lf.getPrimaryIdentity().getCompoundName();
 				idc= lf.getPrimaryIdentity().getConfidenceLevel();
 			}
 			String[] line = new String[] {

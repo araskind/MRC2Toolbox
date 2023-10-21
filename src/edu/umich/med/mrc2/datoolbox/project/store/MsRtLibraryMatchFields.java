@@ -25,6 +25,8 @@ public enum MsRtLibraryMatchFields {
 	RefMsRt,
 	LibId,
 	TGID,
+	TGName,
+	TGSpectrum,
 	Score,
 	AdScores,
 	;

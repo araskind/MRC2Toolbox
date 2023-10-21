@@ -51,7 +51,8 @@ public class IdentityWordWrapCellRenderer extends JTextArea implements TableCell
         setWrapStyleWord(true);
     }
 
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    public Component getTableCellRendererComponent(
+    		JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
     	Component rendererComponent = table.prepareRenderer(new DefaultTableCellRenderer(), row, column);
 		setForeground(rendererComponent.getForeground());
@@ -77,9 +78,14 @@ public class IdentityWordWrapCellRenderer extends JTextArea implements TableCell
 			return this;
 		}
 		String text = "";
-		if (idField.equals(CompoundIdentityField.NAME))
-			text = id.getName();
-
+		if (idField.equals(CompoundIdentityField.NAME)) {
+			
+			if(value instanceof CompoundIdentity)
+				text = id.getName();
+			
+			if(value instanceof MsFeatureIdentity)
+				text = ((MsFeatureIdentity)value).getIdentityName();
+		}
 		if (idField.equals(CompoundIdentityField.COMMON_NAME))
 			text = id.getCommonName();
 

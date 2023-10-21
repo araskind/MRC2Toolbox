@@ -81,7 +81,6 @@ public class MsFeatureIdentity implements Serializable {
 			idSource = CompoundIdSource.UNKNOWN;
 	}
 
-
 	public CompoundIdentity getCompoundIdentity() {
 		return compoundIdentity;
 	}
@@ -98,12 +97,23 @@ public class MsFeatureIdentity implements Serializable {
 		this.confidenceLevel = confidenceLevel;
 	}
 
-	public String getName() {
+	public String getCompoundName() {
 		
 		if(compoundIdentity == null)
 			return null;
+		else
+			return compoundIdentity.getName();
+	}
+	
+	public String getIdentityName() {
 		
-		return compoundIdentity.getName();
+		if(compoundIdName != null)
+			return compoundIdName;
+		else if(msRtLibraryMatch != null 
+				&& msRtLibraryMatch.getLibraryTargetName() != null)
+			return msRtLibraryMatch.getLibraryTargetName();
+		else
+			return null;
 	}
 
 	public CompoundDatabaseEnum getPrimaryDatabase(){
@@ -153,17 +163,7 @@ public class MsFeatureIdentity implements Serializable {
 	public void setQcStandard(boolean qcStandard) {
 		this.qcStandard = qcStandard;
 	}
-
-	/**
-	 * @return the libraryTargetName
-	 */
-	public String getIdentityName() {
-		return compoundIdName;
-	}
-
-	/**
-	 * @param libraryTargetName the libraryTargetName to set
-	 */
+	
 	public void setIdentityName(String libraryTargetName) {
 		this.compoundIdName = libraryTargetName;
 	}
@@ -233,32 +233,30 @@ public class MsFeatureIdentity implements Serializable {
 		this.uniqueId = uniqueId;
 	}
 
-	/**
-	 * @return the referenceMsMsLibraryMatch
-	 */
 	public ReferenceMsMsLibraryMatch getReferenceMsMsLibraryMatch() {
 		return referenceMsMsLibraryMatch;
 	}
 
-	/**
-	 * @param referenceMsMsLibraryMatch the referenceMsMsLibraryMatch to set
-	 */
-	public void setReferenceMsMsLibraryMatch(ReferenceMsMsLibraryMatch referenceMsMsLibraryMatch) {
+	public void setReferenceMsMsLibraryMatch(
+			ReferenceMsMsLibraryMatch referenceMsMsLibraryMatch) {
+		
 		this.referenceMsMsLibraryMatch = referenceMsMsLibraryMatch;
+		compoundIdentity = 
+				referenceMsMsLibraryMatch.getMatchedLibraryFeature().getCompoundIdentity();
+		idSource = CompoundIdSource.LIBRARY_MS2;
+		confidenceLevel = CompoundIdentificationConfidence.ACCURATE_MASS_MSMS;
 	}
 
-	/**
-	 * @return the msRtLibraryMatch
-	 */
 	public MsRtLibraryMatch getMsRtLibraryMatch() {
 		return msRtLibraryMatch;
 	}
 
-	/**
-	 * @param msRtLibraryMatch the msRtLibraryMatch to set
-	 */
 	public void setMsRtLibraryMatch(MsRtLibraryMatch msRtLibraryMatch) {
-		this.msRtLibraryMatch = msRtLibraryMatch;
+		
+		this.msRtLibraryMatch = msRtLibraryMatch;	
+		compoundIdName = msRtLibraryMatch.getLibraryTargetName();
+		idSource = CompoundIdSource.LIBRARY;
+		confidenceLevel = CompoundIdentificationConfidence.ACCURATE_MASS_RT;
 	}
 
 	public double getScore() {
@@ -280,37 +278,22 @@ public class MsFeatureIdentity implements Serializable {
 		return 0.0d;
 	}
 
-	/**
-	 * @return the assignedOn
-	 */
 	public Date getAssignedOn() {
 		return assignedOn;
 	}
 
-	/**
-	 * @return the assignedBy
-	 */
 	public LIMSUser getAssignedBy() {
 		return assignedBy;
 	}
 
-	/**
-	 * @param assignedOn the assignedOn to set
-	 */
 	public void setAssignedOn(Date assignedOn) {
 		this.assignedOn = assignedOn;
 	}
 
-	/**
-	 * @param assignedBy the assignedBy to set
-	 */
 	public void setAssignedBy(LIMSUser assignedBy) {
 		this.assignedBy = assignedBy;
 	}
 
-	/**
-	 * @return the identificationStatus
-	 */
 	public MSFeatureIdentificationLevel getIdentificationLevel() {
 		
 		if(compoundIdentity == null)
@@ -319,9 +302,6 @@ public class MsFeatureIdentity implements Serializable {
 			return identificationLevel;
 	}
 
-	/**
-	 * @param identificationStatus the identificationStatus to set
-	 */
 	public void setIdentificationLevel(
 			MSFeatureIdentificationLevel identificationStatus) {
 		if(compoundIdentity == null)

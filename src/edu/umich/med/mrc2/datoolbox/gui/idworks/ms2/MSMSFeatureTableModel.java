@@ -162,7 +162,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 					compoundName = primaryId.getIdentityName();
 				}
 				else {
-					compoundName = primaryId.getName();
+					compoundName = primaryId.getCompoundName();
 					double neutralMass = primaryId.getCompoundIdentity().getExactMass();
 					neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
 				}
@@ -255,7 +255,7 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 				compoundName = primaryId.getIdentityName();
 			}
 			else {
-				compoundName = primaryId.getName();
+				compoundName = primaryId.getCompoundName();
 				double neutralMass = primaryId.getCompoundIdentity().getExactMass();
 				neutralMassDeltaMz = instrumentMsMs.getParent().getMz() - neutralMass;
 			}	

@@ -374,6 +374,20 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		return identifications;
 	}
 	
+	public Set<MsFeatureIdentity> getMSRTIdentifications() {
+		
+		return identifications.stream().
+				filter(id -> Objects.nonNull(id.getMsRtLibraryMatch())).
+				collect(Collectors.toSet());
+	}
+	
+	public Set<MsFeatureIdentity> getMSMSIdentifications() {
+		
+		return identifications.stream().
+				filter(id -> Objects.nonNull(id.getReferenceMsMsLibraryMatch())).
+				collect(Collectors.toSet());
+	}
+	
 	public MsFeatureIdentity getIdentityByPartialName(String partName) {
 		
 		if(identifications == null || identifications.isEmpty())
@@ -381,7 +395,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		
 		String upName = partName.toUpperCase();
 		return identifications.stream().
-				filter(i -> i.getName().toUpperCase().contains(upName)).
+				filter(i -> i.getCompoundName().toUpperCase().contains(upName)).
 				findFirst().orElse(null);
 	}
 	

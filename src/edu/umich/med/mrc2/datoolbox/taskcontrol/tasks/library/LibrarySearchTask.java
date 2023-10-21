@@ -134,20 +134,17 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 		taskDescription = "Clearing previous search results ...";
 		total = inputFeatures.size();
 		processed = 0;
-		Collection<MsFeatureIdentity>toRemove = 
-				new ArrayList<MsFeatureIdentity>();
+		Collection<MsFeatureIdentity>toRemove = null;
 		for(MsFeature f : inputFeatures) {
 
-			toRemove.clear();
-			for(MsFeatureIdentity id : f.getIdentifications()) {
-				
-				if(id.getMsRtLibraryMatch() != null)
-					toRemove.add(id);
-			}	
+			toRemove = f.getMSRTIdentifications();	
 			if(!toRemove.isEmpty()) {
 				
+				f.setSuppressEvents(true);
 				for(MsFeatureIdentity id : toRemove)
 					f.removeIdentity(id);
+				
+				f.setSuppressEvents(false);
 			}
 			processed++;
 		}
@@ -304,6 +301,7 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 					mslf.getRetentionTime(),
 					mslf.getSpectrum());
 			rtlMatch.setLibraryId(mslf.getLibraryId());
+			rtlMatch.setLibraryTargetName(mslf.getName());
 			match.setMsRtLibraryMatch(rtlMatch);
 		}
 		return match;

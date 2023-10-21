@@ -57,7 +57,7 @@ public class MSMSFeatureInfoBundleTooltipGenerator implements XYZToolTipGenerato
 		String tooltip = 
 			"<html><b>" + f.getName() + "</b><br>";
 		if(f.getPrimaryIdentity() != null)
-		tooltip += "<font style=\"font-weight:bold; color:blue\">" + f.getPrimaryIdentity().getName() + "</font><br>";
+		tooltip += "<font style=\"font-weight:bold; color:blue\">" + f.getPrimaryIdentity().getCompoundName() + "</font><br>";
 		int charge = f.getCharge();
 		String chargeString = "<BR><B>Charge: </B>";
 		if(charge > 0)

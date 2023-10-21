@@ -107,13 +107,13 @@ public class MsFeatureInfoBundleComparator extends ObjectCompatrator<MSFeatureIn
 		case pimaryId:
 			result = 0;
 			if (o1.getMsFeature().getPrimaryIdentity() != null && o2.getMsFeature().getPrimaryIdentity() != null)
-				result = o1.getMsFeature().getPrimaryIdentity().getName().compareTo(o2.getMsFeature().getPrimaryIdentity().getName());
+				result = o1.getMsFeature().getPrimaryIdentity().getCompoundName().compareTo(o2.getMsFeature().getPrimaryIdentity().getCompoundName());
 
 			if (o1.getMsFeature().getPrimaryIdentity() != null && o2.getMsFeature().getPrimaryIdentity() == null)
-				result = o1.getMsFeature().getPrimaryIdentity().getName().compareTo(o2.getMsFeature().getName());
+				result = o1.getMsFeature().getPrimaryIdentity().getCompoundName().compareTo(o2.getMsFeature().getName());
 
 			if (o1.getMsFeature().getPrimaryIdentity() == null && o2.getMsFeature().getPrimaryIdentity() != null)
-				result = o1.getMsFeature().getName().compareTo(o2.getMsFeature().getPrimaryIdentity().getName());
+				result = o1.getMsFeature().getName().compareTo(o2.getMsFeature().getPrimaryIdentity().getCompoundName());
 
 			if (o1.getMsFeature().getPrimaryIdentity() == null && o2.getMsFeature().getPrimaryIdentity() == null) {
 				result = o1.getMsFeature().getName().compareTo(o2.getMsFeature().getName());

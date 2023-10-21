@@ -157,7 +157,7 @@ public class LibraryMsFeature extends MsFeature implements Serializable {
 		if(name != null && !name.isEmpty())
 			return name;
 		else if(getPrimaryIdentity() != null)
-			return getPrimaryIdentity().getName();
+			return getPrimaryIdentity().getCompoundName();
 		else
 			return id;			
 	}

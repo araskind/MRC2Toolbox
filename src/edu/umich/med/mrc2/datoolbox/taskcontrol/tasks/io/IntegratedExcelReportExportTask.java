@@ -420,8 +420,8 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 				if(f.getPrimaryIdentity().getIdentityName() != null)
 					idName = f.getPrimaryIdentity().getIdentityName();
 
-				if(f.getPrimaryIdentity().getName() != null) {
-					cpdName = f.getPrimaryIdentity().getName();
+				if(f.getPrimaryIdentity().getCompoundName() != null) {
+					cpdName = f.getPrimaryIdentity().getCompoundName();
 					idConfidence = f.getPrimaryIdentity().getConfidenceLevel().getLevelId();
 				}
 				if(f.getPrimaryIdentity().getCompoundIdentity().getFormula() != null)
@@ -799,8 +799,8 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 
 			if(msf.isIdentified()){
 
-				if(msf.getPrimaryIdentity().getName() != null)
-					cpdName = msf.getPrimaryIdentity().getName();
+				if(msf.getPrimaryIdentity().getCompoundName() != null)
+					cpdName = msf.getPrimaryIdentity().getCompoundName();
 			}
 			else {
 				cpdName = msf.getName();
@@ -972,8 +972,8 @@ public class IntegratedExcelReportExportTask  extends AbstractTask {
 
 			if(msf.isIdentified()){
 
-				if(msf.getPrimaryIdentity().getName() != null)
-					cpdName = msf.getPrimaryIdentity().getName();
+				if(msf.getPrimaryIdentity().getCompoundName() != null)
+					cpdName = msf.getPrimaryIdentity().getCompoundName();
 
 				if(msf.getPrimaryIdentity().getCompoundIdentity().getFormula() != null)
 					formula = msf.getPrimaryIdentity().getCompoundIdentity().getFormula();

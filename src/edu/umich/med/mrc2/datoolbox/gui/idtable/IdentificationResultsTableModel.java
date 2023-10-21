@@ -113,7 +113,7 @@ public class IdentificationResultsTableModel extends BasicTableModel {
 				id.equals(defaultId),
 				id.isQcStandard(),
 				id.getIdentityName(),
-				id.getName(),
+				id.getCompoundName(),
 				id,
 				formula,
 				exactMass,
