@@ -24,6 +24,7 @@ package edu.umich.med.mrc2.datoolbox.project;
 public enum ProjectType {
 
 	DATA_ANALYSIS,
+	DATA_ANALYSIS_NEW_FORMAT,
 	ID_TRACKER_DATA_ANALYSIS,
 	RAW_DATA_ANALYSIS,
 	;

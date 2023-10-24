@@ -250,7 +250,16 @@ public class MainWindow extends JFrame
 		
 		if (command.equals(MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_FROM_DATABASE_COMMAND.getName()))
 			openRawDataExperimentFromDatabase();
-
+		
+		if (command.equals(MainActionCommands.NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND.getName())) {
+			
+		}
+		if (command.equals(MainActionCommands.OPEN_METABOLOMICS_XML_EXPERIMENT_COMMAND.getName()))
+			openExperiment(ProjectType.DATA_ANALYSIS_NEW_FORMAT);
+		
+		if (command.equals(MainActionCommands.SAVE_AS_XML_EXPERIMENT_COMMAND.getName()))
+			saveMetabolomicsExperimentInNewFormat();
+		
 		if (command.equals(MainActionCommands.SHOW_MS_TOOLBOX_COMMAND.getName()))
 			showMsTools();
 
@@ -303,6 +312,11 @@ public class MainWindow extends JFrame
 			showOnlineHelp();
 	}
 	
+	private void saveMetabolomicsExperimentInNewFormat() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private void goToExperimentFolder() {
 		
 		File expDir = null;
@@ -1138,99 +1152,114 @@ public class MainWindow extends JFrame
 	}
 
 	public void createNewExperimentFromLimsExperiment(
-			File experimentFile, 
+			File parentDirectory,
+			String experimentName, 
 			String experimentDescription,
 			ProjectType experimentType, 
 			LIMSExperiment activeExperiment) {
-
-		String name = "";
-		if(experimentFile != null)
-			name = experimentFile.getName();
-
-		if (name == null || name.isEmpty()) {
-			MessageDialog.showWarningMsg("Please provide a name for the experiment!");
-			return;
-		}
-		File experimentDirectory = experimentFile.getParentFile();
-		if (experimentFile.exists()) {
-			MessageDialog.showWarningMsg(
-					"Experiment with this name already exists in this location!\n"
-					+ "Please choose a different name or different parent directory.");
-			return;
-		}
-		if (experimentDescription.isEmpty())
-			experimentDescription = name;
-
-		currentExperiment = new DataAnalysisProject(
-				name, experimentDescription, experimentDirectory, experimentType);
-		if(activeExperiment.getExperimentDesign() != null)
-			currentExperiment.getExperimentDesign().replaceDesign(
-					activeExperiment.getExperimentDesign());
-
-		currentExperiment.setLimsExperiment(activeExperiment);
-		currentExperiment.setLimsProject(activeExperiment.getProject());
-
-		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(currentExperiment);
-		setGuiFromActiveExperiment();
-
-		//	Add design listeners
-		currentExperiment.getExperimentDesign().addListener(experimentSetupDraw);
-		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
-			currentExperiment.getExperimentDesign().addListener(entry.getValue());
 		
-		experimentBaseDirectory = experimentDirectory.getParentFile();
-		savePreferences();
+		
+		
+		if(experimentType.equals(ProjectType.DATA_ANALYSIS)) {
+			
+			createNewMetabolomicsExperimentFromLIMSExperiment(
+					parentDirectory, experimentName, experimentDescription, activeExperiment);
+		}
 
-		experimentSwitchController = 
-				new ExperimentSwitchController(false, null, false, ProjectType.DATA_ANALYSIS, null);
-		SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
-		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
-		MRC2ToolBoxCore.getTaskController().addTask(spt);
+//		String name = "";
+//		if(experimentFile != null)
+//			name = experimentFile.getName();
+//
+//		if (name == null || name.isEmpty()) {
+//			MessageDialog.showWarningMsg("Please provide a name for the experiment!");
+//			return;
+//		}
+//		File experimentDirectory = experimentFile.getParentFile();
+//		if (experimentFile.exists()) {
+//			MessageDialog.showWarningMsg(
+//					"Experiment with this name already exists in this location!\n"
+//					+ "Please choose a different name or different parent directory.");
+//			return;
+//		}
+//		if (experimentDescription.isEmpty())
+//			experimentDescription = name;
+//
+//		currentExperiment = new DataAnalysisProject(
+//				name, experimentDescription, experimentDirectory);
+//		if(activeExperiment.getExperimentDesign() != null)
+//			currentExperiment.getExperimentDesign().replaceDesign(
+//					activeExperiment.getExperimentDesign());
+//
+//		currentExperiment.setLimsExperiment(activeExperiment);
+//		currentExperiment.setLimsProject(activeExperiment.getProject());
+//
+//		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(currentExperiment);
+//		setGuiFromActiveExperiment();
+//
+//		//	Add design listeners
+//		currentExperiment.getExperimentDesign().addListener(experimentSetupDraw);
+//		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
+//			currentExperiment.getExperimentDesign().addListener(entry.getValue());
+//		
+//		experimentBaseDirectory = experimentDirectory.getParentFile();
+//		savePreferences();
+//
+//		experimentSwitchController = 
+//				new ExperimentSwitchController(false, null, false, ProjectType.DATA_ANALYSIS, null);
+//		SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
+//		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
+//		MRC2ToolBoxCore.getTaskController().addTask(spt);
 	}
 
-	public void createNewExperimentFromIDTrackerExperiment(
-			File experimentFile,
-			String experimentDescription,
-			LIMSExperiment limsExperiment) {
+//	public void createNewExperimentFromIDTrackerExperiment(
+//			File experimentFile,
+//			String experimentDescription,
+//			LIMSExperiment limsExperiment) {
+//
+//		String name = "";
+//		if(experimentFile != null)
+//			name = experimentFile.getName();
+//
+//		if (name == null || name.isEmpty()) {
+//			MessageDialog.showWarningMsg("Please provide a name for the experiment!");
+//			return;
+//		}
+//		File experimentDirectory = experimentFile.getParentFile();
+//
+//		if (experimentFile.exists()) {
+//			MessageDialog.showWarningMsg(
+//					"Experiment with this name already exists in this location!\n"
+//					+ "Please choose a different name or different parent directory.");
+//			return;
+//		}
+//		if (experimentDescription.isEmpty())
+//			experimentDescription = name;
+//
+//		currentExperiment = new DataAnalysisProject(
+//				name, experimentDescription,
+//				experimentDirectory, ProjectType.ID_TRACKER_DATA_ANALYSIS);
+//		if(limsExperiment.getExperimentDesign() != null)
+//			currentExperiment.getExperimentDesign().replaceDesign(limsExperiment.getExperimentDesign());
+//
+//		currentExperiment.setLimsExperiment(limsExperiment);
+//		currentExperiment.setLimsProject(limsExperiment.getProject());
+//		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(currentExperiment);
+//		setGuiFromActiveExperiment();
+//
+//		//	Add design listeners
+//		currentExperiment.getExperimentDesign().addListener(experimentSetupDraw);
+//		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
+//			currentExperiment.getExperimentDesign().addListener(entry.getValue());
+//		
+//		SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
+//		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
+//		MRC2ToolBoxCore.getTaskController().addTask(spt);
+//	}
 
-		String name = "";
-		if(experimentFile != null)
-			name = experimentFile.getName();
-
-		if (name == null || name.isEmpty()) {
-			MessageDialog.showWarningMsg("Please provide a name for the experiment!");
-			return;
-		}
-		File experimentDirectory = experimentFile.getParentFile();
-
-		if (experimentFile.exists()) {
-			MessageDialog.showWarningMsg(
-					"Experiment with this name already exists in this location!\n"
-					+ "Please choose a different name or different parent directory.");
-			return;
-		}
-		if (experimentDescription.isEmpty())
-			experimentDescription = name;
-
-		currentExperiment = new DataAnalysisProject(
-				name, experimentDescription,
-				experimentDirectory, ProjectType.ID_TRACKER_DATA_ANALYSIS);
-		if(limsExperiment.getExperimentDesign() != null)
-			currentExperiment.getExperimentDesign().replaceDesign(limsExperiment.getExperimentDesign());
-
-		currentExperiment.setLimsExperiment(limsExperiment);
-		currentExperiment.setLimsProject(limsExperiment.getProject());
-		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(currentExperiment);
-		setGuiFromActiveExperiment();
-
-		//	Add design listeners
-		currentExperiment.getExperimentDesign().addListener(experimentSetupDraw);
-		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
-			currentExperiment.getExperimentDesign().addListener(entry.getValue());
+	private void createNewMetabolomicsExperimentFromLIMSExperiment(File parentDirectory, String experimentName,
+			String experimentDescription, LIMSExperiment activeExperiment) {
+		// TODO Auto-generated method stub
 		
-		SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
-		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
-		MRC2ToolBoxCore.getTaskController().addTask(spt);
 	}
 
 	public void createNewExperiment(
@@ -1239,48 +1268,48 @@ public class MainWindow extends JFrame
 			ProjectType experimentType, 
 			ExperimentDesign design) {
 
-		String name = "";
-
-		if(experimentFile != null)
-			name = experimentFile.getName();
-
-		if (name == null || name.isEmpty()) {
-			MessageDialog.showWarningMsg("Please provide a name for the experiment!");
-			return;
-		}
-		File experimentDirectory = experimentFile.getParentFile();
-
-		if (experimentFile.exists()) {
-			MessageDialog.showWarningMsg(
-					"Experiment with this name already exists in this location!\n"
-					+ "Please choose a different name or different parent directory.");
-			return;
-		}
-		if (experimentDescription.isEmpty())
-			experimentDescription = name;
-
-		experimentBaseDirectory = experimentDirectory.getParentFile();
-		savePreferences();
-		
-		currentExperiment = new DataAnalysisProject(
-				name, experimentDescription, experimentDirectory, experimentType);
-		if(design != null)
-			currentExperiment.getExperimentDesign().replaceDesign(design);
-
-		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(currentExperiment);
-		setGuiFromActiveExperiment();
-
-		//	Add design listeners
-		currentExperiment.getExperimentDesign().addListener(experimentSetupDraw);
-		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
-			currentExperiment.getExperimentDesign().addListener(entry.getValue());
-		
-		experimentSwitchController = 
-				new ExperimentSwitchController(true, null, false, ProjectType.DATA_ANALYSIS, null);
-		
-		SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
-		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
-		MRC2ToolBoxCore.getTaskController().addTask(spt);
+//		String name = "";
+//
+//		if(experimentFile != null)
+//			name = experimentFile.getName();
+//
+//		if (name == null || name.isEmpty()) {
+//			MessageDialog.showWarningMsg("Please provide a name for the experiment!");
+//			return;
+//		}
+//		File experimentDirectory = experimentFile.getParentFile();
+//
+//		if (experimentFile.exists()) {
+//			MessageDialog.showWarningMsg(
+//					"Experiment with this name already exists in this location!\n"
+//					+ "Please choose a different name or different parent directory.");
+//			return;
+//		}
+//		if (experimentDescription.isEmpty())
+//			experimentDescription = name;
+//
+//		experimentBaseDirectory = experimentDirectory.getParentFile();
+//		savePreferences();
+//		
+//		currentExperiment = new DataAnalysisProject(
+//				name, experimentDescription, experimentDirectory, experimentType);
+//		if(design != null)
+//			currentExperiment.getExperimentDesign().replaceDesign(design);
+//
+//		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(currentExperiment);
+//		setGuiFromActiveExperiment();
+//
+//		//	Add design listeners
+//		currentExperiment.getExperimentDesign().addListener(experimentSetupDraw);
+//		for (Entry<PanelList, DockableMRC2ToolboxPanel> entry : panels.entrySet())
+//			currentExperiment.getExperimentDesign().addListener(entry.getValue());
+//		
+//		experimentSwitchController = 
+//				new ExperimentSwitchController(true, null, false, ProjectType.DATA_ANALYSIS, null);
+//		
+//		SaveExperimentTask spt = new SaveExperimentTask(currentExperiment);
+//		spt.addTaskListener(MRC2ToolBoxCore.getMainWindow());
+//		MRC2ToolBoxCore.getTaskController().addTask(spt);
 	}
 
 	public void showPanel(PanelList panelType) {
@@ -1389,6 +1418,8 @@ public class MainWindow extends JFrame
 
 		MRC2ToolBoxCore.setActiveMetabolomicsExperiment(eTask.getNewExperiment());
 		setGuiFromActiveExperiment();
+		MRC2ToolBoxCore.getTaskController().getTaskQueue().clear();
+		hideProgressDialog();
 	}
 	
 	private void clearGuiAfterExperimentClosed() {

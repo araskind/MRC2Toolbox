@@ -162,6 +162,39 @@ public class StatusBar extends JPanel implements
 		gbc_msmsClusterLabel.gridy = 0;
 		statusTextPanel.add(msmsClusterLabel, gbc_msmsClusterLabel);
 		
+		//	Memory block		
+		JPanel memoryPanel = new JPanel();
+		memoryPanel.setLayout(new BoxLayout(memoryPanel, BoxLayout.X_AXIS));
+		memoryPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED));
+		memoryPanel.add(Box
+				.createRigidArea(new Dimension(10, STATUS_BAR_HEIGHT)));		
+		memoryPanel.add(Box
+				.createRigidArea(new Dimension(10, STATUS_BAR_HEIGHT)));
+		
+		memoryLabel = new LabeledProgressBar();
+		memoryLabel.addMouseListener(this);
+		memoryPanel.add(memoryLabel);
+		
+		gcButton = new JButton("");
+		gcButton.setIcon(garbageIcon);
+		gcButton.setToolTipText("Force garbage collection");
+		gcButton.setActionCommand(GC_COMMAND);
+		gcButton.addActionListener(this);
+		
+		statusTextLabel = new JLabel();
+		add(statusTextLabel);
+		statusTextLabel.setFont(statusBarFont);
+		statusTextLabel.setMinimumSize(new Dimension(100, STATUS_BAR_HEIGHT));
+		statusTextLabel.setPreferredSize(new Dimension(3200, STATUS_BAR_HEIGHT));		
+				
+		gcButton.setMaximumSize(new Dimension(20, 20));
+		gcButton.setMinimumSize(new Dimension(20, 20));
+		gcButton.setSize(new Dimension(20, 20));
+		gcButton.setPreferredSize(new Dimension(20, 20));
+		add(gcButton);
+		
+		add(memoryPanel);
+
 		//	Task block
 		JPanel taskPanel = new JPanel();	
 		taskPanel.setBorder(new EmptyBorder(5, 30, 5, 30));
@@ -236,43 +269,8 @@ public class StatusBar extends JPanel implements
 		gbc_waitingTasksLabel.gridx = 5;
 		gbc_waitingTasksLabel.gridy = 0;
 		taskPanel.add(waitingTasksLabel, gbc_waitingTasksLabel);
-			
-		add(taskPanel);
-		
-		//	Memory block		
-		JPanel memoryPanel = new JPanel();
-		memoryPanel.setLayout(new BoxLayout(memoryPanel, BoxLayout.X_AXIS));
-		memoryPanel.setBorder(new EtchedBorder(EtchedBorder.RAISED));
-		memoryPanel.add(Box
-				.createRigidArea(new Dimension(10, STATUS_BAR_HEIGHT)));		
-		memoryPanel.add(Box
-				.createRigidArea(new Dimension(10, STATUS_BAR_HEIGHT)));
-		
-		memoryLabel = new LabeledProgressBar();
-		memoryLabel.addMouseListener(this);
-		memoryPanel.add(memoryLabel);
-		
-		gcButton = new JButton("");
-		gcButton.setIcon(garbageIcon);
-		gcButton.setToolTipText("Force garbage collection");
-		gcButton.setActionCommand(GC_COMMAND);
-		gcButton.addActionListener(this);
-		
-		statusTextLabel = new JLabel();
-		add(statusTextLabel);
-		statusTextLabel.setFont(statusBarFont);
-		statusTextLabel.setMinimumSize(new Dimension(100, STATUS_BAR_HEIGHT));
-		statusTextLabel.setPreferredSize(new Dimension(3200, STATUS_BAR_HEIGHT));
 		
 		add(taskPanel);
-				
-		gcButton.setMaximumSize(new Dimension(20, 20));
-		gcButton.setMinimumSize(new Dimension(20, 20));
-		gcButton.setSize(new Dimension(20, 20));
-		gcButton.setPreferredSize(new Dimension(20, 20));
-		add(gcButton);
-
-		add(memoryPanel);
 
 		Thread memoryLabelUpdaterThread = new Thread(this,
 				"Memory label updater thread");

@@ -1022,8 +1022,14 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this.getContentPane());
 			return;
 		} 
-		//	featureDataTable.getTable().getSelectionModel().removeListSelectionListener(this);
-
+		if(librarySearchSetupDialog.clearPreviousResults()) {
+			
+			int res = MessageDialog.showChoiceWithWarningMsg(
+					"Do you want to clear previous library search results?", 
+					librarySearchSetupDialog);
+			if(res != JOptionPane.YES_OPTION)
+				return;
+		}
 		MSRTSearchParametersObject spo = 
 				librarySearchSetupDialog.getMSRTSearchParameters();
 		Collection<MsFeature> featuresToSearch = 

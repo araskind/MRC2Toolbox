@@ -321,15 +321,22 @@ public class MassSpectrum implements Serializable {
 
 	public MsPoint[] getMsForAdduct(Adduct adduct) {
 
-		if(adductMap.get(adduct) == null)
-			return null;
-
-		if(adductMap.get(adduct).isEmpty())
+		if(adductMap.get(adduct) == null || adductMap.get(adduct).isEmpty())
 			return null;
 
 		return adductMap.get(adduct).stream().
 			sorted(MsUtils.mzSorter).
 			toArray(size -> new MsPoint[size]);
+	}
+	
+	public Collection<MsPoint> getMsPointsForAdduct(Adduct adduct) {
+
+		if(adductMap.get(adduct) == null || adductMap.get(adduct).isEmpty())
+			return null;
+
+		return adductMap.get(adduct).stream().
+			sorted(MsUtils.mzSorter).
+			collect(Collectors.toList());
 	}
 
 	public MsPoint[] getMsForAdduct(Adduct adduct, boolean scale) {
@@ -337,10 +344,7 @@ public class MassSpectrum implements Serializable {
 		if(!scale)
 			return getMsForAdduct(adduct);
 
-		if(adductMap.get(adduct) == null)
-			return null;
-
-		if(adductMap.get(adduct).isEmpty())
+		if(adductMap.get(adduct) == null || adductMap.get(adduct).isEmpty())
 			return null;
 
 		return MsUtils.normalizeAndSortMsPattern(adductMap.get(adduct));

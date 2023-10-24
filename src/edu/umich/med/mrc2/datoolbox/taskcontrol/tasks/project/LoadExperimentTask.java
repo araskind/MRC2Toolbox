@@ -29,6 +29,8 @@ import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -43,6 +45,7 @@ import com.thoughtworks.xstream.security.NoTypePermission;
 import com.thoughtworks.xstream.security.NullPermission;
 import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 
+import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignLevel;
@@ -52,16 +55,25 @@ import edu.umich.med.mrc2.datoolbox.data.MsFeatureIdentity;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataPrefix;
 import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.library.MsLibraryPanel;
+import edu.umich.med.mrc2.datoolbox.gui.main.PanelList;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.ReferenceSamplesManager;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.AbstractTask;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.library.LoadDatabaseLibraryTask;
 
-public class LoadExperimentTask extends AbstractTask {
+public class LoadExperimentTask extends AbstractTask implements TaskListener{
 
 	private DataAnalysisProject newExperiment;
 	private File experimentDirectory, experimentFile;
+	private boolean waitingForlibrariesToLoad;
+	private Set<String>libraryIds;
+	private int loadedLibsCount;
 
 	public LoadExperimentTask(File newExperimentFile) {
 
@@ -117,39 +129,41 @@ public class LoadExperimentTask extends AbstractTask {
 						newExperiment.setDataMatrixForDataPipeline(dataPipeline, dataMatrix);
 					}
 				}
-				//	Feature matrix			
-//				if(newProject.getFeatureMatrixFileNameForDataPipeline(dataPipeline) != null) {
-//					
-//					taskDescription = "Reading feature matrix for " + dataPipeline.getName();
-//					
-//					File featureMatrixFile = 
-//							Paths.get(experimentDirectory.getAbsolutePath(), 
-//								newExperiment.getFeatureMatrixFileNameForDataPipeline(dataPipeline)).toFile();
-//
-//					Matrix featureMatrix = null;
-//					if (featureMatrixFile.exists()) {
-//						try {
-//							featureMatrix = Matrix.Factory.load(featureMatrixFile);
-//						} catch (ClassNotFoundException | IOException e) {
-//							setStatus(TaskStatus.ERROR);
-//							e.printStackTrace();
-//						}
-//						if (featureMatrix != null) {
-//
-//							featureMatrix.setMetaDataDimensionMatrix(0, 
-//									newExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 0));
-//							featureMatrix.setMetaDataDimensionMatrix(1, 
-//									newExperiment.getMetaDataMatrixForDataPipeline(dataPipeline, 1));
-//							newExperiment.setFeatureMatrixForDataPipeline(dataPipeline, featureMatrix);
-//						}
-//					}
-//				}
 			}
 			newExperiment.restoreData();
 			updateFeatureIdentifications();
 		}
-		processed = 100;
-		this.setStatus(TaskStatus.FINISHED);
+		loadLibraries();
+		
+		if(!waitingForlibrariesToLoad) {
+			processed = 100;
+			this.setStatus(TaskStatus.FINISHED);
+		}
+	}
+
+	private void loadLibraries() {
+		
+		libraryIds = new TreeSet<String>();		
+		for (DataPipeline dataPipeline : newExperiment.getDataPipelines()) {
+			
+			Set<String> plLibIds = newExperiment.getMsFeaturesForDataPipeline(dataPipeline).stream().
+				filter(f -> f.isIdentified()).flatMap(f -> f.getMSRTIdentifications().stream()).				
+				filter(i -> Objects.nonNull(i.getMsRtLibraryMatch().getLibraryId())).
+				map(i -> i.getMsRtLibraryMatch().getLibraryId()).distinct().collect(Collectors.toSet());
+			if(!plLibIds.isEmpty())
+				libraryIds.addAll(plLibIds);
+		}
+		if(!libraryIds.isEmpty()) {
+			
+			waitingForlibrariesToLoad = true;
+			loadedLibsCount = 0;
+			for(String libId : libraryIds) {
+				
+				LoadDatabaseLibraryTask task = new LoadDatabaseLibraryTask(libId);
+				task.addTaskListener(this);
+				MRC2ToolBoxCore.getTaskController().addTask(task);
+			}
+		}
 	}
 
 	private void updateFeatureIdentifications() {
@@ -260,6 +274,33 @@ public class LoadExperimentTask extends AbstractTask {
 	
 	public DataAnalysisProject getNewExperiment() {
 		return newExperiment;
+	}
+
+	@Override
+	public void statusChanged(TaskEvent e) {
+
+		if (e.getStatus() == TaskStatus.FINISHED) {
+
+			((AbstractTask) e.getSource()).removeTaskListener(this);
+			
+			if (e.getSource().getClass().equals(LoadDatabaseLibraryTask.class)){
+				
+				CompoundLibrary library = 
+						((LoadDatabaseLibraryTask)e.getSource()).getLibrary();
+				
+				if(library != null)
+					MRC2ToolBoxCore.getActiveMsLibraries().add(library);
+				
+				loadedLibsCount = loadedLibsCount + 1;
+
+				if (loadedLibsCount == libraryIds.size()) {
+					
+					((MsLibraryPanel)MRC2ToolBoxCore.getMainWindow().
+								getPanel(PanelList.MS_LIBRARY)).updateLibraryMenuAndLabel();
+					setStatus(TaskStatus.FINISHED);
+				}
+			}
+		}
 	}
 }
 

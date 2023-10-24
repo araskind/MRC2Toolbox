@@ -25,7 +25,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -35,6 +34,9 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.prefs.Preferences;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -56,6 +58,7 @@ import javax.swing.border.TitledBorder;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
@@ -63,15 +66,18 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 
-public class NewExperimentDialog extends JDialog implements ActionListener {
+public class NewExperimentDialog extends JDialog implements ActionListener, BackedByPreferences {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 3164807824653540814L;
 	public static final String CHOOSE_PARENT_DIR_COMMAND = "CHOOSE_PARENT_DIR";
-	private ActionListener alistener;
+	
+	private Preferences preferences;
+	public static final String BASE_DIR = "BASE_DIR";
 	private File baseDirectory;
+	
 	private JTextArea descriptionTextArea;
 	private ProjectType projectType;
 	private ExperimentDesign design;
@@ -84,14 +90,11 @@ public class NewExperimentDialog extends JDialog implements ActionListener {
 
 	public NewExperimentDialog(ActionListener listener) {
 
-		super((Frame) listener, "Create new experiment");
+		super();
+		setTitle("Create new experiment");
 		setIconImage(((ImageIcon) newProjectIcon).getImage());
 		setPreferredSize(new Dimension(640, 300));
 		setModalityType(ModalityType.APPLICATION_MODAL);
-
-		alistener = listener;
-		setResizable(false);
-
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 
@@ -105,8 +108,6 @@ public class NewExperimentDialog extends JDialog implements ActionListener {
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE };
 		projectPanel.setLayout(gbl_panel);
 
-		baseDirectory = new File(MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory());
-		
 		JLabel lblNewLabel = 
 				new JLabel("Choose location for the project:");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -202,14 +203,22 @@ public class NewExperimentDialog extends JDialog implements ActionListener {
 		};
 		btnCancel.addActionListener(al);
 
-		JButton btnSave = new JButton(MainActionCommands.NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName());
-		btnSave.setActionCommand(MainActionCommands.NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName());
+		JButton btnSave = new JButton(MainActionCommands.CREATE_NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName());
+		btnSave.setActionCommand(MainActionCommands.CREATE_NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName());
 		btnSave.addActionListener(this);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		rootPane.setDefaultButton(btnSave);
+		
+		loadPreferences();
 		pack();
+	}
+	
+	public void dispose() {
+		
+		savePreferences();
+		super.dispose();
 	}
 
 	@Override
@@ -219,9 +228,6 @@ public class NewExperimentDialog extends JDialog implements ActionListener {
 		
 		if (command.equals(CHOOSE_PARENT_DIR_COMMAND))
 			setProjectLocation();
-		
-		if (command.equals(MainActionCommands.NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName()))
-			createNewProject();		
 	}
 
 	private void setProjectLocation() {
@@ -232,12 +238,10 @@ public class NewExperimentDialog extends JDialog implements ActionListener {
 		fc.setMultiSelectionEnabled(false);
 		fc.setSaveButtonText("Set project location");
 		if (fc.showOpenDialog(this)) {
-			try {
-				experimentDirectoryLocationTextField.setText(fc.getSelectedFile().getCanonicalPath());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
+			baseDirectory = fc.getSelectedFile();
+			experimentDirectoryLocationTextField.setText(baseDirectory.getAbsolutePath());
+			savePreferences();
 		}
 	}
 
@@ -262,7 +266,7 @@ public class NewExperimentDialog extends JDialog implements ActionListener {
 		String pdesc = descriptionTextArea.getText().trim();
 		if(activeExperiment != null)
 			MRC2ToolBoxCore.getMainWindow().createNewExperimentFromLimsExperiment(
-					projFile, pdesc, projectType, activeExperiment);
+					projFile.getParentFile(), projName, pdesc, projectType, activeExperiment);
 		else
 			MRC2ToolBoxCore.getMainWindow().createNewExperiment(
 					projFile, pdesc, projectType, design);
@@ -308,6 +312,58 @@ public class NewExperimentDialog extends JDialog implements ActionListener {
 			
 			descriptionTextArea.setText(description);
 		}
+	}
+	
+	public String getProjectName() {
+		return projectNameTextField.getText().trim();
+	}
+	
+	public LIMSExperiment getLimsExperiment() {
+		return activeExperiment;
+	}
+	
+	public Collection<String>validateProjectData(){
+		
+		Collection<String>errors = new ArrayList<String>();
+		
+		if(getProjectName().isEmpty())
+			errors.add("Project name cannot be empty.");
+		
+		if(baseDirectory == null || !baseDirectory.exists())
+			errors.add("Invalid project directory.");
+		
+		if(!getProjectName().isEmpty() && baseDirectory != null) {
+			
+			File newProjectDir = 
+					Paths.get(baseDirectory.getAbsolutePath(), getProjectName()).toFile();
+			if(newProjectDir.exists()) {
+				errors.add("Project \"" + getProjectName() + "\" already exists\n"
+						+ "in the directory \"" + baseDirectory.getAbsolutePath() + "\"");
+			}
+		}		
+		return errors;
+	}
+	
+	@Override
+	public void loadPreferences(Preferences preferences) {
+		
+		this.preferences = preferences;
+		baseDirectory =
+				new File(preferences.get(BASE_DIR, 
+						MRC2ToolBoxConfiguration.getDefaultExperimentsDirectory())).getAbsoluteFile();		
+		experimentDirectoryLocationTextField.setText(baseDirectory.getAbsolutePath());
+	}
+
+	@Override
+	public void loadPreferences() {
+		loadPreferences(Preferences.userNodeForPackage(this.getClass()));		
+	}
+
+	@Override
+	public void savePreferences() {
+
+		preferences = Preferences.userNodeForPackage(this.getClass());
+		preferences.put(BASE_DIR, baseDirectory.getAbsolutePath());
 	}
 }
 

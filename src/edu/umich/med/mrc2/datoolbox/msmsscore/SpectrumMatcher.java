@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.msmsscore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -65,10 +66,10 @@ public class SpectrumMatcher {
 							relaxMinorIsotopeError);
 
 					if(matchScore > 0.0d)
-						matchMap.add(new AdductMatch(ad, observedSpectrum.getPrimaryAdduct(), matchScore));
+						matchMap.add(new AdductMatch(
+								ad, observedSpectrum.getPrimaryAdduct(), matchScore));					
 				}
 			}
-			return matchMap;
 		}
 		if(observedSpectrum.getAdducts().size() > 1) {
 
@@ -93,7 +94,6 @@ public class SpectrumMatcher {
 						}
 					}
 				}
-				return matchMap;
 			}
 			else {	//	Check if same adducts present in both observed and library spectra
 				HashSet<Adduct>commonAdducts = findCommonAdducts(observedSpectrum, librarySpectrum);
@@ -113,10 +113,32 @@ public class SpectrumMatcher {
 							matchMap.add(new AdductMatch(ad, ad, matchScore));
 					}
 				}
-				return matchMap;
+			}
+		}
+		if(!matchMap.isEmpty()) {
+			
+			for(AdductMatch m : matchMap) {
+				
+				double entropyScore = calculateEntropyScoreForAdductMatch(
+						observedSpectrum,  librarySpectrum, m, massError, errorType);
+				m.setEntropyScore(entropyScore);
 			}
 		}
 		return matchMap;
+	}
+	
+	public static double calculateEntropyScoreForAdductMatch(
+			MassSpectrum observedSpectrum, 
+			MassSpectrum librarySpectrum, 
+			AdductMatch m,
+			double massError,
+			MassErrorType errorType) {
+		
+		Collection<MsPoint> observed = observedSpectrum.getMsPointsForAdduct(m.getUnknownMatch());
+		Collection<MsPoint> library = librarySpectrum.getMsPointsForAdduct(m.getLibraryMatch());
+		return MSMSScoreCalculator.calculateEntropyBasedMatchScore(
+				observed, library, massError, errorType, 
+				MSMSScoreCalculator.DEFAULT_MS_REL_INT_NOISE_CUTOFF);
 	}
 
 

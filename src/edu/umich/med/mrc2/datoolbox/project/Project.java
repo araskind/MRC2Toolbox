@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -31,8 +32,14 @@ import java.util.UUID;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public abstract class Project {
+public abstract class Project implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	protected ProjectType projectType;
 	protected String id;
 	protected String name;
 	protected String description;
@@ -41,10 +48,12 @@ public abstract class Project {
 	protected File exportsDirectory;
 	protected Date dateCreated, lastModified;
 	
-	public Project(String projectName, 
-			String projectDescription, 
-			File parentDirectory) {
+	public Project(ProjectType projectType,
+					String projectName, 
+					String projectDescription, 
+					File parentDirectory) {
 		super();
+		this.projectType = projectType;
 		this.name = projectName;
 		this.description = projectDescription;		
 		this.id = UUID.randomUUID().toString();
@@ -86,9 +95,6 @@ public abstract class Project {
 		
 		projectDirectory = 
 				Paths.get(parentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-")).toFile();				
-		projectFile = 
-				Paths.get(projectDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-") + "."
-				+ MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION).toFile();	
 		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
 		try {

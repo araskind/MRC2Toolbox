@@ -274,6 +274,10 @@ public class MsFeatureIdentity implements Serializable {
 
 		if(referenceMsMsLibraryMatch != null)
 			return referenceMsMsLibraryMatch.getEntropyBasedScore();
+		
+		if(msRtLibraryMatch != null 
+				&& msRtLibraryMatch.getTopAdductMatch() != null)
+			return msRtLibraryMatch.getTopAdductMatch().getEntropyScore();
 
 		return 0.0d;
 	}

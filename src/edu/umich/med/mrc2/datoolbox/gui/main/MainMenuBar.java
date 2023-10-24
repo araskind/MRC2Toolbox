@@ -53,6 +53,9 @@ public class MainMenuBar extends CommonMenuBar {
 	private static final Icon newExperimentIcon = GuiUtils.getIcon("newProject", 24);
 	private static final Icon openExperimentIcon = GuiUtils.getIcon("open", 24);
 	private static final Icon saveExperimentIcon = GuiUtils.getIcon("save", 24);
+	private static final Icon newXMLExperimentIcon = GuiUtils.getIcon("newXmlProject", 24);
+	private static final Icon openXMLExperimentIcon = GuiUtils.getIcon("openXmlProject", 24);
+	private static final Icon saveXMLExperimentIcon = GuiUtils.getIcon("saveXmlProject", 24);
 	private static final Icon saveExperimentCopyIcon = GuiUtils.getIcon("saveAs", 24);
 	private static final Icon newRdaExperimentIcon = GuiUtils.getIcon("newRawDataAnalysisProject", 24);
 	private static final Icon editRdaExperimentIcon = GuiUtils.getIcon("editRawDataAnalysisProject", 24);
@@ -90,11 +93,14 @@ public class MainMenuBar extends CommonMenuBar {
 	// Experiment items
 	private JMenuItem
 		newExperimentMenuItem,
+		newXMLExperimentMenuItem,
 		newIDExperimentMenuItem,
 		openExperimentMenuItem,
+		openXMLExperimentMenuItem,		
 		openRdaExperimentMenuItem,
 		openRdaExperimentFromDatabaseMenuItem,
 		saveExperimentMenuItem,
+		saveAsXMLExperimentMenuItem,
 		saveExperimentAsMenuItem,				
 		editIDExperimentMenuItem,		
 		closeExperimentMenuItem,
@@ -134,19 +140,29 @@ public class MainMenuBar extends CommonMenuBar {
 			newExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.NEW_METABOLOMICS_EXPERIMENT_COMMAND, newExperimentIcon);
 			newExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK | InputEvent.SHIFT_DOWN_MASK));
-		}
-		newIDExperimentMenuItem = addItem(experimentMenu, 
-				MainActionCommands.NEW_RAW_DATA_EXPERIMENT_SETUP_COMMAND, newRdaExperimentIcon);
-		newIDExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK));
-		
-		experimentMenu.addSeparator();
-
-		if(BuildInformation.getStartupConfiguration().equals(StartupConfiguration.COMPLETE_TOOLBOX)) {
 			
 			openExperimentMenuItem = addItem(experimentMenu, 
 					MainActionCommands.OPEN_METABOLOMICS_EXPERIMENT_COMMAND, openExperimentIcon);
 			openExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK | InputEvent.SHIFT_DOWN_MASK));
+			
+			experimentMenu.addSeparator();
+			
+			newXMLExperimentMenuItem = addItem(experimentMenu, 
+					MainActionCommands.NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND, newXMLExperimentIcon);
+			newXMLExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('M', MASK | InputEvent.SHIFT_DOWN_MASK));
+			
+			openXMLExperimentMenuItem = addItem(experimentMenu, 
+					MainActionCommands.OPEN_METABOLOMICS_XML_EXPERIMENT_COMMAND, openXMLExperimentIcon);
+			
+			saveAsXMLExperimentMenuItem = addItem(experimentMenu, 
+					MainActionCommands.SAVE_AS_XML_EXPERIMENT_COMMAND, saveXMLExperimentIcon);
+			
+			experimentMenu.addSeparator();
 		}
+		newIDExperimentMenuItem = addItem(experimentMenu, 
+				MainActionCommands.NEW_RAW_DATA_EXPERIMENT_SETUP_COMMAND, newRdaExperimentIcon);
+		newIDExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('N', MASK));
+
 		openRdaExperimentMenuItem = addItem(experimentMenu, 
 				MainActionCommands.OPEN_RAW_DATA_EXPERIMENT_COMMAND, openRdaExperimentIcon);
 		openRdaExperimentMenuItem.setAccelerator(KeyStroke.getKeyStroke('O', MASK));

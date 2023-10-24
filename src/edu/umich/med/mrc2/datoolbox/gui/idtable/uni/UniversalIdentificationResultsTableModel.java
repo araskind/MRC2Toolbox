@@ -101,6 +101,7 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 						ID_SOURCE_COLUMN,
 						ID_CONFIDENCE_COLUMN,
 						ID_SCORE_COLUMN,
+						ENTROPY_BASED_SCORE_COLUMN,
 						MASS_ERROR_COLUMN,
 						RETENTION_ERROR_COLUMN,
 						BEST_MATCH_ADDUCT_COLUMN,
@@ -197,16 +198,10 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 			if(id.getCompoundIdentity() == null)
 				continue;
 			
-			double deltaMz = 0.0d;
+			Double deltaMz = 0.0d;
 			Double deltaRt = calculateRetentionShift(id);
 			Adduct adductMatch = id.getPrimaryAdduct();
 			CompoundLibrary msRtLibrary = null;		
-			if(id.getMsRtLibraryMatch() != null
-					&& id.getMsRtLibraryMatch().getLibraryId() != null) {
-				msRtLibrary = 
-						IDTDataCache.getMSRTLibraryById(id.getMsRtLibraryMatch().getLibraryId());	
-			}
-			double entropyBasedScore = 0.0d;
 			double parentMz = 0.0d;
 			String collisionEnergyValue = null;
 			double forwardScore = 0.0d;
@@ -222,6 +217,14 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 			double posteriorProbability = 0.0d;
 			double percolatorScore = 0.0d;
 
+			if(id.getMsRtLibraryMatch() != null) {
+				
+				if(id.getMsRtLibraryMatch().getLibraryId() != null) {
+					msRtLibrary = IDTDataCache.getMSRTLibraryById(
+							id.getMsRtLibraryMatch().getLibraryId());	
+				}
+				deltaMz = MsUtils.getPpmMassErrorForTopAdductMatch(parentFeature);
+			}			
 			TandemMassSpectrum experimentalMsMs = 
 					parentFeature.getSpectrum().getTandemSpectrum(SpectrumSource.EXPERIMENTAL);
 			if(experimentalMsMs != null) {
@@ -236,7 +239,6 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 				matchFeature = msmslibMatch.getMatchedLibraryFeature();
 				lib = IDTDataCache.getReferenceMsMsLibraryById(matchFeature.getMsmsLibraryIdentifier());
 				collisionEnergyValue = matchFeature.getCollisionEnergyValue();
-				entropyBasedScore = msmslibMatch.getEntropyBasedScore();
 				forwardScore = msmslibMatch.getForwardScore();
 				reverseScore = msmslibMatch.getReverseScore();
 				probability = msmslibMatch.getProbability();
@@ -253,10 +255,10 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 				posteriorProbability = msmslibMatch.getPosteriorErrorProbability();
 				percolatorScore = msmslibMatch.getPercolatorScore();
 			}
-			if(id.getCompoundIdentity() == null) {
-				System.out.println(id.toString());
-				return;
-			}
+//			if(id.getCompoundIdentity() == null) {
+//				System.out.println(id.toString());
+//				return;
+//			}
 			Object[] obj = {
 					id.equals(defaultId),
 					id.getIdentificationLevel(),
@@ -267,7 +269,7 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 					id.getIdSource(),
 					id.getConfidenceLevel(),
 					id.getScore(),	
-					entropyBasedScore,
+					id.getEntropyBasedScore(),
 					deltaMz,
 					deltaRt,
 					adductMatch,

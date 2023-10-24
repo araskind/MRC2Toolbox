@@ -24,9 +24,13 @@ package edu.umich.med.mrc2.datoolbox.gui.main;
 public enum MainActionCommands {
 
 	// Project
-	NEW_METABOLOMICS_EXPERIMENT_COMMAND("New metabolomics experiment"),
+	NEW_METABOLOMICS_EXPERIMENT_COMMAND("New metabolomics experiment setup"),
+	CREATE_NEW_METABOLOMICS_EXPERIMENT_COMMAND("Create new metabolomics experiment"),
+	NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND("New metabolomics experiment (new format)"),
 	OPEN_METABOLOMICS_EXPERIMENT_COMMAND("Open metabolomics experiment"),
+	OPEN_METABOLOMICS_XML_EXPERIMENT_COMMAND("Open metabolomics experiment (new format)"),
 	SAVE_EXPERIMENT_COMMAND("Save experiment"),
+	SAVE_AS_XML_EXPERIMENT_COMMAND("Save metabolomics experiment in the new format"),
 	SAVE_EXPERIMENT_COPY_COMMAND("Save experiment as ..."),
 	
 	NEW_IDTRACKER_PROJECT_DIALOG_COMMAND("New MetIDTracker project"),

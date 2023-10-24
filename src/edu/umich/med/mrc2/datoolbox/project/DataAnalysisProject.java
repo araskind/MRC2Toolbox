@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.project;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -62,26 +61,16 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class DataAnalysisProject implements Serializable {
+public class DataAnalysisProject extends Project {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 618045235335401590L;
 
-	protected ProjectType projectType;
-	protected String id;
-	protected String name;
-	protected String description;
-	protected File projectFile;
-	protected File projectDirectory;
-	protected File exportsDirectory;
-
 	protected LIMSProject limsProject;
 	protected LIMSExperiment limsExperiment;
 	protected ProjectPreferences projectPreferences;
-	
-	protected Date dateCreated, lastModified;
 	protected ExperimentDesign experimentDesign;
 
 	protected TreeSet<DataPipeline> dataPipelines;
@@ -104,44 +93,37 @@ public class DataAnalysisProject implements Serializable {
 	protected TreeMap<DataAcquisitionMethod, Worklist> worklistMap;
 	protected Set<MsFeatureClusterSet>dataIntegrationSets;
 
-	public DataAnalysisProject(
-			String name, 
-			String projectDescription2,
-			File projectDirectory2, 
-			ProjectType projectType2) {
-
-		this(name, projectDescription2, projectDirectory2);
-		this.projectType = projectType2;
-	}
+//	public DataAnalysisProject(
+//			String name, 
+//			String projectDescription2,
+//			File projectDirectory2, 
+//			ProjectType projectType2) {
+//
+//		this(name, projectDescription2, projectDirectory2);
+//		this.projectType = projectType2;
+//	}
 	
 	public DataAnalysisProject(
 			String projectName, 
 			String projectDescription, 
 			File parentDirectory) {
 
-		this.name = projectName;
-		this.description = projectDescription;
-		this.id = UUID.randomUUID().toString();
-		projectType = ProjectType.DATA_ANALYSIS;
-		dateCreated = new Date();
-		lastModified = new Date();
+		super(ProjectType.DATA_ANALYSIS, 
+				projectName, 
+				projectDescription, 
+				parentDirectory);
 
-		projectDirectory = 
-				Paths.get(parentDirectory.getAbsolutePath(), projectName).toFile();
-		projectFile = 
-				Paths.get(projectDirectory.getAbsolutePath(), projectName + "."
-				+ MRC2ToolBoxConfiguration.EXPERIMENT_FILE_EXTENSION).toFile();
-		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
-		if (!createProjectDirectory(projectDirectory)) {
-			MessageDialog.showWarningMsg("Failed to create project directory");
-			return;
-		}
-		if (!createProjectDirectory(exportsDirectory)) {
-			MessageDialog.showWarningMsg("Failed to create exports directory");
-			return;
-		}
+		initNewExperiment(parentDirectory);
 		initNewProject();		
+	}
+	
+	@Override
+	protected void initNewExperiment(File parentDirectory) {
+		
+		super.initNewExperiment(parentDirectory);
+		projectFile = 
+				Paths.get(projectDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-") + "."
+				+ MRC2ToolBoxConfiguration.EXPERIMENT_FILE_EXTENSION).toFile();
 	}
 	
 	public void updateExperimentLocation(File newProjectFile) {

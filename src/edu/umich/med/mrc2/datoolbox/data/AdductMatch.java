@@ -31,13 +31,14 @@ public class AdductMatch implements Serializable, Comparable<AdductMatch> {
 	private static final long serialVersionUID = 2942119307333672379L;
 	Adduct libraryMatch;
 	Adduct unknownMatch;
-	double score;
+	double dotProductScore;
+	double entropyScore;
 
-	public AdductMatch(Adduct libraryMatch, Adduct unknownMatch, double score) {
+	public AdductMatch(Adduct libraryMatch, Adduct unknownMatch, double dotProductScore) {
 		super();
 		this.libraryMatch = libraryMatch;
 		this.unknownMatch = unknownMatch;
-		this.score = score;
+		this.dotProductScore = dotProductScore;
 	}
 
 	public Adduct getLibraryMatch() {
@@ -48,12 +49,20 @@ public class AdductMatch implements Serializable, Comparable<AdductMatch> {
 		return unknownMatch;
 	}
 
-	public double getScore() {
-		return score;
+	public double getDotProductScore() {
+		return dotProductScore;
 	}
 
 	@Override
 	public int compareTo(AdductMatch o) {
-		return Double.compare(o.getScore(), score);
+		return Double.compare(o.getDotProductScore(), dotProductScore);
+	}
+
+	public double getEntropyScore() {
+		return entropyScore;
+	}
+
+	public void setEntropyScore(double entropyScore) {
+		this.entropyScore = entropyScore;
 	}
 }

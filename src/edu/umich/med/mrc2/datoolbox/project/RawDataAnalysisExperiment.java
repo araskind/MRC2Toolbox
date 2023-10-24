@@ -67,6 +67,10 @@ import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
 public class RawDataAnalysisExperiment extends Project {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	protected File rawDataDirectory;
 	protected File uncompressedExperimentFilesDirectory;
 	protected LIMSInstrument instrument;
@@ -89,10 +93,11 @@ public class RawDataAnalysisExperiment extends Project {
 			File parentDirectory,
 			LIMSUser createdBy) {
 
-		super(experimentName, experimentDescription, parentDirectory);
+		super(ProjectType.RAW_DATA_ANALYSIS, experimentName, 
+				experimentDescription, parentDirectory);
 		initNewExperiment(parentDirectory);
 		initFields();
-		this.createdBy = createdBy;		
+		this.createdBy = createdBy;
 	}
 	
 	public RawDataAnalysisExperiment(
@@ -132,6 +137,9 @@ public class RawDataAnalysisExperiment extends Project {
 	protected void initNewExperiment(File parentDirectory) {
 		
 		super.initNewExperiment(parentDirectory);
+		projectFile = 
+				Paths.get(projectDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-") + "."
+				+ MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION).toFile();	
 		rawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
 		uncompressedExperimentFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 

@@ -79,66 +79,40 @@ public class MsRtLibraryMatch implements Serializable {
 		this(null, libraryTargetId, null, 0.0d, expectedRetention, librarySpectrum, adductScoreMap);
 	}
 
-	/**
-	 * @return the libraryTargetId
-	 */
 	public String getLibraryTargetId() {
 		return libraryTargetId;
 	}
 
-	/**
-	 * @return the score
-	 */
-	public double getScore() {
-		return score;
+	public double getScore() {		
+		return getTopAdductScore();
 	}
 
-	/**
-	 * @return the adductScoreMap
-	 */
 	public Set<AdductMatch> getAdductScoreMap() {
 		return adductScoreMap;
 	}
 
-	/**
-	 * @return the expectedRetention
-	 */
 	public double getExpectedRetention() {
 		return expectedRetention;
 	}
 
-	/**
-	 * @param score the score to set
-	 */
-	public void setScore(double score) {
-		this.score = score;
-	}
-
-	/**
-	 * @param expectedRetention the expectedRetention to set
-	 */
 	public void setExpectedRetention(double expectedRetention) {
 		this.expectedRetention = expectedRetention;
 	}
 
 	public double getTopAdductScore() {
 
-		double topAdductScore = 0.0;
-
-		if(!adductScoreMap.isEmpty())
-			return adductScoreMap.stream().map(s -> s.getScore()).reduce(Double::max).get();
-
-		return topAdductScore;
+		if(adductScoreMap.isEmpty())
+			return 0.0;
+		else
+			return adductScoreMap.stream().
+					map(s -> s.getDotProductScore()).
+					reduce(Double::max).get();
 	}
 
 	public AdductMatch getTopAdductMatch() {
 
-		if(!adductScoreMap.isEmpty())
-			return adductScoreMap.stream().
-			        sorted().
-			        findFirst().get();
-
-		return null;
+		return adductScoreMap.stream().
+			        sorted().findFirst().orElse(null);
 	}
 
 	@Override
@@ -228,16 +202,14 @@ public class MsRtLibraryMatch implements Serializable {
 			refMsRtElement.setAttribute(
 					MsRtLibraryMatchFields.TGName.name(), libraryTargetName);
 		
-		if(score > 0.0)
-			refMsRtElement.setAttribute(
-					MsRtLibraryMatchFields.Score.name(), Double.toString(score));
-		
 		if(adductScoreMap != null && !adductScoreMap.isEmpty()) {
 			
 			List<String> amList = adductScoreMap.stream().
 					map(s -> s.getLibraryMatch().getId() + "|" 
 							+ s.getUnknownMatch().getId() + "|" 
-							+ Double.toString(s.getScore())).collect(Collectors.toList());
+							+ Double.toString(s.getDotProductScore())  + "|" 
+							+ Double.toString(s.getEntropyScore())).
+					collect(Collectors.toList());
 			refMsRtElement.setAttribute(
 					MsRtLibraryMatchFields.AdScores.name(), 
 					StringUtils.join(amList, "@"));
@@ -271,14 +243,16 @@ public class MsRtLibraryMatch implements Serializable {
 			for(String adductListElement : adductList) {
 				
 				String[]parts = adductListElement.split("|");
-				if(parts.length == 3) {
+				if(parts.length == 4) {
 					
 					Adduct libMatch = AdductManager.getAdductById(parts[0]);
 					Adduct unkMatch = AdductManager.getAdductById(parts[1]);
 					double amScore = Double.parseDouble(parts[2]);
+					double entropyScore = Double.parseDouble(parts[3]);
 					if(libMatch != null && unkMatch != null) {
 						
 						AdductMatch am = new AdductMatch(libMatch, unkMatch, amScore);
+						am.setEntropyScore(entropyScore);
 						adductScoreMap.add(am);
 					}
 				}

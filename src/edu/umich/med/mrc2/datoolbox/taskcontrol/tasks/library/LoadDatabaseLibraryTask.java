@@ -68,7 +68,7 @@ public class LoadDatabaseLibraryTask extends AbstractTask {
 		processed = 20;
 
 		if (library != null) {
-
+			taskDescription = "loading library " + library.getLibraryName();
 			try {
 				Connection conn = ConnectionManager.getConnection();
 				Collection<LibraryMsFeatureDbBundle>bundles =

@@ -225,7 +225,6 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 	private Set<MsFeatureIdentity> lookupFeatureInLibrary(MsFeature f) {
 
 		Set<MsFeatureIdentity>ids = new HashSet<MsFeatureIdentity>();
-
 		if(polarityMap.get(f.getPolarity()) == null)
 			return ids;
 
@@ -240,12 +239,22 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 			if(match != null)
 				ids.add(match);
 		}
+		if(!ids.isEmpty() && !f.getMSRTIdentifications().isEmpty()) {
+			
+			Set<String> existingIds = 
+					f.getMSRTIdentifications().stream().
+					map(i -> i.getMsRtLibraryMatch().getLibraryTargetId()).
+					collect(Collectors.toSet());
+			ids = ids.stream().
+					filter(i -> !existingIds.contains(i.getMsRtLibraryMatch().getLibraryTargetId())).
+					collect(Collectors.toSet());
+		}
 		if(ids.size() > maxHits)
 			return ids.stream().
 					sorted(new MsFeatureIdentityComparator(SortProperty.Quality)).
 					limit(maxHits).
 					collect(Collectors.toSet());
-
+		
 		return ids;
 	}
 

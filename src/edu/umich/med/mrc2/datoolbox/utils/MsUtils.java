@@ -57,6 +57,7 @@ import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 
 import edu.umich.med.mrc2.datoolbox.data.Adduct;
 import edu.umich.med.mrc2.datoolbox.data.AdductExchange;
+import edu.umich.med.mrc2.datoolbox.data.AdductMatch;
 import edu.umich.med.mrc2.datoolbox.data.BasicIsotopicPattern;
 import edu.umich.med.mrc2.datoolbox.data.CompoundIdentity;
 import edu.umich.med.mrc2.datoolbox.data.LabeledMolecularFormula;
@@ -722,6 +723,26 @@ public class MsUtils {
 				spectrum.addSpectrumForAdduct(adduct, points);
 			}
 		}
+	}
+	
+	public static Double getPpmMassErrorForTopAdductMatch(MsFeature feature) {
+		
+		if(feature.getPrimaryIdentity() == null 
+				|| feature.getPrimaryIdentity().getMsRtLibraryMatch() == null)
+			return Double.NaN;
+		
+		AdductMatch adductMatch = 
+				feature.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch();
+		if(adductMatch == null)
+			return Double.NaN;
+		
+		MsPoint[] observed = feature.getSpectrum().getMsForAdduct(adductMatch.getUnknownMatch());
+		MsPoint[] library = feature.getPrimaryIdentity().getMsRtLibraryMatch().
+				getLibrarySpectrum().getMsForAdduct(adductMatch.getLibraryMatch());
+		if(observed == null || library == null)
+			return Double.NaN;
+		
+		return (observed[0].getMz() - library[0].getMz()) / library[0].getMz() * 1000000.0d;
 	}
 
 	public static double getPpmMassErrorForIdentity(MsFeature parentFeature, MsFeatureIdentity id) {
