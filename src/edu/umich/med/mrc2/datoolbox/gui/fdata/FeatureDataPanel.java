@@ -982,6 +982,10 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		}
 		return null;
 	}
+	
+	public Collection<MsFeature>getFeatures(TableRowSubset subset){
+			return featureDataTable.getFeatures(subset);
+	}
 
 	private void showLibrarySearchSetup(TableRowSubset rowSubset) {
 				
@@ -1866,7 +1870,29 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			identificationsTable.setModelFromMsFeature(selectedFeature);
 	}
 	
-	public void updateFeatureData(MsFeature source) {
-		featureDataTable.updateFeatureData(source);
+	public void updateFeatureData(MsFeature toUpdate) {
+		
+		FeatureUpdateTask task = new FeatureUpdateTask(toUpdate);
+		IndeterminateProgressDialog idp = new IndeterminateProgressDialog(
+				"Updating feature ...", this.getContentPane(), task);
+		idp.setLocationRelativeTo(this.getContentPane());
+		idp.setVisible(true);
+	}
+	
+	class FeatureUpdateTask extends LongUpdateTask {
+		
+		private MsFeature toUpdate;
+			
+		public FeatureUpdateTask(MsFeature toUpdate) {
+			super();
+			this.toUpdate = toUpdate;
+		}
+
+		@Override
+		public Void doInBackground() {
+			
+			featureDataTable.updateFeatureData(toUpdate);
+			return null;
+		}
 	}
 }

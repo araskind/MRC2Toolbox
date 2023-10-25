@@ -43,8 +43,8 @@ import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureDataCleanupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundFeatureSetRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
@@ -76,8 +76,19 @@ public class FeatureSubsetTable extends BasicTable {
 		columnModel.getColumnById(FeatureSubsetTableModel.ACTIVE_COLUMN)
 			.setCellRenderer(new RadioButtonRenderer());
 		columnModel.getColumnById(FeatureSubsetTableModel.FEATURES_SUBSET_COLUMN)
-			.setCellRenderer(new CompoundFeatureSetRenderer());
+			.setCellRenderer(new WordWrapCellRenderer());
 
+		columnModel.getColumnById(
+				FeatureSubsetTableModel.ACTIVE_COLUMN).setMaxWidth(80);
+		columnModel.getColumnById(
+				FeatureSubsetTableModel.NUM_FEATURES_COLUMN).setMaxWidth(150);	
+		columnModel.getColumnById(
+				FeatureSubsetTableModel.NUM_FEATURES_COLUMN).setMinWidth(100);	
+		fixedWidthColumns.add(getColumnIndex(
+				FeatureSubsetTableModel.ACTIVE_COLUMN));
+		fixedWidthColumns.add(getColumnIndex(
+				FeatureSubsetTableModel.NUM_FEATURES_COLUMN));
+		
 		this.addMouseListener(
 
 		        new MouseAdapter(){
@@ -89,6 +100,7 @@ public class FeatureSubsetTable extends BasicTable {
 	        });
 		addFeatureSetPropertiesPopup();
 		finalizeLayout();
+		tca.adjustColumnsExcluding(fixedWidthColumns);
 	}
 	
 	public void actionPerformed(ActionEvent event) {
@@ -217,10 +229,11 @@ public class FeatureSubsetTable extends BasicTable {
 				model.getColumnIndex(FeatureSubsetTableModel.FEATURES_SUBSET_COLUMN));
 	}
 
-	public void setModelFromProject(DataAnalysisProject currentProject, DataPipeline activeDataPipeline) {
+	public void setModelFromProject(
+			DataAnalysisProject currentProject, 
+			DataPipeline activeDataPipeline) {
 
 		model.setModelFromProject(currentProject, activeDataPipeline);
-		columnModel.getColumnById(FeatureSubsetTableModel.ACTIVE_COLUMN).setWidth(30);
-		columnModel.getColumnById(FeatureSubsetTableModel.NUM_FEATURES_COLUMN).setWidth(50);
+		tca.adjustColumnsExcluding(fixedWidthColumns);
 	}
 }

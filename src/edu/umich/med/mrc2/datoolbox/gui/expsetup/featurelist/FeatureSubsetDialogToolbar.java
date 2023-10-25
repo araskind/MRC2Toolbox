@@ -52,8 +52,8 @@ public class FeatureSubsetDialogToolbar extends CommonToolbar {
 		super(commandListener);
 
 		saveChangesButton = GuiUtils.addButton(this, null, saveEditIcon, commandListener,
-				MainActionCommands.FINISH_FEATURE_SUBSET_EDIT_COMMAND.getName(),
-				MainActionCommands.FINISH_FEATURE_SUBSET_EDIT_COMMAND.getName(), buttonDimension);
+				MainActionCommands.SAVE_CHANGES_TO_FEATURE_SUBSET_COMMAND.getName(),
+				MainActionCommands.SAVE_CHANGES_TO_FEATURE_SUBSET_COMMAND.getName(), buttonDimension);
 
 		addSeparator(buttonDimension);
 

@@ -114,7 +114,7 @@ public class DockableMzRtBubblePlotPanel extends DefaultSingleCDockable
 		if(command.equals(MainActionCommands.FILTER_SELECTED_MS_FEATURES_IN_TABLE.getName())) {
 			
 		}
-		if(command.equals(MainActionCommands.FINISH_FEATURE_SUBSET_EDIT_COMMAND.getName()))
+		if(command.equals(MainActionCommands.SAVE_CHANGES_TO_FEATURE_SUBSET_COMMAND.getName()))
 			finishSubsetEdit();		
 	}
 	

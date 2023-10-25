@@ -24,21 +24,18 @@ package edu.umich.med.mrc2.datoolbox.gui.expsetup.featurelist;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.Arrays;
+import java.util.Collection;
 
-import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 
+import org.apache.commons.lang3.StringUtils;
+
 import edu.umich.med.mrc2.datoolbox.data.CompoundLibrary;
-import edu.umich.med.mrc2.datoolbox.data.MsFeature;
 import edu.umich.med.mrc2.datoolbox.data.MsFeatureSet;
 import edu.umich.med.mrc2.datoolbox.data.enums.ParameterSetStatus;
-import edu.umich.med.mrc2.datoolbox.data.enums.TableRowSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignEvent;
 import edu.umich.med.mrc2.datoolbox.gui.communication.ExperimentDesignSubsetEvent;
@@ -59,8 +56,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 
 	private FeatureSubsetToolbar toolbar;
-	private JPanel wrapper;
-	private JScrollPane scrollPane;
+
 	private FeatureSubsetTable featureSetTable;
 	private FeatureSubsetDialog featureSubsetDialog;
 
@@ -77,19 +73,9 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 
 		toolbar = new FeatureSubsetToolbar(this);
 		add(toolbar, BorderLayout.NORTH);
-		wrapper = new JPanel();
-		wrapper.setBorder(new EmptyBorder(10, 10, 10, 10));
-		add(wrapper, BorderLayout.CENTER);
-		wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
-
 		featureSetTable = new FeatureSubsetTable();
-		featureSetTable.setBorder(new EmptyBorder(10, 0, 20, 0));
-		scrollPane = new JScrollPane(featureSetTable);
-		scrollPane.setBorder(new EmptyBorder(0, 0, 20, 0));
-		wrapper.add(scrollPane);
+		add(new JScrollPane(featureSetTable), BorderLayout.CENTER);
 		
-		//	TODO switch to "DISPOSE_ON_CLOSE"
-		featureSubsetDialog = new FeatureSubsetDialog(this);
 		initActions();
 		loadLayout(layoutConfigFile);
 		populatePanelsMenu();
@@ -98,115 +84,105 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		
-		if(MRC2ToolBoxCore.getIdTrackerUser() == null) {
-			MessageDialog.showErrorMsg(
-					"You are not logged in ID tracker!", 
-					this.getContentPane());
+		if(MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return;
-		}
-		super.actionPerformed(event);
 		
-		if (event.getActionCommand().equals(MainActionCommands.NEW_FEATURE_SUBSET_COMMAND.getName()))
+		super.actionPerformed(event);
+		String command = event.getActionCommand();
+		
+		if (command.equals(MainActionCommands.NEW_FEATURE_SUBSET_COMMAND.getName()))
 			showNewFeatureSetDialog();
+		
+		if (command.equals(MainActionCommands.CREATE_NEW_FEATURE_SUBSET_COMMAND.getName()))
+			createNewFeatureSubset();
 
-		if (event.getActionCommand().equals(MainActionCommands.EDIT_FEATURE_SUBSET_COMMAND.getName()))
+		if (command.equals(MainActionCommands.EDIT_FEATURE_SUBSET_COMMAND.getName()))
 			showFeatureSetEditor();
 
-		if (event.getActionCommand().equals(MainActionCommands.EXPORT_FEATURE_SUBSET_COMMAND.getName()))
+		if (command.equals(MainActionCommands.SAVE_CHANGES_TO_FEATURE_SUBSET_COMMAND.getName()))
+			saveChangesToFeatureSet();
+		
+		if (command.equals(MainActionCommands.DELETE_FEATURE_SUBSET_COMMAND.getName()))
+			deleteSelectedFeatureSet();
+		
+		if (command.equals(MainActionCommands.SHOW_FEATURE_EXPORT_DIALOG_COMMAND.getName()))
+			showExportDialog();
+		
+		if (command.equals(MainActionCommands.EXPORT_FEATURE_SUBSET_COMMAND.getName()))
 			exportSelectedFeatureSet();
 
-		if (event.getActionCommand().equals(MainActionCommands.DELETE_FEATURE_SUBSET_COMMAND.getName()))
-			deleteSelectedFeatureSet();
+//		if (command.equals(MainActionCommands.REMOVE_SELECTED_FEATURES_FROM_SUBSET_COMMAND.getName()))
+//			removeSelectedFeatures();
 
-		if (event.getActionCommand().equals(MainActionCommands.FINISH_FEATURE_SUBSET_EDIT_COMMAND.getName()))
-			finishSubsetEdit();
-
-		if (event.getActionCommand().equals(MainActionCommands.SHOW_FEATURE_EXPORT_DIALOG_COMMAND.getName()))
-			showExportDialog();
-
-		if (event.getActionCommand().equals(MainActionCommands.REMOVE_SELECTED_FEATURES_FROM_SUBSET_COMMAND.getName()))
-			removeSelectedFeatures();
-
-		if (event.getActionCommand().equals(MainActionCommands.ADD_SELECTED_FEATURES_TO_SUBSET_COMMAND.getName())
-				|| event.getActionCommand()
-						.equals(MainActionCommands.ADD_FILTERED_FEATURES_TO_SUBSET_COMMAND.getName())) {
-
-			addFeaturesFromStatsTableToActiveSet(event.getActionCommand());
-		}
-		if (event.getActionCommand().equals(MainActionCommands.LINK_FEATURE_SUBSET_COMMAND.getName()))
-			linkToFeatureDataPanel();
-
-		if (event.getActionCommand().equals(MainActionCommands.UNLINK_FEATURE_SUBSET_COMMAND.getName()))
-			unlinkFromFeatureDataPanel();
+//		if (command.equals(MainActionCommands.ADD_SELECTED_FEATURES_TO_SUBSET_COMMAND.getName())
+//				|| command
+//						.equals(MainActionCommands.ADD_FILTERED_FEATURES_TO_SUBSET_COMMAND.getName())) {
+//
+//			addFeaturesFromStatsTableToActiveSet(command);
+//		}
+//		if (command.equals(MainActionCommands.LINK_FEATURE_SUBSET_COMMAND.getName()))
+//			linkToFeatureDataPanel();
+//
+//		if (command.equals(MainActionCommands.UNLINK_FEATURE_SUBSET_COMMAND.getName()))
+//			unlinkFromFeatureDataPanel();
 	}
 
 	private void activateDefaultSet() {
 		
-		MsFeatureSet allfeatureSet = currentExperiment.getAllFeaturesSetFordataPipeline(activeDataPipeline);
-		currentExperiment.setActiveFeatureSetForDataPipeline(allfeatureSet, activeDataPipeline);
+		MsFeatureSet allfeatureSet = 
+				currentExperiment.getAllFeaturesSetFordataPipeline(activeDataPipeline);
+		currentExperiment.setActiveFeatureSetForDataPipeline(
+				allfeatureSet, activeDataPipeline);
+	}
 
-
-//		int column = featureSetTable.getColumnIndex(FeatureSubsetTableModel.FEATURES_SUBSET_COLUMN);
+//	private void addFeaturesFromStatsTableToActiveSet(String actionCommand) {
 //
-//		for (int i = 0; i < featureSetTable.getRowCount(); i++) {
+//		if (activeSet.isLocked()) {
 //
-//			MsFeatureSet set = (MsFeatureSet) featureSetTable.getValueAt(i, column);
-//
-//			if (set.getName().equals(GlobalDefaults.ALL_FEATURES.getName()))
-//				set.setActive(true);
-//			else
-//				set.setActive(false);
+//			MessageDialog.showWarningMsg(
+//					"Active set is locked and can't be edited!\n" + 
+//					"Please select or create another feature set.");
+//			return;
 //		}
-	}
-
-	private void addFeaturesFromStatsTableToActiveSet(String actionCommand) {
-
-		if (activeSet.isLocked()) {
-
-			MessageDialog.showWarningMsg(
-					"Active set is locked and can't be edited!\n" + 
-					"Please select or create another feature set.");
-			return;
-		}
-		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
-		MsFeature[] features = new MsFeature[0];
-
-		if (actionCommand.equals(MainActionCommands.ADD_SELECTED_FEATURES_TO_SUBSET_COMMAND.getName()))
-			features = ((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
-					.getSelectedFeaturesArray();
-
-		if (actionCommand.equals(MainActionCommands.ADD_FILTERED_FEATURES_TO_SUBSET_COMMAND.getName()))
-			features = ((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
-					.getFilteredFeatures();
-
-		if (activeSet != null && features.length > 0)
-			activeSet.addFeatures(Arrays.asList(features));
-	}
-
-	private void addSelectedFeatures(MsFeatureSet editedSet) {
-
-		if (editedSet.isLocked()) {
-
-			MessageDialog.showWarningMsg(
-					"Active set is locked and can't be edited!\n" + 
-					"Please select or create another feature set.");
-			return;
-		}
-
-		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
-		MsFeature[] selected = new MsFeature[0];
-
-		if (featureSubsetDialog.getFeaturesSelectionToAdd().equals(TableRowSubset.SELECTED))
-			selected = ((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
-					.getSelectedFeaturesArray();
-
-		if (featureSubsetDialog.getFeaturesSelectionToAdd().equals(TableRowSubset.FILTERED))
-			selected = ((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
-					.getFilteredFeatures();
-
-		if (selected.length > 0)
-			editedSet.addFeatures(Arrays.asList(selected));
-	}
+//		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
+//		MsFeature[] features = new MsFeature[0];
+//
+//		if (actionCommand.equals(MainActionCommands.ADD_SELECTED_FEATURES_TO_SUBSET_COMMAND.getName()))
+//			features = ((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
+//					.getSelectedFeaturesArray();
+//
+//		if (actionCommand.equals(MainActionCommands.ADD_FILTERED_FEATURES_TO_SUBSET_COMMAND.getName()))
+//			features = ((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
+//					.getFilteredFeatures();
+//
+//		if (activeSet != null && features.length > 0)
+//			activeSet.addFeatures(Arrays.asList(features));
+//	}
+//
+//	private void addSelectedFeatures(MsFeatureSet editedSet) {
+//
+//		if (editedSet.isLocked()) {
+//
+//			MessageDialog.showWarningMsg(
+//					"Active set is locked and can't be edited!\n" + 
+//					"Please select or create another feature set.");
+//			return;
+//		}
+//
+//		MRC2ToolBoxCore.getMainWindow().showPanel(PanelList.FEATURE_DATA);
+//		MsFeature[] selected = new MsFeature[0];
+//
+//		if (featureSubsetDialog.getFeaturesSelectionToAdd().equals(TableRowSubset.SELECTED))
+//			selected = ((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
+//					.getSelectedFeaturesArray();
+//
+//		if (featureSubsetDialog.getFeaturesSelectionToAdd().equals(TableRowSubset.FILTERED))
+//			selected = ((FeatureDataPanel) MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA))
+//					.getFilteredFeatures();
+//
+//		if (selected.length > 0)
+//			editedSet.addFeatures(Arrays.asList(selected));
+//	}
 
 	public void addSetListeners(MsFeatureSet newSet) {
 
@@ -217,28 +193,8 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 		// TODO link other panels if necessary
 	}
 
-	private void createNewFeatureSet(MsFeatureSet newSet) {
-
-		String newName = featureSubsetDialog.getSubsetName();
-		MsFeatureSet existing  = currentExperiment.getMsFeatureSetsForDataPipeline(activeDataPipeline).stream().
-			filter(s -> s.getName().equalsIgnoreCase(newName)).findFirst().orElse(null);
-		if (existing != null) {
-			MessageDialog.showWarningMsg("Feature set with the name '" + newSet.getName()
-					+ "' already exists.\nPlease specify a different name.");
-			return;
-		}
-		newSet.setName(newName);
-		newSet.addFeatures(featureSubsetDialog.getSelectedSourceSubset().getFeatures());
-
-		if (featureSubsetDialog.getFeaturesSelectionToAdd() != null)
-			addSelectedFeatures(newSet);
-
-		addSetListeners(newSet);
-		activeSet = newSet;
-		newSet.fireFeatureSetEvent(ParameterSetStatus.CREATED);
-	}
-
 	private void deleteSelectedFeatureSet() {
+		
 		
 		if(featureSetTable.getSelectedRow() == -1)
 			return;
@@ -263,17 +219,6 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 			
 			featureSetTable.setModelFromProject(currentExperiment, activeDataPipeline);
 		}
-	}
-
-	private void editSelectedFeatureSet(MsFeatureSet editedSet) {
-
-		editedSet.setSuppressEvents(true);
-		editedSet.setName(featureSubsetDialog.getSubsetName());
-		if (featureSubsetDialog.getFeaturesSelectionToAdd() != null)
-			addSelectedFeatures(editedSet);
-		
-		editedSet.setSuppressEvents(false);
-		editedSet.fireFeatureSetEvent(ParameterSetStatus.CHANGED);
 	}
 
 	private void exportSelectedFeatureSet() {
@@ -303,50 +248,60 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 		libraryExportDialog.setVisible(true);
 	}
 
-	private void finishSubsetEdit() {
+	private void saveChangesToFeatureSet() {
 
-		MsFeatureSet setToEdit = featureSubsetDialog.getActiveSet();
-		if (currentExperiment.getMsFeatureSetsForDataPipeline(activeDataPipeline).contains(setToEdit))
-			editSelectedFeatureSet(setToEdit);
-		else
-			createNewFeatureSet(setToEdit);			
-
+		Collection<String>errors = 
+				featureSubsetDialog.validateFeatureSubsetData();
+		if(!errors.isEmpty()){
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), featureSubsetDialog);
+			return;
+		}
+		MsFeatureSet editedSet = featureSubsetDialog.getActiveSet();
+		editedSet.setSuppressEvents(true);
+		editedSet.setName(featureSubsetDialog.getSubsetName());
+//		if (featureSubsetDialog.getFeaturesSelectionToAdd() != null)
+//			addSelectedFeatures(editedSet);
+		
+		editedSet.setSuppressEvents(false);
+		editedSet.fireFeatureSetEvent(ParameterSetStatus.CHANGED);
 		featureSubsetDialog.dispose();
 	}
 
-	private void linkToFeatureDataPanel() {
+//	private void linkToFeatureDataPanel() {
+//
+//		int column = featureSetTable.getColumnIndex(
+//				FeatureSubsetTableModel.FEATURES_SUBSET_COLUMN);
+//
+//		for (int i = 0; i < featureSetTable.getRowCount(); i++) {
+//
+//			MsFeatureSet set = (MsFeatureSet) featureSetTable.getValueAt(i, column);
+//			addSetListeners(set);
+//		}
+//		activeSet.fireFeatureSetEvent(ParameterSetStatus.CHANGED);
+//	}
 
-		int column = featureSetTable.getColumnIndex(
-				FeatureSubsetTableModel.FEATURES_SUBSET_COLUMN);
+//	private void removeSelectedFeatures() {
+//
+//		Collection<MsFeature> selected = 
+//				featureSubsetDialog.getSelectedFeatures();
+//		if (selected.isEmpty())
+//			return;
+//
+//		int approve = MessageDialog.showChoiceMsg(
+//				"Remove selected features from the subset?",
+//				this.getContentPane());
+//
+//		if (approve == JOptionPane.YES_OPTION) {
+//
+//			MsFeatureSet setToEdit = featureSubsetDialog.getActiveSet();
+//			setToEdit.removeFeatures(selected);
+//		}
+//	}
 
-		for (int i = 0; i < featureSetTable.getRowCount(); i++) {
-
-			MsFeatureSet set = (MsFeatureSet) featureSetTable.getValueAt(i, column);
-			addSetListeners(set);
-		}
-		activeSet.fireFeatureSetEvent(ParameterSetStatus.CHANGED);
-	}
-
-	private void removeSelectedFeatures() {
-
-		MsFeature[] selected = featureSubsetDialog.getSelectedFeatures();
-		if (selected.length > 0) {
-
-			int approve = MessageDialog.showChoiceMsg(
-					"Remove selected features from the subset?",
-					this.getContentPane());
-
-			if (approve == JOptionPane.YES_OPTION) {
-
-				MsFeatureSet setToEdit = featureSubsetDialog.getActiveSet();
-				setToEdit.removeFeatures(selected);
-			}
-		}
-	}
-
-	private void removeSetListeners(MsFeatureSet newSet) {
-		newSet.removeAllListeners();
-	}
+//	private void removeSetListeners(MsFeatureSet newSet) {
+//		newSet.removeAllListeners();
+//	}
 
 	private void showExportDialog() {
 		// TODO Auto-generated method stub
@@ -354,34 +309,59 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 	}
 
 	private void showFeatureSetEditor() {
-		if (featureSetTable.getSelectedRow() == -1) 
+		
+		MsFeatureSet setToEdit = featureSetTable.getSelectedMsFeatureSet();		
+		if (setToEdit == null) 
 			return;
-
-		MsFeatureSet setToEdit = 
-				(MsFeatureSet) featureSetTable.getValueAt(featureSetTable.getSelectedRow(), 1);
 
 		if (setToEdit.isLocked()) {
 			MessageDialog
 					.showErrorMsg("Feature subset '" + setToEdit.getName() + 
 							"' is locked and can not be edited!", this.getContentPane());
-		} else {
-			featureSubsetDialog = new FeatureSubsetDialog(this);
-			featureSubsetDialog.loadFeatureSubset(setToEdit);
-			featureSubsetDialog.disableSetSelector();
-			featureSubsetDialog.setLocationRelativeTo(this.getContentPane());
-			featureSubsetDialog.setVisible(true);
-		}	
+			return;
+		}
+		featureSubsetDialog = new FeatureSubsetDialog(setToEdit, this);		
+		featureSubsetDialog.setLocationRelativeTo(this.getContentPane());
+		featureSubsetDialog.setVisible(true);			
 	}
 
 	private void showNewFeatureSetDialog() {
 
-		MsFeatureSet newSet = new MsFeatureSet("New feature set");
-		featureSubsetDialog = new FeatureSubsetDialog(this);
-		featureSubsetDialog.loadFeatureSubset(newSet);
-		featureSubsetDialog.populateSetSelector();
-		featureSubsetDialog.enableSetSelector();
+		featureSubsetDialog = new FeatureSubsetDialog(null, this);
 		featureSubsetDialog.setLocationRelativeTo(this.getContentPane());
 		featureSubsetDialog.setVisible(true);
+	}
+	
+	private void createNewFeatureSubset() {
+
+		Collection<String>errors = 
+				featureSubsetDialog.validateFeatureSubsetData();
+		if(!errors.isEmpty()){
+			MessageDialog.showErrorMsg(
+					StringUtils.join(errors, "\n"), featureSubsetDialog);
+			return;
+		}
+		MsFeatureSet newSet = 
+				new MsFeatureSet(featureSubsetDialog.getSubsetName());
+		
+		if (featureSubsetDialog.getFeaturesSelectionToAdd() != null) {
+			FeatureDataPanel panel = 
+					(FeatureDataPanel)MRC2ToolBoxCore.getMainWindow().getPanel(PanelList.FEATURE_DATA);
+			newSet.addFeatures(panel.getFeatures(
+					featureSubsetDialog.getFeaturesSelectionToAdd()));			
+		}
+		if(featureSubsetDialog.getSelectedSourceSubset() != null) {			
+			newSet.addFeatures(featureSubsetDialog.getSelectedSourceSubset().getFeatures());
+		}
+		addSetListeners(newSet);
+		currentExperiment.addFeatureSetForDataPipeline(newSet, activeDataPipeline);
+		currentExperiment.setActiveFeatureSetForDataPipeline(newSet, activeDataPipeline);
+		
+//		addSetListeners(newSet);
+//		activeSet = newSet;
+//		newSet.fireFeatureSetEvent(ParameterSetStatus.CREATED);
+		
+		featureSubsetDialog.dispose();
 	}
 
 	@Override
@@ -392,22 +372,22 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 
 		if (status.equals(ParameterSetStatus.CHANGED)) {
 
-			if (featureSubsetDialog.isVisible())
-				featureSubsetDialog.loadFeatureSubset(featureSet);
+//			featureSetTable.setModelFromProject(
+//					currentExperiment, activeDataPipeline);
 		}
-		if (status.equals(ParameterSetStatus.CREATED)) {
+		else if (status.equals(ParameterSetStatus.CREATED)) {
 
 			if(!activeSet.equals(featureSet)) {
 				activeSet = featureSet;
 				currentExperiment.setActiveFeatureSetForDataPipeline(activeSet, activeDataPipeline);
 			}
 		}
-		if (status.equals(ParameterSetStatus.DELETED)) {
+		else if (status.equals(ParameterSetStatus.DELETED)) {
 
 			if (activeSet.equals(featureSet))
 				activateDefaultSet();
 		}
-		if (status.equals(ParameterSetStatus.ENABLED)) {
+		else if (status.equals(ParameterSetStatus.ENABLED)) {
 
 			if(!activeSet.equals(featureSet)) {
 				
@@ -415,40 +395,43 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 				currentExperiment.setActiveFeatureSetForDataPipeline(activeSet, activeDataPipeline);
 			}
 		}
-		switchDataPipeline(currentExperiment, activeDataPipeline);
+		//switchDataPipeline(currentExperiment, activeDataPipeline);
+		featureSetTable.setModelFromProject(
+					currentExperiment, activeDataPipeline);		
 	}
 
-	private void unlinkFromFeatureDataPanel() {
-
-		int column = featureSetTable.getColumnIndex(
-				FeatureSubsetTableModel.FEATURES_SUBSET_COLUMN);
-
-		for (int i = 0; i < featureSetTable.getRowCount(); i++) {
-
-			MsFeatureSet set = (MsFeatureSet) featureSetTable.getValueAt(i, column);
-			removeSetListeners(set);
-		}
-	}
+//	private void unlinkFromFeatureDataPanel() {
+//
+//		int column = featureSetTable.getColumnIndex(
+//				FeatureSubsetTableModel.FEATURES_SUBSET_COLUMN);
+//
+//		for (int i = 0; i < featureSetTable.getRowCount(); i++) {
+//
+//			MsFeatureSet set = (MsFeatureSet) featureSetTable.getValueAt(i, column);
+//			removeSetListeners(set);
+//		}
+//	}
 
 	@Override
 	public void switchDataPipeline(DataAnalysisProject project, DataPipeline newDataPipeline) {
 
 		clearPanel();
 		super.switchDataPipeline(project, newDataPipeline);
-		if(project == null || newDataPipeline == null)
+		if(currentExperiment == null || activeDataPipeline == null)
 			return;
 		
-		featureSetTable.setModelFromProject(currentExperiment, newDataPipeline);
-		scrollPane.setPreferredSize(featureSetTable.getPreferredScrollableViewportSize());
+		featureSetTable.setModelFromProject(
+				currentExperiment, activeDataPipeline);
 		activeSet = null;
-		if (newDataPipeline != null) {
+		if (activeDataPipeline != null) {
 
-			for (MsFeatureSet set : currentExperiment.getMsFeatureSetsForDataPipeline(newDataPipeline))
+			for (MsFeatureSet set : currentExperiment.getMsFeatureSetsForDataPipeline(activeDataPipeline))
 				addSetListeners(set);
 
-			activeSet = currentExperiment.getActiveFeatureSetForDataPipeline(newDataPipeline);
+			activeSet = currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline);
 		}
-		toolbar.updateGuiFromExperimentAndDataPipeline(currentExperiment, newDataPipeline);
+		toolbar.updateGuiFromExperimentAndDataPipeline(
+				currentExperiment, activeDataPipeline);
 	}
 	
 	@Override
@@ -461,7 +444,8 @@ public class FeatureSubsetPanel extends DockableMRC2ToolboxPanel {
 
 		super.closeExperiment();
 		clearPanel();
-		toolbar.updateGuiFromExperimentAndDataPipeline(currentExperiment, activeDataPipeline);
+		toolbar.updateGuiFromExperimentAndDataPipeline(
+				currentExperiment, activeDataPipeline);
 	}
 
 	@Override

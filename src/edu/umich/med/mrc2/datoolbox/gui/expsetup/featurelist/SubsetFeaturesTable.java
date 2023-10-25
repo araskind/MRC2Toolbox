@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.expsetup.featurelist;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 import javax.swing.ListSelectionModel;
@@ -63,6 +62,8 @@ public class SubsetFeaturesTable extends BasicTable {
 		columnModel.getColumnById(SubsetFeaturesTableModel.MS_FEATURE_COLUMN)
 				.setCellRenderer(cfRenderer);
 		columnModel.getColumnById(SubsetFeaturesTableModel.ORDER_COLUMN).setMaxWidth(50);
+		fixedWidthColumns.add(
+				columnModel.getColumnIndex(SubsetFeaturesTableModel.ORDER_COLUMN));
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
@@ -72,14 +73,13 @@ public class SubsetFeaturesTable extends BasicTable {
 		thf.setTable(null);
 		model.setTableModelFromFeatureSet(featureSet);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(Collections.singleton(
-				columnModel.getColumnIndex(SubsetFeaturesTableModel.ORDER_COLUMN)));
+		tca.adjustColumnsExcluding(fixedWidthColumns);
 	}
 	
 	public void addFeatures(Collection<MsFeature> features) {
 		
 		thf.setTable(null);
-		Collection<MsFeature> current = getFeatures();
+		Collection<MsFeature> current = getAllFeatures();
 		Collection<MsFeature>toAdd = features.stream().
 				filter(f -> !current.contains(f)).collect(Collectors.toSet());
 		if(toAdd.isEmpty())
@@ -89,24 +89,36 @@ public class SubsetFeaturesTable extends BasicTable {
 		
 		model.setTableModelFromFeatures(current);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(Collections.singleton(
-				columnModel.getColumnIndex(SubsetFeaturesTableModel.ORDER_COLUMN)));
+		tca.adjustColumnsExcluding(fixedWidthColumns);
 	}
 	
 	public void setTableModelFromFeatures(Collection<MsFeature> features) {
 		thf.setTable(null);
 		model.setTableModelFromFeatures(features);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(Collections.singleton(
-				columnModel.getColumnIndex(SubsetFeaturesTableModel.ORDER_COLUMN)));
+		tca.adjustColumnsExcluding(fixedWidthColumns);
 	}
 	
-	public Collection<MsFeature> getFeatures() {
+	public Collection<MsFeature> getAllFeatures() {
 		
 		Collection<MsFeature> features = new ArrayList<MsFeature>();
 		int col = model.getColumnIndex(SubsetFeaturesTableModel.MS_FEATURE_COLUMN);
 		for(int i=0; i<model.getRowCount(); i++) 
 			features.add((MsFeature)model.getValueAt(i, col));
+		
+		return features;	
+	}
+	
+	public Collection<MsFeature> getSelectedFeatures() {
+		
+		Collection<MsFeature> features = new ArrayList<MsFeature>();
+		int[]rows = getSelectedRows();
+		if(rows.length == 0)
+			return features;
+		
+		int col = model.getColumnIndex(SubsetFeaturesTableModel.MS_FEATURE_COLUMN);
+		for(int i : rows) 
+			features.add((MsFeature)model.getValueAt(convertRowIndexToModel(i), col));
 		
 		return features;	
 	}

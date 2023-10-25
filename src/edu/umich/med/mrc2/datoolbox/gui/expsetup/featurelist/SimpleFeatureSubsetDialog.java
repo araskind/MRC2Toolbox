@@ -172,8 +172,8 @@ public class SimpleFeatureSubsetDialog extends JDialog implements ItemListener {
 		};
 		btnCancel.addActionListener(al);
 
-		JButton btnSave = new JButton(MainActionCommands.FINISH_FEATURE_SUBSET_EDIT_COMMAND.getName());
-		btnSave.setActionCommand(MainActionCommands.FINISH_FEATURE_SUBSET_EDIT_COMMAND.getName());
+		JButton btnSave = new JButton(MainActionCommands.SAVE_CHANGES_TO_FEATURE_SUBSET_COMMAND.getName());
+		btnSave.setActionCommand(MainActionCommands.SAVE_CHANGES_TO_FEATURE_SUBSET_COMMAND.getName());
 		btnSave.addActionListener(actionListener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
@@ -190,7 +190,7 @@ public class SimpleFeatureSubsetDialog extends JDialog implements ItemListener {
 	}
 
 	public Collection<MsFeature>getFeatures(){
-		return featuresTable.getFeatures();
+		return featuresTable.getAllFeatures();
 	}
 
 	@Override

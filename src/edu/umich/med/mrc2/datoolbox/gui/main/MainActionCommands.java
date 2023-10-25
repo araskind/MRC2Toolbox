@@ -506,7 +506,8 @@ public enum MainActionCommands {
 	REMOVE_MOTRPAC_STUDY_TISSUES_COMMAND("Remove tissues from MoTrPAC experiment"),
 
 	// Feature subset commands
-	NEW_FEATURE_SUBSET_COMMAND("Create new feature subset"),
+	NEW_FEATURE_SUBSET_COMMAND("Define new feature subset"),
+	CREATE_NEW_FEATURE_SUBSET_COMMAND("Create new feature subset"),
 	ADD_SELECTED_FEATURES_TO_SUBSET_COMMAND(	"Add selected features to active subset"),
 	ADD_FILTERED_FEATURES_TO_SUBSET_COMMAND(	"Add filtered features to active subset"),
 	EDIT_FEATURE_SUBSET_COMMAND(	"Edit selected feature subset"),
@@ -514,7 +515,7 @@ public enum MainActionCommands {
 	REMOVE_SELECTED_FEATURES_FROM_SUBSET_COMMAND(	"Remove selected features from subset"),
 	EXPORT_FEATURE_SUBSET_COMMAND(	"Export selected feature subset as library"),
 	SHOW_FEATURE_EXPORT_DIALOG_COMMAND(	"Feature subset export setup"),
-	FINISH_FEATURE_SUBSET_EDIT_COMMAND(	"Save changes to feature subset"),
+	SAVE_CHANGES_TO_FEATURE_SUBSET_COMMAND(	"Save changes to feature subset"),
 	LINK_FEATURE_SUBSET_COMMAND(	"Link feature subset"),
 	UNLINK_FEATURE_SUBSET_COMMAND(	"Unlink feature subset"),
 	LOCK_FEATURE_SUBSET_COMMAND("Lock selected feature subset"),
