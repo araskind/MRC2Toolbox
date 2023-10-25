@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -169,11 +170,12 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 	private void updateFeatureIdentifications() {
 
 		taskDescription = "Processing identifications ... ";
-		
+		Collection<MsFeatureIdentity>toRemove = new ArrayList<MsFeatureIdentity>();
 		for (DataPipeline dataPipeline : newExperiment.getDataPipelines()) {
 			
 			for(MsFeature feature : newExperiment.getMsFeaturesForDataPipeline(dataPipeline)) {
 				
+				toRemove.clear();
 				for(MsFeatureIdentity id : feature.getIdentifications()) {
 					
 					MsFeatureIdentity fbfId = null;
@@ -188,6 +190,12 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 						fbfId = id;
 					}
 					if(fbfId != null)
+						toRemove.add(fbfId);
+						
+				}
+				if(!toRemove.isEmpty()) {
+					
+					for(MsFeatureIdentity fbfId : toRemove)
 						feature.removeIdentity(fbfId);
 				}
 			}

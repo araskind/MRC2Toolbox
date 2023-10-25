@@ -27,6 +27,7 @@ public enum MainActionCommands {
 	NEW_METABOLOMICS_EXPERIMENT_COMMAND("New metabolomics experiment setup"),
 	CREATE_NEW_METABOLOMICS_EXPERIMENT_COMMAND("Create new metabolomics experiment"),
 	NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND("New metabolomics experiment (new format)"),
+	CREATE_NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND("Create new metabolomics experiment (new format)"),
 	OPEN_METABOLOMICS_EXPERIMENT_COMMAND("Open metabolomics experiment"),
 	OPEN_METABOLOMICS_XML_EXPERIMENT_COMMAND("Open metabolomics experiment (new format)"),
 	SAVE_EXPERIMENT_COMMAND("Save experiment"),

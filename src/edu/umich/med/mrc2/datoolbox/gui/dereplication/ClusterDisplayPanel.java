@@ -475,7 +475,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 			}			
 			correlationPanel.createCorrelationPlot(fOne, dpOne, fTwo, dpTwo);
 		}
-		if(firstSelected.getPrimaryIdentity() == null) 
+		if(!firstSelected.isIdentified()) 
 			return;
 
 		try {

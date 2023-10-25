@@ -32,7 +32,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,18 +54,16 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.gui.utils.jnafilechooser.api.JnaFileChooser;
-import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.project.ProjectType;
 
-public class NewExperimentDialog extends JDialog implements ActionListener, BackedByPreferences {
+public class NewMetabolomicsExperimentDialog extends JDialog 
+	implements ActionListener, BackedByPreferences {
 
 	/**
 	 *
@@ -80,19 +77,18 @@ public class NewExperimentDialog extends JDialog implements ActionListener, Back
 	
 	private JTextArea descriptionTextArea;
 	private ProjectType projectType;
-	private ExperimentDesign design;
 	private LIMSExperiment activeExperiment;
 
 	private static final Icon newProjectIcon = GuiUtils.getIcon("newProject", 32);
-	private static final Icon newIdProjectIcon = GuiUtils.getIcon("newIdProject", 32);
+	private static final Icon newFormatProjectIcon = GuiUtils.getIcon("newXmlProject", 32);
 	private JTextField experimentDirectoryLocationTextField;
 	private JTextField projectNameTextField;
 
-	public NewExperimentDialog(ActionListener listener) {
+	public NewMetabolomicsExperimentDialog(
+			ActionListener listener, 
+			ProjectType projectType) {
 
 		super();
-		setTitle("Create new experiment");
-		setIconImage(((ImageIcon) newProjectIcon).getImage());
 		setPreferredSize(new Dimension(640, 300));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -126,13 +122,7 @@ public class NewExperimentDialog extends JDialog implements ActionListener, Back
 		gbc_textField.gridx = 0;
 		gbc_textField.gridy = 1;
 		projectPanel.add(experimentDirectoryLocationTextField, gbc_textField);
-		try {
-			experimentDirectoryLocationTextField.setText(
-					Paths.get(baseDirectory.getCanonicalPath()).toString());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
+		
 		JButton browseButton = new JButton("Browse");
 		browseButton.setActionCommand(CHOOSE_PARENT_DIR_COMMAND);
 		browseButton.addActionListener(this);
@@ -202,10 +192,24 @@ public class NewExperimentDialog extends JDialog implements ActionListener, Back
 			}
 		};
 		btnCancel.addActionListener(al);
+		
+		this.projectType = projectType;
+		String command = "";
+		if(projectType.equals(ProjectType.DATA_ANALYSIS)) {
 
-		JButton btnSave = new JButton(MainActionCommands.CREATE_NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName());
-		btnSave.setActionCommand(MainActionCommands.CREATE_NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName());
-		btnSave.addActionListener(this);
+			setTitle("Create new data analysis experiment");
+			setIconImage(((ImageIcon) newProjectIcon).getImage());
+			command = MainActionCommands.CREATE_NEW_METABOLOMICS_EXPERIMENT_COMMAND.getName();
+		}
+		if(projectType.equals(ProjectType.DATA_ANALYSIS_NEW_FORMAT)) {
+
+			setTitle("Create new data analysis experiment (new format)");
+			setIconImage(((ImageIcon) newFormatProjectIcon).getImage());
+			command = MainActionCommands.CREATE_NEW_METABOLOMICS_XML_EXPERIMENT_COMMAND.getName();
+		}
+		JButton btnSave = new JButton(command);
+		btnSave.setActionCommand(command);
+		btnSave.addActionListener(listener);
 		panel.add(btnSave);
 		JRootPane rootPane = SwingUtilities.getRootPane(btnSave);
 		rootPane.registerKeyboardAction(al, stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -245,55 +249,6 @@ public class NewExperimentDialog extends JDialog implements ActionListener, Back
 		}
 	}
 
-	private void createNewProject() {
-		
-		String projLocation = experimentDirectoryLocationTextField.getText().trim();
-		String projName = projectNameTextField.getText().trim();
-		if(projLocation.isEmpty() || projName.isEmpty()) {
-			MessageDialog.showErrorMsg("Experiment name and location must be defined", this);
-			return;
-		}
-		File projFile = Paths.get(projLocation, projName).toFile();
-		if(projFile == null)
-			return;
-		
-		if(projFile.exists()) {
-			MessageDialog.showErrorMsg(
-					"Experiment \""+ projName + "\" already exists at \"" 
-							+ projLocation + "\"", this);
-			return;
-		}	
-		String pdesc = descriptionTextArea.getText().trim();
-		if(activeExperiment != null)
-			MRC2ToolBoxCore.getMainWindow().createNewExperimentFromLimsExperiment(
-					projFile.getParentFile(), projName, pdesc, projectType, activeExperiment);
-		else
-			MRC2ToolBoxCore.getMainWindow().createNewExperiment(
-					projFile, pdesc, projectType, design);
-		
-		dispose();
-	}
-
-	public void setProjectType(ProjectType type) {
-
-		projectType = type;
-
-		if(projectType.equals(ProjectType.DATA_ANALYSIS)) {
-
-			setTitle("Create new data analysis experiment");
-			setIconImage(((ImageIcon) newProjectIcon).getImage());
-		}
-//		if(projectType.equals(ProjectType.FEATURE_IDENTIFICATION)) {
-//
-//			setTitle("Create new feature identification experiment");
-//			setIconImage(((ImageIcon) newIdProjectIcon).getImage());
-//		}
-	}
-
-	public void setDesign(ExperimentDesign design) {
-		this.design = design;
-	}
-
 	public void setLimsExperiment(LIMSExperiment activeExperiment) {
 
 		this.activeExperiment = activeExperiment;
@@ -312,20 +267,35 @@ public class NewExperimentDialog extends JDialog implements ActionListener, Back
 			
 			descriptionTextArea.setText(description);
 		}
+	}	
+	
+	public ProjectType getProjectType() {
+		return projectType;
 	}
 	
 	public String getProjectName() {
 		return projectNameTextField.getText().trim();
 	}
 	
+	public String getProjectDescription() {
+		return descriptionTextArea.getText().trim();
+	}
+	
 	public LIMSExperiment getLimsExperiment() {
 		return activeExperiment;
 	}
 	
-	public Collection<String>validateProjectData(){
+	public File getProjectParentFolder() {
+		return baseDirectory;
+	}
+	
+	public Collection<String>validateExperimentData(){
 		
 		Collection<String>errors = new ArrayList<String>();
 		
+		if(projectType == null)
+			errors.add("Project type not specified.");
+
 		if(getProjectName().isEmpty())
 			errors.add("Project name cannot be empty.");
 		

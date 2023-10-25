@@ -22,11 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.project;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -58,10 +55,9 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSExperiment;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSProject;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
-import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class DataAnalysisProject extends Project {
+public class DataAnalysisProject extends Experiment {
 
 	/**
 	 *
@@ -71,7 +67,7 @@ public class DataAnalysisProject extends Project {
 	protected LIMSProject limsProject;
 	protected LIMSExperiment limsExperiment;
 	protected ProjectPreferences projectPreferences;
-	protected ExperimentDesign experimentDesign;
+	
 
 	protected TreeSet<DataPipeline> dataPipelines;
 	protected DataPipeline activeDataPipeline;
@@ -92,16 +88,6 @@ public class DataAnalysisProject extends Project {
 	protected TreeMap<DataAcquisitionMethod, Set<DataFile>> dataFileMap;
 	protected TreeMap<DataAcquisitionMethod, Worklist> worklistMap;
 	protected Set<MsFeatureClusterSet>dataIntegrationSets;
-
-//	public DataAnalysisProject(
-//			String name, 
-//			String projectDescription2,
-//			File projectDirectory2, 
-//			ProjectType projectType2) {
-//
-//		this(name, projectDescription2, projectDirectory2);
-//		this.projectType = projectType2;
-//	}
 	
 	public DataAnalysisProject(
 			String projectName, 
@@ -113,24 +99,24 @@ public class DataAnalysisProject extends Project {
 				projectDescription, 
 				parentDirectory);
 
-		initNewExperiment(parentDirectory);
+		createDirectoryStructureForNewExperiment(parentDirectory);
 		initNewProject();		
 	}
 	
 	@Override
-	protected void initNewExperiment(File parentDirectory) {
+	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
 		
-		super.initNewExperiment(parentDirectory);
-		projectFile = 
-				Paths.get(projectDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-") + "."
+		super.createDirectoryStructureForNewExperiment(parentDirectory);
+		experimentFile = 
+				Paths.get(experimentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-") + "."
 				+ MRC2ToolBoxConfiguration.EXPERIMENT_FILE_EXTENSION).toFile();
 	}
 	
 	public void updateExperimentLocation(File newProjectFile) {
 		
-		projectFile = newProjectFile;
-		projectDirectory = newProjectFile.getParentFile();
-		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+		experimentFile = newProjectFile;
+		experimentDirectory = newProjectFile.getParentFile();
+		exportsDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();	
 	}
 		
@@ -158,60 +144,8 @@ public class DataAnalysisProject extends Project {
 		metaDataMap = new TreeMap<DataPipeline, Matrix[]>();
 	}
 	
-	public String getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-	
-	public String getDescription() {
-		return description;
-	}
-	
-	public Date getDateCreated() {
-		return dateCreated;
-	}
-
-	public Date getLastModified() {
-		return lastModified;
-	}
-	
-	public File getProjectFile() {
-		return projectFile;
-	}
-	
-	public File getExperimentDirectory() {
-		return projectDirectory;
-	}
-
-	public ExperimentDesign getExperimentDesign() {
-		return experimentDesign;
-	}
-	
 	public Set<DataPipeline> getDataPipelines() {
 		return dataPipelines;
-	}
-
-	public void setId(String projectId) {
-		this.id = projectId;
-	}
-
-	public void setName(String projectName) {
-		this.name = projectName;
-	}
-	
-	public void setDescription(String projectDescription) {
-		this.description = projectDescription;
-	}
-	
-	public void setLastModified(Date lastModified) {
-		this.lastModified = lastModified;
-	}
-	
-	public ProjectType getProjectType() {
-		return projectType;
 	}
 
 	public LIMSProject getLimsProject() {
@@ -230,31 +164,31 @@ public class DataAnalysisProject extends Project {
 		this.limsExperiment = limsExperiment;
 	}
 
-	public File getExportsDirectory() {
-
-		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
-				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
-
-		if(!exportsDirectory.exists()) {
-
-			if (!createProjectDirectory(exportsDirectory)) {
-				MessageDialog.showWarningMsg("Failed to create exports directory");
-				return null;
-			}
-		}
-		return exportsDirectory;
-	}
+//	public File getExportsDirectory() {
+//
+//		exportsDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
+//				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
+//
+//		if(!exportsDirectory.exists()) {
+//
+//			if (!createProjectDirectory(exportsDirectory)) {
+//				MessageDialog.showWarningMsg("Failed to create exports directory");
+//				return null;
+//			}
+//		}
+//		return exportsDirectory;
+//	}
 	
-	protected boolean createProjectDirectory(File projDir) {		
-		try {
-			Files.createDirectories(Paths.get(projDir.getAbsolutePath()));
-			return true;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}
-	}
+//	protected boolean createProjectDirectory(File projDir) {		
+//		try {
+//			Files.createDirectories(Paths.get(projDir.getAbsolutePath()));
+//			return true;
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			return false;
+//		}
+//	}
 
 	public void recreateMatrixMaps() {
 		dataMatrixMap = new TreeMap<DataPipeline, Matrix>();
@@ -263,8 +197,8 @@ public class DataAnalysisProject extends Project {
 	}
 
 	public void setProjectFile(File newProjectFile) {
-		projectFile = newProjectFile;
-		projectDirectory = projectFile.getParentFile();
+		experimentFile = newProjectFile;
+		experimentDirectory = experimentFile.getParentFile();
 		exportsDirectory = getExportsDirectory();
 	}
 	
@@ -313,7 +247,7 @@ public class DataAnalysisProject extends Project {
 
 		// Delete data matrix and storage file
 		dataMatrixMap.remove(pipeline);
-		File dataMatrixFile = Paths.get(projectDirectory.getAbsolutePath(), 
+		File dataMatrixFile = Paths.get(experimentDirectory.getAbsolutePath(), 
 				dataMatrixFileMap.get(pipeline)).toFile();
 		if (dataMatrixFile.exists())
 			dataMatrixFile.delete();
@@ -328,7 +262,7 @@ public class DataAnalysisProject extends Project {
 		
 		//	Delete feature matrix and storage file
 		featureMatrixMap.remove(pipeline);
-		File featureMatrixFile = Paths.get(projectDirectory.getAbsolutePath(), 
+		File featureMatrixFile = Paths.get(experimentDirectory.getAbsolutePath(), 
 				featureMatrixFileMap.get(pipeline)).toFile();
 		if (featureMatrixFile.exists())
 			featureMatrixFile.delete();

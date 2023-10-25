@@ -65,7 +65,7 @@ import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.rawdata.MSMSExtractionParameterSet;
 
-public class RawDataAnalysisExperiment extends Project {
+public class RawDataAnalysisExperiment extends Experiment {
 	
 	/**
 	 * 
@@ -85,8 +85,15 @@ public class RawDataAnalysisExperiment extends Project {
 //	protected Set<Injection>injections;
 	protected LIMSUser createdBy;
 	protected LIMSExperiment idTrackerExperiment;
-	
-	//	New experiment
+		
+	/**
+	 * This constructor is used when creating new experiment
+	 * 
+	 * @param experimentName
+	 * @param experimentDescription
+	 * @param parentDirectory
+	 * @param createdBy
+	 */
 	public RawDataAnalysisExperiment(
 			String experimentName, 
 			String experimentDescription, 
@@ -95,11 +102,21 @@ public class RawDataAnalysisExperiment extends Project {
 
 		super(ProjectType.RAW_DATA_ANALYSIS, experimentName, 
 				experimentDescription, parentDirectory);
-		initNewExperiment(parentDirectory);
+		createDirectoryStructureForNewExperiment(parentDirectory);
 		initFields();
 		this.createdBy = createdBy;
 	}
 	
+	/**
+	 * This constructor is used when restoring the experiment from XML file
+	 * 
+	 * @param id
+	 * @param name
+	 * @param description
+	 * @param experimentFile
+	 * @param dateCreated
+	 * @param lastModified
+	 */
 	public RawDataAnalysisExperiment(
 			String id, 
 			String name, 
@@ -108,17 +125,18 @@ public class RawDataAnalysisExperiment extends Project {
 			Date dateCreated,
 			Date lastModified) {
 		super(id, name, description, experimentFile, dateCreated, lastModified);
+		this.projectType = ProjectType.RAW_DATA_ANALYSIS;
 		setExperimentDirectories();
 		initFields();
 	}
 	
 	public void updateExperimentLocation(File newExperimentFile) {
 		
-		projectFile = newExperimentFile;
-		projectDirectory = newExperimentFile.getParentFile();
-		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+		experimentFile = newExperimentFile;
+		experimentDirectory = newExperimentFile.getParentFile();
+		exportsDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();	
-		File newRawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+		File newRawDataDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
 		if(!newRawDataDirectory.equals(rawDataDirectory)) {
 			
@@ -134,15 +152,15 @@ public class RawDataAnalysisExperiment extends Project {
 	}
 	
 	@Override
-	protected void initNewExperiment(File parentDirectory) {
+	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
 		
-		super.initNewExperiment(parentDirectory);
-		projectFile = 
-				Paths.get(projectDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-") + "."
+		super.createDirectoryStructureForNewExperiment(parentDirectory);
+		experimentFile = 
+				Paths.get(experimentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-") + "."
 				+ MRC2ToolBoxConfiguration.RAW_DATA_EXPERIMENT_FILE_EXTENSION).toFile();	
-		rawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+		rawDataDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
-		uncompressedExperimentFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+		uncompressedExperimentFilesDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.UNCOMPRESSED_EXPERIMENT_FILES_DIRECTORY).toFile();
 		try {
 			Files.createDirectories(Paths.get(rawDataDirectory.getAbsolutePath()));
@@ -165,9 +183,9 @@ public class RawDataAnalysisExperiment extends Project {
 		
 		super.setExperimentDirectories();
 		
-		rawDataDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+		rawDataDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.RAW_DATA_DIRECTORY).toFile();
-		uncompressedExperimentFilesDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+		uncompressedExperimentFilesDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.UNCOMPRESSED_EXPERIMENT_FILES_DIRECTORY).toFile();
 	}
 
@@ -282,46 +300,6 @@ public class RawDataAnalysisExperiment extends Project {
 				sorted().collect(Collectors.toList());
 	}
 	
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Date getDateCreated() {
-		return dateCreated;
-	}
-
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
-	}
-
-	public Date getLastModified() {
-		return lastModified;
-	}
-
-	public void setLastModified(Date lastModified) {
-		this.lastModified = lastModified;
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public File getExportsDirectory() {
-		return exportsDirectory;
-	}
-
 	public File getRawDataDirectory() {
 		return rawDataDirectory;
 	}

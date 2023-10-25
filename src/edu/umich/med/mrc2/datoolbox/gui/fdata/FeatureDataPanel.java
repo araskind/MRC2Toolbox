@@ -1856,4 +1856,17 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 		// TODO Auto-generated method stub
 		
 	}
+
+	public void refreshIdentificationsTable() {
+
+		MsFeature selectedFeature = getSelectedFeature();
+		if(selectedFeature == null)
+			identificationsTable.clearTable();
+		else
+			identificationsTable.setModelFromMsFeature(selectedFeature);
+	}
+	
+	public void updateFeatureData(MsFeature source) {
+		featureDataTable.updateFeatureData(source);
+	}
 }

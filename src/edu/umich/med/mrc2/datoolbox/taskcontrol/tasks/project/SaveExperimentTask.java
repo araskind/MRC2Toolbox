@@ -74,7 +74,7 @@ public class SaveExperimentTask extends AbstractTask {
 	public SaveExperimentTask(DataAnalysisProject experiment) {
 
 		this.experimentToSave = experiment;
-		experimentFile = experimentToSave.getProjectFile();
+		experimentFile = experimentToSave.getExperimentFile();
 		total = 100;
 		processed = 0;
 	}

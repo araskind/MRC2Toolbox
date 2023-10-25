@@ -63,6 +63,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	protected static final long serialVersionUID = 1674860219322623509L;
 	protected String id;
 	protected String name;
+	protected String targetId;
 	protected MassSpectrum spectrum;
 	protected double retentionTime;
 	private double area, height;
@@ -642,14 +643,11 @@ public class MsFeature implements AnnotatedObject, Serializable {
 
 	public boolean isIdentified() {
 		
-		if(primaryIdentity == null)
+		if(primaryIdentity == null 
+				|| primaryIdentity.getCompoundIdentity() == null)
 			return false;
-		else {
-			if(primaryIdentity.getCompoundIdentity() == null)
-				return false;
-			else
-				return true;
-		}
+		else
+			return true;
 	}
 
 	public void setActive(boolean active) {
@@ -1179,17 +1177,21 @@ public class MsFeature implements AnnotatedObject, Serializable {
 	
 	public String getTargetId() {
 		
-		String targetId = identifications.stream().
-			filter(i -> i.getCompoundIdentity() != null).
-			map(i -> i.getCompoundIdentity()).
-			flatMap(c -> c.getDbIdMap().values().stream()).
-			filter(id -> (id.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
-					|| id.startsWith(DataPrefix.MS_FEATURE.getName()))).
-			findFirst().orElse(null);
+//		String targetId = identifications.stream().
+//			filter(i -> i.getCompoundIdentity() != null).
+//			map(i -> i.getCompoundIdentity()).
+//			flatMap(c -> c.getDbIdMap().values().stream()).
+//			filter(id -> (id.startsWith(DataPrefix.MS_LIBRARY_TARGET.getName())
+//					|| id.startsWith(DataPrefix.MS_FEATURE.getName()))).
+//			findFirst().orElse(null);
 		
 		return targetId;
 	}
 
+	public void setTargetId(String targetId) {
+		this.targetId = targetId;
+	}
+	
 	public double getArea() {
 		return area;
 	}

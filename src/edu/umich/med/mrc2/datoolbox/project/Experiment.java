@@ -29,10 +29,11 @@ import java.nio.file.Paths;
 import java.util.Date;
 import java.util.UUID;
 
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesign;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public abstract class Project implements Serializable{
+public abstract class Experiment implements Serializable{
 
 	/**
 	 * 
@@ -43,62 +44,64 @@ public abstract class Project implements Serializable{
 	protected String id;
 	protected String name;
 	protected String description;
-	protected File projectFile;	
-	protected File projectDirectory;
+	protected File experimentFile;	
+	protected File experimentDirectory;
 	protected File exportsDirectory;
 	protected Date dateCreated, lastModified;
+	protected ExperimentDesign experimentDesign;
 	
-	public Project(ProjectType projectType,
-					String projectName, 
-					String projectDescription, 
+	public Experiment(ProjectType projectType,
+					String name, 
+					String description, 
 					File parentDirectory) {
 		super();
 		this.projectType = projectType;
-		this.name = projectName;
-		this.description = projectDescription;		
+		this.name = name;
+		this.description = description;		
 		this.id = UUID.randomUUID().toString();
 		dateCreated = new Date();
 		lastModified = new Date();
 	}
 
-	public Project(
+	public Experiment(
 			String id, 
 			String name,
 			String description, 
-			File projectFile, 
+			File experimentFile, 
 			Date dateCreated, 
 			Date lastModified) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.projectFile = projectFile;
+		this.experimentFile = experimentFile;
 		this.dateCreated = dateCreated;
 		this.lastModified = lastModified;
 		
-		projectDirectory = projectFile.getParentFile();
+		experimentDirectory = experimentFile.getParentFile();
 	}
 	
-	public Project(Project other) {
-		super();
-		this.id = other.getId();
-		this.name = other.getName();
-		this.description = other.getDescription();
-		this.projectFile = other.getExperimentFile();
-		this.dateCreated = other.getDateCreated();
-		this.lastModified = other.getLastModified();		
-		this.projectDirectory = other.getExperimentDirectory();
-		this.exportsDirectory = other.getExportsDirectory();
-	}
+//	public Experiment(Experiment other) {
+//		super();
+//		this.projectType = other.getProjectType();
+//		this.id = other.getId();
+//		this.name = other.getName();
+//		this.description = other.getDescription();
+//		this.experimentFile = other.getExperimentFile();
+//		this.dateCreated = other.getDateCreated();
+//		this.lastModified = other.getLastModified();		
+//		this.experimentDirectory = other.getExperimentDirectory();
+//		this.exportsDirectory = other.getExportsDirectory();
+//	}
 	
-	protected void initNewExperiment(File parentDirectory) {
+	protected void createDirectoryStructureForNewExperiment(File parentDirectory) {
 		
-		projectDirectory = 
+		experimentDirectory = 
 				Paths.get(parentDirectory.getAbsolutePath(), name.replaceAll("\\W+", "-")).toFile();				
-		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+		exportsDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
 		try {
-			Files.createDirectories(Paths.get(projectDirectory.getAbsolutePath()));
+			Files.createDirectories(Paths.get(experimentDirectory.getAbsolutePath()));
 		} catch (IOException e) {
 			e.printStackTrace();
 			MessageDialog.showWarningMsg("Failed to create project directory");
@@ -115,7 +118,7 @@ public abstract class Project implements Serializable{
 	
 	protected void setExperimentDirectories() {
 		
-		exportsDirectory = Paths.get(projectDirectory.getAbsolutePath(), 
+		exportsDirectory = Paths.get(experimentDirectory.getAbsolutePath(), 
 				MRC2ToolBoxConfiguration.DATA_EXPORT_DIRECTORY).toFile();
 	}
 
@@ -144,19 +147,19 @@ public abstract class Project implements Serializable{
 	}
 
 	public File getExperimentFile() {
-		return projectFile;
+		return experimentFile;
 	}
 
 	public void setExperimentFile(File experimentFile) {
-		this.projectFile = experimentFile;
+		this.experimentFile = experimentFile;
 	}
 
 	public File getExperimentDirectory() {
-		return projectDirectory;
+		return experimentDirectory;
 	}
 
-	public void setProjectDirectory(File experimentDirectory) {
-		this.projectDirectory = experimentDirectory;
+	public void setExperimentDirectory(File experimentDirectory) {
+		this.experimentDirectory = experimentDirectory;
 	}
 
 	public File getExportsDirectory() {
@@ -182,10 +185,23 @@ public abstract class Project implements Serializable{
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
 	}
-	
-	
-	
-	
-	
-	
+
+	public ProjectType getProjectType() {
+		return projectType;
+	}
+
+	public void setProjectType(ProjectType projectType) {
+		this.projectType = projectType;
+	}
+
+	public ExperimentDesign getExperimentDesign() {
+		return experimentDesign;
+	}
+
+	public void setExperimentDesign(ExperimentDesign experimentDesign) {
+		this.experimentDesign = experimentDesign;
+	}
 }
+
+
+
