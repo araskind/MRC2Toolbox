@@ -40,7 +40,7 @@ public class MSMSLibraryFeaturesTableModel extends BasicTableModel {
 	public static final String FEATURE_COLUMN = "Name";
 	public static final String LIBRARY_NAME_COLUMN = "Library";
 	public static final String POLARITY_COLUMN = "Polarity";
-	public static final String PARENT_MZ_COLUMN = "Parent M/Z";
+	public static final String PARENT_MZ_COLUMN = "Precursor M/Z";
 	public static final String IONIZATION_TYPE_COLUMN = "Ionization type";
 	public static final String COLLISION_ENERGY_COLUMN = "CE, V";
 	public static final String ENTROPY_COLUMN = "PRE";
@@ -50,14 +50,14 @@ public class MSMSLibraryFeaturesTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(FEATURE_COLUMN, MsMsLibraryFeature.class, true),
-			new ColumnContext(LIBRARY_NAME_COLUMN, String.class, true),
-			new ColumnContext(POLARITY_COLUMN, String.class, true),
-			new ColumnContext(PARENT_MZ_COLUMN, Double.class, false),
-			new ColumnContext(IONIZATION_TYPE_COLUMN, String.class, true),
-			new ColumnContext(COLLISION_ENERGY_COLUMN, String.class, false),			
-			new ColumnContext(ENTROPY_COLUMN, Double.class, false),
-			new ColumnContext(PEAK_NUMBER_COLUMN, Integer.class, false),
+			new ColumnContext(FEATURE_COLUMN, "Feature name", MsMsLibraryFeature.class, true),
+			new ColumnContext(LIBRARY_NAME_COLUMN, "Source library name", String.class, true),
+			new ColumnContext(POLARITY_COLUMN, POLARITY_COLUMN, String.class, true),
+			new ColumnContext(PARENT_MZ_COLUMN, "Precursor ion M/Z", Double.class, false),
+			new ColumnContext(IONIZATION_TYPE_COLUMN, IONIZATION_TYPE_COLUMN, String.class, true),
+			new ColumnContext(COLLISION_ENERGY_COLUMN, "Collision energy", String.class, false),			
+			new ColumnContext(ENTROPY_COLUMN, "Pattern recognition entropy", Double.class, false),
+			new ColumnContext(PEAK_NUMBER_COLUMN, "Number of MSMS peaks", Integer.class, false),
 		};
 	}
 

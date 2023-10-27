@@ -58,7 +58,6 @@ public class FeatureSubsetTable extends BasicTable {
 	private static final long serialVersionUID = -3122391202783544387L;
 	private static final Icon enableSelectedIcon = GuiUtils.getIcon("checkboxFull", 24);
 	private static final Icon infoIcon = GuiUtils.getIcon("infoGreen", 24);
-	private FeatureSubsetTableModel model;
 
 	public FeatureSubsetTable() {
 
@@ -66,7 +65,7 @@ public class FeatureSubsetTable extends BasicTable {
 
 		model = new FeatureSubsetTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<FeatureSubsetTableModel>(model);
+		rowSorter = new TableRowSorter<FeatureSubsetTableModel>((FeatureSubsetTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(FeatureSubsetTableModel.FEATURES_SUBSET_COLUMN),
 				new NameComparator());
@@ -79,15 +78,15 @@ public class FeatureSubsetTable extends BasicTable {
 			.setCellRenderer(new WordWrapCellRenderer());
 
 		columnModel.getColumnById(
-				FeatureSubsetTableModel.ACTIVE_COLUMN).setMaxWidth(80);
+				FeatureSubsetTableModel.ACTIVE_COLUMN).setWidth(50);
 		columnModel.getColumnById(
 				FeatureSubsetTableModel.NUM_FEATURES_COLUMN).setMaxWidth(150);	
 		columnModel.getColumnById(
 				FeatureSubsetTableModel.NUM_FEATURES_COLUMN).setMinWidth(100);	
 		fixedWidthColumns.add(getColumnIndex(
 				FeatureSubsetTableModel.ACTIVE_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(
-				FeatureSubsetTableModel.NUM_FEATURES_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(
+//				FeatureSubsetTableModel.NUM_FEATURES_COLUMN));
 		
 		this.addMouseListener(
 
@@ -100,7 +99,6 @@ public class FeatureSubsetTable extends BasicTable {
 	        });
 		addFeatureSetPropertiesPopup();
 		finalizeLayout();
-		tca.adjustColumnsExcluding(fixedWidthColumns);
 	}
 	
 	public void actionPerformed(ActionEvent event) {
@@ -233,7 +231,7 @@ public class FeatureSubsetTable extends BasicTable {
 			DataAnalysisProject currentProject, 
 			DataPipeline activeDataPipeline) {
 
-		model.setModelFromProject(currentProject, activeDataPipeline);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		((FeatureSubsetTableModel)model).setModelFromProject(currentProject, activeDataPipeline);
+		adjustColumns();
 	}
 }

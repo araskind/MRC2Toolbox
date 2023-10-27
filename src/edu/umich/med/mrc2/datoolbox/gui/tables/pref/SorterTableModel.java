@@ -42,8 +42,9 @@ public class SorterTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(COLUMN_NAME_COLUMN, String.class, false),			
-			new ColumnContext(SORTING_ORDER_COLUMN, SortOrder.class, true),
+			new ColumnContext(COLUMN_NAME_COLUMN, COLUMN_NAME_COLUMN, String.class, false),			
+			new ColumnContext(SORTING_ORDER_COLUMN, 
+					"Data sorting order for this column (if any)", SortOrder.class, true),
 		};
 	}
 

@@ -41,20 +41,20 @@ public class DataPipelinesTableModel extends BasicTableModel {
 
 	public static final String ACTIVE_COLUMN = "Active";
 	public static final String DATA_PIPELINE_COLUMN = "Data pipeline";
-	public static final String NUM_DATA_FILES_COLUMN = "# of data files";
-	public static final String NUM_FEATURES_COLUMN = "# of features";
+	public static final String NUM_DATA_FILES_COLUMN = "# Data files";
+	public static final String NUM_FEATURES_COLUMN = "# Features";
 	public static final String WORKLIST_COLUMN = "Worklist";
 	public static final String LIBRARY_COLUMN = "Library";
 
 	public DataPipelinesTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ACTIVE_COLUMN, Boolean.class, false),
-			new ColumnContext(DATA_PIPELINE_COLUMN, DataPipeline.class, false),
-			new ColumnContext(NUM_DATA_FILES_COLUMN, Integer.class, false),
-			new ColumnContext(NUM_FEATURES_COLUMN, Integer.class, false),
-			new ColumnContext(WORKLIST_COLUMN, Boolean.class, false),	//	TODO convert to int 0,1,2 - no, partial, yes
-			new ColumnContext(LIBRARY_COLUMN, Boolean.class, false)
+			new ColumnContext(ACTIVE_COLUMN, ACTIVE_COLUMN, Boolean.class, false),
+			new ColumnContext(DATA_PIPELINE_COLUMN, DATA_PIPELINE_COLUMN, DataPipeline.class, false),
+			new ColumnContext(NUM_DATA_FILES_COLUMN, "Number of data files in the pipeline", Integer.class, false),
+			new ColumnContext(NUM_FEATURES_COLUMN, "Number of features in the pipeline", Integer.class, false),
+			new ColumnContext(WORKLIST_COLUMN, "Instrument worklist attached", Boolean.class, false),	//	TODO convert to int 0,1,2 - no, partial, yes
+			new ColumnContext(LIBRARY_COLUMN, "Feature library attached", Boolean.class, false)
 		};
 	}
 

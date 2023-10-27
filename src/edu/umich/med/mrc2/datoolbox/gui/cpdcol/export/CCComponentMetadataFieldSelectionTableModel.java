@@ -47,9 +47,9 @@ public class CCComponentMetadataFieldSelectionTableModel extends BasicTableModel
 		super();
 		columnArray = new ColumnContext[] {
 
-				new ColumnContext(CATEGORY_COLUMN, CpdMetadataFieldCategory.class, false),
-				new ColumnContext(PROPERTY_COLUMN, CpdMetadataField.class, false), 
-				new ColumnContext(SELECTED_COLUMN, Boolean.class, true),			
+				new ColumnContext(CATEGORY_COLUMN, "Metadata category", CpdMetadataFieldCategory.class, false),
+				new ColumnContext(PROPERTY_COLUMN, PROPERTY_COLUMN, CpdMetadataField.class, false), 
+				new ColumnContext(SELECTED_COLUMN, "Select to include in export", Boolean.class, true),			
 		};
 	}
 

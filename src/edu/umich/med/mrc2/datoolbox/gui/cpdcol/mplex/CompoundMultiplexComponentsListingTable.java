@@ -57,10 +57,6 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = -3817580957098149548L;
 
-	private CompoundMultiplexComponentsListingTableModel model;
-
-	private MouseMotionAdapter mma;
-
 	public CompoundMultiplexComponentsListingTable() {
 
 		super();
@@ -70,7 +66,8 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
 		rowSorter = 
-				new TableRowSorter<CompoundMultiplexComponentsListingTableModel>(model);
+				new TableRowSorter<CompoundMultiplexComponentsListingTableModel>(
+						(CompoundMultiplexComponentsListingTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(
 				model.getColumnIndex(CompoundMultiplexComponentsListingTableModel.SOLVENT_COLUMN),
@@ -94,7 +91,7 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 		setDefaultRenderer(CompoundIdentity.class, msfIdRenderer);
 		
 		//	Database link adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -136,18 +133,20 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 			Collection<CompoundMultiplexMixtureComponent>components)   {
 
 //		thf.setTable(null);
-		model.setTableModelFromCompoundMultiplexMixtureComponents(components);
+		((CompoundMultiplexComponentsListingTableModel)model).
+				setTableModelFromCompoundMultiplexMixtureComponents(components);
 //		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void setTableModelFromCompoundMultiplexMixtures(
 			Collection<CompoundMultiplexMixture>mixtures)   {
 
 //		thf.setTable(null);
-		model.setTableModelFromCompoundMultiplexMixtures(mixtures);
+		((CompoundMultiplexComponentsListingTableModel)model).
+				setTableModelFromCompoundMultiplexMixtures(mixtures);
 //		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public CompoundMultiplexMixtureComponent getSelectedCompoundMultiplexMixtureComponent() {
@@ -161,7 +160,7 @@ public class CompoundMultiplexComponentsListingTable extends BasicTable {
 	}
 
 	public void updateComponentData(CompoundMultiplexMixtureComponent mmComponent) {
-		model.updateComponentData(mmComponent);
+		((CompoundMultiplexComponentsListingTableModel)model).updateComponentData(mmComponent);
 	}
 }
 

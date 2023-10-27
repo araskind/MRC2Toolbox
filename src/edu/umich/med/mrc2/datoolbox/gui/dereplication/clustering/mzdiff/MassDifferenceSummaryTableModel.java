@@ -37,16 +37,16 @@ public class MassDifferenceSummaryTableModel extends BasicTableModel {
 	private static final long serialVersionUID = 7222450809135744946L;
 	public static final String DELTA_MZ_COLUMN = "M/Z difference";
 	public static final String BIN_WIDTH_COLUMN = "Binning window, Da";
-	public static final String COUNTS_COLUMN = "Counts";
+	public static final String COUNTS_COLUMN = "#Counts";
 	public static final String STDEV_COLUMN = "SD";
 
 	public MassDifferenceSummaryTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DELTA_MZ_COLUMN, Double.class, true),
-			new ColumnContext(BIN_WIDTH_COLUMN, Double.class, false),
-			new ColumnContext(COUNTS_COLUMN, Integer.class, false),
-			new ColumnContext(STDEV_COLUMN, Double.class, false),
+			new ColumnContext(DELTA_MZ_COLUMN, DELTA_MZ_COLUMN, Double.class, true),
+			new ColumnContext(BIN_WIDTH_COLUMN, BIN_WIDTH_COLUMN, Double.class, false),
+			new ColumnContext(COUNTS_COLUMN, "Number of counts", Integer.class, false),
+			new ColumnContext(STDEV_COLUMN, "M/Z standard deviation in the bin", Double.class, false),
 		};
 	}
 

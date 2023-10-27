@@ -44,9 +44,9 @@ public class CompoundMultiplexListingTableModel extends BasicTableModel {
 	public CompoundMultiplexListingTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ID_COLUMN, String.class, false),
-			new ColumnContext(NAME_COLUMN, CompoundMultiplexMixture.class, false),
-			new ColumnContext(SIZE_COLUMN, Integer.class, false),
+			new ColumnContext(ID_COLUMN, "Multiplex mixture ID", String.class, false),
+			new ColumnContext(NAME_COLUMN, NAME_COLUMN, CompoundMultiplexMixture.class, false),
+			new ColumnContext(SIZE_COLUMN, "Number of compounds in the mixture", Integer.class, false),
 		};
 	}
 

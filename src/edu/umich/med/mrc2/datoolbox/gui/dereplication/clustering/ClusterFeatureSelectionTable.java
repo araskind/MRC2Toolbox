@@ -39,7 +39,6 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.FeatureSelectionTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
@@ -50,7 +49,6 @@ public class ClusterFeatureSelectionTable extends FeatureSelectionTable {
 	 *
 	 */
 	private static final long serialVersionUID = 479098239886904475L;
-	private ClusterFeatureSelectionTableModel model;
 	private ClusterFeatureSelectionTableModelListener modelListener;
 	private MsFeatureCluster activeCluster;
 
@@ -62,7 +60,8 @@ public class ClusterFeatureSelectionTable extends FeatureSelectionTable {
 		modelListener = new ClusterFeatureSelectionTableModelListener();
 		model.addTableModelListener(modelListener);
 
-		featureSorter = new TableRowSorter<ClusterFeatureSelectionTableModel>(model);
+		featureSorter = new TableRowSorter<ClusterFeatureSelectionTableModel>(
+				(ClusterFeatureSelectionTableModel)model);
 		setRowSorter(featureSorter);
 		featureSorter.setComparator(model.getColumnIndex(ClusterFeatureSelectionTableModel.FEATURE_COLUMN),
 				new MsFeatureComparator(SortProperty.Name, SortDirection.ASC));
@@ -97,12 +96,18 @@ public class ClusterFeatureSelectionTable extends FeatureSelectionTable {
 				.setCellRenderer(percentRenderer); // Sample RSD
 		columnModel.getColumnById(ClusterFeatureSelectionTableModel.SAMPLE_FREQUENCY_COLUMN)
 				.setCellRenderer(pieChartFrequencyRenderer); // Sample frequency
-
-		addColumnSelectorPopup();
-
+		
+		columnModel.getColumnById(ClusterFeatureSelectionTableModel.PRIMARY_COLUMN)
+			.setWidth(50);
+		columnModel.getColumnById(ClusterFeatureSelectionTableModel.INCLUDE_COLUMN)
+			.setWidth(50);
+		fixedWidthColumns.add(model.getColumnIndex(
+				ClusterFeatureSelectionTableModel.PRIMARY_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(
+				ClusterFeatureSelectionTableModel.INCLUDE_COLUMN));
+		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		tca = new TableColumnAdjuster(this);
-		tca.adjustColumns();
+		finalizeLayout();
 	}
 
 	private class ClusterFeatureSelectionTableModelListener implements TableModelListener {
@@ -120,14 +125,14 @@ public class ClusterFeatureSelectionTable extends FeatureSelectionTable {
 					activeCluster.setPrimaryFeature(selectedFeature);
 
 				model.removeTableModelListener(modelListener);
-				model.reloadData();
+				((ClusterFeatureSelectionTableModel)model).reloadData();
 				model.addTableModelListener(modelListener);
 			}
 			if (col == getColumnIndex(ClusterFeatureSelectionTableModel.INCLUDE_COLUMN)) {
 
 				activeCluster.setFeatureEnabled(selectedFeature, (boolean) getValueAt(row, col));
 				model.removeTableModelListener(modelListener);
-				model.reloadData();
+				((ClusterFeatureSelectionTableModel)model).reloadData();
 				model.addTableModelListener(modelListener);
 			}
 		}
@@ -140,69 +145,6 @@ public class ClusterFeatureSelectionTable extends FeatureSelectionTable {
 		model.setRowCount(0);
 		model.addTableModelListener(modelListener);
 	}
-
-/*
-	@Override
-	public void editingStopped(ChangeEvent event) {
-
-		MsFeature selectedFeature;
-		boolean selected;
-		boolean selectionPresent;
-		int featureCol = this.getColumnIndex(ClusterFeatureSelectionTableModel.FEATURE_COLUMN);
-
-		if (this.getSelectedRow() > -1) {
-
-			selectedFeature = (MsFeature) this.getValueAt(this.getSelectedRow(), featureCol);
-
-			// Primary feature selection
-			if (event.getSource().getClass().equals(RadioButtonEditor.class)) {
-
-				selected = (boolean) ((RadioButtonEditor) event.getSource()).getCellEditorValue();
-				selectionPresent = false;
-
-				if (!selected) {
-
-					selectedFeature.setPrinmary(false);
-
-					for (MsFeature cf : model.getCurrentCluster().getFeatures()) {
-
-						if (cf.isPrinmary()) {
-
-							selectionPresent = true;
-							break;
-						}
-					}
-					if (!selectionPresent)
-						selectedFeature.setPrinmary(true);
-				} else {
-					selectedFeature.setPrinmary(true);
-
-					for (MsFeature cf : model.getCurrentCluster().getFeatures()) {
-
-						if (!cf.equals(selectedFeature))
-							cf.setPrinmary(false);
-					}
-				}
-				model.reloadData();
-				super.editingStopped(event);
-			}
-			// Combine (toggle)
-			if (this.getSelectedColumn() == this.getColumnIndex(ClusterFeatureSelectionTableModel.COMBINE_COLUMN)) {
-
-				selectedFeature.setToCombine(!selectedFeature.isToCombine());
-				model.reloadData();
-				super.editingStopped(event);
-			}
-			// Reject (toggle)
-			if (this.getSelectedColumn() == this.getColumnIndex(ClusterFeatureSelectionTableModel.REJECT_COLUMN)) {
-
-				selectedFeature.setActive(!selectedFeature.isActive());
-				model.reloadData();
-				super.editingStopped(event);
-			}
-		}
-	}*/
-
 	public int getFeatureRow(MsFeature feature) {
 
 		int row = -1;
@@ -226,12 +168,8 @@ public class ClusterFeatureSelectionTable extends FeatureSelectionTable {
 		Collection<MsFeature> featureList = featureCluster.getFeatures();
 		model.removeTableModelListener(modelListener);
 		setrendererReferences(featureList);
-		model.setTableModelFromFeatureCluster(featureCluster);
-		tca.adjustColumns();
-		columnModel.getColumnById(ClusterFeatureSelectionTableModel.POOLED_MEAN_COLUMN)
-			.setPreferredWidth(preferredWidth);
-		columnModel.getColumnById(ClusterFeatureSelectionTableModel.SAMPLE_MEAN_COLUMN)
-			.setPreferredWidth(preferredWidth);
+		((ClusterFeatureSelectionTableModel)model).setTableModelFromFeatureCluster(featureCluster);
+		adjustColumns();
 		model.addTableModelListener(modelListener);
 	}
 

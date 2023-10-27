@@ -50,7 +50,6 @@ import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureIdentityFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
@@ -65,9 +64,6 @@ public class FeatureDataTable extends BasicFeatureTable {
 	 */
 	private static final long serialVersionUID = 7633347730576608261L;
 
-	private FeatureDataTableModel model;
-	private TableRowSorter<FeatureDataTableModel> featureSorter;
-	private MouseMotionAdapter mma;
 	private PieChartFrequencyRenderer pieChartFrequencyRenderer;
 
 	public FeatureDataTable() {
@@ -78,11 +74,12 @@ public class FeatureDataTable extends BasicFeatureTable {
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		//	Row sorters
-		featureSorter = new TableRowSorter<FeatureDataTableModel>(model);
-		setRowSorter(featureSorter);
-		featureSorter.setComparator(model.getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN),
+		rowSorter = new TableRowSorter<FeatureDataTableModel>(
+				(FeatureDataTableModel)model);
+		setRowSorter(rowSorter);
+		rowSorter.setComparator(model.getColumnIndex(FeatureDataTableModel.MS_FEATURE_COLUMN),
 				new MsFeatureComparator(SortProperty.Name));
-		featureSorter.setComparator(model.getColumnIndex(FeatureDataTableModel.DATABSE_LINK_COLUMN),
+		rowSorter.setComparator(model.getColumnIndex(FeatureDataTableModel.DATABSE_LINK_COLUMN),
 				new MsFeatureIdentityComparator(SortProperty.ID));
 
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
@@ -124,7 +121,7 @@ public class FeatureDataTable extends BasicFeatureTable {
 			.setCellRenderer(pieChartFrequencyRenderer); // Sample frequency
 
 		//	Database link adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -145,17 +142,14 @@ public class FeatureDataTable extends BasicFeatureTable {
 		addMouseListener(msfIdRenderer);
 		addMouseMotionListener(msfIdRenderer);
 
-		addColumnSelectorPopup();
-
 		//	Table header filter
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(MsFeature.class, new MsFeatureFormat(SortProperty.Name));
 		thf.getParserModel().setComparator(MsFeature.class, new MsFeatureComparator(SortProperty.Name));
 		thf.getParserModel().setFormat(MsFeatureIdentity.class, new MsFeatureIdentityFormat(CompoundIdentityField.DB_ID));
 		thf.getParserModel().setComparator(MsFeatureIdentity.class, new MsFeatureIdentityComparator(SortProperty.ID));
-
-		tca = new TableColumnAdjuster(this);
-		tca.adjustColumns();
+		
+		finalizeLayout();
 	}
 
 
@@ -232,11 +226,11 @@ public class FeatureDataTable extends BasicFeatureTable {
 				JTable table = thf.getTable();
 				thf.setTable(null);
 				model.removeTableModelListener(table);
-				model.setTableModelFromFeatureMap(featureMap);
+				((FeatureDataTableModel)model).setTableModelFromFeatureMap(featureMap);
 				model.addTableModelListener(table);
 				model.fireTableDataChanged();
 				thf.setTable(table);
-				tca.adjustColumns();
+				adjustColumns();
 			}
 		};
 		try {
@@ -267,8 +261,10 @@ public class FeatureDataTable extends BasicFeatureTable {
 	public void setTableModelFromFeatureCluster(MsFeatureCluster selectedCluster) {
 
 		clearTable();
-		if(selectedCluster != null)
-			model.setTableModelFromFeatureCluster(selectedCluster);
+		if(selectedCluster != null) {
+			((FeatureDataTableModel)model).setTableModelFromFeatureCluster(selectedCluster);
+			adjustColumns();
+		}
 	}
 	
 	@Override

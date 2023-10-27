@@ -27,7 +27,6 @@ import java.util.Map;
 
 import edu.umich.med.mrc2.datoolbox.data.cpdcoll.CpdMetadataField;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
@@ -38,7 +37,6 @@ public class CCComponentMetadataFieldSelectionTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 4327961356138766378L;
-	private CCComponentMetadataFieldSelectionTableModel model;
 	
 	public CCComponentMetadataFieldSelectionTable() {
 		super();
@@ -59,14 +57,14 @@ public class CCComponentMetadataFieldSelectionTable extends BasicTable {
 				CCComponentMetadataFieldSelectionTableModel.CATEGORY_COLUMN));
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		tca = new TableColumnAdjuster(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		finalizeLayout();
 	}
 
 	public void setTableModelFromPropertyMap(
 			Map<CpdMetadataField,Boolean>selectedPropertiesMap) {
-		model.setTableModelFromPropertyMap(selectedPropertiesMap);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		((CCComponentMetadataFieldSelectionTableModel)model).
+				setTableModelFromPropertyMap(selectedPropertiesMap);
+		adjustColumns();
 	}
 	
 	public Collection<CpdMetadataField> getSelectedProperties() {

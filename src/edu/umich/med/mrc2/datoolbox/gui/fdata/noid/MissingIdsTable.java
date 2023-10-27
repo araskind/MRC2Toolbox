@@ -40,7 +40,6 @@ import edu.umich.med.mrc2.datoolbox.data.format.CompoundLibraryFormat;
 import edu.umich.med.mrc2.datoolbox.data.format.MsFeatureFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundLibraryRenderer;
@@ -52,7 +51,6 @@ public class MissingIdsTable extends BasicFeatureTable {
 	 */
 	private static final long serialVersionUID = 405761804010862253L;
 
-	private MissingIdsTableModel model;
 	private CompoundLibraryRenderer compoundLibraryRenderer;
 	private TableRowSorter<MissingIdsTableModel> featureSorter;
 
@@ -62,9 +60,9 @@ public class MissingIdsTable extends BasicFeatureTable {
 		model = new MissingIdsTableModel();
 		setModel(model);
 
-		featureSorter = new TableRowSorter<MissingIdsTableModel>();
+		featureSorter = new TableRowSorter<MissingIdsTableModel>(
+				(MissingIdsTableModel)model);
 		setRowSorter(featureSorter);
-		featureSorter.setModel(model);
 		featureSorter.setComparator(model.getColumnIndex(MissingIdsTableModel.FEATURE_COLUMN),
 				new MsFeatureComparator(SortProperty.Name));
 
@@ -81,14 +79,11 @@ public class MissingIdsTable extends BasicFeatureTable {
 
 		addTablePopupMenu(new MissingIdTablePopupMenu(listener));
 
-		addColumnSelectorPopup();
-
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(MsFeature.class, new MsFeatureFormat(SortProperty.Name));
 		thf.getParserModel().setComparator(MsFeature.class, new MsFeatureComparator(SortProperty.Name));
 		thf.getParserModel().setFormat(CompoundLibrary.class, new CompoundLibraryFormat(SortProperty.Name));
-		tca = new TableColumnAdjuster(this);
-		tca.adjustColumns();
+		finalizeLayout();
 	}
 
 	@Override
@@ -129,8 +124,8 @@ public class MissingIdsTable extends BasicFeatureTable {
 
 	public void setTableModelFromFeatureMap(HashMap<CompoundLibrary, Collection<MsFeature>> unidentified) {
 
-		model.setTableModelFromFeatureMap(unidentified);
-		tca.adjustColumns();
+		((MissingIdsTableModel)model).setTableModelFromFeatureMap(unidentified);
+		adjustColumns();
 	}
 
 	@Override

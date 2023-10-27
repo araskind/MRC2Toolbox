@@ -36,13 +36,13 @@ public class PropertiesTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = -5567062758292304236L;
-	private PropertiesTableModel model;
 
 	public PropertiesTable() {
 		super();
 		model = new PropertiesTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<PropertiesTableModel>(model);
+		rowSorter = new TableRowSorter<PropertiesTableModel>(
+				(PropertiesTableModel) model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -53,9 +53,9 @@ public class PropertiesTable extends BasicTable {
 	public void setTableModelFromPropertyMap(Map<? extends Object,? extends Object>properties) {
 		
 		thf.setTable(null);
-		model.setTableModelFromPropertyMap(properties);
+		((PropertiesTableModel)model).setTableModelFromPropertyMap(properties);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void setPropertyNameRenderer(TableCellRenderer renderer) {		

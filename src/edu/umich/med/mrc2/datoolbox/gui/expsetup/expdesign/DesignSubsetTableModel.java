@@ -42,8 +42,8 @@ public class DesignSubsetTableModel extends BasicTableModel {
 	public DesignSubsetTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ACTIVE_COLUMN, Boolean.class, true),
-			new ColumnContext(DESIGN_SUBSET_COLUMN, ExperimentDesignSubset.class, false)
+			new ColumnContext(ACTIVE_COLUMN, ACTIVE_COLUMN, Boolean.class, true),
+			new ColumnContext(DESIGN_SUBSET_COLUMN, "Experimental design subset", ExperimentDesignSubset.class, false)
 		};
 	}
 

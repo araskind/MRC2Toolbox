@@ -21,13 +21,13 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.expsetup.projinfo;
 
-import javax.swing.JTable;
 import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.TristateCheckboxRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class DataPipelinesTable extends BasicTable {
@@ -36,28 +36,29 @@ public class DataPipelinesTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3232039944841480790L;
-	private DataPipelinesTableModel model;
 
 	public DataPipelinesTable() {
 
 		super();
 		model = new DataPipelinesTableModel();		
 		setModel(model);
-		rowSorter = new TableRowSorter<DataPipelinesTableModel>(model);
+		rowSorter = new TableRowSorter<DataPipelinesTableModel>(
+				(DataPipelinesTableModel)model);
 		setRowSorter(rowSorter);
 		
 		columnModel.getColumnById(DataPipelinesTableModel.ACTIVE_COLUMN)
 			.setCellRenderer(new RadioButtonRenderer());
+		columnModel.getColumnById(DataPipelinesTableModel.DATA_PIPELINE_COLUMN)
+			.setCellRenderer(new WordWrapCellRenderer());
 		columnModel.getColumnById(DataPipelinesTableModel.WORKLIST_COLUMN)
 			.setCellRenderer(new TristateCheckboxRenderer());
 		
-		setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		finalizeLayout();
 	}
 
 	public void setTableModelFromProject(DataAnalysisProject currentProject) {
-		model.setTableModelFromProject(currentProject);
-		tca.adjustColumns();
+		((DataPipelinesTableModel)model).setTableModelFromProject(currentProject);
+		adjustColumns();
 	}
 	
 	public DataPipeline getSelectedDataPipeline() {

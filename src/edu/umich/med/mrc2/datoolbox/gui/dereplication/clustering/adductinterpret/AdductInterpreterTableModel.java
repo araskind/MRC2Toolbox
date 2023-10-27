@@ -65,21 +65,21 @@ public class AdductInterpreterTableModel extends BasicTableModel {
 	public AdductInterpreterTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-				new ColumnContext(FEATURE_COLUMN, MsFeature.class, false),
-				new ColumnContext(RETENTION_COLUMN, Double.class, false),
-				new ColumnContext(BASE_PEAK_COLUMN, Double.class, false),
-				new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-				new ColumnContext(POOLED_MEAN_COLUMN, Double.class, false),
-				new ColumnContext(SAMPLE_MEAN_COLUMN, Double.class, false),
-				new ColumnContext(KMD_COLUMN, Double.class, false),
-				new ColumnContext(ANNOTATION_COLUMN, String.class, false),
-				new ColumnContext(CHEM_MOD_COLUMN, Adduct.class, false),
-				new ColumnContext(CHEM_MOD_ERROR, Double.class, false),
-				new ColumnContext(SUGGESTED_CHEM_MOD_COLUMN, Adduct.class, true),
-				new ColumnContext(SUGGESTED_CHEM_MOD_AMBIGUOUS_COLUMN, Boolean.class, false),
-				new ColumnContext(SUGGESTED_CHEM_MOD_ERROR, Double.class, false),
-				new ColumnContext(ACCEPT_CHEM_MOD_COLUMN, Boolean.class, true),
-				new ColumnContext(DATA_PIPELINE_COLUMN, DataPipeline.class, false)
+				new ColumnContext(FEATURE_COLUMN, "Feature name", MsFeature.class, false),
+				new ColumnContext(RETENTION_COLUMN, "Retention time", Double.class, false),
+				new ColumnContext(BASE_PEAK_COLUMN, "Base peak M/Z", Double.class, false),
+				new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+				new ColumnContext(POOLED_MEAN_COLUMN, "Pooled samples mean area", Double.class, false),
+				new ColumnContext(SAMPLE_MEAN_COLUMN, "Regular samples mean area", Double.class, false),
+				new ColumnContext(KMD_COLUMN, "Kendrick mass defect", Double.class, false),
+				new ColumnContext(ANNOTATION_COLUMN, ANNOTATION_COLUMN, String.class, false),
+				new ColumnContext(CHEM_MOD_COLUMN, "Assigned adduct", Adduct.class, false),
+				new ColumnContext(CHEM_MOD_ERROR, "Mass error relative to calculated value, ppm", Double.class, false),
+				new ColumnContext(SUGGESTED_CHEM_MOD_COLUMN, "Suggested adduct", Adduct.class, true),
+				new ColumnContext(SUGGESTED_CHEM_MOD_AMBIGUOUS_COLUMN, "Is suggested adduct ambiguous (more than one option)?", Boolean.class, false),
+				new ColumnContext(SUGGESTED_CHEM_MOD_ERROR, "Mass error relative to calculated value for suggested adduct, ppm", Double.class, false),
+				new ColumnContext(ACCEPT_CHEM_MOD_COLUMN, "Accept suggested adduct", Boolean.class, true),
+				new ColumnContext(DATA_PIPELINE_COLUMN, DATA_PIPELINE_COLUMN, DataPipeline.class, false)
 		};
 	}
 

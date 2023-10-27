@@ -40,7 +40,7 @@ public class DuplicateSelectionTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = -82494899827528731L;
 	public static final String ID_COLUMN = "ID";
-	public static final String DATA_COLUMN = "Data";
+//	public static final String DATA_COLUMN = "Data";
 	public static final String FEATURE_COLUMN = "Name";
 	public static final String COMPOUND_NAME_COLUMN = "Identification";
 	public static final String CHEM_MOD_LIBRARY_COLUMN = "Form (Lib)";
@@ -64,23 +64,23 @@ public class DuplicateSelectionTableModel extends BasicTableModel {
 		super();
 
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ID_COLUMN, Boolean.class, true),
-			new ColumnContext(DATA_COLUMN, Boolean.class, true),
-			new ColumnContext(FEATURE_COLUMN, MsFeature.class, false),
-			new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
-			new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, Adduct.class, false),
-			new ColumnContext(SCORE_COLUMN, Double.class, false),
-			new ColumnContext(RETENTION_COLUMN, Double.class, false),
-			new ColumnContext(OBSERVED_RETENTION_COLUMN, Double.class, false),
-			new ColumnContext(BASE_PEAK_COLUMN, Double.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(POOLED_MEAN_COLUMN, Double.class, false),
-			new ColumnContext(POOLED_RSD_COLUMN, Double.class, false),
-			new ColumnContext(POOLED_FREQUENCY_COLUMN, Double.class, false),
-			new ColumnContext(SAMPLE_MEAN_COLUMN, Double.class, false),
-			new ColumnContext(SAMPLE_RSD_COLUMN, Double.class, false),
-			new ColumnContext(SAMPLE_FREQUENCY_COLUMN, Double.class, false),
-			new ColumnContext(DATA_PIPELINE_COLUMN, DataPipeline.class, false)
+			new ColumnContext(ID_COLUMN, "Primary feature", Boolean.class, true),
+//			new ColumnContext(DATA_COLUMN, Boolean.class, true),
+			new ColumnContext(FEATURE_COLUMN, "Feature name", MsFeature.class, false),
+			new ColumnContext(COMPOUND_NAME_COLUMN, "Compound name", String.class, false),
+			new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, "Adduct (based on library / FbF match)", Adduct.class, false),
+			new ColumnContext(SCORE_COLUMN, SCORE_COLUMN, Double.class, false),
+			new ColumnContext(RETENTION_COLUMN, "Retention time from library / FbF match", Double.class, false),
+			new ColumnContext(OBSERVED_RETENTION_COLUMN, "Retention time observed (median across all samples)", Double.class, false),
+			new ColumnContext(BASE_PEAK_COLUMN, "Base peak M/Z", Double.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+			new ColumnContext(POOLED_MEAN_COLUMN, "Mean area for pooled samples", Double.class, false),
+			new ColumnContext(POOLED_RSD_COLUMN, "Relative standard deviation (%) for pooled samples", Double.class, false),
+			new ColumnContext(POOLED_FREQUENCY_COLUMN, "Detection frequency in pooled samples", Double.class, false),
+			new ColumnContext(SAMPLE_MEAN_COLUMN, "Mean area for regular samples", Double.class, false),
+			new ColumnContext(SAMPLE_RSD_COLUMN, "Relative standard deviation (%) for regular samples", Double.class, false),
+			new ColumnContext(SAMPLE_FREQUENCY_COLUMN, "Detection frequency in regular samples", Double.class, false),
+			new ColumnContext(DATA_PIPELINE_COLUMN, DATA_PIPELINE_COLUMN, DataPipeline.class, false)
 		};
 	}
 

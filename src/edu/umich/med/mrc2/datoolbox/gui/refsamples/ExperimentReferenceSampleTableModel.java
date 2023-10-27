@@ -50,10 +50,10 @@ public class ExperimentReferenceSampleTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(SAMPLE_ID_COLUMN, ExperimentalSample.class, false),
-			new ColumnContext(SAMPLE_NAME_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_TYPE_COLUMN, MoTrPACQCSampleType.class, false),
-			new ColumnContext(SAMPLE_COUNT_COLUMN, Integer.class, false),
+			new ColumnContext(SAMPLE_ID_COLUMN, SAMPLE_ID_COLUMN, ExperimentalSample.class, false),
+			new ColumnContext(SAMPLE_NAME_COLUMN, SAMPLE_NAME_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_TYPE_COLUMN, SAMPLE_TYPE_COLUMN, MoTrPACQCSampleType.class, false),
+			new ColumnContext(SAMPLE_COUNT_COLUMN, "Number of samples of the type in the experiment", Integer.class, false),
 		};
 	}
 

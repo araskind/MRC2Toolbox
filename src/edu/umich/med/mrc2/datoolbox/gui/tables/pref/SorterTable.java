@@ -34,7 +34,6 @@ public class SorterTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = -1947571928720135555L;
-	private SorterTableModel model;
 	
 	public SorterTable() {
 		super();
@@ -54,11 +53,11 @@ public class SorterTable extends BasicTable {
 	}
 
 	public void setTableModelFromColumns(TableColumnState[] columns) {
-		model.setTableModelFromColumns(columns);
+		((SorterTableModel)model).setTableModelFromColumns(columns);
 	}
 	
 	public void addColumnToSorter(TableColumnState columnState) {
-		model.addColumnToSorter(columnState);
+		((SorterTableModel)model).addColumnToSorter(columnState);
 	}
 	
 	public boolean containsSorter(TableColumnState newSorter) {
@@ -100,7 +99,7 @@ public class SorterTable extends BasicTable {
 			else
 				newSorters[i] = sorters[i];	
 		}	
-		model.setTableModelFromColumns(newSorters);
+		((SorterTableModel)model).setTableModelFromColumns(newSorters);
 	}
 	
 	public void moveSelectedSorterDown() {
@@ -121,7 +120,7 @@ public class SorterTable extends BasicTable {
 			else
 				newSorters[i] = sorters[i];	
 		}	
-		model.setTableModelFromColumns(newSorters);
+		((SorterTableModel)model).setTableModelFromColumns(newSorters);
 	}
 
 	public TableColumnState[] getColumnSettings() {

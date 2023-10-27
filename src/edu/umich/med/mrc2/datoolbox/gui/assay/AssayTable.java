@@ -38,19 +38,17 @@ public class AssayTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -5022129546919771647L;
-	private AssayTableModel model;
-	private AssayMethodRenderer methodRenderer;
 
 	public AssayTable() {
 		super();
 		model = new AssayTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<AssayTableModel>(model);
+		rowSorter = new TableRowSorter<AssayTableModel>((AssayTableModel)model);
 		setRowSorter(rowSorter);
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		methodRenderer = new AssayMethodRenderer();
-		columnModel.getColumnById(AssayTableModel.ASSAY_COLUMN).setCellRenderer(methodRenderer);
+		columnModel.getColumnById(AssayTableModel.ASSAY_COLUMN).setCellRenderer(new AssayMethodRenderer());
+		columnModel.getColumnById(AssayTableModel.ASSAY_COLUMN).setMaxWidth(100);
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
@@ -59,9 +57,9 @@ public class AssayTable extends BasicTable {
 	public void setTableModelFromAssayCollection(Collection<Assay> assayCollection) {
 
 		thf.setTable(null);
-		model.setTableModelFromAssayCollection(assayCollection);
+		((AssayTableModel)model).setTableModelFromAssayCollection(assayCollection);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 		
 	public Assay getSelectedAssay() {

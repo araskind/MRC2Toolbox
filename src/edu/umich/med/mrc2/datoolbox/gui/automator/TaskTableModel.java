@@ -41,8 +41,8 @@ public class TaskTableModel extends BasicTableModel {
 	public TaskTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DATA_FILE_COLUMN, String.class, false),
-			new ColumnContext(METHOD_COLUMN, String.class, false)
+			new ColumnContext(DATA_FILE_COLUMN, "Raw data file", String.class, false),
+			new ColumnContext(METHOD_COLUMN, "Data processing method", String.class, false)
 		};
 	}
 

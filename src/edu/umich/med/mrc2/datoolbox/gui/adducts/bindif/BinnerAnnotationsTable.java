@@ -39,7 +39,6 @@ public class BinnerAnnotationsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 1511489263877797538L;
-	private BinnerAnnotationsTableModel model;
 
 	public BinnerAnnotationsTable() {
 
@@ -47,7 +46,7 @@ public class BinnerAnnotationsTable extends BasicTable {
 		model = new BinnerAnnotationsTableModel();
 		setModel(model);
 		
-		rowSorter = new TableRowSorter<BinnerAnnotationsTableModel>(model);
+		rowSorter = new TableRowSorter<BinnerAnnotationsTableModel>((BinnerAnnotationsTableModel)model);
 		setRowSorter(rowSorter);
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -63,9 +62,9 @@ public class BinnerAnnotationsTable extends BasicTable {
 
 	public void setTableModelFromBinnerAdducttList(Collection<BinnerAdduct> collection) {
 		thf.setTable(null);
-		model.setTableModelFromBinnerAdductList(collection);
+		((BinnerAnnotationsTableModel)model).setTableModelFromBinnerAdductList(collection);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public BinnerAdduct getSelectedBinnerAdduct() {
@@ -74,7 +73,8 @@ public class BinnerAnnotationsTable extends BasicTable {
 		if(row == -1)
 			return null;
 		
-		return (BinnerAdduct)getValueAt(row, getColumnIndex(BinnerAnnotationsTableModel.BINNER_ADDUCT_COLUMN));		
+		return (BinnerAdduct)getValueAt(
+				row, getColumnIndex(BinnerAnnotationsTableModel.BINNER_ADDUCT_COLUMN));		
 	}
 	
 	public void removeBinnerAdduct(BinnerAdduct adduct) {

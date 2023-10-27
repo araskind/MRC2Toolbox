@@ -37,29 +37,30 @@ public class ReferenceSampleTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5200794508214563011L;
-	private ReferenceSampleTableModel model;
 
 	public ReferenceSampleTable() {
 
 		super();
 		model =  new ReferenceSampleTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ReferenceSampleTableModel>(model);
+		rowSorter = new TableRowSorter<ReferenceSampleTableModel>(
+				(ReferenceSampleTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		columnModel.getColumnById(ReferenceSampleTableModel.SAMPLE_ID_COLUMN).
 			setCellRenderer(new ExperimentalSampleRenderer(SortProperty.ID));
-
+		columnModel.getColumnById(ReferenceSampleTableModel.LOCKED_COLUMN).setWidth(50);
+		fixedWidthColumns.add(model.getColumnIndex(ReferenceSampleTableModel.LOCKED_COLUMN));
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
 	}
 
 	public void loadReferenceSamples() {
 		thf.setTable(null);
-		model.loadReferenceSamples();
+		((ReferenceSampleTableModel)model).loadReferenceSamples();
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public ExperimentalSample getSelectedSample() {

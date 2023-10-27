@@ -198,6 +198,8 @@ public class LoadExperimentTask extends AbstractTask implements TaskListener{
 					for(MsFeatureIdentity fbfId : toRemove)
 						feature.removeIdentity(fbfId);
 				}
+				if(feature.getPrimaryIdentity() == null && feature.getIdentifications().isEmpty())
+					feature.createDefaultPrimaryIdentity();
 			}
 		}
 	}

@@ -49,9 +49,9 @@ public class ObjectAnnotationTableModel extends BasicTableModel {
 	public ObjectAnnotationTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ANNOTATION_COLUMN, ObjectAnnotation.class, false),			
+			new ColumnContext(ANNOTATION_COLUMN, ANNOTATION_COLUMN, ObjectAnnotation.class, false),			
 //			new ColumnContext(FILE_PREVIEW_COLUMN, ObjectAnnotation.class, false),
-			new ColumnContext(FILE_DOWNLOAD_COLUMN, ObjectAnnotation.class, false),
+			new ColumnContext(FILE_DOWNLOAD_COLUMN, "Click to download (icon shows document format)", ObjectAnnotation.class, false),
 //			new ColumnContext(LAST_MODIFIED_COLUMN, Date.class, false),
 		};
 	}

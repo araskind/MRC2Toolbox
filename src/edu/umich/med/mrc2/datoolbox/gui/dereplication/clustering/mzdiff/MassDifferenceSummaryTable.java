@@ -36,13 +36,13 @@ public class MassDifferenceSummaryTable extends BasicTable{
 	 *
 	 */
 	private static final long serialVersionUID = -2732608561036372556L;
-	private MassDifferenceSummaryTableModel model;
 
 	public MassDifferenceSummaryTable() {
 		super();
 		model = new MassDifferenceSummaryTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MassDifferenceSummaryTableModel>(model);
+		rowSorter = new TableRowSorter<MassDifferenceSummaryTableModel>(
+				(MassDifferenceSummaryTableModel)model);
 		setRowSorter(rowSorter);
 
 		columnModel.getColumnById(MassDifferenceSummaryTableModel.DELTA_MZ_COLUMN).
@@ -58,8 +58,8 @@ public class MassDifferenceSummaryTable extends BasicTable{
 
 	public void setModelFromBins(Collection<DoubleValueBin>bins) {
 		thf.setTable(null);
-		model.setModelFromBins(bins);
+		((MassDifferenceSummaryTableModel)model).setModelFromBins(bins);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 }

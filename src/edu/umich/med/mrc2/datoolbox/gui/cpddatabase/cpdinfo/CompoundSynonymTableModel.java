@@ -45,13 +45,13 @@ public class CompoundSynonymTableModel extends BasicTableModel {
 		super();
 
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DEFAULT_COLUMN, Boolean.class, true),
-			new ColumnContext(SYNONYM_COLUMN, String.class, false)
+			new ColumnContext(DEFAULT_COLUMN, DEFAULT_COLUMN, Boolean.class, true),
+			new ColumnContext(SYNONYM_COLUMN, SYNONYM_COLUMN, String.class, false)
 		};
 	}
 	
 	public void disableEditing() {
-		columnArray[0] = new ColumnContext(DEFAULT_COLUMN, Boolean.class, false);
+		columnArray[0] = new ColumnContext(DEFAULT_COLUMN, DEFAULT_COLUMN, Boolean.class, false);
 	}
 
 	public void setModelFromCompoundNameSet(CompoundNameSet nameSet) {

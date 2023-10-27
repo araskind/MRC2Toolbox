@@ -59,20 +59,20 @@ public class IdentificationResultsTableModel extends BasicTableModel {
 	public IdentificationResultsTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DEFAULT_ID_COLUMN, Boolean.class, true),
-			new ColumnContext(QC_COLUMN, Boolean.class, false),
-			new ColumnContext(FEATURE_NAME_COLUMN, String.class, false),
-			new ColumnContext(IDENTIFICATION_COLUMN, String.class, false),
-			new ColumnContext(COMPOUND_ID_COLUMN, MsFeatureIdentity.class, false),
-			new ColumnContext(FORMULA_COLUMN, String.class, false),
-			new ColumnContext(NEUTRAL_MASS_COLUMN, Double.class, false),
-			new ColumnContext(MASS_ERROR_COLUMN, Double.class, false),
-			new ColumnContext(EXPECTED_RETENTION_COLUMN, Double.class, false),
-			new ColumnContext(RETENTION_ERROR_COLUMN, Double.class, false),
-			new ColumnContext(BEST_MATCH_ADDUCT_COLUMN, Adduct.class, false),
-			new ColumnContext(ID_SCORE_COLUMN, Double.class, false),
-			new ColumnContext(ID_CONFIDENCE_COLUMN, String.class, false),
-			new ColumnContext(ID_SOURCE_COLUMN, String.class, false),
+//			new ColumnContext(DEFAULT_ID_COLUMN, Boolean.class, true),
+//			new ColumnContext(QC_COLUMN, Boolean.class, false),
+//			new ColumnContext(FEATURE_NAME_COLUMN, String.class, false),
+//			new ColumnContext(IDENTIFICATION_COLUMN, String.class, false),
+//			new ColumnContext(COMPOUND_ID_COLUMN, MsFeatureIdentity.class, false),
+//			new ColumnContext(FORMULA_COLUMN, String.class, false),
+//			new ColumnContext(NEUTRAL_MASS_COLUMN, Double.class, false),
+//			new ColumnContext(MASS_ERROR_COLUMN, Double.class, false),
+//			new ColumnContext(EXPECTED_RETENTION_COLUMN, Double.class, false),
+//			new ColumnContext(RETENTION_ERROR_COLUMN, Double.class, false),
+//			new ColumnContext(BEST_MATCH_ADDUCT_COLUMN, Adduct.class, false),
+//			new ColumnContext(ID_SCORE_COLUMN, Double.class, false),
+//			new ColumnContext(ID_CONFIDENCE_COLUMN, String.class, false),
+//			new ColumnContext(ID_SOURCE_COLUMN, String.class, false),
 		};
 	}
 

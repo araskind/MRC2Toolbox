@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumn;
@@ -41,14 +40,13 @@ public class ConcentrationsTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = -5171270869259062864L;
 	
-	private ConcentrationsTableModel model;
-	
 	public ConcentrationsTable() {
 		
 		super();
 		model = new ConcentrationsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ConcentrationsTableModel>(model);
+		rowSorter = new TableRowSorter<ConcentrationsTableModel>(
+				(ConcentrationsTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -56,6 +54,7 @@ public class ConcentrationsTable extends BasicTable {
 				columnModel.getColumnById(ConcentrationsTableModel.COMMENTS_COLUMN);
 		commentsColumn.setCellRenderer(new WordWrapCellRenderer()); 
 		commentsColumn.setMinWidth(200);
+		fixedWidthColumns.add(model.getColumnIndex(ConcentrationsTableModel.COMMENTS_COLUMN));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
@@ -64,10 +63,9 @@ public class ConcentrationsTable extends BasicTable {
 	public void setModelFromConcentrations(Collection<CompoundConcentration>concentrations) {
 		
 		thf.setTable(null);
-		model.setModelFromConcentrations(concentrations);		
+		((ConcentrationsTableModel)model).setModelFromConcentrations(concentrations);		
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(
-				Collections.singleton(getColumnIndex(ConcentrationsTableModel.COMMENTS_COLUMN)));
+		adjustColumns();
 	}
 }
 

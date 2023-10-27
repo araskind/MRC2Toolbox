@@ -42,8 +42,8 @@ public class AssayTableModel extends BasicTableModel {
 	public AssayTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ASSAY_ID_COLUMN, String.class, false),
-			new ColumnContext(ASSAY_COLUMN, Assay.class, false),
+			new ColumnContext(ASSAY_ID_COLUMN, ASSAY_ID_COLUMN, String.class, false),
+			new ColumnContext(ASSAY_COLUMN, ASSAY_COLUMN, Assay.class, false),
 		};
 	}
 

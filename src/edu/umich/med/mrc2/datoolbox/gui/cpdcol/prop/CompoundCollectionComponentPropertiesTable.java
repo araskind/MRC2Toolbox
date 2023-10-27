@@ -47,7 +47,6 @@ public class CompoundCollectionComponentPropertiesTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = 6761893383490446061L;
 	
-	private CompoundCollectionComponentPropertiesTableModel model;
 	private CompoundCollectionComponent compoundCollectionComponent;
 	private PropertyEditorDialog propertyEditorDialog;
 
@@ -81,9 +80,10 @@ public class CompoundCollectionComponentPropertiesTable extends BasicTable {
 			CompoundCollectionComponent component) {
 //		thf.setTable(null);
 		this.compoundCollectionComponent = component;
-		model.setTableModelFromCompoundCollectionComponent(component);
+		((CompoundCollectionComponentPropertiesTableModel)model).
+				setTableModelFromCompoundCollectionComponent(component);
 //		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	@Override
@@ -176,5 +176,6 @@ public class CompoundCollectionComponentPropertiesTable extends BasicTable {
 
 		return tuple;
 	}
-
 }
+
+

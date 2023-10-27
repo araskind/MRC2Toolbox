@@ -37,7 +37,6 @@ public class CompoundStructureTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 6719085533971443823L;
-	private CompoundStructureTableModel model;
 	private CompoundIdentityCluster activeCluster;
 
 	public CompoundStructureTable() {
@@ -55,7 +54,7 @@ public class CompoundStructureTable extends BasicTable {
 	}
 	
 	public void setModelFromCompoundIdentityCluster(CompoundIdentityCluster cluster) {
-		model.setModelFromCompoundIdentityCluster(cluster);
+		((CompoundStructureTableModel)model).setModelFromCompoundIdentityCluster(cluster);
 		activeCluster = cluster;
 	}
 	

@@ -31,8 +31,7 @@ public class TaskTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 6038476299497788543L;
-	private TaskTableModel model;
-
+	
 	public TaskTable() {
 
 		model = new TaskTableModel();
@@ -44,7 +43,7 @@ public class TaskTable extends BasicTable {
 
 	public void addTask(Task taskToAdd) {
 
-		model.addTask(taskToAdd);
+		((TaskTableModel)model).addTask(taskToAdd);
 		tca.adjustColumns();
 	}
 }

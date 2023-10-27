@@ -52,7 +52,7 @@ public abstract class BasicFeatureTable extends BasicTable {
 		radioRenderer = new RadioButtonRenderer();
 		radioEditor = new RadioButtonEditor(new JCheckBox());
 		radioEditor.addCellEditorListener(this);
-		intensityRenderer = new IntensityRenderer();
+		intensityRenderer = new IntensityRenderer();		
 	}
 
 	public abstract Collection<MsFeature> getSelectedFeatures();

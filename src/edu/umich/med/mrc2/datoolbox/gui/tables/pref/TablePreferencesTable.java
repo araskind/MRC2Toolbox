@@ -33,7 +33,6 @@ public class TablePreferencesTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1119544379104686403L;
-	private TablePreferencesTableModel model;
 
 	public TablePreferencesTable() {
 		super();
@@ -51,7 +50,7 @@ public class TablePreferencesTable extends BasicTable {
 	}
 
 	public void setTableModelFromColumns(TableColumnState[] columns) {
-		model.setTableModelFromColumns(columns);
+		((TablePreferencesTableModel)model).setTableModelFromColumns(columns);
 	}
 	
 	public TableColumnState getSelectedColumnSettings() {

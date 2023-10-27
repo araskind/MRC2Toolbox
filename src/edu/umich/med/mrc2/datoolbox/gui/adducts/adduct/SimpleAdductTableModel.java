@@ -45,10 +45,10 @@ public class SimpleAdductTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(CHEM_MOD_COLUMN, Adduct.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(OLIGOMER_COLUMN, Integer.class, false),
+			new ColumnContext(CHEM_MOD_COLUMN, CHEM_MOD_COLUMN, Adduct.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+			new ColumnContext(OLIGOMER_COLUMN, "Oligomeric state", Integer.class, false),
 		};
 	}
 

@@ -46,10 +46,10 @@ public class ReferenceSampleTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(LOCKED_COLUMN, Boolean.class, false),
-			new ColumnContext(SAMPLE_ID_COLUMN, ExperimentalSample.class, false),
-			new ColumnContext(SAMPLE_NAME_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_TYPE_COLUMN, MoTrPACQCSampleType.class, false),
+			new ColumnContext(LOCKED_COLUMN, LOCKED_COLUMN, Boolean.class, false),
+			new ColumnContext(SAMPLE_ID_COLUMN, SAMPLE_ID_COLUMN, ExperimentalSample.class, false),
+			new ColumnContext(SAMPLE_NAME_COLUMN, SAMPLE_NAME_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_TYPE_COLUMN, SAMPLE_TYPE_COLUMN, MoTrPACQCSampleType.class, false),
 		};
 	}
 

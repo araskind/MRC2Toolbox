@@ -85,10 +85,8 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = 4342547780389381013L;
 
-	private UniversalIdentificationResultsTableModel model;
-	private FormattedDecimalRenderer ppmRenderer, scoreRenderer;
+	private FormattedDecimalRenderer scoreRenderer;
 	private MsFeature parentFeature;
-	private MouseMotionAdapter mma;
 	private TableModelListener identificationTableModelListener;
 
 	public UniversalIdentificationResultsTable() {
@@ -101,7 +99,8 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		rowSorter = new TableRowSorter<UniversalIdentificationResultsTableModel>(model);
+		rowSorter = new TableRowSorter<UniversalIdentificationResultsTableModel>(
+				(UniversalIdentificationResultsTableModel)model);
 		setRowSorter(rowSorter);
 
 		rowSorter.setComparator(model.getColumnIndex(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN),
@@ -113,17 +112,16 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		rowSorter.setComparator(model.getColumnIndex(UniversalIdentificationResultsTableModel.MSMS_MATCH_TYPE_COLUMN),
 				new ReferenceMsMsLibraryMatchTypeComparator());		
 		
-		ppmRenderer = new FormattedDecimalRenderer(new DecimalFormat("###.#"), true);
 		scoreRenderer = new FormattedDecimalRenderer(new DecimalFormat("###.##"), true);
 		chmodRenderer = new AdductRenderer();
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
 		
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN)
 				.setCellRenderer(new RadioButtonRenderer()); // Primary identification
-		columnModel.getColumnById(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN)
-			.setCellRenderer(new MSFeatureIdentificationLevelColorRenderer());
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN)
-				.setCellEditor(new RadioButtonEditor(new JCheckBox()));			
+				.setCellEditor(new RadioButtonEditor(new JCheckBox()));	
+		columnModel.getColumnById(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN)
+			.setCellRenderer(new MSFeatureIdentificationLevelColorRenderer());		
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN)
 			.setCellRenderer(new IdentityWordWrapCellRenderer(CompoundIdentityField.NAME));		
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.COMPOUND_ID_COLUMN)
@@ -177,14 +175,19 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.PERCOLATOR_SCORE_COLUMN)
 			.setCellRenderer(scoreRenderer);
 		
-		columnModel.getColumnById(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN).setMaxWidth(50);
-		columnModel.getColumnById(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN).setMaxWidth(80);
-		columnModel.getColumnById(UniversalIdentificationResultsTableModel.MSMS_MATCH_TYPE_COLUMN).setMaxWidth(50);
-		columnModel.getColumnById(UniversalIdentificationResultsTableModel.ID_CONFIDENCE_COLUMN).setMaxWidth(50);
+		columnModel.getColumnById(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN).setWidth(50);
+		columnModel.getColumnById(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN).setWidth(50);
+		columnModel.getColumnById(UniversalIdentificationResultsTableModel.MSMS_MATCH_TYPE_COLUMN).setWidth(50);
+		columnModel.getColumnById(UniversalIdentificationResultsTableModel.ID_CONFIDENCE_COLUMN).setWidth(50);
 		columnModel.getColumnById(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN).setMinWidth(200);
-	
+		
+		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN));
+		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN));
+		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.MSMS_MATCH_TYPE_COLUMN));
+		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.ID_CONFIDENCE_COLUMN));
+		
 		//	Database link adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -216,6 +219,8 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		thf.getParserModel().setComparator(Adduct.class, new AdductComparator(SortProperty.Name));		
 		thf.getParserModel().setFormat(ReferenceMsMsLibraryMatch.class, new ReferenceMsMsLibraryMatchTypeFormat());
 		thf.getParserModel().setComparator(ReferenceMsMsLibraryMatch.class, new ReferenceMsMsLibraryMatchTypeComparator());
+		
+
 		
 		finalizeLayout();
 		
@@ -254,10 +259,10 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		if(showUniqueIdsOnly)
 			idList = IdentificationUtils.getBestMatchIds(feature);			
 		
-		model.setParentFeature(parentFeature);
-		model.setModelFromIdList(idList, parentFeature.getPrimaryIdentity());	
+		((UniversalIdentificationResultsTableModel)model).setParentFeature(parentFeature);
+		((UniversalIdentificationResultsTableModel)model).setModelFromIdList(idList, parentFeature.getPrimaryIdentity());	
 		thf.setTable(this);
-		adjustVarWidthColumns();
+		adjustColumns();
 		if(idList.contains(selectedId))
 			selectIdentity(selectedId);
 		else
@@ -266,16 +271,16 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 		addModelListeners();
 	}
 	
-	private void adjustVarWidthColumns() {
-		
-		fixedWidthColumns.clear();
-		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.MSMS_MATCH_TYPE_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.ID_CONFIDENCE_COLUMN));
-		tca.adjustColumnsExcluding(fixedWidthColumns);
-		columnModel.getColumnById(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN).setMinWidth(200);
-	}
+//	private void adjustVarWidthColumns() {
+//		
+//		fixedWidthColumns.clear();
+//		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.DEFAULT_ID_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.ID_LEVEL_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.MSMS_MATCH_TYPE_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(UniversalIdentificationResultsTableModel.ID_CONFIDENCE_COLUMN));
+//		tca.adjustColumnsExcluding(fixedWidthColumns);
+//		columnModel.getColumnById(UniversalIdentificationResultsTableModel.IDENTIFICATION_COLUMN).setMinWidth(200);
+//	}
 	
 	public void setModelFromMsFeature(
 			MsFeature feature, 
@@ -296,15 +301,16 @@ public class UniversalIdentificationResultsTable extends BasicTable {
 			
 		removeModelListeners();
 		parentFeature = feature;
-		model.setParentFeature(parentFeature);
-		model.setModelFromIdList(idList, parentFeature.getPrimaryIdentity());
+		((UniversalIdentificationResultsTableModel)model).setParentFeature(parentFeature);
+		((UniversalIdentificationResultsTableModel)model).setModelFromIdList(idList, parentFeature.getPrimaryIdentity());
 		thf.setTable(this);
-		adjustVarWidthColumns();
+		
 		if(idList.contains(selectedId))
 			selectIdentity(selectedId);
 		else
 			selectPrimaryIdentity();
 		
+		adjustColumns();
 		addModelListeners();
 	}
 	

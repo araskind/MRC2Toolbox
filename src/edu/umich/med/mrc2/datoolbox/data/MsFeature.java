@@ -1107,7 +1107,7 @@ public class MsFeature implements AnnotatedObject, Serializable {
 		}
 	}
 	
-	private void createDefaultPrimaryIdentity() {
+	public void createDefaultPrimaryIdentity() {
 		
 		MsFeatureIdentity defaultId = new MsFeatureIdentity(
 				null, CompoundIdentificationConfidence.UNKNOWN_ACCURATE_MASS_RT);

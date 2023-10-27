@@ -44,10 +44,10 @@ public class CompoundCollectionListingTableModel extends BasicTableModel {
 	public CompoundCollectionListingTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ID_COLUMN, String.class, false),
-			new ColumnContext(COLLECTION_NAME_COLUMN, CompoundCollection.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(URL_COLUMN, String.class, false)
+			new ColumnContext(ID_COLUMN, "Compound collection ID", String.class, false),
+			new ColumnContext(COLLECTION_NAME_COLUMN, COLLECTION_NAME_COLUMN, CompoundCollection.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(URL_COLUMN, "Web address (manufacturer)", String.class, false)
 		};
 	}
 

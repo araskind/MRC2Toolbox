@@ -34,14 +34,14 @@ public class ExperimentalGroupsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 1574891455989936345L;
-	private ExperimentalGroupsTableModel model;
 
 	public ExperimentalGroupsTable() {
 
 		super();
 		model = new ExperimentalGroupsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ExperimentalGroupsTableModel>(model);
+		rowSorter = new TableRowSorter<ExperimentalGroupsTableModel>(
+				(ExperimentalGroupsTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -53,7 +53,7 @@ public class ExperimentalGroupsTable extends BasicTable {
 
 	public void setModelFromDesignSubset(ExperimentDesignSubset activeDesignSubset) {
 
-		model.setModelFromDesignSubset(activeDesignSubset);
-		tca.adjustColumns();
+		((ExperimentalGroupsTableModel)model).setModelFromDesignSubset(activeDesignSubset);
+		adjustColumns();
 	}
 }

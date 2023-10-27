@@ -40,7 +40,6 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicFeatureTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.ChemicalModificationEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RowEditorModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
@@ -55,9 +54,7 @@ public class AdductInterpreterTable extends BasicFeatureTable {
 	 *
 	 */
 	private static final long serialVersionUID = 6783435341041065498L;
-	private AdductInterpreterTableModel model;
 	private TableRowSorter<AdductInterpreterTableModel> featureSorter;
-	private FormattedDecimalRenderer ppmRenderer;
 	private RowEditorModel rowEditorModel;
 	private MsFeatureSuggestedModificationRenderer suggestedModificationRenderer;
 
@@ -70,7 +67,7 @@ public class AdductInterpreterTable extends BasicFeatureTable {
 
 		featureSorter = new TableRowSorter<AdductInterpreterTableModel>();
 		setRowSorter(featureSorter);
-		featureSorter.setModel(model);
+		featureSorter.setModel((AdductInterpreterTableModel)model);
 		getTableHeader().setReorderingAllowed(false);
 
 		featureSorter.setComparator(model.getColumnIndex(AdductInterpreterTableModel.FEATURE_COLUMN),
@@ -105,12 +102,8 @@ public class AdductInterpreterTable extends BasicFeatureTable {
 			.setCellRenderer(areaRenderer); // Sample mean
 
 		rowEditorModel = new RowEditorModel();
-
-		addColumnSelectorPopup();
-
 		thf = new TableFilterHeader(this, AutoChoices.DISABLED);
-		tca = new TableColumnAdjuster(this);
-		tca.adjustColumns();
+		finalizeLayout();
 	}
 
 	@Override
@@ -146,9 +139,9 @@ public class AdductInterpreterTable extends BasicFeatureTable {
 		for(int i=0; i<featureCluster.getFeatures().size(); i++)
 			rowEditorModel.addEditorForRow(i, new ChemicalModificationEditor());
 
-		model.setTableModelFromFeatureCluster(featureCluster);
+		((AdductInterpreterTableModel)model).setTableModelFromFeatureCluster(featureCluster);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public void setTableModelFromFeatureCluster(MsFeatureCluster featureCluster, MsFeature referenceFeature,
@@ -160,9 +153,9 @@ public class AdductInterpreterTable extends BasicFeatureTable {
 		for(int i=0; i<featureCluster.getFeatures().size(); i++)
 			rowEditorModel.addEditorForRow(i, new ChemicalModificationEditor());
 
-		model.setTableModelFromFeatureCluster(featureCluster, referenceFeature, referenceModification);
+		((AdductInterpreterTableModel)model).setTableModelFromFeatureCluster(featureCluster, referenceFeature, referenceModification);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	@Override

@@ -21,8 +21,6 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.annotation;
 
-import javax.swing.JTable;
-
 import edu.umich.med.mrc2.datoolbox.data.AnnotatedObject;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
@@ -36,7 +34,6 @@ public class ObjectAnnotationTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -7205271819061712691L;
-	private ObjectAnnotationTableModel model;
 	private AnnotatedObject currentObject;
 
 	public static final int iconSize = 24;
@@ -47,15 +44,20 @@ public class ObjectAnnotationTable extends BasicTable {
 
 		model = new ObjectAnnotationTableModel();
 		setModel(model);
-		setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-		getColumnModel().getColumn(model.getColumnIndex(ObjectAnnotationTableModel.ANNOTATION_COLUMN))
-				.setCellRenderer(new ObjectAnnotationTextPreviewRenderer(SortProperty.Name, maxAnnotationPreviewLength));
+		columnModel.getColumnById(ObjectAnnotationTableModel.ANNOTATION_COLUMN)
+				.setCellRenderer(new ObjectAnnotationTextPreviewRenderer(
+						SortProperty.Name, maxAnnotationPreviewLength));
 //		getColumnModel().getColumn(model.getColumnIndex(ObjectAnnotationTableModel.FILE_PREVIEW_COLUMN))
 //				.setCellRenderer(new ObjectAnnotationFilePreviewRenderer(this));
-		getColumnModel().getColumn(model.getColumnIndex(ObjectAnnotationTableModel.FILE_DOWNLOAD_COLUMN))
+		columnModel.getColumnById(ObjectAnnotationTableModel.FILE_DOWNLOAD_COLUMN)
 				.setCellRenderer(new ObjectAnnotationDocumentTypeRenderer(this));
-
+		
+		columnModel.getColumnById(
+				ObjectAnnotationTableModel.FILE_DOWNLOAD_COLUMN).setWidth(iconSize * 2);
+		fixedWidthColumns.add(columnModel.getColumnIndex(
+				ObjectAnnotationTableModel.FILE_DOWNLOAD_COLUMN));
 		currentObject = null;
+		
 		finalizeLayout();
 	}
 
@@ -66,12 +68,11 @@ public class ObjectAnnotationTable extends BasicTable {
 	public void setTableModelFromAnnotatedObject(AnnotatedObject feature) {
 
 		currentObject = feature;
-		model.setTableModelFromAnnotatedObject(feature);
+		((ObjectAnnotationTableModel)model).setTableModelFromAnnotatedObject(feature);
 //		getColumnModel().getColumn(
 //				model.getColumnIndex(ObjectAnnotationTableModel.FILE_PREVIEW_COLUMN)).setWidth(iconSize * 2);
-		getColumnModel().getColumn(
-				model.getColumnIndex(ObjectAnnotationTableModel.FILE_DOWNLOAD_COLUMN)).setWidth(iconSize * 2);
-		tca.adjustColumn(getColumnIndex(ObjectAnnotationTableModel.ANNOTATION_COLUMN));
+		
+		adjustColumns();
 	}
 
 	public void previewAnnotationDocument(ObjectAnnotation annotation) {

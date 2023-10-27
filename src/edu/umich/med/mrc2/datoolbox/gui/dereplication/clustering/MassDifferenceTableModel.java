@@ -46,8 +46,8 @@ public class MassDifferenceTableModel extends BasicTableModel {
 	public static final String FEATURE_TWO_COLUMN = "Feature 2";
 	public static final String DATA_PIPELINE_TWO_COLUMN = "Data pipeline 2";
 	public static final String BINNER_ANNOTATION_TWO_COLUMN = "Binner 2";
-	public static final String DELTA_COLUMN = "Delta";
-	public static final String DELTA_ABS_COLUMN = "Delta abs.";
+	public static final String DELTA_COLUMN = '\u0394' + "M/Z";
+	public static final String DELTA_ABS_COLUMN = '\u0394' + " M/Z abs.";
 	public static final String CORRELATION_COLUMN = "Correlation";
 	public static final String ANNOTATION_COLUMN = "Annotation";
 	public static final String ANNOTATION_DESCRIPTION_COLUMN = "Annotation description";
@@ -55,17 +55,17 @@ public class MassDifferenceTableModel extends BasicTableModel {
 	public MassDifferenceTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(FEATURE_ONE_COLUMN, MsFeature.class, false),
-			new ColumnContext(DATA_PIPELINE_ONE_COLUMN, DataPipeline.class, false),
-			new ColumnContext(BINNER_ANNOTATION_ONE_COLUMN, String.class, false),
-			new ColumnContext(FEATURE_TWO_COLUMN, MsFeature.class, false),
-			new ColumnContext(DATA_PIPELINE_TWO_COLUMN, DataPipeline.class, false),
-			new ColumnContext(BINNER_ANNOTATION_TWO_COLUMN, String.class, false),
-			new ColumnContext(DELTA_COLUMN, Double.class, false),
-			new ColumnContext(DELTA_ABS_COLUMN, Double.class, false),
-			new ColumnContext(CORRELATION_COLUMN, Double.class, false),
-			new ColumnContext(ANNOTATION_COLUMN, Adduct.class, false),
-			new ColumnContext(ANNOTATION_DESCRIPTION_COLUMN, String.class, false)
+			new ColumnContext(FEATURE_ONE_COLUMN, FEATURE_ONE_COLUMN, MsFeature.class, false),
+			new ColumnContext(DATA_PIPELINE_ONE_COLUMN, DATA_PIPELINE_ONE_COLUMN, DataPipeline.class, false),
+			new ColumnContext(BINNER_ANNOTATION_ONE_COLUMN, "Binner annotation for feature 1", String.class, false),
+			new ColumnContext(FEATURE_TWO_COLUMN, FEATURE_TWO_COLUMN, MsFeature.class, false),
+			new ColumnContext(DATA_PIPELINE_TWO_COLUMN, DATA_PIPELINE_TWO_COLUMN, DataPipeline.class, false),
+			new ColumnContext(BINNER_ANNOTATION_TWO_COLUMN, "Binner annotation for feature 1", String.class, false),
+			new ColumnContext(DELTA_COLUMN, "M/Z difference", Double.class, false),
+			new ColumnContext(DELTA_ABS_COLUMN, "Absolute M/Z difference", Double.class, false),
+			new ColumnContext(CORRELATION_COLUMN, CORRELATION_COLUMN, Double.class, false),
+			new ColumnContext(ANNOTATION_COLUMN, "Adduct", Adduct.class, false),
+			new ColumnContext(ANNOTATION_DESCRIPTION_COLUMN, ANNOTATION_DESCRIPTION_COLUMN, String.class, false)
 		};
 	}
 

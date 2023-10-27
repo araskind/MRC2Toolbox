@@ -51,16 +51,16 @@ public class AdductTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(TYPE_COLUMN, String.class, false),
-			new ColumnContext(CHEM_MOD_COLUMN, Adduct.class, false),
-			new ColumnContext(CEF_NOTATION_COLUMN, String.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(OLIGOMER_COLUMN, Integer.class, false),
-			new ColumnContext(ADDED_GROUP_COLUMN, String.class, false),
-			new ColumnContext(REMOVED_GROUP_COLUMN, String.class, false),
-			new ColumnContext(MASS_CORRECTION_COLUMN, Double.class, false),
-			new ColumnContext(MASS_CORRECTION_ABS_COLUMN, Double.class, false)
+			new ColumnContext(TYPE_COLUMN, "Modification type", String.class, false),
+			new ColumnContext(CHEM_MOD_COLUMN, CHEM_MOD_COLUMN, Adduct.class, false),
+			new ColumnContext(CEF_NOTATION_COLUMN, "Agilent (CEF file) notation", String.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+			new ColumnContext(OLIGOMER_COLUMN, "Oligomeric state", Integer.class, false),
+			new ColumnContext(ADDED_GROUP_COLUMN, "Added group formula", String.class, false),
+			new ColumnContext(REMOVED_GROUP_COLUMN, "Removed group formula", String.class, false),
+			new ColumnContext(MASS_CORRECTION_COLUMN, "Mass correction", Double.class, false),
+			new ColumnContext(MASS_CORRECTION_ABS_COLUMN, "Absolute mass correction", Double.class, false)
 		};
 	}
 

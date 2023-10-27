@@ -49,8 +49,8 @@ public class ExperimentalGroupsTableModel extends BasicTableModel {
 	public ExperimentalGroupsTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(FACTOR_COLUMN, ExperimentDesignFactor.class, false),
-			new ColumnContext("Levels", String.class, false)
+			new ColumnContext(FACTOR_COLUMN, "Experimental factor", ExperimentDesignFactor.class, false),
+			new ColumnContext(LEVELS_COLUMN, "Included levels", String.class, false)
 			// , new ColumnContext(NUM_SAMPLES_COLUMN, Integer.class, false)
 		};
 	}

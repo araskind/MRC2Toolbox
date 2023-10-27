@@ -94,7 +94,7 @@ public class BasicTable extends JTable implements ActionListener{
 	protected PercentValueRenderer percentRenderer;
 	protected DateTimeCellRenderer dtRenderer;
 	protected WordWrapCellRenderer longTextRenderer;
-	protected FormattedDecimalRenderer areaRenderer, mzRenderer, rtRenderer;
+	protected FormattedDecimalRenderer areaRenderer, mzRenderer, rtRenderer, ppmRenderer;
 	protected IntensityRenderer intensityRenderer;
 	protected CompoundIdentityDatabaseLinkRenderer msfIdRenderer;
 	protected RadioButtonRenderer radioRenderer;
@@ -104,6 +104,7 @@ public class BasicTable extends JTable implements ActionListener{
 	protected int popupRow;
 	protected int popupCol;
 
+	protected BasicTableModel model;
 	protected XTableColumnModel columnModel;
 	protected TableColumnAdjuster tca;
 	protected Collection<Integer>fixedWidthColumns;
@@ -155,13 +156,23 @@ public class BasicTable extends JTable implements ActionListener{
 		fixedWidthColumns = new ArrayList<Integer>();
 		initTable();
 	}
-
+	
 	public void adjustColumns() {
 
-		try {
-			tca.adjustColumns();
-		} catch (Exception e) {
-			// e.printStackTrace();
+		if(fixedWidthColumns.isEmpty()) {
+			
+			try {
+				tca.adjustColumnsExcluding(fixedWidthColumns);
+			} catch (Exception e) {
+				// e.printStackTrace();
+			}
+		}
+		else {
+			try {
+				tca.adjustColumns();
+			} catch (Exception e) {
+				// e.printStackTrace();
+			}
 		}
 	}
 	
@@ -218,6 +229,7 @@ public class BasicTable extends JTable implements ActionListener{
 		mzRenderer = new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getMzFormat(), true);
 		rtRenderer = new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getRtFormat(), true);
 		areaRenderer = new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getIntensityFormat(), true);
+		ppmRenderer = new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getPpmFormat(), true);
 	}
 
 	private void initTable() {
@@ -237,6 +249,8 @@ public class BasicTable extends JTable implements ActionListener{
 
 		setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		initPreferenceBasedRenderers();		
+		
+		//	Clumn header tooltips
 	}
 	
 	public void finalizeLayout() {
@@ -249,7 +263,7 @@ public class BasicTable extends JTable implements ActionListener{
 			//	e.printStackTrace();
 		}
 		tll = new TableLayoutListener(this);
-		tca.adjustColumns();
+		adjustColumns();
 		addColumnSelectorPopup();
 	}
 
@@ -301,13 +315,7 @@ public class BasicTable extends JTable implements ActionListener{
 		
 		TableLayoutManager.setTableLayout(this);
 	}
-
-	public void adjustAllColumns() {
-
-		if(tca != null)
-			tca.adjustColumns();
-	}
-
+	
 	public void resetFilter() {
 
 		if(thf != null)
@@ -404,18 +412,18 @@ public class BasicTable extends JTable implements ActionListener{
 		if(command.equals(MainActionCommands.SHOW_ALL_TABLE_COLUMNS_COMMAND.getName())) {
 
 			showAllColumns();
-			adjustAllColumns();
+			adjustColumns();
 			return;
 		}
 		if(command.equals(MainActionCommands.ADJUST_ALL_TABLE_COLUMNS_COMMAND.getName())) {
 
-			adjustAllColumns();
+			adjustColumns();
 			return;
 		}
 		if(command.equals(MainActionCommands.RESET_COLUMN_FILTERS_COMMAND.getName())) {
 
 			resetFilter();
-			adjustAllColumns();
+			adjustColumns();
 			return;
 		}
 		if(command.equals(MainActionCommands.SHOW_TABLE_PREFERENCES_COMMAND.getName())) {
@@ -756,16 +764,26 @@ public class BasicTable extends JTable implements ActionListener{
 	
 	@Override
     protected JTableHeader createDefaultTableHeader() {
+		
         return new JTableHeader(columnModel) {
-            public String getToolTipText(MouseEvent e) {
+
+			private static final long serialVersionUID = 1L;
+			public String getToolTipText(MouseEvent e) {
                 String tip = null;
+                //	TODO
                 java.awt.Point p = e.getPoint();
                 int index = columnModel.getColumnIndexAtX(p.x);
-                return columnModel.getColumn(index).getHeaderValue().toString();
+                if(model != null) {
+                	
+                    int realIndex = columnModel.getColumn(index).getModelIndex();                   
+                    return model.getColumnTooltip(realIndex);
+                }
+                else {
+                	return columnModel.getColumn(index).getHeaderValue().toString();
+                }
             }
         };
     }
-	
 	
 	@Override
 	public void setEnabled(boolean b) {
@@ -783,6 +801,32 @@ public class BasicTable extends JTable implements ActionListener{
 		}			
 		super.setEnabled(b);
 	}
+	
+//	protected String[] columnToolTips = {
+//		    null, // "First Name" assumed obvious
+//		    null, // "Last Name" assumed obvious
+//		    "The person's favorite sport to participate in",
+//		    "The number of years the person has played the sport",
+//		    "If checked, the person eats no meat"};
+//		...
+//
+//		JTable table = new JTable(new MyTableModel()) {
+//		    ...
+//
+//		    //Implement table header tool tips.
+//		    protected JTableHeader createDefaultTableHeader() {
+//		        return new JTableHeader(columnModel) {
+//		            public String getToolTipText(MouseEvent e) {
+//		                String tip = null;
+//		                java.awt.Point p = e.getPoint();
+//		                int index = columnModel.getColumnIndexAtX(p.x);
+//		                int realIndex = 
+//		                        columnModel.getColumn(index).getModelIndex();
+//		                return columnToolTips[realIndex];
+//		            }
+//		        };
+//		    }
+//		};
 }
 
 

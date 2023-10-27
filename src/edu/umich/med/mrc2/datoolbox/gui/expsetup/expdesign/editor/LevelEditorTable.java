@@ -32,7 +32,11 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 
 public class LevelEditorTable extends BasicTable {
 
-	private LevelEditorTableModel model;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private ExperimentDesignSubset activeDesignSubset;
 	private ExperimentDesignFactor activeFactor;
 
@@ -54,8 +58,8 @@ public class LevelEditorTable extends BasicTable {
 
 		activeDesignSubset = designSubset;
 		activeFactor = factor;
-		model.setTableModelFromDesignSubsetFactor(designSubset, factor);
-		tca.adjustColumns();
+		((LevelEditorTableModel)model).setTableModelFromDesignSubsetFactor(designSubset, factor);
+		adjustColumns();
 	}
 
 	//	TODO replace with table model listener
@@ -84,7 +88,7 @@ public class LevelEditorTable extends BasicTable {
 				return;
 			}
 		}
-		model.setTableModelFromDesignSubsetFactor(activeDesignSubset, activeFactor);
+		((LevelEditorTableModel)model).setTableModelFromDesignSubsetFactor(activeDesignSubset, activeFactor);
 		highlightLevel(selectedLevel);		
 	}
 
@@ -109,7 +113,7 @@ public class LevelEditorTable extends BasicTable {
 	}
 
 	public void setEditingAllowed(boolean allowEdit) {
-		model.setEditingAllowed(allowEdit);
+		((LevelEditorTableModel)model).setEditingAllowed(allowEdit);
 	}
 
 	public void highlightLevel(ExperimentDesignLevel selectedLevel) {

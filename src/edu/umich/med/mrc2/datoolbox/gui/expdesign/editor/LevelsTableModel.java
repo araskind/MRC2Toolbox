@@ -40,7 +40,7 @@ public class LevelsTableModel extends BasicTableModel {
 	public LevelsTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(LEVEL_COLUMN, ExperimentDesignLevel.class, true),
+			new ColumnContext(LEVEL_COLUMN, "Level name", ExperimentDesignLevel.class, true),
 		};
 	}
 

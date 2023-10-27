@@ -56,14 +56,15 @@ public class MissingIdsTableModel extends BasicTableModel{
 	public MissingIdsTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(LIBRARY_COLUMN, CompoundLibrary.class, false),
-			new ColumnContext(FEATURE_COLUMN, LibraryMsFeature.class, false),
-			new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
-			new ColumnContext(FORMULA_COLUMN, String.class, false),
-			new ColumnContext(MASS_COLUMN, Double.class, false),
-			new ColumnContext(RT_COLUMN, Double.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(ID_CONFIDENCE_COLUMN, CompoundIdentificationConfidence.class, false),
+			new ColumnContext(LIBRARY_COLUMN, "Compound library", CompoundLibrary.class, false),
+			new ColumnContext(FEATURE_COLUMN, "Library entry", LibraryMsFeature.class, false),
+			new ColumnContext(COMPOUND_NAME_COLUMN, COMPOUND_NAME_COLUMN, String.class, false),
+			new ColumnContext(FORMULA_COLUMN, FORMULA_COLUMN, String.class, false),
+			new ColumnContext(MASS_COLUMN, MASS_COLUMN, Double.class, false),
+			new ColumnContext(RT_COLUMN, "Retention time", Double.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+			new ColumnContext(ID_CONFIDENCE_COLUMN, 
+					"Identification confidence level", CompoundIdentificationConfidence.class, false),
 		};
 	}
 

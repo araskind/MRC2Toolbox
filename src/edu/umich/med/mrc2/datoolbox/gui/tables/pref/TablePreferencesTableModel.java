@@ -35,17 +35,19 @@ public class TablePreferencesTableModel extends BasicTableModel {
 	 * 
 	 */
 	private static final long serialVersionUID = 6668820289960924964L;
-	public static final String COLUMN_NAME_COLUMN = "Column name";
+	
 	public static final String VISIBLE_COLUMN = "Visible";
+	public static final String COLUMN_NAME_COLUMN = "Column name";	
 	public static final String SORTING_ORDER_COLUMN = "Sort order";
 
 	public TablePreferencesTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(VISIBLE_COLUMN, Boolean.class, true),
-			new ColumnContext(COLUMN_NAME_COLUMN, String.class, false),			
-			new ColumnContext(SORTING_ORDER_COLUMN, SortOrder.class, false),
+			new ColumnContext(VISIBLE_COLUMN, "Select visible columns", Boolean.class, true),
+			new ColumnContext(COLUMN_NAME_COLUMN, COLUMN_NAME_COLUMN, String.class, false),			
+			new ColumnContext(SORTING_ORDER_COLUMN, 
+					"Data sorting order for this column (if any)", SortOrder.class, false),
 		};
 	}
 

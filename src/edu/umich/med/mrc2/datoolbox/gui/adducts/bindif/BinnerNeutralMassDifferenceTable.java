@@ -39,8 +39,7 @@ public class BinnerNeutralMassDifferenceTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -5791881460238004998L;
-	private BinnerNeutralMassDifferenceTableModel model;
-	
+
 	public BinnerNeutralMassDifferenceTable() {
 
 		super();
@@ -49,7 +48,8 @@ public class BinnerNeutralMassDifferenceTable extends BasicTable {
 		
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		rowSorter = new TableRowSorter<BinnerNeutralMassDifferenceTableModel>(model);
+		rowSorter = new TableRowSorter<BinnerNeutralMassDifferenceTableModel>(
+				(BinnerNeutralMassDifferenceTableModel)model);
 		setRowSorter(rowSorter);
 		setDefaultRenderer(Adduct.class, new AdductRenderer());
 	
@@ -84,9 +84,10 @@ public class BinnerNeutralMassDifferenceTable extends BasicTable {
 	public void setTableModelFromBinnerNeutralMassDifferenceList(
 			Collection<BinnerNeutralMassDifference> list) {
 		thf.setTable(null);
-		model.setTableModelFromBinnerNeutralMassDifferenceList(list);
+		((BinnerNeutralMassDifferenceTableModel)model).
+				setTableModelFromBinnerNeutralMassDifferenceList(list);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 }
 

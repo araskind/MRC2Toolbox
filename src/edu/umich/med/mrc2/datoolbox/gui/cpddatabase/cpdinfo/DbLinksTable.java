@@ -42,21 +42,18 @@ public class DbLinksTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = 1672474751840148196L;
 
-	private DbLinksTableModel model;
-	private MouseMotionAdapter mma;
-
 	public DbLinksTable() {
 		super();
 		model = new DbLinksTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<DbLinksTableModel>(model);
+		rowSorter = new TableRowSorter<DbLinksTableModel>((DbLinksTableModel)model);
 		setRowSorter(rowSorter);
 
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
 		columnModel.getColumnById(DbLinksTableModel.LINK_COLUMN).setCellRenderer(msfIdRenderer);
 
 		//	Database link adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -84,8 +81,8 @@ public class DbLinksTable extends BasicTable {
 	public void setModelFromLinks(List<CompoundIdentity> dbLinks) {
 
 		thf.setTable(null);
-		model.setModelFromLinks(dbLinks);
+		((DbLinksTableModel)model).setModelFromLinks(dbLinks);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 }

@@ -78,29 +78,30 @@ public class FeatureDataTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-				new ColumnContext(ORDER_COLUMN, Integer.class, false),
-				new ColumnContext(MS_FEATURE_COLUMN, MsFeature.class, false),
-				new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
-				new ColumnContext(DATABSE_LINK_COLUMN, MsFeatureIdentity.class, false),
-				new ColumnContext(AMBIGUITY_COLUMN, Boolean.class, false),
+				new ColumnContext(ORDER_COLUMN, "Order number", Integer.class, false),
+				new ColumnContext(MS_FEATURE_COLUMN, "Feature name", MsFeature.class, false),
+				new ColumnContext(COMPOUND_NAME_COLUMN, "Compound name", String.class, false),
+				new ColumnContext(DATABSE_LINK_COLUMN, 
+						"Primary database accession and web link to the source database", MsFeatureIdentity.class, false),
+				new ColumnContext(AMBIGUITY_COLUMN, "Ambiguous identification", Boolean.class, false),
 //				new ColumnContext(QC_COLUMN, Boolean.class, false),
-				new ColumnContext(CHEM_MOD_OBSERVED_COLUMN, Adduct.class, false),
-				new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, Adduct.class, false),
-				new ColumnContext(RETENTION_COLUMN, Double.class, false),
-				new ColumnContext(RETENTION_OBSERVED_MEDIAN_COLUMN, Double.class, false),
-				new ColumnContext(NEUTRAL_MASS_COLUMN, Double.class, false),
-				new ColumnContext(MONOISOTOPIC_PEAK_COLUMN, Double.class, false),
-				new ColumnContext(MCMILLAN_PERCENT_DELTA_COLUMN, Double.class, false),			
-				new ColumnContext(KMD_COLUMN, Double.class, false),
-				new ColumnContext(KMD_MOD_COLUMN, Double.class, false),
-				new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-				new ColumnContext(POOLED_MEAN_COLUMN, Double.class, false),
-				new ColumnContext(POOLED_RSD_COLUMN, Double.class, false),
-				new ColumnContext(POOLED_FREQUENCY_COLUMN, Double.class, false),
-				new ColumnContext(SAMPLE_MEAN_COLUMN, Double.class, false),
-				new ColumnContext(SAMPLE_RSD_COLUMN, Double.class, false),
-				new ColumnContext(SAMPLE_FREQUENCY_COLUMN, Double.class, false),
-				new ColumnContext(DATA_PIPELINE_COLUMN, DataPipeline.class, false)
+				new ColumnContext(CHEM_MOD_OBSERVED_COLUMN, "Observed (or default) adduct", Adduct.class, false),
+				new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, "Adduct based on library match", Adduct.class, false),
+				new ColumnContext(RETENTION_COLUMN, "Retention time from feature library", Double.class, false),
+				new ColumnContext(RETENTION_OBSERVED_MEDIAN_COLUMN, "Observed retention time (median for all samples)", Double.class, false),
+				new ColumnContext(NEUTRAL_MASS_COLUMN, "Monoisotopic neutral mass", Double.class, false),
+				new ColumnContext(MONOISOTOPIC_PEAK_COLUMN, "Monoisotopic M/Z", Double.class, false),
+				new ColumnContext(MCMILLAN_PERCENT_DELTA_COLUMN, "McMillan mass defect, %", Double.class, false),			
+				new ColumnContext(KMD_COLUMN, "Kendrick mass defect", Double.class, false),
+				new ColumnContext(KMD_MOD_COLUMN, "Kendrick mass defect, modified", Double.class, false),
+				new ColumnContext(CHARGE_COLUMN, "Observed charge", Integer.class, false),
+				new ColumnContext(POOLED_MEAN_COLUMN, "Mean area for pooled samples", Double.class, false),
+				new ColumnContext(POOLED_RSD_COLUMN, "Relative standard deviation (%) for pooled samples", Double.class, false),
+				new ColumnContext(POOLED_FREQUENCY_COLUMN, "Detection frequency in pooled samples", Double.class, false),
+				new ColumnContext(SAMPLE_MEAN_COLUMN, "Mean area for regular samples", Double.class, false),
+				new ColumnContext(SAMPLE_RSD_COLUMN, "Relative standard deviation (%) for regular samples", Double.class, false),
+				new ColumnContext(SAMPLE_FREQUENCY_COLUMN, "Detection frequency in regular samples", Double.class, false),
+				new ColumnContext(DATA_PIPELINE_COLUMN, DATA_PIPELINE_COLUMN, DataPipeline.class, false)
 			};
 	}
 
@@ -131,12 +132,10 @@ public class FeatureDataTableModel extends BasicTableModel {
 					chmodObserved = cf.getSpectrum().getPrimaryAdduct();
 					mcMillanDelta = cf.getSpectrum().getMcMillanCutoffPercentDelta();
 				}
-//				boolean qc = false;
 				if(cf.getPrimaryIdentity() != null) {
 					compoundName = cf.getPrimaryIdentity().getIdentityName();
 					if(cf.getPrimaryIdentity().getMsRtLibraryMatch() != null)
 					chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
-//					qc = cf.getPrimaryIdentity().isQcStandard();
 				}
 				boolean ambig = cf.getIdentifications().stream().
 						filter(i -> Objects.nonNull(i.getCompoundIdentity())).count() > 1;
@@ -148,7 +147,6 @@ public class FeatureDataTableModel extends BasicTableModel {
 						compoundName,
 						cf.getPrimaryIdentity(),
 						ambig,
-//						qc,
 						chmodObserved,
 						chmodLibrary,
 						cf.getRetentionTime(),
@@ -195,12 +193,10 @@ public class FeatureDataTableModel extends BasicTableModel {
 			charge = cf.getCharge();
 			chmodObserved = cf.getSpectrum().getPrimaryAdduct();
 		}
-//		boolean qc = false;
 		if(cf.getPrimaryIdentity() != null) {
 			compoundName = cf.getPrimaryIdentity().getIdentityName();
 			if(cf.getPrimaryIdentity().getMsRtLibraryMatch() != null)
 			chmodLibrary = cf.getPrimaryIdentity().getMsRtLibraryMatch().getTopAdductMatch().getLibraryMatch();
-//			qc = cf.getPrimaryIdentity().isQcStandard();
 		}
 		boolean ambig = cf.getIdentifications().size() > 1;
 
@@ -208,7 +204,6 @@ public class FeatureDataTableModel extends BasicTableModel {
 		setValueAt(compoundName, row, getColumnIndex(COMPOUND_NAME_COLUMN));
 		setValueAt(cf.getPrimaryIdentity(), row, getColumnIndex(DATABSE_LINK_COLUMN));
 		setValueAt(ambig, row, getColumnIndex(AMBIGUITY_COLUMN));
-//		setValueAt(qc, row, getColumnIndex(QC_COLUMN));
 		setValueAt(chmodObserved, row, getColumnIndex(CHEM_MOD_OBSERVED_COLUMN));
 		setValueAt(chmodLibrary, row, getColumnIndex(CHEM_MOD_LIBRARY_COLUMN));
 		setValueAt(cf.getRetentionTime(), row, getColumnIndex(RETENTION_COLUMN));

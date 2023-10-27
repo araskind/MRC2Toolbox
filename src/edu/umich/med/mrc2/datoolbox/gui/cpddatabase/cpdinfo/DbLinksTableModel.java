@@ -44,8 +44,8 @@ public class DbLinksTableModel extends BasicTableModel {
 		super();
 
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DATABASE_COLUMN, String.class, false),
-			new ColumnContext(LINK_COLUMN, CompoundIdentity.class, false)
+			new ColumnContext(DATABASE_COLUMN, DATABASE_COLUMN, String.class, false),
+			new ColumnContext(LINK_COLUMN, "Accession and web link to the source",CompoundIdentity.class, false)
 		};
 	}
 

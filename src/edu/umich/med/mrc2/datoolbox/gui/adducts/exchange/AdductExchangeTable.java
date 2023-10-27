@@ -39,7 +39,6 @@ public class AdductExchangeTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -5791881460238004998L;
-	private AdductExchangeTableModel model;
 	
 	public AdductExchangeTable() {
 
@@ -47,7 +46,8 @@ public class AdductExchangeTable extends BasicTable {
 		model = new AdductExchangeTableModel();
 		setModel(model);
 
-		rowSorter = new TableRowSorter<AdductExchangeTableModel>(model);
+		rowSorter = new TableRowSorter<AdductExchangeTableModel>(
+				(AdductExchangeTableModel)model);
 		setRowSorter(rowSorter);
 		setDefaultRenderer(Adduct.class, new AdductRenderer());
 		setDefaultRenderer(AdductExchange.class, new AdductExchangeDeltaMassRenderer());
@@ -81,9 +81,9 @@ public class AdductExchangeTable extends BasicTable {
 
 	public void setTableModelFromAdductExchangeList(Collection<AdductExchange> list) {
 		thf.setTable(null);
-		model.setTableModelFromAdductExchangeList(list);
+		((AdductExchangeTableModel)model).setTableModelFromAdductExchangeList(list);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 }
 

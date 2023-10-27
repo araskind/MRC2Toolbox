@@ -41,7 +41,7 @@ public class CompoundStructureTableModel extends BasicTableModel {
 	public CompoundStructureTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(STRUCTURE_COLUMN, CompoundIdentity.class, false),			
+			new ColumnContext(STRUCTURE_COLUMN, "Compound structure", CompoundIdentity.class, false),			
 		};
 	}
 

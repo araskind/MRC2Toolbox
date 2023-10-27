@@ -29,8 +29,6 @@ public class CompoundPropertiesTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 6761893383490446061L;
-	
-	private CompoundPropertiesTableModel model;
 
 	public CompoundPropertiesTable() {
 		super();

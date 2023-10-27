@@ -54,7 +54,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering.ClusterFeatureSelectionTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.DockableFeatureIntensitiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
-import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableIdentificationResultsTable;
+import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.DockableUniversalIdentificationResultsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;
@@ -80,7 +80,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 	protected DockableFeatureIntensitiesTable featureIntensitiesTable;
 	protected DockableSpectumPlot spectrumPlot;
 	protected DockableMsTable spectrumTable;
-	protected DockableIdentificationResultsTable idTable;
+	protected DockableUniversalIdentificationResultsTable idTable;
 	protected DockableMolStructurePanel molStructurePanel;
 	protected DockableObjectAnnotationPanel featureAnnotationPanel;
 	protected DockableCorrelationDataPanel correlationPanel;
@@ -109,7 +109,7 @@ public abstract class ClusterDisplayPanel extends DockableMRC2ToolboxPanel
 				"ClusterDisplayPanelCorrelationDataPanel", "Feature correlation");
 		spectrumTable = new DockableMsTable(
 				"ClusterDisplayPanelDockableMsTableMS1", "MS1 table");
-		idTable = new DockableIdentificationResultsTable(
+		idTable = new DockableUniversalIdentificationResultsTable(
 				"ClusterDisplayPanelDockableIdentificationResultsTable", "Identifications");
 		molStructurePanel = new DockableMolStructurePanel(
 				"ClusterDisplayPanelDockableMolStructurePanel");

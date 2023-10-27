@@ -48,9 +48,9 @@ public class MsMsTableModel extends BasicTableModel {
 	public MsMsTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(MZ_COLUMN, Double.class, false),
-			new ColumnContext(INTENSITY_COLUMN, Double.class, false),
-			new ColumnContext(ANNOTATION_COLUMN, String.class, false)
+			new ColumnContext(MZ_COLUMN, MZ_COLUMN, Double.class, false),
+			new ColumnContext(INTENSITY_COLUMN, INTENSITY_COLUMN, Double.class, false),
+			new ColumnContext(ANNOTATION_COLUMN, ANNOTATION_COLUMN, String.class, false)
 		};
 	}
 

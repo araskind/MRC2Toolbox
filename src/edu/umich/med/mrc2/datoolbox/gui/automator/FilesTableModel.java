@@ -41,11 +41,11 @@ public class FilesTableModel extends BasicTableModel {
 	public FilesTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(FILES_COLUMN, File.class, false),
+			new ColumnContext(FILES_COLUMN, FILES_COLUMN, File.class, false),
 		};
 	}
 
-	public void setTableModelFromAssayCollection(Collection<File> files) {
+	public void setTableModelFromFileCollection(Collection<File> files) {
 
 		setRowCount(0);
 		List<Object[]>rowData = new ArrayList<Object[]>();

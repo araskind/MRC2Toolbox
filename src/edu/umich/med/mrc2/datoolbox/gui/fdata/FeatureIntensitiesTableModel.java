@@ -55,10 +55,10 @@ public class FeatureIntensitiesTableModel extends BasicTableModel {
 	public FeatureIntensitiesTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ORDER_COLUMN, Integer.class, true),
-			new ColumnContext(MS_FEATURE_COLUMN, MsFeature.class, false),
-			new ColumnContext(SAMPLE_COLUMN, DataFile.class, true),
-			new ColumnContext(AREA_COLUMN, Double.class, false),
+			new ColumnContext(ORDER_COLUMN, "Order number", Integer.class, true),
+			new ColumnContext(MS_FEATURE_COLUMN, "Feature name", MsFeature.class, false),
+			new ColumnContext(SAMPLE_COLUMN, "Sample name", DataFile.class, true),
+			new ColumnContext(AREA_COLUMN, "Peak area", Double.class, false),
 			//	new ColumnContext(IMPUTED_AREA_COLUMN, Double.class, false)
 		};
 	}

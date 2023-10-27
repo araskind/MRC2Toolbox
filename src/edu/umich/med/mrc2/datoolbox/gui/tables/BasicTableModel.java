@@ -56,6 +56,10 @@ public class BasicTableModel extends DefaultTableModel {
 	public String getColumnName(int modelIndex) {
 		return columnArray[modelIndex].columnName;
 	}
+	
+	public String getColumnTooltip(int modelIndex) {
+		return columnArray[modelIndex].columnTooltip;
+	}
 
 	@Override
 	public boolean isCellEditable(int row, int col) {

@@ -60,7 +60,6 @@ public class MsOneTable  extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 883564169882286269L;
-	private MsOneTableModel model;
 	private MsFeature currentFeature;
 	private IScan currentScan;
 
@@ -70,7 +69,7 @@ public class MsOneTable  extends BasicTable {
 
 		model = new MsOneTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MsOneTableModel>(model);
+		rowSorter = new TableRowSorter<MsOneTableModel>((MsOneTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -93,31 +92,31 @@ public class MsOneTable  extends BasicTable {
 	public void setTableModelFromMsFeature(MsFeature feature) {
 
 		thf.setTable(null);
-		model.setTableModelFromMsFeature(feature);
+		((MsOneTableModel)model).setTableModelFromMsFeature(feature);
 		thf.setTable(this);
 		currentFeature = feature;
 		currentScan = null;
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void setTableModelFromSpectrum(MassSpectrum spectrum) {
 		
 		thf.setTable(null);
-		model.setTableModelFromSpectrum(spectrum);
+		((MsOneTableModel)model).setTableModelFromSpectrum(spectrum);
 		thf.setTable(this);
 		currentFeature = null;
 		currentScan = null;
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void setTableModelFromScan(IScan scan) {
 		
 		thf.setTable(null);
-		model.setTableModelFromScan(scan);
+		((MsOneTableModel)model).setTableModelFromScan(scan);
 		thf.setTable(this);
 		currentFeature = null;
 		currentScan = scan;
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	@Override

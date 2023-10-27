@@ -39,7 +39,7 @@ public class LevelsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5773952561737781351L;
-	private LevelsTableModel model;
+
 	private ExperimentDesignFactor activeFactor;
 	private ExperimentalLevelRenderer elRenderer;
 	private RenamableObjectEditor editor;
@@ -68,14 +68,14 @@ public class LevelsTable extends BasicTable {
 	public void setTableModelFromFactor(ExperimentDesignFactor factor) {
 
 		activeFactor = factor;
-		model.setTableModelFromFactor(factor);
-		tca.adjustColumns();
+		((LevelsTableModel)model).setTableModelFromFactor(factor);
+		adjustColumns();
 	}
 
 	public void addLevel(ExperimentDesignLevel newLevel) {
 
-		model.addLevel(newLevel);
-		tca.adjustColumns();
+		((LevelsTableModel)model).addLevel(newLevel);
+		adjustColumns();
 	}
 
 	public Collection<ExperimentDesignLevel>getLevels(){

@@ -22,7 +22,6 @@
 package edu.umich.med.mrc2.datoolbox.gui.expsetup.expdesign;
 
 import javax.swing.JCheckBox;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelListener;
@@ -43,7 +42,7 @@ public class DesignSubsetTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 3448932509470903799L;
-	private DesignSubsetTableModel model;
+
 	private TableModelListener mlistener;
 	private ExpDesignSubsetRenderer edsRenderer;
 
@@ -52,7 +51,8 @@ public class DesignSubsetTable extends BasicTable {
 		super();
 		model = new DesignSubsetTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<DesignSubsetTableModel>(model);
+		rowSorter = new TableRowSorter<DesignSubsetTableModel>(
+				(DesignSubsetTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(DesignSubsetTableModel.DESIGN_SUBSET_COLUMN),
 				new ExpDesignSubsetComparator());
@@ -74,8 +74,8 @@ public class DesignSubsetTable extends BasicTable {
 				.setCellEditor(radioEditor);
 		columnModel.getColumnById(DesignSubsetTableModel.DESIGN_SUBSET_COLUMN)
 				.setCellRenderer(edsRenderer);
-
-		setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		columnModel.getColumnById(DesignSubsetTableModel.ACTIVE_COLUMN).setWidth(50);
+		fixedWidthColumns.add(model.getColumnIndex(DesignSubsetTableModel.ACTIVE_COLUMN));
 		finalizeLayout();
 	}
 
@@ -96,7 +96,7 @@ public class DesignSubsetTable extends BasicTable {
 				if(!selectedSubset.isActive())
 					MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().setActiveDesignSubset(selectedSubset);
 
-				model.setModelFromProject(MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
+				((DesignSubsetTableModel)model).setModelFromProject(MRC2ToolBoxCore.getActiveMetabolomicsExperiment());
 				super.editingStopped(event);
 				return;
 			}
@@ -106,8 +106,7 @@ public class DesignSubsetTable extends BasicTable {
 
 	public void setModelFromProject(DataAnalysisProject currentProject) {
 
-		model.setModelFromProject(currentProject);
-		//tca.adjustColumns();
+		((DesignSubsetTableModel)model).setModelFromProject(currentProject);
 		columnModel.getColumnById(DesignSubsetTableModel.ACTIVE_COLUMN).setWidth(50);
 	}
 
@@ -116,7 +115,8 @@ public class DesignSubsetTable extends BasicTable {
 		int subIndex = model.getColumnIndex(DesignSubsetTableModel.DESIGN_SUBSET_COLUMN);
 		for(int i=0; i<getRowCount(); i++) {
 
-			ExperimentDesignSubset subset = (ExperimentDesignSubset) model.getValueAt(convertRowIndexToModel(i), subIndex);
+			ExperimentDesignSubset subset = (ExperimentDesignSubset) 
+					model.getValueAt(convertRowIndexToModel(i), subIndex);
 			if(subset.isActive()) {
 				setRowSelectionInterval(i, i);
 				break;

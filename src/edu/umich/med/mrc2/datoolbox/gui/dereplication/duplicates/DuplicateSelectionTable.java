@@ -39,8 +39,8 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.FeatureSelectionTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
+import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 
 public class DuplicateSelectionTable extends FeatureSelectionTable {
 
@@ -50,7 +50,6 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 	private static final long serialVersionUID = 4922558139324447994L;
 
 	private MsFeatureCluster activeCluster;
-	private DuplicateSelectionTableModel model;
 	private DuplicateSelectionTableModelListener modelListener;
 
 	public DuplicateSelectionTable() {
@@ -63,23 +62,23 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 		modelListener = new DuplicateSelectionTableModelListener();
 		model.addTableModelListener(modelListener);
 
-		featureSorter = new TableRowSorter<DuplicateSelectionTableModel>(model);
+		featureSorter = new TableRowSorter<DuplicateSelectionTableModel>(
+				(DuplicateSelectionTableModel)model);
 		setRowSorter(featureSorter);
-		featureSorter.setComparator(model.getColumnIndex(DuplicateSelectionTableModel.FEATURE_COLUMN),
+		featureSorter.setComparator(
+				model.getColumnIndex(DuplicateSelectionTableModel.FEATURE_COLUMN),
 				new MsFeatureComparator(SortProperty.Name, SortDirection.ASC));
-
-		chmodRenderer = new AdductRenderer();
-
+		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		columnModel.getColumnById(DuplicateSelectionTableModel.ID_COLUMN)
 				.setCellRenderer(radioRenderer);
 		columnModel.getColumnById(DuplicateSelectionTableModel.ID_COLUMN)
 				.setCellEditor(radioEditor);
-		columnModel.getColumnById(DuplicateSelectionTableModel.DATA_COLUMN)
-				.setCellRenderer(radioRenderer);
-		columnModel.getColumnById(DuplicateSelectionTableModel.DATA_COLUMN)
-				.setCellEditor(radioEditor);
+//		columnModel.getColumnById(DuplicateSelectionTableModel.DATA_COLUMN)
+//				.setCellRenderer(radioRenderer);
+//		columnModel.getColumnById(DuplicateSelectionTableModel.DATA_COLUMN)
+//				.setCellEditor(radioEditor);
 		columnModel.getColumnById(DuplicateSelectionTableModel.FEATURE_COLUMN)
 			.setCellRenderer(cfRenderer);
 		columnModel.getColumnById(DuplicateSelectionTableModel.SCORE_COLUMN)
@@ -103,10 +102,10 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 		columnModel.getColumnById(DuplicateSelectionTableModel.SAMPLE_FREQUENCY_COLUMN)
 				.setCellRenderer(pieChartFrequencyRenderer);
 
-		addColumnSelectorPopup();
-
-		tca = new TableColumnAdjuster(this);
-		tca.adjustColumns();
+		columnModel.getColumnById(DuplicateSelectionTableModel.ID_COLUMN).setWidth(50);
+		fixedWidthColumns.add(model.getColumnIndex(DuplicateSelectionTableModel.ID_COLUMN));	
+		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		finalizeLayout();
 	}
 
 	private class DuplicateSelectionTableModelListener implements TableModelListener {
@@ -126,25 +125,25 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 					activeCluster.setPrimaryFeature(selectedFeature);
 
 				model.removeTableModelListener(modelListener);
-				model.reloadData();
+				((DuplicateSelectionTableModel)model).reloadData();
 				model.addTableModelListener(modelListener);
 			}
-			if (col == model.getColumnIndex(DuplicateSelectionTableModel.DATA_COLUMN)) {
-
-				if((boolean) model.getValueAt(row, col)) {
-
-					for(MsFeature f : activeCluster.getFeatures()) {
-
-						if(f.equals(selectedFeature))
-							activeCluster.setFeatureEnabled(f, true);
-						else
-							activeCluster.setFeatureEnabled(f, false);
-					}
-				}
-				model.removeTableModelListener(modelListener);
-				model.reloadData();
-				model.addTableModelListener(modelListener);
-			}
+//			if (col == model.getColumnIndex(DuplicateSelectionTableModel.DATA_COLUMN)) {
+//
+//				if((boolean) model.getValueAt(row, col)) {
+//
+//					for(MsFeature f : activeCluster.getFeatures()) {
+//
+//						if(f.equals(selectedFeature))
+//							activeCluster.setFeatureEnabled(f, true);
+//						else
+//							activeCluster.setFeatureEnabled(f, false);
+//					}
+//				}
+//				model.removeTableModelListener(modelListener);
+//				((DuplicateSelectionTableModel)model).reloadData();
+//				model.addTableModelListener(modelListener);
+//			}
 		}
 	}
 
@@ -178,14 +177,8 @@ public class DuplicateSelectionTable extends FeatureSelectionTable {
 		activeCluster = featureCluster;
 		model.removeTableModelListener(modelListener);
 		setrendererReferences(activeCluster.getFeatures());
-		model.setTableModelFromFeatureCluster(activeCluster);
-		tca.adjustColumns();
-
-		columnModel.getColumnById(DuplicateSelectionTableModel.POOLED_MEAN_COLUMN)
-				.setPreferredWidth(preferredWidth);
-		columnModel.getColumnById(DuplicateSelectionTableModel.SAMPLE_MEAN_COLUMN)
-				.setPreferredWidth(preferredWidth);
-
+		((DuplicateSelectionTableModel)model).setTableModelFromFeatureCluster(activeCluster);
+		adjustColumns();
 		model.addTableModelListener(modelListener);
 	}
 

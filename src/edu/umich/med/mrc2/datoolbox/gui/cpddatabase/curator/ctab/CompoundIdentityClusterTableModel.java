@@ -44,19 +44,17 @@ public class CompoundIdentityClusterTableModel extends BasicTableModel {
 	public static final String FORMULA_COLUMN = "Formula";
 	public static final String MASS_COLUMN = "Monoisotopic mass";
 	public static final String CHARGE_COLUMN = "Charge";
-
-
 	
 	public CompoundIdentityClusterTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(PRIMARY_COLUMN, Boolean.class, true),
-			new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
-			new ColumnContext(DATABASE_COLUMN, String.class, false),
-			new ColumnContext(ID_COLUMN, CompoundIdentity.class, false),			
-			new ColumnContext(FORMULA_COLUMN, String.class, false),
-			new ColumnContext(MASS_COLUMN, Double.class, false),
-			new ColumnContext(CHARGE_COLUMN, String.class, false)
+			new ColumnContext(PRIMARY_COLUMN, PRIMARY_COLUMN, Boolean.class, true),
+			new ColumnContext(COMPOUND_NAME_COLUMN, "Compound name", String.class, false),
+			new ColumnContext(DATABASE_COLUMN, "Source database", String.class, false),
+			new ColumnContext(ID_COLUMN, "Source database accession and web link", CompoundIdentity.class, false),			
+			new ColumnContext(FORMULA_COLUMN, FORMULA_COLUMN, String.class, false),
+			new ColumnContext(MASS_COLUMN, "Monoisotopic mass", Double.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, String.class, false)
 		};
 	}
 

@@ -38,8 +38,8 @@ public class PropertiesTableModel extends BasicTableModel {
 	public PropertiesTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(PROPERTY_COLUMN, Object.class, false),
-			new ColumnContext(VALUE_COLUMN, Object.class, false)
+			new ColumnContext(PROPERTY_COLUMN, PROPERTY_COLUMN, Object.class, false),
+			new ColumnContext(VALUE_COLUMN, VALUE_COLUMN, Object.class, false)
 		};
 	}
 

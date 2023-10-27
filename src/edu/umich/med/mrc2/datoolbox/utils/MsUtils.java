@@ -1384,6 +1384,7 @@ public class MsUtils {
 	 * @return pattern recognition entropy
 	 * Based on paper
 	 * https://www.sciencedirect.com/science/article/pii/S0021967318304758
+	 * "Pattern recognition entropy"
 	 */
 	public static double calculateSpectrumEntropy(Collection<MsPoint>spectrum) {
 		

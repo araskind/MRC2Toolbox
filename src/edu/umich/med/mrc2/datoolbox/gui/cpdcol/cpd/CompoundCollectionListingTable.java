@@ -42,9 +42,6 @@ public class CompoundCollectionListingTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = -3817580957098149548L;
 
-	private CompoundCollectionListingTableModel model;
-	private MouseMotionAdapter mma;
-
 	public CompoundCollectionListingTable() {
 
 		super();
@@ -53,11 +50,12 @@ public class CompoundCollectionListingTable extends BasicTable {
 		setModel(model);
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<CompoundCollectionListingTableModel>(model);
+		rowSorter = new TableRowSorter<CompoundCollectionListingTableModel>(
+				(CompoundCollectionListingTableModel)model);
 		setRowSorter(rowSorter);
 
 		//	URL adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -83,9 +81,10 @@ public class CompoundCollectionListingTable extends BasicTable {
 			Collection<CompoundCollection> compoundCollections) {
 
 		thf.setTable(null);
-		model.setTableModelFromCompoundCollections(compoundCollections);
+		((CompoundCollectionListingTableModel)model).
+			setTableModelFromCompoundCollections(compoundCollections);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public CompoundCollection getSelectedCompoundCollection() {

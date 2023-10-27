@@ -38,15 +38,15 @@ public class BinnerNeutralMassDifferenceTableModel extends BasicTableModel {
 
 	public static final String NAME_COLUMN = "Name";
 	public static final String NORMALIZED_NAME_COLUMN = "Normalized name";	
-	public static final String MASS_DIFFERENCE_COLUMN = "Mass difference";
+	public static final String MASS_DIFFERENCE_COLUMN = '\u0394' + " mass";
 
 	public BinnerNeutralMassDifferenceTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(NAME_COLUMN, BinnerNeutralMassDifference.class, false),
-			new ColumnContext(NORMALIZED_NAME_COLUMN, String.class, false),
-			new ColumnContext(MASS_DIFFERENCE_COLUMN, Double.class, false)
+			new ColumnContext(NAME_COLUMN, NAME_COLUMN, BinnerNeutralMassDifference.class, false),
+			new ColumnContext(NORMALIZED_NAME_COLUMN, NORMALIZED_NAME_COLUMN, String.class, false),
+			new ColumnContext(MASS_DIFFERENCE_COLUMN, "Mass difference", Double.class, false)
 		};
 	}
 

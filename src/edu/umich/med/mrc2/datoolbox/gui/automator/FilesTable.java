@@ -39,13 +39,12 @@ public class FilesTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -5022129546919771647L;
-	private FilesTableModel model;
 
 	public FilesTable() {
 		super();
 		model = new FilesTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<FilesTableModel>(model);
+		rowSorter = new TableRowSorter<FilesTableModel>((FilesTableModel)model);
 		setRowSorter(rowSorter);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		columnModel.getColumnById(FilesTableModel.FILES_COLUMN).setCellRenderer(new FileRenderer());
@@ -55,9 +54,9 @@ public class FilesTable extends BasicTable {
 
 	public void setTableModelFromFileCollection(Collection<File> files) {
 		thf.setTable(null);;
-		model.setTableModelFromAssayCollection(files);
+		((FilesTableModel)model).setTableModelFromFileCollection(files);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public File getSelectedFile() {

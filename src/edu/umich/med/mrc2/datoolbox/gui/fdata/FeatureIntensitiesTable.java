@@ -50,7 +50,6 @@ public class FeatureIntensitiesTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1435205828153798672L;
-	private FeatureIntensitiesTableModel model;
 	private DataFileCellRenderer fileRenderer;
 	private DecimalAlignRenderer lefttRenderer;
 
@@ -61,7 +60,8 @@ public class FeatureIntensitiesTable extends BasicTable {
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		model = new FeatureIntensitiesTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<FeatureIntensitiesTableModel>(model);
+		rowSorter = new TableRowSorter<FeatureIntensitiesTableModel>(
+				(FeatureIntensitiesTableModel)model);
 		setRowSorter(rowSorter);
 		
 		rowSorter.setComparator(model.getColumnIndex(FeatureIntensitiesTableModel.MS_FEATURE_COLUMN),
@@ -87,18 +87,18 @@ public class FeatureIntensitiesTable extends BasicTable {
 				MsFeature feature, DataPipeline dataPipeline) {
 
 		thf.setTable(null);
-		model.setTableModelFromFeatureAndPipeline(feature, dataPipeline);
+		((FeatureIntensitiesTableModel)model).setTableModelFromFeatureAndPipeline(feature, dataPipeline);
 		thf.setTable(this);
 		sortByFeatureAndSample();		
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public void setTableModelFromFeatureMap(
 			Map<DataPipeline, Collection<MsFeature>> selectedFeaturesMap) {
 		thf.setTable(null);
-		model.setTableModelFromFeatureMap(selectedFeaturesMap);
+		((FeatureIntensitiesTableModel)model).setTableModelFromFeatureMap(selectedFeaturesMap);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public void sortByFeatureAndSample() {

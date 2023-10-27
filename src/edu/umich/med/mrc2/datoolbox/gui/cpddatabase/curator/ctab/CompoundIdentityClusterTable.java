@@ -25,7 +25,6 @@ import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.util.Collections;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelListener;
@@ -51,7 +50,6 @@ public class CompoundIdentityClusterTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = 4196101350391353613L;
 	
-	private CompoundIdentityClusterTableModel model;
 	private CompoundIdentityCluster activeCluster;
 	private TableModelListener defaultIdTableModelListener;
 
@@ -61,7 +59,8 @@ public class CompoundIdentityClusterTable extends BasicTable {
 		setModel(model);
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<CompoundIdentityClusterTableModel>(model);
+		rowSorter = new TableRowSorter<CompoundIdentityClusterTableModel>(
+				(CompoundIdentityClusterTableModel)model);
 		setRowSorter(rowSorter);
 		
 		columnModel.getColumnById(CompoundIdentityClusterTableModel.PRIMARY_COLUMN)
@@ -103,6 +102,7 @@ public class CompoundIdentityClusterTable extends BasicTable {
 				new CompoundIdentityComparator(SortProperty.ID));
 		columnModel.getColumnById(CompoundIdentityClusterTableModel.PRIMARY_COLUMN).setWidth(50);
 		columnModel.getColumnById(CompoundIdentityClusterTableModel.COMPOUND_NAME_COLUMN).setMinWidth(250);
+		fixedWidthColumns.add(model.getColumnIndex(CompoundIdentityClusterTableModel.PRIMARY_COLUMN));
 		finalizeLayout();
 	}
 	
@@ -110,12 +110,10 @@ public class CompoundIdentityClusterTable extends BasicTable {
 		
 		removeModelListeners();
 		thf.setTable(null);
-		model.setModelFromCompoundIdentityCluster(cluster);
+		((CompoundIdentityClusterTableModel)model).setModelFromCompoundIdentityCluster(cluster);
 		activeCluster = cluster;
-		tca.adjustColumnsExcluding(Collections.singleton(
-				columnModel.getColumnIndex(CompoundIdentityClusterTableModel.PRIMARY_COLUMN)));
-		columnModel.getColumnById(CompoundIdentityClusterTableModel.COMPOUND_NAME_COLUMN).setMinWidth(250);
 		thf.setTable(this);
+		adjustColumns();		
 		addModelListeners();
 	}
 	

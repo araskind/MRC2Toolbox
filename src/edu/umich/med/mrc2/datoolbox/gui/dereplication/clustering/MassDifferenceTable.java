@@ -48,14 +48,14 @@ public class MassDifferenceTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 3341027440098202037L;
-	private MassDifferenceTableModel model;
 
 	public MassDifferenceTable() {
 
 		super();
 		model = new MassDifferenceTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MassDifferenceTableModel>(model);
+		rowSorter = new TableRowSorter<MassDifferenceTableModel>(
+				(MassDifferenceTableModel)model);
 		setRowSorter(rowSorter);	
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -84,18 +84,18 @@ public class MassDifferenceTable extends BasicTable {
 			MsFeatureCluster selectedCluster) {
 
 		thf.setTable(null);
-		model.setTableModelFromFeatureCluster(selectedCluster);
+		((MassDifferenceTableModel)model).setTableModelFromFeatureCluster(selectedCluster);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public void setTableModelFromFeatures(
 			Collection<MsFeature> selectedFeatures, MsFeatureCluster activeCluster) {
 
 		thf.setTable(null);
-		model.setTableModelFromFeatures(selectedFeatures, activeCluster);
+		((MassDifferenceTableModel)model).setTableModelFromFeatures(selectedFeatures, activeCluster);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public Collection<MsFeature>getSelectedFeatures() {

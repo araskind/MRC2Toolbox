@@ -41,14 +41,14 @@ public class ExperimentReferenceSampleTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5200794508214563011L;
-	private ExperimentReferenceSampleTableModel model;
 
 	public ExperimentReferenceSampleTable() {
 
 		super();
 		model =  new ExperimentReferenceSampleTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ExperimentReferenceSampleTableModel>(model);
+		rowSorter = new TableRowSorter<ExperimentReferenceSampleTableModel>(
+				(ExperimentReferenceSampleTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -61,9 +61,9 @@ public class ExperimentReferenceSampleTable extends BasicTable {
 
 	public void loadReferenceSamples(ExperimentDesign design) {
 		thf.setTable(null);
-		model.loadReferenceSamples(design);
+		((ExperimentReferenceSampleTableModel)model).loadReferenceSamples(design);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public Collection<ExperimentalSample> getSelectedSamples() {

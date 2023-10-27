@@ -34,7 +34,6 @@ public class FactorEditorTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 6616085176709256386L;
-	private FactorEditorTableModel model;
 	private ExperimentDesignSubset activeDesignSubset;
 
 	public FactorEditorTable() {
@@ -52,14 +51,14 @@ public class FactorEditorTable extends BasicTable {
 	}
 
 	public void setEditingAllowed(boolean allowEdit) {
-		model.setEditingAllowed(allowEdit);
+		((FactorEditorTableModel)model).setEditingAllowed(allowEdit);
 	}
 
 	public void setTableModelFromDesignSubset(ExperimentDesignSubset designSubset) {
 
 		activeDesignSubset = designSubset;
-		model.setTableModelFromDesignSubset(activeDesignSubset);
-		tca.adjustColumns();
+		((FactorEditorTableModel)model).setTableModelFromDesignSubset(activeDesignSubset);
+		adjustColumns();
 	}
 
 	public ExperimentDesignFactor getSelectedFactor() {
@@ -95,24 +94,8 @@ public class FactorEditorTable extends BasicTable {
 		ExperimentDesignFactor selectedFactor = getSelectedFactor();
 
 		if(selectedFactor != null) {
-/*
-			boolean isEnabled = (boolean) this.getValueAt(this.getSelectedRow(),
-					this.getColumnIndex(FactorEditorTableModel.ACTIVE_COLUMN));
 
-			if(isEnabled)
-				activeDesignSubset.addFactor(selectedFactor);
-			else {
-
-				if(activeDesignSubset.getOrderedDesign().size() > 1)
-					activeDesignSubset.removeFactor(selectedFactor);
-				else {
-					this.setValueAt(true, this.getSelectedRow(),
-							this.getColumnIndex(FactorEditorTableModel.ACTIVE_COLUMN));
-					MessageDialogue.showErrorMsg("Disabling the only factor in design subset not allowed!");
-					return;
-				}
-			}*/
-			model.setTableModelFromDesignSubset(activeDesignSubset);
+			((FactorEditorTableModel)model).setTableModelFromDesignSubset(activeDesignSubset);
 			highlightFactor(selectedFactor);
 		}
 	}

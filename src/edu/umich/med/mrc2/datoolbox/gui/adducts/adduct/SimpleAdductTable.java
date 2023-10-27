@@ -39,7 +39,6 @@ public class SimpleAdductTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 1511489263877797538L;
-	private SimpleAdductTableModel model;
 
 	public SimpleAdductTable() {
 
@@ -47,7 +46,8 @@ public class SimpleAdductTable extends BasicTable {
 		model = new SimpleAdductTableModel();
 		setModel(model);
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<SimpleAdductTableModel>(model);
+		rowSorter = new TableRowSorter<SimpleAdductTableModel>(
+				(SimpleAdductTableModel)model);
 		setRowSorter(rowSorter);
 		setDefaultRenderer(Adduct.class, new AdductRenderer());
 
@@ -79,9 +79,9 @@ public class SimpleAdductTable extends BasicTable {
 	
 	public void setTableModelFromAdductList(Collection<Adduct> adducts) {
 		thf.setTable(null);
-		model.setTableModelFromAdductList(adducts);
+		((SimpleAdductTableModel)model).setTableModelFromAdductList(adducts);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void selectAdduct(Adduct toSelect) {

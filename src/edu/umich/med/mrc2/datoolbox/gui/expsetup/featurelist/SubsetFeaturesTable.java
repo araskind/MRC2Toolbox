@@ -44,14 +44,14 @@ public class SubsetFeaturesTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 6510383188876035906L;
-	private SubsetFeaturesTableModel model;
 
 	public SubsetFeaturesTable() {
 
 		super();
 		model = new SubsetFeaturesTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<SubsetFeaturesTableModel>(model);
+		rowSorter = new TableRowSorter<SubsetFeaturesTableModel>(
+				(SubsetFeaturesTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(columnModel.getColumnIndex(SubsetFeaturesTableModel.MS_FEATURE_COLUMN),
 				new MsFeatureComparator(SortProperty.Name, SortDirection.ASC));
@@ -61,7 +61,7 @@ public class SubsetFeaturesTable extends BasicTable {
 		cfRenderer = new MsFeatureRenderer(SortProperty.Name);
 		columnModel.getColumnById(SubsetFeaturesTableModel.MS_FEATURE_COLUMN)
 				.setCellRenderer(cfRenderer);
-		columnModel.getColumnById(SubsetFeaturesTableModel.ORDER_COLUMN).setMaxWidth(50);
+		columnModel.getColumnById(SubsetFeaturesTableModel.ORDER_COLUMN).setWidth(50);
 		fixedWidthColumns.add(
 				columnModel.getColumnIndex(SubsetFeaturesTableModel.ORDER_COLUMN));
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
@@ -71,9 +71,9 @@ public class SubsetFeaturesTable extends BasicTable {
 	public void setTableModelFromFeatureSet(MsFeatureSet featureSet) {
 
 		thf.setTable(null);
-		model.setTableModelFromFeatureSet(featureSet);
+		((SubsetFeaturesTableModel)model).setTableModelFromFeatureSet(featureSet);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 	
 	public void addFeatures(Collection<MsFeature> features) {
@@ -87,16 +87,16 @@ public class SubsetFeaturesTable extends BasicTable {
 		
 		current.addAll(toAdd);
 		
-		model.setTableModelFromFeatures(current);
+		((SubsetFeaturesTableModel)model).setTableModelFromFeatures(current);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 	
 	public void setTableModelFromFeatures(Collection<MsFeature> features) {
 		thf.setTable(null);
-		model.setTableModelFromFeatures(features);
+		((SubsetFeaturesTableModel)model).setTableModelFromFeatures(features);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 	
 	public Collection<MsFeature> getAllFeatures() {

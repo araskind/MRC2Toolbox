@@ -138,41 +138,42 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 	public UniversalIdentificationResultsTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DEFAULT_ID_COLUMN, Boolean.class, true),
-			new ColumnContext(ID_LEVEL_COLUMN, MSFeatureIdentificationLevel.class, false),
-			new ColumnContext(IDENTIFICATION_COLUMN, MsFeatureIdentity.class, false),
-			new ColumnContext(COMPOUND_ID_COLUMN, CompoundIdentity.class, false),
-			new ColumnContext(FORMULA_COLUMN, String.class, false),
-			new ColumnContext(NEUTRAL_MASS_COLUMN, Double.class, false),
-			new ColumnContext(ID_SOURCE_COLUMN, CompoundIdSource.class, false),
-			new ColumnContext(ID_CONFIDENCE_COLUMN, CompoundIdentificationConfidence.class, false),			
-			new ColumnContext(ID_SCORE_COLUMN, Double.class, false),	//	Also LIB_SCORE_COLUMN
-			new ColumnContext(ENTROPY_BASED_SCORE_COLUMN, Double.class, false),
+			new ColumnContext(DEFAULT_ID_COLUMN, "Default identification", Boolean.class, true),
+			new ColumnContext(ID_LEVEL_COLUMN, "Identification level", MSFeatureIdentificationLevel.class, false),
+			new ColumnContext(IDENTIFICATION_COLUMN, "Compound name", MsFeatureIdentity.class, false),
+			new ColumnContext(COMPOUND_ID_COLUMN, 
+					"Primary database accession and web link to the source database",CompoundIdentity.class, false),
+			new ColumnContext(FORMULA_COLUMN, FORMULA_COLUMN, String.class, false),
+			new ColumnContext(NEUTRAL_MASS_COLUMN, "Monoisotopic neutral mass", Double.class, false),
+			new ColumnContext(ID_SOURCE_COLUMN, "Identification source", CompoundIdSource.class, false),
+			new ColumnContext(ID_CONFIDENCE_COLUMN, "Identification confidence level", CompoundIdentificationConfidence.class, false),			
+			new ColumnContext(ID_SCORE_COLUMN, "Score", Double.class, false),	//	Also LIB_SCORE_COLUMN
+			new ColumnContext(ENTROPY_BASED_SCORE_COLUMN, "Entropy based MSMS match score", Double.class, false),
 			//	MS1/RT library match
-			new ColumnContext(MASS_ERROR_COLUMN, Double.class, false),
-			new ColumnContext(RETENTION_ERROR_COLUMN, Double.class, false),
-			new ColumnContext(BEST_MATCH_ADDUCT_COLUMN, Adduct.class, false),
-			new ColumnContext(MSRT_LIB_COLUMN, CompoundLibrary.class, false),	//	TODO replace by library class?
+			new ColumnContext(MASS_ERROR_COLUMN, "Mass error relative to calculated value, ppm", Double.class, false),
+			new ColumnContext(RETENTION_ERROR_COLUMN, "Retention time error relative to library RT", Double.class, false),
+			new ColumnContext(BEST_MATCH_ADDUCT_COLUMN, "Best match adduct", Adduct.class, false),
+			new ColumnContext(MSRT_LIB_COLUMN, "MS/RT compound library name", CompoundLibrary.class, false),	//	TODO replace by library class?
 			//	MSMS library match						
-			new ColumnContext(MSMS_MATCH_TYPE_COLUMN, ReferenceMsMsLibraryMatch.class, false),
-			new ColumnContext(PARENT_MZ_COLUMN, Double.class, false),
-			new ColumnContext(MSMS_LIB_COLUMN, ReferenceMsMsLibrary.class, false),
-			new ColumnContext(COLLISION_ENERGY_COLUMN, String.class, false),
-			new ColumnContext(FWD_SCORE_COLUMN, Double.class, false),
-			new ColumnContext(REV_SCORE_COLUMN, Double.class, false),
-			new ColumnContext(PROBABILITY_COLUMN, Double.class, false),
-			new ColumnContext(DOT_PRODUCT_COLUMN, Double.class, false),			
-			new ColumnContext(REVERSE_DOT_PRODUCT_COLUMN, Double.class, false),
-			new ColumnContext(HYBRID_DOT_PRODUCT_COLUMN, Double.class, false),
-			new ColumnContext(HYBRID_SCORE_COLUMN, Double.class, false),
-			new ColumnContext(HYBRID_DELTA_MZ_COLUMN, Double.class, false),	
-			new ColumnContext(SPECTRUM_ENTROPY_COLUMN, Double.class, false),
+			new ColumnContext(MSMS_MATCH_TYPE_COLUMN, "MSMS matching type", ReferenceMsMsLibraryMatch.class, false),
+			new ColumnContext(PARENT_MZ_COLUMN, "MSMS precursor M/Z", Double.class, false),
+			new ColumnContext(MSMS_LIB_COLUMN, "Reference MSMS library name", ReferenceMsMsLibrary.class, false),
+			new ColumnContext(COLLISION_ENERGY_COLUMN, "MSMS collision energy", String.class, false),
+			new ColumnContext(FWD_SCORE_COLUMN, "MSMS forward match score", Double.class, false),
+			new ColumnContext(REV_SCORE_COLUMN, "MSMS reverse match score", Double.class, false),
+			new ColumnContext(PROBABILITY_COLUMN, "MSMS match probability", Double.class, false),
+			new ColumnContext(DOT_PRODUCT_COLUMN, "MSMS forward match dot-product", Double.class, false),			
+			new ColumnContext(REVERSE_DOT_PRODUCT_COLUMN, "MSMS reverse match dot-product", Double.class, false),
+			new ColumnContext(HYBRID_DOT_PRODUCT_COLUMN, "MSMS hybrid match dot-product", Double.class, false),
+			new ColumnContext(HYBRID_SCORE_COLUMN, "MSMS hybrid match score", Double.class, false),
+			new ColumnContext(HYBRID_DELTA_MZ_COLUMN, "MSMS hybrid match M/Z shift", Double.class, false),	
+			new ColumnContext(SPECTRUM_ENTROPY_COLUMN, "MSMS Pattern recognition entropy", Double.class, false),
 			//	FDR estimation
-			new ColumnContext(Q_VALUE_COLUMN, Double.class, false),
-			new ColumnContext(POSTERIOR_PROBABILITY_COLUMN, Double.class, false),
-			new ColumnContext(PERCOLATOR_SCORE_COLUMN, Double.class, false),
+			new ColumnContext(Q_VALUE_COLUMN, "Q-value (false discovery rate estimation)", Double.class, false),
+			new ColumnContext(POSTERIOR_PROBABILITY_COLUMN,  "Posterior probability (false discovery rate estimation)", Double.class, false),
+			new ColumnContext(PERCOLATOR_SCORE_COLUMN,  "Percollator score (false discovery rate estimation)", Double.class, false),
 			
-			new ColumnContext(QC_COLUMN, Boolean.class, false),
+			new ColumnContext(QC_COLUMN, "QC reference", Boolean.class, false),
 		};
 	}
 

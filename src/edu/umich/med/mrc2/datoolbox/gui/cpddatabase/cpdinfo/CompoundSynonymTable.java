@@ -30,7 +30,6 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.CompoundNameSet;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableLayoutListener;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
@@ -43,7 +42,6 @@ public class CompoundSynonymTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -7302585893077525162L;
-	private CompoundSynonymTableModel model;
 	private CompoundNameSet currentNameSet;
 	private SynonymTableModelListener modelListener;
 
@@ -52,36 +50,26 @@ public class CompoundSynonymTable extends BasicTable {
 
 		model = new CompoundSynonymTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<CompoundSynonymTableModel>(model);
+		rowSorter = new TableRowSorter<CompoundSynonymTableModel>(
+				(CompoundSynonymTableModel)model);
 		setRowSorter(rowSorter);
-
-		radioRenderer = new RadioButtonRenderer();
-		radioEditor = new RadioButtonEditor(new JCheckBox());
-		radioEditor.addCellEditorListener(this);
-		
 		TableColumn defaultColumn = 
 				columnModel.getColumnById(CompoundSynonymTableModel.DEFAULT_COLUMN);
 		defaultColumn.setCellRenderer(new RadioButtonRenderer());
 		defaultColumn.setCellEditor(new RadioButtonEditor(new JCheckBox()));
-		defaultColumn.setMaxWidth(70);
-		
+		defaultColumn.setWidth(70);
+		fixedWidthColumns.add(model.getColumnIndex(CompoundSynonymTableModel.DEFAULT_COLUMN));
 		columnModel.getColumnById(CompoundSynonymTableModel.SYNONYM_COLUMN).
 				setCellRenderer(new WordWrapCellRenderer());
-		
-//		columnModel.getColumnById(CompoundSynonymTableModel.DEFAULT_COLUMN)
-//			.setCellRenderer(radioRenderer); // Primary name
-//		columnModel.getColumnById(CompoundSynonymTableModel.DEFAULT_COLUMN)
-//			.setCellEditor(radioEditor);
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-		loadSavedLayout();
-		tll = new TableLayoutListener(this);
-		
-		//	finalizeLayout();
+//		loadSavedLayout();
+//		tll = new TableLayoutListener(this);
+		finalizeLayout();
 	}
 	
 	public void disableEditing() {
-		model.disableEditing();
+		((CompoundSynonymTableModel)model).disableEditing();
 	}
 
 	@Override
@@ -99,10 +87,10 @@ public class CompoundSynonymTable extends BasicTable {
 		thf.setTable(null);
 		model.removeTableModelListener(modelListener);
 		currentNameSet = nameSet;
-		model.setModelFromCompoundNameSet(nameSet);
-		columnModel.getColumnById(CompoundSynonymTableModel.DEFAULT_COLUMN).setMaxWidth(70);
+		((CompoundSynonymTableModel)model).setModelFromCompoundNameSet(currentNameSet);		
 		model.addTableModelListener(modelListener);
 		thf.setTable(this);
+		adjustColumns();
 	}
 
 	public Map<String, Boolean> getSelectedNames() {

@@ -52,7 +52,6 @@ public class MsMsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5088486364694169431L;
-	private MsMsTableModel model;
 	private TandemMassSpectrum currentMsms;
 	private IScan currentScan;
 
@@ -61,7 +60,7 @@ public class MsMsTable extends BasicTable {
 		super();
 		model = new MsMsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MsMsTableModel>(model);
+		rowSorter = new TableRowSorter<MsMsTableModel>((MsMsTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -89,26 +88,27 @@ public class MsMsTable extends BasicTable {
 	public void setTableModelFromTandemMs(TandemMassSpectrum msms) {
 
 		thf.setTable(null);
-		model.setTableModelFromTandemMs(msms);
+		((MsMsTableModel)model).setTableModelFromTandemMs(msms);
 		thf.setTable(this);
-		tca.adjustColumns();	
+		adjustColumns();	
 		currentMsms = msms;
 		currentScan = null;
 	}
 
 	public void setTableModelFromScan(IScan scan) {
 		thf.setTable(null);
-		model.setTableModelFromScan(scan);
+		((MsMsTableModel)model).setTableModelFromScan(scan);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 		currentMsms = null;
 		currentScan = scan;
 	}
 	
 	public void setTableModelFromDataPoints(Collection<MsPoint> points, MsPoint parent) {
 		thf.setTable(null);
-		model.setTableModelFromDataPoints(points, parent);
+		((MsMsTableModel)model).setTableModelFromDataPoints(points, parent);
 		thf.setTable(this);
+		adjustColumns();
 		currentMsms = null;
 		currentScan = null;
 	}

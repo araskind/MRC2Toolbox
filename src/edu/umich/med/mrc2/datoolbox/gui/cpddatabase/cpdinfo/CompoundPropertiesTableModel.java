@@ -21,11 +21,10 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.cpddatabase.cpdinfo;
 
-import javax.swing.table.DefaultTableModel;
-
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-public class CompoundPropertiesTableModel extends DefaultTableModel {
+public class CompoundPropertiesTableModel extends BasicTableModel {
 
 	/**
 	 * 
@@ -38,41 +37,8 @@ public class CompoundPropertiesTableModel extends DefaultTableModel {
 
 	private static final ColumnContext[] columnArray = new ColumnContext[] {
 
-			new ColumnContext(PROPERTY_COLUMN, String.class, false), 
-			new ColumnContext(VALUE_COLUMN, String.class, false),
-			new ColumnContext(VALUE_TYPE_COLUMN, String.class, false)
+			new ColumnContext(PROPERTY_COLUMN, PROPERTY_COLUMN, String.class, false), 
+			new ColumnContext(VALUE_COLUMN, VALUE_COLUMN, String.class, false),
+			new ColumnContext(VALUE_TYPE_COLUMN, VALUE_TYPE_COLUMN, String.class, false)
 	};
-	
-	@Override
-	public Class<?> getColumnClass(int modelIndex) {
-		return columnArray[modelIndex].columnClass;
-	}
-
-	@Override
-	public int getColumnCount() {
-		return columnArray.length;
-	}
-	
-	public int getColumnIdex(String columnName) {
-
-		int index = -1;
-
-		for (int i = 0; i < columnArray.length; i++) {
-
-			if (columnName.equalsIgnoreCase(columnArray[i].columnName))
-				index = i;
-		}
-		return index;
-	}
-
-	@Override
-	public String getColumnName(int modelIndex) {
-		return columnArray[modelIndex].columnName;
-	}
-
-	@Override
-	public boolean isCellEditable(int row, int col) {
-		return columnArray[col].isEditable;
-	}
-
 }

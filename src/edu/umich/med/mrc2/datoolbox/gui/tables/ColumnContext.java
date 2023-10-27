@@ -24,12 +24,18 @@ package edu.umich.med.mrc2.datoolbox.gui.tables;
 public class ColumnContext {
 
 	public final String columnName;
+	public final String columnTooltip;
 	public final Class columnClass;
 	public final boolean isEditable;
 
-	public ColumnContext(String columnName, Class columnClass, boolean isEditable) {
+	public ColumnContext(
+			String columnName, 
+			String columnTooltip,			
+			Class columnClass, 
+			boolean isEditable) {
 
 		this.columnName = columnName;
+		this.columnTooltip = columnTooltip;
 		this.columnClass = columnClass;
 		this.isEditable = isEditable;
 	}

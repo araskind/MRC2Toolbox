@@ -33,22 +33,22 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AdductRenderer;
 
-public class SimpleNeutraModificationTable extends BasicTable {
+public class SimpleNeutralModificationTable extends BasicTable {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1511489263877797538L;
-	private SimpleNeutralModificationTableModel model;
 
-	public SimpleNeutraModificationTable() {
+	public SimpleNeutralModificationTable() {
 
 		super();
 		model = new SimpleNeutralModificationTableModel();
 		setModel(model);
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
-		rowSorter = new TableRowSorter<SimpleNeutralModificationTableModel>(model);
+		rowSorter = new TableRowSorter<SimpleNeutralModificationTableModel>(
+				(SimpleNeutralModificationTableModel)model);
 		setRowSorter(rowSorter);
 		setDefaultRenderer(Adduct.class, new AdductRenderer());
 
@@ -68,8 +68,8 @@ public class SimpleNeutraModificationTable extends BasicTable {
 
 	public void setTableModelFromAdductList(Collection<Adduct> adducts) {
 		thf.setTable(null);
-		model.setTableModelFromAdductList(adducts);
+		((SimpleNeutralModificationTableModel)model).setTableModelFromAdductList(adducts);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 }

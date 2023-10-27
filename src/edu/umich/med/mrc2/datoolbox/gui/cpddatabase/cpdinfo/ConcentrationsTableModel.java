@@ -50,15 +50,15 @@ public class ConcentrationsTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-				new ColumnContext(LOCATION_COLUMN, String.class, false), 
-				new ColumnContext(CONCENTRATION_COLUMN, String.class, false), 
-				new ColumnContext(UNITS_COLUMN, String.class, false), 
-				new ColumnContext(HEALTH_STATUS_COLUMN, String.class, false), 	
-				new ColumnContext(COMMENTS_COLUMN, String.class, false), 
-				new ColumnContext(AGE_COLUMN, String.class, false), 
-				new ColumnContext(SEX_COLUMN, String.class, false), 
-				new ColumnContext(FLAG_COLUMN, String.class, false), 
-				new ColumnContext(TYPE_COLUMN, String.class, false), 			
+				new ColumnContext(LOCATION_COLUMN, "Biolocation", String.class, false), 
+				new ColumnContext(CONCENTRATION_COLUMN, CONCENTRATION_COLUMN, String.class, false), 
+				new ColumnContext(UNITS_COLUMN, "Measurement units", String.class, false), 
+				new ColumnContext(HEALTH_STATUS_COLUMN, HEALTH_STATUS_COLUMN, String.class, false), 	
+				new ColumnContext(COMMENTS_COLUMN, COMMENTS_COLUMN, String.class, false), 
+				new ColumnContext(AGE_COLUMN, AGE_COLUMN, String.class, false), 
+				new ColumnContext(SEX_COLUMN, SEX_COLUMN, String.class, false), 
+				new ColumnContext(FLAG_COLUMN, FLAG_COLUMN, String.class, false), 
+				new ColumnContext(TYPE_COLUMN, TYPE_COLUMN, String.class, false), 			
 		};
 	}
 

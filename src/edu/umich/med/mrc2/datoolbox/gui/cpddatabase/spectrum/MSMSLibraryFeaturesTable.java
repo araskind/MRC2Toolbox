@@ -41,12 +41,12 @@ public class MSMSLibraryFeaturesTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -8853294038580302429L;
-	private MSMSLibraryFeaturesTableModel model;
 	public MSMSLibraryFeaturesTable() {
 		super();
 		model = new MSMSLibraryFeaturesTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MSMSLibraryFeaturesTableModel>(model);
+		rowSorter = new TableRowSorter<MSMSLibraryFeaturesTableModel>(
+				(MSMSLibraryFeaturesTableModel)model);
 		setRowSorter(rowSorter);
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -66,9 +66,9 @@ public class MSMSLibraryFeaturesTable extends BasicTable {
 	public void setTableModelFromLibraryFeatureCollection(Collection<MsMsLibraryFeature>libraryFeatures) {
 
 		thf.setTable(null);
-		model.setTableModelFromLibraryFeatureCollection(libraryFeatures);
+		((MSMSLibraryFeaturesTableModel)model).setTableModelFromLibraryFeatureCollection(libraryFeatures);
 		thf.setTable(this);
-		tca.adjustColumns();		
+		adjustColumns();		
 	}
 
 	public MsMsLibraryFeature getSelectedFeature() {

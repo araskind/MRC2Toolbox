@@ -41,7 +41,6 @@ public class CompositeAdductComponentsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 1511489263877797538L;
-	private CompositeAdductComponentsTableModel model;
 
 	public CompositeAdductComponentsTable() {
 
@@ -49,7 +48,8 @@ public class CompositeAdductComponentsTable extends BasicTable {
 		model = new CompositeAdductComponentsTableModel();
 		setModel(model);
 		
-		rowSorter = new TableRowSorter<CompositeAdductComponentsTableModel>(model);
+		rowSorter = new TableRowSorter<CompositeAdductComponentsTableModel>(
+				(CompositeAdductComponentsTableModel)model);
 		setRowSorter(rowSorter);
 
 		chmodRenderer = new AdductRenderer();
@@ -74,9 +74,9 @@ public class CompositeAdductComponentsTable extends BasicTable {
 
 	public void setTableModelFromCompositAdduct(CompositeAdduct composite) {
 		thf.setTable(null);
-		model.setTableModelFromCompositeAdduct(composite);
+		((CompositeAdductComponentsTableModel)model).setTableModelFromCompositeAdduct(composite);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public Collection<SimpleAdduct>getAllAdducts(){
@@ -94,19 +94,23 @@ public class CompositeAdductComponentsTable extends BasicTable {
 
 		Collection<SimpleAdduct>current = getAllAdducts();
 		current.add(mod);
-		model.setTableModelFromAdductList(current);
+		((CompositeAdductComponentsTableModel)model).setTableModelFromAdductList(current);
+		adjustColumns();
 	}
 	
 	public void removeModification(SimpleAdduct mod) {
 
 		Collection<SimpleAdduct>current = getAllAdducts();
 		current.remove(mod);
-		model.setTableModelFromAdductList(current);
+		((CompositeAdductComponentsTableModel)model).setTableModelFromAdductList(current);
+		adjustColumns();
 	}
 
-	public void setTableModelFromBinnerNeutralMassDifference(BinnerNeutralMassDifference binnerNeutralMassDifference) {
-		model.setTableModelFromBinnerNeutralMassDifference(binnerNeutralMassDifference);
-		tca.adjustColumns();
+	public void setTableModelFromBinnerNeutralMassDifference(
+			BinnerNeutralMassDifference binnerNeutralMassDifference) {
+		((CompositeAdductComponentsTableModel)model).
+				setTableModelFromBinnerNeutralMassDifference(binnerNeutralMassDifference);
+		adjustColumns();
 	}
 }
 

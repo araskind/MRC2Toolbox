@@ -38,17 +38,17 @@ public class CompoundCollectionComponentPropertiesTableModel extends BasicTableM
 	 */
 	private static final long serialVersionUID = 2715013996794159556L;
 
+	public static final String CATEGORY_COLUMN = "Category";
 	public static final String PROPERTY_COLUMN = "Property";
 	public static final String VALUE_COLUMN = "Value";
-	public static final String CATEGORY_COLUMN = "Category";
-
+	
 	public CompoundCollectionComponentPropertiesTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
 
-				new ColumnContext(CATEGORY_COLUMN, CpdMetadataFieldCategory.class, false),
-				new ColumnContext(PROPERTY_COLUMN, CpdMetadataField.class, false), 
-				new ColumnContext(VALUE_COLUMN, String.class, false),			
+				new ColumnContext(CATEGORY_COLUMN, "Metadata category", CpdMetadataFieldCategory.class, false),
+				new ColumnContext(PROPERTY_COLUMN, PROPERTY_COLUMN, CpdMetadataField.class, false), 
+				new ColumnContext(VALUE_COLUMN, VALUE_COLUMN, String.class, false),			
 		};
 	}
 

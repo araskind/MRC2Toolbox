@@ -53,9 +53,6 @@ public class CuratedDatabaseCompoundTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = -3817580957098149548L;
 
-	private CuratedDatabaseCompoundTableModel model;
-	private MouseMotionAdapter mma;
-
 	public CuratedDatabaseCompoundTable() {
 
 		super();
@@ -64,7 +61,8 @@ public class CuratedDatabaseCompoundTable extends BasicTable {
 		setModel(model);
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<CuratedDatabaseCompoundTableModel>(model);
+		rowSorter = new TableRowSorter<CuratedDatabaseCompoundTableModel>(
+				(CuratedDatabaseCompoundTableModel)model);
 		setRowSorter(rowSorter);
 
 		rowSorter.setComparator(model.getColumnIndex(CuratedDatabaseCompoundTableModel.ID_COLUMN),
@@ -80,9 +78,8 @@ public class CuratedDatabaseCompoundTable extends BasicTable {
 		columnModel.getColumnById(CuratedDatabaseCompoundTableModel.CURATED_COLUMN)
 		.setCellRenderer(new BooleanColorCircleFlagRenderer(15));
 		
-
 		//	Database link adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -131,9 +128,10 @@ public class CuratedDatabaseCompoundTable extends BasicTable {
 	public void setTableModelFromCompoundCollection(Map<CompoundIdentity,Boolean> compoundCollection) {
 
 		thf.setTable(null);
-		model.setTableModelFromCompoundCollection(compoundCollection);
+		((CuratedDatabaseCompoundTableModel)model).
+				setTableModelFromCompoundCollection(compoundCollection);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public MsFeatureIdentity getSelectedIdentity() {
@@ -172,11 +170,11 @@ public class CuratedDatabaseCompoundTable extends BasicTable {
 	}
 
 	public void updateMSFidData(MsFeatureIdentity id, boolean isCurated) {
-		model.updateMSFidData(id, isCurated);
+		((CuratedDatabaseCompoundTableModel)model).updateMSFidData(id, isCurated);
 	}
 	
 	public void updateCidData(CompoundIdentity cid, boolean isCurated) {
-		model.updateCidData(cid, isCurated);
+		((CuratedDatabaseCompoundTableModel)model).updateCidData(cid, isCurated);
 	}
 
 	public void selectCompoundIdentity(CompoundIdentity cid) {

@@ -47,12 +47,12 @@ public class BinnerAnnotationsTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(BINNER_ADDUCT_COLUMN, BinnerAdduct.class, false),
-			new ColumnContext(STD_NAME_COLUMN, String.class, false),
-			new ColumnContext(POLARITY_COLUMN, String.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(TIER_COLUMN, Integer.class, false),
-			new ColumnContext(MASS_CORRECTION_COLUMN, Double.class, false),
+			new ColumnContext(BINNER_ADDUCT_COLUMN, BINNER_ADDUCT_COLUMN, BinnerAdduct.class, false),
+			new ColumnContext(STD_NAME_COLUMN, STD_NAME_COLUMN, String.class, false),
+			new ColumnContext(POLARITY_COLUMN, POLARITY_COLUMN, String.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+			new ColumnContext(TIER_COLUMN, TIER_COLUMN, Integer.class, false),
+			new ColumnContext(MASS_CORRECTION_COLUMN, "Mass difference", Double.class, false),
 		};
 	}
 

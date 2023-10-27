@@ -44,7 +44,7 @@ public class LevelEditorTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 			//new ColumnContext(ACTIVE_COLUMN, Boolean.class, true),
-			new ColumnContext(LEVEL_COLUMN, ExperimentDesignLevel.class, false),
+			new ColumnContext(LEVEL_COLUMN, "Level name", ExperimentDesignLevel.class, false),
 		};
 	}
 

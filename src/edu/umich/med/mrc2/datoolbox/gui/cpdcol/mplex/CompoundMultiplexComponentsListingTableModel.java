@@ -42,12 +42,13 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 
 	public static final String COLLECTION_ID_COLUMN = "CollectionID";
 	public static final String MIXTURE_ID_COLUMN = "MixtureID";
+	public static final String IS_MS_READY_COLUMN = "MSReady";
 	public static final String ID_COLUMN = "ComponentID";
 	public static final String NAME_COLUMN = "Name";
 	public static final String ACCESSION_COLUMN = "Accession";
 	public static final String CAS_COLUMN = "CAS";	
 	public static final String SOLVENT_COLUMN = "Solvent";
-	public static final String CONCENTRATION_COLUMN = "Concentration, uM";
+	public static final String CONCENTRATION_COLUMN = "Conc., " + '\u03BC' + "M";
 	public static final String XLOGP_COLUMN = "XLogP";
 	public static final String ALIQUOTE_VOLUME_COLUMN = "Subaliquot volume";
 	public static final String FORMULA_COLUMN = "Formula";	
@@ -55,26 +56,26 @@ public class CompoundMultiplexComponentsListingTableModel extends BasicTableMode
 	public static final String CHARGE_COLUMN = "CHARGE";
 	public static final String FORMULAS_DELTA_MASS_COLUMN = '\u0394' + " mass(?)";
 	public static final String CONFLICT_COLUMN = "Conflict";
-	public static final String IS_MS_READY_COLUMN = "MSReady";
-
+	
 	public CompoundMultiplexComponentsListingTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ID_COLUMN, String.class, false),
-			new ColumnContext(MIXTURE_ID_COLUMN, CompoundMultiplexMixture.class, false),
-			new ColumnContext(IS_MS_READY_COLUMN, Boolean.class, false),
-			new ColumnContext(NAME_COLUMN, CompoundMultiplexMixtureComponent.class, false),
-			new ColumnContext(ACCESSION_COLUMN, CompoundIdentity.class, false),
-			new ColumnContext(CAS_COLUMN, String.class, false),			
-			new ColumnContext(SOLVENT_COLUMN, MobilePhase.class, false),
-			new ColumnContext(CONCENTRATION_COLUMN, Double.class, false),
-			new ColumnContext(XLOGP_COLUMN, Double.class, false),
-			new ColumnContext(ALIQUOTE_VOLUME_COLUMN, Double.class, false),			
-			new ColumnContext(FORMULA_COLUMN, String.class, false),	
-			new ColumnContext(SMILES_FORMULA_COLUMN, String.class, false),	
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),			
-			new ColumnContext(FORMULAS_DELTA_MASS_COLUMN, Double.class, false),
-			new ColumnContext(CONFLICT_COLUMN, Boolean.class, false),
+			new ColumnContext(ID_COLUMN, "Compound collection ID", String.class, false),
+			new ColumnContext(MIXTURE_ID_COLUMN, "Multiplex mixture ID", CompoundMultiplexMixture.class, false),
+			new ColumnContext(IS_MS_READY_COLUMN, "Is compound in MS-ready form?", Boolean.class, false),
+			new ColumnContext(NAME_COLUMN, "Compound name", CompoundMultiplexMixtureComponent.class, false),
+			new ColumnContext(ACCESSION_COLUMN, "Primary database accession and web link to the source database", CompoundIdentity.class, false),
+			new ColumnContext(CAS_COLUMN, "CAS registry number", String.class, false),			
+			new ColumnContext(SOLVENT_COLUMN, "Solvent used", MobilePhase.class, false),
+			new ColumnContext(CONCENTRATION_COLUMN, "Concentration, " + '\u03BC' + "M", Double.class, false),
+			new ColumnContext(XLOGP_COLUMN, "octanol/water partition coefficient", Double.class, false),
+			new ColumnContext(ALIQUOTE_VOLUME_COLUMN, ALIQUOTE_VOLUME_COLUMN, Double.class, false),			
+			new ColumnContext(FORMULA_COLUMN, "Formula provided by manufacturer", String.class, false),	
+			new ColumnContext(SMILES_FORMULA_COLUMN, "Formula calculated from SMILES string", String.class, false),	
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),			
+			new ColumnContext(FORMULAS_DELTA_MASS_COLUMN, 
+					"Mass difference between the formula provided by manufacturer and calculated from SMILES", Double.class, false),
+			new ColumnContext(CONFLICT_COLUMN, "Is formula conflict present?", Boolean.class, false),
 		};		
 	}	
 

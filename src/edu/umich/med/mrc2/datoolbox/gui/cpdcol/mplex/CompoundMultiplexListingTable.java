@@ -38,8 +38,6 @@ public class CompoundMultiplexListingTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = -3817580957098149548L;
 
-	private CompoundMultiplexListingTableModel model;
-
 	public CompoundMultiplexListingTable() {
 
 		super();
@@ -55,9 +53,10 @@ public class CompoundMultiplexListingTable extends BasicTable {
 			Collection<CompoundMultiplexMixture> multiplexes)  {
 
 		thf.setTable(null);
-		model.setTableModelFromCompoundMultiplexMixtureCollection(multiplexes);
+		((CompoundMultiplexListingTableModel)model).
+				setTableModelFromCompoundMultiplexMixtureCollection(multiplexes);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public Collection<CompoundMultiplexMixture> getSelectedMultiplexMixtures() {

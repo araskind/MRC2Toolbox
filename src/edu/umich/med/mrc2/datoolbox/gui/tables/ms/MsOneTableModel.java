@@ -49,10 +49,10 @@ public class MsOneTableModel extends BasicTableModel {
 	public MsOneTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(MZ_COLUMN, Double.class, false),
-			new ColumnContext(INTENSITY_COLUMN, Double.class, false),
-			new ColumnContext(ADDUCT_COLUMN, Adduct.class, false),
-			new ColumnContext(NUM_ION_COLUMN, Integer.class, false)
+			new ColumnContext(MZ_COLUMN, MZ_COLUMN, Double.class, false),
+			new ColumnContext(INTENSITY_COLUMN, INTENSITY_COLUMN, Double.class, false),
+			new ColumnContext(ADDUCT_COLUMN, ADDUCT_COLUMN, Adduct.class, false),
+			new ColumnContext(NUM_ION_COLUMN, "Ion number in series for the adduct", Integer.class, false)
 		};
 	}
 

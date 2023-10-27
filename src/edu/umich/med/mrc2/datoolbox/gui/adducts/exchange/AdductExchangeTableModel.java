@@ -39,15 +39,15 @@ public class AdductExchangeTableModel extends BasicTableModel {
 
 	public static final String ADDUCT_ONE_COLUMN = "Leaving adduct";
 	public static final String ADDUCT_TWO_COLUMN = "Coming adduct";
-	public static final String MASS_DIFFERENCE_COLUMN = "Mass difference";
+	public static final String MASS_DIFFERENCE_COLUMN = '\u0394' + " mass";
 
 	public AdductExchangeTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(ADDUCT_ONE_COLUMN, Adduct.class, false),
-			new ColumnContext(ADDUCT_TWO_COLUMN, Adduct.class, false),
-			new ColumnContext(MASS_DIFFERENCE_COLUMN, AdductExchange.class, false)
+			new ColumnContext(ADDUCT_ONE_COLUMN, ADDUCT_ONE_COLUMN, Adduct.class, false),
+			new ColumnContext(ADDUCT_TWO_COLUMN, ADDUCT_TWO_COLUMN, Adduct.class, false),
+			new ColumnContext(MASS_DIFFERENCE_COLUMN, "Mass difference", AdductExchange.class, false)
 		};
 	}
 

@@ -50,9 +50,6 @@ public class DatabaseCompoundTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = -3817580957098149548L;
 
-	private DatabaseCompoundTableModel model;
-	private MouseMotionAdapter mma;
-
 	public DatabaseCompoundTable() {
 
 		super();
@@ -61,7 +58,8 @@ public class DatabaseCompoundTable extends BasicTable {
 		setModel(model);
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<DatabaseCompoundTableModel>(model);
+		rowSorter = new TableRowSorter<DatabaseCompoundTableModel>(
+				(DatabaseCompoundTableModel)model);
 		setRowSorter(rowSorter);
 
 		rowSorter.setComparator(model.getColumnIndex(DatabaseCompoundTableModel.ID_COLUMN),
@@ -76,7 +74,7 @@ public class DatabaseCompoundTable extends BasicTable {
 			.setCellRenderer(mzRenderer); // Neutral mass
 
 		//	Database link adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -113,9 +111,10 @@ public class DatabaseCompoundTable extends BasicTable {
 	public void setTableModelFromCompoundCollection(Collection<CompoundIdentity> compoundCollection) {
 
 		thf.setTable(null);
-		model.setTableModelFromCompoundCollection(compoundCollection);
+		((DatabaseCompoundTableModel)model).
+				setTableModelFromCompoundCollection(compoundCollection);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public MsFeatureIdentity getSelectedIdentity() {
@@ -154,7 +153,7 @@ public class DatabaseCompoundTable extends BasicTable {
 	}
 
 	public void updateCidData(MsFeatureIdentity id) {
-		model.updateCidData(id);
+		((DatabaseCompoundTableModel)model).updateCidData(id);
 	}
 }
 

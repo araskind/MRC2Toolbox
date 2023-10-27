@@ -45,10 +45,10 @@ public class AdductSelectionTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(CHEM_MOD_COLUMN, Adduct.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(OLIGOMER_COLUMN, Integer.class, false),
-			new ColumnContext(MASS_CORRECTION_COLUMN, Double.class, false),
+			new ColumnContext(CHEM_MOD_COLUMN, CHEM_MOD_COLUMN, Adduct.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+			new ColumnContext(OLIGOMER_COLUMN, "Oligomeric state", Integer.class, false),
+			new ColumnContext(MASS_CORRECTION_COLUMN, "Mass difference", Double.class, false),
 		};
 	}
 

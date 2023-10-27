@@ -37,15 +37,13 @@ public class AdductTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 1511489263877797538L;
-	private AdductTableModel model;
-
 	public AdductTable() {
 
 		super();
 		model = new AdductTableModel();
 		setModel(model);
 		
-		rowSorter = new TableRowSorter<AdductTableModel>(model);
+		rowSorter = new TableRowSorter<AdductTableModel>((AdductTableModel)model);
 		setRowSorter(rowSorter);
 
 		chmodRenderer = new AdductRenderer();
@@ -62,9 +60,9 @@ public class AdductTable extends BasicTable {
 
 	public void setTableModelFromAdductList(Collection<Adduct> collection) {
 		thf.setTable(null);
-		model.setTableModelFromAdductList(collection);
+		((AdductTableModel)model).setTableModelFromAdductList(collection);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public Adduct getSelectedModification() {

@@ -41,7 +41,7 @@ public class FactorEditorTableModel extends BasicTableModel {
 	public FactorEditorTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(FACTOR_COLUMN, ExperimentDesignFactor.class, false)
+			new ColumnContext(FACTOR_COLUMN, "Experimental factor name", ExperimentDesignFactor.class, false)
 		};
 	}
 

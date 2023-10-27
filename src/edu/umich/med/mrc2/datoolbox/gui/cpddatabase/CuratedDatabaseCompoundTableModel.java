@@ -51,14 +51,15 @@ public class CuratedDatabaseCompoundTableModel extends BasicTableModel {
 	public CuratedDatabaseCompoundTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ORDER_COLUMN, Integer.class, false),
-			new ColumnContext(CURATED_COLUMN, Boolean.class, false),
-			new ColumnContext(ID_COLUMN, MsFeatureIdentity.class, false),
-			new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
-			new ColumnContext(FORMULA_COLUMN, String.class, false),
-			new ColumnContext(MASS_COLUMN, Double.class, false),
-			new ColumnContext(SPECTRA_COLUMN, Integer.class, false),
-			new ColumnContext(BIOLOCATION_COLUMN, String.class, false)
+			new ColumnContext(ORDER_COLUMN, "Order", Integer.class, false),
+			new ColumnContext(CURATED_COLUMN, CURATED_COLUMN, Boolean.class, false),
+			new ColumnContext(ID_COLUMN, 
+					"Primary database accession and web link to the source database", MsFeatureIdentity.class, false),
+			new ColumnContext(COMPOUND_NAME_COLUMN,  "Compound name", String.class, false),
+			new ColumnContext(FORMULA_COLUMN, FORMULA_COLUMN, String.class, false),
+			new ColumnContext(MASS_COLUMN, "Monoisotopic mass", Double.class, false),
+			new ColumnContext(SPECTRA_COLUMN, "Number of spectra in the database",Integer.class, false),
+			new ColumnContext(BIOLOCATION_COLUMN, BIOLOCATION_COLUMN, String.class, false)
 		};
 	}
 
