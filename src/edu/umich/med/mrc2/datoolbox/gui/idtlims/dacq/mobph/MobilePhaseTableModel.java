@@ -43,8 +43,8 @@ public class MobilePhaseTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(MOBILE_PHASE_ID_COLUMN, MobilePhase.class, false),
-			new ColumnContext(MOBILE_PHASE_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(MOBILE_PHASE_ID_COLUMN, MOBILE_PHASE_ID_COLUMN, MobilePhase.class, false),
+			new ColumnContext(MOBILE_PHASE_DESCRIPTION_COLUMN, MOBILE_PHASE_DESCRIPTION_COLUMN, String.class, false),
 		};
 	}
 

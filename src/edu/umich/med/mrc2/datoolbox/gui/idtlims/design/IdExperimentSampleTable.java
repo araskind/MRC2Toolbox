@@ -47,14 +47,14 @@ public class IdExperimentSampleTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3052614381449638727L;
-	private IdExperimentSampleTableModel model;
-
+	
 	public IdExperimentSampleTable() {
 
 		super();
 		model = new IdExperimentSampleTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<IdExperimentSampleTableModel>(model);
+		rowSorter = new TableRowSorter<IdExperimentSampleTableModel>(
+				(IdExperimentSampleTableModel)model);
 		setRowSorter(rowSorter);
 
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -73,9 +73,9 @@ public class IdExperimentSampleTable extends BasicTable {
 
 	public void setTableModelFromSamples(Collection<IDTExperimentalSample>samples) {
 		thf.setTable(null);
-		model.setTableModelFromSamples(samples);
+		((IdExperimentSampleTableModel)model).setTableModelFromSamples(samples);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public Collection<IDTExperimentalSample>getSelectedSamples(){

@@ -42,8 +42,6 @@ public class ScanTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 2087167895707677516L;
-	private ScanTableModel model;
-
 	public ScanTable() {
 
 		super();
@@ -52,7 +50,7 @@ public class ScanTable extends BasicTable {
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
-		rowSorter = new TableRowSorter<ScanTableModel>(model);
+		rowSorter = new TableRowSorter<ScanTableModel>((ScanTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(ScanTableModel.SCAN_COLUMN),
 				new IScanComparator(SortProperty.RT));
@@ -73,9 +71,9 @@ public class ScanTable extends BasicTable {
 	public void setModelFromDataFile(DataFile dataFile) {
 
 		thf.setTable(null);
-		model.setModelFromDataFile(dataFile);
+		((ScanTableModel)model).setModelFromDataFile(dataFile);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public IScan getSelectedScan(){

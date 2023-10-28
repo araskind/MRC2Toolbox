@@ -47,20 +47,20 @@ public class ChromatogramTableModel extends BasicTableModel {
 	public static final String MASS_WINDOW_COLUMN = "M/Z window";
 	public static final String RT_RANGE_COLUMN = "RT range";
 	public static final String DATA_FILE_COLUMN = "Data file";
-	public static final String NOTE_COLUMN = "Note";
+	public static final String NOTE_COLUMN = "Notes";
 	
 	public ChromatogramTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(CHROMATOGRAM_TYPE_COLUMN, String.class, false),
-			new ColumnContext(POLARIRTY_COLUMN, Polarity.class, false),			
-			new ColumnContext(MS_LEVEL_COLUMN, Integer.class, false),
-			new ColumnContext(MASSES_COLUMN, String.class, false),
-			new ColumnContext(SUM_ALL_COLUMN, Boolean.class, false),
-			new ColumnContext(MASS_WINDOW_COLUMN, String.class, false),
-			new ColumnContext(RT_RANGE_COLUMN, Range.class, false),
-			new ColumnContext(DATA_FILE_COLUMN, ExtractedChromatogram.class, false),			
-			new ColumnContext(NOTE_COLUMN, String.class, false),
+			new ColumnContext(CHROMATOGRAM_TYPE_COLUMN, "Chromatogram type", String.class, false),
+			new ColumnContext(POLARIRTY_COLUMN, POLARIRTY_COLUMN, Polarity.class, false),			
+			new ColumnContext(MS_LEVEL_COLUMN, "MS level", Integer.class, false),
+			new ColumnContext(MASSES_COLUMN, MASSES_COLUMN, String.class, false),
+			new ColumnContext(SUM_ALL_COLUMN, "Is this sum of multiple extracted M/Z values", Boolean.class, false),
+			new ColumnContext(MASS_WINDOW_COLUMN, "M/Z window for chromatogram extraction", String.class, false),
+			new ColumnContext(RT_RANGE_COLUMN, "Chromatogram retention time range", Range.class, false),
+			new ColumnContext(DATA_FILE_COLUMN,"Source data file",  ExtractedChromatogram.class, false),			
+			new ColumnContext(NOTE_COLUMN, NOTE_COLUMN, String.class, false),
 		};
 	}
 

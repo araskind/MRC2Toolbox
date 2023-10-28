@@ -79,14 +79,13 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -8853294038580302429L;
-	private ReferenceMsOneFeatureTableModel model;
-	private MouseMotionAdapter mma;
-
+	
 	public ReferenceMsOneFeatureTable() {
 		super();
 		model = new ReferenceMsOneFeatureTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ReferenceMsOneFeatureTableModel>(model);
+		rowSorter = new TableRowSorter<ReferenceMsOneFeatureTableModel>(
+				(ReferenceMsOneFeatureTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(ReferenceMsOneFeatureTableModel.MS_FEATURE_COLUMN),
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
@@ -137,7 +136,7 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 			.setCellRenderer(new MSFeatureIdentificationLevelColorRenderer());
 		
 		//	Database link adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -163,6 +162,11 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.ID_LEVEL_COLUMN).setMaxWidth(50);
 		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.ANNOTATIONS_COLUMN).setMaxWidth(50);
 		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.FOLLOWUP_COLUMN).setMaxWidth(50);
+		
+//		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.AMBIGUITY_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.ID_LEVEL_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.ANNOTATIONS_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.FOLLOWUP_COLUMN));
 		
 		//	Table header filter
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
@@ -190,22 +194,22 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 	public void setTableModelFromFeatureList(Collection<MSFeatureInfoBundle> selectedMsOneFeatures) {
 
 		thf.setTable(null);
-		model.setTableModelFromFeatureList(selectedMsOneFeatures);
+		((ReferenceMsOneFeatureTableModel)model).setTableModelFromFeatureList(selectedMsOneFeatures);
 		thf.setTable(this);
-		adjustVariableColumns();
+		adjustColumns();
 	}
 	
-	private void adjustVariableColumns() {
-		
-		fixedWidthColumns.clear();
-		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.AMBIGUITY_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.ID_LEVEL_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.ANNOTATIONS_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.FOLLOWUP_COLUMN));
-				
-		tca.adjustColumnsExcluding(fixedWidthColumns);
-		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.COMPOUND_NAME_COLUMN).setMinWidth(200);
-	}
+//	private void adjustVariableColumns() {
+//		
+//		fixedWidthColumns.clear();
+//		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.AMBIGUITY_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.ID_LEVEL_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.ANNOTATIONS_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(ReferenceMsOneFeatureTableModel.FOLLOWUP_COLUMN));
+//				
+//		tca.adjustColumnsExcluding(fixedWidthColumns);
+//		columnModel.getColumnById(ReferenceMsOneFeatureTableModel.COMPOUND_NAME_COLUMN).setMinWidth(200);
+//	}
 
 	public MSFeatureInfoBundle getSelectedBundle() {
 
@@ -258,9 +262,9 @@ public class ReferenceMsOneFeatureTable extends BasicTable {
 
 	public void updateFeatureData(MSFeatureInfoBundle selectedBundle) {
 		thf.setTable(null);
-		model.updateFeatureData(selectedBundle);
+		((ReferenceMsOneFeatureTableModel)model).updateFeatureData(selectedBundle);
 		thf.setTable(this);
-		adjustVariableColumns();
+		adjustColumns();
 	}
 
 	public void selectBundle(MSFeatureInfoBundle toSelect) {

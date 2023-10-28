@@ -43,13 +43,12 @@ public class VendorTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 2069272556941448636L;
-	private VendorTableModel model;
 
 	public VendorTable() {
 		super();
 		model = new VendorTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<VendorTableModel>(model);
+		rowSorter = new TableRowSorter<VendorTableModel>((VendorTableModel)model);
 		setRowSorter(rowSorter);		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		columnModel.getColumnById(VendorTableModel.VENDOR_COLUMN).
@@ -92,10 +91,9 @@ public class VendorTable extends BasicTable {
 	public void setTableModelFromManufacturers(Collection<Manufacturer>manufacturerList) {
 
 		thf.setTable(null);
-		model.setTableModelFromManufacturers(manufacturerList);
+		((VendorTableModel)model).setTableModelFromManufacturers(manufacturerList);
 		thf.setTable(this);
-		tca.adjustColumns();
-		columnModel.getColumnById(VendorTableModel.VENDOR_COLUMN).setMinWidth(200);
+		adjustColumns();		
 	}
 
 	public Manufacturer getSelectedVendor(){

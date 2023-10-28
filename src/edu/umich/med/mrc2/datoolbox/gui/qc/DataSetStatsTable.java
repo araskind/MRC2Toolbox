@@ -41,7 +41,6 @@ public class DataSetStatsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 8420590862541088371L;
-	private DataSetStatsTableModel model;
 	private DataFileCellRenderer dfRenderer;
 	
 	public DataSetStatsTable() {
@@ -50,7 +49,7 @@ public class DataSetStatsTable extends BasicTable {
 
 		model = new DataSetStatsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<DataSetStatsTableModel>(model);
+		rowSorter = new TableRowSorter<DataSetStatsTableModel>((DataSetStatsTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -89,8 +88,8 @@ public class DataSetStatsTable extends BasicTable {
 
 	public void setTableModelFromStatsList(Collection<DataFileStatisticalSummary> statsList) {
 		thf.setTable(null);
-		model.setTableModelFromDataSetStats(statsList);
+		((DataSetStatsTableModel)model).setTableModelFromDataSetStats(statsList);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 }

@@ -45,10 +45,10 @@ public class SoftwareTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(SOFTWARE_COLUMN, DataProcessingSoftware.class, false),
-			new ColumnContext(SOFTWARE_TYPE_COLUMN, String.class, false),
-			new ColumnContext(SOFTWARE_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(VENDOR_COLUMN, Manufacturer.class, false),
+			new ColumnContext(SOFTWARE_COLUMN, "Software name", DataProcessingSoftware.class, false),
+			new ColumnContext(SOFTWARE_TYPE_COLUMN, "Software type", String.class, false),
+			new ColumnContext(SOFTWARE_DESCRIPTION_COLUMN, SOFTWARE_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(VENDOR_COLUMN, VENDOR_COLUMN, Manufacturer.class, false),
 		};
 	}
 

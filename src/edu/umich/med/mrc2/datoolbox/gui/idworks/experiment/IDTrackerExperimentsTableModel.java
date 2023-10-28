@@ -49,12 +49,12 @@ public class IDTrackerExperimentsTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(EXPERIMENT_ID_COLUMN, LIMSExperiment.class, false),
-			new ColumnContext(EXPERIMENT_NAME_COLUMN, String.class, false),
-			new ColumnContext(EXPERIMENT_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(PROJECT_COLUMN, String.class, false),
-			new ColumnContext(CONTACT_PERSON_COLUMN, LIMSUser.class, false),
-			new ColumnContext(START_DATE_COLUMN, Date.class, false),
+			new ColumnContext(EXPERIMENT_ID_COLUMN, "Experiment ID", LIMSExperiment.class, false),
+			new ColumnContext(EXPERIMENT_NAME_COLUMN, EXPERIMENT_NAME_COLUMN, String.class, false),
+			new ColumnContext(EXPERIMENT_DESCRIPTION_COLUMN, EXPERIMENT_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(PROJECT_COLUMN, "Parent project", String.class, false),
+			new ColumnContext(CONTACT_PERSON_COLUMN, CONTACT_PERSON_COLUMN, LIMSUser.class, false),
+			new ColumnContext(START_DATE_COLUMN, START_DATE_COLUMN, Date.class, false),
 		};
 	}
 

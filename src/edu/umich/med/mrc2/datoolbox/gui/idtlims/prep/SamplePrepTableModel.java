@@ -31,7 +31,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-@SuppressWarnings("unused")
 public class SamplePrepTableModel extends BasicTableModel {
 
 	/**
@@ -48,10 +47,10 @@ public class SamplePrepTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(PREP_COLUMN_ID_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_PREP_COLUMN, LIMSSamplePreparation.class, false),
-			new ColumnContext(PREP_DATE_COLUMN, Date.class, false),
-			new ColumnContext(PREP_AUTHOR_COLUMN, LIMSUser.class, false),
+			new ColumnContext(PREP_COLUMN_ID_COLUMN, PREP_COLUMN_ID_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_PREP_COLUMN, SAMPLE_PREP_COLUMN, LIMSSamplePreparation.class, false),
+			new ColumnContext(PREP_DATE_COLUMN, PREP_DATE_COLUMN, Date.class, false),
+			new ColumnContext(PREP_AUTHOR_COLUMN, PREP_AUTHOR_COLUMN, LIMSUser.class, false),
 		};
 	}
 

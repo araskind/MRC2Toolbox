@@ -42,8 +42,8 @@ public class VendorTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(VENDOR_COLUMN, Manufacturer.class, false),
-			new ColumnContext(WEB_ADDRESS_COLUMN, Manufacturer.class, false),
+			new ColumnContext(VENDOR_COLUMN, VENDOR_COLUMN, Manufacturer.class, false),
+			new ColumnContext(WEB_ADDRESS_COLUMN, WEB_ADDRESS_COLUMN, Manufacturer.class, false),
 		};
 	}
 

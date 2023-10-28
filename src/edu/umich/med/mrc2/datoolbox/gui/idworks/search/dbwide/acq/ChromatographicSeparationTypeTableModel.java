@@ -43,8 +43,8 @@ public class ChromatographicSeparationTypeTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ID_COLUMN, ChromatographicSeparationType.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(ID_COLUMN, ID_COLUMN, ChromatographicSeparationType.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
 		};
 	}
 

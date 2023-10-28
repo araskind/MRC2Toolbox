@@ -41,13 +41,12 @@ public class IdLevelTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private IdLevelTableModel model;
 
 	public IdLevelTable() {
 		super();
 		model =  new IdLevelTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<IdLevelTableModel>(model);
+		rowSorter = new TableRowSorter<IdLevelTableModel>((IdLevelTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(IdLevelTableModel.LEVEL_COLUMN),
 				new IdStatusComparator(SortProperty.Name));
@@ -65,8 +64,8 @@ public class IdLevelTable extends BasicTable {
 	}
 
 	public void setTableModelFromLevelList(Collection<MSFeatureIdentificationLevel>statusList) {
-		model.setTableModelFromLevelList(statusList);
-		tca.adjustColumns();
+		((IdLevelTableModel)model).setTableModelFromLevelList(statusList);
+		adjustColumns();
 	}
 
 	public MSFeatureIdentificationLevel getSelectedLevel() {

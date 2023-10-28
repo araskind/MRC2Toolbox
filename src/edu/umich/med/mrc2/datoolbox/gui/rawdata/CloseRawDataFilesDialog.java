@@ -53,7 +53,7 @@ public class CloseRawDataFilesDialog extends JDialog {
 	 */
 	private static final long serialVersionUID = 7706787312742576009L;
 	private static final Icon closeDataFileIcon = GuiUtils.getIcon("closeDataFile", 24);
-	private RawDataFileTable rawDataFileTable;
+	private DataFileToAcquisitionMethodTable rawDataFileTable;
 
 	public CloseRawDataFilesDialog(ActionListener listener) {
 		
@@ -67,7 +67,7 @@ public class CloseRawDataFilesDialog extends JDialog {
 		
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
-		rawDataFileTable = new RawDataFileTable();
+		rawDataFileTable = new DataFileToAcquisitionMethodTable();
 		JScrollPane tableScroll = new JScrollPane(rawDataFileTable);
 		getContentPane().add(tableScroll, BorderLayout.CENTER);
 		rawDataFileTable.setModelFromDataFiles(RawDataManager.getRawDataMap().keySet(), false);

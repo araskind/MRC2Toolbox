@@ -38,14 +38,14 @@ public class MinimalMSOneFeatureTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3232039944841480790L;
-	private MinimalMSOneFeatureTableModel model;
 
 	public MinimalMSOneFeatureTable() {
 
 		super();
 		model = new MinimalMSOneFeatureTableModel();		
 		setModel(model);
-		rowSorter = new TableRowSorter<MinimalMSOneFeatureTableModel>(model);
+		rowSorter = new TableRowSorter<MinimalMSOneFeatureTableModel>(
+				(MinimalMSOneFeatureTableModel)model);
 		setRowSorter(rowSorter);
 		
 		columnModel.getColumnById(MinimalMSOneFeatureTableModel.SMILES_COLUMN).
@@ -59,8 +59,9 @@ public class MinimalMSOneFeatureTable extends BasicTable {
 	
 	public void setTableModelFromFeatureCollection(Collection<MinimalMSOneFeature>features) {
 		thf.setTable(null);
-		model.setTableModelFromFeatureCollection(features);
+		((MinimalMSOneFeatureTableModel)model).setTableModelFromFeatureCollection(features);
 		thf.setTable(this);
+		adjustColumns();
 	}
 	
 	public Collection<MinimalMSOneFeature>getSelectedFeatures(){

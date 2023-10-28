@@ -30,23 +30,23 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class SpectraTableModel extends BasicTableModel {
+public class AverageMassSpectraTableModel extends BasicTableModel {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -4864924940070524356L;
-
-	public static final String DATA_FILE_COLUMN = "Data file";
+	
 	public static final String MS_LEVEL_COLUMN = "Level";
 	public static final String RT_RANGE_COLUMN = "RT range";
+	public static final String DATA_FILE_COLUMN = "Data file";
 	
-	public SpectraTableModel() {
+	public AverageMassSpectraTableModel() {
 		super();
 		columnArray = new ColumnContext[] {					
-			new ColumnContext(MS_LEVEL_COLUMN, Integer.class, false),
-			new ColumnContext(RT_RANGE_COLUMN, Range.class, false),
-			new ColumnContext(DATA_FILE_COLUMN, AverageMassSpectrum.class, false),
+			new ColumnContext(MS_LEVEL_COLUMN, "MS level", Integer.class, false),
+			new ColumnContext(RT_RANGE_COLUMN, "Retention time range", Range.class, false),
+			new ColumnContext(DATA_FILE_COLUMN, "Source data file", AverageMassSpectrum.class, false),
 		};
 	}
 

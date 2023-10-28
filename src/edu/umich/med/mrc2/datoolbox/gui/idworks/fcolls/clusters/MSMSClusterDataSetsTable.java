@@ -52,15 +52,13 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = -6499296198033405250L;
-
-	private MSMSClusterDataSetsTableModel model;
 	
 	public MSMSClusterDataSetsTable() {
 		super();
 		model = new MSMSClusterDataSetsTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<MSMSClusterDataSetsTableModel>(model);
+		rowSorter = new TableRowSorter<MSMSClusterDataSetsTableModel>((MSMSClusterDataSetsTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(MSMSClusterDataSetsTableModel.OWNER_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
@@ -76,7 +74,7 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 		columnModel.getColumnById(MSMSClusterDataSetsTableModel.DESCRIPTION_COLUMN)
 			.setMinWidth(120);
 		
-		LIMSUserRenderer userRenderer = new LIMSUserRenderer();
+		userRenderer = new LIMSUserRenderer();
 		setDefaultRenderer(LIMSUser.class, userRenderer);
 		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
@@ -113,19 +111,10 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 			Collection<MSMSClusterDataSet> msmsClusterDataSetCollections) {
 		
 		thf.setTable(null);
-		model.setTableModelFromMSMSClusterDataSetList(msmsClusterDataSetCollections);
+		((MSMSClusterDataSetsTableModel)model).setTableModelFromMSMSClusterDataSetList(msmsClusterDataSetCollections);
 		thf.setTable(this);	
-		adjustColumnWidth();
+		adjustColumns();
 		
-	}
-	
-	private void adjustColumnWidth() {
-		
-		tca.adjustColumns();
-		columnModel.getColumnById(MSMSClusterDataSetsTableModel.CLUSTER_DATA_SET_COLUMN)
-			.setMinWidth(120);
-		columnModel.getColumnById(MSMSClusterDataSetsTableModel.DESCRIPTION_COLUMN)
-			.setMinWidth(120);
 	}
 	
 	public MSMSClusterDataSet getSelectedDataSet() {
@@ -154,9 +143,9 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 	
 	public void updateMSMSClusterDataSetData(MSMSClusterDataSet edited) {
 		thf.setTable(null);
-		model.updateMSMSClusterDataSetData(edited);
+		((MSMSClusterDataSetsTableModel)model).updateMSMSClusterDataSetData(edited);
 		thf.setTable(this);
-		adjustColumnWidth();
+		adjustColumns();
 	}
 }
 

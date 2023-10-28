@@ -48,7 +48,7 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 	public static final String CHEM_MOD_LIBRARY_COLUMN = "Form (Lib)";
 	public static final String ASSAY_COLUMN = "Assay";
 	public static final String SCORE_COLUMN = "Score";
-	public static final String RETENTION_COLUMN = "Retention";
+	public static final String RETENTION_COLUMN = "RT";
 	public static final String BASE_PEAK_COLUMN = "Base peak";
 	public static final String CHARGE_COLUMN = "Charge";
 	public static final String POOLED_MEAN_COLUMN = "Pooled mean";
@@ -64,22 +64,22 @@ public class DataIntegrationFeatureSelectionTableModel extends BasicTableModel {
 	public DataIntegrationFeatureSelectionTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ID_COLUMN, Boolean.class, true),
-			new ColumnContext(MERGE_COLUMN, Boolean.class, true),
-			new ColumnContext(FEATURE_COLUMN, MsFeature.class, false),
-			new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
-			new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, Adduct.class, false),
-			new ColumnContext(DATA_PIPELINE_COLUMN, DataPipeline.class, false),
-			new ColumnContext(SCORE_COLUMN, Double.class, false),
-			new ColumnContext(RETENTION_COLUMN, Double.class, false),
-			new ColumnContext(BASE_PEAK_COLUMN, Double.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(POOLED_MEAN_COLUMN, Double.class, false),
-			new ColumnContext(POOLED_RSD_COLUMN, Double.class, false),
-			new ColumnContext(POOLED_FREQUENCY_COLUMN, Double.class, false),
-			new ColumnContext(SAMPLE_MEAN_COLUMN, Double.class, false),
-			new ColumnContext(SAMPLE_RSD_COLUMN, Double.class, false),
-			new ColumnContext(SAMPLE_FREQUENCY_COLUMN, Double.class, false)
+			new ColumnContext(ID_COLUMN, "Primary feature", Boolean.class, true),
+			new ColumnContext(MERGE_COLUMN, "Sum areas", Boolean.class, true),
+			new ColumnContext(FEATURE_COLUMN, "Feature name", MsFeature.class, false),
+			new ColumnContext(COMPOUND_NAME_COLUMN, "Compound name", String.class, false),
+			new ColumnContext(CHEM_MOD_LIBRARY_COLUMN, "Adduct (based on library /FbF assignment)", Adduct.class, false),
+			new ColumnContext(DATA_PIPELINE_COLUMN, DATA_PIPELINE_COLUMN, DataPipeline.class, false),
+			new ColumnContext(SCORE_COLUMN, SCORE_COLUMN, Double.class, false),
+			new ColumnContext(RETENTION_COLUMN, "Retention time", Double.class, false),
+			new ColumnContext(BASE_PEAK_COLUMN, "Base peak M/Z", Double.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+			new ColumnContext(POOLED_MEAN_COLUMN, "Mean area for pooled samples", Double.class, false),
+			new ColumnContext(POOLED_RSD_COLUMN, "Relative standard deviation (%) for pooled samples", Double.class, false),
+			new ColumnContext(POOLED_FREQUENCY_COLUMN, "Detection frequency in pooled samples", Double.class, false),
+			new ColumnContext(SAMPLE_MEAN_COLUMN, "Mean area for regular samples", Double.class, false),
+			new ColumnContext(SAMPLE_RSD_COLUMN, "Relative standard deviation (%) for regular samples", Double.class, false),
+			new ColumnContext(SAMPLE_FREQUENCY_COLUMN, "Detection frequency in regular samples", Double.class, false)
 		};
 	}
 

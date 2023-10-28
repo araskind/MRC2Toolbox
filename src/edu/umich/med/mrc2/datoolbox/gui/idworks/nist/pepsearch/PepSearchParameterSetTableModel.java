@@ -58,20 +58,24 @@ public class PepSearchParameterSetTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(PS_OBJECT_COLUMN, NISTPepSearchParameterObject.class, false),
-			new ColumnContext(HR_SEARCH_OPTION_COLUMN, String.class, false),
-			new ColumnContext(HR_SEARCH_TYPE_COLUMN, String.class, false),
-			new ColumnContext(HR_SEARCH_THRESHOLD_COLUMN, String.class, false),
-			new ColumnContext(IS_REVERSE_COLUMN, Boolean.class, false),
-			new ColumnContext(IS_ALT_MATCHING_COLUMN, Boolean.class, false),			
-			new ColumnContext(IGNORE_AROUND_PRECURSOR_COLUMN, String.class, false),
-			new ColumnContext(PRECURSOR_ERROR_COLUMN, String.class, false),
-			new ColumnContext(FRAG_ERROR_COLUMN, String.class, false),
-			new ColumnContext(MASS_RANGE_COLUMN, String.class, false),			
-			new ColumnContext(MATCH_POLARITY_COLUMN, Boolean.class, false),
-			new ColumnContext(MATCH_CHARGE_COLUMN, Boolean.class, false),
-			new ColumnContext(SCORE_CUTOFF_COLUMN, Integer.class, false),
-			new ColumnContext(NUM_HITS_COLUMN, Long.class, false),
+			new ColumnContext(PS_OBJECT_COLUMN, "Parameter set ID", NISTPepSearchParameterObject.class, false),
+			new ColumnContext(HR_SEARCH_OPTION_COLUMN, 
+					"High resolution search option (regular / in-source / hybrid)", String.class, false),
+			new ColumnContext(HR_SEARCH_TYPE_COLUMN, 
+					"High resolution search type (peptide / generic / dot product)", String.class, false),
+			new ColumnContext(HR_SEARCH_THRESHOLD_COLUMN, 
+					"High resolution search threshold", String.class, false),
+			new ColumnContext(IS_REVERSE_COLUMN, "Run reverse search", Boolean.class, false),
+			new ColumnContext(IS_ALT_MATCHING_COLUMN, "Use alternative matching", Boolean.class, false),			
+			new ColumnContext(IGNORE_AROUND_PRECURSOR_COLUMN, 
+					"Ignore the peaks around precursor ion within specified window", String.class, false),
+			new ColumnContext(PRECURSOR_ERROR_COLUMN, "Maximal mass error for precursor ion", String.class, false),
+			new ColumnContext(FRAG_ERROR_COLUMN, "Maximal mass error for fragment ions", String.class, false),
+			new ColumnContext(MASS_RANGE_COLUMN, "Limit search to mass range", String.class, false),			
+			new ColumnContext(MATCH_POLARITY_COLUMN, MATCH_POLARITY_COLUMN, Boolean.class, false),
+			new ColumnContext(MATCH_CHARGE_COLUMN, MATCH_CHARGE_COLUMN, Boolean.class, false),
+			new ColumnContext(SCORE_CUTOFF_COLUMN, "Report obly hits with the score above cutoff", Integer.class, false),
+			new ColumnContext(NUM_HITS_COLUMN, "Maximal number of hits to report", Long.class, false),
 		};
 	}
 

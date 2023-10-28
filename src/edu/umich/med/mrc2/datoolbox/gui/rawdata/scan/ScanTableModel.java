@@ -60,13 +60,14 @@ public class ScanTableModel extends BasicTableModel {
 	public ScanTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(SCAN_COLUMN, IScan.class, false),
-			new ColumnContext(RT_COLUMN, Double.class, false),
-			new ColumnContext(LEVEL_COLUMN, Integer.class, false),
-			new ColumnContext(POLARITY_COLUMN, String.class, false),
+			new ColumnContext(SCAN_COLUMN, "Scan number", IScan.class, false),
+			new ColumnContext(RT_COLUMN, "Retention time", Double.class, false),
+			new ColumnContext(LEVEL_COLUMN, "MS level", Integer.class, false),
+			new ColumnContext(POLARITY_COLUMN, "Scan polarity", String.class, false),
 			//new ColumnContext(SCAN_TYPE_COLUMN, String.class, false),	
-			new ColumnContext(PRECURSOR_MZ_COLUMN, Double.class, false),
-			new ColumnContext(PRECURSOR_MZ_RANGE_COLUMN, String.class, false),
+			new ColumnContext(PRECURSOR_MZ_COLUMN, "Precursor ion M/Z (for MSn scans)", Double.class, false),
+			new ColumnContext(PRECURSOR_MZ_RANGE_COLUMN, 
+					"Precursor isolation window (for MSn scans)", String.class, false),
 		};
 	}
 

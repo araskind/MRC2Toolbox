@@ -49,13 +49,13 @@ public class MzFrequencyDataTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(AVG_MZ_COLUMN, MzFrequencyObject.class, false),
-			new ColumnContext(MZ_RANGE_COLUMN, Range.class, false),
-			new ColumnContext(RT_RANGE_COLUMN, Range.class, false),
-			new ColumnContext(RT_RSD_COLUMN, MzFrequencyObject.class, false),
-			new ColumnContext(FEATURE_COUNT_COLUMN, Integer.class, false),
-			new ColumnContext(FREQUENCY_COLUMN, Double.class, false),
-			new ColumnContext(PERCENT_IDENTIFIED_COLUMN, Double.class, false),
+			new ColumnContext(AVG_MZ_COLUMN, "Average M/Z value", MzFrequencyObject.class, false),
+			new ColumnContext(MZ_RANGE_COLUMN, MZ_RANGE_COLUMN, Range.class, false),
+			new ColumnContext(RT_RANGE_COLUMN, "Retention time range", Range.class, false),
+			new ColumnContext(RT_RSD_COLUMN, "Retention time relative standard deviation, %", MzFrequencyObject.class, false),
+			new ColumnContext(FEATURE_COUNT_COLUMN, "Number of features", Integer.class, false),
+			new ColumnContext(FREQUENCY_COLUMN, FREQUENCY_COLUMN, Double.class, false),
+			new ColumnContext(PERCENT_IDENTIFIED_COLUMN, PERCENT_IDENTIFIED_COLUMN, Double.class, false),
 		};
 	}
 

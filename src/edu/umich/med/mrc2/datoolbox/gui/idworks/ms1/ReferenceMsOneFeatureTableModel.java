@@ -47,7 +47,7 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 	 *
 	 */
 	private static final long serialVersionUID = -8721639551336713264L;
-	public static final String ORDER_COLUMN = "##";
+	//	public static final String ORDER_COLUMN = "##";
 	public static final String MS_FEATURE_COLUMN = "Feature name";
 	public static final String COMPOUND_NAME_COLUMN = "Identification";
 	public static final String DATABSE_LINK_COLUMN = "DBID";
@@ -60,10 +60,10 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 	public static final String KMD_MOD_COLUMN = "KMD mod";
 	public static final String EXPERIMENT_COLUMN = "Experiment";
 	public static final String SAMPLE_COLUMN = "Sample";
-	public static final String SAMPLE_TYPE_COLUMN = "sample type";
+	public static final String SAMPLE_TYPE_COLUMN = "Sample type";
 	public static final String ACQ_METHOD_ID_COLUMN = "Acq. method";
 	public static final String DEX_METHOD_ID_COLUMN = "DA method";
-	public static final String ANNOTATIONS_COLUMN = "Annotations";
+	public static final String ANNOTATIONS_COLUMN = "Annot.";
 	public static final String AMBIGUITY_COLUMN = "ID status";
 	public static final String FOLLOWUP_COLUMN = "Follow-up";
 	public static final String ID_LEVEL_COLUMN = "ID level";
@@ -72,25 +72,27 @@ public class ReferenceMsOneFeatureTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(MS_FEATURE_COLUMN, MSFeatureInfoBundle.class, false),
-			new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
-			new ColumnContext(DATABSE_LINK_COLUMN, MsFeatureIdentity.class, false),
-			new ColumnContext(AMBIGUITY_COLUMN, FeatureIdentificationState.class, false),
-			new ColumnContext(ID_LEVEL_COLUMN, MSFeatureIdentificationLevel.class, false),
-			new ColumnContext(ANNOTATIONS_COLUMN, Boolean.class, false),
-			new ColumnContext(FOLLOWUP_COLUMN, Boolean.class, false),
-			new ColumnContext(CHEM_MOD_COLUMN, Adduct.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(RETENTION_COLUMN, Double.class, false),
-			new ColumnContext(NEUTRAL_MASS_COLUMN, Double.class, false),
-			new ColumnContext(BASE_PEAK_COLUMN, Double.class, false),
-			new ColumnContext(KMD_COLUMN, Double.class, false),
-			new ColumnContext(KMD_MOD_COLUMN, Double.class, false),
-			new ColumnContext(EXPERIMENT_COLUMN, LIMSExperiment.class, false),
-			new ColumnContext(SAMPLE_COLUMN, IDTExperimentalSample.class, false),
-			new ColumnContext(SAMPLE_TYPE_COLUMN, LIMSSampleType.class, false),
-			new ColumnContext(ACQ_METHOD_ID_COLUMN, DataAcquisitionMethod.class, false),
-			new ColumnContext(DEX_METHOD_ID_COLUMN, DataExtractionMethod.class, false),
+			new ColumnContext(MS_FEATURE_COLUMN, MS_FEATURE_COLUMN, MSFeatureInfoBundle.class, false),
+			new ColumnContext(COMPOUND_NAME_COLUMN, "Compound name", String.class, false),
+			new ColumnContext(DATABSE_LINK_COLUMN, 
+					"Primary database accession and web link to the source database", MsFeatureIdentity.class, false),
+			new ColumnContext(AMBIGUITY_COLUMN, 
+					"Identification status (unknown, single / multiple IDs)", FeatureIdentificationState.class, false),
+			new ColumnContext(ID_LEVEL_COLUMN, "Identification level", MSFeatureIdentificationLevel.class, false),
+			new ColumnContext(ANNOTATIONS_COLUMN, "Has annotations (standard or free form)", Boolean.class, false),
+			new ColumnContext(FOLLOWUP_COLUMN, "Identification followup steps assigned", Boolean.class, false),
+			new ColumnContext(CHEM_MOD_COLUMN, "Primary adduct", Adduct.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+			new ColumnContext(RETENTION_COLUMN, "Retention time", Double.class, false),
+			new ColumnContext(NEUTRAL_MASS_COLUMN, "Monoisotopic neutral mass", Double.class, false),
+			new ColumnContext(BASE_PEAK_COLUMN, "Base peak M/Z", Double.class, false),
+			new ColumnContext(KMD_COLUMN, "Kendrick mass defect", Double.class, false),
+			new ColumnContext(KMD_MOD_COLUMN, "Kendrick mass defect, modified", Double.class, false),
+			new ColumnContext(EXPERIMENT_COLUMN, EXPERIMENT_COLUMN, LIMSExperiment.class, false),
+			new ColumnContext(SAMPLE_COLUMN, SAMPLE_COLUMN, IDTExperimentalSample.class, false),
+			new ColumnContext(SAMPLE_TYPE_COLUMN, SAMPLE_TYPE_COLUMN, LIMSSampleType.class, false),
+			new ColumnContext(ACQ_METHOD_ID_COLUMN, "Data acquisition method", DataAcquisitionMethod.class, false),
+			new ColumnContext(DEX_METHOD_ID_COLUMN, "Data analysis method", DataExtractionMethod.class, false),
 		};
 	}
 

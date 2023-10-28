@@ -32,7 +32,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-public class RawDataFileTableModel extends BasicTableModel {
+public class DataFileToAcquisitionMethodTableModel extends BasicTableModel {
 
 	/**
 	 * 
@@ -41,11 +41,11 @@ public class RawDataFileTableModel extends BasicTableModel {
 	public static final String DATA_FILE_COLUMN = "Data file";
 	public static final String ACQ_METHOD_COLUMN = "Acq. method";
 
-	public RawDataFileTableModel() {
+	public DataFileToAcquisitionMethodTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DATA_FILE_COLUMN, DataFile.class, false),
-			new ColumnContext(ACQ_METHOD_COLUMN, DataAcquisitionMethod.class, false)
+			new ColumnContext(DATA_FILE_COLUMN, DATA_FILE_COLUMN, DataFile.class, false),
+			new ColumnContext(ACQ_METHOD_COLUMN, "Data acquisition method", DataAcquisitionMethod.class, false)
 		};
 	}
 

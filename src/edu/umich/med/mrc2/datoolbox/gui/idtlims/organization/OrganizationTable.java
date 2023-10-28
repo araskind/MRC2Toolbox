@@ -21,10 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.organization;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
@@ -52,16 +49,13 @@ public class OrganizationTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -4961051611998862332L;
-
-	private OrganizationTableModel model;
 	private LIMSUserRenderer userRenderer;
-	private MouseMotionAdapter mma;
 
 	public OrganizationTable() {
 		super();
 		model =  new OrganizationTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<OrganizationTableModel>(model);
+		rowSorter = new TableRowSorter<OrganizationTableModel>((OrganizationTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(OrganizationTableModel.PI_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
@@ -72,28 +66,33 @@ public class OrganizationTable extends BasicTable {
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setDefaultRenderer(DataExtractionMethod.class, new AnalysisMethodRenderer());
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
 		setDefaultRenderer(IdTrackerOrganization.class, new IdTrackerOrganizationRenderer(SortProperty.Name));
-		mma = new MouseMotionAdapter() {
 
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-
-				if(columnModel.isColumnVisible(columnModel.getColumnById(OrganizationTableModel.PI_COLUMN)) &&
-					columnAtPoint(p) == columnModel.getColumnIndex(OrganizationTableModel.PI_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else if(columnModel.isColumnVisible(columnModel.getColumnById(OrganizationTableModel.CONTACT_PERSON_COLUMN)) &&
-						columnAtPoint(p) == columnModel.getColumnIndex(OrganizationTableModel.CONTACT_PERSON_COLUMN))
-						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
+		createInteractiveUserRenderer(Arrays.asList(
+				OrganizationTableModel.PI_COLUMN, 
+				OrganizationTableModel.CONTACT_PERSON_COLUMN));
+		
+//		userRenderer = new LIMSUserRenderer();
+//		setDefaultRenderer(LIMSUser.class, userRenderer);
+//		MouseMotionAdapter mma = new MouseMotionAdapter() {
+//
+//			public void mouseMoved(MouseEvent e) {
+//
+//				Point p = e.getPoint();
+//
+//				if(columnModel.isColumnVisible(columnModel.getColumnById(OrganizationTableModel.PI_COLUMN)) &&
+//					columnAtPoint(p) == columnModel.getColumnIndex(OrganizationTableModel.PI_COLUMN))
+//					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//				else if(columnModel.isColumnVisible(columnModel.getColumnById(OrganizationTableModel.CONTACT_PERSON_COLUMN)) &&
+//						columnAtPoint(p) == columnModel.getColumnIndex(OrganizationTableModel.CONTACT_PERSON_COLUMN))
+//						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//				else
+//					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+//			}
+//		};
+//		addMouseMotionListener(mma);
+//		addMouseListener(userRenderer);
+//		addMouseMotionListener(userRenderer);
 
 		WordWrapCellRenderer wwcr = new WordWrapCellRenderer();
 //		columnModel.getColumnById(OrganizationTableModel.DEPARTMENT_COLUMN).setCellRenderer(wwcr);
@@ -110,9 +109,9 @@ public class OrganizationTable extends BasicTable {
 
 	public void setTableModelFromOrganizations(Collection<IdTrackerOrganization> organizations) {
 		thf.setTable(null);
-		model.setTableModelFromOrganizations(organizations);
+		((OrganizationTableModel)model).setTableModelFromOrganizations(organizations);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public IdTrackerOrganization getSelectedOrganization() {

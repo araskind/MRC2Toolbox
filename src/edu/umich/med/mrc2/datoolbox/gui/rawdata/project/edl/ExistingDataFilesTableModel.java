@@ -53,11 +53,11 @@ public class ExistingDataFilesTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(EXPERIMENT_COLUMN, LIMSExperiment.class, false),
-			new ColumnContext(SAMPLE_COLUMN, ExperimentalSample.class, false),
-			new ColumnContext(DATA_FILE_COLUMN, DataFile.class, false),
-			new ColumnContext(ACQ_METHOD_COLUMN, DataAcquisitionMethod.class, false),
-			new ColumnContext(INJECTION_TIME_COLUMN, Date.class, false),
+			new ColumnContext(EXPERIMENT_COLUMN, EXPERIMENT_COLUMN, LIMSExperiment.class, false),
+			new ColumnContext(SAMPLE_COLUMN, SAMPLE_COLUMN, ExperimentalSample.class, false),
+			new ColumnContext(DATA_FILE_COLUMN, DATA_FILE_COLUMN, DataFile.class, false),
+			new ColumnContext(ACQ_METHOD_COLUMN, ACQ_METHOD_COLUMN, DataAcquisitionMethod.class, false),
+			new ColumnContext(INJECTION_TIME_COLUMN, INJECTION_TIME_COLUMN, Date.class, false),
 		};
 	}
 

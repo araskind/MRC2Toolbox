@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.gui.tables.editors;
 
 import java.awt.Component;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Collection;
@@ -45,10 +47,11 @@ public class ExperimentalSampleSelectorEditor extends DefaultCellEditor {
 	/**
 	 * @param comboBox
 	 */
+	@SuppressWarnings("unchecked")
 	public ExperimentalSampleSelectorEditor(Collection<? extends ExperimentalSample>samples, JTable table) {
 
-		super(new JComboBox<>());
-		JComboBox cBox = ((JComboBox)editorComponent);
+		super(new JComboBox<ExperimentalSample>());
+		JComboBox<ExperimentalSample> cBox = ((JComboBox<ExperimentalSample>)editorComponent);
 		cBox.setRenderer(new ExperimentalSampleComboboxRenderer());
 		cBox.setModel(new SortedComboBoxModel(samples));
 		cBox.setToolTipText("Click to select value");
@@ -62,11 +65,25 @@ public class ExperimentalSampleSelectorEditor extends DefaultCellEditor {
 				}
 			}
 		});
+		cBox.addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				cBox.showPopup();
+			}
+		});
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object getCellEditorValue() {
-		return ((JComboBox)editorComponent).getSelectedItem();
+		return ((JComboBox<ExperimentalSample>)editorComponent).getSelectedItem();
 	}
 
 	@SuppressWarnings("unchecked")

@@ -47,14 +47,13 @@ public class PrepSampleTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 8797892159401292726L;
-	private PrepSampleTableModel model;
 
 	public PrepSampleTable() {
 
 		super();
 		model = new PrepSampleTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<PrepSampleTableModel>(model);
+		rowSorter = new TableRowSorter<PrepSampleTableModel>((PrepSampleTableModel)model);
 		setRowSorter(rowSorter);
 
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -72,9 +71,9 @@ public class PrepSampleTable extends BasicTable {
 
 	public void setTableModelFromSamples(Collection<? extends ExperimentalSample>samples) {
 		thf.setTable(null);
-		model.setTableModelFromSamples(samples);
+		((PrepSampleTableModel)model).setTableModelFromSamples(samples);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public Collection<IDTExperimentalSample>getSelectedSamples(){

@@ -47,7 +47,6 @@ public class ColumnFieldMatchTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3111543056268144390L;
-	private ColumnFieldMatchTableModel model;
 
 	public ColumnFieldMatchTable() {
 
@@ -56,39 +55,37 @@ public class ColumnFieldMatchTable extends BasicTable {
 		getTableHeader().setReorderingAllowed(false);
 		model = new ColumnFieldMatchTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ColumnFieldMatchTableModel>(model);
+		rowSorter = new TableRowSorter<ColumnFieldMatchTableModel>(
+				(ColumnFieldMatchTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setDefaultRenderer(ExperimentalSample.class, new ExperimentalSampleRendererExtended());
 		setDefaultRenderer(DataFile.class, new DataFileCellRenderer());
-
+		setExactColumnWidth(ColumnFieldMatchTableModel.ENABLED_COLUMN, 50);
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
-		//columnModel.getColumnById(DataFileSampleMatchTableModel.ENABLED_COLUMN).setWidth(50);
 	}
 
 	public void setTableModelFromFiles(File[] inputFiles, DataAcquisitionMethod acquisitionMethod) {
 
 		thf.setTable(null);
-		model.setTableModelFromFiles(inputFiles, acquisitionMethod);
+		((ColumnFieldMatchTableModel)model).setTableModelFromFiles(inputFiles, acquisitionMethod);
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(
 						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples(), this));
 		thf.setTable(this);
-		tca.adjustColumns();
-		//columnModel.getColumnById(DataFileSampleMatchTableModel.ENABLED_COLUMN).setWidth(50);
+		adjustColumns();
 	}
 
 	public void setTableModelFromFiles(File[] inputFiles, Collection<ExperimentalSample>samples) {
 
 		thf.setTable(null);	
-		model.setTableModelFromFiles(inputFiles, null);
+		((ColumnFieldMatchTableModel)model).setTableModelFromFiles(inputFiles, null);
 		setDefaultEditor(ExperimentalSample.class,
 			new ExperimentalSampleSelectorEditor(samples, this));
 
 		thf.setTable(this);
-		tca.adjustColumns();
-		//columnModel.getColumnById(DataFileSampleMatchTableModel.ENABLED_COLUMN).setWidth(50);
+		adjustColumns();
 	}
 
 	public DataFile[] getActiveDataFiles() {
@@ -146,9 +143,11 @@ public class ColumnFieldMatchTable extends BasicTable {
 	        .sorted(Collections.reverseOrder())
 	        .forEach(((DefaultTableModel)getModel())::removeRow);
 		thf.setTable(this);
+		adjustColumns();
 	}
 
-	public void updateSampleAssignmentForDataFiles(Collection<DataFile> selectedDataFiles, ExperimentalSample sample) {
+	public void updateSampleAssignmentForDataFiles(
+			Collection<DataFile> selectedDataFiles, ExperimentalSample sample) {
 
 		int dfIndex = model.getColumnIndex(ColumnFieldMatchTableModel.DATA_FILE_COLUMN);
 		int sampleIndex = model.getColumnIndex(ColumnFieldMatchTableModel.SAMPLE_ID_COLUMN);
@@ -157,6 +156,7 @@ public class ColumnFieldMatchTable extends BasicTable {
 			if(selectedDataFiles.contains(model.getValueAt(i, dfIndex)))
 				model.setValueAt(sample, i, sampleIndex);
 		}
+		adjustColumns();
 	}
 }
 

@@ -52,14 +52,13 @@ public class FeatureCollectionsTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = -6499296198033405250L;
 
-	private FeatureCollectionsTableModel model;
-	
 	public FeatureCollectionsTable() {
 		super();
 		model = new FeatureCollectionsTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<FeatureCollectionsTableModel>(model);
+		rowSorter = new TableRowSorter<FeatureCollectionsTableModel>(
+				(FeatureCollectionsTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(FeatureCollectionsTableModel.OWNER_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
@@ -75,7 +74,7 @@ public class FeatureCollectionsTable extends BasicTable {
 		columnModel.getColumnById(FeatureCollectionsTableModel.DESCRIPTION_COLUMN)
 			.setMinWidth(120);
 		
-		LIMSUserRenderer userRenderer = new LIMSUserRenderer();
+		userRenderer = new LIMSUserRenderer();
 		setDefaultRenderer(LIMSUser.class, userRenderer);
 		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
@@ -112,18 +111,9 @@ public class FeatureCollectionsTable extends BasicTable {
 			Collection<MsFeatureInfoBundleCollection>featureCollections) {
 		
 		thf.setTable(null);
-		model.setTableModelFromFeatureCollectionList(featureCollections);	
-		adjustColumnWidth();
+		((FeatureCollectionsTableModel)model).setTableModelFromFeatureCollectionList(featureCollections);			
 		thf.setTable(this);
-	}
-	
-	private void adjustColumnWidth() {
-		
-		tca.adjustColumns();
-		columnModel.getColumnById(FeatureCollectionsTableModel.COLLECTION_COLUMN)
-			.setMinWidth(120);
-		columnModel.getColumnById(FeatureCollectionsTableModel.DESCRIPTION_COLUMN)
-			.setMinWidth(120);
+		adjustColumns();
 	}
 	
 	public MsFeatureInfoBundleCollection getSelectedCollection() {
@@ -152,9 +142,9 @@ public class FeatureCollectionsTable extends BasicTable {
 	
 	public void updateCollectionData(MsFeatureInfoBundleCollection edited) {
 		thf.setTable(null);
-		model.updateCollectionData(edited);
+		((FeatureCollectionsTableModel)model).updateCollectionData(edited);
 		thf.setTable(this);
-		adjustColumnWidth();
+		adjustColumns();
 	}
 }
 

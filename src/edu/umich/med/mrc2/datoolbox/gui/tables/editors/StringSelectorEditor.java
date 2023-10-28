@@ -22,6 +22,8 @@
 package edu.umich.med.mrc2.datoolbox.gui.tables.editors;
 
 import java.awt.Component;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Collection;
@@ -45,8 +47,8 @@ public class StringSelectorEditor extends DefaultCellEditor {
 	 */
 	public StringSelectorEditor(Collection<String>items, JTable table) {
 
-		super(new JComboBox<>());
-		JComboBox cBox = ((JComboBox)editorComponent);
+		super(new JComboBox<String>());
+		JComboBox<String> cBox = ((JComboBox<String>)editorComponent);
 		cBox.setModel(new SortedComboBoxModel(items));
 		cBox.setToolTipText("Click to select value");
 		cBox.addItemListener(new ItemListener() {
@@ -57,6 +59,19 @@ public class StringSelectorEditor extends DefaultCellEditor {
 					stopCellEditing();
 					((DefaultTableModel) table.getModel()).fireTableDataChanged();
 				}
+			}
+		});
+		cBox.addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				cBox.showPopup();
 			}
 		});
 	}

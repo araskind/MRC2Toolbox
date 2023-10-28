@@ -61,8 +61,6 @@ public class MSMSLibraryMatchTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -8853294038580302429L;
-	private MSMSLibraryMatchTableModel model;
-	private MouseMotionAdapter mma;
 	private MSFeatureInfoBundle selectedMsMsFeatureBundle;
 	private MSMSLibMatchTableModelListener msmsMatchModelListener;
 
@@ -70,7 +68,7 @@ public class MSMSLibraryMatchTable extends BasicTable {
 		super();
 		model = new MSMSLibraryMatchTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MSMSLibraryMatchTableModel>(model);
+		rowSorter = new TableRowSorter<MSMSLibraryMatchTableModel>((MSMSLibraryMatchTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(MSMSLibraryMatchTableModel.MS_FEATURE_ID_COLUMN),
 				new MsFeatureIdentityComparator(SortProperty.Name));
@@ -108,11 +106,12 @@ public class MSMSLibraryMatchTable extends BasicTable {
 			.setCellRenderer(scoreRenderer); // Parent mass
 
 		msfIdRenderer = new CompoundIdentityDatabaseLinkRenderer();
-		setDefaultRenderer(MsFeatureIdentity.class,  new IdentityWordWrapCellRenderer(CompoundIdentityField.NAME));
+		setDefaultRenderer(MsFeatureIdentity.class,  
+				new IdentityWordWrapCellRenderer(CompoundIdentityField.NAME));
 		setDefaultRenderer(CompoundIdentity.class, msfIdRenderer);
 
 		//	Database link adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -152,9 +151,9 @@ public class MSMSLibraryMatchTable extends BasicTable {
 		
 		this.selectedMsMsFeatureBundle = selectedMsMsFeatureBundle;
 		thf.setTable(null);
-		model.setTableModelFromFeatureBundle(selectedMsMsFeatureBundle);
+		((MSMSLibraryMatchTableModel)model).setTableModelFromFeatureBundle(selectedMsMsFeatureBundle);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 		
 		if(msmsMatchModelListener != null)
 			model.addTableModelListener(msmsMatchModelListener);

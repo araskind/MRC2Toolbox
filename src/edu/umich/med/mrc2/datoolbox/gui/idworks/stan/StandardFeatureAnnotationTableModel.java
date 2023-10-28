@@ -43,8 +43,8 @@ public class StandardFeatureAnnotationTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(CODE_COLUMN, String.class, false),
-			new ColumnContext(TEXT_COLUMN, StandardFeatureAnnotation.class, false),
+			new ColumnContext(CODE_COLUMN, "Standard annotation code", String.class, false),
+			new ColumnContext(TEXT_COLUMN, "Standard annotation text", StandardFeatureAnnotation.class, false),
 		};
 	}
 

@@ -47,13 +47,12 @@ public class MethodTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private MethodTableModel model;
 
 	public MethodTable() {
 		super();
 		model =  new MethodTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MethodTableModel>(model);
+		rowSorter = new TableRowSorter<MethodTableModel>((MethodTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(getColumnIndex(MethodTableModel.METHOD_ID_COLUMN), 
 				new AnalysisMethodComparator(SortProperty.ID));
@@ -63,10 +62,9 @@ public class MethodTable extends BasicTable {
 
 		columnModel.getColumnById(MethodTableModel.METHOD_NAME_COLUMN)
 				.setCellRenderer(new FileBaseNameRenderer());
-		columnModel.getColumnById(MethodTableModel.METHOD_ID_COLUMN).setMaxWidth(80);
-		
-		columnModel.getColumnById(MethodTableModel.METHOD_ID_COLUMN).
-				setPreferredWidth(80);
+		columnModel.getColumnById(MethodTableModel.METHOD_ID_COLUMN).setWidth(80);
+		fixedWidthColumns.add(model.getColumnIndex(MethodTableModel.METHOD_ID_COLUMN));
+
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
@@ -83,9 +81,9 @@ public class MethodTable extends BasicTable {
 			methodFilesMap.put(methodName, existingMethod);
 		}
 		thf.setTable(null);
-		model.setTableModelFromMethods(methodFilesMap);
+		((MethodTableModel)model).setTableModelFromMethods(methodFilesMap);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public void setTableModelFromDataAnalysisMethods(Collection<DataExtractionMethod> dataExtractionMethods) {
@@ -95,9 +93,9 @@ public class MethodTable extends BasicTable {
 			methodFilesMap.put(mf.getName(), mf);
 		
 		thf.setTable(null);
-		model.setTableModelFromMethods(methodFilesMap);
+		((MethodTableModel)model).setTableModelFromMethods(methodFilesMap);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public AnalysisMethod getSelectedAnalysisMethod() {

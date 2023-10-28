@@ -45,9 +45,9 @@ public class IDTrackerSearchQueryListingTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(QUERY_COLUMN, IDTSearchQuery.class, false),
-			new ColumnContext(USER_COLUMN, LIMSUser.class, false),
-			new ColumnContext(DATE_COLUMN, Date.class, false),
+			new ColumnContext(QUERY_COLUMN, QUERY_COLUMN, IDTSearchQuery.class, false),
+			new ColumnContext(USER_COLUMN, USER_COLUMN, LIMSUser.class, false),
+			new ColumnContext(DATE_COLUMN, DATE_COLUMN, Date.class, false),
 		};
 	}
 	

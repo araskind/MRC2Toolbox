@@ -41,14 +41,14 @@ public class AdductChooserTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -392741375728418413L;
-	private AdductChooserTableModel model;
 
 	public AdductChooserTable() {
 
 		super();
 		model = new AdductChooserTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<AdductChooserTableModel>(model);
+		rowSorter = new TableRowSorter<AdductChooserTableModel>(
+				(AdductChooserTableModel)model);
 		setRowSorter(rowSorter);
 		
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -70,7 +70,7 @@ public class AdductChooserTable extends BasicTable {
 		Collection<Adduct> adducts = 
 				AdductManager.getAdductsForPolarity(feature.getPolarity());
 		//	adducts.addAll(AdductManager.getNeutralLosses());
-		model.setTableModelFromAdductList(adducts);	
+		((AdductChooserTableModel)model).setTableModelFromAdductList(adducts);	
 		Adduct primaryAdduct = null;		
 		if(feature.getPrimaryIdentity() != null)
 			primaryAdduct = feature.getPrimaryIdentity().getPrimaryAdduct();

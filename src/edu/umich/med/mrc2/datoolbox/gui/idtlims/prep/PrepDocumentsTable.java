@@ -48,15 +48,13 @@ public class PrepDocumentsTable extends BasicTable {
 	private static final long serialVersionUID = -6975693354223437089L;
 	
 	public static final int iconSize = 24;
-	private PrepDocumentsTableModel model;
 	private LIMSUserRenderer userRenderer;
-	private MouseMotionAdapter mma;
 
 	public PrepDocumentsTable() {
 		super();
 		model =  new PrepDocumentsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<PrepDocumentsTableModel>(model);
+		rowSorter = new TableRowSorter<PrepDocumentsTableModel>((PrepDocumentsTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(PrepDocumentsTableModel.ADDED_BY_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
@@ -70,10 +68,14 @@ public class PrepDocumentsTable extends BasicTable {
 				new ObjectAnnotationDocumentTypeRenderer(this);
 		columnModel.getColumnById(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN)
 			.setCellRenderer(annotationRenderer);
-
+		
+		columnModel.getColumn(
+				model.getColumnIndex(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN)).setWidth(iconSize * 2);
+		fixedWidthColumns.add(model.getColumnIndex(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN));
+		
 		userRenderer = new LIMSUserRenderer();
 		setDefaultRenderer(LIMSUser.class, userRenderer);
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -97,10 +99,8 @@ public class PrepDocumentsTable extends BasicTable {
 	}
 
 	public void setModelFromAnnotations(Collection<ObjectAnnotation>annotations) {
-		model.setModelFromAnnotations(annotations);
-		getColumnModel().getColumn(
-				model.getColumnIndex(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN)).setWidth(iconSize * 2);
-		tca.adjustColumn(getColumnIndex(PrepDocumentsTableModel.DOCUMENT_DESCRIPTION_COLUMN));
+		((PrepDocumentsTableModel)model).setModelFromAnnotations(annotations);
+		adjustColumns();
 	}
 
 	public Collection<ObjectAnnotation>getSelectedAnnotations() {

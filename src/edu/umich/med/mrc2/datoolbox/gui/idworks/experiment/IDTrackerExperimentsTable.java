@@ -52,15 +52,13 @@ public class IDTrackerExperimentsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -8965100101624914727L;
-	private IDTrackerExperimentsTableModel model;
-	private LIMSUserRenderer userRenderer;
-	private MouseMotionAdapter mma;
 
 	public IDTrackerExperimentsTable() {
 		super();
 		model = new IDTrackerExperimentsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<IDTrackerExperimentsTableModel>(model);
+		rowSorter = new TableRowSorter<IDTrackerExperimentsTableModel>(
+				(IDTrackerExperimentsTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(IDTrackerExperimentsTableModel.EXPERIMENT_ID_COLUMN),
 				new LIMSExperimentComparator(SortProperty.ID, SortDirection.DESC));
@@ -82,7 +80,7 @@ public class IDTrackerExperimentsTable extends BasicTable {
 		userRenderer = new LIMSUserRenderer();
 		setDefaultRenderer(LIMSUser.class, userRenderer);
 
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -110,10 +108,10 @@ public class IDTrackerExperimentsTable extends BasicTable {
 
 	public void setModelFromExperimentCollection(Collection<LIMSExperiment>experimentCollection) {
 		thf.setTable(null);
-		model.setModelFromExperimentCollection(experimentCollection);
+		((IDTrackerExperimentsTableModel)model).setModelFromExperimentCollection(experimentCollection);
 		thf.setTable(this);
 		rowSorter.sort();
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public LIMSExperiment getSelectedExperiment() {

@@ -45,8 +45,8 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(METHOD_ID_COLUMN, AnalysisMethod.class, false),
-			new ColumnContext(METHOD_NAME_COLUMN, String.class, false),
+			new ColumnContext(METHOD_ID_COLUMN, "Method ID", AnalysisMethod.class, false),
+			new ColumnContext(METHOD_NAME_COLUMN, METHOD_NAME_COLUMN, String.class, false),
 		};
 	}
 

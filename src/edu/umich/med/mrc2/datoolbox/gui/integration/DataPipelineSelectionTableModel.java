@@ -42,8 +42,8 @@ public class DataPipelineSelectionTableModel extends BasicTableModel {
 	public DataPipelineSelectionTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(SELECTED_COLUMN, Boolean.class, true),
-			new ColumnContext(DATA_PIPELINE_COLUMN, DataPipeline.class, false),
+			new ColumnContext(SELECTED_COLUMN, SELECTED_COLUMN, Boolean.class, true),
+			new ColumnContext(DATA_PIPELINE_COLUMN, DATA_PIPELINE_COLUMN, DataPipeline.class, false),
 		};
 	}
 

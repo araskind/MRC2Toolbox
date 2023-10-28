@@ -39,7 +39,6 @@ import edu.umich.med.mrc2.datoolbox.data.compare.SortDirection;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.tables.FeatureSelectionTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.TableColumnAdjuster;
 
 public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable {
 
@@ -47,7 +46,6 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 	 *
 	 */
 	private static final long serialVersionUID = 7042158268272205223L;
-	private DataIntegrationFeatureSelectionTableModel model;
 	private MsFeatureCluster activeCluster;
 	private DataIntegrationFeatureSelectionTableModelListener modelListener;
 
@@ -60,7 +58,8 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 		modelListener = new DataIntegrationFeatureSelectionTableModelListener();
 		model.addTableModelListener(modelListener);
 
-		featureSorter = new TableRowSorter<DataIntegrationFeatureSelectionTableModel>(model);
+		featureSorter = new TableRowSorter<DataIntegrationFeatureSelectionTableModel>(
+				(DataIntegrationFeatureSelectionTableModel)model);
 		setRowSorter(featureSorter);
 		featureSorter.setComparator(model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.FEATURE_COLUMN),
 				new MsFeatureComparator(SortProperty.Name, SortDirection.ASC));
@@ -92,11 +91,13 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 				.setCellRenderer(percentRenderer);
 		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.SAMPLE_FREQUENCY_COLUMN)
 				.setCellRenderer(pieChartFrequencyRenderer);
+		
+		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.ID_COLUMN).setWidth(50);
+		columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN).setWidth(50);
+		fixedWidthColumns.add(model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.ID_COLUMN));
+		fixedWidthColumns.add(model.getColumnIndex(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN));
 
-		addColumnSelectorPopup();
-
-		tca = new TableColumnAdjuster(this);
-		tca.adjustColumns();
+		finalizeLayout();
 	}
 
 	private class DataIntegrationFeatureSelectionTableModelListener implements TableModelListener {
@@ -114,7 +115,7 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 					activeCluster.setPrimaryFeature(selectedFeature);
 
 				model.removeTableModelListener(modelListener);
-				model.reloadData();
+				((DataIntegrationFeatureSelectionTableModel)model).reloadData();
 				model.addTableModelListener(modelListener);
 			}
 			if (col == getColumnIndex(DataIntegrationFeatureSelectionTableModel.MERGE_COLUMN)) {
@@ -122,7 +123,7 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 				boolean included = (boolean) getValueAt(row, col);
 				activeCluster.setFeatureEnabled(selectedFeature, included);
 				model.removeTableModelListener(modelListener);
-				model.reloadData();
+				((DataIntegrationFeatureSelectionTableModel)model).reloadData();
 				model.addTableModelListener(modelListener);
 			}
 		}
@@ -160,16 +161,10 @@ public class DataIntegrationFeatureSelectionTable extends FeatureSelectionTable 
 		if(activeCluster != null) {
 
 			model.removeTableModelListener(modelListener);
-			model.setCurrentCluster(featureCluster);
+			((DataIntegrationFeatureSelectionTableModel)model).setCurrentCluster(featureCluster);
 			setrendererReferences(featureCluster.getFeatures());
-			model.setTableModelFromFeatureCluster(activeCluster);;
-			tca.adjustColumns();
-
-			columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.POOLED_MEAN_COLUMN)
-				.setPreferredWidth(preferredWidth);
-			columnModel.getColumnById(DataIntegrationFeatureSelectionTableModel.SAMPLE_MEAN_COLUMN)
-				.setPreferredWidth(preferredWidth);
-
+			((DataIntegrationFeatureSelectionTableModel)model).setTableModelFromFeatureCluster(activeCluster);;
+			adjustColumns();
 			model.addTableModelListener(modelListener);
 		}
 	}

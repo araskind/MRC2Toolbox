@@ -42,8 +42,8 @@ public class RawDataFilesTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(RAW_DATA_FILE_COLUMN, File.class, false),
-			new ColumnContext(FULL_PATH_COLUMN, String.class, false),
+			new ColumnContext(RAW_DATA_FILE_COLUMN, RAW_DATA_FILE_COLUMN, File.class, false),
+			new ColumnContext(FULL_PATH_COLUMN, FULL_PATH_COLUMN, String.class, false),
 		};
 	}
 

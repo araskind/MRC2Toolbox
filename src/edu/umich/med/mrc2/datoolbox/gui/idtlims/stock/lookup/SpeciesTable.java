@@ -40,15 +40,13 @@ public class SpeciesTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 1837501767078275796L;
-	private SpeciesTableModel model;
 
 	public SpeciesTable() {
 		super();
 		model = new SpeciesTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<SpeciesTableModel>(model);
+		rowSorter = new TableRowSorter<SpeciesTableModel>((SpeciesTableModel)model);
 		setRowSorter(rowSorter);
-		rowSorter = new TableRowSorter<SpeciesTableModel>(model);
 		rowSorter.setComparator(model.getColumnIndex(SpeciesTableModel.TAX_ID_COLUMN),
 				new BioSpeciesComparator(SortProperty.ID));
 
@@ -62,9 +60,9 @@ public class SpeciesTable extends BasicTable {
 	public void setModelFromSpeciesList(Collection<LIMSBioSpecies>speciesList) {
 
 		thf.setTable(null);
-		model.setModelFromSpeciesList(speciesList);
+		((SpeciesTableModel)model).setModelFromSpeciesList(speciesList);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public LIMSBioSpecies getSelectedSpecies() {

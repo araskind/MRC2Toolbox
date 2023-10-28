@@ -47,13 +47,13 @@ public class AcquisitionMethodTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private AcquisitionMethodTableModel model;
 
 	public AcquisitionMethodTable() {
 		super();
 		model =  new AcquisitionMethodTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<AcquisitionMethodTableModel>(model);
+		rowSorter = new TableRowSorter<AcquisitionMethodTableModel>(
+				(AcquisitionMethodTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(getColumnIndex(AcquisitionMethodTableModel.METHOD_ID_COLUMN), 
 				new AnalysisMethodComparator(SortProperty.ID));
@@ -83,17 +83,17 @@ public class AcquisitionMethodTable extends BasicTable {
 			methodFilesMap.put(methodName, existingMethod);
 		}	
 		thf.setTable(null);
-		model.setTableModelFromMethods(methodFilesMap);
+		((AcquisitionMethodTableModel)model).setTableModelFromMethods(methodFilesMap);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void setTableModelFromAcquisitionMethodsCollection(
 			Collection<? extends AnalysisMethod> methods) {
 		thf.setTable(null);
-		model.setTableModelFromMethodCollection(methods);
+		((AcquisitionMethodTableModel)model).setTableModelFromMethodCollection(methods);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public void setTableModelFromDataAnalysisMethods(
@@ -104,9 +104,9 @@ public class AcquisitionMethodTable extends BasicTable {
 			methodFilesMap.put(mf.getName(), mf);
 		
 		thf.setTable(null);
-		model.setTableModelFromMethods(methodFilesMap);
+		((AcquisitionMethodTableModel)model).setTableModelFromMethods(methodFilesMap);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public AnalysisMethod getSelectedAnalysisMethod() {
@@ -195,9 +195,9 @@ public class AcquisitionMethodTable extends BasicTable {
 	public void addMethods(Collection<DataAcquisitionMethod> toAdd) {
 		
 		thf.setTable(null);
-		model.addMethods(toAdd);
+		((AcquisitionMethodTableModel)model).addMethods(toAdd);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 }
 

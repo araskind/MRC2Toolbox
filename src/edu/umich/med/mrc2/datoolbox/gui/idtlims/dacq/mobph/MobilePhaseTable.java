@@ -40,21 +40,20 @@ public class MobilePhaseTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private MobilePhaseTableModel model;
 
 	public MobilePhaseTable() {
 		super();
 		model =  new MobilePhaseTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MobilePhaseTableModel>(model);
+		rowSorter = new TableRowSorter<MobilePhaseTableModel>((MobilePhaseTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_DESCRIPTION_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
-		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN).setMaxWidth(120);
-		
+		columnModel.getColumnById(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN).setWidth(80);
+		fixedWidthColumns.add(model.getColumnIndex(MobilePhaseTableModel.MOBILE_PHASE_ID_COLUMN));
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(MobilePhase.class, new MobilePhaseFormat(SortProperty.ID));		
 		finalizeLayout();
@@ -62,9 +61,9 @@ public class MobilePhaseTable extends BasicTable {
 
 	public void setTableModelFromMobilePhaseCollection(Collection<MobilePhase>phases) {
 		thf.setTable(null);
-		model.setTableModelFromMobilePhaseCollection(phases);
+		((MobilePhaseTableModel)model).setTableModelFromMobilePhaseCollection(phases);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public MobilePhase getSelectedMobilePhase() {

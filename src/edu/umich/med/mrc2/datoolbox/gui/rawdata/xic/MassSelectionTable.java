@@ -40,7 +40,6 @@ public class MassSelectionTable  extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = -5800108674852597479L;
-	private MassSelectionTableModel model;
 	
 	public MassSelectionTable() {
 
@@ -48,7 +47,8 @@ public class MassSelectionTable  extends BasicTable {
 
 		model = new MassSelectionTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MassSelectionTableModel>(model);
+		rowSorter = new TableRowSorter<MassSelectionTableModel>(
+				(MassSelectionTableModel)model);
 		setRowSorter(rowSorter);
 
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -56,7 +56,8 @@ public class MassSelectionTable  extends BasicTable {
 		columnModel.getColumnById(MassSelectionTableModel.MZ_COLUMN)
 			.setCellRenderer(mzRenderer);
 		columnModel.getColumnById(MassSelectionTableModel.INTENSITY_COLUMN)
-			.setCellRenderer(new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getSpectrumIntensityFormat()));
+			.setCellRenderer(new FormattedDecimalRenderer(
+					MRC2ToolBoxConfiguration.getSpectrumIntensityFormat()));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
@@ -65,9 +66,9 @@ public class MassSelectionTable  extends BasicTable {
 	public void setTableModelFromDataPoints(Collection<MsPoint>points) {
 
 		thf.setTable(null);
-		model.setTableModelFromDataPoints(points);
+		((MassSelectionTableModel)model).setTableModelFromDataPoints(points);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public Collection<Double> getSelectedMasses() {

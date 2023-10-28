@@ -50,14 +50,13 @@ public class FeatureLookupDataSetListTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = -6499296198033405250L;
 
-	private FeatureLookupDataSetListTableModel model;
-	
 	public FeatureLookupDataSetListTable() {
 		super();
 		model = new FeatureLookupDataSetListTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<FeatureLookupDataSetListTableModel>(model);
+		rowSorter = new TableRowSorter<FeatureLookupDataSetListTableModel>(
+				(FeatureLookupDataSetListTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(FeatureLookupDataSetListTableModel.OWNER_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
@@ -73,7 +72,7 @@ public class FeatureLookupDataSetListTable extends BasicTable {
 		columnModel.getColumnById(FeatureLookupDataSetListTableModel.DESCRIPTION_COLUMN)
 			.setMinWidth(120);
 		
-		LIMSUserRenderer userRenderer = new LIMSUserRenderer();
+		userRenderer = new LIMSUserRenderer();
 		setDefaultRenderer(LIMSUser.class, userRenderer);
 		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
@@ -106,18 +105,9 @@ public class FeatureLookupDataSetListTable extends BasicTable {
 			Collection<FeatureLookupDataSet>dataSetList) {
 		
 		thf.setTable(null);
-		model.setTableModelFromFeatureLookupDataSetList(dataSetList);	
-		adjustColumnWidth();
+		((FeatureLookupDataSetListTableModel)model).setTableModelFromFeatureLookupDataSetList(dataSetList);			
 		thf.setTable(this);
-	}
-	
-	private void adjustColumnWidth() {
-		
-		tca.adjustColumns();
-		columnModel.getColumnById(FeatureLookupDataSetListTableModel.DATA_SET_COLUMN)
-			.setMinWidth(120);
-		columnModel.getColumnById(FeatureLookupDataSetListTableModel.DESCRIPTION_COLUMN)
-			.setMinWidth(120);
+		adjustColumns();
 	}
 	
 	public FeatureLookupDataSet getSelectedDataSet() {
@@ -146,9 +136,9 @@ public class FeatureLookupDataSetListTable extends BasicTable {
 	
 	public void updateCollectionData(FeatureLookupDataSet edited) {
 		thf.setTable(null);
-		model.updateCollectionData(edited);
+		((FeatureLookupDataSetListTableModel)model).updateCollectionData(edited);
 		thf.setTable(this);
-		adjustColumnWidth();
+		adjustColumns();
 	}
 }
 

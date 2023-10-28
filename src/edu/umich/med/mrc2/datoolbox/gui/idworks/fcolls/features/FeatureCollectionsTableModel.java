@@ -43,7 +43,7 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 	public static final String COLLECTION_COLUMN = "Name";
 	public static final String DESCRIPTION_COLUMN = "Description";
 	public static final String NUM_FEATURES_COLUMN = "# of features";
-	public static final String OWNER_COLUMN = "Owner";
+	public static final String OWNER_COLUMN = "Created by";
 	public static final String DATE_CREATED_COLUMN = "Date created";
 	public static final String LAST_MODIFIED_COLUMN = "Last modified";
 
@@ -52,12 +52,12 @@ public class FeatureCollectionsTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(COLLECTION_COLUMN, MsFeatureInfoBundleCollection.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(NUM_FEATURES_COLUMN, Integer.class, true),
-			new ColumnContext(OWNER_COLUMN, LIMSUser.class, false),
-			new ColumnContext(DATE_CREATED_COLUMN, Date.class, true),
-			new ColumnContext(LAST_MODIFIED_COLUMN, Date.class, true),
+			new ColumnContext(COLLECTION_COLUMN, "Feature collection name", MsFeatureInfoBundleCollection.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(NUM_FEATURES_COLUMN, "Nmber of features", Integer.class, true),
+			new ColumnContext(OWNER_COLUMN, OWNER_COLUMN, LIMSUser.class, false),
+			new ColumnContext(DATE_CREATED_COLUMN, DATE_CREATED_COLUMN, Date.class, true),
+			new ColumnContext(LAST_MODIFIED_COLUMN, LAST_MODIFIED_COLUMN, Date.class, true),
 		};
 	}
 

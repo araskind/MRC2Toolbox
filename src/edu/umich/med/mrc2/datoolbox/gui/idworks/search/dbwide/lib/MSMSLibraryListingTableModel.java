@@ -44,9 +44,9 @@ public class MSMSLibraryListingTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ID_COLUMN, ReferenceMsMsLibrary.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(DECOY_COLUMN, Boolean.class, false),
+			new ColumnContext(ID_COLUMN, "Library ID", ReferenceMsMsLibrary.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(DECOY_COLUMN, "Is it the decoy library", Boolean.class, false),
 		};
 	}
 

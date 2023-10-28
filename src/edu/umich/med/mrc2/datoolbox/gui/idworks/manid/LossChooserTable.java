@@ -40,14 +40,13 @@ public class LossChooserTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -392741375728418413L;
-	private LossChooserTableModel model;
 
 	public LossChooserTable() {
 
 		super();
 		model = new LossChooserTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<LossChooserTableModel>(model);
+		rowSorter = new TableRowSorter<LossChooserTableModel>((LossChooserTableModel)model);
 		setRowSorter(rowSorter);
 		
 		getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -62,7 +61,7 @@ public class LossChooserTable extends BasicTable {
 	public void loadAdductsForPolarityAndFeature(Polarity polarity, MsFeature feature) {
 
 		thf.setTable(null);
-		model.setTableModelFromLossList(AdductManager.getNeutralLosses());		
+		((LossChooserTableModel)model).setTableModelFromLossList(AdductManager.getNeutralLosses());		
 		if(feature != null) {
 			
 			MassSpectrum spectrum = feature.getSpectrum();
@@ -81,7 +80,7 @@ public class LossChooserTable extends BasicTable {
 			}
 		}
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public Adduct getSelectedAdduct(){

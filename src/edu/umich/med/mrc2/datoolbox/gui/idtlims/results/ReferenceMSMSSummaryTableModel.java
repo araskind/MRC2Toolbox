@@ -48,7 +48,7 @@ public class ReferenceMSMSSummaryTableModel extends BasicTableModel {
 	public static final String ACQ_METHOD = "Acquisition method";
 	public static final String POLARITY_COLUMN = "Polarity";
 	public static final String CHROMATOGRAPHIC_COLUMN = "Column";
-	public static final String DA_METHOD = "Data extraction method";
+	public static final String DA_METHOD = "DA method";
 	public static final String COLLISION_ENERGY = "Collision energy";
 	public static final String NUM_FEATURES = "# of features";
 
@@ -56,16 +56,16 @@ public class ReferenceMSMSSummaryTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(EXPERIMENT_COLUMN, LIMSExperiment.class, false),
-			new ColumnContext(SAMPLE_COLUMN, IDTExperimentalSample.class, false),
-			new ColumnContext(SAMPLE_TYPE_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_SPECIES_COLUMN, String.class, false),
-			new ColumnContext(ACQ_METHOD, DataAcquisitionMethod.class, false),
-			new ColumnContext(POLARITY_COLUMN, String.class, false),
-			new ColumnContext(COLLISION_ENERGY, Double.class, false),
-			new ColumnContext(CHROMATOGRAPHIC_COLUMN, LIMSChromatographicColumn.class, false),
-			new ColumnContext(DA_METHOD, DataExtractionMethod.class, false),
-			new ColumnContext(NUM_FEATURES, Integer.class, false),
+			new ColumnContext(EXPERIMENT_COLUMN, EXPERIMENT_COLUMN, LIMSExperiment.class, false),
+			new ColumnContext(SAMPLE_COLUMN, SAMPLE_COLUMN, IDTExperimentalSample.class, false),
+			new ColumnContext(SAMPLE_TYPE_COLUMN, SAMPLE_TYPE_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_SPECIES_COLUMN, SAMPLE_SPECIES_COLUMN, String.class, false),
+			new ColumnContext(ACQ_METHOD, ACQ_METHOD, DataAcquisitionMethod.class, false),
+			new ColumnContext(POLARITY_COLUMN, POLARITY_COLUMN, String.class, false),
+			new ColumnContext(COLLISION_ENERGY, COLLISION_ENERGY, Double.class, false),
+			new ColumnContext(CHROMATOGRAPHIC_COLUMN, "Chromatographic column", LIMSChromatographicColumn.class, false),
+			new ColumnContext(DA_METHOD, "Data extraction method", DataExtractionMethod.class, false),
+			new ColumnContext(NUM_FEATURES,"Number of features",  Integer.class, false),
 		};
 	}
 

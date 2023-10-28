@@ -48,13 +48,13 @@ public class InstrumentTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(INSTRUMENT_ID_COLUMN, String.class, false),
-			new ColumnContext(INSTRUMENT_COLUMN, LIMSInstrument.class, false),
-			new ColumnContext(INSTRUMENT_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(MASS_ANALYZER_COLUMN, String.class, false),
-			new ColumnContext(SEPARATION_TYPE_COLUMN, String.class, false),
-			new ColumnContext(MANUFACTURER_COLUMN, String.class, false),
-			new ColumnContext(SERIAL_NUMBER_COLUMN, String.class, false),
+			new ColumnContext(INSTRUMENT_ID_COLUMN, INSTRUMENT_ID_COLUMN, String.class, false),
+			new ColumnContext(INSTRUMENT_COLUMN, "Instrument model name", LIMSInstrument.class, false),
+			new ColumnContext(INSTRUMENT_DESCRIPTION_COLUMN, INSTRUMENT_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(MASS_ANALYZER_COLUMN, "Mass analyzer type", String.class, false),
+			new ColumnContext(SEPARATION_TYPE_COLUMN, "Chromatographic separation type", String.class, false),
+			new ColumnContext(MANUFACTURER_COLUMN, MANUFACTURER_COLUMN, String.class, false),
+			new ColumnContext(SERIAL_NUMBER_COLUMN, "Instrument serial number", String.class, false),
 		};
 	}
 

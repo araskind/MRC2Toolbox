@@ -49,13 +49,13 @@ public class OrganizationTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ORGANIZATION_ID_COLUMN, String.class, false),
-			new ColumnContext(ORGANIZATION_COLUMN, IdTrackerOrganization.class, false),
-			new ColumnContext(DEPARTMENT_COLUMN, String.class, false),
-			new ColumnContext(LABORATORY_COLUMN, String.class, false),			
-			new ColumnContext(PI_COLUMN, LIMSUser.class, false),
-			new ColumnContext(CONTACT_PERSON_COLUMN, LIMSUser.class, false),
-			new ColumnContext(MAILING_ADDRESS_COLUMN, String.class, false),
+			new ColumnContext(ORGANIZATION_ID_COLUMN, "Organization ID", String.class, false),
+			new ColumnContext(ORGANIZATION_COLUMN, "Organization name", IdTrackerOrganization.class, false),
+			new ColumnContext(DEPARTMENT_COLUMN, DEPARTMENT_COLUMN, String.class, false),
+			new ColumnContext(LABORATORY_COLUMN, LABORATORY_COLUMN, String.class, false),			
+			new ColumnContext(PI_COLUMN, PI_COLUMN, LIMSUser.class, false),
+			new ColumnContext(CONTACT_PERSON_COLUMN, CONTACT_PERSON_COLUMN, LIMSUser.class, false),
+			new ColumnContext(MAILING_ADDRESS_COLUMN, MAILING_ADDRESS_COLUMN, String.class, false),
 		};
 	}
 

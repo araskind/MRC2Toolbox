@@ -55,8 +55,6 @@ public class AcquisitionMethodTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private AcquisitionMethodTableModel model;
-	private MouseMotionAdapter mma;
 	private LIMSUserRenderer userRenderer;
 
 	public AcquisitionMethodTable() {
@@ -64,7 +62,8 @@ public class AcquisitionMethodTable extends BasicTable {
 		model =  new AcquisitionMethodTableModel();
 		setModel(model);
 		
-		rowSorter = new TableRowSorter<AcquisitionMethodTableModel>(model);
+		rowSorter = new TableRowSorter<AcquisitionMethodTableModel>(
+				(AcquisitionMethodTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(AcquisitionMethodTableModel.USER_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
@@ -81,7 +80,7 @@ public class AcquisitionMethodTable extends BasicTable {
 		columnModel.getColumnById(AcquisitionMethodTableModel.ACQ_METHOD_DESCRIPTION_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
 	
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -112,9 +111,9 @@ public class AcquisitionMethodTable extends BasicTable {
 	public void setTableModelFromAcquisitionMethods(Collection<DataAcquisitionMethod> acquisitionMethods) {
 		
 		thf.setTable(null);
-		model.setTableModelFromMethods(acquisitionMethods);
+		((AcquisitionMethodTableModel)model).setTableModelFromMethods(acquisitionMethods);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void setSelectedAcquisitionMethods(Collection<DataAcquisitionMethod> acquisitionMethods) {

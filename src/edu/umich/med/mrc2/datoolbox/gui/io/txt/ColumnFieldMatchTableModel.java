@@ -57,9 +57,9 @@ public class ColumnFieldMatchTableModel extends BasicTableModel {
 		super();
 
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ENABLED_COLUMN, Boolean.class, true),
-			new ColumnContext(DATA_FILE_COLUMN, DataFile.class, false),
-			new ColumnContext(SAMPLE_ID_COLUMN, ExperimentalSample.class, true)
+			new ColumnContext(ENABLED_COLUMN, ENABLED_COLUMN, Boolean.class, true),
+			new ColumnContext(DATA_FILE_COLUMN, DATA_FILE_COLUMN, DataFile.class, false),
+			new ColumnContext(SAMPLE_ID_COLUMN, SAMPLE_ID_COLUMN, ExperimentalSample.class, true)
 		};
 		sampleIdMask = MRC2ToolBoxConfiguration.getSampleIdMask();
 		sampleIdPattern = Pattern.compile(sampleIdMask);

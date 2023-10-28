@@ -38,13 +38,12 @@ public class SoftwareTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 2069272556941448636L;
-	private SoftwareTableModel model;
 
 	public SoftwareTable() {
 		super();
 		model = new SoftwareTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<SoftwareTableModel>(model);
+		rowSorter = new TableRowSorter<SoftwareTableModel>((SoftwareTableModel)model);
 		setRowSorter(rowSorter);		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		columnModel.getColumnById(SoftwareTableModel.SOFTWARE_DESCRIPTION_COLUMN).
@@ -56,9 +55,9 @@ public class SoftwareTable extends BasicTable {
 	public void setTableModelFromSoftwareList(Collection<DataProcessingSoftware>softwareItems) {
 
 		thf.setTable(null);
-		model.setTableModelFromSoftwareList(softwareItems);
+		((SoftwareTableModel)model).setTableModelFromSoftwareList(softwareItems);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public DataProcessingSoftware getSelectedSoftware(){

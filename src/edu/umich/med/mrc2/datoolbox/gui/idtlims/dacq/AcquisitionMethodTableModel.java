@@ -55,16 +55,16 @@ public class AcquisitionMethodTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ACQ_METHOD_ID_COLUMN, String.class, false),
-			new ColumnContext(ACQ_METHOD_COLUMN, DataAcquisitionMethod.class, false),
-			new ColumnContext(ACQ_METHOD_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(POLARITY_COLUMN, String.class, false),
-			new ColumnContext(IONIZATION_TYPE_COLUMN, String.class, false),
-			new ColumnContext(MS_TYPE_COLUMN, String.class, false),
-			new ColumnContext(COLUMN_NAME_COLUMN, LIMSChromatographicColumn.class, false),
-			new ColumnContext(USER_COLUMN, LIMSUser.class, false),
-			new ColumnContext(DATE_CREATED_COLUMN, Date.class, false),
-			new ColumnContext(SOFTWARE_COLUMN, DataProcessingSoftware.class, false),
+			new ColumnContext(ACQ_METHOD_ID_COLUMN, ACQ_METHOD_ID_COLUMN, String.class, false),
+			new ColumnContext(ACQ_METHOD_COLUMN, ACQ_METHOD_COLUMN, DataAcquisitionMethod.class, false),
+			new ColumnContext(ACQ_METHOD_DESCRIPTION_COLUMN, ACQ_METHOD_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(POLARITY_COLUMN, POLARITY_COLUMN, String.class, false),
+			new ColumnContext(IONIZATION_TYPE_COLUMN, "Ionization method", String.class, false),
+			new ColumnContext(MS_TYPE_COLUMN, MS_TYPE_COLUMN, String.class, false),
+			new ColumnContext(COLUMN_NAME_COLUMN, "Chromatographic column", LIMSChromatographicColumn.class, false),
+			new ColumnContext(USER_COLUMN, USER_COLUMN, LIMSUser.class, false),
+			new ColumnContext(DATE_CREATED_COLUMN, DATE_CREATED_COLUMN, Date.class, false),
+			new ColumnContext(SOFTWARE_COLUMN, "Instrument control software", DataProcessingSoftware.class, false),
 		};
 	}
 

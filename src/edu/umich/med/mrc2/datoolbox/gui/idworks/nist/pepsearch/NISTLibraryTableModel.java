@@ -45,8 +45,8 @@ public class NISTLibraryTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ACTIVE_COLUMN, Boolean.class, true),
-			new ColumnContext(LIBRARY_FILE_COLUMN, File.class, false),
+			new ColumnContext(ACTIVE_COLUMN, ACTIVE_COLUMN, Boolean.class, true),
+			new ColumnContext(LIBRARY_FILE_COLUMN, LIBRARY_FILE_COLUMN, File.class, false),
 		};
 	}
 

@@ -48,16 +48,15 @@ public class DataFileSampleMatchTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3111543056268144390L;
-	private DataFileSampleMatchTableModel model;
-
+	
 	public DataFileSampleMatchTable() {
 
 		super();
-
-		getTableHeader().setReorderingAllowed(false);
 		model = new DataFileSampleMatchTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<DataFileSampleMatchTableModel>(model);
+		getTableHeader().setReorderingAllowed(false);
+		rowSorter = new TableRowSorter<DataFileSampleMatchTableModel>(
+				(DataFileSampleMatchTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(DataFileSampleMatchTableModel.SDR_OBJECT_COLUMN),
 				new SampleDataResultObjectComparator(SortProperty.resultFile));
@@ -68,7 +67,8 @@ public class DataFileSampleMatchTable extends BasicTable {
 		//	setDefaultRenderer(DataFile.class, new DataFileCellRenderer());
 		setDefaultRenderer(SampleDataResultObject.class, 
 				new SampleDataResultObjectRenderer(SortProperty.resultFile));
-
+		setExactColumnWidth(DataFileSampleMatchTableModel.ENABLED_COLUMN, 50);
+		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(ExperimentalSample.class, 
 				new ExperimentalSampleFormat(SortProperty.ID));
@@ -78,24 +78,20 @@ public class DataFileSampleMatchTable extends BasicTable {
 				new SampleDataResultObjectFormat(SortProperty.resultFile));
 		thf.getParserModel().setComparator(SampleDataResultObject.class, 
 				new SampleDataResultObjectComparator(SortProperty.resultFile));
-		
 		finalizeLayout();
-		columnModel.getColumnById(DataFileSampleMatchTableModel.ENABLED_COLUMN).setMaxWidth(50);
 	}
 	
 	public void setModelFromSampleDataResultObjects(Set<SampleDataResultObject>objects) {
 		
 		thf.setTable(null);
-		model.setModelFromSampleDataResultObjects(objects);
+		((DataFileSampleMatchTableModel)model).setModelFromSampleDataResultObjects(objects);
 		TreeSet<ExperimentalSample> samples = 
-				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples();
-		
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples();		
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(samples, this));
 
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(Collections.singleton(
-				getColumnIndex(DataFileSampleMatchTableModel.ENABLED_COLUMN)));
+		adjustColumns();
 	}
 	
 	public Set<SampleDataResultObject>getSampleDataResultObject(boolean enabledOnly){
@@ -124,7 +120,6 @@ public class DataFileSampleMatchTable extends BasicTable {
 		Set<SampleDataResultObject>objects = 
 				new TreeSet<SampleDataResultObject>(new SampleDataResultObjectComparator(SortProperty.resultFile));
 		
-		int bCol = model.getColumnIndex(DataFileSampleMatchTableModel.ENABLED_COLUMN);
 		int col = model.getColumnIndex(DataFileSampleMatchTableModel.SDR_OBJECT_COLUMN);
 		int sCol = model.getColumnIndex(DataFileSampleMatchTableModel.SAMPLE_COLUMN);
 		for(int r : getSelectedRows()) {

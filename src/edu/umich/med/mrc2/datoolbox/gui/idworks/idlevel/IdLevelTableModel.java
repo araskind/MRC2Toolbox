@@ -48,11 +48,11 @@ public class IdLevelTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 			//	new ColumnContext(STATUS_ID_COLUMN, String.class, false),
-			new ColumnContext(LEVEL_COLUMN, MSFeatureIdentificationLevel.class, false),
-			new ColumnContext(LEVEL_RANK_COLUMN, Integer.class, false),
-			new ColumnContext(LEVEL_COLOR_CODE_COLUMN, MSFeatureIdentificationLevel.class, false),
-			new ColumnContext(SHORCUT_COLUMN, String.class, false),
-			new ColumnContext(ALLOW_UPDATE_DEFAULT_ID_COLUMN, Boolean.class, true),
+			new ColumnContext(LEVEL_COLUMN, "Identification level", MSFeatureIdentificationLevel.class, false),
+			new ColumnContext(LEVEL_RANK_COLUMN, LEVEL_RANK_COLUMN, Integer.class, false),
+			new ColumnContext(LEVEL_COLOR_CODE_COLUMN, LEVEL_COLOR_CODE_COLUMN, MSFeatureIdentificationLevel.class, false),
+			new ColumnContext(SHORCUT_COLUMN, SHORCUT_COLUMN, String.class, false),
+			new ColumnContext(ALLOW_UPDATE_DEFAULT_ID_COLUMN, ALLOW_UPDATE_DEFAULT_ID_COLUMN, Boolean.class, true),
 		};
 	}
 

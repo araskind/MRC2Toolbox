@@ -41,13 +41,11 @@ public class NISTLibraryTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = 3916578878036401634L;
 
-	private NISTLibraryTableModel model;
-
 	public NISTLibraryTable() {
 		super();
 		model = new NISTLibraryTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<NISTLibraryTableModel>(model);
+		rowSorter = new TableRowSorter<NISTLibraryTableModel>((NISTLibraryTableModel)model);
 		setRowSorter(rowSorter);
 		getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		getColumn(NISTLibraryTableModel.ACTIVE_COLUMN).setMaxWidth(80);
@@ -58,20 +56,23 @@ public class NISTLibraryTable extends BasicTable {
 	
 	public void setModelFromFiles(Map<File, Boolean> libFiles) {
 		thf.setTable(null);
-		model.setModelFromFiles(libFiles);
+		((NISTLibraryTableModel)model).setModelFromFiles(libFiles);
 		thf.setTable(this);
+		adjustColumns();
 	}
 	
 	public void addLibraryFile(File libFile) {
 		thf.setTable(null);
-		model.addLibraryFile(libFile);
+		((NISTLibraryTableModel)model).addLibraryFile(libFile);
 		thf.setTable(this);
+		adjustColumns();
 	}
 
 	public void removeLibraryFiles(Collection<File> libFiles) {
 		thf.setTable(null);
-		model.removeLibraryFiles(libFiles);
+		((NISTLibraryTableModel)model).removeLibraryFiles(libFiles);
 		thf.setTable(this);
+		adjustColumns();
 	}
 
 	public Collection<File>getLibraryFiles(){

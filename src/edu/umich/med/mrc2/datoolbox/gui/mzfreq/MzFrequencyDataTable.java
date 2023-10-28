@@ -50,7 +50,6 @@ public class MzFrequencyDataTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 1511489263877797538L;
-	private MzFrequencyDataTableModel model;
 
 	public MzFrequencyDataTable() {
 
@@ -58,7 +57,8 @@ public class MzFrequencyDataTable extends BasicTable {
 		model = new MzFrequencyDataTableModel();
 		setModel(model);
 		
-		rowSorter = new TableRowSorter<MzFrequencyDataTableModel>(model);
+		rowSorter = new TableRowSorter<MzFrequencyDataTableModel>(
+				(MzFrequencyDataTableModel)model);
 		rowSorter.setComparator(model.getColumnIndex(MzFrequencyDataTableModel.AVG_MZ_COLUMN),
 				new MzFrequencyObjectComparator(SortProperty.rangeMidpoint));
 		rowSorter.setComparator(model.getColumnIndex(MzFrequencyDataTableModel.MZ_RANGE_COLUMN),
@@ -100,9 +100,9 @@ public class MzFrequencyDataTable extends BasicTable {
 	public void setTableModelFromMzFrequencyObjectCollection(
 			Collection<MzFrequencyObject> collection) {
 		thf.setTable(null);
-		model.setTableModelFromMzFrequencyObjectCollection(collection);
+		((MzFrequencyDataTableModel)model).setTableModelFromMzFrequencyObjectCollection(collection);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public MzFrequencyObject getSelectedMzFrequencyObject() {

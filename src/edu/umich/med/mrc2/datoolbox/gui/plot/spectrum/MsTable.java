@@ -23,6 +23,7 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.spectrum;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.RowSorter;
@@ -42,7 +43,6 @@ public class MsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5088486364694169431L;
-	private MsTableModel model;
 
 	public MsTable() {
 
@@ -50,7 +50,7 @@ public class MsTable extends BasicTable {
 
 		model = new MsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MsTableModel>(model);
+		rowSorter = new TableRowSorter<MsTableModel>((MsTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -66,20 +66,19 @@ public class MsTable extends BasicTable {
 
 	public void setTableModelFromFeature(MsFeature feature, boolean scaleMs) {
 
-		ArrayList<MsFeature> featureList = new ArrayList<MsFeature>();
-		featureList.add(feature);
 		thf.setTable(null);
-		model.setTableModelFromFeatureList(featureList, scaleMs);
-		sortByMz();
+		((MsTableModel)model).setTableModelFromFeatureList(
+				Collections.singleton(feature), scaleMs);
+		//	sortByMz();
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public void setTableModelFromFeatureList(Collection<MsFeature> featureList, boolean scaleMs) {
 
-		model.setTableModelFromFeatureList(featureList, scaleMs);
-		sortByMz();
-		tca.adjustColumns();
+		((MsTableModel)model).setTableModelFromFeatureList(featureList, scaleMs);
+		//	sortByMz();
+		adjustColumns();
 	}
 
 	private void sortByMz() {

@@ -38,13 +38,12 @@ public class IdFollowupStepTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private IdFollowupStepTableModel model;
 
 	public IdFollowupStepTable() {
 		super();
 		model =  new IdFollowupStepTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<IdFollowupStepTableModel>(model);
+		rowSorter = new TableRowSorter<IdFollowupStepTableModel>((IdFollowupStepTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(IdFollowupStepTableModel.STEP_COLUMN),
 				new IdFollowupStepComparator(SortProperty.Name));
@@ -55,8 +54,8 @@ public class IdFollowupStepTable extends BasicTable {
 
 	public void setTableModelFromFollowupStepList(
 			Collection<MSFeatureIdentificationFollowupStep>followupStepList) {
-		model.setTableModelFromFollowupStepList(followupStepList);
-		tca.adjustColumns();
+		((IdFollowupStepTableModel)model).setTableModelFromFollowupStepList(followupStepList);
+		adjustColumns();
 	}
 
 	public MSFeatureIdentificationFollowupStep getSelectedFollowupStep() {

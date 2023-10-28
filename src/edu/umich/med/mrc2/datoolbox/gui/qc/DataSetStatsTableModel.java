@@ -40,26 +40,26 @@ public class DataSetStatsTableModel extends BasicTableModel {
 	private static final long serialVersionUID = 6956836392142526044L;
 
 	public static final String DATA_FILE_COLUMN = "Data file";
-	public static final String INJECTION_TIME_COLUMN = "Injection timee";
+	public static final String INJECTION_TIME_COLUMN = "Injection time";
 
 	public DataSetStatsTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DATA_FILE_COLUMN, DataFile.class, false),
-			new ColumnContext(INJECTION_TIME_COLUMN, Date.class, false),
-			new ColumnContext(DataSetQcField.OBSERVATIONS.getName(), Integer.class, false),
-			new ColumnContext(DataSetQcField.MISSING.getName(), Integer.class, false),
-			new ColumnContext(DataSetQcField.OUTLIERS.getName(), Integer.class, false),
-			new ColumnContext(DataSetQcField.MIN.getName(), Double.class, false),
-			new ColumnContext(DataSetQcField.MAX.getName(), Double.class, false),
-			new ColumnContext(DataSetQcField.MEAN.getName(), Double.class, false),
-			new ColumnContext(DataSetQcField.MEAN_TRIM.getName(), Double.class, false),
-			new ColumnContext(DataSetQcField.MEDIAN.getName(), Double.class, false),
-			new ColumnContext(DataSetQcField.SD.getName(), Double.class, false),
-			new ColumnContext(DataSetQcField.RSD.getName(), Double.class, false),
-			new ColumnContext(DataSetQcField.SD_TRIM.getName(), Double.class, false),
-			new ColumnContext(DataSetQcField.RSD_TRIM.getName(), Double.class, false)
+			new ColumnContext(DATA_FILE_COLUMN, DATA_FILE_COLUMN, DataFile.class, false),
+			new ColumnContext(INJECTION_TIME_COLUMN, INJECTION_TIME_COLUMN, Date.class, false),
+			new ColumnContext(DataSetQcField.OBSERVATIONS.getName(), DataSetQcField.OBSERVATIONS.getDescription(), Integer.class, false),
+			new ColumnContext(DataSetQcField.MISSING.getName(), DataSetQcField.MISSING.getDescription(), Integer.class, false),
+			new ColumnContext(DataSetQcField.OUTLIERS.getName(), DataSetQcField.OUTLIERS.getDescription(), Integer.class, false),
+			new ColumnContext(DataSetQcField.MIN.getName(), DataSetQcField.MIN.getDescription(), Double.class, false),
+			new ColumnContext(DataSetQcField.MAX.getName(), DataSetQcField.MAX.getDescription(), Double.class, false),
+			new ColumnContext(DataSetQcField.MEAN.getName(), DataSetQcField.MEAN.getDescription(), Double.class, false),
+			new ColumnContext(DataSetQcField.MEAN_TRIM.getName(), DataSetQcField.MEAN_TRIM.getDescription(), Double.class, false),
+			new ColumnContext(DataSetQcField.MEDIAN.getName(), DataSetQcField.MEDIAN.getDescription(), Double.class, false),
+			new ColumnContext(DataSetQcField.SD.getName(), DataSetQcField.SD.getDescription(), Double.class, false),
+			new ColumnContext(DataSetQcField.RSD.getName(), DataSetQcField.RSD.getDescription(), Double.class, false),
+			new ColumnContext(DataSetQcField.SD_TRIM.getName(), DataSetQcField.SD_TRIM.getDescription(), Double.class, false),
+			new ColumnContext(DataSetQcField.RSD_TRIM.getName(), DataSetQcField.RSD_TRIM.getDescription(), Double.class, false)
 		};
 	}
 

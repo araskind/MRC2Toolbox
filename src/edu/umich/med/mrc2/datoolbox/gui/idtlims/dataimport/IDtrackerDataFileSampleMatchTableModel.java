@@ -61,10 +61,10 @@ public class IDtrackerDataFileSampleMatchTableModel extends BasicTableModel {
 
 		columnArray = new ColumnContext[] {
 //			new ColumnContext(ENABLED_COLUMN, Boolean.class, true),
-			new ColumnContext(DATA_FILE_COLUMN, DataFile.class, false),
-			new ColumnContext(ACQUISITION_METHOD_COLUMN, DataAcquisitionMethod.class, false),
-			new ColumnContext(INJETION_TIMESTAMP_COLUMN, Date.class, false),
-			new ColumnContext(DA_METHOD_COLUMN, DataExtractionMethod.class, true),
+			new ColumnContext(DATA_FILE_COLUMN, DATA_FILE_COLUMN, DataFile.class, false),
+			new ColumnContext(ACQUISITION_METHOD_COLUMN, ACQUISITION_METHOD_COLUMN, DataAcquisitionMethod.class, false),
+			new ColumnContext(INJETION_TIMESTAMP_COLUMN, INJETION_TIMESTAMP_COLUMN, Date.class, false),
+			new ColumnContext(DA_METHOD_COLUMN, DA_METHOD_COLUMN, DataExtractionMethod.class, true),
 		};
 	}
 

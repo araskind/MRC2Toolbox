@@ -51,16 +51,14 @@ public class DataExtractionMethodTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -4961051611998862332L;
-
-	private DataExtractionMethodTableModel model;
 	private LIMSUserRenderer userRenderer;
-	private MouseMotionAdapter mma;
 
 	public DataExtractionMethodTable() {
 		super();
 		model =  new DataExtractionMethodTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<DataExtractionMethodTableModel>(model);
+		rowSorter = new TableRowSorter<DataExtractionMethodTableModel>(
+				(DataExtractionMethodTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(DataExtractionMethodTableModel.USER_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
@@ -71,7 +69,7 @@ public class DataExtractionMethodTable extends BasicTable {
 		setDefaultRenderer(DataExtractionMethod.class, new AnalysisMethodRenderer());
 		userRenderer = new LIMSUserRenderer();
 		setDefaultRenderer(LIMSUser.class, userRenderer);
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -101,9 +99,9 @@ public class DataExtractionMethodTable extends BasicTable {
 
 	public void setTableModelFromMethods(Collection<DataExtractionMethod> dataExtractionMethods) {
 		thf.setTable(null);
-		model.setTableModelFromMethods(dataExtractionMethods);
+		((DataExtractionMethodTableModel)model).setTableModelFromMethods(dataExtractionMethods);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public DataExtractionMethod getSelectedMethod() {

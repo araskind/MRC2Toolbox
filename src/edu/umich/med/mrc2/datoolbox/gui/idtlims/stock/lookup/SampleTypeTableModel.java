@@ -42,8 +42,8 @@ public class SampleTypeTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(SAMPLE_TYPE_ID_COLUMN, LIMSSampleType.class, false),
-			new ColumnContext(SAMPLE_TYPE_NAME_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_TYPE_ID_COLUMN, SAMPLE_TYPE_ID_COLUMN, LIMSSampleType.class, false),
+			new ColumnContext(SAMPLE_TYPE_NAME_COLUMN, SAMPLE_TYPE_NAME_COLUMN, String.class, false),
 		};
 	}
 

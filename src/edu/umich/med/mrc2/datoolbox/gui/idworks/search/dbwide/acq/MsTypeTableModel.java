@@ -43,8 +43,8 @@ public class MsTypeTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ID_COLUMN, MsType.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(ID_COLUMN, ID_COLUMN, MsType.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
 		};
 	}
 

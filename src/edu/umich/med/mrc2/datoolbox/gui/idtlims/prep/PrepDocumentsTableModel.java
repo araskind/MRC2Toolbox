@@ -41,21 +41,22 @@ public class PrepDocumentsTableModel extends BasicTableModel {
 	//	TODO - make this annotations table
 	
 	public static final String ANNOTATION_ID_COLUMN = "ID";
-	public static final String DOCUMENT_DESCRIPTION_COLUMN = "Description";
-	public static final String FILE_DOWNLOAD_COLUMN = "Format";
+	public static final String DOCUMENT_DESCRIPTION_COLUMN = "Description";	
 	public static final String ADDED_BY_COLUMN = "Added by";
 	public static final String ADDED_ON_COLUMN = "Added on";
+	public static final String FILE_DOWNLOAD_COLUMN = "Format";
 
 	public PrepDocumentsTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(ANNOTATION_ID_COLUMN, ObjectAnnotation.class, false),
-			new ColumnContext(DOCUMENT_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(ADDED_BY_COLUMN, LIMSUser.class, false),
-			new ColumnContext(ADDED_ON_COLUMN, Date.class, false),
-			new ColumnContext(FILE_DOWNLOAD_COLUMN, ObjectAnnotation.class, false),
+			new ColumnContext(ANNOTATION_ID_COLUMN, "Annotation ID", ObjectAnnotation.class, false),
+			new ColumnContext(DOCUMENT_DESCRIPTION_COLUMN, DOCUMENT_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(ADDED_BY_COLUMN, ADDED_BY_COLUMN, LIMSUser.class, false),
+			new ColumnContext(ADDED_ON_COLUMN, ADDED_ON_COLUMN, Date.class, false),
+			new ColumnContext(FILE_DOWNLOAD_COLUMN, 
+					"Click to download (icon shows document format)", ObjectAnnotation.class, false),
 		};
 	}
 

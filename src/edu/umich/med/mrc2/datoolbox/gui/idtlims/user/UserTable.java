@@ -47,15 +47,13 @@ public class UserTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 2959278423863597193L;
-	private UserTableModel model;
 	private LIMSUserRenderer userRenderer;
-	private MouseMotionAdapter mma;
 
 	public UserTable() {
 		super();
 		model = new UserTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<UserTableModel>(model);
+		rowSorter = new TableRowSorter<UserTableModel>((UserTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(UserTableModel.USER_COLUMN),
 				new LIMSExperimentComparator(SortProperty.Name, SortDirection.DESC));
@@ -65,7 +63,7 @@ public class UserTable extends BasicTable {
 		userRenderer = new LIMSUserRenderer();
 		setDefaultRenderer(LIMSUser.class, userRenderer);
 
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -91,9 +89,9 @@ public class UserTable extends BasicTable {
 
 	public void setTableModelFromUserList(Collection<LIMSUser> users) {
 		thf.setTable(null);
-		model.setTableModelFromUserList(users);
+		((UserTableModel)model).setTableModelFromUserList(users);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public LIMSUser getSelectedUser() {

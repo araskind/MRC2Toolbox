@@ -43,8 +43,8 @@ public class SpeciesTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(TAX_ID_COLUMN, LIMSBioSpecies.class, false),
-			new ColumnContext(SPECIES_COLUMN, String.class, false),
+			new ColumnContext(TAX_ID_COLUMN, TAX_ID_COLUMN, LIMSBioSpecies.class, false),
+			new ColumnContext(SPECIES_COLUMN, SPECIES_COLUMN, String.class, false),
 		};
 	}
 

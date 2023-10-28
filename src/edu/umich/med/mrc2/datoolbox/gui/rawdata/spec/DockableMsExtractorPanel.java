@@ -54,8 +54,8 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.enums.MassErrorType;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.DataFileToAcquisitionMethodTable;
 import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataExaminerPanel;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataFileTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.gui.utils.MessageDialog;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -70,7 +70,7 @@ public class DockableMsExtractorPanel extends DefaultSingleCDockable implements 
 //	private JList<DataFile> sampleFileList;
 //	private DefaultListModel<DataFile> fileListModel;
 	
-	private RawDataFileTable rawDataFileTable;
+	private DataFileToAcquisitionMethodTable rawDataFileTable;
 	private RawDataExaminerPanel rawDataPanel;
 	private JButton extractAverageSpectrumButton;
 	private JButton findByFragmentButton;
@@ -153,7 +153,7 @@ public class DockableMsExtractorPanel extends DefaultSingleCDockable implements 
 //		scrollPane.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Data files",
 //				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
 		
-		rawDataFileTable = new RawDataFileTable();
+		rawDataFileTable = new DataFileToAcquisitionMethodTable();
 		JScrollPane scrollPane = new JScrollPane(rawDataFileTable);
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
 		gbc_scrollPane_1.gridwidth = 6;

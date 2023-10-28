@@ -46,9 +46,9 @@ public class DataFileSampleMatchTableModel extends BasicTableModel {
 		super();
 
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ENABLED_COLUMN, Boolean.class, true),	
-			new ColumnContext(SDR_OBJECT_COLUMN, SampleDataResultObject.class, false),
-			new ColumnContext(SAMPLE_COLUMN, ExperimentalSample.class, true)
+			new ColumnContext(ENABLED_COLUMN, ENABLED_COLUMN, Boolean.class, true),	
+			new ColumnContext(SDR_OBJECT_COLUMN, SDR_OBJECT_COLUMN, SampleDataResultObject.class, false),
+			new ColumnContext(SAMPLE_COLUMN, SAMPLE_COLUMN, ExperimentalSample.class, true)
 		};
 	}
 		

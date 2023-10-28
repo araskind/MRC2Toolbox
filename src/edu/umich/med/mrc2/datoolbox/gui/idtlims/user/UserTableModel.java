@@ -38,14 +38,14 @@ public class UserTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = -7757896216107421231L;
 	public static final String USER_COLUMN = "User";
-	public static final String CONTACT_COLUMN = "Contact info";
+	public static final String CONTACT_COLUMN = "Contact details";
 
 	public UserTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(USER_COLUMN, LIMSUser.class, false),
-			new ColumnContext(CONTACT_COLUMN, String.class, false),
+			new ColumnContext(USER_COLUMN, "User name", LIMSUser.class, false),
+			new ColumnContext(CONTACT_COLUMN, CONTACT_COLUMN, String.class, false),
 		};
 	}
 

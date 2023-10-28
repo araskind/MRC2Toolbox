@@ -38,23 +38,23 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisMethodRenderer;
 
-public class RawDataFileTable extends BasicTable {
+public class DataFileToAcquisitionMethodTable extends BasicTable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 2087167895707677516L;
-	private RawDataFileTableModel model;
 
-	public RawDataFileTable() {
+	public DataFileToAcquisitionMethodTable() {
 
 		super();
 
-		model = new RawDataFileTableModel();
+		model = new DataFileToAcquisitionMethodTableModel();
 		setModel(model);
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		
-		rowSorter = new TableRowSorter<RawDataFileTableModel>(model);
+		rowSorter = new TableRowSorter<DataFileToAcquisitionMethodTableModel>(
+				(DataFileToAcquisitionMethodTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(
 				ReferenceMsOneFeatureTableModel.ACQ_METHOD_ID_COLUMN),
@@ -72,9 +72,9 @@ public class RawDataFileTable extends BasicTable {
 	public void setModelFromDataFiles(Collection<DataFile> files, boolean append) {
 
 		thf.setTable(null);
-		model.setModelFromDataFiles(files, append);
+		((DataFileToAcquisitionMethodTableModel)model).setModelFromDataFiles(files, append);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public Collection<DataFile>getSelectedFiles(){
@@ -83,7 +83,7 @@ public class RawDataFileTable extends BasicTable {
 		if(getSelectedRowCount() == 0)
 			return selected;
 		
-		int fileColumn = model.getColumnIndex(RawDataFileTableModel.DATA_FILE_COLUMN);
+		int fileColumn = model.getColumnIndex(DataFileToAcquisitionMethodTableModel.DATA_FILE_COLUMN);
 		for(int i : getSelectedRows())
 			selected.add((DataFile)model.getValueAt(convertRowIndexToModel(i),fileColumn));
 				
@@ -96,7 +96,7 @@ public class RawDataFileTable extends BasicTable {
 		if(dataFiles == null || dataFiles.isEmpty())
 			return;
 		
-		int fileColumn = model.getColumnIndex(RawDataFileTableModel.DATA_FILE_COLUMN);
+		int fileColumn = model.getColumnIndex(DataFileToAcquisitionMethodTableModel.DATA_FILE_COLUMN);
 		for(int i=0; i<getRowCount(); i++) {
 			DataFile rowFile = ((DataFile)model.getValueAt(convertRowIndexToModel(i),fileColumn));
 			if(dataFiles.contains(rowFile))
@@ -106,7 +106,7 @@ public class RawDataFileTable extends BasicTable {
 	}
 
 	public void removeDataFiles(Collection<DataFile> filesToRemove) {
-		model.removeFiles(filesToRemove);
+		((DataFileToAcquisitionMethodTableModel)model).removeFiles(filesToRemove);
 	}
 }
 

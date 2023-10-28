@@ -46,14 +46,14 @@ public class DataPipelinesTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3232039944841480790L;
-	private DataPipelinesTableModel model;
 
 	public DataPipelinesTable() {
 
 		super();
 		model = new DataPipelinesTableModel();		
 		setModel(model);
-		rowSorter = new TableRowSorter<DataPipelinesTableModel>(model);
+		rowSorter = new TableRowSorter<DataPipelinesTableModel>(
+				(DataPipelinesTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(DataPipelinesTableModel.DATA_ACQ_METHOD_COLUMN),
 				new AnalysisMethodComparator(SortProperty.Name));
@@ -67,6 +67,9 @@ public class DataPipelinesTable extends BasicTable {
 		
 		columnModel.getColumnById(DataPipelinesTableModel.CODE_COLUMN)
 			.setCellRenderer(new DataPipelineRenderer(SortProperty.ID));
+		
+		columnModel.getColumnById(DataPipelinesTableModel.POLARITY_COLUMN).setMaxWidth(80);
+		columnModel.getColumnById(DataPipelinesTableModel.CODE_COLUMN).setMaxWidth(120);
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setComparator(DataAcquisitionMethod.class, 
@@ -87,11 +90,9 @@ public class DataPipelinesTable extends BasicTable {
 
 	public void setTableModelFromDataPipelineCollection(Collection<DataPipeline>pipelines) {
 		thf.setTable(null);
-		model.setTableModelFromDataPipelineCollection(pipelines);
+		((DataPipelinesTableModel)model).setTableModelFromDataPipelineCollection(pipelines);
 		thf.setTable(this);
-		tca.adjustColumns();
-		columnModel.getColumnById(DataPipelinesTableModel.POLARITY_COLUMN).setMaxWidth(80);
-		columnModel.getColumnById(DataPipelinesTableModel.CODE_COLUMN).setMaxWidth(120);
+		adjustColumns();
 	}
 	
 	public Collection<DataPipeline> getSelectedDataPipelines() {

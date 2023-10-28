@@ -69,10 +69,10 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 	
 	public static final String EXPERIMENT_COLUMN = "Experiment";
 	public static final String SAMPLE_COLUMN = "Sample";
-	public static final String SAMPLE_TYPE_COLUMN = "sample type";
+	public static final String SAMPLE_TYPE_COLUMN = "Sample type";
 	public static final String ACQ_METHOD_ID_COLUMN = "Acq. method";
 	public static final String DEX_METHOD_ID_COLUMN = "DA method";
-	public static final String ANNOTATIONS_COLUMN = "Annotations";
+	public static final String ANNOTATIONS_COLUMN = "Annot.";
 	public static final String FOLLOWUP_COLUMN = "Follow-up";
 	public static final String PARENT_ION_PURITY_COLUMN = "PIpurity";
 	public static final String PARENT_ION_IS_MINOR_ISOTOPE_COLUMN = "MinorP";
@@ -85,35 +85,38 @@ public class MSMSFeatureTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(MS_FEATURE_COLUMN, MSFeatureInfoBundle.class, false),
-			new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
-			new ColumnContext(DATABASE_LINK_COLUMN, MsFeatureIdentity.class, false),
-			new ColumnContext(AMBIGUITY_COLUMN, FeatureIdentificationState.class, false),
-			new ColumnContext(ID_LEVEL_COLUMN, MSFeatureIdentificationLevel.class, false),
-			new ColumnContext(ADDUCT_COLUMN, Adduct.class, false),
-			new ColumnContext(POLARITY_COLUMN, Polarity.class, false),
-			new ColumnContext(ANNOTATIONS_COLUMN, Boolean.class, false),
-			new ColumnContext(FOLLOWUP_COLUMN, Boolean.class, false),
-			new ColumnContext(RETENTION_COLUMN, Double.class, false),
-			new ColumnContext(PARENT_MZ_COLUMN, Double.class, false),			
-			new ColumnContext(NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN, Double.class, false),
-			new ColumnContext(LIBRARY_PRECURSOR_DELTA_MZ_COLUMN, Double.class, false),			
-			new ColumnContext(COLLISION_ENERGY_COLUMN, Double.class, false),
-			new ColumnContext(ENTROPY_BASED_SCORE_COLUMN, Double.class, false),
-			new ColumnContext(MSMS_MATCH_TYPE_COLUMN, ReferenceMsMsLibraryMatch.class, false),
-
+			new ColumnContext(MS_FEATURE_COLUMN, MS_FEATURE_COLUMN, MSFeatureInfoBundle.class, false),
+			new ColumnContext(COMPOUND_NAME_COLUMN, "Compound name", String.class, false),
+			new ColumnContext(DATABASE_LINK_COLUMN, 
+					"Primary database accession and web link to the source database", MsFeatureIdentity.class, false),
+			new ColumnContext(AMBIGUITY_COLUMN, 
+					"Identification status (unknown, single / multiple IDs)", FeatureIdentificationState.class, false),
+			new ColumnContext(ID_LEVEL_COLUMN, "Identification level", MSFeatureIdentificationLevel.class, false),
+			new ColumnContext(ADDUCT_COLUMN, "Primary adduct", Adduct.class, false),
+			new ColumnContext(POLARITY_COLUMN, POLARITY_COLUMN, Polarity.class, false),
+			new ColumnContext(ANNOTATIONS_COLUMN, "Has annotations (standard or free form)", Boolean.class, false),
+			new ColumnContext(FOLLOWUP_COLUMN, "Identification followup steps assigned", Boolean.class, false),
+			new ColumnContext(RETENTION_COLUMN, "Retention time", Double.class, false),
+			new ColumnContext(PARENT_MZ_COLUMN, "Precursor ion M/Z", Double.class, false),			
+			new ColumnContext(NEUTRAL_MASS_PRECURSOR_DELTA_MZ_COLUMN, 
+					"Difference between calculated neutral mass and precursor ion M/Z", Double.class, false),
+			new ColumnContext(LIBRARY_PRECURSOR_DELTA_MZ_COLUMN, 
+					"Difference between precursor M/Z from reference MSMS library\n"
+					+ "and observed precursor ion M/Z", Double.class, false),			
+			new ColumnContext(COLLISION_ENERGY_COLUMN, "MSMS collision energy", Double.class, false),
+			new ColumnContext(ENTROPY_BASED_SCORE_COLUMN, "Entropy based MSMS match score", Double.class, false),
+			new ColumnContext(MSMS_MATCH_TYPE_COLUMN, "MSMS match type", ReferenceMsMsLibraryMatch.class, false),
 //			new ColumnContext(LIB_SCORE_COLUMN, Double.class, false),
-//			new ColumnContext(MSMS_LIB_COLUMN, ReferenceMsMsLibrary.class, false),
-			
-			new ColumnContext(SAMPLE_TYPE_COLUMN, LIMSSampleType.class, false),
-			new ColumnContext(SAMPLE_COLUMN, IDTExperimentalSample.class, false),
-			new ColumnContext(EXPERIMENT_COLUMN, LIMSExperiment.class, false),
-			new ColumnContext(ACQ_METHOD_ID_COLUMN, DataAcquisitionMethod.class, false),
-			new ColumnContext(DEX_METHOD_ID_COLUMN, DataExtractionMethod.class, false),			
-			new ColumnContext(PARENT_ION_PURITY_COLUMN, Double.class, false),
-			new ColumnContext(PARENT_ION_IS_MINOR_ISOTOPE_COLUMN, Boolean.class, false),			
-			new ColumnContext(SPECTRUM_ENTROPY_COLUMN, Double.class, false),
-			new ColumnContext(SPECTRUM_TOTAL_INTENSITY_COLUMN, Double.class, false),
+//			new ColumnContext(MSMS_LIB_COLUMN, ReferenceMsMsLibrary.class, false),			
+			new ColumnContext(SAMPLE_TYPE_COLUMN, SAMPLE_TYPE_COLUMN, LIMSSampleType.class, false),
+			new ColumnContext(SAMPLE_COLUMN, "Sample ID", IDTExperimentalSample.class, false),
+			new ColumnContext(EXPERIMENT_COLUMN, "Experiment ID", LIMSExperiment.class, false),
+			new ColumnContext(ACQ_METHOD_ID_COLUMN, "Data acquisition method", DataAcquisitionMethod.class, false),
+			new ColumnContext(DEX_METHOD_ID_COLUMN, "Data analysis method", DataExtractionMethod.class, false),			
+			new ColumnContext(PARENT_ION_PURITY_COLUMN, "Precursor ion purity", Double.class, false),
+			new ColumnContext(PARENT_ION_IS_MINOR_ISOTOPE_COLUMN, "Is precursor ion a minor isotope (not monoisotopic peak)", Boolean.class, false),			
+			new ColumnContext(SPECTRUM_ENTROPY_COLUMN, "Pattern recognition entropy for observed MSMS", Double.class, false),
+			new ColumnContext(SPECTRUM_TOTAL_INTENSITY_COLUMN, "Sum of intensities of all peaks in observed MSMS", Double.class, false),
 		};
 	}
 	

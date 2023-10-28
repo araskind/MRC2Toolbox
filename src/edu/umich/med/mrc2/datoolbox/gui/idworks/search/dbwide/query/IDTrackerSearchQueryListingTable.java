@@ -46,19 +46,18 @@ public class IDTrackerSearchQueryListingTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = -363757863489122914L;
-	private IDTrackerSearchQueryListingTableModel model;
 
 	public IDTrackerSearchQueryListingTable() {
 		super();
 		model = new IDTrackerSearchQueryListingTableModel();
 		setModel(model);
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<IDTrackerSearchQueryListingTableModel>(model);
+		rowSorter = new TableRowSorter<IDTrackerSearchQueryListingTableModel>((IDTrackerSearchQueryListingTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(IDTrackerSearchQueryListingTableModel.USER_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
 		
-		LIMSUserRenderer userRenderer = new LIMSUserRenderer();
+		userRenderer = new LIMSUserRenderer();
 		setDefaultRenderer(LIMSUser.class, userRenderer);
 		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
@@ -87,9 +86,9 @@ public class IDTrackerSearchQueryListingTable extends BasicTable {
 	public void setTableModelFromQueryList(Collection<IDTSearchQuery>queryList) {
 		
 		thf.setTable(null);
-		model.setTableModelFromQueryList(queryList);
+		((IDTrackerSearchQueryListingTableModel)model).setTableModelFromQueryList(queryList);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public IDTSearchQuery getSelectedQuery() {

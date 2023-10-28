@@ -46,11 +46,11 @@ public class FoundLookupFeaturesTableModel extends BasicTableModel {
 	public FoundLookupFeaturesTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(FEATURE_COLUMN, MinimalMSOneFeature.class, false),
-			new ColumnContext(MZ_COLUMN, Double.class, false),
-			new ColumnContext(RT_COLUMN, Double.class, false),
-			new ColumnContext(RANK_COLUMN, Double.class, false),
-			new ColumnContext(CLUSTER_COLUMN, MsFeatureInfoBundleCluster.class, false)
+			new ColumnContext(FEATURE_COLUMN, "Feature name", MinimalMSOneFeature.class, false),
+			new ColumnContext(MZ_COLUMN, MZ_COLUMN, Double.class, false),
+			new ColumnContext(RT_COLUMN, "Retention time", Double.class, false),
+			new ColumnContext(RANK_COLUMN, RANK_COLUMN, Double.class, false),
+			new ColumnContext(CLUSTER_COLUMN, "Feature cluster", MsFeatureInfoBundleCluster.class, false)
 		};
 	}
 

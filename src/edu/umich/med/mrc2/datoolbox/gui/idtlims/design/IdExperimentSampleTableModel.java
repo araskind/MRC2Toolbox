@@ -49,15 +49,15 @@ public class IdExperimentSampleTableModel extends BasicTableModel {
 	public IdExperimentSampleTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(SAMPLE_ID_COLUMN, IDTExperimentalSample.class, false),
-			new ColumnContext(SAMPLE_NAME_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(PARENT_SAMPLE_ID_COLUMN, StockSample.class, false),
-			new ColumnContext(PARENT_SAMPLE_NAME_COLUMN, String.class, false),
-			new ColumnContext(PARENT_SAMPLE_TYPE_COLUMN, String.class, false),
-			new ColumnContext(PARENT_SAMPLE_SPECIES_COLUMN, String.class, false),
-			new ColumnContext(PARENT_SAMPLE_EXTERNAL_SOURCE_COLUMN, String.class, false),
-			new ColumnContext(PARENT_SAMPLE_EXTERNAL_ID_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_ID_COLUMN, SAMPLE_ID_COLUMN, IDTExperimentalSample.class, false),
+			new ColumnContext(SAMPLE_NAME_COLUMN, SAMPLE_NAME_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_DESCRIPTION_COLUMN, SAMPLE_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(PARENT_SAMPLE_ID_COLUMN, PARENT_SAMPLE_ID_COLUMN, StockSample.class, false),
+			new ColumnContext(PARENT_SAMPLE_NAME_COLUMN, PARENT_SAMPLE_NAME_COLUMN, String.class, false),
+			new ColumnContext(PARENT_SAMPLE_TYPE_COLUMN, PARENT_SAMPLE_TYPE_COLUMN, String.class, false),
+			new ColumnContext(PARENT_SAMPLE_SPECIES_COLUMN, PARENT_SAMPLE_SPECIES_COLUMN, String.class, false),
+			new ColumnContext(PARENT_SAMPLE_EXTERNAL_SOURCE_COLUMN, PARENT_SAMPLE_EXTERNAL_SOURCE_COLUMN, String.class, false),
+			new ColumnContext(PARENT_SAMPLE_EXTERNAL_ID_COLUMN, PARENT_SAMPLE_EXTERNAL_ID_COLUMN, String.class, false),
 		};
 	}
 

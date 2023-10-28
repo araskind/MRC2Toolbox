@@ -23,30 +23,36 @@ package edu.umich.med.mrc2.datoolbox.data.enums;
 
 public enum DataSetQcField {
 
-	RAW_VALUES("Raw values"),
-	TOTAL_AREA("Total feature area"),
-	OBSERVATIONS("Observations"),
-	MISSING("Missing"),
-	OUTLIERS("Outliers"),
-	MIN("Min"),
-	MAX("Max"),
-	MEAN("Mean"),
-	MEAN_TRIM("Mean (90% trim)"),
-	MEDIAN("Median"),
-	SD("SD"),
-	RSD("%RSD"),
-	SD_TRIM("SD (90% trim)"),
-	RSD_TRIM("%RSD (90% trim)");
+	RAW_VALUES("Raw values", "Raw values"),
+	TOTAL_AREA("Total area","Total feature area"),
+	OBSERVATIONS("Observations", "Number of observations"),
+	MISSING("Missing", "Number of missing values"),
+	OUTLIERS("Outliers", "Number of outliers"),
+	MIN("Min", "Minimal value"),
+	MAX("Max", "Maximal value"),
+	MEAN("Mean", "Mean value"),
+	MEAN_TRIM("Mean (90% trim)", "Mean value (90% trim)"),
+	MEDIAN("Median", "Median value"),
+	SD("SD", "Standard deviation"),
+	RSD("%RSD", "Relative standard deviation, %"),
+	SD_TRIM("SD (90% trim)", "Standard deviation (90% trim)"),
+	RSD_TRIM("%RSD (90% trim)", "Relative standard deviation, % (90% trim)");
 
 	private final String uiName;
+	private final String description;
 
-	DataSetQcField(String uiName) {
+	DataSetQcField(String uiName, String description) {
 
 		this.uiName = uiName;
+		this.description = description;
 	}
 
 	public String getName() {
 		return uiName;
+	}
+	
+	public String getDescription() {
+		return description;
 	}
 
 	@Override

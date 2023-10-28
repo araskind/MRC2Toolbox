@@ -51,13 +51,13 @@ public class ExistingDataFilesTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5111265849253755884L;
-	private ExistingDataFilesTableModel model;
 
 	public ExistingDataFilesTable() {
 		super();
 		model = new ExistingDataFilesTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ExistingDataFilesTableModel>(model);
+		rowSorter = new TableRowSorter<ExistingDataFilesTableModel>(
+				(ExistingDataFilesTableModel)model);
 		setRowSorter(rowSorter);
 		
 		rowSorter.setComparator(model.getColumnIndex(ExistingDataFilesTableModel.EXPERIMENT_COLUMN),
@@ -94,9 +94,9 @@ public class ExistingDataFilesTable extends BasicTable {
 			Map<LIMSExperiment, Collection<DataFile>>existingDataFiles) {
 		
 		thf.setTable(null);
-		model.setTableModelFromExistingDataFiles(existingDataFiles);
+		((ExistingDataFilesTableModel)model).setTableModelFromExistingDataFiles(existingDataFiles);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 }
 

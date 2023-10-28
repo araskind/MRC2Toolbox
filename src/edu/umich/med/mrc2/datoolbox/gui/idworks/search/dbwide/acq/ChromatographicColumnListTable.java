@@ -42,13 +42,13 @@ public class ChromatographicColumnListTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5111265849253755884L;
-	private ChromatographicColumnListTableModel model;
 
 	public ChromatographicColumnListTable() {
 		super();
 		model = new ChromatographicColumnListTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ChromatographicColumnListTableModel>(model);
+		rowSorter = new TableRowSorter<ChromatographicColumnListTableModel>(
+				(ChromatographicColumnListTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(ChromatographicColumnListTableModel.CHROM_COLUMN_COLUMN),
 				new ChromatographicColumnComparator(SortProperty.Name));
@@ -67,9 +67,9 @@ public class ChromatographicColumnListTable extends BasicTable {
 
 	public void setTableModelFromColumns(Collection<LIMSChromatographicColumn>columns) {
 		thf.setTable(null);
-		model.setTableModelFromColumns(columns);
+		((ChromatographicColumnListTableModel)model).setTableModelFromColumns(columns);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void selectColumns(Collection<LIMSChromatographicColumn>columns) {

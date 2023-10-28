@@ -42,8 +42,8 @@ public class IDTrackerExperimentListingTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(EXPERIMENT_ID_COLUMN, LIMSExperiment.class, false),
-			new ColumnContext(EXPERIMENT_NAME_COLUMN, String.class, false),
+			new ColumnContext(EXPERIMENT_ID_COLUMN, "Experiment ID", LIMSExperiment.class, false),
+			new ColumnContext(EXPERIMENT_NAME_COLUMN, EXPERIMENT_NAME_COLUMN, String.class, false),
 		};
 	}
 	

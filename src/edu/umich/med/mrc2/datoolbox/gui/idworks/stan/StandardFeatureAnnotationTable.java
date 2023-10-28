@@ -40,13 +40,13 @@ public class StandardFeatureAnnotationTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private StandardFeatureAnnotationTableModel model;
 
 	public StandardFeatureAnnotationTable() {
 		super();
 		model =  new StandardFeatureAnnotationTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<StandardFeatureAnnotationTableModel>(model);
+		rowSorter = new TableRowSorter<StandardFeatureAnnotationTableModel>(
+				(StandardFeatureAnnotationTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(StandardFeatureAnnotationTableModel.CODE_COLUMN),
 				new StandardFeatureAnnotationComparator(SortProperty.Name));
@@ -65,9 +65,8 @@ public class StandardFeatureAnnotationTable extends BasicTable {
 
 	public void setTableModelFromStandardFeatureAnnotationList(
 			Collection<StandardFeatureAnnotation> annotationList) {
-		model.setTableModelFromStandardFeatureAnnotationList(annotationList);
-		tca.adjustColumns();
-		columnModel.getColumnById(StandardFeatureAnnotationTableModel.CODE_COLUMN).setMaxWidth(80);
+		((StandardFeatureAnnotationTableModel)model).setTableModelFromStandardFeatureAnnotationList(annotationList);
+		adjustColumns();
 	}
 
 	public StandardFeatureAnnotation getSelectedStandardFeatureAnnotation() {

@@ -61,13 +61,12 @@ public class InstrumentSequenceTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5111265849253755884L;
-	private InstrumentSequenceTableModel model;
 
 	public InstrumentSequenceTable() {
 		super();
 		model = new InstrumentSequenceTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<InstrumentSequenceTableModel>(model);
+		rowSorter = new TableRowSorter<InstrumentSequenceTableModel>((InstrumentSequenceTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(InstrumentSequenceTableModel.SAMPLE_COLUMN),
 				new ExperimentalSampleComparator(SortProperty.Name));
@@ -129,9 +128,9 @@ public class InstrumentSequenceTable extends BasicTable {
 		columnModel.getColumnById(InstrumentSequenceTableModel.SAMPLE_PREP_ITEM_COLUMN).
 				setCellEditor(new StringSelectorEditor(prepItems, this));
 
-		model.setTableModelFromLimsWorklist(wkl);
+		((InstrumentSequenceTableModel)model).setTableModelFromLimsWorklist(wkl);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void updateColumnEditorsFromSamplesAndPrep(

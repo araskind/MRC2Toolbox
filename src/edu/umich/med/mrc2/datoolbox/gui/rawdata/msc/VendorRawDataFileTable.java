@@ -41,7 +41,6 @@ public class VendorRawDataFileTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 7128358130733304926L;
-	private VendorRawDataFileTableModel model;
 
 	public VendorRawDataFileTable() {
 
@@ -49,7 +48,7 @@ public class VendorRawDataFileTable extends BasicTable {
 
 		model = new VendorRawDataFileTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<VendorRawDataFileTableModel>(model);
+		rowSorter = new TableRowSorter<VendorRawDataFileTableModel>((VendorRawDataFileTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(VendorRawDataFileTableModel.DATA_FILE_COLUMN),
 				new FileBaseNameComparator());
@@ -69,17 +68,17 @@ public class VendorRawDataFileTable extends BasicTable {
 	public void setModelFromDataFiles(Collection<File> files) {
 
 		thf.setTable(null);
-		model.setModelFromDataFiles(files, true);
+		((VendorRawDataFileTableModel)model).setModelFromDataFiles(files, true);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void addDataFiles(Collection<File> files) {
 
 		thf.setTable(null);
-		model.setModelFromDataFiles(files, false);
+		((VendorRawDataFileTableModel)model).setModelFromDataFiles(files, false);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public Collection<File>getSelectedFiles(){

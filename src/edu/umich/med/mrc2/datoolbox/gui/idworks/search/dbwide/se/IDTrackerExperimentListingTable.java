@@ -42,13 +42,13 @@ public class IDTrackerExperimentListingTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = -363757863489122914L;
-	private IDTrackerExperimentListingTableModel model;
 
 	public IDTrackerExperimentListingTable() {
 		super();
 		model = new IDTrackerExperimentListingTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<IDTrackerExperimentListingTableModel>(model);
+		rowSorter = new TableRowSorter<IDTrackerExperimentListingTableModel>(
+				(IDTrackerExperimentListingTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(IDTrackerExperimentListingTableModel.EXPERIMENT_ID_COLUMN),
 				new LIMSExperimentComparator(SortProperty.ID));
@@ -68,11 +68,9 @@ public class IDTrackerExperimentListingTable extends BasicTable {
 	public void setTableModelFromExperimentList(Collection<LIMSExperiment>experimentList) {
 		
 		thf.setTable(null);
-		model.setTableModelFromExperimentList(experimentList);
+		((IDTrackerExperimentListingTableModel)model).setTableModelFromExperimentList(experimentList);
 		thf.setTable(this);
-		tca.adjustColumns();
-//		getColumnModel().getColumn(
-//				model.getColumnIndex(IDTrackerExperimentListingTableModel.EXPERIMENT_ID_COLUMN)).setWidth(80);
+		adjustColumns();
 	}
 	
 	public Collection<LIMSExperiment>getSelectedExperiments(){

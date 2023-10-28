@@ -48,14 +48,14 @@ public class StockSampleTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(SAMPLE_ID_COLUMN, StockSample.class, false),
-			new ColumnContext(SAMPLE_NAME_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_TYPE_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_SPECIES_COLUMN, String.class, false),
-			new ColumnContext(LIMS_EXPERIMENT_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_EXTERNAL_SOURCE_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_EXTERNAL_ID_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_ID_COLUMN, SAMPLE_ID_COLUMN, StockSample.class, false),
+			new ColumnContext(SAMPLE_NAME_COLUMN, SAMPLE_NAME_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_DESCRIPTION_COLUMN, SAMPLE_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_TYPE_COLUMN, SAMPLE_TYPE_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_SPECIES_COLUMN, SAMPLE_SPECIES_COLUMN, String.class, false),
+			new ColumnContext(LIMS_EXPERIMENT_COLUMN, LIMS_EXPERIMENT_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_EXTERNAL_SOURCE_COLUMN, SAMPLE_EXTERNAL_SOURCE_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_EXTERNAL_ID_COLUMN, SAMPLE_EXTERNAL_ID_COLUMN, String.class, false),
 		};
 	}
 

@@ -34,7 +34,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableSpectraListingPanel extends DefaultSingleCDockable {
 
-	private SpectraTable spectraTable;
+	private AverageMassSpectraTable spectraTable;
 	private static final Icon tableIcon = GuiUtils.getIcon("specTable", 16);
 
 	public DockableSpectraListingPanel() {
@@ -43,7 +43,7 @@ public class DockableSpectraListingPanel extends DefaultSingleCDockable {
 		setCloseable(false);
 		
 		setLayout(new BorderLayout(0, 0));
-		spectraTable = new SpectraTable();
+		spectraTable = new AverageMassSpectraTable();
 		JScrollPane scroll = new JScrollPane(spectraTable);
 		add(scroll, BorderLayout.CENTER);
 	}	
@@ -85,7 +85,7 @@ public class DockableSpectraListingPanel extends DefaultSingleCDockable {
 		spectraTable.clearTable();
 	}
 
-	public SpectraTable getTable() {
+	public AverageMassSpectraTable getTable() {
 		return spectraTable;
 	}
 }

@@ -183,13 +183,14 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 
 	/*
 	 * Adjust the widths of all the columns in the table except specified
+	 * based on table model since columns may be moved and column model index may change
 	 */
 	public void adjustColumnsExcluding(Collection<Integer>columnsToExclude) {
 		TableColumnModel tcm = table.getColumnModel();
 
 		for (int i = 0; i < tcm.getColumnCount(); i++) {
 
-			if(!columnsToExclude.contains(i))
+			if(!columnsToExclude.contains(tcm.getColumn(i).getModelIndex()))
 				adjustColumn(i);
 		}
 	}
@@ -420,6 +421,7 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 	 * Update the TableColumn with the newly calculated width
 	 */
 	private void updateTableColumn(int column, int width) {
+		
 		final TableColumn tableColumn = table.getColumnModel().getColumn(column);
 
 		if (!tableColumn.getResizable())
@@ -432,8 +434,14 @@ public class TableColumnAdjuster implements PropertyChangeListener, TableModelLi
 		if (isOnlyAdjustLarger) {
 			width = Math.max(width, tableColumn.getPreferredWidth());
 		}
+		//	Honor min/max settings
+		if(width > tableColumn.getMaxWidth())
+			width = tableColumn.getMaxWidth();
+		
+		if(width < tableColumn.getMinWidth())
+			width = tableColumn.getMinWidth();
 
-		columnSizes.put(tableColumn, new Integer(tableColumn.getWidth()));
+		columnSizes.put(tableColumn, tableColumn.getWidth());
 
 		table.getTableHeader().setResizingColumn(tableColumn);
 		tableColumn.setWidth(width);

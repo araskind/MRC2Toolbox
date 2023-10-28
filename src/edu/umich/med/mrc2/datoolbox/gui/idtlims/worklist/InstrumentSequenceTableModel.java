@@ -44,25 +44,25 @@ public class InstrumentSequenceTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = 5386419982114129215L;
 
-	public static final String SAMPLE_COLUMN = "Sample ID";
-	public static final String SAMPLE_PREP_COLUMN = "Prep ID";
-	public static final String SAMPLE_PREP_ITEM_COLUMN = "Prep item ID";
 	public static final String DATA_FILE_COLUMN = "Data file";
+	public static final String SAMPLE_COLUMN = "Sample ID";	
+	public static final String SAMPLE_PREP_ITEM_COLUMN = "Prep item ID";
 	public static final String ACQ_METHOD_COLUMN = "Acquisition method";
 	public static final String INJECTION_TIME_COLUMN = "Injection time";
-	public static final String INJECTION_VOLUME_COLUMN = "Injection volume";
+	public static final String INJECTION_VOLUME_COLUMN = "Injection volume, " + '\u03BC' + "l";
+	public static final String SAMPLE_PREP_COLUMN = "Prep ID";
 
 	public InstrumentSequenceTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DATA_FILE_COLUMN, DataFile.class, false),
-			new ColumnContext(SAMPLE_COLUMN, ExperimentalSample.class, true),
-			new ColumnContext(SAMPLE_PREP_ITEM_COLUMN, String.class, false),
-			new ColumnContext(ACQ_METHOD_COLUMN, DataAcquisitionMethod.class, false),
-			new ColumnContext(INJECTION_TIME_COLUMN, Date.class, false),
-			new ColumnContext(INJECTION_VOLUME_COLUMN, Double.class, false),
-			new ColumnContext(SAMPLE_PREP_COLUMN, LIMSSamplePreparation.class, false),
+			new ColumnContext(DATA_FILE_COLUMN, DATA_FILE_COLUMN, DataFile.class, false),
+			new ColumnContext(SAMPLE_COLUMN, SAMPLE_COLUMN, ExperimentalSample.class, true),
+			new ColumnContext(SAMPLE_PREP_ITEM_COLUMN, "Sample prep item ID", String.class, false),
+			new ColumnContext(ACQ_METHOD_COLUMN, ACQ_METHOD_COLUMN, DataAcquisitionMethod.class, false),
+			new ColumnContext(INJECTION_TIME_COLUMN, INJECTION_TIME_COLUMN, Date.class, false),
+			new ColumnContext(INJECTION_VOLUME_COLUMN, INJECTION_VOLUME_COLUMN, Double.class, false),
+			new ColumnContext(SAMPLE_PREP_COLUMN, "Sample preparation", LIMSSamplePreparation.class, false),
 		};
 	}
 

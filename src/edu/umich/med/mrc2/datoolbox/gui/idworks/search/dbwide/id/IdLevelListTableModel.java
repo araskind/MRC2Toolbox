@@ -44,9 +44,9 @@ public class IdLevelListTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(LEVEL_COLUMN, MSFeatureIdentificationLevel.class, false),
-			new ColumnContext(LEVEL_RANK_COLUMN, Integer.class, false),
-			new ColumnContext(LEVEL_COLOR_CODE_COLUMN, MSFeatureIdentificationLevel.class, false),
+			new ColumnContext(LEVEL_COLUMN, "Identification level", MSFeatureIdentificationLevel.class, false),
+			new ColumnContext(LEVEL_RANK_COLUMN, LEVEL_RANK_COLUMN, Integer.class, false),
+			new ColumnContext(LEVEL_COLOR_CODE_COLUMN, LEVEL_COLOR_CODE_COLUMN, MSFeatureIdentificationLevel.class, false),
 		};
 	}
 

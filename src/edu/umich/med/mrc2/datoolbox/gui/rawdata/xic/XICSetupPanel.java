@@ -57,7 +57,7 @@ import edu.umich.med.mrc2.datoolbox.data.lims.DataAcquisitionMethod;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.chromatogram.ChromatogramPlotMode;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.BackedByPreferences;
-import edu.umich.med.mrc2.datoolbox.gui.rawdata.RawDataFileTable;
+import edu.umich.med.mrc2.datoolbox.gui.rawdata.DataFileToAcquisitionMethodTable;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.tasks.rawdata.ChromatogramExtractionTask;
@@ -71,7 +71,7 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 	private static final long serialVersionUID = 1598480456937212595L;
 	private static final Icon chromIcon = GuiUtils.getIcon("ionChroms", 16);
 	
-	private RawDataFileTable rawDataFileTable;
+	private DataFileToAcquisitionMethodTable rawDataFileTable;
 	private JComboBox chromTypeComboBox;
 	private JComboBox polarityComboBox;
 	private JComboBox msLevelcomboBox;
@@ -129,7 +129,7 @@ public class XICSetupPanel extends JPanel implements ActionListener, ItemListene
 		gbl_panel.rowWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
 
-		rawDataFileTable = new RawDataFileTable();
+		rawDataFileTable = new DataFileToAcquisitionMethodTable();
 		JScrollPane scrollPane = new JScrollPane(rawDataFileTable);
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
 		gbc_scrollPane_1.gridwidth = 6;

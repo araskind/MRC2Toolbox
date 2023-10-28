@@ -42,13 +42,13 @@ public class MSMSLibraryListingTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private MSMSLibraryListingTableModel model;
 
 	public MSMSLibraryListingTable() {
 		super();
 		model =  new MSMSLibraryListingTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MSMSLibraryListingTableModel>(model);
+		rowSorter = new TableRowSorter<MSMSLibraryListingTableModel>(
+				(MSMSLibraryListingTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(MSMSLibraryListingTableModel.ID_COLUMN),
 				new ReferenceMsMsLibraryComparator(SortProperty.ID));
@@ -66,9 +66,9 @@ public class MSMSLibraryListingTable extends BasicTable {
 
 	public void setTableModelFromReferenceMsMsLibraryList(Collection<ReferenceMsMsLibrary>libList) {
 		thf.setTable(null);
-		model.setTableModelFromReferenceMsMsLibraryList(libList);
+		((MSMSLibraryListingTableModel)model).setTableModelFromReferenceMsMsLibraryList(libList);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void selectLibraries(Collection<ReferenceMsMsLibrary>libList) {

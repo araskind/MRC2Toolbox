@@ -61,11 +61,11 @@ public class ExtendedDataFileSampleMatchTableModel extends BasicTableModel {
 		super();
 
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ENABLED_COLUMN, Boolean.class, true),
-			new ColumnContext(DATA_FILE_COLUMN, DataFile.class, false),
-			new ColumnContext(IMPORTED_SAMPLE_ID_COLUMN, String.class, false),
-			new ColumnContext(IMPORTED_SAMPLE_NAME_COLUMN, String.class, false),
-			new ColumnContext(SAMPLE_ID_COLUMN, ExperimentalSample.class, true)
+			new ColumnContext(ENABLED_COLUMN, ENABLED_COLUMN, Boolean.class, true),
+			new ColumnContext(DATA_FILE_COLUMN, DATA_FILE_COLUMN, DataFile.class, false),
+			new ColumnContext(IMPORTED_SAMPLE_ID_COLUMN, IMPORTED_SAMPLE_ID_COLUMN, String.class, false),
+			new ColumnContext(IMPORTED_SAMPLE_NAME_COLUMN, IMPORTED_SAMPLE_NAME_COLUMN, String.class, false),
+			new ColumnContext(SAMPLE_ID_COLUMN, SAMPLE_ID_COLUMN, ExperimentalSample.class, true)
 		};
 		sampleIdPattern = Pattern.compile(MRC2ToolBoxConfiguration.getSampleIdMask());
 		sampleNamePattern = Pattern.compile(MRC2ToolBoxConfiguration.getSampleNameMask());

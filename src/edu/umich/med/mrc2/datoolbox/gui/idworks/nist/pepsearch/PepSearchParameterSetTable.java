@@ -39,13 +39,12 @@ public class PepSearchParameterSetTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = 3916578878036401634L;
 
-	private PepSearchParameterSetTableModel model;
-
 	public PepSearchParameterSetTable() {
 		super();
 		model = new PepSearchParameterSetTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<PepSearchParameterSetTableModel>(model);
+		rowSorter = new TableRowSorter<PepSearchParameterSetTableModel>(
+				(PepSearchParameterSetTableModel)model);
 		setRowSorter(rowSorter);
 		
 		columnModel.getColumnById(PepSearchParameterSetTableModel.PS_OBJECT_COLUMN).
@@ -57,6 +56,7 @@ public class PepSearchParameterSetTable extends BasicTable {
 			setCellRenderer(new WordWrapCellRenderer());
 				
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		finalizeLayout();
 	}
 
 	public NISTPepSearchParameterObject getSelectedNISTPepSearchParameterObject(){
@@ -70,11 +70,13 @@ public class PepSearchParameterSetTable extends BasicTable {
 	}
 
 	public void setModelFromObjectCollection(Collection<NISTPepSearchParameterObject> pspObjects) {
-		model.setModelFromObjectCollection(pspObjects);
+		((PepSearchParameterSetTableModel)model).setModelFromObjectCollection(pspObjects);
+		adjustColumns();
 	}
 	
 	public void setModelFromHitCountMap(Map<NISTPepSearchParameterObject, Long>paramCounts) {
-		model.setModelFromHitCountMap(paramCounts);
+		((PepSearchParameterSetTableModel)model).setModelFromHitCountMap(paramCounts);
+		adjustColumns();
 	}
 }
 

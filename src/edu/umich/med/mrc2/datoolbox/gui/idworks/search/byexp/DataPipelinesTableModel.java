@@ -47,10 +47,10 @@ public class DataPipelinesTableModel extends BasicTableModel {
 	public DataPipelinesTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(POLARITY_COLUMN, Polarity.class, false),
-			new ColumnContext(DATA_ACQ_METHOD_COLUMN, DataAcquisitionMethod.class, false),
-			new ColumnContext(DATA_PROC_METHOD_COLUMN, DataExtractionMethod.class, false),
-			new ColumnContext(CODE_COLUMN, DataPipeline.class, false)
+			new ColumnContext(POLARITY_COLUMN, POLARITY_COLUMN, Polarity.class, false),
+			new ColumnContext(DATA_ACQ_METHOD_COLUMN, DATA_ACQ_METHOD_COLUMN, DataAcquisitionMethod.class, false),
+			new ColumnContext(DATA_PROC_METHOD_COLUMN, DATA_PROC_METHOD_COLUMN, DataExtractionMethod.class, false),
+			new ColumnContext(CODE_COLUMN, "Data pipeline code", DataPipeline.class, false)
 		};
 	}
 

@@ -40,43 +40,38 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RangeRenderer;
 import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 import edu.umich.med.mrc2.datoolbox.utils.Range;
 
-public class SpectraTable  extends BasicTable {
+public class AverageMassSpectraTable  extends BasicTable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -7515659594072618562L;
-	private SpectraTableModel model;
 	
-	public SpectraTable() {
+	public AverageMassSpectraTable() {
 
 		super();
 
-		model = new SpectraTableModel();
+		model = new AverageMassSpectraTableModel();
 		setModel(model); 	
-		rowSorter = new TableRowSorter<SpectraTableModel>(model);
+		rowSorter = new TableRowSorter<AverageMassSpectraTableModel>(
+				(AverageMassSpectraTableModel)model);
 		setRowSorter(rowSorter);
-		rowSorter.setComparator(model.getColumnIndex(SpectraTableModel.DATA_FILE_COLUMN),
+		rowSorter.setComparator(model.getColumnIndex(AverageMassSpectraTableModel.DATA_FILE_COLUMN),
 				new AverageMassSpectrumComparator(SortProperty.dataFile));
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-		columnModel.getColumnById(SpectraTableModel.RT_RANGE_COLUMN)
+		columnModel.getColumnById(AverageMassSpectraTableModel.RT_RANGE_COLUMN)
 			.setCellRenderer(new RangeRenderer(MRC2ToolBoxConfiguration.getRtFormat()));
-		columnModel.getColumnById(SpectraTableModel.DATA_FILE_COLUMN)
+		columnModel.getColumnById(AverageMassSpectraTableModel.DATA_FILE_COLUMN)
 			.setCellRenderer(new AverageMassSpectrumRenderer());
 
 		columnModel.getColumnById(
-				SpectraTableModel.RT_RANGE_COLUMN).setMaxWidth(120);
+				AverageMassSpectraTableModel.RT_RANGE_COLUMN).setMaxWidth(120);
 		columnModel.getColumnById(
-				SpectraTableModel.MS_LEVEL_COLUMN).setMaxWidth(80);
+				AverageMassSpectraTableModel.MS_LEVEL_COLUMN).setMaxWidth(80);
 		columnModel.getColumnById(
-				SpectraTableModel.DATA_FILE_COLUMN).setMinWidth(300);
-
-		fixedWidthColumns.add(
-				getColumnIndex(SpectraTableModel.MS_LEVEL_COLUMN));
-//		fixedWidthColumns.add(
-//				getColumnIndex(SpectraTableModel.RT_RANGE_COLUMN));
+				AverageMassSpectraTableModel.DATA_FILE_COLUMN).setMinWidth(300);
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(AverageMassSpectrum.class, 
@@ -87,16 +82,16 @@ public class SpectraTable  extends BasicTable {
 				new RangeFormat(MRC2ToolBoxConfiguration.getRtFormat()));
 		
 		finalizeLayout();
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		
 	}
 
 	public void setTableModelFromSpectra(
 			Collection<AverageMassSpectrum>spectra) {
 
 		thf.setTable(null);
-		model.setTableModelFromSpectra(spectra);
+		((AverageMassSpectraTableModel)model).setTableModelFromSpectra(spectra);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 	
 	public AverageMassSpectrum getSelectedSpectrum() {
@@ -107,14 +102,14 @@ public class SpectraTable  extends BasicTable {
 		
 		return (AverageMassSpectrum)model.getValueAt(
 					convertRowIndexToModel(row), 
-					model.getColumnIndex(SpectraTableModel.DATA_FILE_COLUMN));
+					model.getColumnIndex(AverageMassSpectraTableModel.DATA_FILE_COLUMN));
 	}
 
 	public Collection<AverageMassSpectrum> getSelectedSpectra() {
 		
 		Collection<AverageMassSpectrum>selected = 
 				new ArrayList<AverageMassSpectrum>();
-		int chromColumn = model.getColumnIndex(SpectraTableModel.DATA_FILE_COLUMN);
+		int chromColumn = model.getColumnIndex(AverageMassSpectraTableModel.DATA_FILE_COLUMN);
 		for(int i : getSelectedRows()) 
 			selected.add((AverageMassSpectrum)model.getValueAt(
 							convertRowIndexToModel(i), chromColumn));		
@@ -124,30 +119,30 @@ public class SpectraTable  extends BasicTable {
 	
 	public void addSpectrum(AverageMassSpectrum spectrum) {
 		thf.setTable(null);
-		model.addSpectrum(spectrum);
+		((AverageMassSpectraTableModel)model).addSpectrum(spectrum);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 	
 	public void removeSpectrum(AverageMassSpectrum spectrum) {
 		thf.setTable(null);
-		model.removeSpectrum(spectrum);
+		((AverageMassSpectraTableModel)model).removeSpectrum(spectrum);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 	
 	public void addSpectra(Collection<AverageMassSpectrum>spectra) {
 		thf.setTable(null);
-		model.addSpectra(spectra);
+		((AverageMassSpectraTableModel)model).addSpectra(spectra);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 	
 	public void removeSpectra(Collection<AverageMassSpectrum>spectra) {	
 		thf.setTable(null);
-		spectra.stream().forEach(c -> model.removeSpectrum(c));	
+		spectra.stream().forEach(c -> ((AverageMassSpectraTableModel)model).removeSpectrum(c));	
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 }
 

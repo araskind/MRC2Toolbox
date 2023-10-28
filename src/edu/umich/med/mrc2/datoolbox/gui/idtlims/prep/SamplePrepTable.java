@@ -40,13 +40,12 @@ public class SamplePrepTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5111265849253755884L;
-	private SamplePrepTableModel model;
 
 	public SamplePrepTable() {
 		super();
 		model = new SamplePrepTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<SamplePrepTableModel>(model);
+		rowSorter = new TableRowSorter<SamplePrepTableModel>((SamplePrepTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(SamplePrepTableModel.SAMPLE_PREP_COLUMN),
 				new LIMSSamplePreparationComparator(SortProperty.Name));
@@ -64,9 +63,9 @@ public class SamplePrepTable extends BasicTable {
 
 	public void setTableModelFromPreps(Collection<LIMSSamplePreparation>preps) {
 		thf.setTable(null);
-		model.setTableModelFromPreps(preps);
+		((SamplePrepTableModel)model).setTableModelFromPreps(preps);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public LIMSSamplePreparation getSelectedPrep() {
@@ -97,7 +96,7 @@ public class SamplePrepTable extends BasicTable {
 	}
 
 	public void updatePrepData(LIMSSamplePreparation prep) {
-		model.updatePrepData(prep);
+		((SamplePrepTableModel)model).updatePrepData(prep);
 	}	
 }
 

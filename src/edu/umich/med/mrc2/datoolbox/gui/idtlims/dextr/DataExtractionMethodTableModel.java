@@ -50,12 +50,12 @@ public class DataExtractionMethodTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DEX_METHOD_ID_COLUMN, String.class, false),
-			new ColumnContext(DEX_METHOD_COLUMN, DataExtractionMethod.class, false),
-			new ColumnContext(DEX_METHOD_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(USER_COLUMN, LIMSUser.class, false),
-			new ColumnContext(DATE_CREATED_COLUMN, Date.class, false),
-			new ColumnContext(SOFTWARE_COLUMN, DataProcessingSoftware.class, false),
+			new ColumnContext(DEX_METHOD_ID_COLUMN, DEX_METHOD_ID_COLUMN, String.class, false),
+			new ColumnContext(DEX_METHOD_COLUMN, DEX_METHOD_COLUMN, DataExtractionMethod.class, false),
+			new ColumnContext(DEX_METHOD_DESCRIPTION_COLUMN, DEX_METHOD_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(USER_COLUMN, USER_COLUMN, LIMSUser.class, false),
+			new ColumnContext(DATE_CREATED_COLUMN, DATE_CREATED_COLUMN, Date.class, false),
+			new ColumnContext(SOFTWARE_COLUMN, "Data processing software", DataProcessingSoftware.class, false),
 		};
 	}
 

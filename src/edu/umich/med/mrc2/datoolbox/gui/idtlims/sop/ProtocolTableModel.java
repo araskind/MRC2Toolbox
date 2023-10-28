@@ -32,7 +32,6 @@ import edu.umich.med.mrc2.datoolbox.data.lims.SopCategory;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
-@SuppressWarnings("unused")
 public class ProtocolTableModel extends BasicTableModel {
 
 	/**
@@ -53,14 +52,14 @@ public class ProtocolTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(SOP_ID_COLUMN, String.class, false),
-			new ColumnContext(SOP_GROUP_COLUMN, String.class, false),
-			new ColumnContext(SOP_COLUMN, LIMSProtocol.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(VERSION_COLUMN, String.class, false),
-			new ColumnContext(DATE_CREATED_COLUMN, Date.class, false),
-			new ColumnContext(CRERATED_BY_COLUMN, LIMSUser.class, false),
-			new ColumnContext(CATEGORY_COLUMN, SopCategory.class, false),
+			new ColumnContext(SOP_ID_COLUMN, "Protocol ID", String.class, false),
+			new ColumnContext(SOP_GROUP_COLUMN, "SOP group", String.class, false),
+			new ColumnContext(SOP_COLUMN, SOP_COLUMN, LIMSProtocol.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(VERSION_COLUMN, VERSION_COLUMN, String.class, false),
+			new ColumnContext(DATE_CREATED_COLUMN, DATE_CREATED_COLUMN, Date.class, false),
+			new ColumnContext(CRERATED_BY_COLUMN, CRERATED_BY_COLUMN, LIMSUser.class, false),
+			new ColumnContext(CATEGORY_COLUMN, "SOP category", SopCategory.class, false),
 		};
 	}
 

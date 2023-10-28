@@ -23,7 +23,9 @@ package edu.umich.med.mrc2.datoolbox.gui.tables;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -32,10 +34,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.IntStream;
 
 import javax.swing.AbstractButton;
@@ -61,6 +66,7 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
 import edu.umich.med.mrc2.datoolbox.data.compare.TableColumnStateComparator;
+import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.preferences.TableLayoutManager;
 import edu.umich.med.mrc2.datoolbox.gui.tables.editors.RadioButtonEditor;
@@ -72,6 +78,7 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.CompoundIdentityDatabas
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.DateTimeCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.IntensityRenderer;
+import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MsFeatureRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.PercentValueRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.RadioButtonRenderer;
@@ -99,6 +106,8 @@ public class BasicTable extends JTable implements ActionListener{
 	protected CompoundIdentityDatabaseLinkRenderer msfIdRenderer;
 	protected RadioButtonRenderer radioRenderer;
 	protected RadioButtonEditor radioEditor;
+	protected LIMSUserRenderer userRenderer;
+	
 	protected JPopupMenu tablePopupMenu;
 	protected ColumnSelectorPopup columnSelectorPopupMenu;
 	protected int popupRow;
@@ -107,7 +116,8 @@ public class BasicTable extends JTable implements ActionListener{
 	protected BasicTableModel model;
 	protected XTableColumnModel columnModel;
 	protected TableColumnAdjuster tca;
-	protected Collection<Integer>fixedWidthColumns;
+	protected Set<Integer>fixedWidthColumns;
+	protected Set<String>userColumns;
 	protected TableFilterHeader thf;
 	protected TablePreferencesDialog tablePreferencesDialog;
 	protected TableRowSorter<? extends TableModel> rowSorter;
@@ -121,7 +131,6 @@ public class BasicTable extends JTable implements ActionListener{
 		super();
 		columnModel  = new XTableColumnModel();
 		setColumnModel(columnModel);
-		fixedWidthColumns = new ArrayList<Integer>();
 		initTable();
 	}
 
@@ -130,7 +139,6 @@ public class BasicTable extends JTable implements ActionListener{
 		columnModel  = new XTableColumnModel();
 		setColumnModel(columnModel);
 		setModel(tableModel);
-		fixedWidthColumns = new ArrayList<Integer>();
 		initTable();
 	}
 
@@ -153,7 +161,6 @@ public class BasicTable extends JTable implements ActionListener{
 		columnModel  = new XTableColumnModel();
 		setColumnModel(columnModel);
 		setModel(model);
-		fixedWidthColumns = new ArrayList<Integer>();
 		initTable();
 	}
 	
@@ -250,7 +257,8 @@ public class BasicTable extends JTable implements ActionListener{
 		setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		initPreferenceBasedRenderers();		
 		
-		//	Clumn header tooltips
+		fixedWidthColumns = new TreeSet<Integer>();
+		userColumns = new TreeSet<String>();
 	}
 	
 	public void finalizeLayout() {
@@ -802,31 +810,41 @@ public class BasicTable extends JTable implements ActionListener{
 		super.setEnabled(b);
 	}
 	
-//	protected String[] columnToolTips = {
-//		    null, // "First Name" assumed obvious
-//		    null, // "Last Name" assumed obvious
-//		    "The person's favorite sport to participate in",
-//		    "The number of years the person has played the sport",
-//		    "If checked, the person eats no meat"};
-//		...
-//
-//		JTable table = new JTable(new MyTableModel()) {
-//		    ...
-//
-//		    //Implement table header tool tips.
-//		    protected JTableHeader createDefaultTableHeader() {
-//		        return new JTableHeader(columnModel) {
-//		            public String getToolTipText(MouseEvent e) {
-//		                String tip = null;
-//		                java.awt.Point p = e.getPoint();
-//		                int index = columnModel.getColumnIndexAtX(p.x);
-//		                int realIndex = 
-//		                        columnModel.getColumn(index).getModelIndex();
-//		                return columnToolTips[realIndex];
-//		            }
-//		        };
-//		    }
-//		};
+	protected void createInteractiveUserRenderer(Collection<String>userColumnIdentifiers) { 
+		
+		userRenderer = new LIMSUserRenderer();
+		setDefaultRenderer(LIMSUser.class, userRenderer);
+		userColumns.clear();
+		userColumns.addAll(userColumnIdentifiers);
+		
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
+
+			public void mouseMoved(MouseEvent e) {
+
+				Point p = e.getPoint();
+				for(String columnId : userColumns) {
+					
+					if(columnModel.isColumnVisible(columnModel.getColumnById(columnId)) &&
+							columnAtPoint(p) == columnModel.getColumnIndex(columnId))
+						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+					else
+						setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				}
+			}
+		};
+		addMouseMotionListener(mma);
+		addMouseListener(userRenderer);
+		addMouseMotionListener(userRenderer);
+	}
+	
+	protected void setExactColumnWidth(String columnIdentifier, int width) {
+		
+		TableColumn column = columnModel.getColumnById(columnIdentifier);
+		if(column != null) {
+			column.setWidth(width);
+			column.setResizable(false);
+		}
+	}
 }
 
 

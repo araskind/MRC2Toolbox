@@ -42,8 +42,8 @@ public class MassSelectionTableModel extends BasicTableModel {
 	public MassSelectionTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(MZ_COLUMN, Double.class, false),
-			new ColumnContext(INTENSITY_COLUMN, Double.class, false),
+			new ColumnContext(MZ_COLUMN, MZ_COLUMN, Double.class, false),
+			new ColumnContext(INTENSITY_COLUMN, INTENSITY_COLUMN, Double.class, false),
 		};
 	}
 

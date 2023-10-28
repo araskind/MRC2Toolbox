@@ -37,15 +37,15 @@ public class MethodTableModel extends BasicTableModel {
 	 */
 	private static final long serialVersionUID = 3417856068405445036L;
 
-	public static final String METHOD_ID_COLUMN = "DB ID";
+	public static final String METHOD_ID_COLUMN = "Method ID";
 	public static final String METHOD_NAME_COLUMN = "Method name";
 
 	public MethodTableModel() {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(METHOD_ID_COLUMN, AnalysisMethod.class, false),
-			new ColumnContext(METHOD_NAME_COLUMN, String.class, false),
+			new ColumnContext(METHOD_ID_COLUMN, METHOD_ID_COLUMN, AnalysisMethod.class, false),
+			new ColumnContext(METHOD_NAME_COLUMN, METHOD_NAME_COLUMN, String.class, false),
 		};
 	}
 

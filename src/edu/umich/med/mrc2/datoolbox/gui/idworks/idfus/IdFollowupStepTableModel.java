@@ -44,7 +44,8 @@ public class IdFollowupStepTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 			//	new ColumnContext(STEP_ID_COLUMN, String.class, false),
-			new ColumnContext(STEP_COLUMN, MSFeatureIdentificationFollowupStep.class, false),
+			new ColumnContext(STEP_COLUMN, "Identification followup step", 
+					MSFeatureIdentificationFollowupStep.class, false),
 		};
 	}
 

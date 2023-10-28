@@ -46,24 +46,22 @@ public class ExtendedDataFileSampleMatchTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3111543056268144390L;
-	private ExtendedDataFileSampleMatchTableModel model;
 
 	public ExtendedDataFileSampleMatchTable() {
 
 		super();
-
-		getTableHeader().setReorderingAllowed(false);
 		model = new ExtendedDataFileSampleMatchTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ExtendedDataFileSampleMatchTableModel>(model);
+		getTableHeader().setReorderingAllowed(false);
+		rowSorter = new TableRowSorter<ExtendedDataFileSampleMatchTableModel>(
+				(ExtendedDataFileSampleMatchTableModel)model);
 		setRowSorter(rowSorter);
 
 		setDefaultRenderer(ExperimentalSample.class, new ExperimentalSampleRendererExtended());
 		setDefaultRenderer(DataFile.class, new DataFileCellRenderer());
-
+		setExactColumnWidth(ExtendedDataFileSampleMatchTableModel.ENABLED_COLUMN, 50);
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
-		//columnModel.getColumnById(ExtendedDataFileSampleMatchTableModel.ENABLED_COLUMN).setWidth(50);
 	}
 
 	public void setTableModelFromReportData(
@@ -73,13 +71,13 @@ public class ExtendedDataFileSampleMatchTable extends BasicTable {
 			DataAcquisitionMethod acquisitionMethod) {
 
 		thf.setTable(null);
-		model.setTableModelFromReportData(
+		((ExtendedDataFileSampleMatchTableModel)model).setTableModelFromReportData(
 			sampleIds, sampleNames, dataFileNames, acquisitionMethod);
 		setDefaultEditor(ExperimentalSample.class,
 				new ExperimentalSampleSelectorEditor(
 						MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getExperimentDesign().getSamples(), this));
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public DataFile[] getActiveDataFiles() {
@@ -138,6 +136,7 @@ public class ExtendedDataFileSampleMatchTable extends BasicTable {
 	        .forEach(((DefaultTableModel)getModel())::removeRow);
 		
 		thf.setTable(this);
+		adjustColumns();
 	}
 
 	public void updateSampleAssignmentForDataFiles(
@@ -150,6 +149,7 @@ public class ExtendedDataFileSampleMatchTable extends BasicTable {
 			if(selectedDataFiles.contains(model.getValueAt(i, dfIndex)))
 				model.setValueAt(sample, i, sampleIndex);
 		}
+		adjustColumns();
 	}
 }
 

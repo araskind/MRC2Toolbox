@@ -49,7 +49,6 @@ public class IDtrackerDataFileSampleMatchTable  extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3111543056268144390L;
-	private IDtrackerDataFileSampleMatchTableModel model;
 
 	public IDtrackerDataFileSampleMatchTable() {
 
@@ -58,11 +57,13 @@ public class IDtrackerDataFileSampleMatchTable  extends BasicTable {
 		getTableHeader().setReorderingAllowed(false);
 		model = new IDtrackerDataFileSampleMatchTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<IDtrackerDataFileSampleMatchTableModel>(model);
+		rowSorter = new TableRowSorter<IDtrackerDataFileSampleMatchTableModel>(
+				(IDtrackerDataFileSampleMatchTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setDefaultRenderer(DataFile.class, new DataFileCellRenderer());
-		setDefaultRenderer(ExperimentalSample.class, new ExperimentalSampleRendererExtended());
+		setDefaultRenderer(ExperimentalSample.class, 
+				new ExperimentalSampleRendererExtended());
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
@@ -71,16 +72,18 @@ public class IDtrackerDataFileSampleMatchTable  extends BasicTable {
 	public void addDataFilesUsingWorklist(File[] inputFiles, Worklist worklist) {
 		
 		thf.setTable(null);
-		model.addDataFilesUsingWorklist(inputFiles, worklist);
+		((IDtrackerDataFileSampleMatchTableModel)model).
+				addDataFilesUsingWorklist(inputFiles, worklist);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public void setTableModelFromFiles(File[] inputFiles, LIMSExperiment experiment) {
 		thf.setTable(null);
-		model.setTableModelFromFiles(inputFiles, experiment);
+		((IDtrackerDataFileSampleMatchTableModel)model).
+				setTableModelFromFiles(inputFiles, experiment);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public Collection<DataFile>getDataFiles(){

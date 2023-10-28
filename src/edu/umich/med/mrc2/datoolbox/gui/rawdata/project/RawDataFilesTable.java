@@ -43,14 +43,14 @@ public class RawDataFilesTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private RawDataFilesTableModel model;
 
 	public RawDataFilesTable() {
 		super();
 		model =  new RawDataFilesTableModel();
 		setModel(model);
 		
-		rowSorter = new TableRowSorter<RawDataFilesTableModel>(model);
+		rowSorter = new TableRowSorter<RawDataFilesTableModel>(
+				(RawDataFilesTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(RawDataFilesTableModel.RAW_DATA_FILE_COLUMN),
 				new FileBaseNameComparator());
@@ -77,9 +77,9 @@ public class RawDataFilesTable extends BasicTable {
 	public void setTableModelFromDataFiles(File[]dataFiles) {
 		
 		thf.setTable(null);
-		model.setTableModelFromDataFiles(dataFiles, true);
+		((RawDataFilesTableModel)model).setTableModelFromDataFiles(dataFiles, true);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void addDataFiles(File[]dataFiles) {
@@ -92,9 +92,9 @@ public class RawDataFilesTable extends BasicTable {
 			return;
 		
 		thf.setTable(null);
-		model.setTableModelFromDataFiles(filesToAdd, false);
+		((RawDataFilesTableModel)model).setTableModelFromDataFiles(filesToAdd, false);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public Collection<File> getSelectedDataFiles() {

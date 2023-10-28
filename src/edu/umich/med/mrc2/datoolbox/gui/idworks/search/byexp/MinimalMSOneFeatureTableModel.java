@@ -46,12 +46,12 @@ public class MinimalMSOneFeatureTableModel extends BasicTableModel {
 	public MinimalMSOneFeatureTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(FEATURE_COLUMN, MinimalMSOneFeature.class, false),
-			new ColumnContext(MZ_COLUMN, Double.class, false),
-			new ColumnContext(RT_COLUMN, Double.class, false),
-			new ColumnContext(RANK_COLUMN, Double.class, false),
-			new ColumnContext(SMILES_COLUMN,String.class, false),
-			new ColumnContext(INCHI_KEY_COLUMN,String.class, false),
+			new ColumnContext(FEATURE_COLUMN, "Feature name", MinimalMSOneFeature.class, false),
+			new ColumnContext(MZ_COLUMN, "Monoisotopic M/Z", Double.class, false),
+			new ColumnContext(RT_COLUMN, "Retention time", Double.class, false),
+			new ColumnContext(RANK_COLUMN, RANK_COLUMN, Double.class, false),
+			new ColumnContext(SMILES_COLUMN, SMILES_COLUMN, String.class, false),
+			new ColumnContext(INCHI_KEY_COLUMN, INCHI_KEY_COLUMN, String.class, false),
 		};
 	}
 

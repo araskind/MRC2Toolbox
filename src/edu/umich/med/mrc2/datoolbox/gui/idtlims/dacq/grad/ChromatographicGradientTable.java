@@ -37,7 +37,6 @@ public class ChromatographicGradientTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = -2695577206283079527L;
-	private ChromatographicGradientTableModel model;
 
 	public ChromatographicGradientTable() {
 		super();
@@ -67,9 +66,9 @@ public class ChromatographicGradientTable extends BasicTable {
 
 	public void setTableModelFromGradient(ChromatographicGradient gradient) {
 		thf.setTable(null);
-		model.setTableModelFromGradient(gradient);
+		((ChromatographicGradientTableModel)model).setTableModelFromGradient(gradient);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 }
 

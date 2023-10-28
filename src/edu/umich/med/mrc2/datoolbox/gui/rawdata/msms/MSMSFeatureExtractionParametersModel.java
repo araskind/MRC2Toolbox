@@ -39,9 +39,9 @@ public class MSMSFeatureExtractionParametersModel extends BasicTableModel {
 	public MSMSFeatureExtractionParametersModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(METHOD_ID_COLUMN, String.class, false),
-			new ColumnContext(METHOD_COLUMN, Double.class, false),
-			new ColumnContext(POLARITY_COLUMN, String.class, false),
+			new ColumnContext(METHOD_ID_COLUMN, "Method ID", String.class, false),
+			new ColumnContext(METHOD_COLUMN, "Method name", MSMSExtractionParameterSet.class, false),
+			new ColumnContext(POLARITY_COLUMN, POLARITY_COLUMN, String.class, false),
 		};
 	}
 

@@ -49,12 +49,12 @@ public class ChromatographicColumnTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(CHROM_COLUMN_ID_COLUMN, String.class, false),
-			new ColumnContext(CHROM_COLUMN_COLUMN, LIMSChromatographicColumn.class, false),
-			new ColumnContext(SEPARATION_TYPE_COLUMN, ChromatographicSeparationType.class, false),
-			new ColumnContext(CHEMISTRY_COLUMN, String.class, false),
-			new ColumnContext(MANUFACTURER_COLUMN, Manufacturer.class, false),
-			new ColumnContext(CATALOG_NUMBER_COLUMN, String.class, false),
+			new ColumnContext(CHROM_COLUMN_ID_COLUMN, CHROM_COLUMN_ID_COLUMN, String.class, false),
+			new ColumnContext(CHROM_COLUMN_COLUMN, "Column name", LIMSChromatographicColumn.class, false),
+			new ColumnContext(SEPARATION_TYPE_COLUMN, SEPARATION_TYPE_COLUMN, ChromatographicSeparationType.class, false),
+			new ColumnContext(CHEMISTRY_COLUMN, "Column chemistry", String.class, false),
+			new ColumnContext(MANUFACTURER_COLUMN, MANUFACTURER_COLUMN, Manufacturer.class, false),
+			new ColumnContext(CATALOG_NUMBER_COLUMN, CATALOG_NUMBER_COLUMN, String.class, false),
 		};
 	}
 

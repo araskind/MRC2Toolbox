@@ -48,7 +48,6 @@ public class ChromatogramTable  extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = -7515659594072618562L;
-	private ChromatogramTableModel model;
 	
 	public ChromatogramTable() {
 
@@ -56,7 +55,8 @@ public class ChromatogramTable  extends BasicTable {
 
 		model = new ChromatogramTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ChromatogramTableModel>(model);
+		rowSorter = new TableRowSorter<ChromatogramTableModel>(
+				(ChromatogramTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(ChromatogramTableModel.DATA_FILE_COLUMN),
 				new ExtractedChromatogramComparator(SortProperty.dataFile));
@@ -83,14 +83,14 @@ public class ChromatogramTable  extends BasicTable {
 		columnModel.getColumnById(
 				ChromatogramTableModel.DATA_FILE_COLUMN).setMinWidth(200);
 		
-		fixedWidthColumns.add(
-				getColumnIndex(ChromatogramTableModel.CHROMATOGRAM_TYPE_COLUMN));
-		fixedWidthColumns.add(
-				getColumnIndex(ChromatogramTableModel.POLARIRTY_COLUMN));
-		fixedWidthColumns.add(
-				getColumnIndex(ChromatogramTableModel.MS_LEVEL_COLUMN));
-		fixedWidthColumns.add(
-				getColumnIndex(ChromatogramTableModel.SUM_ALL_COLUMN));
+//		fixedWidthColumns.add(
+//				getColumnIndex(ChromatogramTableModel.CHROMATOGRAM_TYPE_COLUMN));
+//		fixedWidthColumns.add(
+//				getColumnIndex(ChromatogramTableModel.POLARIRTY_COLUMN));
+//		fixedWidthColumns.add(
+//				getColumnIndex(ChromatogramTableModel.MS_LEVEL_COLUMN));
+//		fixedWidthColumns.add(
+//				getColumnIndex(ChromatogramTableModel.SUM_ALL_COLUMN));
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(ExtractedChromatogram.class, 
@@ -101,16 +101,15 @@ public class ChromatogramTable  extends BasicTable {
 				new RangeFormat(MRC2ToolBoxConfiguration.getRtFormat()));
 		
 		finalizeLayout();
-		tca.adjustColumnsExcluding(fixedWidthColumns);
 	}
 
 	public void setTableModelFromChromatograms(
 			Collection<ExtractedChromatogram>chromatograms) {
 
 		thf.setTable(null);
-		model.setTableModelFromChromatograms(chromatograms);
+		((ChromatogramTableModel)model).setTableModelFromChromatograms(chromatograms);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 
 	public Collection<ExtractedChromatogram> getSelectedChromatograms() {
@@ -127,30 +126,30 @@ public class ChromatogramTable  extends BasicTable {
 	
 	public void addChromatogram(ExtractedChromatogram chromatogram) {
 		thf.setTable(null);
-		model.addChromatogram(chromatogram);
+		((ChromatogramTableModel)model).addChromatogram(chromatogram);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 	
 	public void removeChromatogram(ExtractedChromatogram chromatogram) {
 		thf.setTable(null);
-		model.removeChromatogram(chromatogram);
+		((ChromatogramTableModel)model).removeChromatogram(chromatogram);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 	
 	public void addChromatograms(Collection<ExtractedChromatogram>chromatograms) {
 		thf.setTable(null);
-		model.addChromatograms(chromatograms);
+		((ChromatogramTableModel)model).addChromatograms(chromatograms);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 	
 	public void removeChromatograms(Collection<ExtractedChromatogram>chromatograms) {	
 		thf.setTable(null);
-		chromatograms.stream().forEach(c -> model.removeChromatogram(c));	
+		chromatograms.stream().forEach(c -> ((ChromatogramTableModel)model).removeChromatogram(c));	
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 }
 

@@ -42,8 +42,8 @@ public class VendorRawDataFileTableModel extends BasicTableModel {
 	public VendorRawDataFileTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DATA_FILE_COLUMN, File.class, false),
-			new ColumnContext(PATH_COLUMN, String.class, false)
+			new ColumnContext(DATA_FILE_COLUMN, DATA_FILE_COLUMN, File.class, false),
+			new ColumnContext(PATH_COLUMN, PATH_COLUMN, String.class, false)
 		};
 	}
 

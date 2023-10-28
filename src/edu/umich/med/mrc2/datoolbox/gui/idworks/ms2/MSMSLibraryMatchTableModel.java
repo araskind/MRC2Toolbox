@@ -60,18 +60,19 @@ public class MSMSLibraryMatchTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(DEFAULT_ID_COLUMN, Boolean.class, true),
-			new ColumnContext(MS_FEATURE_ID_COLUMN, MsFeatureIdentity.class, false),
-			new ColumnContext(DATABASE_LINK_COLUMN, CompoundIdentity.class, false),
-			new ColumnContext(NEUTRAL_MASS_COLUMN, Double.class, false),
-			new ColumnContext(PARENT_MZ_COLUMN, Double.class, false),
-			new ColumnContext(MSMS_LIB_COLUMN, ReferenceMsMsLibrary.class, false),
-			new ColumnContext(COLLISION_ENERGY_COLUMN, Double.class, false),
-			new ColumnContext(LIB_SCORE_COLUMN, Double.class, false),
-			new ColumnContext(FWD_SCORE_COLUMN, Double.class, false),
-			new ColumnContext(REV_SCORE_COLUMN, Double.class, false),
-			new ColumnContext(PROBABILITY_COLUMN, Double.class, false),
-			new ColumnContext(DOT_PRODUCT_COLUMN, Double.class, false),
+			new ColumnContext(DEFAULT_ID_COLUMN, DEFAULT_ID_COLUMN, Boolean.class, true),
+			new ColumnContext(MS_FEATURE_ID_COLUMN, "Compound name", MsFeatureIdentity.class, false),
+			new ColumnContext(DATABASE_LINK_COLUMN, 
+					"Primary database accession and web link to the source database", CompoundIdentity.class, false),
+			new ColumnContext(NEUTRAL_MASS_COLUMN, "Monoisotopic neutral mass", Double.class, false),
+			new ColumnContext(PARENT_MZ_COLUMN, "Precursor ion M/Z", Double.class, false),
+			new ColumnContext(MSMS_LIB_COLUMN, "MSMS library name", ReferenceMsMsLibrary.class, false),
+			new ColumnContext(COLLISION_ENERGY_COLUMN, "MSMS collision energy", Double.class, false),
+			new ColumnContext(LIB_SCORE_COLUMN, LIB_SCORE_COLUMN, Double.class, false),
+			new ColumnContext(FWD_SCORE_COLUMN, "MSMS forward match score", Double.class, false),
+			new ColumnContext(REV_SCORE_COLUMN, "MSMS reverse match score", Double.class, false),
+			new ColumnContext(PROBABILITY_COLUMN, "MSMS match probability", Double.class, false),
+			new ColumnContext(DOT_PRODUCT_COLUMN, "MSMS dot product", Double.class, false),
 		};
 	}
 

@@ -38,7 +38,6 @@ public class MSMSFeatureExtractionParametersTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 2087167895707677516L;
-	private MSMSFeatureExtractionParametersModel model;
 
 	public MSMSFeatureExtractionParametersTable() {
 
@@ -48,12 +47,13 @@ public class MSMSFeatureExtractionParametersTable extends BasicTable {
 		setModel(model);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
-		rowSorter = new TableRowSorter<MSMSFeatureExtractionParametersModel>(model);
+		rowSorter = new TableRowSorter<MSMSFeatureExtractionParametersModel>(
+				(MSMSFeatureExtractionParametersModel)model);
 		setRowSorter(rowSorter);
 
 		columnModel.getColumnById(MSMSFeatureExtractionParametersModel.METHOD_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());		
-		
+		setExactColumnWidth(MSMSFeatureExtractionParametersModel.METHOD_ID_COLUMN, 80);
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);		
 		finalizeLayout();
 	}
@@ -61,9 +61,9 @@ public class MSMSFeatureExtractionParametersTable extends BasicTable {
 	public void setModelFromParametersList(Collection<MSMSExtractionParameterSet>parameterList) {
 
 		thf.setTable(null);
-		model.setModelFromParametersList(parameterList);
+		((MSMSFeatureExtractionParametersModel)model).setModelFromParametersList(parameterList);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public MSMSExtractionParameterSet getSelectedMSMSExtractionParameterSet(){

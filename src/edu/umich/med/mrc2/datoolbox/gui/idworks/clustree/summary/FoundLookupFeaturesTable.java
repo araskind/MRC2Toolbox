@@ -39,14 +39,14 @@ public class FoundLookupFeaturesTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3232039944841480790L;
-	private FoundLookupFeaturesTableModel model;
 
 	public FoundLookupFeaturesTable() {
 
 		super();
 		model = new FoundLookupFeaturesTableModel();		
 		setModel(model);
-		rowSorter = new TableRowSorter<FoundLookupFeaturesTableModel>(model);
+		rowSorter = new TableRowSorter<FoundLookupFeaturesTableModel>(
+				(FoundLookupFeaturesTableModel)model);
 		setRowSorter(rowSorter);
 		columnModel.getColumnById(
 				FoundLookupFeaturesTableModel.CLUSTER_COLUMN).setCellRenderer(
@@ -68,9 +68,9 @@ public class FoundLookupFeaturesTable extends BasicTable {
 	public void setTableModelFromMsFeatureInfoBundleClusterCollection(
 			Collection<MsFeatureInfoBundleCluster>clusters) {
 		thf.setTable(null);
-		model.setTableModelFromMsFeatureInfoBundleClusterCollection(clusters);
+		((FoundLookupFeaturesTableModel)model).setTableModelFromMsFeatureInfoBundleClusterCollection(clusters);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 
 	}
 	

@@ -50,15 +50,13 @@ public class ProtocolTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5111265849253755884L;
-	private ProtocolTableModel model;
 	private LIMSUserRenderer userRenderer;
-	private MouseMotionAdapter mma;
 
 	public ProtocolTable() {
 		super();
 		model = new ProtocolTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ProtocolTableModel>(model);
+		rowSorter = new TableRowSorter<ProtocolTableModel>((ProtocolTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(ProtocolTableModel.SOP_COLUMN),
 				new LIMSSopComparator(SortProperty.Name));
@@ -68,7 +66,7 @@ public class ProtocolTable extends BasicTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		userRenderer = new LIMSUserRenderer();
 		setDefaultRenderer(LIMSUser.class, userRenderer);
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -103,9 +101,9 @@ public class ProtocolTable extends BasicTable {
 
 	public void setTableModelFromProtocols(Collection<LIMSProtocol>protocols) {
 		thf.setTable(null);
-		model.setTableModelFromProtocols(protocols);
+		((ProtocolTableModel)model).setTableModelFromProtocols(protocols);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public LIMSProtocol getSelectedProtocol() {

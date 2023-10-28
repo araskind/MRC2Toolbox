@@ -43,7 +43,7 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 	public static final String CLUSTER_DATA_SET_COLUMN = "Name";
 	public static final String DESCRIPTION_COLUMN = "Description";
 	public static final String NUM_CLUSTERS_COLUMN = "# of clusters";
-	public static final String OWNER_COLUMN = "Owner";
+	public static final String OWNER_COLUMN = "Created by";
 	public static final String DATE_CREATED_COLUMN = "Date created";
 	public static final String LAST_MODIFIED_COLUMN = "Last modified";
 
@@ -52,12 +52,12 @@ public class MSMSClusterDataSetsTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(CLUSTER_DATA_SET_COLUMN, MSMSClusterDataSet.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(NUM_CLUSTERS_COLUMN, Integer.class, true),
-			new ColumnContext(OWNER_COLUMN, LIMSUser.class, false),
-			new ColumnContext(DATE_CREATED_COLUMN, Date.class, true),
-			new ColumnContext(LAST_MODIFIED_COLUMN, Date.class, true),
+			new ColumnContext(CLUSTER_DATA_SET_COLUMN, "Cluster data set name", MSMSClusterDataSet.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(NUM_CLUSTERS_COLUMN, "Number of clusters", Integer.class, true),
+			new ColumnContext(OWNER_COLUMN, OWNER_COLUMN, LIMSUser.class, false),
+			new ColumnContext(DATE_CREATED_COLUMN, DATE_CREATED_COLUMN, Date.class, true),
+			new ColumnContext(LAST_MODIFIED_COLUMN, LAST_MODIFIED_COLUMN, Date.class, true),
 		};
 	}
 

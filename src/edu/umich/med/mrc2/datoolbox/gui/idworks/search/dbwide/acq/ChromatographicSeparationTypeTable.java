@@ -39,14 +39,13 @@ public class ChromatographicSeparationTypeTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private ChromatographicSeparationTypeTableModel model;
-
 
 	public ChromatographicSeparationTypeTable() {
 		super();
 		model =  new ChromatographicSeparationTypeTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ChromatographicSeparationTypeTableModel>(model);
+		rowSorter = new TableRowSorter<ChromatographicSeparationTypeTableModel>(
+				(ChromatographicSeparationTypeTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(ChromatographicSeparationTypeTableModel.ID_COLUMN),
 				new ChromatographicSeparationTypeComparator(SortProperty.ID));
@@ -57,9 +56,11 @@ public class ChromatographicSeparationTypeTable extends BasicTable {
 		finalizeLayout();
 	}
 
-	public void setTableModelFromChromatographicSeparationTypeList(Collection<ChromatographicSeparationType>typeList) {
-		model.setTableModelFromChromatographicSeparationTypeList(typeList);
-		tca.adjustColumns();
+	public void setTableModelFromChromatographicSeparationTypeList(
+			Collection<ChromatographicSeparationType>typeList) {
+		((ChromatographicSeparationTypeTableModel)model).
+				setTableModelFromChromatographicSeparationTypeList(typeList);
+		adjustColumns();
 	}
 	
 	public void selectTypeList(Collection<ChromatographicSeparationType>typeList) {

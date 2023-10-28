@@ -54,13 +54,12 @@ public class ReferenceMSMSSummaryTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 8422881492134548457L;
-	private ReferenceMSMSSummaryTableModel model;
 
 	public ReferenceMSMSSummaryTable() {
 		super();
 		model = new ReferenceMSMSSummaryTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ReferenceMSMSSummaryTableModel>(model);
+		rowSorter = new TableRowSorter<ReferenceMSMSSummaryTableModel>((ReferenceMSMSSummaryTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(ReferenceMSMSSummaryTableModel.ACQ_METHOD),
 				new AnalysisMethodComparator(SortProperty.Name));
@@ -106,8 +105,8 @@ public class ReferenceMSMSSummaryTable extends BasicTable {
 
 	public void setTableModelFromSummaryCollection(Collection<IDTMsSummary>dataSummaries) {
 		thf.setTable(null);
-		model.setTableModelFromSummaryCollection(dataSummaries);
+		((ReferenceMSMSSummaryTableModel)model).setTableModelFromSummaryCollection(dataSummaries);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 }

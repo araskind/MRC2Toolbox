@@ -41,13 +41,12 @@ public class SampleTypeTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 1837501767078275796L;
-	private SampleTypeTableModel model;
 
 	public SampleTypeTable() {
 		super();
 		model = new SampleTypeTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<SampleTypeTableModel>(model);
+		rowSorter = new TableRowSorter<SampleTypeTableModel>((SampleTypeTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(SampleTypeTableModel.SAMPLE_TYPE_ID_COLUMN),
 				new SampleTypeComparator(SortProperty.ID));
@@ -62,9 +61,9 @@ public class SampleTypeTable extends BasicTable {
 	public void setModelFromSampleTypeList(Collection<LIMSSampleType>typeList) {
 
 		thf.setTable(null);
-		model.setModelFromSampleTypeList(typeList);
+		((SampleTypeTableModel)model).setModelFromSampleTypeList(typeList);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public LIMSSampleType getSelectedSampleType() {

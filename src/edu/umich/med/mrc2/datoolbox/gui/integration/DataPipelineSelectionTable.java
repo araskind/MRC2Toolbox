@@ -36,14 +36,14 @@ public class DataPipelineSelectionTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -4918759221443655308L;
-	private DataPipelineSelectionTableModel model;
 
 	public DataPipelineSelectionTable() {
 
 		super();
 		model = new DataPipelineSelectionTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<DataPipelineSelectionTableModel>(model);
+		rowSorter = new TableRowSorter<DataPipelineSelectionTableModel>(
+				(DataPipelineSelectionTableModel)model);
 		setRowSorter(rowSorter);
 		
 		getTableHeader().setReorderingAllowed(false);
@@ -51,8 +51,8 @@ public class DataPipelineSelectionTable extends BasicTable {
 	}
 
 	public void setTableModelFromExperiment(DataAnalysisProject currentProject) {
-		model.setTableModelFromExperiment(currentProject);
-		tca.adjustColumns();
+		((DataPipelineSelectionTableModel)model).setTableModelFromExperiment(currentProject);
+		adjustColumns();
 	}
 	
 	public Collection<DataPipeline>getSelectedDataPipelines(){

@@ -39,13 +39,12 @@ public class MsTypeTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -1405921543482090501L;
-	private MsTypeTableModel model;
 
 	public MsTypeTable() {
 		super();
 		model =  new MsTypeTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MsTypeTableModel>(model);
+		rowSorter = new TableRowSorter<MsTypeTableModel>((MsTypeTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(MsTypeTableModel.ID_COLUMN),
 				new MsTypeComparator(SortProperty.ID));
@@ -58,8 +57,8 @@ public class MsTypeTable extends BasicTable {
 	}
 
 	public void setTableModelFromMsTypeList(Collection<MsType>typeList) {
-		model.setTableModelFromMsTypeList(typeList);
-		tca.adjustColumns();
+		((MsTypeTableModel)model).setTableModelFromMsTypeList(typeList);
+		adjustColumns();
 	}
 	
 	public void selectTypeList(Collection<MsType>typeList) {

@@ -93,8 +93,7 @@ public class MSMSFeatureTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -8853294038580302429L;
-	private MSMSFeatureTableModel model;
-	private MouseMotionAdapter mma;
+
 	private TableUpdateProgressDialog idp;
 	private FormattedDecimalRenderer scoreRenderer;
 
@@ -106,7 +105,7 @@ public class MSMSFeatureTable extends BasicTable {
 		setModel(model);
 		setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-		rowSorter = new TableRowSorter<MSMSFeatureTableModel>(model);
+		rowSorter = new TableRowSorter<MSMSFeatureTableModel>((MSMSFeatureTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(MSMSFeatureTableModel.MS_FEATURE_COLUMN),
 				new MsFeatureInfoBundleComparator(SortProperty.Name));
@@ -174,7 +173,7 @@ public class MSMSFeatureTable extends BasicTable {
 			.setCellRenderer(new ColorCircleFlagRenderer(16)); 
 
 		//	Database link adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -226,17 +225,17 @@ public class MSMSFeatureTable extends BasicTable {
 		finalizeLayout();
 	}
 	
-	private void adjustVariableColumns() {
-		
-		fixedWidthColumns.clear();
-		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.AMBIGUITY_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.ID_LEVEL_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.ANNOTATIONS_COLUMN));
-		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.FOLLOWUP_COLUMN));
-				
-		tca.adjustColumnsExcluding(fixedWidthColumns);
-		columnModel.getColumnById(MSMSFeatureTableModel.COMPOUND_NAME_COLUMN).setMinWidth(200);
-	}
+//	private void adjustVariableColumns() {
+//		
+//		fixedWidthColumns.clear();
+//		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.AMBIGUITY_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.ID_LEVEL_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.ANNOTATIONS_COLUMN));
+//		fixedWidthColumns.add(getColumnIndex(MSMSFeatureTableModel.FOLLOWUP_COLUMN));
+//				
+//		tca.adjustColumnsExcluding(fixedWidthColumns);
+//		columnModel.getColumnById(MSMSFeatureTableModel.COMPOUND_NAME_COLUMN).setMinWidth(200);
+//	}
 	
 	public void setTableModelFromFeatureList(Collection<MSFeatureInfoBundle> featureList) {
 
@@ -261,7 +260,7 @@ public class MSMSFeatureTable extends BasicTable {
 
 			thf.setTable(null);
 			model.setRowCount(0);
-			List<Object[]> modelData = model.createModelData(featureList);
+			List<Object[]> modelData = ((MSMSFeatureTableModel)model).createModelData(featureList);
 			Thread.sleep(200);
 			for (int index = 0; index < modelData.size(); index++) {
 
@@ -295,7 +294,7 @@ public class MSMSFeatureTable extends BasicTable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			adjustVariableColumns();
+			adjustColumns();
 			idp.dispose();
 		}
 	}
@@ -354,7 +353,7 @@ public class MSMSFeatureTable extends BasicTable {
 
 	public void updateFeatureData(MSFeatureInfoBundle bundle) {
 //		thf.setTable(null);
-		model.updateFeatureData(bundle);
+		((MSMSFeatureTableModel)model).updateFeatureData(bundle);
 //		thf.setTable(this);
 //		adjustVariableColumns();
 	}

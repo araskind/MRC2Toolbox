@@ -48,12 +48,12 @@ public class ChromatographicGradientTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(START_TIME_COLUMN, Double.class, false),
-			new ColumnContext(PERCENT_A_COLUMN, Double.class, false),
-			new ColumnContext(PERCENT_B_COLUMN, Double.class, false),
-			new ColumnContext(PERCENT_C_COLUMN, Double.class, false),
-			new ColumnContext(PERCENT_D_COLUMN, Double.class, false),
-			new ColumnContext(FLOW_RATE_COLUMN, Double.class, false),
+			new ColumnContext(START_TIME_COLUMN, START_TIME_COLUMN, Double.class, false),
+			new ColumnContext(PERCENT_A_COLUMN, "% solvent A", Double.class, false),
+			new ColumnContext(PERCENT_B_COLUMN, "% solvent B", Double.class, false),
+			new ColumnContext(PERCENT_C_COLUMN, "% solvent C", Double.class, false),
+			new ColumnContext(PERCENT_D_COLUMN, "% solvent D", Double.class, false),
+			new ColumnContext(FLOW_RATE_COLUMN, FLOW_RATE_COLUMN, Double.class, false),
 		};
 	}
 
