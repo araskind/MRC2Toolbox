@@ -41,16 +41,15 @@ public class MsMsClusterTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3148919982635938249L;
-	private MsMsClusterTableModel model;
 	private MsMsClusterTableMouseHandler mouseHandler;
 	private StringSelection msmsStringSelection;
-	private Clipboard clipboard;
 
 	public MsMsClusterTable() {
 
 		model = new MsMsClusterTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MsMsClusterTableModel>(model);
+		rowSorter = new TableRowSorter<MsMsClusterTableModel>(
+				(MsMsClusterTableModel)model);
 		setRowSorter(rowSorter);
 		
 		putClientProperty("terminateEditOnFocusLost", Boolean.TRUE);
@@ -63,8 +62,7 @@ public class MsMsClusterTable extends BasicTable {
 				.setCellRenderer(radioRenderer);
 		columnModel.getColumnById(MsMsClusterTableModel.PRIMARY_COLUMN)
 				.setCellEditor(radioEditor);
-
-		clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		
 		mouseHandler = new MsMsClusterTableMouseHandler(this);
 		addMouseListener(mouseHandler);
 		finalizeLayout();
@@ -72,8 +70,8 @@ public class MsMsClusterTable extends BasicTable {
 	
 	public void setTableModelFromMsMsCluster(MsMsCluster featureCluster) {
 
-		model.setTableModelFromFeatureCluster(featureCluster);
-		tca.adjustColumns();
+		((MsMsClusterTableModel)model).setTableModelFromFeatureCluster(featureCluster);
+		adjustColumns();
 	}
 	
 	public SimpleMsMs getSelectedMsMs() {
@@ -92,6 +90,7 @@ public class MsMsClusterTable extends BasicTable {
 		if(feature == null)
 			return;
 		
+		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		msmsStringSelection = new StringSelection(feature.getMsMsString());
 		clipboard.setContents(msmsStringSelection, msmsStringSelection);
 	}

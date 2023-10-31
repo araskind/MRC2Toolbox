@@ -53,13 +53,13 @@ public class LabNotesTableModel extends BasicTableModel {
 	public LabNotesTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(DATE_CREATED_COLUMN, Date.class, false),
-			new ColumnContext(CREATED_BY_COLUMN, LIMSUser.class, false),
-			new ColumnContext(EXPERIMENT_COLUMN, LIMSExperiment.class, false),
-			new ColumnContext(ASSAY_COLUMN, Assay.class, false),
-			new ColumnContext(SAMPLE_COLUMN, ExperimentalSample.class, false),
-			new ColumnContext(INSTRUMENT_COLUMN, LIMSInstrument.class, false),
-			new ColumnContext(EVENT_CATEGORY_COLUMN, AnalysisQcEventAnnotation.class, false),
+			new ColumnContext(DATE_CREATED_COLUMN, DATE_CREATED_COLUMN, Date.class, false),
+			new ColumnContext(CREATED_BY_COLUMN, CREATED_BY_COLUMN, LIMSUser.class, false),
+			new ColumnContext(EXPERIMENT_COLUMN, EXPERIMENT_COLUMN, LIMSExperiment.class, false),
+			new ColumnContext(ASSAY_COLUMN, ASSAY_COLUMN, Assay.class, false),
+			new ColumnContext(SAMPLE_COLUMN, SAMPLE_COLUMN, ExperimentalSample.class, false),
+			new ColumnContext(INSTRUMENT_COLUMN, INSTRUMENT_COLUMN, LIMSInstrument.class, false),
+			new ColumnContext(EVENT_CATEGORY_COLUMN, EVENT_CATEGORY_COLUMN, AnalysisQcEventAnnotation.class, false),
 		};
 	}
 

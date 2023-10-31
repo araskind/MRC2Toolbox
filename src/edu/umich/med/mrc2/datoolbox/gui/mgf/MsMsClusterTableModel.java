@@ -40,8 +40,8 @@ public class MsMsClusterTableModel extends BasicTableModel {
 	public static final String INCLUDE_COLUMN = "Include";
 	public static final String MSMS_COLUMN = "Name";
 	public static final String PARENT_MASS_COLUMN = "Parent mass";
-	public static final String ANNOTATION_COLUMN = "Retention";
-	public static final String RETENTION_COLUMN = "Retention";
+	public static final String ANNOTATION_COLUMN = "Annotation";
+	public static final String RETENTION_COLUMN = "RT";
 	public static final String TOP_INTENSITY_COLUMN = "Top intensity";
 	public static final String TOTAL_INTENSITY_COLUMN = "Total intensity";
 	public static final String NUM_PEAKS_COLUMN = "# of peaks";
@@ -52,15 +52,15 @@ public class MsMsClusterTableModel extends BasicTableModel {
 	public MsMsClusterTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(PRIMARY_COLUMN, Boolean.class, true),
-			new ColumnContext(INCLUDE_COLUMN, Boolean.class, true),
-			new ColumnContext(MSMS_COLUMN, SimpleMsMs.class, false),
-			new ColumnContext(PARENT_MASS_COLUMN, Double.class, false),
-			new ColumnContext(RETENTION_COLUMN, Double.class, false),
-			new ColumnContext(TOP_INTENSITY_COLUMN, Double.class, false),
-			new ColumnContext(TOTAL_INTENSITY_COLUMN, Double.class, false),
-			new ColumnContext(NUM_PEAKS_COLUMN, Integer.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false)
+			new ColumnContext(PRIMARY_COLUMN, "Primary feature", Boolean.class, true),
+			new ColumnContext(INCLUDE_COLUMN, INCLUDE_COLUMN, Boolean.class, true),
+			new ColumnContext(MSMS_COLUMN, MSMS_COLUMN, SimpleMsMs.class, false),
+			new ColumnContext(PARENT_MASS_COLUMN, PARENT_MASS_COLUMN, Double.class, false),
+			new ColumnContext(RETENTION_COLUMN, "Retention time", Double.class, false),
+			new ColumnContext(TOP_INTENSITY_COLUMN, TOP_INTENSITY_COLUMN, Double.class, false),
+			new ColumnContext(TOTAL_INTENSITY_COLUMN, TOTAL_INTENSITY_COLUMN, Double.class, false),
+			new ColumnContext(NUM_PEAKS_COLUMN, "Number of peaks", Integer.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false)
 		};
 	}
 

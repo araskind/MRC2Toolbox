@@ -42,8 +42,8 @@ public class TissueCodeTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(TISSUE_CODE_COLUMN, MoTrPACTissueCode.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(TISSUE_CODE_COLUMN, TISSUE_CODE_COLUMN, MoTrPACTissueCode.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
 		};
 	}
 

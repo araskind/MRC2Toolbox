@@ -21,10 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.user;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
@@ -60,25 +57,7 @@ public class UserTable extends BasicTable {
 		
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setRowHeight(80);
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
-
-		MouseMotionAdapter mma = new MouseMotionAdapter() {
-
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-
-				if(columnModel.isColumnVisible(columnModel.getColumnById(UserTableModel.USER_COLUMN)) &&
-					columnAtPoint(p) == columnModel.getColumnIndex(UserTableModel.USER_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
+		createInteractiveUserRenderer(Arrays.asList(UserTableModel.USER_COLUMN));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(LIMSUser.class, new LIMSUserFormat());

@@ -21,11 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.dextr;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
@@ -66,26 +63,8 @@ public class DataExtractionMethodTable extends BasicTable {
 				new AnalysisMethodComparator(SortProperty.Name));
 
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		setDefaultRenderer(DataExtractionMethod.class, new AnalysisMethodRenderer());
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
-		MouseMotionAdapter mma = new MouseMotionAdapter() {
-
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-
-				if(columnModel.isColumnVisible(columnModel.getColumnById(DataExtractionMethodTableModel.USER_COLUMN)) &&
-					columnAtPoint(p) == columnModel.getColumnIndex(DataExtractionMethodTableModel.USER_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
-
+		setDefaultRenderer(DataExtractionMethod.class, new AnalysisMethodRenderer());	
+		createInteractiveUserRenderer(Arrays.asList(DataExtractionMethodTableModel.USER_COLUMN));
 		columnModel.getColumnById(DataExtractionMethodTableModel.DEX_METHOD_DESCRIPTION_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
 

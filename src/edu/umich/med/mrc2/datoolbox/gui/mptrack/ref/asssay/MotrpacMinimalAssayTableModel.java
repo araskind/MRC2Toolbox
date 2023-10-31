@@ -42,7 +42,7 @@ public class MotrpacMinimalAssayTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ASSAY_COLUMN, MoTrPACAssay.class, false),
+			new ColumnContext(ASSAY_COLUMN, ASSAY_COLUMN, MoTrPACAssay.class, false),
 		};
 	}
 

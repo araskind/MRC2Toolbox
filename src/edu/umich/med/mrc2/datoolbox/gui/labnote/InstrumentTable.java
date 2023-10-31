@@ -41,13 +41,12 @@ public class InstrumentTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -3580581442927796511L;
-	private InstrumentTableModel model;
 
 	public InstrumentTable() {
 		super();
 		model = new InstrumentTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<InstrumentTableModel>(model);
+		rowSorter = new TableRowSorter<InstrumentTableModel>((InstrumentTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(InstrumentTableModel.INSTRUMENT_COLUMN),
 				new InstrumentComparator(SortProperty.ID));
@@ -64,9 +63,9 @@ public class InstrumentTable extends BasicTable {
 
 	public void setTableModelFromInstrumentCollection(Collection<LIMSInstrument>instruments) {
 		thf.setTable(null);
-		model.setTableModelFromInstrumentCollection(instruments);
+		((InstrumentTableModel)model).setTableModelFromInstrumentCollection(instruments);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public LIMSInstrument getSelectedInstrument() {

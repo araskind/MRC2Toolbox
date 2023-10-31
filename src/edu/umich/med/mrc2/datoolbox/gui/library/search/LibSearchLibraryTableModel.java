@@ -51,12 +51,12 @@ public class LibSearchLibraryTableModel extends BasicTableModel {
 	public LibSearchLibraryTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(USE_COLUMN, Boolean.class, true),
-			new ColumnContext(LIBRARY_COLUMN, CompoundLibrary.class, false),
-			new ColumnContext(DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(POLARITY_COLUMN, Polarity.class, false),
-			new ColumnContext(NUM_ENTRIES_COLUMN, Integer.class, false),
-			new ColumnContext(DATE_CREATED_COLUMN, Date.class, false),
+			new ColumnContext(USE_COLUMN, "Include the library in the search", Boolean.class, true),
+			new ColumnContext(LIBRARY_COLUMN, LIBRARY_COLUMN, CompoundLibrary.class, false),
+			new ColumnContext(DESCRIPTION_COLUMN, DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(POLARITY_COLUMN, POLARITY_COLUMN, Polarity.class, false),
+			new ColumnContext(NUM_ENTRIES_COLUMN, "Number of entries in the library", Integer.class, false),
+			new ColumnContext(DATE_CREATED_COLUMN, DATE_CREATED_COLUMN, Date.class, false),
 		};
 	}
 

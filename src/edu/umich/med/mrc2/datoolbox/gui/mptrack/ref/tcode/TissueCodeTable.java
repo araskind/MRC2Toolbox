@@ -40,13 +40,13 @@ public class TissueCodeTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1472881417476433802L;
-	private TissueCodeTableModel model;
 
 	public TissueCodeTable() {
 		super();
 		model = new TissueCodeTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<TissueCodeTableModel>(model);
+		rowSorter = new TableRowSorter<TissueCodeTableModel>(
+				(TissueCodeTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -60,9 +60,9 @@ public class TissueCodeTable extends BasicTable {
 
 	public void setTableModelFromTissueCodes(Collection<MoTrPACTissueCode>codes) {
 		thf.setTable(null);
-		model.setTableModelFromTissueCodes(codes);
+		((TissueCodeTableModel)model).setTableModelFromTissueCodes(codes);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public MoTrPACTissueCode getSelectedCode(){

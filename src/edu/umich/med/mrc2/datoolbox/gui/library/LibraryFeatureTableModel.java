@@ -61,20 +61,21 @@ public class LibraryFeatureTableModel extends BasicTableModel {
 	public LibraryFeatureTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ORDER_COLUMN, Integer.class, false),
-			new ColumnContext(ENABLED_COLUMN, Boolean.class, true),
-			new ColumnContext(QC_COLUMN, Boolean.class, true),
-			new ColumnContext(ID_COLUMN, MsFeatureIdentity.class, false),
-			new ColumnContext(FEATURE_COLUMN, LibraryMsFeature.class, false),
-			new ColumnContext(COMPOUND_NAME_COLUMN, String.class, false),
-			new ColumnContext(FORMULA_COLUMN, String.class, false),
-			new ColumnContext(MASS_COLUMN, Double.class, false),
-			new ColumnContext(RT_COLUMN, Double.class, false),
-			new ColumnContext(MS_COLUMN, Boolean.class, false),
-			new ColumnContext(MSMS_COLUMN, Boolean.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(ID_CONFIDENCE_COLUMN, CompoundIdentificationConfidence.class, false),
-			new ColumnContext(ANNOTATIONS_COLUMN, Boolean.class, false)
+			new ColumnContext(ORDER_COLUMN, "Order number", Integer.class, false),
+			new ColumnContext(ENABLED_COLUMN, ENABLED_COLUMN, Boolean.class, true),
+			new ColumnContext(QC_COLUMN, "Is this feature the QC standard", Boolean.class, true),
+			new ColumnContext(ID_COLUMN, 
+					"Primary database accession and web link to the source database", MsFeatureIdentity.class, false),
+			new ColumnContext(FEATURE_COLUMN, "Library feature name", LibraryMsFeature.class, false),
+			new ColumnContext(COMPOUND_NAME_COLUMN, "Compound name", String.class, false),
+			new ColumnContext(FORMULA_COLUMN, FORMULA_COLUMN, String.class, false),
+			new ColumnContext(MASS_COLUMN, MASS_COLUMN, Double.class, false),
+			new ColumnContext(RT_COLUMN, "Retention time", Double.class, false),
+			new ColumnContext(MS_COLUMN, "Is MS1 defined", Boolean.class, false),
+			new ColumnContext(MSMS_COLUMN, "Does the feature have MSMS information", Boolean.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+			new ColumnContext(ID_CONFIDENCE_COLUMN, ID_CONFIDENCE_COLUMN, CompoundIdentificationConfidence.class, false),
+			new ColumnContext(ANNOTATIONS_COLUMN, "Is the feature annotated", Boolean.class, false)
 		};
 	}
 

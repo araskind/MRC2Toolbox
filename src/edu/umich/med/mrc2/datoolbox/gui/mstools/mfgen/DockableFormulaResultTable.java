@@ -29,7 +29,7 @@ import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
 public class DockableFormulaResultTable extends DefaultSingleCDockable {
 
-	private FormulaResultTable formulaResultTable;
+	private FormulaResultsTable formulaResultTable;
 	private static final Icon componentIcon = GuiUtils.getIcon("searchDatabaseByFormula", 16);
 
 	public DockableFormulaResultTable() {
@@ -37,14 +37,14 @@ public class DockableFormulaResultTable extends DefaultSingleCDockable {
 		super("DockableFormulaResultTable", componentIcon, "Generated formulas", null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
 
-		formulaResultTable = new FormulaResultTable();
+		formulaResultTable = new FormulaResultsTable();
 		add(new JScrollPane(formulaResultTable));
 	}
 
 	/**
 	 * @return the elementSelectionTable
 	 */
-	public FormulaResultTable getTable() {
+	public FormulaResultsTable getTable() {
 		return formulaResultTable;
 	}
 }

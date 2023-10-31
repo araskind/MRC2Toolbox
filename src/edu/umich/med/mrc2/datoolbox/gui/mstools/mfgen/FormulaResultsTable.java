@@ -33,29 +33,24 @@ import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.FormattedDecimalRenderer;
-import edu.umich.med.mrc2.datoolbox.main.config.MRC2ToolBoxConfiguration;
 
-public class FormulaResultTable extends BasicTable{
+public class FormulaResultsTable extends BasicTable{
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1552278354304005851L;
-	private FormulaResultsTableModel model;
-	private FormattedDecimalRenderer ppmRenderer;
 
-	public FormulaResultTable() {
+	public FormulaResultsTable() {
 
 		model = new FormulaResultsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<FormulaResultsTableModel>(model);
+		rowSorter = new TableRowSorter<FormulaResultsTableModel>(
+				(FormulaResultsTableModel)model);
 		setRowSorter(rowSorter);
 		
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
-		ppmRenderer = new FormattedDecimalRenderer(MRC2ToolBoxConfiguration.getPpmFormat());
-
 		columnModel.getColumnById(FormulaResultsTableModel.FORMULA_MASS_COLUMN)
 			.setCellRenderer(mzRenderer);
 		columnModel.getColumnById(FormulaResultsTableModel.ADDUCT_MASS_COLUMN)
@@ -67,7 +62,7 @@ public class FormulaResultTable extends BasicTable{
 		columnModel.getColumnById(FormulaResultsTableModel.ABS_PPM_ERROR_COLUMN)
 			.setCellRenderer(ppmRenderer);
 
-		addTablePopupMenu(new FormulaTablePopupMenu(this));
+		addTablePopupMenu(new FormulaTablePopupMenu(this, this));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		finalizeLayout();
@@ -75,9 +70,9 @@ public class FormulaResultTable extends BasicTable{
 
 	public void setTableModelFromFormulaGeneratorResults(IMolecularFormulaSet formulas, double neutralMass, Adduct ad) {
 		thf.setTable(null);
-		model.setFromFormulaGeneratorResults(formulas, neutralMass, ad);
+		((FormulaResultsTableModel)model).setFromFormulaGeneratorResults(formulas, neutralMass, ad);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void actionPerformed(ActionEvent event) {
@@ -90,23 +85,7 @@ public class FormulaResultTable extends BasicTable{
 			searchSelectedFormulaAgainstDatabase();
 		
 		if(command.equals(MainActionCommands.SEARCH_FORMULA_AGAINST_LIBRARY_COMMAND.getName()))
-			searchSelectedFormulaAgainstActiveLibrary();
-		
-		if(command.equals(MainActionCommands.COPY_FORMULA_COMMAND.getName()))
-			copyFormula();
-		
-		if(command.equals(MainActionCommands.COPY_LINE_COMMAND.getName()))
-			copyLine();		
-	}
-
-	private void copyLine() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private void copyFormula() {
-		// TODO Auto-generated method stub
-		
+			searchSelectedFormulaAgainstActiveLibrary();	
 	}
 
 	private void searchSelectedFormulaAgainstActiveLibrary() {

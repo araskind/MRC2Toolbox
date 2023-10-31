@@ -333,9 +333,6 @@ public class AutomatorPanel extends DockableMRC2ToolboxPanel implements TaskCont
 			}
 			MRC2ToolBoxCore.getTaskController().setMaxRunningThreads(processNumber);
 
-			// displayErrorMessage("File count", "To process\n" + "POS " +
-			// posDataFileList.length + "\nNEG " + negDataFileList.length);
-
 			if (posDataFileList.length > 0) {
 
 				for (File df : posDataFileList) {

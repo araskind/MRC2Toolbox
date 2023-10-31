@@ -37,34 +37,32 @@ public class MsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 8985239471225099508L;
-	private MsTableModel model;
 
 	public MsTable() {
 
 		super();
 		model = new MsTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MsTableModel>(model);
+		rowSorter = new TableRowSorter<MsTableModel>((MsTableModel)model);
 		setRowSorter(rowSorter);
 		finalizeLayout();
 	}
 
 	public void setTableModelFromIsotopePattern(IsotopePattern isoPattern) {
 
-		model.setTableModelFromIsotopePattern(isoPattern);
-		tca.adjustColumns();
+		((MsTableModel)model).setTableModelFromIsotopePattern(isoPattern);
+		adjustColumns();
 	}
 
 	public void setTableModelFromSimpleMs(SimpleMs ms) {
 
-		model.setTableModelFromSimpleMs(ms);
-		tca.adjustColumns();
+		((MsTableModel)model).setTableModelFromSimpleMs(ms);
+		adjustColumns();
 	}
 
 	public void setTableModelFromMsPointCollection(Collection<MsPoint> msPoints) {
 
-		model.setTableModelFromMsPointCollection(msPoints);
-		tca.adjustColumns();
+		((MsTableModel)model).setTableModelFromMsPointCollection(msPoints);
+		adjustColumns();
 	}
-
 }

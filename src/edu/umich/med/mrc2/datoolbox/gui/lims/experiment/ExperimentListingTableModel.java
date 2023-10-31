@@ -39,7 +39,7 @@ public class ExperimentListingTableModel extends BasicTableModel {
 	private static final long serialVersionUID = 8721014012518397650L;
 
 	public static final String EXPERIMENT_ID_COLUMN = "ID";
-	public static final String SERVICE_REQUEST_ID_COLUMN = "Service req ID";
+	public static final String SERVICE_REQUEST_ID_COLUMN = "SR ID";
 	public static final String EXPERIMENT_NAME_COLUMN = "Name";
 	public static final String PROJECT_COLUMN = "Project";
 	public static final String LAB_DATA_COLUMN = "Laboratory";
@@ -53,15 +53,15 @@ public class ExperimentListingTableModel extends BasicTableModel {
 		super();
 		columnArray = new ColumnContext[] {
 
-			new ColumnContext(EXPERIMENT_ID_COLUMN, LIMSExperiment.class, false),
-			new ColumnContext(SERVICE_REQUEST_ID_COLUMN, String.class, false),
-			new ColumnContext(EXPERIMENT_NAME_COLUMN, String.class, false),
-			new ColumnContext(PROJECT_COLUMN, String.class, false),
-			new ColumnContext(LAB_DATA_COLUMN, String.class, false),
-			new ColumnContext(PRINCIPAL_INVESTIGATOR_COLUMN, LIMSUser.class, false),
-			new ColumnContext(CONTACT_PERSON_COLUMN, LIMSUser.class, false),
-			new ColumnContext(START_DATE_COLUMN, Date.class, false),
-			new ColumnContext(NIH_GRANT_NUMBER_COLUMN, String.class, false),
+			new ColumnContext(EXPERIMENT_ID_COLUMN, "LIMS experiment ID", LIMSExperiment.class, false),
+			new ColumnContext(SERVICE_REQUEST_ID_COLUMN, "Service request ID", String.class, false),
+			new ColumnContext(EXPERIMENT_NAME_COLUMN, "Experiment name", String.class, false),
+			new ColumnContext(PROJECT_COLUMN, "Parent LIMS project", String.class, false),
+			new ColumnContext(LAB_DATA_COLUMN, LAB_DATA_COLUMN, String.class, false),
+			new ColumnContext(PRINCIPAL_INVESTIGATOR_COLUMN, PRINCIPAL_INVESTIGATOR_COLUMN, LIMSUser.class, false),
+			new ColumnContext(CONTACT_PERSON_COLUMN, CONTACT_PERSON_COLUMN, LIMSUser.class, false),
+			new ColumnContext(START_DATE_COLUMN, START_DATE_COLUMN, Date.class, false),
+			new ColumnContext(NIH_GRANT_NUMBER_COLUMN, "NIH Grant number (if available)", String.class, false),
 		};
 	}
 

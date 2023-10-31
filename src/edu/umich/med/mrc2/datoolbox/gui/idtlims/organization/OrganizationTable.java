@@ -67,37 +67,11 @@ public class OrganizationTable extends BasicTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setDefaultRenderer(DataExtractionMethod.class, new AnalysisMethodRenderer());
 		setDefaultRenderer(IdTrackerOrganization.class, new IdTrackerOrganizationRenderer(SortProperty.Name));
-
 		createInteractiveUserRenderer(Arrays.asList(
 				OrganizationTableModel.PI_COLUMN, 
 				OrganizationTableModel.CONTACT_PERSON_COLUMN));
-		
-//		userRenderer = new LIMSUserRenderer();
-//		setDefaultRenderer(LIMSUser.class, userRenderer);
-//		MouseMotionAdapter mma = new MouseMotionAdapter() {
-//
-//			public void mouseMoved(MouseEvent e) {
-//
-//				Point p = e.getPoint();
-//
-//				if(columnModel.isColumnVisible(columnModel.getColumnById(OrganizationTableModel.PI_COLUMN)) &&
-//					columnAtPoint(p) == columnModel.getColumnIndex(OrganizationTableModel.PI_COLUMN))
-//					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//				else if(columnModel.isColumnVisible(columnModel.getColumnById(OrganizationTableModel.CONTACT_PERSON_COLUMN)) &&
-//						columnAtPoint(p) == columnModel.getColumnIndex(OrganizationTableModel.CONTACT_PERSON_COLUMN))
-//						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-//				else
-//					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-//			}
-//		};
-//		addMouseMotionListener(mma);
-//		addMouseListener(userRenderer);
-//		addMouseMotionListener(userRenderer);
-
-		WordWrapCellRenderer wwcr = new WordWrapCellRenderer();
-//		columnModel.getColumnById(OrganizationTableModel.DEPARTMENT_COLUMN).setCellRenderer(wwcr);
-//		columnModel.getColumnById(OrganizationTableModel.LABORATORY_COLUMN).setCellRenderer(wwcr);
-		columnModel.getColumnById(OrganizationTableModel.MAILING_ADDRESS_COLUMN).setCellRenderer(wwcr);
+		columnModel.getColumnById(OrganizationTableModel.MAILING_ADDRESS_COLUMN).
+			setCellRenderer(new WordWrapCellRenderer());
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(LIMSUser.class, new LIMSUserFormat());

@@ -46,11 +46,11 @@ public class MotrpacAssayTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ASSAY_COLUMN, MoTrPACAssay.class, false),
-			new ColumnContext(ASSAY_CODE_COLUMN, String.class, false),
-			new ColumnContext(ASSAY_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(POLARITY_COLUMN, String.class, false),
-			new ColumnContext(BUCKET_CODE_COLUMN, String.class, false),
+			new ColumnContext(ASSAY_COLUMN, ASSAY_COLUMN, MoTrPACAssay.class, false),
+			new ColumnContext(ASSAY_CODE_COLUMN, "MoTrPAC code", String.class, false),
+			new ColumnContext(ASSAY_DESCRIPTION_COLUMN, ASSAY_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(POLARITY_COLUMN, POLARITY_COLUMN, String.class, false),
+			new ColumnContext(BUCKET_CODE_COLUMN, "Cloud storage bucket code", String.class, false),
 		};
 	}
 

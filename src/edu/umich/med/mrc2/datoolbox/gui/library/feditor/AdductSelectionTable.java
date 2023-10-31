@@ -42,14 +42,14 @@ public class AdductSelectionTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -392741375728418413L;
-	private AdductSelectionTableModel model;
 
 	public AdductSelectionTable() {
 
 		super();
 		model = new AdductSelectionTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<AdductSelectionTableModel>(model);
+		rowSorter = new TableRowSorter<AdductSelectionTableModel>(
+				(AdductSelectionTableModel)model);
 		setRowSorter(rowSorter);
 		
 		getTableHeader().setReorderingAllowed(false);
@@ -75,9 +75,9 @@ public class AdductSelectionTable extends BasicTable {
 			adducts = AdductManager.getSimplifiedAdductListForPolarity(polarity);
 		
 		thf.setTable(null);
-		model.setTableModelFromAdductListAndFeature(adducts, feature);
+		((AdductSelectionTableModel)model).setTableModelFromAdductListAndFeature(adducts, feature);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public void setTableModelFromAdductListForPolarityAndSubset(
@@ -103,9 +103,9 @@ public class AdductSelectionTable extends BasicTable {
 	public void setTableModelFromAdductList(Collection<Adduct> adducts) {
 		
 		thf.setTable(null);
-		model.setTableModelFromAdductList(adducts);
+		((AdductSelectionTableModel)model).setTableModelFromAdductList(adducts);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public Collection<Adduct>getSelectedAdducts(){

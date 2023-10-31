@@ -25,12 +25,13 @@ import java.awt.event.ActionListener;
 
 import javax.swing.Icon;
 import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
+import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTablePopupMenu;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
 
-public class FormulaTablePopupMenu extends JPopupMenu {
+public class FormulaTablePopupMenu extends BasicTablePopupMenu {
 
 	/**
 	 *
@@ -38,17 +39,17 @@ public class FormulaTablePopupMenu extends JPopupMenu {
 	private static final long serialVersionUID = 1429925123500070269L;
 	private static final Icon searchLibraryIcon = GuiUtils.getIcon("searchLibrary", 24);
 	private static final Icon searchDatabaseIcon = GuiUtils.getIcon("searchDatabase", 24);
-	private static final Icon copyFormulaIcon = GuiUtils.getIcon("clipBoard", 24);
-	private static final Icon copyLineIcon = GuiUtils.getIcon("clipBoard", 24);
+//	private static final Icon copyFormulaIcon = GuiUtils.getIcon("clipBoard", 24);
+//	private static final Icon copyLineIcon = GuiUtils.getIcon("clipBoard", 24);
 
 	private JMenuItem databaseLookupMenuItem;
 	private JMenuItem libraryLookupMenuItem;
-	private JMenuItem copyFormulaMenuItem;
-	private JMenuItem copyLineMenuItem;
+//	private JMenuItem copyFormulaMenuItem;
+//	private JMenuItem copyLineMenuItem;
 
-	public FormulaTablePopupMenu(ActionListener listener) {
+	public FormulaTablePopupMenu(ActionListener listener, BasicTable copyListener) {
 
-		super();
+		super(listener, copyListener);
 
 		databaseLookupMenuItem = GuiUtils.addMenuItem(this,
 				MainActionCommands.SEARCH_FORMULA_AGAINST_DATABASE_COMMAND.getName(), listener,
@@ -60,16 +61,18 @@ public class FormulaTablePopupMenu extends JPopupMenu {
 				MainActionCommands.SEARCH_FORMULA_AGAINST_LIBRARY_COMMAND.getName());
 		libraryLookupMenuItem.setIcon(searchLibraryIcon);
 
-		this.addSeparator();
-
-		copyFormulaMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_FORMULA_COMMAND.getName(), listener,
-				MainActionCommands.COPY_FORMULA_COMMAND.getName());
-		copyFormulaMenuItem.setIcon(copyFormulaIcon);
-
-		copyLineMenuItem = GuiUtils.addMenuItem(this,
-				MainActionCommands.COPY_LINE_COMMAND.getName(), listener,
-				MainActionCommands.COPY_LINE_COMMAND.getName());
-		copyLineMenuItem.setIcon(copyLineIcon);
+//		this.addSeparator();
+//
+//		copyFormulaMenuItem = GuiUtils.addMenuItem(this,
+//				MainActionCommands.COPY_FORMULA_COMMAND.getName(), listener,
+//				MainActionCommands.COPY_FORMULA_COMMAND.getName());
+//		copyFormulaMenuItem.setIcon(copyFormulaIcon);
+//
+//		copyLineMenuItem = GuiUtils.addMenuItem(this,
+//				MainActionCommands.COPY_LINE_COMMAND.getName(), listener,
+//				MainActionCommands.COPY_LINE_COMMAND.getName());
+//		copyLineMenuItem.setIcon(copyLineIcon);
+		
+		addCopyBlock();
 	}
 }

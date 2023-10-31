@@ -37,13 +37,13 @@ public class MotrpacAssayTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = -381502820936496986L;
-	private MotrpacAssayTableModel model;
 
 	public MotrpacAssayTable() {
 		super();
 		model = new MotrpacAssayTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MotrpacAssayTableModel>(model);
+		rowSorter = new TableRowSorter<MotrpacAssayTableModel>(
+				(MotrpacAssayTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -57,8 +57,8 @@ public class MotrpacAssayTable extends BasicTable {
 
 	public void setTableModelFromAssays(Collection<MoTrPACAssay> assays)  {
 
-		model.setTableModelFromAssays(assays);
-		tca.adjustColumns();
+		((MotrpacAssayTableModel)model).setTableModelFromAssays(assays);
+		adjustColumns();
 	}
 
 	public MoTrPACAssay getSelectedAssay(){

@@ -33,12 +33,11 @@ public class MsMsTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -4165675452825468215L;
-	private MsMsTableModel model;
 
 	public MsMsTable() {
 
 		model = new MsMsTableModel();
-		rowSorter = new TableRowSorter<MsMsTableModel>(model);
+		rowSorter = new TableRowSorter<MsMsTableModel>((MsMsTableModel)model);
 		setRowSorter(rowSorter);
 		setModel(model);
 		finalizeLayout();
@@ -46,14 +45,13 @@ public class MsMsTable extends BasicTable {
 
 	public void setTableModelFromMsMsCluster(MsMsCluster featureCluster) {
 
-		model.setTableModelFromMsMsCluster(featureCluster);
-		tca.adjustColumns();
+		((MsMsTableModel)model).setTableModelFromMsMsCluster(featureCluster);
+		adjustColumns();
 	}
 
 	public void setTableModelFromSimpleMsMs(SimpleMsMs msms) {
 
-		model.setTableModelFromSimpleMsMs(msms);
-		tca.adjustColumns();
+		((MsMsTableModel)model).setTableModelFromSimpleMsMs(msms);
+		adjustColumns();
 	}
-
 }

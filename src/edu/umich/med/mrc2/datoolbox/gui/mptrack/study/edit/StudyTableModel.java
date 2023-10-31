@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.List;
 
 import edu.umich.med.mrc2.datoolbox.data.motrpac.MoTrPACStudy;
-import edu.umich.med.mrc2.datoolbox.data.motrpac.MotrpacSampleType;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
 
@@ -44,9 +43,9 @@ public class StudyTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(STUDY_COLUMN, MotrpacSampleType.class, false),
-			new ColumnContext(STUDY_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(STUDY_SUBJECT_COLUMN, String.class, false),
+			new ColumnContext(STUDY_COLUMN, STUDY_COLUMN, MoTrPACStudy.class, false),
+			new ColumnContext(STUDY_DESCRIPTION_COLUMN, STUDY_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(STUDY_SUBJECT_COLUMN, STUDY_SUBJECT_COLUMN, String.class, false),
 		};
 	}
 

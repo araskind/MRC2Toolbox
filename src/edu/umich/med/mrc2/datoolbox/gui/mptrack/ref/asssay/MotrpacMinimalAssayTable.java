@@ -39,13 +39,13 @@ public class MotrpacMinimalAssayTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = -381502820936496986L;
-	private MotrpacMinimalAssayTableModel model;
 
 	public MotrpacMinimalAssayTable() {
 		super();
 		model = new MotrpacMinimalAssayTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MotrpacMinimalAssayTableModel>(model);
+		rowSorter = new TableRowSorter<MotrpacMinimalAssayTableModel>(
+				(MotrpacMinimalAssayTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(MotrpacMinimalAssayTableModel.ASSAY_COLUMN),
 				new MoTrPACAssayComparator(SortProperty.Description));
@@ -60,8 +60,8 @@ public class MotrpacMinimalAssayTable extends BasicTable {
 	}
 
 	public void setTableModelFromAssays(Collection<MoTrPACAssay> assays)  {
-		model.setTableModelFromAssays(assays);
-		tca.adjustColumns();
+		((MotrpacMinimalAssayTableModel)model).setTableModelFromAssays(assays);
+		adjustColumns();
 	}
 
 	public MoTrPACAssay getSelectedAssay(){

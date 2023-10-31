@@ -38,13 +38,13 @@ public class SampleTypeTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1472881417476433802L;
-	private SampleTypeTableModel model;
 
 	public SampleTypeTable() {
 		super();
 		model = new SampleTypeTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<SampleTypeTableModel>(model);
+		rowSorter = new TableRowSorter<SampleTypeTableModel>(
+				(SampleTypeTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -58,9 +58,9 @@ public class SampleTypeTable extends BasicTable {
 
 	public void setTableModelFromSamples(Collection<MotrpacSampleType>samples) {
 		thf.setTable(null);
-		model.setTableModelFromSamples(samples);
+		((SampleTypeTableModel)model).setTableModelFromSamples(samples);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public MotrpacSampleType getSelectedSample(){

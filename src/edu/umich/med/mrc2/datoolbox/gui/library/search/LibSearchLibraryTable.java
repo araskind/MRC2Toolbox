@@ -42,14 +42,13 @@ public class LibSearchLibraryTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = 2890411818566368839L;
 
-	private LibSearchLibraryTableModel model;
-
 	public LibSearchLibraryTable() {
 
 		super();
 		model = new LibSearchLibraryTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<LibSearchLibraryTableModel>(model);
+		rowSorter = new TableRowSorter<LibSearchLibraryTableModel>(
+				(LibSearchLibraryTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -72,9 +71,9 @@ public class LibSearchLibraryTable extends BasicTable {
 
 	public void setTableModelFromLibraryCollection(Collection<CompoundLibrary> libraryCollection) {
 		thf.setTable(null);
-		model.setTableModelFromLibraryCollection(libraryCollection);
+		((LibSearchLibraryTableModel)model).setTableModelFromLibraryCollection(libraryCollection);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 	}
 
 	public List<CompoundLibrary>getSelectedLibraries(){

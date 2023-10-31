@@ -59,18 +59,18 @@ public class MoTrPACReportTableModel extends BasicTableModel {
 		super();
 		Collection<MoTrPACReportCodeBlock> codeBlocks = MoTrPACDatabaseCache.getMotrpacReportCodeBlocks();
 		columnArray = new ColumnContext[8 + codeBlocks.size()];
-		columnArray[0] = new ColumnContext(DOCUMENT_NAME_COLUMN, String.class, false);	
-		columnArray[1] = new ColumnContext(DOCUMENT_VERSION_COLUMN, Integer.class, false);
-		columnArray[2] = new ColumnContext(CREATED_BY_COLUMN, LIMSUser.class, false);	
-		columnArray[3] = new ColumnContext(DATE_CREATED_COLUMN, Date.class, false);	
-		columnArray[4] = new ColumnContext(EXPERIMENT_COLUMN, LIMSExperiment.class, false);	
-		columnArray[5] = new ColumnContext(ASSAY_COLUMN, MoTrPACAssay.class, false);
-		columnArray[6] = new ColumnContext(TISSUE_COLUMN, MoTrPACTissueCode.class, false);	
-		columnArray[7] = new ColumnContext(FILE_DOWNLOAD_COLUMN, MoTrPACReport.class, false);
+		columnArray[0] = new ColumnContext(DOCUMENT_NAME_COLUMN, DOCUMENT_NAME_COLUMN, String.class, false);	
+		columnArray[1] = new ColumnContext(DOCUMENT_VERSION_COLUMN, DOCUMENT_VERSION_COLUMN, Integer.class, false);
+		columnArray[2] = new ColumnContext(CREATED_BY_COLUMN, CREATED_BY_COLUMN, LIMSUser.class, false);	
+		columnArray[3] = new ColumnContext(DATE_CREATED_COLUMN, DATE_CREATED_COLUMN, Date.class, false);	
+		columnArray[4] = new ColumnContext(EXPERIMENT_COLUMN, EXPERIMENT_COLUMN, LIMSExperiment.class, false);	
+		columnArray[5] = new ColumnContext(ASSAY_COLUMN, ASSAY_COLUMN, MoTrPACAssay.class, false);
+		columnArray[6] = new ColumnContext(TISSUE_COLUMN, TISSUE_COLUMN, MoTrPACTissueCode.class, false);	
+		columnArray[7] = new ColumnContext(FILE_DOWNLOAD_COLUMN, "Click to download the report file", MoTrPACReport.class, false);
 		int columnCount = 8;
 		for(MoTrPACReportCodeBlock block : codeBlocks) {
 			columnArray[columnCount] = 
-					new ColumnContext(block.getBlockId(), MoTrPACReportCode.class, false);
+					new ColumnContext(block.getBlockId(), block.getBlockId(), MoTrPACReportCode.class, false);
 			columnCount++;
 		}
 	}

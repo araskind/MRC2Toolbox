@@ -46,10 +46,12 @@ public class ElementSelectionTableModel  extends BasicTableModel {
 	public ElementSelectionTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ENABLED_COLUMN, Boolean.class, true),
-			new ColumnContext(ELEMENT_COLUMN, IIsotope.class, false),
-			new ColumnContext(MIN_COLUMN, Integer.class, true),
-			new ColumnContext(MAX_COLUMN, Integer.class, true)
+			new ColumnContext(ENABLED_COLUMN, ENABLED_COLUMN, Boolean.class, true),
+			new ColumnContext(ELEMENT_COLUMN, ELEMENT_COLUMN, IIsotope.class, false),
+			new ColumnContext(MIN_COLUMN, 
+					"Minimal element atom count in generated formulas", Integer.class, true),
+			new ColumnContext(MAX_COLUMN, 
+					"Maximal element atom count in generated formulas", Integer.class, true)
 		};
 		try {
 			populateDefaultModel();

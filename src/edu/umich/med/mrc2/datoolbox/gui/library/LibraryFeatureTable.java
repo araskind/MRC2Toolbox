@@ -63,10 +63,6 @@ public class LibraryFeatureTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = -1796705932786773010L;
 
-	private LibraryFeatureTableModel model;
-	private MouseMotionAdapter mma;
-	private CompoundLibrary library;
-	private RadioButtonRenderer radioRenderer;
 	private CompoundIdConfidenceRenderer compoundIdConfidenceRenderer;
 
 	public LibraryFeatureTable() {
@@ -74,7 +70,8 @@ public class LibraryFeatureTable extends BasicTable {
 		super();
 		model = new LibraryFeatureTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<LibraryFeatureTableModel>(model);
+		rowSorter = new TableRowSorter<LibraryFeatureTableModel>(
+				(LibraryFeatureTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(LibraryFeatureTableModel.FEATURE_COLUMN),
 				new MsFeatureComparator(SortProperty.Name));
@@ -100,7 +97,7 @@ public class LibraryFeatureTable extends BasicTable {
 		columnModel.getColumnById(LibraryFeatureTableModel.MASS_COLUMN).setCellRenderer(mzRenderer); // Neutral mass
 
 		//	Database link adapter
-		mma = new MouseMotionAdapter() {
+		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -133,16 +130,15 @@ public class LibraryFeatureTable extends BasicTable {
 
 	public void setTableModelFromCompoundLibrary(CompoundLibrary library) {
 
-		this.library = library;
 		Collection<LibraryMsFeature> features =	library.getFeatures().stream()
 	    	.filter(LibraryMsFeature.class::isInstance)
 	    	.map(LibraryMsFeature.class::cast)
 	    	.sorted(new MsFeatureComparator(SortProperty.Name)).collect(Collectors.toList());
 
 		thf.setTable(null);
-		model.setTableModelFromFeatureList(features);
+		((LibraryFeatureTableModel)model).setTableModelFromFeatureList(features);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public int getFeatureRow(LibraryMsFeature feature) {

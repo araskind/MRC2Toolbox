@@ -21,10 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.sop;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeSet;
 
@@ -64,24 +61,8 @@ public class ProtocolTable extends BasicTable {
 				new LIMSUserComparator(SortProperty.Name));
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
-		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-
-				if(columnModel.isColumnVisible(columnModel.getColumnById(ProtocolTableModel.CRERATED_BY_COLUMN)) &&
-					columnAtPoint(p) == columnModel.getColumnIndex(ProtocolTableModel.CRERATED_BY_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
+		createInteractiveUserRenderer(Arrays.asList(ProtocolTableModel.CRERATED_BY_COLUMN));
 
 		columnModel.getColumnById(ProtocolTableModel.SOP_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());		

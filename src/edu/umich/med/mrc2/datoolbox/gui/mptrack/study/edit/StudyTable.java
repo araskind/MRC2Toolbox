@@ -39,13 +39,13 @@ public class StudyTable extends BasicTable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1472881417476433802L;
-	private StudyTableModel model;
-
+	
 	public StudyTable() {
 		super();
 		model = new StudyTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<StudyTableModel>(model);
+		rowSorter = new TableRowSorter<StudyTableModel>(
+				(StudyTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -59,9 +59,9 @@ public class StudyTable extends BasicTable {
 
 	public void setTableModelFromStudies(Collection<MoTrPACStudy>studies) {
 		thf.setTable(null);
-		model.setTableModelFromStudies(studies);
+		((StudyTableModel)model).setTableModelFromStudies(studies);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public MoTrPACStudy getSelectedStudy(){

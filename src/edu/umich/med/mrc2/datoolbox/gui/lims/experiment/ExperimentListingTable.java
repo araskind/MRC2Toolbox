@@ -21,10 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.lims.experiment;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
@@ -42,22 +39,18 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSExperimentRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class ExperimentListingTable extends BasicTable {
 
 	private static final long serialVersionUID = 5953976894424046681L;
-	private ExperimentListingTableModel model;
-	private LIMSUserRenderer userRenderer;
-	private MouseMotionAdapter mma;
 
 	public ExperimentListingTable() {
 
 		super();
 		model = new ExperimentListingTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<ExperimentListingTableModel>(model);
+		rowSorter = new TableRowSorter<ExperimentListingTableModel>((ExperimentListingTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(ExperimentListingTableModel.EXPERIMENT_ID_COLUMN),
 				new LIMSExperimentComparator(SortProperty.ID, SortDirection.DESC));
@@ -74,29 +67,9 @@ public class ExperimentListingTable extends BasicTable {
 			.setCellRenderer(longTextRenderer);
 
 		setDefaultRenderer(LIMSExperiment.class, new LIMSExperimentRenderer());
-
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
-
-		mma = new MouseMotionAdapter() {
-
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-
-				if(columnModel.isColumnVisible(columnModel.getColumnById(ExperimentListingTableModel.PRINCIPAL_INVESTIGATOR_COLUMN)) &&
-					columnAtPoint(p) == columnModel.getColumnIndex(ExperimentListingTableModel.PRINCIPAL_INVESTIGATOR_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else if(columnModel.isColumnVisible(columnModel.getColumnById(ExperimentListingTableModel.CONTACT_PERSON_COLUMN)) &&
-						columnAtPoint(p) == columnModel.getColumnIndex(ExperimentListingTableModel.CONTACT_PERSON_COLUMN))
-						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
+		createInteractiveUserRenderer(Arrays.asList(
+				ExperimentListingTableModel.PRINCIPAL_INVESTIGATOR_COLUMN, 
+				ExperimentListingTableModel.CONTACT_PERSON_COLUMN));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(LIMSExperiment.class, new LIMSExperimentFormat());
@@ -109,10 +82,10 @@ public class ExperimentListingTable extends BasicTable {
 
 	public void setModelFromExperimentCollection(Collection<LIMSExperiment>experimentCollection) {
 		thf.setTable(null);
-		model.setModelFromExperimentCollection(experimentCollection);
+		((ExperimentListingTableModel)model).setModelFromExperimentCollection(experimentCollection);
 		rowSorter.sort();
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public LIMSExperiment getSelectedExperiment() {

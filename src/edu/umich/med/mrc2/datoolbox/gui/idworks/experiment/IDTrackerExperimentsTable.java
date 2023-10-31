@@ -21,10 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.experiment;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
@@ -43,7 +40,6 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSExperimentRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class IDTrackerExperimentsTable extends BasicTable {
@@ -76,25 +72,8 @@ public class IDTrackerExperimentsTable extends BasicTable {
 			.setCellRenderer(longTextRenderer);
 
 		setDefaultRenderer(LIMSExperiment.class, new LIMSExperimentRenderer());
-
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
-
-		MouseMotionAdapter mma = new MouseMotionAdapter() {
-
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-				if(columnModel.isColumnVisible(columnModel.getColumnById(IDTrackerExperimentsTableModel.CONTACT_PERSON_COLUMN)) &&
-						columnAtPoint(p) == columnModel.getColumnIndex(IDTrackerExperimentsTableModel.CONTACT_PERSON_COLUMN))
-						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
+		createInteractiveUserRenderer(Arrays.asList(
+				IDTrackerExperimentsTableModel.CONTACT_PERSON_COLUMN));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(LIMSExperiment.class, new LIMSExperimentFormat());

@@ -44,10 +44,10 @@ public class AdductSelectionTableModel extends BasicTableModel {
 	public AdductSelectionTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(ENABLED_COLUMN, Boolean.class, true),
-			new ColumnContext(CHEM_MOD_COLUMN, Adduct.class, false),
-			new ColumnContext(CHARGE_COLUMN, Integer.class, false),
-			new ColumnContext(NMER_COLUMN, Integer.class, false)
+			new ColumnContext(ENABLED_COLUMN, ENABLED_COLUMN, Boolean.class, true),
+			new ColumnContext(CHEM_MOD_COLUMN, "Adduct name", Adduct.class, false),
+			new ColumnContext(CHARGE_COLUMN, CHARGE_COLUMN, Integer.class, false),
+			new ColumnContext(NMER_COLUMN, "Oligomeric state", Integer.class, false)
 		};
 	}
 

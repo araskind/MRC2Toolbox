@@ -41,24 +41,20 @@ public class ElementSelectionTable extends BasicTable{
 	 *
 	 */
 	private static final long serialVersionUID = -5112212976307291771L;
-	private ElementSelectionTableModel model;
-	private CdkIsotopeRenderer isotopeRenderer;
-	private SpinnerEditor spinnerEditor;
 
 	public ElementSelectionTable() {
 
 		model = new ElementSelectionTableModel();
 		setModel(model);
 		getTableHeader().setReorderingAllowed(false);
-		rowSorter = new TableRowSorter<ElementSelectionTableModel>(model);
+		rowSorter = new TableRowSorter<ElementSelectionTableModel>(
+				(ElementSelectionTableModel)model);
 		setRowSorter(rowSorter);
 		
 		setRowHeight(25);
-		isotopeRenderer = new CdkIsotopeRenderer();
-		setDefaultRenderer(IIsotope.class, isotopeRenderer);
+		setDefaultRenderer(IIsotope.class, new CdkIsotopeRenderer());
 
-		spinnerEditor = new SpinnerEditor(0, 1000);
-		setDefaultEditor(Integer.class, spinnerEditor);
+		setDefaultEditor(Integer.class, new SpinnerEditor(0, 1000));
 		finalizeLayout();
 	}
 
@@ -145,7 +141,7 @@ public class ElementSelectionTable extends BasicTable{
 
 		model.setRowCount(0);
 		try {
-			model.populateDefaultModel();
+			((ElementSelectionTableModel)model).populateDefaultModel();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

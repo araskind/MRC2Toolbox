@@ -42,7 +42,7 @@ public class FormulaResultsTableModel extends BasicTableModel {
 	private static final long serialVersionUID = 5299963957599425248L;
 
 	public static final String FORMULA_COLUMN = "Formula";
-	public static final String ADDUCT_MASS_COLUMN = "Adduct mass";
+	public static final String ADDUCT_MASS_COLUMN = "Adduct M/Z";
 	public static final String FORMULA_MASS_COLUMN = "Formula mass";
 	public static final String EXPECTED_NEUTRAL_MASS_COLUMN = "Expected neutral mass";
 	public static final String PPM_ERROR_COLUMN = "Error, ppm";
@@ -51,12 +51,14 @@ public class FormulaResultsTableModel extends BasicTableModel {
 	public FormulaResultsTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(FORMULA_COLUMN, String.class, false),
-			new ColumnContext(ADDUCT_MASS_COLUMN, String.class, false),
-			new ColumnContext(FORMULA_MASS_COLUMN, Double.class, false),
-			new ColumnContext(EXPECTED_NEUTRAL_MASS_COLUMN, Double.class, false),
-			new ColumnContext(PPM_ERROR_COLUMN, Double.class, false),
-			new ColumnContext(ABS_PPM_ERROR_COLUMN, Double.class, false)
+			new ColumnContext(FORMULA_COLUMN, FORMULA_COLUMN, String.class, false),
+			new ColumnContext(ADDUCT_MASS_COLUMN, ADDUCT_MASS_COLUMN, String.class, false),
+			new ColumnContext(FORMULA_MASS_COLUMN, FORMULA_MASS_COLUMN, Double.class, false),
+			new ColumnContext(EXPECTED_NEUTRAL_MASS_COLUMN, EXPECTED_NEUTRAL_MASS_COLUMN, Double.class, false),
+			new ColumnContext(PPM_ERROR_COLUMN, 
+					"Difference between observed and expected neutral mass, ppm", Double.class, false),
+			new ColumnContext(ABS_PPM_ERROR_COLUMN, 
+					"Absolute difference between observed and expected neutral mass, ppm", Double.class, false)
 		};
 	}
 

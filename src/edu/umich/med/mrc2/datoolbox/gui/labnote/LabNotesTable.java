@@ -21,10 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.labnote;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
@@ -58,7 +55,6 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AnalysisQcEventAnnotati
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.AssayMethodRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ExperimentalSampleRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.InstrumentRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 
 public class LabNotesTable extends BasicTable {
 
@@ -67,16 +63,11 @@ public class LabNotesTable extends BasicTable {
 	 */
 	private static final long serialVersionUID = 1870878007998038229L;
 
-	private LabNotesTableModel model;
-	private LIMSUserRenderer userRenderer;
-
-	private MouseMotionAdapter mma;
-
 	public LabNotesTable() {
 		super();
 		model = new LabNotesTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<LabNotesTableModel>(model);
+		rowSorter = new TableRowSorter<LabNotesTableModel>((LabNotesTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(LabNotesTableModel.INSTRUMENT_COLUMN),
 				new InstrumentComparator(SortProperty.Description));
@@ -94,42 +85,19 @@ public class LabNotesTable extends BasicTable {
 		setDefaultRenderer(Assay.class, new AssayMethodRenderer());
 		setDefaultRenderer(AnalysisQcEventAnnotation.class, new AnalysisQcEventAnnotationRenderer(SortProperty.Quality));
 		setDefaultRenderer(LIMSInstrument.class, new InstrumentRenderer(SortProperty.Description));
-
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
-		mma = new MouseMotionAdapter() {
-
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-				if(columnModel.isColumnVisible(columnModel.getColumnById(LabNotesTableModel.CREATED_BY_COLUMN)) &&
-						columnAtPoint(p) == columnModel.getColumnIndex(LabNotesTableModel.CREATED_BY_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
+		createInteractiveUserRenderer(Arrays.asList(LabNotesTableModel.CREATED_BY_COLUMN));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
-
 		thf.getParserModel().setFormat(LIMSUser.class, new LIMSUserFormat());
 		thf.getParserModel().setComparator(LIMSUser.class, new LIMSUserComparator(SortProperty.Name));
-
 		thf.getParserModel().setComparator(Assay.class, new AssayMethodComparator(SortProperty.Name));
 		thf.getParserModel().setFormat(Assay.class, new AssayMethodFormat(SortProperty.Name));
-
 		thf.getParserModel().setFormat(LIMSInstrument.class, new InstrumentFormat(SortProperty.Description));
 		thf.getParserModel().setComparator(LIMSInstrument.class, new InstrumentComparator(SortProperty.Description));
-
 		thf.getParserModel().setFormat(LIMSExperiment.class, new LIMSExperimentFormat());
 		thf.getParserModel().setComparator(LIMSExperiment.class, new LIMSExperimentComparator(SortProperty.ID));
-
 		thf.getParserModel().setFormat(ExperimentalSample.class, new ExperimentalSampleFormat(SortProperty.ID));
 		thf.getParserModel().setComparator(ExperimentalSample.class, new ExperimentalSampleComparator(SortProperty.ID));
-
 		thf.getParserModel().setFormat(AnalysisQcEventAnnotation.class, new AnalysisQcEventAnnotationFormat(SortProperty.Quality));
 		thf.getParserModel().setComparator(AnalysisQcEventAnnotation.class, new AnalysisQcEventAnnotationComparator(SortProperty.Quality));
 
@@ -138,16 +106,16 @@ public class LabNotesTable extends BasicTable {
 
 	public void setTableModelFromAnnotations(Collection<AnalysisQcEventAnnotation> annotations) {
 		thf.setTable(null);
-		model.setTableModelFromAnnotations(annotations, true);
+		((LabNotesTableModel)model).setTableModelFromAnnotations(annotations, true);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public void addAnnotations(Collection<AnalysisQcEventAnnotation> annotations) {
 		thf.setTable(null);
-		model.setTableModelFromAnnotations(annotations, false);
+		((LabNotesTableModel)model).setTableModelFromAnnotations(annotations, false);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 
 	public AnalysisQcEventAnnotation getSelectedAnnotation() {
@@ -173,7 +141,7 @@ public class LabNotesTable extends BasicTable {
 	}
 
 	public void removeAnnotations(Collection<AnalysisQcEventAnnotation> annotations) {
-		model.removeAnnotations(annotations);
+		((LabNotesTableModel)model).removeAnnotations(annotations);
 	}
 }
 

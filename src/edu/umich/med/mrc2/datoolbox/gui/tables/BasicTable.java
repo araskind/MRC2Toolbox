@@ -816,20 +816,16 @@ public class BasicTable extends JTable implements ActionListener{
 		setDefaultRenderer(LIMSUser.class, userRenderer);
 		userColumns.clear();
 		userColumns.addAll(userColumnIdentifiers);
-		
 		MouseMotionAdapter mma = new MouseMotionAdapter() {
 
 			public void mouseMoved(MouseEvent e) {
 
 				Point p = e.getPoint();
-				for(String columnId : userColumns) {
-					
-					if(columnModel.isColumnVisible(columnModel.getColumnById(columnId)) &&
-							columnAtPoint(p) == columnModel.getColumnIndex(columnId))
-						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-					else
-						setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				}
+				Object columnId = columnModel.getColumn(columnAtPoint(p)).getIdentifier();
+				if(userColumns.contains(columnId))
+					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				else
+					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			}
 		};
 		addMouseMotionListener(mma);

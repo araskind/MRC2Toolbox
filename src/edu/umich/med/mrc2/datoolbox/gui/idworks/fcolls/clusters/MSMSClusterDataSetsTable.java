@@ -21,10 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.fcolls.clusters;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
@@ -42,7 +39,6 @@ import edu.umich.med.mrc2.datoolbox.data.msclust.MSMSClusterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.TimestampRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
@@ -73,25 +69,8 @@ public class MSMSClusterDataSetsTable extends BasicTable {
 			.setMinWidth(120);
 		columnModel.getColumnById(MSMSClusterDataSetsTableModel.DESCRIPTION_COLUMN)
 			.setMinWidth(120);
-		
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
-		MouseMotionAdapter mma = new MouseMotionAdapter() {
-
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-
-				if(columnModel.isColumnVisible(columnModel.getColumnById(MSMSClusterDataSetsTableModel.OWNER_COLUMN)) &&
-					columnAtPoint(p) == columnModel.getColumnIndex(MSMSClusterDataSetsTableModel.OWNER_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
+		createInteractiveUserRenderer(Arrays.asList(
+				MSMSClusterDataSetsTableModel.OWNER_COLUMN));
 		
 		setDefaultRenderer(Date.class, new TimestampRenderer());
 		

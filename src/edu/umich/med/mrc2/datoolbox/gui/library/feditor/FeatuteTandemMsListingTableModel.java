@@ -41,7 +41,7 @@ public class FeatuteTandemMsListingTableModel extends BasicTableModel {
 	public FeatuteTandemMsListingTableModel() {
 		super();
 		columnArray = new ColumnContext[] {
-				new ColumnContext(MSMS_COLUMN, TandemMassSpectrum.class, false)
+				new ColumnContext(MSMS_COLUMN, MSMS_COLUMN, TandemMassSpectrum.class, false)
 		};
 	}
 

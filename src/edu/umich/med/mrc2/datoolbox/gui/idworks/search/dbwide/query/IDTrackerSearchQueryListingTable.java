@@ -21,10 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idworks.search.dbwide.query;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
@@ -33,11 +30,11 @@ import javax.swing.table.TableRowSorter;
 import edu.umich.med.mrc2.datoolbox.data.IDTSearchQuery;
 import edu.umich.med.mrc2.datoolbox.data.compare.LIMSUserComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
+import edu.umich.med.mrc2.datoolbox.data.format.LIMSUserFormat;
 import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
 
 public class IDTrackerSearchQueryListingTable extends BasicTable {
@@ -52,34 +49,20 @@ public class IDTrackerSearchQueryListingTable extends BasicTable {
 		model = new IDTrackerSearchQueryListingTableModel();
 		setModel(model);
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		rowSorter = new TableRowSorter<IDTrackerSearchQueryListingTableModel>((IDTrackerSearchQueryListingTableModel)model);
+		rowSorter = new TableRowSorter<IDTrackerSearchQueryListingTableModel>(
+				(IDTrackerSearchQueryListingTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(IDTrackerSearchQueryListingTableModel.USER_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
-		
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
-		MouseMotionAdapter mma = new MouseMotionAdapter() {
-
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-
-				if(columnModel.isColumnVisible(columnModel.getColumnById(IDTrackerSearchQueryListingTableModel.USER_COLUMN)) &&
-					columnAtPoint(p) == columnModel.getColumnIndex(IDTrackerSearchQueryListingTableModel.USER_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
+		createInteractiveUserRenderer(Arrays.asList(
+				IDTrackerSearchQueryListingTableModel.USER_COLUMN));
 		
 		columnModel.getColumnById(IDTrackerSearchQueryListingTableModel.QUERY_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
 		
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
+		thf.getParserModel().setFormat(LIMSUser.class, new LIMSUserFormat());
+		thf.getParserModel().setComparator(LIMSUser.class, new LIMSUserComparator(SortProperty.Name));
 		finalizeLayout();
 	}
 	

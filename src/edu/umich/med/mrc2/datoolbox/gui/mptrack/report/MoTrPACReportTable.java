@@ -21,10 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.mptrack.report;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
@@ -51,7 +48,6 @@ import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.AutoChoices;
 import edu.umich.med.mrc2.datoolbox.gui.tables.filters.gui.TableFilterHeader;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.DateTimeCellRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSExperimentRenderer;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MoTrPACReportCodeRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MoTrPACReportDocumentTypeRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.MotrpacAssayRenderer;
@@ -64,7 +60,6 @@ public class MoTrPACReportTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -7297021115977628847L;
-	private MoTrPACReportTableModel model;
 	public static final int iconSize = 24;
 	
 	public MoTrPACReportTable() {
@@ -72,7 +67,8 @@ public class MoTrPACReportTable extends BasicTable {
 		super();
 		model = new MoTrPACReportTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<MoTrPACReportTableModel>(model);
+		rowSorter = new TableRowSorter<MoTrPACReportTableModel>(
+				(MoTrPACReportTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(MoTrPACReportTableModel.CREATED_BY_COLUMN),
 				new LIMSUserComparator(SortProperty.Name));
@@ -87,29 +83,15 @@ public class MoTrPACReportTable extends BasicTable {
 		
 		getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
-		LIMSUserRenderer userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
-		MouseMotionAdapter mma = new MouseMotionAdapter() {
-			public void mouseMoved(MouseEvent e) {
-				Point p = e.getPoint();
-				if(columnModel.isColumnVisible(columnModel.getColumnById(MoTrPACReportTableModel.CREATED_BY_COLUMN)) &&
-					columnAtPoint(p) == columnModel.getColumnIndex(MoTrPACReportTableModel.CREATED_BY_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else if(columnModel.isColumnVisible(columnModel.getColumnById(MoTrPACReportTableModel.FILE_DOWNLOAD_COLUMN)) &&
-						columnAtPoint(p) == columnModel.getColumnIndex(MoTrPACReportTableModel.FILE_DOWNLOAD_COLUMN))
-						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
+		createInteractiveUserRenderer(Arrays.asList(
+				MoTrPACReportTableModel.CREATED_BY_COLUMN, 
+				MoTrPACReportTableModel.FILE_DOWNLOAD_COLUMN));
 
 		setDefaultRenderer(Date.class, new DateTimeCellRenderer());
 		setDefaultRenderer(LIMSExperiment.class, new LIMSExperimentRenderer());
 		setDefaultRenderer(MoTrPACAssay.class, new MotrpacAssayRenderer(SortProperty.Name));
 		setDefaultRenderer(MoTrPACTissueCode.class, new MotrpacTissueCodeRenderer(SortProperty.Name));
+		//	TODO is download implemented?
 		setDefaultRenderer(MoTrPACReport.class, new MoTrPACReportDocumentTypeRenderer());	
 		setDefaultRenderer(MoTrPACReportCode.class, new MoTrPACReportCodeRenderer());	
 		
@@ -131,9 +113,9 @@ public class MoTrPACReportTable extends BasicTable {
 	
 	public void setTableModelFromReports(Collection<MoTrPACReport>reports) {
 		thf.setTable(null);
-		model.setTableModelFromReports(reports);
+		((MoTrPACReportTableModel)model).setTableModelFromReports(reports);
 		thf.setTable(this);
-		tca.adjustColumns();
+		adjustColumns();
 	}
 	
 	public MoTrPACReport getSelectedReport() {

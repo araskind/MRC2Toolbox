@@ -21,11 +21,8 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.dacq;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import javax.swing.ListSelectionModel;
@@ -74,28 +71,11 @@ public class AcquisitionMethodTable extends BasicTable {
 		
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setDefaultRenderer(DataAcquisitionMethod.class, new AnalysisMethodRenderer());
-		setDefaultRenderer(LIMSChromatographicColumn.class, new ChromatographicColumnRenderer());		
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
+		setDefaultRenderer(LIMSChromatographicColumn.class, new ChromatographicColumnRenderer());
 		columnModel.getColumnById(AcquisitionMethodTableModel.ACQ_METHOD_DESCRIPTION_COLUMN)
 			.setCellRenderer(new WordWrapCellRenderer());
-	
-		MouseMotionAdapter mma = new MouseMotionAdapter() {
-
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-
-				if(columnModel.isColumnVisible(columnModel.getColumnById(AcquisitionMethodTableModel.USER_COLUMN)) &&
-					columnAtPoint(p) == columnModel.getColumnIndex(AcquisitionMethodTableModel.USER_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
+		
+		createInteractiveUserRenderer(Arrays.asList(AcquisitionMethodTableModel.USER_COLUMN));
 
 		thf = new TableFilterHeader(this, AutoChoices.ENABLED);
 		thf.getParserModel().setFormat(LIMSUser.class, new LIMSUserFormat());

@@ -44,14 +44,14 @@ public class LibraryListingTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = -8952035680682723707L;
-	private LibraryListingTableModel model;
 
 	public LibraryListingTable() {
 
 		super();
 		model = new LibraryListingTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<LibraryListingTableModel>(model);
+		rowSorter = new TableRowSorter<LibraryListingTableModel>(
+				(LibraryListingTableModel)model);
 		setRowSorter(rowSorter);
 		rowSorter.setComparator(model.getColumnIndex(LibraryListingTableModel.LIBRARY_COLUMN),
 				new CompoundLibraryComparator(SortProperty.Name));
@@ -83,9 +83,10 @@ public class LibraryListingTable extends BasicTable {
 			CompoundLibrary activeLibrary) {
 
 		thf.setTable(null);
-		model.setTableModelFromLibraryCollection(libraryCollection, activeLibrary);
+		((LibraryListingTableModel)model).setTableModelFromLibraryCollection(
+				libraryCollection, activeLibrary);
 		thf.setTable(this);
-		tca.adjustColumnsExcluding(fixedWidthColumns);
+		adjustColumns();
 		
 		if(activeLibrary != null)
 			selectLibrary(activeLibrary);

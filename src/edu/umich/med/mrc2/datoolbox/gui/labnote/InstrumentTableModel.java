@@ -47,13 +47,13 @@ public class InstrumentTableModel extends BasicTableModel {
 
 		super();
 		columnArray = new ColumnContext[] {
-			new ColumnContext(INSTRUMENT_COLUMN, LIMSInstrument.class, false),
-			new ColumnContext(INSTRUMENT_NAME_COLUMN, String.class, false),
-			new ColumnContext(INSTRUMENT_DESCRIPTION_COLUMN, String.class, false),
-			new ColumnContext(INSTRUMENT_TYPE_COLUMN, String.class, false),
-			new ColumnContext(MANUFACTURER_COLUMN, String.class, false),
-			new ColumnContext(MODEL_COLUMN, String.class, false),
-			new ColumnContext(SERIAL_NUMBER_COLUMN, String.class, false),
+			new ColumnContext(INSTRUMENT_COLUMN, INSTRUMENT_COLUMN, LIMSInstrument.class, false),
+			new ColumnContext(INSTRUMENT_NAME_COLUMN, INSTRUMENT_NAME_COLUMN, String.class, false),
+			new ColumnContext(INSTRUMENT_DESCRIPTION_COLUMN, INSTRUMENT_DESCRIPTION_COLUMN, String.class, false),
+			new ColumnContext(INSTRUMENT_TYPE_COLUMN, INSTRUMENT_TYPE_COLUMN, String.class, false),
+			new ColumnContext(MANUFACTURER_COLUMN, MANUFACTURER_COLUMN, String.class, false),
+			new ColumnContext(MODEL_COLUMN, MODEL_COLUMN, String.class, false),
+			new ColumnContext(SERIAL_NUMBER_COLUMN, SERIAL_NUMBER_COLUMN, String.class, false),
 		};
 	}
 

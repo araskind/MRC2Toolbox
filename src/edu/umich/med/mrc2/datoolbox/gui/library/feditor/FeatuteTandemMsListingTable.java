@@ -34,14 +34,14 @@ public class FeatuteTandemMsListingTable extends BasicTable {
 	 *
 	 */
 	private static final long serialVersionUID = 5088486364694169431L;
-	private FeatuteTandemMsListingTableModel model;
 
 	public FeatuteTandemMsListingTable() {
 
 		super();
 		model = new FeatuteTandemMsListingTableModel();
 		setModel(model);
-		rowSorter = new TableRowSorter<FeatuteTandemMsListingTableModel>(model);
+		rowSorter = new TableRowSorter<FeatuteTandemMsListingTableModel>(
+				(FeatuteTandemMsListingTableModel)model);
 		setRowSorter(rowSorter);
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		finalizeLayout();
@@ -49,8 +49,8 @@ public class FeatuteTandemMsListingTable extends BasicTable {
 
 	public void setTableModelFromFeature(MsFeature feature) {
 
-		model.setTableModelFromFeature(feature);
-		tca.adjustColumns();
+		((FeatuteTandemMsListingTableModel)model).setTableModelFromFeature(feature);
+		adjustColumns();
 	}
 
 	public TandemMassSpectrum getSelectedMsMs() {

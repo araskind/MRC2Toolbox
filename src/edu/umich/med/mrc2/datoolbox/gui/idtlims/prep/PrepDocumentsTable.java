@@ -21,10 +21,7 @@
 
 package edu.umich.med.mrc2.datoolbox.gui.idtlims.prep;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeSet;
 
@@ -32,10 +29,8 @@ import javax.swing.table.TableRowSorter;
 
 import edu.umich.med.mrc2.datoolbox.data.compare.LIMSUserComparator;
 import edu.umich.med.mrc2.datoolbox.data.compare.SortProperty;
-import edu.umich.med.mrc2.datoolbox.data.lims.LIMSUser;
 import edu.umich.med.mrc2.datoolbox.data.lims.ObjectAnnotation;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTable;
-import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.LIMSUserRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ObjectAnnotationDocumentTypeRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.ObjectAnnotationRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.tables.renderers.WordWrapCellRenderer;
@@ -48,7 +43,6 @@ public class PrepDocumentsTable extends BasicTable {
 	private static final long serialVersionUID = -6975693354223437089L;
 	
 	public static final int iconSize = 24;
-	private LIMSUserRenderer userRenderer;
 
 	public PrepDocumentsTable() {
 		super();
@@ -66,6 +60,7 @@ public class PrepDocumentsTable extends BasicTable {
 		
 		ObjectAnnotationDocumentTypeRenderer annotationRenderer = 
 				new ObjectAnnotationDocumentTypeRenderer(this);
+		addMouseListener(annotationRenderer);	
 		columnModel.getColumnById(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN)
 			.setCellRenderer(annotationRenderer);
 		
@@ -73,28 +68,32 @@ public class PrepDocumentsTable extends BasicTable {
 				model.getColumnIndex(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN)).setWidth(iconSize * 2);
 		fixedWidthColumns.add(model.getColumnIndex(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN));
 		
-		userRenderer = new LIMSUserRenderer();
-		setDefaultRenderer(LIMSUser.class, userRenderer);
-		MouseMotionAdapter mma = new MouseMotionAdapter() {
-
-			public void mouseMoved(MouseEvent e) {
-
-				Point p = e.getPoint();
-
-				if(columnModel.isColumnVisible(columnModel.getColumnById(PrepDocumentsTableModel.ADDED_BY_COLUMN)) &&
-					columnAtPoint(p) == columnModel.getColumnIndex(PrepDocumentsTableModel.ADDED_BY_COLUMN))
-					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else if(columnModel.isColumnVisible(columnModel.getColumnById(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN)) &&
-						columnAtPoint(p) == columnModel.getColumnIndex(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN))
-						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				else
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			}
-		};
-		addMouseMotionListener(mma);
-		addMouseListener(userRenderer);
-		addMouseMotionListener(userRenderer);
-		addMouseListener(annotationRenderer);		
+//		userRenderer = new LIMSUserRenderer();
+//		setDefaultRenderer(LIMSUser.class, userRenderer);
+//		MouseMotionAdapter mma = new MouseMotionAdapter() {
+//
+//			public void mouseMoved(MouseEvent e) {
+//
+//				Point p = e.getPoint();
+//
+//				if(columnModel.isColumnVisible(columnModel.getColumnById(PrepDocumentsTableModel.ADDED_BY_COLUMN)) &&
+//					columnAtPoint(p) == columnModel.getColumnIndex(PrepDocumentsTableModel.ADDED_BY_COLUMN))
+//					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//				else if(columnModel.isColumnVisible(columnModel.getColumnById(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN)) &&
+//						columnAtPoint(p) == columnModel.getColumnIndex(PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN))
+//						setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//				else
+//					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+//			}
+//		};
+//		addMouseMotionListener(mma);
+//		addMouseListener(userRenderer);
+//		addMouseMotionListener(userRenderer);
+		
+		createInteractiveUserRenderer(Arrays.asList(
+				PrepDocumentsTableModel.ADDED_BY_COLUMN, 
+				PrepDocumentsTableModel.FILE_DOWNLOAD_COLUMN));
+			
 		finalizeLayout();
 	}
 
