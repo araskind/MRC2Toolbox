@@ -83,8 +83,8 @@ import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureCleanupParameters;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.cleanup.FeatureDataCleanupDialog;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.noid.MissingIdentificationsDialog;
-import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.DockableUniversalIdentificationResultsTable;
-import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.MetabolomicsIdentificationTableModelListener;
+import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableUniversalIdentificationResultsTable;
+import edu.umich.med.mrc2.datoolbox.gui.idtable.MetabolomicsIdentificationTableModelListener;
 import edu.umich.med.mrc2.datoolbox.gui.io.DataExportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.IntegratedReportDialog;
 import edu.umich.med.mrc2.datoolbox.gui.io.MultiFileDataImportDialog;
@@ -759,32 +759,33 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 	private void clearSelectedFeatureIdentifications() {
 
-		selectedFeaturesMap = featureDataTable.getSelectedFeaturesMap();
-		int firstSelectedRow = featureDataTable.getTable().getSelectedRow();
-		if(!selectedFeaturesMap.isEmpty()) {
+		selectedFeaturesMap = featureDataTable.getSelectedFeaturesMap();		
+		if(selectedFeaturesMap.isEmpty())
+			return;
 
-			int confirm = MessageDialog.showChoiceWithWarningMsg(
-				"Do you want to remove compound identification data from selected features?",
-				this.getContentPane());
+		int confirm = MessageDialog.showChoiceWithWarningMsg(
+			"Do you want to remove compound identification data from selected features?",
+			this.getContentPane());
+		if (confirm != JOptionPane.YES_OPTION)
+			return;
+			
+		List<MsFeature>selectedFeatures = selectedFeaturesMap.values().
+				stream().flatMap(c -> c.stream()).collect(Collectors.toList());
+		selectedFeatures.stream().forEach(f -> f.clearIdentification());
 
-			if (confirm == JOptionPane.YES_OPTION) {
 
-				selectedFeaturesMap.values().stream().flatMap(c -> c.stream()).forEach(f -> {
-					f.clearIdentification();
-					featureDataTable.updateFeatureData(f);
-				});
-				//	If knowns only shown remove row from view and scroll to nearest selected
-				if(activeFeatureFilter.equals(FeatureFilter.IDENTIFIED_ONLY)) {
+		//	If knowns only shown remove row from view and scroll to nearest selected
+		if(activeFeatureFilter.equals(FeatureFilter.IDENTIFIED_ONLY)) {
 
-					List<MsFeature> sorted =
-							currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline).getFeatures().stream().
-							filter(f -> f.isIdentified()).sorted(new MsFeatureComparator(SortProperty.Name)).
-							collect(Collectors.toList());
+			List<MsFeature> sorted =
+					currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline).getFeatures().stream().
+					filter(f -> f.isIdentified()).sorted(new MsFeatureComparator(SortProperty.Name)).
+					collect(Collectors.toList());
 
-					setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, sorted));
-					featureDataTable.selectFeatureRow(firstSelectedRow);
-				}
-			}
+			setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, sorted));
+		}
+		else {			
+			featureDataTable.updateMultipleFeatureData(selectedFeatures);
 		}
 	}
 
@@ -1260,21 +1261,21 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 			clearPanel();
 			return;
 		}
-		Collection<MsFeature> features =
-				currentExperiment.getActiveFeatureSetForDataPipeline(activeDataPipeline).
-				getFeatures();
-		setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, features));
 		activeFeatureFilter = FeatureFilter.ALL_FEATURES;
+		setTableModelFromFeatureMap(Collections.singletonMap(
+				activeDataPipeline, activeMsFeatureSet.getFeatures()));
 	}
 	
-	public void setTableModelFromFeatureMap(Map<DataPipeline, Collection<MsFeature>> featureMap) {
+	public void setTableModelFromFeatureMap(
+			Map<DataPipeline, Collection<MsFeature>> featureMap) {
 
 		featureDataTable.getTable().getSelectionModel().removeListSelectionListener(this);
 		featureDataTable.setTableModelFromFeatureMap(featureMap);
 		featureDataTable.getTable().getSelectionModel().addListSelectionListener(this);
 	}
 
-	public void setTableModelFromFeatureSet(MsFeatureSet activeFeatureSetForMethod) {
+	public void setTableModelFromFeatureSet(
+			MsFeatureSet activeFeatureSetForMethod) {
 		
 		if(activeFeatureSetForMethod.equals(activeMsFeatureSet))
 			return;
@@ -1285,7 +1286,8 @@ public class FeatureDataPanel extends DockableMRC2ToolboxPanel implements ListSe
 
 		activeMsFeatureSet = activeFeatureSetForMethod;
 		activeMsFeatureSet.addListener(this);
-		setTableModelFromFeatureMap(Collections.singletonMap(activeDataPipeline, activeMsFeatureSet.getFeatures()));
+		setTableModelFromFeatureMap(Collections.singletonMap(
+				activeDataPipeline, activeMsFeatureSet.getFeatures()));
 	}
 
 	public void showFeatureData(MsFeature selectedFeature) {

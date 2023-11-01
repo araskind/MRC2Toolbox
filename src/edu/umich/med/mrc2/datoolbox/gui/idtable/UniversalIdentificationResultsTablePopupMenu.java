@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idtable.uni;
+package edu.umich.med.mrc2.datoolbox.gui.idtable;
 
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;

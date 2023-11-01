@@ -140,6 +140,10 @@ public class DockableFeatureDataTable extends DefaultSingleCDockable{
 		((FeatureDataTableModel) featureDataTable.getModel()).updateFeatureData(source);
 		featureDataTable.scrollToSelected();
 	}
+	
+	public void updateMultipleFeatureData(Collection<MsFeature>featuresToUpdate){
+		((FeatureDataTableModel) featureDataTable.getModel()).updateMultipleFeatureData(featuresToUpdate);
+	}
 
 	class TableUpdateTask extends LongUpdateTask {
 		/*

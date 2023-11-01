@@ -49,6 +49,7 @@ import edu.umich.med.mrc2.datoolbox.taskcontrol.Task;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskEvent;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskListener;
 import edu.umich.med.mrc2.datoolbox.taskcontrol.TaskStatus;
+import edu.umich.med.mrc2.datoolbox.utils.MSRTSearchUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class LibrarySearchTask  extends AbstractTask implements TaskListener{
@@ -210,6 +211,12 @@ public class LibrarySearchTask  extends AbstractTask implements TaskListener{
 					f.addIdentity(fid);
 					
 				f.setTopScoreIdAsDefault();
+				
+				if(ids.size() > 1) {
+					MsFeatureIdentity bestRtMatch = MSRTSearchUtils.getIDwithClosestRT(f);
+					if(bestRtMatch != null)
+						f.setPrimaryIdentity(bestRtMatch);
+				}
 			}
 			if(addToList)
 				identifiedFeatures.add(f);

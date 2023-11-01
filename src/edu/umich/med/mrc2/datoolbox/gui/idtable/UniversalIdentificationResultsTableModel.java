@@ -19,7 +19,7 @@
  *
  ******************************************************************************/
 
-package edu.umich.med.mrc2.datoolbox.gui.idtable.uni;
+package edu.umich.med.mrc2.datoolbox.gui.idtable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +43,7 @@ import edu.umich.med.mrc2.datoolbox.data.enums.SpectrumSource;
 import edu.umich.med.mrc2.datoolbox.database.idt.IDTDataCache;
 import edu.umich.med.mrc2.datoolbox.gui.tables.BasicTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.tables.ColumnContext;
+import edu.umich.med.mrc2.datoolbox.utils.MSRTSearchUtils;
 import edu.umich.med.mrc2.datoolbox.utils.MsUtils;
 
 public class UniversalIdentificationResultsTableModel extends BasicTableModel {
@@ -200,7 +201,8 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 				continue;
 			
 			Double deltaMz = 0.0d;
-			Double deltaRt = calculateRetentionShift(id);
+			Double deltaRt = 
+					MSRTSearchUtils.calculateRetentionShift(parentFeature, id);
 			Adduct adductMatch = id.getPrimaryAdduct();
 			CompoundLibrary msRtLibrary = null;		
 			double parentMz = 0.0d;
@@ -256,10 +258,6 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 				posteriorProbability = msmslibMatch.getPosteriorErrorProbability();
 				percolatorScore = msmslibMatch.getPercolatorScore();
 			}
-//			if(id.getCompoundIdentity() == null) {
-//				System.out.println(id.toString());
-//				return;
-//			}
 			Object[] obj = {
 					id.equals(defaultId),
 					id.getIdentificationLevel(),
@@ -297,28 +295,7 @@ public class UniversalIdentificationResultsTableModel extends BasicTableModel {
 		}
 		if(!rowData.isEmpty())
 			addRows(rowData);
-	}
-	
-	private Double calculateRetentionShift(MsFeatureIdentity id) {
-
-		if(id.getMsRtLibraryMatch() == null)
-			return null;
-
-		double expectedRt = id.getMsRtLibraryMatch().getExpectedRetention();
-		if(expectedRt == 0.0d) {
-			return null;
-		}
-		else {
-			if(parentFeature.getStatsSummary() != null) {
-				if(parentFeature.getStatsSummary().getMedianObservedRetention() > 0)
-					return parentFeature.getStatsSummary().getMedianObservedRetention() - expectedRt;
-				else
-					return parentFeature.getRetentionTime() - expectedRt;
-			}
-			else
-				return parentFeature.getRetentionTime() - expectedRt;
-		}
-	}
+	}	
 
 	/**
 	 * @param parentFeature the parentFeature to set

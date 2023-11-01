@@ -173,8 +173,18 @@ public class FeatureDataTableModel extends BasicTableModel {
 			addRows(rowData);
 	}
 
-	public void updateFeatureData(MsFeature cf) {
+	public void updateMultipleFeatureData(Collection<MsFeature>featuresToUpdate) {
 
+		suppressEvents = true;
+		for(MsFeature cf : featuresToUpdate)
+			updateFeatureData(cf);
+		
+		suppressEvents = false;
+		fireTableDataChanged();
+	}
+	
+	public void updateFeatureData(MsFeature cf) {
+		
 		int row = getFeatureRow(cf);
 		if(row == -1)
 			return;
@@ -219,6 +229,7 @@ public class FeatureDataTableModel extends BasicTableModel {
 		setValueAt(cf.getStatsSummary().getSampleRsd(), row, getColumnIndex(SAMPLE_RSD_COLUMN));
 		setValueAt(cf.getStatsSummary().getSampleFrequency(), row, getColumnIndex(SAMPLE_FREQUENCY_COLUMN));
 	}
+	
 
 	public int getFeatureRow(MsFeature feature) {
 

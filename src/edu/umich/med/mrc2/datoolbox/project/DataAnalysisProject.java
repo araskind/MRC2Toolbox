@@ -651,7 +651,9 @@ public class DataAnalysisProject extends Experiment {
 		if(currentActiveSet != null && currentActiveSet.equals(activeSet))
 			return;
 		
-		featureSetMap.get(pipeline).add(activeSet);
+		if(!featureSetMap.get(pipeline).contains(activeSet))
+			featureSetMap.get(pipeline).add(activeSet);
+		
 		featureSetMap.get(pipeline).stream().forEach(s -> {
 			s.setSuppressEvents(true);
 			s.setActive(false);

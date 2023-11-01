@@ -34,7 +34,7 @@ public class BasicTableModel extends DefaultTableModel {
 	 */
 	private static final long serialVersionUID = -2434174808937948792L;
 
-
+	protected boolean suppressEvents;
 	protected ColumnContext[] columnArray;
 
 	public BasicTableModel() {
@@ -90,7 +90,26 @@ public class BasicTableModel extends DefaultTableModel {
 		dataVector.addAll(vRowData);
 		fireTableRowsInserted(rowCount, getRowCount() - 1);
 	}
+
+	public boolean isSuppressEvents() {
+		return suppressEvents;
+	}
+
+	public void setSuppressEvents(boolean suppressEvents) {
+		this.suppressEvents = suppressEvents;
+	}
 	
+	@Override
+    public void setValueAt(Object aValue, int row, int column) {
+        @SuppressWarnings("unchecked")
+        Vector<Object> rowVector = dataVector.elementAt(row);
+        rowVector.setElementAt(aValue, column);
+        if(suppressEvents)
+        	return;
+        else
+        	fireTableCellUpdated(row, column);
+    }
+    
 //    public void addRow(Object[]rowData) {
 //    	int row = dataList.size();
 //        dataList.add(rowData);

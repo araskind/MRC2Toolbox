@@ -47,6 +47,7 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
+import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
@@ -74,6 +75,8 @@ public class TwoDqcPlot extends MasterPlotPanel
 	private DataScale dataScale;
 	private DataSetQcField qcParameter;
 	protected PlotDataGrouping groupingType;
+	protected ChartColorOption chartColorOption;
+	
 	protected ExperimentDesignFactor category;
 	protected ExperimentDesignFactor subCategory;
 	protected ExperimentDesignSubset activeDesign;
@@ -89,7 +92,8 @@ public class TwoDqcPlot extends MasterPlotPanel
 		plotType = QcPlotType.BARCHART;
 		sortingOrder = FileSortingOrder.NAME;		
 		dataScale = DataScale.RAW;
-		qcParameter = DataSetQcField.OBSERVATIONS;		
+		qcParameter = DataSetQcField.OBSERVATIONS;	
+		chartColorOption = ChartColorOption.BY_FILE;
 	}
 	
 	/**

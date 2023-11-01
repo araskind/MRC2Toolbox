@@ -54,7 +54,7 @@ import edu.umich.med.mrc2.datoolbox.gui.communication.MsFeatureEvent;
 import edu.umich.med.mrc2.datoolbox.gui.dereplication.clustering.ClusterFeatureSelectionTableModel;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.DockableFeatureIntensitiesTable;
 import edu.umich.med.mrc2.datoolbox.gui.fdata.corr.DockableCorrelationDataPanel;
-import edu.umich.med.mrc2.datoolbox.gui.idtable.uni.DockableUniversalIdentificationResultsTable;
+import edu.umich.med.mrc2.datoolbox.gui.idtable.DockableUniversalIdentificationResultsTable;
 import edu.umich.med.mrc2.datoolbox.gui.main.DockableMRC2ToolboxPanel;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.main.MainWindow;

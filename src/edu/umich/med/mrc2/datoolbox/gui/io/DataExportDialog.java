@@ -419,25 +419,15 @@ public class DataExportDialog extends JDialog
 						
 			exportFile = fc.getSelectedFile();
 			baseDirectory = exportFile.getParentFile();
-		}		
+		}	
+		if(exportFile == null)
+			return;
+		
 		Collection<String>errors = validateInput();
 		if(!errors.isEmpty()) {
 			MessageDialog.showErrorMsg(StringUtils.join(errors, "\n"), this);
 			return;
-		}	
-//		DataExportTask det = new DataExportTask(
-//				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
-//				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),
-//				exportFile,
-//				getExportType(),
-//				getMissingExportType(),
-//				areFilteresEnabled(),
-//				getMaxRsd(),
-//				getMinFrequency(),
-//				getDataExportNamingField(),
-//				exportManifest(),
-//				replaceSpecChars());
-		
+		}			
 		DataExportTask det = new DataExportTask(
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment(),
 				MRC2ToolBoxCore.getActiveMetabolomicsExperiment().getActiveDataPipeline(),

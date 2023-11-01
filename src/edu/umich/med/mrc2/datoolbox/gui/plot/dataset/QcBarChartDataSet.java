@@ -37,6 +37,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
+import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
@@ -71,14 +72,24 @@ public class QcBarChartDataSet extends DefaultCategoryDataset {
 		HashSet<DataFile> files = samples.stream().
 				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
 				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
+//		Map<String, DataFile[]> seriesFileMap = 
+//				PlotDataSetUtils.createSeriesFileMap(
+//						pipeline, 
+//						files,
+//						sortingOrder, 
+//						experiment.getExperimentDesign().getCompleteDesignSubset(), 
+//						PlotDataGrouping.IGNORE_DESIGN,
+//						null,
+//						null, 
+//						false);
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(
 						pipeline, 
 						files,
 						sortingOrder, 
 						experiment.getExperimentDesign().getCompleteDesignSubset(), 
-						PlotDataGrouping.IGNORE_DESIGN,	// PlotDataGrouping.ONE_FACTOR, 
-						null,	//	experiment.getExperimentDesign().getFactorByName(StandardFactors.SAMPLE_CONTROL_TYPE.getName()), 
+						PlotDataGrouping.ONE_FACTOR, 
+						experiment.getExperimentDesign().getFactorByName(StandardFactors.SAMPLE_CONTROL_TYPE.getName()), 
 						null, 
 						false);
 		Map<String,Paint>seriesPaintNameMap = new TreeMap<String,Paint>();
