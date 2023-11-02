@@ -33,13 +33,15 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentalSample;
+import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
-import edu.umich.med.mrc2.datoolbox.data.enums.StandardFactors;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
+import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDqcPlotParameterObject;
 import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
@@ -53,9 +55,14 @@ public class QcBarChartDataSet extends DefaultCategoryDataset {
 	private Map<Integer,Paint>seriesPaintMap;
 	
 	public QcBarChartDataSet(
-			Collection<DataFileStatisticalSummary> dataSetStats, 
+			Collection<DataFileStatisticalSummary> dataSetStats, 			
+			DataSetQcField statsField,
 			FileSortingOrder sortingOrder, 
-			DataSetQcField statsField) {
+			ChartColorOption chartColorOption,
+			PlotDataGrouping groupingType,
+			ExperimentDesignFactor category,
+			ExperimentDesignFactor subCategory,
+			boolean splitByBatch) {
 		
 		if (statsField == DataSetQcField.RAW_VALUES)
 			return;
@@ -72,33 +79,23 @@ public class QcBarChartDataSet extends DefaultCategoryDataset {
 		HashSet<DataFile> files = samples.stream().
 				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
 				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
-//		Map<String, DataFile[]> seriesFileMap = 
-//				PlotDataSetUtils.createSeriesFileMap(
-//						pipeline, 
-//						files,
-//						sortingOrder, 
-//						experiment.getExperimentDesign().getCompleteDesignSubset(), 
-//						PlotDataGrouping.IGNORE_DESIGN,
-//						null,
-//						null, 
-//						false);
+
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(
 						pipeline, 
 						files,
 						sortingOrder, 
 						experiment.getExperimentDesign().getCompleteDesignSubset(), 
-						PlotDataGrouping.ONE_FACTOR, 
-						experiment.getExperimentDesign().getFactorByName(StandardFactors.SAMPLE_CONTROL_TYPE.getName()), 
-						null, 
-						false);
+						groupingType, 
+						category, 
+						subCategory);
 		Map<String,Paint>seriesPaintNameMap = new TreeMap<String,Paint>();
 		seriesPaintMap = new TreeMap<Integer,Paint>();
 		int sCount = 0;
 		for(String sName : seriesFileMap.keySet()) {
 			seriesPaintNameMap.put(sName, MasterPlotPanel.getBrewerColor(sCount));
 			sCount++;
-		}		
+		}
 		Integer rowCount = 0;
 		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
 
@@ -117,6 +114,78 @@ public class QcBarChartDataSet extends DefaultCategoryDataset {
 		}		
 	}
 	
+	private Map<String,Paint> createSeriesPaintMap(
+			Map<String, DataFile[]> seriesFileMap, 
+			PlotDataGrouping groupingType,
+			ChartColorOption chartColorOption) {
+		
+		Map<String,Paint>seriesPaintNameMap = new TreeMap<String,Paint>();
+		seriesPaintMap = new TreeMap<Integer,Paint>();
+		int sCount = 0;
+		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN)
+				&& chartColorOption.equals(ChartColorOption.BY_SAMPLE_TYPE)) {
+			
+		}
+		else {
+			for(String sName : seriesFileMap.keySet()) {
+				seriesPaintNameMap.put(sName, MasterPlotPanel.getBrewerColor(sCount));
+				sCount++;
+			}
+		}
+		return seriesPaintNameMap;
+	}
+	
+	public QcBarChartDataSet(TwoDqcPlotParameterObject plotParameters) {
+		
+		if (plotParameters.getStatsField().equals(DataSetQcField.RAW_VALUES))
+			return;
+		
+		DataAnalysisProject experiment = 
+				MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
+		if(experiment == null)
+			return;
+		
+		DataPipeline pipeline = experiment.getActiveDataPipeline();
+		
+		Collection<ExperimentalSample> samples = 
+				experiment.getExperimentDesign().getSamples();
+		HashSet<DataFile> files = samples.stream().
+				flatMap(s -> s.getDataFilesForMethod(pipeline.getAcquisitionMethod()).stream()).
+				filter(s -> s.isEnabled()).collect(Collectors.toCollection(HashSet::new));
+
+		Map<String, DataFile[]> seriesFileMap = 
+				PlotDataSetUtils.createSeriesFileMap(
+						pipeline, 
+						files,
+						plotParameters.getSortingOrder(), 
+						experiment.getExperimentDesign().getCompleteDesignSubset(), 
+						plotParameters.getGroupingType(), 
+						plotParameters.getCategory(), 
+						plotParameters.getSubCategory());
+		
+		Map<String,Paint>seriesPaintNameMap = 
+				createSeriesPaintMap(seriesFileMap, plotParameters.getGroupingType(), 
+						plotParameters.getChartColorOption());
+		Integer rowCount = 0;
+		
+		DataSetQcField sf = plotParameters.getStatsField();
+		for (Entry<String, DataFile[]> entry : seriesFileMap.entrySet()) {
+
+			for(DataFile df : entry.getValue()) {
+				
+				DataFileStatisticalSummary fileSummary = 
+						plotParameters.getDataSetStats().stream().
+						filter(st -> st.getFile().equals(df)).
+						findFirst().orElse(null);
+				if(fileSummary != null) {
+					addValue(fileSummary.getProperty(sf).doubleValue(), df.getName(), entry.getKey());
+					seriesPaintMap.put(rowCount, seriesPaintNameMap.get(entry.getKey()));
+					rowCount++;
+				}				
+			}
+		}
+	}
+
 	public Map<Integer, Paint> getSeriesPaintMap() {
 		return seriesPaintMap;
 	}

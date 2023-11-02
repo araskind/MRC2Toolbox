@@ -65,8 +65,7 @@ public class BoxAndWhiskerCategoryDatasetCa extends DefaultBoxAndWhiskerCategory
 			ExperimentDesignSubset activeDesign,
 			PlotDataGrouping groupingType,
 			ExperimentDesignFactor category,
-			ExperimentDesignFactor subCategory,
-			boolean splitByBatch) {
+			ExperimentDesignFactor subCategory) {
 
 		super();
 		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
@@ -90,7 +89,7 @@ public class BoxAndWhiskerCategoryDatasetCa extends DefaultBoxAndWhiskerCategory
 						PlotDataSetUtils.getNormalizedDataForFeature(experiment, msf, entry.getKey(),  files, dataScale);
 				Map<String, DataFile[]> seriesFileMap = 
 						PlotDataSetUtils.createSeriesFileMap(entry.getKey(), files,
-						sortingOrder, activeDesign, groupingType, category, subCategory, splitByBatch);
+						sortingOrder, activeDesign, groupingType, category, subCategory);
 
 				//	Add data
 				for (Entry<String, DataFile[]> seriesEntry : seriesFileMap.entrySet()) {

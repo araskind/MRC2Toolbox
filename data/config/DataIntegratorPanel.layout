@@ -100,7 +100,7 @@
 									<content delegate="SplitDockStationFactory">
 										<fullscreen-action>false</fullscreen-action>
 										<node nodeId="1600213796232" orientation="HORIZONTAL" divider="0.2">
-											<leaf id="1" nodeId="1600213796234">
+											<leaf id="5" nodeId="1600213796234">
 												<placeholders>
 													<placeholder>dock.single.DataIntegratorPanelDockableClusterTree</placeholder>
 												</placeholders>
@@ -113,7 +113,7 @@
 																<placeholder>dock.single.DockableDataIntegrationFeatureSelectionTable</placeholder>
 															</placeholders>
 														</leaf>
-														<leaf id="5" nodeId="1600213796244">
+														<leaf id="1" nodeId="1600213796244">
 															<placeholders>
 																<placeholder>dock.single.ClusterDisplayPanelDockableMolStructurePanel</placeholder>
 															</placeholders>
@@ -286,10 +286,10 @@
 									</children>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.DataIntegratorPanelDockableClusterTree">
-										<replacement id="dockablesingle DataIntegratorPanelDockableClusterTree"/>
+									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableMolStructurePanel">
+										<replacement id="dockablesingle ClusterDisplayPanelDockableMolStructurePanel"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>DataIntegratorPanelDockableClusterTree</id>
+											<id>ClusterDisplayPanelDockableMolStructurePanel</id>
 											<area/>
 										</delegate>
 									</layout>
@@ -399,10 +399,10 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="predefined" placeholder="dock.single.ClusterDisplayPanelDockableMolStructurePanel">
-										<replacement id="dockablesingle ClusterDisplayPanelDockableMolStructurePanel"/>
+									<layout factory="predefined" placeholder="dock.single.DataIntegratorPanelDockableClusterTree">
+										<replacement id="dockablesingle DataIntegratorPanelDockableClusterTree"/>
 										<delegate id="delegate_ccontrol backup factory id">
-											<id>ClusterDisplayPanelDockableMolStructurePanel</id>
+											<id>DataIntegratorPanelDockableClusterTree</id>
 											<area/>
 										</delegate>
 									</layout>

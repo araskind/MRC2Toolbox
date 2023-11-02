@@ -62,9 +62,8 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 	protected static final Icon sidePanelShowIcon = GuiUtils.getIcon("sidePanelShow", 24);
 	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 24);		
 
-	private Dockable2DQCPanel parentPlotContainerPanel;
 	private JComboBox<DataSetQcField> statParameterComboBox;
-	private TwoDqcPlot plot;
+	private TwoDimQCPlot plot;
 	private JComboBox<QcPlotType> plotTypeComboBox;
 	private JComboBox<DataScale> dataScaleComboBox;
 	private FileSortingOrder fileSortingOrder;
@@ -73,12 +72,11 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 	private JButton colorOptionButton;
 	private JButton sidePanelButton;
 	
-	public TwoDqcPlotToolbar(Dockable2DQCPanel parentPlotContainerPanel) {
+	public TwoDqcPlotToolbar(TwoDimQCPlot plot, ActionListener secondaryListener) {
 
-		super(parentPlotContainerPanel.getPlotPanel());
-		this.parentPlotContainerPanel = parentPlotContainerPanel;
-		plot = parentPlotContainerPanel.getPlotPanel();
-		plot.setToolbar(this);
+		super(plot);
+		this.plot = plot;
+		this.plot.setToolbar(this);
 		xAxisUnits = "design";
 
 		createLegendToggle();
@@ -160,10 +158,11 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 		add(Box.createHorizontalGlue());
 		
 		sidePanelButton = GuiUtils.addButton(
-				this, null, sidePanelHideIcon, this, 
+				this, null, sidePanelHideIcon, secondaryListener, 
 				MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName(), 
 				MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName(), 
 				buttonDimension);
+		sidePanelButton.addActionListener(this);
 		add(sidePanelButton);
 		
 		toggleItemListeners(true);
@@ -240,7 +239,6 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 			sidePanelButton.setActionCommand(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName());
 			sidePanelButton.setToolTipText(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName());
 		}
-		parentPlotContainerPanel.setSidePanelVisible(b);
 	}
 
 	private void toggleItemListeners(boolean enabled) {
@@ -294,7 +292,7 @@ public class TwoDqcPlotToolbar extends PlotToolbar implements ActionListener, It
 	
 	private void updatePlot() {
 		
-		plot.updateParametersFromToolbar();
+		plot.updateParametersFromControls();
 		plot.redrawPlot();
 	}
 

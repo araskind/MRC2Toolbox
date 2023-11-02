@@ -30,15 +30,18 @@ import javax.swing.Icon;
 
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
+import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.lims.DataPipeline;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
+import edu.umich.med.mrc2.datoolbox.main.MRC2ToolBoxCore;
 import edu.umich.med.mrc2.datoolbox.project.DataAnalysisProject;
 
 public class Dockable2DQCPanel extends DefaultSingleCDockable implements ActionListener{
 
-	private TwoDqcPlot plotPanel;
-	private TwoDqcPlotToolbar plotToolbar;
+	private TwoDimQCPlot plotPanel;	
+	private TwoDqcPlotToolbar toolbar;
 	private DataPlotControlsPanel dataPlotControlsPanel;
 
 	private static final Icon componentIcon = GuiUtils.getIcon("poxplot", 16);
@@ -47,21 +50,45 @@ public class Dockable2DQCPanel extends DefaultSingleCDockable implements ActionL
 
 		super(id, componentIcon, title, null, Permissions.MIN_MAX_STACK);
 		setCloseable(false);
-
 		setLayout(new BorderLayout(0, 0));
-		plotPanel = new TwoDqcPlot();
-		add(plotPanel, BorderLayout.CENTER);
-		plotToolbar = new TwoDqcPlotToolbar(this);
-		add(plotToolbar, BorderLayout.NORTH);
 
+		plotPanel = new TwoDimQCPlot();
+		add(plotPanel, BorderLayout.CENTER);
+		
+		toolbar = new TwoDqcPlotToolbar(plotPanel, this);
+		add(toolbar, BorderLayout.NORTH);
+		plotPanel.setToolbar(toolbar);
+		
 		dataPlotControlsPanel = new DataPlotControlsPanel(plotPanel);
 		add(dataPlotControlsPanel, BorderLayout.EAST);
+		plotPanel.setDataPlotControlsPanel(dataPlotControlsPanel);
 		
-		plotPanel.updateParametersFromToolbar();
+		plotPanel.updateParametersFromControls();
+		
 		//	TODO update from control panel
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		String command = e.getActionCommand();
+		
+		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName()))
+			setSidePanelVisible(false);
+		
+		if(command.equals(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName()))
+			setSidePanelVisible(true);
+	}
+	
+	public void setSidePanelVisible(boolean b) {
+		dataPlotControlsPanel.setVisible(b);
 	}
 
 	public void loadDataSetStats(Collection<DataFileStatisticalSummary> dataSetStats2) {
+		
+		ExperimentDesignSubset ds = MRC2ToolBoxCore.getActiveMetabolomicsExperiment().
+				getExperimentDesign().getActiveDesignSubset();
+		dataPlotControlsPanel.populateCategories(ds);
 		plotPanel.loadDataSetStats(dataSetStats2);
 	}
 
@@ -74,17 +101,9 @@ public class Dockable2DQCPanel extends DefaultSingleCDockable implements ActionL
 		plotPanel.removeAllDataSets();
 	}
 
-	public TwoDqcPlot getPlotPanel() {
+	public TwoDimQCPlot getPlotPanel() {
 		return plotPanel;
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
 
-	public void setSidePanelVisible(boolean b) {
-		dataPlotControlsPanel.setVisible(b);
-	}
 }

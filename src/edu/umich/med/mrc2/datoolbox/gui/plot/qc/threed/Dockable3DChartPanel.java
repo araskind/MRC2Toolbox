@@ -167,8 +167,7 @@ public class Dockable3DChartPanel  extends DefaultSingleCDockable implements Act
 										activeDesign,
 										groupingType,
 										category,
-										subCategory,
-										splitByBatch);
+										subCategory);
 
 		XYZSeriesCollection<String> dataset = new XYZSeriesCollection<String>();
 		for (Entry<String, DataFile[]> entry :dataMap.entrySet()) {

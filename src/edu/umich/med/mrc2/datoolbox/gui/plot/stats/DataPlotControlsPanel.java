@@ -29,7 +29,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,6 +40,7 @@ import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
 import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataTypeName;
 import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
+import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDimQCPlot;
 import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 
 public class DataPlotControlsPanel extends JPanel implements ItemListener {
@@ -50,16 +50,18 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 	 */
 	private static final long serialVersionUID = 6747485797254654577L;
 
-	private DataPlotControl  plot;
 	private JComboBox groupByComboBox;
 	private JComboBox categoryComboBox;
 	private JComboBox subCategoryComboBox;	
-	private JCheckBox splitByBatchCheckBox;
-
+	//	private JCheckBox splitByBatchCheckBox;
+	private TwoDimQCPlot plot;
+	
 	@SuppressWarnings("unchecked")
-	public DataPlotControlsPanel(DataPlotControl  plot) {
+	public DataPlotControlsPanel(TwoDimQCPlot parentPlot) {
 		super();
-		this.plot = plot;
+
+		this.plot = parentPlot;
+		
 		setBorder(new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), new EmptyBorder(10, 10, 10, 10)));
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0, 0};
@@ -132,13 +134,13 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 		gbc_comboBox_2.gridy = 2;
 		add(subCategoryComboBox, gbc_comboBox_2);
 		
-		splitByBatchCheckBox = new JCheckBox("Split by batch");
-		splitByBatchCheckBox.addItemListener(this);
-		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
-		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
-		gbc_chckbxNewCheckBox.gridx = 1;
-		gbc_chckbxNewCheckBox.gridy = 3;
-		add(splitByBatchCheckBox, gbc_chckbxNewCheckBox);
+//		splitByBatchCheckBox = new JCheckBox("Split by batch");
+//		splitByBatchCheckBox.addItemListener(this);
+//		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
+//		gbc_chckbxNewCheckBox.anchor = GridBagConstraints.WEST;
+//		gbc_chckbxNewCheckBox.gridx = 1;
+//		gbc_chckbxNewCheckBox.gridy = 3;
+//		add(splitByBatchCheckBox, gbc_chckbxNewCheckBox);
 		
 		toggleItemListeners(true);
 	}
@@ -150,10 +152,12 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 			groupByComboBox.addItemListener(this);
 			categoryComboBox.addItemListener(this);
 			subCategoryComboBox.addItemListener(this);
+//			splitByBatchCheckBox.addItemListener(this);
 		} else {
 			groupByComboBox.removeItemListener(this);
 			categoryComboBox.removeItemListener(this);
 			subCategoryComboBox.removeItemListener(this);
+//			splitByBatchCheckBox.removeItemListener(this);
 		}
 	}
 	
@@ -183,6 +187,8 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 			categoryComboBox.setEnabled(false);
 			subCategoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
 			subCategoryComboBox.setEnabled(false);
+//			splitByBatchCheckBox.setSelected(false);
+//			splitByBatchCheckBox.setEnabled(false);
 		}
 		updateFactorSelectors();
 	}
@@ -221,14 +227,42 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 			subCategoryComboBox.setEnabled(true);
 		}
 	}
-	private PlotDataGrouping getDataGroupingType() {
+	
+	public PlotDataGrouping getDataGroupingType() {
 		return (PlotDataGrouping)groupByComboBox.getSelectedItem();
 	}
+	
+	public ExperimentDesignFactor getCategory() {
+		return (ExperimentDesignFactor)categoryComboBox.getSelectedItem();
+	}
+	
+	public ExperimentDesignFactor getSububCategory() {
+		return (ExperimentDesignFactor)subCategoryComboBox.getSelectedItem();
+	}
+	
+//	public boolean isSplitByBatch() {
+//		return splitByBatchCheckBox.isSelected();
+//	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		// TODO Auto-generated method stub
-
+		
+		if(e.getStateChange() == ItemEvent.SELECTED) {
+			
+			toggleItemListeners(false);
+			updateFactorSelectors();
+			toggleItemListeners(true);
+			updatePlot();
+		}
+//		if(e.getStateChange() == ItemEvent.DESELECTED 
+//				&& e.getSource().equals(splitByBatchCheckBox)) {
+//			updatePlot();
+//		}
 	}
-
+	
+	private void updatePlot() {
+		
+		plot.updateParametersFromControls();
+		plot.redrawPlot();
+	}
 }

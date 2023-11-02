@@ -23,7 +23,6 @@ package edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Collection;
@@ -45,13 +44,8 @@ import org.jfree.chart.ui.RectangleInsets;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
-import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
-import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
 import edu.umich.med.mrc2.datoolbox.gui.plot.MasterPlotPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBarChartDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcBoxPlotDataSet;
@@ -59,74 +53,72 @@ import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcScatterDataSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.dataset.QcTimedScatterSet;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeBarRenderer;
 import edu.umich.med.mrc2.datoolbox.gui.plot.renderer.category.VariableCategorySizeCategoryAxis;
-import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControl;
+import edu.umich.med.mrc2.datoolbox.gui.plot.stats.DataPlotControlsPanel;
 import edu.umich.med.mrc2.datoolbox.gui.plot.stats.QcPlotType;
 import edu.umich.med.mrc2.datoolbox.gui.plot.tooltip.FileStatsBoxAndWhiskerToolTipGenerator;
 
-public class TwoDqcPlot extends MasterPlotPanel 
-	implements DataPlotControl, ActionListener, ItemListener {
+public class TwoDimQCPlot extends MasterPlotPanel implements ItemListener {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8509961200306648220L;
+	
 	private QcPlotType plotType;
-	private FileSortingOrder sortingOrder;
 	private DataScale dataScale;
-	private DataSetQcField qcParameter;
-	protected PlotDataGrouping groupingType;
-	protected ChartColorOption chartColorOption;
 	
-	protected ExperimentDesignFactor category;
-	protected ExperimentDesignFactor subCategory;
-	protected ExperimentDesignSubset activeDesign;
+//	private FileSortingOrder sortingOrder;
+//	private ChartColorOption chartColorOption;
+//	private DataSetQcField qcParameter;	
+//	private PlotDataGrouping groupingType;
+//	private ExperimentDesignFactor category;
+//	private ExperimentDesignFactor subCategory;
+//	private boolean splitByBatch;
+////	private ExperimentDesignSubset activeDesign;
 	
-	private TwoDqcPlotToolbar toolbar;
+	private TwoDqcPlotParameterObject plotParameters;
+
 	private Collection<DataFileStatisticalSummary> dataSetStats;
 	private Plot activePlot;
+	private DataPlotControlsPanel dataPlotControlsPanel;
 
-	public TwoDqcPlot() {
+	public TwoDimQCPlot() {
 
 		super();
-		
-		plotType = QcPlotType.BARCHART;
-		sortingOrder = FileSortingOrder.NAME;		
-		dataScale = DataScale.RAW;
-		qcParameter = DataSetQcField.OBSERVATIONS;	
-		chartColorOption = ChartColorOption.BY_FILE;
-	}
-	
-	/**
-	 * @param toolbar the toolbar to set
-	 */
-	public void setToolbar(TwoDqcPlotToolbar toolbar) {		
-		this.toolbar = toolbar;
+//		plotType = QcPlotType.BARCHART;
+//		sortingOrder = FileSortingOrder.NAME;		
+//		dataScale = DataScale.RAW;
+//		qcParameter = DataSetQcField.OBSERVATIONS;	
+//		chartColorOption = ChartColorOption.BY_FILE;
 	}
 	
 	public void loadDataSetStats(Collection<DataFileStatisticalSummary> dataSetStats2) {
 		
-		dataSetStats = dataSetStats2;		
+		if(dataSetStats2 == null) {
+			removeAllDataSets();
+			return;
+		}
+		this.dataSetStats = dataSetStats2;
+		updateParametersFromControls();		
 		
 		if (plotType.equals(QcPlotType.BARCHART))			
 			loadBarChart();
 		
 		if ((plotType.equals(QcPlotType.LINES) || plotType.equals(QcPlotType.SCATTER)) 
-				&& sortingOrder.equals(FileSortingOrder.NAME))
-			chart.getXYPlot().setDataset(new QcScatterDataSet(dataSetStats, qcParameter));
+				&& plotParameters.getSortingOrder().equals(FileSortingOrder.NAME))
+			chart.getXYPlot().setDataset(new QcScatterDataSet(plotParameters));
 		
 		if ((plotType.equals(QcPlotType.LINES) || plotType.equals(QcPlotType.SCATTER)) 
-				&& sortingOrder.equals(FileSortingOrder.TIMESTAMP))
-			chart.getXYPlot().setDataset(new QcTimedScatterSet(dataSetStats, qcParameter));
+				&& plotParameters.getSortingOrder().equals(FileSortingOrder.TIMESTAMP))
+			chart.getXYPlot().setDataset(new QcTimedScatterSet(plotParameters));
 		
 		if (plotType.equals(QcPlotType.BOXPLOT))
-			chart.getCategoryPlot().setDataset(new QcBoxPlotDataSet(dataSetStats, sortingOrder));
+			chart.getCategoryPlot().setDataset(new QcBoxPlotDataSet(plotParameters));
 	}
 	
 	private void loadBarChart() {
 		
-		QcBarChartDataSet ds = 
-				new QcBarChartDataSet(dataSetStats, sortingOrder, qcParameter);	
-		
+		QcBarChartDataSet ds = new QcBarChartDataSet(plotParameters);		
 		VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
         renderer.setDefaultToolTipGenerator(new StandardCategoryToolTipGenerator());
 		for(int i=0; i<ds.getRowCount(); i++)
@@ -144,17 +136,26 @@ public class TwoDqcPlot extends MasterPlotPanel
 			loadDataSetStats(dataSetStats);		
 	}	
 	
-	public void updateParametersFromToolbar() {
-
-		plotType = toolbar.getQcPlotType();
-		sortingOrder = toolbar.getSortingOrder();
-		dataScale = toolbar.getDataScale();
-		qcParameter = toolbar.getStatParameter();
+	public void updateParametersFromControls() {
 		
-		initChart();
-		initTitles();
-		initAxes();
-		initLegend(RectangleEdge.RIGHT, legendVisible);
+		plotParameters = 
+				new TwoDqcPlotParameterObject(
+				dataSetStats,
+				((TwoDqcPlotToolbar)toolbar).getStatParameter(),
+				((TwoDqcPlotToolbar)toolbar).getSortingOrder(), 
+				((TwoDqcPlotToolbar)toolbar).getChartColorOption(),
+				dataPlotControlsPanel.getDataGroupingType(), 
+				dataPlotControlsPanel.getCategory(), 
+				dataPlotControlsPanel.getSububCategory());		
+		if(chart == null 
+				|| !((TwoDqcPlotToolbar)toolbar).getQcPlotType().equals(plotType)) {
+			
+			plotType = ((TwoDqcPlotToolbar)toolbar).getQcPlotType();
+			initChart();
+			initTitles();
+			initAxes();
+			initLegend(RectangleEdge.RIGHT, legendVisible);
+		}
 	}
 	
 	@Override
@@ -243,10 +244,10 @@ public class TwoDqcPlot extends MasterPlotPanel
 		
 		if(activePlot instanceof XYPlot) {
 			
-			if (sortingOrder.equals(FileSortingOrder.NAME))
+			if (plotParameters.getSortingOrder().equals(FileSortingOrder.NAME))
 				((XYPlot)activePlot).setDomainAxis(new NumberAxis("Data files"));
 			
-			if (sortingOrder.equals(FileSortingOrder.TIMESTAMP))
+			if (plotParameters.getSortingOrder().equals(FileSortingOrder.TIMESTAMP))
 				((XYPlot)activePlot).setDomainAxis(new DateAxis("Injection time"));
 		}
 	}
@@ -385,38 +386,40 @@ public class TwoDqcPlot extends MasterPlotPanel
 			legendVisible = true;
 		}
 		toolbar.toggleLegendIcon(legendVisible);
-	}
+	}	
 
-	@Override
-	public FileSortingOrder getSortingOrder() {
-		return sortingOrder;		
-	}
+//	@Override
+//	public FileSortingOrder getSortingOrder() {
+//		return sortingOrder;		
+//	}
+//
+//	@Override
+//	public void setSortingOrder(FileSortingOrder sortingOrder) {
+//		this.sortingOrder = sortingOrder;
+//		redrawPlot();
+//	}
+//
+//	@Override
+//	public PlotDataGrouping getGroupingType() {
+//		return groupingType;
+//	}
+//
+//	@Override
+//	public void setGroupingType(PlotDataGrouping groupingType) {
+//		this.groupingType = groupingType;
+//		redrawPlot();
+//	}
 
-	@Override
-	public void setSortingOrder(FileSortingOrder sortingOrder) {
-		this.sortingOrder = sortingOrder;
-		redrawPlot();
-	}
-
-	@Override
-	public PlotDataGrouping getGroupingType() {
-		return groupingType;
-	}
-
-	@Override
-	public void setGroupingType(PlotDataGrouping groupingType) {
-		this.groupingType = groupingType;
-		redrawPlot();
-	}
-
-	@Override
 	public DataScale getDataScale() {
 		return dataScale;
 	}
 
-	@Override
 	public void setDataScale(DataScale dataScale) {
 		this.dataScale = dataScale;
 		redrawPlot();
+	}
+
+	public void setDataPlotControlsPanel(DataPlotControlsPanel dataPlotControlsPanel) {
+		this.dataPlotControlsPanel = dataPlotControlsPanel;
 	}
 }

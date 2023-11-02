@@ -143,8 +143,7 @@ public class PlotDataSetUtils {
 			ExperimentDesignSubset activeDesign,
 			PlotDataGrouping groupingType,
 			ExperimentDesignFactor category,
-			ExperimentDesignFactor subCategory,
-			boolean splitByBatch) {
+			ExperimentDesignFactor subCategory) {
 
 		if (MRC2ToolBoxCore.getActiveMetabolomicsExperiment() == null)
 			return null;
@@ -159,9 +158,9 @@ public class PlotDataSetUtils {
 
 		if(groupingType.equals(PlotDataGrouping.IGNORE_DESIGN)) {
 
-			if(splitByBatch)
-				return PlotDataSetUtils.mapSeriesByBatch(pipeline, sortingOrder, activeDesign);
-			else
+//			if(splitByBatch)
+//				return PlotDataSetUtils.mapSeriesByBatch(pipeline, sortingOrder, activeDesign);
+//			else
 				return PlotDataSetUtils.mapSeriesIgnoreDesign(pipeline, sortingOrder, activeDesign);
 		}
 		else {
@@ -186,38 +185,40 @@ public class PlotDataSetUtils {
 								s.getDataFilesForMethod(pipeline.getAcquisitionMethod()));
 				}
 			}
-			if(splitByBatch) {
-
-				for (Entry<String, ArrayList<DataFile>> entry : dataFileMapInterm.entrySet()) {
-
-					int[] batches = entry.getValue().stream().mapToInt(f -> f.getBatchNumber()).distinct().sorted().toArray();
-					for(int batch : batches) {
-
-						String batchSeriesKey = entry.getKey() + "\nBatch " + Integer.toString(batch);
-
-						if (sortingOrder.equals(FileSortingOrder.NAME))
-							dataFileMap.put(batchSeriesKey,
-									entry.getValue().stream().filter(f -> f.getBatchNumber() == batch).sorted()
-											.toArray(size -> new DataFile[size]));
-
-						if (sortingOrder.equals(FileSortingOrder.TIMESTAMP))
-							dataFileMap.put(batchSeriesKey,
-									entry.getValue().stream().filter(f -> f.getBatchNumber() == batch)
-											.sorted(new DataFileTimeStampComparator())
-											.toArray(size -> new DataFile[size]));
-					}
-				}
-			}
-			else {
+//			if(splitByBatch) {
+//
+//				for (Entry<String, ArrayList<DataFile>> entry : dataFileMapInterm.entrySet()) {
+//
+//					int[] batches = entry.getValue().stream().mapToInt(f -> f.getBatchNumber()).distinct().sorted().toArray();
+//					for(int batch : batches) {
+//
+//						String batchSeriesKey = entry.getKey() + "\nBatch " + Integer.toString(batch);
+//
+//						if (sortingOrder.equals(FileSortingOrder.NAME))
+//							dataFileMap.put(batchSeriesKey,
+//									entry.getValue().stream().filter(f -> f.getBatchNumber() == batch).sorted()
+//											.toArray(size -> new DataFile[size]));
+//
+//						if (sortingOrder.equals(FileSortingOrder.TIMESTAMP))
+//							dataFileMap.put(batchSeriesKey,
+//									entry.getValue().stream().filter(f -> f.getBatchNumber() == batch)
+//											.sorted(new DataFileTimeStampComparator())
+//											.toArray(size -> new DataFile[size]));
+//					}
+//				}
+//			}
+//			else {
 				for (Entry<String, ArrayList<DataFile>> entry : dataFileMapInterm.entrySet()) {
 
 					if(sortingOrder.equals(FileSortingOrder.NAME))
 						dataFileMap.put(entry.getKey(), entry.getValue().stream().sorted().toArray(size -> new DataFile[size]));
 
 					if(sortingOrder.equals(FileSortingOrder.TIMESTAMP))
-						dataFileMap.put(entry.getKey(), entry.getValue().stream().sorted(new DataFileTimeStampComparator()).toArray(size -> new DataFile[size]));
+						dataFileMap.put(entry.getKey(), entry.getValue().stream().
+								sorted(new DataFileTimeStampComparator()).
+								toArray(size -> new DataFile[size]));
 				}
-			}
+//			}
 		}
 		return dataFileMap;
 	}

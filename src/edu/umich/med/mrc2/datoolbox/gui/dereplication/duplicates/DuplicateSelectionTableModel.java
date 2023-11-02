@@ -114,7 +114,7 @@ public class DuplicateSelectionTableModel extends BasicTableModel {
 
 				Object[] obj = {
 					cf.equals(activeCluster.getPrimaryFeature()),
-					currentCluster.isFeatureEnabled(cf),
+					//	currentCluster.isFeatureEnabled(cf),
 					cf,
 					compoundName,
 					chmodLibrary,

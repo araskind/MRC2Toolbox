@@ -30,8 +30,14 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.compare.DataFileTimeStampComparator;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
+import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDqcPlotParameterObject;
 
 public class QcBoxPlotDataSet extends DefaultBoxAndWhiskerCategoryDataset {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public QcBoxPlotDataSet(Collection<DataFileStatisticalSummary> dataSetStats, FileSortingOrder sortingOrder) {
 
@@ -52,6 +58,11 @@ public class QcBoxPlotDataSet extends DefaultBoxAndWhiskerCategoryDataset {
 					add(stats.getBoxplotItem(), stats.getFile().getName(), "");
 			}
 		}
+	}
+
+	public QcBoxPlotDataSet(TwoDqcPlotParameterObject plotParameters) {
+		this(plotParameters.getDataSetStats(), 
+				plotParameters.getSortingOrder());
 	}
 
 }

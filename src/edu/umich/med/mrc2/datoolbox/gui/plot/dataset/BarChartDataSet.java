@@ -63,8 +63,7 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 			ExperimentDesignSubset activeDesign,
 			PlotDataGrouping groupingType,
 			ExperimentDesignFactor category,
-			ExperimentDesignFactor subCategory,
-			boolean splitByBatch) {
+			ExperimentDesignFactor subCategory) {
 
 		super();
 		experiment = MRC2ToolBoxCore.getActiveMetabolomicsExperiment();
@@ -80,7 +79,7 @@ public class BarChartDataSet extends DefaultCategoryDataset {
 				PlotDataSetUtils.getNormalizedDataForFeature(experiment, msf, pipeline, files, dataScale);
 		Map<String, DataFile[]> seriesFileMap = 
 				PlotDataSetUtils.createSeriesFileMap(pipeline, files,
-				sortingOrder, activeDesign, groupingType, category, subCategory, splitByBatch);
+				sortingOrder, activeDesign, groupingType, category, subCategory);
 		Map<String,Paint>seriesPaintNameMap = new TreeMap<String,Paint>();
 		seriesPaintMap = new TreeMap<Integer,Paint>();
 		int sCount = 0;

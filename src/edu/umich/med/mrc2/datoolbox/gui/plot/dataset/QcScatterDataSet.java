@@ -29,8 +29,14 @@ import edu.umich.med.mrc2.datoolbox.data.DataFile;
 import edu.umich.med.mrc2.datoolbox.data.DataFileStatisticalSummary;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataSetQcField;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
+import edu.umich.med.mrc2.datoolbox.gui.plot.qc.twod.TwoDqcPlotParameterObject;
 
 public class QcScatterDataSet extends XYSeriesCollection {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public QcScatterDataSet(
 			Collection<DataFileStatisticalSummary> dataSetStats, 
@@ -39,7 +45,9 @@ public class QcScatterDataSet extends XYSeriesCollection {
 		
 		if (statsField != DataSetQcField.RAW_VALUES) {
 
-			DataFile[] files = dataSetStats.stream().map(s -> s.getFile()).sorted().toArray(size -> new DataFile[size]);
+			DataFile[] files = dataSetStats.stream().
+					map(s -> s.getFile()).sorted().
+					toArray(size -> new DataFile[size]);
 			
 			int count = 1;
 			NamedXYSeries series = new NamedXYSeries(statsField.getName());
@@ -84,5 +92,11 @@ public class QcScatterDataSet extends XYSeriesCollection {
 			}
 			addSeries(series);
 		}
+	}
+
+	public QcScatterDataSet(TwoDqcPlotParameterObject plotParameters) {
+		this(plotParameters.getDataSetStats(), 
+				plotParameters.getSortingOrder(),
+				plotParameters.getStatsField());
 	}
 }

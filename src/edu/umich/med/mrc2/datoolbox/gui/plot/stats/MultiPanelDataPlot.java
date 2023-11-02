@@ -559,8 +559,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 					activeDesign,
 					groupingType,
 					category,
-					subCategory,
-					splitByBatch);
+					subCategory);
 
 			boxPlot.setDataset(ds);
 
@@ -588,8 +587,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel
 						activeDesign,
 						groupingType,
 						category,
-						subCategory,
-						splitByBatch);
+						subCategory);
 
 				for(int i=0; i<ds.getRowCount(); i++)
 					((BarRenderer)barChart.getRenderer()).setSeriesPaint(i, ds.getSeriesPaintMap().get(i));
