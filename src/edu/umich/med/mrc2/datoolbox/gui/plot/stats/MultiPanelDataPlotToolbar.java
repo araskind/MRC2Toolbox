@@ -1,473 +1,327 @@
 /*******************************************************************************
- *
+ * 
  * (C) Copyright 2018-2020 MRC2 (http://mrc2.umich.edu).
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
+ * 
  * Contributors:
  * Alexander Raskind (araskind@med.umich.edu)
- *
+ *  
  ******************************************************************************/
 
 package edu.umich.med.mrc2.datoolbox.gui.plot.stats;
 
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
+import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import org.jfree.chart.ChartPanel;
 
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignFactor;
-import edu.umich.med.mrc2.datoolbox.data.ExperimentDesignSubset;
+import edu.umich.med.mrc2.datoolbox.data.compare.ChartColorOption;
 import edu.umich.med.mrc2.datoolbox.data.enums.DataScale;
-import edu.umich.med.mrc2.datoolbox.data.enums.DataTypeName;
 import edu.umich.med.mrc2.datoolbox.data.enums.FileSortingOrder;
-import edu.umich.med.mrc2.datoolbox.data.enums.PlotDataGrouping;
+import edu.umich.med.mrc2.datoolbox.gui.main.MainActionCommands;
 import edu.umich.med.mrc2.datoolbox.gui.plot.PlotToolbar;
+import edu.umich.med.mrc2.datoolbox.gui.utils.ComboBoxRendererWithIcons;
 import edu.umich.med.mrc2.datoolbox.gui.utils.GuiUtils;
-import edu.umich.med.mrc2.datoolbox.gui.utils.SortedComboBoxModel;
 
-public class MultiPanelDataPlotToolbar extends PlotToolbar implements ItemListener {
+public class MultiPanelDataPlotToolbar extends PlotToolbar implements ActionListener, ItemListener{
 
 	/**
-	 *
+	 * 
 	 */
-	private static final long serialVersionUID = 3114901163421622675L;
+	private static final long serialVersionUID = 1141069124870103442L;
+	
+	protected static final Icon sortByNameIcon = GuiUtils.getIcon("sortByClusterName", 24);
+	protected static final Icon sortByTimeIcon = GuiUtils.getIcon("sortByTime", 24);
+	protected static final Icon colorByFileIcon = GuiUtils.getIcon("barChart", 24);
+	protected static final Icon colorBySampleTypeIcon = GuiUtils.getIcon("barChartGrouped", 24);
+	protected static final Icon sidePanelShowIcon = GuiUtils.getIcon("sidePanelShow", 24);
+	protected static final Icon sidePanelHideIcon = GuiUtils.getIcon("sidePanelHide", 24);		
 
-	protected JComboBox<StatsPlotType> plotTypeComboBox;
-	protected JComboBox<FileSortingOrder> fileSortComboBox;
-	protected JComboBox<DataScale> dataScaleComboBox;
+	private MultiPanelDataPlot plot;
+	private JComboBox<StatsPlotType> plotTypeComboBox;
+	private JComboBox<DataScale> dataScaleComboBox;
+	private FileSortingOrder fileSortingOrder;
+	private ChartColorOption chartColorOption;
+	private JButton sortOrderButton;
+	private JButton colorOptionButton;
+	private JButton sidePanelButton;
+	
+	public MultiPanelDataPlotToolbar(MultiPanelDataPlot plot, ActionListener secondaryListener) {
 
-	protected MultiPanelDataPlot plot;
-	private JComboBox categoryComboBox;
-	private JComboBox subCategoryComboBox;
-	private JComboBox groupByComboBox;
-	private JCheckBox splitByBatchCheckBox;
-	private JPanel panel;
-	private JPanel panel_1;
-
-	public MultiPanelDataPlotToolbar(MultiPanelDataPlot parentPlot) {
-
-		super(parentPlot);
-		plot = parentPlot;
-		plot.setToolbar(this);
+		super(plot);
+		this.plot = plot;
+		this.plot.setToolbar(this);
 		xAxisUnits = "design";
 
 		createLegendToggle();
+
 		addSeparator(buttonDimension);
 
 		GuiUtils.addButton(this, null, autoRangeIcon, commandListener, ChartPanel.ZOOM_RESET_BOTH_COMMAND,
-				"Fit to  " + xAxisUnits + "  and intensity ranges", buttonDimension);
+				"Reset zoom", buttonDimension);
 
 		addSeparator(buttonDimension);
+		
 		createServiceBlock();
-		toggleLegendIcon(parentPlot.isLegendVisible());
-		addSeparator(buttonDimension);
 
-		panel_1 = new JPanel();
-		add(panel_1);
-		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[] { 0, 0, 0, 0 };
-		gbl_panel_1.rowHeights = new int[] { 0, 0, 0 };
-		gbl_panel_1.columnWeights = new double[] { 1.0, 1.0, 1.0, Double.MIN_VALUE };
-		gbl_panel_1.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
-		panel_1.setLayout(gbl_panel_1);
+		toggleLegendIcon(plot.isLegendVisible());
 
 		// Add plot type options
-		JLabel lblPlotType = new JLabel("Plot type");
-		GridBagConstraints gbc_lblPlotType = new GridBagConstraints();
-		gbc_lblPlotType.anchor = GridBagConstraints.WEST;
-		gbc_lblPlotType.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPlotType.gridx = 0;
-		gbc_lblPlotType.gridy = 0;
-		panel_1.add(lblPlotType, gbc_lblPlotType);
-
+		addSeparator(buttonDimension);
+		//	add(new JLabel("Plot type: "));
 		plotTypeComboBox = new JComboBox<StatsPlotType>();
-		plotTypeComboBox.setModel(new DefaultComboBoxModel(StatsPlotType.values()));
+		plotTypeComboBox.setModel(
+				new DefaultComboBoxModel<StatsPlotType>(new StatsPlotType[] {
+						StatsPlotType.BARCHART,
+						StatsPlotType.LINES,
+						StatsPlotType.SCATTER,
+//						StatsPlotType.BOXPLOT_BY_FEATURE,
+//						StatsPlotType.BOXPLOT_BY_GROUP,						
+						}));	//	TODO fix boxplot
+		plotTypeComboBox.setSelectedItem(StatsPlotType.BARCHART);
+		plotTypeComboBox.addItemListener(this);
 		plotTypeComboBox.setMaximumSize(new Dimension(120, 26));
-
-		GridBagConstraints gbc_plotTypeComboBox = new GridBagConstraints();
-		gbc_plotTypeComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_plotTypeComboBox.insets = new Insets(0, 0, 0, 5);
-		gbc_plotTypeComboBox.gridx = 0;
-		gbc_plotTypeComboBox.gridy = 1;
-		panel_1.add(plotTypeComboBox, gbc_plotTypeComboBox);
-
-		// Add file sorting options
-		JLabel lblSortFilesBy = new JLabel("Sort files by");
-		GridBagConstraints gbc_lblSortFilesBy = new GridBagConstraints();
-		gbc_lblSortFilesBy.anchor = GridBagConstraints.WEST;
-		gbc_lblSortFilesBy.insets = new Insets(0, 0, 5, 5);
-		gbc_lblSortFilesBy.gridx = 1;
-		gbc_lblSortFilesBy.gridy = 0;
-		panel_1.add(lblSortFilesBy, gbc_lblSortFilesBy);
-
-		fileSortComboBox = new JComboBox<FileSortingOrder>();
-		fileSortComboBox.setModel(new DefaultComboBoxModel(FileSortingOrder.values()));
-		fileSortComboBox.setMaximumSize(new Dimension(120, 26));
-
-		GridBagConstraints gbc_fileSortComboBox = new GridBagConstraints();
-		gbc_fileSortComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_fileSortComboBox.insets = new Insets(0, 0, 0, 5);
-		gbc_fileSortComboBox.gridx = 1;
-		gbc_fileSortComboBox.gridy = 1;
-		panel_1.add(fileSortComboBox, gbc_fileSortComboBox);
+		
+		Map<Object,Icon> imageMap = new HashMap<Object,Icon>();
+		imageMap.put(StatsPlotType.BARCHART, GuiUtils.getIcon("barChart", 24));
+		imageMap.put(StatsPlotType.LINES, GuiUtils.getIcon("lines", 24));
+		imageMap.put(StatsPlotType.SCATTER, GuiUtils.getIcon("scatter", 24));
+		imageMap.put(StatsPlotType.BOXPLOT_BY_FEATURE, GuiUtils.getIcon("boxplot", 24));
+		imageMap.put(StatsPlotType.BOXPLOT_BY_GROUP, GuiUtils.getIcon("boxplot", 24));
+		
+		plotTypeComboBox.setRenderer(
+				new ComboBoxRendererWithIcons(imageMap));
+		
+		add(plotTypeComboBox);		
 
 		// Add data scale options
-		JLabel lblScale = new JLabel("Scale");
-		GridBagConstraints gbc_lblScale = new GridBagConstraints();
-		gbc_lblScale.anchor = GridBagConstraints.WEST;
-		gbc_lblScale.insets = new Insets(0, 0, 5, 0);
-		gbc_lblScale.gridx = 2;
-		gbc_lblScale.gridy = 0;
-		panel_1.add(lblScale, gbc_lblScale);
-
+		add(new JLabel("  Scale: "));
 		dataScaleComboBox = new JComboBox<DataScale>();
-		dataScaleComboBox.setModel(new DefaultComboBoxModel(DataScale.values()));
+		dataScaleComboBox.setModel(
+				new DefaultComboBoxModel<DataScale>(DataScale.values()));
 		dataScaleComboBox.setSelectedItem(DataScale.RAW);
+		dataScaleComboBox.addItemListener(this);
 		dataScaleComboBox.setMaximumSize(new Dimension(120, 26));
-
-		GridBagConstraints gbc_dataScaleComboBox = new GridBagConstraints();
-		gbc_dataScaleComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_dataScaleComboBox.gridx = 2;
-		gbc_dataScaleComboBox.gridy = 1;
-		panel_1.add(dataScaleComboBox, gbc_dataScaleComboBox);
-
+		add(dataScaleComboBox);
+		
 		addSeparator(buttonDimension);
-
-		//	Data grouping
-		panel = new JPanel();
-		add(panel);
-		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[] { 0, 0, 0, 0, 0 };
-		gbl_panel.rowHeights = new int[] { 0, 0, 0 };
-		gbl_panel.columnWeights = new double[] { 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE };
-		gbl_panel.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
-		panel.setLayout(gbl_panel);
-
-		//	Group by
-		JLabel lblGroupBy = new JLabel("Group by");
-		GridBagConstraints gbc_lblGroupBy = new GridBagConstraints();
-		gbc_lblGroupBy.anchor = GridBagConstraints.WEST;
-		gbc_lblGroupBy.insets = new Insets(0, 0, 5, 5);
-		gbc_lblGroupBy.gridx = 0;
-		gbc_lblGroupBy.gridy = 0;
-		panel.add(lblGroupBy, gbc_lblGroupBy);
-
-		groupByComboBox = new JComboBox();
-		groupByComboBox.setModel(new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
-		groupByComboBox.setSelectedItem(PlotDataGrouping.IGNORE_DESIGN);
-		groupByComboBox.setMaximumSize(new Dimension(120, 26));
-
-		GridBagConstraints gbc_groupByComboBox = new GridBagConstraints();
-		gbc_groupByComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_groupByComboBox.insets = new Insets(0, 0, 0, 5);
-		gbc_groupByComboBox.gridx = 0;
-		gbc_groupByComboBox.gridy = 1;
-		panel.add(groupByComboBox, gbc_groupByComboBox);
-
-		//	Category
-		JLabel lblCategory = new JLabel("Category");
-		GridBagConstraints gbc_lblCategory = new GridBagConstraints();
-		gbc_lblCategory.anchor = GridBagConstraints.WEST;
-		gbc_lblCategory.insets = new Insets(0, 0, 5, 5);
-		gbc_lblCategory.gridx = 1;
-		gbc_lblCategory.gridy = 0;
-		panel.add(lblCategory, gbc_lblCategory);
-
-		categoryComboBox = new JComboBox();
-		categoryComboBox.setName(DataTypeName.CATEGORY.name());
-		categoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
-		categoryComboBox.setMaximumSize(new Dimension(250, 26));
-		categoryComboBox.setEnabled(false);
-
-		GridBagConstraints gbc_categoryComboBox = new GridBagConstraints();
-		gbc_categoryComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_categoryComboBox.insets = new Insets(0, 0, 0, 5);
-		gbc_categoryComboBox.gridx = 1;
-		gbc_categoryComboBox.gridy = 1;
-		panel.add(categoryComboBox, gbc_categoryComboBox);
-
-		//	Sub-category
-		JLabel lblSubcategory = new JLabel("Sub-category");
-		GridBagConstraints gbc_lblSubcategory = new GridBagConstraints();
-		gbc_lblSubcategory.anchor = GridBagConstraints.WEST;
-		gbc_lblSubcategory.insets = new Insets(0, 0, 5, 5);
-		gbc_lblSubcategory.gridx = 2;
-		gbc_lblSubcategory.gridy = 0;
-		panel.add(lblSubcategory, gbc_lblSubcategory);
-
-		subCategoryComboBox = new JComboBox();
-		subCategoryComboBox.setName(DataTypeName.SUB_CATEGORY.name());
-		subCategoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
-		subCategoryComboBox.setMaximumSize(new Dimension(250, 26));
-		subCategoryComboBox.setEnabled(false);
-
-		GridBagConstraints gbc_subCategoryComboBox = new GridBagConstraints();
-		gbc_subCategoryComboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_subCategoryComboBox.insets = new Insets(0, 0, 0, 5);
-		gbc_subCategoryComboBox.gridx = 2;
-		gbc_subCategoryComboBox.gridy = 1;
-		panel.add(subCategoryComboBox, gbc_subCategoryComboBox);
-
-		//	Split by batch
-		splitByBatchCheckBox = new JCheckBox("Split by batch");
-		splitByBatchCheckBox.addItemListener(this);
-		GridBagConstraints gbc_splitByBatchCheckBox = new GridBagConstraints();
-		gbc_splitByBatchCheckBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_splitByBatchCheckBox.gridx = 3;
-		gbc_splitByBatchCheckBox.gridy = 1;
-		panel.add(splitByBatchCheckBox, gbc_splitByBatchCheckBox);
-
-		setPlotType(plot.getPlotType());
-//		setFileOrder(plot.getSortingOrder());
-//		setPlotScale(plot.getDataScale());
-
+		
+		// Add file sorting options
+		fileSortingOrder = FileSortingOrder.NAME;
+		sortOrderButton = GuiUtils.addButton(
+				this, null, sortByNameIcon, this, 
+				MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName(), 
+				MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName(), 
+				buttonDimension);
+		add(sortOrderButton);
+		
+		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
+		colorOptionButton = GuiUtils.addButton(
+				this, null, colorBySampleTypeIcon, this, 
+				MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName(), 
+				MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName(), 
+				buttonDimension);
+		add(sortOrderButton);
+		
+		addSeparator(buttonDimension);
+		
+		add(Box.createHorizontalGlue());
+		
+		sidePanelButton = GuiUtils.addButton(
+				this, null, sidePanelHideIcon, secondaryListener, 
+				MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName(), 
+				MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName(), 
+				buttonDimension);
+		sidePanelButton.addActionListener(this);
+		add(sidePanelButton);
+		
 		toggleItemListeners(true);
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		String command = e.getActionCommand();
+		if(command.equals(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName()))
+			sortDataByFileName();
+		
+		if(command.equals(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName()))
+			sortDataByInjectionTime();
+			
+		if(command.equals(MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName()))
+			colorByDataFile();
+		
+		if(command.equals(MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName()))
+			colorBySampleType();
+		
+		if(command.equals(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName()))
+			setSidePanelVisible(true);
+		
+		if(command.equals(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName())) 
+			setSidePanelVisible(false);
+	}
+	
+	private void sortDataByFileName(){
+		
+		sortOrderButton.setIcon(sortByNameIcon);
+		sortOrderButton.setActionCommand(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
+		sortOrderButton.setToolTipText(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
+		fileSortingOrder = FileSortingOrder.NAME;
+		updatePlot();
+	}
+	
+	private void sortDataByInjectionTime(){
+		
+		sortOrderButton.setIcon(sortByTimeIcon);
+		sortOrderButton.setActionCommand(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
+		sortOrderButton.setToolTipText(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
+		fileSortingOrder = FileSortingOrder.TIMESTAMP;
+		updatePlot();
+	}
+	
+	private void colorByDataFile(){
+		
+		colorOptionButton.setIcon(colorByFileIcon);
+		colorOptionButton.setActionCommand(MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName());
+		colorOptionButton.setToolTipText(MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName());
+		chartColorOption = ChartColorOption.BY_FILE;
+		updatePlot();
+	}
+	
+	private void colorBySampleType(){
+		
+		colorOptionButton.setIcon(colorBySampleTypeIcon);
+		colorOptionButton.setActionCommand(MainActionCommands.COLOR_BY_FILE_NAME_COMMAND.getName());
+		colorOptionButton.setToolTipText(MainActionCommands.COLOR_BY_SAMPLE_TYPE_COMMAND.getName());
+		chartColorOption = ChartColorOption.BY_SAMPLE_TYPE;
+		updatePlot();
+	}
+	
+	private void setSidePanelVisible(boolean b){
+		
+		if(b) {
+			sidePanelButton.setIcon(sidePanelHideIcon);
+			sidePanelButton.setActionCommand(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName());
+			sidePanelButton.setToolTipText(MainActionCommands.HIDE_CHART_SIDE_PANEL_COMMAND.getName());
+		}
+		else {
+			sidePanelButton.setIcon(sidePanelShowIcon);
+			sidePanelButton.setActionCommand(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName());
+			sidePanelButton.setToolTipText(MainActionCommands.SHOW_CHART_SIDE_PANEL_COMMAND.getName());
+		}
 	}
 
 	private void toggleItemListeners(boolean enabled) {
-
-		if (enabled) {
-
-			groupByComboBox.addItemListener(this);
+		
+		if(enabled) {			
 			plotTypeComboBox.addItemListener(this);
-			fileSortComboBox.addItemListener(this);
 			dataScaleComboBox.addItemListener(this);
-			categoryComboBox.addItemListener(this);
-			subCategoryComboBox.addItemListener(this);
-		} else {
-			groupByComboBox.removeItemListener(this);
+		}
+		else {
 			plotTypeComboBox.removeItemListener(this);
-			fileSortComboBox.removeItemListener(this);
 			dataScaleComboBox.removeItemListener(this);
-			categoryComboBox.removeItemListener(this);
-			subCategoryComboBox.removeItemListener(this);
 		}
 	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-
-		if (e.getSource() instanceof JComboBox &&
-				e.getStateChange() == ItemEvent.SELECTED) {
-
+		
+		if(e.getStateChange() == ItemEvent.SELECTED) {
+			
 			toggleItemListeners(false);
-
-			if (e.getSource().equals(plotTypeComboBox)) {
-
-				updatePlotGroupingOptions();
-				updateFactorSelectors();
-				updateFileSortingOptions();
-			}
-			if (e.getSource().equals(groupByComboBox)) {
-
-				updateFactorSelectors();
-				updateFileSortingOptions();
-			}
-			toggleItemListeners(true);
-			updatePlot();
-		}
-		if (e.getSource() instanceof JCheckBox)
-			updatePlot();
+			updatePlotType();
+			toggleItemListeners(true);			
+		}		
 	}
-
-	@SuppressWarnings("unchecked")
-	public void populateCategories(ExperimentDesignSubset activeSubset) {
-
-		ExperimentDesignFactor[] factors = new ExperimentDesignFactor[0];
-
-		if (activeSubset != null) {
-
-			factors = activeSubset.getOrderedDesign().keySet()
-					.toArray(new ExperimentDesignFactor[activeSubset.getOrderedDesign().size()]);
-			categoryComboBox.setModel(new SortedComboBoxModel<ExperimentDesignFactor>(factors));
-			categoryComboBox.setSelectedItem(factors[0]);
-
-			if (factors.length > 1) {
-
-				subCategoryComboBox.setModel(new SortedComboBoxModel<ExperimentDesignFactor>(factors));
-				subCategoryComboBox.setSelectedItem(factors[1]);
-				subCategoryComboBox.setEnabled(true);
-			} else {
-				subCategoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
-				subCategoryComboBox.setEnabled(false);
-			}
-		} else {
-			categoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
-			categoryComboBox.setEnabled(false);
-			subCategoryComboBox.setModel(new DefaultComboBoxModel<ExperimentDesignFactor>());
-			subCategoryComboBox.setEnabled(false);
-		}
-		updateFactorSelectors();
+	
+	private void updatePlotType() {
+		
+		plot.updatePlotType();
+		plot.redrawPlot();
 	}
-
-	public ExperimentDesignFactor getCategory() {
-
-		if (categoryComboBox.isEnabled())
-			return (ExperimentDesignFactor) categoryComboBox.getSelectedItem();
-
-		return null;
-	}
-
-	public ExperimentDesignFactor getSubCategory() {
-
-		if (subCategoryComboBox.isEnabled())
-			return (ExperimentDesignFactor) subCategoryComboBox.getSelectedItem();
-
-		return null;
-	}
-
-	public FileSortingOrder getFileOrder() {
-
-		return (FileSortingOrder) fileSortComboBox.getSelectedItem();
-	}
-
-	public StatsPlotType getPlotType() {
-
-		return (StatsPlotType) plotTypeComboBox.getSelectedItem();
-	}
-
-	public void setFileOrder(FileSortingOrder order) {
-
-		fileSortComboBox.setSelectedItem(order);
-	}
-
-	public void setPlotType(StatsPlotType type) {
-
-		plotTypeComboBox.setSelectedItem(type);
-	}
-
-	public void setPlotScale(DataScale scale) {
-		dataScaleComboBox.setSelectedItem(scale);
-	}
-
-	public DataScale getPlotScale() {
-
-		return (DataScale) dataScaleComboBox.getSelectedItem();
-	}
-
-	public PlotDataGrouping getDataGroupingType() {
-
-		return (PlotDataGrouping) groupByComboBox.getSelectedItem();
-	}
-
-	// Do not allow ignore design with BoxPlot
-	@SuppressWarnings("unchecked")
-	private void updatePlotGroupingOptions() {
-
-		PlotDataGrouping grouping = getDataGroupingType();
-		StatsPlotType plotType = getPlotType();
-
-		if (plotType.equals(StatsPlotType.BOXPLOT_BY_FEATURE) || plotType.equals(StatsPlotType.BOXPLOT_BY_GROUP)) {
-
-			groupByComboBox.setModel(
-					new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
-			groupByComboBox.removeItem(PlotDataGrouping.IGNORE_DESIGN);
-			groupByComboBox.setSelectedItem(PlotDataGrouping.EACH_FACTOR);
-			categoryComboBox.setSelectedIndex(-1);
-			subCategoryComboBox.setSelectedIndex(-1);
-			categoryComboBox.setEnabled(false);
-			subCategoryComboBox.setEnabled(false);
-		}
-		if (plotType.equals(StatsPlotType.BARCHART)) {
-
-			groupByComboBox.setModel(
-					new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
-			groupByComboBox.setSelectedItem(grouping);
-		}
-		if (plotType.equals(StatsPlotType.LINES) || plotType.equals(StatsPlotType.SCATTER)) {
-
-			groupByComboBox.setModel(new DefaultComboBoxModel<PlotDataGrouping>(
-					new PlotDataGrouping[] { PlotDataGrouping.IGNORE_DESIGN }));
-			groupByComboBox.setSelectedItem(PlotDataGrouping.IGNORE_DESIGN);
-		}
-	}
-
-	private void updateFactorSelectors() {
-
-		PlotDataGrouping grouping = getDataGroupingType();
-
-		if (grouping.equals(PlotDataGrouping.IGNORE_DESIGN) 
-				|| grouping.equals(PlotDataGrouping.EACH_FACTOR)
-				|| !groupByComboBox.isEnabled()) {
-
-			categoryComboBox.setSelectedIndex(-1);
-			subCategoryComboBox.setSelectedIndex(-1);
-			categoryComboBox.setEnabled(false);
-			subCategoryComboBox.setEnabled(false);
-		}
-		if (grouping.equals(PlotDataGrouping.ONE_FACTOR)) {
-
-			if (categoryComboBox.getModel().getSize() > 0)
-				categoryComboBox.setSelectedIndex(0);
-
-			subCategoryComboBox.setSelectedIndex(-1);
-			categoryComboBox.setEnabled(true);
-			subCategoryComboBox.setEnabled(false);
-		}
-		if (grouping.equals(PlotDataGrouping.TWO_FACTORS)) {
-
-			if (categoryComboBox.getModel().getSize() > 0)
-				categoryComboBox.setSelectedIndex(0);
-
-			if (subCategoryComboBox.getModel().getSize() > 0)
-				subCategoryComboBox.setSelectedIndex(0);
-
-			categoryComboBox.setEnabled(true);
-			subCategoryComboBox.setEnabled(true);
-		}
-	}
-
-	// Allow sort by sample ID and sample name only with ignore design
-	@SuppressWarnings("unchecked")
-	private void updateFileSortingOptions() {
-
-		PlotDataGrouping grouping = getDataGroupingType();
-		StatsPlotType plotType = getPlotType();
-
-		if (!grouping.equals(PlotDataGrouping.IGNORE_DESIGN) || plotType.equals(StatsPlotType.LINES)
-				|| plotType.equals(StatsPlotType.SCATTER)) {
-
-			fileSortComboBox.setModel(new DefaultComboBoxModel(
-					new FileSortingOrder[] { FileSortingOrder.NAME, FileSortingOrder.TIMESTAMP }));
-			fileSortComboBox.setSelectedIndex(0);
-		} else {
-			fileSortComboBox.setModel(new DefaultComboBoxModel(FileSortingOrder.values()));
-			fileSortComboBox.setSelectedIndex(0);
-		}
-	}
-
+	
 	private void updatePlot() {
-
+		
 		plot.updateParametersFromControls();
 		plot.redrawPlot();
 	}
 
-	public boolean splitByBatch() {
+	public StatsPlotType getStatsPlotType() {
+		return (StatsPlotType) plotTypeComboBox.getSelectedItem();
+	}
 
-		if (splitByBatchCheckBox.isEnabled())
-			return splitByBatchCheckBox.isSelected();
-		else
-			return false;
+	public void setStatsPlotType(StatsPlotType type) {
+		plotTypeComboBox.setSelectedItem(type);
+	}
+
+	public FileSortingOrder getSortingOrder() {
+		return fileSortingOrder;
+	}
+
+	public void setSortingOrder(FileSortingOrder order) {
+
+		fileSortingOrder = order;
+		if(fileSortingOrder.equals(FileSortingOrder.NAME)) {
+			sortOrderButton.setIcon(sortByNameIcon);
+			sortOrderButton.setActionCommand(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
+			sortOrderButton.setToolTipText(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
+		}
+		if(fileSortingOrder.equals(FileSortingOrder.TIMESTAMP)) {
+			sortOrderButton.setIcon(sortByTimeIcon);
+			sortOrderButton.setActionCommand(MainActionCommands.SORT_BY_FILE_NAME_COMMAND.getName());
+			sortOrderButton.setToolTipText(MainActionCommands.SORT_BY_INJECTION_TIME_COMMAND.getName());
+		}
+	}
+		
+	public DataScale getDataScale() {
+		return (DataScale) dataScaleComboBox.getSelectedItem();
+	}
+	
+	public void setDataScale(DataScale scale) {
+		dataScaleComboBox.setSelectedItem(scale);
+	}
+	
+	public ChartColorOption getChartColorOption() {
+		return chartColorOption;
+	}
+
+	public void setChartColorOption(ChartColorOption chartColorOption) {
+		this.chartColorOption = chartColorOption;
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

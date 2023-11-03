@@ -198,20 +198,22 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 			subCategoryComboBox.setSelectedIndex(-1);
 			categoryComboBox.setEnabled(false);
 			subCategoryComboBox.setEnabled(false);
+			updateFactorSelectors();
 		}
 		if (plotType.equals(StatsPlotType.BARCHART)) {
 
 			groupByComboBox.setModel(
 					new DefaultComboBoxModel<PlotDataGrouping>(PlotDataGrouping.values()));
 			groupByComboBox.setSelectedItem(grouping);
+			updateFactorSelectors();
 		}
 		if (plotType.equals(StatsPlotType.LINES) || plotType.equals(StatsPlotType.SCATTER)) {
 
 			groupByComboBox.setModel(new DefaultComboBoxModel<PlotDataGrouping>(
 					new PlotDataGrouping[] { PlotDataGrouping.IGNORE_DESIGN }));
 			groupByComboBox.setSelectedItem(PlotDataGrouping.IGNORE_DESIGN);
-		}
-		updateFactorSelectors();
+			updateFactorSelectors();
+		}		
 		toggleItemListeners(true);
 	}
 	
@@ -276,9 +278,12 @@ public class DataPlotControlsPanel extends JPanel implements ItemListener {
 		
 		if(e.getStateChange() == ItemEvent.SELECTED) {
 			
-			toggleItemListeners(false);
-			updateFactorSelectors();
-			toggleItemListeners(true);
+			if(e.getSource().equals(groupByComboBox)) {
+				
+				toggleItemListeners(false);
+				updateFactorSelectors();
+				toggleItemListeners(true);
+			}
 			updatePlot();
 		}
 //		if(e.getStateChange() == ItemEvent.DESELECTED 

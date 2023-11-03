@@ -297,7 +297,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 
 		clearPlotMatrix();
 		plottedFeaturesMap.clear();		
-		plotType = ((MultiPanelDataPlotToolbarNew)toolbar).getStatsPlotType();
+		plotType = ((MultiPanelDataPlotToolbar)toolbar).getStatsPlotType();
 		activeDesign = null;
 		plotParameters = null;
 	}
@@ -519,20 +519,6 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 			for(MsFeature msf : entry.getValue()) {
 				
 				CategoryPlot barChart = getNewBarchart();
-//				((BarRenderer)barChart.getRenderer()).setBarPainter(new StandardBarPainter());
-//
-//				BarChartDataSet ds = new BarChartDataSet(
-//						msf,
-//						entry.getKey(),
-//						plotParameters.getSortingOrder(),
-//						plotParameters.getDataScale(),
-//						activeDesign,
-//						plotParameters.getGroupingType(),
-//						plotParameters.getCategory(),
-//						plotParameters.getSubCategory());
-//
-//				for(int i=0; i<ds.getRowCount(); i++)
-//					((BarRenderer)barChart.getRenderer()).setSeriesPaint(i, ds.getSeriesPaintMap().get(i));
 
 				MsFeatureBarChartDataSet ds = new MsFeatureBarChartDataSet(msf, plotParameters);
 				VariableCategorySizeBarRenderer renderer = new VariableCategorySizeBarRenderer();
@@ -552,11 +538,14 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 				
 				CategoryAxis axis = barChart.getDomainAxis();
 				axis.setLabel(msf.getName());
-				axis.setCategoryLabelPositions(getCategoryLabelPosition());
+				axis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
 				axis.setMaximumCategoryLabelLines(calculateLineNumberForCategoryLabels());
 				axis.setLowerMargin(0.1);
 				axis.setUpperMargin(0.1);
 				axis.setCategoryMargin(0.1);
+				
+				if(plotParameters.getGroupingType().equals(PlotDataGrouping.IGNORE_DESIGN))
+				axis.setTickLabelsVisible(false);
 				
 				categoryPlot.add(barChart);
 			}
@@ -617,12 +606,7 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 		toolbar.toggleAnnotationsIcon(annotationsVisible);
 	}
 
-	public void setToolbar(MultiPanelDataPlotToolbar toolbar) {
-
-		this.toolbar = toolbar;
-	}
-
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unchecked" })
 	public void toggleDataPoints() {
 
 		dataPointsVisible = !dataPointsVisible;
@@ -669,27 +653,31 @@ public class MultiPanelDataPlot extends MasterPlotPanel implements ActionListene
 		}
 		toolbar.toggleLegendIcon(legendVisible);
 	}
-
-	@Override
-	public void updateParametersFromControls() {
+	
+	public void updatePlotType() {
 		
 		if(chart == null 
-				|| !((MultiPanelDataPlotToolbarNew)toolbar).getStatsPlotType().equals(plotType)) {
+				|| !((MultiPanelDataPlotToolbar)toolbar).getStatsPlotType().equals(plotType)) {
 			
-			plotType = ((MultiPanelDataPlotToolbarNew)toolbar).getStatsPlotType();
+			plotType = ((MultiPanelDataPlotToolbar)toolbar).getStatsPlotType();
 			initChart();
 			initTitles();
 			initAxes();
 			initLegend(RectangleEdge.RIGHT, legendVisible);
 		}
 		dataPlotControlsPanel.updatePlotGroupingOptions(
-				((MultiPanelDataPlotToolbarNew)toolbar).getStatsPlotType());
+				((MultiPanelDataPlotToolbar)toolbar).getStatsPlotType());
+	}
+
+	@Override
+	public void updateParametersFromControls() {
+				
 		plotParameters = 
 				new TwoDimFeatureDataPlotParameterObject(
 				plottedFeaturesMap,
-				((MultiPanelDataPlotToolbarNew)toolbar).getSortingOrder(), 
-				((MultiPanelDataPlotToolbarNew)toolbar).getDataScale(),
-				((MultiPanelDataPlotToolbarNew)toolbar).getChartColorOption(),
+				((MultiPanelDataPlotToolbar)toolbar).getSortingOrder(), 
+				((MultiPanelDataPlotToolbar)toolbar).getDataScale(),
+				((MultiPanelDataPlotToolbar)toolbar).getChartColorOption(),
 				dataPlotControlsPanel.getDataGroupingType(), 
 				dataPlotControlsPanel.getCategory(), 
 				dataPlotControlsPanel.getSububCategory());		

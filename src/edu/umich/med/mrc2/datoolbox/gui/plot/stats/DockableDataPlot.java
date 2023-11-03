@@ -41,7 +41,7 @@ public class DockableDataPlot extends DefaultSingleCDockable implements ActionLi
 	private static final Icon componentIcon = GuiUtils.getIcon("boxplot", 16);
 
 	private MultiPanelDataPlot dataPlot;
-	private MultiPanelDataPlotToolbarNew plotToolbar;
+	private MultiPanelDataPlotToolbar plotToolbar;
 	private DataPlotControlsPanel dataPlotControlsPanel;
 
 	public DockableDataPlot(String id, String title) {
@@ -57,7 +57,7 @@ public class DockableDataPlot extends DefaultSingleCDockable implements ActionLi
 		add(dataPlotControlsPanel, BorderLayout.EAST);
 		dataPlot.setDataPlotControlsPanel(dataPlotControlsPanel);
 		
-		plotToolbar = new MultiPanelDataPlotToolbarNew(dataPlot, this);
+		plotToolbar = new MultiPanelDataPlotToolbar(dataPlot, this);
 		dataPlot.setToolbar(plotToolbar);
 		add(plotToolbar, BorderLayout.NORTH);
 	}	
